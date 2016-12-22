@@ -1,0 +1,136 @@
+// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+
+/*
+This module implements the api module client of grpc service.
+
+*/
+
+package grpcapi
+
+import (
+	"strconv"
+	"strings"
+
+	"grpc"
+)
+
+func CreateVolume(resourceType string, name string, size int) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"CreateVolume", resourceType, name, strconv.Itoa(size)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetVolume(resourceType string, volID string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetVolume", resourceType, volID}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetAllVolumes(resourceType string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetAllVolumes", resourceType}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func UpdateVolume(resourceType string, volID string, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"UpdateVolume", resourceType, volID, name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func DeleteVolume(resourceType string, volID string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"DeleteVolume", resourceType, volID}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func CreateDatabase(name string, size int) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"CreateDatabase", name, strconv.Itoa(size)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetDatabase(id int, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetDatabase", strconv.Itoa(id), name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetAllDatabases() (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetAllDatabases"}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func UpdateDatabase(id int, size int, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"UpdateDatabase", strconv.Itoa(id),
+		strconv.Itoa(size), name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func DeleteDatabase(id int, name string, cascade bool) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"DeleteDatabase", strconv.Itoa(id),
+		name, strconv.FormatBool(cascade)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func CreateFileSystem(name string, size int) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"CreateFileSystem", name, strconv.Itoa(size)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetFileSystem(id int, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetFileSystem", strconv.Itoa(id), name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetAllFileSystems() (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"GetAllFileSystems"}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func UpdateFileSystem(id int, size int, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"UpdateFileSystem", strconv.Itoa(id),
+		strconv.Itoa(size), name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func DeleteFileSystem(id int, name string, cascade bool) (string, error) {
+	var client grpc.Client
+	url := "opensds/orchestration"
+	action := []string{"DeleteFileSystem", strconv.Itoa(id),
+		name, strconv.FormatBool(cascade)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
