@@ -28,8 +28,171 @@ import (
 	"api/databases"
 	"api/fileSystems"
 	"api/volumes"
-	"grpc/server"
 )
+
+func main() {
+	// Start the system loop.
+	for {
+		var cmd string
+		log.Printf("Please input your action:")
+		fmt.Scanln(&cmd)
+
+		if strings.Contains(cmd, "volume") {
+			if strings.Contains(cmd, "create") {
+				result, err := createVolume(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "show") {
+				result, err := showVolume(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "list") {
+				result, err := listVolume(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "update") {
+				result, err := updateVolume(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "delete") {
+				result, err := deleteVolume(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+		}
+		if strings.Contains(cmd, "db") {
+			if strings.Contains(cmd, "create") {
+				result, err := createDatabase(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "show") {
+				result, err := showDatabase(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "list") {
+				result, err := listDatabase()
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "update") {
+				result, err := updateDatabase(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "delete") {
+				result, err := deleteDatabase(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+		}
+		if strings.Contains(cmd, "fs") {
+			if strings.Contains(cmd, "create") {
+				result, err := createFileSystem(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "show") {
+				result, err := showFileSystem(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "list") {
+				result, err := listFileSystem()
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "update") {
+				result, err := updateFileSystem(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+			if strings.Contains(cmd, "delete") {
+				result, err := deleteFileSystem(cmd)
+
+				if err != nil {
+					fmt.Println("Failure!")
+				} else {
+					fmt.Printf("%v\n", result)
+				}
+			}
+		}
+		var rsp string
+		log.Printf("Do you want to do it again?(y/n)")
+		fmt.Scanln(&rsp)
+
+		if rsp != "y" && rsp != "n" {
+			fmt.Println("Input Error!")
+			break
+		} else {
+			if rsp == "n" {
+				break
+			}
+		}
+	}
+	fmt.Println("Good Bye!")
+}
 
 func createVolume(cmd string) (string, error) {
 	if strings.Contains(cmd, "name") && strings.Contains(cmd, "size") {
@@ -80,8 +243,12 @@ func listVolume(cmd string) (string, error) {
 	input := make([]string, 3, 6)
 	input = strings.Split(cmd, "--")
 	resourceType := input[2]
+	var allowDetails bool = false
+	if strings.Contains(cmd, "detail") {
+		allowDetails = true
+	}
 
-	result, err := volumes.List(resourceType)
+	result, err := volumes.List(resourceType, allowDetails)
 
 	if err != nil {
 		return "Error", err
@@ -334,176 +501,4 @@ func deleteFileSystem(cmd string) (string, error) {
 	} else {
 		return "Input Error!", nil
 	}
-}
-
-func main() {
-	//Construct a grpc server struct and do some initialization.
-	s := new(server.Server)
-	s.Init()
-
-	//Start the system loop.
-	for {
-		var cmd string
-		log.Printf("Please input your action:")
-		fmt.Scanln(&cmd)
-
-		//Start the watcher mechanism of orchestration and adapter module.
-		go s.OrchestrationWatch("opensds/orchestration")
-		go s.AdapterWatch("opensds/adapter")
-
-		if strings.Contains(cmd, "volume") {
-			if strings.Contains(cmd, "create") {
-				result, err := createVolume(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "show") {
-				result, err := showVolume(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "list") {
-				result, err := listVolume(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "update") {
-				result, err := updateVolume(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "delete") {
-				result, err := deleteVolume(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-		}
-		if strings.Contains(cmd, "db") {
-			if strings.Contains(cmd, "create") {
-				result, err := createDatabase(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "show") {
-				result, err := showDatabase(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "list") {
-				result, err := listDatabase()
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "update") {
-				result, err := updateDatabase(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "delete") {
-				result, err := deleteDatabase(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-		}
-		if strings.Contains(cmd, "fs") {
-			if strings.Contains(cmd, "create") {
-				result, err := createFileSystem(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "show") {
-				result, err := showFileSystem(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "list") {
-				result, err := listFileSystem()
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "update") {
-				result, err := updateFileSystem(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-			if strings.Contains(cmd, "delete") {
-				result, err := deleteFileSystem(cmd)
-
-				if err != nil {
-					fmt.Println("Failure!")
-				} else {
-					fmt.Printf("%v\n", result)
-				}
-			}
-		}
-		var rsp string
-		log.Printf("Do you want to do it again?(y/n)")
-		fmt.Scanln(&rsp)
-
-		if rsp != "y" && rsp != "n" {
-			fmt.Println("Input Error!")
-			break
-		} else {
-			if rsp == "n" {
-				break
-			}
-		}
-	}
-	fmt.Println("Good Bye!")
 }

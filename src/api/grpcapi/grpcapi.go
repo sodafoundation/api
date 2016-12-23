@@ -40,10 +40,11 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func GetAllVolumes(resourceType string) (string, error) {
+func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 	var client grpc.Client
 	url := "opensds/orchestration"
-	action := []string{"GetAllVolumes", resourceType}
+	action := []string{"GetAllVolumes", resourceType,
+		strconv.FormatBool(allowDetails)}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 

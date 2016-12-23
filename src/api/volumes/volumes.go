@@ -43,8 +43,8 @@ func Show(resourceType string, volID string) (string, error) {
 	}
 }
 
-func List(resourceType string) (string, error) {
-	result, err := grpcapi.GetAllVolumes(resourceType)
+func List(resourceType string, allowDetails bool) (string, error) {
+	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
 		return "Error", err

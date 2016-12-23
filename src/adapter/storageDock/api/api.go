@@ -43,8 +43,8 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	}
 }
 
-func GetAllVolumes(resourceType string) (string, error) {
-	result, err := storageDock.GetAllVolumes(resourceType)
+func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
+	result, err := storageDock.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
 		return "Error", err

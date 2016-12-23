@@ -20,8 +20,6 @@ This module implements a standard SouthBound interface to storage plugins.
 package storageDock
 
 import (
-	"fmt"
-
 	"adapter/storagePlugins"
 )
 
@@ -39,7 +37,7 @@ type VolumeDriver interface {
 
 	GetVolume(volID string) (string, error)
 
-	GetAllVolumes() (string, error)
+	GetAllVolumes(allowDetails bool) (string, error)
 
 	UpdateVolume(volID string, name string) (string, error)
 
@@ -52,12 +50,10 @@ type VolumeDriver interface {
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := new(storagePlugins.StoragePluginTable)
-	plugins.Init()
+	plugins := storagePlugins.Init(resourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	v := (*plugins)[resourceType]
-	var volumeDriver VolumeDriver = v
+	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.CreateVolume(name, size)
 	if err != nil {
 		return "Error", err
@@ -67,12 +63,11 @@ func CreateVolume(resourceType string, name string, size int) (string, error) {
 }
 
 func GetVolume(resourceType string, volID string) (string, error) {
-	plugins := new(storagePlugins.StoragePluginTable)
-	fmt.Println("plug init success!")
-	plugins.Init()
-	fmt.Println("plugin init success!")
-	v := (*plugins)[resourceType]
-	var volumeDriver VolumeDriver = v
+	//Get the storage plugins and do some initializations.
+	plugins := storagePlugins.Init(resourceType)
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.GetVolume(volID)
 	if err != nil {
 		return "Error", err
@@ -81,13 +76,13 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	}
 }
 
-func GetAllVolumes(resourceType string) (string, error) {
-	plugins := new(storagePlugins.StoragePluginTable)
-	plugins.Init()
+func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins := storagePlugins.Init(resourceType)
 
-	v := (*plugins)[resourceType]
-	var volumeDriver VolumeDriver = v
-	result, err := volumeDriver.GetAllVolumes()
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.GetAllVolumes(allowDetails)
 	if err != nil {
 		return "Error", err
 	} else {
@@ -96,11 +91,11 @@ func GetAllVolumes(resourceType string) (string, error) {
 }
 
 func UpdateVolume(resourceType string, volID string, name string) (string, error) {
-	plugins := new(storagePlugins.StoragePluginTable)
-	plugins.Init()
+	//Get the storage plugins and do some initializations.
+	plugins := storagePlugins.Init(resourceType)
 
-	v := (*plugins)[resourceType]
-	var volumeDriver VolumeDriver = v
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.UpdateVolume(volID, name)
 	if err != nil {
 		return "Error", err
@@ -110,11 +105,11 @@ func UpdateVolume(resourceType string, volID string, name string) (string, error
 }
 
 func DeleteVolume(resourceType string, volID string) (string, error) {
-	plugins := new(storagePlugins.StoragePluginTable)
-	plugins.Init()
+	//Get the storage plugins and do some initializations.
+	plugins := storagePlugins.Init(resourceType)
 
-	v := (*plugins)[resourceType]
-	var volumeDriver VolumeDriver = v
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.DeleteVolume(volID)
 	if err != nil {
 		return "Error", err
