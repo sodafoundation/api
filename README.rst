@@ -9,9 +9,12 @@ API module manages the request about storage resources, such as volumes,
 databases, file systems, policys and so forth.
 
 Orchestration module has three roles:
+
 1. Handles the request from API module.
+
 2. Collects the statistics (connection information, feature and so on) of
    storage resources through adapter module.
+   
 3. Orchestrates storage resources and shows appropriate resources to users
    according to scenarios.
 
