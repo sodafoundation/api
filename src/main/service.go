@@ -24,13 +24,17 @@ import (
 )
 
 func main() {
-	// Construct a grpc server struct and do some initialization.
+	// Construct api module grpc server struct and do some initialization.
+	api := new(server.Server)
+	api.Init()
+	// Construct orchestration module grpc server struct and do some initialization.
 	orchestration := new(server.Server)
-	adapter := new(server.Server)
 	orchestration.Init()
+	// Construct adapter module grpc server struct and do some initialization.
+	adapter := new(server.Server)
 	adapter.Init()
 	// Start the watcher mechanism of orchestration and adapter module.
+	go api.ApiWatch("opensds/api")
 	go orchestration.OrchestrationWatch("opensds/orchestration")
 	adapter.AdapterWatch("opensds/adapter")
-
 }

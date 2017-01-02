@@ -29,6 +29,7 @@ import (
 	"golang.org/x/net/context"
 
 	adapterApi "adapter/storageDock/api"
+	volumeApi "api/volumes"
 	orchestrationApi "orchestration/api"
 )
 
@@ -49,12 +50,71 @@ func (s *Server) Init() {
 		log.Fatal(err)
 	}
 	s.etcd = client.NewKeysAPI(cli)
-	_, err = s.etcd.Set(context.Background(), "opensds/api", "Server start!", nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Server intialized success!")
 	s.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
+	log.Println("Server intialized success!")
+}
+
+func (s *Server) ApiWatch(url string) {
+	for {
+		w := s.etcd.Watcher(url, &s.watchOpts)
+		r, err := w.Next(context.Background())
+		if err != nil {
+			log.Fatal("Error occurred", err)
+		}
+
+		value := r.Node.Value
+		tmp := make([]string, 5, 10)
+		tmp = strings.Split(value, ",")
+		var result string
+
+		switch tmp[0] {
+		case "CreateVolume":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, err = volumeApi.Create(resourceType, name, size)
+			if err != nil {
+				log.Println("Error occured when create volume!")
+			}
+		case "GetVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = volumeApi.Show(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when get volume!")
+			}
+		case "GetAllVolumes":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, err = volumeApi.List(resourceType, allowDetails)
+			if err != nil {
+				log.Println("Error occured when get all volumes!")
+			}
+		case "UpdateVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			name := tmp[3]
+			result, err = volumeApi.Update(resourceType, volID, name)
+			if err != nil {
+				log.Println("Error occured when update volume!")
+			}
+		case "DeleteVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = volumeApi.Delete(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when delete volume!")
+			}
+		default:
+			log.Printf("Error, no action: %s\n", tmp[0])
+			result = "Error"
+		}
+
+		_, err = s.etcd.Set(context.Background(), url, result, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func (s *Server) OrchestrationWatch(url string) {
