@@ -13,14 +13,9 @@ Orchestration module has three roles:
 1. Handles the request from API module.
 
 2. Collects the statistics (connection information, feature and so on) of
-<<<<<<< HEAD
    storage resources through adapter module and deliver them to metaData
-   module. (not achieved now)
-
-=======
-   storage resources through adapter module.
+   module.
    
->>>>>>> 6e9452bd348213802918fa41286c1db2bda253e2
 3. Orchestrates storage resources and shows appropriate resources to users
    according to scenarios.
 
