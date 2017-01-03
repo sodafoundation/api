@@ -48,8 +48,6 @@ func (c *Client) Run(url string, action string) (string, error) {
 	resp, err := c.etcd.Set(context.Background(), url, action, nil)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Printf("Set is done. URL is %s. Index is %d\n", url, resp.Index)
 	}
 
 	c.watchOpts = client.WatcherOptions{AfterIndex: resp.Index, Recursive: true}

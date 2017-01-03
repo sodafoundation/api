@@ -49,205 +49,206 @@ func (s *Server) Init() {
 		log.Fatal(err)
 	}
 	s.etcd = client.NewKeysAPI(cli)
-	resp, err := s.etcd.Set(context.Background(), "opensds/api", "Server start!", nil)
+	_, err = s.etcd.Set(context.Background(), "opensds/api", "Server start!", nil)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Printf("Set is done. Index is %d\n", resp.Index)
 	}
-	s.watchOpts = client.WatcherOptions{AfterIndex: resp.Index, Recursive: true}
+	log.Println("Server intialized success!")
+	s.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
 }
 
 func (s *Server) OrchestrationWatch(url string) {
-	w := s.etcd.Watcher(url, &s.watchOpts)
-	r, err := w.Next(context.Background())
-	if err != nil {
-		log.Fatal("Error occurred", err)
-	}
+	for {
+		w := s.etcd.Watcher(url, &s.watchOpts)
+		r, err := w.Next(context.Background())
+		if err != nil {
+			log.Fatal("Error occurred", err)
+		}
 
-	value := r.Node.Value
-	tmp := make([]string, 5, 10)
-	tmp = strings.Split(value, ",")
-	var result string
+		value := r.Node.Value
+		tmp := make([]string, 5, 10)
+		tmp = strings.Split(value, ",")
+		var result string
 
-	switch tmp[0] {
-	case "CreateVolume":
-		resourceType := tmp[1]
-		name := tmp[2]
-		size, _ := strconv.Atoi(tmp[3])
-		result, err = orchestrationApi.CreateVolume(resourceType, name, size)
-		if err != nil {
-			log.Println("Error occured when create volume!")
+		switch tmp[0] {
+		case "CreateVolume":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, err = orchestrationApi.CreateVolume(resourceType, name, size)
+			if err != nil {
+				log.Println("Error occured when create volume!")
+			}
+		case "GetVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = orchestrationApi.GetVolume(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when get volume!")
+			}
+		case "GetAllVolumes":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, err = orchestrationApi.GetAllVolumes(resourceType, allowDetails)
+			if err != nil {
+				log.Println("Error occured when get all volumes!")
+			}
+		case "UpdateVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			name := tmp[3]
+			result, err = orchestrationApi.UpdateVolume(resourceType, volID, name)
+			if err != nil {
+				log.Println("Error occured when update volume!")
+			}
+		case "DeleteVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = orchestrationApi.DeleteVolume(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when delete volume!")
+			}
+		case "CreateDatabase":
+			name := tmp[1]
+			size, _ := strconv.Atoi(tmp[2])
+			result, err = orchestrationApi.CreateDatabase(name, size)
+			if err != nil {
+				log.Println("Error occured when create database!")
+			}
+		case "GetDatabase":
+			id, _ := strconv.Atoi(tmp[1])
+			name := tmp[2]
+			result, err = orchestrationApi.GetDatabase(id, name)
+			if err != nil {
+				log.Println("Error occured when get database!")
+			}
+		case "GetAllDatabases":
+			result, err = orchestrationApi.GetAllDatabases()
+			if err != nil {
+				log.Println("Error occured when get all databases!")
+			}
+		case "UpdateDatabase":
+			id, _ := strconv.Atoi(tmp[1])
+			size, _ := strconv.Atoi(tmp[2])
+			name := tmp[3]
+			result, err = orchestrationApi.UpdateDatabase(id, size, name)
+			if err != nil {
+				log.Println("Error occured when update database!")
+			}
+		case "DeleteDatabase":
+			id, _ := strconv.Atoi(tmp[1])
+			name := tmp[2]
+			cascade, _ := strconv.ParseBool(tmp[3])
+			result, err = orchestrationApi.DeleteDatabase(id, name, cascade)
+			if err != nil {
+				log.Println("Error occured when delete database!")
+			}
+		case "CreateFileSystem":
+			name := tmp[1]
+			size, _ := strconv.Atoi(tmp[2])
+			result, err = orchestrationApi.CreateFileSystem(name, size)
+			if err != nil {
+				log.Println("Error occured when create file system!")
+			}
+		case "GetFileSystem":
+			id, _ := strconv.Atoi(tmp[1])
+			name := tmp[2]
+			result, err = orchestrationApi.GetFileSystem(id, name)
+			if err != nil {
+				log.Println("Error occured when get file system!")
+			}
+		case "GetAllFileSystems":
+			result, err = orchestrationApi.GetAllFileSystems()
+			if err != nil {
+				log.Println("Error occured when get all file systems!")
+			}
+		case "UpdateFileSystem":
+			id, _ := strconv.Atoi(tmp[1])
+			size, _ := strconv.Atoi(tmp[2])
+			name := tmp[3]
+			result, err = orchestrationApi.UpdateFileSystem(id, size, name)
+			if err != nil {
+				log.Println("Error occured when update file system!")
+			}
+		case "DeleteFileSystem":
+			id, _ := strconv.Atoi(tmp[1])
+			name := tmp[2]
+			cascade, _ := strconv.ParseBool(tmp[3])
+			result, err = orchestrationApi.DeleteFileSystem(id, name, cascade)
+			if err != nil {
+				log.Println("Error occured when delete file system!")
+			}
+		default:
+			log.Printf("Error, no action: %s\n", tmp[0])
+			result = "Error"
 		}
-	case "GetVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		result, err = orchestrationApi.GetVolume(resourceType, volID)
-		if err != nil {
-			log.Println("Error occured when get volume!")
-		}
-	case "GetAllVolumes":
-		resourceType := tmp[1]
-		result, err = orchestrationApi.GetAllVolumes(resourceType)
-		if err != nil {
-			log.Println("Error occured when get all volumes!")
-		}
-	case "UpdateVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		name := tmp[3]
-		result, err = orchestrationApi.UpdateVolume(resourceType, volID, name)
-		if err != nil {
-			log.Println("Error occured when update volume!")
-		}
-	case "DeleteVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		result, err = orchestrationApi.DeleteVolume(resourceType, volID)
-		if err != nil {
-			log.Println("Error occured when delete volume!")
-		}
-	case "CreateDatabase":
-		name := tmp[1]
-		size, _ := strconv.Atoi(tmp[2])
-		result, err = orchestrationApi.CreateDatabase(name, size)
-		if err != nil {
-			log.Println("Error occured when create database!")
-		}
-	case "GetDatabase":
-		id, _ := strconv.Atoi(tmp[1])
-		name := tmp[2]
-		result, err = orchestrationApi.GetDatabase(id, name)
-		if err != nil {
-			log.Println("Error occured when get database!")
-		}
-	case "GetAllDatabases":
-		result, err = orchestrationApi.GetAllDatabases()
-		if err != nil {
-			log.Println("Error occured when get all databases!")
-		}
-	case "UpdateDatabase":
-		id, _ := strconv.Atoi(tmp[1])
-		size, _ := strconv.Atoi(tmp[2])
-		name := tmp[3]
-		result, err = orchestrationApi.UpdateDatabase(id, size, name)
-		if err != nil {
-			log.Println("Error occured when update database!")
-		}
-	case "DeleteDatabase":
-		id, _ := strconv.Atoi(tmp[1])
-		name := tmp[2]
-		cascade, _ := strconv.ParseBool(tmp[3])
-		result, err = orchestrationApi.DeleteDatabase(id, name, cascade)
-		if err != nil {
-			log.Println("Error occured when delete database!")
-		}
-	case "CreateFileSystem":
-		name := tmp[1]
-		size, _ := strconv.Atoi(tmp[2])
-		result, err = orchestrationApi.CreateFileSystem(name, size)
-		if err != nil {
-			log.Println("Error occured when create file system!")
-		}
-	case "GetFileSystem":
-		id, _ := strconv.Atoi(tmp[1])
-		name := tmp[2]
-		result, err = orchestrationApi.GetFileSystem(id, name)
-		if err != nil {
-			log.Println("Error occured when get file system!")
-		}
-	case "GetAllFileSystems":
-		result, err = orchestrationApi.GetAllFileSystems()
-		if err != nil {
-			log.Println("Error occured when get all file systems!")
-		}
-	case "UpdateFileSystem":
-		id, _ := strconv.Atoi(tmp[1])
-		size, _ := strconv.Atoi(tmp[2])
-		name := tmp[3]
-		result, err = orchestrationApi.UpdateFileSystem(id, size, name)
-		if err != nil {
-			log.Println("Error occured when update file system!")
-		}
-	case "DeleteFileSystem":
-		id, _ := strconv.Atoi(tmp[1])
-		name := tmp[2]
-		cascade, _ := strconv.ParseBool(tmp[3])
-		result, err = orchestrationApi.DeleteFileSystem(id, name, cascade)
-		if err != nil {
-			log.Println("Error occured when delete file system!")
-		}
-	default:
-		log.Printf("Error, no action: %s\n", tmp[0])
-		result = "Error"
-	}
 
-	_, err = s.etcd.Set(context.Background(), url, result, nil)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Printf("Set is done. URL is %s.\n", url)
+		_, err = s.etcd.Set(context.Background(), url, result, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (s *Server) AdapterWatch(url string) {
-	w := s.etcd.Watcher(url, &s.watchOpts)
-	r, err := w.Next(context.Background())
-	if err != nil {
-		log.Fatal("Error occurred", err)
-	}
+	for {
+		w := s.etcd.Watcher(url, &s.watchOpts)
+		r, err := w.Next(context.Background())
+		if err != nil {
+			log.Fatal("Error occurred", err)
+		}
 
-	value := r.Node.Value
-	tmp := make([]string, 5, 10)
-	tmp = strings.Split(value, ",")
-	var result string
+		value := r.Node.Value
+		tmp := make([]string, 5, 10)
+		tmp = strings.Split(value, ",")
+		var result string
 
-	switch tmp[0] {
-	case "CreateVolume":
-		resourceType := tmp[1]
-		name := tmp[2]
-		size, _ := strconv.Atoi(tmp[3])
-		result, err = adapterApi.CreateVolume(resourceType, name, size)
-		if err != nil {
-			log.Println("Error occured when create volume!")
+		switch tmp[0] {
+		case "CreateVolume":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, err = adapterApi.CreateVolume(resourceType, name, size)
+			if err != nil {
+				log.Println("Error occured when create volume!")
+			}
+		case "GetVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = adapterApi.GetVolume(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when get volume!")
+			}
+		case "GetAllVolumes":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, err = adapterApi.GetAllVolumes(resourceType, allowDetails)
+			if err != nil {
+				log.Println("Error occured when get all volumes!")
+			}
+		case "UpdateVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			name := tmp[3]
+			result, err = adapterApi.UpdateVolume(resourceType, volID, name)
+			if err != nil {
+				log.Println("Error occured when update volume!")
+			}
+		case "DeleteVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, err = adapterApi.DeleteVolume(resourceType, volID)
+			if err != nil {
+				log.Println("Error occured when delete volume!")
+			}
+		default:
+			log.Printf("Error, no action: %s\n", tmp[0])
+			result = "Error"
 		}
-	case "GetVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		result, err = adapterApi.GetVolume(resourceType, volID)
-		if err != nil {
-			log.Println("Error occured when get volume!")
-		}
-	case "GetAllVolumes":
-		resourceType := tmp[1]
-		result, err = adapterApi.GetAllVolumes(resourceType)
-		if err != nil {
-			log.Println("Error occured when get all volumes!")
-		}
-	case "UpdateVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		name := tmp[3]
-		result, err = adapterApi.UpdateVolume(resourceType, volID, name)
-		if err != nil {
-			log.Println("Error occured when update volume!")
-		}
-	case "DeleteVolume":
-		resourceType := tmp[1]
-		volID := tmp[2]
-		result, err = adapterApi.DeleteVolume(resourceType, volID)
-		if err != nil {
-			log.Println("Error occured when delete volume!")
-		}
-	default:
-		log.Printf("Error, no action: %s\n", tmp[0])
-		result = "Error"
-	}
 
-	_, err = s.etcd.Set(context.Background(), url, result, nil)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Printf("Set is done. URL is %s.\n", url)
+		_, err = s.etcd.Set(context.Background(), url, result, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

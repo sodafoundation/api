@@ -13,18 +13,30 @@
 //    under the License.
 
 /*
-This module defines an standard table of storage plugin. When vendors add their own
-plugin in storagePlugins module, they must add the plugin information into the
-StoragePluginTable by modifying the Init() method.
+This module defines an standard table of storage plugin. The default storage
+plugin is Cinder plugin. If you want to use other storage plugin, just modify
+Init() method.
 
 */
 
 package storagePlugins
 
-import "adapter/storagePlugins/cinder"
+import (
+	"adapter/storagePlugins/cinder"
+)
 
-type StoragePluginTable map[string]*cinder.CinderPlugin
+func Init(resourceType string) *cinder.CinderPlugin {
+	if resourceType == "default" {
+		plugin := &cinder.CinderPlugin{
+			"http://162.3.140.36:35357/v2.0",
+			"admin",
+			"huawei",
+			"admin",
+		}
+		return plugin
+	} else {
+		//Add initialization of other plugins here.
+		return nil
+	}
 
-func (plugins *StoragePluginTable) Init() {
-	(*plugins)["cinder"] = new(cinder.CinderPlugin)
 }

@@ -48,8 +48,8 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	}
 }
 
-func GetAllVolumes(resourceType string) (string, error) {
-	result, err := grpcapi.GetAllVolumes(resourceType)
+func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
+	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
 		return "Error", err
