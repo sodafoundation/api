@@ -23,6 +23,7 @@ package storagePlugins
 
 import (
 	"crypto/tls"
+	"errors"
 	"net/http"
 	"net/url"
 
@@ -46,12 +47,12 @@ type StoragePlugin interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	Mount(host string, volID string)
+	MountVolume(volID, host, mountpoint string) (string, error)
 
-	Unmount(host string, volID string)
+	UnmountVolume(volID string, attachement string) (string, error)
 }
 
-func Init(resourceType string) StoragePlugin {
+func Init(resourceType string) (StoragePlugin, error) {
 	switch resourceType {
 	case "cinder":
 		var plugin StoragePlugin = &cinder.CinderPlugin{
@@ -60,7 +61,7 @@ func Init(resourceType string) StoragePlugin {
 			"huawei",
 			"admin",
 		}
-		return plugin
+		return plugin, nil
 	case "coprhd":
 		var plugin StoragePlugin = &coprhd.Driver{
 			"https://coprhd.emc.com",
@@ -71,8 +72,9 @@ func Init(resourceType string) StoragePlugin {
 				},
 			},
 		}
-		return plugin
+		return plugin, nil
 	default:
-		return nil
+		err := errors.New("Can't find this resource type in backend storage.")
+		return nil, err
 	}
 }

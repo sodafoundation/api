@@ -42,45 +42,91 @@ func main() {
 				result, err := createVolume(cmd)
 
 				if err != nil {
-					fmt.Println("Failure!")
+					fmt.Println(err)
 				} else {
-					fmt.Printf("%v\n", result)
+					if result == "" {
+						fmt.Println("Create volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
 				}
 			}
 			if strings.Contains(cmd, "show") {
 				result, err := showVolume(cmd)
 
 				if err != nil {
-					fmt.Println("Failure!")
+					fmt.Println(err)
 				} else {
-					fmt.Printf("%v\n", result)
+					if result == "" {
+						fmt.Println("Show volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
 				}
 			}
 			if strings.Contains(cmd, "list") {
 				result, err := listVolume(cmd)
 
 				if err != nil {
-					fmt.Println("Failure!")
+					fmt.Println(err)
 				} else {
-					fmt.Printf("%v\n", result)
+					if result == "" {
+						fmt.Println("List volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
 				}
 			}
 			if strings.Contains(cmd, "update") {
 				result, err := updateVolume(cmd)
 
 				if err != nil {
-					fmt.Println("Failure!")
+					fmt.Println(err)
 				} else {
-					fmt.Printf("%v\n", result)
+					if result == "" {
+						fmt.Println("Update volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
 				}
 			}
 			if strings.Contains(cmd, "delete") {
 				result, err := deleteVolume(cmd)
 
 				if err != nil {
-					fmt.Println("Failure!")
+					fmt.Println(err)
 				} else {
-					fmt.Printf("%v\n", result)
+					if result == "" {
+						fmt.Println("Delete volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "mount") {
+				result, err := mountVolume(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Mount volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "unmount") {
+				result, err := unmountVolume(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Unmount volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
 				}
 			}
 		}
@@ -183,7 +229,7 @@ func main() {
 		fmt.Scanln(&rsp)
 
 		if rsp != "y" && rsp != "n" {
-			fmt.Println("Input Error!")
+			fmt.Println("Input Error, please input y/n!")
 			break
 		} else {
 			if rsp == "n" {
@@ -206,15 +252,11 @@ func createVolume(cmd string) (string, error) {
 		name := nameSlice[1]
 		size, _ := strconv.Atoi(sizeSlice[1])
 
-		result, err := volumes.Create(resourceType, name, size)
+		return volumes.Create(resourceType, name, size)
 
-		if err != nil {
-			return "Error", err
-		} else {
-			return result, nil
-		}
 	} else {
-		return "Input Error!", nil
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
 	}
 }
 
@@ -227,15 +269,11 @@ func showVolume(cmd string) (string, error) {
 		resourceType := input[2]
 		volID := idSlice[1]
 
-		result, err := volumes.Show(resourceType, volID)
+		return volumes.Show(resourceType, volID)
 
-		if err != nil {
-			return "Error", err
-		} else {
-			return result, nil
-		}
 	} else {
-		return "Input Error!", nil
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
 	}
 }
 
@@ -248,13 +286,7 @@ func listVolume(cmd string) (string, error) {
 		allowDetails = true
 	}
 
-	result, err := volumes.List(resourceType, allowDetails)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
+	return volumes.List(resourceType, allowDetails)
 }
 
 func updateVolume(cmd string) (string, error) {
@@ -267,15 +299,11 @@ func updateVolume(cmd string) (string, error) {
 		volID := idSlice[1]
 		name := nameSlice[1]
 
-		result, err := volumes.Update(resourceType, volID, name)
+		return volumes.Update(resourceType, volID, name)
 
-		if err != nil {
-			return "Error", err
-		} else {
-			return result, nil
-		}
 	} else {
-		return "Input Error!", nil
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
 	}
 }
 
@@ -287,15 +315,50 @@ func deleteVolume(cmd string) (string, error) {
 		resourceType := input[2]
 		volID := idSlice[1]
 
-		result, err := volumes.Delete(resourceType, volID)
+		return volumes.Delete(resourceType, volID)
 
-		if err != nil {
-			return "Error", err
-		} else {
-			return result, nil
-		}
 	} else {
-		return "Input Error!", nil
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func mountVolume(cmd string) (string, error) {
+	if strings.Contains(cmd, "id") && strings.Contains(cmd, "host") &&
+		strings.Contains(cmd, "mountpoint") {
+		input := make([]string, 6, 12)
+		input = strings.Split(cmd, "--")
+		var idSlice []string = strings.Split(input[3], "=")
+		var hostSlice []string = strings.Split(input[4], "=")
+		var mountSlice []string = strings.Split(input[5], "=")
+		resourceType := input[2]
+		volID := idSlice[1]
+		host := hostSlice[1]
+		mountpoint := mountSlice[1]
+
+		return volumes.Mount(resourceType, volID, host, mountpoint)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func unmountVolume(cmd string) (string, error) {
+	if strings.Contains(cmd, "id") && strings.Contains(cmd, "attachment") {
+		input := make([]string, 5, 10)
+		input = strings.Split(cmd, "--")
+		var idSlice []string = strings.Split(input[3], "=")
+		var attachSlice []string = strings.Split(input[4], "=")
+		resourceType := input[2]
+		volID := idSlice[1]
+		attachment := attachSlice[1]
+
+		return volumes.Unmount(resourceType, volID, attachment)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
 	}
 }
 
