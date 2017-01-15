@@ -14,8 +14,8 @@ Orchestration module has three roles:
 
 2. Collects the statistics (connection information, feature and so on) of
    storage resources through adapter module and deliver them to metaData
-   module.
-   
+   module. (not achieved now)
+
 3. Orchestrates storage resources and shows appropriate resources to users
    according to scenarios.
 

@@ -20,6 +20,8 @@ This module implements a standard SouthBound interface to storage plugins.
 package storageDock
 
 import (
+	"log"
+
 	"adapter/storagePlugins"
 )
 
@@ -43,34 +45,44 @@ type VolumeDriver interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	Mount(host string, volID string)
+	MountVolume(volID, host, mountpoint string) (string, error)
 
-	Unmount(host string, volID string)
+	UnmountVolume(volID string, attachment string) (string, error)
 }
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.CreateVolume(name, size)
 	if err != nil {
-		return "Error", err
+		log.Println("Call plugin to create volume failed:", err)
+		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func GetVolume(resourceType string, volID string) (string, error) {
+func GetVolume(resourceType, volID string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.GetVolume(volID)
 	if err != nil {
-		return "Error", err
+		log.Println("Call plugin to get volume failed:", err)
+		return "", err
 	} else {
 		return result, nil
 	}
@@ -78,41 +90,94 @@ func GetVolume(resourceType string, volID string) (string, error) {
 
 func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.GetAllVolumes(allowDetails)
 	if err != nil {
-		return "Error", err
+		log.Println("Call plugin to get all volumes failed:", err)
+		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func UpdateVolume(resourceType string, volID string, name string) (string, error) {
+func UpdateVolume(resourceType, volID, name string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.UpdateVolume(volID, name)
 	if err != nil {
-		return "Error", err
+		log.Println("Call plugin to update volume failed:", err)
+		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func DeleteVolume(resourceType string, volID string) (string, error) {
+func DeleteVolume(resourceType, volID string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
 	result, err := volumeDriver.DeleteVolume(volID)
 	if err != nil {
-		return "Error", err
+		log.Println("Call plugin to delete volume failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.MountVolume(volID, host, mountpoint)
+	if err != nil {
+		log.Println("Call plugin to mount volume failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func UnmountVolume(resourceType, volID, attachment string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.Init(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.UnmountVolume(volID, attachment)
+	if err != nil {
+		log.Println("Call plugin to unmount volume failed:", err)
+		return "", err
 	} else {
 		return result, nil
 	}

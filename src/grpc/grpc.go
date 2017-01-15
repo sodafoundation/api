@@ -41,20 +41,23 @@ func (c *Client) Run(url string, action string) (string, error) {
 	}
 	cli, err := client.New(c.cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Client intialized failed:", err)
+		return "", err
 	}
 	c.etcd = client.NewKeysAPI(cli)
 
 	resp, err := c.etcd.Set(context.Background(), url, action, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Client SET failed:", err)
+		return "", err
 	}
 
 	c.watchOpts = client.WatcherOptions{AfterIndex: resp.Index, Recursive: true}
 	w := c.etcd.Watcher(url, &c.watchOpts)
 	r, err := w.Next(context.Background())
 	if err != nil {
-		log.Fatal("Error occurred", err)
+		log.Println("Client WATCH failed:", err)
+		return "", err
 	}
-	return r.Node.Value, err
+	return r.Node.Value, nil
 }
