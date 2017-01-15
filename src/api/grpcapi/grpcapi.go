@@ -62,20 +62,6 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	var client grpc.Client
-	url := "opensds/orchestration"
-	action := []string{"MountVolume", resourceType, volID, host, mountpoint}
-	return client.Run(url, strings.Join(action[:], ","))
-}
-
-func UnmountVolume(resourceType, volID, attchment string) (string, error) {
-	var client grpc.Client
-	url := "opensds/orchestration"
-	action := []string{"UnmountVolume", resourceType, volID, attchment}
-	return client.Run(url, strings.Join(action[:], ","))
-}
-
 func CreateDatabase(name string, size int) (string, error) {
 	var client grpc.Client
 	url := "opensds/orchestration"

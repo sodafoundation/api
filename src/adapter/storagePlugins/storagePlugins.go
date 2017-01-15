@@ -22,59 +22,21 @@ Init() method.
 package storagePlugins
 
 import (
-	"crypto/tls"
-	"errors"
-	"net/http"
-	"net/url"
-
 	"adapter/storagePlugins/cinder"
-	"adapter/storagePlugins/coprhd"
 )
 
-type StoragePlugin interface {
-	//Any initialization the volume driver does while starting.
-	Setup()
-	//Any operation the volume driver does while stoping.
-	Unset()
-
-	CreateVolume(name string, size int) (string, error)
-
-	GetVolume(volID string) (string, error)
-
-	GetAllVolumes(allowDetails bool) (string, error)
-
-	UpdateVolume(volID string, name string) (string, error)
-
-	DeleteVolume(volID string) (string, error)
-
-	MountVolume(volID, host, mountpoint string) (string, error)
-
-	UnmountVolume(volID string, attachement string) (string, error)
-}
-
-func Init(resourceType string) (StoragePlugin, error) {
-	switch resourceType {
-	case "cinder":
-		var plugin StoragePlugin = &cinder.CinderPlugin{
+func Init(resourceType string) *cinder.CinderPlugin {
+	if resourceType == "default" {
+		plugin := &cinder.CinderPlugin{
 			"http://162.3.140.36:35357/v2.0",
 			"admin",
 			"huawei",
 			"admin",
 		}
-		return plugin, nil
-	case "coprhd":
-		var plugin StoragePlugin = &coprhd.Driver{
-			"https://coprhd.emc.com",
-			url.UserPassword("admin", "password"),
-			&http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-				},
-			},
-		}
-		return plugin, nil
-	default:
-		err := errors.New("Can't find this resource type in backend storage.")
-		return nil, err
+		return plugin
+	} else {
+		//Add initialization of other plugins here.
+		return nil
 	}
+
 }
