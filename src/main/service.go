@@ -20,35 +20,17 @@ This module implements a entry into the OpenSDS service.
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-
 	"grpc/server"
 )
 
 func main() {
-	// Open OpenSDS log file
-	f, err := os.OpenFile("log/opensds.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Printf("error opening file: %v", err)
-	}
-	defer f.Close()
-	// assign it to the standard logger
-	log.SetOutput(f)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	// Construct api module grpc server struct and do some initialization.
-	api := new(server.Server)
-	api.Init()
-	// Construct orchestration module grpc server struct and do some initialization.
+	// Construct a grpc server struct and do some initialization.
 	orchestration := new(server.Server)
-	orchestration.Init()
-	// Construct adapter module grpc server struct and do some initialization.
 	adapter := new(server.Server)
+	orchestration.Init()
 	adapter.Init()
 	// Start the watcher mechanism of orchestration and adapter module.
-	go api.ApiWatch("opensds/api")
 	go orchestration.OrchestrationWatch("opensds/orchestration")
 	adapter.AdapterWatch("opensds/adapter")
+
 }

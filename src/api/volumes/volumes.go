@@ -20,8 +20,6 @@ This module implements the entry into CRUD operation of volumes.
 package volumes
 
 import (
-	"log"
-
 	"api/grpcapi"
 )
 
@@ -29,8 +27,7 @@ func Create(resourceType string, name string, size int) (string, error) {
 	result, err := grpcapi.CreateVolume(resourceType, name, size)
 
 	if err != nil {
-		log.Println("Create volume error: ", err)
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -40,8 +37,7 @@ func Show(resourceType string, volID string) (string, error) {
 	result, err := grpcapi.GetVolume(resourceType, volID)
 
 	if err != nil {
-		log.Println("Show volume error: ", err)
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -51,8 +47,7 @@ func List(resourceType string, allowDetails bool) (string, error) {
 	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
-		log.Println("List volume error: ", err)
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -62,8 +57,7 @@ func Update(resourceType string, volID string, name string) (string, error) {
 	result, err := grpcapi.UpdateVolume(resourceType, volID, name)
 
 	if err != nil {
-		log.Println("Update volume error: ", err)
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -73,30 +67,7 @@ func Delete(resourceType string, volID string) (string, error) {
 	result, err := grpcapi.DeleteVolume(resourceType, volID)
 
 	if err != nil {
-		log.Println("Delete volume error: ", err)
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func Mount(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := grpcapi.MountVolume(resourceType, volID, host, mountpoint)
-
-	if err != nil {
-		log.Println("Mount volume error: ", err)
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func Unmount(resourceType, volID, attachment string) (string, error) {
-	result, err := grpcapi.UnmountVolume(resourceType, volID, attachment)
-
-	if err != nil {
-		log.Println("Unmount volume error: ", err)
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}

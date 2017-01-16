@@ -20,8 +20,6 @@ This module implements the entry into operations of storageDock module.
 package api
 
 import (
-	"log"
-
 	"adapter/storageDock"
 )
 
@@ -29,8 +27,7 @@ func CreateVolume(resourceType string, name string, size int) (string, error) {
 	result, err := storageDock.CreateVolume(resourceType, name, size)
 
 	if err != nil {
-		log.Println("Error occured in adapter module when create volume!")
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -40,8 +37,7 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	result, err := storageDock.GetVolume(resourceType, volID)
 
 	if err != nil {
-		log.Println("Error occured in adapter module when get volume!")
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -51,8 +47,7 @@ func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 	result, err := storageDock.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
-		log.Println("Error occured in adapter module when get all volumes!")
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -62,8 +57,7 @@ func UpdateVolume(resourceType string, volID string, name string) (string, error
 	result, err := storageDock.UpdateVolume(resourceType, volID, name)
 
 	if err != nil {
-		log.Println("Error occured in adapter module when update volume!")
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
@@ -73,30 +67,7 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	result, err := storageDock.DeleteVolume(resourceType, volID)
 
 	if err != nil {
-		log.Println("Error occured in adapter module when delete volume!")
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := storageDock.MountVolume(resourceType, volID, host, mountpoint)
-
-	if err != nil {
-		log.Println("Error occured in adapter module when mount volume!")
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func UnmountVolume(resourceType, volID, attachment string) (string, error) {
-	result, err := storageDock.UnmountVolume(resourceType, volID, attachment)
-
-	if err != nil {
-		log.Println("Error occured in adapter module when unmount volume!")
-		return "", err
+		return "Error", err
 	} else {
 		return result, nil
 	}
