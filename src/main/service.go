@@ -20,10 +20,24 @@ This module implements a entry into the OpenSDS service.
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
+
 	"grpc/server"
 )
 
 func main() {
+	// Open OpenSDS log file
+	f, err := os.OpenFile("log/opensds.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+	}
+	defer f.Close()
+	// assign it to the standard logger
+	log.SetOutput(f)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	// Construct api module grpc server struct and do some initialization.
 	api := new(server.Server)
 	api.Init()

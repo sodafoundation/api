@@ -40,10 +40,12 @@ ATTACH_TO_OTHER = consts.ATTACH_TO_OTHER
 
 OPENSTACK = 'openstack'
 OSBRICK = 'osbrick'
+OPENSDS = 'opensds'
 
 volume_connector_conf = {
     OPENSTACK: 'fuxi.connector.cloudconnector.openstack.CinderConnector',
-    OSBRICK: 'fuxi.connector.osbrickconnector.CinderConnector'}
+    OSBRICK: 'fuxi.connector.osbrickconnector.CinderConnector',
+    OPENSDS: 'fuxi.connector.osbrickconnector.OpenSDSConnector'}
 
 LOG = logging.getLogger(__name__)
 
@@ -169,7 +171,7 @@ class OpenSDS(provider.Provider):
             # search_opts = {'name': docker_volume_name,
             #                'metadata': {consts.VOLUME_FROM: CONF.volume_from}}
             for vol in self.opensdsclient.list():
-		vol = APIDictWrapper(vol)
+				vol = APIDictWrapper(vol)
                 LOG.info("dsl: vol=%s", vol.__dict__)
                 if vol.name == docker_volume_name:
                     if vol.attachments:
@@ -474,91 +476,3 @@ class OpenSDS(provider.Provider):
         if state == UNKNOWN:
             return False
         return True
-"""
-class OpenSDS(provider.Provider):
-
-	volume_provider_type = 'opensds'
-
-	def __init__(self):
-		super(OpenSDS, self).__init__()
-		self.opensdsclient = GrpcApi()
-
-	def create(self, docker_volume_name, volume_opts):
-		if not volume_opts:
-			volume_opts = {"size": 1}
-
-		cinder_volume, state = self._get_docker_volume(docker_volume_name)
-		if state == NOT_ATTACH:
-			LOG.warning(_LW("The volume {0} {1} already exists and attached "
-					"to this server").format(docker_volume_name,
-								cinder_volume))
-		else:
-			return self.opensdsclient.create(docker_volume_name,
-							volume_opts["size"])
-
-	def delete(self, docker_volume_name):
-		cinder_volume, state = self._get_docker_volume(docker_volume_name)
-		LOG.info(_LI("Get docker volume {0} {1} with state "
-			"{2}").format(docker_volume_name, cinder_volume, state))
-
-        	if cinder_volume is not None:
-        		self.opensdsclient.delete(cinder_volume['id'])
-
-	def list(self):
-        	LOG.info(_LI("Start to retrieve all docker volumes from OpenSDS"))
-        	vols = self.opensdsclient.list()
-        	docker_volumes = []
-        	try:
-        	    for vol in vols:
-            		mountpoint = self._get_mountpoint(vol["name"])
-            		docker_vol = { 'Name': vol["name"],
-            				'Mountpoint': mountpoint}
-            		docker_volumes.append(docker_vol)
-        	except cinder_exception.ClientException as e:
-        	    LOG.error(_LE("Retrieve volume list failed. Error: {0}").format(e))
-        	    raise
-
-        	LOG.info(_LI("Retrieve docker volumes {0} from OpenSDS "
-        	             "successfully").format(docker_volumes))
-        	return docker_volumes
-
-	def _get_docker_volume(self, docker_volume_name):
-	        LOG.info(_LI("Retrieve docker volume {0} from "
-	                     "OpenSDS").format(docker_volume_name))
-
-	        for vol in self.opensdsclient.list():
-	        	if vol["name"] == docker_volume_name:
-	        		return vol, NOT_ATTACH
-	        	else:
-        			return None, UNKNOWN
-
-	def show(self, docker_volume_name):
-
-    		vols = self.opensdsclient.list()
-    		for vol in vols:
-    			if vol["name"] == docker_volume_name:
-				mountpoint = self._get_mountpoint(vol["name"])
-    				return {"Name": docker_volume_name,
-    					"Mountpoint": mountpoint}
-      	  		else:        
-            			msg = _LW("Can't find this volume '{0}' in "
-                		      "OpenSDS").format(docker_volume_name)
-            		LOG.warning(msg)
-            		raise exceptions.NotFound(msg)
-
-	def mount(self, docker_volume_name):
-        	return "/mnt/docker/test002"
-
-	def unmount(self, docker_volume_name):
-        	return
-
-	def check_exist(self, docker_volume_name):
-    		return True
-        	_, state = self._get_docker_volume(docker_volume_name)
-        	LOG.info(_LI("Get docker volume {0} with state "
-        	             "{1}").format(docker_volume_name, state))
-
-        	if state == UNKNOWN:
-        	    return False
-        	return True
-"""
