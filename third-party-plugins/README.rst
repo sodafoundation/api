@@ -5,7 +5,6 @@
 
   1.1 Start OpenSDS service:
 	etcd
-	
 	go run goproj/opensds/src/main/service.go
 	
 	fuxi-server --config-file /etc/fuxi/fuxi.conf --log-dir /var/log/ --log-file fuxi.log
