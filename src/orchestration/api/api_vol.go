@@ -24,7 +24,8 @@ service module.
 package api
 
 import (
-	"metaData"
+	"log"
+
 	"orchestration/grpcapi"
 )
 
@@ -32,7 +33,8 @@ func CreateVolume(resourceType string, name string, size int) (string, error) {
 	result, err := grpcapi.CreateVolume(resourceType, name, size)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when create volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
@@ -42,7 +44,8 @@ func GetVolume(resourceType string, volID string) (string, error) {
 	result, err := grpcapi.GetVolume(resourceType, volID)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when get volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
@@ -52,7 +55,8 @@ func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when get all volumes!")
+		return "", err
 	} else {
 		return result, nil
 	}
@@ -62,7 +66,8 @@ func UpdateVolume(resourceType string, volID string, name string) (string, error
 	result, err := grpcapi.UpdateVolume(resourceType, volID, name)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when update volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
@@ -72,107 +77,30 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	result, err := grpcapi.DeleteVolume(resourceType, volID)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when delete volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func CreateDatabase(name string, size int) (string, error) {
-	result, err := metaData.CreateDatabase(name, size)
+func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
+	result, err := grpcapi.MountVolume(resourceType, volID, host, mountpoint)
 
 	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when mount volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func GetDatabase(id int, name string) (string, error) {
-	result, err := metaData.GetDatabase(id, name)
+func UnmountVolume(resourceType, volID, attachment string) (string, error) {
+	result, err := grpcapi.UnmountVolume(resourceType, volID, attachment)
 
 	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func GetAllDatabases() (string, error) {
-	result, err := metaData.GetAllDatabases()
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func UpdateDatabase(id int, size int, name string) (string, error) {
-	result, err := metaData.UpdateDatabase(id, size, name)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func DeleteDatabase(id int, name string, cascade bool) (string, error) {
-	result, err := metaData.DeleteDatabase(id, name, cascade)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func CreateFileSystem(name string, size int) (string, error) {
-	result, err := metaData.CreateFileSystem(name, size)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func GetFileSystem(id int, name string) (string, error) {
-	result, err := metaData.GetFileSystem(id, name)
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func GetAllFileSystems() (string, error) {
-	result, err := metaData.GetAllFileSystems()
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func UpdateFileSystem(id int, size int, name string) (string, error) {
-	result, err := metaData.UpdateFileSystem(id, size, name)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func DeleteFileSystem(id int, name string, cascade bool) (string, error) {
-	result, err := metaData.DeleteFileSystem(id, name, cascade)
-
-	if err != nil {
-		return "Error", err
+		log.Println("Error occured in orchestration module when unmount volume!")
+		return "", err
 	} else {
 		return result, nil
 	}
