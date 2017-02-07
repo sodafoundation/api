@@ -29,9 +29,10 @@ import (
 
 	"adapter/storagePlugins/cinder"
 	"adapter/storagePlugins/coprhd"
+	"adapter/storagePlugins/manila"
 )
 
-type StoragePlugin interface {
+type VolumePlugin interface {
 	//Any initialization the volume driver does while starting.
 	Setup()
 	//Any operation the volume driver does while stoping.
@@ -52,18 +53,35 @@ type StoragePlugin interface {
 	UnmountVolume(volID string, attachement string) (string, error)
 }
 
-func Init(resourceType string) (StoragePlugin, error) {
+type SharePlugin interface {
+	//Any initialization the file share driver does while starting.
+	Setup()
+	//Any operation the file share driver does while stoping.
+	Unset()
+
+	CreateShare(name string, size int) (string, error)
+
+	GetShare(shrID string) (string, error)
+
+	GetAllShares(allowDetails bool) (string, error)
+
+	UpdateShare(shrID string, name string) (string, error)
+
+	DeleteShare(shrID string) (string, error)
+}
+
+func InitVP(resourceType string) (VolumePlugin, error) {
 	switch resourceType {
 	case "cinder":
-		var plugin StoragePlugin = &cinder.CinderPlugin{
-			"http://162.3.140.36:35357/v2.0",
-			"admin",
-			"huawei",
-			"admin",
+		var plugin VolumePlugin = &cinder.CinderPlugin{
+			Host:        "http://162.3.140.36:35357/v2.0",
+			Username:    "admin",
+			Password:    "huawei",
+			ProjectName: "admin",
 		}
 		return plugin, nil
 	case "coprhd":
-		var plugin StoragePlugin = &coprhd.Driver{
+		var plugin VolumePlugin = &coprhd.Driver{
 			"https://coprhd.emc.com",
 			url.UserPassword("admin", "password"),
 			&http.Client{
@@ -71,6 +89,22 @@ func Init(resourceType string) (StoragePlugin, error) {
 					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 				},
 			},
+		}
+		return plugin, nil
+	default:
+		err := errors.New("Can't find this resource type in backend storage.")
+		return nil, err
+	}
+}
+
+func InitSP(resourceType string) (SharePlugin, error) {
+	switch resourceType {
+	case "manila":
+		var plugin SharePlugin = &manila.ManilaPlugin{
+			Host:        "http://162.3.140.36:35357/v2.0",
+			Username:    "admin",
+			Password:    "huawei",
+			ProjectName: "admin",
 		}
 		return plugin, nil
 	default:

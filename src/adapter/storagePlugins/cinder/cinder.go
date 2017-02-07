@@ -199,7 +199,6 @@ func (plugin *CinderPlugin) UnmountVolume(volID, attachment string) (string, err
 }
 
 func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
-	nullVolumeService := v3.Service{}
 	creds := openstack.AuthOpts{
 		AuthUrl:     plugin.Host,
 		Username:    plugin.Username,
@@ -208,17 +207,16 @@ func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
 	}
 	auth, err := openstack.DoAuthRequest(creds)
 	if err != nil {
-		log.Println("There was an error authenticating:", err)
-		return nullVolumeService, err
+		log.Fatalln("There was an error authenticating:", err)
 	}
 	if !auth.GetExpiration().After(time.Now()) {
-		log.Println("There was an error. The auth token has an invalid expiration.")
+		log.Fatalln("There was an error. The auth token has an invalid expiration.")
 	}
 
 	// Find the endpoint for the volume service.
 	url, err := auth.GetEndpoint("volumev2", "")
 	if url == "" || err != nil {
-		log.Println("Volume service url not found during authentication.")
+		log.Fatalln("Volume service url not found during authentication.")
 	}
 
 	// Make a new client with these creds, here configure InsecureSkipVerify
@@ -227,14 +225,9 @@ func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
 	tls.InsecureSkipVerify = true
 	sess, err := openstack.NewSession(nil, auth, tls)
 	if err != nil {
-		log.Println("Error crating new Session:", err)
-		return nullVolumeService, err
+		log.Fatalln("Error creating new Session:", err)
 	}
 
-	volumeService := v3.Service{
-		Session: *sess,
-		Client:  *http.DefaultClient,
-		URL:     url,
-	}
+	volumeService, _ := v3.NewService(*sess, *http.DefaultClient, url)
 	return volumeService, nil
 }

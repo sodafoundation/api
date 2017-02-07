@@ -25,8 +25,8 @@ import (
 	"adapter/storagePlugins"
 )
 
-type Policy struct {
-	//The standard policy configuration will be defined here.
+type VolumePolicy struct {
+	//The standard volume policy configuration will be defined here.
 }
 
 type VolumeDriver interface {
@@ -52,7 +52,7 @@ type VolumeDriver interface {
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -71,7 +71,7 @@ func CreateVolume(resourceType string, name string, size int) (string, error) {
 
 func GetVolume(resourceType, volID string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -90,7 +90,7 @@ func GetVolume(resourceType, volID string) (string, error) {
 
 func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -109,7 +109,7 @@ func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 
 func UpdateVolume(resourceType, volID, name string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -128,7 +128,7 @@ func UpdateVolume(resourceType, volID, name string) (string, error) {
 
 func DeleteVolume(resourceType, volID string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -147,7 +147,7 @@ func DeleteVolume(resourceType, volID string) (string, error) {
 
 func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err
@@ -166,7 +166,7 @@ func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 
 func UnmountVolume(resourceType, volID, attachment string) (string, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.Init(resourceType)
+	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
 		log.Printf("Find %s failed: %v\n", resourceType, err)
 		return "", err

@@ -47,11 +47,11 @@ func (s *Server) Init() {
 	}
 	cli, err := client.New(s.cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Server initialized failed:", err)
 	}
 	s.etcd = client.NewKeysAPI(cli)
 	s.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
-	log.Println("Server intialized success!")
+	log.Println("Server initialized success!")
 }
 
 func (s *Server) ApiWatch(url string) {
@@ -101,6 +101,28 @@ func (s *Server) ApiWatch(url string) {
 			volID := tmp[2]
 			attachment := tmp[3]
 			result, _ = volumeApi.Unmount(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = adapterApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = adapterApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = adapterApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.DeleteShare(resourceType, shrID)
 		default:
 			log.Printf("Error, no action: %s\n", tmp[0])
 			result = ""
@@ -160,6 +182,28 @@ func (s *Server) OrchestrationWatch(url string) {
 			volID := tmp[2]
 			attachment := tmp[3]
 			result, _ = orchestrationApi.UnmountVolume(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = orchestrationApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = orchestrationApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = orchestrationApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = orchestrationApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = orchestrationApi.DeleteShare(resourceType, shrID)
 		case "CreateDatabase":
 			name := tmp[1]
 			size, _ := strconv.Atoi(tmp[2])
@@ -289,6 +333,28 @@ func (s *Server) AdapterWatch(url string) {
 			volID := tmp[2]
 			attachment := tmp[3]
 			result, _ = adapterApi.UnmountVolume(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = adapterApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = adapterApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = adapterApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.DeleteShare(resourceType, shrID)
 		default:
 			log.Printf("Error, no action: %s\n", tmp[0])
 			result = ""

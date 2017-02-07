@@ -27,6 +27,7 @@ import (
 
 	"api/databases"
 	"api/fileSystems"
+	"api/shares"
 	"api/volumes"
 )
 
@@ -124,6 +125,73 @@ func main() {
 				} else {
 					if result == "" {
 						fmt.Println("Unmount volume failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+		}
+		if strings.Contains(cmd, "share") {
+			if strings.Contains(cmd, "create") {
+				result, err := createShare(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Create share failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "show") {
+				result, err := showShare(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Show share failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "list") {
+				result, err := listShare(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("List file shares failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "update") {
+				result, err := updateShare(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Update file share failed!")
+					} else {
+						fmt.Printf("%v\n", result)
+					}
+				}
+			}
+			if strings.Contains(cmd, "delete") {
+				result, err := deleteShare(cmd)
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if result == "" {
+						fmt.Println("Delete file share failed!")
 					} else {
 						fmt.Printf("%v\n", result)
 					}
@@ -355,6 +423,89 @@ func unmountVolume(cmd string) (string, error) {
 		attachment := attachSlice[1]
 
 		return volumes.Unmount(resourceType, volID, attachment)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func createShare(cmd string) (string, error) {
+	if strings.Contains(cmd, "name") && strings.Contains(cmd, "size") {
+		input := make([]string, 5, 10)
+		input = strings.Split(cmd, "--")
+		nameSlice := make([]string, 2, 4)
+		sizeSlice := make([]string, 2, 4)
+		nameSlice = strings.Split(input[3], "=")
+		sizeSlice = strings.Split(input[4], "=")
+		resourceType := input[2]
+		name := nameSlice[1]
+		size, _ := strconv.Atoi(sizeSlice[1])
+
+		return shares.Create(resourceType, name, size)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func showShare(cmd string) (string, error) {
+	if strings.Contains(cmd, "id") {
+		input := make([]string, 4, 8)
+		input = strings.Split(cmd, "--")
+		idSlice := make([]string, 2, 4)
+		idSlice = strings.Split(input[3], "=")
+		resourceType := input[2]
+		shrID := idSlice[1]
+
+		return shares.Show(resourceType, shrID)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func listShare(cmd string) (string, error) {
+	input := make([]string, 3, 6)
+	input = strings.Split(cmd, "--")
+	resourceType := input[2]
+	var allowDetails bool = false
+	if strings.Contains(cmd, "detail") {
+		allowDetails = true
+	}
+
+	return shares.List(resourceType, allowDetails)
+}
+
+func updateShare(cmd string) (string, error) {
+	if strings.Contains(cmd, "id") && strings.Contains(cmd, "name") {
+		input := make([]string, 5, 10)
+		input = strings.Split(cmd, "--")
+		var idSlice []string = strings.Split(input[3], "=")
+		var nameSlice []string = strings.Split(input[4], "=")
+		resourceType := input[2]
+		shrID := idSlice[1]
+		name := nameSlice[1]
+
+		return shares.Update(resourceType, shrID, name)
+
+	} else {
+		err := fmt.Errorf("Input Error: %s", cmd)
+		return "", err
+	}
+}
+
+func deleteShare(cmd string) (string, error) {
+	if strings.Contains(cmd, "id") {
+		input := make([]string, 4, 8)
+		input = strings.Split(cmd, "--")
+		var idSlice []string = strings.Split(input[3], "=")
+		resourceType := input[2]
+		shrID := idSlice[1]
+
+		return shares.Delete(resourceType, shrID)
 
 	} else {
 		err := fmt.Errorf("Input Error: %s", cmd)

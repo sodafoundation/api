@@ -26,7 +26,6 @@ package api
 import (
 	"log"
 
-	"metaData"
 	"orchestration/grpcapi"
 )
 
@@ -102,106 +101,6 @@ func UnmountVolume(resourceType, volID, attachment string) (string, error) {
 	if err != nil {
 		log.Println("Error occured in orchestration module when unmount volume!")
 		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func CreateDatabase(name string, size int) (string, error) {
-	result, err := metaData.CreateDatabase(name, size)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func GetDatabase(id int, name string) (string, error) {
-	result, err := metaData.GetDatabase(id, name)
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func GetAllDatabases() (string, error) {
-	result, err := metaData.GetAllDatabases()
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func UpdateDatabase(id int, size int, name string) (string, error) {
-	result, err := metaData.UpdateDatabase(id, size, name)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func DeleteDatabase(id int, name string, cascade bool) (string, error) {
-	result, err := metaData.DeleteDatabase(id, name, cascade)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func CreateFileSystem(name string, size int) (string, error) {
-	result, err := metaData.CreateFileSystem(name, size)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func GetFileSystem(id int, name string) (string, error) {
-	result, err := metaData.GetFileSystem(id, name)
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func GetAllFileSystems() (string, error) {
-	result, err := metaData.GetAllFileSystems()
-
-	if err != nil {
-		return result, err
-	} else {
-		return result, nil
-	}
-}
-
-func UpdateFileSystem(id int, size int, name string) (string, error) {
-	result, err := metaData.UpdateFileSystem(id, size, name)
-
-	if err != nil {
-		return "Error", err
-	} else {
-		return result, nil
-	}
-}
-
-func DeleteFileSystem(id int, name string, cascade bool) (string, error) {
-	result, err := metaData.DeleteFileSystem(id, name, cascade)
-
-	if err != nil {
-		return "Error", err
 	} else {
 		return result, nil
 	}

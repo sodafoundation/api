@@ -46,13 +46,13 @@ func (c *Client) Run(url string, action string) (string, error) {
 	}
 	c.etcd = client.NewKeysAPI(cli)
 
-	resp, err := c.etcd.Set(context.Background(), url, action, nil)
+	_, err = c.etcd.Set(context.Background(), url, action, nil)
 	if err != nil {
 		log.Println("Client SET failed:", err)
 		return "", err
 	}
 
-	c.watchOpts = client.WatcherOptions{AfterIndex: resp.Index, Recursive: true}
+	c.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
 	w := c.etcd.Watcher(url, &c.watchOpts)
 	r, err := w.Next(context.Background())
 	if err != nil {

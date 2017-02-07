@@ -75,3 +75,39 @@ func UnmountVolume(resourceType, volID, attchment string) (string, error) {
 	action := []string{"UnmountVolume", resourceType, volID, attchment}
 	return client.Run(url, strings.Join(action[:], ","))
 }
+
+func CreateShare(resourceType string, name string, size int) (string, error) {
+	var client grpc.Client
+	url := "opensds/adapter"
+	action := []string{"CreateShare", resourceType, name, strconv.Itoa(size)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetShare(resourceType string, shrID string) (string, error) {
+	var client grpc.Client
+	url := "opensds/adapter"
+	action := []string{"GetShare", resourceType, shrID}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func GetAllShares(resourceType string, allowDetails bool) (string, error) {
+	var client grpc.Client
+	url := "opensds/adapter"
+	action := []string{"GetAllShares", resourceType,
+		strconv.FormatBool(allowDetails)}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func UpdateShare(resourceType string, shrID string, name string) (string, error) {
+	var client grpc.Client
+	url := "opensds/adapter"
+	action := []string{"UpdateShare", resourceType, shrID, name}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func DeleteShare(resourceType string, shrID string) (string, error) {
+	var client grpc.Client
+	url := "opensds/adapter"
+	action := []string{"DeleteShare", resourceType, shrID}
+	return client.Run(url, strings.Join(action[:], ","))
+}
