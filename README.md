@@ -1,5 +1,7 @@
 # OpenSDS
 
+[![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
+
 <img src="https://www.opensds.io/wp-content/uploads/2016/11/logo_opensds.png" width="100">
 
 ## Introduction
@@ -19,8 +21,9 @@ targeted the mid of 2017.
 
 The OpenSDS community welcomes anyone who is interested in software defined
 storage and shaping the future of cloud-era storage. If you are a company,
-you should consider joining the [OpenSDS Project](https://opensds.io/). If
-you are a developer want to be part of the PoC development that is happening
+you should consider joining the [OpenSDS Project](https://opensds.io/). 
+
+If you are a developer want to be part of the PoC development that is happening
 now, please register to the [OpenSDS Mailinglist](https://groups.google.com/forum/#!forum/opensds-dev/) to get involved.
 
 ## Contribute
@@ -58,4 +61,4 @@ Cinder, Manila, Swift and so on) and enterprise projects (such as
 OceanStor DJ). The rawStorage contains raw storage device from Intel and
 WD (such as NVMe and NOF).
 
-
+## Installation
