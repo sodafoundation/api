@@ -29,6 +29,7 @@ import (
 	"golang.org/x/net/context"
 
 	adapterApi "adapter/storageDock/api"
+	volumeApi "api/volumes"
 	orchestrationApi "orchestration/api"
 )
 
@@ -46,23 +47,19 @@ func (s *Server) Init() {
 	}
 	cli, err := client.New(s.cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Server initialized failed:", err)
 	}
 	s.etcd = client.NewKeysAPI(cli)
-	_, err = s.etcd.Set(context.Background(), "opensds/api", "Server start!", nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Server intialized success!")
 	s.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
+	log.Println("Server initialized success!")
 }
 
-func (s *Server) OrchestrationWatch(url string) {
+func (s *Server) ApiWatch(url string) {
 	for {
 		w := s.etcd.Watcher(url, &s.watchOpts)
 		r, err := w.Next(context.Background())
 		if err != nil {
-			log.Fatal("Error occurred", err)
+			log.Fatalln("API modlue server WATCH failed:", err)
 		}
 
 		value := r.Node.Value
@@ -75,39 +72,138 @@ func (s *Server) OrchestrationWatch(url string) {
 			resourceType := tmp[1]
 			name := tmp[2]
 			size, _ := strconv.Atoi(tmp[3])
-			result, err = orchestrationApi.CreateVolume(resourceType, name, size)
-			if err != nil {
-				log.Println("Error occured when create volume!")
-			}
+			result, _ = volumeApi.Create(resourceType, name, size)
 		case "GetVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
-			result, err = orchestrationApi.GetVolume(resourceType, volID)
-			if err != nil {
-				log.Println("Error occured when get volume!")
-			}
+			result, _ = volumeApi.Show(resourceType, volID)
 		case "GetAllVolumes":
 			resourceType := tmp[1]
 			allowDetails, _ := strconv.ParseBool(tmp[2])
-			result, err = orchestrationApi.GetAllVolumes(resourceType, allowDetails)
-			if err != nil {
-				log.Println("Error occured when get all volumes!")
-			}
+			result, _ = volumeApi.List(resourceType, allowDetails)
 		case "UpdateVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			name := tmp[3]
-			result, err = orchestrationApi.UpdateVolume(resourceType, volID, name)
-			if err != nil {
-				log.Println("Error occured when update volume!")
-			}
+			result, _ = volumeApi.Update(resourceType, volID, name)
 		case "DeleteVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
-			result, err = orchestrationApi.DeleteVolume(resourceType, volID)
-			if err != nil {
-				log.Println("Error occured when delete volume!")
-			}
+			result, _ = volumeApi.Delete(resourceType, volID)
+		case "MountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			host := tmp[3]
+			mountpoint := tmp[4]
+			result, _ = volumeApi.Mount(resourceType, volID, host, mountpoint)
+		case "UnmountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			attachment := tmp[3]
+			result, _ = volumeApi.Unmount(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = adapterApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = adapterApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = adapterApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.DeleteShare(resourceType, shrID)
+		default:
+			log.Printf("Error, no action: %s\n", tmp[0])
+			result = ""
+		}
+
+		_, err = s.etcd.Set(context.Background(), url, result, nil)
+		if err != nil {
+			log.Fatalln("API modlue server SET failed:", err)
+		}
+	}
+}
+
+func (s *Server) OrchestrationWatch(url string) {
+	for {
+		w := s.etcd.Watcher(url, &s.watchOpts)
+		r, err := w.Next(context.Background())
+		if err != nil {
+			log.Fatalln("Orchestration modlue server WATCH failed:", err)
+		}
+
+		value := r.Node.Value
+		tmp := make([]string, 5, 10)
+		tmp = strings.Split(value, ",")
+		var result string
+
+		switch tmp[0] {
+		case "CreateVolume":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = orchestrationApi.CreateVolume(resourceType, name, size)
+		case "GetVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, _ = orchestrationApi.GetVolume(resourceType, volID)
+		case "GetAllVolumes":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = orchestrationApi.GetAllVolumes(resourceType, allowDetails)
+		case "UpdateVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			name := tmp[3]
+			result, _ = orchestrationApi.UpdateVolume(resourceType, volID, name)
+		case "DeleteVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			result, _ = orchestrationApi.DeleteVolume(resourceType, volID)
+		case "MountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			host := tmp[3]
+			mountpoint := tmp[4]
+			result, _ = orchestrationApi.MountVolume(resourceType, volID, host, mountpoint)
+		case "UnmountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			attachment := tmp[3]
+			result, _ = orchestrationApi.UnmountVolume(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = orchestrationApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = orchestrationApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = orchestrationApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = orchestrationApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = orchestrationApi.DeleteShare(resourceType, shrID)
 		case "CreateDatabase":
 			name := tmp[1]
 			size, _ := strconv.Atoi(tmp[2])
@@ -180,12 +276,12 @@ func (s *Server) OrchestrationWatch(url string) {
 			}
 		default:
 			log.Printf("Error, no action: %s\n", tmp[0])
-			result = "Error"
+			result = ""
 		}
 
 		_, err = s.etcd.Set(context.Background(), url, result, nil)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln("Orchesration modlue server SET failed:", err)
 		}
 	}
 }
@@ -195,7 +291,7 @@ func (s *Server) AdapterWatch(url string) {
 		w := s.etcd.Watcher(url, &s.watchOpts)
 		r, err := w.Next(context.Background())
 		if err != nil {
-			log.Fatal("Error occurred", err)
+			log.Fatalln("Adapter modlue server WATCH failed:", err)
 		}
 
 		value := r.Node.Value
@@ -208,47 +304,65 @@ func (s *Server) AdapterWatch(url string) {
 			resourceType := tmp[1]
 			name := tmp[2]
 			size, _ := strconv.Atoi(tmp[3])
-			result, err = adapterApi.CreateVolume(resourceType, name, size)
-			if err != nil {
-				log.Println("Error occured when create volume!")
-			}
+			result, _ = adapterApi.CreateVolume(resourceType, name, size)
 		case "GetVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
-			result, err = adapterApi.GetVolume(resourceType, volID)
-			if err != nil {
-				log.Println("Error occured when get volume!")
-			}
+			result, _ = adapterApi.GetVolume(resourceType, volID)
 		case "GetAllVolumes":
 			resourceType := tmp[1]
 			allowDetails, _ := strconv.ParseBool(tmp[2])
-			result, err = adapterApi.GetAllVolumes(resourceType, allowDetails)
-			if err != nil {
-				log.Println("Error occured when get all volumes!")
-			}
+			result, _ = adapterApi.GetAllVolumes(resourceType, allowDetails)
 		case "UpdateVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			name := tmp[3]
-			result, err = adapterApi.UpdateVolume(resourceType, volID, name)
-			if err != nil {
-				log.Println("Error occured when update volume!")
-			}
+			result, _ = adapterApi.UpdateVolume(resourceType, volID, name)
 		case "DeleteVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
-			result, err = adapterApi.DeleteVolume(resourceType, volID)
-			if err != nil {
-				log.Println("Error occured when delete volume!")
-			}
+			result, _ = adapterApi.DeleteVolume(resourceType, volID)
+		case "MountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			host := tmp[3]
+			mountpoint := tmp[4]
+			result, _ = adapterApi.MountVolume(resourceType, volID, host, mountpoint)
+		case "UnmountVolume":
+			resourceType := tmp[1]
+			volID := tmp[2]
+			attachment := tmp[3]
+			result, _ = adapterApi.UnmountVolume(resourceType, volID, attachment)
+		case "CreateShare":
+			resourceType := tmp[1]
+			name := tmp[2]
+			size, _ := strconv.Atoi(tmp[3])
+			result, _ = adapterApi.CreateShare(resourceType, name, size)
+		case "GetShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.GetShare(resourceType, shrID)
+		case "GetAllShares":
+			resourceType := tmp[1]
+			allowDetails, _ := strconv.ParseBool(tmp[2])
+			result, _ = adapterApi.GetAllShares(resourceType, allowDetails)
+		case "UpdateShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			name := tmp[3]
+			result, _ = adapterApi.UpdateShare(resourceType, shrID, name)
+		case "DeleteShare":
+			resourceType := tmp[1]
+			shrID := tmp[2]
+			result, _ = adapterApi.DeleteShare(resourceType, shrID)
 		default:
 			log.Printf("Error, no action: %s\n", tmp[0])
-			result = "Error"
+			result = ""
 		}
 
 		_, err = s.etcd.Set(context.Background(), url, result, nil)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln("Adapter modlue server SET failed:", err)
 		}
 	}
 }

@@ -23,7 +23,7 @@ package cinder
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -50,102 +50,152 @@ func (plugin *CinderPlugin) CreateVolume(name string, size int) (string, error) 
 	//Get the certified volume service.
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		panicString := fmt.Sprint("Cannot access volume service:", err)
-		panic(panicString)
+		log.Println("Cannot access volume service:", err)
+		return "", err
 	}
 
 	//Configure HTTP request body, the body is defined in v3 package.
-	requestBody := v3.RequestBody{name, size}
-	body := v3.Body{requestBody}
-	volumes, err := volumeService.Create(&body)
+	requestBody := v3.RequestBody{}
+	requestBody.Name = name
+	requestBody.Size = size
+	body := v3.CreateBody{requestBody}
+	volume, err := volumeService.Create(&body)
 	if err != nil {
-		panicString := fmt.Sprint("Cannot create volume:", err)
-		panic(panicString)
+		log.Println("Cannot create volume:", err)
+		return "", err
 	}
 
-	a, _ := json.Marshal(volumes)
-	result := fmt.Sprint("Create volume success!\n", string(a))
+	a, _ := json.Marshal(volume)
+	result := string(a)
+	log.Println("Create volume success, dls =", result)
 	return result, nil
 }
 
 func (plugin *CinderPlugin) GetVolume(volID string) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		panicString := fmt.Sprint("Cannot access volume service:", err)
-		panic(panicString)
+		log.Println("Cannot access volume service:", err)
+		return "", err
 	}
 
-	volumes, err := volumeService.Show(volID)
+	volume, err := volumeService.Show(volID)
 	if err != nil {
-		panicString := fmt.Sprint("Cannot show volume:", err)
-		panic(panicString)
+		log.Println("Cannot show volume:", err)
+		return "", err
 	}
 
-	a, _ := json.Marshal(volumes)
-	return string(a), nil
+	a, _ := json.Marshal(volume)
+	result := string(a)
+	log.Println("Get volume success, dls =", result)
+	return result, nil
 }
 
 func (plugin *CinderPlugin) GetAllVolumes(allowDetails bool) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		panicString := fmt.Sprint("Cannot access volume service:", err)
-		panic(panicString)
+		log.Println("Cannot access volume service:", err)
+		return "", err
 	}
 
 	var volumes interface{}
 	if allowDetails {
 		volumes, err = volumeService.Detail()
 		if err != nil {
-			panicString := fmt.Sprint("Cannot detail volumes:", err)
-			panic(panicString)
+			log.Println("Cannot detail volumes:", err)
+			return "", err
 		}
 	} else {
 		volumes, err = volumeService.List()
 		if err != nil {
-			panicString := fmt.Sprint("Cannot list volumes:", err)
-			panic(panicString)
+			log.Println("Cannot list volumes:", err)
+			return "", err
 		}
 	}
 
 	a, _ := json.Marshal(volumes)
-	return string(a), nil
+	result := string(a)
+	log.Println("Get all volumes success, dls =", result)
+	return result, nil
 }
 
 func (plugin *CinderPlugin) UpdateVolume(volID string, name string) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		panicString := fmt.Sprint("Cannot access volume service:", err)
-		panic(panicString)
+		log.Println("Cannot access volume service:", err)
+		return "", err
 	}
 
-	requestBody := v3.RequestBody{name, 0}
-	body := v3.Body{requestBody}
-	volumes, err := volumeService.Update(volID, &body)
+	requestBody := v3.RequestBody{}
+	requestBody.Name = name
+	body := v3.CreateBody{requestBody}
+	volume, err := volumeService.Update(volID, &body)
 	if err != nil {
-		panicString := fmt.Sprint("Cannot update volume:", err)
-		panic(panicString)
+		log.Println("Cannot update volume:", err)
+		return "", err
 	}
 
-	a, _ := json.Marshal(volumes)
-	result := fmt.Sprint("Update volume success!\n", string(a))
+	a, _ := json.Marshal(volume)
+	result := string(a)
+	log.Println("Update volume success, dls =", result)
 	return result, nil
 }
 
 func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		panicString := fmt.Sprint("Cannot access volume service:", err)
-		panic(panicString)
+		log.Println("Cannot access volume service:", err)
+		return "", err
 	}
 
 	err = volumeService.Delete(volID)
 	if err != nil {
-		panicString := fmt.Sprint("Cannot delete volume:", err)
-		panic(panicString)
+		log.Println("Cannot delete volume:", err)
+		return "", err
 	}
 
-	resp := "Delete volume success!"
-	return resp, nil
+	result := "Delete volume success!"
+	return result, nil
+}
+
+func (plugin *CinderPlugin) MountVolume(volID, host, mountpoint string) (string, error) {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	requestBody := v3.RequestBody{}
+	requestBody.HostName = host
+	requestBody.Mountpoint = mountpoint
+	body := v3.MountBody{requestBody}
+	err = volumeService.Mount(volID, &body)
+	if err != nil {
+		log.Println("Cannot mount volume:", err)
+		return "", err
+	}
+
+	result := "Mount volume success!"
+	return result, nil
+}
+
+func (plugin *CinderPlugin) UnmountVolume(volID, attachment string) (string, error) {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	requestBody := v3.RequestBody{}
+	requestBody.AttachmentID = attachment
+	body := v3.UnmountBody{requestBody}
+	err = volumeService.Unmount(volID, &body)
+	if err != nil {
+		log.Println("Cannot unmount volume:", err)
+		return "", err
+	}
+
+	result := "Unmount volume success!"
+	return result, nil
 }
 
 func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
@@ -157,17 +207,16 @@ func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
 	}
 	auth, err := openstack.DoAuthRequest(creds)
 	if err != nil {
-		panicString := fmt.Sprint("There was an error authenticating:", err)
-		panic(panicString)
+		log.Fatalln("There was an error authenticating:", err)
 	}
 	if !auth.GetExpiration().After(time.Now()) {
-		panic("There was an error. The auth token has an invalid expiration.")
+		log.Fatalln("There was an error. The auth token has an invalid expiration.")
 	}
 
 	// Find the endpoint for the volume service.
 	url, err := auth.GetEndpoint("volumev2", "")
 	if url == "" || err != nil {
-		panic("Volume service url not found during authentication")
+		log.Fatalln("Volume service url not found during authentication.")
 	}
 
 	// Make a new client with these creds, here configure InsecureSkipVerify
@@ -176,22 +225,9 @@ func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
 	tls.InsecureSkipVerify = true
 	sess, err := openstack.NewSession(nil, auth, tls)
 	if err != nil {
-		panicString := fmt.Sprint("Error crating new Session:", err)
-		panic(panicString)
+		log.Fatalln("Error creating new Session:", err)
 	}
 
-	volumeService := v3.Service{
-		Session: *sess,
-		Client:  *http.DefaultClient,
-		URL:     url,
-	}
+	volumeService, _ := v3.NewService(*sess, *http.DefaultClient, url)
 	return volumeService, nil
-}
-
-func (plugin *CinderPlugin) Mount(host string, volID string) {
-
-}
-
-func (plugin *CinderPlugin) Unmount(host string, volID string) {
-
 }
