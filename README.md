@@ -1,6 +1,3 @@
-.. This work is licensed under a Creative Commons Attribution 4.0 International License.
-.. http://creativecommons.org/licenses/by/4.0
-
 # OpenSDS
 
 <img src="https://www.opensds.io/wp-content/uploads/2016/11/logo_opensds.png" width="100">
@@ -34,28 +31,28 @@ and submit your contribution via PR.
 
 ## PoC Code Introduction
 
-* Please be aware that this code is under heavy development and subject to
-change, do use with discreption.
+_Please be aware that this code is under heavy development and subject to
+change, do use with discreption._
 
 The current PoC code consists of three main components: API, orchestration and
 adapter. Those three components communicate with each other through gRPC with
 the help of etcd.
 
-API module manages the request about storage resources, such as volumes,
+** API module manages the request about storage resources, such as volumes, 
 databases, file systems, policys and so forth.
 
-Orchestration module has three roles:
+** Orchestration module has three roles:
 
-1. Handles the request from API module.
+* Handles the request from API module.
 
-2. Collects the statistics (connection information, feature and so on) of
+* Collects the statistics (connection information, feature and so on) of
    storage resources through adapter module and deliver them to metaData
    module.
    
-3. Orchestrates storage resources and shows appropriate resources to users
+* Orchestrates storage resources and shows appropriate resources to users
    according to scenarios.
 
-Adapter module contains a standard storageDock and plugins of cookedStorage
+** Adapter module contains a standard storageDock and plugins of cookedStorage
 and rawStorage. The cookedStorage contains open source projects (such as
 Cinder, Manila, Swift and so on) and enterprise projects (such as
 OceanStor DJ). The rawStorage contains raw storage device from Intel and
