@@ -1,8 +1,8 @@
-# How to contribute
+## How to contribute
 
 opensds is Apache 2.0 licensed and accepts contributions via GitHub pull requests. This document outlines some of the conventions on commit message formatting, contact points for developers and other resources to make getting your contribution into etcd easier.
 
-# Email and chat
+## Email and chat
 
 - Email: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
 - Slack: #[opensds](https://opensds.slack.com) 
