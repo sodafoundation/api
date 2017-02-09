@@ -62,3 +62,23 @@ OceanStor DJ). The rawStorage contains raw storage device from Intel and
 WD (such as NVMe and NOF).
 
 ## Installation
+
+# Requirement
+
+* etcd
+
+For easy installation, the download link of etcd binary file is at: https://github.com/coreos/etcd/releases
+You can just use the command followed to set up etcd service:
+1. curl -L  https://github.com/coreos/etcd/releases/download/v2.0.0-rc.1/etcd-v2.0.0-rc.1-linux-amd64.tar.gz -o etcd-v2.0.0-rc.1-linux-amd64.tar.gz
+2. tar xzvf etcd-v2.0.0-rc.1-linux-amd64.tar.gz
+3. cd etcd-v2.0.0-rc.1-linux-amd64
+4. ./etcd
+
+* OpenStack, OceanStor DJ, CoprHD or ...
+
+As a Software-Defined-Storage controller, OpenSDS must be able to connect to backend storage environment. You can just deploy OpenSDS in any of these environments directly to avoid troublesomes. Since OpenSDS expose its interface through gRPC, there is nothing else to install. Lastly, please attention that POC only support OpenStack and OceanStor DJ right now, but we are working on other backend-storage environments.
+
+* Go environment
+
+To run a Go project, configuring Gopath is indispensable. After downloading the project, you should add "path_to_OpenSDS" in GOPATH environ variable.
+
