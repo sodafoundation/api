@@ -24,14 +24,15 @@ import (
 	"log"
 	"os"
 
-	"grpc/server"
+	"github.com/opensds/opensds/pkg/grpc/server"
 )
 
 func main() {
 	// Open OpenSDS log file
-	f, err := os.OpenFile("log/opensds.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("/var/log/opensds.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Printf("error opening file: %v", err)
+		fmt.Println("error opening file:", err)
+		os.Exit(1)
 	}
 	defer f.Close()
 	// assign it to the standard logger
