@@ -67,14 +67,14 @@ the help of etcd.
 
 * Orchestration module has three roles: 
 
-** Handles the request from API module. **
+**Handles the request from API module.**
 
-** Collects the statistics (connection information, feature and so on) of
+**Collects the statistics (connection information, feature and so on) of
    storage resources through adapter module and deliver them to metaData
-   module. **
+   module.**
    
-** Orchestrates storage resources and shows appropriate resources to users
-   according to scenarios. **
+**Orchestrates storage resources and shows appropriate resources to users
+   according to scenarios.**
 
 * Adapter module contains a standard Dock and plugins of different storage backends which contains both open source projects (such as Cinder, Manila, Swift and so on) and enterprise projects (such as Vipr, OceanStor DJ). Raw storage device will also be supported later
 
