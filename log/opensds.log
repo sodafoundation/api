@@ -1,5 +1,0 @@
-2017/02/07 23:48:26 server.go:54: Server initialized success!
-2017/02/07 23:48:26 server.go:54: Server initialized success!
-2017/02/07 23:48:26 server.go:54: Server initialized success!
-2017/02/07 23:48:44 volume.go:247: Start GET request to get all volumes, url = http://162.3.140.36:8776/v2/40f96153dd8d47aab04b04f227c9e62c/volumes
-2017/02/07 23:48:45 cinder.go:117: Get all volumes success, dls = [{"id":"bae78b42-680f-4302-bd9b-bf6c17fc3352","name":"test","links":[{"href":"http://162.3.140.36:8776/v2/40f96153dd8d47aab04b04f227c9e62c/volumes/bae78b42-680f-4302-bd9b-bf6c17fc3352","rel":"self"},{"href":"http://162.3.140.36:8776/40f96153dd8d47aab04b04f227c9e62c/volumes/bae78b42-680f-4302-bd9b-bf6c17fc3352","rel":"bookmark"}]}]
