@@ -104,3 +104,30 @@ As a Software-Defined-Storage controller, OpenSDS must be able to connect to bac
 
 To run a Go project, configuring Gopath is indispensable. After downloading the project, you should add "path_to_OpenSDS" in GOPATH environ variable.
 
+#### Build
+
+1. export GOPATH=$HOME/gopath
+
+   export PATH=$HOME/gopath/bin:$PATH
+   
+   mkdir -p $HOME/gopath/src/github.com/opensds/
+   
+   cd $HOME/gopath/src/github.com/opensds
+   
+2. git clone https://github.com/opensds/opensds.git $HOME/gopath/src/github.com/opensds/
+
+3. cd opensds
+
+   go get ... (import necessary packages)
+   
+4. cd cmd/sdslet
+
+   go build (as root)
+   
+5. cd cmd/sdsctl
+
+   go buld (as root)
+   
+6. cp cmd/sdslet/sdslet /usr/local/bin
+
+   cp cmd/sdsctl/sdsctl /usr/local/bin
