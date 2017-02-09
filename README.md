@@ -34,7 +34,7 @@ EMC and Wetern Digital.
 - Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
 - slack: #[opensds](https://opensds.slack.com)
 - Planning/Roadmap: [milestones](https://github.com/opensds/opensds/milestones), [roadmap](./ROADMAP.md)
-- Bugs: [issues](https://github.com/opensds/opensds/issues)
+- Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
 
 ### Contribute
 
@@ -50,7 +50,13 @@ change, do use with discreption._
 ### Purpose
 
 The purpose of the opensds poc is to verify the concept we envisioned for opensds.
-The PoC scenario is to have Kubernetes use 
+The PoC scenario is to have Kubernetes use OpenSDS as its storage provider via a
+plugin, and OpenSDS use OpenStack Cinder and Manila for its storage resource infra-
+structure.
+
+The goal is to demonstrate the capability of having OpenSDS provision block and file
+services that are provided by OpenStack for Kubernetes. OpenSDS's api will provide
+a single entry for Kubernetes to talk to different OpenStack storage services.
 
 ### Structure
 The current PoC code consists of three main components: api, orchestration and
