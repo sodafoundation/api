@@ -1,10 +1,11 @@
 dist: trusty
 language: go
-go_import_path: github.com/opensds/opensds
+#go_import_path: github.com/opensds/opensds
 sudo: false
 
 go:
-  - 1.7.4
+  - 1.6
+  - 1.7
   - tip
 
 env:
@@ -29,17 +30,17 @@ matrix:
   - go: tip
     env: TARGET=ppc64le
 
-script:
- - >
-    case "${TARGET}" in
-      amd64)
-        GOARCH=amd64 ./test
-        ;;
-      386)
-        GOARCH=386 PASSES="build unit" ./test
-        ;;
-      *)
-        # test building out of gopath
-        GO_BUILD_FLAGS="-a -v" GOPATH="" GOARCH="${TARGET}" ./build
-        ;;
-    esac
+#script:
+# - >
+#    case "${TARGET}" in
+#      amd64)
+#        GOARCH=amd64 ./test
+#        ;;
+#      386)
+#        GOARCH=386 PASSES="build unit" ./test
+#        ;;
+#      *)
+#        # test building out of gopath
+#        GO_BUILD_FLAGS="-a -v" GOPATH="" GOARCH="${TARGET}" ./build
+#        ;;
+#    esac
