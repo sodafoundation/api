@@ -27,8 +27,9 @@ import (
 	"net/http"
 	"time"
 
+	"openstack/golang-client/share"
+
 	"git.openstack.org/openstack/golang-client.git/openstack"
-	"git.openstack.org/openstack/golang-client.git/share"
 )
 
 type ManilaPlugin struct {

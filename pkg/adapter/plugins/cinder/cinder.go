@@ -27,8 +27,9 @@ import (
 	"net/http"
 	"time"
 
+	"openstack/golang-client/volume"
+
 	"git.openstack.org/openstack/golang-client.git/openstack"
-	"git.openstack.org/openstack/golang-client.git/volume/v3"
 )
 
 type CinderPlugin struct {
@@ -54,11 +55,11 @@ func (plugin *CinderPlugin) CreateVolume(name string, size int) (string, error) 
 		return "", err
 	}
 
-	//Configure HTTP request body, the body is defined in v3 package.
-	requestBody := v3.RequestBody{}
+	//Configure HTTP request body, the body is defined in volume package.
+	requestBody := volume.RequestBody{}
 	requestBody.Name = name
 	requestBody.Size = size
-	body := v3.CreateBody{requestBody}
+	body := volume.CreateBody{requestBody}
 	volume, err := volumeService.Create(&body)
 	if err != nil {
 		log.Println("Cannot create volume:", err)
@@ -125,9 +126,9 @@ func (plugin *CinderPlugin) UpdateVolume(volID string, name string) (string, err
 		return "", err
 	}
 
-	requestBody := v3.RequestBody{}
+	requestBody := volume.RequestBody{}
 	requestBody.Name = name
-	body := v3.CreateBody{requestBody}
+	body := volume.CreateBody{requestBody}
 	volume, err := volumeService.Update(volID, &body)
 	if err != nil {
 		log.Println("Cannot update volume:", err)
@@ -164,10 +165,10 @@ func (plugin *CinderPlugin) MountVolume(volID, host, mountpoint string) (string,
 		return "", err
 	}
 
-	requestBody := v3.RequestBody{}
+	requestBody := volume.RequestBody{}
 	requestBody.HostName = host
 	requestBody.Mountpoint = mountpoint
-	body := v3.MountBody{requestBody}
+	body := volume.MountBody{requestBody}
 	err = volumeService.Mount(volID, &body)
 	if err != nil {
 		log.Println("Cannot mount volume:", err)
@@ -185,9 +186,9 @@ func (plugin *CinderPlugin) UnmountVolume(volID, attachment string) (string, err
 		return "", err
 	}
 
-	requestBody := v3.RequestBody{}
+	requestBody := volume.RequestBody{}
 	requestBody.AttachmentID = attachment
-	body := v3.UnmountBody{requestBody}
+	body := volume.UnmountBody{requestBody}
 	err = volumeService.Unmount(volID, &body)
 	if err != nil {
 		log.Println("Cannot unmount volume:", err)
@@ -198,7 +199,7 @@ func (plugin *CinderPlugin) UnmountVolume(volID, attachment string) (string, err
 	return result, nil
 }
 
-func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
+func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 	creds := openstack.AuthOpts{
 		AuthUrl:     plugin.Host,
 		Username:    plugin.Username,
@@ -228,6 +229,6 @@ func (plugin *CinderPlugin) getVolumeService() (v3.Service, error) {
 		log.Fatalln("Error creating new Session:", err)
 	}
 
-	volumeService, _ := v3.NewService(*sess, *http.DefaultClient, url)
+	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, url)
 	return volumeService, nil
 }
