@@ -23,9 +23,11 @@ targeted the mid of 2017.
 The OpenSDS community welcomes anyone who is interested in software defined
 storage and shaping the future of cloud-era storage. If you are a company,
 you should consider joining the [OpenSDS Project](https://opensds.io/). 
-
 If you are a developer want to be part of the PoC development that is happening
 now, please refer to the Contribute sections below.
+
+The current opensds team that is developing the PoC prototype comes from Huawei,Intel,
+EMC and Wetern Digital.
 
 ### Contact
 
@@ -45,30 +47,30 @@ details on submitting patches and the contribution workflow.
 _Please be aware that this code is under heavy development and subject to
 change, do use with discreption._
 
+### Purpose
+
+The purpose of the opensds poc is to verify the concept we envisioned for opensds.
+The PoC scenario is to have Kubernetes use 
+
 ### Structure
-The current PoC code consists of three main components: API, orchestration and
+The current PoC code consists of three main components: api, orchestration and
 adapter. Those three components communicate with each other through gRPC with
 the help of etcd.
 
-** API module manages the request about storage resources, such as volumes, 
-databases, file systems, policys and so forth.
+* API module manages the request about storage resources, such as volumes, databases, file systems, policys and so forth. 
 
-** Orchestration module has three roles:
+* Orchestration module has three roles: 
 
-* Handles the request from API module.
+** Handles the request from API module. **
 
-* Collects the statistics (connection information, feature and so on) of
+** Collects the statistics (connection information, feature and so on) of
    storage resources through adapter module and deliver them to metaData
-   module.
+   module. **
    
-* Orchestrates storage resources and shows appropriate resources to users
-   according to scenarios.
+** Orchestrates storage resources and shows appropriate resources to users
+   according to scenarios. **
 
-** Adapter module contains a standard storageDock and plugins of cookedStorage
-and rawStorage. The cookedStorage contains open source projects (such as
-Cinder, Manila, Swift and so on) and enterprise projects (such as
-OceanStor DJ). The rawStorage contains raw storage device from Intel and
-WD (such as NVMe and NOF).
+* Adapter module contains a standard Dock and plugins of different storage backends which contains both open source projects (such as Cinder, Manila, Swift and so on) and enterprise projects (such as Vipr, OceanStor DJ). Raw storage device will also be supported later
 
 ### Development
 
@@ -77,10 +79,15 @@ WD (such as NVMe and NOF).
 * Clustering : etcd
 
 For easy installation, the download link of etcd binary file is at: https://github.com/coreos/etcd/releases
+
 You can just use the command followed to set up etcd service:
+
 1. curl -L  https://github.com/coreos/etcd/releases/download/v2.0.0-rc.1/etcd-v2.0.0-rc.1-linux-amd64.tar.gz -o etcd-v2.0.0-rc.1-linux-amd64.tar.gz
+
 2. tar xzvf etcd-v2.0.0-rc.1-linux-amd64.tar.gz
+
 3. cd etcd-v2.0.0-rc.1-linux-amd64
+
 4. ./etcd
 
 * Infrastructre : OpenStack, OceanStor DJ, CoprHD or ...
