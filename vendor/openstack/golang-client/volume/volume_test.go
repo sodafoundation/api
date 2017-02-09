@@ -42,7 +42,7 @@ func TestCreateVolume(t *testing.T) {
 		requestBody.Name = "myvol1"
 		requestBody.Size = 2
 		body := volume.CreateBody{requestBody}
-		volume, err := volumeService.Create(&body)
+		result, err := volumeService.Create(&body)
 		if err != nil {
 			t.Error(err)
 		}
@@ -52,7 +52,7 @@ func TestCreateVolume(t *testing.T) {
 			ID:   "f5fc9874-fc89-4814-a358-23ba83a6115f",
 			Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "self"},
 				{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "bookmark"}}}
-		testUtil.Equals(t, expectedVolume, volume)
+		testUtil.Equals(t, expectedVolume, result)
 	}
 
 	testCreateVolumeServiceAction(t, tokn, sampleVolumeData, "volumes", sampleRequestBody, anon)
@@ -77,7 +77,7 @@ func testCreateVolumeServiceAction(t *testing.T, tokn string, testData string, u
 func TestGetVolume(t *testing.T) {
 	anon := func(volumeService volume.Service) {
 		volID := "30becf77-63fe-4f5e-9507-a0578ffe0949"
-		volume, err := volumeService.Show(volID)
+		result, err := volumeService.Show(volID)
 		if err != nil {
 			t.Error(err)
 		}
@@ -106,7 +106,7 @@ func TestGetVolume(t *testing.T) {
 			Aavailability_zone:  "default_cluster",
 			Rreplication_status: "",
 			Consistencygroup_id: ""}
-		testUtil.Equals(t, expectedVolume, volume)
+		testUtil.Equals(t, expectedVolume, result)
 	}
 
 	testGetVolumeServiceAction(t, "30becf77-63fe-4f5e-9507-a0578ffe0949", sampleVolumeDetailData, anon)
