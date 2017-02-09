@@ -22,9 +22,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 
-	"api/volumes"
+	"github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/pkg/api/volumes"
 
 	"github.com/spf13/cobra"
 )
@@ -77,16 +79,21 @@ var volumeUnmountCommand = &cobra.Command{
 	Run:   volumeUnmountAction,
 }
 
+var falseVolumeResponse = api.VolumeResponse{}
+var falseVolumeDetailResponse = api.VolumeDetailResponse{}
+var falseAllVolumesResponse = make([]api.VolumeResponse, 0)
+var falseAllVolumesDetailResponse = make([]api.VolumeDetailResponse, 0)
+
 var (
-	resourceType string
-	name         string
-	allowDetails bool
-	host         string
-	mountpoint   string
+	volResourceType string
+	volName         string
+	volAllowDetails bool
+	host            string
+	mountpoint      string
 )
 
 func init() {
-	volumeCommand.PersistentFlags().StringVarP(&resourceType, "backend", "b", "cinder", "backend resource type")
+	volumeCommand.PersistentFlags().StringVarP(&volResourceType, "backend", "b", "cinder", "backend resource type")
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
@@ -94,8 +101,8 @@ func init() {
 	volumeCommand.AddCommand(volumeDeleteCommand)
 	volumeCommand.AddCommand(volumeMountCommand)
 	volumeCommand.AddCommand(volumeUnmountCommand)
-	volumeCreateCommand.Flags().StringVarP(&name, "name", "n", "null", "the name of created volume")
-	volumeListCommand.Flags().BoolVarP(&allowDetails, "detail", "d", false, "list volumes in details")
+	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
+	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
 	volumeMountCommand.Flags().StringVarP(&host, "host", "h", "localhost", "the hostname mounting volume")
 	volumeMountCommand.Flags().StringVarP(&mountpoint, "mountpoint", "m", "/dev/vdc", "mountpoint of volume")
 }
@@ -117,11 +124,11 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		die("error parsing size %s: %v", args[0], err)
 	}
 
-	result, err := volumes.Create(resourceType, name, size)
+	result, err := volumes.Create(volResourceType, volName, size)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if result == "" {
+		if reflect.DeepEqual(result, falseVolumeResponse) {
 			fmt.Println("Create volume failed!")
 		} else {
 			fmt.Printf("%v\n", result)
@@ -138,11 +145,11 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 
 	volID := args[0]
 
-	result, err := volumes.Show(resourceType, volID)
+	result, err := volumes.Show(volResourceType, volID)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if result == "" {
+		if reflect.DeepEqual(result, falseVolumeDetailResponse) {
 			fmt.Println("Show volume failed!")
 		} else {
 			fmt.Printf("%v\n", result)
@@ -157,11 +164,11 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	result, err := volumes.List(resourceType, allowDetails)
+	result, err := volumes.List(volResourceType, volAllowDetails)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if result == "" {
+		if reflect.DeepEqual(result, falseAllVolumesResponse) {
 			fmt.Println("List volumes failed!")
 		} else {
 			fmt.Printf("%v\n", result)
@@ -178,11 +185,11 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 
 	volID := args[0]
 
-	result, err := volumes.Update(resourceType, volID, name)
+	result, err := volumes.Update(volResourceType, volID, volName)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if result == "" {
+		if reflect.DeepEqual(result, falseVolumeResponse) {
 			fmt.Println("Update volume failed!")
 		} else {
 			fmt.Printf("%v\n", result)
@@ -199,7 +206,7 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 
 	volID := args[0]
 
-	result, err := volumes.Delete(resourceType, volID)
+	result, err := volumes.Delete(volResourceType, volID)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -220,7 +227,7 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 
 	volID := args[0]
 
-	result, err := volumes.Mount(resourceType, volID, host, mountpoint)
+	result, err := volumes.Mount(volResourceType, volID, host, mountpoint)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -242,7 +249,7 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 	volID := args[0]
 	attachment := args[1]
 
-	result, err := volumes.Unmount(resourceType, volID, attachment)
+	result, err := volumes.Unmount(volResourceType, volID, attachment)
 	if err != nil {
 		fmt.Println(err)
 	} else {
