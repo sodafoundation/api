@@ -131,3 +131,25 @@ To run a Go project, configuring Gopath is indispensable. After downloading the 
 6. cp cmd/sdslet/sdslet /usr/local/bin
 
    cp cmd/sdsctl/sdsctl /usr/local/bin
+
+#### Run
+
+1. Make sure **etcd** is up
+
+```sh
+./bin/etcd
+```
+
+2. Start **sdslet**
+
+```sh
+sudo sdslet //suppose the user has copied the compiled binary to /usr/local/bin
+```
+
+3. Run **"sdsctl --help"** to see what operation you want to perform. 
+
+Currently sdsctl supports all the basic Cinder/Manila operations, for example if you want to 
+create a volume just type 
+```sh
+sdsctl volume create 1 -n cinder-vmax-volume -b cinder //suppose the user has copied the compiled binary to /usr/local/bin
+```
