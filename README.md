@@ -78,9 +78,9 @@ the help of etcd.
 
 * Adapter module contains a standard Dock and plugins of different storage backends which contains both open source projects (such as Cinder, Manila, Swift and so on) and enterprise projects (such as Vipr, OceanStor DJ). Raw storage device will also be supported later
 
-### Development
+### Usage/Hacking
 
-#### Installation/Deployment Requirements
+#### Requirements
 
 * Clustering : etcd
 
@@ -146,10 +146,15 @@ To run a Go project, configuring Gopath is indispensable. After downloading the 
 sudo sdslet //suppose the user has copied the compiled binary to /usr/local/bin
 ```
 
-3. Run **"sdsctl --help"** to see what operation you want to perform. 
+3. Run **sdsctl** for operations you want to perform. 
+
+```sh
+sdsctl --help //see what you can do with opensds
+```
 
 Currently sdsctl supports all the basic Cinder/Manila operations, for example if you want to 
-create a volume just type 
+create a volume giving that you already have OpenStack Cinder connected to a Dell-EMC Vmax driver:
+
 ```sh
-sdsctl volume create 1 -n cinder-vmax-volume -b cinder //suppose the user has copied the compiled binary to /usr/local/bin
+sdsctl volume create 1 -n cinder-vmax-volume -b cinder
 ```
