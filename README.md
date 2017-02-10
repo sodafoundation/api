@@ -29,6 +29,11 @@ now, please refer to the Contribute sections below.
 The current opensds team that is developing the PoC prototype comes from Huawei,Intel,
 EMC and Wetern Digital.
 
+### Collaborative Testing
+
+* [CNCF Cluster](https://github.com/cncf/cluster/issues/30)
+* OpenStack OISC (submitted)
+
 ### Contact
 
 - Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
