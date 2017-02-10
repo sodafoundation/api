@@ -134,27 +134,29 @@ To run a Go project, configuring Gopath is indispensable. After downloading the 
 
 #### Run
 
-1. Make sure **etcd** is up
+* Make sure **etcd** is up
 
 ```sh
 ./bin/etcd
 ```
 
-2. Start **sdslet**
+* Start **sdslet** with root access (for logging purpose)
 
 ```sh
 sudo sdslet //suppose the user has copied the compiled binary to /usr/local/bin
 ```
 
-3. Run **sdsctl** for operations you want to perform. 
+* Run **sdsctl** for operations you want to perform. 
 
 ```sh
 sdsctl --help //see what you can do with opensds
 ```
 
 Currently sdsctl supports all the basic Cinder/Manila operations, for example if you want to 
-create a volume giving that you already have OpenStack Cinder connected to a Dell-EMC Vmax driver:
+create a 1GB volume from a Dell-EMC VMAX, which is connected to the OpenSDS underlay infra - 
+OpenStack Cinder via its in-tree vmax cinder driver, using OpenSDS for an easy access:
 
 ```sh
 sdsctl volume create 1 -n cinder-vmax-volume -b cinder
 ```
+Viola !
