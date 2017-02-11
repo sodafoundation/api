@@ -28,7 +28,7 @@ import (
 )
 
 func Create(resourceType string, name string, size int) (api.VolumeResponse, error) {
-	nullResponse := api.VolumeResponse{}
+	var nullResponse api.VolumeResponse
 
 	result, err := grpcapi.CreateVolume(resourceType, name, size)
 	if err != nil {
@@ -36,8 +36,8 @@ func Create(resourceType string, name string, size int) (api.VolumeResponse, err
 		return nullResponse, err
 	}
 
-	volumeResponse := api.VolumeResponse{}
-	rbody, _ := json.Marshal(result)
+	var volumeResponse api.VolumeResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &volumeResponse); err != nil {
 		return nullResponse, err
 	}
@@ -45,7 +45,7 @@ func Create(resourceType string, name string, size int) (api.VolumeResponse, err
 }
 
 func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
-	nullResponse := api.VolumeDetailResponse{}
+	var nullResponse api.VolumeDetailResponse
 
 	result, err := grpcapi.GetVolume(resourceType, shrID)
 	if err != nil {
@@ -53,8 +53,8 @@ func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
 		return nullResponse, err
 	}
 
-	volumeDetailResponse := api.VolumeDetailResponse{}
-	rbody, _ := json.Marshal(result)
+	var volumeDetailResponse api.VolumeDetailResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &volumeDetailResponse); err != nil {
 		return nullResponse, err
 	}
@@ -62,7 +62,7 @@ func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
 }
 
 func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) {
-	nullResponses := make([]api.VolumeResponse, 0)
+	var nullResponses []api.VolumeResponse
 
 	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
 	if err != nil {
@@ -70,16 +70,16 @@ func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) 
 		return nullResponses, err
 	}
 
-	volumesResponse := make([]api.VolumeResponse, 3)
-	rbody, _ := json.Marshal(result)
-	if err = json.Unmarshal(rbody, volumesResponse); err != nil {
+	var volumesResponse []api.VolumeResponse
+	rbody := []byte(result)
+	if err = json.Unmarshal(rbody, &volumesResponse); err != nil {
 		return nullResponses, err
 	}
 	return volumesResponse, nil
 }
 
 func Update(resourceType string, shrID string, name string) (api.VolumeResponse, error) {
-	nullResponse := api.VolumeResponse{}
+	var nullResponse api.VolumeResponse
 
 	result, err := grpcapi.UpdateVolume(resourceType, shrID, name)
 	if err != nil {
@@ -87,8 +87,8 @@ func Update(resourceType string, shrID string, name string) (api.VolumeResponse,
 		return nullResponse, err
 	}
 
-	volumeResponse := api.VolumeResponse{}
-	rbody, _ := json.Marshal(result)
+	var volumeResponse api.VolumeResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &volumeResponse); err != nil {
 		return nullResponse, err
 	}

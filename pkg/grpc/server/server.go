@@ -113,8 +113,10 @@ func (s *Server) ApiWatch(url string) {
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			resp, _ := shareApi.Create(resourceType, name, size)
+			shrType := tmp[3]
+			shrProto := tmp[4]
+			size, _ := strconv.Atoi(tmp[5])
+			resp, _ := shareApi.Create(resourceType, name, shrType, shrProto, size)
 			result, _ = json.Marshal(resp)
 		case "GetShare":
 			resourceType := tmp[1]
@@ -199,8 +201,10 @@ func (s *Server) OrchestrationWatch(url string) {
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			result, _ = orchestrationApi.CreateShare(resourceType, name, size)
+			shrType := tmp[3]
+			shrProto := tmp[4]
+			size, _ := strconv.Atoi(tmp[5])
+			result, _ = orchestrationApi.CreateShare(resourceType, name, shrType, shrProto, size)
 		case "GetShare":
 			resourceType := tmp[1]
 			shrID := tmp[2]
@@ -350,8 +354,10 @@ func (s *Server) AdapterWatch(url string) {
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			result, _ = adapterApi.CreateShare(resourceType, name, size)
+			shrType := tmp[3]
+			shrProto := tmp[4]
+			size, _ := strconv.Atoi(tmp[5])
+			result, _ = adapterApi.CreateShare(resourceType, name, shrType, shrProto, size)
 		case "GetShare":
 			resourceType := tmp[1]
 			shrID := tmp[2]

@@ -127,15 +127,23 @@ To run a Go project, configuring Gopath is indispensable. After downloading the 
    
 4. cd cmd/sdslet
 
-   go build (as root)
+   go build
    
 5. cd cmd/sdsctl
 
-   go buld (as root)
+   go buld
    
 6. cp cmd/sdslet/sdslet /usr/local/bin
 
    cp cmd/sdsctl/sdsctl /usr/local/bin
+
+7. vim examples/config.json (config backend storage credential information)
+
+   sudo mkdir /etc/opensds
+
+   sudo cp examples/config.json /etc/opensds/
+
+8. sudo touch /var/log/opensds.log (create OpenSDS logging file)
 
 #### Run
 

@@ -67,10 +67,10 @@ func NewService(
 }
 
 type RequestBody struct {
-	Name             string `json:"name"`
-	Size             int    `json:"size"`
-	Share_proto      string `json:"share_proto"`
-	Share_network_id string `json:"share_network_id"`
+	Name        string `json:"name"`
+	Size        int    `json:"size"`
+	Share_proto string `json:"share_proto"`
+	Share_type  string `json:"share_type"`
 }
 
 type CreateBody struct {

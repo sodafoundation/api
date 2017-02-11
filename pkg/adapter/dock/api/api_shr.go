@@ -25,8 +25,8 @@ import (
 	"github.com/opensds/opensds/pkg/adapter/dock"
 )
 
-func CreateShare(resourceType string, name string, size int) (string, error) {
-	result, err := dock.CreateShare(resourceType, name, size)
+func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
+	result, err := dock.CreateShare(resourceType, name, shrType, shrProto, size)
 
 	if err != nil {
 		log.Println("Error occured in adapter module when create file share!")

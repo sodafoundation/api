@@ -29,8 +29,8 @@ import (
 	"github.com/opensds/opensds/pkg/orchestration/grpcapi"
 )
 
-func CreateShare(resourceType string, name string, size int) (string, error) {
-	result, err := grpcapi.CreateShare(resourceType, name, size)
+func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
+	result, err := grpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when create share!")
