@@ -42,7 +42,7 @@ func TestCreateShare(t *testing.T) {
 		requestBody.Name = "My_share"
 		requestBody.Size = 1
 		requestBody.Share_proto = "NFS"
-		requestBody.Share_network_id = "1dffedcf-c0d5-43bf-9bd4-6b85667c24a1"
+		requestBody.Share_type = "g-nfs"
 		body := share.CreateBody{requestBody}
 		result, err := shareService.Create(&body)
 		if err != nil {
@@ -277,7 +277,7 @@ func testDeleteShareServiceAction(t *testing.T, uriEndsWith string, shareService
 	shareServiceAction(shareService)
 }
 
-var sampleRequestBody = `{"share":{"name":"My_share","size":1,"share_proto":"NFS","share_network_id":"1dffedcf-c0d5-43bf-9bd4-6b85667c24a1"}}`
+var sampleRequestBody = `{"share":{"name":"My_share","size":1,"share_proto":"NFS","share_type":"g-nfs"}}`
 
 var sampleShareData = `{
 	"share": {

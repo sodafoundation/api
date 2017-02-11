@@ -20,6 +20,7 @@ This module implements a entry into the OpenSDS service.
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
@@ -38,7 +39,7 @@ var shareCommand = &cobra.Command{
 }
 
 var shareCreateCommand = &cobra.Command{
-	Use:   "create <size>",
+	Use:   "create <share_proto> <size>",
 	Short: "create a share in the cluster",
 	Run:   shareCreateAction,
 }
@@ -67,14 +68,15 @@ var shareDeleteCommand = &cobra.Command{
 	Run:   shareDeleteAction,
 }
 
-var falseShareResponse = api.ShareResponse{}
-var falseShareDetailResponse = api.ShareDetailResponse{}
-var falseAllSharesResponse = make([]api.ShareResponse, 0)
-var falseAllSharesDetailResponse = make([]api.ShareDetailResponse, 0)
+var falseShareResponse api.ShareResponse
+var falseShareDetailResponse api.ShareDetailResponse
+var falseAllSharesResponse []api.ShareResponse
+var falseAllSharesDetailResponse []api.ShareDetailResponse
 
 var (
 	shrResourceType string
 	shrName         string
+	shrType         string
 	shrAllowDetails bool
 )
 
@@ -86,6 +88,7 @@ func init() {
 	shareCommand.AddCommand(shareUpdateCommand)
 	shareCommand.AddCommand(shareDeleteCommand)
 	shareCreateCommand.Flags().StringVarP(&shrName, "name", "n", "null", "the name of created share")
+	shareCreateCommand.Flags().StringVarP(&shrType, "type", "t", "default", "the type of created share")
 	shareListCommand.Flags().BoolVarP(&shrAllowDetails, "detail", "d", false, "list shares in details")
 }
 
@@ -95,25 +98,27 @@ func shareAction(cmd *cobra.Command, args []string) {
 }
 
 func shareCreateAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
+	if len(args) != 2 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
-	size, err := strconv.Atoi(args[0])
+	shrProto := args[0]
+	size, err := strconv.Atoi(args[1])
 	if err != nil {
 		die("error parsing size %s: %v", args[0], err)
 	}
 
-	result, err := shares.Create(shrResourceType, shrName, size)
+	result, err := shares.Create(shrResourceType, shrName, shrType, shrProto, size)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		if reflect.DeepEqual(result, falseShareResponse) {
 			fmt.Println("Create share failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -133,7 +138,8 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseShareDetailResponse) {
 			fmt.Println("Show share failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -152,7 +158,8 @@ func shareListAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseAllSharesResponse) {
 			fmt.Println("List shares failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -173,7 +180,8 @@ func shareUpdateAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseShareResponse) {
 			fmt.Println("Update share failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }

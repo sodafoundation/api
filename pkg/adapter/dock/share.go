@@ -35,7 +35,7 @@ type ShareDriver interface {
 	//Any operation the volume driver does while stoping.
 	Unset()
 
-	CreateShare(name string, size int) (string, error)
+	CreateShare(name string, shrType string, shrProto string, size int) (string, error)
 
 	GetShare(shrID string) (string, error)
 
@@ -46,7 +46,7 @@ type ShareDriver interface {
 	DeleteShare(shrID string) (string, error)
 }
 
-func CreateShare(resourceType string, name string, size int) (string, error) {
+func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
 	//Get the storage plugins and do some initializations.
 	plugins, err := storagePlugins.InitSP(resourceType)
 	if err != nil {
@@ -56,7 +56,7 @@ func CreateShare(resourceType string, name string, size int) (string, error) {
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var shareDriver ShareDriver = plugins
-	result, err := shareDriver.CreateShare(name, size)
+	result, err := shareDriver.CreateShare(name, shrType, shrProto, size)
 	if err != nil {
 		log.Println("Call plugin to create volume failed:", err)
 		return "", err

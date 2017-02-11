@@ -76,10 +76,10 @@ func UnmountVolume(resourceType, volID, attchment string) (string, error) {
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func CreateShare(resourceType string, name string, size int) (string, error) {
+func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
 	var client grpc.Client
 	url := "opensds/orchestration"
-	action := []string{"CreateShare", resourceType, name, strconv.Itoa(size)}
+	action := []string{"CreateShare", resourceType, name, shrType, shrProto, strconv.Itoa(size)}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 

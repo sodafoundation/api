@@ -27,17 +27,17 @@ import (
 	"github.com/opensds/opensds/pkg/api/grpcapi"
 )
 
-func Create(resourceType string, name string, size int) (api.ShareResponse, error) {
-	nullResponse := api.ShareResponse{}
+func Create(resourceType, name, shrType, shrProto string, size int) (api.ShareResponse, error) {
+	var nullResponse api.ShareResponse
 
-	result, err := grpcapi.CreateShare(resourceType, name, size)
+	result, err := grpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
 	if err != nil {
 		log.Println("Create file share error: ", err)
 		return nullResponse, err
 	}
 
-	shareResponse := api.ShareResponse{}
-	rbody, _ := json.Marshal(result)
+	var shareResponse api.ShareResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &shareResponse); err != nil {
 		return nullResponse, err
 	}
@@ -45,7 +45,7 @@ func Create(resourceType string, name string, size int) (api.ShareResponse, erro
 }
 
 func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
-	nullResponse := api.ShareDetailResponse{}
+	var nullResponse api.ShareDetailResponse
 
 	result, err := grpcapi.GetShare(resourceType, shrID)
 	if err != nil {
@@ -53,8 +53,8 @@ func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
 		return nullResponse, err
 	}
 
-	shareDetailResponse := api.ShareDetailResponse{}
-	rbody, _ := json.Marshal(result)
+	var shareDetailResponse api.ShareDetailResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &shareDetailResponse); err != nil {
 		return nullResponse, err
 	}
@@ -62,7 +62,7 @@ func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
 }
 
 func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
-	nullResponses := make([]api.ShareResponse, 0)
+	var nullResponses []api.ShareResponse
 
 	result, err := grpcapi.GetAllShares(resourceType, allowDetails)
 	if err != nil {
@@ -70,16 +70,16 @@ func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
 		return nullResponses, err
 	}
 
-	sharesResponse := make([]api.ShareResponse, 3)
-	rbody, _ := json.Marshal(result)
-	if err = json.Unmarshal(rbody, sharesResponse); err != nil {
+	var sharesResponse []api.ShareResponse
+	rbody := []byte(result)
+	if err = json.Unmarshal(rbody, &sharesResponse); err != nil {
 		return nullResponses, err
 	}
 	return sharesResponse, nil
 }
 
 func Update(resourceType string, shrID string, name string) (api.ShareResponse, error) {
-	nullResponse := api.ShareResponse{}
+	var nullResponse api.ShareResponse
 
 	result, err := grpcapi.UpdateShare(resourceType, shrID, name)
 	if err != nil {
@@ -87,8 +87,8 @@ func Update(resourceType string, shrID string, name string) (api.ShareResponse, 
 		return nullResponse, err
 	}
 
-	shareResponse := api.ShareResponse{}
-	rbody, _ := json.Marshal(result)
+	var shareResponse api.ShareResponse
+	rbody := []byte(result)
 	if err = json.Unmarshal(rbody, &shareResponse); err != nil {
 		return nullResponse, err
 	}

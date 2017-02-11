@@ -20,6 +20,7 @@ This module implements a entry into the OpenSDS service.
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
@@ -79,10 +80,10 @@ var volumeUnmountCommand = &cobra.Command{
 	Run:   volumeUnmountAction,
 }
 
-var falseVolumeResponse = api.VolumeResponse{}
-var falseVolumeDetailResponse = api.VolumeDetailResponse{}
-var falseAllVolumesResponse = make([]api.VolumeResponse, 0)
-var falseAllVolumesDetailResponse = make([]api.VolumeDetailResponse, 0)
+var falseVolumeResponse api.VolumeResponse
+var falseVolumeDetailResponse api.VolumeDetailResponse
+var falseAllVolumesResponse []api.VolumeResponse
+var falseAllVolumesDetailResponse api.VolumeDetailResponse
 
 var (
 	volResourceType string
@@ -103,7 +104,7 @@ func init() {
 	volumeCommand.AddCommand(volumeUnmountCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
 	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
-	volumeMountCommand.Flags().StringVarP(&host, "host", "h", "localhost", "the hostname mounting volume")
+	volumeMountCommand.Flags().StringVarP(&host, "host", "o", "localhost", "the hostname mounting volume")
 	volumeMountCommand.Flags().StringVarP(&mountpoint, "mountpoint", "m", "/dev/vdc", "mountpoint of volume")
 }
 
@@ -131,7 +132,8 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseVolumeResponse) {
 			fmt.Println("Create volume failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -152,7 +154,8 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseVolumeDetailResponse) {
 			fmt.Println("Show volume failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -171,7 +174,8 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseAllVolumesResponse) {
 			fmt.Println("List volumes failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }
@@ -192,7 +196,8 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseVolumeResponse) {
 			fmt.Println("Update volume failed!")
 		} else {
-			fmt.Printf("%v\n", result)
+			rbody, _ := json.Marshal(result)
+			fmt.Printf("%s\n", string(rbody))
 		}
 	}
 }

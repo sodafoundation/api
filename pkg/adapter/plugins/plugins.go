@@ -59,7 +59,7 @@ type SharePlugin interface {
 	//Any operation the file share driver does while stoping.
 	Unset()
 
-	CreateShare(name string, size int) (string, error)
+	CreateShare(name string, shrType string, shrProto string, size int) (string, error)
 
 	GetShare(shrID string) (string, error)
 
