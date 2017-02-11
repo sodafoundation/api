@@ -1,0 +1,19 @@
+{
+	"cinder": {
+		"host": "http://162.3.140.36:35357/v2.0",
+		"username": "admin",
+		"password": "huawei",
+		"project_name": "admin"
+	},
+	"manila": {
+		"host": "http://162.3.140.36:35357/v2.0",
+		"username": "admin",
+		"password": "huawei",
+		"project_name": "admin"
+	},
+	"coprhd": {
+		"host": "",
+		"username": "",
+		"password": ""
+	}
+}

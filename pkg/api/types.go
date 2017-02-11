@@ -35,7 +35,7 @@ type VolumeResponse struct {
 // VolumeDetailResponse is a structure for all properties of
 // an volume for a detailed query
 type VolumeDetailResponse struct {
-	ID              string               `json:"id,,omitempty"`
+	ID              string               `json:"id,omitempty"`
 	Attachments     []map[string]string  `json:"attachments"`
 	Links           []map[string]string  `json:"links"`
 	Metadata        map[string]string    `json:"metadata"`
