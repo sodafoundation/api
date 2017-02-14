@@ -20,7 +20,7 @@ This module implements the grpc server.
 package server
 
 import (
-	"encoding/json"
+	_ "encoding/json"
 	"log"
 	"strconv"
 	"strings"
@@ -30,8 +30,6 @@ import (
 	"golang.org/x/net/context"
 
 	adapterApi "github.com/opensds/opensds/pkg/adapter/dock/api"
-	shareApi "github.com/opensds/opensds/pkg/api/shares"
-	volumeApi "github.com/opensds/opensds/pkg/api/volumes"
 	orchestrationApi "github.com/opensds/opensds/pkg/orchestration/api"
 )
 
@@ -54,99 +52,6 @@ func (s *Server) Init() {
 	s.etcd = client.NewKeysAPI(cli)
 	s.watchOpts = client.WatcherOptions{AfterIndex: 0, Recursive: true}
 	log.Println("Server initialized success!")
-}
-
-func (s *Server) ApiWatch(url string) {
-	for {
-		w := s.etcd.Watcher(url, &s.watchOpts)
-		r, err := w.Next(context.Background())
-		if err != nil {
-			log.Fatalln("API modlue server WATCH failed:", err)
-		}
-
-		value := r.Node.Value
-		tmp := make([]string, 5, 10)
-		tmp = strings.Split(value, ",")
-		var result []byte
-
-		switch tmp[0] {
-		case "CreateVolume":
-			resourceType := tmp[1]
-			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			resp, _ := volumeApi.Create(resourceType, name, size)
-			result, _ = json.Marshal(resp)
-		case "GetVolume":
-			resourceType := tmp[1]
-			volID := tmp[2]
-			resp, _ := volumeApi.Show(resourceType, volID)
-			result, _ = json.Marshal(resp)
-		case "GetAllVolumes":
-			resourceType := tmp[1]
-			allowDetails, _ := strconv.ParseBool(tmp[2])
-			resp, _ := volumeApi.List(resourceType, allowDetails)
-			result, _ = json.Marshal(resp)
-		case "UpdateVolume":
-			resourceType := tmp[1]
-			volID := tmp[2]
-			name := tmp[3]
-			resp, _ := volumeApi.Update(resourceType, volID, name)
-			result, _ = json.Marshal(resp)
-		case "DeleteVolume":
-			resourceType := tmp[1]
-			volID := tmp[2]
-			resp, _ := volumeApi.Delete(resourceType, volID)
-			result, _ = json.Marshal(resp)
-		case "MountVolume":
-			resourceType := tmp[1]
-			volID := tmp[2]
-			host := tmp[3]
-			mountpoint := tmp[4]
-			resp, _ := volumeApi.Mount(resourceType, volID, host, mountpoint)
-			result, _ = json.Marshal(resp)
-		case "UnmountVolume":
-			resourceType := tmp[1]
-			volID := tmp[2]
-			attachment := tmp[3]
-			resp, _ := volumeApi.Unmount(resourceType, volID, attachment)
-			result, _ = json.Marshal(resp)
-		case "CreateShare":
-			resourceType := tmp[1]
-			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			resp, _ := shareApi.Create(resourceType, name, size)
-			result, _ = json.Marshal(resp)
-		case "GetShare":
-			resourceType := tmp[1]
-			shrID := tmp[2]
-			resp, _ := shareApi.Show(resourceType, shrID)
-			result, _ = json.Marshal(resp)
-		case "GetAllShares":
-			resourceType := tmp[1]
-			allowDetails, _ := strconv.ParseBool(tmp[2])
-			resp, _ := shareApi.List(resourceType, allowDetails)
-			result, _ = json.Marshal(resp)
-		case "UpdateShare":
-			resourceType := tmp[1]
-			shrID := tmp[2]
-			name := tmp[3]
-			resp, _ := shareApi.Update(resourceType, shrID, name)
-			result, _ = json.Marshal(resp)
-		case "DeleteShare":
-			resourceType := tmp[1]
-			shrID := tmp[2]
-			resp, _ := shareApi.Delete(resourceType, shrID)
-			result, _ = json.Marshal(resp)
-		default:
-			log.Printf("Error, no action: %s\n", tmp[0])
-			// result = ""
-		}
-
-		_, err = s.etcd.Set(context.Background(), url, string(result), nil)
-		if err != nil {
-			log.Fatalln("API modlue server SET failed:", err)
-		}
-	}
 }
 
 func (s *Server) OrchestrationWatch(url string) {
@@ -199,8 +104,10 @@ func (s *Server) OrchestrationWatch(url string) {
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			result, _ = orchestrationApi.CreateShare(resourceType, name, size)
+			shrType := tmp[3]
+			shrProto := tmp[4]
+			size, _ := strconv.Atoi(tmp[5])
+			result, _ = orchestrationApi.CreateShare(resourceType, name, shrType, shrProto, size)
 		case "GetShare":
 			resourceType := tmp[1]
 			shrID := tmp[2]
@@ -350,8 +257,10 @@ func (s *Server) AdapterWatch(url string) {
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
-			size, _ := strconv.Atoi(tmp[3])
-			result, _ = adapterApi.CreateShare(resourceType, name, size)
+			shrType := tmp[3]
+			shrProto := tmp[4]
+			size, _ := strconv.Atoi(tmp[5])
+			result, _ = adapterApi.CreateShare(resourceType, name, shrType, shrProto, size)
 		case "GetShare":
 			resourceType := tmp[1]
 			shrID := tmp[2]

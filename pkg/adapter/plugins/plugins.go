@@ -23,7 +23,10 @@ package plugins
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -59,7 +62,7 @@ type SharePlugin interface {
 	//Any operation the file share driver does while stoping.
 	Unset()
 
-	CreateShare(name string, size int) (string, error)
+	CreateShare(name string, shrType string, shrProto string, size int) (string, error)
 
 	GetShare(shrID string) (string, error)
 
@@ -70,21 +73,49 @@ type SharePlugin interface {
 	DeleteShare(shrID string) (string, error)
 }
 
+type cinderConfig struct {
+	Host        string `json:"host"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	ProjectName string `json:"project_name"`
+}
+
+type manilaConfig struct {
+	Host        string `json:"host"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	ProjectName string `json:"project_name"`
+}
+
+type coprHDConfig struct {
+	Host     string `json:"host"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type pluginsConfig struct {
+	Cinder cinderConfig `json:"cinder"`
+	Manila manilaConfig `json:"manila"`
+	CoprHD coprHDConfig `json:"coprhd"`
+}
+
 func InitVP(resourceType string) (VolumePlugin, error) {
+	config := getConfig()
+
 	switch resourceType {
 	case "cinder":
 		var plugin VolumePlugin = &cinder.CinderPlugin{
-			Host:        "http://162.3.140.36:35357/v2.0",
-			Username:    "admin",
-			Password:    "huawei",
-			ProjectName: "admin",
+			Host:        config.Cinder.Host,
+			Username:    config.Cinder.Username,
+			Password:    config.Cinder.Password,
+			ProjectName: config.Cinder.ProjectName,
 		}
 		return plugin, nil
 	case "coprhd":
 		var plugin VolumePlugin = &coprhd.Driver{
-			"https://coprhd.emc.com",
-			url.UserPassword("admin", "password"),
-			&http.Client{
+			Url:   config.CoprHD.Host,
+			Creds: url.UserPassword(config.CoprHD.Username, config.CoprHD.Password),
+			HttpClient: &http.Client{
 				Transport: &http.Transport{
 					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 				},
@@ -98,17 +129,32 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 }
 
 func InitSP(resourceType string) (SharePlugin, error) {
+	config := getConfig()
+
 	switch resourceType {
 	case "manila":
 		var plugin SharePlugin = &manila.ManilaPlugin{
-			Host:        "http://162.3.140.36:35357/v2.0",
-			Username:    "admin",
-			Password:    "huawei",
-			ProjectName: "admin",
+			Host:        config.Manila.Host,
+			Username:    config.Manila.Username,
+			Password:    config.Manila.Password,
+			ProjectName: config.Manila.ProjectName,
 		}
 		return plugin, nil
 	default:
 		err := errors.New("Can't find this resource type in backend storage.")
 		return nil, err
 	}
+}
+
+// getConfig provides access to credentials in backend resource plugins.
+func getConfig() pluginsConfig {
+	var config pluginsConfig
+	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
+	if err != nil {
+		log.Println("ReadFile json failed:", err)
+	}
+	if err = json.Unmarshal(userJSON, &config); err != nil {
+		log.Println("Unmarshal json failed:", err)
+	}
+	return config
 }

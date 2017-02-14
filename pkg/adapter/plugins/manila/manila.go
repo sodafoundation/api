@@ -47,7 +47,7 @@ func (plugin *ManilaPlugin) Unset() {
 
 }
 
-func (plugin *ManilaPlugin) CreateShare(name string, size int) (string, error) {
+func (plugin *ManilaPlugin) CreateShare(name string, shrType string, shrProto string, size int) (string, error) {
 	//Get the certified file share service.
 	shareService, err := plugin.getShareService()
 	if err != nil {
@@ -59,8 +59,8 @@ func (plugin *ManilaPlugin) CreateShare(name string, size int) (string, error) {
 	requestBody := share.RequestBody{}
 	requestBody.Name = name
 	requestBody.Size = size
-	requestBody.Share_proto = "NFS"
-	requestBody.Share_network_id = "1dffedcf-c0d5-43bf-9bd4-6b85667c24a1"
+	requestBody.Share_proto = shrProto
+	requestBody.Share_type = shrType
 	body := share.CreateBody{requestBody}
 	share, err := shareService.Create(&body)
 	if err != nil {

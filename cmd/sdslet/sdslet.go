@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/opensds/opensds/cmd/sdslet/northbound"
 	"github.com/opensds/opensds/pkg/grpc/server"
 )
 
@@ -39,17 +40,17 @@ func main() {
 	log.SetOutput(f)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Construct api module grpc server struct and do some initialization.
-	api := new(server.Server)
-	api.Init()
+	// Start OpenSDS northbound REST service.
+	go northbound.Run()
+
 	// Construct orchestration module grpc server struct and do some initialization.
 	orchestration := new(server.Server)
 	orchestration.Init()
 	// Construct adapter module grpc server struct and do some initialization.
 	adapter := new(server.Server)
 	adapter.Init()
+
 	// Start the watcher mechanism of orchestration and adapter module.
-	go api.ApiWatch("opensds/api")
 	go orchestration.OrchestrationWatch("opensds/orchestration")
 	adapter.AdapterWatch("opensds/adapter")
 }

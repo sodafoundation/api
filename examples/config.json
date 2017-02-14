@@ -1,0 +1,19 @@
+{
+	"cinder": {
+		"host": "http://.../v2.0",
+		"username": "",
+		"password": "",
+		"project_name": ""
+	},
+	"manila": {
+		"host": "http://.../v2.0",
+		"username": "",
+		"password": "",
+		"project_name": ""
+	},
+	"coprhd": {
+		"host": "",
+		"username": "",
+		"password": ""
+	}
+}
