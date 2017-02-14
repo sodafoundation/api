@@ -13,11 +13,11 @@
 //    under the License.
 
 /*
-This module implements the grpc client.
+This module implements the messaging service.
 
 */
 
-package grpc
+package messaging
 
 import (
 	"log"

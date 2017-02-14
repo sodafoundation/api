@@ -20,11 +20,11 @@ This module implements the entry into CRUD operation of databases.
 package databases
 
 import (
-	"github.com/opensds/opensds/pkg/api/grpcapi"
+	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
 func Create(name string, size int) (string, error) {
-	result, err := grpcapi.CreateDatabase(name, size)
+	result, err := rpcapi.CreateDatabase(name, size)
 
 	if err != nil {
 		return "Error", err
@@ -34,7 +34,7 @@ func Create(name string, size int) (string, error) {
 }
 
 func Show(id int, name string) (string, error) {
-	result, err := grpcapi.GetDatabase(id, name)
+	result, err := rpcapi.GetDatabase(id, name)
 
 	if err != nil {
 		return result, err
@@ -44,7 +44,7 @@ func Show(id int, name string) (string, error) {
 }
 
 func List() (string, error) {
-	result, err := grpcapi.GetAllDatabases()
+	result, err := rpcapi.GetAllDatabases()
 
 	if err != nil {
 		return result, err
@@ -54,7 +54,7 @@ func List() (string, error) {
 }
 
 func Update(id int, size int, name string) (string, error) {
-	result, err := grpcapi.UpdateDatabase(id, size, name)
+	result, err := rpcapi.UpdateDatabase(id, size, name)
 
 	if err != nil {
 		return "Error", err
@@ -64,7 +64,7 @@ func Update(id int, size int, name string) (string, error) {
 }
 
 func Delete(id int, name string, cascade bool) (string, error) {
-	result, err := grpcapi.DeleteDatabase(id, name, cascade)
+	result, err := rpcapi.DeleteDatabase(id, name, cascade)
 
 	if err != nil {
 		return "Error", err

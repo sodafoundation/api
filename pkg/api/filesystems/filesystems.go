@@ -20,11 +20,11 @@ This module implements the entry into CRUD operation of file systems.
 package filesystems
 
 import (
-	"github.com/opensds/opensds/pkg/api/grpcapi"
+	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
 func Create(name string, size int) (string, error) {
-	result, err := grpcapi.CreateFileSystem(name, size)
+	result, err := rpcapi.CreateFileSystem(name, size)
 
 	if err != nil {
 		return "Error", err
@@ -34,7 +34,7 @@ func Create(name string, size int) (string, error) {
 }
 
 func Show(id int, name string) (string, error) {
-	result, err := grpcapi.GetFileSystem(id, name)
+	result, err := rpcapi.GetFileSystem(id, name)
 
 	if err != nil {
 		return result, err
@@ -44,7 +44,7 @@ func Show(id int, name string) (string, error) {
 }
 
 func List() (string, error) {
-	result, err := grpcapi.GetAllFileSystems()
+	result, err := rpcapi.GetAllFileSystems()
 
 	if err != nil {
 		return result, err
@@ -54,7 +54,7 @@ func List() (string, error) {
 }
 
 func Update(id int, size int, name string) (string, error) {
-	result, err := grpcapi.UpdateFileSystem(id, size, name)
+	result, err := rpcapi.UpdateFileSystem(id, size, name)
 
 	if err != nil {
 		return "Error", err
@@ -64,7 +64,7 @@ func Update(id int, size int, name string) (string, error) {
 }
 
 func Delete(id int, name string, cascade bool) (string, error) {
-	result, err := grpcapi.DeleteFileSystem(id, name, cascade)
+	result, err := rpcapi.DeleteFileSystem(id, name, cascade)
 
 	if err != nil {
 		return "Error", err

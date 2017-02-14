@@ -13,35 +13,35 @@
 //    under the License.
 
 /*
-This module implements the orchestation module client of grpc service.
+This module implements the orchestation module client of messaging service.
 
 */
 
-package grpcapi
+package rpcapi
 
 import (
 	"strconv"
 	"strings"
 
-	"github.com/opensds/opensds/pkg/grpc"
+	"github.com/opensds/opensds/pkg/messaging"
 )
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"CreateVolume", resourceType, name, strconv.Itoa(size)}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func GetVolume(resourceType string, volID string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"GetVolume", resourceType, volID}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"GetAllVolumes", resourceType,
 		strconv.FormatBool(allowDetails)}
@@ -49,49 +49,49 @@ func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 }
 
 func UpdateVolume(resourceType string, volID string, name string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"UpdateVolume", resourceType, volID, name}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func DeleteVolume(resourceType string, volID string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"DeleteVolume", resourceType, volID}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"MountVolume", resourceType, volID, host, mountpoint}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func UnmountVolume(resourceType, volID, attchment string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"UnmountVolume", resourceType, volID, attchment}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"CreateShare", resourceType, name, shrType, shrProto, strconv.Itoa(size)}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func GetShare(resourceType string, shrID string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"GetShare", resourceType, shrID}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func GetAllShares(resourceType string, allowDetails bool) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"GetAllShares", resourceType,
 		strconv.FormatBool(allowDetails)}
@@ -99,14 +99,14 @@ func GetAllShares(resourceType string, allowDetails bool) (string, error) {
 }
 
 func UpdateShare(resourceType string, shrID string, name string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"UpdateShare", resourceType, shrID, name}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
 func DeleteShare(resourceType string, shrID string) (string, error) {
-	var client grpc.Client
+	var client messaging.Client
 	url := "opensds/adapter"
 	action := []string{"DeleteShare", resourceType, shrID}
 	return client.Run(url, strings.Join(action[:], ","))
