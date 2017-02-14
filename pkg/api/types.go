@@ -98,3 +98,23 @@ type ShareDetailResponse struct {
 	Volume_type                 string               `json:"volume_type,omitempty"`
 	Source_cgsnapshot_member_id string               `json:"source_cgsnapshot_member_id,omitempty"`
 }
+
+type VolumeRequest struct {
+	Resource_type string `json:"resource_type,omitempty"`
+	Id            string `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	Size          int    `json:"size"`
+	Allow_details bool   `json:"allow_details"`
+	Host          string `json:"host,omitempty"`
+	Mountpoint    string `json:"mountpoint,omitempty"`
+}
+
+type ShareRequest struct {
+	Resource_type string `json:"resource_type,omitempty"`
+	Id            string `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	Size          int    `json:"size"`
+	Share_type    string `json:"share_type,omitempty"`
+	Share_proto   string `json:"share_proto,omitempty"`
+	Allow_details bool   `json:"allow_details"`
+}
