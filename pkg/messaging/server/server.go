@@ -13,7 +13,7 @@
 //    under the License.
 
 /*
-This module implements the grpc server.
+This module implements the messaging server service.
 
 */
 

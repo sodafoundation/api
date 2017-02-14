@@ -24,13 +24,13 @@ import (
 	"log"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/grpcapi"
+	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
 func Create(resourceType string, name string, size int) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
-	result, err := grpcapi.CreateVolume(resourceType, name, size)
+	result, err := rpcapi.CreateVolume(resourceType, name, size)
 	if err != nil {
 		log.Println("Create volume error: ", err)
 		return nullResponse, err
@@ -47,7 +47,7 @@ func Create(resourceType string, name string, size int) (api.VolumeResponse, err
 func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
 	var nullResponse api.VolumeDetailResponse
 
-	result, err := grpcapi.GetVolume(resourceType, shrID)
+	result, err := rpcapi.GetVolume(resourceType, shrID)
 	if err != nil {
 		log.Println("Show volume error: ", err)
 		return nullResponse, err
@@ -64,7 +64,7 @@ func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
 func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) {
 	var nullResponses []api.VolumeResponse
 
-	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
+	result, err := rpcapi.GetAllVolumes(resourceType, allowDetails)
 	if err != nil {
 		log.Println("List volumes error: ", err)
 		return nullResponses, err
@@ -81,7 +81,7 @@ func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) 
 func Update(resourceType string, shrID string, name string) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
-	result, err := grpcapi.UpdateVolume(resourceType, shrID, name)
+	result, err := rpcapi.UpdateVolume(resourceType, shrID, name)
 	if err != nil {
 		log.Println("Update volume error: ", err)
 		return nullResponse, err
@@ -96,7 +96,7 @@ func Update(resourceType string, shrID string, name string) (api.VolumeResponse,
 }
 
 func Delete(resourceType string, volID string) (string, error) {
-	result, err := grpcapi.DeleteVolume(resourceType, volID)
+	result, err := rpcapi.DeleteVolume(resourceType, volID)
 
 	if err != nil {
 		log.Println("Delete volume error: ", err)
@@ -107,7 +107,7 @@ func Delete(resourceType string, volID string) (string, error) {
 }
 
 func Mount(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := grpcapi.MountVolume(resourceType, volID, host, mountpoint)
+	result, err := rpcapi.MountVolume(resourceType, volID, host, mountpoint)
 
 	if err != nil {
 		log.Println("Mount volume error: ", err)
@@ -118,7 +118,7 @@ func Mount(resourceType, volID, host, mountpoint string) (string, error) {
 }
 
 func Unmount(resourceType, volID, attachment string) (string, error) {
-	result, err := grpcapi.UnmountVolume(resourceType, volID, attachment)
+	result, err := rpcapi.UnmountVolume(resourceType, volID, attachment)
 
 	if err != nil {
 		log.Println("Unmount volume error: ", err)

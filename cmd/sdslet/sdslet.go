@@ -25,7 +25,7 @@ import (
 	"os"
 
 	"github.com/opensds/opensds/cmd/sdslet/northbound"
-	"github.com/opensds/opensds/pkg/grpc/server"
+	"github.com/opensds/opensds/pkg/messaging/server"
 )
 
 func main() {

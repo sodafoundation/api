@@ -26,11 +26,11 @@ package api
 import (
 	"log"
 
-	"github.com/opensds/opensds/pkg/orchestration/grpcapi"
+	"github.com/opensds/opensds/pkg/orchestration/rpcapi"
 )
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
-	result, err := grpcapi.CreateVolume(resourceType, name, size)
+	result, err := rpcapi.CreateVolume(resourceType, name, size)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when create volume!")
@@ -41,7 +41,7 @@ func CreateVolume(resourceType string, name string, size int) (string, error) {
 }
 
 func GetVolume(resourceType string, volID string) (string, error) {
-	result, err := grpcapi.GetVolume(resourceType, volID)
+	result, err := rpcapi.GetVolume(resourceType, volID)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when get volume!")
@@ -52,7 +52,7 @@ func GetVolume(resourceType string, volID string) (string, error) {
 }
 
 func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
-	result, err := grpcapi.GetAllVolumes(resourceType, allowDetails)
+	result, err := rpcapi.GetAllVolumes(resourceType, allowDetails)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when get all volumes!")
@@ -63,7 +63,7 @@ func GetAllVolumes(resourceType string, allowDetails bool) (string, error) {
 }
 
 func UpdateVolume(resourceType string, volID string, name string) (string, error) {
-	result, err := grpcapi.UpdateVolume(resourceType, volID, name)
+	result, err := rpcapi.UpdateVolume(resourceType, volID, name)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when update volume!")
@@ -74,7 +74,7 @@ func UpdateVolume(resourceType string, volID string, name string) (string, error
 }
 
 func DeleteVolume(resourceType string, volID string) (string, error) {
-	result, err := grpcapi.DeleteVolume(resourceType, volID)
+	result, err := rpcapi.DeleteVolume(resourceType, volID)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when delete volume!")
@@ -85,7 +85,7 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 }
 
 func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := grpcapi.MountVolume(resourceType, volID, host, mountpoint)
+	result, err := rpcapi.MountVolume(resourceType, volID, host, mountpoint)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when mount volume!")
@@ -96,7 +96,7 @@ func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 }
 
 func UnmountVolume(resourceType, volID, attachment string) (string, error) {
-	result, err := grpcapi.UnmountVolume(resourceType, volID, attachment)
+	result, err := rpcapi.UnmountVolume(resourceType, volID, attachment)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when unmount volume!")

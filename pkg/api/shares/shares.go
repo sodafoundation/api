@@ -24,13 +24,13 @@ import (
 	"log"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/grpcapi"
+	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
 func Create(resourceType, name, shrType, shrProto string, size int) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
-	result, err := grpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
+	result, err := rpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
 	if err != nil {
 		log.Println("Create file share error: ", err)
 		return nullResponse, err
@@ -47,7 +47,7 @@ func Create(resourceType, name, shrType, shrProto string, size int) (api.ShareRe
 func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
 	var nullResponse api.ShareDetailResponse
 
-	result, err := grpcapi.GetShare(resourceType, shrID)
+	result, err := rpcapi.GetShare(resourceType, shrID)
 	if err != nil {
 		log.Println("Show file share error: ", err)
 		return nullResponse, err
@@ -64,7 +64,7 @@ func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
 func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
 	var nullResponses []api.ShareResponse
 
-	result, err := grpcapi.GetAllShares(resourceType, allowDetails)
+	result, err := rpcapi.GetAllShares(resourceType, allowDetails)
 	if err != nil {
 		log.Println("List file shares error: ", err)
 		return nullResponses, err
@@ -81,7 +81,7 @@ func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
 func Update(resourceType string, shrID string, name string) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
-	result, err := grpcapi.UpdateShare(resourceType, shrID, name)
+	result, err := rpcapi.UpdateShare(resourceType, shrID, name)
 	if err != nil {
 		log.Println("Update file share error: ", err)
 		return nullResponse, err
@@ -96,7 +96,7 @@ func Update(resourceType string, shrID string, name string) (api.ShareResponse, 
 }
 
 func Delete(resourceType string, shrID string) (string, error) {
-	result, err := grpcapi.DeleteShare(resourceType, shrID)
+	result, err := rpcapi.DeleteShare(resourceType, shrID)
 
 	if err != nil {
 		log.Println("Delete file share error: ", err)

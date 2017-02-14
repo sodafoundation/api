@@ -26,11 +26,11 @@ package api
 import (
 	"log"
 
-	"github.com/opensds/opensds/pkg/orchestration/grpcapi"
+	"github.com/opensds/opensds/pkg/orchestration/rpcapi"
 )
 
 func CreateShare(resourceType, name, shrType, shrProto string, size int) (string, error) {
-	result, err := grpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
+	result, err := rpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when create share!")
@@ -41,7 +41,7 @@ func CreateShare(resourceType, name, shrType, shrProto string, size int) (string
 }
 
 func GetShare(resourceType string, shrID string) (string, error) {
-	result, err := grpcapi.GetShare(resourceType, shrID)
+	result, err := rpcapi.GetShare(resourceType, shrID)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when get share!")
@@ -52,7 +52,7 @@ func GetShare(resourceType string, shrID string) (string, error) {
 }
 
 func GetAllShares(resourceType string, allowDetails bool) (string, error) {
-	result, err := grpcapi.GetAllShares(resourceType, allowDetails)
+	result, err := rpcapi.GetAllShares(resourceType, allowDetails)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when get all shares!")
@@ -63,7 +63,7 @@ func GetAllShares(resourceType string, allowDetails bool) (string, error) {
 }
 
 func UpdateShare(resourceType string, shrID string, name string) (string, error) {
-	result, err := grpcapi.UpdateShare(resourceType, shrID, name)
+	result, err := rpcapi.UpdateShare(resourceType, shrID, name)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when update share!")
@@ -74,7 +74,7 @@ func UpdateShare(resourceType string, shrID string, name string) (string, error)
 }
 
 func DeleteShare(resourceType string, shrID string) (string, error) {
-	result, err := grpcapi.DeleteShare(resourceType, shrID)
+	result, err := rpcapi.DeleteShare(resourceType, shrID)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when delete share!")
