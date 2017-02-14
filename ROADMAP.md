@@ -12,9 +12,15 @@ Over Fabric baremetal storage resource.
 - Kubernetes connects to OpenSDS via OpenStack Fuxi Plugin (out of tree)
 - OpenSDS connects to OpenStack Cinder and Manila via OpenStack Golang-client
 - etcd for MQ and cluster mgmt.
-- gRPC for communication between modules
 
-### To-do
+### Achievement Feb 14th, 2017
+- REST framework built with [Beego](https://github.com/astaxie/beego)
+
+### To-do (shorter term)
+- Develop flexvolume out-of-tree plugin
+- Using etcd3 and gRPC
+
+### To-do (short term)
 - Plan for collaboration with libStorage
 - Plan for involvement with k8s-storage-sig Flex2 development
 - NVMe Over Fabric related developments
