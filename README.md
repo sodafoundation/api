@@ -65,7 +65,7 @@ a single entry for Kubernetes to talk to different OpenStack storage services.
 
 ### Structure
 The current PoC code consists of three main components: api, orchestration and
-adapter. Those three components communicate with each other through gRPC with
+adapter. Those three components communicate with each other with
 the help of etcd.
 
 * API module manages the request about storage resources, such as volumes, databases, file systems, policys and so forth. 
@@ -103,7 +103,7 @@ You can just use the command followed to set up etcd service:
 
 * Infrastructre : OpenStack, OceanStor DJ, CoprHD or ...
 
-As a Software-Defined-Storage controller, OpenSDS must be able to connect to backend storage environment. You can just deploy OpenSDS in any of these environments directly to avoid troublesomes. Since OpenSDS expose its interface through gRPC, the user needs to utilize the golang-client for interacting with OpenStack infrastructures. If you have infrastructures other than OpenStack, you could develop the corresponding plugin for your infrastructure.
+As a Software-Defined-Storage controller, OpenSDS must be able to connect to backend storage environment. You can just deploy OpenSDS in any of these environments directly to avoid troublesomes. Since OpenSDS is writen in Go, the user needs to utilize the golang-client for interacting with OpenStack infrastructures. If you have infrastructures other than OpenStack, you could develop the corresponding plugin for your infrastructure.
 
 * Language : Go environment
 
