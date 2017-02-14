@@ -121,9 +121,13 @@ To run a Go project, configuring Gopath is indispensable. After downloading the 
    
 2. git clone https://github.com/opensds/opensds.git $HOME/gopath/src/github.com/opensds/
 
-3. cd opensds
+3. cd opensds (import necessary packages)
 
-   go get ... (import necessary packages)
+   go get github.com/spf13/cobra
+
+   go get github.com/astaxie/beego
+
+   go get github.com/coreos/etcd/client
    
 4. cd cmd/sdslet
 

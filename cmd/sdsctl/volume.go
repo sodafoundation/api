@@ -105,7 +105,7 @@ func init() {
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
 	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
 	volumeMountCommand.Flags().StringVarP(&host, "host", "o", "localhost", "the hostname mounting volume")
-	volumeMountCommand.Flags().StringVarP(&mountpoint, "mountpoint", "m", "/dev/vdc", "mountpoint of volume")
+	volumeMountCommand.Flags().StringVarP(&mountpoint, "mountpoint", "m", "/dev/sda8", "mountpoint of volume")
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
