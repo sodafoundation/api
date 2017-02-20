@@ -24,7 +24,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/opensds/opensds/cmd/sdslet/northbound"
+	"github.com/opensds/opensds/cmd/osdslet/northbound"
 	"github.com/opensds/opensds/pkg/messaging/server"
 )
 

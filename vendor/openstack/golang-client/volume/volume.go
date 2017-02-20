@@ -45,9 +45,9 @@ type Service interface {
 
 	Delete(id string) error
 
-	Mount(id string, reqBody *MountBody) error
+	Attach(id string, reqBody *AttachBody) error
 
-	Unmount(id string, reqBody *UnmountBody) error
+	Detach(id string, reqBody *DetachBody) error
 }
 
 type volumeService struct {
@@ -74,7 +74,7 @@ type RequestBody struct {
 	Name         string `json:"name"`
 	Size         int    `json:"size"`
 	HostName     string `json:"host_name"`
-	Mountpoint   string `json:"mountpoint"`
+	Device       string `json:"device"`
 	AttachmentID string `json:"attachment_id"`
 }
 
@@ -82,21 +82,23 @@ type CreateBody struct {
 	VolumeBody RequestBody `json:"volume"`
 }
 
-type MountBody struct {
+type AttachBody struct {
 	VolumeBody RequestBody `json:"os-attach"`
 }
 
-type UnmountBody struct {
+type DetachBody struct {
 	VolumeBody RequestBody `json:"os-detach"`
 }
 
 // Response is a structure for all properties of
 // an volume for a non detailed query
 type Response struct {
-	ID    string              `json:"id"`
-	Name  string              `json:"name"`
-	Links []map[string]string `json:"links"`
-	// Consistencygroup_id string `json:"consistencygroup_id"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Status      string              `json:"status"`
+	Size        int64               `json:"size"`
+	Volume_type string              `json:"volume_type"`
+	Attachments []map[string]string `json:"attachments"`
 }
 
 // DetailResponse is a structure for all properties of
@@ -239,7 +241,7 @@ func getAllVolumes(vs volumeService) ([]Response, error) {
 		log.Println("Parse URL error:", err)
 		return nullResponses, err
 	}
-	urlPostFix := "/volumes"
+	urlPostFix := "/volumes/detail"
 	reqURL.Path += urlPostFix
 
 	var headers http.Header = http.Header{}
@@ -385,11 +387,11 @@ func deleteVolume(vs volumeService, id string) error {
 	return nil
 }
 
-func (vs volumeService) Mount(id string, reqBody *MountBody) error {
-	return mountVolume(vs, id, reqBody)
+func (vs volumeService) Attach(id string, reqBody *AttachBody) error {
+	return attachVolume(vs, id, reqBody)
 }
 
-func mountVolume(vs volumeService, id string, reqBody *MountBody) error {
+func attachVolume(vs volumeService, id string, reqBody *AttachBody) error {
 	reqURL, err := url.Parse(vs.URL)
 	if err != nil {
 		log.Println("Parse URL error:", err)
@@ -401,7 +403,7 @@ func mountVolume(vs volumeService, id string, reqBody *MountBody) error {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
-	log.Printf("Start POST request to mount volume, url = %s, body = %s\n",
+	log.Printf("Start POST request to attach volume, url = %s, body = %s\n",
 		reqURL.String(), body)
 	resp, err := vs.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
@@ -417,11 +419,11 @@ func mountVolume(vs volumeService, id string, reqBody *MountBody) error {
 	return nil
 }
 
-func (vs volumeService) Unmount(id string, reqBody *UnmountBody) error {
-	return unmountVolume(vs, id, reqBody)
+func (vs volumeService) Detach(id string, reqBody *DetachBody) error {
+	return detachVolume(vs, id, reqBody)
 }
 
-func unmountVolume(vs volumeService, id string, reqBody *UnmountBody) error {
+func detachVolume(vs volumeService, id string, reqBody *DetachBody) error {
 	reqURL, err := url.Parse(vs.URL)
 	if err != nil {
 		log.Println("Parse URL error:", err)
@@ -433,9 +435,9 @@ func unmountVolume(vs volumeService, id string, reqBody *UnmountBody) error {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
-	log.Printf("Start PUT request to unmount volume, url = %s, body = %s\n",
+	log.Printf("Start POST request to detach volume, url = %s, body = %s\n",
 		reqURL.String(), body)
-	resp, err := vs.Session.Put(reqURL.String(), nil, &headers, &body)
+	resp, err := vs.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
 		log.Println("PUT response error:", err)
 		return err

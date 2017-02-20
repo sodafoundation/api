@@ -23,6 +23,7 @@ package cinder
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -148,6 +149,12 @@ func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 		return "", err
 	}
 
+	_, err = volumeService.Show(volID)
+	if err != nil {
+		log.Println("Cannot get volume:", err)
+		return "", err
+	}
+
 	err = volumeService.Delete(volID)
 	if err != nil {
 		log.Println("Cannot delete volume:", err)
@@ -158,47 +165,77 @@ func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 	return result, nil
 }
 
-func (plugin *CinderPlugin) MountVolume(volID, host, mountpoint string) (string, error) {
+func (plugin *CinderPlugin) AttachVolume(volID, host, device string) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	vol, err := volumeService.Show(volID)
+	if err != nil {
+		log.Println("Cannot get volume:", err)
+		return "", err
+	}
+	if vol.Status != "available" {
+		err = errors.New("The status of volume is not available!")
+		log.Println("Cannot attach volume:", err)
 		return "", err
 	}
 
 	requestBody := volume.RequestBody{}
 	requestBody.HostName = host
-	requestBody.Mountpoint = mountpoint
-	body := volume.MountBody{requestBody}
-	err = volumeService.Mount(volID, &body)
+	requestBody.Device = device
+	body := volume.AttachBody{requestBody}
+	err = volumeService.Attach(volID, &body)
 	if err != nil {
-		log.Println("Cannot mount volume:", err)
+		log.Println("Cannot attach volume:", err)
 		return "", err
 	}
 
-	result := "Mount volume success!"
+	result := "Attach volume success!"
 	return result, nil
 }
 
-func (plugin *CinderPlugin) UnmountVolume(volID, attachment string) (string, error) {
+func (plugin *CinderPlugin) DetachVolume(volID, attachment string) (string, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
 		return "", err
 	}
 
-	requestBody := volume.RequestBody{}
-	requestBody.AttachmentID = attachment
-	body := volume.UnmountBody{requestBody}
-	err = volumeService.Unmount(volID, &body)
+	vol, err := volumeService.Show(volID)
 	if err != nil {
-		log.Println("Cannot unmount volume:", err)
+		log.Println("Cannot get volume:", err)
+		return "", err
+	}
+	if vol.Status != "in-use" {
+		err = errors.New("The status of volume is not in-use!")
+		log.Println("Cannot attach volume:", err)
 		return "", err
 	}
 
-	result := "Unmount volume success!"
+	requestBody := volume.RequestBody{}
+	requestBody.AttachmentID = attachment
+	body := volume.DetachBody{requestBody}
+	err = volumeService.Detach(volID, &body)
+	if err != nil {
+		log.Println("Cannot detach volume:", err)
+		return "", err
+	}
+
+	result := "Detach volume success!"
 	return result, nil
 }
 
+/*
+There is some touble now in getVolumeService(). After setting up OpenSDS
+
+service, this process would dump if any credential works don't work. And
+
+we thought it could be solved by make this function a goroutine.
+
+*/
 func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 	creds := openstack.AuthOpts{
 		AuthUrl:     plugin.Host,

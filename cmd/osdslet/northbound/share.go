@@ -42,95 +42,128 @@ type ShareController struct {
 }
 
 func (this *ShareController) Get() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
 	resourceType := this.Ctx.Input.Param(":resource")
 	id := this.Ctx.Input.Param(":id")
 
-	result, err := shares.Show(resourceType, id)
+	shareRequest := shares.ShareRequest{
+		ResourceType: resourceType,
+		Id:           id,
+	}
+	result, err := shares.Show(shareRequest)
 	if err != nil {
 		log.Println(err)
-		this.Ctx.WriteString("Show share failed!")
+		rbody, _ := json.Marshal("Show share failed!")
+		this.Ctx.Output.Body(rbody)
 	} else {
 		if reflect.DeepEqual(result, falseShareResponse) {
 			log.Println("Show share failed!")
-			this.Ctx.WriteString("Show share failed!")
+			rbody, _ := json.Marshal("Show share failed!")
+			this.Ctx.Output.Body(rbody)
 		} else {
 			rbody, _ := json.Marshal(result)
-			this.Ctx.WriteString(string(rbody))
+			this.Ctx.Output.Body(rbody)
 		}
 	}
 }
 
 func (this *ShareController) Put() {
-	this.Ctx.WriteString("Not finished!")
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+	rbody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(rbody)
 }
 
 func (this *ShareController) Delete() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
 	resourceType := this.Ctx.Input.Param(":resource")
 	id := this.Ctx.Input.Param(":id")
 
-	result, err := shares.Delete(resourceType, id)
+	shareRequest := shares.ShareRequest{
+		ResourceType: resourceType,
+		Id:           id,
+	}
+	result, err := shares.Delete(shareRequest)
 	if err != nil {
 		log.Println(err)
-		this.Ctx.WriteString("Delete share failed!")
+		rbody, _ := json.Marshal("Delete share failed!")
+		this.Ctx.Output.Body(rbody)
 	} else {
 		if result == "" {
 			log.Println("Delete share failed!")
-			this.Ctx.WriteString("Delete share failed!")
+			rbody, _ := json.Marshal("Delete share failed!")
+			this.Ctx.Output.Body(rbody)
 		} else {
-			this.Ctx.WriteString(result)
+			rbody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(rbody)
 		}
 	}
 }
 
 func PostShare(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
 	resourceType := ctx.Input.Param(":resource")
 	rbody, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		log.Println("Read share request body failed:", err)
-		ctx.WriteString("Read share request body failed!")
+		rbody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.Body(rbody)
 	}
 
-	var shareRequest api.ShareRequest
-	shareRequest.Resource_type = resourceType
+	var shareRequest shares.ShareRequest
+	shareRequest.ResourceType = resourceType
 	if err = json.Unmarshal(rbody, &shareRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
-		ctx.WriteString("Parse volume request body failed!")
+		rbody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.Body(rbody)
 	}
 
-	result, err := shares.Create(shareRequest.Resource_type,
-		shareRequest.Name,
-		shareRequest.Share_type,
-		shareRequest.Share_proto,
-		shareRequest.Size)
+	result, err := shares.Create(shareRequest)
 	if err != nil {
 		log.Println(err)
-		ctx.WriteString("Create share failed!")
+		rbody, _ := json.Marshal("Create share failed!")
+		ctx.Output.Body(rbody)
 	} else {
 		if reflect.DeepEqual(result, falseShareResponse) {
 			log.Println("Create share failed!")
-			ctx.WriteString("Create share failed!")
+			rbody, _ := json.Marshal("Create share failed!")
+			ctx.Output.Body(rbody)
 		} else {
 			rbody, _ := json.Marshal(result)
-			ctx.WriteString(string(rbody))
+			ctx.Output.Body(rbody)
 		}
 	}
 }
 
 func GetAllShares(ctx *context.Context) {
-	resourceType := ctx.Input.Param(":resource")
-	allowDetails := false
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
 
-	result, err := shares.List(resourceType, allowDetails)
+	resourceType := ctx.Input.Param(":resource")
+
+	shareRequest := shares.ShareRequest{
+		ResourceType: resourceType,
+		AllowDetails: false,
+	}
+	result, err := shares.List(shareRequest)
 	if err != nil {
 		log.Println(err)
-		ctx.WriteString("List shares failed!")
+		rbody, _ := json.Marshal("List shares failed!")
+		ctx.Output.Body(rbody)
 	} else {
 		if reflect.DeepEqual(result, falseAllSharesResponse) {
 			log.Println("List shares failed!")
-			ctx.WriteString("List shares failed!")
+			rbody, _ := json.Marshal("List shares failed!")
+			ctx.Output.Body(rbody)
 		} else {
 			rbody, _ := json.Marshal(result)
-			ctx.WriteString(string(rbody))
+			ctx.Output.Body(rbody)
 		}
 	}
 }

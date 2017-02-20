@@ -26,10 +26,12 @@ import (
 // VolumeResponse is a structure for all properties of
 // an volume for a non detailed query
 type VolumeResponse struct {
-	ID    string              `json:"id,omitempty"`
-	Name  string              `json:"name,omitempty"`
-	Links []map[string]string `json:"links"`
-	// Consistencygroup_id string `json:"consistencygroup_id"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Status      string              `json:"status"`
+	Size        int64               `json:"size"`
+	Volume_type string              `json:"volume_type"`
+	Attachments []map[string]string `json:"attachments"`
 }
 
 // VolumeDetailResponse is a structure for all properties of
@@ -97,24 +99,4 @@ type ShareDetailResponse struct {
 	Share_proto                 string               `json:"share_proto,omitempty"`
 	Volume_type                 string               `json:"volume_type,omitempty"`
 	Source_cgsnapshot_member_id string               `json:"source_cgsnapshot_member_id,omitempty"`
-}
-
-type VolumeRequest struct {
-	Resource_type string `json:"resource_type,omitempty"`
-	Id            string `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Size          int    `json:"size"`
-	Allow_details bool   `json:"allow_details"`
-	Host          string `json:"host,omitempty"`
-	Mountpoint    string `json:"mountpoint,omitempty"`
-}
-
-type ShareRequest struct {
-	Resource_type string `json:"resource_type,omitempty"`
-	Id            string `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Size          int    `json:"size"`
-	Share_type    string `json:"share_type,omitempty"`
-	Share_proto   string `json:"share_proto,omitempty"`
-	Allow_details bool   `json:"allow_details"`
 }

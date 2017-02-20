@@ -68,15 +68,27 @@ var volumeDeleteCommand = &cobra.Command{
 	Run:   volumeDeleteAction,
 }
 
+var volumeAttachCommand = &cobra.Command{
+	Use:   "attach <id>",
+	Short: "attach a volume in the cluster",
+	Run:   volumeAttachAction,
+}
+
+var volumeDetachCommand = &cobra.Command{
+	Use:   "detach <id> <attachment_id>",
+	Short: "detach a volume with attachment_id in the cluster",
+	Run:   volumeDetachAction,
+}
+
 var volumeMountCommand = &cobra.Command{
-	Use:   "mount <id>",
+	Use:   "mount <target mount dir> <mount device> <volume id>",
 	Short: "mount a volume in the cluster",
 	Run:   volumeMountAction,
 }
 
 var volumeUnmountCommand = &cobra.Command{
-	Use:   "unmount <id> <attachment_id>",
-	Short: "unmount a volume with attachment_id in the cluster",
+	Use:   "unmount <mount dir>",
+	Short: "unmount a volume in the cluster",
 	Run:   volumeUnmountAction,
 }
 
@@ -90,22 +102,29 @@ var (
 	volName         string
 	volAllowDetails bool
 	host            string
-	mountpoint      string
+	attachDevice    string
+	fsType          string
 )
 
 func init() {
+	defaultHost, err := os.Hostname()
+	if err != nil {
+		panic("Can't get the host name!")
+	}
+
 	volumeCommand.PersistentFlags().StringVarP(&volResourceType, "backend", "b", "cinder", "backend resource type")
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
 	volumeCommand.AddCommand(volumeUpdateCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
-	volumeCommand.AddCommand(volumeMountCommand)
-	volumeCommand.AddCommand(volumeUnmountCommand)
+	volumeCommand.AddCommand(volumeAttachCommand)
+	volumeCommand.AddCommand(volumeDetachCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
 	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
-	volumeMountCommand.Flags().StringVarP(&host, "host", "o", "localhost", "the hostname mounting volume")
-	volumeMountCommand.Flags().StringVarP(&mountpoint, "mountpoint", "m", "/dev/sda8", "mountpoint of volume")
+	volumeAttachCommand.Flags().StringVarP(&host, "host", "o", defaultHost, "the name of attaching host")
+	volumeAttachCommand.Flags().StringVarP(&attachDevice, "path", "p", "/mnt", "the path of attaching device")
+	volumeMountCommand.Flags().StringVarP(&fsType, "type", "t", "ext4", "the file system type")
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -125,7 +144,12 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		die("error parsing size %s: %v", args[0], err)
 	}
 
-	result, err := volumes.Create(volResourceType, volName, size)
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Name:         volName,
+		Size:         size,
+	}
+	result, err := volumes.Create(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -145,9 +169,11 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volID := args[0]
-
-	result, err := volumes.Show(volResourceType, volID)
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Id:           args[0],
+	}
+	result, err := volumes.Show(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -167,7 +193,11 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	result, err := volumes.List(volResourceType, volAllowDetails)
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		AllowDetails: volAllowDetails,
+	}
+	result, err := volumes.List(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -187,9 +217,12 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volID := args[0]
-
-	result, err := volumes.Update(volResourceType, volID, volName)
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Id:           args[0],
+		Name:         volName,
+	}
+	result, err := volumes.Update(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -209,9 +242,11 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volID := args[0]
-
-	result, err := volumes.Delete(volResourceType, volID)
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Id:           args[0],
+	}
+	result, err := volumes.Delete(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -223,16 +258,69 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	}
 }
 
-func volumeMountAction(cmd *cobra.Command, args []string) {
+func volumeAttachAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
-	volID := args[0]
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Id:           args[0],
+		Host:         host,
+		Device:       attachDevice,
+	}
+	result, err := volumes.Attach(volumeRequest)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		if result == "" {
+			fmt.Println("Attach volume failed!")
+		} else {
+			fmt.Printf("%v\n", result)
+		}
+	}
+}
 
-	result, err := volumes.Mount(volResourceType, volID, host, mountpoint)
+func volumeDetachAction(cmd *cobra.Command, args []string) {
+	if len(args) != 2 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	volumeRequest := volumes.VolumeRequest{
+		ResourceType: volResourceType,
+		Id:           args[0],
+		Attachment:   args[1],
+	}
+	result, err := volumes.Detach(volumeRequest)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		if result == "" {
+			fmt.Println("Detach volume failed!")
+		} else {
+			fmt.Printf("%v\n", result)
+		}
+	}
+}
+
+func volumeMountAction(cmd *cobra.Command, args []string) {
+	if len(args) != 3 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	volumeRequest := volumes.VolumeRequest{
+		MountDir: args[0],
+		Device:   args[1],
+		Id:       args[2],
+		FsType:   fsType,
+	}
+	result, err := volumes.Mount(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -245,16 +333,17 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeUnmountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
+	if len(args) != 1 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
-	volID := args[0]
-	attachment := args[1]
+	volumeRequest := volumes.VolumeRequest{
+		MountDir: args[0],
+	}
 
-	result, err := volumes.Unmount(volResourceType, volID, attachment)
+	result, err := volumes.Unmount(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {

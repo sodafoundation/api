@@ -110,7 +110,14 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 		die("error parsing size %s: %v", args[0], err)
 	}
 
-	result, err := shares.Create(shrResourceType, shrName, shrType, shrProto, size)
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		Name:         shrName,
+		ShareType:    shrType,
+		ShareProto:   shrProto,
+		Size:         size,
+	}
+	result, err := shares.Create(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -129,9 +136,11 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	shrID := args[0]
-
-	result, err := shares.Show(shrResourceType, shrID)
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		Id:           args[0],
+	}
+	result, err := shares.Show(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -151,7 +160,11 @@ func shareListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	result, err := shares.List(shrResourceType, shrAllowDetails)
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		AllowDetails: shrAllowDetails,
+	}
+	result, err := shares.List(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -171,9 +184,12 @@ func shareUpdateAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	shrID := args[0]
-
-	result, err := shares.Update(shrResourceType, shrID, shrName)
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		Id:           args[0],
+		Name:         shrName,
+	}
+	result, err := shares.Update(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -192,9 +208,11 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	shrID := args[0]
-
-	result, err := shares.Delete(shrResourceType, shrID)
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		Id:           args[0],
+	}
+	result, err := shares.Delete(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {

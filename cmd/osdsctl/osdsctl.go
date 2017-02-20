@@ -27,10 +27,9 @@ import (
 )
 
 var rootCommand = &cobra.Command{
-	Use:   "sdsctl",
+	Use:   "osdsctl",
 	Short: "Administer the opensds storage cluster",
 	Long:  `Admin utility for the opensds unified storage cluster.`,
-	// PersistentPreRun: configure,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(1)

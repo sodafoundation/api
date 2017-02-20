@@ -38,6 +38,7 @@ func Run() {
 					beego.NSRouter("/:resource/:id", &VolumeController{}),
 					beego.NSPost("/:resource", PostVolume),
 					beego.NSGet("/:resource", GetAllVolumes),
+					beego.NSPost("/action/:resource/:id", PostVolumeAction),
 				),
 				beego.NSNamespace("/shares",
 					beego.NSRouter("/:resource/:id", &ShareController{}),

@@ -51,9 +51,9 @@ type VolumePlugin interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	MountVolume(volID, host, mountpoint string) (string, error)
+	AttachVolume(volID, host, device string) (string, error)
 
-	UnmountVolume(volID string, attachement string) (string, error)
+	DetachVolume(volID string, attachement string) (string, error)
 }
 
 type SharePlugin interface {
