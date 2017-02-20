@@ -90,17 +90,26 @@ func (s *Server) OrchestrationWatch(url string) {
 			resourceType := tmp[1]
 			volID := tmp[2]
 			result, _ = orchestrationApi.DeleteVolume(resourceType, volID)
-		case "MountVolume":
+		case "AttachVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			host := tmp[3]
-			mountpoint := tmp[4]
-			result, _ = orchestrationApi.MountVolume(resourceType, volID, host, mountpoint)
-		case "UnmountVolume":
+			device := tmp[4]
+			result, _ = orchestrationApi.AttachVolume(resourceType, volID, host, device)
+		case "DetachVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			attachment := tmp[3]
-			result, _ = orchestrationApi.UnmountVolume(resourceType, volID, attachment)
+			result, _ = orchestrationApi.DetachVolume(resourceType, volID, attachment)
+		case "MountVolume":
+			mountDir := tmp[1]
+			device := tmp[2]
+			volID := tmp[3]
+			fsType := tmp[4]
+			result, _ = orchestrationApi.MountVolume(mountDir, device, volID, fsType)
+		case "UnmountVolume":
+			mountDir := tmp[1]
+			result, _ = orchestrationApi.UnmountVolume(mountDir)
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]
@@ -243,17 +252,26 @@ func (s *Server) AdapterWatch(url string) {
 			resourceType := tmp[1]
 			volID := tmp[2]
 			result, _ = adapterApi.DeleteVolume(resourceType, volID)
-		case "MountVolume":
+		case "AttachVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			host := tmp[3]
-			mountpoint := tmp[4]
-			result, _ = adapterApi.MountVolume(resourceType, volID, host, mountpoint)
-		case "UnmountVolume":
+			device := tmp[4]
+			result, _ = adapterApi.AttachVolume(resourceType, volID, host, device)
+		case "DetachVolume":
 			resourceType := tmp[1]
 			volID := tmp[2]
 			attachment := tmp[3]
-			result, _ = adapterApi.UnmountVolume(resourceType, volID, attachment)
+			result, _ = adapterApi.DetachVolume(resourceType, volID, attachment)
+		case "MountVolume":
+			mountDir := tmp[1]
+			device := tmp[2]
+			volID := tmp[3]
+			fsType := tmp[4]
+			result, _ = adapterApi.MountVolume(mountDir, device, volID, fsType)
+		case "UnmountVolume":
+			mountDir := tmp[1]
+			result, _ = adapterApi.UnmountVolume(mountDir)
 		case "CreateShare":
 			resourceType := tmp[1]
 			name := tmp[2]

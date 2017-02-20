@@ -62,17 +62,31 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
+func AttachVolume(resourceType, volID, host, device string) (string, error) {
 	var client messaging.Client
 	url := "opensds/adapter"
-	action := []string{"MountVolume", resourceType, volID, host, mountpoint}
+	action := []string{"AttachVolume", resourceType, volID, host, device}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func UnmountVolume(resourceType, volID, attchment string) (string, error) {
+func DetachVolume(resourceType, volID, attchment string) (string, error) {
 	var client messaging.Client
 	url := "opensds/adapter"
-	action := []string{"UnmountVolume", resourceType, volID, attchment}
+	action := []string{"DetachVolume", resourceType, volID, attchment}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func MountVolume(mountDir, device, volID, fsType string) (string, error) {
+	var client messaging.Client
+	url := "opensds/adapter"
+	action := []string{"MountVolume", mountDir, device, volID, fsType}
+	return client.Run(url, strings.Join(action[:], ","))
+}
+
+func UnmountVolume(mountDir string) (string, error) {
+	var client messaging.Client
+	url := "opensds/adapter"
+	action := []string{"UnmountVolume", mountDir}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 

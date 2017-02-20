@@ -48,10 +48,12 @@ func TestCreateVolume(t *testing.T) {
 		}
 
 		expectedVolume := volume.Response{
-			Name: "myvol1",
-			ID:   "f5fc9874-fc89-4814-a358-23ba83a6115f",
-			Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "self"},
-				{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "bookmark"}}}
+			Name:        "myvol1",
+			ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
+			Status:      "available",
+			Size:        2,
+			Volume_type: "lvmdriver-1",
+			Attachments: []map[string]string{}}
 		testUtil.Equals(t, expectedVolume, result)
 	}
 
@@ -142,14 +144,16 @@ func TestGetAllVolumes(t *testing.T) {
 		}
 
 		expectedVolume := volume.Response{
-			Name: "myvol1",
-			ID:   "f5fc9874-fc89-4814-a358-23ba83a6115f",
-			Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "self"},
-				{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "bookmark"}}}
+			Name:        "myvol1",
+			ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
+			Status:      "in-use",
+			Size:        1,
+			Volume_type: "lvmdriver-1",
+			Attachments: []map[string]string{{"attached_at": "2017-02-11T14:08:17.000000", "attachment_id": "c7f84865-640c-44ea-94ab-379a27f0ff65", "device": "/dev/vdc", "host_name": "localhost", "id": "034af8c9-ef44-4855-8e70-d51dceed7fc4", "server_id": "", "volume_id": "034af8c9-ef44-4855-8e70-d51dceed7fc4"}}}
 		testUtil.Equals(t, expectedVolume, volumes[0])
 	}
 
-	testDetailAllVolumesServiceAction(t, "volumes", sampleVolumesData, anon)
+	testDetailAllVolumesServiceAction(t, "volumes/detail", sampleVolumesData, anon)
 }
 
 func testGetAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(volume.Service)) {
@@ -262,16 +266,16 @@ func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServi
 	volumeServiceAction(volumeService)
 }
 
-var sampleRequestBody = `{"volume":{"name":"myvol1","size":2,"host_name":"","mountpoint":"","attachment_id":""}}`
+var sampleRequestBody = `{"volume":{"name":"myvol1","size":2,"host_name":"","device":"","attachment_id":""}}`
 
 var sampleVolumeData = `{
-	"volume": {
+	"volume":{
 		"name":"myvol1",
 		"id":"f5fc9874-fc89-4814-a358-23ba83a6115f",
-		"links":[
-			{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "self"},
-			{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "bookmark"}
-		]
+		"status":"available",
+		"size":2,
+		"volume_type":"lvmdriver-1",
+		"attachments":[]
 	}
 }`
 
@@ -280,18 +284,20 @@ var sampleVolumesData = `{
 		{
 			"name":"myvol1",
 			"id":"f5fc9874-fc89-4814-a358-23ba83a6115f",
-			"links":[
-				{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "self"},
-				{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/f5fc9874-fc89-4814-a358-23ba83a6115f", "rel": "bookmark"}
+			"status":"in-use",
+			"size":1,
+			"volume_type":"lvmdriver-1",
+			"attachments":[
+				{"attached_at":"2017-02-11T14:08:17.000000","attachment_id":"c7f84865-640c-44ea-94ab-379a27f0ff65","device":"/dev/vdc","host_name":"localhost","id":"034af8c9-ef44-4855-8e70-d51dceed7fc4","server_id":"","volume_id":"034af8c9-ef44-4855-8e70-d51dceed7fc4"}
 			]
 		},
 		{
 			"name":"myvol2",
 			"id":"60055a0a-2451-4d78-af9c-f2302150602f",
-			"links":[
-				{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/60055a0a-2451-4d78-af9c-f2302150602f", "rel": "self"},
-				{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/60055a0a-2451-4d78-af9c-f2302150602f", "rel": "bookmark"}
-			]
+			"status":"available",
+			"size":2,
+			"volume_type":"lvmdriver-1",
+			"attachments":[]
 		}
    	]
 }`

@@ -84,8 +84,30 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	}
 }
 
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := rpcapi.MountVolume(resourceType, volID, host, mountpoint)
+func AttachVolume(resourceType, volID, host, device string) (string, error) {
+	result, err := rpcapi.AttachVolume(resourceType, volID, host, device)
+
+	if err != nil {
+		log.Println("Error occured in orchestration module when attach volume!")
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func DetachVolume(resourceType, volID, attachment string) (string, error) {
+	result, err := rpcapi.DetachVolume(resourceType, volID, attachment)
+
+	if err != nil {
+		log.Println("Error occured in orchestration module when detach volume!")
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func MountVolume(mountDir, device, volID, fsType string) (string, error) {
+	result, err := rpcapi.MountVolume(mountDir, device, volID, fsType)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when mount volume!")
@@ -95,8 +117,8 @@ func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 	}
 }
 
-func UnmountVolume(resourceType, volID, attachment string) (string, error) {
-	result, err := rpcapi.UnmountVolume(resourceType, volID, attachment)
+func UnmountVolume(mountDir string) (string, error) {
+	result, err := rpcapi.UnmountVolume(mountDir)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when unmount volume!")

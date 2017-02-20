@@ -27,10 +27,54 @@ import (
 	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
-func Create(resourceType, name, shrType, shrProto string, size int) (api.ShareResponse, error) {
+type ShareRequestDeliver interface {
+	createShare() (string, error)
+
+	getShare() (string, error)
+
+	getAllShares() (string, error)
+
+	updateShare() (string, error)
+
+	deleteShare() (string, error)
+}
+
+// ShareRequest is a structure for all properties of
+// a share request
+type ShareRequest struct {
+	ResourceType string `json:"resourceType,omitempty"`
+	Id           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Size         int    `json:"size"`
+	ShareType    string `json:"shareType,omitempty"`
+	ShareProto   string `json:"shareProto,omitempty"`
+	AllowDetails bool   `json:"allowDetails"`
+}
+
+func (sr ShareRequest) createShare() (string, error) {
+	return rpcapi.CreateShare(sr.ResourceType, sr.Name, sr.ShareType, sr.ShareProto, sr.Size)
+}
+
+func (sr ShareRequest) getShare() (string, error) {
+	return rpcapi.GetShare(sr.ResourceType, sr.Id)
+}
+
+func (sr ShareRequest) getAllShares() (string, error) {
+	return rpcapi.GetAllShares(sr.ResourceType, sr.AllowDetails)
+}
+
+func (sr ShareRequest) updateShare() (string, error) {
+	return rpcapi.UpdateShare(sr.ResourceType, sr.Id, sr.Name)
+}
+
+func (sr ShareRequest) deleteShare() (string, error) {
+	return rpcapi.DeleteShare(sr.ResourceType, sr.Id)
+}
+
+func Create(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
-	result, err := rpcapi.CreateShare(resourceType, name, shrType, shrProto, size)
+	result, err := srd.createShare()
 	if err != nil {
 		log.Println("Create file share error: ", err)
 		return nullResponse, err
@@ -44,10 +88,10 @@ func Create(resourceType, name, shrType, shrProto string, size int) (api.ShareRe
 	return shareResponse, nil
 }
 
-func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
+func Show(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
 	var nullResponse api.ShareDetailResponse
 
-	result, err := rpcapi.GetShare(resourceType, shrID)
+	result, err := srd.getShare()
 	if err != nil {
 		log.Println("Show file share error: ", err)
 		return nullResponse, err
@@ -61,10 +105,10 @@ func Show(resourceType string, shrID string) (api.ShareDetailResponse, error) {
 	return shareDetailResponse, nil
 }
 
-func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
+func List(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
 	var nullResponses []api.ShareResponse
 
-	result, err := rpcapi.GetAllShares(resourceType, allowDetails)
+	result, err := srd.getAllShares()
 	if err != nil {
 		log.Println("List file shares error: ", err)
 		return nullResponses, err
@@ -78,10 +122,10 @@ func List(resourceType string, allowDetails bool) ([]api.ShareResponse, error) {
 	return sharesResponse, nil
 }
 
-func Update(resourceType string, shrID string, name string) (api.ShareResponse, error) {
+func Update(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
-	result, err := rpcapi.UpdateShare(resourceType, shrID, name)
+	result, err := srd.updateShare()
 	if err != nil {
 		log.Println("Update file share error: ", err)
 		return nullResponse, err
@@ -95,13 +139,12 @@ func Update(resourceType string, shrID string, name string) (api.ShareResponse, 
 	return shareResponse, nil
 }
 
-func Delete(resourceType string, shrID string) (string, error) {
-	result, err := rpcapi.DeleteShare(resourceType, shrID)
+func Delete(srd ShareRequestDeliver) (string, error) {
+	result, err := srd.deleteShare()
 
 	if err != nil {
 		log.Println("Delete file share error: ", err)
 		return "", err
-	} else {
-		return result, nil
 	}
+	return result, nil
 }

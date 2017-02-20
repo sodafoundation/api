@@ -27,10 +27,83 @@ import (
 	"github.com/opensds/opensds/pkg/api/rpcapi"
 )
 
-func Create(resourceType string, name string, size int) (api.VolumeResponse, error) {
+type VolumeRequestDeliver interface {
+	createVolume() (string, error)
+
+	getVolume() (string, error)
+
+	getAllVolumes() (string, error)
+
+	updateVolume() (string, error)
+
+	deleteVolume() (string, error)
+
+	attachVolume() (string, error)
+
+	detachVolume() (string, error)
+
+	mountVolume() (string, error)
+
+	unmountVolume() (string, error)
+}
+
+// VolumeRequest is a structure for all properties of
+// a volume request
+type VolumeRequest struct {
+	ResourceType string `json:"resourcetType,omitempty"`
+	Id           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Size         int    `json:"size"`
+	AllowDetails bool   `json:"allowDetails"`
+
+	ActionType string `json:"actionType"`
+	Host       string `json:"host,omitempty"`
+	Device     string `json:"device"`
+	Attachment string `json:"attachment,omitempty"`
+	MountDir   string `json:"mountDir"`
+	FsType     string `json:"fsType"`
+}
+
+func (vr VolumeRequest) createVolume() (string, error) {
+	return rpcapi.CreateVolume(vr.ResourceType, vr.Name, vr.Size)
+}
+
+func (vr VolumeRequest) getVolume() (string, error) {
+	return rpcapi.GetVolume(vr.ResourceType, vr.Id)
+}
+
+func (vr VolumeRequest) getAllVolumes() (string, error) {
+	return rpcapi.GetAllVolumes(vr.ResourceType, vr.AllowDetails)
+}
+
+func (vr VolumeRequest) updateVolume() (string, error) {
+	return rpcapi.UpdateVolume(vr.ResourceType, vr.Id, vr.Name)
+}
+
+func (vr VolumeRequest) deleteVolume() (string, error) {
+	return rpcapi.DeleteVolume(vr.ResourceType, vr.Id)
+}
+
+func (vr VolumeRequest) attachVolume() (string, error) {
+	return rpcapi.AttachVolume(vr.ResourceType, vr.Id, vr.Host, vr.Device)
+}
+
+func (vr VolumeRequest) detachVolume() (string, error) {
+	return rpcapi.DetachVolume(vr.ResourceType, vr.Id, vr.Attachment)
+}
+
+func (vr VolumeRequest) mountVolume() (string, error) {
+	return rpcapi.MountVolume(vr.MountDir, vr.Device, vr.Id, vr.FsType)
+}
+
+func (vr VolumeRequest) unmountVolume() (string, error) {
+	return rpcapi.UnmountVolume(vr.MountDir)
+}
+
+func Create(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
-	result, err := rpcapi.CreateVolume(resourceType, name, size)
+	result, err := vrd.createVolume()
 	if err != nil {
 		log.Println("Create volume error: ", err)
 		return nullResponse, err
@@ -44,10 +117,10 @@ func Create(resourceType string, name string, size int) (api.VolumeResponse, err
 	return volumeResponse, nil
 }
 
-func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
+func Show(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
 	var nullResponse api.VolumeDetailResponse
 
-	result, err := rpcapi.GetVolume(resourceType, shrID)
+	result, err := vrd.getVolume()
 	if err != nil {
 		log.Println("Show volume error: ", err)
 		return nullResponse, err
@@ -61,10 +134,10 @@ func Show(resourceType string, shrID string) (api.VolumeDetailResponse, error) {
 	return volumeDetailResponse, nil
 }
 
-func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) {
+func List(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
 	var nullResponses []api.VolumeResponse
 
-	result, err := rpcapi.GetAllVolumes(resourceType, allowDetails)
+	result, err := vrd.getAllVolumes()
 	if err != nil {
 		log.Println("List volumes error: ", err)
 		return nullResponses, err
@@ -78,10 +151,10 @@ func List(resourceType string, allowDetails bool) ([]api.VolumeResponse, error) 
 	return volumesResponse, nil
 }
 
-func Update(resourceType string, shrID string, name string) (api.VolumeResponse, error) {
+func Update(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
-	result, err := rpcapi.UpdateVolume(resourceType, shrID, name)
+	result, err := vrd.updateVolume()
 	if err != nil {
 		log.Println("Update volume error: ", err)
 		return nullResponse, err
@@ -95,35 +168,47 @@ func Update(resourceType string, shrID string, name string) (api.VolumeResponse,
 	return volumeResponse, nil
 }
 
-func Delete(resourceType string, volID string) (string, error) {
-	result, err := rpcapi.DeleteVolume(resourceType, volID)
-
+func Delete(vrd VolumeRequestDeliver) (string, error) {
+	result, err := vrd.deleteVolume()
 	if err != nil {
 		log.Println("Delete volume error: ", err)
 		return "", err
-	} else {
-		return result, nil
 	}
+	return result, nil
 }
 
-func Mount(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := rpcapi.MountVolume(resourceType, volID, host, mountpoint)
+func Attach(vrd VolumeRequestDeliver) (string, error) {
+	result, err := vrd.attachVolume()
+	if err != nil {
+		log.Println("Attach volume error: ", err)
+		return "", err
+	}
+	return result, nil
+}
 
+func Detach(vrd VolumeRequestDeliver) (string, error) {
+	result, err := vrd.detachVolume()
+	if err != nil {
+		log.Println("Detach volume error: ", err)
+		return "", err
+	}
+	return result, nil
+}
+
+func Mount(vrd VolumeRequestDeliver) (string, error) {
+	result, err := vrd.mountVolume()
 	if err != nil {
 		log.Println("Mount volume error: ", err)
 		return "", err
-	} else {
-		return result, nil
 	}
+	return result, nil
 }
 
-func Unmount(resourceType, volID, attachment string) (string, error) {
-	result, err := rpcapi.UnmountVolume(resourceType, volID, attachment)
-
+func Unmount(vrd VolumeRequestDeliver) (string, error) {
+	result, err := vrd.unmountVolume()
 	if err != nil {
 		log.Println("Unmount volume error: ", err)
 		return "", err
-	} else {
-		return result, nil
 	}
+	return result, nil
 }

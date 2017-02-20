@@ -150,6 +150,12 @@ func (plugin *ManilaPlugin) DeleteShare(shrID string) (string, error) {
 		return "", err
 	}
 
+	_, err = shareService.Show(shrID)
+	if err != nil {
+		log.Println("Cannot get file share:", err)
+		return "", err
+	}
+
 	err = shareService.Delete(shrID)
 	if err != nil {
 		log.Println("Cannot delete file share:", err)

@@ -45,9 +45,9 @@ type VolumeDriver interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	MountVolume(volID, host, mountpoint string) (string, error)
+	AttachVolume(volID, host, device string) (string, error)
 
-	UnmountVolume(volID string, attachment string) (string, error)
+	DetachVolume(volID string, attachment string) (string, error)
 }
 
 func CreateVolume(resourceType string, name string, size int) (string, error) {
@@ -145,7 +145,7 @@ func DeleteVolume(resourceType, volID string) (string, error) {
 	}
 }
 
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
+func AttachVolume(resourceType, volID, host, device string) (string, error) {
 	//Get the storage plugins and do some initializations.
 	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
@@ -155,16 +155,16 @@ func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.MountVolume(volID, host, mountpoint)
+	result, err := volumeDriver.AttachVolume(volID, host, device)
 	if err != nil {
-		log.Println("Call plugin to mount volume failed:", err)
+		log.Println("Call plugin to attach volume failed:", err)
 		return "", err
 	} else {
 		return result, nil
 	}
 }
 
-func UnmountVolume(resourceType, volID, attachment string) (string, error) {
+func DetachVolume(resourceType, volID, attachment string) (string, error) {
 	//Get the storage plugins and do some initializations.
 	plugins, err := storagePlugins.InitVP(resourceType)
 	if err != nil {
@@ -174,11 +174,27 @@ func UnmountVolume(resourceType, volID, attachment string) (string, error) {
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.UnmountVolume(volID, attachment)
+	result, err := volumeDriver.DetachVolume(volID, attachment)
 	if err != nil {
-		log.Println("Call plugin to unmount volume failed:", err)
+		log.Println("Call plugin to detach volume failed:", err)
 		return "", err
 	} else {
 		return result, nil
 	}
+}
+
+func MountVolume(mountDir, device, volID, fsType string) (string, error) {
+	if err := storagePlugins.Mount(mountDir, device, fsType); err != nil {
+		log.Println("Call plugin to mount volume failed:", err)
+		return "Mount volume failed!", err
+	}
+	return "Mount volume success!", nil
+}
+
+func UnmountVolume(mountDir string) (string, error) {
+	if err := storagePlugins.Unmount(mountDir); err != nil {
+		log.Println("Call plugin to unmount volume failed:", err)
+		return "Unmount volume failed!", err
+	}
+	return "Unmount volume success!", nil
 }
