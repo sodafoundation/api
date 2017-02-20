@@ -54,7 +54,7 @@ func (OpenSDSPlugin) Attach(opts interface{}) Result {
 	req := httplib.Post(url).SetTimeout(100*time.Second, 50*time.Second)
 
 	var volumeRequest VolumeRequest
-	volumeRequest.Action_type = "attach"
+	volumeRequest.ActionType = "attach"
 	volumeRequest.Device = DEVICE_PREFIX + volId
 
 	req.JSONBody(volumeRequest)
@@ -120,7 +120,7 @@ func (OpenSDSPlugin) Detach(device string) Result {
 	req = httplib.Post(url).SetTimeout(10*time.Second, 5*time.Second)
 
 	var volumeRequest VolumeRequest
-	volumeRequest.Action_type = "detach"
+	volumeRequest.ActionType = "detach"
 	volumeRequest.Attachment = volumeResponse.Attachments[0]["attachment_id"]
 
 	req.JSONBody(volumeRequest)
@@ -157,7 +157,7 @@ func (OpenSDSPlugin) Mount(mountDir string, device string, opts interface{}) Res
 	req := httplib.Post(url).SetTimeout(100*time.Second, 50*time.Second)
 
 	var volumeRequest VolumeRequest
-	volumeRequest.Action_type = "mount"
+	volumeRequest.ActionType = "mount"
 	volumeRequest.MountDir = mountDir
 	volumeRequest.Device = device
 	volumeRequest.FsType = opt.FsType
@@ -194,7 +194,7 @@ func (OpenSDSPlugin) Unmount(mountDir string) Result {
 	req := httplib.Post(url).SetTimeout(100*time.Second, 50*time.Second)
 
 	var volumeRequest VolumeRequest
-	volumeRequest.Action_type = "unmount"
+	volumeRequest.ActionType = "unmount"
 	volumeRequest.MountDir = mountDir
 
 	req.JSONBody(volumeRequest)

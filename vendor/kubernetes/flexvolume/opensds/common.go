@@ -37,18 +37,18 @@ type DefaultOptions struct {
 // VolumeRequest is a structure for all properties of
 // a volume request
 type VolumeRequest struct {
-	Resource_type string `json:"resource_type,omitempty"`
-	Id            string `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Size          int    `json:"size"`
-	Allow_details bool   `json:"allow_details"`
+	ResourceType string `json:"resourceType,omitempty"`
+	Id           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Size         int    `json:"size"`
+	AllowDetails bool   `json:"allowDetails"`
 
-	Action_type string `json:"action_type"`
-	Host        string `json:"host,omitempty"`
-	Device      string `json:"device"`
-	Attachment  string `json:"attachment,omitempty"`
-	MountDir    string `json:"mountDir"`
-	FsType      string `json:"fsType"`
+	ActionType string `json:"actionType"`
+	Host       string `json:"host,omitempty"`
+	Device     string `json:"device"`
+	Attachment string `json:"attachment,omitempty"`
+	MountDir   string `json:"mountDir"`
+	FsType     string `json:"fsType"`
 }
 
 // VolumeResponse is a structure for all properties of
