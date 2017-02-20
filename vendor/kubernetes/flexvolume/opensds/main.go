@@ -55,7 +55,7 @@ func (OpenSDSPlugin) Attach(opts interface{}) Result {
 
 	var volumeRequest VolumeRequest
 	volumeRequest.Action_type = "attach"
-	volumeRequest.Device = DEVICE_PREFIX + volumeId
+	volumeRequest.Device = DEVICE_PREFIX + volId
 
 	req.JSONBody(volumeRequest)
 	resp, err := req.Response()
