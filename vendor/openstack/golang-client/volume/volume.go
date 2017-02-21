@@ -96,7 +96,7 @@ type Response struct {
 	ID          string              `json:"id"`
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
-	Size        int64               `json:"size"`
+	Size        int                 `json:"size"`
 	Volume_type string              `json:"volume_type"`
 	Attachments []map[string]string `json:"attachments"`
 }
@@ -120,7 +120,7 @@ type DetailResponse struct {
 	Name            string               `json:"name"`
 	Source_volid    string               `json:"source_volid"`
 	Snapshot_id     string               `json:"snapshot_id"`
-	Size            int64                `json:"size"`
+	Size            int                  `json:"size"`
 
 	Aavailability_zone  string `json:"availability_zone"`
 	Rreplication_status string `json:"replication_status"`

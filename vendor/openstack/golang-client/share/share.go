@@ -95,7 +95,7 @@ type DetailResponse struct {
 	Share_server_id             string               `json:"share_server_id"`
 	Snapshot_id                 string               `json:"snapshot_id"`
 	ID                          string               `json:"id"`
-	Size                        int64                `json:"size"`
+	Size                        int                  `json:"size"`
 	Share_type                  string               `json:"share_type"`
 	Share_type_name             string               `json:"share_type_name"`
 	Export_location             string               `json:"export_location"`

@@ -56,12 +56,12 @@ type VolumeRequest struct {
 	Size         int    `json:"size"`
 	AllowDetails bool   `json:"allowDetails"`
 
-	ActionType string `json:"actionType"`
+	ActionType string `json:"actionType,omitempty"`
 	Host       string `json:"host,omitempty"`
-	Device     string `json:"device"`
+	Device     string `json:"device,omitempty"`
 	Attachment string `json:"attachment,omitempty"`
-	MountDir   string `json:"mountDir"`
-	FsType     string `json:"fsType"`
+	MountDir   string `json:"mountDir,omitempty"`
+	FsType     string `json:"fsType,omitempty"`
 }
 
 func (vr VolumeRequest) createVolume() (string, error) {
