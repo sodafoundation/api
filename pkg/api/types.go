@@ -29,7 +29,7 @@ type VolumeResponse struct {
 	ID          string              `json:"id"`
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
-	Size        int64               `json:"size"`
+	Size        int                 `json:"size"`
 	Volume_type string              `json:"volume_type"`
 	Attachments []map[string]string `json:"attachments"`
 }
@@ -53,7 +53,7 @@ type VolumeDetailResponse struct {
 	Name            string               `json:"name,omitempty"`
 	Source_volid    string               `json:"source_volid,omitempty"`
 	Snapshot_id     string               `json:"snapshot_id,omitempty"`
-	Size            int64                `json:"size"`
+	Size            int                  `json:"size"`
 
 	Aavailability_zone  string `json:"availability_zone,omitempty"`
 	Rreplication_status string `json:"replication_status,omitempty"`
@@ -78,7 +78,7 @@ type ShareDetailResponse struct {
 	Share_server_id             string               `json:"share_server_id,omitempty"`
 	Snapshot_id                 string               `json:"snapshot_id,omitempty"`
 	ID                          string               `json:"id,omitempty"`
-	Size                        int64                `json:"size"`
+	Size                        int                  `json:"size"`
 	Share_type                  string               `json:"share_type,omitempty"`
 	Share_type_name             string               `json:"share_type_name,omitempty"`
 	Export_location             string               `json:"export_location,omitempty"`
