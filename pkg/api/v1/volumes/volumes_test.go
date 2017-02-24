@@ -81,7 +81,7 @@ func (fvr fakeVolumeRequest) unmountVolume() (string, error) {
 	return "Unmount volume success!", nil
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeCreateRequest), &fvr)
@@ -89,7 +89,7 @@ func TestCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	volume, err := Create(fvr)
+	volume, err := CreateVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestGetVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeGetRequest), &fvr)
@@ -120,7 +120,7 @@ func TestGet(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	volume, err := Show(fvr)
+	volume, err := GetVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListVolumes(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeListRequest), &fvr)
@@ -165,7 +165,7 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	volumes, err := List(fvr)
+	volumes, err := ListVolumes(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +182,7 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdateVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeUpdateRequest), &fvr)
@@ -190,7 +190,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	volume, err := Update(fvr)
+	volume, err := UpdateVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -210,7 +210,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeDeleteRequest), &fvr)
@@ -218,7 +218,7 @@ func TestDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Delete(fvr)
+	result, err := DeleteVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +228,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestAttach(t *testing.T) {
+func TestAttachVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeAttachRequest), &fvr)
@@ -236,7 +236,7 @@ func TestAttach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Attach(fvr)
+	result, err := AttachVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -246,7 +246,7 @@ func TestAttach(t *testing.T) {
 	}
 }
 
-func TestDetach(t *testing.T) {
+func TestDetachVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeDetachRequest), &fvr)
@@ -254,7 +254,7 @@ func TestDetach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Detach(fvr)
+	result, err := DetachVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestDetach(t *testing.T) {
 	}
 }
 
-func TestMount(t *testing.T) {
+func TestMountVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeMountRequest), &fvr)
@@ -272,7 +272,7 @@ func TestMount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Mount(fvr)
+	result, err := MountVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +282,7 @@ func TestMount(t *testing.T) {
 	}
 }
 
-func TestUnmount(t *testing.T) {
+func TestUnmountVolume(t *testing.T) {
 	var fvr fakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeUnmountRequest), &fvr)
@@ -290,7 +290,7 @@ func TestUnmount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Unmount(fvr)
+	result, err := UnmountVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}

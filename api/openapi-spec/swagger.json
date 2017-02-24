@@ -17,12 +17,14 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "listVersions",
+				"operationId": "ListVersions",
 				"parameters": [],
 				"responses": {
 					"200": {
 						"description": "OK",
-						"schema": {}
+						"schema": {
+							"$ref": "#/definitions/AvailableVersions"
+						}
 					}
 				}
 			}
@@ -39,12 +41,14 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "getVersionv1",
+				"operationId": "GetVersionv1",
 				"parameters": [],
 				"responses": {
 					"200": {
 						"description": "OK",
-						"schema": {}
+						"schema": {
+							"$ref": "#/definitions/VersionInfo"
+						}
 					}
 				}
 			}
@@ -61,7 +65,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "listVolumeResources",
+				"operationId": "ListVolumeResources",
 				"parameters": [],
 				"responses": {
 					"200": {
@@ -83,7 +87,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "createVolume",
+				"operationId": "CreateVolume",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -122,7 +126,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "getAllVolumes",
+				"operationId": "ListVolumes",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -161,6 +165,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "GetVolume",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -197,6 +202,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "UpdateVolume",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -242,6 +248,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "DeleteVolume",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -280,6 +287,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "OperateVolume",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -327,7 +335,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "listShareResources",
+				"operationId": "ListShareResources",
 				"parameters": [],
 				"responses": {
 					"200": {
@@ -349,7 +357,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "createShare",
+				"operationId": "CreateShare",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -388,7 +396,7 @@
 				"schemes": [
 					"http"
 				],
-				"operationId": "getAllShares",
+				"operationId": "ListShares",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -427,6 +435,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "GetShare",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -463,6 +472,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "UpdateShare",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -508,6 +518,7 @@
 				"schemes": [
 					"http"
 				],
+				"operationId": "DeleteShare",
 				"parameters": [
 					{
 						"name": "resourceType",
@@ -536,6 +547,30 @@
 		}
 	},
 	"definitions": {
+		"VersionInfo": {
+			"type": "object",
+			"properties": {
+				"Id": {
+					"type": "string"
+				},
+				"Status": {
+					"type": "string"
+				},
+				"UpdateAt": {
+					"type": "string"
+				}
+			}
+		},
+		"AvailableVersions": {
+			"type": "object",
+			"properties": {
+				"Versions": {
+					"schema": {
+						"$ref": "#/definitions/VersionInfo"
+					}
+				}
+			}
+		},
 		"DefaultResponse": {
 			"type": "object",
 			"properties": {

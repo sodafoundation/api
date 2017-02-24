@@ -23,6 +23,16 @@ import (
 	"openstack/golang-client/util"
 )
 
+type VersionInfo struct {
+	Id        string `json:"id"`
+	Status    string `json:"status"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type AvailableVersions struct {
+	Versions []VersionInfo `json:"versions"`
+}
+
 // VolumeResponse is a structure for all properties of
 // an volume for a non detailed query
 type VolumeResponse struct {

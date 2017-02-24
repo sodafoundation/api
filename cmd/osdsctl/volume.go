@@ -27,7 +27,7 @@ import (
 	"strconv"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/volumes"
+	"github.com/opensds/opensds/pkg/api/v1/volumes"
 
 	"github.com/spf13/cobra"
 )
@@ -75,7 +75,7 @@ var volumeAttachCommand = &cobra.Command{
 }
 
 var volumeDetachCommand = &cobra.Command{
-	Use:   "detach <id> <attachment_id>",
+	Use:   "detach <id> <attachment id>",
 	Short: "detach a volume with attachment_id in the cluster",
 	Run:   volumeDetachAction,
 }
@@ -149,7 +149,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		Name:         volName,
 		Size:         size,
 	}
-	result, err := volumes.Create(volumeRequest)
+	result, err := volumes.CreateVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -173,7 +173,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		ResourceType: volResourceType,
 		Id:           args[0],
 	}
-	result, err := volumes.Show(volumeRequest)
+	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -197,7 +197,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		ResourceType: volResourceType,
 		AllowDetails: volAllowDetails,
 	}
-	result, err := volumes.List(volumeRequest)
+	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -222,7 +222,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Id:           args[0],
 		Name:         volName,
 	}
-	result, err := volumes.Update(volumeRequest)
+	result, err := volumes.UpdateVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -246,7 +246,7 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 		ResourceType: volResourceType,
 		Id:           args[0],
 	}
-	result, err := volumes.Delete(volumeRequest)
+	result, err := volumes.DeleteVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -271,7 +271,7 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 		Host:         host,
 		Device:       attachDevice,
 	}
-	result, err := volumes.Attach(volumeRequest)
+	result, err := volumes.AttachVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -295,7 +295,7 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 		Id:           args[0],
 		Attachment:   args[1],
 	}
-	result, err := volumes.Detach(volumeRequest)
+	result, err := volumes.DetachVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -320,7 +320,7 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 		Id:       args[2],
 		FsType:   fsType,
 	}
-	result, err := volumes.Mount(volumeRequest)
+	result, err := volumes.MountVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -343,7 +343,7 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 		MountDir: args[0],
 	}
 
-	result, err := volumes.Unmount(volumeRequest)
+	result, err := volumes.UnmountVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {

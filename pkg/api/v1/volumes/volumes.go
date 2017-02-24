@@ -100,7 +100,7 @@ func (vr VolumeRequest) unmountVolume() (string, error) {
 	return rpcapi.UnmountVolume(vr.MountDir)
 }
 
-func Create(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
+func CreateVolume(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
 	result, err := vrd.createVolume()
@@ -117,7 +117,7 @@ func Create(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	return volumeResponse, nil
 }
 
-func Show(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
+func GetVolume(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
 	var nullResponse api.VolumeDetailResponse
 
 	result, err := vrd.getVolume()
@@ -134,7 +134,7 @@ func Show(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
 	return volumeDetailResponse, nil
 }
 
-func List(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
+func ListVolumes(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
 	var nullResponses []api.VolumeResponse
 
 	result, err := vrd.getAllVolumes()
@@ -151,7 +151,7 @@ func List(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
 	return volumesResponse, nil
 }
 
-func Update(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
+func UpdateVolume(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
 	result, err := vrd.updateVolume()
@@ -168,7 +168,7 @@ func Update(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	return volumeResponse, nil
 }
 
-func Delete(vrd VolumeRequestDeliver) (string, error) {
+func DeleteVolume(vrd VolumeRequestDeliver) (string, error) {
 	result, err := vrd.deleteVolume()
 	if err != nil {
 		log.Println("Delete volume error: ", err)
@@ -177,7 +177,7 @@ func Delete(vrd VolumeRequestDeliver) (string, error) {
 	return result, nil
 }
 
-func Attach(vrd VolumeRequestDeliver) (string, error) {
+func AttachVolume(vrd VolumeRequestDeliver) (string, error) {
 	result, err := vrd.attachVolume()
 	if err != nil {
 		log.Println("Attach volume error: ", err)
@@ -186,7 +186,7 @@ func Attach(vrd VolumeRequestDeliver) (string, error) {
 	return result, nil
 }
 
-func Detach(vrd VolumeRequestDeliver) (string, error) {
+func DetachVolume(vrd VolumeRequestDeliver) (string, error) {
 	result, err := vrd.detachVolume()
 	if err != nil {
 		log.Println("Detach volume error: ", err)
@@ -195,7 +195,7 @@ func Detach(vrd VolumeRequestDeliver) (string, error) {
 	return result, nil
 }
 
-func Mount(vrd VolumeRequestDeliver) (string, error) {
+func MountVolume(vrd VolumeRequestDeliver) (string, error) {
 	result, err := vrd.mountVolume()
 	if err != nil {
 		log.Println("Mount volume error: ", err)
@@ -204,7 +204,7 @@ func Mount(vrd VolumeRequestDeliver) (string, error) {
 	return result, nil
 }
 
-func Unmount(vrd VolumeRequestDeliver) (string, error) {
+func UnmountVolume(vrd VolumeRequestDeliver) (string, error) {
 	result, err := vrd.unmountVolume()
 	if err != nil {
 		log.Println("Unmount volume error: ", err)

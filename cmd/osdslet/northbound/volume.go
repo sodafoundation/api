@@ -28,7 +28,7 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/volumes"
+	"github.com/opensds/opensds/pkg/api/v1/volumes"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -54,7 +54,7 @@ func (this *VolumeController) Get() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := volumes.Show(volumeRequest)
+	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Show volume failed!")
@@ -89,7 +89,7 @@ func (this *VolumeController) Delete() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := volumes.Delete(volumeRequest)
+	result, err := volumes.DeleteVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Delete volume failed!")
@@ -126,7 +126,7 @@ func PostVolume(ctx *context.Context) {
 		ctx.Output.Body(rbody)
 	}
 
-	result, err := volumes.Create(volumeRequest)
+	result, err := volumes.CreateVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Create volume failed!")
@@ -153,7 +153,7 @@ func GetAllVolumes(ctx *context.Context) {
 		ResourceType: resourceType,
 		AllowDetails: false,
 	}
-	result, err := volumes.List(volumeRequest)
+	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List volumes failed!")
@@ -201,7 +201,7 @@ func PostVolumeAction(ctx *context.Context) {
 			volumeRequest.Device = "/mnt"
 		}
 
-		result, err := volumes.Attach(volumeRequest)
+		result, err := volumes.AttachVolume(volumeRequest)
 		if err != nil {
 			log.Println(err)
 			rbody, _ := json.Marshal("Attach volume failed!")
@@ -217,7 +217,7 @@ func PostVolumeAction(ctx *context.Context) {
 			}
 		}
 	case "detach":
-		result, err := volumes.Detach(volumeRequest)
+		result, err := volumes.DetachVolume(volumeRequest)
 		if err != nil {
 			log.Println(err)
 			rbody, _ := json.Marshal("Detach volume failed!")
@@ -233,7 +233,7 @@ func PostVolumeAction(ctx *context.Context) {
 			}
 		}
 	case "mount":
-		result, err := volumes.Mount(volumeRequest)
+		result, err := volumes.MountVolume(volumeRequest)
 		if err != nil {
 			log.Println(err)
 			rbody, _ := json.Marshal("Mount volume failed!")
@@ -249,7 +249,7 @@ func PostVolumeAction(ctx *context.Context) {
 			}
 		}
 	case "unmount":
-		result, err := volumes.Unmount(volumeRequest)
+		result, err := volumes.UnmountVolume(volumeRequest)
 		if err != nil {
 			log.Println(err)
 			rbody, _ := json.Marshal("Unmount volume failed!")

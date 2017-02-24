@@ -37,7 +37,7 @@ var rootCommand = &cobra.Command{
 }
 
 func init() {
-	//rootCommand.AddCommand(metadataCommand)
+	rootCommand.AddCommand(versionCommand)
 	rootCommand.AddCommand(shareCommand)
 	rootCommand.AddCommand(volumeCommand)
 }

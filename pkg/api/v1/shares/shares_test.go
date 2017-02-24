@@ -60,7 +60,7 @@ func (fsr fakeShareRequest) deleteShare() (string, error) {
 	return "Delete share success!", nil
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateShare(t *testing.T) {
 	var fsr fakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareCreateRequest), &fsr)
@@ -68,7 +68,7 @@ func TestCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	share, err := Create(fsr)
+	share, err := CreateShare(fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestGetShare(t *testing.T) {
 	var fsr fakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareGetRequest), &fsr)
@@ -94,7 +94,7 @@ func TestGet(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	share, err := Show(fsr)
+	share, err := GetShare(fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListShares(t *testing.T) {
 	var fsr fakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareListRequest), &fsr)
@@ -146,7 +146,7 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	shares, err := List(fsr)
+	shares, err := ListShares(fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdateShare(t *testing.T) {
 	var fsr fakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareUpdateRequest), &fsr)
@@ -169,7 +169,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	share, err := Update(fsr)
+	share, err := UpdateShare(fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +187,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteShare(t *testing.T) {
 	var fsr fakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareDeleteRequest), &fsr)
@@ -195,7 +195,7 @@ func TestDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := Delete(fsr)
+	result, err := DeleteShare(fsr)
 	if err != nil {
 		t.Fatal(err)
 	}

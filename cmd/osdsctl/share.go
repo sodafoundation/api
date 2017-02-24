@@ -27,7 +27,7 @@ import (
 	"strconv"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/shares"
+	"github.com/opensds/opensds/pkg/api/v1/shares"
 
 	"github.com/spf13/cobra"
 )
@@ -117,7 +117,7 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 		ShareProto:   shrProto,
 		Size:         size,
 	}
-	result, err := shares.Create(shareRequest)
+	result, err := shares.CreateShare(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -140,7 +140,7 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 		ResourceType: shrResourceType,
 		Id:           args[0],
 	}
-	result, err := shares.Show(shareRequest)
+	result, err := shares.GetShare(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -164,7 +164,7 @@ func shareListAction(cmd *cobra.Command, args []string) {
 		ResourceType: shrResourceType,
 		AllowDetails: shrAllowDetails,
 	}
-	result, err := shares.List(shareRequest)
+	result, err := shares.ListShares(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -189,7 +189,7 @@ func shareUpdateAction(cmd *cobra.Command, args []string) {
 		Id:           args[0],
 		Name:         shrName,
 	}
-	result, err := shares.Update(shareRequest)
+	result, err := shares.UpdateShare(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -212,7 +212,7 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 		ResourceType: shrResourceType,
 		Id:           args[0],
 	}
-	result, err := shares.Delete(shareRequest)
+	result, err := shares.DeleteShare(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {

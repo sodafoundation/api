@@ -71,7 +71,7 @@ func (sr ShareRequest) deleteShare() (string, error) {
 	return rpcapi.DeleteShare(sr.ResourceType, sr.Id)
 }
 
-func Create(srd ShareRequestDeliver) (api.ShareResponse, error) {
+func CreateShare(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
 	result, err := srd.createShare()
@@ -88,7 +88,7 @@ func Create(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	return shareResponse, nil
 }
 
-func Show(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
+func GetShare(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
 	var nullResponse api.ShareDetailResponse
 
 	result, err := srd.getShare()
@@ -105,7 +105,7 @@ func Show(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
 	return shareDetailResponse, nil
 }
 
-func List(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
+func ListShares(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
 	var nullResponses []api.ShareResponse
 
 	result, err := srd.getAllShares()
@@ -122,7 +122,7 @@ func List(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
 	return sharesResponse, nil
 }
 
-func Update(srd ShareRequestDeliver) (api.ShareResponse, error) {
+func UpdateShare(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
 	result, err := srd.updateShare()
@@ -139,7 +139,7 @@ func Update(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	return shareResponse, nil
 }
 
-func Delete(srd ShareRequestDeliver) (string, error) {
+func DeleteShare(srd ShareRequestDeliver) (string, error) {
 	result, err := srd.deleteShare()
 
 	if err != nil {

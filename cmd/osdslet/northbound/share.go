@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/shares"
+	"github.com/opensds/opensds/pkg/api/v1/shares"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -52,7 +52,7 @@ func (this *ShareController) Get() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := shares.Show(shareRequest)
+	result, err := shares.GetShare(shareRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Show share failed!")
@@ -87,7 +87,7 @@ func (this *ShareController) Delete() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := shares.Delete(shareRequest)
+	result, err := shares.DeleteShare(shareRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Delete share failed!")
@@ -124,7 +124,7 @@ func PostShare(ctx *context.Context) {
 		ctx.Output.Body(rbody)
 	}
 
-	result, err := shares.Create(shareRequest)
+	result, err := shares.CreateShare(shareRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Create share failed!")
@@ -151,7 +151,7 @@ func GetAllShares(ctx *context.Context) {
 		ResourceType: resourceType,
 		AllowDetails: false,
 	}
-	result, err := shares.List(shareRequest)
+	result, err := shares.ListShares(shareRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List shares failed!")

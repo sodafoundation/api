@@ -33,7 +33,9 @@ func Run() {
 				}
 				return false
 			}),
+			beego.NSGet("/", GetAllVersions),
 			beego.NSNamespace("/v1",
+				beego.NSGet("/", GetVersionv1),
 				beego.NSNamespace("/volumes",
 					beego.NSRouter("/:resource/:id", &VolumeController{}),
 					beego.NSPost("/:resource", PostVolume),
