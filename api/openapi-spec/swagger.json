@@ -842,7 +842,7 @@
 		"SharesResponse": {
 			"type": "slice",
 			"properties": {
-				"VolumeResponse": {
+				"ShareResponse": {
 					"schema": {
 						"$ref": "#/definitions/ShareResponse"
 					}
