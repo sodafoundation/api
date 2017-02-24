@@ -99,7 +99,7 @@ func TestCreate(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "available",
 		Size:        2,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{}}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)
@@ -127,7 +127,7 @@ func TestGet(t *testing.T) {
 
 	createdAt, _ := util.NewDateTime(`"2014-09-29T14:44:31"`)
 	expectedVolume := api.VolumeDetailResponse{
-		ID:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
+		Id:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
 		Attachments: []map[string]string{{"attachment_id": "ddb2ac07-ed62-49eb-93da-73b258dd9bec", "host_name": "host_test", "volume_id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "device": "/dev/vdb", "id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "server_id": "0f081aae-1b0c-4b89-930c-5f2562460c72"}},
 		Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "self"},
 			{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "bookmark"}},
@@ -140,20 +140,20 @@ func TestGet(t *testing.T) {
 		Multiattach:     false,
 		CreatedAt:       createdAt,
 		Description:     "test volume",
-		Volume_type:     "test_type",
+		VolumeType:      "test_type",
 		Name:            "test_volume",
-		Source_volid:    "4b58bbb8-3b00-4f87-8243-8c622707bbab",
-		Snapshot_id:     "cc488e4a-9649-4e5f-ad12-20ab37c683b5",
+		SourceVolid:     "4b58bbb8-3b00-4f87-8243-8c622707bbab",
+		SnapshotId:      "cc488e4a-9649-4e5f-ad12-20ab37c683b5",
 		Size:            2,
 
-		Aavailability_zone:  "default_cluster",
-		Rreplication_status: "",
-		Consistencygroup_id: ""}
+		AvailabilityZone:   "default_cluster",
+		ReplicationStatus:  "",
+		ConsistencygroupId: ""}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)
 	}
-	if !reflect.DeepEqual(fvr.Id, volume.ID) {
-		t.Fatalf("Expected\n%#v\ngot\n%#v", fvr.Id, volume.ID)
+	if !reflect.DeepEqual(fvr.Id, volume.Id) {
+		t.Fatalf("Expected\n%#v\ngot\n%#v", fvr.Id, volume.Id)
 	}
 }
 
@@ -175,7 +175,7 @@ func TestList(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "in-use",
 		Size:        1,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{{"attached_at": "2017-02-11T14:08:17.000000", "attachment_id": "c7f84865-640c-44ea-94ab-379a27f0ff65", "device": "/dev/vdc", "host_name": "localhost", "id": "034af8c9-ef44-4855-8e70-d51dceed7fc4", "server_id": "", "volume_id": "034af8c9-ef44-4855-8e70-d51dceed7fc4"}}}
 	if !reflect.DeepEqual(expectedVolume, volumes[0]) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volumes[0])
@@ -200,7 +200,7 @@ func TestUpdate(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "available",
 		Size:        2,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{}}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)

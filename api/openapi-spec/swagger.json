@@ -1,0 +1,856 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"title": "OpenSDS",
+		"version": "v1"
+	},
+	"paths": {
+		"/api/": {
+			"get": {
+				"description": "get available API versions",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "listVersions",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {}
+					}
+				}
+			}
+		},
+		"/api/v1": {
+			"get": {
+				"description": "show API version",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "getVersionv1",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {}
+					}
+				}
+			}
+		},
+		"/api/v1/volumes": {
+			"get": {
+				"description": "list volume backend resource types",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "listVolumeResources",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {}
+					}
+				}
+			}
+		},
+		"/api/v1/volumes/{resourceType}": {
+			"post": {
+				"description": "create a volume in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "createVolume",
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "volumeRequest",
+						"in": "body",
+						"description": "Volume request object",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/VolumeRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/VolumeResponse"
+						}
+					}
+				}
+			},
+			"get": {
+				"description": "list volumes in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "getAllVolumes",
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "allowDetails",
+						"in": "query",
+						"description": "allow the detailed response of volume",
+						"required": false,
+						"type": "bool"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/VolumesResponse"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/volumes/{resourceType}/{id}": {
+			"get": {
+				"description": "get specified volume in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified volume",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/VolumeDetailResponse"
+						}
+					}
+				}
+			},
+			"put": {
+				"description": "update specified volume in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified volume",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "volumeRequest",
+						"in": "body",
+						"description": "Volume request object",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/VolumeRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/VolumeResponse"
+						}
+					}
+				}	
+			},
+			"delete": {
+				"description": "delete specified volume in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified volume",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/DefaultResponse"
+						}
+					}
+				}	
+			}
+		},
+		"/api/v1/volumes/action/{resourceType}/{id}": {
+			"post": {
+				"description": "opreate specified volume in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified volume backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified volume",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "volumeRequest",
+						"in": "body",
+						"description": "Volume request object",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/VolumeRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/DefaultResponse"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/shares": {
+			"get": {
+				"description": "list share backend resource types",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "listShareResources",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {}
+					}
+				}
+			}
+		},
+		"/api/v1/shares/{resourceType}": {
+			"post": {
+				"description": "create a share in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "createShare",
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified share backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "shareRequest",
+						"in": "body",
+						"description": "Share request object",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/ShareRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/ShareResponse"
+						}
+					}
+				}
+			},
+			"get": {
+				"description": "list shares in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"operationId": "getAllShares",
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified share backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "allowDetails",
+						"in": "query",
+						"description": "allow the detailed response of share",
+						"required": false,
+						"type": "bool"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/SharesResponse"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/shares/{resourceType}/{id}": {
+			"get": {
+				"description": "get specified share in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified share backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified share",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/ShareDetailResponse"
+						}
+					}
+				}	
+			},
+			"put": {
+				"description": "update specified share in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified share backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified share",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"name": "shareRequest",
+						"in": "body",
+						"description": "Share request object",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/ShareRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/ShareResponse"
+						}
+					}
+				}	
+			},
+			"delete": {
+				"description": "delete specified share in specified backend resource",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"schemes": [
+					"http"
+				],
+				"parameters": [
+					{
+						"name": "resourceType",
+						"in": "path",
+						"description": "Type of specified share backend resource",
+						"required": false,
+						"type": "string"
+					},
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID of specified share",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/DefaultResponse"
+						}
+					}
+				}	
+			}
+		}
+	},
+	"definitions": {
+		"DefaultResponse": {
+			"type": "object",
+			"properties": {
+				"Status": {
+					"type": "string"
+				},
+				"Message": {
+					"type": "string"
+				},
+				"Error": {
+					"type": "string"
+				}
+			}
+		},
+		"VolumeRequest": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"AllowDetails": {
+					"type": "boolean",
+					"default": false
+				},
+				"ActionType": {
+					"type": "string"
+				},
+				"Host": {
+					"type": "string"
+				},
+				"Device": {
+					"type": "string"
+				},
+				"Attachment": {
+					"type": "string"
+				},
+				"MountDir": {
+					"type": "string"
+				},
+				"FsType": {
+					"type": "string"
+				}
+			}
+		},
+		"VolumeResponse": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Status": {
+					"type": "string"
+				},
+				"Size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"VolumeType": {
+					"type": "string"
+				},
+				"Attachments": {
+					"type": "[]map[string]string"
+				}
+			}
+		},
+		"VolumeDetailResponse": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Attachments": {
+					"type": "[]map[string]string"
+				},
+				"Links": {
+					"type": "[]map[string]string"
+				},
+				"Metadata": {
+					"type": "map[string]string"
+				},
+				"Protected": {
+					"type": "boolean",
+					"default": false
+				},
+				"Status": {
+					"type": "string"
+				},
+				"MigrationStatus": {
+					"type": "string"
+				},
+				"UserId": {
+					"type": "string"
+				},
+				"Encrypted": {
+					"type": "boolean",
+					"default": false
+				},
+				"Multiattach": {
+					"type": "boolean",
+					"default": false
+				},
+				"CreateAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"Description": {
+					"type": "string"
+				},
+				"VolumeType": {
+					"type": "string"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"SourceVolid": {
+					"type": "string"
+				},
+				"SnapshotId": {
+					"type": "string"
+				},
+				"size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"AvailabilityZone": {
+					"type": "string"
+				},
+				"ReplicationStatus": {
+					"type": "string"
+				},
+				"ConsistencygroupId": {
+					"type": "string"
+				}
+			}
+		},
+		"VolumesResponse": {
+			"type": "slice",
+			"properties": {
+				"VolumeResponse": {
+					"schema": {
+						"$ref": "#/definitions/VolumeResponse"
+					}
+				}
+			}
+		},
+		"ShareRequest": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"ShareType": {
+					"type": "string"
+				},
+				"ShareProto": {
+					"type": "string"
+				},
+				"AllowDetails": {
+					"type": "boolean",
+					"default": false
+				}
+			}
+		},
+		"ShareResponse": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Attachments": {
+					"type": "[]map[string]string"
+				}
+			}
+		},
+		"ShareDetailResponse": {
+			"type": "object",
+			"properties": {
+				"ResourceType": {
+					"type": "string"
+				},
+				"Links": {
+					"type": "[]map[string]string"
+				},
+				"AvailabilityZone": {
+					"type": "string"
+				},
+				"ShareNetworkId": {
+					"type": "string"
+				},
+				"ExportLocations": {
+					"type": "[]string"
+				},
+				"ShareServerId": {
+					"type": "string"
+				},
+				"Id": {
+					"type": "string"
+				},
+				"Size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"ShareType": {
+					"type": "string"
+				},
+				"ShareTypeName": {
+					"type": "string"
+				},
+				"ExprotLocation": {
+					"type": "string"
+				},
+				"ConsistencyGroupId": {
+					"type": "string"
+				},
+				"ProjectId": {
+					"type": "string"
+				},
+				"Metadata": {
+					"type": "map[string]string"
+				},
+				"Status": {
+					"type": "string"
+				},
+				"AccessRulesStatus": {
+					"type": "string"
+				},
+				"Description": {
+					"type": "string"
+				},
+				"Host": {
+					"type": "string"
+				},
+				"TaskState": {
+					"type": "string"
+				},
+				"IsPublic": {
+					"type": "boolean",
+					"default": false
+				},
+				"SnapshotSupport": {
+					"type": "boolean",
+					"default": false
+				},
+				"Name": {
+					"type": "string"
+				},
+				"HasReplicas": {
+					"type": "boolean",
+					"default": false
+				},
+				"ReplicationType": {
+					"type": "string"
+				},
+				"CreatedAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"ShareProto": {
+					"type": "string"
+				},
+				"VolumeType": {
+					"type": "string"
+				},
+				"SourceCgsnapshotMemberId": {
+					"type": "string"
+				}
+			}
+		},
+		"SharesResponse": {
+			"type": "slice",
+			"properties": {
+				"VolumeResponse": {
+					"schema": {
+						"$ref": "#/definitions/ShareResponse"
+					}
+				}
+			}
+		}
+	},
+	"consumes": [
+		"application/json"
+	]
+}

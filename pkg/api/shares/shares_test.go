@@ -74,7 +74,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	expectedShare := api.ShareResponse{
-		ID:   "d94a8548-2079-4be0-b21c-0a887acd31ca",
+		Id:   "d94a8548-2079-4be0-b21c-0a887acd31ca",
 		Name: "My_share",
 		Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 			{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}}}
@@ -103,38 +103,38 @@ func TestGet(t *testing.T) {
 	expectedShare := api.ShareDetailResponse{
 		Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 			{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}},
-		Availability_zone:           "nova",
-		Share_network_id:            "713df749-aac0-4a54-af52-10f6c991e80c",
-		Export_locations:            []string{},
-		Share_server_id:             "e268f4aa-d571-43dd-9ab3-f49ad06ffaef",
-		Snapshot_id:                 "",
-		ID:                          "d94a8548-2079-4be0-b21c-0a887acd31ca",
-		Size:                        1,
-		Share_type:                  "25747776-08e5-494f-ab40-a64b9d20d8f7",
-		Share_type_name:             "default",
-		Export_location:             "",
-		Consistency_group_id:        "9397c191-8427-4661-a2e8-b23820dc01d4",
-		Project_id:                  "16e1ab15c35a457e9c2b2aa189f544e1",
-		Metadata:                    map[string]string{"project": "my_app", "aim": "doc"},
-		Status:                      "available",
-		Description:                 "My custom share London",
-		Host:                        "manila2@generic1#GENERIC1",
-		Access_rules_status:         "active",
-		Has_replicas:                false,
-		Replication_type:            "",
-		Task_state:                  "",
-		Is_public:                   true,
-		Snapshot_support:            true,
-		Name:                        "My_share",
-		CreatedAt:                   createdAt,
-		Share_proto:                 "NFS",
-		Volume_type:                 "default",
-		Source_cgsnapshot_member_id: ""}
+		AvailabilityZone:         "nova",
+		ShareNetworkId:           "713df749-aac0-4a54-af52-10f6c991e80c",
+		ExportLocations:          []string{},
+		ShareServerId:            "e268f4aa-d571-43dd-9ab3-f49ad06ffaef",
+		SnapshotId:               "",
+		Id:                       "d94a8548-2079-4be0-b21c-0a887acd31ca",
+		Size:                     1,
+		ShareType:                "25747776-08e5-494f-ab40-a64b9d20d8f7",
+		ShareTypeName:            "default",
+		ExportLocation:           "",
+		ConsistencyGroupId:       "9397c191-8427-4661-a2e8-b23820dc01d4",
+		ProjectId:                "16e1ab15c35a457e9c2b2aa189f544e1",
+		Metadata:                 map[string]string{"project": "my_app", "aim": "doc"},
+		Status:                   "available",
+		Description:              "My custom share London",
+		Host:                     "manila2@generic1#GENERIC1",
+		AccessRulesStatus:        "active",
+		HasReplicas:              false,
+		ReplicationType:          "",
+		TaskState:                "",
+		IsPublic:                 true,
+		SnapshotSupport:          true,
+		Name:                     "My_share",
+		CreatedAt:                createdAt,
+		ShareProto:               "NFS",
+		VolumeType:               "default",
+		SourceCgsnapshotMemberId: ""}
 	if !reflect.DeepEqual(expectedShare, share) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedShare, share)
 	}
-	if !reflect.DeepEqual(fsr.Id, share.ID) {
-		t.Fatalf("Expected\n%#v\ngot\n%#v", fsr.Id, share.ID)
+	if !reflect.DeepEqual(fsr.Id, share.Id) {
+		t.Fatalf("Expected\n%#v\ngot\n%#v", fsr.Id, share.Id)
 	}
 }
 
@@ -152,7 +152,7 @@ func TestList(t *testing.T) {
 	}
 
 	expectedShare := api.ShareResponse{
-		ID: "d94a8548-2079-4be0-b21c-0a887acd31ca",
+		Id: "d94a8548-2079-4be0-b21c-0a887acd31ca",
 		Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 			{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}},
 		Name: "My_share"}
@@ -175,7 +175,7 @@ func TestUpdate(t *testing.T) {
 	}
 
 	expectedShare := api.ShareResponse{
-		ID:   "d94a8548-2079-4be0-b21c-0a887acd31ca",
+		Id:   "d94a8548-2079-4be0-b21c-0a887acd31ca",
 		Name: "New_share",
 		Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 			{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}}}
