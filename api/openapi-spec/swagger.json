@@ -93,7 +93,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -132,22 +132,18 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
-					},
-					{
-						"name": "allowDetails",
-						"in": "query",
-						"description": "allow the detailed response of volume",
-						"required": false,
-						"type": "bool"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/VolumesResponse"
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/VolumeResponse"
+							}
 						}
 					}
 				}
@@ -171,7 +167,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -208,7 +204,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -254,7 +250,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -293,7 +289,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified volume backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -363,7 +359,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified share backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -402,22 +398,18 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified share backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
-					},
-					{
-						"name": "allowDetails",
-						"in": "query",
-						"description": "allow the detailed response of share",
-						"required": false,
-						"type": "bool"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/SharesResponse"
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/ShareResponse"
+							}		
 						}
 					}
 				}
@@ -441,7 +433,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified share backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -478,7 +470,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified share backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -524,7 +516,7 @@
 						"name": "resourceType",
 						"in": "path",
 						"description": "Type of specified share backend resource",
-						"required": false,
+						"required": true,
 						"type": "string"
 					},
 					{
@@ -550,13 +542,13 @@
 		"VersionInfo": {
 			"type": "object",
 			"properties": {
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Status": {
+				"status": {
 					"type": "string"
 				},
-				"UpdateAt": {
+				"updateAt": {
 					"type": "string"
 				}
 			}
@@ -564,8 +556,9 @@
 		"AvailableVersions": {
 			"type": "object",
 			"properties": {
-				"Versions": {
-					"schema": {
+				"versions": {
+					"type": "array",
+					"items": {
 						"$ref": "#/definitions/VersionInfo"
 					}
 				}
@@ -574,13 +567,13 @@
 		"DefaultResponse": {
 			"type": "object",
 			"properties": {
-				"Status": {
+				"status": {
 					"type": "string"
 				},
-				"Message": {
+				"message": {
 					"type": "string"
 				},
-				"Error": {
+				"error": {
 					"type": "string"
 				}
 			}
@@ -588,39 +581,39 @@
 		"VolumeRequest": {
 			"type": "object",
 			"properties": {
-				"ResourceType": {
+				"resourceType": {
 					"type": "string"
 				},
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Name": {
+				"name": {
 					"type": "string"
 				},
-				"Size": {
+				"size": {
 					"type": "integer",
 					"format": "int32"
 				},
-				"AllowDetails": {
+				"allowDetails": {
 					"type": "boolean",
 					"default": false
 				},
-				"ActionType": {
+				"actionType": {
 					"type": "string"
 				},
-				"Host": {
+				"host": {
 					"type": "string"
 				},
-				"Device": {
+				"device": {
 					"type": "string"
 				},
-				"Attachment": {
+				"attachment": {
 					"type": "string"
 				},
-				"MountDir": {
+				"mountDir": {
 					"type": "string"
 				},
-				"FsType": {
+				"fsType": {
 					"type": "string"
 				}
 			}
@@ -628,136 +621,114 @@
 		"VolumeResponse": {
 			"type": "object",
 			"properties": {
-				"ResourceType": {
+				"resourceType": {
 					"type": "string"
 				},
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Name": {
+				"name": {
 					"type": "string"
 				},
-				"Status": {
-					"type": "string"
-				},
-				"Size": {
-					"type": "integer",
-					"format": "int32"
-				},
-				"VolumeType": {
-					"type": "string"
-				},
-				"Attachments": {
-					"type": "[]map[string]string"
-				}
-			}
-		},
-		"VolumeDetailResponse": {
-			"type": "object",
-			"properties": {
-				"ResourceType": {
-					"type": "string"
-				},
-				"Id": {
-					"type": "string"
-				},
-				"Attachments": {
-					"type": "[]map[string]string"
-				},
-				"Links": {
-					"type": "[]map[string]string"
-				},
-				"Metadata": {
-					"type": "map[string]string"
-				},
-				"Protected": {
-					"type": "boolean",
-					"default": false
-				},
-				"Status": {
-					"type": "string"
-				},
-				"MigrationStatus": {
-					"type": "string"
-				},
-				"UserId": {
-					"type": "string"
-				},
-				"Encrypted": {
-					"type": "boolean",
-					"default": false
-				},
-				"Multiattach": {
-					"type": "boolean",
-					"default": false
-				},
-				"CreateAt": {
-					"type": "string",
-					"format": "date-time"
-				},
-				"Description": {
-					"type": "string"
-				},
-				"VolumeType": {
-					"type": "string"
-				},
-				"Name": {
-					"type": "string"
-				},
-				"SourceVolid": {
-					"type": "string"
-				},
-				"SnapshotId": {
+				"status": {
 					"type": "string"
 				},
 				"size": {
 					"type": "integer",
 					"format": "int32"
 				},
-				"AvailabilityZone": {
-					"type": "string"
-				},
-				"ReplicationStatus": {
-					"type": "string"
-				},
-				"ConsistencygroupId": {
+				"volumeType": {
 					"type": "string"
 				}
 			}
 		},
-		"VolumesResponse": {
-			"type": "slice",
+		"VolumeDetailResponse": {
+			"type": "object",
 			"properties": {
-				"VolumeResponse": {
-					"schema": {
-						"$ref": "#/definitions/VolumeResponse"
-					}
+				"resourceType": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"protected": {
+					"type": "boolean",
+					"default": false
+				},
+				"status": {
+					"type": "string"
+				},
+				"migrationStatus": {
+					"type": "string"
+				},
+				"userId": {
+					"type": "string"
+				},
+				"encrypted": {
+					"type": "boolean",
+					"default": false
+				},
+				"multiattach": {
+					"type": "boolean",
+					"default": false
+				},
+				"createAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"description": {
+					"type": "string"
+				},
+				"volumeType": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"sourceVolid": {
+					"type": "string"
+				},
+				"snapshotId": {
+					"type": "string"
+				},
+				"size": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"availabilityZone": {
+					"type": "string"
+				},
+				"replicationStatus": {
+					"type": "string"
+				},
+				"consistencygroupId": {
+					"type": "string"
 				}
 			}
 		},
 		"ShareRequest": {
 			"type": "object",
 			"properties": {
-				"ResourceType": {
+				"resourceType": {
 					"type": "string"
 				},
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Name": {
+				"name": {
 					"type": "string"
 				},
-				"Size": {
+				"size": {
 					"type": "integer",
 					"format": "int32"
 				},
-				"ShareType": {
+				"shareType": {
 					"type": "string"
 				},
-				"ShareProto": {
+				"shareProto": {
 					"type": "string"
 				},
-				"AllowDetails": {
+				"allowDetails": {
 					"type": "boolean",
 					"default": false
 				}
@@ -766,121 +737,105 @@
 		"ShareResponse": {
 			"type": "object",
 			"properties": {
-				"ResourceType": {
+				"resourceType": {
 					"type": "string"
 				},
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Name": {
+				"name": {
 					"type": "string"
-				},
-				"Attachments": {
-					"type": "[]map[string]string"
 				}
 			}
 		},
 		"ShareDetailResponse": {
 			"type": "object",
 			"properties": {
-				"ResourceType": {
+				"resourceType": {
 					"type": "string"
 				},
-				"Links": {
-					"type": "[]map[string]string"
-				},
-				"AvailabilityZone": {
+				"availabilityZone": {
 					"type": "string"
 				},
-				"ShareNetworkId": {
+				"shareNetworkId": {
 					"type": "string"
 				},
-				"ExportLocations": {
-					"type": "[]string"
+				"exportLocations": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				},
-				"ShareServerId": {
+				"shareServerId": {
 					"type": "string"
 				},
-				"Id": {
+				"id": {
 					"type": "string"
 				},
-				"Size": {
+				"size": {
 					"type": "integer",
 					"format": "int32"
 				},
-				"ShareType": {
+				"shareType": {
 					"type": "string"
 				},
-				"ShareTypeName": {
+				"shareTypeName": {
 					"type": "string"
 				},
-				"ExprotLocation": {
+				"exportLocation": {
 					"type": "string"
 				},
-				"ConsistencyGroupId": {
+				"consistencyGroupId": {
 					"type": "string"
 				},
-				"ProjectId": {
+				"projectId": {
 					"type": "string"
 				},
-				"Metadata": {
-					"type": "map[string]string"
-				},
-				"Status": {
+				"status": {
 					"type": "string"
 				},
-				"AccessRulesStatus": {
+				"accessRulesStatus": {
 					"type": "string"
 				},
-				"Description": {
+				"description": {
 					"type": "string"
 				},
-				"Host": {
+				"host": {
 					"type": "string"
 				},
-				"TaskState": {
+				"taskState": {
 					"type": "string"
 				},
-				"IsPublic": {
+				"isPublic": {
 					"type": "boolean",
 					"default": false
 				},
-				"SnapshotSupport": {
+				"snapshotSupport": {
 					"type": "boolean",
 					"default": false
 				},
-				"Name": {
+				"name": {
 					"type": "string"
 				},
-				"HasReplicas": {
+				"hasReplicas": {
 					"type": "boolean",
 					"default": false
 				},
-				"ReplicationType": {
+				"replicationType": {
 					"type": "string"
 				},
-				"CreatedAt": {
+				"createdAt": {
 					"type": "string",
 					"format": "date-time"
 				},
-				"ShareProto": {
+				"shareProto": {
 					"type": "string"
 				},
-				"VolumeType": {
+				"volumeType": {
 					"type": "string"
 				},
-				"SourceCgsnapshotMemberId": {
+				"sourceCgsnapshotMemberId": {
 					"type": "string"
-				}
-			}
-		},
-		"SharesResponse": {
-			"type": "slice",
-			"properties": {
-				"ShareResponse": {
-					"schema": {
-						"$ref": "#/definitions/ShareResponse"
-					}
 				}
 			}
 		}
