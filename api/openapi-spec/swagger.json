@@ -549,7 +549,8 @@
 					"type": "string"
 				},
 				"updateAt": {
-					"type": "string"
+					"type": "string",
+					"format": "date-time"
 				}
 			}
 		},
@@ -568,9 +569,6 @@
 			"type": "object",
 			"properties": {
 				"status": {
-					"type": "string"
-				},
-				"message": {
 					"type": "string"
 				},
 				"error": {
@@ -621,9 +619,6 @@
 		"VolumeResponse": {
 			"type": "object",
 			"properties": {
-				"resourceType": {
-					"type": "string"
-				},
 				"id": {
 					"type": "string"
 				},
@@ -645,9 +640,6 @@
 		"VolumeDetailResponse": {
 			"type": "object",
 			"properties": {
-				"resourceType": {
-					"type": "string"
-				},
 				"id": {
 					"type": "string"
 				},
@@ -737,9 +729,6 @@
 		"ShareResponse": {
 			"type": "object",
 			"properties": {
-				"resourceType": {
-					"type": "string"
-				},
 				"id": {
 					"type": "string"
 				},
@@ -751,9 +740,6 @@
 		"ShareDetailResponse": {
 			"type": "object",
 			"properties": {
-				"resourceType": {
-					"type": "string"
-				},
 				"availabilityZone": {
 					"type": "string"
 				},

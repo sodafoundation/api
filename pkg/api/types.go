@@ -24,31 +24,34 @@ import (
 )
 
 type VersionInfo struct {
-	Id        string `json:"id"`
-	Status    string `json:"status"`
-	UpdatedAt string `json:"updatedAt"`
+	Id        string               `json:"id"`
+	Status    string               `json:"status"`
+	UpdatedAt util.RFC8601DateTime `json:"updatedAt"`
 }
 
 type AvailableVersions struct {
 	Versions []VersionInfo `json:"versions"`
 }
 
+type DefaultResponse struct {
+	Error  string `json:"error"`
+	Status string `json:"status"`
+}
+
 // VolumeResponse is a structure for all properties of
 // an volume for a non detailed query
 type VolumeResponse struct {
-	ResourceType string              `json:"resourceType"`
-	ID           string              `json:"id"`
-	Name         string              `json:"name"`
-	Status       string              `json:"status"`
-	Size         int                 `json:"size"`
-	VolumeType   string              `json:"volume_type"`
-	Attachments  []map[string]string `json:"attachments"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Status      string              `json:"status"`
+	Size        int                 `json:"size"`
+	VolumeType  string              `json:"volume_type"`
+	Attachments []map[string]string `json:"attachments"`
 }
 
 // VolumeDetailResponse is a structure for all properties of
 // an volume for a detailed query
 type VolumeDetailResponse struct {
-	ResourceType    string               `json:"resourceType"`
 	Id              string               `json:"id,omitempty"`
 	Attachments     []map[string]string  `json:"attachments"`
 	Links           []map[string]string  `json:"links"`
@@ -75,16 +78,14 @@ type VolumeDetailResponse struct {
 // ShareResponse is a structure for all properties of
 // an share for a non detailed query
 type ShareResponse struct {
-	ResourceType string              `json:"resourceType"`
-	Id           string              `json:"id,omitempty"`
-	Name         string              `json:"name,omitempty"`
-	Links        []map[string]string `json:"links"`
+	Id    string              `json:"id,omitempty"`
+	Name  string              `json:"name,omitempty"`
+	Links []map[string]string `json:"links"`
 }
 
 // ShareDetailResponse is a structure for all properties of
 // an share for a detailed query
 type ShareDetailResponse struct {
-	ResourceType             string               `json:"resourceType"`
 	Links                    []map[string]string  `json:"links"`
 	AvailabilityZone         string               `json:"availability_zone,omitempty"`
 	ShareNetworkId           string               `json:"share_network_id,omitempty"`

@@ -21,7 +21,9 @@ package shares
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/rpcapi"
@@ -139,12 +141,20 @@ func UpdateShare(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	return shareResponse, nil
 }
 
-func DeleteShare(srd ShareRequestDeliver) (string, error) {
-	result, err := srd.deleteShare()
+func DeleteShare(srd ShareRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
 
+	result, err := srd.deleteShare()
 	if err != nil {
-		log.Println("Delete file share error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete file share error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete file share error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }

@@ -87,21 +87,9 @@ func (this *ShareController) Delete() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := shares.DeleteShare(shareRequest)
-	if err != nil {
-		log.Println(err)
-		rbody, _ := json.Marshal("Delete share failed!")
-		this.Ctx.Output.Body(rbody)
-	} else {
-		if result == "" {
-			log.Println("Delete share failed!")
-			rbody, _ := json.Marshal("Delete share failed!")
-			this.Ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(rbody)
-		}
-	}
+	result := shares.DeleteShare(shareRequest)
+	rbody, _ := json.Marshal(result)
+	this.Ctx.Output.Body(rbody)
 }
 
 func PostShare(ctx *context.Context) {

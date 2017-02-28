@@ -31,7 +31,7 @@ const (
 			{
 				"id": "v1",
 				"status": "SUPPORTED",
-				"updatedAt": "2017-02-24T15:40:45Z"
+				"updatedAt": "2017-02-24T15:40:45"
 			}
 		]
 	}`

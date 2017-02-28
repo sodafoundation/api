@@ -89,21 +89,9 @@ func (this *VolumeController) Delete() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := volumes.DeleteVolume(volumeRequest)
-	if err != nil {
-		log.Println(err)
-		rbody, _ := json.Marshal("Delete volume failed!")
-		this.Ctx.Output.Body(rbody)
-	} else {
-		if result == "" {
-			log.Println("Delete volume failed!")
-			rbody, _ := json.Marshal("Delete volume failed!")
-			this.Ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(rbody)
-		}
-	}
+	result := volumes.DeleteVolume(volumeRequest)
+	rbody, _ := json.Marshal(result)
+	this.Ctx.Output.Body(rbody)
 }
 
 func PostVolume(ctx *context.Context) {
@@ -201,69 +189,21 @@ func PostVolumeAction(ctx *context.Context) {
 			volumeRequest.Device = "/mnt"
 		}
 
-		result, err := volumes.AttachVolume(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Attach volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Attach volume failed!")
-				rbody, _ := json.Marshal("Attach volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.AttachVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "detach":
-		result, err := volumes.DetachVolume(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Detach volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Detach volume failed!")
-				rbody, _ := json.Marshal("Detach volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.DetachVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "mount":
-		result, err := volumes.MountVolume(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Mount volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Mount volume failed!")
-				rbody, _ := json.Marshal("Mount volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.MountVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "unmount":
-		result, err := volumes.UnmountVolume(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Unmount volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Unmount volume failed!")
-				rbody, _ := json.Marshal("Unmount volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.UnmountVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	default:
 		err := errors.New("The type of volume action is not correct!")
 		log.Println(err)

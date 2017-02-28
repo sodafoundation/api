@@ -22,7 +22,6 @@ package shares
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 	"testing"
 
 	"openstack/golang-client/util"
@@ -30,7 +29,7 @@ import (
 	"github.com/opensds/opensds/pkg/api"
 )
 
-type fakeShareRequest struct {
+type FakeShareRequest struct {
 	ResourceType string `json:"resourceType,omitempty"`
 	Id           string `json:"id,omitempty"`
 	Name         string `json:"name,omitempty"`
@@ -40,28 +39,28 @@ type fakeShareRequest struct {
 	AllowDetails bool   `json:"allowDetails"`
 }
 
-func (fsr fakeShareRequest) createShare() (string, error) {
+func (fsr FakeShareRequest) createShare() (string, error) {
 	return sampleShareData, nil
 }
 
-func (fsr fakeShareRequest) getShare() (string, error) {
+func (fsr FakeShareRequest) getShare() (string, error) {
 	return sampleShareDetailData, nil
 }
 
-func (fsr fakeShareRequest) getAllShares() (string, error) {
+func (fsr FakeShareRequest) getAllShares() (string, error) {
 	return sampleSharesData, nil
 }
 
-func (fsr fakeShareRequest) updateShare() (string, error) {
+func (fsr FakeShareRequest) updateShare() (string, error) {
 	return sampleModifiedShareData, nil
 }
 
-func (fsr fakeShareRequest) deleteShare() (string, error) {
+func (fsr FakeShareRequest) deleteShare() (string, error) {
 	return "Delete share success!", nil
 }
 
 func TestCreateShare(t *testing.T) {
-	var fsr fakeShareRequest
+	var fsr FakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareCreateRequest), &fsr)
 	if err != nil {
@@ -87,7 +86,7 @@ func TestCreateShare(t *testing.T) {
 }
 
 func TestGetShare(t *testing.T) {
-	var fsr fakeShareRequest
+	var fsr FakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareGetRequest), &fsr)
 	if err != nil {
@@ -139,7 +138,7 @@ func TestGetShare(t *testing.T) {
 }
 
 func TestListShares(t *testing.T) {
-	var fsr fakeShareRequest
+	var fsr FakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareListRequest), &fsr)
 	if err != nil {
@@ -162,7 +161,7 @@ func TestListShares(t *testing.T) {
 }
 
 func TestUpdateShare(t *testing.T) {
-	var fsr fakeShareRequest
+	var fsr FakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareUpdateRequest), &fsr)
 	if err != nil {
@@ -188,20 +187,16 @@ func TestUpdateShare(t *testing.T) {
 }
 
 func TestDeleteShare(t *testing.T) {
-	var fsr fakeShareRequest
+	var fsr FakeShareRequest
 
 	err := json.Unmarshal([]byte(sampleShareDeleteRequest), &fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := DeleteShare(fsr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Delete share failed!")
+	result := DeleteShare(fsr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 

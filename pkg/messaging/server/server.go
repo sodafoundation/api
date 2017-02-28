@@ -104,9 +104,8 @@ func (s *Server) OrchestrationWatch(url string) {
 		case "MountVolume":
 			mountDir := tmp[1]
 			device := tmp[2]
-			volID := tmp[3]
 			fsType := tmp[4]
-			result, _ = orchestrationApi.MountVolume(mountDir, device, volID, fsType)
+			result, _ = orchestrationApi.MountVolume(mountDir, device, fsType)
 		case "UnmountVolume":
 			mountDir := tmp[1]
 			result, _ = orchestrationApi.UnmountVolume(mountDir)
@@ -266,9 +265,8 @@ func (s *Server) AdapterWatch(url string) {
 		case "MountVolume":
 			mountDir := tmp[1]
 			device := tmp[2]
-			volID := tmp[3]
-			fsType := tmp[4]
-			result, _ = adapterApi.MountVolume(mountDir, device, volID, fsType)
+			fsType := tmp[3]
+			result, _ = adapterApi.MountVolume(mountDir, device, fsType)
 		case "UnmountVolume":
 			mountDir := tmp[1]
 			result, _ = adapterApi.UnmountVolume(mountDir)

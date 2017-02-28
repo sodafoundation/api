@@ -22,6 +22,8 @@ package api
 import (
 	"reflect"
 	"testing"
+
+	"openstack/golang-client/util"
 )
 
 func TestListVersions(t *testing.T) {
@@ -30,10 +32,11 @@ func TestListVersions(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	updatedAt, _ := util.NewDateTime(`"2017-02-24T15:40:45"`)
 	expectedResult := VersionInfo{
 		Id:        "v1",
 		Status:    "SUPPORTED",
-		UpdatedAt: "2017-02-24T15:40:45Z",
+		UpdatedAt: updatedAt,
 	}
 	if !reflect.DeepEqual(expectedResult, aVersions.Versions[0]) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedResult, aVersions.Versions[1])
@@ -46,10 +49,11 @@ func TestGetVersionv1(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	updatedAt, _ := util.NewDateTime(`"2017-02-24T15:40:45"`)
 	expectedResult := VersionInfo{
 		Id:        "v1",
 		Status:    "SUPPORTED",
-		UpdatedAt: "2017-02-24T15:40:45Z",
+		UpdatedAt: updatedAt,
 	}
 	if !reflect.DeepEqual(expectedResult, version) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedResult, version)
