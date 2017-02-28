@@ -212,14 +212,7 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 		ResourceType: shrResourceType,
 		Id:           args[0],
 	}
-	result, err := shares.DeleteShare(shareRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Delete share failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+
+	result := shares.DeleteShare(shareRequest)
+	fmt.Printf("%v\n", result)
 }

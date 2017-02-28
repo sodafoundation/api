@@ -246,16 +246,9 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 		ResourceType: volResourceType,
 		Id:           args[0],
 	}
-	result, err := volumes.DeleteVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Delete volume failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+
+	result := volumes.DeleteVolume(volumeRequest)
+	fmt.Printf("%v\n", result)
 }
 
 func volumeAttachAction(cmd *cobra.Command, args []string) {
@@ -271,16 +264,9 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 		Host:         host,
 		Device:       attachDevice,
 	}
-	result, err := volumes.AttachVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Attach volume failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+
+	result := volumes.AttachVolume(volumeRequest)
+	fmt.Printf("%v\n", result)
 }
 
 func volumeDetachAction(cmd *cobra.Command, args []string) {
@@ -295,16 +281,9 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 		Id:           args[0],
 		Attachment:   args[1],
 	}
-	result, err := volumes.DetachVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Detach volume failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+
+	result := volumes.DetachVolume(volumeRequest)
+	fmt.Printf("%v\n", result)
 }
 
 func volumeMountAction(cmd *cobra.Command, args []string) {
@@ -320,16 +299,9 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 		Id:       args[2],
 		FsType:   fsType,
 	}
-	result, err := volumes.MountVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Mount volume failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+
+	result := volumes.MountVolume(volumeRequest)
+	fmt.Printf("%v\n", result)
 }
 
 func volumeUnmountAction(cmd *cobra.Command, args []string) {
@@ -343,14 +315,6 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 		MountDir: args[0],
 	}
 
-	result, err := volumes.UnmountVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if result == "" {
-			fmt.Println("Unmount volume failed!")
-		} else {
-			fmt.Printf("%v\n", result)
-		}
-	}
+	result := volumes.UnmountVolume(volumeRequest)
+	fmt.Printf("%v\n", result)
 }
