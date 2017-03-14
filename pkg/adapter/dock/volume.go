@@ -183,7 +183,7 @@ func DetachVolume(resourceType, volID, attachment string) (string, error) {
 	}
 }
 
-func MountVolume(mountDir, device, volID, fsType string) (string, error) {
+func MountVolume(mountDir, device, fsType string) (string, error) {
 	if err := storagePlugins.Mount(mountDir, device, fsType); err != nil {
 		log.Println("Call plugin to mount volume failed:", err)
 		return "Mount volume failed!", err

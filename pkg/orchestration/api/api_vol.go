@@ -106,8 +106,8 @@ func DetachVolume(resourceType, volID, attachment string) (string, error) {
 	}
 }
 
-func MountVolume(mountDir, device, volID, fsType string) (string, error) {
-	result, err := rpcapi.MountVolume(mountDir, device, volID, fsType)
+func MountVolume(mountDir, device, fsType string) (string, error) {
+	result, err := rpcapi.MountVolume(mountDir, device, fsType)
 
 	if err != nil {
 		log.Println("Error occured in orchestration module when mount volume!")

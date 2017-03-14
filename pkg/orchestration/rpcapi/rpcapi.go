@@ -76,10 +76,10 @@ func DetachVolume(resourceType, volID, attchment string) (string, error) {
 	return client.Run(url, strings.Join(action[:], ","))
 }
 
-func MountVolume(mountDir, device, volID, fsType string) (string, error) {
+func MountVolume(mountDir, device, fsType string) (string, error) {
 	var client messaging.Client
 	url := "opensds/adapter"
-	action := []string{"MountVolume", mountDir, device, volID, fsType}
+	action := []string{"MountVolume", mountDir, device, fsType}
 	return client.Run(url, strings.Join(action[:], ","))
 }
 

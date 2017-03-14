@@ -21,7 +21,9 @@ package shares
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/rpcapi"
@@ -71,7 +73,7 @@ func (sr ShareRequest) deleteShare() (string, error) {
 	return rpcapi.DeleteShare(sr.ResourceType, sr.Id)
 }
 
-func Create(srd ShareRequestDeliver) (api.ShareResponse, error) {
+func CreateShare(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
 	result, err := srd.createShare()
@@ -88,7 +90,7 @@ func Create(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	return shareResponse, nil
 }
 
-func Show(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
+func GetShare(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
 	var nullResponse api.ShareDetailResponse
 
 	result, err := srd.getShare()
@@ -105,7 +107,7 @@ func Show(srd ShareRequestDeliver) (api.ShareDetailResponse, error) {
 	return shareDetailResponse, nil
 }
 
-func List(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
+func ListShares(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
 	var nullResponses []api.ShareResponse
 
 	result, err := srd.getAllShares()
@@ -122,7 +124,7 @@ func List(srd ShareRequestDeliver) ([]api.ShareResponse, error) {
 	return sharesResponse, nil
 }
 
-func Update(srd ShareRequestDeliver) (api.ShareResponse, error) {
+func UpdateShare(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	var nullResponse api.ShareResponse
 
 	result, err := srd.updateShare()
@@ -139,12 +141,20 @@ func Update(srd ShareRequestDeliver) (api.ShareResponse, error) {
 	return shareResponse, nil
 }
 
-func Delete(srd ShareRequestDeliver) (string, error) {
-	result, err := srd.deleteShare()
+func DeleteShare(srd ShareRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
 
+	result, err := srd.deleteShare()
 	if err != nil {
-		log.Println("Delete file share error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete file share error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete file share error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }

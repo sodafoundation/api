@@ -22,7 +22,6 @@ package volumes
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 	"testing"
 
 	"openstack/golang-client/util"
@@ -30,7 +29,7 @@ import (
 	"github.com/opensds/opensds/pkg/api"
 )
 
-type fakeVolumeRequest struct {
+type FakeVolumeRequest struct {
 	ResourceType string `json:"resourcetType,omitempty"`
 	Id           string `json:"id,omitempty"`
 	Name         string `json:"name,omitempty"`
@@ -45,51 +44,51 @@ type fakeVolumeRequest struct {
 	FsType     string `json:"fsType,omitempty"`
 }
 
-func (fvr fakeVolumeRequest) createVolume() (string, error) {
+func (fvr FakeVolumeRequest) createVolume() (string, error) {
 	return sampleVolumeData, nil
 }
 
-func (fvr fakeVolumeRequest) getVolume() (string, error) {
+func (fvr FakeVolumeRequest) getVolume() (string, error) {
 	return sampleVolumeDetailData, nil
 }
 
-func (fvr fakeVolumeRequest) getAllVolumes() (string, error) {
+func (fvr FakeVolumeRequest) getAllVolumes() (string, error) {
 	return sampleVolumesData, nil
 }
 
-func (fvr fakeVolumeRequest) updateVolume() (string, error) {
+func (fvr FakeVolumeRequest) updateVolume() (string, error) {
 	return sampleModifiedVolumeData, nil
 }
 
-func (fvr fakeVolumeRequest) deleteVolume() (string, error) {
+func (fvr FakeVolumeRequest) deleteVolume() (string, error) {
 	return "Delete volume success!", nil
 }
 
-func (fvr fakeVolumeRequest) attachVolume() (string, error) {
+func (fvr FakeVolumeRequest) attachVolume() (string, error) {
 	return "Attach volume success!", nil
 }
 
-func (fvr fakeVolumeRequest) detachVolume() (string, error) {
+func (fvr FakeVolumeRequest) detachVolume() (string, error) {
 	return "Detach volume success!", nil
 }
 
-func (fvr fakeVolumeRequest) mountVolume() (string, error) {
+func (fvr FakeVolumeRequest) mountVolume() (string, error) {
 	return "Mount volume success!", nil
 }
 
-func (fvr fakeVolumeRequest) unmountVolume() (string, error) {
+func (fvr FakeVolumeRequest) unmountVolume() (string, error) {
 	return "Unmount volume success!", nil
 }
 
-func TestCreate(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestCreateVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeCreateRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	volume, err := Create(fvr)
+	volume, err := CreateVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +98,7 @@ func TestCreate(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "available",
 		Size:        2,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{}}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)
@@ -112,22 +111,22 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestGetVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeGetRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	volume, err := Show(fvr)
+	volume, err := GetVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	createdAt, _ := util.NewDateTime(`"2014-09-29T14:44:31"`)
 	expectedVolume := api.VolumeDetailResponse{
-		ID:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
+		Id:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
 		Attachments: []map[string]string{{"attachment_id": "ddb2ac07-ed62-49eb-93da-73b258dd9bec", "host_name": "host_test", "volume_id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "device": "/dev/vdb", "id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "server_id": "0f081aae-1b0c-4b89-930c-5f2562460c72"}},
 		Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "self"},
 			{"href": "http://172.16.197.131:8776/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "bookmark"}},
@@ -140,32 +139,32 @@ func TestGet(t *testing.T) {
 		Multiattach:     false,
 		CreatedAt:       createdAt,
 		Description:     "test volume",
-		Volume_type:     "test_type",
+		VolumeType:      "test_type",
 		Name:            "test_volume",
-		Source_volid:    "4b58bbb8-3b00-4f87-8243-8c622707bbab",
-		Snapshot_id:     "cc488e4a-9649-4e5f-ad12-20ab37c683b5",
+		SourceVolid:     "4b58bbb8-3b00-4f87-8243-8c622707bbab",
+		SnapshotId:      "cc488e4a-9649-4e5f-ad12-20ab37c683b5",
 		Size:            2,
 
-		Aavailability_zone:  "default_cluster",
-		Rreplication_status: "",
-		Consistencygroup_id: ""}
+		AvailabilityZone:   "default_cluster",
+		ReplicationStatus:  "",
+		ConsistencygroupId: ""}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)
 	}
-	if !reflect.DeepEqual(fvr.Id, volume.ID) {
-		t.Fatalf("Expected\n%#v\ngot\n%#v", fvr.Id, volume.ID)
+	if !reflect.DeepEqual(fvr.Id, volume.Id) {
+		t.Fatalf("Expected\n%#v\ngot\n%#v", fvr.Id, volume.Id)
 	}
 }
 
-func TestList(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestListVolumes(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeListRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	volumes, err := List(fvr)
+	volumes, err := ListVolumes(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,22 +174,22 @@ func TestList(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "in-use",
 		Size:        1,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{{"attached_at": "2017-02-11T14:08:17.000000", "attachment_id": "c7f84865-640c-44ea-94ab-379a27f0ff65", "device": "/dev/vdc", "host_name": "localhost", "id": "034af8c9-ef44-4855-8e70-d51dceed7fc4", "server_id": "", "volume_id": "034af8c9-ef44-4855-8e70-d51dceed7fc4"}}}
 	if !reflect.DeepEqual(expectedVolume, volumes[0]) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volumes[0])
 	}
 }
 
-func TestUpdate(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestUpdateVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeUpdateRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	volume, err := Update(fvr)
+	volume, err := UpdateVolume(fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +199,7 @@ func TestUpdate(t *testing.T) {
 		ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 		Status:      "available",
 		Size:        2,
-		Volume_type: "lvmdriver-1",
+		VolumeType:  "lvmdriver-1",
 		Attachments: []map[string]string{}}
 	if !reflect.DeepEqual(expectedVolume, volume) {
 		t.Fatalf("Expected\n%#v\ngot\n%#v", expectedVolume, volume)
@@ -210,93 +209,73 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestDeleteVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeDeleteRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := Delete(fvr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Delete volume failed!")
+	result := DeleteVolume(fvr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 
-func TestAttach(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestAttachVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeAttachRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := Attach(fvr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Attach volume failed!")
+	result := AttachVolume(fvr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 
-func TestDetach(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestDetachVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeDetachRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := Detach(fvr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Detach volume failed!")
+	result := DetachVolume(fvr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 
-func TestMount(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestMountVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeMountRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := Mount(fvr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Mount volume failed!")
+	result := MountVolume(fvr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 
-func TestUnmount(t *testing.T) {
-	var fvr fakeVolumeRequest
+func TestUnmountVolume(t *testing.T) {
+	var fvr FakeVolumeRequest
 
 	err := json.Unmarshal([]byte(sampleVolumeUnmountRequest), &fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	result, err := Unmount(fvr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(result, "success") {
-		t.Fatal("Delete volume failed!")
+	result := UnmountVolume(fvr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
 	}
 }
 

@@ -28,7 +28,7 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/volumes"
+	"github.com/opensds/opensds/pkg/api/v1/volumes"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -54,7 +54,7 @@ func (this *VolumeController) Get() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := volumes.Show(volumeRequest)
+	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Show volume failed!")
@@ -89,21 +89,9 @@ func (this *VolumeController) Delete() {
 		ResourceType: resourceType,
 		Id:           id,
 	}
-	result, err := volumes.Delete(volumeRequest)
-	if err != nil {
-		log.Println(err)
-		rbody, _ := json.Marshal("Delete volume failed!")
-		this.Ctx.Output.Body(rbody)
-	} else {
-		if result == "" {
-			log.Println("Delete volume failed!")
-			rbody, _ := json.Marshal("Delete volume failed!")
-			this.Ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(rbody)
-		}
-	}
+	result := volumes.DeleteVolume(volumeRequest)
+	rbody, _ := json.Marshal(result)
+	this.Ctx.Output.Body(rbody)
 }
 
 func PostVolume(ctx *context.Context) {
@@ -126,7 +114,7 @@ func PostVolume(ctx *context.Context) {
 		ctx.Output.Body(rbody)
 	}
 
-	result, err := volumes.Create(volumeRequest)
+	result, err := volumes.CreateVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Create volume failed!")
@@ -153,7 +141,7 @@ func GetAllVolumes(ctx *context.Context) {
 		ResourceType: resourceType,
 		AllowDetails: false,
 	}
-	result, err := volumes.List(volumeRequest)
+	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List volumes failed!")
@@ -201,69 +189,21 @@ func PostVolumeAction(ctx *context.Context) {
 			volumeRequest.Device = "/mnt"
 		}
 
-		result, err := volumes.Attach(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Attach volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Attach volume failed!")
-				rbody, _ := json.Marshal("Attach volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.AttachVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "detach":
-		result, err := volumes.Detach(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Detach volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Detach volume failed!")
-				rbody, _ := json.Marshal("Detach volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.DetachVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "mount":
-		result, err := volumes.Mount(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Mount volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Mount volume failed!")
-				rbody, _ := json.Marshal("Mount volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.MountVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	case "unmount":
-		result, err := volumes.Unmount(volumeRequest)
-		if err != nil {
-			log.Println(err)
-			rbody, _ := json.Marshal("Unmount volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			if result == "" {
-				log.Println("Unmount volume failed!")
-				rbody, _ := json.Marshal("Unmount volume failed!")
-				ctx.Output.Body(rbody)
-			} else {
-				rbody, _ := json.Marshal(result)
-				ctx.Output.Body(rbody)
-			}
-		}
+		result := volumes.UnmountVolume(volumeRequest)
+		rbody, _ := json.Marshal(result)
+		ctx.Output.Body(rbody)
 	default:
 		err := errors.New("The type of volume action is not correct!")
 		log.Println(err)

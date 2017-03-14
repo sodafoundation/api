@@ -23,6 +23,21 @@ import (
 	"openstack/golang-client/util"
 )
 
+type VersionInfo struct {
+	Id        string               `json:"id"`
+	Status    string               `json:"status"`
+	UpdatedAt util.RFC8601DateTime `json:"updatedAt"`
+}
+
+type AvailableVersions struct {
+	Versions []VersionInfo `json:"versions"`
+}
+
+type DefaultResponse struct {
+	Error  string `json:"error"`
+	Status string `json:"status"`
+}
+
 // VolumeResponse is a structure for all properties of
 // an volume for a non detailed query
 type VolumeResponse struct {
@@ -30,14 +45,14 @@ type VolumeResponse struct {
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
 	Size        int                 `json:"size"`
-	Volume_type string              `json:"volume_type"`
+	VolumeType  string              `json:"volume_type"`
 	Attachments []map[string]string `json:"attachments"`
 }
 
 // VolumeDetailResponse is a structure for all properties of
 // an volume for a detailed query
 type VolumeDetailResponse struct {
-	ID              string               `json:"id,omitempty"`
+	Id              string               `json:"id,omitempty"`
 	Attachments     []map[string]string  `json:"attachments"`
 	Links           []map[string]string  `json:"links"`
 	Metadata        map[string]string    `json:"metadata"`
@@ -49,21 +64,21 @@ type VolumeDetailResponse struct {
 	Multiattach     bool                 `json:"multiattach"`
 	CreatedAt       util.RFC8601DateTime `json:"created_at"`
 	Description     string               `json:"description,omitempty"`
-	Volume_type     string               `json:"volume_type,omitempty"`
+	VolumeType      string               `json:"volume_type,omitempty"`
 	Name            string               `json:"name,omitempty"`
-	Source_volid    string               `json:"source_volid,omitempty"`
-	Snapshot_id     string               `json:"snapshot_id,omitempty"`
+	SourceVolid     string               `json:"source_volid,omitempty"`
+	SnapshotId      string               `json:"snapshot_id,omitempty"`
 	Size            int                  `json:"size"`
 
-	Aavailability_zone  string `json:"availability_zone,omitempty"`
-	Rreplication_status string `json:"replication_status,omitempty"`
-	Consistencygroup_id string `json:"consistencygroup_id,omitempty"`
+	AvailabilityZone   string `json:"availability_zone,omitempty"`
+	ReplicationStatus  string `json:"replication_status,omitempty"`
+	ConsistencygroupId string `json:"consistencygroup_id,omitempty"`
 }
 
 // ShareResponse is a structure for all properties of
 // an share for a non detailed query
 type ShareResponse struct {
-	ID    string              `json:"id,omitempty"`
+	Id    string              `json:"id,omitempty"`
 	Name  string              `json:"name,omitempty"`
 	Links []map[string]string `json:"links"`
 }
@@ -71,32 +86,32 @@ type ShareResponse struct {
 // ShareDetailResponse is a structure for all properties of
 // an share for a detailed query
 type ShareDetailResponse struct {
-	Links                       []map[string]string  `json:"links"`
-	Availability_zone           string               `json:"availability_zone,omitempty"`
-	Share_network_id            string               `json:"share_network_id,omitempty"`
-	Export_locations            []string             `json:"export_locations"`
-	Share_server_id             string               `json:"share_server_id,omitempty"`
-	Snapshot_id                 string               `json:"snapshot_id,omitempty"`
-	ID                          string               `json:"id,omitempty"`
-	Size                        int                  `json:"size"`
-	Share_type                  string               `json:"share_type,omitempty"`
-	Share_type_name             string               `json:"share_type_name,omitempty"`
-	Export_location             string               `json:"export_location,omitempty"`
-	Consistency_group_id        string               `json:"consistency_group_id,omitempty"`
-	Project_id                  string               `json:"project_id,omitempty"`
-	Metadata                    map[string]string    `json:"metadata"`
-	Status                      string               `json:"status,omitempty"`
-	Access_rules_status         string               `json:"access_rules_status,omitempty"`
-	Description                 string               `json:"description,omitempty"`
-	Host                        string               `json:"host,omitempty"`
-	Task_state                  string               `json:"task_state,omitempty"`
-	Is_public                   bool                 `json:"is_public"`
-	Snapshot_support            bool                 `json:"snapshot_support"`
-	Name                        string               `json:"name,omitempty"`
-	Has_replicas                bool                 `json:"has_replicas"`
-	Replication_type            string               `json:"replication_type,omitempty"`
-	CreatedAt                   util.RFC8601DateTime `json:"created_at"`
-	Share_proto                 string               `json:"share_proto,omitempty"`
-	Volume_type                 string               `json:"volume_type,omitempty"`
-	Source_cgsnapshot_member_id string               `json:"source_cgsnapshot_member_id,omitempty"`
+	Links                    []map[string]string  `json:"links"`
+	AvailabilityZone         string               `json:"availability_zone,omitempty"`
+	ShareNetworkId           string               `json:"share_network_id,omitempty"`
+	ExportLocations          []string             `json:"export_locations"`
+	ShareServerId            string               `json:"share_server_id,omitempty"`
+	SnapshotId               string               `json:"snapshot_id,omitempty"`
+	Id                       string               `json:"id,omitempty"`
+	Size                     int                  `json:"size"`
+	ShareType                string               `json:"share_type,omitempty"`
+	ShareTypeName            string               `json:"share_type_name,omitempty"`
+	ExportLocation           string               `json:"export_location,omitempty"`
+	ConsistencyGroupId       string               `json:"consistency_group_id,omitempty"`
+	ProjectId                string               `json:"project_id,omitempty"`
+	Metadata                 map[string]string    `json:"metadata"`
+	Status                   string               `json:"status,omitempty"`
+	AccessRulesStatus        string               `json:"access_rules_status,omitempty"`
+	Description              string               `json:"description,omitempty"`
+	Host                     string               `json:"host,omitempty"`
+	TaskState                string               `json:"task_state,omitempty"`
+	IsPublic                 bool                 `json:"is_public"`
+	SnapshotSupport          bool                 `json:"snapshot_support"`
+	Name                     string               `json:"name,omitempty"`
+	HasReplicas              bool                 `json:"has_replicas"`
+	ReplicationType          string               `json:"replication_type,omitempty"`
+	CreatedAt                util.RFC8601DateTime `json:"created_at"`
+	ShareProto               string               `json:"share_proto,omitempty"`
+	VolumeType               string               `json:"volume_type,omitempty"`
+	SourceCgsnapshotMemberId string               `json:"source_cgsnapshot_member_id,omitempty"`
 }

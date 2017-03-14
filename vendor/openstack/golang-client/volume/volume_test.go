@@ -19,15 +19,13 @@ The CRUD operation of volumes can be retrieved using the api.
 
 */
 
-package volume_test
+package volume
 
 import (
 	"errors"
 	"net/http"
 	"strings"
 	"testing"
-
-	"openstack/golang-client/volume"
 
 	"git.openstack.org/openstack/golang-client.git/openstack"
 	"git.openstack.org/openstack/golang-client.git/testUtil"
@@ -37,17 +35,17 @@ import (
 var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
 
 func TestCreateVolume(t *testing.T) {
-	anon := func(volumeService volume.Service) {
-		requestBody := volume.RequestBody{}
+	anon := func(volumeService Service) {
+		requestBody := RequestBody{}
 		requestBody.Name = "myvol1"
 		requestBody.Size = 2
-		body := volume.CreateBody{requestBody}
+		body := CreateBody{requestBody}
 		result, err := volumeService.Create(&body)
 		if err != nil {
 			t.Error(err)
 		}
 
-		expectedVolume := volume.Response{
+		expectedVolume := Response{
 			Name:        "myvol1",
 			ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 			Status:      "available",
@@ -60,7 +58,7 @@ func TestCreateVolume(t *testing.T) {
 	testCreateVolumeServiceAction(t, tokn, sampleVolumeData, "volumes", sampleRequestBody, anon)
 }
 
-func testCreateVolumeServiceAction(t *testing.T, tokn string, testData string, uriEndsWith string, sampleRequestBody string, volumeServiceAction func(volume.Service)) {
+func testCreateVolumeServiceAction(t *testing.T, tokn string, testData string, uriEndsWith string, sampleRequestBody string, volumeServiceAction func(Service)) {
 	apiServer := testUtil.CreatePostJSONTestRequestServer(t, tokn, testData, uriEndsWith, sampleRequestBody)
 	defer apiServer.Close()
 
@@ -72,12 +70,12 @@ func testCreateVolumeServiceAction(t *testing.T, tokn string, testData string, u
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
 func TestGetVolume(t *testing.T) {
-	anon := func(volumeService volume.Service) {
+	anon := func(volumeService Service) {
 		volID := "30becf77-63fe-4f5e-9507-a0578ffe0949"
 		result, err := volumeService.Show(volID)
 		if err != nil {
@@ -85,7 +83,7 @@ func TestGetVolume(t *testing.T) {
 		}
 
 		createdAt, _ := util.NewDateTime(`"2014-09-29T14:44:31"`)
-		expectedVolume := volume.DetailResponse{
+		expectedVolume := DetailResponse{
 			ID:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
 			Attachments: []map[string]string{{"attachment_id": "ddb2ac07-ed62-49eb-93da-73b258dd9bec", "host_name": "host_test", "volume_id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "device": "/dev/vdb", "id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "server_id": "0f081aae-1b0c-4b89-930c-5f2562460c72"}},
 			Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "self"},
@@ -114,7 +112,7 @@ func TestGetVolume(t *testing.T) {
 	testGetVolumeServiceAction(t, "30becf77-63fe-4f5e-9507-a0578ffe0949", sampleVolumeDetailData, anon)
 }
 
-func testGetVolumeServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(volume.Service)) {
+func testGetVolumeServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -132,18 +130,18 @@ func testGetVolumeServiceAction(t *testing.T, uriEndsWith string, testData strin
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
 func TestGetAllVolumes(t *testing.T) {
-	anon := func(volumeService volume.Service) {
+	anon := func(volumeService Service) {
 		volumes, err := volumeService.List()
 		if err != nil {
 			t.Error(err)
 		}
 
-		expectedVolume := volume.Response{
+		expectedVolume := Response{
 			Name:        "myvol1",
 			ID:          "f5fc9874-fc89-4814-a358-23ba83a6115f",
 			Status:      "in-use",
@@ -156,7 +154,7 @@ func TestGetAllVolumes(t *testing.T) {
 	testDetailAllVolumesServiceAction(t, "volumes/detail", sampleVolumesData, anon)
 }
 
-func testGetAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(volume.Service)) {
+func testGetAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -174,19 +172,19 @@ func testGetAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData s
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
 func TestTailAllVolumes(t *testing.T) {
-	anon := func(volumeService volume.Service) {
+	anon := func(volumeService Service) {
 		volumes, err := volumeService.Detail()
 		if err != nil {
 			t.Error(err)
 		}
 
 		createdAt, _ := util.NewDateTime(`"2014-09-29T14:44:31"`)
-		expectedVolumeDetail := volume.DetailResponse{
+		expectedVolumeDetail := DetailResponse{
 			ID:          "30becf77-63fe-4f5e-9507-a0578ffe0949",
 			Attachments: []map[string]string{{"attachment_id": "ddb2ac07-ed62-49eb-93da-73b258dd9bec", "host_name": "host_test", "volume_id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "device": "/dev/vdb", "id": "30becf77-63fe-4f5e-9507-a0578ffe0949", "server_id": "0f081aae-1b0c-4b89-930c-5f2562460c72"}},
 			Links: []map[string]string{{"href": "http://172.16.197.131:8776/v2/1d8837c5fcef4892951397df97661f97/volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", "rel": "self"},
@@ -216,7 +214,7 @@ func TestTailAllVolumes(t *testing.T) {
 	testDetailAllVolumesServiceAction(t, "volumes/detail", sampleVolumesDetailData, anon)
 }
 
-func testDetailAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(volume.Service)) {
+func testDetailAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData string, volumeServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -234,12 +232,12 @@ func testDetailAllVolumesServiceAction(t *testing.T, uriEndsWith string, testDat
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
 func TestDeleteVolume(t *testing.T) {
-	anon := func(volumeService volume.Service) {
+	anon := func(volumeService Service) {
 		volID := "30becf77-63fe-4f5e-9507-a0578ffe0949"
 		err := volumeService.Delete(volID)
 		if err != nil {
@@ -250,7 +248,7 @@ func TestDeleteVolume(t *testing.T) {
 	testDeleteVolumeServiceAction(t, "volumes/30becf77-63fe-4f5e-9507-a0578ffe0949", anon)
 }
 
-func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServiceAction func(volume.Service)) {
+func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServiceAction func(Service)) {
 	apiServer := testUtil.CreateDeleteTestRequestServer(t, tokn, uriEndsWith)
 	defer apiServer.Close()
 
@@ -262,7 +260,7 @@ func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServi
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 

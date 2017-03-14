@@ -21,7 +21,9 @@ package volumes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/rpcapi"
@@ -93,14 +95,14 @@ func (vr VolumeRequest) detachVolume() (string, error) {
 }
 
 func (vr VolumeRequest) mountVolume() (string, error) {
-	return rpcapi.MountVolume(vr.MountDir, vr.Device, vr.Id, vr.FsType)
+	return rpcapi.MountVolume(vr.MountDir, vr.Device, vr.FsType)
 }
 
 func (vr VolumeRequest) unmountVolume() (string, error) {
 	return rpcapi.UnmountVolume(vr.MountDir)
 }
 
-func Create(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
+func CreateVolume(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
 	result, err := vrd.createVolume()
@@ -117,7 +119,7 @@ func Create(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	return volumeResponse, nil
 }
 
-func Show(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
+func GetVolume(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
 	var nullResponse api.VolumeDetailResponse
 
 	result, err := vrd.getVolume()
@@ -134,7 +136,7 @@ func Show(vrd VolumeRequestDeliver) (api.VolumeDetailResponse, error) {
 	return volumeDetailResponse, nil
 }
 
-func List(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
+func ListVolumes(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
 	var nullResponses []api.VolumeResponse
 
 	result, err := vrd.getAllVolumes()
@@ -151,7 +153,7 @@ func List(vrd VolumeRequestDeliver) ([]api.VolumeResponse, error) {
 	return volumesResponse, nil
 }
 
-func Update(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
+func UpdateVolume(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	var nullResponse api.VolumeResponse
 
 	result, err := vrd.updateVolume()
@@ -168,47 +170,92 @@ func Update(vrd VolumeRequestDeliver) (api.VolumeResponse, error) {
 	return volumeResponse, nil
 }
 
-func Delete(vrd VolumeRequestDeliver) (string, error) {
+func DeleteVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
+
 	result, err := vrd.deleteVolume()
 	if err != nil {
-		log.Println("Delete volume error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete volume error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Delete volume error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }
 
-func Attach(vrd VolumeRequestDeliver) (string, error) {
+func AttachVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
+
 	result, err := vrd.attachVolume()
 	if err != nil {
-		log.Println("Attach volume error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Attach volume error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Attach volume error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }
 
-func Detach(vrd VolumeRequestDeliver) (string, error) {
+func DetachVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
+
 	result, err := vrd.detachVolume()
 	if err != nil {
-		log.Println("Detach volume error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Detach volume error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Detach volume error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }
 
-func Mount(vrd VolumeRequestDeliver) (string, error) {
+func MountVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
+
 	result, err := vrd.mountVolume()
 	if err != nil {
-		log.Println("Mount volume error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Mount volume error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Mount volume error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }
 
-func Unmount(vrd VolumeRequestDeliver) (string, error) {
+func UnmountVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
+	var defaultResponse api.DefaultResponse
+
 	result, err := vrd.unmountVolume()
 	if err != nil {
-		log.Println("Unmount volume error: ", err)
-		return "", err
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Unmount volume error:", err)
+		return defaultResponse
+	} else if !strings.Contains(result, "success") {
+		defaultResponse.Status = "Failure"
+		defaultResponse.Error = fmt.Sprintln("Unmount volume error!")
+		return defaultResponse
 	}
-	return result, nil
+
+	defaultResponse.Status = "Success"
+	return defaultResponse
 }
