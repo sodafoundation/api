@@ -30,7 +30,7 @@ import (
 
 	"openstack/golang-client/volume"
 
-	"git.openstack.org/openstack/golang-client.git/openstack"
+	"git.openstack.org/openstack/golang-client/openstack"
 )
 
 type CinderPlugin struct {
