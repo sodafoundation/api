@@ -13,7 +13,7 @@
 //    under the License.
 
 /*
-This module implements a entry into the OpenSDS service.
+This module implements a entry into the OpenSDS REST service.
 
 */
 
@@ -25,14 +25,20 @@ import (
 	"os"
 
 	"github.com/opensds/opensds/cmd/osdslet/northbound"
-	"github.com/opensds/opensds/pkg/messaging/server"
+	"github.com/opensds/opensds/cmd/utils"
+	orchServer "github.com/opensds/opensds/pkg/grpc/controller/orchestration/server"
+)
+
+const (
+	NORTHBOUND_PORT    = ":50048"
+	ORCHESTRATION_PORT = ":50049"
 )
 
 func main() {
 	// Open OpenSDS log file
-	f, err := os.OpenFile("/var/log/opensds.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("/var/log/opensds/osdslet.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("error opening file:", err)
+		fmt.Println("Error opening file:", err)
 		os.Exit(1)
 	}
 	defer f.Close()
@@ -40,17 +46,18 @@ func main() {
 	log.SetOutput(f)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	// Get OpenSDS host IP.
+	host, err := utils.GetHostIP()
+	if err != nil {
+		panic(err)
+	}
+
 	// Start OpenSDS northbound REST service.
-	go northbound.Run()
+	go northbound.Run(host + NORTHBOUND_PORT)
 
 	// Construct orchestration module grpc server struct and do some initialization.
-	orchestration := new(server.Server)
-	orchestration.Init()
-	// Construct adapter module grpc server struct and do some initialization.
-	adapter := new(server.Server)
-	adapter.Init()
+	os := orchServer.NewOrchServer(host + ORCHESTRATION_PORT)
 
-	// Start the watcher mechanism of orchestration and adapter module.
-	go orchestration.OrchestrationWatch("opensds/orchestration")
-	adapter.AdapterWatch("opensds/adapter")
+	// Start the listen mechanism of controller orchestration module.
+	os.ListenAndServe()
 }

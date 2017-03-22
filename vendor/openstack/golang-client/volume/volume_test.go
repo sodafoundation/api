@@ -27,9 +27,9 @@ import (
 	"strings"
 	"testing"
 
-	"git.openstack.org/openstack/golang-client.git/openstack"
-	"git.openstack.org/openstack/golang-client.git/testUtil"
-	"git.openstack.org/openstack/golang-client.git/util"
+	"git.openstack.org/openstack/golang-client/openstack"
+	"git.openstack.org/openstack/golang-client/testUtil"
+	"git.openstack.org/openstack/golang-client/util"
 )
 
 var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
@@ -38,6 +38,7 @@ func TestCreateVolume(t *testing.T) {
 	anon := func(volumeService Service) {
 		requestBody := RequestBody{}
 		requestBody.Name = "myvol1"
+		requestBody.VolumeType = "lvm"
 		requestBody.Size = 2
 		body := CreateBody{requestBody}
 		result, err := volumeService.Create(&body)
@@ -264,7 +265,7 @@ func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServi
 	volumeServiceAction(volumeService)
 }
 
-var sampleRequestBody = `{"volume":{"name":"myvol1","size":2,"host_name":"","device":"","attachment_id":""}}`
+var sampleRequestBody = `{"volume":{"name":"myvol1","volume_type":"lvm","size":2,"host_name":"","mountpoint":"","attachment_id":""}}`
 
 var sampleVolumeData = `{
 	"volume":{

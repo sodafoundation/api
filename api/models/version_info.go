@@ -18,9 +18,6 @@ type VersionInfo struct {
 
 	// status
 	Status string `json:"status,omitempty"`
-
-	// update at
-	UpdateAt strfmt.DateTime `json:"updateAt,omitempty"`
 }
 
 // Validate validates this version info

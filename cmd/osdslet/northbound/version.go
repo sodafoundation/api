@@ -24,7 +24,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/astaxie/beego/context"
 )

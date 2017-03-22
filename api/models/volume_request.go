@@ -45,6 +45,9 @@ type VolumeRequest struct {
 
 	// size
 	Size int32 `json:"size,omitempty"`
+
+	// volume type
+	VolumeType string `json:"volumeType,omitempty"`
 }
 
 // Validate validates this volume request

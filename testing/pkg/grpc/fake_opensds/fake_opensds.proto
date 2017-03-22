@@ -1,0 +1,123 @@
+// Copyright 2015, Google Inc.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+syntax = "proto3";
+
+package fake_opensds;
+
+// The orchestration service definition.
+service Orchestration {
+  // Create a volume
+  rpc CreateVolume (VolumeRequest) returns (Response) {}
+  // Get a volume
+  rpc GetVolume (VolumeRequest) returns (Response) {}
+  // List all volumes
+  rpc ListVolumes (VolumeRequest) returns (Response) {}
+  // Delete a volume
+  rpc DeleteVolume (VolumeRequest) returns (Response) {}
+  // Attach a volume
+  rpc AttachVolume (VolumeRequest) returns (Response) {}
+  // Detach a volume
+  rpc DetachVolume (VolumeRequest) returns (Response) {}
+  // Mount a volume
+  rpc MountVolume (VolumeRequest) returns (Response) {}
+  // Unmount a volume
+  rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a share
+  rpc CreateShare (ShareRequest) returns (Response) {}
+  // Get a share
+  rpc GetShare (ShareRequest) returns (Response) {}
+  // List all shares
+  rpc ListShares (ShareRequest) returns (Response) {}
+  // Delete a share
+  rpc DeleteShare (ShareRequest) returns (Response) {}
+}
+
+// The dock service definition.
+service Dock {
+  // Create a volume
+  rpc CreateVolume (VolumeRequest) returns (Response) {}
+  // Get a volume
+  rpc GetVolume (VolumeRequest) returns (Response) {}
+  // List all volumes
+  rpc ListVolumes (VolumeRequest) returns (Response) {}
+  // Delete a volume
+  rpc DeleteVolume (VolumeRequest) returns (Response) {}
+  // Attach a volume
+  rpc AttachVolume (VolumeRequest) returns (Response) {}
+  // Detach a volume
+  rpc DetachVolume (VolumeRequest) returns (Response) {}
+  // Mount a volume
+  rpc MountVolume (VolumeRequest) returns (Response) {}
+  // Unmount a volume
+  rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a share
+  rpc CreateShare (ShareRequest) returns (Response) {}
+  // Get a share
+  rpc GetShare (ShareRequest) returns (Response) {}
+  // List all shares
+  rpc ListShares (ShareRequest) returns (Response) {}
+  // Delete a share
+  rpc DeleteShare (ShareRequest) returns (Response) {}
+}
+
+// The VolumeRequest message containing all properties of
+// a volume request.
+message VolumeRequest {
+  string resoureType = 1;
+  string id = 2;
+  string name = 3;
+  int32 size = 4;
+  bool allowDetails = 5;
+  string host = 6;
+  string device = 7;
+  string attachment = 8;
+  string mountDir = 9;
+  string fsType = 10;
+}
+
+// The ShareRequest message containing all properties of
+// a share request.
+message ShareRequest {
+  string resoureType = 1;
+  string id = 2;
+  string name = 3;
+  int32 size = 4;
+  string shareType = 5;
+  string shareProto = 6;
+  bool allowDetails = 7;
+}
+
+// The Response message containing all properties of
+// resource response.
+message Response {
+  string status = 1;
+  string message = 2;
+  string error = 3;
+}

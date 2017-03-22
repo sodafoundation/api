@@ -28,8 +28,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"git.openstack.org/openstack/golang-client.git/openstack"
-	"git.openstack.org/openstack/golang-client.git/util"
+	"git.openstack.org/openstack/golang-client/openstack"
+	"git.openstack.org/openstack/golang-client/util"
 )
 
 type Service interface {
@@ -40,8 +40,6 @@ type Service interface {
 	List() ([]Response, error)
 
 	Detail() ([]DetailResponse, error)
-
-	Update(id string, reqBody *CreateBody) (Response, error)
 
 	Delete(id string) error
 }
@@ -68,7 +66,7 @@ func NewService(
 
 type RequestBody struct {
 	Name        string `json:"name"`
-	Size        int    `json:"size"`
+	Size        int32  `json:"size"`
 	Share_proto string `json:"share_proto"`
 	Share_type  string `json:"share_type"`
 }
@@ -302,50 +300,6 @@ func detailAllShares(ss shareService) ([]DetailResponse, error) {
 		return nullResponses, err
 	}
 	return detailSharesResponse.DetailShares, nil
-}
-
-func (ss shareService) Update(id string, reqBody *CreateBody) (Response, error) {
-	return updateShare(ss, id, reqBody)
-}
-
-func updateShare(ss shareService, id string, reqBody *CreateBody) (Response, error) {
-	nullResponse := Response{}
-
-	reqURL, err := url.Parse(ss.URL)
-	if err != nil {
-		log.Println("Parse URL error:", err)
-		return nullResponse, err
-	}
-	urlPostFix := "/shares" + "/" + id
-	reqURL.Path += urlPostFix
-
-	var headers http.Header = http.Header{}
-	headers.Set("Content-Type", "application/json")
-	body, _ := json.Marshal(reqBody)
-	log.Printf("Start PUT request to update share, url = %s, body = %s\n",
-		reqURL.String(), body)
-	resp, err := ss.Session.Put(reqURL.String(), nil, &headers, &body)
-	if err != nil {
-		log.Println("PUT response error:", err)
-		return nullResponse, err
-	}
-
-	err = util.CheckHTTPResponseStatusCode(resp)
-	if err != nil {
-		return nullResponse, err
-	}
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Read response body failed:", err)
-		return nullResponse, err
-	}
-
-	shareResponse := new(ShareResponse)
-	if err = json.Unmarshal(rbody, shareResponse); err != nil {
-		return nullResponse, err
-	}
-	return shareResponse.Share, nil
 }
 
 func (ss shareService) Delete(id string) error {

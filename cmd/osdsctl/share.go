@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/v1/shares"
+	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/opensds/opensds/pkg/controller/api/v1/shares"
 
 	"github.com/spf13/cobra"
 )
@@ -56,12 +56,6 @@ var shareListCommand = &cobra.Command{
 	Run:   shareListAction,
 }
 
-var shareUpdateCommand = &cobra.Command{
-	Use:   "update <id>",
-	Short: "update a share in the cluster",
-	Run:   shareUpdateAction,
-}
-
 var shareDeleteCommand = &cobra.Command{
 	Use:   "delete <id>",
 	Short: "delete a share in the cluster",
@@ -85,10 +79,9 @@ func init() {
 	shareCommand.AddCommand(shareCreateCommand)
 	shareCommand.AddCommand(shareShowCommand)
 	shareCommand.AddCommand(shareListCommand)
-	shareCommand.AddCommand(shareUpdateCommand)
 	shareCommand.AddCommand(shareDeleteCommand)
 	shareCreateCommand.Flags().StringVarP(&shrName, "name", "n", "null", "the name of created share")
-	shareCreateCommand.Flags().StringVarP(&shrType, "type", "t", "default", "the type of created share")
+	shareCreateCommand.Flags().StringVarP(&shrType, "type", "t", "", "the type of created share")
 	shareListCommand.Flags().BoolVarP(&shrAllowDetails, "detail", "d", false, "list shares in details")
 }
 
@@ -115,7 +108,7 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 		Name:         shrName,
 		ShareType:    shrType,
 		ShareProto:   shrProto,
-		Size:         size,
+		Size:         int32(size),
 	}
 	result, err := shares.CreateShare(shareRequest)
 	if err != nil {
@@ -170,31 +163,6 @@ func shareListAction(cmd *cobra.Command, args []string) {
 	} else {
 		if reflect.DeepEqual(result, falseAllSharesResponse) {
 			fmt.Println("List shares failed!")
-		} else {
-			rbody, _ := json.Marshal(result)
-			fmt.Printf("%s\n", string(rbody))
-		}
-	}
-}
-
-func shareUpdateAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
-		Name:         shrName,
-	}
-	result, err := shares.UpdateShare(shareRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if reflect.DeepEqual(result, falseShareResponse) {
-			fmt.Println("Update share failed!")
 		} else {
 			rbody, _ := json.Marshal(result)
 			fmt.Printf("%s\n", string(rbody))
