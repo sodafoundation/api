@@ -25,7 +25,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/spf13/cobra"
 )

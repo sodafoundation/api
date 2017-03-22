@@ -19,9 +19,6 @@ type VolumeDetailResponse struct {
 	// consistencygroup Id
 	ConsistencygroupID string `json:"consistencygroupId,omitempty"`
 
-	// create at
-	CreateAt strfmt.DateTime `json:"createAt,omitempty"`
-
 	// description
 	Description string `json:"description,omitempty"`
 
