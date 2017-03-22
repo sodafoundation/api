@@ -27,8 +27,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/v1/volumes"
+	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/opensds/opensds/pkg/controller/api/v1/volumes"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
