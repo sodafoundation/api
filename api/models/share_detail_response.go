@@ -23,9 +23,6 @@ type ShareDetailResponse struct {
 	// consistency group Id
 	ConsistencyGroupID string `json:"consistencyGroupId,omitempty"`
 
-	// created at
-	CreatedAt strfmt.DateTime `json:"createdAt,omitempty"`
-
 	// description
 	Description string `json:"description,omitempty"`
 

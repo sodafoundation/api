@@ -41,8 +41,6 @@ type Service interface {
 
 	Detail() ([]DetailResponse, error)
 
-	Update(id string, reqBody *CreateBody) (Response, error)
-
 	Delete(id string) error
 
 	Attach(id string, reqBody *AttachBody) error
@@ -72,9 +70,10 @@ func NewService(
 
 type RequestBody struct {
 	Name         string `json:"name"`
-	Size         int    `json:"size"`
+	VolumeType   string `json:"volume_type"`
+	Size         int32  `json:"size"`
 	HostName     string `json:"host_name"`
-	Device       string `json:"device"`
+	Mountpoint   string `json:"mountpoint"`
 	AttachmentID string `json:"attachment_id"`
 }
 
@@ -311,50 +310,6 @@ func detailAllVolumes(vs volumeService) ([]DetailResponse, error) {
 		return nullResponses, err
 	}
 	return detailVolumesResponse.DetailVolumes, nil
-}
-
-func (vs volumeService) Update(id string, reqBody *CreateBody) (Response, error) {
-	return updateVolume(vs, id, reqBody)
-}
-
-func updateVolume(vs volumeService, id string, reqBody *CreateBody) (Response, error) {
-	nullResponse := Response{}
-
-	reqURL, err := url.Parse(vs.URL)
-	if err != nil {
-		log.Println("Parse URL error:", err)
-		return nullResponse, err
-	}
-	urlPostFix := "/volumes" + "/" + id
-	reqURL.Path += urlPostFix
-
-	var headers http.Header = http.Header{}
-	headers.Set("Content-Type", "application/json")
-	body, _ := json.Marshal(reqBody)
-	log.Printf("Start PUT request to update volume, url = %s, body = %s\n",
-		reqURL.String(), body)
-	resp, err := vs.Session.Put(reqURL.String(), nil, &headers, &body)
-	if err != nil {
-		log.Println("PUT response error:", err)
-		return nullResponse, err
-	}
-
-	err = util.CheckHTTPResponseStatusCode(resp)
-	if err != nil {
-		return nullResponse, err
-	}
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Read response body failed:", err)
-		return nullResponse, err
-	}
-
-	volumeResponse := new(VolumeResponse)
-	if err = json.Unmarshal(rbody, volumeResponse); err != nil {
-		return nullResponse, err
-	}
-	return volumeResponse.Volume, nil
 }
 
 func (vs volumeService) Delete(id string) error {
