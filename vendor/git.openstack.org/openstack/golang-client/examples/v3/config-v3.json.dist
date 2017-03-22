@@ -1,0 +1,12 @@
+{
+	"host": "http://.../auth/tokens",
+	"methods": [
+		"password"
+	],
+	"username": "",
+	"password": "",
+	"projectID": "",
+	"projectName": "",
+ 	"container": "I♡HW",
+	"imageRegion": ""
+}
