@@ -148,11 +148,11 @@ func (d *Driver) DeleteVolume(volID string) (string, error) {
 	return "", nil
 }
 
-func (d *Driver) MountVolume(volId, host, mountpoint string) (string, error) {
+func (d *Driver) AttachVolume(volId, host, mountpoint string) (string, error) {
 	return "", nil
 }
 
-func (d *Driver) UnmountVolume(volID string, attachment string) (string, error) {
+func (d *Driver) DetachVolume(volID string, attachment string) (string, error) {
 	return "", nil
 }
 

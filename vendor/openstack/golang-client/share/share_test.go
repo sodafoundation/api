@@ -19,15 +19,13 @@ The CRUD operation of shares can be retrieved using the api.
 
 */
 
-package share_test
+package share
 
 import (
 	"errors"
 	"net/http"
 	"strings"
 	"testing"
-
-	"openstack/golang-client/share"
 
 	"git.openstack.org/openstack/golang-client.git/openstack"
 	"git.openstack.org/openstack/golang-client.git/testUtil"
@@ -37,19 +35,19 @@ import (
 var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
 
 func TestCreateShare(t *testing.T) {
-	anon := func(shareService share.Service) {
-		requestBody := share.RequestBody{}
+	anon := func(shareService Service) {
+		requestBody := RequestBody{}
 		requestBody.Name = "My_share"
 		requestBody.Size = 1
 		requestBody.Share_proto = "NFS"
 		requestBody.Share_type = "g-nfs"
-		body := share.CreateBody{requestBody}
+		body := CreateBody{requestBody}
 		result, err := shareService.Create(&body)
 		if err != nil {
 			t.Error(err)
 		}
 
-		expectedShare := share.Response{
+		expectedShare := Response{
 			ID:   "d94a8548-2079-4be0-b21c-0a887acd31ca",
 			Name: "My_share",
 			Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
@@ -60,7 +58,7 @@ func TestCreateShare(t *testing.T) {
 	testCreateShareServiceAction(t, tokn, sampleShareData, "shares", sampleRequestBody, anon)
 }
 
-func testCreateShareServiceAction(t *testing.T, tokn string, testData string, uriEndsWith string, sampleRequestBody string, shareServiceAction func(share.Service)) {
+func testCreateShareServiceAction(t *testing.T, tokn string, testData string, uriEndsWith string, sampleRequestBody string, shareServiceAction func(Service)) {
 	apiServer := testUtil.CreatePostJSONTestRequestServer(t, tokn, testData, uriEndsWith, sampleRequestBody)
 	defer apiServer.Close()
 
@@ -72,12 +70,12 @@ func testCreateShareServiceAction(t *testing.T, tokn string, testData string, ur
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
 func TestGetShare(t *testing.T) {
-	anon := func(shareService share.Service) {
+	anon := func(shareService Service) {
 		volID := "d94a8548-2079-4be0-b21c-0a887acd31ca"
 		result, err := shareService.Show(volID)
 		if err != nil {
@@ -85,7 +83,7 @@ func TestGetShare(t *testing.T) {
 		}
 
 		createdAt, _ := util.NewDateTime(`"2015-09-18T10:25:24.000000"`)
-		expectedShareDetail := share.DetailResponse{
+		expectedShareDetail := DetailResponse{
 			Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 				{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}},
 			Availability_zone:           "nova",
@@ -121,7 +119,7 @@ func TestGetShare(t *testing.T) {
 	testGetShareServiceAction(t, "d94a8548-2079-4be0-b21c-0a887acd31ca", sampleShareDetailData, anon)
 }
 
-func testGetShareServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(share.Service)) {
+func testGetShareServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -139,18 +137,18 @@ func testGetShareServiceAction(t *testing.T, uriEndsWith string, testData string
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
 func TestGetAllShares(t *testing.T) {
-	anon := func(shareService share.Service) {
+	anon := func(shareService Service) {
 		shares, err := shareService.List()
 		if err != nil {
 			t.Error(err)
 		}
 
-		expectedShare := share.Response{
+		expectedShare := Response{
 			ID: "d94a8548-2079-4be0-b21c-0a887acd31ca",
 			Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 				{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}},
@@ -161,7 +159,7 @@ func TestGetAllShares(t *testing.T) {
 	testGetAllSharesServiceAction(t, "shares", sampleSharesData, anon)
 }
 
-func testGetAllSharesServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(share.Service)) {
+func testGetAllSharesServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -179,19 +177,19 @@ func testGetAllSharesServiceAction(t *testing.T, uriEndsWith string, testData st
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
 func TestTailAllShares(t *testing.T) {
-	anon := func(shareService share.Service) {
+	anon := func(shareService Service) {
 		shares, err := shareService.Detail()
 		if err != nil {
 			t.Error(err)
 		}
 
 		createdAt, _ := util.NewDateTime(`"2015-09-16T18:19:50.000000"`)
-		expectedShareDetail := share.DetailResponse{
+		expectedShareDetail := DetailResponse{
 			Links: []map[string]string{{"href": "http://172.18.198.54:8786/v2/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "self"},
 				{"href": "http://172.18.198.54:8786/16e1ab15c35a457e9c2b2aa189f544e1/shares/d94a8548-2079-4be0-b21c-0a887acd31ca", "rel": "bookmark"}},
 			Availability_zone:           "nova",
@@ -227,7 +225,7 @@ func TestTailAllShares(t *testing.T) {
 	testDetailAllSharesServiceAction(t, "shares/detail", sampleSharesDetailData, anon)
 }
 
-func testDetailAllSharesServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(share.Service)) {
+func testDetailAllSharesServiceAction(t *testing.T, uriEndsWith string, testData string, shareServiceAction func(Service)) {
 	anon := func(req *http.Request) {
 		reqURL := req.URL.String()
 		if !strings.HasSuffix(reqURL, uriEndsWith) {
@@ -245,12 +243,12 @@ func testDetailAllSharesServiceAction(t *testing.T, uriEndsWith string, testData
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
 func TestDeleteShare(t *testing.T) {
-	anon := func(shareService share.Service) {
+	anon := func(shareService Service) {
 		volID := "d94a8548-2079-4be0-b21c-0a887acd31ca"
 		err := shareService.Delete(volID)
 		if err != nil {
@@ -261,7 +259,7 @@ func TestDeleteShare(t *testing.T) {
 	testDeleteShareServiceAction(t, "shares/d94a8548-2079-4be0-b21c-0a887acd31ca", anon)
 }
 
-func testDeleteShareServiceAction(t *testing.T, uriEndsWith string, shareServiceAction func(share.Service)) {
+func testDeleteShareServiceAction(t *testing.T, uriEndsWith string, shareServiceAction func(Service)) {
 	apiServer := testUtil.CreateDeleteTestRequestServer(t, tokn, uriEndsWith)
 	defer apiServer.Close()
 
@@ -273,7 +271,7 @@ func testDeleteShareServiceAction(t *testing.T, uriEndsWith string, shareService
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 

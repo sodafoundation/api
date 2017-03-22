@@ -80,8 +80,30 @@ func DeleteVolume(resourceType string, volID string) (string, error) {
 	}
 }
 
-func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
-	result, err := dock.MountVolume(resourceType, volID, host, mountpoint)
+func AttachVolume(resourceType, volID, host, device string) (string, error) {
+	result, err := dock.AttachVolume(resourceType, volID, host, device)
+
+	if err != nil {
+		log.Println("Error occured in adapter module when attach volume!")
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func DetachVolume(resourceType, volID, attachment string) (string, error) {
+	result, err := dock.DetachVolume(resourceType, volID, attachment)
+
+	if err != nil {
+		log.Println("Error occured in adapter module when detach volume!")
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func MountVolume(mountDir, device, fsType string) (string, error) {
+	result, err := dock.MountVolume(mountDir, device, fsType)
 
 	if err != nil {
 		log.Println("Error occured in adapter module when mount volume!")
@@ -91,8 +113,8 @@ func MountVolume(resourceType, volID, host, mountpoint string) (string, error) {
 	}
 }
 
-func UnmountVolume(resourceType, volID, attachment string) (string, error) {
-	result, err := dock.UnmountVolume(resourceType, volID, attachment)
+func UnmountVolume(mountDir string) (string, error) {
+	result, err := dock.UnmountVolume(mountDir)
 
 	if err != nil {
 		log.Println("Error occured in adapter module when unmount volume!")
