@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/opensds/opensds/pkg/api"
-	"github.com/opensds/opensds/pkg/api/v1/volumes"
+	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/opensds/opensds/pkg/controller/api/v1/volumes"
 
 	"github.com/spf13/cobra"
 )
@@ -54,12 +54,6 @@ var volumeListCommand = &cobra.Command{
 	Use:   "list",
 	Short: "list all volumes in the cluster",
 	Run:   volumeListAction,
-}
-
-var volumeUpdateCommand = &cobra.Command{
-	Use:   "update <id>",
-	Short: "update a volume in the cluster",
-	Run:   volumeUpdateAction,
 }
 
 var volumeDeleteCommand = &cobra.Command{
@@ -100,6 +94,7 @@ var falseAllVolumesDetailResponse api.VolumeDetailResponse
 var (
 	volResourceType string
 	volName         string
+	volType         string
 	volAllowDetails bool
 	host            string
 	attachDevice    string
@@ -116,15 +111,15 @@ func init() {
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
-	volumeCommand.AddCommand(volumeUpdateCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
 	volumeCommand.AddCommand(volumeAttachCommand)
 	volumeCommand.AddCommand(volumeDetachCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
+	volumeCreateCommand.Flags().StringVarP(&volType, "type", "t", "", "the type of created volume")
 	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
 	volumeAttachCommand.Flags().StringVarP(&host, "host", "o", defaultHost, "the name of attaching host")
 	volumeAttachCommand.Flags().StringVarP(&attachDevice, "path", "p", "/mnt", "the path of attaching device")
-	volumeMountCommand.Flags().StringVarP(&fsType, "type", "t", "ext4", "the file system type")
+	volumeMountCommand.Flags().StringVarP(&fsType, "type", "t", "", "the file system type")
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -147,7 +142,8 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	volumeRequest := volumes.VolumeRequest{
 		ResourceType: volResourceType,
 		Name:         volName,
-		Size:         size,
+		VolumeType:   volType,
+		Size:         int32(size),
 	}
 	result, err := volumes.CreateVolume(volumeRequest)
 	if err != nil {
@@ -203,31 +199,6 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	} else {
 		if reflect.DeepEqual(result, falseAllVolumesResponse) {
 			fmt.Println("List volumes failed!")
-		} else {
-			rbody, _ := json.Marshal(result)
-			fmt.Printf("%s\n", string(rbody))
-		}
-	}
-}
-
-func volumeUpdateAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	volumeRequest := volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		Id:           args[0],
-		Name:         volName,
-	}
-	result, err := volumes.UpdateVolume(volumeRequest)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if reflect.DeepEqual(result, falseVolumeResponse) {
-			fmt.Println("Update volume failed!")
 		} else {
 			rbody, _ := json.Marshal(result)
 			fmt.Printf("%s\n", string(rbody))
