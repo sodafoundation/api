@@ -12,11 +12,11 @@
 
 3. cd opensds (import necessary packages)
 
-   go get github.com/spf13/cobra
+   go get github.com/opensds/opensds/cmd/osdsctl
 
-   go get github.com/astaxie/beego
+   go get github.com/opensds/opensds/cmd/osdslet
 
-   go get github.com/coreos/etcd/client
+   go get github.com/opensds/opensds/cmd/osdsdock
    
 4. cd cmd/sdslet
 
@@ -25,25 +25,35 @@
 5. cd cmd/sdsctl
 
    go buld
+
+6. cd cmd/sdsdock
+
+   go build
    
-6. cp cmd/sdslet/sdslet /usr/local/bin
+7. cp cmd/sdslet/sdslet /usr/local/bin
 
    cp cmd/sdsctl/sdsctl /usr/local/bin
 
+   cp cmd/sdsdock/sdsdock /usr/local/bin
+
 7. vim examples/config.json (config backend storage credential information)
+
+   vim examples/dock_route.json (config dock route table in controller module)
+
+   vim examples/dock_node.json (config dock node in dock module)
 
    sudo mkdir /etc/opensds
 
-   sudo cp examples/config.json /etc/opensds/
+   sudo cp examples/*.json /etc/opensds/
 
-8. sudo touch /var/log/opensds.log (create OpenSDS logging file)
+8. sudo mkdir /var/log/opensds (create OpenSDS logging directory)
 
 #### Run
 
-* Make sure **etcd** is up
+* Start **sdsdock** with root access (for logging purpose)
 
 ```sh
-./bin/etcd
+sudo sdsdock //suppose the user has copied the compiled binary to /usr/local/bin
 ```
 
 * Start **sdslet** with root access (for logging purpose)

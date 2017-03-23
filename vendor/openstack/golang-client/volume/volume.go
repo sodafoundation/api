@@ -49,23 +49,21 @@ type Service interface {
 }
 
 type volumeService struct {
-	Session openstack.Session
-	Client  http.Client
+	Session *openstack.Session
+	Client  *http.Client
 	URL     string
 }
 
 func NewService(
-	session openstack.Session,
-	client http.Client,
-	url string) (*volumeService, error) {
+	session *openstack.Session,
+	client *http.Client,
+	url string) *volumeService {
 
-	vs := &volumeService{
+	return &volumeService{
 		Session: session,
 		Client:  client,
 		URL:     url,
 	}
-
-	return vs, nil
 }
 
 type RequestBody struct {

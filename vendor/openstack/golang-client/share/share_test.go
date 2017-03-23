@@ -36,13 +36,15 @@ var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
 
 func TestCreateShare(t *testing.T) {
 	anon := func(shareService Service) {
-		requestBody := RequestBody{}
-		requestBody.Name = "My_share"
-		requestBody.Size = 1
-		requestBody.Share_proto = "NFS"
-		requestBody.Share_type = "g-nfs"
-		body := CreateBody{requestBody}
-		result, err := shareService.Create(&body)
+		body := &CreateBody{
+			ShareBody: RequestBody{
+				Name:        "My_share",
+				Size:        1,
+				Share_proto: "NFS",
+				Share_type:  "g-nfs",
+			},
+		}
+		result, err := shareService.Create(body)
 		if err != nil {
 			t.Error(err)
 		}
@@ -70,7 +72,7 @@ func testCreateShareServiceAction(t *testing.T, tokn string, testData string, ur
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService := NewService(sess, http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
@@ -137,7 +139,7 @@ func testGetShareServiceAction(t *testing.T, uriEndsWith string, testData string
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService := NewService(sess, http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
@@ -177,7 +179,7 @@ func testGetAllSharesServiceAction(t *testing.T, uriEndsWith string, testData st
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService := NewService(sess, http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
@@ -243,7 +245,7 @@ func testDetailAllSharesServiceAction(t *testing.T, uriEndsWith string, testData
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService := NewService(sess, http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 
@@ -271,7 +273,7 @@ func testDeleteShareServiceAction(t *testing.T, uriEndsWith string, shareService
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	shareService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	shareService := NewService(sess, http.DefaultClient, apiServer.URL)
 	shareServiceAction(shareService)
 }
 

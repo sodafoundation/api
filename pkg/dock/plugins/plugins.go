@@ -70,17 +70,21 @@ type SharePlugin interface {
 }
 
 type cinderConfig struct {
-	Host        string `json:"host"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	ProjectName string `json:"project_name"`
+	Host        string   `json:"host"`
+	Methods     []string `json:"methods"`
+	Username    string   `json:"username"`
+	Password    string   `json:"password"`
+	ProjectId   string   `json:"projectId"`
+	ProjectName string   `json:"projectName"`
 }
 
 type manilaConfig struct {
-	Host        string `json:"host"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	ProjectName string `json:"project_name"`
+	Host        string   `json:"host"`
+	Methods     []string `json:"methods"`
+	Username    string   `json:"username"`
+	Password    string   `json:"password"`
+	ProjectId   string   `json:"projectId"`
+	ProjectName string   `json:"projectName"`
 }
 
 type coprHDConfig struct {
@@ -100,15 +104,16 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 
 	switch resourceType {
 	case "cinder":
-		var plugin VolumePlugin = &cinder.CinderPlugin{
+		return &cinder.CinderPlugin{
 			Host:        config.Cinder.Host,
+			Methods:     config.Cinder.Methods,
 			Username:    config.Cinder.Username,
 			Password:    config.Cinder.Password,
+			ProjectId:   config.Cinder.ProjectId,
 			ProjectName: config.Cinder.ProjectName,
-		}
-		return plugin, nil
+		}, nil
 	case "coprhd":
-		var plugin VolumePlugin = &coprhd.Driver{
+		return &coprhd.Driver{
 			Url:   config.CoprHD.Host,
 			Creds: url.UserPassword(config.CoprHD.Username, config.CoprHD.Password),
 			HttpClient: &http.Client{
@@ -116,8 +121,7 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 				},
 			},
-		}
-		return plugin, nil
+		}, nil
 	default:
 		err := errors.New("Can't find this resource type in backend storage.")
 		return nil, err
@@ -129,13 +133,14 @@ func InitSP(resourceType string) (SharePlugin, error) {
 
 	switch resourceType {
 	case "manila":
-		var plugin SharePlugin = &manila.ManilaPlugin{
+		return &manila.ManilaPlugin{
 			Host:        config.Manila.Host,
+			Methods:     config.Manila.Methods,
 			Username:    config.Manila.Username,
 			Password:    config.Manila.Password,
+			ProjectId:   config.Manila.ProjectId,
 			ProjectName: config.Manila.ProjectName,
-		}
-		return plugin, nil
+		}, nil
 	default:
 		err := errors.New("Can't find this resource type in backend storage.")
 		return nil, err
@@ -145,6 +150,7 @@ func InitSP(resourceType string) (SharePlugin, error) {
 // getConfig provides access to credentials in backend resource plugins.
 func getConfig() pluginsConfig {
 	var config pluginsConfig
+
 	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
 	if err != nil {
 		log.Println("ReadFile json failed:", err)

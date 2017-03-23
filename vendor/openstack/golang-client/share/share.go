@@ -45,23 +45,21 @@ type Service interface {
 }
 
 type shareService struct {
-	Session openstack.Session
-	Client  http.Client
+	Session *openstack.Session
+	Client  *http.Client
 	URL     string
 }
 
 func NewService(
-	session openstack.Session,
-	client http.Client,
-	url string) (*shareService, error) {
+	session *openstack.Session,
+	client *http.Client,
+	url string) *shareService {
 
-	ss := &shareService{
+	return &shareService{
 		Session: session,
 		Client:  client,
 		URL:     url,
 	}
-
-	return ss, nil
 }
 
 type RequestBody struct {
@@ -150,8 +148,10 @@ func createShare(ss shareService, reqBody *CreateBody) (Response, error) {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
+
 	log.Printf("Start POST request to create share, url = %s, body = %s\n",
 		reqURL.String(), body)
+
 	resp, err := ss.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
 		log.Println("POST response error:", err)
@@ -193,7 +193,9 @@ func getShare(ss shareService, id string) (DetailResponse, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to get share, url =", reqURL.String())
+
 	resp, err := ss.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -235,7 +237,9 @@ func getAllShares(ss shareService) ([]Response, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to get all shares, url =", reqURL.String())
+
 	resp, err := ss.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -277,7 +281,9 @@ func detailAllShares(ss shareService) ([]DetailResponse, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to detail all shares, url =", reqURL.String())
+
 	resp, err := ss.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -317,7 +323,9 @@ func deleteShare(ss shareService, id string) error {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start DELETE request to delete share, url =", reqURL.String())
+
 	resp, err := ss.Session.Delete(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("DELETE response error:", err)
