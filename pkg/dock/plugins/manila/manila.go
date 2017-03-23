@@ -25,8 +25,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
+	// "time"
 
+	"openstack/golang-client/auth"
 	"openstack/golang-client/share"
 
 	"git.openstack.org/openstack/golang-client/openstack"
@@ -34,8 +35,10 @@ import (
 
 type ManilaPlugin struct {
 	Host        string
+	Methods     []string
 	Username    string
 	Password    string
+	ProjectId   string
 	ProjectName string
 }
 
@@ -55,14 +58,17 @@ func (plugin *ManilaPlugin) CreateShare(name string, shrType string, shrProto st
 		return "", err
 	}
 
-	//Configure HTTP request body, the body is defined in share package.
-	requestBody := share.RequestBody{}
-	requestBody.Name = name
-	requestBody.Size = size
-	requestBody.Share_proto = shrProto
-	requestBody.Share_type = shrType
-	body := share.CreateBody{requestBody}
-	share, err := shareService.Create(&body)
+	//Configure create request body, the body is defined in share package.
+	body := &share.CreateBody{
+		ShareBody: share.RequestBody{
+			Name:        name,
+			Size:        size,
+			Share_proto: shrProto,
+			Share_type:  shrType,
+		},
+	}
+
+	share, err := shareService.Create(body)
 	if err != nil {
 		log.Println("Cannot create file share:", err)
 		return "", err
@@ -145,21 +151,25 @@ func (plugin *ManilaPlugin) DeleteShare(shrID string) (string, error) {
 }
 
 func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
-	creds := openstack.AuthOpts{
+	creds := auth.AuthOpts{
 		AuthUrl:     plugin.Host,
+		Methods:     plugin.Methods,
 		Username:    plugin.Username,
 		Password:    plugin.Password,
+		ProjectId:   plugin.ProjectId,
 		ProjectName: plugin.ProjectName,
 	}
-	auth, err := openstack.DoAuthRequest(creds)
+	auth, err := auth.DoAuthRequestV3(creds)
 	if err != nil {
 		log.Fatalln("There was an error authenticating:", err)
 	}
-	if !auth.GetExpiration().After(time.Now()) {
-		log.Fatalln("There was an error. The auth token has an invalid expiration.")
-	}
+	/*
+		if !auth.GetExpiration().After(time.Now()) {
+			log.Fatalln("There was an error. The auth token has an invalid expiration.")
+		}
+	*/
 
-	// Find the endpoint for the file share service.
+	// Find the endpoint for the share v2 service.
 	url, err := auth.GetEndpoint("sharev2", "")
 	if url == "" || err != nil {
 		log.Fatalln("Share service url not found during authentication.")
@@ -176,6 +186,6 @@ func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
 		log.Fatalln("Error creating new Session:", err)
 	}
 
-	shareService, _ := share.NewService(*sess, *http.DefaultClient, url)
+	shareService := share.NewService(sess, http.DefaultClient, url)
 	return shareService, nil
 }
