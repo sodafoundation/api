@@ -36,12 +36,14 @@ var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
 
 func TestCreateVolume(t *testing.T) {
 	anon := func(volumeService Service) {
-		requestBody := RequestBody{}
-		requestBody.Name = "myvol1"
-		requestBody.VolumeType = "lvm"
-		requestBody.Size = 2
-		body := CreateBody{requestBody}
-		result, err := volumeService.Create(&body)
+		body := &CreateBody{
+			VolumeBody: RequestBody{
+				Name:       "myvol1",
+				VolumeType: "lvm",
+				Size:       2,
+			},
+		}
+		result, err := volumeService.Create(body)
 		if err != nil {
 			t.Error(err)
 		}
@@ -71,7 +73,7 @@ func testCreateVolumeServiceAction(t *testing.T, tokn string, testData string, u
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService := NewService(sess, http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
@@ -131,7 +133,7 @@ func testGetVolumeServiceAction(t *testing.T, uriEndsWith string, testData strin
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService := NewService(sess, http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
@@ -173,7 +175,7 @@ func testGetAllVolumesServiceAction(t *testing.T, uriEndsWith string, testData s
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService := NewService(sess, http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
@@ -233,7 +235,7 @@ func testDetailAllVolumesServiceAction(t *testing.T, uriEndsWith string, testDat
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService := NewService(sess, http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 
@@ -261,7 +263,7 @@ func testDeleteVolumeServiceAction(t *testing.T, uriEndsWith string, volumeServi
 		},
 	}
 	sess, _ := openstack.NewSession(http.DefaultClient, auth, nil)
-	volumeService, _ := NewService(*sess, *http.DefaultClient, apiServer.URL)
+	volumeService := NewService(sess, http.DefaultClient, apiServer.URL)
 	volumeServiceAction(volumeService)
 }
 

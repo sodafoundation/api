@@ -26,8 +26,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
+	// "time"
 
+	"openstack/golang-client/auth"
 	"openstack/golang-client/volume"
 
 	"git.openstack.org/openstack/golang-client/openstack"
@@ -35,8 +36,10 @@ import (
 
 type CinderPlugin struct {
 	Host        string
+	Methods     []string
 	Username    string
 	Password    string
+	ProjectId   string
 	ProjectName string
 }
 
@@ -56,13 +59,16 @@ func (plugin *CinderPlugin) CreateVolume(name, volType string, size int32) (stri
 		return "", err
 	}
 
-	//Configure HTTP request body, the body is defined in volume package.
-	requestBody := volume.RequestBody{}
-	requestBody.Name = name
-	requestBody.VolumeType = volType
-	requestBody.Size = size
-	body := volume.CreateBody{requestBody}
-	volume, err := volumeService.Create(&body)
+	//Configure create request body, the body is defined in volume package.
+	body := &volume.CreateBody{
+		VolumeBody: volume.RequestBody{
+			Name:       name,
+			VolumeType: volType,
+			Size:       size,
+		},
+	}
+
+	volume, err := volumeService.Create(body)
 	if err != nil {
 		log.Println("Cannot create volume:", err)
 		return "", err
@@ -162,11 +168,15 @@ func (plugin *CinderPlugin) AttachVolume(volID, host, device string) (string, er
 		return "", err
 	}
 
-	requestBody := volume.RequestBody{}
-	requestBody.HostName = host
-	requestBody.Mountpoint = device
-	body := volume.AttachBody{requestBody}
-	err = volumeService.Attach(volID, &body)
+	//Configure attach request body, the body is defined in volume package.
+	body := &volume.AttachBody{
+		VolumeBody: volume.RequestBody{
+			HostName:   host,
+			Mountpoint: device,
+		},
+	}
+
+	err = volumeService.Attach(volID, body)
 	if err != nil {
 		log.Println("Cannot attach volume:", err)
 		return "", err
@@ -194,10 +204,14 @@ func (plugin *CinderPlugin) DetachVolume(volID, attachment string) (string, erro
 		return "", err
 	}
 
-	requestBody := volume.RequestBody{}
-	requestBody.AttachmentID = attachment
-	body := volume.DetachBody{requestBody}
-	err = volumeService.Detach(volID, &body)
+	//Configure detach request body, the body is defined in volume package.
+	body := &volume.DetachBody{
+		VolumeBody: volume.RequestBody{
+			AttachmentID: attachment,
+		},
+	}
+
+	err = volumeService.Detach(volID, body)
 	if err != nil {
 		log.Println("Cannot detach volume:", err)
 		return "", err
@@ -216,21 +230,25 @@ we thought it could be solved by make this function a goroutine.
 
 */
 func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
-	creds := openstack.AuthOpts{
+	creds := auth.AuthOpts{
 		AuthUrl:     plugin.Host,
+		Methods:     plugin.Methods,
 		Username:    plugin.Username,
 		Password:    plugin.Password,
+		ProjectId:   plugin.ProjectId,
 		ProjectName: plugin.ProjectName,
 	}
-	auth, err := openstack.DoAuthRequest(creds)
+	auth, err := auth.DoAuthRequestV3(creds)
 	if err != nil {
 		log.Fatalln("There was an error authenticating:", err)
 	}
-	if !auth.GetExpiration().After(time.Now()) {
-		log.Fatalln("There was an error. The auth token has an invalid expiration.")
-	}
+	/*
+		if !auth.GetExpiration().After(time.Now()) {
+			log.Fatalln("There was an error. The auth token has an invalid expiration.")
+		}
+	*/
 
-	// Find the endpoint for the volume service.
+	// Find the endpoint for the volume v2 service.
 	url, err := auth.GetEndpoint("volumev2", "")
 	if url == "" || err != nil {
 		log.Fatalln("Volume service url not found during authentication.")
@@ -247,6 +265,6 @@ func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 		log.Fatalln("Error creating new Session:", err)
 	}
 
-	volumeService, _ := volume.NewService(*sess, *http.DefaultClient, url)
+	volumeService := volume.NewService(sess, http.DefaultClient, url)
 	return volumeService, nil
 }
