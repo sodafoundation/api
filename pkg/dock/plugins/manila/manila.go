@@ -150,6 +150,22 @@ func (plugin *ManilaPlugin) DeleteShare(shrID string) (string, error) {
 	return result, nil
 }
 
+func (plugin *ManilaPlugin) AttachShare(shrID string) (string, error) {
+	return AttachShareToHost(plugin, shrID)
+}
+
+func (plugin *ManilaPlugin) DetachShare(device string) (string, error) {
+	return DetachShareFromHost(plugin, device)
+}
+
+func (plugin *ManilaPlugin) MountShare(mountDir, device, fsType string) (string, error) {
+	return MountShareToHost(mountDir, device, fsType)
+}
+
+func (plugin *ManilaPlugin) UnmountShare(mountDir string) (string, error) {
+	return UnmountShareFromHost(mountDir)
+}
+
 func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
 	creds := auth.AuthOpts{
 		AuthUrl:     plugin.Host,

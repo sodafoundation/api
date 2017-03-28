@@ -41,30 +41,67 @@ type ShareController struct {
 	beego.Controller
 }
 
+func (this *ShareController) Post() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	resourceType := this.Ctx.Input.Param(":resource")
+	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		this.Ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{
+		ResourceType: resourceType,
+	}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		this.Ctx.Output.Body(resBody)
+	}
+
+	result, err := shares.CreateShare(shareRequest)
+	if err != nil {
+		log.Println(err)
+		resBody, _ := json.Marshal("Create share failed!")
+		this.Ctx.Output.Body(resBody)
+	} else {
+		if reflect.DeepEqual(result, falseShareResponse) {
+			log.Println("Create share failed!")
+			resBody, _ := json.Marshal("Create share failed!")
+			this.Ctx.Output.Body(resBody)
+		} else {
+			resBody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(resBody)
+		}
+	}
+}
+
 func (this *ShareController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
 	resourceType := this.Ctx.Input.Param(":resource")
-	id := this.Ctx.Input.Param(":id")
 
-	shareRequest := shares.ShareRequest{
+	shareRequest := &shares.ShareRequest{
 		ResourceType: resourceType,
-		Id:           id,
+		AllowDetails: false,
 	}
-	result, err := shares.GetShare(shareRequest)
+	result, err := shares.ListShares(shareRequest)
 	if err != nil {
 		log.Println(err)
-		rbody, _ := json.Marshal("Show share failed!")
-		this.Ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("List shares failed!")
+		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseShareResponse) {
-			log.Println("Show share failed!")
-			rbody, _ := json.Marshal("Show share failed!")
-			this.Ctx.Output.Body(rbody)
+		if reflect.DeepEqual(result, falseAllSharesResponse) {
+			log.Println("List shares failed!")
+			resBody, _ := json.Marshal("List shares failed!")
+			this.Ctx.Output.Body(resBody)
 		} else {
-			rbody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(rbody)
+			resBody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(resBody)
 		}
 	}
 }
@@ -72,8 +109,8 @@ func (this *ShareController) Get() {
 func (this *ShareController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	rbody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(rbody)
+	resBody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(resBody)
 }
 
 func (this *ShareController) Delete() {
@@ -81,77 +118,143 @@ func (this *ShareController) Delete() {
 	this.Ctx.Output.ContentType("application/json")
 
 	resourceType := this.Ctx.Input.Param(":resource")
-	id := this.Ctx.Input.Param(":id")
-
-	shareRequest := shares.ShareRequest{
-		ResourceType: resourceType,
-		Id:           id,
-	}
-	result := shares.DeleteShare(shareRequest)
-	rbody, _ := json.Marshal(result)
-	this.Ctx.Output.Body(rbody)
-}
-
-func PostShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	resourceType := ctx.Input.Param(":resource")
-	rbody, err := ioutil.ReadAll(ctx.Request.Body)
+	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read share request body failed:", err)
-		rbody, _ := json.Marshal("Read share request body failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		this.Ctx.Output.Body(resBody)
 	}
 
-	var shareRequest shares.ShareRequest
-	shareRequest.ResourceType = resourceType
-	if err = json.Unmarshal(rbody, &shareRequest); err != nil {
-		log.Println("Parse volume request body failed:", err)
-		rbody, _ := json.Marshal("Parse share request body failed!")
-		ctx.Output.Body(rbody)
+	shareRequest := &shares.ShareRequest{
+		ResourceType: resourceType,
+	}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		this.Ctx.Output.Body(resBody)
 	}
 
-	result, err := shares.CreateShare(shareRequest)
-	if err != nil {
-		log.Println(err)
-		rbody, _ := json.Marshal("Create share failed!")
-		ctx.Output.Body(rbody)
-	} else {
-		if reflect.DeepEqual(result, falseShareResponse) {
-			log.Println("Create share failed!")
-			rbody, _ := json.Marshal("Create share failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(result)
-			ctx.Output.Body(rbody)
-		}
-	}
+	result := shares.DeleteShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.Body(resBody)
 }
 
-func GetAllShares(ctx *context.Context) {
+func GetShare(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
 	resourceType := ctx.Input.Param(":resource")
+	volId := ctx.Input.Param(":id")
 
-	shareRequest := shares.ShareRequest{
+	shareRequest := &shares.ShareRequest{
 		ResourceType: resourceType,
-		AllowDetails: false,
+		Id:           volId,
 	}
-	result, err := shares.ListShares(shareRequest)
+	result, err := shares.GetShare(shareRequest)
 	if err != nil {
 		log.Println(err)
-		rbody, _ := json.Marshal("List shares failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Get share failed!")
+		ctx.Output.Body(resBody)
 	} else {
 		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			log.Println("List shares failed!")
-			rbody, _ := json.Marshal("List shares failed!")
-			ctx.Output.Body(rbody)
+			log.Println("Get share failed!")
+			resBody, _ := json.Marshal("Get share failed!")
+			ctx.Output.Body(resBody)
 		} else {
-			rbody, _ := json.Marshal(result)
-			ctx.Output.Body(rbody)
+			resBody, _ := json.Marshal(result)
+			ctx.Output.Body(resBody)
 		}
 	}
+}
+
+func AttachShare(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := shares.AttachShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
+
+func DetachShare(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := shares.DetachShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
+
+func MountShare(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := shares.MountShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
+
+func UnmountShare(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := shares.UnmountShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
 }

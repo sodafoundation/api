@@ -32,7 +32,7 @@ func CreateVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.CreateVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -45,7 +45,7 @@ func GetVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.GetVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -58,7 +58,7 @@ func ListVolumes(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.ListVolumes(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -71,7 +71,7 @@ func DeleteVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.DeleteVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -84,7 +84,7 @@ func AttachVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.AttachVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -97,7 +97,7 @@ func DetachVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.DetachVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -110,7 +110,7 @@ func MountVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.MountVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -123,7 +123,7 @@ func UnmountVolume(vr *pb.VolumeRequest) *pb.Response {
 	resp, err := client.UnmountVolume(vr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -136,7 +136,7 @@ func CreateShare(sr *pb.ShareRequest) *pb.Response {
 	resp, err := client.CreateShare(sr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -149,7 +149,7 @@ func GetShare(sr *pb.ShareRequest) *pb.Response {
 	resp, err := client.GetShare(sr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -162,7 +162,7 @@ func ListShares(sr *pb.ShareRequest) *pb.Response {
 	resp, err := client.ListShares(sr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 
@@ -175,7 +175,59 @@ func DeleteShare(sr *pb.ShareRequest) *pb.Response {
 	resp, err := client.DeleteShare(sr)
 	if err != nil {
 		falseResp.Status = "Failure"
-		falseResp.Error = fmt.Sprintf("%v", err)
+		falseResp.Error = fmt.Sprintf("%+v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func AttachShare(sr *pb.ShareRequest) *pb.Response {
+	var falseResp *pb.Response
+
+	resp, err := client.AttachShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%+v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func DetachShare(sr *pb.ShareRequest) *pb.Response {
+	var falseResp *pb.Response
+
+	resp, err := client.DetachShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%+v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func MountShare(sr *pb.ShareRequest) *pb.Response {
+	var falseResp *pb.Response
+
+	resp, err := client.MountShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%+v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func UnmountShare(sr *pb.ShareRequest) *pb.Response {
+	var falseResp *pb.Response
+
+	resp, err := client.UnmountShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%+v", err)
 		return falseResp
 	}
 

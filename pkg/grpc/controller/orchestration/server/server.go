@@ -127,10 +127,34 @@ func (os *orchServer) DeleteShare(ctx context.Context, in *pb.ShareRequest) (*pb
 	return orchApi.DeleteShare(in)
 }
 
+// AttachShare implements opensds.OrchestrationServer
+func (ds *orchServer) AttachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive attach share request, sr =", in)
+	return orchApi.AttachShare(in)
+}
+
+// DetachShare implements opensds.OrchestrationServer
+func (ds *orchServer) DetachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive detach share request, sr =", in)
+	return orchApi.DetachShare(in)
+}
+
+// MountShare implements opensds.OrchestrationServer
+func (ds *orchServer) MountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive mount share request, sr =", in)
+	return orchApi.MountShare(in)
+}
+
+// UnmountShare implements opensds.OrchestrationServer
+func (ds *orchServer) UnmountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive unmount share request, sr =", in)
+	return orchApi.UnmountShare(in)
+}
+
 func (os *orchServer) ListenAndServe() {
 	lis, err := net.Listen("tcp", os.Port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %+v", err)
 	}
 
 	log.Println("Orchestration server initialized! Start listening on port:", os.Port)

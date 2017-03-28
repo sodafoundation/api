@@ -127,10 +127,34 @@ func (ds *dockServer) DeleteShare(ctx context.Context, in *pb.ShareRequest) (*pb
 	return dockApi.DeleteShare(in)
 }
 
+// AttachShare implements opensds.DockServer
+func (ds *dockServer) AttachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Dock server receive attach share request, sr =", in)
+	return dockApi.AttachShare(in)
+}
+
+// DetachShare implements opensds.DockServer
+func (ds *dockServer) DetachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Dock server receive detach share request, sr =", in)
+	return dockApi.DetachShare(in)
+}
+
+// MountShare implements opensds.DockServer
+func (ds *dockServer) MountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Dock server receive mount share request, sr =", in)
+	return dockApi.MountShare(in)
+}
+
+// UnmountShare implements opensds.DockServer
+func (ds *dockServer) UnmountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
+	log.Println("Dock server receive unmount share request, sr =", in)
+	return dockApi.UnmountShare(in)
+}
+
 func (ds *dockServer) ListenAndServe() {
 	lis, err := net.Listen("tcp", ds.Port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %+v", err)
 	}
 
 	log.Println("Dock server initialized! Start listening on port:", ds.Port)

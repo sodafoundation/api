@@ -59,9 +59,7 @@ type VolumeRequest struct {
 	AllowDetails bool   `json:"allowDetails"`
 
 	ActionType string `json:"actionType,omitempty"`
-	Host       string `json:"host,omitempty"`
 	Device     string `json:"device,omitempty"`
-	Attachment string `json:"attachment,omitempty"`
 	MountDir   string `json:"mountDir,omitempty"`
 	FsType     string `json:"fsType,omitempty"`
 }
@@ -83,11 +81,11 @@ func (vr VolumeRequest) deleteVolume() *pb.Response {
 }
 
 func (vr VolumeRequest) attachVolume() *pb.Response {
-	return grpcapi.AttachVolume(vr.DockId, vr.ResourceType, vr.Id, vr.Host, vr.Device)
+	return grpcapi.AttachVolume(vr.DockId, vr.ResourceType, vr.Id, vr.VolumeType)
 }
 
 func (vr VolumeRequest) detachVolume() *pb.Response {
-	return grpcapi.DetachVolume(vr.DockId, vr.ResourceType, vr.Id, vr.Attachment)
+	return grpcapi.DetachVolume(vr.DockId, vr.ResourceType, vr.Device)
 }
 
 func (vr VolumeRequest) mountVolume() *pb.Response {
@@ -179,6 +177,7 @@ func AttachVolume(vrd VolumeRequestDeliver) api.DefaultResponse {
 	}
 
 	defaultResponse.Status = "Success"
+	defaultResponse.Message = result.GetMessage()
 	return defaultResponse
 }
 

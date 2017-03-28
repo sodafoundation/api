@@ -29,8 +29,9 @@ type AvailableVersions struct {
 }
 
 type DefaultResponse struct {
-	Error  string `json:"error"`
-	Status string `json:"status"`
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Status  string `json:"status"`
 }
 
 // VolumeResponse is a structure for all properties of
