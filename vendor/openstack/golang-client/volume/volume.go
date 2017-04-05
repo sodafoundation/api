@@ -403,3 +403,89 @@ func detachVolume(vs volumeService, id string, reqBody *DetachBody) error {
 
 	return nil
 }
+
+type ConnectorProperties struct {
+	DoLocalAttach bool   `json:"do_local_attach"`
+	Platform      string `json:"platform"`
+	OsType        string `json:"os_type"`
+	Ip            string `json:"ip"`
+	Host          string `json:"host"`
+	MultiPath     bool   `json:"multipath"`
+	Initiator     string `json:"initiator"`
+}
+
+type Connector struct {
+	ConnectorProperties `json:"connector"`
+}
+
+type InitializeBody struct {
+	Connector `json:"os-initialize_connection"`
+}
+
+type TerminateBody struct {
+	Connector `json:"os-terminateconnection"`
+}
+
+type ConnectionDataContainer interface{}
+
+type ConnectionInfo struct {
+	DriverVolumeType        string `json:"driver_volume_type"`
+	ConnectionDataContainer `json:"data"`
+}
+
+type ConnectionResponse struct {
+	Info ConnectionInfo `json:"connection_info"`
+}
+
+func (vs volumeService) InitializeConnection(
+	id string,
+	reqBody *InitializeBody,
+) (*ConnectionInfo, error) {
+	return initializeConnection(vs, id, reqBody)
+}
+
+func initializeConnection(
+	vs volumeService,
+	id string,
+	reqBody *InitializeBody,
+) (*ConnectionInfo, error) {
+	var fakeCon = &ConnectionInfo{}
+
+	reqURL, err := url.Parse(vs.URL)
+	if err != nil {
+		log.Println("Parse URL error:", err)
+		return fakeCon, err
+	}
+	urlPostFix := "/volumes" + "/" + id + "/action"
+	reqURL.Path += urlPostFix
+
+	var headers = &http.Header{}
+	headers.Set("Content-Type", "application/json")
+	body, _ := json.Marshal(reqBody)
+
+	log.Printf("Start POST request to initialize connection, url = %s, body = %s\n",
+		reqURL.String(), body)
+
+	resp, err := vs.Session.Post(reqURL.String(), nil, headers, &body)
+	if err != nil {
+		log.Println("PUT response error:", err)
+		return fakeCon, err
+	}
+
+	err = util.CheckHTTPResponseStatusCode(resp)
+	if err != nil {
+		return fakeCon, err
+	}
+
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Read response body failed:", err)
+		return fakeCon, err
+	}
+
+	var conResp = &ConnectionResponse{}
+	if err = json.Unmarshal(rbody, conResp); err != nil {
+		return fakeCon, err
+	}
+	return &conResp.Info, nil
+}

@@ -45,3 +45,19 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	return grpcapi.DeleteShare(sr), nil
 }
+
+func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	return grpcapi.AttachShare(sr), nil
+}
+
+func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	return grpcapi.DetachShare(sr), nil
+}
+
+func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	return grpcapi.MountShare(sr), nil
+}
+
+func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	return grpcapi.UnmountShare(sr), nil
+}

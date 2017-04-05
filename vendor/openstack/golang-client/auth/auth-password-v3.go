@@ -22,8 +22,7 @@ import (
 )
 
 type Domain struct {
-	Id string `json:"id"`
-	// Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 type User struct {
@@ -42,7 +41,9 @@ type IdentityEntry struct {
 }
 
 type Project struct {
-	Id string `json:"id"`
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Domain `json:"domain"`
 }
 
 type ScopeEntry struct {
@@ -86,7 +87,7 @@ func NewUserPassV3(ao AuthOpts) (*UserPassV3, error) {
 				PasswordCredentials: PasswordCredentials{
 					User: User{
 						Domain: Domain{
-							Id: "default",
+							Name: "default",
 						},
 						Username: ao.Username,
 						Password: ao.Password,
@@ -95,7 +96,11 @@ func NewUserPassV3(ao AuthOpts) (*UserPassV3, error) {
 			},
 			ScopeEntry: ScopeEntry{
 				Project: Project{
-					Id: ao.ProjectId,
+					Id:   ao.ProjectId,
+					Name: ao.ProjectName,
+					Domain: Domain{
+						Name: "default",
+					},
 				},
 			},
 		},

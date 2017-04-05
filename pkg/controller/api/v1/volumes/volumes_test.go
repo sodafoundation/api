@@ -38,63 +38,61 @@ type FakeVolumeRequest struct {
 	AllowDetails bool   `json:"allowDetails"`
 
 	ActionType string `json:"actionType,omitempty"`
-	Host       string `json:"host,omitempty"`
 	Device     string `json:"device,omitempty"`
-	Attachment string `json:"attachment,omitempty"`
 	MountDir   string `json:"mountDir,omitempty"`
 	FsType     string `json:"fsType,omitempty"`
 }
 
-func (fvr FakeVolumeRequest) createVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) createVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleVolumeData,
 	}
 }
 
-func (fvr FakeVolumeRequest) getVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) getVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleVolumeDetailData,
 	}
 }
 
-func (fvr FakeVolumeRequest) listVolumes() *pb.Response {
+func (fvr *FakeVolumeRequest) listVolumes() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleVolumesData,
 	}
 }
 
-func (fvr FakeVolumeRequest) deleteVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) deleteVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: "Delete volume success!",
 	}
 }
 
-func (fvr FakeVolumeRequest) attachVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) attachVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
-		Message: "Attach volume success!",
+		Message: "/dev/dm-0",
 	}
 }
 
-func (fvr FakeVolumeRequest) detachVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) detachVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: "Detach volume success!",
 	}
 }
 
-func (fvr FakeVolumeRequest) mountVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) mountVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: "Mount volume success!",
 	}
 }
 
-func (fvr FakeVolumeRequest) unmountVolume() *pb.Response {
+func (fvr *FakeVolumeRequest) unmountVolume() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: "Unmount volume success!",
@@ -102,9 +100,9 @@ func (fvr FakeVolumeRequest) unmountVolume() *pb.Response {
 }
 
 func TestCreateVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeCreateRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeCreateRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,9 +131,9 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestGetVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeGetRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeGetRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,9 +174,9 @@ func TestGetVolume(t *testing.T) {
 }
 
 func TestListVolumes(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeListRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeListRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,9 +199,9 @@ func TestListVolumes(t *testing.T) {
 }
 
 func TestDeleteVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeDeleteRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeDeleteRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,9 +213,9 @@ func TestDeleteVolume(t *testing.T) {
 }
 
 func TestAttachVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeAttachRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeAttachRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,9 +227,9 @@ func TestAttachVolume(t *testing.T) {
 }
 
 func TestDetachVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeDetachRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeDetachRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,9 +241,9 @@ func TestDetachVolume(t *testing.T) {
 }
 
 func TestMountVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeMountRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeMountRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,9 +255,9 @@ func TestMountVolume(t *testing.T) {
 }
 
 func TestUnmountVolume(t *testing.T) {
-	var fvr FakeVolumeRequest
+	var fvr = &FakeVolumeRequest{}
 
-	err := json.Unmarshal([]byte(sampleVolumeUnmountRequest), &fvr)
+	err := json.Unmarshal([]byte(sampleVolumeUnmountRequest), fvr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,24 +293,23 @@ var sampleVolumeDeleteRequest = `{
 var sampleVolumeAttachRequest = `{
 	"resourceType":"cinder",
 	"id":"f5fc9874-fc89-4814-a358-23ba83a6115f",
-	"host":"localhost",
-	"device":"/dev/vdc"
+	"volumeType":"lvm"
 }`
 
 var sampleVolumeDetachRequest = `{
 	"resourceType":"cinder",
-	"id":"f5fc9874-fc89-4814-a358-23ba83a6115f",
-	"attachment":"ddb2ac07-ed62-49eb-93da-73b258dd9bec"
+	"device":"/dev/dm-0"
 }`
 
 var sampleVolumeMountRequest = `{
+	"resourceType":"cinder",
 	"mountDir":"/mnt",
 	"device":"/dev/vdc",
-	"id":"f5fc9874-fc89-4814-a358-23ba83a6115f",
 	"fsType":"ext4"
 }`
 
 var sampleVolumeUnmountRequest = `{
+	"resourceType":"cinder",
 	"mountDir":"/mnt"
 }`
 

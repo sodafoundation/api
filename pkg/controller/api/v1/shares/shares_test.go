@@ -37,40 +37,73 @@ type FakeShareRequest struct {
 	ShareType    string `json:"shareType,omitempty"`
 	ShareProto   string `json:"shareProto,omitempty"`
 	AllowDetails bool   `json:"allowDetails"`
+
+	ActionType string `json:"actionType,omitempty"`
+	Device     string `json:"device,omitempty"`
+	MountDir   string `json:"mountDir,omitempty"`
+	FsType     string `json:"fsType,omitempty"`
 }
 
-func (fsr FakeShareRequest) createShare() *pb.Response {
+func (fsr *FakeShareRequest) createShare() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleShareData,
 	}
 }
 
-func (fsr FakeShareRequest) getShare() *pb.Response {
+func (fsr *FakeShareRequest) getShare() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleShareDetailData,
 	}
 }
 
-func (fsr FakeShareRequest) listShares() *pb.Response {
+func (fsr *FakeShareRequest) listShares() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: sampleSharesData,
 	}
 }
 
-func (fsr FakeShareRequest) deleteShare() *pb.Response {
+func (fsr *FakeShareRequest) deleteShare() *pb.Response {
 	return &pb.Response{
 		Status:  "Success",
 		Message: "Delete share success!",
 	}
 }
 
-func TestCreateShare(t *testing.T) {
-	var fsr FakeShareRequest
+func (fsr *FakeShareRequest) attachShare() *pb.Response {
+	return &pb.Response{
+		Status:  "Success",
+		Message: "/dev/dm-0",
+	}
+}
 
-	err := json.Unmarshal([]byte(sampleShareCreateRequest), &fsr)
+func (fsr *FakeShareRequest) detachShare() *pb.Response {
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Detach share success!",
+	}
+}
+
+func (fsr *FakeShareRequest) mountShare() *pb.Response {
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Mount share success!",
+	}
+}
+
+func (fsr *FakeShareRequest) unmountShare() *pb.Response {
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Unmount share success!",
+	}
+}
+
+func TestCreateShare(t *testing.T) {
+	var fsr = &FakeShareRequest{}
+
+	err := json.Unmarshal([]byte(sampleShareCreateRequest), fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,9 +127,9 @@ func TestCreateShare(t *testing.T) {
 }
 
 func TestGetShare(t *testing.T) {
-	var fsr FakeShareRequest
+	var fsr = &FakeShareRequest{}
 
-	err := json.Unmarshal([]byte(sampleShareGetRequest), &fsr)
+	err := json.Unmarshal([]byte(sampleShareGetRequest), fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,9 +177,9 @@ func TestGetShare(t *testing.T) {
 }
 
 func TestListShares(t *testing.T) {
-	var fsr FakeShareRequest
+	var fsr = &FakeShareRequest{}
 
-	err := json.Unmarshal([]byte(sampleShareListRequest), &fsr)
+	err := json.Unmarshal([]byte(sampleShareListRequest), fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,14 +200,70 @@ func TestListShares(t *testing.T) {
 }
 
 func TestDeleteShare(t *testing.T) {
-	var fsr FakeShareRequest
+	var fsr = &FakeShareRequest{}
 
-	err := json.Unmarshal([]byte(sampleShareDeleteRequest), &fsr)
+	err := json.Unmarshal([]byte(sampleShareDeleteRequest), fsr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	result := DeleteShare(fsr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
+	}
+}
+
+func TestAttachShare(t *testing.T) {
+	var fsr = &FakeShareRequest{}
+
+	err := json.Unmarshal([]byte(sampleShareAttachRequest), fsr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := AttachShare(fsr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
+	}
+}
+
+func TestDetachShare(t *testing.T) {
+	var fsr = &FakeShareRequest{}
+
+	err := json.Unmarshal([]byte(sampleShareDetachRequest), fsr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := DetachShare(fsr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
+	}
+}
+
+func TestMountShare(t *testing.T) {
+	var fsr = &FakeShareRequest{}
+
+	err := json.Unmarshal([]byte(sampleShareMountRequest), fsr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := MountShare(fsr)
+	if result.Status != "Success" {
+		t.Fatal(result.Error)
+	}
+}
+
+func TestUnmountShare(t *testing.T) {
+	var fsr = &FakeShareRequest{}
+
+	err := json.Unmarshal([]byte(sampleShareUnmountRequest), fsr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := UnmountShare(fsr)
 	if result.Status != "Success" {
 		t.Fatal(result.Error)
 	}
@@ -201,6 +290,28 @@ var sampleShareListRequest = `{
 var sampleShareDeleteRequest = `{
 	"resourceType":"manila",
 	"id":"d94a8548-2079-4be0-b21c-0a887acd31ca"
+}`
+
+var sampleShareAttachRequest = `{
+	"resourceType":"manila",
+	"id":"d94a8548-2079-4be0-b21c-0a887acd31ca"
+}`
+
+var sampleShareDetachRequest = `{
+	"resourceType":"manila",
+	"device":"/dev/dm-0"
+}`
+
+var sampleShareMountRequest = `{
+	"resourceType":"manila",
+	"mountDir":"/mnt",
+	"device":"/dev/vdc",
+	"fsType":"ext4"
+}`
+
+var sampleShareUnmountRequest = `{
+	"resourceType":"manila",
+	"mountDir":"/mnt"
 }`
 
 var sampleShareData = `{

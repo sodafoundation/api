@@ -17,6 +17,7 @@ package auth
 
 import (
 	"errors"
+	"log"
 	// "time"
 
 	"git.openstack.org/openstack/golang-client/openstack"
@@ -73,6 +74,7 @@ func DoAuthRequestV3(authopts AuthOpts) (openstack.AuthRef, error) {
 	// Start POST request to get authentication token.
 	resp, err := openstack.PostJSON(auth_mod.AuthUrl+"/auth/tokens", nil, nil, auth_mod, authV3)
 	if err != nil {
+		log.Printf("Can't get auth token, cred = %+v\n", auth_mod)
 		return nil, err
 	}
 

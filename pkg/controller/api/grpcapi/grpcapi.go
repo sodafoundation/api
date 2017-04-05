@@ -30,11 +30,11 @@ func CreateVolume(dockId, resourceType, name, volumeType string, size int32) *pb
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Name:        name,
-		VolumeType:  volumeType,
-		Size:        size,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Name:         name,
+		VolumeType:   volumeType,
+		Size:         size,
 	}
 
 	resp, err := client.CreateVolume(vr)
@@ -51,9 +51,9 @@ func GetVolume(dockId, resourceType string, volID string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          volID,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           volID,
 	}
 
 	resp, err := client.GetVolume(vr)
@@ -71,7 +71,7 @@ func ListVolumes(dockId, resourceType string, allowDetails bool) *pb.Response {
 
 	vr := &pb.VolumeRequest{
 		DockId:       dockId,
-		ResoureType:  resourceType,
+		ResourceType: resourceType,
 		AllowDetails: allowDetails,
 	}
 
@@ -89,9 +89,9 @@ func DeleteVolume(dockId, resourceType string, volID string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          volID,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           volID,
 	}
 
 	resp, err := client.DeleteVolume(vr)
@@ -104,15 +104,14 @@ func DeleteVolume(dockId, resourceType string, volID string) *pb.Response {
 	return resp
 }
 
-func AttachVolume(dockId, resourceType, volID, host, device string) *pb.Response {
+func AttachVolume(dockId, resourceType, volID, volType string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          volID,
-		Host:        host,
-		Device:      device,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           volID,
+		VolumeType:   volType,
 	}
 
 	resp, err := client.AttachVolume(vr)
@@ -125,14 +124,13 @@ func AttachVolume(dockId, resourceType, volID, host, device string) *pb.Response
 	return resp
 }
 
-func DetachVolume(dockId, resourceType, volID, attachment string) *pb.Response {
+func DetachVolume(dockId, resourceType, device string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          volID,
-		Attachment:  attachment,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Device:       device,
 	}
 
 	resp, err := client.DetachVolume(vr)
@@ -149,11 +147,11 @@ func MountVolume(dockId, resourceType, mountDir, device, fsType string) *pb.Resp
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		MountDir:    mountDir,
-		Device:      device,
-		FsType:      fsType,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		MountDir:     mountDir,
+		Device:       device,
+		FsType:       fsType,
 	}
 
 	resp, err := client.MountVolume(vr)
@@ -170,9 +168,9 @@ func UnmountVolume(dockId, resourceType, mountDir string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		MountDir:    mountDir,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		MountDir:     mountDir,
 	}
 
 	resp, err := client.UnmountVolume(vr)
@@ -189,12 +187,12 @@ func CreateShare(dockId, resourceType, name, shrType, shrProto string, size int3
 	var falseResp *pb.Response
 
 	sr := &pb.ShareRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Name:        name,
-		ShareType:   shrType,
-		ShareProto:  shrProto,
-		Size:        size,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Name:         name,
+		ShareType:    shrType,
+		ShareProto:   shrProto,
+		Size:         size,
 	}
 
 	resp, err := client.CreateShare(sr)
@@ -211,9 +209,9 @@ func GetShare(dockId, resourceType string, shrID string) *pb.Response {
 	var falseResp *pb.Response
 
 	sr := &pb.ShareRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          shrID,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           shrID,
 	}
 
 	resp, err := client.GetShare(sr)
@@ -231,7 +229,7 @@ func ListShares(dockId, resourceType string, allowDetails bool) *pb.Response {
 
 	sr := &pb.ShareRequest{
 		DockId:       dockId,
-		ResoureType:  resourceType,
+		ResourceType: resourceType,
 		AllowDetails: allowDetails,
 	}
 
@@ -249,12 +247,90 @@ func DeleteShare(dockId, resourceType string, shrID string) *pb.Response {
 	var falseResp *pb.Response
 
 	sr := &pb.ShareRequest{
-		DockId:      dockId,
-		ResoureType: resourceType,
-		Id:          shrID,
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           shrID,
 	}
 
 	resp, err := client.DeleteShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func AttachShare(dockId, resourceType, shrID string) *pb.Response {
+	var falseResp *pb.Response
+
+	sr := &pb.ShareRequest{
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Id:           shrID,
+	}
+
+	resp, err := client.AttachShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func DetachShare(dockId, resourceType, device string) *pb.Response {
+	var falseResp *pb.Response
+
+	sr := &pb.ShareRequest{
+		DockId:       dockId,
+		ResourceType: resourceType,
+		Device:       device,
+	}
+
+	resp, err := client.DetachShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func MountShare(dockId, resourceType, mountDir, device, fsType string) *pb.Response {
+	var falseResp *pb.Response
+
+	sr := &pb.ShareRequest{
+		DockId:       dockId,
+		ResourceType: resourceType,
+		MountDir:     mountDir,
+		Device:       device,
+		FsType:       fsType,
+	}
+
+	resp, err := client.MountShare(sr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func UnmountShare(dockId, resourceType, mountDir string) *pb.Response {
+	var falseResp *pb.Response
+
+	sr := &pb.ShareRequest{
+		DockId:       dockId,
+		ResourceType: resourceType,
+		MountDir:     mountDir,
+	}
+
+	resp, err := client.UnmountShare(sr)
 	if err != nil {
 		falseResp.Status = "Failure"
 		falseResp.Error = fmt.Sprintf("%v", err)

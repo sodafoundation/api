@@ -21,10 +21,8 @@ package northbound
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"log"
-	"os"
 	"reflect"
 
 	"github.com/opensds/opensds/pkg/controller/api"
@@ -43,30 +41,67 @@ type VolumeController struct {
 	beego.Controller
 }
 
+func (this *VolumeController) Post() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	resourceType := this.Ctx.Input.Param(":resource")
+	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
+	if err != nil {
+		log.Println("Read volume request body failed:", err)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.Body(resBody)
+	}
+
+	volumeRequest := &volumes.VolumeRequest{
+		ResourceType: resourceType,
+	}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
+		log.Println("Parse volume request body failed:", err)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.Body(resBody)
+	}
+
+	result, err := volumes.CreateVolume(volumeRequest)
+	if err != nil {
+		log.Println(err)
+		resBody, _ := json.Marshal("Create volume failed!")
+		this.Ctx.Output.Body(resBody)
+	} else {
+		if reflect.DeepEqual(result, falseVolumeResponse) {
+			log.Println("Create volume failed!")
+			resBody, _ := json.Marshal("Create volume failed!")
+			this.Ctx.Output.Body(resBody)
+		} else {
+			resBody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(resBody)
+		}
+	}
+}
+
 func (this *VolumeController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
 	resourceType := this.Ctx.Input.Param(":resource")
-	id := this.Ctx.Input.Param(":id")
 
-	volumeRequest := volumes.VolumeRequest{
+	volumeRequest := &volumes.VolumeRequest{
 		ResourceType: resourceType,
-		Id:           id,
+		AllowDetails: false,
 	}
-	result, err := volumes.GetVolume(volumeRequest)
+	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
 		log.Println(err)
-		rbody, _ := json.Marshal("Show volume failed!")
-		this.Ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("List volumes failed!")
+		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseVolumeResponse) {
-			log.Println("Show volume failed!")
-			rbody, _ := json.Marshal("Show volume failed!")
-			this.Ctx.Output.Body(rbody)
+		if reflect.DeepEqual(result, falseAllVolumesResponse) {
+			log.Println("List volumes failed!")
+			resBody, _ := json.Marshal("List volumes failed!")
+			this.Ctx.Output.Body(resBody)
 		} else {
-			rbody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(rbody)
+			resBody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(resBody)
 		}
 	}
 }
@@ -74,8 +109,8 @@ func (this *VolumeController) Get() {
 func (this *VolumeController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	rbody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(rbody)
+	resBody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(resBody)
 }
 
 func (this *VolumeController) Delete() {
@@ -83,131 +118,143 @@ func (this *VolumeController) Delete() {
 	this.Ctx.Output.ContentType("application/json")
 
 	resourceType := this.Ctx.Input.Param(":resource")
-	id := this.Ctx.Input.Param(":id")
-
-	volumeRequest := volumes.VolumeRequest{
-		ResourceType: resourceType,
-		Id:           id,
-	}
-	result := volumes.DeleteVolume(volumeRequest)
-	rbody, _ := json.Marshal(result)
-	this.Ctx.Output.Body(rbody)
-}
-
-func PostVolume(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	resourceType := ctx.Input.Param(":resource")
-	rbody, err := ioutil.ReadAll(ctx.Request.Body)
+	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
-		rbody, _ := json.Marshal("Read volume request body failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.Body(resBody)
 	}
 
-	var volumeRequest volumes.VolumeRequest
-	volumeRequest.ResourceType = resourceType
-	if err = json.Unmarshal(rbody, &volumeRequest); err != nil {
+	volumeRequest := &volumes.VolumeRequest{
+		ResourceType: resourceType,
+	}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
-		rbody, _ := json.Marshal("Parse volume request body failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.Body(resBody)
 	}
 
-	result, err := volumes.CreateVolume(volumeRequest)
-	if err != nil {
-		log.Println(err)
-		rbody, _ := json.Marshal("Create volume failed!")
-		ctx.Output.Body(rbody)
-	} else {
-		if reflect.DeepEqual(result, falseVolumeResponse) {
-			log.Println("Create volume failed!")
-			rbody, _ := json.Marshal("Create volume failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(result)
-			ctx.Output.Body(rbody)
-		}
-	}
+	result := volumes.DeleteVolume(volumeRequest)
+	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.Body(resBody)
 }
 
-func GetAllVolumes(ctx *context.Context) {
+func GetVolume(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
 	resourceType := ctx.Input.Param(":resource")
+	volId := ctx.Input.Param(":id")
 
-	volumeRequest := volumes.VolumeRequest{
+	volumeRequest := &volumes.VolumeRequest{
 		ResourceType: resourceType,
-		AllowDetails: false,
+		Id:           volId,
 	}
-	result, err := volumes.ListVolumes(volumeRequest)
+	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
 		log.Println(err)
-		rbody, _ := json.Marshal("List volumes failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Get volume failed!")
+		ctx.Output.Body(resBody)
 	} else {
 		if reflect.DeepEqual(result, falseAllVolumesResponse) {
-			log.Println("List volumes failed!")
-			rbody, _ := json.Marshal("List volumes failed!")
-			ctx.Output.Body(rbody)
+			log.Println("Get volume failed!")
+			resBody, _ := json.Marshal("Get volume failed!")
+			ctx.Output.Body(resBody)
 		} else {
-			rbody, _ := json.Marshal(result)
-			ctx.Output.Body(rbody)
+			resBody, _ := json.Marshal(result)
+			ctx.Output.Body(resBody)
 		}
 	}
 }
 
-func PostVolumeAction(ctx *context.Context) {
+func AttachVolume(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
-	resourceType := ctx.Input.Param(":resource")
-	id := ctx.Input.Param(":id")
-	rbody, err := ioutil.ReadAll(ctx.Request.Body)
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
-		rbody, _ := json.Marshal("Read volume request body failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		ctx.Output.Body(resBody)
 	}
 
-	var volumeRequest volumes.VolumeRequest
-	volumeRequest.ResourceType = resourceType
-	volumeRequest.Id = id
-	if err = json.Unmarshal(rbody, &volumeRequest); err != nil {
+	volumeRequest := &volumes.VolumeRequest{}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
-		rbody, _ := json.Marshal("Parse volume request body failed!")
-		ctx.Output.Body(rbody)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		ctx.Output.Body(resBody)
 	}
 
-	switch volumeRequest.ActionType {
-	case "attach":
-		if volumeRequest.Host == "" {
-			volumeRequest.Host, _ = os.Hostname()
-		}
-		if volumeRequest.Device == "" {
-			volumeRequest.Device = "/mnt"
-		}
+	result := volumes.AttachVolume(volumeRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
 
-		result := volumes.AttachVolume(volumeRequest)
-		rbody, _ := json.Marshal(result)
-		ctx.Output.Body(rbody)
-	case "detach":
-		result := volumes.DetachVolume(volumeRequest)
-		rbody, _ := json.Marshal(result)
-		ctx.Output.Body(rbody)
-	case "mount":
-		result := volumes.MountVolume(volumeRequest)
-		rbody, _ := json.Marshal(result)
-		ctx.Output.Body(rbody)
-	case "unmount":
-		result := volumes.UnmountVolume(volumeRequest)
-		rbody, _ := json.Marshal(result)
-		ctx.Output.Body(rbody)
-	default:
-		err := errors.New("The type of volume action is not correct!")
-		log.Println(err)
-		rbody, _ := json.Marshal("The type of volume action is not correct!")
-		ctx.Output.Body(rbody)
+func DetachVolume(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read volume request body failed:", err)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		ctx.Output.Body(resBody)
 	}
+
+	volumeRequest := &volumes.VolumeRequest{}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
+		log.Println("Parse volume request body failed:", err)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := volumes.DetachVolume(volumeRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
+
+func MountVolume(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read volume request body failed:", err)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	volumeRequest := &volumes.VolumeRequest{}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
+		log.Println("Parse volume request body failed:", err)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := volumes.MountVolume(volumeRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
+}
+
+func UnmountVolume(ctx *context.Context) {
+	ctx.Output.Header("Content-Type", "application/json")
+	ctx.Output.ContentType("application/json")
+
+	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		log.Println("Read volume request body failed:", err)
+		resBody, _ := json.Marshal("Read volume request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	volumeRequest := &volumes.VolumeRequest{}
+	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
+		log.Println("Parse volume request body failed:", err)
+		resBody, _ := json.Marshal("Parse volume request body failed!")
+		ctx.Output.Body(resBody)
+	}
+
+	result := volumes.UnmountVolume(volumeRequest)
+	resBody, _ := json.Marshal(result)
+	ctx.Output.Body(resBody)
 }

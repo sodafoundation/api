@@ -24,7 +24,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os/exec"
+	"time"
 )
 
 type DockRoute struct {
@@ -58,7 +60,9 @@ func GetDockAddress(dockId string) (string, error) {
 
 	if dockId == "" {
 		log.Println("Dock id not provided, arrange the address randomly!")
-		return routes[0].Address, nil
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		n := r.Intn(len(routes))
+		return routes[n].Address, nil
 	}
 
 	for _, i := range routes {
