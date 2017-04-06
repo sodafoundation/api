@@ -36,7 +36,7 @@ package client
 import (
 	"log"
 
-	"github.com/opensds/opensds/pkg/controller/metadata"
+	dockRoute "github.com/opensds/opensds/pkg/controller/metadata/dock_route"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -464,9 +464,11 @@ func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
 
 func getDialAddress(dockId string) (string, error) {
 	// Get Dock client host address.
-	address, err := metadata.GetDockAddress(dockId)
+	route, err := dockRoute.GetDockRoute(dockId)
 	if err != nil {
 		return "", err
 	}
+
+	address := route.Address + DOCK_PORT
 	return address, nil
 }

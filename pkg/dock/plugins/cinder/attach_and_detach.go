@@ -108,12 +108,12 @@ func DetachVolumeFromHost(plugin *CinderPlugin, device string) (string, error) {
 
 	log.Printf("Receive connection info: %+v\n", conn)
 
-	_, err := conn.DisconnectVolume()
+	_, err = conn.DisconnectVolume()
 	if err != nil {
 		return "", err
 	}
 
-	err := sendDetachRequest(plugin, volID)
+	err = sendDetachRequest(plugin, volID)
 	if err != nil {
 		return "", err
 	} else {
@@ -155,7 +155,7 @@ func sendDetachRequest(plugin *CinderPlugin, volID string) error {
 	return nil
 }
 
-func getConnectionInfo(plugin *cinder.CinderPlugin, volID string) (*connector.Connector, error) {
+func getConnectionInfo(plugin *CinderPlugin, volID string) (*connector.Connector, error) {
 	isMultipath := false
 	properties, err := connector.GetConnectorProperties(isMultipath)
 	if err != nil {

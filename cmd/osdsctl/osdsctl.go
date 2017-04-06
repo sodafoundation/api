@@ -40,6 +40,7 @@ func init() {
 	rootCommand.AddCommand(versionCommand)
 	rootCommand.AddCommand(shareCommand)
 	rootCommand.AddCommand(volumeCommand)
+	rootCommand.AddCommand(dockCommand)
 }
 
 func main() {

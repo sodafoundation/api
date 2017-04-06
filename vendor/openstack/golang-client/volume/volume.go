@@ -33,6 +33,8 @@ import (
 )
 
 type Service interface {
+	InitializeConnection(id string, reqBody *InitializeBody) (*ConnectionInfo, error)
+
 	Create(reqBody *CreateBody) (Response, error)
 
 	Show(volID string) (DetailResponse, error)

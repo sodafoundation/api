@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	NORTHBOUND_PORT    = ":50048"
-	ORCHESTRATION_PORT = ":50049"
+	NORTHBOUND_PORT    = ":50040"
+	ORCHESTRATION_PORT = ":50041"
 )
 
 func main() {

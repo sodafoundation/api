@@ -81,7 +81,7 @@ func (vr VolumeRequest) deleteVolume() *pb.Response {
 }
 
 func (vr VolumeRequest) attachVolume() *pb.Response {
-	return grpcapi.AttachVolume(vr.DockId, vr.ResourceType, vr.Id, vr.VolumeType)
+	return grpcapi.AttachVolume(vr.DockId, vr.ResourceType, vr.Id)
 }
 
 func (vr VolumeRequest) detachVolume() *pb.Response {
