@@ -38,18 +38,16 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 // The VolumeRequest message containing all properties of
 // a volume request.
 type VolumeRequest struct {
-	ResoureType  string `protobuf:"bytes,1,opt,name=resoureType" json:"resoureType,omitempty"`
+	ResourceType string `protobuf:"bytes,1,opt,name=resourceType" json:"resourceType,omitempty"`
 	Id           string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
 	Name         string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
 	VolumeType   string `protobuf:"bytes,4,opt,name=volumeType" json:"volumeType,omitempty"`
 	Size         int32  `protobuf:"varint,5,opt,name=size" json:"size,omitempty"`
 	AllowDetails bool   `protobuf:"varint,6,opt,name=allowDetails" json:"allowDetails,omitempty"`
-	Host         string `protobuf:"bytes,7,opt,name=host" json:"host,omitempty"`
-	Device       string `protobuf:"bytes,8,opt,name=device" json:"device,omitempty"`
-	Attachment   string `protobuf:"bytes,9,opt,name=attachment" json:"attachment,omitempty"`
-	MountDir     string `protobuf:"bytes,10,opt,name=mountDir" json:"mountDir,omitempty"`
-	FsType       string `protobuf:"bytes,11,opt,name=fsType" json:"fsType,omitempty"`
-	DockId       string `protobuf:"bytes,12,opt,name=dockId" json:"dockId,omitempty"`
+	Device       string `protobuf:"bytes,7,opt,name=device" json:"device,omitempty"`
+	MountDir     string `protobuf:"bytes,8,opt,name=mountDir" json:"mountDir,omitempty"`
+	FsType       string `protobuf:"bytes,9,opt,name=fsType" json:"fsType,omitempty"`
+	DockId       string `protobuf:"bytes,10,opt,name=dockId" json:"dockId,omitempty"`
 }
 
 func (m *VolumeRequest) Reset()                    { *m = VolumeRequest{} }
@@ -57,9 +55,9 @@ func (m *VolumeRequest) String() string            { return proto.CompactTextStr
 func (*VolumeRequest) ProtoMessage()               {}
 func (*VolumeRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *VolumeRequest) GetResoureType() string {
+func (m *VolumeRequest) GetResourceType() string {
 	if m != nil {
-		return m.ResoureType
+		return m.ResourceType
 	}
 	return ""
 }
@@ -99,23 +97,9 @@ func (m *VolumeRequest) GetAllowDetails() bool {
 	return false
 }
 
-func (m *VolumeRequest) GetHost() string {
-	if m != nil {
-		return m.Host
-	}
-	return ""
-}
-
 func (m *VolumeRequest) GetDevice() string {
 	if m != nil {
 		return m.Device
-	}
-	return ""
-}
-
-func (m *VolumeRequest) GetAttachment() string {
-	if m != nil {
-		return m.Attachment
 	}
 	return ""
 }
@@ -144,14 +128,17 @@ func (m *VolumeRequest) GetDockId() string {
 // The ShareRequest message containing all properties of
 // a share request.
 type ShareRequest struct {
-	ResoureType  string `protobuf:"bytes,1,opt,name=resoureType" json:"resoureType,omitempty"`
+	ResourceType string `protobuf:"bytes,1,opt,name=resourceType" json:"resourceType,omitempty"`
 	Id           string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
 	Name         string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
 	Size         int32  `protobuf:"varint,4,opt,name=size" json:"size,omitempty"`
 	ShareType    string `protobuf:"bytes,5,opt,name=shareType" json:"shareType,omitempty"`
 	ShareProto   string `protobuf:"bytes,6,opt,name=shareProto" json:"shareProto,omitempty"`
 	AllowDetails bool   `protobuf:"varint,7,opt,name=allowDetails" json:"allowDetails,omitempty"`
-	DockId       string `protobuf:"bytes,8,opt,name=dockId" json:"dockId,omitempty"`
+	Device       string `protobuf:"bytes,8,opt,name=device" json:"device,omitempty"`
+	MountDir     string `protobuf:"bytes,9,opt,name=mountDir" json:"mountDir,omitempty"`
+	FsType       string `protobuf:"bytes,10,opt,name=fsType" json:"fsType,omitempty"`
+	DockId       string `protobuf:"bytes,11,opt,name=dockId" json:"dockId,omitempty"`
 }
 
 func (m *ShareRequest) Reset()                    { *m = ShareRequest{} }
@@ -159,9 +146,9 @@ func (m *ShareRequest) String() string            { return proto.CompactTextStri
 func (*ShareRequest) ProtoMessage()               {}
 func (*ShareRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (m *ShareRequest) GetResoureType() string {
+func (m *ShareRequest) GetResourceType() string {
 	if m != nil {
-		return m.ResoureType
+		return m.ResourceType
 	}
 	return ""
 }
@@ -206,6 +193,27 @@ func (m *ShareRequest) GetAllowDetails() bool {
 		return m.AllowDetails
 	}
 	return false
+}
+
+func (m *ShareRequest) GetDevice() string {
+	if m != nil {
+		return m.Device
+	}
+	return ""
+}
+
+func (m *ShareRequest) GetMountDir() string {
+	if m != nil {
+		return m.MountDir
+	}
+	return ""
+}
+
+func (m *ShareRequest) GetFsType() string {
+	if m != nil {
+		return m.FsType
+	}
+	return ""
 }
 
 func (m *ShareRequest) GetDockId() string {
@@ -290,6 +298,14 @@ type OrchestrationClient interface {
 	ListShares(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Delete a share
 	DeleteShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Attach a share
+	AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Detach a share
+	DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Mount a share
+	MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Unmount a share
+	UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type orchestrationClient struct {
@@ -408,6 +424,42 @@ func (c *orchestrationClient) DeleteShare(ctx context.Context, in *ShareRequest,
 	return out, nil
 }
 
+func (c *orchestrationClient) AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/AttachShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestrationClient) DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/DetachShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestrationClient) MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/MountShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestrationClient) UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/UnmountShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Orchestration service
 
 type OrchestrationServer interface {
@@ -435,6 +487,14 @@ type OrchestrationServer interface {
 	ListShares(context.Context, *ShareRequest) (*Response, error)
 	// Delete a share
 	DeleteShare(context.Context, *ShareRequest) (*Response, error)
+	// Attach a share
+	AttachShare(context.Context, *ShareRequest) (*Response, error)
+	// Detach a share
+	DetachShare(context.Context, *ShareRequest) (*Response, error)
+	// Mount a share
+	MountShare(context.Context, *ShareRequest) (*Response, error)
+	// Unmount a share
+	UnmountShare(context.Context, *ShareRequest) (*Response, error)
 }
 
 func RegisterOrchestrationServer(s *grpc.Server, srv OrchestrationServer) {
@@ -657,6 +717,78 @@ func _Orchestration_DeleteShare_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orchestration_AttachShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestrationServer).AttachShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Orchestration/AttachShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestrationServer).AttachShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestration_DetachShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestrationServer).DetachShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Orchestration/DetachShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestrationServer).DetachShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestration_MountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestrationServer).MountShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Orchestration/MountShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestrationServer).MountShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestration_UnmountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestrationServer).UnmountShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Orchestration/UnmountShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestrationServer).UnmountShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Orchestration_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "opensds.Orchestration",
 	HandlerType: (*OrchestrationServer)(nil),
@@ -709,6 +841,22 @@ var _Orchestration_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteShare",
 			Handler:    _Orchestration_DeleteShare_Handler,
 		},
+		{
+			MethodName: "AttachShare",
+			Handler:    _Orchestration_AttachShare_Handler,
+		},
+		{
+			MethodName: "DetachShare",
+			Handler:    _Orchestration_DetachShare_Handler,
+		},
+		{
+			MethodName: "MountShare",
+			Handler:    _Orchestration_MountShare_Handler,
+		},
+		{
+			MethodName: "UnmountShare",
+			Handler:    _Orchestration_UnmountShare_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "opensds.proto",
@@ -741,6 +889,14 @@ type DockClient interface {
 	ListShares(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Delete a share
 	DeleteShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Attach a share
+	AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Detach a share
+	DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Mount a share
+	MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
+	// Unmount a share
+	UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type dockClient struct {
@@ -859,6 +1015,42 @@ func (c *dockClient) DeleteShare(ctx context.Context, in *ShareRequest, opts ...
 	return out, nil
 }
 
+func (c *dockClient) AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/AttachShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dockClient) DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/DetachShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dockClient) MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/MountShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dockClient) UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/UnmountShare", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Dock service
 
 type DockServer interface {
@@ -886,6 +1078,14 @@ type DockServer interface {
 	ListShares(context.Context, *ShareRequest) (*Response, error)
 	// Delete a share
 	DeleteShare(context.Context, *ShareRequest) (*Response, error)
+	// Attach a share
+	AttachShare(context.Context, *ShareRequest) (*Response, error)
+	// Detach a share
+	DetachShare(context.Context, *ShareRequest) (*Response, error)
+	// Mount a share
+	MountShare(context.Context, *ShareRequest) (*Response, error)
+	// Unmount a share
+	UnmountShare(context.Context, *ShareRequest) (*Response, error)
 }
 
 func RegisterDockServer(s *grpc.Server, srv DockServer) {
@@ -1108,6 +1308,78 @@ func _Dock_DeleteShare_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Dock_AttachShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).AttachShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/AttachShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).AttachShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_DetachShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).DetachShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/DetachShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).DetachShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_MountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).MountShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/MountShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).MountShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_UnmountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).UnmountShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/UnmountShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).UnmountShare(ctx, req.(*ShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Dock_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "opensds.Dock",
 	HandlerType: (*DockServer)(nil),
@@ -1160,6 +1432,22 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteShare",
 			Handler:    _Dock_DeleteShare_Handler,
 		},
+		{
+			MethodName: "AttachShare",
+			Handler:    _Dock_AttachShare_Handler,
+		},
+		{
+			MethodName: "DetachShare",
+			Handler:    _Dock_DetachShare_Handler,
+		},
+		{
+			MethodName: "MountShare",
+			Handler:    _Dock_MountShare_Handler,
+		},
+		{
+			MethodName: "UnmountShare",
+			Handler:    _Dock_UnmountShare_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "opensds.proto",
@@ -1168,36 +1456,37 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("opensds.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 488 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xec, 0x56, 0x4b, 0x8b, 0x13, 0x41,
-	0x10, 0x36, 0x31, 0x93, 0x4c, 0x2a, 0x89, 0x60, 0xa3, 0x4b, 0xb3, 0x88, 0x2c, 0x39, 0x79, 0xda,
-	0xc3, 0x0a, 0xb2, 0x3e, 0x2e, 0x62, 0x40, 0x04, 0x45, 0x19, 0x1f, 0xf7, 0x36, 0x29, 0xcd, 0xe0,
-	0xcc, 0x74, 0xec, 0xea, 0x59, 0xd1, 0xff, 0xe7, 0x1f, 0xf0, 0xea, 0xcd, 0x5f, 0x62, 0x77, 0x75,
-	0xe7, 0x85, 0x7b, 0x99, 0xc1, 0xd3, 0x92, 0x5b, 0x7d, 0x5f, 0xcd, 0x57, 0xef, 0x86, 0x81, 0x89,
-	0x5e, 0x61, 0x45, 0x0b, 0x3a, 0x5d, 0x19, 0x6d, 0xb5, 0x18, 0x44, 0x38, 0xfd, 0xd9, 0x85, 0xc9,
-	0x07, 0x5d, 0xd4, 0x25, 0x66, 0xf8, 0xb5, 0x46, 0xb2, 0xe2, 0x04, 0x46, 0x06, 0x49, 0xd7, 0x06,
-	0xdf, 0x7d, 0x5f, 0xa1, 0xec, 0x9c, 0x74, 0xee, 0x0d, 0xb3, 0x5d, 0x4a, 0xdc, 0x80, 0x6e, 0xbe,
-	0x90, 0x5d, 0x76, 0x38, 0x4b, 0x08, 0xe8, 0x55, 0xaa, 0x44, 0x79, 0x9d, 0x19, 0xb6, 0xc5, 0x5d,
-	0x80, 0x0b, 0x0e, 0xcb, 0x41, 0x7a, 0xec, 0xd9, 0x61, 0xbc, 0x86, 0xf2, 0x1f, 0x28, 0x13, 0xe7,
-	0x49, 0x32, 0xb6, 0xc5, 0x14, 0xc6, 0xaa, 0x28, 0xf4, 0xb7, 0x19, 0x5a, 0x95, 0x17, 0x24, 0xfb,
-	0xce, 0x97, 0x66, 0x7b, 0x9c, 0xd7, 0x2d, 0x35, 0x59, 0x39, 0x08, 0xb9, 0xbc, 0x2d, 0x8e, 0xa0,
-	0xbf, 0xc0, 0x8b, 0x7c, 0x8e, 0x32, 0x65, 0x36, 0x22, 0x5f, 0x83, 0xb2, 0x56, 0xcd, 0x97, 0x25,
-	0x56, 0x56, 0x0e, 0x43, 0x0d, 0x5b, 0x46, 0x1c, 0x43, 0x5a, 0xea, 0xba, 0xb2, 0xb3, 0xdc, 0x48,
-	0x60, 0xef, 0x06, 0xfb, 0x98, 0x9f, 0x88, 0x6b, 0x1f, 0x85, 0x98, 0x01, 0x71, 0x2e, 0x3d, 0xff,
-	0xf2, 0x62, 0x21, 0xc7, 0x31, 0x17, 0xa3, 0xe9, 0x9f, 0x0e, 0x8c, 0xdf, 0x2e, 0x95, 0xf9, 0xcf,
-	0x63, 0x5c, 0x8f, 0xa9, 0xb7, 0x33, 0xa6, 0x3b, 0x30, 0x24, 0x9f, 0x89, 0xe3, 0x26, 0xfc, 0xf1,
-	0x96, 0xf0, 0x4d, 0x33, 0x78, 0xe3, 0xf7, 0xcc, 0x23, 0x74, 0x4d, 0x6f, 0x99, 0x7f, 0x86, 0x3c,
-	0xb8, 0x64, 0xc8, 0xdb, 0x26, 0xd3, 0xbd, 0x26, 0x33, 0x48, 0x33, 0xa4, 0x95, 0xae, 0x88, 0x07,
-	0x41, 0x56, 0xd9, 0x9a, 0x62, 0x6b, 0x11, 0x09, 0x09, 0x83, 0x12, 0x89, 0xd4, 0x67, 0x8c, 0xad,
-	0xad, 0xa1, 0xb8, 0x05, 0x09, 0x1a, 0xa3, 0x4d, 0x6c, 0x30, 0x80, 0xb3, 0xdf, 0x09, 0x4c, 0x5e,
-	0x9b, 0xf9, 0xd2, 0xcd, 0xcc, 0x28, 0x9b, 0xeb, 0x4a, 0x3c, 0x86, 0xf1, 0x33, 0x83, 0xca, 0x62,
-	0xb8, 0x4b, 0x71, 0x74, 0xba, 0xbe, 0xdd, 0xbd, 0x43, 0x3d, 0xbe, 0xb9, 0xe1, 0xd7, 0x45, 0x4d,
-	0xaf, 0x89, 0x73, 0x18, 0x3e, 0x47, 0xdb, 0x46, 0xf9, 0x08, 0x46, 0x2f, 0x73, 0x8a, 0x52, 0x6a,
-	0xa6, 0x75, 0x25, 0xcf, 0xb0, 0xc0, 0x76, 0x25, 0x3b, 0xf1, 0x53, 0x3e, 0xca, 0x96, 0x62, 0xbf,
-	0xb5, 0x76, 0x62, 0xd7, 0xf2, 0x2b, 0x7f, 0xf0, 0x6d, 0xb4, 0x4f, 0x60, 0xf2, 0xbe, 0x2a, 0xdb,
-	0xaa, 0x1f, 0xc2, 0x28, 0xec, 0x98, 0xdf, 0x8c, 0xb8, 0xbd, 0xf9, 0x66, 0xf7, 0x0d, 0x5d, 0x2e,
-	0x7d, 0x00, 0xa9, 0xdb, 0x70, 0x73, 0xdd, 0x39, 0x80, 0xdf, 0x2f, 0x7f, 0x48, 0x8d, 0x94, 0xae,
-	0xd8, 0xb0, 0xdd, 0xc6, 0x49, 0xcf, 0x7e, 0x25, 0xd0, 0x9b, 0xb9, 0xc7, 0x73, 0x38, 0xea, 0xc3,
-	0x51, 0x5f, 0x95, 0xa3, 0xfe, 0xd8, 0xe7, 0x7f, 0x88, 0xfb, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff,
-	0x4b, 0x38, 0xe8, 0xbc, 0x54, 0x08, 0x00, 0x00,
+	// 501 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xec, 0x56, 0xcd, 0x8a, 0x13, 0x41,
+	0x10, 0x76, 0x63, 0x92, 0x99, 0xa9, 0x24, 0x82, 0x8d, 0x2e, 0xcd, 0x22, 0x22, 0x39, 0x79, 0xda,
+	0xc3, 0x0a, 0xb2, 0xae, 0x5e, 0xc4, 0x80, 0x08, 0x8a, 0x32, 0xfe, 0xdc, 0xdb, 0x49, 0x69, 0x06,
+	0x67, 0xa6, 0x63, 0x57, 0xcf, 0x8a, 0xbe, 0x86, 0x2f, 0xe2, 0x13, 0x78, 0xf5, 0xb5, 0xec, 0xae,
+	0xe9, 0x64, 0x13, 0x34, 0xc2, 0x0c, 0x5e, 0x16, 0x72, 0x9b, 0xaf, 0xaa, 0xbf, 0xea, 0xea, 0xef,
+	0xab, 0x0a, 0x81, 0x89, 0x5e, 0x62, 0x45, 0x73, 0x3a, 0x5e, 0x1a, 0x6d, 0xb5, 0x88, 0x02, 0x9c,
+	0x7e, 0xef, 0xc1, 0xe4, 0x9d, 0x2e, 0xea, 0x12, 0x53, 0xfc, 0x5c, 0x23, 0x59, 0x31, 0x85, 0xb1,
+	0x41, 0xd2, 0xb5, 0xc9, 0xf0, 0xcd, 0xd7, 0x25, 0xca, 0x83, 0x3b, 0x07, 0x77, 0x93, 0x74, 0x2b,
+	0x26, 0xae, 0x41, 0x2f, 0x9f, 0xcb, 0x1e, 0x67, 0xdc, 0x97, 0x10, 0xd0, 0xaf, 0x54, 0x89, 0xf2,
+	0x2a, 0x47, 0xf8, 0x5b, 0xdc, 0x06, 0x38, 0xe7, 0xc2, 0x5c, 0xa5, 0xcf, 0x99, 0x8d, 0x88, 0xe7,
+	0x50, 0xfe, 0x0d, 0xe5, 0xc0, 0x65, 0x06, 0x29, 0x7f, 0xfb, 0xbb, 0x55, 0x51, 0xe8, 0x2f, 0x33,
+	0xb4, 0x2a, 0x2f, 0x48, 0x0e, 0x5d, 0x2e, 0x4e, 0xb7, 0x62, 0xe2, 0x10, 0x86, 0x73, 0x3c, 0xcf,
+	0x33, 0x94, 0x11, 0xd7, 0x0c, 0x48, 0x1c, 0x41, 0x5c, 0xea, 0xba, 0xb2, 0xb3, 0xdc, 0xc8, 0x98,
+	0x33, 0x6b, 0xec, 0x39, 0x1f, 0x88, 0xfb, 0x48, 0x1a, 0x4e, 0x83, 0xb8, 0x96, 0xce, 0x3e, 0x3d,
+	0x9b, 0x4b, 0x08, 0xb5, 0x18, 0x4d, 0x7f, 0xf4, 0x60, 0xfc, 0x7a, 0xa1, 0xcc, 0x7f, 0x17, 0x65,
+	0xf5, 0xe8, 0xfe, 0xc6, 0xa3, 0x6f, 0x41, 0x42, 0xfe, 0x2e, 0x2e, 0x3c, 0xe0, 0xc3, 0x17, 0x01,
+	0x2f, 0x23, 0x83, 0x57, 0xde, 0x37, 0x16, 0xc4, 0xc9, 0x78, 0x11, 0xf9, 0x43, 0xb2, 0xe8, 0x9f,
+	0x92, 0xc5, 0x3b, 0x25, 0x4b, 0x76, 0x4a, 0x06, 0x3b, 0x24, 0x1b, 0x6d, 0x49, 0x96, 0x42, 0x9c,
+	0x22, 0x2d, 0x75, 0x45, 0x7c, 0x86, 0xac, 0xb2, 0x35, 0x05, 0x9d, 0x02, 0x12, 0x12, 0xa2, 0x12,
+	0x89, 0xd4, 0x47, 0x0c, 0x32, 0xad, 0xa0, 0xb8, 0x01, 0x03, 0x34, 0x46, 0x9b, 0x20, 0x56, 0x03,
+	0x4e, 0x7e, 0x45, 0x30, 0x79, 0x69, 0xb2, 0x85, 0x73, 0xc0, 0x28, 0x9b, 0xeb, 0x4a, 0x3c, 0x84,
+	0xf1, 0x13, 0x83, 0xca, 0x62, 0x33, 0xb3, 0xe2, 0xf0, 0x78, 0x35, 0xd7, 0x5b, 0x43, 0x7c, 0x74,
+	0x7d, 0x1d, 0x5f, 0x35, 0x35, 0xbd, 0x22, 0x4e, 0x21, 0x79, 0x8a, 0xb6, 0x0b, 0xf3, 0x0c, 0x46,
+	0xcf, 0x73, 0x0a, 0x54, 0x6a, 0xc7, 0x75, 0x2d, 0xcf, 0xb0, 0xc0, 0x6e, 0x2d, 0x3b, 0xf2, 0x63,
+	0x6b, 0x55, 0xb6, 0xe8, 0x48, 0xf6, 0x13, 0xd0, 0x8d, 0xec, 0x9e, 0xfc, 0xc2, 0xcf, 0x42, 0x17,
+	0xee, 0x23, 0x98, 0xbc, 0xad, 0xca, 0xae, 0xec, 0x07, 0x30, 0x6a, 0x3c, 0xe6, 0x0d, 0x14, 0x37,
+	0xd7, 0x67, 0x36, 0x37, 0xf2, 0xef, 0xd4, 0xfb, 0x10, 0x3b, 0x87, 0xdb, 0xf3, 0x4e, 0x01, 0xbc,
+	0xbf, 0x7c, 0x90, 0x5a, 0x31, 0x5d, 0xb3, 0x8d, 0xbb, 0xed, 0x2f, 0x75, 0xd4, 0xc6, 0xdb, 0x4e,
+	0xd4, 0xc6, 0xd9, 0x4e, 0x4f, 0x65, 0x5f, 0xdb, 0x33, 0xcf, 0x60, 0x1c, 0x5c, 0x6d, 0xcd, 0x3d,
+	0xf9, 0x19, 0x41, 0x7f, 0xe6, 0x7e, 0x28, 0xf6, 0x0b, 0xbc, 0x5f, 0xe0, 0xfd, 0x02, 0x5f, 0xbe,
+	0x05, 0x7e, 0x3f, 0xe4, 0xff, 0x8d, 0xf7, 0x7e, 0x07, 0x00, 0x00, 0xff, 0xff, 0xb2, 0x69, 0xf8,
+	0x12, 0x48, 0x0a, 0x00, 0x00,
 }

@@ -45,58 +45,21 @@ type VolumeRequest struct {
 	ResourceType string `json:"resourceType,omitempty"`
 	Id           string `json:"id,omitempty"`
 	Name         string `json:"name,omitempty"`
+	VolumeType   string `json:"volumeType,omitempty"`
 	Size         int    `json:"size"`
 	AllowDetails bool   `json:"allowDetails"`
 
-	ActionType string `json:"actionType"`
-	Host       string `json:"host,omitempty"`
-	Device     string `json:"device"`
-	Attachment string `json:"attachment,omitempty"`
-	MountDir   string `json:"mountDir"`
-	FsType     string `json:"fsType"`
+	Device   string `json:"device"`
+	MountDir string `json:"mountDir"`
+	FsType   string `json:"fsType"`
 }
 
 // VolumeResponse is a structure for all properties of
 // an volume for a non detailed query
 type VolumeResponse struct {
-	ID          string              `json:"id"`
-	Name        string              `json:"name"`
-	Status      string              `json:"status"`
-	Size        int64               `json:"size"`
-	Volume_type string              `json:"volume_type"`
-	Attachments []map[string]string `json:"attachments"`
-}
-
-// ShareDetailResponse is a structure for all properties of
-// an share for a detailed query
-type ShareDetailResponse struct {
-	Links                    []map[string]string `json:"links"`
-	AvailabilityZone         string              `json:"availability_zone,omitempty"`
-	ShareNetworkId           string              `json:"share_network_id,omitempty"`
-	ExportLocations          []string            `json:"export_locations"`
-	ShareServerId            string              `json:"share_server_id,omitempty"`
-	SnapshotId               string              `json:"snapshot_id,omitempty"`
-	Id                       string              `json:"id,omitempty"`
-	Size                     int                 `json:"size"`
-	ShareType                string              `json:"share_type,omitempty"`
-	ShareTypeName            string              `json:"share_type_name,omitempty"`
-	ExportLocation           string              `json:"export_location,omitempty"`
-	ConsistencyGroupId       string              `json:"consistency_group_id,omitempty"`
-	ProjectId                string              `json:"project_id,omitempty"`
-	Metadata                 map[string]string   `json:"metadata"`
-	Status                   string              `json:"status,omitempty"`
-	AccessRulesStatus        string              `json:"access_rules_status,omitempty"`
-	Description              string              `json:"description,omitempty"`
-	Host                     string              `json:"host,omitempty"`
-	TaskState                string              `json:"task_state,omitempty"`
-	IsPublic                 bool                `json:"is_public"`
-	SnapshotSupport          bool                `json:"snapshot_support"`
-	Name                     string              `json:"name,omitempty"`
-	HasReplicas              bool                `json:"has_replicas"`
-	ReplicationType          string              `json:"replication_type,omitempty"`
-	ShareProto               string              `json:"share_proto,omitempty"`
-	VolumeType               string              `json:"volume_type,omitempty"`
-	SourceCgsnapshotMemberId string              `json:"source_cgsnapshot_member_id,omitempty"`
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Status  string `json:"status"`
 }
 
 type FlexVolumePlugin interface {

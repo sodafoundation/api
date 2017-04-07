@@ -28,12 +28,12 @@ import (
 )
 
 func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.CreateVolume(vr.GetResoureType(),
+	result, err := dock.CreateVolume(vr.GetResourceType(),
 		vr.GetName(),
 		vr.GetVolumeType(),
 		vr.GetSize())
 	if err != nil {
-		log.Println("Error occured in adapter module when create volume:", err)
+		log.Println("Error occured in dock module when create volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -49,9 +49,9 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.GetVolume(vr.GetResoureType(), vr.GetId())
+	result, err := dock.GetVolume(vr.GetResourceType(), vr.GetId())
 	if err != nil {
-		log.Println("Error occured in adapter module when get volume:", err)
+		log.Println("Error occured in dock module when get volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -67,10 +67,10 @@ func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.GetAllVolumes(vr.GetResoureType(),
+	result, err := dock.GetAllVolumes(vr.GetResourceType(),
 		vr.GetAllowDetails())
 	if err != nil {
-		log.Println("Error occured in adapter module when list volumes:", err)
+		log.Println("Error occured in dock module when list volumes:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -86,10 +86,10 @@ func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.DeleteVolume(vr.GetResoureType(),
+	result, err := dock.DeleteVolume(vr.GetResourceType(),
 		vr.GetId())
 	if err != nil {
-		log.Println("Error occured in adapter module when delete volume:", err)
+		log.Println("Error occured in dock module when delete volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -105,12 +105,11 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.AttachVolume(vr.GetResoureType(),
+	result, err := dock.AttachVolume(vr.GetResourceType(),
 		vr.GetId(),
-		vr.GetHost(),
-		vr.GetDevice())
+		vr.GetVolumeType())
 	if err != nil {
-		log.Println("Error occured in adapter module when attach volume:", err)
+		log.Println("Error occured in dock module when attach volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -126,11 +125,10 @@ func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.DetachVolume(vr.GetResoureType(),
-		vr.GetId(),
-		vr.GetAttachment())
+	result, err := dock.DetachVolume(vr.GetResourceType(),
+		vr.GetDevice())
 	if err != nil {
-		log.Println("Error occured in adapter module when detach volume:", err)
+		log.Println("Error occured in dock module when detach volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -146,11 +144,12 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.MountVolume(vr.GetMountDir(),
+	result, err := dock.MountVolume(vr.GetResourceType(),
+		vr.GetMountDir(),
 		vr.GetDevice(),
 		vr.GetFsType())
 	if err != nil {
-		log.Println("Error occured in adapter module when mount volume:", err)
+		log.Println("Error occured in dock module when mount volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -166,9 +165,10 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.UnmountVolume(vr.GetMountDir())
+	result, err := dock.UnmountVolume(vr.GetResourceType(),
+		vr.GetMountDir())
 	if err != nil {
-		log.Println("Error occured in adapter module when unmount volume:", err)
+		log.Println("Error occured in dock module when unmount volume:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),

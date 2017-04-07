@@ -44,7 +44,7 @@ func init() {
 
 func main() {
 	if err := rootCommand.Execute(); err != nil {
-		die("%v", err)
+		die("%+v", err)
 	}
 }
 

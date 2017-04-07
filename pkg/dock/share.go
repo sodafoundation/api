@@ -42,6 +42,14 @@ type ShareDriver interface {
 	GetAllShares(allowDetails bool) (string, error)
 
 	DeleteShare(shrID string) (string, error)
+
+	AttachShare(shrID string) (string, error)
+
+	DetachShare(device string) (string, error)
+
+	MountShare(mountDir, device, fsType string) (string, error)
+
+	UnmountShare(mountDir string) (string, error)
 }
 
 func CreateShare(resourceType, name, shrType, shrProto string, size int32) (string, error) {
@@ -114,6 +122,82 @@ func DeleteShare(resourceType, shrID string) (string, error) {
 	result, err := shareDriver.DeleteShare(shrID)
 	if err != nil {
 		log.Println("Call plugin to delete share failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func AttachShare(resourceType, shrID string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitSP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var shareDriver ShareDriver = plugins
+	result, err := shareDriver.AttachShare(shrID)
+	if err != nil {
+		log.Println("Call plugin to attach share failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func DetachShare(resourceType, device string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitSP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var shareDriver ShareDriver = plugins
+	result, err := shareDriver.DetachShare(device)
+	if err != nil {
+		log.Println("Call plugin to detach share failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func MountShare(resourceType, mountDir, device, fsType string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitSP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var shareDriver ShareDriver = plugins
+	result, err := shareDriver.MountShare(mountDir, device, fsType)
+	if err != nil {
+		log.Println("Call plugin to mount share failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func UnmountShare(resourceType, mountDir string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitSP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var shareDriver ShareDriver = plugins
+	result, err := shareDriver.UnmountShare(mountDir)
+	if err != nil {
+		log.Println("Call plugin to unmount share failed:", err)
 		return "", err
 	} else {
 		return result, nil

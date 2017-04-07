@@ -23,7 +23,6 @@ package cinder
 import (
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	// "time"
@@ -150,75 +149,20 @@ func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 	return result, nil
 }
 
-func (plugin *CinderPlugin) AttachVolume(volID, host, device string) (string, error) {
-	volumeService, err := plugin.getVolumeService()
-	if err != nil {
-		log.Println("Cannot access volume service:", err)
-		return "", err
-	}
-
-	vol, err := volumeService.Show(volID)
-	if err != nil {
-		log.Println("Cannot get volume:", err)
-		return "", err
-	}
-	if vol.Status != "available" {
-		err = errors.New("The status of volume is not available!")
-		log.Println("Cannot attach volume:", err)
-		return "", err
-	}
-
-	//Configure attach request body, the body is defined in volume package.
-	body := &volume.AttachBody{
-		VolumeBody: volume.RequestBody{
-			HostName:   host,
-			Mountpoint: device,
-		},
-	}
-
-	err = volumeService.Attach(volID, body)
-	if err != nil {
-		log.Println("Cannot attach volume:", err)
-		return "", err
-	}
-
-	result := "Attach volume success!"
-	return result, nil
+func (plugin *CinderPlugin) AttachVolume(volID, volType string) (string, error) {
+	return AttachVolumeToHost(plugin, volID, volType)
 }
 
-func (plugin *CinderPlugin) DetachVolume(volID, attachment string) (string, error) {
-	volumeService, err := plugin.getVolumeService()
-	if err != nil {
-		log.Println("Cannot access volume service:", err)
-		return "", err
-	}
+func (plugin *CinderPlugin) DetachVolume(device string) (string, error) {
+	return DetachVolumeFromHost(plugin, device)
+}
 
-	vol, err := volumeService.Show(volID)
-	if err != nil {
-		log.Println("Cannot get volume:", err)
-		return "", err
-	}
-	if vol.Status != "in-use" {
-		err = errors.New("The status of volume is not in-use!")
-		log.Println("Cannot detach volume:", err)
-		return "", err
-	}
+func (plugin *CinderPlugin) MountVolume(mountDir, device, fsType string) (string, error) {
+	return MountVolumeToHost(mountDir, device, fsType)
+}
 
-	//Configure detach request body, the body is defined in volume package.
-	body := &volume.DetachBody{
-		VolumeBody: volume.RequestBody{
-			AttachmentID: attachment,
-		},
-	}
-
-	err = volumeService.Detach(volID, body)
-	if err != nil {
-		log.Println("Cannot detach volume:", err)
-		return "", err
-	}
-
-	result := "Detach volume success!"
-	return result, nil
+func (plugin *CinderPlugin) UnmountVolume(mountDir string) (string, error) {
+	return UnmountVolumeFromHost(mountDir)
 }
 
 /*

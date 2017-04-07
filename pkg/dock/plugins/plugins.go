@@ -49,9 +49,13 @@ type VolumePlugin interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	AttachVolume(volID, host, device string) (string, error)
+	AttachVolume(volID, volType string) (string, error)
 
-	DetachVolume(volID string, attachement string) (string, error)
+	DetachVolume(device string) (string, error)
+
+	MountVolume(mountDir, device, fsType string) (string, error)
+
+	UnmountVolume(mountDir string) (string, error)
 }
 
 type SharePlugin interface {
@@ -67,6 +71,14 @@ type SharePlugin interface {
 	GetAllShares(allowDetails bool) (string, error)
 
 	DeleteShare(shrID string) (string, error)
+
+	AttachShare(shrID string) (string, error)
+
+	DetachShare(device string) (string, error)
+
+	MountShare(mountDir, device, fsType string) (string, error)
+
+	UnmountShare(mountDir string) (string, error)
 }
 
 type cinderConfig struct {
