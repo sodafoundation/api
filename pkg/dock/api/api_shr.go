@@ -28,13 +28,13 @@ import (
 )
 
 func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.CreateShare(sr.GetResoureType(),
+	result, err := dock.CreateShare(sr.GetResourceType(),
 		sr.GetName(),
 		sr.GetShareType(),
 		sr.GetShareProto(),
 		sr.GetSize())
 	if err != nil {
-		log.Println("Error occured in adapter module when create share:", err)
+		log.Println("Error occured in dock module when create share:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -50,9 +50,9 @@ func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.GetShare(sr.GetResoureType(), sr.GetId())
+	result, err := dock.GetShare(sr.GetResourceType(), sr.GetId())
 	if err != nil {
-		log.Println("Error occured in adapter module when get share:", err)
+		log.Println("Error occured in dock module when get share:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -68,10 +68,10 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.GetAllShares(sr.GetResoureType(),
+	result, err := dock.GetAllShares(sr.GetResourceType(),
 		sr.GetAllowDetails())
 	if err != nil {
-		log.Println("Error occured in adapter module when list shares:", err)
+		log.Println("Error occured in dock module when list shares:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),
@@ -87,10 +87,88 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.DeleteShare(sr.GetResoureType(),
+	result, err := dock.DeleteShare(sr.GetResourceType(),
 		sr.GetId())
 	if err != nil {
-		log.Println("Error occured in adapter module when delete share:", err)
+		log.Println("Error occured in dock module when delete share:", err)
+		resp := &pb.Response{
+			Status: "Failure",
+			Error:  fmt.Sprintf("%v", err),
+		}
+		return resp, nil
+	}
+
+	resp := &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}
+	return resp, nil
+}
+
+func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	result, err := dock.AttachShare(sr.GetResourceType(),
+		sr.GetId())
+	if err != nil {
+		log.Println("Error occured in dock module when attach share:", err)
+		resp := &pb.Response{
+			Status: "Failure",
+			Error:  fmt.Sprintf("%v", err),
+		}
+		return resp, nil
+	}
+
+	resp := &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}
+	return resp, nil
+}
+
+func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	result, err := dock.DetachShare(sr.GetResourceType(),
+		sr.GetDevice())
+	if err != nil {
+		log.Println("Error occured in dock module when detach share:", err)
+		resp := &pb.Response{
+			Status: "Failure",
+			Error:  fmt.Sprintf("%v", err),
+		}
+		return resp, nil
+	}
+
+	resp := &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}
+	return resp, nil
+}
+
+func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	result, err := dock.MountShare(sr.GetResourceType(),
+		sr.GetMountDir(),
+		sr.GetDevice(),
+		sr.GetFsType())
+	if err != nil {
+		log.Println("Error occured in dock module when mount share:", err)
+		resp := &pb.Response{
+			Status: "Failure",
+			Error:  fmt.Sprintf("%v", err),
+		}
+		return resp, nil
+	}
+
+	resp := &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}
+	return resp, nil
+}
+
+func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	result, err := dock.UnmountShare(sr.GetResourceType(),
+		sr.GetMountDir())
+	if err != nil {
+		log.Println("Error occured in dock module when unmount share:", err)
 		resp := &pb.Response{
 			Status: "Failure",
 			Error:  fmt.Sprintf("%v", err),

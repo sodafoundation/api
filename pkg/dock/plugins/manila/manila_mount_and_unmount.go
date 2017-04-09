@@ -13,13 +13,12 @@
 //    under the License.
 
 /*
-This module defines an standard table of storage plugin. The default storage
-plugin is Cinder plugin. If you want to use other storage plugin, just modify
-Init() method.
+This module implements manila plugin for OpenSDS. Manila plugin will pass these
+operation requests about share to OpenStack go-client module.
 
 */
 
-package plugins
+package manila
 
 import (
 	"bufio"
@@ -27,8 +26,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-
-	"golang.org/x/sys/unix"
+	// "time"
 )
 
 func isMounted(mountDir string) bool {
@@ -60,93 +58,37 @@ func isMounted(mountDir string) bool {
 	return findmntText == mountDir
 }
 
-func Mount(mountDir, device, fsType string) error {
-	if fsType == "" {
-		err := errors.New("No filesystem type specified!")
-		return err
-	}
-
-	switch fsType {
-	case "nfs":
-		return fsMount(mountDir, device, fsType)
-	default:
-		return blockMount(mountDir, device, fsType)
-	}
-
-}
-
-func blockMount(mountDir, device, fsType string) error {
-	var res unix.Stat_t
-
-	if err := unix.Stat(device, &res); err != nil {
-		log.Println("Could not stat", device, ":", err.Error())
-		return err
-	}
-
-	if res.Mode&unix.S_IFMT != unix.S_IFBLK {
-		err := errors.New("Not a block device: " + device)
-		return err
-	}
-
+func MountShareToHost(mountDir, device, fsType string) (string, error) {
 	if isMounted(mountDir) {
 		err := errors.New("This path has been mounted!")
-		return err
+		return "", err
 	}
 
 	if err := os.MkdirAll(mountDir, 0777); err != nil {
 		log.Println("Could not create directory:", err.Error())
-		return err
-	}
-
-	mountCmd := exec.Command("mount", device, mountDir)
-	if _, err := mountCmd.CombinedOutput(); err != nil {
-		mkfsCmd := exec.Command("mkfs", "-t", fsType, device)
-		if mkfsOut, err := mkfsCmd.CombinedOutput(); err != nil {
-			log.Println("Could not mkfs:", err.Error(), "Output:", string(mkfsOut))
-			return err
-		}
-
-		mountCmd := exec.Command("mount", device, mountDir)
-		if mountOut, err := mountCmd.CombinedOutput(); err != nil {
-			log.Println("Could not mount:", err.Error(), "Output:", string(mountOut))
-			return err
-		}
-	}
-
-	return nil
-}
-
-func fsMount(mountDir, device, fsType string) error {
-	if isMounted(mountDir) {
-		err := errors.New("This path has been mounted!")
-		return err
-	}
-
-	if err := os.MkdirAll(mountDir, 0777); err != nil {
-		log.Println("Could not create directory:", err.Error())
-		return err
+		return "", err
 	}
 
 	mountCmd := exec.Command("mount.nfs", device, mountDir)
 	if mountOut, err := mountCmd.CombinedOutput(); err != nil {
 		log.Println("Could not mount:", err.Error(), "Output:", string(mountOut))
-		return err
+		return "", err
 	}
 
-	return nil
+	return "Mount share success!", nil
 }
 
-func Unmount(mountDir string) error {
+func UnmountShareFromHost(mountDir string) (string, error) {
 	if !isMounted(mountDir) {
 		err := errors.New("This path is not mounted!")
-		return err
+		return "", err
 	}
 
 	umountCmd := exec.Command("umount", "-l", mountDir)
 	if umountOut, err := umountCmd.CombinedOutput(); err != nil {
 		log.Println("Could not unmount:", err.Error(), "Output:", string(umountOut))
-		return err
+		return "", err
 	}
 
-	return nil
+	return "Unmount share success!", nil
 }

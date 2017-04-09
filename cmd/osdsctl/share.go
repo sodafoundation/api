@@ -34,32 +34,56 @@ import (
 
 var shareCommand = &cobra.Command{
 	Use:   "share",
-	Short: "manage shares in the cluster",
+	Short: "manage shares in the specified backend of OpenSDS cluster",
 	Run:   shareAction,
 }
 
 var shareCreateCommand = &cobra.Command{
 	Use:   "create <share_proto> <size>",
-	Short: "create a share in the cluster",
+	Short: "create a share in the specified backend of OpenSDS cluster",
 	Run:   shareCreateAction,
 }
 
 var shareShowCommand = &cobra.Command{
 	Use:   "show <id>",
-	Short: "show a share in the cluster",
+	Short: "show a share in the specified backend of OpenSDS cluster",
 	Run:   shareShowAction,
 }
 
 var shareListCommand = &cobra.Command{
 	Use:   "list",
-	Short: "list shares in the cluster",
+	Short: "list shares in the specified backend of OpenSDS cluster",
 	Run:   shareListAction,
 }
 
 var shareDeleteCommand = &cobra.Command{
 	Use:   "delete <id>",
-	Short: "delete a share in the cluster",
+	Short: "delete a share in the specified backend of OpenSDS cluster",
 	Run:   shareDeleteAction,
+}
+
+var shareAttachCommand = &cobra.Command{
+	Use:   "attach <id>",
+	Short: "attach a share in the specified backend of OpenSDS cluster",
+	Run:   shareAttachAction,
+}
+
+var shareDetachCommand = &cobra.Command{
+	Use:   "detach <device path>",
+	Short: "detach a share with device path in the specified backend of OpenSDS cluster",
+	Run:   shareDetachAction,
+}
+
+var shareMountCommand = &cobra.Command{
+	Use:   "mount <file system> <mount device> <target mount dir>",
+	Short: "mount a share in the specified backend of OpenSDS cluster",
+	Run:   shareMountAction,
+}
+
+var shareUnmountCommand = &cobra.Command{
+	Use:   "unmount <mount dir>",
+	Short: "unmount a share in the specified backend of OpenSDS cluster",
+	Run:   shareUnmountAction,
 }
 
 var falseShareResponse api.ShareResponse
@@ -80,6 +104,10 @@ func init() {
 	shareCommand.AddCommand(shareShowCommand)
 	shareCommand.AddCommand(shareListCommand)
 	shareCommand.AddCommand(shareDeleteCommand)
+	shareCommand.AddCommand(shareAttachCommand)
+	shareCommand.AddCommand(shareDetachCommand)
+	shareCommand.AddCommand(shareMountCommand)
+	shareCommand.AddCommand(shareUnmountCommand)
 	shareCreateCommand.Flags().StringVarP(&shrName, "name", "n", "null", "the name of created share")
 	shareCreateCommand.Flags().StringVarP(&shrType, "type", "t", "", "the type of created share")
 	shareListCommand.Flags().BoolVarP(&shrAllowDetails, "detail", "d", false, "list shares in details")
@@ -100,7 +128,7 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 	shrProto := args[0]
 	size, err := strconv.Atoi(args[1])
 	if err != nil {
-		die("error parsing size %s: %v", args[0], err)
+		die("error parsing size %s: %+v", args[0], err)
 	}
 
 	shareRequest := shares.ShareRequest{
@@ -182,5 +210,71 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.DeleteShare(shareRequest)
-	fmt.Printf("%v\n", result)
+	fmt.Printf("%+v\n", result)
+}
+
+func shareAttachAction(cmd *cobra.Command, args []string) {
+	if len(args) != 2 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	shareRequest := &shares.ShareRequest{
+		ResourceType: shrResourceType,
+		Id:           args[0],
+	}
+
+	result := shares.AttachShare(shareRequest)
+	fmt.Printf("%+v\n", result)
+}
+
+func shareDetachAction(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	shareRequest := shares.ShareRequest{
+		ResourceType: volResourceType,
+		Device:       args[0],
+	}
+
+	result := shares.DetachShare(shareRequest)
+	fmt.Printf("%+v\n", result)
+}
+
+func shareMountAction(cmd *cobra.Command, args []string) {
+	if len(args) != 3 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		FsType:       args[0],
+		Device:       args[1],
+		MountDir:     args[2],
+	}
+
+	result := shares.MountShare(shareRequest)
+	fmt.Printf("%+v\n", result)
+}
+
+func shareUnmountAction(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	shareRequest := shares.ShareRequest{
+		ResourceType: shrResourceType,
+		MountDir:     args[0],
+	}
+
+	result := shares.UnmountShare(shareRequest)
+	fmt.Printf("%+v\n", result)
 }

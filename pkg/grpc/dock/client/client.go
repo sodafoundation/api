@@ -55,7 +55,7 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -63,7 +63,7 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.CreateVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not create: %v\n", err)
+		log.Printf("could not create: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -81,7 +81,7 @@ func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -89,7 +89,7 @@ func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.GetVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not get: %v\n", err)
+		log.Printf("could not get: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -107,7 +107,7 @@ func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -115,7 +115,7 @@ func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.ListVolumes(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not list: %v\n", err)
+		log.Printf("could not list: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -133,7 +133,7 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -141,7 +141,7 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.DeleteVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not delete: %v\n", err)
+		log.Printf("could not delete: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -159,7 +159,7 @@ func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -167,7 +167,7 @@ func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.AttachVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not attach: %v\n", err)
+		log.Printf("could not attach: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -185,7 +185,7 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -193,7 +193,7 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.DetachVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not detach: %v\n", err)
+		log.Printf("could not detach: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -211,7 +211,7 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -219,7 +219,7 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.MountVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not mount: %v\n", err)
+		log.Printf("could not mount: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -237,7 +237,7 @@ func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -245,7 +245,7 @@ func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.UnmountVolume(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not unmount: %v\n", err)
+		log.Printf("could not unmount: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -263,7 +263,7 @@ func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -271,7 +271,7 @@ func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.CreateShare(context.Background(), sr)
 	if err != nil {
-		log.Printf("could not create: %v\n", err)
+		log.Printf("could not create: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -289,7 +289,7 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -297,7 +297,7 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.GetShare(context.Background(), sr)
 	if err != nil {
-		log.Printf("could not get: %v\n", err)
+		log.Printf("could not get: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -315,7 +315,7 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -323,7 +323,7 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.ListShares(context.Background(), sr)
 	if err != nil {
-		log.Printf("could not list: %v\n", err)
+		log.Printf("could not list: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
@@ -341,7 +341,7 @@ func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v\n", err)
+		log.Printf("did not connect: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
@@ -349,11 +349,115 @@ func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	c := pb.NewDockClient(conn)
 	resp, err := c.DeleteShare(context.Background(), sr)
 	if err != nil {
-		log.Printf("could not delete: %v\n", err)
+		log.Printf("could not delete: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
 	log.Println("Dock client receive delete share response, sr =", resp)
+
+	return resp, nil
+}
+
+func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	address, err := getDialAddress(sr.GetDockId())
+	if err != nil {
+		return &pb.Response{}, err
+	}
+
+	// Set up a connection to the Dock server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("did not connect: %+v\n", err)
+		return &pb.Response{}, err
+	}
+	defer conn.Close()
+
+	c := pb.NewDockClient(conn)
+	resp, err := c.AttachShare(context.Background(), sr)
+	if err != nil {
+		log.Printf("could not attach: %+v\n", err)
+		return &pb.Response{}, err
+	}
+
+	log.Println("Dock client receive attach share response, sr =", resp)
+
+	return resp, nil
+}
+
+func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	address, err := getDialAddress(sr.GetDockId())
+	if err != nil {
+		return &pb.Response{}, err
+	}
+
+	// Set up a connection to the Dock server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("did not connect: %+v\n", err)
+		return &pb.Response{}, err
+	}
+	defer conn.Close()
+
+	c := pb.NewDockClient(conn)
+	resp, err := c.DetachShare(context.Background(), sr)
+	if err != nil {
+		log.Printf("could not detach: %+v\n", err)
+		return &pb.Response{}, err
+	}
+
+	log.Println("Dock client receive detach share response, vr =", resp)
+
+	return resp, nil
+}
+
+func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	address, err := getDialAddress(sr.GetDockId())
+	if err != nil {
+		return &pb.Response{}, err
+	}
+
+	// Set up a connection to the Dock server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("did not connect: %+v\n", err)
+		return &pb.Response{}, err
+	}
+	defer conn.Close()
+
+	c := pb.NewDockClient(conn)
+	resp, err := c.MountShare(context.Background(), sr)
+	if err != nil {
+		log.Printf("could not mount: %+v\n", err)
+		return &pb.Response{}, err
+	}
+
+	log.Println("Dock client receive mount share response, sr =", resp)
+
+	return resp, nil
+}
+
+func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
+	address, err := getDialAddress(sr.GetDockId())
+	if err != nil {
+		return &pb.Response{}, err
+	}
+
+	// Set up a connection to the Dock server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Printf("did not connect: %+v\n", err)
+		return &pb.Response{}, err
+	}
+	defer conn.Close()
+
+	c := pb.NewDockClient(conn)
+	resp, err := c.UnmountShare(context.Background(), sr)
+	if err != nil {
+		log.Printf("could not unmount: %+v\n", err)
+		return &pb.Response{}, err
+	}
+
+	log.Println("Dock client receive unmount share response, sr =", resp)
 
 	return resp, nil
 }

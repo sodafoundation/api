@@ -57,6 +57,14 @@ service Orchestration {
   rpc ListShares (ShareRequest) returns (Response) {}
   // Delete a share
   rpc DeleteShare (ShareRequest) returns (Response) {}
+  // Attach a share
+  rpc AttachShare (ShareRequest) returns (Response) {}
+  // Detach a share
+  rpc DetachShare (ShareRequest) returns (Response) {}
+  // Mount a share
+  rpc MountShare (ShareRequest) returns (Response) {}
+  // Unmount a share
+  rpc UnmountShare (ShareRequest) returns (Response) {}
 }
 
 // The dock service definition.
@@ -85,36 +93,45 @@ service Dock {
   rpc ListShares (ShareRequest) returns (Response) {}
   // Delete a share
   rpc DeleteShare (ShareRequest) returns (Response) {}
+  // Attach a share
+  rpc AttachShare (ShareRequest) returns (Response) {}
+  // Detach a share
+  rpc DetachShare (ShareRequest) returns (Response) {}
+  // Mount a share
+  rpc MountShare (ShareRequest) returns (Response) {}
+  // Unmount a share
+  rpc UnmountShare (ShareRequest) returns (Response) {}
 }
 
 // The VolumeRequest message containing all properties of
 // a volume request.
 message VolumeRequest {
-  string resoureType = 1;
+  string resourceType = 1;
   string id = 2;
   string name = 3;
   string volumeType = 4;
   int32 size = 5;
   bool allowDetails = 6;
-  string host = 7;
-  string device = 8;
-  string attachment = 9;
-  string mountDir = 10;
-  string fsType = 11;
-  string dockId = 12;
+  string device = 7;
+  string mountDir = 8;
+  string fsType = 9;
+  string dockId = 10;
 }
 
 // The ShareRequest message containing all properties of
 // a share request.
 message ShareRequest {
-  string resoureType = 1;
+  string resourceType = 1;
   string id = 2;
   string name = 3;
   int32 size = 4;
   string shareType = 5;
   string shareProto = 6;
   bool allowDetails = 7;
-  string dockId = 8;
+  string device = 8;
+  string mountDir = 9;
+  string fsType = 10;
+  string dockId = 11;
 }
 
 // The Response message containing all properties of
