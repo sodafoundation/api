@@ -28,6 +28,16 @@ type AvailableVersions struct {
 	Versions []VersionInfo `json:"versions"`
 }
 
+type DockRoute struct {
+	Id      string `json:"id"`
+	Status  string `json:"status"`
+	Address string `json:"address"`
+}
+
+type DockRoutes struct {
+	Routes []DockRoute `json:"routes"`
+}
+
 type DefaultResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`

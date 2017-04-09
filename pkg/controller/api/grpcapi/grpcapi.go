@@ -104,14 +104,13 @@ func DeleteVolume(dockId, resourceType string, volID string) *pb.Response {
 	return resp
 }
 
-func AttachVolume(dockId, resourceType, volID, volType string) *pb.Response {
+func AttachVolume(dockId, resourceType, volID string) *pb.Response {
 	var falseResp *pb.Response
 
 	vr := &pb.VolumeRequest{
 		DockId:       dockId,
 		ResourceType: resourceType,
 		Id:           volID,
-		VolumeType:   volType,
 	}
 
 	resp, err := client.AttachVolume(vr)

@@ -30,12 +30,12 @@ import (
 )
 
 const (
-	NORTHBOUND_PORT    = ":50048"
-	ORCHESTRATION_PORT = ":50049"
+	NORTHBOUND_PORT    = ":50040"
+	ORCHESTRATION_PORT = ":50041"
 )
 
 func main() {
-	// Open OpenSDS log file
+	// Open OpenSDS controller service log file
 	f, err := os.OpenFile("/var/log/opensds/osdslet.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
