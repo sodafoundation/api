@@ -196,9 +196,9 @@ func CheckHTTPResponseStatusCode(resp *http.Response) error {
 }
 
 type DockNode struct {
-	Id      string   `json:"id"`
-	Drivers []string `json:"drivers"`
-	Address string   `json:"address"`
+	Id      string `json:"id"`
+	Status  string `json:"status"`
+	Address string `json:"address"`
 }
 
 func getDockNode() (*DockNode, error) {
@@ -213,6 +213,10 @@ func getDockNode() (*DockNode, error) {
 	if err = json.Unmarshal(userJSON, nodePtr); err != nil {
 		log.Println("Unmarshal json failed:", err)
 		return nodePtr, err
+	}
+
+	if nodePtr.Status != "available" {
+		return nodePtr, fmt.Errorf("The status of dock node %s is not available", nodePtr.Id)
 	}
 	return nodePtr, nil
 }

@@ -21,6 +21,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,9 +41,21 @@ func init() {
 	rootCommand.AddCommand(versionCommand)
 	rootCommand.AddCommand(shareCommand)
 	rootCommand.AddCommand(volumeCommand)
+	rootCommand.AddCommand(dockCommand)
 }
 
 func main() {
+	// Open OpenSDS CLI service log file
+	f, err := os.OpenFile("/var/log/opensds/osdsctl.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	// assign it to the standard logger
+	log.SetOutput(f)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	if err := rootCommand.Execute(); err != nil {
 		die("%+v", err)
 	}
