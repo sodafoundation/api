@@ -1,0 +1,111 @@
+// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+
+/*
+This module implements cinder plugin for OpenSDS. Cinder plugin will pass these
+operation requests about volume to OpenStack go-client module.
+
+*/
+
+package connector
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+const (
+	ISCSI_TRANSLATE = "tcp"
+)
+
+type StatFunc func(string) (os.FileInfo, error)
+type GlobFunc func(string) ([]string, error)
+
+func waitForPathToExist(devicePath string, maxRetries int, deviceTransport string) bool {
+	// This makes unit testing a lot easier
+	return waitForPathToExistInternal(devicePath, maxRetries, deviceTransport, os.Stat, filepath.Glob)
+}
+func waitForPathToExistInternal(devicePath string, maxRetries int, deviceTransport string, osStat StatFunc, filepathGlob GlobFunc) bool {
+	for i := 0; i < maxRetries; i++ {
+		var err error
+		if deviceTransport == "tcp" {
+			_, err = osStat(devicePath)
+		} else {
+			fpath, _ := filepathGlob(devicePath)
+			if fpath == nil {
+				err = os.ErrNotExist
+			}
+		}
+		if err == nil {
+			return true
+		}
+		if err != nil && !os.IsNotExist(err) {
+			return false
+		}
+		if i == maxRetries-1 {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	return false
+}
+
+func ConnectIscsiVolume(conn *Connector) (string, error) {
+	var devicePath = strings.Join([]string{
+		"/dev/disk/by-path/ip",
+		conn.TargetPortal,
+		"iscsi",
+		conn.TargetIqn,
+		"lun",
+		fmt.Sprint(conn.TargetLun)}, "-")
+
+	exist := waitForPathToExist(devicePath, 1, ISCSI_TRANSLATE)
+	if exist == false {
+		// discover iscsi target
+		outCmd := exec.Command("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", conn.TargetPortal)
+		out, err := outCmd.CombinedOutput()
+		if err != nil {
+			log.Printf("iscsi: failed to sendtargets to portal %s error: %s\n", conn.TargetPortal, string(out))
+			return "", err
+		}
+		// login to iscsi target
+		outCmd = exec.Command("iscsiadm", "-m", "node", "-p", conn.TargetPortal, "-T", conn.TargetIqn, "--login")
+		out, err = outCmd.CombinedOutput()
+		if err != nil {
+			log.Printf("iscsi: failed to attach disk:Error: %s (%v)\n", string(out), err)
+			return "", err
+		}
+		exist = waitForPathToExist(devicePath, 1, iscsiTransport)
+		if !exist {
+			return "", errors.New("Could not attach disk: Timeout after 1s")
+		}
+	}
+	return devicePath, nil
+}
+
+func DisconnectIscsiVolume(conn *Connector) (string, error) {
+	outCmd := exec.Command("iscsiadm", []string{"-m", "node", "-p", conn.TargetPortal, "-T", conn.TargetIqn, "--logout"})
+	out, err := outCmd.CombinedOutput()
+	if err != nil {
+		log.Printf("iscsi: failed to detach disk Error: %s\n", string(out))
+		return "", err
+	}
+	return "Disconnect success!", nil
+}

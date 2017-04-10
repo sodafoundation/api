@@ -43,7 +43,7 @@ import (
 )
 
 const (
-	ORCHESTRATION_PORT = ":50049"
+	ORCHESTRATION_PORT = ":50041"
 )
 
 func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {

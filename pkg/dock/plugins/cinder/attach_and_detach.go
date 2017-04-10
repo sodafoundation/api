@@ -22,39 +22,28 @@ package cinder
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 	// "time"
 
 	"openstack/golang-client/volume"
-)
 
-const (
-	CEPH_POOL_NAME     string = "volumes"
-	CEPH_LINK_PREFIX   string = "volumes/volume-"
-	CINDER_LINK_PREFIX string = "/dev/mapper/cinder--volumes-volume--"
-	DEVICE_PREFIX      string = "/dev/"
+	"github.com/opensds/opensds/pkg/dock/plugins/connector"
 )
 
 func AttachVolumeToHost(plugin *CinderPlugin, volID, volType string) (string, error) {
-	var devPath string
-	switch volType {
-	case "lvm":
-		dev, err := getLvmDevicePath(volID)
-		if err != nil {
-			return "", err
-		}
+	conn, err := getConnectionInfo(plugin, volID)
+	if err != nil {
+		return "", err
+	}
 
-		devPath = dev
-	case "ceph":
-		dev, err := getCephDevicePath(volID)
-		if err != nil {
-			return "", err
-		}
+	log.Printf("Receive connection info: %+v\n", conn)
 
-		devPath = dev
+	devPath, err := conn.ConnectVolume()
+	if err != nil {
+		return "", err
 	}
 
 	host, err := os.Hostname()
@@ -105,32 +94,26 @@ func sendAttachRequest(plugin *CinderPlugin, volID, host, device string) error {
 }
 
 func DetachVolumeFromHost(plugin *CinderPlugin, device string) (string, error) {
-	var volID string
-
-	if strings.HasPrefix(device, CINDER_LINK_PREFIX) {
-		volumeId := device[len(CINDER_LINK_PREFIX):len(device)]
-		volID = strings.Replace(volumeId, "--", "-", 4)
-	} else {
-		if strings.HasPrefix(device, "/dev/rbd") {
-			image, err := parseCephDevicePath(device)
-			if err != nil {
-				return "", err
-			}
-
-			volID = image[7:len(image)]
-
-			unmapCmd := exec.Command("rbd", "unmap", device)
-			_, err = unmapCmd.CombinedOutput()
-			if err != nil {
-				return "", err
-			}
-		} else {
-			err := errors.New("Unexpect device prefix: " + device)
-			return "", err
-		}
+	ind := strings.Index(device, "by-id/")
+	if ind <= 0 {
+		return "", fmt.Errorf("Detach disk: no volume id in %s", device)
 	}
 
-	err := sendDetachRequest(plugin, volID)
+	var volID = device[ind+6 : len(device)]
+
+	conn, err := getConnectionInfo(plugin, volID)
+	if err != nil {
+		return "", err
+	}
+
+	log.Printf("Receive connection info: %+v\n", conn)
+
+	_, err = conn.DisconnectVolume()
+	if err != nil {
+		return "", err
+	}
+
+	err = sendDetachRequest(plugin, volID)
 	if err != nil {
 		return "", err
 	} else {
@@ -172,57 +155,34 @@ func sendDetachRequest(plugin *CinderPlugin, volID string) error {
 	return nil
 }
 
-func getLvmDevicePath(volId string) (string, error) {
-	link := CINDER_LINK_PREFIX + strings.Replace(volId, "-", "--", 4)
-
-	path, err := os.Readlink(link)
+func getConnectionInfo(plugin *CinderPlugin, volID string) (*connector.Connector, error) {
+	isMultipath := false
+	properties, err := connector.GetConnectorProperties(isMultipath)
 	if err != nil {
-		err = errors.New("Can't find device path!")
-		return "", err
+		return &connector.Connector{}, err
 	}
 
-	slice := strings.Split(path, "/")
-	device := "/dev/" + slice[1]
-	return device, nil
-}
-
-func getCephDevicePath(volId string) (string, error) {
-	imagesCmd := exec.Command("rbd", "showmapped")
-	images, err := imagesCmd.CombinedOutput()
+	//Get the certified volume service.
+	volumeService, err := plugin.getVolumeService()
 	if err != nil {
-		return "", err
+		log.Println("Cannot access volume service:", err)
+		return &connector.Connector{}, err
 	}
 
-	if strings.Contains(string(images), volId) {
-		err := errors.New("This volume have been attached!")
-		return "", err
+	body := &volume.InitializeBody{
+		Connector: volume.Connector{
+			ConnectorProperties: *properties,
+		},
 	}
 
-	pathCmd := exec.Command("rbd", "map", CEPH_LINK_PREFIX+volId)
-	device, err := pathCmd.CombinedOutput()
+	connInfo, err := volumeService.InitializeConnection(volID, body)
 	if err != nil {
-		return "", err
+		log.Println("Cannot initialize volume connection:", err)
+		return &connector.Connector{}, err
 	}
 
-	devSlice := strings.Split(string(device), "\n")
-	return devSlice[0], nil
-}
-
-func parseCephDevicePath(device string) (string, error) {
-	linksCmd := exec.Command("rbd", "showmapped")
-	links, err := linksCmd.CombinedOutput()
-	if err != nil {
-		return "", err
+	conn := &connector.Connector{
+		ConnInfo: *connInfo,
 	}
-
-	linkSlice := strings.Split(string(links), "\n")
-	for _, i := range linkSlice {
-		if strings.Contains(i, device) {
-			imageSlice := strings.Fields(i)
-			return imageSlice[2], nil
-		}
-	}
-
-	err = errors.New("Can't parse device path!")
-	return "", err
+	return conn, nil
 }

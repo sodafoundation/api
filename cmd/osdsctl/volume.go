@@ -63,25 +63,25 @@ var volumeDeleteCommand = &cobra.Command{
 }
 
 var volumeAttachCommand = &cobra.Command{
-	Use:   "attach <id> <volume type>",
-	Short: "attach a volume with volume type in the specified backend of OpenSDS cluster",
+	Use:   "attach <dock id> <volume id>",
+	Short: "attach a volume with dock id in the specified backend of OpenSDS cluster",
 	Run:   volumeAttachAction,
 }
 
 var volumeDetachCommand = &cobra.Command{
-	Use:   "detach <device path>",
+	Use:   "detach <dock id> <device path>",
 	Short: "detach a volume with device path in the specified backend of OpenSDS cluster",
 	Run:   volumeDetachAction,
 }
 
 var volumeMountCommand = &cobra.Command{
-	Use:   "mount <file system> <mount device> <target mount dir>",
+	Use:   "mount <dock id> <file system> <mount device> <target mount dir>",
 	Short: "mount a volume in the specified backend of OpenSDS cluster",
 	Run:   volumeMountAction,
 }
 
 var volumeUnmountCommand = &cobra.Command{
-	Use:   "unmount <mount dir>",
+	Use:   "unmount <dock id> <mount dir>",
 	Short: "unmount a volume in the specified backend of OpenSDS cluster",
 	Run:   volumeUnmountAction,
 }
@@ -222,8 +222,8 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := &volumes.VolumeRequest{
 		ResourceType: volResourceType,
-		Id:           args[0],
-		VolumeType:   args[1],
+		DockId:       args[0],
+		Id:           args[1],
 	}
 
 	result := volumes.AttachVolume(volumeRequest)
@@ -231,7 +231,7 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeDetachAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
+	if len(args) != 2 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
@@ -239,7 +239,8 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := volumes.VolumeRequest{
 		ResourceType: volResourceType,
-		Device:       args[0],
+		DockId:       args[0],
+		Device:       args[1],
 	}
 
 	result := volumes.DetachVolume(volumeRequest)
@@ -247,7 +248,7 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeMountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 3 {
+	if len(args) != 4 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
@@ -255,9 +256,10 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := volumes.VolumeRequest{
 		ResourceType: volResourceType,
-		FsType:       args[0],
-		Device:       args[1],
-		MountDir:     args[2],
+		DockId:       args[0],
+		FsType:       args[1],
+		Device:       args[2],
+		MountDir:     args[3],
 	}
 
 	result := volumes.MountVolume(volumeRequest)
@@ -265,7 +267,7 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeUnmountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
+	if len(args) != 2 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
@@ -273,7 +275,8 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := volumes.VolumeRequest{
 		ResourceType: volResourceType,
-		MountDir:     args[0],
+		DockId:       args[0],
+		MountDir:     args[1],
 	}
 
 	result := volumes.UnmountVolume(volumeRequest)

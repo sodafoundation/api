@@ -1,17 +1,12 @@
 [
 	{
 		"id": "77afc284-2b0b-4e7a-afef-258c4b7ef6ea",
-		"drivers": [
-			"cinder"
-		],
+		"status": "available",
 		"address": "10.2.1.233:50050"
 	},
 	{
 		"id": "a05f4179-3ee6-4897-93fb-60aaf3a69a1d",
-		"drivers": [
-			"manila",
-			"coprhd"
-		],
+		"status": "unavailable",
 		"address": "10.2.1.234:50050"
 	}
 ]

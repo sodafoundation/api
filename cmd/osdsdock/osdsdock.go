@@ -33,7 +33,7 @@ const (
 )
 
 func main() {
-	// Open OpenSDS log file
+	// Open OpenSDS dock service log file
 	f, err := os.OpenFile("/var/log/opensds/osdsdock.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
