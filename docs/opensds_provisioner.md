@@ -12,8 +12,8 @@ Problem description
 
 As we know, Kubernetes provides a framework of storage for container
 orchestration layer. When users create a PVC, the controller will retrieve PV
-from backends through a "Provisioner" interface. Since each backend has its
-own provisioner(nfs, glusterfs, cephfs and so on), it's unbearable for vendors
+from backends through "Provisioner" interface. But right now each backend has
+its own provisioner(nfs, efs, cephfs and so on), and it's unbearable for vendors
 to maintain all provisoners if they want to support multiple backends.
 
 As a unified SDS controller, it's necessary for OpenSDS to solve this problem
