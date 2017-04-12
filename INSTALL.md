@@ -1,78 +1,147 @@
-#### Build
+#### Download and Build OpenSDS Source Code
 
-1. export GOPATH=$HOME/gopath
-
-   export PATH=$HOME/gopath/bin:$PATH
-   
-   mkdir -p $HOME/gopath/src/github.com/opensds/
-   
-   cd $HOME/gopath/src/github.com/opensds
-   
-2. git clone https://github.com/opensds/opensds.git $HOME/gopath/src/github.com/opensds/
-
-3. cd opensds (import necessary packages)
-
-   go get github.com/opensds/opensds/cmd/osdsctl
-
-   go get github.com/opensds/opensds/cmd/osdslet
-
-   go get github.com/opensds/opensds/cmd/osdsdock
-   
-4. cd cmd/sdslet
-
-   go build
-   
-5. cd cmd/sdsctl
-
-   go buld
-
-6. cd cmd/sdsdock
-
-   go build
-   
-7. cp cmd/sdslet/sdslet /usr/local/bin
-
-   cp cmd/sdsctl/sdsctl /usr/local/bin
-
-   cp cmd/sdsdock/sdsdock /usr/local/bin
-
-7. vim examples/config.json (config backend storage credential information)
-
-   vim examples/dock_route.json (config dock route table in controller module)
-
-   vim examples/dock_node.json (config dock node in dock module)
-
-   sudo mkdir /etc/opensds
-
-   sudo cp examples/*.json /etc/opensds/
-
-8. sudo mkdir /var/log/opensds (create OpenSDS logging directory)
-
-#### Run
-
-* Start **sdsdock** with root access (for logging purpose)
+* Configure local environment
 
 ```sh
-sudo sdsdock //suppose the user has copied the compiled binary to /usr/local/bin
+export GOPATH=$HOME/gopath
+export PATH=$HOME/gopath/bin:$PATH
+mkdir -p $HOME/gopath/src/github.com/opensds/   
+cd $HOME/gopath/src/github.com/opensds
 ```
 
-* Start **sdslet** with root access (for logging purpose)
+* Download OpenSDS source code
 
 ```sh
-sudo sdslet //suppose the user has copied the compiled binary to /usr/local/bin
+git clone https://github.com/opensds/opensds.git $HOME/gopath/src/github.com/opensds/
 ```
 
-* Run **sdsctl** for operations you want to perform. 
+* Import dependency packages
 
 ```sh
-sdsctl --help //see what you can do with opensds
+go get github.com/opensds/opensds/cmd/osdsctl
+go get github.com/opensds/opensds/cmd/osdslet
+go get github.com/opensds/opensds/cmd/osdsdock
 ```
 
-Currently sdsctl supports all the basic Cinder/Manila operations, for example if you want to 
+* Build OpenSDS source code to generate executable files
+
+```sh
+cd cmd/sdslet
+go build
+   
+cd cmd/sdsctl
+go buld
+
+cd cmd/sdsdock
+go build
+```
+
+* Move these executable files to /usr/local/bin
+
+```sh
+cp cmd/sdslet/sdslet /usr/local/bin
+cp cmd/sdsctl/sdsctl /usr/local/bin
+cp cmd/sdsdock/sdsdock /usr/local/bin
+```
+
+### Dependencies Installation
+
+* Install pip
+
+```sh
+curl https://bootstrap.pypa.io/get-pip.py | python
+```
+
+* Install python dependencies
+
+```sh
+curl https://bootstrap.pypa.io/get-pip.py | python
+```
+
+* Install os-brick
+
+```sh
+pip install git+https://github.com/leonwanghui/os-brick.git
+```
+
+* Create configuration files
+
+```sh
+cp /usr/local/etcc/os-brick/ /etc/ -r
+```
+
+* Modify config file(/etc/os-brick/os-brick.conf) and change one line below:
+
+```sh
+[DEFAULT]
+my_ip=your_host_ip
+```
+
+### Configuration
+
+* Configure backend storage credential information
+
+```sh
+sudo mkdir /etc/opensds
+```
+
+```sh
+vim examples/config.json
+```
+
+```sh
+sudo cp examples/config.json /etc/opensds/
+```
+
+* Configure dock route table in controller module
+
+```sh
+sudo touch /etc/opensds/dock_route.json 
+```
+
+* Create OpenSDS logging directory
+
+```sh
+sudo mkdir /var/log/opensds
+```
+
+#### Run OpenSDS Service
+
+* Start **osdsdock** with root access (for logging purpose)
+
+```sh
+sudo cp examples/osdsdock /etc/init.d
+```
+
+```sh
+sudo chmod +x /etc/init.d/osdsdock
+```
+
+```sh
+service osdsdock start
+```
+
+* Start **osdslet** with root access (for logging purpose)
+
+```sh
+sudo osdslet //suppose the user has copied the compiled binary to /usr/local/bin
+```
+
+* Run **osdsctl** for operations you want to perform. 
+
+```sh
+sudo osdsctl --help //see what you can do with opensds
+```
+
+```sh
+sudo osdsctl dock register osdsdock_node_ip //register your osdsdock node ip into controller.
+```
+
+Currently osdsctl supports all the basic Cinder/Manila operations, for example if you want to 
 create a 1GB volume from a Dell-EMC VMAX, which is connected to the OpenSDS underlay infra - 
 OpenStack Cinder via its in-tree vmax cinder driver, using OpenSDS for an easy access:
 
 ```sh
-sdsctl volume create 1 -n cinder-vmax-volume -b cinder
+sudo sdsctl volume create 1 -n cinder-vmax-volume -b cinder
 ```
 Viola !
