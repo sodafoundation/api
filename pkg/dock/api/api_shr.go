@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/opensds/opensds/pkg/dock"
+	dock "github.com/opensds/opensds/pkg/dock/share"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
@@ -144,8 +144,7 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.MountShare(sr.GetResourceType(),
-		sr.GetMountDir(),
+	result, err := dock.MountShare(sr.GetMountDir(),
 		sr.GetDevice(),
 		sr.GetFsType())
 	if err != nil {
@@ -165,8 +164,7 @@ func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.UnmountShare(sr.GetResourceType(),
-		sr.GetMountDir())
+	result, err := dock.UnmountShare(sr.GetMountDir())
 	if err != nil {
 		log.Println("Error occured in dock module when unmount share:", err)
 		resp := &pb.Response{

@@ -13,12 +13,12 @@
 //    under the License.
 
 /*
-This module implements manila plugin for OpenSDS. Manila plugin will pass these
-operation requests about share to OpenStack go-client module.
+This module implements a standard SouthBound interface of share resource to
+storage plugins.
 
 */
 
-package manila
+package share
 
 import (
 	"bufio"
@@ -58,7 +58,7 @@ func isMounted(mountDir string) bool {
 	return findmntText == mountDir
 }
 
-func MountShareToHost(mountDir, device, fsType string) (string, error) {
+func MountShare(mountDir, device, fsType string) (string, error) {
 	if isMounted(mountDir) {
 		err := errors.New("This path has been mounted!")
 		return "", err
@@ -78,7 +78,7 @@ func MountShareToHost(mountDir, device, fsType string) (string, error) {
 	return "Mount share success!", nil
 }
 
-func UnmountShareFromHost(mountDir string) (string, error) {
+func UnmountShare(mountDir string) (string, error) {
 	if !isMounted(mountDir) {
 		err := errors.New("This path is not mounted!")
 		return "", err
