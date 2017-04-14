@@ -44,7 +44,7 @@ type InitializeRequest struct {
 }
 
 func GetConnectorProperties(isMultipath bool) (*volume.ConnectorProperties, error) {
-	url := URL_PREFIX + "Volume/Initialize"
+	url := URL_PREFIX + "/Volume/Initialize"
 
 	initReq := &InitializeRequest{
 		Multipath: isMultipath,
@@ -83,7 +83,7 @@ func GetConnectorProperties(isMultipath bool) (*volume.ConnectorProperties, erro
 }
 
 func (conn *Connector) ConnectVolume() (string, error) {
-	url := URL_PREFIX + "Volume/Connect"
+	url := URL_PREFIX + "/Volume/Connect"
 
 	log.Printf("Start POST request to connect volume, url = %s, body = %+v\n",
 		url, conn)
@@ -110,7 +110,7 @@ func (conn *Connector) ConnectVolume() (string, error) {
 }
 
 func (conn *Connector) DisconnectVolume() (string, error) {
-	url := URL_PREFIX + "Volume/Disconnect"
+	url := URL_PREFIX + "/Volume/Disconnect"
 
 	log.Printf("Start POST request to disconnect volume, url = %s, body = %+v\n",
 		url, conn)
