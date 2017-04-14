@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/opensds/opensds/pkg/dock"
+	dock "github.com/opensds/opensds/pkg/dock/volume"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
@@ -106,8 +106,7 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 
 func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	result, err := dock.AttachVolume(vr.GetResourceType(),
-		vr.GetId(),
-		vr.GetVolumeType())
+		vr.GetId())
 	if err != nil {
 		log.Println("Error occured in dock module when attach volume:", err)
 		resp := &pb.Response{
@@ -144,8 +143,7 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.MountVolume(vr.GetResourceType(),
-		vr.GetMountDir(),
+	result, err := dock.MountVolume(vr.GetMountDir(),
 		vr.GetDevice(),
 		vr.GetFsType())
 	if err != nil {
@@ -165,8 +163,7 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.UnmountVolume(vr.GetResourceType(),
-		vr.GetMountDir())
+	result, err := dock.UnmountVolume(vr.GetMountDir())
 	if err != nil {
 		log.Println("Error occured in dock module when unmount volume:", err)
 		resp := &pb.Response{

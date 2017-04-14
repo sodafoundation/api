@@ -20,6 +20,7 @@ This module implements a entry into the OpenSDS service.
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -81,9 +82,10 @@ func dockRegisterAction(cmd *cobra.Command, args []string) {
 
 	dock, err := docks.RegisterDock(dockRequest, args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Register dock resource failed: ", err)
 	} else {
-		fmt.Printf("%+v\n", dock)
+		rbody, _ := json.MarshalIndent(dock, "", "  ")
+		fmt.Printf("%s\n", string(rbody))
 	}
 }
 
@@ -98,7 +100,7 @@ func dockDeregisterAction(cmd *cobra.Command, args []string) {
 
 	res, err := docks.DeregisterDock(dockRequest, args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Deregester dock resource failed: ", err)
 	} else {
 		fmt.Printf("%s\n", res)
 	}
@@ -115,9 +117,10 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 
 	dock, err := docks.GetDock(dockRequest, args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Get dock resource failed: ", err)
 	} else {
-		fmt.Printf("%+v\n", dock)
+		rbody, _ := json.MarshalIndent(dock, "", "  ")
+		fmt.Printf("%s\n", string(rbody))
 	}
 }
 
@@ -132,8 +135,9 @@ func dockListAction(cmd *cobra.Command, args []string) {
 
 	docks, err := docks.ListDocks(dockRequest)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("List dock resources failed: ", err)
 	} else {
-		fmt.Printf("%+v\n", docks)
+		rbody, _ := json.MarshalIndent(docks, "", "  ")
+		fmt.Printf("%s\n", string(rbody))
 	}
 }

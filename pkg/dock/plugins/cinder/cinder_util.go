@@ -33,7 +33,7 @@ import (
 	"github.com/opensds/opensds/pkg/dock/plugins/connector"
 )
 
-func AttachVolumeToHost(plugin *CinderPlugin, volID, volType string) (string, error) {
+func AttachVolumeToHost(plugin *CinderPlugin, volID string) (string, error) {
 	conn, err := getConnectionInfo(plugin, volID)
 	if err != nil {
 		return "", err

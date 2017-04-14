@@ -13,12 +13,12 @@
 //    under the License.
 
 /*
-This module implements cinder plugin for OpenSDS. Cinder plugin will pass these
-operation requests about volume to OpenStack go-client module.
+This module implements a standard SouthBound interface of volume resource to
+storage plugins.
 
 */
 
-package cinder
+package volume
 
 import (
 	"bufio"
@@ -60,7 +60,7 @@ func isMounted(mountDir string) bool {
 	return findmntText == mountDir
 }
 
-func MountVolumeToHost(mountDir, device, fsType string) (string, error) {
+func MountVolume(mountDir, device, fsType string) (string, error) {
 	var res unix.Stat_t
 
 	if err := unix.Stat(device, &res); err != nil {
@@ -101,7 +101,7 @@ func MountVolumeToHost(mountDir, device, fsType string) (string, error) {
 	return "Mount volume success!", nil
 }
 
-func UnmountVolumeFromHost(mountDir string) (string, error) {
+func UnmountVolume(mountDir string) (string, error) {
 	if !isMounted(mountDir) {
 		err := errors.New("This path is not mounted!")
 		return "", err

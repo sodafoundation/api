@@ -143,7 +143,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseVolumeResponse) {
 			fmt.Println("Create volume failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -167,7 +167,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseVolumeDetailResponse) {
 			fmt.Println("Show volume failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -191,7 +191,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseAllVolumesResponse) {
 			fmt.Println("List volumes failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -210,7 +210,8 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := volumes.DeleteVolume(volumeRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeAttachAction(cmd *cobra.Command, args []string) {
@@ -227,7 +228,8 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := volumes.AttachVolume(volumeRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeDetachAction(cmd *cobra.Command, args []string) {
@@ -244,7 +246,8 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := volumes.DetachVolume(volumeRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeMountAction(cmd *cobra.Command, args []string) {
@@ -263,7 +266,8 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := volumes.MountVolume(volumeRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeUnmountAction(cmd *cobra.Command, args []string) {
@@ -280,5 +284,6 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := volumes.UnmountVolume(volumeRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }

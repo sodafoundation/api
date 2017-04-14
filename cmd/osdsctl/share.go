@@ -145,7 +145,7 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseShareResponse) {
 			fmt.Println("Create share failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -168,7 +168,7 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseShareDetailResponse) {
 			fmt.Println("Show share failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -192,7 +192,7 @@ func shareListAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(result, falseAllSharesResponse) {
 			fmt.Println("List shares failed!")
 		} else {
-			rbody, _ := json.Marshal(result)
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -210,7 +210,8 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.DeleteShare(shareRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func shareAttachAction(cmd *cobra.Command, args []string) {
@@ -226,7 +227,8 @@ func shareAttachAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.AttachShare(shareRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func shareDetachAction(cmd *cobra.Command, args []string) {
@@ -242,7 +244,8 @@ func shareDetachAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.DetachShare(shareRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func shareMountAction(cmd *cobra.Command, args []string) {
@@ -260,7 +263,8 @@ func shareMountAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.MountShare(shareRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func shareUnmountAction(cmd *cobra.Command, args []string) {
@@ -276,5 +280,6 @@ func shareUnmountAction(cmd *cobra.Command, args []string) {
 	}
 
 	result := shares.UnmountShare(shareRequest)
-	fmt.Printf("%+v\n", result)
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
