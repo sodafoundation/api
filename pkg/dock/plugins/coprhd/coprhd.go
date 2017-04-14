@@ -260,19 +260,11 @@ func (d *Driver) DeleteVolume(volID string) (string, error) {
 	return "Delete volume success!", nil
 }
 
-func (d *Driver) AttachVolume(volId, volType string) (string, error) {
+func (d *Driver) AttachVolume(volId string) (string, error) {
 	return "", nil
 }
 
 func (d *Driver) DetachVolume(device string) (string, error) {
-	return "", nil
-}
-
-func (d *Driver) MountVolume(mountDir, device, fsType string) (string, error) {
-	return "", nil
-}
-
-func (d *Driver) UnmountVolume(mountDir string) (string, error) {
 	return "", nil
 }
 

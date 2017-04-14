@@ -13,11 +13,12 @@
 //    under the License.
 
 /*
-This module implements a standard SouthBound interface to storage plugins.
+This module implements a standard SouthBound interface of share resource to
+storage plugins.
 
 */
 
-package dock
+package share
 
 import (
 	"log"
@@ -46,10 +47,6 @@ type ShareDriver interface {
 	AttachShare(shrID string) (string, error)
 
 	DetachShare(device string) (string, error)
-
-	MountShare(mountDir, device, fsType string) (string, error)
-
-	UnmountShare(mountDir string) (string, error)
 }
 
 func CreateShare(resourceType, name, shrType, shrProto string, size int32) (string, error) {
@@ -160,44 +157,6 @@ func DetachShare(resourceType, device string) (string, error) {
 	result, err := shareDriver.DetachShare(device)
 	if err != nil {
 		log.Println("Call plugin to detach share failed:", err)
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func MountShare(resourceType, mountDir, device, fsType string) (string, error) {
-	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitSP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return "", err
-	}
-
-	//Call function of StoragePlugins configured by storage plugins.
-	var shareDriver ShareDriver = plugins
-	result, err := shareDriver.MountShare(mountDir, device, fsType)
-	if err != nil {
-		log.Println("Call plugin to mount share failed:", err)
-		return "", err
-	} else {
-		return result, nil
-	}
-}
-
-func UnmountShare(resourceType, mountDir string) (string, error) {
-	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitSP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return "", err
-	}
-
-	//Call function of StoragePlugins configured by storage plugins.
-	var shareDriver ShareDriver = plugins
-	result, err := shareDriver.UnmountShare(mountDir)
-	if err != nil {
-		log.Println("Call plugin to unmount share failed:", err)
 		return "", err
 	} else {
 		return result, nil

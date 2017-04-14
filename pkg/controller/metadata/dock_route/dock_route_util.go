@@ -21,32 +21,51 @@ node information and record it to dock route service.
 package dock_route
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
-	"os/exec"
 
 	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/satori/go.uuid"
 )
 
-func GenerateDockRoute(dockIp string) (api.DockRoute, error) {
-	dockId, err := generateDockId()
-	if err != nil {
-		log.Println("Could not generate dock id:", err)
-		return api.DockRoute{}, err
-	}
-
+func generateDockRoute(dockIp string) api.DockRoute {
 	return api.DockRoute{
-		Id:      dockId,
+		Id:      uuid.NewV4().String(),
 		Status:  "available",
 		Address: dockIp,
-	}, nil
+	}
 }
 
-func generateDockId() (string, error) {
-	out, err := exec.Command("uuidgen").Output()
+func readDockRoutesFromFile() ([]api.DockRoute, error) {
+	var routes []api.DockRoute
+
+	userJSON, err := ioutil.ReadFile("/etc/opensds/dock_route.json")
 	if err != nil {
-		return "", err
+		log.Println("ReadFile json failed:", err)
+		return routes, err
 	}
 
-	dockId := string(out)
-	return dockId[0 : len(dockId)-1], nil
+	// If the dock route table is empty, consider it as a normal condition
+	if len(userJSON) == 0 {
+		return routes, nil
+	} else if err = json.Unmarshal(userJSON, &routes); err != nil {
+		log.Println("Unmarshal json failed:", err)
+		return routes, err
+	}
+	return routes, nil
+}
+
+func writeDockRoutesToFile(routes *[]api.DockRoute) bool {
+	body, err := json.Marshal(routes)
+	if err != nil {
+		log.Println("Marshal json failed:", err)
+		return false
+	}
+
+	if err = ioutil.WriteFile("/etc/opensds/dock_route.json", body, 0666); err != nil {
+		log.Println("WriteFile json failed:", err)
+		return false
+	}
+	return true
 }

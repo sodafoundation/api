@@ -149,20 +149,12 @@ func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 	return result, nil
 }
 
-func (plugin *CinderPlugin) AttachVolume(volID, volType string) (string, error) {
-	return AttachVolumeToHost(plugin, volID, volType)
+func (plugin *CinderPlugin) AttachVolume(volID string) (string, error) {
+	return AttachVolumeToHost(plugin, volID)
 }
 
 func (plugin *CinderPlugin) DetachVolume(device string) (string, error) {
 	return DetachVolumeFromHost(plugin, device)
-}
-
-func (plugin *CinderPlugin) MountVolume(mountDir, device, fsType string) (string, error) {
-	return MountVolumeToHost(mountDir, device, fsType)
-}
-
-func (plugin *CinderPlugin) UnmountVolume(mountDir string) (string, error) {
-	return UnmountVolumeFromHost(mountDir)
 }
 
 /*

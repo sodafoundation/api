@@ -49,13 +49,9 @@ type VolumePlugin interface {
 
 	DeleteVolume(volID string) (string, error)
 
-	AttachVolume(volID, volType string) (string, error)
+	AttachVolume(volID string) (string, error)
 
 	DetachVolume(device string) (string, error)
-
-	MountVolume(mountDir, device, fsType string) (string, error)
-
-	UnmountVolume(mountDir string) (string, error)
 }
 
 type SharePlugin interface {
@@ -75,10 +71,6 @@ type SharePlugin interface {
 	AttachShare(shrID string) (string, error)
 
 	DetachShare(device string) (string, error)
-
-	MountShare(mountDir, device, fsType string) (string, error)
-
-	UnmountShare(mountDir string) (string, error)
 }
 
 type cinderConfig struct {
@@ -112,7 +104,7 @@ type pluginsConfig struct {
 }
 
 func InitVP(resourceType string) (VolumePlugin, error) {
-	config := getConfig()
+	config := readBackendConfigFile()
 
 	switch resourceType {
 	case "cinder":
@@ -141,7 +133,7 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 }
 
 func InitSP(resourceType string) (SharePlugin, error) {
-	config := getConfig()
+	config := readBackendConfigFile()
 
 	switch resourceType {
 	case "manila":
@@ -159,15 +151,15 @@ func InitSP(resourceType string) (SharePlugin, error) {
 	}
 }
 
-// getConfig provides access to credentials in backend resource plugins.
-func getConfig() pluginsConfig {
-	var config pluginsConfig
+// readBackendConfigFile provides access to credentials in backend resource plugins.
+func readBackendConfigFile() *pluginsConfig {
+	var config *pluginsConfig
 
 	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
 	if err != nil {
 		log.Println("ReadFile json failed:", err)
 	}
-	if err = json.Unmarshal(userJSON, &config); err != nil {
+	if err = json.Unmarshal(userJSON, config); err != nil {
 		log.Println("Unmarshal json failed:", err)
 	}
 	return config

@@ -30,11 +30,7 @@ import (
 )
 
 func RegisterDockRoute(dockIp string) (*api.DockRoute, error) {
-	route, err := GenerateDockRoute(dockIp)
-	if err != nil {
-		log.Println("Could not generate dock route:", err)
-		return &api.DockRoute{}, err
-	}
+	route := generateDockRoute(dockIp)
 
 	routes, err := readDockRoutesFromFile()
 	if err != nil {
