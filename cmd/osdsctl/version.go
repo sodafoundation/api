@@ -75,7 +75,7 @@ func versionListAction(cmd *cobra.Command, args []string) {
 		if reflect.DeepEqual(versions, fakeVersions) {
 			fmt.Println("List versions failed!")
 		} else {
-			rbody, _ := json.Marshal(versions)
+			rbody, _ := json.MarshalIndent(versions, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -97,7 +97,7 @@ func versionShowAction(cmd *cobra.Command, args []string) {
 			if reflect.DeepEqual(version, fakeVersion) {
 				fmt.Println("Get version failed!")
 			} else {
-				rbody, _ := json.Marshal(version)
+				rbody, _ := json.MarshalIndent(version, "", "  ")
 				fmt.Printf("%s\n", string(rbody))
 			}
 		}
