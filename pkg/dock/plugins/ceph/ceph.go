@@ -327,7 +327,7 @@ func (imgMgr *ImageMgr) GetSnapshot(id string) (*SnapshotResponse, error) {
 	return &SnapshotResponse{}, rbd.RbdErrorNotFound
 }
 
-func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
+func (imgMgr *ImageMgr) GetSnapshots() ([]SnapshotResponse, error) {
 	imageNames, err := rbd.GetImageNames(imgMgr.Ioctx)
 	if err != nil {
 		log.Println("[Error] When getImageNames:", err)
@@ -363,7 +363,7 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 			snapshots = append(snapshots, snapshot)
 		}
 	}
-	return &snapshots, nil
+	return snapshots, nil
 }
 
 type CephPlugin struct{}
