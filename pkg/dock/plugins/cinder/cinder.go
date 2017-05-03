@@ -59,15 +59,15 @@ func (plugin *CinderPlugin) CreateVolume(name, volType string, size int32) (stri
 	}
 
 	//Configure create request body, the body is defined in volume package.
-	body := &volume.CreateBody{
-		VolumeBody: volume.RequestBody{
+	body := &volume.VolumeCreateBody{
+		VolumeRequestBody: volume.VolumeRequestBody{
 			Name:       name,
 			VolumeType: volType,
 			Size:       size,
 		},
 	}
 
-	volume, err := volumeService.Create(body)
+	volume, err := volumeService.CreateVolume(body)
 	if err != nil {
 		log.Println("Cannot create volume:", err)
 		return "", err
@@ -86,7 +86,7 @@ func (plugin *CinderPlugin) GetVolume(volID string) (string, error) {
 		return "", err
 	}
 
-	volume, err := volumeService.Show(volID)
+	volume, err := volumeService.ShowVolume(volID)
 	if err != nil {
 		log.Println("Cannot show volume:", err)
 		return "", err
@@ -107,13 +107,13 @@ func (plugin *CinderPlugin) GetAllVolumes(allowDetails bool) (string, error) {
 
 	var volumes interface{}
 	if allowDetails {
-		volumes, err = volumeService.Detail()
+		volumes, err = volumeService.DetailVolumes()
 		if err != nil {
 			log.Println("Cannot detail volumes:", err)
 			return "", err
 		}
 	} else {
-		volumes, err = volumeService.List()
+		volumes, err = volumeService.ListVolumes()
 		if err != nil {
 			log.Println("Cannot list volumes:", err)
 			return "", err
@@ -133,13 +133,13 @@ func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
 		return "", err
 	}
 
-	_, err = volumeService.Show(volID)
+	_, err = volumeService.ShowVolume(volID)
 	if err != nil {
 		log.Println("Cannot get volume:", err)
 		return "", err
 	}
 
-	err = volumeService.Delete(volID)
+	err = volumeService.DeleteVolume(volID)
 	if err != nil {
 		log.Println("Cannot delete volume:", err)
 		return "", err
@@ -155,6 +155,97 @@ func (plugin *CinderPlugin) AttachVolume(volID string) (string, error) {
 
 func (plugin *CinderPlugin) DetachVolume(device string) (string, error) {
 	return DetachVolumeFromHost(plugin, device)
+}
+
+func (plugin *CinderPlugin) CreateSnapshot(name, volID, description string, forced bool) (string, error) {
+	//Get the certified volume service.
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	//Configure snapshot request body, the body is defined in volume package.
+	body := &volume.SnapshotBody{
+		SnapshotRequestBody: volume.SnapshotRequestBody{
+			Name:            name,
+			VolumeID:        volID,
+			Description:     description,
+			ForceSnapshoted: forced,
+		},
+	}
+
+	snapshot, err := volumeService.CreateSnapshot(body)
+	if err != nil {
+		log.Println("Cannot create snapshot:", err)
+		return "", err
+	}
+
+	a, _ := json.Marshal(snapshot)
+	result := string(a)
+	log.Println("Create snapshot success, dls =", result)
+	return result, nil
+}
+
+func (plugin *CinderPlugin) GetSnapshot(snapID string) (string, error) {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	snapshot, err := volumeService.ShowSnapshot(snapID)
+	if err != nil {
+		log.Println("Cannot show snapshot:", err)
+		return "", err
+	}
+
+	a, _ := json.Marshal(snapshot)
+	result := string(a)
+	log.Println("Get snapshot success, dls =", result)
+	return result, nil
+}
+
+func (plugin *CinderPlugin) GetAllSnapshots() (string, error) {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	snapshots, err := volumeService.ListSnapshots()
+	if err != nil {
+		log.Println("Cannot list snapshots:", err)
+		return "", err
+	}
+
+	a, _ := json.Marshal(snapshots)
+	result := string(a)
+	log.Println("Get all snapshots success, dls =", result)
+	return result, nil
+}
+
+func (plugin *CinderPlugin) DeleteSnapshot(snapID string) (string, error) {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return "", err
+	}
+
+	_, err = volumeService.ShowSnapshot(snapID)
+	if err != nil {
+		log.Println("Cannot get snapshot:", err)
+		return "", err
+	}
+
+	err = volumeService.DeleteSnapshot(snapID)
+	if err != nil {
+		log.Println("Cannot delete snapshot:", err)
+		return "", err
+	}
+
+	result := "Delete snapshot success!"
+	return result, nil
 }
 
 /*
@@ -176,7 +267,7 @@ func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 	}
 	auth, err := auth.DoAuthRequestV3(creds)
 	if err != nil {
-		log.Fatalln("There was an error authenticating:", err)
+		log.Println("There was an error authenticating:", err)
 	}
 	/*
 		if !auth.GetExpiration().After(time.Now()) {
@@ -187,7 +278,7 @@ func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 	// Find the endpoint for the volume v2 service.
 	url, err := auth.GetEndpoint("volumev2", "")
 	if url == "" || err != nil {
-		log.Fatalln("Volume service url not found during authentication.")
+		log.Println("Volume service url not found during authentication.")
 	}
 
 	// Make a new client with these creds, here configure InsecureSkipVerify
@@ -198,7 +289,7 @@ func (plugin *CinderPlugin) getVolumeService() (volume.Service, error) {
 
 	sess, err := openstack.NewSession(nil, auth, tls)
 	if err != nil {
-		log.Fatalln("Error creating new Session:", err)
+		log.Println("Error creating new Session:", err)
 	}
 
 	volumeService := volume.NewService(sess, http.DefaultClient, url)

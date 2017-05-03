@@ -25,8 +25,8 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/controller/api"
-	"github.com/opensds/opensds/pkg/controller/api/v1/volumes"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	volumes "github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -45,7 +45,6 @@ func (this *VolumeController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	resourceType := this.Ctx.Input.Param(":resource")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
@@ -53,9 +52,7 @@ func (this *VolumeController) Post() {
 		this.Ctx.Output.Body(resBody)
 	}
 
-	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: resourceType,
-	}
+	volumeRequest := &volumes.VolumeRequest{}
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
@@ -83,11 +80,15 @@ func (this *VolumeController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	resourceType := this.Ctx.Input.Param(":resource")
+	resourceType := this.GetString("resource")
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: resourceType,
-		AllowDetails: false,
+		Profile: &api.StorageProfile{
+			BackendDriver: resourceType,
+		},
+		Schema: &api.VolumeOperationSchema{
+			AllowDetails: false,
+		},
 	}
 	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
@@ -116,8 +117,65 @@ func (this *VolumeController) Put() {
 func (this *VolumeController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	resBody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(resBody)
+}
 
-	resourceType := this.Ctx.Input.Param(":resource")
+type SpecifiedVolumeController struct {
+	beego.Controller
+}
+
+func (this *SpecifiedVolumeController) Post() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+	resBody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(resBody)
+}
+
+func (this *SpecifiedVolumeController) Get() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	volId := this.Ctx.Input.Param(":id")
+	resourceType := this.GetString("resource")
+
+	volumeRequest := &volumes.VolumeRequest{
+		Schema: &api.VolumeOperationSchema{
+			Id: volId,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: resourceType,
+		},
+	}
+	result, err := volumes.GetVolume(volumeRequest)
+	if err != nil {
+		log.Println(err)
+		resBody, _ := json.Marshal("Get volume failed!")
+		this.Ctx.Output.Body(resBody)
+	} else {
+		if reflect.DeepEqual(result, falseAllVolumesResponse) {
+			log.Println("Get volume failed!")
+			resBody, _ := json.Marshal("Get volume failed!")
+			this.Ctx.Output.Body(resBody)
+		} else {
+			resBody, _ := json.Marshal(result)
+			this.Ctx.Output.Body(resBody)
+		}
+	}
+}
+
+func (this *SpecifiedVolumeController) Put() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+	resBody, _ := json.Marshal("Not supported!")
+	this.Ctx.Output.Body(resBody)
+}
+
+func (this *SpecifiedVolumeController) Delete() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	volId := this.Ctx.Input.Param(":id")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
@@ -125,46 +183,17 @@ func (this *VolumeController) Delete() {
 		this.Ctx.Output.Body(resBody)
 	}
 
-	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: resourceType,
-	}
+	volumeRequest := &volumes.VolumeRequest{}
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
 		this.Ctx.Output.Body(resBody)
 	}
+	volumeRequest.Schema.Id = volId
 
 	result := volumes.DeleteVolume(volumeRequest)
 	resBody, _ := json.Marshal(result)
 	this.Ctx.Output.Body(resBody)
-}
-
-func GetVolume(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	resourceType := ctx.Input.Param(":resource")
-	volId := ctx.Input.Param(":id")
-
-	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: resourceType,
-		Id:           volId,
-	}
-	result, err := volumes.GetVolume(volumeRequest)
-	if err != nil {
-		log.Println(err)
-		resBody, _ := json.Marshal("Get volume failed!")
-		ctx.Output.Body(resBody)
-	} else {
-		if reflect.DeepEqual(result, falseAllVolumesResponse) {
-			log.Println("Get volume failed!")
-			resBody, _ := json.Marshal("Get volume failed!")
-			ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			ctx.Output.Body(resBody)
-		}
-	}
 }
 
 func AttachVolume(ctx *context.Context) {

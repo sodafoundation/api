@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod-ceph
+spec:
+  containers:
+    - image: busybox
+      name: busy-container1-ceph
+      command: ["/bin/sleep","7d"]  
+      volumeMounts:
+        - name: vol1
+          mountPath: /mnt/pv-1
+  volumes:
+    - name: vol1
+      persistentVolumeClaim:
+        claimName: "pv-ceph"

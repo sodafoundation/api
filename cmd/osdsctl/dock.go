@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opensds/opensds/pkg/controller/api/v1/docks"
+	docks "github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/spf13/cobra"
 )
@@ -80,11 +80,11 @@ func dockRegisterAction(cmd *cobra.Command, args []string) {
 
 	dockRequest := docks.DockRequest{}
 
-	dock, err := docks.RegisterDock(dockRequest, args[0])
+	result, err := docks.RegisterDock(dockRequest, args[0])
 	if err != nil {
 		fmt.Println("Register dock resource failed: ", err)
 	} else {
-		rbody, _ := json.MarshalIndent(dock, "", "  ")
+		rbody, _ := json.MarshalIndent(result, "", "  ")
 		fmt.Printf("%s\n", string(rbody))
 	}
 }
@@ -98,11 +98,11 @@ func dockDeregisterAction(cmd *cobra.Command, args []string) {
 
 	dockRequest := docks.DockRequest{}
 
-	res, err := docks.DeregisterDock(dockRequest, args[0])
+	result, err := docks.DeregisterDock(dockRequest, args[0])
 	if err != nil {
 		fmt.Println("Deregester dock resource failed: ", err)
 	} else {
-		fmt.Printf("%s\n", res)
+		fmt.Printf("%s\n", result)
 	}
 }
 
@@ -115,11 +115,11 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 
 	dockRequest := docks.DockRequest{}
 
-	dock, err := docks.GetDock(dockRequest, args[0])
+	result, err := docks.GetDock(dockRequest, args[0])
 	if err != nil {
 		fmt.Println("Get dock resource failed: ", err)
 	} else {
-		rbody, _ := json.MarshalIndent(dock, "", "  ")
+		rbody, _ := json.MarshalIndent(result, "", "  ")
 		fmt.Printf("%s\n", string(rbody))
 	}
 }
@@ -133,11 +133,11 @@ func dockListAction(cmd *cobra.Command, args []string) {
 
 	dockRequest := docks.DockRequest{}
 
-	docks, err := docks.ListDocks(dockRequest)
+	result, err := docks.ListDocks(dockRequest)
 	if err != nil {
 		fmt.Println("List dock resources failed: ", err)
 	} else {
-		rbody, _ := json.MarshalIndent(docks, "", "  ")
+		rbody, _ := json.MarshalIndent(result, "", "  ")
 		fmt.Printf("%s\n", string(rbody))
 	}
 }

@@ -1,0 +1,13 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: flex-provisioner
+spec:
+  containers:
+    - name: flex-provisioner
+      image: quay.io/kebernetes_incubator/flex-provisioner
+      securityContext:
+      args:
+        - "-provisioner=external/flex-simple"
+        - "-execCommand=/opt/storage/flex-provision.sh"
+      imagePullPolicy: "IfNotPresent"

@@ -1,0 +1,50 @@
+package: github.com/kubernetes-incubator/external-storage
+excludeDirs:
+- nfs/test/e2e
+import:
+- package: github.com/aws/aws-sdk-go
+  version: v1.7.3
+  subpackages:
+  - aws
+  - aws/session
+  - service/efs
+- package: github.com/docker/docker
+  version: v1.13.1
+  subpackages:
+  - pkg/mount
+- package: github.com/golang/glog
+- package: github.com/guelfey/go.dbus
+- package: github.com/mitchellh/mapstructure
+  version: db1efb5
+- package: k8s.io/apimachinery
+  version: c1c4a7f
+  subpackages:
+  - pkg/api/errors
+  - pkg/api/resource
+  - pkg/apis/meta/v1
+  - pkg/runtime
+  - pkg/types
+  - pkg/util/runtime
+  - pkg/util/uuid
+  - pkg/util/validation
+  - pkg/util/validation/field
+  - pkg/util/wait
+  - pkg/watch
+- package: k8s.io/client-go
+  version: 7615377
+  subpackages:
+  - kubernetes
+  - kubernetes/typed/core/v1
+  - pkg/api
+  - pkg/api/v1
+  - pkg/apis/storage/v1
+  - pkg/apis/storage/v1beta1
+  - rest
+  - tools/cache
+  - tools/clientcmd
+  - tools/record
+- package: k8s.io/kubernetes
+  version: v1.6.0
+  subpackages:
+  - pkg/util/goroutinemap
+  - pkg/util/version

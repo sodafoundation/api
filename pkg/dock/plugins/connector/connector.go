@@ -35,10 +35,6 @@ const (
 	URL_PREFIX = "http://localhost:7879"
 )
 
-type Connector struct {
-	ConnInfo volume.ConnectionInfo `json:"connection_info"`
-}
-
 type InitializeRequest struct {
 	Multipath bool `json:"multipath"`
 }
@@ -82,6 +78,10 @@ func GetConnectorProperties(isMultipath bool) (*volume.ConnectorProperties, erro
 	return prop, nil
 }
 
+type Connector struct {
+	ConnInfo volume.ConnectionInfo `json:"connection_info"`
+}
+
 func (conn *Connector) ConnectVolume() (string, error) {
 	url := URL_PREFIX + "/Volume/Connect"
 
@@ -106,7 +106,11 @@ func (conn *Connector) ConnectVolume() (string, error) {
 		return "", err
 	}
 
-	return string(rbody), nil
+	devPath, err := parseDevicePath(rbody)
+	if err != nil {
+		return "", err
+	}
+	return devPath, nil
 }
 
 func (conn *Connector) DisconnectVolume() (string, error) {
@@ -134,4 +138,14 @@ func (conn *Connector) DisconnectVolume() (string, error) {
 	}
 
 	return string(rbody), nil
+}
+
+func parseDevicePath(body []byte) (string, error) {
+	var deviceData map[string]string
+
+	if err := json.Unmarshal(body, &deviceData); err != nil {
+		log.Println("Unable to parse device path:", err)
+		return "", err
+	}
+	return deviceData["path"], nil
 }

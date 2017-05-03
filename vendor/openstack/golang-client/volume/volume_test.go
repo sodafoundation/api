@@ -36,8 +36,8 @@ var tokn = "ae5aebe5-6a5d-4a40-840a-9736a067aff4"
 
 func TestCreateVolume(t *testing.T) {
 	anon := func(volumeService Service) {
-		body := &CreateBody{
-			VolumeBody: RequestBody{
+		body := &VolumeCreateBody{
+			VolumeRequestBody: VolumeRequestBody{
 				Name:       "myvol1",
 				VolumeType: "lvm",
 				Size:       2,

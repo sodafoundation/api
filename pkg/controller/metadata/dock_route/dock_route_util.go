@@ -14,7 +14,8 @@
 
 /*
 This module defines the initialization work about dock service: generate dock
-node information and record it to dock route service.
+node information and record it to dock route service. Please DO NOT
+modify this file.
 
 */
 
@@ -25,7 +26,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/opensds/opensds/pkg/controller/api"
+	api "github.com/opensds/opensds/pkg/api/v1"
 	"github.com/satori/go.uuid"
 )
 
@@ -56,8 +57,8 @@ func readDockRoutesFromFile() ([]api.DockRoute, error) {
 	return routes, nil
 }
 
-func writeDockRoutesToFile(routes *[]api.DockRoute) bool {
-	body, err := json.Marshal(routes)
+func writeDockRoutesToFile(routes []api.DockRoute) bool {
+	body, err := json.Marshal(&routes)
 	if err != nil {
 		log.Println("Marshal json failed:", err)
 		return false

@@ -103,6 +103,30 @@ func (ds *dockServer) UnmountVolume(ctx context.Context, in *pb.VolumeRequest) (
 	return dockApi.UnmountVolume(in)
 }
 
+// CreateVolumeSnapshot implements opensds.DockServer
+func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive create volume snapshot request, vr =", in)
+	return dockApi.CreateVolumeSnapshot(in)
+}
+
+// GetVolumeSnapshot implements opensds.DockServer
+func (ds *dockServer) GetVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive get volume snapshot request, vr =", in)
+	return dockApi.GetVolumeSnapshot(in)
+}
+
+// ListVolumeSnapshots implements opensds.DockServer
+func (ds *dockServer) ListVolumeSnapshots(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive list volume snapshots request, vr =", in)
+	return dockApi.ListVolumeSnapshots(in)
+}
+
+// DeleteVolumeSnapshot implements opensds.DockServer
+func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive delete volume snapshot request, vr =", in)
+	return dockApi.DeleteVolumeSnapshot(in)
+}
+
 // CreateShare implements opensds.DockServer
 func (ds *dockServer) CreateShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
 	log.Println("Dock server receive create share request, sr =", in)
@@ -154,7 +178,7 @@ func (ds *dockServer) UnmountShare(ctx context.Context, in *pb.ShareRequest) (*p
 func (ds *dockServer) ListenAndServe() {
 	lis, err := net.Listen("tcp", ds.Port)
 	if err != nil {
-		log.Fatalf("failed to listen: %+v", err)
+		log.Printf("failed to listen: %+v", err)
 	}
 
 	log.Println("Dock server initialized! Start listening on port:", ds.Port)

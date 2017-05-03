@@ -1,3 +1,4 @@
+
 #### Download and Build OpenSDS Source Code
 
 * Configure local environment
@@ -55,7 +56,7 @@ curl https://bootstrap.pypa.io/get-pip.py | python
 * Install python dependencies
 
 ```sh
-curl https://bootstrap.pypa.io/get-pip.py | python
+sudo apt-get install python-dev
 ```
 
 * Install os-brick
@@ -67,7 +68,7 @@ pip install git+https://github.com/leonwanghui/os-brick.git
 * Create configuration files
 
 ```sh
-cp /usr/local/etcc/os-brick/ /etc/ -r
+cp /usr/local/etc/os-brick/ /etc/ -r
 ```
 
 * Modify config file(/etc/os-brick/os-brick.conf) and change one line below:

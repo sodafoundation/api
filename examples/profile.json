@@ -1,0 +1,20 @@
+[
+	{
+		"id": "",
+		"name": "cinder",
+		"backend": "cinder",
+		"tags": {
+			"highAvailability": "true",
+			"intervalSnapshot": "5s",
+			"deleteSnapshotPolicy": "true"
+		}
+	},
+	{
+		"id": "",
+		"name": "ceph",
+		"backend": "ceph",
+		"tags": {
+			"latency": "low"
+		}
+	}
+]

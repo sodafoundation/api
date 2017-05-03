@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/opensds/opensds/pkg/controller/api"
-	"github.com/opensds/opensds/pkg/controller/api/v1/shares"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	shares "github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/spf13/cobra"
 )
@@ -92,14 +92,14 @@ var falseAllSharesResponse []api.ShareResponse
 var falseAllSharesDetailResponse []api.ShareDetailResponse
 
 var (
-	shrResourceType string
-	shrName         string
-	shrType         string
-	shrAllowDetails bool
+	shrBackendDriver string
+	shrName          string
+	shrType          string
+	shrAllowDetails  bool
 )
 
 func init() {
-	shareCommand.PersistentFlags().StringVarP(&shrResourceType, "backend", "b", "manila", "backend resource type")
+	shareCommand.PersistentFlags().StringVarP(&shrBackendDriver, "backend", "b", "manila", "backend resource type")
 	shareCommand.AddCommand(shareCreateCommand)
 	shareCommand.AddCommand(shareShowCommand)
 	shareCommand.AddCommand(shareListCommand)
@@ -132,11 +132,15 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Name:         shrName,
-		ShareType:    shrType,
-		ShareProto:   shrProto,
-		Size:         int32(size),
+		Schema: &api.ShareOperationSchema{
+			Name:       shrName,
+			ShareType:  shrType,
+			ShareProto: shrProto,
+			Size:       int32(size),
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.CreateShare(shareRequest)
 	if err != nil {
@@ -158,8 +162,12 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.GetShare(shareRequest)
 	if err != nil {
@@ -182,8 +190,12 @@ func shareListAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		AllowDetails: shrAllowDetails,
+		Schema: &api.ShareOperationSchema{
+			AllowDetails: shrAllowDetails,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.ListShares(shareRequest)
 	if err != nil {
@@ -205,8 +217,12 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.DeleteShare(shareRequest)
@@ -222,8 +238,12 @@ func shareAttachAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := &shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.AttachShare(shareRequest)
@@ -239,8 +259,12 @@ func shareDetachAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: volResourceType,
-		Device:       args[0],
+		Schema: &api.ShareOperationSchema{
+			Device: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.DetachShare(shareRequest)
@@ -256,10 +280,14 @@ func shareMountAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		FsType:       args[0],
-		Device:       args[1],
-		MountDir:     args[2],
+		Schema: &api.ShareOperationSchema{
+			FsType:   args[0],
+			Device:   args[1],
+			MountDir: args[2],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.MountShare(shareRequest)
@@ -275,8 +303,12 @@ func shareUnmountAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		MountDir:     args[0],
+		Schema: &api.ShareOperationSchema{
+			MountDir: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.UnmountShare(shareRequest)
