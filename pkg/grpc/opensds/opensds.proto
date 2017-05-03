@@ -49,6 +49,14 @@ service Orchestration {
   rpc MountVolume (VolumeRequest) returns (Response) {}
   // Unmount a volume
   rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a volume snapshot
+  rpc CreateVolumeSnapshot (VolumeRequest) returns (Response) {}
+  // Get a volume snapshot
+  rpc GetVolumeSnapshot (VolumeRequest) returns (Response) {}
+  // List all volume snapshots
+  rpc ListVolumeSnapshots (VolumeRequest) returns (Response) {}
+  // Delete a volume snapshot
+  rpc DeleteVolumeSnapshot (VolumeRequest) returns (Response) {}
   // Create a share
   rpc CreateShare (ShareRequest) returns (Response) {}
   // Get a share
@@ -85,6 +93,14 @@ service Dock {
   rpc MountVolume (VolumeRequest) returns (Response) {}
   // Unmount a volume
   rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a volume snapshot
+  rpc CreateVolumeSnapshot (VolumeRequest) returns (Response) {}
+  // Get a volume snapshot
+  rpc GetVolumeSnapshot (VolumeRequest) returns (Response) {}
+  // List all volume snapshots
+  rpc ListVolumeSnapshots (VolumeRequest) returns (Response) {}
+  // Delete a volume snapshot
+  rpc DeleteVolumeSnapshot (VolumeRequest) returns (Response) {}
   // Create a share
   rpc CreateShare (ShareRequest) returns (Response) {}
   // Get a share
@@ -116,6 +132,11 @@ message VolumeRequest {
   string mountDir = 8;
   string fsType = 9;
   string dockId = 10;
+  string snapshotId = 11;
+  string snapshotName = 12;
+  string description = 13;
+  bool forceSnapshoted = 14;
+  string storageProfile = 15;
 }
 
 // The ShareRequest message containing all properties of
@@ -132,6 +153,7 @@ message ShareRequest {
   string mountDir = 9;
   string fsType = 10;
   string dockId = 11;
+  string storageProfile = 12;
 }
 
 // The Response message containing all properties of

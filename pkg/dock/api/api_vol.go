@@ -20,7 +20,6 @@ This module implements the entry into operations of storageDock module.
 package api
 
 import (
-	"fmt"
 	"log"
 
 	dock "github.com/opensds/opensds/pkg/dock/volume"
@@ -34,36 +33,26 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetSize())
 	if err != nil {
 		log.Println("Error occured in dock module when create volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	result, err := dock.GetVolume(vr.GetResourceType(), vr.GetId())
 	if err != nil {
 		log.Println("Error occured in dock module when get volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
@@ -71,18 +60,13 @@ func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetAllowDetails())
 	if err != nil {
 		log.Println("Error occured in dock module when list volumes:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
@@ -90,18 +74,13 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetId())
 	if err != nil {
 		log.Println("Error occured in dock module when delete volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
@@ -109,18 +88,13 @@ func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetId())
 	if err != nil {
 		log.Println("Error occured in dock module when attach volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
@@ -128,18 +102,13 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetDevice())
 	if err != nil {
 		log.Println("Error occured in dock module when detach volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
@@ -148,34 +117,81 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 		vr.GetFsType())
 	if err != nil {
 		log.Println("Error occured in dock module when mount volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
-	}
-	return resp, nil
+	}, nil
 }
 
 func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	result, err := dock.UnmountVolume(vr.GetMountDir())
 	if err != nil {
 		log.Println("Error occured in dock module when unmount volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	return &pb.Response{
 		Status:  "Success",
 		Message: result,
+	}, nil
+}
+
+func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	result, err := dock.CreateSnapshot(vr.GetResourceType(),
+		vr.GetSnapshotName(),
+		vr.GetId(),
+		vr.GetDescription(),
+		vr.GetForceSnapshoted())
+	if err != nil {
+		log.Println("Error occured in dock module when create snapshot:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}, nil
+}
+
+func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	result, err := dock.GetSnapshot(vr.GetResourceType(), vr.GetSnapshotId())
+	if err != nil {
+		log.Println("Error occured in dock module when get snapshot:", err)
+		return &pb.Response{}, err
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}, nil
+}
+
+func ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
+	result, err := dock.GetAllSnapshots(vr.GetResourceType())
+	if err != nil {
+		log.Println("Error occured in dock module when list snapshots:", err)
+		return &pb.Response{}, err
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}, nil
+}
+
+func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	result, err := dock.DeleteSnapshot(vr.GetResourceType(),
+		vr.GetSnapshotId())
+	if err != nil {
+		log.Println("Error occured in dock module when delete snapshot:", err)
+		return &pb.Response{}, err
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: result,
+	}, nil
 }

@@ -30,6 +30,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/opensds/opensds/pkg/dock/plugins/ceph"
 	"github.com/opensds/opensds/pkg/dock/plugins/cinder"
 	"github.com/opensds/opensds/pkg/dock/plugins/coprhd"
 	"github.com/opensds/opensds/pkg/dock/plugins/manila"
@@ -52,6 +53,14 @@ type VolumePlugin interface {
 	AttachVolume(volID string) (string, error)
 
 	DetachVolume(device string) (string, error)
+
+	CreateSnapshot(name, volID, description string, forced bool) (string, error)
+
+	GetSnapshot(snapID string) (string, error)
+
+	GetAllSnapshots() (string, error)
+
+	DeleteSnapshot(snapID string) (string, error)
 }
 
 type SharePlugin interface {
@@ -104,7 +113,11 @@ type pluginsConfig struct {
 }
 
 func InitVP(resourceType string) (VolumePlugin, error) {
-	config := readBackendConfigFile()
+	config, err := readBackendConfigFile()
+	if err != nil {
+		log.Printf("Configure backend resource %s failed: %v\n", resourceType, err)
+		return nil, err
+	}
 
 	switch resourceType {
 	case "cinder":
@@ -126,6 +139,8 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 				},
 			},
 		}, nil
+	case "ceph":
+		return &ceph.CephPlugin{}, nil
 	default:
 		err := errors.New("Can't find this resource type in backend storage.")
 		return nil, err
@@ -133,7 +148,11 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 }
 
 func InitSP(resourceType string) (SharePlugin, error) {
-	config := readBackendConfigFile()
+	config, err := readBackendConfigFile()
+	if err != nil {
+		log.Printf("Configure backend resource %s failed: %v\n", resourceType, err)
+		return nil, err
+	}
 
 	switch resourceType {
 	case "manila":
@@ -152,15 +171,17 @@ func InitSP(resourceType string) (SharePlugin, error) {
 }
 
 // readBackendConfigFile provides access to credentials in backend resource plugins.
-func readBackendConfigFile() *pluginsConfig {
-	var config *pluginsConfig
+func readBackendConfigFile() (*pluginsConfig, error) {
+	var config = &pluginsConfig{}
 
 	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
 	if err != nil {
 		log.Println("ReadFile json failed:", err)
+		return nil, err
 	}
 	if err = json.Unmarshal(userJSON, config); err != nil {
 		log.Println("Unmarshal json failed:", err)
+		return nil, err
 	}
-	return config
+	return config, nil
 }

@@ -22,8 +22,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/opensds/opensds/cmd/utils"
+	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
 type Result struct {
@@ -41,17 +44,8 @@ type DefaultOptions struct {
 // VolumeRequest is a structure for all properties of
 // a volume request
 type VolumeRequest struct {
-	DockId       string `json:"dockId,omitempty"`
-	ResourceType string `json:"resourceType,omitempty"`
-	Id           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	VolumeType   string `json:"volumeType,omitempty"`
-	Size         int    `json:"size"`
-	AllowDetails bool   `json:"allowDetails"`
-
-	Device   string `json:"device"`
-	MountDir string `json:"mountDir"`
-	FsType   string `json:"fsType"`
+	Schema  *api.VolumeOperationSchema `json:"schema"`
+	Profile *api.StorageProfile        `json:"profile"`
 }
 
 // VolumeResponse is a structure for all properties of
@@ -239,5 +233,42 @@ func GetDockId() (string, error) {
 	} else {
 		err = errors.New("Could not find dock service!")
 		return "", err
+	}
+}
+
+func FindLinkPath(device string) (string, error) {
+	listCmd := exec.Command("ls", "/dev/disk/by-id", "-l")
+	listCmdOut, err := listCmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Could not find link path %f: %v\n", listCmdOut, err)
+		return "", err
+	}
+
+	split := strings.Split(string(listCmdOut), "\n")
+
+	var isFound, findStr = false, ""
+	for i := 0; i < len(split); i++ {
+		if strings.Contains(split[i], device) {
+			isFound, findStr = true, split[i]
+			break
+		}
+	}
+	if !isFound {
+		return "", errors.New("No link path matched!")
+	}
+
+	split1 := strings.Fields(findStr)
+	volId := split1[8]
+	linkPath := "/dev/disk/by-id/" + volId
+	return linkPath, nil
+}
+
+func FindBackendDriver(device string) (string, error) {
+	if strings.HasPrefix(device, "/dev/sd") {
+		return "cinder", nil
+	} else if strings.HasPrefix(device, "/dev/rbd") {
+		return "ceph", nil
+	} else {
+		return "", errors.New("No backend driver matched!")
 	}
 }

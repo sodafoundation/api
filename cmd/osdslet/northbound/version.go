@@ -24,7 +24,8 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/opensds/opensds/pkg/api"
+	versions "github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/astaxie/beego/context"
 )
@@ -36,18 +37,18 @@ func GetAllVersions(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
-	versions, err := api.ListVersions()
+	result, err := versions.ListVersions()
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List versions failed!")
 		ctx.Output.Body(rbody)
 	} else {
-		if reflect.DeepEqual(versions, fakeVersions) {
+		if reflect.DeepEqual(result, fakeVersions) {
 			log.Println("List versions failed!")
 			rbody, _ := json.Marshal("List versions failed!")
 			ctx.Output.Body(rbody)
 		} else {
-			rbody, _ := json.Marshal(versions)
+			rbody, _ := json.Marshal(result)
 			ctx.Output.Body(rbody)
 		}
 	}
@@ -57,18 +58,18 @@ func GetVersionv1(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
-	version, err := api.GetVersionv1()
+	result, err := versions.GetVersionv1()
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Get version v1 failed!")
 		ctx.Output.Body(rbody)
 	} else {
-		if reflect.DeepEqual(version, fakeVersion) {
+		if reflect.DeepEqual(result, fakeVersion) {
 			log.Println("Get version v1 failed!")
 			rbody, _ := json.Marshal("Get version v1 failed!")
 			ctx.Output.Body(rbody)
 		} else {
-			rbody, _ := json.Marshal(version)
+			rbody, _ := json.Marshal(result)
 			ctx.Output.Body(rbody)
 		}
 	}

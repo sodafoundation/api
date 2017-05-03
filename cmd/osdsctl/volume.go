@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/opensds/opensds/pkg/controller/api"
-	"github.com/opensds/opensds/pkg/controller/api/v1/volumes"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	volumes "github.com/opensds/opensds/pkg/controller/api"
 
 	"github.com/spf13/cobra"
 )
@@ -92,25 +92,30 @@ var falseAllVolumesResponse []api.VolumeResponse
 var falseAllVolumesDetailResponse api.VolumeDetailResponse
 
 var (
-	volResourceType string
-	volName         string
-	volType         string
-	volAllowDetails bool
+	profileName      string
+	volBackendDriver string
+	volName          string
+	volType          string
+	volAllowDetails  bool
 )
 
 func init() {
-	volumeCommand.PersistentFlags().StringVarP(&volResourceType, "backend", "b", "cinder", "backend resource type")
+	volumeCommand.PersistentFlags().StringVarP(&volBackendDriver, "backend", "b", "cinder", "backend resource type")
+	volumeCommand.PersistentFlags().StringVarP(&profileName, "profile", "p", "", "the name of profile configured by admin")
+
 	volumeCommand.AddCommand(volumeCreateCommand)
+	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
+	volumeCreateCommand.Flags().StringVarP(&volType, "type", "t", "", "the type of created volume")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
+	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
 	volumeCommand.AddCommand(volumeDeleteCommand)
 	volumeCommand.AddCommand(volumeAttachCommand)
 	volumeCommand.AddCommand(volumeDetachCommand)
 	volumeCommand.AddCommand(volumeMountCommand)
 	volumeCommand.AddCommand(volumeUnmountCommand)
-	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
-	volumeCreateCommand.Flags().StringVarP(&volType, "type", "t", "", "the type of created volume")
-	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
+
+	volumeCommand.AddCommand(volumeSnapshotCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -131,10 +136,15 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		Name:         volName,
-		VolumeType:   volType,
-		Size:         int32(size),
+		Schema: &api.VolumeOperationSchema{
+			Name:       volName,
+			VolumeType: volType,
+			Size:       int32(size),
+		},
+		Profile: &api.StorageProfile{
+			Name:          profileName,
+			BackendDriver: volBackendDriver,
+		},
 	}
 	result, err := volumes.CreateVolume(volumeRequest)
 	if err != nil {
@@ -157,8 +167,12 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 	}
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		Id:           args[0],
+		Schema: &api.VolumeOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
@@ -181,8 +195,12 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	}
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		AllowDetails: volAllowDetails,
+		Schema: &api.VolumeOperationSchema{
+			AllowDetails: volAllowDetails,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
@@ -205,8 +223,13 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		Id:           args[0],
+		Schema: &api.VolumeOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			Name:          profileName,
+			BackendDriver: volBackendDriver,
+		},
 	}
 
 	result := volumes.DeleteVolume(volumeRequest)
@@ -222,9 +245,13 @@ func volumeAttachAction(cmd *cobra.Command, args []string) {
 	}
 
 	volumeRequest := &volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		DockId:       args[0],
-		Id:           args[1],
+		Schema: &api.VolumeOperationSchema{
+			DockId: args[0],
+			Id:     args[1],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 
 	result := volumes.AttachVolume(volumeRequest)
@@ -239,10 +266,14 @@ func volumeDetachAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volumeRequest := volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		DockId:       args[0],
-		Device:       args[1],
+	volumeRequest := &volumes.VolumeRequest{
+		Schema: &api.VolumeOperationSchema{
+			DockId: args[0],
+			Device: args[1],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 
 	result := volumes.DetachVolume(volumeRequest)
@@ -257,12 +288,16 @@ func volumeMountAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volumeRequest := volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		DockId:       args[0],
-		FsType:       args[1],
-		Device:       args[2],
-		MountDir:     args[3],
+	volumeRequest := &volumes.VolumeRequest{
+		Schema: &api.VolumeOperationSchema{
+			DockId:   args[0],
+			FsType:   args[1],
+			Device:   args[2],
+			MountDir: args[3],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 
 	result := volumes.MountVolume(volumeRequest)
@@ -277,10 +312,14 @@ func volumeUnmountAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volumeRequest := volumes.VolumeRequest{
-		ResourceType: volResourceType,
-		DockId:       args[0],
-		MountDir:     args[1],
+	volumeRequest := &volumes.VolumeRequest{
+		Schema: &api.VolumeOperationSchema{
+			DockId:   args[0],
+			MountDir: args[1],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: volBackendDriver,
+		},
 	}
 
 	result := volumes.UnmountVolume(volumeRequest)

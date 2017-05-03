@@ -268,6 +268,22 @@ func (d *Driver) DetachVolume(device string) (string, error) {
 	return "", nil
 }
 
+func (d *Driver) CreateSnapshot(name, volID, description string, forced bool) (string, error) {
+	return "", nil
+}
+
+func (d *Driver) GetSnapshot(snapID string) (string, error) {
+	return "", nil
+}
+
+func (d *Driver) GetAllSnapshots() (string, error) {
+	return "", nil
+}
+
+func (d *Driver) DeleteSnapshot(snapID string) (string, error) {
+	return "", nil
+}
+
 // getAuthSession returns an authenticated API Session
 func (d *Driver) getAuthSession() (session *napping.Session, err error) {
 	s := napping.Session{

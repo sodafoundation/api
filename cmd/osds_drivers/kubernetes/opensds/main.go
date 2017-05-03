@@ -22,17 +22,17 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/httplib"
+	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
 const (
-	URL_PREFIX string = "http://10.2.0.115:50048"
+	URL_PREFIX string = "http://10.169.149.191:50040"
 )
 
 type OpenSDSOptions struct {
 	DefaultOptions
-	VolumeId     string `json:"volumeId"`
-	ResourceType string `json:"resourceType"`
-	VolumeType   string `json:"volumeType"`
+	VolumeId      string `json:"volumeId"`
+	BackendDriver string `json:"backendDriver"`
 }
 
 type OpenSDSPlugin struct{}
@@ -57,10 +57,13 @@ func (OpenSDSPlugin) Attach(opts interface{}) Result {
 	}
 
 	vr := &VolumeRequest{
-		DockId:       dockId,
-		ResourceType: opt.ResourceType,
-		Id:           opt.VolumeId,
-		VolumeType:   opt.VolumeType,
+		Schema: &api.VolumeOperationSchema{
+			DockId: dockId,
+			Id:     opt.VolumeId,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: opt.BackendDriver,
+		},
 	}
 
 	// fmt.Println("Start PUT request to attach volume, url =", url)
@@ -106,10 +109,23 @@ func (OpenSDSPlugin) Detach(device string) Result {
 	if err != nil {
 		return Fail(err.Error())
 	}
+	linkPath, err := FindLinkPath(device)
+	if err != nil {
+		return Fail(err.Error())
+	}
+	backendDriver, err := FindBackendDriver(device)
+	if err != nil {
+		return Fail(err.Error())
+	}
 
 	vr := &VolumeRequest{
-		DockId:       dockId,
-		ResourceType: "cinder",
+		Schema: &api.VolumeOperationSchema{
+			DockId: dockId,
+			Device: linkPath,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: backendDriver,
+		},
 	}
 
 	// fmt.Println("Start DELETE request to detach volume, url =", url)
@@ -142,7 +158,7 @@ func (OpenSDSPlugin) Detach(device string) Result {
 func (OpenSDSPlugin) Mount(mountDir string, device string, opts interface{}) Result {
 	opt := opts.(*OpenSDSOptions)
 
-	url := URL_PREFIX + "/api/v1/volumes/action/mount"
+	url := URL_PREFIX + "/api/v1/volumes/mount"
 
 	dockId, err := GetDockId()
 	if err != nil {
@@ -150,11 +166,13 @@ func (OpenSDSPlugin) Mount(mountDir string, device string, opts interface{}) Res
 	}
 
 	vr := &VolumeRequest{
-		DockId:       dockId,
-		ResourceType: opt.ResourceType,
-		MountDir:     mountDir,
-		Device:       device,
-		FsType:       opt.FsType,
+		Schema: &api.VolumeOperationSchema{
+			DockId:   dockId,
+			FsType:   opt.FsType,
+			Device:   device,
+			MountDir: mountDir,
+		},
+		Profile: &api.StorageProfile{},
 	}
 
 	// fmt.Println("Start PUT request to mount volume, url =", url)
@@ -192,9 +210,11 @@ func (OpenSDSPlugin) Unmount(mountDir string) Result {
 	}
 
 	vr := &VolumeRequest{
-		DockId:       dockId,
-		ResourceType: "cinder",
-		MountDir:     mountDir,
+		Schema: &api.VolumeOperationSchema{
+			DockId:   dockId,
+			MountDir: mountDir,
+		},
+		Profile: &api.StorageProfile{},
 	}
 
 	// fmt.Println("Start DELETE request to unmount volume, url =", url)

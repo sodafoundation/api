@@ -169,7 +169,7 @@ func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
 	}
 	auth, err := auth.DoAuthRequestV3(creds)
 	if err != nil {
-		log.Fatalln("There was an error authenticating:", err)
+		log.Println("There was an error authenticating:", err)
 	}
 	/*
 		if !auth.GetExpiration().After(time.Now()) {
@@ -180,7 +180,7 @@ func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
 	// Find the endpoint for the share v2 service.
 	url, err := auth.GetEndpoint("sharev2", "")
 	if url == "" || err != nil {
-		log.Fatalln("Share service url not found during authentication.")
+		log.Println("Share service url not found during authentication.")
 	}
 
 	// Make a new client with these creds, here configure InsecureSkipVerify
@@ -191,7 +191,7 @@ func (plugin *ManilaPlugin) getShareService() (share.Service, error) {
 
 	sess, err := openstack.NewSession(nil, auth, tls)
 	if err != nil {
-		log.Fatalln("Error creating new Session:", err)
+		log.Println("Error creating new Session:", err)
 	}
 
 	shareService := share.NewService(sess, http.DefaultClient, url)

@@ -24,40 +24,131 @@ service module.
 package api
 
 import (
-	_ "log"
+	"encoding/json"
 
-	"github.com/opensds/opensds/pkg/controller/orchestration/grpcapi"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	"github.com/opensds/opensds/pkg/controller/orchestration/scheduler"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
+var profile = &api.StorageProfile{}
+
 func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.CreateVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.CreateVolume(vr)
 }
 
 func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.GetVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.GetVolume(vr)
 }
 
 func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.ListVolumes(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.ListVolumes(vr)
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.DeleteVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.DeleteVolume(vr)
 }
 
 func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.AttachVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.AttachVolume(vr)
 }
 
 func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.DetachVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.DetachVolume(vr)
 }
 
 func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.MountVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.MountVolume(vr)
 }
 
 func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.UnmountVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.UnmountVolume(vr)
+}
+
+func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.CreateVolumeSnapshot(vr)
+}
+
+func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.GetVolumeSnapshot(vr)
+}
+
+func ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.ListVolumeSnapshots(vr)
+}
+
+func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vs := &scheduler.VolumeScheduler{
+		DesiredProfile: profile,
+	}
+	return vs.DeleteVolumeSnapshot(vr)
 }

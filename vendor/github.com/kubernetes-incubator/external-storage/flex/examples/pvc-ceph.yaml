@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pv-ceph
+  annotations:
+    volume.beta.kubernetes.io/storage-class: opensds-ceph
+	fsType: "ext4"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

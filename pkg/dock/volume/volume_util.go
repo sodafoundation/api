@@ -85,7 +85,7 @@ func MountVolume(mountDir, device, fsType string) (string, error) {
 
 	mountCmd := exec.Command("mount", device, mountDir)
 	if _, err := mountCmd.CombinedOutput(); err != nil {
-		mkfsCmd := exec.Command("mkfs", "-t", fsType, device)
+		mkfsCmd := exec.Command("mkfs", "-t", fsType, "-F", device)
 		if mkfsOut, err := mkfsCmd.CombinedOutput(); err != nil {
 			log.Println("Could not mkfs:", err.Error(), "Output:", string(mkfsOut))
 			return "", err

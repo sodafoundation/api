@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          Opensds
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $network $time
+# Should-Stop:       $network $time
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop Opensds dock and connector daemon
+# Description:       Opensds dock and connector service
+### END INIT INFO
+#
+set -e
+set -u
+${DEBIAN_SCRIPT_DEBUG:+ set -v -x}
+
+. /lib/lsb/init-functions
+
+SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
+
+# priority can be overriden and "-s" adds output to stderr
+ERR_LOGGER="logger -p daemon.err -t /etc/init.d/mysql -i"
+
+
+## Checks if there is a server running.
+#
+osdsdock_status () {
+	dock_pid=`ps -ef | grep osdsdock | grep -v grep | awk '{print $2}'`
+	connector_pid=`ps -ef | grep osdsconnector-server | grep -v grep | awk '{print $2}'`
+	if [ -n "$dock_pid" ] && [ -n "$connector_pid" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+#
+# main()
+#
+
+case "${1:-''}" in
+  'start')
+	# Start daemon
+	log_daemon_msg "Starting osdsdock daemon" "osdsdock"
+	if osdsdock_status; then
+		echo "already running"
+		log_end_msg 0
+	else
+		# Start osdsdock!
+		dock_pid=`ps -ef | grep osdsdock | grep -v grep | awk '{print $2}'`
+		connector_pid=`ps -ef | grep osdsconnector-server | grep -v grep | awk '{print $2}'`
+		
+		if [ -z "$dock_pid" ]; then
+			usr/local/bin/osdsdock > /dev/null 2>&1 &
+		fi
+		
+		if [ -z "$dock_pid" ]; then
+			/usr/local/bin/os-brick-api --config-file /etc/os-brick/os-brick.conf > /dev/null 2>&1 &
+		fi
+		
+		for i in $(seq 1 5); do
+				sleep 1
+			if osdsdock_status; then break; fi
+		log_progress_msg "."
+		done
+		if osdsdock_status; then
+				log_end_msg 0
+		else
+			log_end_msg 1
+		log_failure_msg "Please take a look at the syslog"
+		fi
+	fi
+	;;
+
+  'stop')
+	log_daemon_msg "Stopping osdsdock server" "osdsdock"
+	if osdsdock_status; then
+		dock_pid=`ps -ef | grep osdsdock | grep -v grep | awk '{print $2}'`
+		connector_pid=`ps -ef | grep osdsconnector-server | grep -v grep | awk '{print $2}'`
+		if [ -n "$dock_pid" ]; then
+			kill -9 "$dock_pid"
+		fi
+		
+		if [ -n "$connector_pid" ]; then
+			kill -9 "$connector_pid"
+		fi
+	else
+		log_end_msg 0
+			fi
+	;;
+
+  'restart')
+	set +e; $SELF stop; set -e
+	$SELF start
+	;;
+
+  'reload'|'force-reload')
+	echo "not support"
+	;;
+
+  'status')
+	if osdsdock_status; then
+		echo "service is running"
+	else
+		echo "service not running"
+	fi
+	;;
+
+  *)
+	echo "Usage: $SELF start|stop|restart|reload|force-reload|status"
+	exit 1
+	;;
+esac

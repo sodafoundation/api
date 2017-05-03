@@ -47,6 +47,14 @@ type VolumeDriver interface {
 	AttachVolume(volID string) (string, error)
 
 	DetachVolume(device string) (string, error)
+
+	CreateSnapshot(name, volID, description string, forced bool) (string, error)
+
+	GetSnapshot(snapID string) (string, error)
+
+	GetAllSnapshots() (string, error)
+
+	DeleteSnapshot(snapID string) (string, error)
 }
 
 func CreateVolume(resourceType, name, volType string, size int32) (string, error) {
@@ -157,6 +165,82 @@ func DetachVolume(resourceType, device string) (string, error) {
 	result, err := volumeDriver.DetachVolume(device)
 	if err != nil {
 		log.Println("Call plugin to detach volume failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func CreateSnapshot(resourceType, name, volID, description string, forced bool) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitVP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.CreateSnapshot(name, volID, description, forced)
+	if err != nil {
+		log.Println("Call plugin to create snapshot failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func GetSnapshot(resourceType, snapID string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitVP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.GetSnapshot(snapID)
+	if err != nil {
+		log.Println("Call plugin to get snapshot failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func GetAllSnapshots(resourceType string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitVP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.GetAllSnapshots()
+	if err != nil {
+		log.Println("Call plugin to get all snapshots failed:", err)
+		return "", err
+	} else {
+		return result, nil
+	}
+}
+
+func DeleteSnapshot(resourceType, snapID string) (string, error) {
+	//Get the storage plugins and do some initializations.
+	plugins, err := storagePlugins.InitVP(resourceType)
+	if err != nil {
+		log.Printf("Find %s failed: %v\n", resourceType, err)
+		return "", err
+	}
+
+	//Call function of StoragePlugins configured by storage plugins.
+	var volumeDriver VolumeDriver = plugins
+	result, err := volumeDriver.DeleteSnapshot(snapID)
+	if err != nil {
+		log.Println("Call plugin to delete snapshot failed:", err)
 		return "", err
 	} else {
 		return result, nil

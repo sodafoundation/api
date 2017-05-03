@@ -20,21 +20,30 @@ This module implements the api module client of grpc service.
 package grpcapi
 
 import (
+	"encoding/json"
 	"fmt"
 
+	api "github.com/opensds/opensds/pkg/api/v1"
 	"github.com/opensds/opensds/pkg/grpc/controller/orchestration/client"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
-func CreateVolume(dockId, resourceType, name, volumeType string, size int32) *pb.Response {
-	var falseResp *pb.Response
+var falseResp = &pb.Response{}
+
+func CreateVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Name:         name,
-		VolumeType:   volumeType,
-		Size:         size,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Name:           schema.Name,
+		VolumeType:     schema.VolumeType,
+		Size:           schema.Size,
 	}
 
 	resp, err := client.CreateVolume(vr)
@@ -47,13 +56,18 @@ func CreateVolume(dockId, resourceType, name, volumeType string, size int32) *pb
 	return resp
 }
 
-func GetVolume(dockId, resourceType string, volID string) *pb.Response {
-	var falseResp *pb.Response
+func GetVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           volID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.GetVolume(vr)
@@ -66,13 +80,18 @@ func GetVolume(dockId, resourceType string, volID string) *pb.Response {
 	return resp
 }
 
-func ListVolumes(dockId, resourceType string, allowDetails bool) *pb.Response {
-	var falseResp *pb.Response
+func ListVolumes(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		AllowDetails: allowDetails,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		AllowDetails:   schema.AllowDetails,
 	}
 
 	resp, err := client.ListVolumes(vr)
@@ -85,13 +104,18 @@ func ListVolumes(dockId, resourceType string, allowDetails bool) *pb.Response {
 	return resp
 }
 
-func DeleteVolume(dockId, resourceType string, volID string) *pb.Response {
-	var falseResp *pb.Response
+func DeleteVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           volID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.DeleteVolume(vr)
@@ -104,13 +128,18 @@ func DeleteVolume(dockId, resourceType string, volID string) *pb.Response {
 	return resp
 }
 
-func AttachVolume(dockId, resourceType, volID string) *pb.Response {
-	var falseResp *pb.Response
+func AttachVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           volID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.AttachVolume(vr)
@@ -123,13 +152,18 @@ func AttachVolume(dockId, resourceType, volID string) *pb.Response {
 	return resp
 }
 
-func DetachVolume(dockId, resourceType, device string) *pb.Response {
-	var falseResp *pb.Response
+func DetachVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Device:       device,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Device:         schema.Device,
 	}
 
 	resp, err := client.DetachVolume(vr)
@@ -142,15 +176,20 @@ func DetachVolume(dockId, resourceType, device string) *pb.Response {
 	return resp
 }
 
-func MountVolume(dockId, resourceType, mountDir, device, fsType string) *pb.Response {
-	var falseResp *pb.Response
+func MountVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		MountDir:     mountDir,
-		Device:       device,
-		FsType:       fsType,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		MountDir:       schema.MountDir,
+		Device:         schema.Device,
+		FsType:         schema.FsType,
 	}
 
 	resp, err := client.MountVolume(vr)
@@ -163,13 +202,18 @@ func MountVolume(dockId, resourceType, mountDir, device, fsType string) *pb.Resp
 	return resp
 }
 
-func UnmountVolume(dockId, resourceType, mountDir string) *pb.Response {
-	var falseResp *pb.Response
+func UnmountVolume(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		MountDir:     mountDir,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		MountDir:       schema.MountDir,
 	}
 
 	resp, err := client.UnmountVolume(vr)
@@ -182,16 +226,119 @@ func UnmountVolume(dockId, resourceType, mountDir string) *pb.Response {
 	return resp
 }
 
-func CreateShare(dockId, resourceType, name, shrType, shrProto string, size int32) *pb.Response {
-	var falseResp *pb.Response
+func CreateVolumeSnapshot(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	vr := &pb.VolumeRequest{
+		StorageProfile:  string(body),
+		DockId:          schema.DockId,
+		SnapshotName:    schema.SnapshotName,
+		Id:              schema.Id,
+		Description:     schema.Description,
+		ForceSnapshoted: schema.ForceSnapshoted,
+	}
+
+	resp, err := client.CreateVolumeSnapshot(vr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func GetVolumeSnapshot(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	vr := &pb.VolumeRequest{
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		SnapshotId:     schema.SnapshotId,
+	}
+
+	resp, err := client.GetVolumeSnapshot(vr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func ListVolumeSnapshots(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	vr := &pb.VolumeRequest{
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+	}
+
+	resp, err := client.ListVolumeSnapshots(vr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func DeleteVolumeSnapshot(schema *api.VolumeOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	vr := &pb.VolumeRequest{
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		SnapshotId:     schema.SnapshotId,
+	}
+
+	resp, err := client.DeleteVolumeSnapshot(vr)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
+
+	return resp
+}
+
+func CreateShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Name:         name,
-		ShareType:    shrType,
-		ShareProto:   shrProto,
-		Size:         size,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Name:           schema.Name,
+		ShareType:      schema.ShareType,
+		ShareProto:     schema.ShareProto,
+		Size:           schema.Size,
 	}
 
 	resp, err := client.CreateShare(sr)
@@ -204,13 +351,18 @@ func CreateShare(dockId, resourceType, name, shrType, shrProto string, size int3
 	return resp
 }
 
-func GetShare(dockId, resourceType string, shrID string) *pb.Response {
-	var falseResp *pb.Response
+func GetShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           shrID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.GetShare(sr)
@@ -223,13 +375,18 @@ func GetShare(dockId, resourceType string, shrID string) *pb.Response {
 	return resp
 }
 
-func ListShares(dockId, resourceType string, allowDetails bool) *pb.Response {
-	var falseResp *pb.Response
+func ListShares(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		AllowDetails: allowDetails,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		AllowDetails:   schema.AllowDetails,
 	}
 
 	resp, err := client.ListShares(sr)
@@ -242,13 +399,18 @@ func ListShares(dockId, resourceType string, allowDetails bool) *pb.Response {
 	return resp
 }
 
-func DeleteShare(dockId, resourceType string, shrID string) *pb.Response {
-	var falseResp *pb.Response
+func DeleteShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           shrID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.DeleteShare(sr)
@@ -261,13 +423,18 @@ func DeleteShare(dockId, resourceType string, shrID string) *pb.Response {
 	return resp
 }
 
-func AttachShare(dockId, resourceType, shrID string) *pb.Response {
-	var falseResp *pb.Response
+func AttachShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Id:           shrID,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Id:             schema.Id,
 	}
 
 	resp, err := client.AttachShare(sr)
@@ -280,13 +447,18 @@ func AttachShare(dockId, resourceType, shrID string) *pb.Response {
 	return resp
 }
 
-func DetachShare(dockId, resourceType, device string) *pb.Response {
-	var falseResp *pb.Response
+func DetachShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		Device:       device,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		Device:         schema.Device,
 	}
 
 	resp, err := client.DetachShare(sr)
@@ -299,15 +471,20 @@ func DetachShare(dockId, resourceType, device string) *pb.Response {
 	return resp
 }
 
-func MountShare(dockId, resourceType, mountDir, device, fsType string) *pb.Response {
-	var falseResp *pb.Response
+func MountShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		MountDir:     mountDir,
-		Device:       device,
-		FsType:       fsType,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		MountDir:       schema.MountDir,
+		Device:         schema.Device,
+		FsType:         schema.FsType,
 	}
 
 	resp, err := client.MountShare(sr)
@@ -320,13 +497,18 @@ func MountShare(dockId, resourceType, mountDir, device, fsType string) *pb.Respo
 	return resp
 }
 
-func UnmountShare(dockId, resourceType, mountDir string) *pb.Response {
-	var falseResp *pb.Response
+func UnmountShare(schema *api.ShareOperationSchema, profile *api.StorageProfile) *pb.Response {
+	body, err := json.Marshal(profile)
+	if err != nil {
+		falseResp.Status = "Failure"
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	sr := &pb.ShareRequest{
-		DockId:       dockId,
-		ResourceType: resourceType,
-		MountDir:     mountDir,
+		StorageProfile: string(body),
+		DockId:         schema.DockId,
+		MountDir:       schema.MountDir,
 	}
 
 	resp, err := client.UnmountShare(sr)

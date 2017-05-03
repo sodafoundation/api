@@ -14,7 +14,8 @@
 
 /*
 This module defines the initialization work about dock service: generate dock
-node information and record it to dock route service.
+node information and record it to dock route service. Please DO NOT
+modify this file.
 
 */
 
@@ -26,7 +27,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/opensds/opensds/pkg/controller/api"
+	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
 func RegisterDockRoute(dockIp string) (*api.DockRoute, error) {
@@ -40,7 +41,7 @@ func RegisterDockRoute(dockIp string) (*api.DockRoute, error) {
 
 	routes = append(routes, route)
 
-	if !writeDockRoutesToFile(&routes) {
+	if !writeDockRoutesToFile(routes) {
 		err = errors.New("Register dock ip " + dockIp + " failed!")
 		return &api.DockRoute{}, err
 	} else {
@@ -49,8 +50,6 @@ func RegisterDockRoute(dockIp string) (*api.DockRoute, error) {
 }
 
 func DeregisterDockRoute(dockIp string) (string, error) {
-	var newRoutes []api.DockRoute
-
 	routes, err := readDockRoutesFromFile()
 	if err != nil {
 		log.Println("Could not get dock routes:", err)
@@ -58,6 +57,7 @@ func DeregisterDockRoute(dockIp string) (string, error) {
 	}
 
 	var dockFound bool
+	var newRoutes []api.DockRoute
 
 	for i, route := range routes {
 		if route.Address == dockIp {
@@ -66,13 +66,12 @@ func DeregisterDockRoute(dockIp string) (string, error) {
 			break
 		}
 	}
-
 	if !dockFound {
 		err = errors.New("Couldn't find dock ip " + dockIp + " in dock route tables!")
 		return "", err
 	}
 
-	if !writeDockRoutesToFile(&newRoutes) {
+	if !writeDockRoutesToFile(newRoutes) {
 		err = errors.New("Deregister dock ip " + dockIp + " failed!")
 		return "", err
 	} else {

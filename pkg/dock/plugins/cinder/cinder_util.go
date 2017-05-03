@@ -65,7 +65,7 @@ func sendAttachRequest(plugin *CinderPlugin, volID, host, device string) error {
 		return err
 	}
 
-	vol, err := volumeService.Show(volID)
+	vol, err := volumeService.ShowVolume(volID)
 	if err != nil {
 		log.Println("Cannot get volume:", err)
 		return err
@@ -77,14 +77,14 @@ func sendAttachRequest(plugin *CinderPlugin, volID, host, device string) error {
 	}
 
 	//Configure attach request body, the body is defined in volume package.
-	body := &volume.AttachBody{
-		VolumeBody: volume.RequestBody{
+	body := &volume.VolumeAttachBody{
+		VolumeRequestBody: volume.VolumeRequestBody{
 			HostName:   host,
 			Mountpoint: device,
 		},
 	}
 
-	err = volumeService.Attach(volID, body)
+	err = volumeService.AttachVolume(volID, body)
 	if err != nil {
 		log.Println("Cannot attach volume:", err)
 		return err
@@ -128,7 +128,7 @@ func sendDetachRequest(plugin *CinderPlugin, volID string) error {
 		return err
 	}
 
-	vol, err := volumeService.Show(volID)
+	vol, err := volumeService.ShowVolume(volID)
 	if err != nil {
 		log.Println("Cannot get volume:", err)
 		return err
@@ -140,13 +140,13 @@ func sendDetachRequest(plugin *CinderPlugin, volID string) error {
 	}
 
 	//Configure detach request body, the body is defined in volume package.
-	body := &volume.DetachBody{
-		VolumeBody: volume.RequestBody{
+	body := &volume.VolumeDetachBody{
+		VolumeRequestBody: volume.VolumeRequestBody{
 			AttachmentID: vol.Attachments[0]["attachment_id"],
 		},
 	}
 
-	err = volumeService.Detach(volID, body)
+	err = volumeService.DetachVolume(volID, body)
 	if err != nil {
 		log.Println("Cannot detach volume:", err)
 		return err
