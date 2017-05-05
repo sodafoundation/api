@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"

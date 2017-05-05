@@ -39,7 +39,7 @@ const (
 	identityFile = "flex-provisioner.identity"
 
 	// osdslet service entry
-	URL_PREFIX string = "http://10.169.149.191:50040"
+	URL_PREFIX string = "http://192.168.0.9:50040"
 
 	// are we allowed to set this? else make up our own
 	annCreatedBy = "kubernetes.io/createdby"
@@ -146,7 +146,7 @@ func (p *flexProvisioner) Provision(options controller.VolumeOptions) (*v1.Persi
 
 				FlexVolume: &v1.FlexVolumeSource{
 					Driver:   "opensds.io/opensds",
-					Options:  FlexVolumeOptions,
+					Options:  flexVolumeOptions,
 					FSType:   fstype,
 					ReadOnly: false,
 				},

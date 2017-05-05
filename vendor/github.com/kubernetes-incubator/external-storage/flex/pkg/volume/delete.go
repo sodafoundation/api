@@ -61,7 +61,7 @@ func (p *flexProvisioner) Delete(volume *v1.PersistentVolume) error {
 		}
 	}
 
-	url := URL_PREFIX + "/api/v1/volumes/" + volumeId
+	url := URL_PREFIX + "/api/v1/volumes/" + volid
 	vr := &VolumeRequest{
 		Schema: &VolumeOperationSchema{},
 		Profile: &StorageProfile{

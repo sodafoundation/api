@@ -5,9 +5,10 @@ metadata:
 spec:
   containers:
     - name: flex-provisioner
-      image: quay.io/kebernetes_incubator/flex-provisioner
+      image: quay.io/kubernetes_incubator/flex-provisioner
       securityContext:
       args:
         - "-provisioner=external/flex-simple"
         - "-execCommand=/opt/storage/flex-provision.sh"
+        - "-master=http://192.168.0.9:8080/"
       imagePullPolicy: "IfNotPresent"
