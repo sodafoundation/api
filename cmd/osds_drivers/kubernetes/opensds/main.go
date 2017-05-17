@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	URL_PREFIX string = "http://10.169.149.191:50040"
+	URL_PREFIX string = "http://192.168.0.9:50040"
 )
 
 type OpenSDSOptions struct {
@@ -158,89 +158,19 @@ func (OpenSDSPlugin) Detach(device string) Result {
 func (OpenSDSPlugin) Mount(mountDir string, device string, opts interface{}) Result {
 	opt := opts.(*OpenSDSOptions)
 
-	url := URL_PREFIX + "/api/v1/volumes/mount"
-
-	dockId, err := GetDockId()
+	_, err := MountVolume(mountDir, device, opt.FsType)
 	if err != nil {
 		return Fail(err.Error())
 	}
-
-	vr := &VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId:   dockId,
-			FsType:   opt.FsType,
-			Device:   device,
-			MountDir: mountDir,
-		},
-		Profile: &api.StorageProfile{},
-	}
-
-	// fmt.Println("Start PUT request to mount volume, url =", url)
-	req := httplib.Put(url).SetTimeout(100*time.Second, 50*time.Second)
-	req.JSONBody(vr)
-
-	resp, err := req.Response()
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	err = CheckHTTPResponseStatusCode(resp)
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Fail(err.Error())
-	}
-	if strings.Contains(string(rbody), "Success") {
-		return Succeed()
-	} else {
-		err = errors.New("Mount volume failed!")
-		return Fail(err.Error())
-	}
+	return Succeed()
 }
 
 func (OpenSDSPlugin) Unmount(mountDir string) Result {
-	url := URL_PREFIX + "/api/v1/volumes/mount"
-
-	dockId, err := GetDockId()
+	_, err := UnmountVolume(mountDir)
 	if err != nil {
 		return Fail(err.Error())
 	}
-
-	vr := &VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId:   dockId,
-			MountDir: mountDir,
-		},
-		Profile: &api.StorageProfile{},
-	}
-
-	// fmt.Println("Start DELETE request to unmount volume, url =", url)
-	req := httplib.Delete(url).SetTimeout(100*time.Second, 50*time.Second)
-	req.JSONBody(vr)
-
-	resp, err := req.Response()
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	err = CheckHTTPResponseStatusCode(resp)
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Fail(err.Error())
-	}
-	if strings.Contains(string(rbody), "Success") {
-		return Succeed()
-	} else {
-		err = errors.New("Unmount volume failed!")
-		return Fail(err.Error())
-	}
+	return Succeed()
 }
 
 func main() {

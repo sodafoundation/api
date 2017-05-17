@@ -24,93 +24,95 @@ package dock_route
 import (
 	"errors"
 	"log"
-	"math/rand"
-	"time"
+	_ "math/rand"
+	_ "time"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
-func RegisterDockRoute(dockIp string) (*api.DockRoute, error) {
-	route := generateDockRoute(dockIp)
+func RegisterDock(edp string, backends []string) (*api.Dock, error) {
+	dock := generateDock(edp, backends)
 
-	routes, err := readDockRoutesFromFile()
+	docks, err := readDocksFromFile()
 	if err != nil {
-		log.Println("Could not get dock routes:", err)
-		return &api.DockRoute{}, err
+		log.Println("Could not get dock resource:", err)
+		return &api.Dock{}, err
 	}
 
-	routes = append(routes, route)
+	docks = append(docks, dock)
 
-	if !writeDockRoutesToFile(routes) {
-		err = errors.New("Register dock ip " + dockIp + " failed!")
-		return &api.DockRoute{}, err
+	if !writeDocksToFile(docks) {
+		err = errors.New("Register dock endpoint " + edp + " failed!")
+		return &api.Dock{}, err
 	} else {
-		return &route, nil
+		return &dock, nil
 	}
 }
 
-func DeregisterDockRoute(dockIp string) (string, error) {
-	routes, err := readDockRoutesFromFile()
+func DeregisterDock(edp string) (string, error) {
+	docks, err := readDocksFromFile()
 	if err != nil {
-		log.Println("Could not get dock routes:", err)
+		log.Println("Could not get dock resource:", err)
 		return "", err
 	}
 
 	var dockFound bool
-	var newRoutes []api.DockRoute
+	var newDocks []api.Dock
 
-	for i, route := range routes {
-		if route.Address == dockIp {
+	for i, dock := range docks {
+		if dock.Endpoint == edp {
 			dockFound = true
-			newRoutes = append(routes[:i], routes[i+1:]...)
+			newDocks = append(docks[:i], docks[i+1:]...)
 			break
 		}
 	}
 	if !dockFound {
-		err = errors.New("Couldn't find dock ip " + dockIp + " in dock route tables!")
+		err = errors.New("Couldn't find dock endpoint " + edp + " in dock resource!")
 		return "", err
 	}
 
-	if !writeDockRoutesToFile(newRoutes) {
-		err = errors.New("Deregister dock ip " + dockIp + " failed!")
+	if !writeDocksToFile(newDocks) {
+		err = errors.New("Deregister dock endpoint " + edp + " failed!")
 		return "", err
 	} else {
 		return "Deregister dock success!", nil
 	}
 }
 
-func GetDockRoute(dockId string) (*api.DockRoute, error) {
-	routes, err := readDockRoutesFromFile()
+func GetDock(dockId string) (*api.Dock, error) {
+	docks, err := readDocksFromFile()
 	if err != nil {
-		log.Println("Could not read dock routes:", err)
-		return &api.DockRoute{}, err
+		log.Println("Could not read dock resource:", err)
+		return &api.Dock{}, err
 	}
 
-	if dockId == "" {
-		log.Println("Dock id not provided, arrange the address randomly!")
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		n := r.Intn(len(routes))
-		return &routes[n], nil
-	}
+	/*
+		if dockId == "" {
+			log.Println("Dock id not provided, arrange the address randomly!")
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			n := r.Intn(len(docks))
+			return &docks[n], nil
+		}
+	*/
 
-	for _, route := range routes {
-		if dockId == route.Id {
-			return &route, nil
+	for _, dock := range docks {
+		if dockId == dock.Id {
+			return &dock, nil
 		}
 	}
 
 	err = errors.New("Could not find this dock service!")
-	return &api.DockRoute{}, err
+	return &api.Dock{}, err
 }
 
-func ListDockRoutes() (*api.DockRoutes, error) {
-	routes, err := readDockRoutesFromFile()
+func ListDocks() (*api.Docks, error) {
+	docks, err := readDocksFromFile()
 	if err != nil {
-		log.Println("Could not read dock routes:", err)
-		return &api.DockRoutes{}, err
+		log.Println("Could not read dock resource:", err)
+		return &api.Docks{}, err
 	}
 
-	return &api.DockRoutes{
-		Routes: routes,
+	return &api.Docks{
+		DockList: docks,
 	}, nil
 }

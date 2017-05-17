@@ -27,70 +27,70 @@ import (
 )
 
 type DockRequestDeliver interface {
-	registerDock(dockIp string) (*api.DockRoute, error)
+	registerDock(edp string, backends []string) (*api.Dock, error)
 
-	deregisterDock(dockIp string) (string, error)
+	deregisterDock(edp string) (string, error)
 
-	getDock(dockId string) (*api.DockRoute, error)
+	getDock(dockId string) (*api.Dock, error)
 
-	listDocks() (*api.DockRoutes, error)
+	listDocks() (*api.Docks, error)
 }
 
 // DockRequest is a structure for all properties of
 // a dock request
 type DockRequest struct{}
 
-func (dr DockRequest) registerDock(dockIp string) (*api.DockRoute, error) {
-	return dockRoute.RegisterDockRoute(dockIp)
+func (dr DockRequest) registerDock(edp string, backends []string) (*api.Dock, error) {
+	return dockRoute.RegisterDock(edp, backends)
 }
 
-func (dr DockRequest) deregisterDock(dockIp string) (string, error) {
-	return dockRoute.DeregisterDockRoute(dockIp)
+func (dr DockRequest) deregisterDock(edp string) (string, error) {
+	return dockRoute.DeregisterDock(edp)
 }
 
-func (dr DockRequest) getDock(dockId string) (*api.DockRoute, error) {
-	return dockRoute.GetDockRoute(dockId)
+func (dr DockRequest) getDock(dockId string) (*api.Dock, error) {
+	return dockRoute.GetDock(dockId)
 }
 
-func (dr DockRequest) listDocks() (*api.DockRoutes, error) {
-	return dockRoute.ListDockRoutes()
+func (dr DockRequest) listDocks() (*api.Docks, error) {
+	return dockRoute.ListDocks()
 }
 
-func RegisterDock(drd DockRequestDeliver, dockIp string) (api.DockRoute, error) {
-	dock, err := drd.registerDock(dockIp)
+func RegisterDock(drd DockRequestDeliver, edp string, backends []string) (api.Dock, error) {
+	dock, err := drd.registerDock(edp, backends)
 	if err != nil {
-		log.Printf("Register dock ip %s error: %v\n", dockIp, err)
-		return api.DockRoute{}, err
+		log.Printf("Register dock endpoint %s error: %v\n", edp, err)
+		return api.Dock{}, err
 	}
 
 	return *dock, nil
 }
 
-func DeregisterDock(drd DockRequestDeliver, dockIp string) (string, error) {
-	res, err := drd.deregisterDock(dockIp)
+func DeregisterDock(drd DockRequestDeliver, edp string) (string, error) {
+	res, err := drd.deregisterDock(edp)
 	if err != nil {
-		log.Printf("Deregister dock ip %s error: %v\n", dockIp, err)
+		log.Printf("Deregister dock endpoint %s error: %v\n", edp, err)
 		return "", err
 	}
 
 	return res, nil
 }
 
-func GetDock(drd DockRequestDeliver, dockId string) (api.DockRoute, error) {
+func GetDock(drd DockRequestDeliver, dockId string) (api.Dock, error) {
 	dock, err := drd.getDock(dockId)
 	if err != nil {
 		log.Printf("Get dock %s error: %v\n", dockId, err)
-		return api.DockRoute{}, err
+		return api.Dock{}, err
 	}
 
 	return *dock, nil
 }
 
-func ListDocks(drd DockRequestDeliver) (api.DockRoutes, error) {
+func ListDocks(drd DockRequestDeliver) (api.Docks, error) {
 	docks, err := drd.listDocks()
 	if err != nil {
 		log.Printf("List docks error: %v\n", err)
-		return api.DockRoutes{}, err
+		return api.Docks{}, err
 	}
 
 	return *docks, nil

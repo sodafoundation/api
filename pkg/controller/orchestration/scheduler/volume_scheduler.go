@@ -55,6 +55,7 @@ func (vs *VolumeScheduler) CreateVolume(vr *pb.VolumeRequest) (*pb.Response, err
 
 	st := policyengine.NewStorageTag(vs.DesiredProfile.StorageTags, CREATE_LIFECIRCLE_FLAG)
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 
 	result, err := client.CreateVolume(vr)
 	if err != nil {
@@ -69,11 +70,13 @@ func (vs *VolumeScheduler) CreateVolume(vr *pb.VolumeRequest) (*pb.Response, err
 
 func (vs *VolumeScheduler) GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.GetVolume(vr)
 }
 
 func (vs *VolumeScheduler) ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.ListVolumes(vr)
 }
 
@@ -86,6 +89,7 @@ func (vs *VolumeScheduler) DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, err
 
 		st := policyengine.NewStorageTag(vs.DesiredProfile.StorageTags, DELETE_LIFECIRCLE_FLAG)
 		vr.ResourceType = vs.DesiredProfile.BackendDriver
+		vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 
 		var errChan = make(chan error, 1)
 		go policyengine.ExecuteAsyncPolicy(vr, st, "", errChan)
@@ -97,45 +101,54 @@ func (vs *VolumeScheduler) DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, err
 	}
 
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.DeleteVolume(vr)
 }
 
 func (vs *VolumeScheduler) AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.AttachVolume(vr)
 }
 
 func (vs *VolumeScheduler) DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.DetachVolume(vr)
 }
 
 func (vs *VolumeScheduler) MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.MountVolume(vr)
 }
 
 func (vs *VolumeScheduler) UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.UnmountVolume(vr)
 }
 
 func (vs *VolumeScheduler) CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.CreateVolumeSnapshot(vr)
 }
 
 func (vs *VolumeScheduler) GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.GetVolumeSnapshot(vr)
 }
 
 func (vs *VolumeScheduler) ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.ListVolumeSnapshots(vr)
 }
 
 func (vs *VolumeScheduler) DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	vr.ResourceType = vs.DesiredProfile.BackendDriver
+	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
 	return client.DeleteVolumeSnapshot(vr)
 }

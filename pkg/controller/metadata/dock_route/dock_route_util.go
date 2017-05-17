@@ -30,41 +30,42 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-func generateDockRoute(dockIp string) api.DockRoute {
-	return api.DockRoute{
-		Id:      uuid.NewV4().String(),
-		Status:  "available",
-		Address: dockIp,
+func generateDock(edp string, backends []string) api.Dock {
+	return api.Dock{
+		Id:       uuid.NewV4().String(),
+		Endpoint: edp,
+		Backends: backends,
+		Status:   "available",
 	}
 }
 
-func readDockRoutesFromFile() ([]api.DockRoute, error) {
-	var routes []api.DockRoute
+func readDocksFromFile() ([]api.Dock, error) {
+	var docks []api.Dock
 
-	userJSON, err := ioutil.ReadFile("/etc/opensds/dock_route.json")
+	userJSON, err := ioutil.ReadFile("/etc/opensds/dock.json")
 	if err != nil {
 		log.Println("ReadFile json failed:", err)
-		return routes, err
+		return docks, err
 	}
 
-	// If the dock route table is empty, consider it as a normal condition
+	// If the dock resource is empty, consider it as a normal condition
 	if len(userJSON) == 0 {
-		return routes, nil
-	} else if err = json.Unmarshal(userJSON, &routes); err != nil {
+		return docks, nil
+	} else if err = json.Unmarshal(userJSON, &docks); err != nil {
 		log.Println("Unmarshal json failed:", err)
-		return routes, err
+		return docks, err
 	}
-	return routes, nil
+	return docks, nil
 }
 
-func writeDockRoutesToFile(routes []api.DockRoute) bool {
-	body, err := json.Marshal(&routes)
+func writeDocksToFile(docks []api.Dock) bool {
+	body, err := json.Marshal(&docks)
 	if err != nil {
 		log.Println("Marshal json failed:", err)
 		return false
 	}
 
-	if err = ioutil.WriteFile("/etc/opensds/dock_route.json", body, 0666); err != nil {
+	if err = ioutil.WriteFile("/etc/opensds/dock.json", body, 0666); err != nil {
 		log.Println("WriteFile json failed:", err)
 		return false
 	}

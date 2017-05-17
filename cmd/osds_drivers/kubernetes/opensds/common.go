@@ -190,9 +190,10 @@ func CheckHTTPResponseStatusCode(resp *http.Response) error {
 }
 
 type DockNode struct {
-	Id      string `json:"id"`
-	Status  string `json:"status"`
-	Address string `json:"address"`
+	Id       string   `json:"id"`
+	Endpoint string   `json:"address"`
+	Backends []string `json:"backends"`
+	Status   string   `json:"status"`
 }
 
 func getDockNode() (*DockNode, error) {
@@ -228,7 +229,7 @@ func GetDockId() (string, error) {
 		return "", err
 	}
 
-	if dock.Address == host {
+	if dock.Endpoint == host {
 		return dock.Id, nil
 	} else {
 		err = errors.New("Could not find dock service!")
@@ -264,7 +265,7 @@ func FindLinkPath(device string) (string, error) {
 }
 
 func FindBackendDriver(device string) (string, error) {
-	if strings.HasPrefix(device, "/dev/sd") {
+	if strings.HasPrefix(device, "/dev/sd") || strings.HasPrefix(device, "dev/dm") {
 		return "cinder", nil
 	} else if strings.HasPrefix(device, "/dev/rbd") {
 		return "ceph", nil

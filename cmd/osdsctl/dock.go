@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	docks "github.com/opensds/opensds/pkg/controller/api"
 
@@ -36,13 +37,13 @@ var dockCommand = &cobra.Command{
 }
 
 var dockRegisterCommand = &cobra.Command{
-	Use:   "register <dock ip>",
-	Short: "register a new dock with ip to controller",
+	Use:   "register <dock endpoint> <backend1,backend2...>",
+	Short: "register a new dock with endpoint and backend list to controller",
 	Run:   dockRegisterAction,
 }
 
 var dockDeregisterCommand = &cobra.Command{
-	Use:   "deregister <dock ip>",
+	Use:   "deregister <dock endpoint>",
 	Short: "deregister an existing dock with ip from controller",
 	Run:   dockDeregisterAction,
 }
@@ -72,15 +73,16 @@ func dockAction(cmd *cobra.Command, args []string) {
 }
 
 func dockRegisterAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
+	if len(args) != 2 {
 		fmt.Println("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	dockRequest := docks.DockRequest{}
+	backends := strings.Split(args[1], ",")
 
-	result, err := docks.RegisterDock(dockRequest, args[0])
+	result, err := docks.RegisterDock(dockRequest, args[0], backends)
 	if err != nil {
 		fmt.Println("Register dock resource failed: ", err)
 	} else {

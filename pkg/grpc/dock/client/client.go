@@ -47,14 +47,14 @@ const (
 )
 
 func NewDockClient(dockId string) (pb.DockClient, *grpc.ClientConn, error) {
-	// Get specified Dock route information.
-	route, err := dockRoute.GetDockRoute(dockId)
+	// Get specified dock information.
+	dock, err := dockRoute.GetDock(dockId)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Generate Dock server address.
-	address := route.Address + DOCK_PORT
+	address := dock.Endpoint + DOCK_PORT
 
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
@@ -295,7 +295,7 @@ func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 }
 
 func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -314,7 +314,7 @@ func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -333,7 +333,7 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -352,7 +352,7 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -371,7 +371,7 @@ func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -390,7 +390,7 @@ func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -409,7 +409,7 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err
@@ -428,7 +428,7 @@ func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient(sr.GetDockId())
+	c, conn, err := NewDockClient(sr.GetResourceType())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
 		return &pb.Response{}, err

@@ -13,19 +13,30 @@
 //    under the License.
 
 /*
-This module implements the common data structure.
+This module implements the policy-based scheduling by parsing storage
+profiles configured by admin.
 
 */
 
-package v1
+package scheduler
 
-type Dock struct {
-	Id       string   `json:"id"`
-	Endpoint string   `json:"address"`
-	Backends []string `json:"backends"`
-	Status   string   `json:"status"`
-}
+import (
+	dockRoute "github.com/opensds/opensds/pkg/controller/metadata/dock_route"
+)
 
-type Docks struct {
-	DockList []Dock `json:"docks"`
+func getDockId(backend string) string {
+	// Get all docks information.
+	docks, err := dockRoute.ListDocks()
+	if err != nil {
+		return ""
+	}
+
+	for _, dock := range docks.DockList {
+		for _, value := range dock.Backends {
+			if value == backend {
+				return dock.Id
+			}
+		}
+	}
+	return ""
 }
