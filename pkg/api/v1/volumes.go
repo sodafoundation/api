@@ -29,17 +29,16 @@ type DefaultResponse struct {
 // volume operation
 type VolumeOperationSchema struct {
 	// Some properties related to basic operation of volumes
-	DockId       string `json:"dockId,omitempty"`
-	Id           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	VolumeType   string `json:"volumeType"`
-	Size         int32  `json:"size"`
-	AllowDetails bool   `json:"allowDetails"`
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Size int32  `json:"size"`
 
-	// Some properties related to attach and mount operation of volumes
-	Device   string `json:"device,omitempty"`
-	MountDir string `json:"mountDir,omitempty"`
-	FsType   string `json:"fsType,omitempty"`
+	// Some properties related to basic operation of volume attachments
+	AttachmentId  string `json:"attachmentId"`
+	DoLocalAttach bool   `json:"doLocalAttach"`
+	MultiPath     bool   `json:"multiPath"`
+	HostInfo      `json:"hostInfo"`
+	Mountpoint    string `json:"mountpoint"`
 
 	// Some properties related to basic operation of volume snapshots
 	SnapshotId      string `json:"snapshotId,omitempty"`
@@ -51,12 +50,14 @@ type VolumeOperationSchema struct {
 // VolumeResponse is a structure for all properties of
 // a volume for a non detailed query
 type VolumeResponse struct {
-	ID          string              `json:"id"`
-	Name        string              `json:"name"`
-	Status      string              `json:"status"`
-	Size        int                 `json:"size"`
-	VolumeType  string              `json:"volume_type"`
-	Attachments []map[string]string `json:"attachments"`
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Status           string `json:"status"`
+	Size             int    `json:"size"`
+	PoolName         string `json:"pool_name"`
+	AvailabilityZone string `json:"availability_zone"`
+	Iops             int32  `json:"iops"`
 }
 
 // VolumeDetailResponse is a structure for all properties of
@@ -84,12 +85,39 @@ type VolumeDetailResponse struct {
 	ConsistencygroupId string `json:"consistencygroup_id,omitempty"`
 }
 
-// VolumeSnapshotResponse is a structure for all properties of
+// VolumeSnapshot is a structure for all properties of
 // a volume snapshot for a non detailed query
-type VolumeSnapshotResponse struct {
+type VolumeSnapshot struct {
 	Status   string `json:"status,omitempty"`
 	Name     string `json:"name,omitempty"`
 	VolumeId string `json:"volume_id,omitempty"`
 	Size     int    `json:"size"`
 	Id       string `json:"id,omitempty"`
+}
+
+// HostInfo is a structure for all properties of host
+// when create a volume attachment
+type HostInfo struct {
+	Platform  string `json:"platform"`
+	OsType    string `json:"os_type"`
+	Ip        string `json:"ip"`
+	Host      string `json:"host"`
+	Initiator string `json:"initiator"`
+}
+
+// ConnectionInfo is a structure for all properties of
+// connection when create a volume attachment
+type ConnectionInfo struct {
+	DriverVolumeType string                 `json:"driver_volume_type"`
+	ConnectionData   map[string]interface{} `json:"data"`
+}
+
+// VolumeAttachment is a structure for all properties of
+// a volume attachment for a non detailed query
+type VolumeAttachment struct {
+	Id             string `json:"id"`
+	Mountpoint     string `json:"mountpoint"`
+	Status         string `json:"status"`
+	HostInfo       `json:"hostInfo"`
+	ConnectionInfo `json:"connectionInfo"`
 }

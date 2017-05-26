@@ -21,18 +21,17 @@ profiles configured by admin.
 package policyengine
 
 import (
-	"encoding/json"
 	"log"
 	"time"
 
-	api "github.com/opensds/opensds/pkg/api/v1"
+	db "github.com/opensds/opensds/pkg/db/api"
 	"github.com/opensds/opensds/pkg/grpc/dock/client"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
 const (
-	RETRY_INTERVAL = 3
-	MAX_RETRY_TIME = 5
+	RETRY_INTERVAL = 5
+	MAX_RETRY_TIME = 10
 )
 
 type DeleteSnapshotExecutor struct {
@@ -80,19 +79,14 @@ func CheckSnapshotDeleted(vr *pb.VolumeRequest) bool {
 
 func findRemainingSnapshot(vr *pb.VolumeRequest) ([]string, error) {
 	var remainingSnapshots = []string{}
-	var snapshots []api.VolumeSnapshotResponse
-	result, err := client.ListVolumeSnapshots(vr)
+	snapshots, err := db.ListVolumeSnapshots()
 	if err != nil {
 		log.Println("[Error] When list volume snapshots:", err)
 		return remainingSnapshots, err
 	}
-	if err = json.Unmarshal([]byte(result.GetMessage()), &snapshots); err != nil {
-		log.Println("[Error] When parse volume snapshots:", err)
-		return remainingSnapshots, err
-	}
 
-	for _, snap := range snapshots {
-		if snap.VolumeId != vr.GetId() {
+	for _, snap := range *snapshots {
+		if snap.VolumeId != vr.GetVolumeId() {
 			continue
 		}
 		remainingSnapshots = append(remainingSnapshots, snap.Id)

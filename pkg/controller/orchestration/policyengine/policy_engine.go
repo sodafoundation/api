@@ -25,26 +25,22 @@ import (
 	"errors"
 	"log"
 
-	api "github.com/opensds/opensds/pkg/api/v1"
-	"github.com/opensds/opensds/pkg/controller/metadata/profile"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
 const (
 	POLICY_TYPE_MAPPING_TABLE = `{
 		"iops": "feature",
-		"latency": "feature",
+		"thinProvision": "feature",
 		"highAvailability": "feature",
 		"intervalSnapshot": "operation",
-		"intervalBackup": "operation",
 		"deleteSnapshotPolicy": "operation"
 	}`
 	POLICY_LIFECIRCLE_TABLE = `{
 		"iops": 1,
-		"latency": 1,
+		"thinProvision": 1,
 		"highAvailability": 1,
 		"intervalSnapshot": 1,
-		"intervalBackup": 1,
 		"deleteSnapshotPolicy": 4
 	}`
 )
@@ -57,34 +53,13 @@ func Init() {
 	json.Unmarshal([]byte(POLICY_LIFECIRCLE_TABLE), &PolicyLifecircleTable)
 }
 
-func IsProfileSupported(desiredProfile *api.StorageProfile) bool {
-	profiles, err := profile.ListProfiles()
-	if err != nil {
-		log.Println("[Error] When list profiles:", err)
-		return false
-	}
-
-	var isSupported bool
-	for _, profile := range profiles.Profiles {
-		// If profile name provided, find if the same one exists in profile tables
-		if profile.Name == desiredProfile.Name && profile.Name != "" {
-			desiredProfile.BackendDriver = profile.BackendDriver
-			desiredProfile.StorageTags = profile.StorageTags
-			return true
-		}
-		// If backend type is not same, move to the next profile
-		if profile.BackendDriver != desiredProfile.BackendDriver {
-			continue
-		}
-		// Find if the desired storage tags are contained in any profile
-		isSupported = true
-		for tag := range desiredProfile.StorageTags {
-			if !Contained(tag, profile.StorageTags) {
-				isSupported = false
-			}
+func IsStorageTagSupported(tags map[string]string) bool {
+	for key, _ := range tags {
+		if PolicyTypeMappingTable[key] != "operation" {
+			return false
 		}
 	}
-	return isSupported
+	return true
 }
 
 func FindPolicyType(policy string) (string, error) {
@@ -127,6 +102,14 @@ func NewStorageTag(tags map[string]string, flag int) *StorageTag {
 		}
 	}
 	return st
+}
+
+func (st *StorageTag) GetSyncTag() map[string]string {
+	return st.syncTag
+}
+
+func (st *StorageTag) GetAsyncTag() map[string]string {
+	return st.asyncTag
 }
 
 func ExecuteSyncPolicy(st *StorageTag, vr *pb.VolumeRequest) error {

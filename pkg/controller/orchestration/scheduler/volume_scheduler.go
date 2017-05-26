@@ -21,134 +21,96 @@ profiles configured by admin.
 package scheduler
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
-	"github.com/opensds/opensds/pkg/controller/orchestration/policyengine"
-	"github.com/opensds/opensds/pkg/grpc/dock/client"
+	db "github.com/opensds/opensds/pkg/db/api"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
-const (
-	CREATE_LIFECIRCLE_FLAG = 1
-	GET_LIFECIRCLE_FLAG    = 2
-	LIST_LIFECIRCLE_FLAG   = 3
-	DELETE_LIFECIRCLE_FLAG = 4
-)
-
-func init() {
-	policyengine.Init()
-}
-
-type VolumeScheduler struct {
-	DesiredProfile *api.StorageProfile
-}
-
-func (vs *VolumeScheduler) CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if vs.DesiredProfile.Name != "" || len(vs.DesiredProfile.StorageTags) != 0 {
-		if !policyengine.IsProfileSupported(vs.DesiredProfile) {
-			log.Printf("[Error] Profile %+v not supported\n", vs.DesiredProfile)
-			return &pb.Response{}, errors.New("Profile not supported")
-		}
+func SearchProfile(profileName string) (*api.StorageProfile, error) {
+	if profileName == "" {
+		profileName = "default"
 	}
-
-	st := policyengine.NewStorageTag(vs.DesiredProfile.StorageTags, CREATE_LIFECIRCLE_FLAG)
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-
-	result, err := client.CreateVolume(vr)
+	profiles, err := db.ListProfiles()
 	if err != nil {
-		return &pb.Response{}, err
+		log.Println("[Error] When list profiles:", err)
+		return &api.StorageProfile{}, err
 	}
 
-	var errChan = make(chan error, 1)
-	go policyengine.ExecuteAsyncPolicy(vr, st, result.GetMessage(), errChan)
-
-	return result, nil
-}
-
-func (vs *VolumeScheduler) GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.GetVolume(vr)
-}
-
-func (vs *VolumeScheduler) ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.ListVolumes(vr)
-}
-
-func (vs *VolumeScheduler) DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if vs.DesiredProfile.Name != "" || len(vs.DesiredProfile.StorageTags) != 0 {
-		if !policyengine.IsProfileSupported(vs.DesiredProfile) {
-			log.Printf("[Error] Profile %+v not supported\n", vs.DesiredProfile)
-			return &pb.Response{}, errors.New("Profile not supported")
+	for _, profile := range *profiles {
+		if profile.Name == profileName {
+			return &profile, nil
 		}
+	}
+	return &api.StorageProfile{}, errors.New("Can not find default profile in db!")
+}
 
-		st := policyengine.NewStorageTag(vs.DesiredProfile.StorageTags, DELETE_LIFECIRCLE_FLAG)
-		vr.ResourceType = vs.DesiredProfile.BackendDriver
-		vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
+func SearchPoolByVolume(volId string) (*api.StoragePool, error) {
+	vol, err := db.GetVolume(volId)
+	if err != nil {
+		log.Printf("[Error] When get volume %s in db: %v\n", volId, err)
+	}
+	pols, err := db.ListPools()
+	if err != nil {
+		log.Println("[Error] When list pool resources in db:", err)
+		return &api.StoragePool{}, err
+	}
 
-		var errChan = make(chan error, 1)
-		go policyengine.ExecuteAsyncPolicy(vr, st, "", errChan)
+	for _, pol := range *pols {
+		if pol.Name == vol.PoolName {
+			return &pol, nil
+		}
+	}
+	return &api.StoragePool{}, errors.New("No pool resource supported!")
+}
 
-		if err := <-errChan; err != nil {
-			log.Println("[Error] When execute async policy:", err)
-			return &pb.Response{}, err
+func SearchSupportedPool(tags map[string]string, usedCapacity int32) (*api.StoragePool, error) {
+	pols, err := db.ListPools()
+	if err != nil {
+		log.Println("[Error] When list pool resources in db:", err)
+		return &api.StoragePool{}, err
+	}
+
+	for _, pol := range *pols {
+		// Find if the desired storage tags are contained in any profile
+		var isSupported = true
+		if pol.FreeCapacity < int64(usedCapacity) {
+			continue
+		}
+		for tag := range tags {
+			if !Contained(tag, pol.StorageTag) {
+				isSupported = false
+				break
+			}
+			if pol.StorageTag[tag] != "true" {
+				isSupported = false
+				break
+			}
+		}
+		if isSupported {
+			return &pol, nil
 		}
 	}
 
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.DeleteVolume(vr)
+	return &api.StoragePool{}, errors.New("No pool resource supported!")
 }
 
-func (vs *VolumeScheduler) AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.AttachVolume(vr)
-}
+func UpdateDockInfo(vr *pb.VolumeRequest, polInfo *api.StoragePool) error {
+	dcks, err := db.ListDocks()
+	if err != nil {
+		log.Printf("[Error] When list dock resources in db:", err)
+		return err
+	}
 
-func (vs *VolumeScheduler) DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.DetachVolume(vr)
-}
-
-func (vs *VolumeScheduler) MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.MountVolume(vr)
-}
-
-func (vs *VolumeScheduler) UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.UnmountVolume(vr)
-}
-
-func (vs *VolumeScheduler) CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.CreateVolumeSnapshot(vr)
-}
-
-func (vs *VolumeScheduler) GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.GetVolumeSnapshot(vr)
-}
-
-func (vs *VolumeScheduler) ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.ListVolumeSnapshots(vr)
-}
-
-func (vs *VolumeScheduler) DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
-	vr.ResourceType = vs.DesiredProfile.BackendDriver
-	vr.DockId = getDockId(vs.DesiredProfile.BackendDriver)
-	return client.DeleteVolumeSnapshot(vr)
+	for _, dck := range *dcks {
+		if dck.Name == polInfo.DockName {
+			dckBody, _ := json.Marshal(dck)
+			vr.DockInfo, vr.PoolName = string(dckBody), polInfo.Name
+			return nil
+		}
+	}
+	return errors.New("No dock resource supported!")
 }

@@ -27,7 +27,7 @@ import (
 	"strconv"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
-	volumes "github.com/opensds/opensds/pkg/controller/api"
+	volumes "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -62,59 +62,22 @@ var volumeDeleteCommand = &cobra.Command{
 	Run:   volumeDeleteAction,
 }
 
-var volumeAttachCommand = &cobra.Command{
-	Use:   "attach <dock id> <volume id>",
-	Short: "attach a volume with dock id in the specified backend of OpenSDS cluster",
-	Run:   volumeAttachAction,
-}
-
-var volumeDetachCommand = &cobra.Command{
-	Use:   "detach <dock id> <device path>",
-	Short: "detach a volume with device path in the specified backend of OpenSDS cluster",
-	Run:   volumeDetachAction,
-}
-
-var volumeMountCommand = &cobra.Command{
-	Use:   "mount <dock id> <file system> <mount device> <target mount dir>",
-	Short: "mount a volume in the specified backend of OpenSDS cluster",
-	Run:   volumeMountAction,
-}
-
-var volumeUnmountCommand = &cobra.Command{
-	Use:   "unmount <dock id> <mount dir>",
-	Short: "unmount a volume in the specified backend of OpenSDS cluster",
-	Run:   volumeUnmountAction,
-}
-
-var falseVolumeResponse api.VolumeResponse
-var falseVolumeDetailResponse api.VolumeDetailResponse
-var falseAllVolumesResponse []api.VolumeResponse
-var falseAllVolumesDetailResponse api.VolumeDetailResponse
-
 var (
-	profileName      string
-	volBackendDriver string
-	volName          string
-	volType          string
-	volAllowDetails  bool
+	falseVolumeResponse       api.VolumeResponse
+	falseVolumeDetailResponse api.VolumeDetailResponse
+	profileName               string
+	volName                   string
 )
 
 func init() {
-	volumeCommand.PersistentFlags().StringVarP(&volBackendDriver, "backend", "b", "cinder", "backend resource type")
 	volumeCommand.PersistentFlags().StringVarP(&profileName, "profile", "p", "", "the name of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
-	volumeCreateCommand.Flags().StringVarP(&volType, "type", "t", "", "the type of created volume")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
-	volumeListCommand.Flags().BoolVarP(&volAllowDetails, "detail", "d", false, "list volumes in details")
 	volumeCommand.AddCommand(volumeDeleteCommand)
-	volumeCommand.AddCommand(volumeAttachCommand)
-	volumeCommand.AddCommand(volumeDetachCommand)
-	volumeCommand.AddCommand(volumeMountCommand)
-	volumeCommand.AddCommand(volumeUnmountCommand)
-
+	volumeCommand.AddCommand(volumeAttachmentCommand)
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 }
 
@@ -137,13 +100,11 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			Name:       volName,
-			VolumeType: volType,
-			Size:       int32(size),
+			Name: volName,
+			Size: int32(size),
 		},
 		Profile: &api.StorageProfile{
-			Name:          profileName,
-			BackendDriver: volBackendDriver,
+			Name: profileName,
 		},
 	}
 	result, err := volumes.CreateVolume(volumeRequest)
@@ -170,16 +131,13 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Schema: &api.VolumeOperationSchema{
 			Id: args[0],
 		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
 	}
 	result, err := volumes.GetVolume(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		if reflect.DeepEqual(result, falseVolumeDetailResponse) {
-			fmt.Println("Show volume failed!")
+			fmt.Printf("The volume id %s not exists!\n", args[0])
 		} else {
 			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
@@ -194,25 +152,14 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			AllowDetails: volAllowDetails,
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
+	volumeRequest := &volumes.VolumeRequest{}
+
 	result, err := volumes.ListVolumes(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		if reflect.DeepEqual(result, falseAllVolumesResponse) {
-			fmt.Println("List volumes failed!")
-		} else {
-			rbody, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Printf("%s\n", string(rbody))
-		}
 	}
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeDeleteAction(cmd *cobra.Command, args []string) {
@@ -227,102 +174,11 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 			Id: args[0],
 		},
 		Profile: &api.StorageProfile{
-			Name:          profileName,
-			BackendDriver: volBackendDriver,
+			Name: profileName,
 		},
 	}
 
 	result := volumes.DeleteVolume(volumeRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func volumeAttachAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId: args[0],
-			Id:     args[1],
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
-
-	result := volumes.AttachVolume(volumeRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func volumeDetachAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId: args[0],
-			Device: args[1],
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
-
-	result := volumes.DetachVolume(volumeRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func volumeMountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 4 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId:   args[0],
-			FsType:   args[1],
-			Device:   args[2],
-			MountDir: args[3],
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
-
-	result := volumes.MountVolume(volumeRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func volumeUnmountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId:   args[0],
-			MountDir: args[1],
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
-
-	result := volumes.UnmountVolume(volumeRequest)
 	rbody, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Printf("%s\n", string(rbody))
 }

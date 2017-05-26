@@ -45,8 +45,8 @@ func (ise *IntervalSnapshotExecutor) Init(in string) error {
 		return err
 	}
 
-	ise.Request.Id = volumeResponse.ID
-	ise.Request.SnapshotName = "snapshot-" + volumeResponse.ID
+	ise.Request.VolumeId = volumeResponse.Id
+	ise.Request.SnapshotName = "snapshot-" + volumeResponse.Id
 	return nil
 }
 

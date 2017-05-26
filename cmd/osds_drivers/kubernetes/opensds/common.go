@@ -18,15 +18,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/opensds/opensds/cmd/utils"
-	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
 type Result struct {
@@ -39,21 +35,6 @@ type DefaultOptions struct {
 	Action_type string `json:"action_type"`
 	MountPath   string `json:"mountPath`
 	FsType      string `json:"kubernetes.io/fsType"`
-}
-
-// VolumeRequest is a structure for all properties of
-// a volume request
-type VolumeRequest struct {
-	Schema  *api.VolumeOperationSchema `json:"schema"`
-	Profile *api.StorageProfile        `json:"profile"`
-}
-
-// VolumeResponse is a structure for all properties of
-// an volume for a non detailed query
-type VolumeResponse struct {
-	Error   string `json:"error"`
-	Message string `json:"message"`
-	Status  string `json:"status"`
 }
 
 type FlexVolumePlugin interface {
@@ -189,54 +170,6 @@ func CheckHTTPResponseStatusCode(resp *http.Response) error {
 	return errors.New("Error: unexpected response status code")
 }
 
-type DockNode struct {
-	Id       string   `json:"id"`
-	Endpoint string   `json:"address"`
-	Backends []string `json:"backends"`
-	Status   string   `json:"status"`
-}
-
-func getDockNode() (*DockNode, error) {
-	var nodePtr = &DockNode{}
-
-	userJSON, err := ioutil.ReadFile("/etc/opensds/dock_node.json")
-	if err != nil {
-		log.Println("ReadFile json failed:", err)
-		return nodePtr, err
-	}
-
-	if err = json.Unmarshal(userJSON, nodePtr); err != nil {
-		log.Println("Unmarshal json failed:", err)
-		return nodePtr, err
-	}
-
-	if nodePtr.Status != "available" {
-		return nodePtr, fmt.Errorf("The status of dock node %s is not available", nodePtr.Id)
-	}
-	return nodePtr, nil
-}
-
-func GetDockId() (string, error) {
-	dock, err := getDockNode()
-	if err != nil {
-		log.Println("Could not get dock routes:", err)
-		return "", err
-	}
-
-	host, err := utils.GetHostIP()
-	if err != nil {
-		log.Println("Could not get dock host ip:", err)
-		return "", err
-	}
-
-	if dock.Endpoint == host {
-		return dock.Id, nil
-	} else {
-		err = errors.New("Could not find dock service!")
-		return "", err
-	}
-}
-
 func FindLinkPath(device string) (string, error) {
 	listCmd := exec.Command("ls", "/dev/disk/by-id", "-l")
 	listCmdOut, err := listCmd.CombinedOutput()
@@ -262,14 +195,4 @@ func FindLinkPath(device string) (string, error) {
 	volId := split1[8]
 	linkPath := "/dev/disk/by-id/" + volId
 	return linkPath, nil
-}
-
-func FindBackendDriver(device string) (string, error) {
-	if strings.HasPrefix(device, "/dev/sd") || strings.HasPrefix(device, "dev/dm") {
-		return "cinder", nil
-	} else if strings.HasPrefix(device, "/dev/rbd") {
-		return "ceph", nil
-	} else {
-		return "", errors.New("No backend driver matched!")
-	}
 }

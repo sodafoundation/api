@@ -23,13 +23,10 @@ package v1
 // share operation
 type ShareOperationSchema struct {
 	// Some properties related to basic operation of shares
-	DockId       string `json:"dockId,omitempty"`
-	Id           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Size         int32  `json:"size"`
-	ShareType    string `json:"shareType,omitempty"`
-	ShareProto   string `json:"shareProto,omitempty"`
-	AllowDetails bool   `json:"allowDetails"`
+	Id         string `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Size       int32  `json:"size"`
+	ShareProto string `json:"shareProto,omitempty"`
 
 	// Some properties related to attach and mount operation of shares
 	Device   string `json:"device,omitempty"`
@@ -40,9 +37,14 @@ type ShareOperationSchema struct {
 // ShareResponse is a structure for all properties of
 // a share for a non detailed query
 type ShareResponse struct {
-	Id    string              `json:"id,omitempty"`
-	Name  string              `json:"name,omitempty"`
-	Links []map[string]string `json:"links"`
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Status           string `json:"status"`
+	Protocol         string `json:"protocol"`
+	Size             int    `json:"size"`
+	AvailabilityZone string `json:"availability_zone"`
+	Iops             int32  `json:"iops"`
 }
 
 // ShareDetailResponse is a structure for all properties of

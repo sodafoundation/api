@@ -22,7 +22,7 @@ package cinder
 
 import (
 	"crypto/tls"
-	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	// "time"
@@ -31,6 +31,7 @@ import (
 	"openstack/golang-client/volume"
 
 	"git.openstack.org/openstack/golang-client/openstack"
+	api "github.com/opensds/opensds/pkg/api/v1"
 )
 
 type CinderPlugin struct {
@@ -50,119 +51,193 @@ func (plugin *CinderPlugin) Unset() {
 
 }
 
-func (plugin *CinderPlugin) CreateVolume(name, volType string, size int32) (string, error) {
+func (plugin *CinderPlugin) CreateVolume(name string, size int32) (*api.VolumeResponse, error) {
 	//Get the certified volume service.
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
+		return &api.VolumeResponse{}, err
 	}
 
 	//Configure create request body, the body is defined in volume package.
 	body := &volume.VolumeCreateBody{
 		VolumeRequestBody: volume.VolumeRequestBody{
 			Name:       name,
-			VolumeType: volType,
+			VolumeType: "",
 			Size:       size,
 		},
 	}
 
-	volume, err := volumeService.CreateVolume(body)
+	vol, err := volumeService.CreateVolume(body)
 	if err != nil {
 		log.Println("Cannot create volume:", err)
-		return "", err
+		return &api.VolumeResponse{}, err
 	}
 
-	a, _ := json.Marshal(volume)
-	result := string(a)
-	log.Println("Create volume success, dls =", result)
-	return result, nil
+	log.Println("Create volume success, dls =", vol)
+	return &api.VolumeResponse{
+		Id:               vol.Id,
+		Name:             vol.Name,
+		Description:      vol.Description,
+		Size:             vol.Size,
+		Status:           vol.Status,
+		AvailabilityZone: vol.Availability_zone,
+	}, nil
 }
 
-func (plugin *CinderPlugin) GetVolume(volID string) (string, error) {
+func (plugin *CinderPlugin) GetVolume(volID string) (*api.VolumeResponse, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
+		return &api.VolumeResponse{}, err
 	}
 
-	volume, err := volumeService.ShowVolume(volID)
+	vol, err := volumeService.ShowVolume(volID)
 	if err != nil {
 		log.Println("Cannot show volume:", err)
-		return "", err
+		return &api.VolumeResponse{}, err
 	}
 
-	a, _ := json.Marshal(volume)
-	result := string(a)
-	log.Println("Get volume success, dls =", result)
-	return result, nil
+	log.Println("Get volume success, dls =", vol)
+	return &api.VolumeResponse{
+		Id:               vol.ID,
+		Name:             vol.Name,
+		Description:      vol.Description,
+		Size:             vol.Size,
+		Status:           vol.Status,
+		AvailabilityZone: vol.Aavailability_zone,
+	}, nil
 }
 
-func (plugin *CinderPlugin) GetAllVolumes(allowDetails bool) (string, error) {
+func (plugin *CinderPlugin) DeleteVolume(volID string) error {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
+		return err
 	}
 
-	var volumes interface{}
-	if allowDetails {
-		volumes, err = volumeService.DetailVolumes()
-		if err != nil {
-			log.Println("Cannot detail volumes:", err)
-			return "", err
-		}
-	} else {
-		volumes, err = volumeService.ListVolumes()
-		if err != nil {
-			log.Println("Cannot list volumes:", err)
-			return "", err
-		}
-	}
-
-	a, _ := json.Marshal(volumes)
-	result := string(a)
-	log.Println("Get all volumes success, dls =", result)
-	return result, nil
-}
-
-func (plugin *CinderPlugin) DeleteVolume(volID string) (string, error) {
-	volumeService, err := plugin.getVolumeService()
-	if err != nil {
-		log.Println("Cannot access volume service:", err)
-		return "", err
-	}
-
-	_, err = volumeService.ShowVolume(volID)
-	if err != nil {
+	if _, err = volumeService.ShowVolume(volID); err != nil {
 		log.Println("Cannot get volume:", err)
-		return "", err
+		return err
 	}
 
-	err = volumeService.DeleteVolume(volID)
-	if err != nil {
+	if err = volumeService.DeleteVolume(volID); err != nil {
 		log.Println("Cannot delete volume:", err)
-		return "", err
+		return err
 	}
-
-	result := "Delete volume success!"
-	return result, nil
+	return nil
 }
 
-func (plugin *CinderPlugin) AttachVolume(volID string) (string, error) {
-	return AttachVolumeToHost(plugin, volID)
-}
-
-func (plugin *CinderPlugin) DetachVolume(device string) (string, error) {
-	return DetachVolumeFromHost(plugin, device)
-}
-
-func (plugin *CinderPlugin) CreateSnapshot(name, volID, description string, forced bool) (string, error) {
+func (plugin *CinderPlugin) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
 	//Get the certified volume service.
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
+		return &api.ConnectionInfo{}, err
+	}
+
+	//Configure initialize request body, the body is defined in volume package.
+	body := &volume.InitializeBody{
+		Connector: volume.Connector{
+			ConnectorProperties: volume.ConnectorProperties{
+				DoLocalAttach: doLocalAttach,
+				MultiPath:     multiPath,
+				Platform:      hostInfo.Platform,
+				OsType:        hostInfo.OsType,
+				Ip:            hostInfo.Ip,
+				Host:          hostInfo.Host,
+				Initiator:     hostInfo.Initiator,
+			},
+		},
+	}
+
+	connInfo, err := volumeService.InitializeConnection(volID, body)
+	if err != nil {
+		log.Println("Cannot initialize volume connection:", err)
+		return &api.ConnectionInfo{}, err
+	}
+	log.Println("Initialize volume connection success, dls =", connInfo)
+	return &api.ConnectionInfo{
+		DriverVolumeType: connInfo.DriverVolumeType,
+		ConnectionData:   connInfo.ConnectionData,
+	}, nil
+}
+
+func (plugin *CinderPlugin) AttachVolume(volID, host, mountpoint string) error {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return err
+	}
+
+	vol, err := volumeService.ShowVolume(volID)
+	if err != nil {
+		log.Println("Cannot get volume:", err)
+		return err
+	}
+	if vol.Status != "available" && !vol.Multiattach {
+		err = errors.New("The status of volume is not available!")
+		log.Println("Cannot attach volume:", err)
+		return err
+	}
+
+	//Configure attach request body, the body is defined in volume package.
+	body := &volume.VolumeAttachBody{
+		VolumeRequestBody: volume.VolumeRequestBody{
+			HostName:   host,
+			Mountpoint: mountpoint,
+		},
+	}
+
+	err = volumeService.AttachVolume(volID, body)
+	if err != nil {
+		log.Println("Cannot attach volume:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (plugin *CinderPlugin) DetachVolume(volID string) error {
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return err
+	}
+
+	vol, err := volumeService.ShowVolume(volID)
+	if err != nil {
+		log.Println("Cannot get volume:", err)
+		return err
+	}
+	if vol.Status != "in-use" {
+		err = errors.New("The status of volume is not in-use!")
+		log.Println("Cannot detach volume:", err)
+		return err
+	}
+
+	//Configure detach request body, the body is defined in volume package.
+	body := &volume.VolumeDetachBody{
+		VolumeRequestBody: volume.VolumeRequestBody{
+			AttachmentID: vol.Attachments[0]["attachment_id"],
+		},
+	}
+
+	err = volumeService.DetachVolume(volID, body)
+	if err != nil {
+		log.Println("Cannot detach volume:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (plugin *CinderPlugin) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshot, error) {
+	//Get the certified volume service.
+	volumeService, err := plugin.getVolumeService()
+	if err != nil {
+		log.Println("Cannot access volume service:", err)
+		return &api.VolumeSnapshot{}, err
 	}
 
 	//Configure snapshot request body, the body is defined in volume package.
@@ -171,81 +246,67 @@ func (plugin *CinderPlugin) CreateSnapshot(name, volID, description string, forc
 			Name:            name,
 			VolumeID:        volID,
 			Description:     description,
-			ForceSnapshoted: forced,
+			ForceSnapshoted: true,
 		},
 	}
 
 	snapshot, err := volumeService.CreateSnapshot(body)
 	if err != nil {
 		log.Println("Cannot create snapshot:", err)
-		return "", err
+		return &api.VolumeSnapshot{}, err
 	}
 
-	a, _ := json.Marshal(snapshot)
-	result := string(a)
-	log.Println("Create snapshot success, dls =", result)
-	return result, nil
+	log.Println("Create snapshot success, dls =", snapshot)
+	return &api.VolumeSnapshot{
+		Id:       snapshot.ID,
+		Name:     snapshot.Name,
+		Status:   snapshot.Status,
+		VolumeId: volID,
+		Size:     snapshot.Size,
+	}, nil
 }
 
-func (plugin *CinderPlugin) GetSnapshot(snapID string) (string, error) {
+func (plugin *CinderPlugin) GetSnapshot(snapID string) (*api.VolumeSnapshot, error) {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
+		return &api.VolumeSnapshot{}, err
 	}
 
 	snapshot, err := volumeService.ShowSnapshot(snapID)
 	if err != nil {
 		log.Println("Cannot show snapshot:", err)
-		return "", err
+		return &api.VolumeSnapshot{}, err
 	}
 
-	a, _ := json.Marshal(snapshot)
-	result := string(a)
-	log.Println("Get snapshot success, dls =", result)
-	return result, nil
+	log.Println("Get snapshot success, dls =", snapshot)
+	return &api.VolumeSnapshot{
+		Id:     snapshot.ID,
+		Name:   snapshot.Name,
+		Status: snapshot.Status,
+		Size:   snapshot.Size,
+	}, nil
 }
 
-func (plugin *CinderPlugin) GetAllSnapshots() (string, error) {
+func (plugin *CinderPlugin) DeleteSnapshot(snapID string) error {
 	volumeService, err := plugin.getVolumeService()
 	if err != nil {
 		log.Println("Cannot access volume service:", err)
-		return "", err
-	}
-
-	snapshots, err := volumeService.ListSnapshots()
-	if err != nil {
-		log.Println("Cannot list snapshots:", err)
-		return "", err
-	}
-
-	a, _ := json.Marshal(snapshots)
-	result := string(a)
-	log.Println("Get all snapshots success, dls =", result)
-	return result, nil
-}
-
-func (plugin *CinderPlugin) DeleteSnapshot(snapID string) (string, error) {
-	volumeService, err := plugin.getVolumeService()
-	if err != nil {
-		log.Println("Cannot access volume service:", err)
-		return "", err
+		return err
 	}
 
 	_, err = volumeService.ShowSnapshot(snapID)
 	if err != nil {
 		log.Println("Cannot get snapshot:", err)
-		return "", err
+		return err
 	}
 
 	err = volumeService.DeleteSnapshot(snapID)
 	if err != nil {
 		log.Println("Cannot delete snapshot:", err)
-		return "", err
+		return err
 	}
-
-	result := "Delete snapshot success!"
-	return result, nil
+	return nil
 }
 
 /*

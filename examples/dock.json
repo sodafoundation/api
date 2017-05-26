@@ -1,0 +1,16 @@
+[
+	{
+		"name": "cinder",
+		"endpoint": "",
+		"availabilityZone": "nova",
+		"driverName": "cinder",
+		"storageType": "block"
+	},
+	{
+		"name": "ceph",
+		"endpoint": "",
+		"availabilityZone": "ceph",
+		"driverName": "ceph",
+		"storageType": "block"
+	}
+]

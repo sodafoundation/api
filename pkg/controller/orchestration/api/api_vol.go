@@ -27,7 +27,7 @@ import (
 	"encoding/json"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
-	"github.com/opensds/opensds/pkg/controller/orchestration/scheduler"
+	"github.com/opensds/opensds/pkg/controller/orchestration"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
@@ -37,118 +37,68 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.CreateVolume(vr)
-}
-
-func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	vs := &scheduler.VolumeScheduler{
-		DesiredProfile: profile,
-	}
-	return vs.GetVolume(vr)
-}
-
-func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	vs := &scheduler.VolumeScheduler{
-		DesiredProfile: profile,
-	}
-	return vs.ListVolumes(vr)
+	return vo.CreateVolume(vr)
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.DeleteVolume(vr)
+	return vo.DeleteVolume(vr)
 }
 
-func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.AttachVolume(vr)
+	return vo.CreateVolumeAttachment(vr)
 }
 
-func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.DetachVolume(vr)
+	return vo.UpdateVolumeAttachment(vr)
 }
 
-func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.MountVolume(vr)
-}
-
-func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	vs := &scheduler.VolumeScheduler{
-		DesiredProfile: profile,
-	}
-	return vs.UnmountVolume(vr)
+	return vo.DeleteVolumeAttachment(vr)
 }
 
 func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.CreateVolumeSnapshot(vr)
-}
-
-func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	vs := &scheduler.VolumeScheduler{
-		DesiredProfile: profile,
-	}
-	return vs.GetVolumeSnapshot(vr)
-}
-
-func ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	vs := &scheduler.VolumeScheduler{
-		DesiredProfile: profile,
-	}
-	return vs.ListVolumeSnapshots(vr)
+	return vo.CreateVolumeSnapshot(vr)
 }
 
 func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
 		return &pb.Response{}, err
 	}
-	vs := &scheduler.VolumeScheduler{
+	vo := &orchestration.VolumeOrchestrator{
 		DesiredProfile: profile,
 	}
-	return vs.DeleteVolumeSnapshot(vr)
+	return vo.DeleteVolumeSnapshot(vr)
 }

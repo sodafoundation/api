@@ -67,40 +67,28 @@ func (ds *dockServer) GetVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.
 	return dockApi.GetVolume(in)
 }
 
-// ListVolumes implements opensds.DockServer
-func (ds *dockServer) ListVolumes(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive list volumes request, vr =", in)
-	return dockApi.ListVolumes(in)
-}
-
 // DeleteVolume implements opensds.DockServer
 func (ds *dockServer) DeleteVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
 	log.Println("Dock server receive delete volume request, vr =", in)
 	return dockApi.DeleteVolume(in)
 }
 
-// AttachVolume implements opensds.DockServer
-func (ds *dockServer) AttachVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive attach volume request, vr =", in)
-	return dockApi.AttachVolume(in)
+// CreateVolumeAttachment implements opensds.DockServer
+func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive create volume attachment request, vr =", in)
+	return dockApi.CreateVolumeAttachment(in)
 }
 
-// DetachVolume implements opensds.DockServer
-func (ds *dockServer) DetachVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive detach volume request, vr =", in)
-	return dockApi.DetachVolume(in)
+// UpdateVolumeAttachment implements opensds.DockServer
+func (ds *dockServer) UpdateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive update volume attachment request, vr =", in)
+	return dockApi.UpdateVolumeAttachment(in)
 }
 
-// MountVolume implements opensds.DockServer
-func (ds *dockServer) MountVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive mount volume request, vr =", in)
-	return dockApi.MountVolume(in)
-}
-
-// UnmountVolume implements opensds.DockServer
-func (ds *dockServer) UnmountVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive unmount volume request, vr =", in)
-	return dockApi.UnmountVolume(in)
+// DeleteVolumeAttachment implements opensds.DockServer
+func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Dock server receive delete volume attachment request, vr =", in)
+	return dockApi.DeleteVolumeAttachment(in)
 }
 
 // CreateVolumeSnapshot implements opensds.DockServer
@@ -113,12 +101,6 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, in *pb.VolumeReq
 func (ds *dockServer) GetVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
 	log.Println("Dock server receive get volume snapshot request, vr =", in)
 	return dockApi.GetVolumeSnapshot(in)
-}
-
-// ListVolumeSnapshots implements opensds.DockServer
-func (ds *dockServer) ListVolumeSnapshots(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Dock server receive list volume snapshots request, vr =", in)
-	return dockApi.ListVolumeSnapshots(in)
 }
 
 // DeleteVolumeSnapshot implements opensds.DockServer
@@ -161,18 +143,6 @@ func (ds *dockServer) AttachShare(ctx context.Context, in *pb.ShareRequest) (*pb
 func (ds *dockServer) DetachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
 	log.Println("Dock server receive detach share request, sr =", in)
 	return dockApi.DetachShare(in)
-}
-
-// MountShare implements opensds.DockServer
-func (ds *dockServer) MountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive mount share request, sr =", in)
-	return dockApi.MountShare(in)
-}
-
-// UnmountShare implements opensds.DockServer
-func (ds *dockServer) UnmountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive unmount share request, sr =", in)
-	return dockApi.UnmountShare(in)
 }
 
 func (ds *dockServer) ListenAndServe() {

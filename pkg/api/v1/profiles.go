@@ -24,10 +24,7 @@ package v1
 type StorageProfile struct {
 	Id            string            `json:"id"`
 	Name          string            `json:"name"`
-	BackendDriver string            `json:"backend"`
+	Description   string            `json:"description"`
+	BackendDriver string            `json:"backendDriver"`
 	StorageTags   map[string]string `json:"tags"`
-}
-
-type StorageProfiles struct {
-	Profiles []StorageProfile `json:"profiles"`
 }

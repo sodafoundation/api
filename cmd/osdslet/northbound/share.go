@@ -23,19 +23,13 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"reflect"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
-	shares "github.com/opensds/opensds/pkg/controller/api"
+	shares "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 )
-
-var falseShareResponse api.ShareResponse
-var falseShareDetailResponse api.ShareDetailResponse
-var falseAllSharesResponse []api.ShareResponse
-var falseAllSharesDetailResponse []api.ShareDetailResponse
 
 type ShareController struct {
 	beego.Controller
@@ -65,14 +59,8 @@ func (this *ShareController) Post() {
 		resBody, _ := json.Marshal("Create share failed!")
 		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseShareResponse) {
-			log.Println("Create share failed!")
-			resBody, _ := json.Marshal("Create share failed!")
-			this.Ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.Body(resBody)
 	}
 }
 
@@ -86,9 +74,6 @@ func (this *ShareController) Get() {
 		Profile: &api.StorageProfile{
 			BackendDriver: resourceType,
 		},
-		Schema: &api.ShareOperationSchema{
-			AllowDetails: false,
-		},
 	}
 	result, err := shares.ListShares(shareRequest)
 	if err != nil {
@@ -96,29 +81,21 @@ func (this *ShareController) Get() {
 		resBody, _ := json.Marshal("List shares failed!")
 		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			log.Println("List shares failed!")
-			resBody, _ := json.Marshal("List shares failed!")
-			this.Ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.Body(resBody)
 	}
 }
 
 func (this *ShareController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	resBody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *ShareController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	resBody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 type SpecifiedShareController struct {
@@ -128,8 +105,7 @@ type SpecifiedShareController struct {
 func (this *SpecifiedShareController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	resBody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *SpecifiedShareController) Get() {
@@ -154,22 +130,15 @@ func (this *SpecifiedShareController) Get() {
 		resBody, _ := json.Marshal("Get share failed!")
 		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			log.Println("Get share failed!")
-			resBody, _ := json.Marshal("Get share failed!")
-			this.Ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.Body(resBody)
 	}
 }
 
 func (this *SpecifiedShareController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	resBody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *SpecifiedShareController) Delete() {
@@ -239,52 +208,6 @@ func DetachShare(ctx *context.Context) {
 	}
 
 	result := shares.DetachShare(shareRequest)
-	resBody, _ := json.Marshal(result)
-	ctx.Output.Body(resBody)
-}
-
-func MountShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		log.Println("Read share request body failed:", err)
-		resBody, _ := json.Marshal("Read share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	shareRequest := &shares.ShareRequest{}
-	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
-		log.Println("Parse share request body failed:", err)
-		resBody, _ := json.Marshal("Parse share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	result := shares.MountShare(shareRequest)
-	resBody, _ := json.Marshal(result)
-	ctx.Output.Body(resBody)
-}
-
-func UnmountShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		log.Println("Read share request body failed:", err)
-		resBody, _ := json.Marshal("Read share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	shareRequest := &shares.ShareRequest{}
-	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
-		log.Println("Parse share request body failed:", err)
-		resBody, _ := json.Marshal("Parse share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	result := shares.UnmountShare(shareRequest)
 	resBody, _ := json.Marshal(result)
 	ctx.Output.Body(resBody)
 }

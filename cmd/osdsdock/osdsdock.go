@@ -25,6 +25,7 @@ import (
 	"os"
 
 	"github.com/opensds/opensds/cmd/utils"
+	dockApi "github.com/opensds/opensds/pkg/dock/api"
 	dockServer "github.com/opensds/opensds/pkg/grpc/dock/server"
 )
 
@@ -47,6 +48,10 @@ func main() {
 	// Get OpenSDS host IP.
 	host, err := utils.GetHostIP()
 	if err != nil {
+		panic(err)
+	}
+
+	if err = dockApi.ResourceDiscovery(); err != nil {
 		panic(err)
 	}
 

@@ -59,13 +59,3 @@ func (ss *ShareScheduler) DetachShare(sr *pb.ShareRequest) (*pb.Response, error)
 	sr.ResourceType = ss.DesiredProfile.BackendDriver
 	return client.DetachShare(sr)
 }
-
-func (ss *ShareScheduler) MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	sr.ResourceType = ss.DesiredProfile.BackendDriver
-	return client.MountShare(sr)
-}
-
-func (ss *ShareScheduler) UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	sr.ResourceType = ss.DesiredProfile.BackendDriver
-	return client.UnmountShare(sr)
-}

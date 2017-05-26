@@ -100,12 +100,12 @@ type VolumeDetachBody struct {
 // Response is a structure for all properties of
 // a volume for a non detailed query
 type Response struct {
-	ID          string              `json:"id"`
-	Name        string              `json:"name"`
-	Status      string              `json:"status"`
-	Size        int                 `json:"size"`
-	Volume_type string              `json:"volume_type"`
-	Attachments []map[string]string `json:"attachments"`
+	Id                string `json:"id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	Status            string `json:"status"`
+	Size              int    `json:"size"`
+	Availability_zone string `json:"availability_zone"`
 }
 
 // DetailResponse is a structure for all properties of
@@ -450,11 +450,9 @@ type TerminateBody struct {
 	Connector `json:"os-terminateconnection"`
 }
 
-type ConnectionDataContainer interface{}
-
 type ConnectionInfo struct {
-	DriverVolumeType        string `json:"driver_volume_type"`
-	ConnectionDataContainer `json:"data"`
+	DriverVolumeType string                 `json:"driver_volume_type"`
+	ConnectionData   map[string]interface{} `json:"data"`
 }
 
 type ConnectionResponse struct {

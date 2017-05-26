@@ -1,20 +1,20 @@
 [
 	{
-		"id": "",
-		"name": "cinder",
-		"backend": "cinder",
+		"name": "default",
+		"tags": {}
+	},
+	{
+		"name": "openstack",
 		"tags": {
-			"highAvailability": "true",
-			"intervalSnapshot": "5s",
-			"deleteSnapshotPolicy": "true"
+			"thinProvision": "true"
 		}
 	},
 	{
-		"id": "",
 		"name": "ceph",
-		"backend": "ceph",
 		"tags": {
-			"latency": "low"
+			"highAvailability": "true",
+			"intervalSnapshot": "10s",
+			"deleteSnapshotPolicy": "true"
 		}
 	}
 ]

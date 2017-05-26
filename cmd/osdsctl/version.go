@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/pkg/api"
-	versions "github.com/opensds/opensds/pkg/controller/api"
+	versions "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )

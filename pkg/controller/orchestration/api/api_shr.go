@@ -89,23 +89,3 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	}
 	return ss.DetachShare(sr)
 }
-
-func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	ss := &scheduler.ShareScheduler{
-		DesiredProfile: profile,
-	}
-	return ss.MountShare(sr)
-}
-
-func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
-		return &pb.Response{}, err
-	}
-	ss := &scheduler.ShareScheduler{
-		DesiredProfile: profile,
-	}
-	return ss.UnmountShare(sr)
-}

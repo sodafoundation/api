@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	api "github.com/opensds/opensds/pkg/api/v1"
-	volumes "github.com/opensds/opensds/pkg/controller/api"
+	volumes "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -56,25 +56,21 @@ var volumeSnapshotListCommand = &cobra.Command{
 }
 
 var volumeSnapshotDeleteCommand = &cobra.Command{
-	Use:   "delete <snapshot id>",
+	Use:   "delete <volume id> <snapshot id>",
 	Short: "delete a volume snapshot in the specified backend of OpenSDS cluster",
 	Run:   volumeSnapshotDeleteAction,
 }
 
-var falseVolumeSnapshotResponse api.VolumeSnapshotResponse
-var falseVolumeSnapshotsResponse []api.VolumeSnapshotResponse
-
 var (
+	falseVolumeSnapshot    api.VolumeSnapshot
 	volSnapshotName        string
 	volSnapshotDescription string
-	volForceSnapshoted     bool
 )
 
 func init() {
 	volumeSnapshotCommand.AddCommand(volumeSnapshotCreateCommand)
 	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotName, "name", "n", "null", "the name of created volume snapshot")
 	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotDescription, "description", "d", "", "description of created volume snapshot")
-	volumeSnapshotCreateCommand.Flags().BoolVarP(&volForceSnapshoted, "force", "f", true, "create a snapshot by force")
 	volumeSnapshotCommand.AddCommand(volumeSnapshotShowCommand)
 	volumeSnapshotCommand.AddCommand(volumeSnapshotListCommand)
 	volumeSnapshotCommand.AddCommand(volumeSnapshotDeleteCommand)
@@ -94,20 +90,16 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			SnapshotName:    volSnapshotName,
-			Id:              args[0],
-			Description:     volSnapshotDescription,
-			ForceSnapshoted: volForceSnapshoted,
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
+			SnapshotName: volSnapshotName,
+			Id:           args[0],
+			Description:  volSnapshotDescription,
 		},
 	}
 	result, err := volumes.CreateVolumeSnapshot(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if reflect.DeepEqual(result, falseVolumeSnapshotResponse) {
+		if reflect.DeepEqual(result, falseVolumeSnapshot) {
 			fmt.Println("Create volume snapshot failed!")
 		} else {
 			rbody, _ := json.MarshalIndent(result, "", "  ")
@@ -127,16 +119,13 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 		Schema: &api.VolumeOperationSchema{
 			SnapshotId: args[0],
 		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
 	}
 	result, err := volumes.GetVolumeSnapshot(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if reflect.DeepEqual(result, falseVolumeSnapshotResponse) {
-			fmt.Println("Show volume snapshot failed!")
+		if reflect.DeepEqual(result, falseVolumeSnapshot) {
+			fmt.Printf("The snapshot id %s not exists!\n", args[0])
 		} else {
 			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
@@ -151,23 +140,14 @@ func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	volumeRequest := &volumes.VolumeRequest{
-		Schema: &api.VolumeOperationSchema{},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
-		},
-	}
+	volumeRequest := &volumes.VolumeRequest{}
+
 	result, err := volumes.ListVolumeSnapshots(volumeRequest)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		if reflect.DeepEqual(result, falseVolumeSnapshotsResponse) {
-			fmt.Println("List volume snapshots failed!")
-		} else {
-			rbody, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Printf("%s\n", string(rbody))
-		}
 	}
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
@@ -179,10 +159,8 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 
 	volumeRequest := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			SnapshotId: args[0],
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: volBackendDriver,
+			Id:         args[0],
+			SnapshotId: args[1],
 		},
 	}
 

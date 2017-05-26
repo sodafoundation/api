@@ -50,7 +50,7 @@ func (plugin *ManilaPlugin) Unset() {
 
 }
 
-func (plugin *ManilaPlugin) CreateShare(name string, shrType string, shrProto string, size int32) (string, error) {
+func (plugin *ManilaPlugin) CreateShare(name, shrProto string, size int32) (string, error) {
 	//Get the certified file share service.
 	shareService, err := plugin.getShareService()
 	if err != nil {
@@ -64,17 +64,16 @@ func (plugin *ManilaPlugin) CreateShare(name string, shrType string, shrProto st
 			Name:        name,
 			Size:        size,
 			Share_proto: shrProto,
-			Share_type:  shrType,
 		},
 	}
 
-	share, err := shareService.Create(body)
+	shr, err := shareService.Create(body)
 	if err != nil {
 		log.Println("Cannot create file share:", err)
 		return "", err
 	}
 
-	a, _ := json.Marshal(share)
+	a, _ := json.Marshal(shr)
 	result := string(a)
 	log.Println("Create file share success, dls =", result)
 	return result, nil
@@ -87,41 +86,32 @@ func (plugin *ManilaPlugin) GetShare(shrID string) (string, error) {
 		return "", err
 	}
 
-	share, err := shareService.Show(shrID)
+	shr, err := shareService.Show(shrID)
 	if err != nil {
 		log.Println("Cannot show file share:", err)
 		return "", err
 	}
 
-	a, _ := json.Marshal(share)
+	a, _ := json.Marshal(shr)
 	result := string(a)
 	log.Println("Get file share success, dls =", result)
 	return result, nil
 }
 
-func (plugin *ManilaPlugin) GetAllShares(allowDetails bool) (string, error) {
+func (plugin *ManilaPlugin) GetAllShares() (string, error) {
 	shareService, err := plugin.getShareService()
 	if err != nil {
 		log.Println("Cannot access file share service:", err)
 		return "", err
 	}
 
-	var shares interface{}
-	if allowDetails {
-		shares, err = shareService.Detail()
-		if err != nil {
-			log.Println("Cannot detail file shares:", err)
-			return "", err
-		}
-	} else {
-		shares, err = shareService.List()
-		if err != nil {
-			log.Println("Cannot list file shares:", err)
-			return "", err
-		}
+	shrs, err := shareService.Detail()
+	if err != nil {
+		log.Println("Cannot detail file shares:", err)
+		return "", err
 	}
 
-	a, _ := json.Marshal(shares)
+	a, _ := json.Marshal(shrs)
 	result := string(a)
 	log.Println("Get all file shares success, dls =", result)
 	return result, nil
@@ -134,14 +124,12 @@ func (plugin *ManilaPlugin) DeleteShare(shrID string) (string, error) {
 		return "", err
 	}
 
-	_, err = shareService.Show(shrID)
-	if err != nil {
+	if _, err = shareService.Show(shrID); err != nil {
 		log.Println("Cannot get file share:", err)
 		return "", err
 	}
 
-	err = shareService.Delete(shrID)
-	if err != nil {
+	if err = shareService.Delete(shrID); err != nil {
 		log.Println("Cannot delete file share:", err)
 		return "", err
 	}

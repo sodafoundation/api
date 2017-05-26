@@ -29,7 +29,6 @@ import (
 func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	result, err := dock.CreateShare(sr.GetResourceType(),
 		sr.GetName(),
-		sr.GetShareType(),
 		sr.GetShareProto(),
 		sr.GetSize())
 	if err != nil {
@@ -57,8 +56,7 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.GetAllShares(sr.GetResourceType(),
-		sr.GetAllowDetails())
+	result, err := dock.GetAllShares(sr.GetResourceType())
 	if err != nil {
 		log.Println("Error occured in dock module when list shares:", err)
 		return &pb.Response{}, err
@@ -103,34 +101,6 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 		sr.GetDevice())
 	if err != nil {
 		log.Println("Error occured in dock module when detach share:", err)
-		return &pb.Response{}, err
-	}
-
-	return &pb.Response{
-		Status:  "Success",
-		Message: result,
-	}, nil
-}
-
-func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.MountShare(sr.GetMountDir(),
-		sr.GetDevice(),
-		sr.GetFsType())
-	if err != nil {
-		log.Println("Error occured in dock module when mount share:", err)
-		return &pb.Response{}, err
-	}
-
-	return &pb.Response{
-		Status:  "Success",
-		Message: result,
-	}, nil
-}
-
-func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	result, err := dock.UnmountShare(sr.GetMountDir())
-	if err != nil {
-		log.Println("Error occured in dock module when unmount share:", err)
 		return &pb.Response{}, err
 	}
 

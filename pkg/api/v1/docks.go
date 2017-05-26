@@ -20,12 +20,13 @@ This module implements the common data structure.
 package v1
 
 type Dock struct {
-	Id       string   `json:"id"`
-	Endpoint string   `json:"address"`
-	Backends []string `json:"backends"`
-	Status   string   `json:"status"`
-}
-
-type Docks struct {
-	DockList []Dock `json:"docks"`
+	Id               string `json:"id"`
+	Name             string `json:"name"`
+	Endpoint         string `json:"endpoint"`
+	Status           string `json:"status"`
+	AvailabilityZone string `json:"availabilityZone"`
+	DriverName       string `json:"driverName"`
+	StorageName      string `json:"storageName"`
+	StorageType      string `json:"storageType"`
+	StorageFqdn      string `json:"storageFqdn"`
 }

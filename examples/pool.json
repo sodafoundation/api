@@ -1,0 +1,24 @@
+[
+	{
+		"name": "cinder-pool",
+		"storageType": "block",
+		"dockName": "cinder",
+		"availabilityZone": "nova",
+		"totalCapacity": 100,
+		"storageTag": {
+			"thinProvision": "true",
+			"highAvailability": "false"
+		}
+	},
+	{
+		"name": "rbd-pool",
+		"storageType": "block",
+		"dockName": "ceph",
+		"availabilityZone": "ceph",
+		"totalCapacity": 200,
+		"storageTag": {
+			"thinProvision": "false",
+			"highAvailability": "true"
+		}
+	}
+]

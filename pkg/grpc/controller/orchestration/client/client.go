@@ -37,7 +37,6 @@ import (
 	"log"
 
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	"github.com/opensds/opensds/pkg/grpc/util"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -48,7 +47,7 @@ const (
 
 func NewOrchestrationClient() (pb.OrchestrationClient, *grpc.ClientConn, error) {
 	// Get Orchestration client host IP.
-	host, err := util.GetHostIP()
+	host, err := GetHostIP()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -85,44 +84,6 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.GetVolume(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive get volume response, vr =", resp)
-
-	return resp, nil
-}
-
-func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.ListVolumes(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not list: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive list volumes response, vr =", resp)
-
-	return resp, nil
-}
-
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c, conn, err := NewOrchestrationClient()
 	if err != nil {
@@ -142,7 +103,7 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c, conn, err := NewOrchestrationClient()
 	if err != nil {
 		log.Printf("get orchestration client failed: %+v\n", err)
@@ -150,18 +111,18 @@ func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	}
 	defer conn.Close()
 
-	resp, err := c.AttachVolume(context.Background(), vr)
+	resp, err := c.CreateVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not attach: %+v\n", err)
+		log.Printf("could not create volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive attach volume response, vr =", resp)
+	log.Println("Orchestration client receive create volume attachment response, vr =", resp)
 
 	return resp, nil
 }
 
-func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c, conn, err := NewOrchestrationClient()
 	if err != nil {
 		log.Printf("get orchestration client failed: %+v\n", err)
@@ -169,18 +130,18 @@ func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	}
 	defer conn.Close()
 
-	resp, err := c.DetachVolume(context.Background(), vr)
+	resp, err := c.UpdateVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not detach: %+v\n", err)
+		log.Printf("could not update volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive detach volume response, vr =", resp)
+	log.Println("Orchestration client receive update volume attachment response, vr =", resp)
 
 	return resp, nil
 }
 
-func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	c, conn, err := NewOrchestrationClient()
 	if err != nil {
 		log.Printf("get orchestration client failed: %+v\n", err)
@@ -188,32 +149,13 @@ func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	}
 	defer conn.Close()
 
-	resp, err := c.MountVolume(context.Background(), vr)
+	resp, err := c.DeleteVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not mount: %+v\n", err)
+		log.Printf("could not delete volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive mount volume response, vr =", resp)
-
-	return resp, nil
-}
-
-func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.UnmountVolume(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not unmount: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive unmount volume response, vr =", resp)
+	log.Println("Orchestration client receive delete volume attachment response, vr =", resp)
 
 	return resp, nil
 }
@@ -233,44 +175,6 @@ func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	}
 
 	log.Println("Orchestration client receive create volume snapshot response, vr =", resp)
-
-	return resp, nil
-}
-
-func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.GetVolumeSnapshot(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive get volume snapshot response, vr =", resp)
-
-	return resp, nil
-}
-
-func ListVolumeSnapshots(vr *pb.VolumeRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.ListVolumeSnapshots(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not list: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive list volume snapshots response, vr =", resp)
 
 	return resp, nil
 }
@@ -404,44 +308,6 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	}
 
 	log.Println("Orchestration client receive detach share response, vr =", resp)
-
-	return resp, nil
-}
-
-func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.MountShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not mount: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive mount share response, sr =", resp)
-
-	return resp, nil
-}
-
-func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewOrchestrationClient()
-	if err != nil {
-		log.Printf("get orchestration client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.UnmountShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not unmount: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive unmount share response, sr =", resp)
 
 	return resp, nil
 }

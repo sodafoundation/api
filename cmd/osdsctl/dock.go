@@ -23,9 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
-	docks "github.com/opensds/opensds/pkg/controller/api"
+	docks "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -34,18 +33,6 @@ var dockCommand = &cobra.Command{
 	Use:   "dock",
 	Short: "manage OpenSDS dock resources",
 	Run:   dockAction,
-}
-
-var dockRegisterCommand = &cobra.Command{
-	Use:   "register <dock endpoint> <backend1,backend2...>",
-	Short: "register a new dock with endpoint and backend list to controller",
-	Run:   dockRegisterAction,
-}
-
-var dockDeregisterCommand = &cobra.Command{
-	Use:   "deregister <dock endpoint>",
-	Short: "deregister an existing dock with ip from controller",
-	Run:   dockDeregisterAction,
 }
 
 var dockShowCommand = &cobra.Command{
@@ -61,8 +48,6 @@ var dockListCommand = &cobra.Command{
 }
 
 func init() {
-	dockCommand.AddCommand(dockRegisterCommand)
-	dockCommand.AddCommand(dockDeregisterCommand)
 	dockCommand.AddCommand(dockShowCommand)
 	dockCommand.AddCommand(dockListCommand)
 }
@@ -72,42 +57,6 @@ func dockAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-func dockRegisterAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	dockRequest := docks.DockRequest{}
-	backends := strings.Split(args[1], ",")
-
-	result, err := docks.RegisterDock(dockRequest, args[0], backends)
-	if err != nil {
-		fmt.Println("Register dock resource failed: ", err)
-	} else {
-		rbody, _ := json.MarshalIndent(result, "", "  ")
-		fmt.Printf("%s\n", string(rbody))
-	}
-}
-
-func dockDeregisterAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	dockRequest := docks.DockRequest{}
-
-	result, err := docks.DeregisterDock(dockRequest, args[0])
-	if err != nil {
-		fmt.Println("Deregester dock resource failed: ", err)
-	} else {
-		fmt.Printf("%s\n", result)
-	}
-}
-
 func dockShowAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		fmt.Println("The number of args is not correct!")
@@ -115,9 +64,11 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	dockRequest := docks.DockRequest{}
+	dockRequest := &docks.DockRequest{
+		Id: args[0],
+	}
 
-	result, err := docks.GetDock(dockRequest, args[0])
+	result, err := docks.GetDock(dockRequest)
 	if err != nil {
 		fmt.Println("Get dock resource failed: ", err)
 	} else {
@@ -133,7 +84,7 @@ func dockListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	dockRequest := docks.DockRequest{}
+	dockRequest := &docks.DockRequest{}
 
 	result, err := docks.ListDocks(dockRequest)
 	if err != nil {

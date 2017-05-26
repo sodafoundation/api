@@ -21,12 +21,13 @@ operation requests about volume to REST API.
 package coprhd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	api "github.com/opensds/opensds/pkg/api/v1"
 
 	"gopkg.in/jmcvetta/napping.v3"
 )
@@ -71,11 +72,12 @@ type GetVolumeReply struct {
 }
 
 type VolumeResponse struct {
-	Name       string `json:"name"`
-	Id         string `json:"id"`
-	Size       int32  `json:"size"`
-	Status     string `json:"status"`
-	VolumeType string `json:"volume_type"`
+	Id                string `json:"id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	Status            string `json:"status"`
+	Size              int    `json:"size"`
+	Availability_zone string `json:"availability_zone"`
 }
 
 type BulkReply struct {
@@ -96,12 +98,11 @@ func (d *Driver) Unset() {
 
 }
 
-func (d *Driver) CreateVolume(name, volType string, size int32) (string, error) {
-
+func (d *Driver) CreateVolume(name string, size int32) (*api.VolumeResponse, error) {
 	s, err := d.getAuthSession()
-
 	if err != nil {
-		log.Fatal("Failed to create session: %s", err.Error())
+		log.Println("Failed to create session:", err)
+		return &api.VolumeResponse{}, err
 	}
 
 	res := &CreateAndDeleteVolumeReply{}
@@ -119,15 +120,15 @@ func (d *Driver) CreateVolume(name, volType string, size int32) (string, error) 
 	resp, err := s.Post(url, &payload, res, nil)
 
 	if resp.Status() != http.StatusAccepted {
-		return "", fmt.Errorf("Failed to create volume: %s", resp.Result)
+		return &api.VolumeResponse{}, fmt.Errorf("Failed to create volume: %s", resp.Result)
 	}
 
 	log.Println("Create volume success, dls =", res)
 
-	vres := &VolumeResponse{
+	vres := &api.VolumeResponse{
 		Id:   res.Task[0].Resource.Id,
 		Name: res.Task[0].Resource.Name,
-		Size: size,
+		Size: int(size),
 	}
 	if res.Task[0].Inactive {
 		vres.Status = "inactive"
@@ -135,15 +136,14 @@ func (d *Driver) CreateVolume(name, volType string, size int32) (string, error) 
 		vres.Status = "active"
 	}
 
-	rbody, _ := json.Marshal(vres)
-	return string(rbody), nil
+	return vres, nil
 }
 
-func (d *Driver) GetVolume(volID string) (string, error) {
+func (d *Driver) GetVolume(volID string) (*api.VolumeResponse, error) {
 	s, err := d.getAuthSession()
-
 	if err != nil {
-		log.Fatal("Failed to create session: %s", err.Error())
+		log.Println("Failed to create session:", err)
+		return &api.VolumeResponse{}, err
 	}
 
 	res := &GetVolumeReply{}
@@ -153,97 +153,34 @@ func (d *Driver) GetVolume(volID string) (string, error) {
 	resp, err := s.Get(url, nil, res, nil)
 
 	if resp.Status() != http.StatusOK {
-		return "", fmt.Errorf("Failed to get volume: %s", resp.Result)
+		return &api.VolumeResponse{}, fmt.Errorf("Failed to get volume: %s", resp.Result)
 	}
 
 	log.Println("Get volume success, dls =", res)
 
 	size, err := strconv.ParseFloat(res.Size, 32)
 	if err != nil {
-		return "", err
+		return &api.VolumeResponse{}, err
 	}
 
-	vres := &VolumeResponse{
-		Id:         res.Id,
-		Name:       res.Name,
-		VolumeType: res.SystemType,
-		Size:       int32(size),
+	vres := &api.VolumeResponse{
+		Id:   res.Id,
+		Name: res.Name,
+		Size: int(size),
 	}
 	if res.Inactive {
 		vres.Status = "inactive"
 	} else {
 		vres.Status = "active"
 	}
-
-	rbody, _ := json.Marshal(vres)
-	return string(rbody), nil
+	return vres, nil
 }
 
-func (d *Driver) GetAllVolumes(allowDetails bool) (string, error) {
-	allowDetails = true
-	s, err := d.getAuthSession()
-
-	if err != nil {
-		log.Fatal("Failed to create session: %s", err.Error())
-	}
-
-	bres := &BulkReply{}
-
-	url := d.Url + "/block/volumes/bulk.json"
-
-	resp, err := s.Get(url, nil, bres, nil)
-
-	if resp.Status() != http.StatusOK {
-		return "", fmt.Errorf("Failed to get all volumes: %s", resp.Result)
-	}
-
-	log.Println("List volume bulks success, dls =", bres)
-
-	var vress []VolumeResponse
-
-	for _, id := range bres.Id {
-		res := &GetVolumeReply{}
-
-		url := d.Url + "/block/volumes/" + id + ".json"
-
-		resp, err = s.Get(url, nil, res, nil)
-
-		if resp.Status() != http.StatusOK {
-			return "", fmt.Errorf("Failed to get volume: %s", resp.Result)
-		}
-
-		log.Println("Get volume success, dls =", res)
-
-		size, err := strconv.ParseFloat(res.Size, 32)
-		if err != nil {
-			return "", err
-		}
-
-		vres := &VolumeResponse{
-			Id:         res.Id,
-			Name:       res.Name,
-			VolumeType: res.SystemType,
-			Size:       int32(size),
-		}
-		if res.Inactive {
-			vres.Status = "inactive"
-		} else {
-			vres.Status = "active"
-		}
-
-		vress = append(vress, *vres)
-	}
-
-	log.Println("List volumes success, dls =", vress)
-
-	rbody, _ := json.Marshal(vress)
-	return string(rbody), nil
-}
-
-func (d *Driver) DeleteVolume(volID string) (string, error) {
+func (d *Driver) DeleteVolume(volID string) error {
 	s, err := d.getAuthSession()
 	if err != nil {
-		log.Fatal("Failed to create session: %s", err.Error())
+		log.Println("Failed to create session:", err)
+		return err
 	}
 
 	res := &CreateAndDeleteVolumeReply{}
@@ -252,36 +189,36 @@ func (d *Driver) DeleteVolume(volID string) (string, error) {
 
 	resp, err := s.Post(url, nil, res, nil)
 	if resp.Status() != http.StatusAccepted {
-		return "", fmt.Errorf("Failed to delete volume: %s", resp.Result)
+		return fmt.Errorf("Failed to delete volume: %s", resp.Result)
 	}
 
 	log.Println("Delete success, dls =", res)
 
-	return "Delete volume success!", nil
+	return nil
 }
 
-func (d *Driver) AttachVolume(volId string) (string, error) {
-	return "", nil
+func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
+	return &api.ConnectionInfo{}, nil
 }
 
-func (d *Driver) DetachVolume(device string) (string, error) {
-	return "", nil
+func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
+	return nil
 }
 
-func (d *Driver) CreateSnapshot(name, volID, description string, forced bool) (string, error) {
-	return "", nil
+func (d *Driver) DetachVolume(volID string) error {
+	return nil
 }
 
-func (d *Driver) GetSnapshot(snapID string) (string, error) {
-	return "", nil
+func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshot, error) {
+	return &api.VolumeSnapshot{}, nil
 }
 
-func (d *Driver) GetAllSnapshots() (string, error) {
-	return "", nil
+func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshot, error) {
+	return &api.VolumeSnapshot{}, nil
 }
 
-func (d *Driver) DeleteSnapshot(snapID string) (string, error) {
-	return "", nil
+func (d *Driver) DeleteSnapshot(snapID string) error {
+	return nil
 }
 
 // getAuthSession returns an authenticated API Session
@@ -294,7 +231,6 @@ func (d *Driver) getAuthSession() (session *napping.Session, err error) {
 	url := d.Url + loginUri
 
 	resp, err := s.Get(url, nil, nil, nil)
-
 	if err != nil {
 		return
 	}

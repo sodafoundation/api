@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"os"
 
-	profiles "github.com/opensds/opensds/pkg/controller/api"
+	profiles "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ var profileCommand = &cobra.Command{
 }
 
 var profileShowCommand = &cobra.Command{
-	Use:   "show <profile name>",
+	Use:   "show <profile id>",
 	Short: "show information of specified profile",
 	Run:   profileShowAction,
 }
@@ -64,9 +64,11 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	profileRequest := profiles.ProfileRequest{}
+	profileRequest := &profiles.ProfileRequest{
+		Id: args[0],
+	}
 
-	result, err := profiles.GetProfile(profileRequest, args[0])
+	result, err := profiles.GetProfile(profileRequest)
 	if err != nil {
 		fmt.Println("Get profile resource failed: ", err)
 	} else {
@@ -82,7 +84,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	profileRequest := profiles.ProfileRequest{}
+	profileRequest := &profiles.ProfileRequest{}
 
 	result, err := profiles.ListProfiles(profileRequest)
 	if err != nil {

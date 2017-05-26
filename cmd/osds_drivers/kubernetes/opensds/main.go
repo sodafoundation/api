@@ -15,14 +15,12 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"fmt"
 	"strings"
-	"time"
 
-	"github.com/astaxie/beego/httplib"
-	api "github.com/opensds/opensds/pkg/api/v1"
+	"github.com/opensds/opensds/cmd/osds_drivers/kubernetes/opensds/api"
+	"github.com/opensds/opensds/cmd/osds_drivers/kubernetes/opensds/connector"
 )
 
 const (
@@ -48,110 +46,90 @@ func (OpenSDSPlugin) NewOptions() interface{} {
 
 func (OpenSDSPlugin) Attach(opts interface{}) Result {
 	opt := opts.(*OpenSDSOptions)
+	volID := opt.VolumeId
+	isMultipath := false
 
-	url := URL_PREFIX + "/api/v1/volumes/attach"
-
-	dockId, err := GetDockId()
+	prop, err := connector.GetConnectorProperties(isMultipath)
 	if err != nil {
 		return Fail(err.Error())
 	}
 
-	vr := &VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId: dockId,
-			Id:     opt.VolumeId,
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: opt.BackendDriver,
-		},
+	atc, err := CreateVolumeAttachment(volID, prop)
+	if err != nil {
+		return Fail(err.Error())
+	}
+	conn := &connector.Connector{
+		ConnInfo: atc.ConnectionInfo,
 	}
 
-	// fmt.Println("Start PUT request to attach volume, url =", url)
-	req := httplib.Put(url).SetTimeout(100*time.Second, 50*time.Second)
-	req.JSONBody(vr)
-
-	resp, err := req.Response()
+	// log.Printf("Receive connection info: %+v\n", conn)
+	devPath, err := conn.ConnectVolume()
 	if err != nil {
 		return Fail(err.Error())
 	}
 
-	err = CheckHTTPResponseStatusCode(resp)
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	rbody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Fail(err.Error())
-	}
-
-	var volumeResponse = &VolumeResponse{}
-	err = json.Unmarshal(rbody, volumeResponse)
+	_, err = UpdateVolumeAttachment(atc.Id, volID, devPath, atc.HostInfo)
 	if err != nil {
 		return Fail(err.Error())
 	} else {
-		if volumeResponse.Status == "Success" {
-			return Result{
-				Status: "Success",
-				Device: volumeResponse.Message,
-			}
-		} else {
-			err = errors.New("Detach volume failed!")
-			return Fail(err.Error())
+		return Result{
+			Status: "Success",
+			Device: devPath,
 		}
 	}
 }
 
 func (OpenSDSPlugin) Detach(device string) Result {
-	url := URL_PREFIX + "/api/v1/volumes/attach"
-
-	dockId, err := GetDockId()
-	if err != nil {
-		return Fail(err.Error())
-	}
 	linkPath, err := FindLinkPath(device)
 	if err != nil {
 		return Fail(err.Error())
 	}
-	backendDriver, err := FindBackendDriver(device)
+	ind := strings.Index(linkPath, "by-id/")
+	if ind <= 0 {
+		return Fail(fmt.Errorf("Detach disk: no volume id in %s", linkPath))
+	}
+
+	var volID = linkPath[ind+6:]
+
+	isMultipath := false
+	prop, err := connector.GetConnectorProperties(isMultipath)
 	if err != nil {
 		return Fail(err.Error())
 	}
 
-	vr := &VolumeRequest{
-		Schema: &api.VolumeOperationSchema{
-			DockId: dockId,
-			Device: linkPath,
-		},
-		Profile: &api.StorageProfile{
-			BackendDriver: backendDriver,
-		},
+	atcs, err := ListVolumeAttachments(volID)
+	if err != nil {
+		return Fail(err.Error())
+	}
+	atcFound, atcPtr := false, &api.VolumeAttachment{}
+	for _, atc := range *atcs {
+		if atc.Mountpoint == linkPath && atc.HostInfo.Host == prop.Host {
+			atcFound, atcPtr = true, &atc
+		}
+	}
+	if !atcFound {
+		return Fail("Wrong device path, can not find volume attachment!")
 	}
 
-	// fmt.Println("Start DELETE request to detach volume, url =", url)
-	req := httplib.Delete(url).SetTimeout(100*time.Second, 50*time.Second)
-	req.JSONBody(vr)
-
-	resp, err := req.Response()
+	conn := &connector.Connector{
+		ConnInfo: atcPtr.ConnectionInfo,
+	}
+	// log.Printf("Receive connection info: %+v\n", conn)
+	_, err = conn.DisconnectVolume()
 	if err != nil {
 		return Fail(err.Error())
 	}
 
-	rbody, err := ioutil.ReadAll(resp.Body)
+	volumeResponse, err := DeleteVolumeAttachment(atcPtr.Id, volID)
 	if err != nil {
 		return Fail(err.Error())
-	}
-
-	var volumeResponse = &VolumeResponse{}
-	err = json.Unmarshal(rbody, volumeResponse)
-	if err != nil {
-		return Fail(err.Error())
-	}
-	if strings.Contains(string(rbody), "Success") {
-		return Succeed()
 	} else {
-		err = errors.New("Detach volume failed!")
-		return Fail(err.Error())
+		if volumeResponse.Status == "Success" {
+			return Succeed()
+		} else {
+			err = errors.New("Detach volume failed!")
+			return Fail(err.Error())
+		}
 	}
 }
 

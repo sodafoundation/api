@@ -35,26 +35,16 @@ package opensds;
 service Orchestration {
   // Create a volume
   rpc CreateVolume (VolumeRequest) returns (Response) {}
-  // Get a volume
-  rpc GetVolume (VolumeRequest) returns (Response) {}
-  // List all volumes
-  rpc ListVolumes (VolumeRequest) returns (Response) {}
   // Delete a volume
   rpc DeleteVolume (VolumeRequest) returns (Response) {}
-  // Attach a volume
-  rpc AttachVolume (VolumeRequest) returns (Response) {}
-  // Detach a volume
-  rpc DetachVolume (VolumeRequest) returns (Response) {}
-  // Mount a volume
-  rpc MountVolume (VolumeRequest) returns (Response) {}
-  // Unmount a volume
-  rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a volume attachment
+  rpc CreateVolumeAttachment (VolumeRequest) returns (Response) {}
+  // Update a volume attachment
+  rpc UpdateVolumeAttachment (VolumeRequest) returns (Response) {}
+  // Delete a volume attachment
+  rpc DeleteVolumeAttachment (VolumeRequest) returns (Response) {}
   // Create a volume snapshot
   rpc CreateVolumeSnapshot (VolumeRequest) returns (Response) {}
-  // Get a volume snapshot
-  rpc GetVolumeSnapshot (VolumeRequest) returns (Response) {}
-  // List all volume snapshots
-  rpc ListVolumeSnapshots (VolumeRequest) returns (Response) {}
   // Delete a volume snapshot
   rpc DeleteVolumeSnapshot (VolumeRequest) returns (Response) {}
   // Create a share
@@ -69,10 +59,6 @@ service Orchestration {
   rpc AttachShare (ShareRequest) returns (Response) {}
   // Detach a share
   rpc DetachShare (ShareRequest) returns (Response) {}
-  // Mount a share
-  rpc MountShare (ShareRequest) returns (Response) {}
-  // Unmount a share
-  rpc UnmountShare (ShareRequest) returns (Response) {}
 }
 
 // The dock service definition.
@@ -81,24 +67,18 @@ service Dock {
   rpc CreateVolume (VolumeRequest) returns (Response) {}
   // Get a volume
   rpc GetVolume (VolumeRequest) returns (Response) {}
-  // List all volumes
-  rpc ListVolumes (VolumeRequest) returns (Response) {}
   // Delete a volume
   rpc DeleteVolume (VolumeRequest) returns (Response) {}
-  // Attach a volume
-  rpc AttachVolume (VolumeRequest) returns (Response) {}
-  // Detach a volume
-  rpc DetachVolume (VolumeRequest) returns (Response) {}
-  // Mount a volume
-  rpc MountVolume (VolumeRequest) returns (Response) {}
-  // Unmount a volume
-  rpc UnmountVolume (VolumeRequest) returns (Response) {}
+  // Create a volume attachment
+  rpc CreateVolumeAttachment (VolumeRequest) returns (Response) {}
+  // Update a volume attachment
+  rpc UpdateVolumeAttachment (VolumeRequest) returns (Response) {}
+  // Delete a volume attachment
+  rpc DeleteVolumeAttachment (VolumeRequest) returns (Response) {}
   // Create a volume snapshot
   rpc CreateVolumeSnapshot (VolumeRequest) returns (Response) {}
   // Get a volume snapshot
   rpc GetVolumeSnapshot (VolumeRequest) returns (Response) {}
-  // List all volume snapshots
-  rpc ListVolumeSnapshots (VolumeRequest) returns (Response) {}
   // Delete a volume snapshot
   rpc DeleteVolumeSnapshot (VolumeRequest) returns (Response) {}
   // Create a share
@@ -113,29 +93,25 @@ service Dock {
   rpc AttachShare (ShareRequest) returns (Response) {}
   // Detach a share
   rpc DetachShare (ShareRequest) returns (Response) {}
-  // Mount a share
-  rpc MountShare (ShareRequest) returns (Response) {}
-  // Unmount a share
-  rpc UnmountShare (ShareRequest) returns (Response) {}
 }
 
 // The VolumeRequest message containing all properties of
 // a volume request.
 message VolumeRequest {
-  string resourceType = 1;
-  string id = 2;
-  string name = 3;
-  string volumeType = 4;
-  int32 size = 5;
-  bool allowDetails = 6;
-  string device = 7;
-  string mountDir = 8;
-  string fsType = 9;
-  string dockId = 10;
-  string snapshotId = 11;
-  string snapshotName = 12;
-  string description = 13;
-  bool forceSnapshoted = 14;
+  string volumeId = 1;
+  string volumeName = 2;
+  int32 size = 3;
+  string dockInfo = 4;
+  string poolId = 5;
+  string poolName = 6;
+  string attachmentId = 7;
+  bool doLocalAttach = 8;
+  bool multiPath = 9;
+  string hostInfo = 10;
+  string mountpoint = 11;
+  string snapshotId = 12;
+  string snapshotName = 13;
+  string snapshotDescription = 14;
   string storageProfile = 15;
 }
 
