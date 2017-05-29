@@ -1,7 +1,7 @@
 dist: trusty
 language: go
 #go_import_path: github.com/opensds/opensds
-sudo: false
+sudo: required
 
 go:
   - 1.7
