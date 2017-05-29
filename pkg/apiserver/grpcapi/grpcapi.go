@@ -110,12 +110,18 @@ func UpdateVolumeAttachment(schema *api.VolumeOperationSchema, profile *api.Stor
 		falseResp.Error = fmt.Sprintf("%v", err)
 		return falseResp
 	}
+	hostInfo, err := json.Marshal(&schema.HostInfo)
+	if err != nil {
+		falseResp.Error = fmt.Sprintf("%v", err)
+		return falseResp
+	}
 
 	vr := &pb.VolumeRequest{
 		StorageProfile: string(body),
 		VolumeId:       schema.Id,
 		AttachmentId:   schema.AttachmentId,
 		Mountpoint:     schema.Mountpoint,
+		HostInfo:       string(hostInfo),
 	}
 
 	resp, err := client.UpdateVolumeAttachment(vr)

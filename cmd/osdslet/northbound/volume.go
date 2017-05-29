@@ -160,6 +160,7 @@ func (this *VolumeAttachmentController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
+	volId := this.Ctx.Input.Param(":id")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
@@ -173,6 +174,7 @@ func (this *VolumeAttachmentController) Post() {
 		resBody, _ := json.Marshal("Parse volume request body failed!")
 		this.Ctx.Output.Body(resBody)
 	}
+	volumeRequest.Schema.Id = volId
 
 	result, err := volumes.CreateVolumeAttachment(volumeRequest)
 	if err != nil {
@@ -189,10 +191,9 @@ func (this *VolumeAttachmentController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.GetString("volId")
 	vr := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			Id: volId,
+			Id: this.Ctx.Input.Param(":volId"),
 		},
 	}
 	result, err := volumes.ListVolumeAttachments(vr)
@@ -232,12 +233,10 @@ func (this *SpecifiedVolumeAttachmentController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.GetString("volId")
-	attachmentId := this.GetString("id")
 	vr := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			Id:           volId,
-			AttachmentId: attachmentId,
+			Id:           this.Ctx.Input.Param(":volId"),
+			AttachmentId: this.Ctx.Input.Param(":id"),
 		},
 	}
 	result, err := volumes.GetVolumeAttachment(vr)
@@ -255,8 +254,8 @@ func (this *SpecifiedVolumeAttachmentController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.GetString("volId")
-	attachmentId := this.GetString("id")
+	volId := this.Ctx.Input.Param(":volId")
+	attachmentId := this.Ctx.Input.Param(":id")
 
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
@@ -273,7 +272,7 @@ func (this *SpecifiedVolumeAttachmentController) Put() {
 	}
 	vr.Schema.Id, vr.Schema.AttachmentId = volId, attachmentId
 
-	result, err := volumes.GetVolumeAttachment(vr)
+	result, err := volumes.UpdateVolumeAttachment(vr)
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Update volume attachment failed!")
@@ -288,12 +287,10 @@ func (this *SpecifiedVolumeAttachmentController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.GetString("volId")
-	attachmentId := this.GetString("id")
 	vr := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			Id:           volId,
-			AttachmentId: attachmentId,
+			Id:           this.Ctx.Input.Param(":volId"),
+			AttachmentId: this.Ctx.Input.Param(":id"),
 		},
 	}
 
@@ -310,6 +307,7 @@ func (this *VolumeSnapshotController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
+	volId := this.Ctx.Input.Param(":volId")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
@@ -323,6 +321,7 @@ func (this *VolumeSnapshotController) Post() {
 		resBody, _ := json.Marshal("Parse volume request body failed!")
 		this.Ctx.Output.Body(resBody)
 	}
+	volumeRequest.Schema.Id = volId
 
 	result, err := volumes.CreateVolumeSnapshot(volumeRequest)
 	if err != nil {
@@ -339,7 +338,11 @@ func (this *VolumeSnapshotController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	vr := &volumes.VolumeRequest{}
+	vr := &volumes.VolumeRequest{
+		Schema: &api.VolumeOperationSchema{
+			Id: this.Ctx.Input.Param(":volId"),
+		},
+	}
 	result, err := volumes.ListVolumeSnapshots(vr)
 	if err != nil {
 		log.Println(err)
@@ -377,10 +380,10 @@ func (this *SpecifiedVolumeSnapshotController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	snapshotId := this.GetString("id")
 	vr := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			SnapshotId: snapshotId,
+			Id:         this.Ctx.Input.Param(":volId"),
+			SnapshotId: this.Ctx.Input.Param(":id"),
 		},
 	}
 	result, err := volumes.GetVolumeSnapshot(vr)
@@ -398,12 +401,10 @@ func (this *SpecifiedVolumeSnapshotController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.GetString("volId")
-	snapshotId := this.GetString("id")
 	vr := &volumes.VolumeRequest{
 		Schema: &api.VolumeOperationSchema{
-			Id:         volId,
-			SnapshotId: snapshotId,
+			Id:         this.Ctx.Input.Param(":volId"),
+			SnapshotId: this.Ctx.Input.Param(":id"),
 		},
 	}
 
