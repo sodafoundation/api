@@ -35,6 +35,7 @@ type PoolController struct {
 func (this *PoolController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -47,9 +48,11 @@ func (this *PoolController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List storage pools failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -57,12 +60,14 @@ func (this *PoolController) Get() {
 func (this *PoolController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *PoolController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -73,6 +78,7 @@ type SpecifiedPoolController struct {
 func (this *SpecifiedPoolController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -87,9 +93,11 @@ func (this *SpecifiedPoolController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get storage pool failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -97,11 +105,13 @@ func (this *SpecifiedPoolController) Get() {
 func (this *SpecifiedPoolController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *SpecifiedPoolController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }

@@ -36,9 +36,11 @@ func GetAllVersions(ctx *context.Context) {
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List versions failed!")
+		ctx.Output.SetStatus(400)
 		ctx.Output.Body(rbody)
 	} else {
 		rbody, _ := json.Marshal(result)
+		ctx.Output.SetStatus(200)
 		ctx.Output.Body(rbody)
 	}
 }
@@ -51,9 +53,11 @@ func GetVersionv1(ctx *context.Context) {
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Get version v1 failed!")
+		ctx.Output.SetStatus(400)
 		ctx.Output.Body(rbody)
 	} else {
 		rbody, _ := json.Marshal(result)
+		ctx.Output.SetStatus(200)
 		ctx.Output.Body(rbody)
 	}
 }

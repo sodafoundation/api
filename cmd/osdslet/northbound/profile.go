@@ -35,6 +35,7 @@ type ProfileController struct {
 func (this *ProfileController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -47,9 +48,11 @@ func (this *ProfileController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List storage profiles failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -57,12 +60,14 @@ func (this *ProfileController) Get() {
 func (this *ProfileController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *ProfileController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -73,6 +78,7 @@ type SpecifiedProfileController struct {
 func (this *SpecifiedProfileController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -87,9 +93,11 @@ func (this *SpecifiedProfileController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get storage profile failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -97,11 +105,13 @@ func (this *SpecifiedProfileController) Get() {
 func (this *SpecifiedProfileController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *SpecifiedProfileController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }

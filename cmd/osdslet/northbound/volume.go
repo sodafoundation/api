@@ -42,6 +42,7 @@ func (this *VolumeController) Post() {
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
 		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -49,6 +50,7 @@ func (this *VolumeController) Post() {
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -56,9 +58,11 @@ func (this *VolumeController) Post() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Create volume failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(201)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -72,9 +76,11 @@ func (this *VolumeController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List volumes failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -82,12 +88,14 @@ func (this *VolumeController) Get() {
 func (this *VolumeController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *VolumeController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -98,6 +106,7 @@ type SpecifiedVolumeController struct {
 func (this *SpecifiedVolumeController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -114,9 +123,11 @@ func (this *SpecifiedVolumeController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get volume failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -124,6 +135,7 @@ func (this *SpecifiedVolumeController) Get() {
 func (this *SpecifiedVolumeController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -136,6 +148,7 @@ func (this *SpecifiedVolumeController) Delete() {
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
 		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -143,12 +156,14 @@ func (this *SpecifiedVolumeController) Delete() {
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 	volumeRequest.Schema.Id = volId
 
 	result := volumes.DeleteVolume(volumeRequest)
 	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.SetStatus(201)
 	this.Ctx.Output.Body(resBody)
 }
 
@@ -165,6 +180,7 @@ func (this *VolumeAttachmentController) Post() {
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
 		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -172,6 +188,7 @@ func (this *VolumeAttachmentController) Post() {
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 	volumeRequest.Schema.Id = volId
@@ -180,9 +197,11 @@ func (this *VolumeAttachmentController) Post() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Create volume attachment failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(201)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -200,9 +219,11 @@ func (this *VolumeAttachmentController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List volume attachments failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -210,12 +231,14 @@ func (this *VolumeAttachmentController) Get() {
 func (this *VolumeAttachmentController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *VolumeAttachmentController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -226,6 +249,7 @@ type SpecifiedVolumeAttachmentController struct {
 func (this *SpecifiedVolumeAttachmentController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -243,9 +267,11 @@ func (this *SpecifiedVolumeAttachmentController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get volume attachment failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -261,6 +287,7 @@ func (this *SpecifiedVolumeAttachmentController) Put() {
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
 		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -268,6 +295,7 @@ func (this *SpecifiedVolumeAttachmentController) Put() {
 	if err = json.Unmarshal(reqBody, vr); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 	vr.Schema.Id, vr.Schema.AttachmentId = volId, attachmentId
@@ -276,9 +304,11 @@ func (this *SpecifiedVolumeAttachmentController) Put() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Update volume attachment failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -296,6 +326,7 @@ func (this *SpecifiedVolumeAttachmentController) Delete() {
 
 	result := volumes.DeleteVolumeAttachment(vr)
 	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.SetStatus(201)
 	this.Ctx.Output.Body(resBody)
 }
 
@@ -312,6 +343,7 @@ func (this *VolumeSnapshotController) Post() {
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
 		resBody, _ := json.Marshal("Read volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -319,6 +351,7 @@ func (this *VolumeSnapshotController) Post() {
 	if err = json.Unmarshal(reqBody, volumeRequest); err != nil {
 		log.Println("Parse volume request body failed:", err)
 		resBody, _ := json.Marshal("Parse volume request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 	volumeRequest.Schema.Id = volId
@@ -327,9 +360,11 @@ func (this *VolumeSnapshotController) Post() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Create volume attachment failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(201)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -347,9 +382,11 @@ func (this *VolumeSnapshotController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List volume snapshots failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -357,12 +394,14 @@ func (this *VolumeSnapshotController) Get() {
 func (this *VolumeSnapshotController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *VolumeSnapshotController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -373,6 +412,7 @@ type SpecifiedVolumeSnapshotController struct {
 func (this *SpecifiedVolumeSnapshotController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -390,9 +430,11 @@ func (this *SpecifiedVolumeSnapshotController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get volume snapshot failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -410,5 +452,6 @@ func (this *SpecifiedVolumeSnapshotController) Delete() {
 
 	result := volumes.DeleteVolumeSnapshot(vr)
 	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.SetStatus(201)
 	this.Ctx.Output.Body(resBody)
 }

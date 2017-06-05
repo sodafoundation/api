@@ -34,6 +34,7 @@ type DockController struct {
 func (this *DockController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -46,9 +47,11 @@ func (this *DockController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List docks failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -56,12 +59,14 @@ func (this *DockController) Get() {
 func (this *DockController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *DockController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -72,6 +77,7 @@ type SpecifiedDockController struct {
 func (this *SpecifiedDockController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
@@ -86,9 +92,11 @@ func (this *SpecifiedDockController) Get() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get dock failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
 		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
 		this.Ctx.Output.Body(resBody)
 	}
 }
@@ -96,11 +104,13 @@ func (this *SpecifiedDockController) Get() {
 func (this *SpecifiedDockController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *SpecifiedDockController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
 	this.Ctx.Output.Body([]byte("Not supported!"))
 }
