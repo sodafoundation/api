@@ -42,6 +42,8 @@ func init() {
 	rootCommand.AddCommand(shareCommand)
 	rootCommand.AddCommand(volumeCommand)
 	rootCommand.AddCommand(dockCommand)
+	rootCommand.AddCommand(profileCommand)
+	rootCommand.AddCommand(poolCommand)
 }
 
 func main() {

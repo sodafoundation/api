@@ -61,46 +61,40 @@ func (os *orchServer) CreateVolume(ctx context.Context, in *pb.VolumeRequest) (*
 	return orchApi.CreateVolume(in)
 }
 
-// GetVolume implements opensds.OrchestrationServer
-func (os *orchServer) GetVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive get volume request, vr =", in)
-	return orchApi.GetVolume(in)
-}
-
-// ListVolumes implements opensds.OrchestrationServer
-func (os *orchServer) ListVolumes(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive list volumes request, vr =", in)
-	return orchApi.ListVolumes(in)
-}
-
 // DeleteVolume implements opensds.OrchestrationServer
 func (os *orchServer) DeleteVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
 	log.Println("Orchestration server receive delete volume request, vr =", in)
 	return orchApi.DeleteVolume(in)
 }
 
-// AttachVolume implements opensds.OrchestrationServer
-func (os *orchServer) AttachVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive attach volume request, vr =", in)
-	return orchApi.AttachVolume(in)
+// CreateVolumeAttachment implements opensds.OrchestrationServer
+func (os *orchServer) CreateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive create volume attachment request, vr =", in)
+	return orchApi.CreateVolumeAttachment(in)
 }
 
-// DetachVolume implements opensds.OrchestrationServer
-func (os *orchServer) DetachVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive detach volume request, vr =", in)
-	return orchApi.DetachVolume(in)
+// UpdateVolumeAttachment implements opensds.OrchestrationServer
+func (os *orchServer) UpdateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive update volume attachment request, vr =", in)
+	return orchApi.UpdateVolumeAttachment(in)
 }
 
-// MountVolume implements opensds.OrchestrationServer
-func (os *orchServer) MountVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive mount volume request, vr =", in)
-	return orchApi.MountVolume(in)
+// DeleteVolumeAttachment implements opensds.OrchestrationServer
+func (os *orchServer) DeleteVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive delete volume attachment request, vr =", in)
+	return orchApi.DeleteVolumeAttachment(in)
 }
 
-// UnmountVolume implements opensds.OrchestrationServer
-func (os *orchServer) UnmountVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive unmount volume request, vr =", in)
-	return orchApi.UnmountVolume(in)
+// CreateVolumeSnapshot implements opensds.OrchestrationServer
+func (ds *orchServer) CreateVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive create volume snapshot request, vr =", in)
+	return orchApi.CreateVolumeSnapshot(in)
+}
+
+// DeleteVolumeSnapshot implements opensds.OrchestrationServer
+func (ds *orchServer) DeleteVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+	log.Println("Orchestration server receive delete volume snapshot request, vr =", in)
+	return orchApi.DeleteVolumeSnapshot(in)
 }
 
 // CreateShare implements opensds.OrchestrationServer
@@ -139,22 +133,10 @@ func (ds *orchServer) DetachShare(ctx context.Context, in *pb.ShareRequest) (*pb
 	return orchApi.DetachShare(in)
 }
 
-// MountShare implements opensds.OrchestrationServer
-func (ds *orchServer) MountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive mount share request, sr =", in)
-	return orchApi.MountShare(in)
-}
-
-// UnmountShare implements opensds.OrchestrationServer
-func (ds *orchServer) UnmountShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Orchestration server receive unmount share request, sr =", in)
-	return orchApi.UnmountShare(in)
-}
-
 func (os *orchServer) ListenAndServe() {
 	lis, err := net.Listen("tcp", os.Port)
 	if err != nil {
-		log.Fatalf("failed to listen: %+v", err)
+		log.Printf("failed to listen: %+v", err)
 	}
 
 	log.Println("Orchestration server initialized! Start listening on port:", os.Port)

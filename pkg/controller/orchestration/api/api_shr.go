@@ -24,40 +24,68 @@ service module.
 package api
 
 import (
-	_ "log"
+	"encoding/json"
 
-	"github.com/opensds/opensds/pkg/controller/orchestration/grpcapi"
+	"github.com/opensds/opensds/pkg/controller/orchestration/scheduler"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
 func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.CreateShare(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.CreateShare(sr)
 }
 
 func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.GetShare(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.GetShare(sr)
 }
 
 func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.ListShares(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.ListShares(sr)
 }
 
 func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.DeleteShare(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.DeleteShare(sr)
 }
 
 func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.AttachShare(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.AttachShare(sr)
 }
 
 func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.DetachShare(sr), nil
-}
-
-func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.MountShare(sr), nil
-}
-
-func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	return grpcapi.UnmountShare(sr), nil
+	if err := json.Unmarshal([]byte(sr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	ss := &scheduler.ShareScheduler{
+		DesiredProfile: profile,
+	}
+	return ss.DetachShare(sr)
 }

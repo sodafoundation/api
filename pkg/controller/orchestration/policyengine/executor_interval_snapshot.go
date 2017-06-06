@@ -1,0 +1,100 @@
+// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+
+/*
+This module implements the policy-based scheduling by parsing storage
+profiles configured by admin.
+
+*/
+
+package policyengine
+
+import (
+	"encoding/json"
+	"errors"
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
+	api "github.com/opensds/opensds/pkg/api/v1"
+	"github.com/opensds/opensds/pkg/grpc/dock/client"
+	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+)
+
+type IntervalSnapshotExecutor struct {
+	Request  *pb.VolumeRequest
+	Interval string
+	TotalNum int
+}
+
+func (ise *IntervalSnapshotExecutor) Init(in string) error {
+	var volumeResponse api.VolumeResponse
+	if err := json.Unmarshal([]byte(in), &volumeResponse); err != nil {
+		return err
+	}
+
+	ise.Request.VolumeId = volumeResponse.Id
+	ise.Request.SnapshotName = "snapshot-" + volumeResponse.Id
+	return nil
+}
+
+func (ise *IntervalSnapshotExecutor) Asynchronized() error {
+	if ise.TotalNum == 0 {
+		ise.TotalNum = 3
+	}
+	num, err := ParseInterval(ise.Interval)
+	if err != nil {
+		log.Println("[Error] When parse snapshot interval:", err)
+		return err
+	}
+
+	for i := 0; i < ise.TotalNum; i++ {
+		// Sleep interval time
+		for j := 0; j < num; j++ {
+			time.Sleep(time.Second)
+		}
+		if _, err = client.CreateVolumeSnapshot(ise.Request); err != nil {
+			log.Printf("[Error] When %dth create volume snapshot: %v\n", i+1, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func ParseInterval(interval string) (int, error) {
+	var times int
+	unit := strings.ToLower(interval[len(interval)-1 : len(interval)])
+	if unit != "s" && unit != "m" && unit != "h" && unit != "d" {
+		return 0, errors.New("interval unit is not correct")
+	}
+	switch unit {
+	case "s":
+		times = 1
+	case "m":
+		times = 60
+	case "h":
+		times = 60 * 60
+	case "d":
+		times = 60 * 60 * 24
+	default:
+		return 0, errors.New("interval unit is not correct")
+	}
+
+	num, err := strconv.Atoi(interval[0 : len(interval)-1])
+	if err != nil {
+		return 0, err
+	}
+	return num * times, nil
+}

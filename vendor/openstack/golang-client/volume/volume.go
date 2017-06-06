@@ -35,19 +35,27 @@ import (
 type Service interface {
 	InitializeConnection(id string, reqBody *InitializeBody) (*ConnectionInfo, error)
 
-	Create(reqBody *CreateBody) (Response, error)
+	CreateVolume(reqBody *VolumeCreateBody) (Response, error)
 
-	Show(volID string) (DetailResponse, error)
+	ShowVolume(volID string) (DetailResponse, error)
 
-	List() ([]Response, error)
+	ListVolumes() ([]Response, error)
 
-	Detail() ([]DetailResponse, error)
+	DetailVolumes() ([]DetailResponse, error)
 
-	Delete(id string) error
+	DeleteVolume(id string) error
 
-	Attach(id string, reqBody *AttachBody) error
+	AttachVolume(id string, reqBody *VolumeAttachBody) error
 
-	Detach(id string, reqBody *DetachBody) error
+	DetachVolume(id string, reqBody *VolumeDetachBody) error
+
+	CreateSnapshot(reqBody *SnapshotBody) (SnapshotResponse, error)
+
+	ShowSnapshot(volID string) (SnapshotResponse, error)
+
+	ListSnapshots() ([]SnapshotResponse, error)
+
+	DeleteSnapshot(id string) error
 }
 
 type volumeService struct {
@@ -68,7 +76,7 @@ func NewService(
 	}
 }
 
-type RequestBody struct {
+type VolumeRequestBody struct {
 	Name         string `json:"name"`
 	VolumeType   string `json:"volume_type"`
 	Size         int32  `json:"size"`
@@ -77,31 +85,31 @@ type RequestBody struct {
 	AttachmentID string `json:"attachment_id"`
 }
 
-type CreateBody struct {
-	VolumeBody RequestBody `json:"volume"`
+type VolumeCreateBody struct {
+	VolumeRequestBody `json:"volume"`
 }
 
-type AttachBody struct {
-	VolumeBody RequestBody `json:"os-attach"`
+type VolumeAttachBody struct {
+	VolumeRequestBody `json:"os-attach"`
 }
 
-type DetachBody struct {
-	VolumeBody RequestBody `json:"os-detach"`
+type VolumeDetachBody struct {
+	VolumeRequestBody `json:"os-detach"`
 }
 
 // Response is a structure for all properties of
-// an volume for a non detailed query
+// a volume for a non detailed query
 type Response struct {
-	ID          string              `json:"id"`
-	Name        string              `json:"name"`
-	Status      string              `json:"status"`
-	Size        int                 `json:"size"`
-	Volume_type string              `json:"volume_type"`
-	Attachments []map[string]string `json:"attachments"`
+	Id                string `json:"id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	Status            string `json:"status"`
+	Size              int    `json:"size"`
+	Availability_zone string `json:"availability_zone"`
 }
 
 // DetailResponse is a structure for all properties of
-// an volume for a detailed query
+// a volume for a detailed query
 type DetailResponse struct {
 	ID              string               `json:"id"`
 	Attachments     []map[string]string  `json:"attachments"`
@@ -142,11 +150,11 @@ type DetailVolumesResponse struct {
 	DetailVolumes []DetailResponse `json:"volumes"`
 }
 
-func (vs volumeService) Create(reqBody *CreateBody) (Response, error) {
+func (vs volumeService) CreateVolume(reqBody *VolumeCreateBody) (Response, error) {
 	return createVolume(vs, reqBody)
 }
 
-func createVolume(vs volumeService, reqBody *CreateBody) (Response, error) {
+func createVolume(vs volumeService, reqBody *VolumeCreateBody) (Response, error) {
 	nullResponse := Response{}
 
 	reqURL, err := url.Parse(vs.URL)
@@ -160,8 +168,10 @@ func createVolume(vs volumeService, reqBody *CreateBody) (Response, error) {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
+
 	log.Printf("Start POST request to create volume, url = %s, body = %s\n",
 		reqURL.String(), body)
+
 	resp, err := vs.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
 		log.Println("POST response error:", err)
@@ -186,7 +196,7 @@ func createVolume(vs volumeService, reqBody *CreateBody) (Response, error) {
 	return volumeResponse.Volume, nil
 }
 
-func (vs volumeService) Show(id string) (DetailResponse, error) {
+func (vs volumeService) ShowVolume(id string) (DetailResponse, error) {
 	return getVolume(vs, id)
 }
 
@@ -203,7 +213,9 @@ func getVolume(vs volumeService, id string) (DetailResponse, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to get volume, url =", reqURL.String())
+
 	resp, err := vs.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -228,7 +240,7 @@ func getVolume(vs volumeService, id string) (DetailResponse, error) {
 	return detailVolumeResponse.DetailVolume, nil
 }
 
-func (vs volumeService) List() ([]Response, error) {
+func (vs volumeService) ListVolumes() ([]Response, error) {
 	return getAllVolumes(vs)
 }
 
@@ -245,7 +257,9 @@ func getAllVolumes(vs volumeService) ([]Response, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to get all volumes, url =", reqURL.String())
+
 	resp, err := vs.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -270,7 +284,7 @@ func getAllVolumes(vs volumeService) ([]Response, error) {
 	return volumesResponse.Volumes, nil
 }
 
-func (vs volumeService) Detail() ([]DetailResponse, error) {
+func (vs volumeService) DetailVolumes() ([]DetailResponse, error) {
 	return detailAllVolumes(vs)
 }
 
@@ -287,7 +301,9 @@ func detailAllVolumes(vs volumeService) ([]DetailResponse, error) {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start GET request to detail all volumes, url =", reqURL.String())
+
 	resp, err := vs.Session.Get(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("GET response error:", err)
@@ -312,7 +328,7 @@ func detailAllVolumes(vs volumeService) ([]DetailResponse, error) {
 	return detailVolumesResponse.DetailVolumes, nil
 }
 
-func (vs volumeService) Delete(id string) error {
+func (vs volumeService) DeleteVolume(id string) error {
 	return deleteVolume(vs, id)
 }
 
@@ -327,7 +343,9 @@ func deleteVolume(vs volumeService, id string) error {
 
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
+
 	log.Println("Start DELETE request to delete volume, url =", reqURL.String())
+
 	resp, err := vs.Session.Delete(reqURL.String(), nil, &headers)
 	if err != nil {
 		log.Println("DELETE response error:", err)
@@ -342,11 +360,11 @@ func deleteVolume(vs volumeService, id string) error {
 	return nil
 }
 
-func (vs volumeService) Attach(id string, reqBody *AttachBody) error {
+func (vs volumeService) AttachVolume(id string, reqBody *VolumeAttachBody) error {
 	return attachVolume(vs, id, reqBody)
 }
 
-func attachVolume(vs volumeService, id string, reqBody *AttachBody) error {
+func attachVolume(vs volumeService, id string, reqBody *VolumeAttachBody) error {
 	reqURL, err := url.Parse(vs.URL)
 	if err != nil {
 		log.Println("Parse URL error:", err)
@@ -358,8 +376,10 @@ func attachVolume(vs volumeService, id string, reqBody *AttachBody) error {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
+
 	log.Printf("Start POST request to attach volume, url = %s, body = %s\n",
 		reqURL.String(), body)
+
 	resp, err := vs.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
 		log.Println("POST response error:", err)
@@ -374,11 +394,11 @@ func attachVolume(vs volumeService, id string, reqBody *AttachBody) error {
 	return nil
 }
 
-func (vs volumeService) Detach(id string, reqBody *DetachBody) error {
+func (vs volumeService) DetachVolume(id string, reqBody *VolumeDetachBody) error {
 	return detachVolume(vs, id, reqBody)
 }
 
-func detachVolume(vs volumeService, id string, reqBody *DetachBody) error {
+func detachVolume(vs volumeService, id string, reqBody *VolumeDetachBody) error {
 	reqURL, err := url.Parse(vs.URL)
 	if err != nil {
 		log.Println("Parse URL error:", err)
@@ -390,8 +410,10 @@ func detachVolume(vs volumeService, id string, reqBody *DetachBody) error {
 	var headers http.Header = http.Header{}
 	headers.Set("Content-Type", "application/json")
 	body, _ := json.Marshal(reqBody)
+
 	log.Printf("Start POST request to detach volume, url = %s, body = %s\n",
 		reqURL.String(), body)
+
 	resp, err := vs.Session.Post(reqURL.String(), nil, &headers, &body)
 	if err != nil {
 		log.Println("PUT response error:", err)
@@ -428,11 +450,9 @@ type TerminateBody struct {
 	Connector `json:"os-terminateconnection"`
 }
 
-type ConnectionDataContainer interface{}
-
 type ConnectionInfo struct {
-	DriverVolumeType        string `json:"driver_volume_type"`
-	ConnectionDataContainer `json:"data"`
+	DriverVolumeType string                 `json:"driver_volume_type"`
+	ConnectionData   map[string]interface{} `json:"data"`
 }
 
 type ConnectionResponse struct {

@@ -1,0 +1,20 @@
+[
+	{
+		"name": "default",
+		"tags": {}
+	},
+	{
+		"name": "openstack",
+		"tags": {
+			"thinProvision": "true"
+		}
+	},
+	{
+		"name": "ceph",
+		"tags": {
+			"highAvailability": "true",
+			"intervalSnapshot": "10s",
+			"deleteSnapshotPolicy": "true"
+		}
+	}
+]

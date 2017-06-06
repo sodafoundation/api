@@ -37,7 +37,6 @@ import (
 	"log"
 
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	"github.com/opensds/opensds/pkg/grpc/util"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -46,21 +45,34 @@ const (
 	ORCHESTRATION_PORT = ":50041"
 )
 
-func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+func NewOrchestrationClient() (pb.OrchestrationClient, *grpc.ClientConn, error) {
+	// Get Orchestration client host IP.
+	host, err := GetHostIP()
 	if err != nil {
-		return &pb.Response{}, err
+		return nil, nil, err
 	}
 
-	// Set up a connection to the orchestration server.
+	// Generate Orchesration server address.
+	address := host + ORCHESTRATION_PORT
+
+	// Set up a connection to the Orchestration server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Printf("did not connect: %+v\n", err)
+		return nil, nil, err
+	}
+
+	return pb.NewOrchestrationClient(conn), conn, nil
+}
+
+func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
+	if err != nil {
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.CreateVolume(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not create: %+v\n", err)
@@ -72,73 +84,14 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
-	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.GetVolume(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive get volume response, vr =", resp)
-
-	return resp, nil
-}
-
-func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
-	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.ListVolumes(context.Background(), vr)
-	if err != nil {
-		log.Printf("could not list: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive list volumes response, vr =", resp)
-
-	return resp, nil
-}
-
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.DeleteVolume(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not delete: %+v\n", err)
@@ -150,125 +103,109 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.AttachVolume(context.Background(), vr)
+	resp, err := c.CreateVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not attach: %+v\n", err)
+		log.Printf("could not create volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive attach volume response, vr =", resp)
+	log.Println("Orchestration client receive create volume attachment response, vr =", resp)
 
 	return resp, nil
 }
 
-func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.DetachVolume(context.Background(), vr)
+	resp, err := c.UpdateVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not detach: %+v\n", err)
+		log.Printf("could not update volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive detach volume response, vr =", resp)
+	log.Println("Orchestration client receive update volume attachment response, vr =", resp)
 
 	return resp, nil
 }
 
-func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.MountVolume(context.Background(), vr)
+	resp, err := c.DeleteVolumeAttachment(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not mount: %+v\n", err)
+		log.Printf("could not delete volume attachment: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive mount volume response, vr =", resp)
+	log.Println("Orchestration client receive delete volume attachment response, vr =", resp)
 
 	return resp, nil
 }
 
-func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.UnmountVolume(context.Background(), vr)
+	resp, err := c.CreateVolumeSnapshot(context.Background(), vr)
 	if err != nil {
-		log.Printf("could not unmount: %+v\n", err)
+		log.Printf("could not create: %+v\n", err)
 		return &pb.Response{}, err
 	}
 
-	log.Println("Orchestration client receive unmount volume response, vr =", resp)
+	log.Println("Orchestration client receive create volume snapshot response, vr =", resp)
+
+	return resp, nil
+}
+
+func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	c, conn, err := NewOrchestrationClient()
+	if err != nil {
+		log.Printf("get orchestration client failed: %+v\n", err)
+		return &pb.Response{}, err
+	}
+	defer conn.Close()
+
+	resp, err := c.DeleteVolumeSnapshot(context.Background(), vr)
+	if err != nil {
+		log.Printf("could not delete: %+v\n", err)
+		return &pb.Response{}, err
+	}
+
+	log.Println("Orchestration client receive delete volume snapshot response, vr =", resp)
 
 	return resp, nil
 }
 
 func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.CreateShare(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not create: %+v\n", err)
@@ -281,20 +218,13 @@ func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.GetShare(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not get: %+v\n", err)
@@ -307,20 +237,13 @@ func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.ListShares(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not list: %+v\n", err)
@@ -333,20 +256,13 @@ func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.DeleteShare(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not delete: %+v\n", err)
@@ -359,20 +275,13 @@ func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the Orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.AttachShare(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not attach: %+v\n", err)
@@ -385,20 +294,13 @@ func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 }
 
 func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
+	c, conn, err := NewOrchestrationClient()
 	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the Orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Printf("get orchestration client failed: %+v\n", err)
 		return &pb.Response{}, err
 	}
 	defer conn.Close()
 
-	c := pb.NewOrchestrationClient(conn)
 	resp, err := c.DetachShare(context.Background(), sr)
 	if err != nil {
 		log.Printf("could not detach: %+v\n", err)
@@ -408,66 +310,4 @@ func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
 	log.Println("Orchestration client receive detach share response, vr =", resp)
 
 	return resp, nil
-}
-
-func MountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
-	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the Orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.MountShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not mount: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive mount share response, sr =", resp)
-
-	return resp, nil
-}
-
-func UnmountShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	address, err := getDialAddress()
-	if err != nil {
-		return &pb.Response{}, err
-	}
-
-	// Set up a connection to the Orchestration server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	c := pb.NewOrchestrationClient(conn)
-	resp, err := c.UnmountShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not unmount: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Orchestration client receive unmount share response, sr =", resp)
-
-	return resp, nil
-}
-
-func getDialAddress() (string, error) {
-	// Get Orchestration client host IP.
-	host, err := util.GetHostIP()
-	if err != nil {
-		return "", err
-	}
-
-	return host + ORCHESTRATION_PORT, nil
 }

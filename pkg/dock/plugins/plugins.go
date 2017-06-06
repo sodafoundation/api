@@ -30,6 +30,8 @@ import (
 	"net/http"
 	"net/url"
 
+	api "github.com/opensds/opensds/pkg/api/v1"
+	"github.com/opensds/opensds/pkg/dock/plugins/ceph"
 	"github.com/opensds/opensds/pkg/dock/plugins/cinder"
 	"github.com/opensds/opensds/pkg/dock/plugins/coprhd"
 	"github.com/opensds/opensds/pkg/dock/plugins/manila"
@@ -41,17 +43,23 @@ type VolumePlugin interface {
 	//Any operation the volume driver does while stoping.
 	Unset()
 
-	CreateVolume(name string, volType string, size int32) (string, error)
+	CreateVolume(name string, size int32) (*api.VolumeResponse, error)
 
-	GetVolume(volID string) (string, error)
+	GetVolume(volID string) (*api.VolumeResponse, error)
 
-	GetAllVolumes(allowDetails bool) (string, error)
+	DeleteVolume(volID string) error
 
-	DeleteVolume(volID string) (string, error)
+	InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error)
 
-	AttachVolume(volID string) (string, error)
+	AttachVolume(volID, host, mountpoint string) error
 
-	DetachVolume(device string) (string, error)
+	DetachVolume(volID string) error
+
+	CreateSnapshot(name, volID, description string) (*api.VolumeSnapshot, error)
+
+	GetSnapshot(snapID string) (*api.VolumeSnapshot, error)
+
+	DeleteSnapshot(snapID string) error
 }
 
 type SharePlugin interface {
@@ -60,11 +68,11 @@ type SharePlugin interface {
 	//Any operation the file share driver does while stoping.
 	Unset()
 
-	CreateShare(name string, shrType string, shrProto string, size int32) (string, error)
+	CreateShare(name, shrProto string, size int32) (string, error)
 
 	GetShare(shrID string) (string, error)
 
-	GetAllShares(allowDetails bool) (string, error)
+	GetAllShares() (string, error)
 
 	DeleteShare(shrID string) (string, error)
 
@@ -104,7 +112,11 @@ type pluginsConfig struct {
 }
 
 func InitVP(resourceType string) (VolumePlugin, error) {
-	config := readBackendConfigFile()
+	config, err := readBackendConfigFile()
+	if err != nil {
+		log.Printf("Configure backend resource %s failed: %v\n", resourceType, err)
+		return nil, err
+	}
 
 	switch resourceType {
 	case "cinder":
@@ -126,6 +138,8 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 				},
 			},
 		}, nil
+	case "ceph":
+		return &ceph.CephPlugin{}, nil
 	default:
 		err := errors.New("Can't find this resource type in backend storage.")
 		return nil, err
@@ -133,7 +147,11 @@ func InitVP(resourceType string) (VolumePlugin, error) {
 }
 
 func InitSP(resourceType string) (SharePlugin, error) {
-	config := readBackendConfigFile()
+	config, err := readBackendConfigFile()
+	if err != nil {
+		log.Printf("Configure backend resource %s failed: %v\n", resourceType, err)
+		return nil, err
+	}
 
 	switch resourceType {
 	case "manila":
@@ -152,15 +170,17 @@ func InitSP(resourceType string) (SharePlugin, error) {
 }
 
 // readBackendConfigFile provides access to credentials in backend resource plugins.
-func readBackendConfigFile() *pluginsConfig {
-	var config *pluginsConfig
+func readBackendConfigFile() (*pluginsConfig, error) {
+	var config = &pluginsConfig{}
 
 	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
 	if err != nil {
 		log.Println("ReadFile json failed:", err)
+		return nil, err
 	}
 	if err = json.Unmarshal(userJSON, config); err != nil {
 		log.Println("Unmarshal json failed:", err)
+		return nil, err
 	}
-	return config
+	return config, nil
 }

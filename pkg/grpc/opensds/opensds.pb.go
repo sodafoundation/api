@@ -38,16 +38,21 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 // The VolumeRequest message containing all properties of
 // a volume request.
 type VolumeRequest struct {
-	ResourceType string `protobuf:"bytes,1,opt,name=resourceType" json:"resourceType,omitempty"`
-	Id           string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
-	Name         string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	VolumeType   string `protobuf:"bytes,4,opt,name=volumeType" json:"volumeType,omitempty"`
-	Size         int32  `protobuf:"varint,5,opt,name=size" json:"size,omitempty"`
-	AllowDetails bool   `protobuf:"varint,6,opt,name=allowDetails" json:"allowDetails,omitempty"`
-	Device       string `protobuf:"bytes,7,opt,name=device" json:"device,omitempty"`
-	MountDir     string `protobuf:"bytes,8,opt,name=mountDir" json:"mountDir,omitempty"`
-	FsType       string `protobuf:"bytes,9,opt,name=fsType" json:"fsType,omitempty"`
-	DockId       string `protobuf:"bytes,10,opt,name=dockId" json:"dockId,omitempty"`
+	VolumeId            string `protobuf:"bytes,1,opt,name=volumeId" json:"volumeId,omitempty"`
+	VolumeName          string `protobuf:"bytes,2,opt,name=volumeName" json:"volumeName,omitempty"`
+	Size                int32  `protobuf:"varint,3,opt,name=size" json:"size,omitempty"`
+	DockInfo            string `protobuf:"bytes,4,opt,name=dockInfo" json:"dockInfo,omitempty"`
+	PoolId              string `protobuf:"bytes,5,opt,name=poolId" json:"poolId,omitempty"`
+	PoolName            string `protobuf:"bytes,6,opt,name=poolName" json:"poolName,omitempty"`
+	AttachmentId        string `protobuf:"bytes,7,opt,name=attachmentId" json:"attachmentId,omitempty"`
+	DoLocalAttach       bool   `protobuf:"varint,8,opt,name=doLocalAttach" json:"doLocalAttach,omitempty"`
+	MultiPath           bool   `protobuf:"varint,9,opt,name=multiPath" json:"multiPath,omitempty"`
+	HostInfo            string `protobuf:"bytes,10,opt,name=hostInfo" json:"hostInfo,omitempty"`
+	Mountpoint          string `protobuf:"bytes,11,opt,name=mountpoint" json:"mountpoint,omitempty"`
+	SnapshotId          string `protobuf:"bytes,12,opt,name=snapshotId" json:"snapshotId,omitempty"`
+	SnapshotName        string `protobuf:"bytes,13,opt,name=snapshotName" json:"snapshotName,omitempty"`
+	SnapshotDescription string `protobuf:"bytes,14,opt,name=snapshotDescription" json:"snapshotDescription,omitempty"`
+	StorageProfile      string `protobuf:"bytes,15,opt,name=storageProfile" json:"storageProfile,omitempty"`
 }
 
 func (m *VolumeRequest) Reset()                    { *m = VolumeRequest{} }
@@ -55,30 +60,16 @@ func (m *VolumeRequest) String() string            { return proto.CompactTextStr
 func (*VolumeRequest) ProtoMessage()               {}
 func (*VolumeRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *VolumeRequest) GetResourceType() string {
+func (m *VolumeRequest) GetVolumeId() string {
 	if m != nil {
-		return m.ResourceType
+		return m.VolumeId
 	}
 	return ""
 }
 
-func (m *VolumeRequest) GetId() string {
+func (m *VolumeRequest) GetVolumeName() string {
 	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-func (m *VolumeRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *VolumeRequest) GetVolumeType() string {
-	if m != nil {
-		return m.VolumeType
+		return m.VolumeName
 	}
 	return ""
 }
@@ -90,37 +81,86 @@ func (m *VolumeRequest) GetSize() int32 {
 	return 0
 }
 
-func (m *VolumeRequest) GetAllowDetails() bool {
+func (m *VolumeRequest) GetDockInfo() string {
 	if m != nil {
-		return m.AllowDetails
+		return m.DockInfo
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetAttachmentId() string {
+	if m != nil {
+		return m.AttachmentId
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetDoLocalAttach() bool {
+	if m != nil {
+		return m.DoLocalAttach
 	}
 	return false
 }
 
-func (m *VolumeRequest) GetDevice() string {
+func (m *VolumeRequest) GetMultiPath() bool {
 	if m != nil {
-		return m.Device
+		return m.MultiPath
+	}
+	return false
+}
+
+func (m *VolumeRequest) GetHostInfo() string {
+	if m != nil {
+		return m.HostInfo
 	}
 	return ""
 }
 
-func (m *VolumeRequest) GetMountDir() string {
+func (m *VolumeRequest) GetMountpoint() string {
 	if m != nil {
-		return m.MountDir
+		return m.Mountpoint
 	}
 	return ""
 }
 
-func (m *VolumeRequest) GetFsType() string {
+func (m *VolumeRequest) GetSnapshotId() string {
 	if m != nil {
-		return m.FsType
+		return m.SnapshotId
 	}
 	return ""
 }
 
-func (m *VolumeRequest) GetDockId() string {
+func (m *VolumeRequest) GetSnapshotName() string {
 	if m != nil {
-		return m.DockId
+		return m.SnapshotName
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetSnapshotDescription() string {
+	if m != nil {
+		return m.SnapshotDescription
+	}
+	return ""
+}
+
+func (m *VolumeRequest) GetStorageProfile() string {
+	if m != nil {
+		return m.StorageProfile
 	}
 	return ""
 }
@@ -128,17 +168,18 @@ func (m *VolumeRequest) GetDockId() string {
 // The ShareRequest message containing all properties of
 // a share request.
 type ShareRequest struct {
-	ResourceType string `protobuf:"bytes,1,opt,name=resourceType" json:"resourceType,omitempty"`
-	Id           string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
-	Name         string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	Size         int32  `protobuf:"varint,4,opt,name=size" json:"size,omitempty"`
-	ShareType    string `protobuf:"bytes,5,opt,name=shareType" json:"shareType,omitempty"`
-	ShareProto   string `protobuf:"bytes,6,opt,name=shareProto" json:"shareProto,omitempty"`
-	AllowDetails bool   `protobuf:"varint,7,opt,name=allowDetails" json:"allowDetails,omitempty"`
-	Device       string `protobuf:"bytes,8,opt,name=device" json:"device,omitempty"`
-	MountDir     string `protobuf:"bytes,9,opt,name=mountDir" json:"mountDir,omitempty"`
-	FsType       string `protobuf:"bytes,10,opt,name=fsType" json:"fsType,omitempty"`
-	DockId       string `protobuf:"bytes,11,opt,name=dockId" json:"dockId,omitempty"`
+	ResourceType   string `protobuf:"bytes,1,opt,name=resourceType" json:"resourceType,omitempty"`
+	Id             string `protobuf:"bytes,2,opt,name=id" json:"id,omitempty"`
+	Name           string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
+	Size           int32  `protobuf:"varint,4,opt,name=size" json:"size,omitempty"`
+	ShareType      string `protobuf:"bytes,5,opt,name=shareType" json:"shareType,omitempty"`
+	ShareProto     string `protobuf:"bytes,6,opt,name=shareProto" json:"shareProto,omitempty"`
+	AllowDetails   bool   `protobuf:"varint,7,opt,name=allowDetails" json:"allowDetails,omitempty"`
+	Device         string `protobuf:"bytes,8,opt,name=device" json:"device,omitempty"`
+	MountDir       string `protobuf:"bytes,9,opt,name=mountDir" json:"mountDir,omitempty"`
+	FsType         string `protobuf:"bytes,10,opt,name=fsType" json:"fsType,omitempty"`
+	DockId         string `protobuf:"bytes,11,opt,name=dockId" json:"dockId,omitempty"`
+	StorageProfile string `protobuf:"bytes,12,opt,name=storageProfile" json:"storageProfile,omitempty"`
 }
 
 func (m *ShareRequest) Reset()                    { *m = ShareRequest{} }
@@ -223,6 +264,13 @@ func (m *ShareRequest) GetDockId() string {
 	return ""
 }
 
+func (m *ShareRequest) GetStorageProfile() string {
+	if m != nil {
+		return m.StorageProfile
+	}
+	return ""
+}
+
 // The Response message containing all properties of
 // resource response.
 type Response struct {
@@ -269,27 +317,25 @@ var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for Orchestration service
 
 type OrchestrationClient interface {
 	// Create a volume
 	CreateVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Get a volume
-	GetVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// List all volumes
-	ListVolumes(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
 	// Delete a volume
 	DeleteVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Attach a volume
-	AttachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Detach a volume
-	DetachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Mount a volume
-	MountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Unmount a volume
-	UnmountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Create a volume attachment
+	CreateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Update a volume attachment
+	UpdateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Delete a volume attachment
+	DeleteVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Create a volume snapshot
+	CreateVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Delete a volume snapshot
+	DeleteVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
 	// Create a share
 	CreateShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Get a share
@@ -302,10 +348,6 @@ type OrchestrationClient interface {
 	AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Detach a share
 	DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
-	// Mount a share
-	MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
-	// Unmount a share
-	UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type orchestrationClient struct {
@@ -325,24 +367,6 @@ func (c *orchestrationClient) CreateVolume(ctx context.Context, in *VolumeReques
 	return out, nil
 }
 
-func (c *orchestrationClient) GetVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/GetVolume", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orchestrationClient) ListVolumes(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/ListVolumes", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *orchestrationClient) DeleteVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := grpc.Invoke(ctx, "/opensds.Orchestration/DeleteVolume", in, out, c.cc, opts...)
@@ -352,36 +376,45 @@ func (c *orchestrationClient) DeleteVolume(ctx context.Context, in *VolumeReques
 	return out, nil
 }
 
-func (c *orchestrationClient) AttachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *orchestrationClient) CreateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/AttachVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/CreateVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *orchestrationClient) DetachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *orchestrationClient) UpdateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/DetachVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/UpdateVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *orchestrationClient) MountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *orchestrationClient) DeleteVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/MountVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/DeleteVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *orchestrationClient) UnmountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *orchestrationClient) CreateVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/UnmountVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/CreateVolumeSnapshot", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestrationClient) DeleteVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Orchestration/DeleteVolumeSnapshot", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -442,43 +475,23 @@ func (c *orchestrationClient) DetachShare(ctx context.Context, in *ShareRequest,
 	return out, nil
 }
 
-func (c *orchestrationClient) MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/MountShare", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orchestrationClient) UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Orchestration/UnmountShare", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for Orchestration service
 
 type OrchestrationServer interface {
 	// Create a volume
 	CreateVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Get a volume
-	GetVolume(context.Context, *VolumeRequest) (*Response, error)
-	// List all volumes
-	ListVolumes(context.Context, *VolumeRequest) (*Response, error)
 	// Delete a volume
 	DeleteVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Attach a volume
-	AttachVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Detach a volume
-	DetachVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Mount a volume
-	MountVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Unmount a volume
-	UnmountVolume(context.Context, *VolumeRequest) (*Response, error)
+	// Create a volume attachment
+	CreateVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Update a volume attachment
+	UpdateVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Delete a volume attachment
+	DeleteVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Create a volume snapshot
+	CreateVolumeSnapshot(context.Context, *VolumeRequest) (*Response, error)
+	// Delete a volume snapshot
+	DeleteVolumeSnapshot(context.Context, *VolumeRequest) (*Response, error)
 	// Create a share
 	CreateShare(context.Context, *ShareRequest) (*Response, error)
 	// Get a share
@@ -491,10 +504,6 @@ type OrchestrationServer interface {
 	AttachShare(context.Context, *ShareRequest) (*Response, error)
 	// Detach a share
 	DetachShare(context.Context, *ShareRequest) (*Response, error)
-	// Mount a share
-	MountShare(context.Context, *ShareRequest) (*Response, error)
-	// Unmount a share
-	UnmountShare(context.Context, *ShareRequest) (*Response, error)
 }
 
 func RegisterOrchestrationServer(s *grpc.Server, srv OrchestrationServer) {
@@ -519,42 +528,6 @@ func _Orchestration_CreateVolume_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_GetVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VolumeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestrationServer).GetVolume(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Orchestration/GetVolume",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).GetVolume(ctx, req.(*VolumeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Orchestration_ListVolumes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VolumeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestrationServer).ListVolumes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Orchestration/ListVolumes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).ListVolumes(ctx, req.(*VolumeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Orchestration_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
@@ -573,74 +546,92 @@ func _Orchestration_DeleteVolume_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_AttachVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Orchestration_CreateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrchestrationServer).AttachVolume(ctx, in)
+		return srv.(OrchestrationServer).CreateVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Orchestration/AttachVolume",
+		FullMethod: "/opensds.Orchestration/CreateVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).AttachVolume(ctx, req.(*VolumeRequest))
+		return srv.(OrchestrationServer).CreateVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_DetachVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Orchestration_UpdateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrchestrationServer).DetachVolume(ctx, in)
+		return srv.(OrchestrationServer).UpdateVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Orchestration/DetachVolume",
+		FullMethod: "/opensds.Orchestration/UpdateVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).DetachVolume(ctx, req.(*VolumeRequest))
+		return srv.(OrchestrationServer).UpdateVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_MountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Orchestration_DeleteVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrchestrationServer).MountVolume(ctx, in)
+		return srv.(OrchestrationServer).DeleteVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Orchestration/MountVolume",
+		FullMethod: "/opensds.Orchestration/DeleteVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).MountVolume(ctx, req.(*VolumeRequest))
+		return srv.(OrchestrationServer).DeleteVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_UnmountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Orchestration_CreateVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrchestrationServer).UnmountVolume(ctx, in)
+		return srv.(OrchestrationServer).CreateVolumeSnapshot(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Orchestration/UnmountVolume",
+		FullMethod: "/opensds.Orchestration/CreateVolumeSnapshot",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).UnmountVolume(ctx, req.(*VolumeRequest))
+		return srv.(OrchestrationServer).CreateVolumeSnapshot(ctx, req.(*VolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestration_DeleteVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestrationServer).DeleteVolumeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Orchestration/DeleteVolumeSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestrationServer).DeleteVolumeSnapshot(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -753,42 +744,6 @@ func _Orchestration_DetachShare_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orchestration_MountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ShareRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestrationServer).MountShare(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Orchestration/MountShare",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).MountShare(ctx, req.(*ShareRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Orchestration_UnmountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ShareRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestrationServer).UnmountShare(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Orchestration/UnmountShare",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestrationServer).UnmountShare(ctx, req.(*ShareRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Orchestration_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "opensds.Orchestration",
 	HandlerType: (*OrchestrationServer)(nil),
@@ -798,32 +753,28 @@ var _Orchestration_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Orchestration_CreateVolume_Handler,
 		},
 		{
-			MethodName: "GetVolume",
-			Handler:    _Orchestration_GetVolume_Handler,
-		},
-		{
-			MethodName: "ListVolumes",
-			Handler:    _Orchestration_ListVolumes_Handler,
-		},
-		{
 			MethodName: "DeleteVolume",
 			Handler:    _Orchestration_DeleteVolume_Handler,
 		},
 		{
-			MethodName: "AttachVolume",
-			Handler:    _Orchestration_AttachVolume_Handler,
+			MethodName: "CreateVolumeAttachment",
+			Handler:    _Orchestration_CreateVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "DetachVolume",
-			Handler:    _Orchestration_DetachVolume_Handler,
+			MethodName: "UpdateVolumeAttachment",
+			Handler:    _Orchestration_UpdateVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "MountVolume",
-			Handler:    _Orchestration_MountVolume_Handler,
+			MethodName: "DeleteVolumeAttachment",
+			Handler:    _Orchestration_DeleteVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "UnmountVolume",
-			Handler:    _Orchestration_UnmountVolume_Handler,
+			MethodName: "CreateVolumeSnapshot",
+			Handler:    _Orchestration_CreateVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteVolumeSnapshot",
+			Handler:    _Orchestration_DeleteVolumeSnapshot_Handler,
 		},
 		{
 			MethodName: "CreateShare",
@@ -849,14 +800,6 @@ var _Orchestration_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DetachShare",
 			Handler:    _Orchestration_DetachShare_Handler,
 		},
-		{
-			MethodName: "MountShare",
-			Handler:    _Orchestration_MountShare_Handler,
-		},
-		{
-			MethodName: "UnmountShare",
-			Handler:    _Orchestration_UnmountShare_Handler,
-		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "opensds.proto",
@@ -869,18 +812,20 @@ type DockClient interface {
 	CreateVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
 	// Get a volume
 	GetVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// List all volumes
-	ListVolumes(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
 	// Delete a volume
 	DeleteVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Attach a volume
-	AttachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Detach a volume
-	DetachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Mount a volume
-	MountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
-	// Unmount a volume
-	UnmountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Create a volume attachment
+	CreateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Update a volume attachment
+	UpdateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Delete a volume attachment
+	DeleteVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Create a volume snapshot
+	CreateVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Get a volume snapshot
+	GetVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
+	// Delete a volume snapshot
+	DeleteVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error)
 	// Create a share
 	CreateShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Get a share
@@ -893,10 +838,6 @@ type DockClient interface {
 	AttachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 	// Detach a share
 	DetachShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
-	// Mount a share
-	MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
-	// Unmount a share
-	UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type dockClient struct {
@@ -925,15 +866,6 @@ func (c *dockClient) GetVolume(ctx context.Context, in *VolumeRequest, opts ...g
 	return out, nil
 }
 
-func (c *dockClient) ListVolumes(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/ListVolumes", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *dockClient) DeleteVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := grpc.Invoke(ctx, "/opensds.Dock/DeleteVolume", in, out, c.cc, opts...)
@@ -943,36 +875,54 @@ func (c *dockClient) DeleteVolume(ctx context.Context, in *VolumeRequest, opts .
 	return out, nil
 }
 
-func (c *dockClient) AttachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *dockClient) CreateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/AttachVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Dock/CreateVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dockClient) DetachVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *dockClient) UpdateVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/DetachVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Dock/UpdateVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dockClient) MountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *dockClient) DeleteVolumeAttachment(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/MountVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Dock/DeleteVolumeAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dockClient) UnmountVolume(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *dockClient) CreateVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/UnmountVolume", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/opensds.Dock/CreateVolumeSnapshot", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dockClient) GetVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/GetVolumeSnapshot", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dockClient) DeleteVolumeSnapshot(ctx context.Context, in *VolumeRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := grpc.Invoke(ctx, "/opensds.Dock/DeleteVolumeSnapshot", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1033,24 +983,6 @@ func (c *dockClient) DetachShare(ctx context.Context, in *ShareRequest, opts ...
 	return out, nil
 }
 
-func (c *dockClient) MountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/MountShare", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dockClient) UnmountShare(ctx context.Context, in *ShareRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := grpc.Invoke(ctx, "/opensds.Dock/UnmountShare", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for Dock service
 
 type DockServer interface {
@@ -1058,18 +990,20 @@ type DockServer interface {
 	CreateVolume(context.Context, *VolumeRequest) (*Response, error)
 	// Get a volume
 	GetVolume(context.Context, *VolumeRequest) (*Response, error)
-	// List all volumes
-	ListVolumes(context.Context, *VolumeRequest) (*Response, error)
 	// Delete a volume
 	DeleteVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Attach a volume
-	AttachVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Detach a volume
-	DetachVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Mount a volume
-	MountVolume(context.Context, *VolumeRequest) (*Response, error)
-	// Unmount a volume
-	UnmountVolume(context.Context, *VolumeRequest) (*Response, error)
+	// Create a volume attachment
+	CreateVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Update a volume attachment
+	UpdateVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Delete a volume attachment
+	DeleteVolumeAttachment(context.Context, *VolumeRequest) (*Response, error)
+	// Create a volume snapshot
+	CreateVolumeSnapshot(context.Context, *VolumeRequest) (*Response, error)
+	// Get a volume snapshot
+	GetVolumeSnapshot(context.Context, *VolumeRequest) (*Response, error)
+	// Delete a volume snapshot
+	DeleteVolumeSnapshot(context.Context, *VolumeRequest) (*Response, error)
 	// Create a share
 	CreateShare(context.Context, *ShareRequest) (*Response, error)
 	// Get a share
@@ -1082,10 +1016,6 @@ type DockServer interface {
 	AttachShare(context.Context, *ShareRequest) (*Response, error)
 	// Detach a share
 	DetachShare(context.Context, *ShareRequest) (*Response, error)
-	// Mount a share
-	MountShare(context.Context, *ShareRequest) (*Response, error)
-	// Unmount a share
-	UnmountShare(context.Context, *ShareRequest) (*Response, error)
 }
 
 func RegisterDockServer(s *grpc.Server, srv DockServer) {
@@ -1128,24 +1058,6 @@ func _Dock_GetVolume_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_ListVolumes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VolumeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).ListVolumes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Dock/ListVolumes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).ListVolumes(ctx, req.(*VolumeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Dock_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
@@ -1164,74 +1076,110 @@ func _Dock_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_AttachVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Dock_CreateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DockServer).AttachVolume(ctx, in)
+		return srv.(DockServer).CreateVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Dock/AttachVolume",
+		FullMethod: "/opensds.Dock/CreateVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).AttachVolume(ctx, req.(*VolumeRequest))
+		return srv.(DockServer).CreateVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_DetachVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Dock_UpdateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DockServer).DetachVolume(ctx, in)
+		return srv.(DockServer).UpdateVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Dock/DetachVolume",
+		FullMethod: "/opensds.Dock/UpdateVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).DetachVolume(ctx, req.(*VolumeRequest))
+		return srv.(DockServer).UpdateVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_MountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Dock_DeleteVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DockServer).MountVolume(ctx, in)
+		return srv.(DockServer).DeleteVolumeAttachment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Dock/MountVolume",
+		FullMethod: "/opensds.Dock/DeleteVolumeAttachment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).MountVolume(ctx, req.(*VolumeRequest))
+		return srv.(DockServer).DeleteVolumeAttachment(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_UnmountVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Dock_CreateVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VolumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DockServer).UnmountVolume(ctx, in)
+		return srv.(DockServer).CreateVolumeSnapshot(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/opensds.Dock/UnmountVolume",
+		FullMethod: "/opensds.Dock/CreateVolumeSnapshot",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).UnmountVolume(ctx, req.(*VolumeRequest))
+		return srv.(DockServer).CreateVolumeSnapshot(ctx, req.(*VolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_GetVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).GetVolumeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/GetVolumeSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).GetVolumeSnapshot(ctx, req.(*VolumeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_DeleteVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VolumeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).DeleteVolumeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/opensds.Dock/DeleteVolumeSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).DeleteVolumeSnapshot(ctx, req.(*VolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1344,42 +1292,6 @@ func _Dock_DetachShare_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Dock_MountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ShareRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).MountShare(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Dock/MountShare",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).MountShare(ctx, req.(*ShareRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_UnmountShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ShareRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).UnmountShare(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/opensds.Dock/UnmountShare",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).UnmountShare(ctx, req.(*ShareRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Dock_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "opensds.Dock",
 	HandlerType: (*DockServer)(nil),
@@ -1393,28 +1305,32 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Dock_GetVolume_Handler,
 		},
 		{
-			MethodName: "ListVolumes",
-			Handler:    _Dock_ListVolumes_Handler,
-		},
-		{
 			MethodName: "DeleteVolume",
 			Handler:    _Dock_DeleteVolume_Handler,
 		},
 		{
-			MethodName: "AttachVolume",
-			Handler:    _Dock_AttachVolume_Handler,
+			MethodName: "CreateVolumeAttachment",
+			Handler:    _Dock_CreateVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "DetachVolume",
-			Handler:    _Dock_DetachVolume_Handler,
+			MethodName: "UpdateVolumeAttachment",
+			Handler:    _Dock_UpdateVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "MountVolume",
-			Handler:    _Dock_MountVolume_Handler,
+			MethodName: "DeleteVolumeAttachment",
+			Handler:    _Dock_DeleteVolumeAttachment_Handler,
 		},
 		{
-			MethodName: "UnmountVolume",
-			Handler:    _Dock_UnmountVolume_Handler,
+			MethodName: "CreateVolumeSnapshot",
+			Handler:    _Dock_CreateVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "GetVolumeSnapshot",
+			Handler:    _Dock_GetVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteVolumeSnapshot",
+			Handler:    _Dock_DeleteVolumeSnapshot_Handler,
 		},
 		{
 			MethodName: "CreateShare",
@@ -1440,14 +1356,6 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DetachShare",
 			Handler:    _Dock_DetachShare_Handler,
 		},
-		{
-			MethodName: "MountShare",
-			Handler:    _Dock_MountShare_Handler,
-		},
-		{
-			MethodName: "UnmountShare",
-			Handler:    _Dock_UnmountShare_Handler,
-		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "opensds.proto",
@@ -1456,37 +1364,46 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("opensds.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 501 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xec, 0x56, 0xcd, 0x8a, 0x13, 0x41,
-	0x10, 0x76, 0x63, 0x92, 0x99, 0xa9, 0x24, 0x82, 0x8d, 0x2e, 0xcd, 0x22, 0x22, 0x39, 0x79, 0xda,
-	0xc3, 0x0a, 0xb2, 0xae, 0x5e, 0xc4, 0x80, 0x08, 0x8a, 0x32, 0xfe, 0xdc, 0xdb, 0x49, 0x69, 0x06,
-	0x67, 0xa6, 0x63, 0x57, 0xcf, 0x8a, 0xbe, 0x86, 0x2f, 0xe2, 0x13, 0x78, 0xf5, 0xb5, 0xec, 0xae,
-	0xe9, 0x64, 0x13, 0x34, 0xc2, 0x0c, 0x5e, 0x16, 0x72, 0x9b, 0xaf, 0xaa, 0xbf, 0xea, 0xea, 0xef,
-	0xab, 0x0a, 0x81, 0x89, 0x5e, 0x62, 0x45, 0x73, 0x3a, 0x5e, 0x1a, 0x6d, 0xb5, 0x88, 0x02, 0x9c,
-	0x7e, 0xef, 0xc1, 0xe4, 0x9d, 0x2e, 0xea, 0x12, 0x53, 0xfc, 0x5c, 0x23, 0x59, 0x31, 0x85, 0xb1,
-	0x41, 0xd2, 0xb5, 0xc9, 0xf0, 0xcd, 0xd7, 0x25, 0xca, 0x83, 0x3b, 0x07, 0x77, 0x93, 0x74, 0x2b,
-	0x26, 0xae, 0x41, 0x2f, 0x9f, 0xcb, 0x1e, 0x67, 0xdc, 0x97, 0x10, 0xd0, 0xaf, 0x54, 0x89, 0xf2,
-	0x2a, 0x47, 0xf8, 0x5b, 0xdc, 0x06, 0x38, 0xe7, 0xc2, 0x5c, 0xa5, 0xcf, 0x99, 0x8d, 0x88, 0xe7,
-	0x50, 0xfe, 0x0d, 0xe5, 0xc0, 0x65, 0x06, 0x29, 0x7f, 0xfb, 0xbb, 0x55, 0x51, 0xe8, 0x2f, 0x33,
-	0xb4, 0x2a, 0x2f, 0x48, 0x0e, 0x5d, 0x2e, 0x4e, 0xb7, 0x62, 0xe2, 0x10, 0x86, 0x73, 0x3c, 0xcf,
-	0x33, 0x94, 0x11, 0xd7, 0x0c, 0x48, 0x1c, 0x41, 0x5c, 0xea, 0xba, 0xb2, 0xb3, 0xdc, 0xc8, 0x98,
-	0x33, 0x6b, 0xec, 0x39, 0x1f, 0x88, 0xfb, 0x48, 0x1a, 0x4e, 0x83, 0xb8, 0x96, 0xce, 0x3e, 0x3d,
-	0x9b, 0x4b, 0x08, 0xb5, 0x18, 0x4d, 0x7f, 0xf4, 0x60, 0xfc, 0x7a, 0xa1, 0xcc, 0x7f, 0x17, 0x65,
-	0xf5, 0xe8, 0xfe, 0xc6, 0xa3, 0x6f, 0x41, 0x42, 0xfe, 0x2e, 0x2e, 0x3c, 0xe0, 0xc3, 0x17, 0x01,
-	0x2f, 0x23, 0x83, 0x57, 0xde, 0x37, 0x16, 0xc4, 0xc9, 0x78, 0x11, 0xf9, 0x43, 0xb2, 0xe8, 0x9f,
-	0x92, 0xc5, 0x3b, 0x25, 0x4b, 0x76, 0x4a, 0x06, 0x3b, 0x24, 0x1b, 0x6d, 0x49, 0x96, 0x42, 0x9c,
-	0x22, 0x2d, 0x75, 0x45, 0x7c, 0x86, 0xac, 0xb2, 0x35, 0x05, 0x9d, 0x02, 0x12, 0x12, 0xa2, 0x12,
-	0x89, 0xd4, 0x47, 0x0c, 0x32, 0xad, 0xa0, 0xb8, 0x01, 0x03, 0x34, 0x46, 0x9b, 0x20, 0x56, 0x03,
-	0x4e, 0x7e, 0x45, 0x30, 0x79, 0x69, 0xb2, 0x85, 0x73, 0xc0, 0x28, 0x9b, 0xeb, 0x4a, 0x3c, 0x84,
-	0xf1, 0x13, 0x83, 0xca, 0x62, 0x33, 0xb3, 0xe2, 0xf0, 0x78, 0x35, 0xd7, 0x5b, 0x43, 0x7c, 0x74,
-	0x7d, 0x1d, 0x5f, 0x35, 0x35, 0xbd, 0x22, 0x4e, 0x21, 0x79, 0x8a, 0xb6, 0x0b, 0xf3, 0x0c, 0x46,
-	0xcf, 0x73, 0x0a, 0x54, 0x6a, 0xc7, 0x75, 0x2d, 0xcf, 0xb0, 0xc0, 0x6e, 0x2d, 0x3b, 0xf2, 0x63,
-	0x6b, 0x55, 0xb6, 0xe8, 0x48, 0xf6, 0x13, 0xd0, 0x8d, 0xec, 0x9e, 0xfc, 0xc2, 0xcf, 0x42, 0x17,
-	0xee, 0x23, 0x98, 0xbc, 0xad, 0xca, 0xae, 0xec, 0x07, 0x30, 0x6a, 0x3c, 0xe6, 0x0d, 0x14, 0x37,
-	0xd7, 0x67, 0x36, 0x37, 0xf2, 0xef, 0xd4, 0xfb, 0x10, 0x3b, 0x87, 0xdb, 0xf3, 0x4e, 0x01, 0xbc,
-	0xbf, 0x7c, 0x90, 0x5a, 0x31, 0x5d, 0xb3, 0x8d, 0xbb, 0xed, 0x2f, 0x75, 0xd4, 0xc6, 0xdb, 0x4e,
-	0xd4, 0xc6, 0xd9, 0x4e, 0x4f, 0x65, 0x5f, 0xdb, 0x33, 0xcf, 0x60, 0x1c, 0x5c, 0x6d, 0xcd, 0x3d,
-	0xf9, 0x19, 0x41, 0x7f, 0xe6, 0x7e, 0x28, 0xf6, 0x0b, 0xbc, 0x5f, 0xe0, 0xfd, 0x02, 0x5f, 0xbe,
-	0x05, 0x7e, 0x3f, 0xe4, 0xff, 0x8d, 0xf7, 0x7e, 0x07, 0x00, 0x00, 0xff, 0xff, 0xb2, 0x69, 0xf8,
-	0x12, 0x48, 0x0a, 0x00, 0x00,
+	// 643 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xec, 0x56, 0xd1, 0x6a, 0xd4, 0x40,
+	0x14, 0xb5, 0xed, 0x76, 0x37, 0x7b, 0xbb, 0x5b, 0xe9, 0x58, 0x4b, 0x28, 0x22, 0xb2, 0x88, 0xf8,
+	0x54, 0xa4, 0x82, 0x54, 0x7c, 0xb1, 0x74, 0x45, 0x0a, 0x45, 0x4b, 0xaa, 0xbe, 0x8f, 0xc9, 0xad,
+	0x09, 0x26, 0x99, 0x38, 0x33, 0xa9, 0xe8, 0x9f, 0xf9, 0x03, 0x7e, 0x83, 0xbf, 0xe1, 0x1f, 0x38,
+	0x73, 0x67, 0x92, 0xcd, 0xca, 0xbe, 0xec, 0xea, 0x83, 0x48, 0xdf, 0xe6, 0x9c, 0x99, 0x73, 0xe7,
+	0xce, 0x3d, 0x39, 0x10, 0x18, 0x8b, 0x0a, 0x4b, 0x95, 0xa8, 0x83, 0x4a, 0x0a, 0x2d, 0xd8, 0xc0,
+	0xc3, 0xc9, 0xcf, 0x0d, 0x18, 0xbf, 0x13, 0x79, 0x5d, 0x60, 0x84, 0x9f, 0x6a, 0x54, 0x9a, 0xed,
+	0x43, 0x70, 0x45, 0xc4, 0x69, 0x12, 0xae, 0xdd, 0x5b, 0x7b, 0x38, 0x8c, 0x5a, 0xcc, 0xee, 0x02,
+	0xb8, 0xf5, 0x2b, 0x5e, 0x60, 0xb8, 0x4e, 0xbb, 0x1d, 0x86, 0x31, 0xe8, 0xa9, 0xec, 0x2b, 0x86,
+	0x1b, 0x66, 0x67, 0x33, 0xa2, 0xb5, 0xad, 0x97, 0x88, 0xf8, 0xe3, 0x69, 0x79, 0x29, 0xc2, 0x9e,
+	0xab, 0xd7, 0x60, 0xb6, 0x07, 0xfd, 0x4a, 0x88, 0xdc, 0xdc, 0xb4, 0x49, 0x3b, 0x1e, 0x59, 0x8d,
+	0x5d, 0xd1, 0x2d, 0x7d, 0xa7, 0x69, 0x30, 0x9b, 0xc0, 0x88, 0x6b, 0xcd, 0xe3, 0xb4, 0xc0, 0x52,
+	0x1b, 0xe5, 0x80, 0xf6, 0xe7, 0x38, 0x76, 0x1f, 0xc6, 0x89, 0x38, 0x13, 0x31, 0xcf, 0x8f, 0x89,
+	0x0e, 0x03, 0x73, 0x28, 0x88, 0xe6, 0x49, 0x76, 0x07, 0x86, 0x45, 0x9d, 0xeb, 0xec, 0x9c, 0xeb,
+	0x34, 0x1c, 0xd2, 0x89, 0x19, 0x61, 0x7b, 0x48, 0x85, 0xd2, 0xd4, 0x37, 0xb8, 0x1e, 0x1a, 0x6c,
+	0xe7, 0x50, 0x88, 0xba, 0xd4, 0x95, 0xc8, 0x4a, 0x1d, 0x6e, 0xb9, 0x39, 0xcc, 0x18, 0xbb, 0xaf,
+	0x4a, 0x5e, 0xa9, 0x54, 0xd8, 0x0e, 0x47, 0x6e, 0x7f, 0xc6, 0xd8, 0x37, 0x34, 0x88, 0xde, 0x38,
+	0x76, 0x6f, 0xe8, 0x72, 0xec, 0x11, 0xdc, 0x6a, 0xf0, 0x14, 0x55, 0x2c, 0xb3, 0x4a, 0x67, 0xa2,
+	0x0c, 0xb7, 0xe9, 0xe8, 0xa2, 0x2d, 0xf6, 0x00, 0xb6, 0x95, 0x16, 0x92, 0x7f, 0xc0, 0x73, 0x29,
+	0x2e, 0xb3, 0x1c, 0xc3, 0x9b, 0x74, 0xf8, 0x37, 0x76, 0xf2, 0x63, 0x1d, 0x46, 0x17, 0x29, 0x97,
+	0xad, 0xe5, 0xa6, 0x1d, 0x89, 0x4a, 0xd4, 0x32, 0xc6, 0x37, 0x5f, 0x2a, 0xf4, 0xb6, 0xcf, 0x71,
+	0x6c, 0x1b, 0xd6, 0xb3, 0xc4, 0x5b, 0x6e, 0x56, 0xd6, 0xea, 0xd2, 0xb6, 0xbe, 0x41, 0x0c, 0xad,
+	0x5b, 0xfb, 0x7b, 0x1d, 0xfb, 0xcd, 0x90, 0x95, 0xbd, 0x8b, 0x0a, 0x3b, 0x97, 0x67, 0x04, 0x0d,
+	0xca, 0x82, 0x73, 0xfb, 0x55, 0x7a, 0xab, 0x3b, 0x0c, 0x99, 0x9d, 0xe7, 0xe2, 0xf3, 0x14, 0x35,
+	0xcf, 0x72, 0x45, 0x66, 0x07, 0xd1, 0x1c, 0x67, 0x3f, 0xa2, 0x04, 0xaf, 0xb2, 0x18, 0xc9, 0x65,
+	0xf3, 0x11, 0x39, 0x64, 0x0d, 0x24, 0x4b, 0xa6, 0x99, 0x24, 0x77, 0x8d, 0x81, 0x0d, 0xb6, 0x9a,
+	0x4b, 0x45, 0x2d, 0x39, 0x6b, 0x3d, 0xa2, 0x5a, 0xf6, 0xe3, 0x4c, 0xbc, 0xa9, 0x1e, 0x2d, 0x18,
+	0xed, 0x68, 0xe1, 0x68, 0x23, 0x08, 0x22, 0x54, 0x95, 0x28, 0x15, 0xd5, 0x52, 0x9a, 0xeb, 0x5a,
+	0xf9, 0x79, 0x7a, 0xc4, 0x42, 0x18, 0x14, 0xa8, 0x94, 0x51, 0xf9, 0x71, 0x36, 0x90, 0xed, 0xc2,
+	0x26, 0x4a, 0x29, 0xa4, 0x1f, 0xaa, 0x03, 0x87, 0xdf, 0xfb, 0x30, 0x7e, 0x2d, 0xe3, 0xd4, 0x38,
+	0x25, 0x39, 0x19, 0xfd, 0x0c, 0x46, 0x27, 0x12, 0xb9, 0x46, 0x97, 0x5c, 0xb6, 0x77, 0xd0, 0xa4,
+	0x7b, 0x2e, 0xca, 0xfb, 0x3b, 0x2d, 0xdf, 0x34, 0x35, 0xb9, 0x61, 0xc5, 0x53, 0xcc, 0x71, 0x35,
+	0xf1, 0x0b, 0xd8, 0xeb, 0xde, 0x7c, 0xdc, 0x86, 0x6e, 0xe9, 0x32, 0x6f, 0xab, 0xe4, 0x6f, 0x94,
+	0xe9, 0x3e, 0x65, 0xd5, 0x32, 0x27, 0xb0, 0xdb, 0x7d, 0xd4, 0x85, 0x8f, 0xd6, 0xd2, 0x45, 0xba,
+	0xbd, 0xac, 0x56, 0xe4, 0x29, 0x6c, 0xb9, 0x4e, 0x28, 0x9e, 0xec, 0x76, 0x7b, 0xa6, 0x1b, 0xd7,
+	0xc5, 0xd2, 0x27, 0x10, 0xbc, 0x44, 0xbd, 0xbc, 0xee, 0x08, 0xe0, 0x2c, 0x53, 0x4e, 0xa8, 0x96,
+	0x52, 0x9a, 0x66, 0xdd, 0x8b, 0x97, 0xbf, 0xd4, 0x48, 0x9d, 0x59, 0x2b, 0x49, 0x6d, 0xf0, 0x57,
+	0x90, 0x1e, 0x7e, 0x1b, 0x40, 0x6f, 0x6a, 0xf2, 0xfc, 0x67, 0xf9, 0x39, 0x82, 0xa1, 0x19, 0xf4,
+	0x75, 0xf2, 0xfe, 0x99, 0xe4, 0x3d, 0x87, 0x9d, 0xd6, 0x90, 0xeb, 0xec, 0xfe, 0x9f, 0xd9, 0x7d,
+	0xdf, 0xa7, 0xff, 0xd6, 0xc7, 0xbf, 0x02, 0x00, 0x00, 0xff, 0xff, 0xc9, 0xc4, 0x0b, 0x2e, 0xc8,
+	0x0a, 0x00, 0x00,
 }

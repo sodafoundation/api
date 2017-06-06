@@ -24,40 +24,81 @@ service module.
 package api
 
 import (
-	_ "log"
+	"encoding/json"
 
-	"github.com/opensds/opensds/pkg/controller/orchestration/grpcapi"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	"github.com/opensds/opensds/pkg/controller/orchestration"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
+var profile = &api.StorageProfile{}
+
 func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.CreateVolume(vr), nil
-}
-
-func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.GetVolume(vr), nil
-}
-
-func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.ListVolumes(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.CreateVolume(vr)
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.DeleteVolume(vr), nil
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.DeleteVolume(vr)
 }
 
-func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.AttachVolume(vr), nil
+func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.CreateVolumeAttachment(vr)
 }
 
-func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.DetachVolume(vr), nil
+func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.UpdateVolumeAttachment(vr)
 }
 
-func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.MountVolume(vr), nil
+func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.DeleteVolumeAttachment(vr)
 }
 
-func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	return grpcapi.UnmountVolume(vr), nil
+func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.CreateVolumeSnapshot(vr)
+}
+
+func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	if err := json.Unmarshal([]byte(vr.GetStorageProfile()), profile); err != nil {
+		return &pb.Response{}, err
+	}
+	vo := &orchestration.VolumeOrchestrator{
+		DesiredProfile: profile,
+	}
+	return vo.DeleteVolumeSnapshot(vr)
 }

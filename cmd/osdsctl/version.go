@@ -25,7 +25,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/opensds/opensds/pkg/controller/api"
+	"github.com/opensds/opensds/pkg/api"
+	versions "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -68,14 +69,14 @@ func versionListAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	versions, err := api.ListVersions()
+	result, err := versions.ListVersions()
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		if reflect.DeepEqual(versions, fakeVersions) {
+		if reflect.DeepEqual(result, fakeVersions) {
 			fmt.Println("List versions failed!")
 		} else {
-			rbody, _ := json.MarshalIndent(versions, "", "  ")
+			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
 		}
 	}
@@ -90,14 +91,14 @@ func versionShowAction(cmd *cobra.Command, args []string) {
 
 	switch args[0] {
 	case "v1":
-		version, err := api.GetVersionv1()
+		result, err := versions.GetVersionv1()
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			if reflect.DeepEqual(version, fakeVersion) {
+			if reflect.DeepEqual(result, fakeVersion) {
 				fmt.Println("Get version failed!")
 			} else {
-				rbody, _ := json.MarshalIndent(version, "", "  ")
+				rbody, _ := json.MarshalIndent(result, "", "  ")
 				fmt.Printf("%s\n", string(rbody))
 			}
 		}

@@ -74,7 +74,7 @@ type CreateBody struct {
 }
 
 // Response is a structure for all properties of
-// an share for a non detailed query
+// a share for a non detailed query
 type Response struct {
 	ID    string              `json:"id"`
 	Name  string              `json:"name"`
@@ -82,7 +82,7 @@ type Response struct {
 }
 
 // DetailResponse is a structure for all properties of
-// an share for a detailed query
+// a share for a detailed query
 type DetailResponse struct {
 	Links                       []map[string]string  `json:"links"`
 	Availability_zone           string               `json:"availability_zone"`

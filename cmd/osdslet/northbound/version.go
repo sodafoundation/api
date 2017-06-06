@@ -22,34 +22,26 @@ package northbound
 import (
 	"encoding/json"
 	"log"
-	"reflect"
 
-	"github.com/opensds/opensds/pkg/controller/api"
+	versions "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/astaxie/beego/context"
 )
-
-var fakeVersion api.VersionInfo
-var fakeVersions api.AvailableVersions
 
 func GetAllVersions(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
-	versions, err := api.ListVersions()
+	result, err := versions.ListVersions()
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("List versions failed!")
+		ctx.Output.SetStatus(400)
 		ctx.Output.Body(rbody)
 	} else {
-		if reflect.DeepEqual(versions, fakeVersions) {
-			log.Println("List versions failed!")
-			rbody, _ := json.Marshal("List versions failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(versions)
-			ctx.Output.Body(rbody)
-		}
+		rbody, _ := json.Marshal(result)
+		ctx.Output.SetStatus(200)
+		ctx.Output.Body(rbody)
 	}
 }
 
@@ -57,19 +49,15 @@ func GetVersionv1(ctx *context.Context) {
 	ctx.Output.Header("Content-Type", "application/json")
 	ctx.Output.ContentType("application/json")
 
-	version, err := api.GetVersionv1()
+	result, err := versions.GetVersionv1()
 	if err != nil {
 		log.Println(err)
 		rbody, _ := json.Marshal("Get version v1 failed!")
+		ctx.Output.SetStatus(400)
 		ctx.Output.Body(rbody)
 	} else {
-		if reflect.DeepEqual(version, fakeVersion) {
-			log.Println("Get version v1 failed!")
-			rbody, _ := json.Marshal("Get version v1 failed!")
-			ctx.Output.Body(rbody)
-		} else {
-			rbody, _ := json.Marshal(version)
-			ctx.Output.Body(rbody)
-		}
+		rbody, _ := json.Marshal(result)
+		ctx.Output.SetStatus(200)
+		ctx.Output.Body(rbody)
 	}
 }

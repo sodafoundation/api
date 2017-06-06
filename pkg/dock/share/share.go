@@ -36,11 +36,11 @@ type ShareDriver interface {
 	//Any operation the volume driver does while stoping.
 	Unset()
 
-	CreateShare(name string, shrType string, shrProto string, size int32) (string, error)
+	CreateShare(name, shrProto string, size int32) (string, error)
 
 	GetShare(shrID string) (string, error)
 
-	GetAllShares(allowDetails bool) (string, error)
+	GetAllShares() (string, error)
 
 	DeleteShare(shrID string) (string, error)
 
@@ -49,7 +49,7 @@ type ShareDriver interface {
 	DetachShare(device string) (string, error)
 }
 
-func CreateShare(resourceType, name, shrType, shrProto string, size int32) (string, error) {
+func CreateShare(resourceType, name, shrProto string, size int32) (string, error) {
 	//Get the storage plugins and do some initializations.
 	plugins, err := storagePlugins.InitSP(resourceType)
 	if err != nil {
@@ -59,7 +59,7 @@ func CreateShare(resourceType, name, shrType, shrProto string, size int32) (stri
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var shareDriver ShareDriver = plugins
-	result, err := shareDriver.CreateShare(name, shrType, shrProto, size)
+	result, err := shareDriver.CreateShare(name, shrProto, size)
 	if err != nil {
 		log.Println("Call plugin to create volume failed:", err)
 		return "", err
@@ -87,7 +87,7 @@ func GetShare(resourceType, shrID string) (string, error) {
 	}
 }
 
-func GetAllShares(resourceType string, allowDetails bool) (string, error) {
+func GetAllShares(resourceType string) (string, error) {
 	//Get the storage plugins and do some initializations.
 	plugins, err := storagePlugins.InitSP(resourceType)
 	if err != nil {
@@ -97,7 +97,7 @@ func GetAllShares(resourceType string, allowDetails bool) (string, error) {
 
 	//Call function of StoragePlugins configured by storage plugins.
 	var shareDriver ShareDriver = plugins
-	result, err := shareDriver.GetAllShares(allowDetails)
+	result, err := shareDriver.GetAllShares()
 	if err != nil {
 		log.Println("Call plugin to get all volumes failed:", err)
 		return "", err

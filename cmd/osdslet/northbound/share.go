@@ -23,19 +23,13 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"reflect"
 
-	"github.com/opensds/opensds/pkg/controller/api"
-	"github.com/opensds/opensds/pkg/controller/api/v1/shares"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	shares "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 )
-
-var falseShareResponse api.ShareResponse
-var falseShareDetailResponse api.ShareDetailResponse
-var falseAllSharesResponse []api.ShareResponse
-var falseAllSharesDetailResponse []api.ShareDetailResponse
 
 type ShareController struct {
 	beego.Controller
@@ -45,20 +39,19 @@ func (this *ShareController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	resourceType := this.Ctx.Input.Param(":resource")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read share request body failed:", err)
 		resBody, _ := json.Marshal("Read share request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
-	shareRequest := &shares.ShareRequest{
-		ResourceType: resourceType,
-	}
+	shareRequest := &shares.ShareRequest{}
 	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
 		log.Println("Parse share request body failed:", err)
 		resBody, _ := json.Marshal("Parse share request body failed!")
+		this.Ctx.Output.SetStatus(500)
 		this.Ctx.Output.Body(resBody)
 	}
 
@@ -66,16 +59,12 @@ func (this *ShareController) Post() {
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Create share failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseShareResponse) {
-			log.Println("Create share failed!")
-			resBody, _ := json.Marshal("Create share failed!")
-			this.Ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(201)
+		this.Ctx.Output.Body(resBody)
 	}
 }
 
@@ -83,88 +72,113 @@ func (this *ShareController) Get() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	resourceType := this.Ctx.Input.Param(":resource")
+	resourceType := this.GetString("resource")
 
 	shareRequest := &shares.ShareRequest{
-		ResourceType: resourceType,
-		AllowDetails: false,
+		Profile: &api.StorageProfile{
+			BackendDriver: resourceType,
+		},
 	}
 	result, err := shares.ListShares(shareRequest)
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("List shares failed!")
+		this.Ctx.Output.SetStatus(400)
 		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			log.Println("List shares failed!")
-			resBody, _ := json.Marshal("List shares failed!")
-			this.Ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			this.Ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
+		this.Ctx.Output.Body(resBody)
 	}
 }
 
 func (this *ShareController) Put() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-	resBody, _ := json.Marshal("Not supported!")
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.SetStatus(501)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
 func (this *ShareController) Delete() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
-
-	resourceType := this.Ctx.Input.Param(":resource")
-	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
-	if err != nil {
-		log.Println("Read share request body failed:", err)
-		resBody, _ := json.Marshal("Read share request body failed!")
-		this.Ctx.Output.Body(resBody)
-	}
-
-	shareRequest := &shares.ShareRequest{
-		ResourceType: resourceType,
-	}
-	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
-		log.Println("Parse share request body failed:", err)
-		resBody, _ := json.Marshal("Parse share request body failed!")
-		this.Ctx.Output.Body(resBody)
-	}
-
-	result := shares.DeleteShare(shareRequest)
-	resBody, _ := json.Marshal(result)
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.SetStatus(501)
+	this.Ctx.Output.Body([]byte("Not supported!"))
 }
 
-func GetShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
+type SpecifiedShareController struct {
+	beego.Controller
+}
 
-	resourceType := ctx.Input.Param(":resource")
-	volId := ctx.Input.Param(":id")
+func (this *SpecifiedShareController) Post() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
+	this.Ctx.Output.Body([]byte("Not supported!"))
+}
+
+func (this *SpecifiedShareController) Get() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	shrId := this.Ctx.Input.Param(":id")
+	resourceType := this.GetString("resource")
 
 	shareRequest := &shares.ShareRequest{
-		ResourceType: resourceType,
-		Id:           volId,
+		Schema: &api.ShareOperationSchema{
+			Id: shrId,
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: resourceType,
+		},
 	}
+
 	result, err := shares.GetShare(shareRequest)
 	if err != nil {
 		log.Println(err)
 		resBody, _ := json.Marshal("Get share failed!")
-		ctx.Output.Body(resBody)
+		this.Ctx.Output.SetStatus(400)
+		this.Ctx.Output.Body(resBody)
 	} else {
-		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			log.Println("Get share failed!")
-			resBody, _ := json.Marshal("Get share failed!")
-			ctx.Output.Body(resBody)
-		} else {
-			resBody, _ := json.Marshal(result)
-			ctx.Output.Body(resBody)
-		}
+		resBody, _ := json.Marshal(result)
+		this.Ctx.Output.SetStatus(200)
+		this.Ctx.Output.Body(resBody)
 	}
+}
+
+func (this *SpecifiedShareController) Put() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+	this.Ctx.Output.SetStatus(501)
+	this.Ctx.Output.Body([]byte("Not supported!"))
+}
+
+func (this *SpecifiedShareController) Delete() {
+	this.Ctx.Output.Header("Content-Type", "application/json")
+	this.Ctx.Output.ContentType("application/json")
+
+	shrId := this.Ctx.Input.Param(":id")
+	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
+	if err != nil {
+		log.Println("Read share request body failed:", err)
+		resBody, _ := json.Marshal("Read share request body failed!")
+		this.Ctx.Output.SetStatus(500)
+		this.Ctx.Output.Body(resBody)
+	}
+
+	shareRequest := &shares.ShareRequest{}
+	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
+		log.Println("Parse share request body failed:", err)
+		resBody, _ := json.Marshal("Parse share request body failed!")
+		this.Ctx.Output.SetStatus(500)
+		this.Ctx.Output.Body(resBody)
+	}
+	shareRequest.Schema.Id = shrId
+
+	result := shares.DeleteShare(shareRequest)
+	resBody, _ := json.Marshal(result)
+	this.Ctx.Output.SetStatus(201)
+	this.Ctx.Output.Body(resBody)
 }
 
 func AttachShare(ctx *context.Context) {
@@ -175,6 +189,7 @@ func AttachShare(ctx *context.Context) {
 	if err != nil {
 		log.Println("Read share request body failed:", err)
 		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.SetStatus(500)
 		ctx.Output.Body(resBody)
 	}
 
@@ -182,11 +197,13 @@ func AttachShare(ctx *context.Context) {
 	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
 		log.Println("Parse share request body failed:", err)
 		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.SetStatus(500)
 		ctx.Output.Body(resBody)
 	}
 
 	result := shares.AttachShare(shareRequest)
 	resBody, _ := json.Marshal(result)
+	ctx.Output.SetStatus(201)
 	ctx.Output.Body(resBody)
 }
 
@@ -198,6 +215,7 @@ func DetachShare(ctx *context.Context) {
 	if err != nil {
 		log.Println("Read share request body failed:", err)
 		resBody, _ := json.Marshal("Read share request body failed!")
+		ctx.Output.SetStatus(500)
 		ctx.Output.Body(resBody)
 	}
 
@@ -205,56 +223,12 @@ func DetachShare(ctx *context.Context) {
 	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
 		log.Println("Parse share request body failed:", err)
 		resBody, _ := json.Marshal("Parse share request body failed!")
+		ctx.Output.SetStatus(500)
 		ctx.Output.Body(resBody)
 	}
 
 	result := shares.DetachShare(shareRequest)
 	resBody, _ := json.Marshal(result)
-	ctx.Output.Body(resBody)
-}
-
-func MountShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		log.Println("Read share request body failed:", err)
-		resBody, _ := json.Marshal("Read share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	shareRequest := &shares.ShareRequest{}
-	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
-		log.Println("Parse share request body failed:", err)
-		resBody, _ := json.Marshal("Parse share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	result := shares.MountShare(shareRequest)
-	resBody, _ := json.Marshal(result)
-	ctx.Output.Body(resBody)
-}
-
-func UnmountShare(ctx *context.Context) {
-	ctx.Output.Header("Content-Type", "application/json")
-	ctx.Output.ContentType("application/json")
-
-	reqBody, err := ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		log.Println("Read share request body failed:", err)
-		resBody, _ := json.Marshal("Read share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	shareRequest := &shares.ShareRequest{}
-	if err = json.Unmarshal(reqBody, shareRequest); err != nil {
-		log.Println("Parse share request body failed:", err)
-		resBody, _ := json.Marshal("Parse share request body failed!")
-		ctx.Output.Body(resBody)
-	}
-
-	result := shares.UnmountShare(shareRequest)
-	resBody, _ := json.Marshal(result)
+	ctx.Output.SetStatus(201)
 	ctx.Output.Body(resBody)
 }

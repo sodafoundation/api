@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/opensds/opensds/pkg/controller/api"
-	"github.com/opensds/opensds/pkg/controller/api/v1/shares"
+	api "github.com/opensds/opensds/pkg/api/v1"
+	shares "github.com/opensds/opensds/pkg/apiserver"
 
 	"github.com/spf13/cobra"
 )
@@ -74,43 +74,22 @@ var shareDetachCommand = &cobra.Command{
 	Run:   shareDetachAction,
 }
 
-var shareMountCommand = &cobra.Command{
-	Use:   "mount <file system> <mount device> <target mount dir>",
-	Short: "mount a share in the specified backend of OpenSDS cluster",
-	Run:   shareMountAction,
-}
-
-var shareUnmountCommand = &cobra.Command{
-	Use:   "unmount <mount dir>",
-	Short: "unmount a share in the specified backend of OpenSDS cluster",
-	Run:   shareUnmountAction,
-}
-
-var falseShareResponse api.ShareResponse
-var falseShareDetailResponse api.ShareDetailResponse
-var falseAllSharesResponse []api.ShareResponse
-var falseAllSharesDetailResponse []api.ShareDetailResponse
-
 var (
-	shrResourceType string
-	shrName         string
-	shrType         string
-	shrAllowDetails bool
+	falseShareResponse       api.ShareResponse
+	falseShareDetailResponse api.ShareDetailResponse
+	shrBackendDriver         string
+	shrName                  string
 )
 
 func init() {
-	shareCommand.PersistentFlags().StringVarP(&shrResourceType, "backend", "b", "manila", "backend resource type")
+	shareCommand.PersistentFlags().StringVarP(&shrBackendDriver, "backend", "b", "manila", "backend resource type")
 	shareCommand.AddCommand(shareCreateCommand)
 	shareCommand.AddCommand(shareShowCommand)
 	shareCommand.AddCommand(shareListCommand)
 	shareCommand.AddCommand(shareDeleteCommand)
 	shareCommand.AddCommand(shareAttachCommand)
 	shareCommand.AddCommand(shareDetachCommand)
-	shareCommand.AddCommand(shareMountCommand)
-	shareCommand.AddCommand(shareUnmountCommand)
 	shareCreateCommand.Flags().StringVarP(&shrName, "name", "n", "null", "the name of created share")
-	shareCreateCommand.Flags().StringVarP(&shrType, "type", "t", "", "the type of created share")
-	shareListCommand.Flags().BoolVarP(&shrAllowDetails, "detail", "d", false, "list shares in details")
 }
 
 func shareAction(cmd *cobra.Command, args []string) {
@@ -132,11 +111,14 @@ func shareCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Name:         shrName,
-		ShareType:    shrType,
-		ShareProto:   shrProto,
-		Size:         int32(size),
+		Schema: &api.ShareOperationSchema{
+			Name:       shrName,
+			ShareProto: shrProto,
+			Size:       int32(size),
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.CreateShare(shareRequest)
 	if err != nil {
@@ -158,15 +140,19 @@ func shareShowAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.GetShare(shareRequest)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		if reflect.DeepEqual(result, falseShareDetailResponse) {
-			fmt.Println("Show share failed!")
+			fmt.Printf("The share id %s not exists!\n", args[0])
 		} else {
 			rbody, _ := json.MarshalIndent(result, "", "  ")
 			fmt.Printf("%s\n", string(rbody))
@@ -182,20 +168,16 @@ func shareListAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		AllowDetails: shrAllowDetails,
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 	result, err := shares.ListShares(shareRequest)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		if reflect.DeepEqual(result, falseAllSharesResponse) {
-			fmt.Println("List shares failed!")
-		} else {
-			rbody, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Printf("%s\n", string(rbody))
-		}
 	}
+	rbody, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Printf("%s\n", string(rbody))
 }
 
 func shareDeleteAction(cmd *cobra.Command, args []string) {
@@ -205,8 +187,12 @@ func shareDeleteAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.DeleteShare(shareRequest)
@@ -222,8 +208,12 @@ func shareAttachAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := &shares.ShareRequest{
-		ResourceType: shrResourceType,
-		Id:           args[0],
+		Schema: &api.ShareOperationSchema{
+			Id: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.AttachShare(shareRequest)
@@ -239,47 +229,15 @@ func shareDetachAction(cmd *cobra.Command, args []string) {
 	}
 
 	shareRequest := shares.ShareRequest{
-		ResourceType: volResourceType,
-		Device:       args[0],
+		Schema: &api.ShareOperationSchema{
+			Device: args[0],
+		},
+		Profile: &api.StorageProfile{
+			BackendDriver: shrBackendDriver,
+		},
 	}
 
 	result := shares.DetachShare(shareRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func shareMountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 3 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		FsType:       args[0],
-		Device:       args[1],
-		MountDir:     args[2],
-	}
-
-	result := shares.MountShare(shareRequest)
-	rbody, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("%s\n", string(rbody))
-}
-
-func shareUnmountAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
-	shareRequest := shares.ShareRequest{
-		ResourceType: shrResourceType,
-		MountDir:     args[0],
-	}
-
-	result := shares.UnmountShare(shareRequest)
 	rbody, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Printf("%s\n", string(rbody))
 }

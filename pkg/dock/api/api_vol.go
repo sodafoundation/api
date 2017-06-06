@@ -20,162 +20,233 @@ This module implements the entry into operations of storageDock module.
 package api
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
+	"strings"
 
+	api "github.com/opensds/opensds/pkg/api/v1"
+	db "github.com/opensds/opensds/pkg/db/api"
 	dock "github.com/opensds/opensds/pkg/dock/volume"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 )
 
 func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.CreateVolume(vr.GetResourceType(),
-		vr.GetName(),
-		vr.GetVolumeType(),
-		vr.GetSize())
-	if err != nil {
-		log.Println("Error occured in dock module when create volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	vol, err := dock.CreateVolume(dck.DriverName, vr.GetVolumeName(), vr.GetSize())
+	if err != nil {
+		log.Println("[Error] When create volume in dock module:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+	vol.PoolName = vr.GetPoolName()
+
+	result, err := db.CreateVolume(vol)
+	if err != nil {
+		log.Println("[Error] When create volume in db module:", err)
+		return &pb.Response{}, err
+	}
+
+	volBody, _ := json.Marshal(result)
+	return &pb.Response{
+		Status:  "Success",
+		Message: string(volBody),
+	}, nil
 }
 
 func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.GetVolume(vr.GetResourceType(), vr.GetId())
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+
+	result, err := dock.GetVolume(dck.DriverName, vr.GetVolumeId())
 	if err != nil {
-		log.Println("Error occured in dock module when get volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		log.Println("[Error] When get volume in dock module:", err)
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
+	volBody, _ := json.Marshal(result)
+	return &pb.Response{
 		Status:  "Success",
-		Message: result,
-	}
-	return resp, nil
-}
-
-func ListVolumes(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.GetAllVolumes(vr.GetResourceType(),
-		vr.GetAllowDetails())
-	if err != nil {
-		log.Println("Error occured in dock module when list volumes:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
-	}
-
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
-	}
-	return resp, nil
+		Message: string(volBody),
+	}, nil
 }
 
 func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.DeleteVolume(vr.GetResourceType(),
-		vr.GetId())
-	if err != nil {
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+
+	if err := dock.DeleteVolume(dck.DriverName, vr.GetVolumeId()); err != nil {
 		log.Println("Error occured in dock module when delete volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	if err := db.DeleteVolume(vr.GetVolumeId()); err != nil {
+		log.Println("Error occured in dock module when delete volume in db:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Delete volume success",
+	}, nil
 }
 
-func AttachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.AttachVolume(vr.GetResourceType(),
-		vr.GetId())
-	if err != nil {
-		log.Println("Error occured in dock module when attach volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck, hostInfo = &api.Dock{}, &api.HostInfo{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+	if err := json.Unmarshal([]byte(vr.GetHostInfo()), hostInfo); err != nil {
+		log.Println("Error occured in dock module when parsing host info:", err)
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	atc, err := dock.CreateVolumeAttachment(dck.DriverName, vr.GetVolumeId(), vr.GetDoLocalAttach(), vr.GetMultiPath(), hostInfo)
+	if err != nil {
+		log.Println("Error occured in dock module when create volume attachment:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+
+	result, err := db.CreateVolumeAttachment(vr.GetVolumeId(), atc)
+	if err != nil {
+		log.Println("Error occured in dock module when create volume attachment in db:", err)
+		return &pb.Response{}, err
+	}
+
+	atcBody, _ := json.Marshal(result)
+	return &pb.Response{
+		Status:  "Success",
+		Message: string(atcBody),
+	}, nil
 }
 
-func DetachVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.DetachVolume(vr.GetResourceType(),
-		vr.GetDevice())
-	if err != nil {
-		log.Println("Error occured in dock module when detach volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck, hostInfo = &api.Dock{}, &api.HostInfo{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+	if err := json.Unmarshal([]byte(vr.GetHostInfo()), hostInfo); err != nil {
+		log.Println("Error occured in dock module when parsing host info:", err)
+		return &pb.Response{}, err
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	if err := dock.UpdateVolumeAttachment(dck.DriverName, vr.GetVolumeId(), hostInfo.Host, vr.GetMountpoint()); err != nil {
+		log.Println("Error occured in dock module when update volume attachment:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+
+	result, err := db.UpdateVolumeAttachment(vr.GetVolumeId(), vr.GetAttachmentId(), vr.GetMountpoint(), hostInfo)
+	if err != nil {
+		log.Println("Error occured in dock module when update volume attachment in db:", err)
+		return &pb.Response{}, err
+	}
+
+	atcBody, _ := json.Marshal(result)
+	return &pb.Response{
+		Status:  "Success",
+		Message: string(atcBody),
+	}, nil
 }
 
-func MountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.MountVolume(vr.GetMountDir(),
-		vr.GetDevice(),
-		vr.GetFsType())
-	if err != nil {
-		log.Println("Error occured in dock module when mount volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	if err := dock.DeleteVolumeAttachment(dck.DriverName, vr.GetVolumeId()); err != nil {
+		log.Println("Error occured in dock module when delete volume attachment:", err)
+		if strings.Contains(err.Error(), "The status of volume is not in-use") {
+			if err = db.DeleteVolumeAttachment(vr.GetVolumeId(), vr.GetAttachmentId()); err != nil {
+				log.Println("Error occured in dock module when delete volume attachment in db:", err)
+				return &pb.Response{}, err
+			}
+		}
+		return &pb.Response{}, nil
 	}
-	return resp, nil
+
+	if err := db.DeleteVolumeAttachment(vr.GetVolumeId(), vr.GetAttachmentId()); err != nil {
+		log.Println("Error occured in dock module when delete volume attachment in db:", err)
+		return &pb.Response{}, err
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Delete volume attachment success",
+	}, nil
 }
 
-func UnmountVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
-	result, err := dock.UnmountVolume(vr.GetMountDir())
-	if err != nil {
-		log.Println("Error occured in dock module when unmount volume:", err)
-		resp := &pb.Response{
-			Status: "Failure",
-			Error:  fmt.Sprintf("%v", err),
-		}
-		return resp, nil
+func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	resp := &pb.Response{
-		Status:  "Success",
-		Message: result,
+	snp, err := dock.CreateSnapshot(dck.DriverName,
+		vr.GetSnapshotName(),
+		vr.GetVolumeId(),
+		vr.GetSnapshotDescription())
+	if err != nil {
+		log.Println("Error occured in dock module when create snapshot:", err)
+		return &pb.Response{}, err
 	}
-	return resp, nil
+
+	result, err := db.CreateVolumeSnapshot(snp)
+	if err != nil {
+		log.Println("Error occured in dock module when create volume snapshot in db:", err)
+		return &pb.Response{}, err
+	}
+
+	snpBody, _ := json.Marshal(result)
+	return &pb.Response{
+		Status:  "Success",
+		Message: string(snpBody),
+	}, nil
+}
+
+func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+
+	result, err := dock.GetSnapshot(dck.DriverName, vr.GetSnapshotId())
+	if err != nil {
+		log.Println("Error occured in dock module when get snapshot:", err)
+		return &pb.Response{}, err
+	}
+
+	snpBody, _ := json.Marshal(result)
+	return &pb.Response{
+		Status:  "Success",
+		Message: string(snpBody),
+	}, nil
+}
+
+func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+	var dck = &api.Dock{}
+	if err := json.Unmarshal([]byte(vr.GetDockInfo()), dck); err != nil {
+		log.Println("[Error] When parsing dock info:", err)
+	}
+
+	if err := dock.DeleteSnapshot(dck.DriverName, vr.GetSnapshotId()); err != nil {
+		log.Println("Error occured in dock module when delete snapshot:", err)
+		return &pb.Response{}, err
+	}
+
+	if err := db.DeleteVolumeSnapshot(vr.GetSnapshotId()); err != nil {
+		log.Println("Error occured in dock module when delete volume snapshot in db:", err)
+		return &pb.Response{}, err
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Delete snapshot success",
+	}, nil
 }
