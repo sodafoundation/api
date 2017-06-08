@@ -175,7 +175,7 @@ func (this *VolumeAttachmentController) Post() {
 	this.Ctx.Output.Header("Content-Type", "application/json")
 	this.Ctx.Output.ContentType("application/json")
 
-	volId := this.Ctx.Input.Param(":id")
+	volId := this.Ctx.Input.Param(":volId")
 	reqBody, err := ioutil.ReadAll(this.Ctx.Request.Body)
 	if err != nil {
 		log.Println("Read volume request body failed:", err)
