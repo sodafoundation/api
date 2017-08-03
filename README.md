@@ -14,45 +14,51 @@ will also seek to collaborate with other upstream open source communities
 such as Cloud Native Computing Foundation, Docker, OpenStack, and Open
 Container Initiative. 
 
-### Community
+It is a software defined storage controller that provides 
+unified block, file, object storage services and focuses on:
 
-The OpenSDS Project is currently running as a technical community which
-focus on developing a working PoC code and working on a formal charter
-targeted the mid of 2017.
+* *Simple*: well-defined API that follows the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification.
+* *Lightweight*: no external dependencies, deployed once in binary file or container.
+* *Extensible*: pluggable framework available for different storage systems, identity services, capability filters, etc.
+
+## Community
 
 The OpenSDS community welcomes anyone who is interested in software defined
 storage and shaping the future of cloud-era storage. If you are a company,
 you should consider joining the [OpenSDS Project](https://opensds.io/). 
-If you are a developer want to be part of the PoC development that is happening
-now, please refer to the Contribute sections below.
+If you are a developer want to be part of the code development that is happening
+now, please refer to the Contributing sections below.
 
-The current opensds team that is developing the PoC prototype comes from Huawei,Intel,
-EMC and Wetern Digital.
-
-### Collaborative Testing
+## Collaborative Testing
 
 * [CNCF Cluster](https://github.com/cncf/cluster/issues/30)
 * OpenStack OISC (submitted)
 
-### Contact
+## Contact
 
-- Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
-- slack: #[opensds](https://opensds.slack.com)
-- Planning/Roadmap: [milestones](https://github.com/opensds/opensds/milestones), [roadmap](./ROADMAP.md)
-- Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
+* Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
+* slack: #[opensds](https://opensds.slack.com)
+* Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
 
-### Contribute
+## OpenSDS Controller Work Group
+See [COMMUNITY](COMMUNITY.md) for details on discussion of the OpenSDS architecture design and feature development.
+
+## Contributing
 
 If you're interested in being a contributor and want to get involved in the
-OpenSDS PoC code developing, please see [CONTRIBUTING](CONTRIBUTING.md) for 
+opensds code developing, please see [CONTRIBUTING](CONTRIBUTING.md) for 
 details on submitting patches and the contribution workflow.
 
-### Hacking
+## Hacking
 
 Please refer to [HACKING](HACKING.md) for any requirements when you want to perform code
 development for opensds.
 
-### Installation
+## Installation
 
 Please refer to [INSTALL](INSTALL.md) for any requirements when you want to perform code
 development for opensds.
+
+## License
+
+Opensds is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
