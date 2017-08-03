@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds)](https://goreportcard.com/report/github.com/opensds/opensds)
 [![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
 
-<img src="https://www.opensds.io/wp-content/uploads/2016/11/logo_opensds.png" width="100">
+<img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
 ## Introduction
 
