@@ -1,16 +1,13 @@
 [
 	{
-		"name": "cinder",
-		"endpoint": "",
-		"availabilityZone": "nova",
-		"driverName": "cinder",
-		"storageType": "block"
-	},
-	{
+		"id": "076454a8-65da-11e7-9a65-5f5d9b935b9f",
 		"name": "ceph",
-		"endpoint": "",
-		"availabilityZone": "ceph",
+		"description": "ceph backend service",
+		"endpoint": "127.0.0.1",
 		"driverName": "ceph",
-		"storageType": "block"
+		"parameters": {
+			"thinProvision": "false",
+			"highAvailability": "true"
+		}
 	}
 ]

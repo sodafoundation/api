@@ -21,138 +21,93 @@ defined in api module.
 package db
 
 import (
-	"log"
-	"time"
+	"fmt"
 
-	"golang.org/x/net/context"
-
-	"github.com/coreos/etcd/clientv3"
+	"github.com/opensds/opensds/pkg/db/drivers/etcd"
+	_ "github.com/opensds/opensds/pkg/db/drivers/mysql"
+	api "github.com/opensds/opensds/pkg/model"
 )
 
-var (
-	TIME_OUT = 3 * time.Second
-)
+var C Client
 
-type DbRequest struct {
-	Url        string `json:"url"`
-	Content    string `json:"content"`
-	NewContent string `json:"newContent"`
+type DBConfig struct {
+	DriverName string
+	Endpoints  []string
+	Credential string
 }
 
-type DbResponse struct {
-	Status  string   `json:"status"`
-	Message []string `json:"message"`
-	Error   string   `json:"error"`
-}
-
-type DbClient struct {
-	Client *clientv3.Client `json:"client"`
-}
-
-func (dbCli *DbClient) Create(dReq *DbRequest) *DbResponse {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
-	defer cancel()
-
-	_, err := dbCli.Client.Put(ctx, dReq.Url, dReq.Content)
-	if err != nil {
-		log.Println("[Error] When create db request:", err)
-		return &DbResponse{
-			Status: "Failure",
-			Error:  err.Error(),
-		}
-	}
-
-	return &DbResponse{
-		Status:  "Success",
-		Message: []string{dReq.Content},
+func Init(conf *DBConfig) {
+	switch conf.DriverName {
+	case "mysql":
+		// C = mysql.Init(conf.DriverName, conf.Crendential)
+		fmt.Errorf("mysql is not implemented right now!")
+	case "etcd":
+		C = etcd.Init(conf.Endpoints)
+	default:
+		fmt.Errorf("Can't find database driver %s!\n", conf.DriverName)
 	}
 }
 
-func (dbCli *DbClient) Get(dReq *DbRequest) *DbResponse {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
-	defer cancel()
+type Client interface {
+	CreateDock(dck *api.DockSpec) (*api.DockSpec, error)
 
-	resp, err := dbCli.Client.Get(ctx, dReq.Url)
-	if err != nil {
-		log.Println("[Error] When get db request:", err)
-		return &DbResponse{
-			Status: "Failure",
-			Error:  err.Error(),
-		}
-	}
+	GetDock(dckID string) (*api.DockSpec, error)
 
-	if len(resp.Kvs) == 0 {
-		return &DbResponse{
-			Status: "Failure",
-			Error:  "Wrong volume_id or attachment_id provided!",
-		}
-	}
-	return &DbResponse{
-		Status:  "Success",
-		Message: []string{string(resp.Kvs[0].Value)},
-	}
-}
+	ListDocks() (*[]api.DockSpec, error)
 
-func (dbCli *DbClient) List(dReq *DbRequest) *DbResponse {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
-	defer cancel()
+	UpdateDock(dckID, name, desp string) (*api.DockSpec, error)
 
-	resp, err := dbCli.Client.Get(ctx, dReq.Url, clientv3.WithPrefix())
-	if err != nil {
-		log.Println("[Error] When get db request:", err)
-		return &DbResponse{
-			Status: "Failure",
-			Error:  err.Error(),
-		}
-	}
+	DeleteDock(dckID string) error
 
-	var message = []string{}
-	for _, v := range resp.Kvs {
-		message = append(message, string(v.Value))
-	}
-	return &DbResponse{
-		Status:  "Success",
-		Message: message,
-	}
-}
+	CreatePool(pol *api.StoragePoolSpec) (*api.StoragePoolSpec, error)
 
-func (dbCli *DbClient) Update(dReq *DbRequest) *DbResponse {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
-	defer cancel()
+	GetPool(polID string) (*api.StoragePoolSpec, error)
 
-	_, err := dbCli.Client.Put(ctx, dReq.Url, dReq.NewContent)
-	if err != nil {
-		log.Println("[Error] When update db request:", err)
-		return &DbResponse{
-			Status: "Failure",
-			Error:  err.Error(),
-		}
-	}
+	ListPools() (*[]api.StoragePoolSpec, error)
 
-	return &DbResponse{
-		Status:  "Success",
-		Message: []string{dReq.NewContent},
-	}
-}
+	UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*api.StoragePoolSpec, error)
 
-func (dbCli *DbClient) Delete(dReq *DbRequest) *DbResponse {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
-	defer cancel()
+	DeletePool(polID string) error
 
-	_, err := dbCli.Client.Delete(ctx, dReq.Url)
-	if err != nil {
-		log.Println("[Error] When delete db request:", err)
-		return &DbResponse{
-			Status: "Failure",
-			Error:  err.Error(),
-		}
-	}
+	CreateProfile(prf *api.ProfileSpec) (*api.ProfileSpec, error)
 
-	return &DbResponse{
-		Status: "Success",
-	}
-}
+	GetProfile(prfID string) (*api.ProfileSpec, error)
 
-func (dbCli *DbClient) Destory() {
-	dbCli.Client.Close()
+	ListProfiles() (*[]api.ProfileSpec, error)
+
+	UpdateProfile(prfID string, input *api.ProfileSpec) (*api.ProfileSpec, error)
+
+	DeleteProfile(prfID string) error
+
+	AddExtraProperty(prfID string, ext api.ExtraSpec) (*api.ExtraSpec, error)
+
+	ListExtraProperties(prfID string) (*api.ExtraSpec, error)
+
+	RemoveExtraProperty(prfID, extraKey string) error
+
+	CreateVolume(vol *api.VolumeSpec) (*api.VolumeSpec, error)
+
+	GetVolume(volID string) (*api.VolumeSpec, error)
+
+	ListVolumes() (*[]api.VolumeSpec, error)
+
+	DeleteVolume(volID string) error
+
+	CreateVolumeAttachment(volID string, atc *api.VolumeAttachmentSpec) (*api.VolumeAttachmentSpec, error)
+
+	GetVolumeAttachment(volID, attachmentID string) (*api.VolumeAttachmentSpec, error)
+
+	ListVolumeAttachments(volID string) (*[]api.VolumeAttachmentSpec, error)
+
+	UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error)
+
+	DeleteVolumeAttachment(volID, attachmentID string) error
+
+	CreateVolumeSnapshot(vs *api.VolumeSnapshotSpec) (*api.VolumeSnapshotSpec, error)
+
+	GetVolumeSnapshot(snapshotID string) (*api.VolumeSnapshotSpec, error)
+
+	ListVolumeSnapshots() (*[]api.VolumeSnapshotSpec, error)
+
+	DeleteVolumeSnapshot(snapshotID string) error
 }

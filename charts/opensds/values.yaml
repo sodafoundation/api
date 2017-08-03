@@ -1,0 +1,27 @@
+# Default values for opensds.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository1: leonwanghui/opensds-controller
+  repository2: leonwanghui/opensds-dock
+  tag: v1alpha
+  pullPolicy: IfNotPresent
+restartPolicy: Never
+service:
+  name1: opensds-api
+  name2: opensds-db
+  type: NodePort
+  externalPort1: 50040
+  internalPort1: 50040
+  externalPort2: 50050
+  internalPort2: 50050
+  externalPort3: 2379
+  internalPort3: 2379
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

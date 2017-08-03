@@ -37,8 +37,8 @@ import (
 	"encoding/json"
 	"log"
 
-	api "github.com/opensds/opensds/pkg/api/v1"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	api "github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -49,7 +49,7 @@ const (
 
 func NewDockClient(dockInfo string) (pb.DockClient, *grpc.ClientConn, error) {
 	// Get Dock endpoint from dock info.
-	var dck = &api.Dock{}
+	var dck = &api.DockSpec{}
 	if err := json.Unmarshal([]byte(dockInfo), dck); err != nil {
 		log.Println("[Error] When parsing dock info:", err)
 	}
@@ -67,18 +67,18 @@ func NewDockClient(dockInfo string) (pb.DockClient, *grpc.ClientConn, error) {
 	return pb.NewDockClient(conn), conn, nil
 }
 
-func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func CreateVolume(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.CreateVolume(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not create: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive create volume response, vr =", resp)
@@ -86,18 +86,18 @@ func CreateVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func GetVolume(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.GetVolume(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive get volume response, vr =", resp)
@@ -105,18 +105,18 @@ func GetVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
+func DeleteVolume(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.DeleteVolume(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not delete: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive delete volume response, vr =", resp)
@@ -124,18 +124,18 @@ func DeleteVolume(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+func CreateVolumeAttachment(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.CreateVolumeAttachment(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not create volume attachment: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive create volume attachment response, vr =", resp)
@@ -143,18 +143,18 @@ func CreateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+func UpdateVolumeAttachment(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.UpdateVolumeAttachment(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not update volume attachment: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive update volume attachment response, vr =", resp)
@@ -162,18 +162,18 @@ func UpdateVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
+func DeleteVolumeAttachment(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.DeleteVolumeAttachment(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not delete volume attachment: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive delete volume attachment response, vr =", resp)
@@ -181,18 +181,18 @@ func DeleteVolumeAttachment(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+func CreateVolumeSnapshot(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.CreateVolumeSnapshot(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not create: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive create volume snapshot response, vr =", resp)
@@ -200,18 +200,18 @@ func CreateVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+func GetVolumeSnapshot(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.GetVolumeSnapshot(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive get volume snapshot response, vr =", resp)
@@ -219,135 +219,21 @@ func GetVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
 	return resp, nil
 }
 
-func DeleteVolumeSnapshot(vr *pb.VolumeRequest) (*pb.Response, error) {
+func DeleteVolumeSnapshot(vr *pb.DockRequest) (*pb.DockResponse, error) {
 	c, conn, err := NewDockClient(vr.GetDockInfo())
 	if err != nil {
 		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 	defer conn.Close()
 
 	resp, err := c.DeleteVolumeSnapshot(context.Background(), vr)
 	if err != nil {
 		log.Printf("could not delete: %+v\n", err)
-		return &pb.Response{}, err
+		return &pb.DockResponse{}, err
 	}
 
 	log.Println("Dock client receive delete volume snapshot response, vr =", resp)
-
-	return resp, nil
-}
-
-func CreateShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.CreateShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not create: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive create share response, sr =", resp)
-
-	return resp, nil
-}
-
-func GetShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.GetShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not get: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive get share response, sr =", resp)
-
-	return resp, nil
-}
-
-func ListShares(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.ListShares(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not list: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive list shares response, sr =", resp)
-
-	return resp, nil
-}
-
-func DeleteShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.DeleteShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not delete: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive delete share response, sr =", resp)
-
-	return resp, nil
-}
-
-func AttachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.AttachShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not attach: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive attach share response, sr =", resp)
-
-	return resp, nil
-}
-
-func DetachShare(sr *pb.ShareRequest) (*pb.Response, error) {
-	c, conn, err := NewDockClient("")
-	if err != nil {
-		log.Printf("get dock client failed: %+v\n", err)
-		return &pb.Response{}, err
-	}
-	defer conn.Close()
-
-	resp, err := c.DetachShare(context.Background(), sr)
-	if err != nil {
-		log.Printf("could not detach: %+v\n", err)
-		return &pb.Response{}, err
-	}
-
-	log.Println("Dock client receive detach share response, vr =", resp)
 
 	return resp, nil
 }

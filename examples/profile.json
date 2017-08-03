@@ -1,17 +1,15 @@
 [
 	{
+		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 		"name": "default",
-		"tags": {}
+		"description": "default policy",
+		"extra": {}
 	},
 	{
-		"name": "openstack",
-		"tags": {
-			"thinProvision": "true"
-		}
-	},
-	{
+		"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 		"name": "ceph",
-		"tags": {
+		"description": "ceph policy",
+		"extra": {
 			"highAvailability": "true",
 			"intervalSnapshot": "10s",
 			"deleteSnapshotPolicy": "true"

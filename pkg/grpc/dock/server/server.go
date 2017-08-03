@@ -56,93 +56,57 @@ func NewDockServer(port string) *dockServer {
 }
 
 // CreateVolume implements opensds.DockServer
-func (ds *dockServer) CreateVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) CreateVolume(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive create volume request, vr =", in)
 	return dockApi.CreateVolume(in)
 }
 
 // GetVolume implements opensds.DockServer
-func (ds *dockServer) GetVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) GetVolume(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive get volume request, vr =", in)
 	return dockApi.GetVolume(in)
 }
 
 // DeleteVolume implements opensds.DockServer
-func (ds *dockServer) DeleteVolume(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) DeleteVolume(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive delete volume request, vr =", in)
 	return dockApi.DeleteVolume(in)
 }
 
 // CreateVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive create volume attachment request, vr =", in)
 	return dockApi.CreateVolumeAttachment(in)
 }
 
 // UpdateVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) UpdateVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) UpdateVolumeAttachment(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive update volume attachment request, vr =", in)
 	return dockApi.UpdateVolumeAttachment(in)
 }
 
 // DeleteVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive delete volume attachment request, vr =", in)
 	return dockApi.DeleteVolumeAttachment(in)
 }
 
 // CreateVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive create volume snapshot request, vr =", in)
 	return dockApi.CreateVolumeSnapshot(in)
 }
 
 // GetVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) GetVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) GetVolumeSnapshot(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive get volume snapshot request, vr =", in)
 	return dockApi.GetVolumeSnapshot(in)
 }
 
 // DeleteVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, in *pb.VolumeRequest) (*pb.Response, error) {
+func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, in *pb.DockRequest) (*pb.DockResponse, error) {
 	log.Println("Dock server receive delete volume snapshot request, vr =", in)
 	return dockApi.DeleteVolumeSnapshot(in)
-}
-
-// CreateShare implements opensds.DockServer
-func (ds *dockServer) CreateShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive create share request, sr =", in)
-	return dockApi.CreateShare(in)
-}
-
-// GetShare implements opensds.DockServer
-func (ds *dockServer) GetShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive get share request, sr =", in)
-	return dockApi.GetShare(in)
-}
-
-// ListShares implements opensds.DockServer
-func (ds *dockServer) ListShares(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive list shares request, sr =", in)
-	return dockApi.ListShares(in)
-}
-
-// DeleteShare implements opensds.DockServer
-func (ds *dockServer) DeleteShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive delete share request, sr =", in)
-	return dockApi.DeleteShare(in)
-}
-
-// AttachShare implements opensds.DockServer
-func (ds *dockServer) AttachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive attach share request, sr =", in)
-	return dockApi.AttachShare(in)
-}
-
-// DetachShare implements opensds.DockServer
-func (ds *dockServer) DetachShare(ctx context.Context, in *pb.ShareRequest) (*pb.Response, error) {
-	log.Println("Dock server receive detach share request, sr =", in)
-	return dockApi.DetachShare(in)
 }
 
 func (ds *dockServer) ListenAndServe() {

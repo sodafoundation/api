@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name1 }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name1 }}
+        image: "{{ .Values.image.repository1 }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort1 }}
+        - containerPort: {{ .Values.service.internalPort3 }}
+        volumeMounts:
+        - mountPath: /var/log/opensds
+          name: log-file
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+      volumes:
+      - name: log-file
+        hostPath:
+          path: /var/log/opensds
+------
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name2 }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name2 }}
+        image: "{{ .Values.image.repository2 }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort2 }}
+        - containerPort: {{ .Values.service.internalPort3 }}
+		volumeMounts:
+        - mountPath: /var/log/opensds
+          name: log-file
+		- mountPath: /etc/opensds
+          name: opensds-conf-file
+        - mountPath: /etc/ceph
+          name: ceph-conf-file
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+      volumes:
+      - name: log-file
+        hostPath:
+          path: /var/log/opensds
+      - name: opensds-conf-file
+        hostPath:
+          path: /etc/opesds
+      - name: ceph-conf-file
+        hostPath:
+          path: /etc/ceph

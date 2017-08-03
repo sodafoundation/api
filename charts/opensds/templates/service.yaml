@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name1 }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.externalPort1 }}
+    targetPort: {{ .Values.service.internalPort1 }}
+    protocol: TCP
+    name: {{ .Values.service.name1 }}
+  selector:
+    app: {{ template "fullname" . }}
+------
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name2 }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.externalPort2 }}
+    targetPort: {{ .Values.service.internalPort2 }}
+    protocol: TCP
+    name: {{ .Values.service.name2 }}
+  selector:
+    app: {{ template "fullname" . }}

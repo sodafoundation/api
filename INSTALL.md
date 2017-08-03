@@ -19,7 +19,6 @@ git clone https://github.com/opensds/opensds.git $HOME/gopath/src/github.com/ope
 * Import dependency packages
 
 ```sh
-go get github.com/opensds/opensds/cmd/osdsctl
 go get github.com/opensds/opensds/cmd/osdslet
 go get github.com/opensds/opensds/cmd/osdsdock
 ```
@@ -27,22 +26,18 @@ go get github.com/opensds/opensds/cmd/osdsdock
 * Build OpenSDS source code to generate executable files
 
 ```sh
-cd cmd/sdslet
+cd cmd/osdslet
 go build
-   
-cd cmd/sdsctl
-go buld
 
-cd cmd/sdsdock
+cd cmd/osdsdock
 go build
 ```
 
 * Move these executable files to /usr/local/bin
 
 ```sh
-cp cmd/sdslet/sdslet /usr/local/bin
-cp cmd/sdsctl/sdsctl /usr/local/bin
-cp cmd/sdsdock/sdsdock /usr/local/bin
+cp cmd/osdslet/osdslet /usr/local/bin
+cp cmd/osdsdock/osdsdock /usr/local/bin
 ```
 
 ### Dependencies Installation
@@ -80,20 +75,6 @@ my_ip=your_host_ip
 
 ### Configuration
 
-* Configure backend storage credential information
-
-```sh
-sudo mkdir /etc/opensds
-```
-
-```sh
-vim examples/config.json
-```
-
-```sh
-sudo cp examples/config.json /etc/opensds/
-```
-
 * Configure resource discovery in dock module
 
 ```sh
@@ -102,10 +83,6 @@ sudo cp examples/dock.json /etc/opensds
 
 ```sh
 sudo cp examples/pool.json /etc/opensds
-```
-
-```sh
-sudo cp examples/profile.json /etc/opensds
 ```
 
 * Create OpenSDS logging directory
