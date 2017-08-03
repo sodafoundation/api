@@ -6,7 +6,7 @@
 ```sh
 export GOPATH=$HOME/gopath
 export PATH=$HOME/gopath/bin:$PATH
-mkdir -p $HOME/gopath/src/github.com/opensds/   
+mkdir -p $HOME/gopath/src/github.com/opensds/
 cd $HOME/gopath/src/github.com/opensds
 ```
 
