@@ -14,6 +14,10 @@ opensds is Apache 2.0 licensed and accepts contributions via GitHub pull request
 - Email: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
 - Slack: #[opensds](https://opensds.slack.com) 
 
+Before you start, NOTICE that ```master``` branch is the relatively stable version
+provided for customers and users. So all code modifications SHOULD be submitted to
+```development``` branch.
+
 ## Getting started
 
 - Fork the repository on GitHub.
