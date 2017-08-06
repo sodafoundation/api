@@ -200,7 +200,7 @@ func DeleteVolumeAttachment(req *pb.DockRequest) (*pb.DockResponse, error) {
 				return &pb.DockResponse{}, err
 			}
 		}
-		return &pb.DockResponse{}, nil
+		return &pb.DockResponse{}, err
 	}
 
 	if err := db.C.DeleteVolumeAttachment(req.GetVolumeId(), req.GetAttachmentId()); err != nil {
