@@ -85,5 +85,5 @@ func main() {
 	// Construct dock module grpc server struct and do some initialization.
 	ds := dockServer.NewDockServer(apiEdp)
 	// Start the listen mechanism of dock module.
-	ds.ListenAndServe()
+	dockServer.ListenAndServe(ds)
 }

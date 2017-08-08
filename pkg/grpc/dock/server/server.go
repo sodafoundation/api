@@ -45,14 +45,23 @@ import (
 
 // dockServer is used to implement opensds.DockServer.
 type dockServer struct {
-	Port string `json:"port"`
+	Server *grpc.Server
+	Port   string
 }
 
 // NewDockServer returns an dockServer instance.
-func NewDockServer(port string) *dockServer {
-	return &dockServer{
-		Port: port,
+func NewDockServer(port string) pb.DockServer {
+	// Construct dock server.
+	gs := grpc.NewServer()
+	ds := &dockServer{
+		Server: gs,
+		Port:   port,
 	}
+
+	// Register dock server.
+	pb.RegisterDockServer(gs, ds)
+
+	return ds
 }
 
 // CreateVolume implements opensds.DockServer
@@ -109,17 +118,27 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, in *pb.DockReque
 	return dockApi.DeleteVolumeSnapshot(in)
 }
 
-func (ds *dockServer) ListenAndServe() {
-	lis, err := net.Listen("tcp", ds.Port)
-	if err != nil {
-		log.Printf("failed to listen: %+v", err)
+func ListenAndServe(srv pb.DockServer) {
+	// Find whether the type of input is supported.
+	switch srv.(type) {
+	case *dockServer:
+		ds := srv.(*dockServer)
+
+		// Listen the dock server port.
+		lis, err := net.Listen("tcp", ds.Port)
+		if err != nil {
+			log.Fatalf("failed to listen: %+v", err)
+			return
+		}
+
+		log.Println("Dock server initialized! Start listening on port:", ds.Port)
+
+		// Start dock server watching loop.
+		ds.Server.Serve(lis)
+
+		defer ds.Server.Stop()
+	default:
+		log.Fatalln("Don't support this type!")
+		return
 	}
-
-	log.Println("Dock server initialized! Start listening on port:", ds.Port)
-
-	gs := grpc.NewServer()
-	pb.RegisterDockServer(gs, ds)
-	gs.Serve(lis)
-
-	defer gs.Stop()
 }
