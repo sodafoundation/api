@@ -23,6 +23,8 @@ provided for customers and users. So all code modifications SHOULD be submitted 
 - Fork the repository on GitHub.
 - Read the README.md and INSTALL.md for project information and build instructions.
 
+For those who just get in touch with this project recently, here is a proposed contributing [tutorial](https://github.com/leonwanghui/installation-note/blob/master/opensds_fork_contribute_tutorial.md).
+
 ## Contribution Workflow
 
 ### Code style

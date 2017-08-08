@@ -31,11 +31,11 @@ func (p *Plugin) Setup() {}
 func (p *Plugin) Unset() {}
 
 func (p *Plugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
-	return &api.VolumeSpec{}, nil
+	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
 func (p *Plugin) GetVolume(volID string) (*api.VolumeSpec, error) {
-	return &api.VolumeSpec{}, nil
+	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
 func (p *Plugin) DeleteVolume(volID string) error {
@@ -55,11 +55,14 @@ func (p *Plugin) DetachVolume(volID string) error {
 }
 
 func (p *Plugin) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
-	return &api.VolumeSnapshotSpec{}, nil
+	return &api.VolumeSnapshotSpec{
+		BaseModel: &api.BaseModel{},
+		VolumeId:  volID,
+	}, nil
 }
 
 func (p *Plugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
-	return &api.VolumeSnapshotSpec{}, nil
+	return &api.VolumeSnapshotSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
 func (p *Plugin) DeleteSnapshot(snapID string) error {
