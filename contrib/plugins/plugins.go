@@ -22,7 +22,7 @@ Init() method.
 package plugins
 
 import (
-	"github.com/opensds/opensds/pkg/dock/plugins/upsplugin"
+	"github.com/opensds/opensds/contrib/plugins/upsplugin"
 	api "github.com/opensds/opensds/pkg/model"
 )
 

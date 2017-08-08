@@ -23,7 +23,7 @@ package dock
 import (
 	"log"
 
-	storagePlugins "github.com/opensds/opensds/pkg/dock/plugins"
+	storagePlugins "github.com/opensds/opensds/contrib/plugins"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
