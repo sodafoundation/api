@@ -23,6 +23,7 @@ package plugins
 
 import (
 	"github.com/opensds/opensds/contrib/plugins/upsplugin"
+	"github.com/opensds/opensds/contrib/plugins/ceph"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
@@ -53,6 +54,8 @@ type VolumePlugin interface {
 
 func InitVP(resourceType string) (VolumePlugin, error) {
 	switch resourceType {
+	case "ceph":
+		return &ceph.CephPlugin{}, nil
 	default:
 		return &upsplugin.Plugin{}, nil
 	}
