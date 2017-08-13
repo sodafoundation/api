@@ -41,7 +41,7 @@ type Response struct {
 }
 
 func (c *client) Create(req *Request) *Response {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
 	c.lock.Lock()
@@ -63,7 +63,7 @@ func (c *client) Create(req *Request) *Response {
 }
 
 func (c *client) Get(req *Request) *Response {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
 	c.lock.Lock()
@@ -91,7 +91,7 @@ func (c *client) Get(req *Request) *Response {
 }
 
 func (c *client) List(req *Request) *Response {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
 	c.lock.Lock()
@@ -117,7 +117,7 @@ func (c *client) List(req *Request) *Response {
 }
 
 func (c *client) Update(req *Request) *Response {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
 	c.lock.Lock()
@@ -139,7 +139,7 @@ func (c *client) Update(req *Request) *Response {
 }
 
 func (c *client) Delete(req *Request) *Response {
-	ctx, cancel := context.WithTimeout(context.Background(), TIME_OUT)
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
 	c.lock.Lock()
