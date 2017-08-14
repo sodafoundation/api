@@ -17,6 +17,10 @@ env:
    - TARGET=386
    - TARGET=ppc64le
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install librados-dev librbd-dev -y 
+
 matrix:
   fast_finish: true
   allow_failures:
