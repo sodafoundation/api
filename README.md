@@ -29,11 +29,6 @@ you should consider joining the [OpenSDS Project](https://opensds.io/).
 If you are a developer want to be part of the code development that is happening
 now, please refer to the Contributing sections below.
 
-## Collaborative Testing
-
-* [CNCF Cluster](https://github.com/cncf/cluster/issues/30)
-* OpenStack OISC (submitted)
-
 ## Contact
 
 * Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
