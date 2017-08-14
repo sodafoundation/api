@@ -34,3 +34,4 @@ matrix:
 script:
   - go get ./cmd/osdslet && go get ./cmd/osdsdock
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
+  - go test cmd/... -cover && go test pkg/... -cover
