@@ -34,5 +34,5 @@ matrix:
 script:
   - go get ./cmd/osdslet && go get ./cmd/osdsdock
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
-  - go test cmd/osdslet -cover && go test cmd/osdsdock -cover
-  - go test pkg/... -cover
+  - go test github.com/opensds/opensds/cmd/osdslet -cover && go test github.com/opensds/opensds/cmd/osdsdock -cover
+  - go test github.com/opensds/opensds/pkg/... -cover
