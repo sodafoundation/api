@@ -365,8 +365,9 @@ func (plugin *CephPlugin) Unset() {}
 
 func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
-	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+	if err :=imgMgr.Init(); err != nil {
+		log.Println("[Error] Connect ceph error.")
+		return &api.VolumeSpec{}, err
 	}
 
 	defer imgMgr.Destory()
