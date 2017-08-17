@@ -1,5 +1,5 @@
 dist: trusty
-sudo: false
+sudo: required 
 
 language: go
 go_import_path: github.com/opensds/opensds
@@ -16,6 +16,10 @@ env:
    - TARGET=arm
    - TARGET=386
    - TARGET=ppc64le
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install librados-dev librbd-dev -y 
 
 matrix:
   fast_finish: true
