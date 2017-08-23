@@ -38,7 +38,9 @@ func CreateVolume(req *pb.DockRequest) (*pb.DockResponse, error) {
 		return &pb.DockResponse{}, err
 	}
 
-	vol, err := dock.CreateVolume(dck.GetDriverName(), req.GetVolumeName(), req.GetVolumeSize())
+	vol, err := dock.NewDockHub(dck.GetDriverName()).CreateVolume(
+		req.GetVolumeName(),
+		req.GetVolumeSize())
 	if err != nil {
 		log.Println("[Error] When create volume in dock module:", err)
 		return &pb.DockResponse{}, err
@@ -80,7 +82,7 @@ func GetVolume(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	result, err := dock.GetVolume(dck.DriverName, req.GetVolumeId())
+	result, err := dock.NewDockHub(dck.GetDriverName()).GetVolume(req.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When get volume in dock module:", err)
 		return &pb.DockResponse{}, err
@@ -99,7 +101,7 @@ func DeleteVolume(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	if err := dock.DeleteVolume(dck.DriverName, req.GetVolumeId()); err != nil {
+	if err := dock.NewDockHub(dck.GetDriverName()).DeleteVolume(req.GetVolumeId()); err != nil {
 		log.Println("Error occured in dock module when delete volume:", err)
 		return &pb.DockResponse{}, err
 	}
@@ -125,7 +127,11 @@ func CreateVolumeAttachment(req *pb.DockRequest) (*pb.DockResponse, error) {
 		return &pb.DockResponse{}, err
 	}
 
-	atc, err := dock.CreateVolumeAttachment(dck.DriverName, req.GetVolumeId(), req.GetDoLocalAttach(), req.GetMultiPath(), hostInfo)
+	atc, err := dock.NewDockHub(dck.GetDriverName()).CreateVolumeAttachment(
+		req.GetVolumeId(),
+		req.GetDoLocalAttach(),
+		req.GetMultiPath(),
+		hostInfo)
 	if err != nil {
 		log.Println("Error occured in dock module when create volume attachment:", err)
 		return &pb.DockResponse{}, err
@@ -168,12 +174,20 @@ func UpdateVolumeAttachment(req *pb.DockRequest) (*pb.DockResponse, error) {
 		return &pb.DockResponse{}, err
 	}
 
-	if err := dock.UpdateVolumeAttachment(dck.DriverName, req.GetVolumeId(), hostInfo.Host, req.GetMountpoint()); err != nil {
+	err := dock.NewDockHub(dck.GetDriverName()).UpdateVolumeAttachment(
+		req.GetVolumeId(),
+		hostInfo.Host,
+		req.GetMountpoint())
+	if err != nil {
 		log.Println("Error occured in dock module when update volume attachment:", err)
 		return &pb.DockResponse{}, err
 	}
 
-	result, err := db.C.UpdateVolumeAttachment(req.GetVolumeId(), req.GetAttachmentId(), req.GetMountpoint(), hostInfo)
+	result, err := db.C.UpdateVolumeAttachment(
+		req.GetVolumeId(),
+		req.GetAttachmentId(),
+		req.GetMountpoint(),
+		hostInfo)
 	if err != nil {
 		log.Println("Error occured in dock module when update volume attachment in db:", err)
 		return &pb.DockResponse{}, err
@@ -192,7 +206,7 @@ func DeleteVolumeAttachment(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	if err := dock.DeleteVolumeAttachment(dck.DriverName, req.GetVolumeId()); err != nil {
+	if err := dock.NewDockHub(dck.GetDriverName()).DeleteVolumeAttachment(req.GetVolumeId()); err != nil {
 		log.Println("Error occured in dock module when delete volume attachment:", err)
 		if strings.Contains(err.Error(), "The status of volume is not in-use") {
 			if err = db.C.DeleteVolumeAttachment(req.GetVolumeId(), req.GetAttachmentId()); err != nil {
@@ -220,7 +234,7 @@ func CreateVolumeSnapshot(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	snp, err := dock.CreateSnapshot(dck.DriverName,
+	snp, err := dock.NewDockHub(dck.GetDriverName()).CreateSnapshot(
 		req.GetSnapshotName(),
 		req.GetVolumeId(),
 		req.GetSnapshotDescription())
@@ -262,7 +276,7 @@ func GetVolumeSnapshot(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	result, err := dock.GetSnapshot(dck.DriverName, req.GetSnapshotId())
+	result, err := dock.NewDockHub(dck.GetDriverName()).GetSnapshot(req.GetSnapshotId())
 	if err != nil {
 		log.Println("Error occured in dock module when get snapshot:", err)
 		return &pb.DockResponse{}, err
@@ -281,7 +295,7 @@ func DeleteVolumeSnapshot(req *pb.DockRequest) (*pb.DockResponse, error) {
 		log.Println("[Error] When parsing dock info:", err)
 	}
 
-	if err := dock.DeleteSnapshot(dck.DriverName, req.GetSnapshotId()); err != nil {
+	if err := dock.NewDockHub(dck.GetDriverName()).DeleteSnapshot(req.GetSnapshotId()); err != nil {
 		log.Println("Error occured in dock module when delete snapshot:", err)
 		return &pb.DockResponse{}, err
 	}

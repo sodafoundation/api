@@ -14,7 +14,7 @@
 
 /*
 This module defines an standard table of storage plugin. The default storage
-plugin is Cinder plugin. If you want to use other storage plugin, just modify
+plugin is ups plugin. If you want to use other storage plugin, just modify
 Init() method.
 
 */
@@ -22,8 +22,8 @@ Init() method.
 package plugins
 
 import (
-	"github.com/opensds/opensds/contrib/plugins/upsplugin"
 	"github.com/opensds/opensds/contrib/plugins/ceph"
+	"github.com/opensds/opensds/contrib/plugins/upsplugin"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
@@ -52,11 +52,11 @@ type VolumePlugin interface {
 	DeleteSnapshot(snapID string) error
 }
 
-func InitVP(resourceType string) (VolumePlugin, error) {
+func InitVP(resourceType string) VolumePlugin {
 	switch resourceType {
 	case "ceph":
-		return &ceph.CephPlugin{}, nil
+		return &ceph.CephPlugin{}
 	default:
-		return &upsplugin.Plugin{}, nil
+		return &upsplugin.Plugin{}
 	}
 }
