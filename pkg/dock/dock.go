@@ -23,50 +23,32 @@ package dock
 import (
 	"log"
 
-	storagePlugins "github.com/opensds/opensds/contrib/plugins"
+	"github.com/opensds/opensds/contrib/plugins"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
-type VolumePolicy struct {
-	//The standard volume policy configuration will be defined here.
+// A reference to DockHub structure with fields that represent some required
+// parameters for initializing and controlling the volume plugin.
+type DockHub struct {
+	// ResourceType represents the type of backend resources. This field is used
+	// for initializing the specified volume plugin.
+	ResourceType string
+
+	plugins.VolumePlugin
 }
 
-type VolumeDriver interface {
-	//Any initialization the volume driver does while starting.
-	Setup()
-	//Any operation the volume driver does while stoping.
-	Unset()
-
-	CreateVolume(name string, size int64) (*api.VolumeSpec, error)
-
-	GetVolume(volID string) (*api.VolumeSpec, error)
-
-	DeleteVolume(volID string) error
-
-	InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error)
-
-	AttachVolume(volID, host, mountpoint string) error
-
-	DetachVolume(volID string) error
-
-	CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error)
-
-	GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error)
-
-	DeleteSnapshot(snapID string) error
-}
-
-func CreateVolume(resourceType, name string, size int64) (*api.VolumeSpec, error) {
-	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return &api.VolumeSpec{}, err
+func NewDockHub(resourceType string) *DockHub {
+	return &DockHub{
+		ResourceType: resourceType,
 	}
+}
+
+func (d *DockHub) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
+	//Get the storage plugins and do some initializations.
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.CreateVolume(name, size)
+	result, err := d.VolumePlugin.CreateVolume(name, size)
 	if err != nil {
 		log.Println("Call plugin to create volume failed:", err)
 		return &api.VolumeSpec{}, err
@@ -75,17 +57,12 @@ func CreateVolume(resourceType, name string, size int64) (*api.VolumeSpec, error
 	}
 }
 
-func GetVolume(resourceType, volID string) (*api.VolumeSpec, error) {
+func (d *DockHub) GetVolume(volID string) (*api.VolumeSpec, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return &api.VolumeSpec{}, err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.GetVolume(volID)
+	result, err := d.VolumePlugin.GetVolume(volID)
 	if err != nil {
 		log.Println("Call plugin to get volume failed:", err)
 		return &api.VolumeSpec{}, err
@@ -94,34 +71,24 @@ func GetVolume(resourceType, volID string) (*api.VolumeSpec, error) {
 	}
 }
 
-func DeleteVolume(resourceType, volID string) error {
+func (d *DockHub) DeleteVolume(volID string) error {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	if err = volumeDriver.DeleteVolume(volID); err != nil {
+	if err := d.VolumePlugin.DeleteVolume(volID); err != nil {
 		log.Println("Call plugin to delete volume failed:", err)
 		return err
 	}
 	return nil
 }
 
-func CreateVolumeAttachment(resourceType, volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error) {
+func (d *DockHub) CreateVolumeAttachment(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return &api.VolumeAttachmentSpec{}, err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	connInfo, err := volumeDriver.InitializeConnection(volID, doLocalAttach, multiPath, hostInfo)
+	connInfo, err := d.VolumePlugin.InitializeConnection(volID, doLocalAttach, multiPath, hostInfo)
 	if err != nil {
 		log.Println("Call plugin to initialize volume connection failed:", err)
 		return &api.VolumeAttachmentSpec{}, err
@@ -133,51 +100,36 @@ func CreateVolumeAttachment(resourceType, volID string, doLocalAttach, multiPath
 	}, nil
 }
 
-func UpdateVolumeAttachment(resourceType, volID, host, mountpoint string) error {
+func (d *DockHub) UpdateVolumeAttachment(volID, host, mountpoint string) error {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	if err = volumeDriver.AttachVolume(volID, host, mountpoint); err != nil {
+	if err := d.VolumePlugin.AttachVolume(volID, host, mountpoint); err != nil {
 		log.Println("Call plugin to update volume attachment failed:", err)
 		return err
 	}
 	return nil
 }
 
-func DeleteVolumeAttachment(resourceType, volID string) error {
+func (d *DockHub) DeleteVolumeAttachment(volID string) error {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	if err = volumeDriver.DetachVolume(volID); err != nil {
+	if err := d.VolumePlugin.DetachVolume(volID); err != nil {
 		log.Println("Call plugin to delete volume attachment failed:", err)
 		return err
 	}
 	return nil
 }
 
-func CreateSnapshot(resourceType, name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *DockHub) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return &api.VolumeSnapshotSpec{}, err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.CreateSnapshot(name, volID, description)
+	result, err := d.VolumePlugin.CreateSnapshot(name, volID, description)
 	if err != nil {
 		log.Println("Call plugin to create snapshot failed:", err)
 		return &api.VolumeSnapshotSpec{}, err
@@ -186,17 +138,12 @@ func CreateSnapshot(resourceType, name, volID, description string) (*api.VolumeS
 	}
 }
 
-func GetSnapshot(resourceType, snapID string) (*api.VolumeSnapshotSpec, error) {
+func (d *DockHub) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return &api.VolumeSnapshotSpec{}, err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	result, err := volumeDriver.GetSnapshot(snapID)
+	result, err := d.VolumePlugin.GetSnapshot(snapID)
 	if err != nil {
 		log.Println("Call plugin to get snapshot failed:", err)
 		return &api.VolumeSnapshotSpec{}, err
@@ -205,17 +152,12 @@ func GetSnapshot(resourceType, snapID string) (*api.VolumeSnapshotSpec, error) {
 	}
 }
 
-func DeleteSnapshot(resourceType, snapID string) error {
+func (d *DockHub) DeleteSnapshot(snapID string) error {
 	//Get the storage plugins and do some initializations.
-	plugins, err := storagePlugins.InitVP(resourceType)
-	if err != nil {
-		log.Printf("Find %s failed: %v\n", resourceType, err)
-		return err
-	}
+	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
 	//Call function of StoragePlugins configured by storage plugins.
-	var volumeDriver VolumeDriver = plugins
-	if err = volumeDriver.DeleteSnapshot(snapID); err != nil {
+	if err := d.VolumePlugin.DeleteSnapshot(snapID); err != nil {
 		log.Println("Call plugin to delete snapshot failed:", err)
 		return err
 	}
