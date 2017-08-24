@@ -26,16 +26,15 @@ import (
 
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/volume"
-	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
 const (
-	CREATE_LIFECIRCLE_FLAG = 1
-	GET_LIFECIRCLE_FLAG    = 2
-	LIST_LIFECIRCLE_FLAG   = 3
-	DELETE_LIFECIRCLE_FLAG = 4
+	CREATE_LIFECIRCLE_FLAG = iota + 1
+	GET_LIFECIRCLE_FLAG
+	LIST_LIFECIRCLE_FLAG
+	DELETE_LIFECIRCLE_FLAG
 )
 
 func NewControllerWithVolumeConfig(
@@ -47,10 +46,12 @@ func NewControllerWithVolumeConfig(
 		request: &pb.DockRequest{},
 	}
 
+	c.searcher = NewDbSearcher()
+
 	// If volume input is not null, the controller will add policy orchestration
 	// to manage volume resource.
 	if vol != nil {
-		prf, err := SearchProfile(db.C, vol.GetProfileId())
+		prf, err := c.searcher.SearchProfile(vol.GetProfileId())
 		if err != nil {
 			log.Println("[Error] when search profiles in db:", err)
 			return nil, err
@@ -62,6 +63,9 @@ func NewControllerWithVolumeConfig(
 		c.request.VolumeDescription = vol.GetDescription()
 		c.request.VolumeSize = vol.GetSize()
 		c.request.ProfileId = prf.GetId()
+
+		// Initialize policy controller when profile is specified.
+		c.policyController = policy.NewController(c.profile)
 	}
 	if atc != nil {
 		c.request.AttachmentId = atc.GetId()
@@ -76,30 +80,33 @@ func NewControllerWithVolumeConfig(
 		c.request.VolumeId = snp.GetVolumeId()
 	}
 
+	// Initialize volume controller.
+	c.volumeController = volume.NewController(c.request)
+
 	return c, nil
 }
 
 type Controller struct {
+	searcher         Searcher
 	volumeController volume.Controller
 	policyController policy.Controller
-	profile          *api.ProfileSpec
-	request          *pb.DockRequest
+
+	profile *api.ProfileSpec
+	request *pb.DockRequest
 }
 
 func (c *Controller) CreateVolume() (*api.VolumeSpec, error) {
-	// Initialize volume and policy controller.
-	c.policyController = policy.NewController(c.profile)
-	c.volumeController = volume.NewController(c.request)
+	// Select the storage tag according to the lifecycle flag.
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 
-	polInfo, err := SearchSupportedPool(db.C, c.policyController.StorageTag().GetSyncTag())
+	polInfo, err := c.searcher.SearchSupportedPool(c.policyController.StorageTag().GetSyncTag())
 	if err != nil {
 		log.Println("[Error] When search supported pool resource:", err)
 		return &api.VolumeSpec{}, err
 	}
 	c.request.PoolId = polInfo.GetId()
 
-	dckInfo, err := SearchDockByPool(db.C, polInfo)
+	dckInfo, err := c.searcher.SearchDockByPool(polInfo)
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.VolumeSpec{}, err
@@ -120,11 +127,10 @@ func (c *Controller) CreateVolume() (*api.VolumeSpec, error) {
 }
 
 func (c *Controller) DeleteVolume() *api.Response {
-	c.policyController = policy.NewController(c.profile)
-	c.volumeController = volume.NewController(c.request)
+	// Select the storage tag according to the lifecycle flag.
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.Response{
@@ -150,9 +156,8 @@ func (c *Controller) DeleteVolume() *api.Response {
 }
 
 func (c *Controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
-	c.volumeController = volume.NewController(c.request)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.VolumeAttachmentSpec{}, err
@@ -164,9 +169,8 @@ func (c *Controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 }
 
 func (c *Controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
-	c.volumeController = volume.NewController(c.request)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.VolumeAttachmentSpec{}, err
@@ -178,9 +182,8 @@ func (c *Controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 }
 
 func (c *Controller) DeleteVolumeAttachment() *api.Response {
-	c.volumeController = volume.NewController(c.request)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.Response{
@@ -195,9 +198,8 @@ func (c *Controller) DeleteVolumeAttachment() *api.Response {
 }
 
 func (c *Controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
-	c.volumeController = volume.NewController(c.request)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.VolumeSnapshotSpec{}, err
@@ -209,9 +211,8 @@ func (c *Controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
 }
 
 func (c *Controller) DeleteVolumeSnapshot() *api.Response {
-	c.volumeController = volume.NewController(c.request)
 
-	dckInfo, err := SearchDockByVolume(db.C, c.request.GetVolumeId())
+	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
 		log.Println("[Error] When search supported dock resource:", err)
 		return &api.Response{

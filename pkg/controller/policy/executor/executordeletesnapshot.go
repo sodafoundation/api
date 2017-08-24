@@ -27,6 +27,7 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/grpc/dock/client"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -35,10 +36,14 @@ const (
 )
 
 type DeleteSnapshotExecutor struct {
+	client.Client
+
 	Request *pb.DockRequest
 }
 
-func (dse *DeleteSnapshotExecutor) Init(in string) error {
+func (dse *DeleteSnapshotExecutor) Init(in string) (err error) {
+	dse.Client = client.NewClient()
+
 	return nil
 }
 
@@ -50,7 +55,7 @@ func (dse *DeleteSnapshotExecutor) Asynchronized() error {
 
 	for i, snapId := range remainSnaps {
 		dse.Request.SnapshotId = snapId
-		if _, err = client.DeleteVolumeSnapshot(dse.Request); err != nil {
+		if _, err = dse.Client.DeleteVolumeSnapshot(context.Background(), dse.Request); err != nil {
 			log.Printf("[Error] When %dth delete volume snapshot: %v\n", i+1, err)
 			return err
 		}

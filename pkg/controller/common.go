@@ -29,8 +29,28 @@ import (
 	api "github.com/opensds/opensds/pkg/model"
 )
 
-func SearchProfile(c db.Client, prfId string) (*api.ProfileSpec, error) {
-	prfs, err := c.ListProfiles()
+type Searcher interface {
+	SearchProfile(prfId string) (*api.ProfileSpec, error)
+
+	SearchSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error)
+
+	SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, error)
+
+	SearchDockByVolume(volId string) (*api.DockSpec, error)
+}
+
+type DbSearcher struct {
+	db.Client
+}
+
+func NewDbSearcher() Searcher {
+	return &DbSearcher{
+		Client: db.C,
+	}
+}
+
+func (s *DbSearcher) SearchProfile(prfId string) (*api.ProfileSpec, error) {
+	prfs, err := s.Client.ListProfiles()
 	if err != nil {
 		log.Println("[Error] When list profiles:", err)
 		return &api.ProfileSpec{}, err
@@ -55,8 +75,8 @@ func SearchProfile(c db.Client, prfId string) (*api.ProfileSpec, error) {
 	return &api.ProfileSpec{}, errors.New("Can not find default profile in db!")
 }
 
-func SearchSupportedPool(c db.Client, tags map[string]string) (*api.StoragePoolSpec, error) {
-	pols, err := c.ListPools()
+func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error) {
+	pols, err := s.Client.ListPools()
 	if err != nil {
 		log.Println("[Error] When list pool resources in db:", err)
 		return &api.StoragePoolSpec{}, err
@@ -83,8 +103,8 @@ func SearchSupportedPool(c db.Client, tags map[string]string) (*api.StoragePoolS
 	return &api.StoragePoolSpec{}, errors.New("No pool resource supported!")
 }
 
-func SearchDockByPool(c db.Client, pol *api.StoragePoolSpec) (*api.DockSpec, error) {
-	dcks, err := c.ListDocks()
+func (s *DbSearcher) SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, error) {
+	dcks, err := s.Client.ListDocks()
 	if err != nil {
 		log.Println("[Error] When list dock resources in db:", err)
 		return &api.DockSpec{}, err
@@ -98,17 +118,17 @@ func SearchDockByPool(c db.Client, pol *api.StoragePoolSpec) (*api.DockSpec, err
 	return &api.DockSpec{}, errors.New("No dock resource supported!")
 }
 
-func SearchDockByVolume(c db.Client, volId string) (*api.DockSpec, error) {
-	vol, err := c.GetVolume(volId)
+func (s *DbSearcher) SearchDockByVolume(volId string) (*api.DockSpec, error) {
+	vol, err := s.Client.GetVolume(volId)
 	if err != nil {
 		log.Printf("[Error] When get volume %s in db: %v\n", volId, err)
 	}
-	pols, err := c.ListPools()
+	pols, err := s.Client.ListPools()
 	if err != nil {
 		log.Println("[Error] When list pool resources in db:", err)
 		return &api.DockSpec{}, err
 	}
-	dcks, err := c.ListDocks()
+	dcks, err := s.Client.ListDocks()
 	if err != nil {
 		log.Println("[Error] When list dock resources in db:", err)
 		return &api.DockSpec{}, err
