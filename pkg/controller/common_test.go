@@ -154,8 +154,16 @@ func (fc *fakeDbClient) DeleteVolumeSnapshot(snapshotID string) error {
 	return errors.New("Not implemented!")
 }
 
-func TestSearchProfile(t *testing.T) {
+func NewFakeDbSearcher() Searcher {
 	var fc *fakeDbClient
+
+	return &DbSearcher{
+		Client: fc,
+	}
+}
+
+func TestSearchProfile(t *testing.T) {
+	s := NewFakeDbSearcher()
 	var expectedDefaultProfile = api.ProfileSpec{
 		BaseModel: &api.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
@@ -178,7 +186,7 @@ func TestSearchProfile(t *testing.T) {
 	}
 
 	// Test if the method would return default profile when no profile id assigned.
-	prf, err := SearchProfile(fc, "")
+	prf, err := s.SearchProfile("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +195,7 @@ func TestSearchProfile(t *testing.T) {
 	}
 
 	// Test if the method would return specified profile when profile id assigned.
-	prf, err = SearchProfile(fc, "2f9c0a04-66ef-11e7-ade2-43158893e017")
+	prf, err = s.SearchProfile("2f9c0a04-66ef-11e7-ade2-43158893e017")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +205,7 @@ func TestSearchProfile(t *testing.T) {
 }
 
 func TestSearchSupportedPool(t *testing.T) {
-	var fc *fakeDbClient
+	s := NewFakeDbSearcher()
 	var expectedPool = api.StoragePoolSpec{
 		BaseModel: &api.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
@@ -218,7 +226,7 @@ func TestSearchSupportedPool(t *testing.T) {
 	}
 
 	// Test if the method would return correct pool when storage tag assigned.
-	pol, err := SearchSupportedPool(fc, inputTag)
+	pol, err := s.SearchSupportedPool(inputTag)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +236,7 @@ func TestSearchSupportedPool(t *testing.T) {
 }
 
 func TestSearchDockByPool(t *testing.T) {
-	var fc *fakeDbClient
+	s := NewFakeDbSearcher()
 	var expectedDock = api.DockSpec{
 		BaseModel: &api.BaseModel{
 			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -259,7 +267,7 @@ func TestSearchDockByPool(t *testing.T) {
 	}
 
 	// Test if the method would return correct dock when storage pool assigned.
-	dck, err := SearchDockByPool(fc, &inputPool)
+	dck, err := s.SearchDockByPool(&inputPool)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +277,7 @@ func TestSearchDockByPool(t *testing.T) {
 }
 
 func TestSearchDockByVolume(t *testing.T) {
-	var fc *fakeDbClient
+	s := NewFakeDbSearcher()
 	var expectedDock = api.DockSpec{
 		BaseModel: &api.BaseModel{
 			Id: "076454a8-65da-11e7-9a65-5f5d9b935b9f",
@@ -286,7 +294,7 @@ func TestSearchDockByVolume(t *testing.T) {
 	var inputVolID = "9193c3ec-771f-11e7-8ca3-d32c0a8b2725"
 
 	// Test if the method would return correct dock when volume id assigned.
-	dck, err := SearchDockByVolume(fc, inputVolID)
+	dck, err := s.SearchDockByVolume(inputVolID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -386,8 +394,8 @@ var (
 			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 			CreatedAt: "2017-08-02T09:17:05",
 		},
-		Name:        "vol-test-01",
-		Description: "volume created for test",
+		Name:        "fake-volume",
+		Description: "fake volume for testing",
 		Size:        1,
 		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
 	}
