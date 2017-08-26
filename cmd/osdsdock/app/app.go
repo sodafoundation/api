@@ -54,14 +54,14 @@ func dockResourceDiscovery() error {
 	for _, dck := range *dcks {
 		// If dock uuid is null, generate it randomly.
 		if dck.GetId() == "" {
-			if ok := utils.SetUuid(dck); ok != nil {
+			if ok := utils.NewSetter().SetUuid(dck); ok != nil {
 				log.Println("[Error] When set dock uuid:", ok)
 				return ok
 			}
 		}
 
 		// Set dock created time.
-		if ok := utils.SetCreatedTimeStamp(dck); ok != nil {
+		if ok := utils.NewSetter().SetCreatedTimeStamp(dck); ok != nil {
 			log.Println("[Error] When set dock created time:", ok)
 			return ok
 		}
@@ -88,14 +88,14 @@ func poolResourceDiscovery() error {
 	for _, pol := range *pols {
 		// If pool uuid is null, generate it randomly.
 		if pol.GetId() == "" {
-			if ok := utils.SetUuid(pol); ok != nil {
+			if ok := utils.NewSetter().SetUuid(pol); ok != nil {
 				log.Println("[Error] When set pool uuid:", ok)
 				return ok
 			}
 		}
 
 		// Set pool created time.
-		if ok := utils.SetCreatedTimeStamp(pol); ok != nil {
+		if ok := utils.NewSetter().SetCreatedTimeStamp(pol); ok != nil {
 			log.Println("[Error] When set pool created time:", ok)
 			return ok
 		}

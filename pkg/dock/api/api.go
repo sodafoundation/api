@@ -48,14 +48,14 @@ func CreateVolume(req *pb.DockRequest) (*pb.DockResponse, error) {
 
 	// If volume uuid is null, generate it randomly.
 	if vol.GetId() == "" {
-		if ok := utils.SetUuid(vol); ok != nil {
+		if ok := utils.NewSetter().SetUuid(vol); ok != nil {
 			log.Println("[Error] When set volume uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume created time.
-	if ok := utils.SetCreatedTimeStamp(vol); ok != nil {
+	if ok := utils.NewSetter().SetCreatedTimeStamp(vol); ok != nil {
 		log.Println("[Error] When set volume created time:", ok)
 		return &pb.DockResponse{}, err
 	}
@@ -139,14 +139,14 @@ func CreateVolumeAttachment(req *pb.DockRequest) (*pb.DockResponse, error) {
 
 	// If volume attachment uuid is null, generate it randomly.
 	if atc.GetId() == "" {
-		if ok := utils.SetUuid(atc); ok != nil {
+		if ok := utils.NewSetter().SetUuid(atc); ok != nil {
 			log.Println("[Error] When set volume attachment uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume attachment created time.
-	if ok := utils.SetCreatedTimeStamp(atc); ok != nil {
+	if ok := utils.NewSetter().SetCreatedTimeStamp(atc); ok != nil {
 		log.Println("[Error] When set volume attachment created time:", ok)
 		return &pb.DockResponse{}, err
 	}
@@ -245,14 +245,14 @@ func CreateVolumeSnapshot(req *pb.DockRequest) (*pb.DockResponse, error) {
 
 	// If volume snapshot uuid is null, generate it randomly.
 	if snp.GetId() == "" {
-		if ok := utils.SetUuid(snp); ok != nil {
+		if ok := utils.NewSetter().SetUuid(snp); ok != nil {
 			log.Println("[Error] When set volume snapshot uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume snapshot created time.
-	if ok := utils.SetCreatedTimeStamp(snp); ok != nil {
+	if ok := utils.NewSetter().SetCreatedTimeStamp(snp); ok != nil {
 		log.Println("[Error] When set volume snapshot created time:", ok)
 		return &pb.DockResponse{}, err
 	}

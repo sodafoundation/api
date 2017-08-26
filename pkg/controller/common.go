@@ -23,10 +23,10 @@ package controller
 import (
 	"errors"
 	"log"
-	"reflect"
 
 	"github.com/opensds/opensds/pkg/db"
 	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 type Searcher interface {
@@ -86,7 +86,7 @@ func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePo
 	for _, pol := range *pols {
 		var isSupported = true
 		for tag := range tags {
-			if !Contained(tag, pol.Parameters) {
+			if !utils.Contained(tag, pol.Parameters) {
 				isSupported = false
 				break
 			}
@@ -146,23 +146,4 @@ func (s *DbSearcher) SearchDockByVolume(volId string) (*api.DockSpec, error) {
 	}
 
 	return &api.DockSpec{}, errors.New("No pool resource supported!")
-}
-
-func Contained(obj, target interface{}) bool {
-	targetValue := reflect.ValueOf(target)
-	switch reflect.TypeOf(target).Kind() {
-	case reflect.Slice, reflect.Array:
-		for i := 0; i < targetValue.Len(); i++ {
-			if targetValue.Index(i).Interface() == obj {
-				return true
-			}
-		}
-	case reflect.Map:
-		if targetValue.MapIndex(reflect.ValueOf(obj)).IsValid() {
-			return true
-		}
-	default:
-		return false
-	}
-	return false
 }

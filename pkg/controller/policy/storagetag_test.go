@@ -13,3 +13,60 @@
 //    under the License.
 
 package policy
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestIsStorageTagSupported(t *testing.T) {
+	var tags = map[string]string{
+		"intervalSnapshot":     "operation",
+		"deleteSnapshotPolicy": "operation",
+	}
+
+	if !IsStorageTagSupported(tags) {
+		t.Errorf("tags %v are not supported by %v\n", tags)
+	}
+}
+
+func TestFindPolicyType(t *testing.T) {
+	var policys = []string{"iops", "thinProvision", "intervalSnapshot"}
+	var expectedTypes = []string{"feature", "feature", "operation"}
+
+	for i, policy := range policys {
+		pType, err := FindPolicyType(policy)
+		if err != nil {
+			t.Errorf("Failed to find the type of policy %v\n", policy)
+		}
+
+		if !reflect.DeepEqual(pType, expectedTypes[i]) {
+			t.Errorf("Expected %v, got %v\n", expectedTypes[i], pType)
+		}
+	}
+}
+
+func TestNewStorageTag(t *testing.T) {
+	var tags = map[string]interface{}{
+		"iops":                 1000,
+		"thinProvision":        true,
+		"highAvailability":     false,
+		"intervalSnapshot":     "1d",
+		"deleteSnapshotPolicy": true,
+	}
+	var expectedSt = &StorageTag{
+		syncTag: map[string]string{
+			"iops":             "1000",
+			"thinProvision":    "true",
+			"highAvailability": "false",
+		},
+		asyncTag: map[string]string{
+			"intervalSnapshot": "1d",
+		},
+	}
+
+	st := NewStorageTag(tags, 1)
+	if reflect.DeepEqual(st, expectedSt) {
+		t.Errorf("Expected %v, got %v\n", expectedSt, st)
+	}
+}

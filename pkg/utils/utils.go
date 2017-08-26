@@ -19,11 +19,83 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/satori/go.uuid"
 )
+
+type Setter interface {
+	SetUuid(m model.Modeler) error
+
+	SetCreatedTimeStamp(m model.Modeler) error
+
+	SetUpdatedTimeStamp(m model.Modeler) error
+}
+
+type setter struct{}
+
+func NewSetter() Setter {
+	return &setter{}
+}
+
+func (s *setter) SetUuid(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		// Set uuid.
+		m.SetId(uuid.NewV4().String())
+
+		return nil
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		// Set uuid.
+		m.SetId(uuid.NewV4().String())
+
+		return nil
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+}
+
+func (s *setter) SetCreatedTimeStamp(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		// Set created time.
+		m.SetCreatedTime(time.Now().Format(TimeFormat))
+
+		return nil
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		// Set created time.
+		m.SetCreatedTime(time.Now().Format(TimeFormat))
+
+		return nil
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+}
+
+func (s *setter) SetUpdatedTimeStamp(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		// Set updated time.
+		m.SetUpdatedTime(time.Now().Format(TimeFormat))
+
+		return nil
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		// Set updated time.
+		m.SetUpdatedTime(time.Now().Format(TimeFormat))
+
+		return nil
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+}
 
 type ErrorRes struct {
 	Code    int    `json:"code"`
@@ -47,59 +119,21 @@ func ErrorStatus(code int, message string) []byte {
 	return body
 }
 
-func SetUuid(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set uuid.
-		m.SetId(uuid.NewV4().String())
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set uuid.
-		m.SetId(uuid.NewV4().String())
-
-		return nil
+func Contained(obj, target interface{}) bool {
+	targetValue := reflect.ValueOf(target)
+	switch reflect.TypeOf(target).Kind() {
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < targetValue.Len(); i++ {
+			if targetValue.Index(i).Interface() == obj {
+				return true
+			}
+		}
+	case reflect.Map:
+		if targetValue.MapIndex(reflect.ValueOf(obj)).IsValid() {
+			return true
+		}
 	default:
-		return errors.New("Unexpected input object format!")
+		return false
 	}
-}
-
-func SetCreatedTimeStamp(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set created time.
-		m.SetCreatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set created time.
-		m.SetCreatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	default:
-		return errors.New("Unexpected input object format!")
-	}
-}
-
-func SetUpdatedTimeStamp(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set updated time.
-		m.SetUpdatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set updated time.
-		m.SetUpdatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	default:
-		return errors.New("Unexpected input object format!")
-	}
+	return false
 }
