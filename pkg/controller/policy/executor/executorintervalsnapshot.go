@@ -31,22 +31,27 @@ import (
 	"github.com/opensds/opensds/pkg/grpc/dock/client"
 	pb "github.com/opensds/opensds/pkg/grpc/opensds"
 	api "github.com/opensds/opensds/pkg/model"
+	"golang.org/x/net/context"
 )
 
 type IntervalSnapshotExecutor struct {
+	client.Client
+
 	Request  *pb.DockRequest
 	Interval string
 	TotalNum int
 }
 
-func (ise *IntervalSnapshotExecutor) Init(in string) error {
+func (ise *IntervalSnapshotExecutor) Init(in string) (err error) {
 	var volumeResponse api.VolumeSpec
-	if err := json.Unmarshal([]byte(in), &volumeResponse); err != nil {
+	if err = json.Unmarshal([]byte(in), &volumeResponse); err != nil {
 		return err
 	}
 
 	ise.Request.VolumeId = volumeResponse.Id
 	ise.Request.SnapshotName = "snapshot-" + volumeResponse.Id
+	ise.Client = client.NewClient()
+
 	return nil
 }
 
@@ -65,7 +70,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 		for j := 0; j < num; j++ {
 			time.Sleep(time.Second)
 		}
-		if _, err = client.CreateVolumeSnapshot(ise.Request); err != nil {
+		if _, err = ise.Client.CreateVolumeSnapshot(context.Background(), ise.Request); err != nil {
 			log.Printf("[Error] When %dth create volume snapshot: %v\n", i+1, err)
 			return err
 		}
