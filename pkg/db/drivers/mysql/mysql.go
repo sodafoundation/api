@@ -13,8 +13,10 @@
 //    under the License.
 
 /*
+This module implements the mysql database operation of data structure
+defined in api module.
 
- */
+*/
 
 package mysql
 

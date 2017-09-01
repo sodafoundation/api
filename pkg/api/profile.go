@@ -50,7 +50,7 @@ func (this *ProfilePortal) CreateProfile() {
 
 	// If profile uuid is null, generate it randomly.
 	if profile.GetId() == "" {
-		if ok := utils.SetUuid(profile); ok != nil {
+		if ok := utils.NewSetter().SetUuid(profile); ok != nil {
 			reason := fmt.Sprintf("Set profile uuid failed: %s", ok.Error())
 			this.Ctx.Output.SetStatus(StatusInternalServerError)
 			this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
@@ -60,7 +60,7 @@ func (this *ProfilePortal) CreateProfile() {
 	}
 
 	// Set profile created time.
-	if ok := utils.SetCreatedTimeStamp(profile); ok != nil {
+	if ok := utils.NewSetter().SetCreatedTimeStamp(profile); ok != nil {
 		reason := fmt.Sprintf("Set profile created time failed: %s", ok.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))

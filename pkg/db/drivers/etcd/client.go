@@ -12,12 +12,6 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
-/*
-This module implements the database operation of data structure
-defined in api module.
-
-*/
-
 package etcd
 
 import (

@@ -13,7 +13,7 @@
 //    under the License.
 
 /*
-This module implements the database operation of data structure
+This module implements the etcd database operation of data structure
 defined in api module.
 
 */

@@ -24,6 +24,9 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
+
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 const (
@@ -52,7 +55,7 @@ func init() {
 }
 
 func IsStorageTagSupported(tags map[string]string) bool {
-	for key, _ := range tags {
+	for key := range tags {
 		if PolicyTypeMappingTable[key] != "operation" {
 			return false
 		}
@@ -61,13 +64,11 @@ func IsStorageTagSupported(tags map[string]string) bool {
 }
 
 func FindPolicyType(policy string) (string, error) {
-	for key := range PolicyTypeMappingTable {
-		if key == policy {
-			return PolicyTypeMappingTable[key], nil
-		}
+	if !utils.Contained(policy, PolicyTypeMappingTable) {
+		return "", errors.New("The policy type of " + policy + " not supported")
 	}
 
-	return "", errors.New("The policy type of " + policy + " not supported")
+	return PolicyTypeMappingTable[policy], nil
 }
 
 type StorageTag struct {
@@ -116,7 +117,12 @@ func MapValuetoString(in map[string]interface{}) map[string]string {
 	var out = map[string]string{}
 
 	for k, v := range in {
-		out[k] = v.(string)
+		switch v.(type) {
+		case int:
+			out[k] = strconv.Itoa(v.(int))
+		case bool:
+			out[k] = strconv.FormatBool(v.(bool))
+		}
 	}
 	return out
 }

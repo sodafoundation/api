@@ -23,10 +23,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	DOCK_PORT = ":50050"
-)
-
 type Client interface {
 	pb.DockClient
 	Update(dockInfo string) error
@@ -50,10 +46,8 @@ func (c *client) Update(dockInfo string) error {
 		return err
 	}
 
-	// Generate Dock server address.
-	address := dck.Endpoint + DOCK_PORT
 	// Set up a connection to the Dock server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(dck.GetEndpoint(), grpc.WithInsecure())
 	if err != nil {
 		log.Printf("did not connect: %+v\n", err)
 		return err
@@ -63,7 +57,7 @@ func (c *client) Update(dockInfo string) error {
 
 	c.DockClient = dc
 	c.ClientConn = conn
-	c.TargetPlace = address
+	c.TargetPlace = dck.GetEndpoint()
 
 	return nil
 }

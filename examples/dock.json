@@ -3,7 +3,7 @@
 		"id": "076454a8-65da-11e7-9a65-5f5d9b935b9f",
 		"name": "ceph",
 		"description": "ceph backend service",
-		"endpoint": "127.0.0.1",
+		"endpoint": "127.0.0.1:50050",
 		"driverName": "ceph",
 		"parameters": {
 			"thinProvision": "false",
