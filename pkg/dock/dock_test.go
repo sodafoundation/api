@@ -27,6 +27,13 @@ var (
 	snpID = "a463ce6e-87d6-11e7-8b27-737694075ac9"
 )
 
+func TestNewDockHub(t *testing.T) {
+	result := NewDockHub("default")
+	if !reflect.DeepEqual(result, fd) {
+		t.Errorf("Expected %v, got %v\n", fd, result)
+	}
+}
+
 func TestCreateVolume(t *testing.T) {
 	var name = "ups-volume"
 	var size int64 = 1
