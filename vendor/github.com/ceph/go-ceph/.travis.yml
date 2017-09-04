@@ -1,0 +1,26 @@
+dist: trusty
+sudo: required
+
+language: go
+
+branches:
+  except:
+    - gh-pages
+
+matrix:
+  include:
+    - env: CEPH_RELEASE=jewel
+    - env: CEPH_RELEASE=kraken
+
+before_install:
+  - sudo apt-get update
+  - ci/before_install.sh
+  - bash ci/micro-osd.sh /tmp/micro-ceph
+  - export CEPH_CONF=/tmp/micro-ceph/ceph.conf
+  - ceph status
+
+script:
+  - go get -t -v ./...
+  - go list ./...
+  - go test -v $(go list ./... | grep -v cephfs)
+  - go fmt ./...
