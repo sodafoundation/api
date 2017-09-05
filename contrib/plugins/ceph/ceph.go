@@ -93,6 +93,16 @@ type SnapshotResponse struct {
 	Size      int64  `json:"size"`
 }
 
+type PoolResponse struct {
+	ID        string `json:"id"`
+	Name             string                 `json:"name,omitempty"`
+	Description      string                 `json:"description,omitempty"`
+	AvailabilityZone string                 `json:"availabilityZone,omitempty"`
+	TotalCapacity    int64                  `json:"totalCapacity,omitempty"`
+	FreeCapacity     int64                  `json:"freeCapacity,omitempty"`
+	StorageType      string                 `json:"-"`
+}
+
 type ImageMgr struct {
 	Conn  *rados.Conn
 	Ioctx *rados.IOContext
@@ -357,6 +367,24 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 	return &snapshots, nil
 }
 
+func (imgMgr *ImageMgr) ListPools() ([]PoolResponse, error) {
+	poolNameList,err := imgMgr.Conn.ListPools()
+	if err != nil {
+		log.Println("[Error] When list pools:", err)
+		return nil, err
+	}
+
+	var pools []PoolResponse
+	for _, name := range poolNameList {
+		pool := PoolResponse{
+			Name:	name,
+			ID:		uuid.NewV5(uuid.NamespaceOID, name).String(),
+		}
+		pools = append(pools, pool)
+	}
+	return pools,nil
+}
+
 type CephPlugin struct{}
 
 func (plugin *CephPlugin) Setup() {}
@@ -532,3 +560,32 @@ func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
 	return nil
 }
 
+func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
+	var imgMgr = &ImageMgr{}
+	if imgMgr.Init() != nil {
+		log.Println("[Error] When ceph connection")
+	}
+	defer imgMgr.Destory()
+
+	var poolList []api.StoragePoolSpec
+	poolsResp, err := imgMgr.ListPools()
+	if err != nil {
+		log.Println("[Error] When get snapshot:", err)
+		return nil, err
+	}
+	for _,pl := range poolsResp{
+		pool := api.StoragePoolSpec{
+			BaseModel: &api.BaseModel{
+				Id: pl.ID,
+			},
+			Name:			pl.Name,
+			Description:	pl.Description,
+			AvailabilityZone:	pl.AvailabilityZone,
+			TotalCapacity:	pl.TotalCapacity,
+			FreeCapacity:	pl.FreeCapacity,
+			StorageType:	pl.StorageType,
+		}
+		poolList = append(poolList, pool)
+	}
+	return poolList, nil
+}

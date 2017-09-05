@@ -253,8 +253,6 @@ func TestGetSnapshot(t *testing.T) {
 }
 
 func TestDeleteSnapshot(t *testing.T) {
-
-
 	defer monkey.UnpatchAll()
 	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
 		return nil
@@ -293,5 +291,37 @@ func TestDeleteSnapshot(t *testing.T) {
 	err := plugin.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
+	}
+}
+
+func TestListPools(t *testing.T) {
+
+	defer monkey.UnpatchAll()
+	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+		return nil
+	})
+	monkey.Patch((*rados.Conn).ListPools, func(c *rados.Conn) ([]string, error) {
+		pools := []string{"rbd", "test2", "test3"}
+		return pools,nil
+	})
+	monkey.Patch((*rbd.Image).Open, func(r *rbd.Image, args ...interface{}) error{return nil })
+	monkey.Patch((*rbd.Image).Close, func(r *rbd.Image) error{return nil })
+	monkey.Patch((*rados.Conn).Shutdown, func(c *rados.Conn) {})
+	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
+
+	plugin := CephPlugin{}
+	pools, err := plugin.ListPools()
+	if err != nil {
+		t.Errorf("Test List Pools error")
+	}
+
+	if pools[0].Name != "rbd"{
+		t.Errorf("Test List Pools Name error")
+	}
+	if pools[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df"{
+		t.Errorf("Test List Pools UUID error")
+	}
+	if pools[1].Name != "test2"{
+		t.Errorf("Test List Pools Name error")
 	}
 }
