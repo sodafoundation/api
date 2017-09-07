@@ -41,7 +41,10 @@ func readDocksFromFile() ([]api.DockSpec, error) {
 	// If the dock resource is empty, consider it as a normal condition
 	if len(userJSON) == 0 {
 		return docks, nil
-	} else if err = json.Unmarshal(userJSON, &docks); err != nil {
+	}
+
+	// Unmarshal the result
+	if err = json.Unmarshal(userJSON, &docks); err != nil {
 		log.Println("Unmarshal json failed:", err)
 		return docks, err
 	}

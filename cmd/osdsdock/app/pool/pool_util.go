@@ -41,7 +41,10 @@ func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
 	// If the pool resource is empty, consider it as a normal condition
 	if len(userJSON) == 0 {
 		return pools, nil
-	} else if err = json.Unmarshal(userJSON, &pools); err != nil {
+	}
+
+	// Unmarshal the result
+	if err = json.Unmarshal(userJSON, &pools); err != nil {
 		log.Println("Unmarshal json failed:", err)
 		return pools, err
 	}
