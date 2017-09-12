@@ -387,3 +387,4 @@ func TestListPools(t *testing.T) {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 }
+

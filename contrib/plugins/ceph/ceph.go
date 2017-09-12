@@ -699,10 +699,6 @@ func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
 
 func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
 	var imgMgr = &ImageMgr{}
-	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
-	}
-	defer imgMgr.Destory()
 
 	var poolList []api.StoragePoolSpec
 	poolsResp, err := imgMgr.ListPools()
