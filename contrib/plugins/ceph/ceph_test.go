@@ -1,3 +1,17 @@
+// Copyright (c) 2016 OpenSDS Authors.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+
 package ceph
 
 import (
@@ -297,17 +311,33 @@ func TestDeleteSnapshot(t *testing.T) {
 func TestListPools(t *testing.T) {
 
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
-		return nil
+	monkey.Patch(execCmd, func(cmd string)(string, error) {
+		cephDuInfo := ""+
+			"GLOBAL:\n"+
+			"    SIZE       AVAIL     RAW USED     %RAW USED\n"+
+			"    19053M     6859M       12194M         64.00\n"+
+			"POOLS:\n"+
+			"    NAME                ID     USED     %USED     MAX AVAIL     OBJECTS\n"+
+			"    rbd                 0      942M     12.21         2286M         245\n"+
+			"    test                1         0         0         2286M           1\n"+
+			"    pool001             2         0         0         2286M           0\n"+
+			"    testpoolerasure     3         0         0         4572M           0\n"+
+			"    NAME                9         0         0         2286M           0\n"+
+			"    ecpool              10        0         0         4115M           0\n"+
+			"    12                  11        0         0         2286M           0"
+		poolAttrInfo := ""+
+			"'rbd' replicated 3 0\n"+
+			"'test' replicated 3 0\n"+
+			"'pool001' replicated 3 0\n"+
+			"'testpoolerasure' erasure 3 1\n"+
+			"'NAME' replicated 3 0\n"+
+			"'ecpool' erasure 5 2\n"+
+			"'12' replicated 3 0"
+		if cmd == "ceph df" {
+			return cephDuInfo, nil
+		}
+		return poolAttrInfo, nil
 	})
-	monkey.Patch((*rados.Conn).ListPools, func(c *rados.Conn) ([]string, error) {
-		pools := []string{"rbd", "test2", "test3"}
-		return pools,nil
-	})
-	monkey.Patch((*rbd.Image).Open, func(r *rbd.Image, args ...interface{}) error{return nil })
-	monkey.Patch((*rbd.Image).Close, func(r *rbd.Image) error{return nil })
-	monkey.Patch((*rados.Conn).Shutdown, func(c *rados.Conn) {})
-	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	plugin := CephPlugin{}
 	pools, err := plugin.ListPools()
@@ -321,7 +351,39 @@ func TestListPools(t *testing.T) {
 	if pools[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df"{
 		t.Errorf("Test List Pools UUID error")
 	}
-	if pools[1].Name != "test2"{
+	if pools[0].FreeCapacity != 2 {
+		t.Errorf("Test List Pools FreeCapacity error")
+	}
+
+	if pools[0].TotalCapacity != 6 {
+		t.Errorf("Test List Pools TotalCapacity error")
+	}
+
+	if pools[0].Parameters["redundancyType"] != "replicated"{
+		t.Errorf("Test List Pools redundancyType error")
+	}
+
+	if pools[0].Parameters["replicateSize"] != "3"{
+		t.Errorf("Test List Pools replicateSize error")
+	}
+
+	if pools[0].Parameters["crushRuleset"] != "0"{
+		t.Errorf("Test List Pools crushRuleset error")
+	}
+
+	if pools[5].Name != "ecpool"{
 		t.Errorf("Test List Pools Name error")
+	}
+
+	if pools[5].Parameters["redundancyType"] != "erasure"{
+		t.Errorf("Test List Pools redundancyType error")
+	}
+
+	if pools[5].Parameters["erasureSize"] != "5"{
+		t.Errorf("Test List Pools replicateSize error")
+	}
+
+	if pools[5].Parameters["crushRuleset"] != "2"{
+		t.Errorf("Test List Pools crushRuleset error")
 	}
 }

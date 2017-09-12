@@ -29,12 +29,36 @@ import (
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	"github.com/satori/go.uuid"
+	"os/exec"
+	"strconv"
 )
 
 const (
 	OPENSDS_PREFIX string = "OPENSDS"
 	SPLIT_CHAR            = ":"
 	SIZE_SHIFT_BIT        = 20
+)
+
+const (
+	GLOBAL_SIZE = iota
+	GLOBAL_AVAIL
+	GLOBAL_RAW_USED
+	GLOBAL_RAW_USED_PERCENTAGE
+)
+
+const (
+	POOL_NAME = iota
+	POOL_ID
+	POOL_USED
+	POOL_USED_PER
+	POOL_MAX_AVAIL
+	POOL_OBJECTS
+)
+
+const (
+	POOL_TYPE = iota
+	POOL_TYPE_SIZE
+	POOL_CRUSH_RULESET
 )
 
 type Name struct {
@@ -101,6 +125,7 @@ type PoolResponse struct {
 	TotalCapacity    int64                  `json:"totalCapacity,omitempty"`
 	FreeCapacity     int64                  `json:"freeCapacity,omitempty"`
 	StorageType      string                 `json:"-"`
+	Parameters       map[string]interface{} `json:"parameters,omitempty"`
 }
 
 type ImageMgr struct {
@@ -366,23 +391,135 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 	}
 	return &snapshots, nil
 }
+func execCmd(cmd string) (string, error){
+	ret , err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		log.Println(err.Error())
+		return "",err
+	}
+	return string(ret[:len(ret)-1]), nil
+}
+
+func (imgMgr *ImageMgr) parseCapStr(cap string) int64{
+	if cap == "0" {
+		return 0
+	}
+	UnitMapper := map[string]uint64{
+		"K": 0,//shift bit
+		"M": 10,
+		"G": 20,
+		"T": 30,
+		"P": 40,
+	}
+	unit := strings.ToUpper(cap[len(cap)-1:])
+	num, err := strconv.ParseInt(cap[:len(cap)-1],10,64)
+	if err != nil {
+		log.Println("[Error] Cannot convert this number", err)
+		return 0
+	}
+	if val, ok := UnitMapper[unit]; ok {
+		return num << val >> SIZE_SHIFT_BIT
+	} else {
+		log.Println("[Error] strage unit is not found.")
+		return 0
+	}
+}
+
+func (imgMgr *ImageMgr) getPoolsCapInfo()([][]string, error) {
+	const poolStartLine = 5
+	output, err:= execCmd("ceph df")
+	if err !=nil {
+		log.Println("[Error]:", err)
+		return nil, err
+	}
+	lines := strings.Split(output,"\n")
+	var poolsInfo [][]string
+	for i := poolStartLine; i < len(lines); i++{
+		poolsInfo = append(poolsInfo, strings.Fields(lines[i]))
+	}
+	return  poolsInfo, nil
+}
+
+func (imgMgr *ImageMgr) getGlobalCapInfo() ([]string, error) {
+	const globalCapInfoLine = 2
+	output, err:= execCmd("ceph df")
+	if err !=nil {
+		log.Println("[Error]:", err)
+		return nil, err
+	}
+	lines := strings.Split(output,"\n")
+	return strings.Fields(lines[globalCapInfoLine]), nil
+}
+
+func (imgMgr *ImageMgr) getPoolsAttr()  (map[string][]string, error){
+	cmd := "ceph osd pool ls detail | grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
+	output, err := execCmd(cmd)
+	if err !=nil {
+		log.Println("[Error]:", err)
+		return nil, err
+	}
+	lines := strings.Split(output, "\n")
+	var poolDetail = make(map[string][]string)
+	for i := range lines {
+		if lines[i] == ""{
+			continue
+		}
+		str := strings.Fields(lines[i])
+		key := strings.Replace(str[0], "'", "", -1)
+		val := str[1:]
+		poolDetail[key] = val
+	}
+	return poolDetail, nil
+}
+
+func(imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{}{
+	param := make(map[string]interface{})
+	param["redundancyType"] = line[POOL_TYPE]
+	if param["redundancyType"] == "replicated" {
+		param["replicateSize"] = line[POOL_TYPE_SIZE]
+	} else {
+		param["erasureSize"] = line[POOL_TYPE_SIZE]
+	}
+	param["crushRuleset"] = line[POOL_CRUSH_RULESET]
+	return param
+}
 
 func (imgMgr *ImageMgr) ListPools() ([]PoolResponse, error) {
-	poolNameList,err := imgMgr.Conn.ListPools()
-	if err != nil {
-		log.Println("[Error] When list pools:", err)
+	pc, err:= imgMgr.getPoolsCapInfo()
+	if err !=nil {
+		log.Println("[Error]:", err)
+		return nil, err
+	}
+	gc, err:= imgMgr.getGlobalCapInfo()
+	if err !=nil {
+		log.Println("[Error]:", err)
+		return nil, err
+	}
+	pa, err := imgMgr.getPoolsAttr()
+	if err !=nil {
+		log.Println("[Error]:", err)
 		return nil, err
 	}
 
 	var pools []PoolResponse
-	for _, name := range poolNameList {
+	for i := range pc {
+		name := pc[i][POOL_NAME]
+		param := imgMgr.getPoolParam(pa[name])
+		totalCap := imgMgr.parseCapStr(gc[GLOBAL_SIZE])
+		maxAvailCap := imgMgr.parseCapStr(pc[i][POOL_MAX_AVAIL])
+		availCap := imgMgr.parseCapStr(gc[GLOBAL_AVAIL])
 		pool := PoolResponse{
 			Name:	name,
 			ID:		uuid.NewV5(uuid.NamespaceOID, name).String(),
+			Parameters:		param,
+			//if redundancy type is replicate, MAX AVAIL =  AVAIL / relicate number,
+			//and it this is erasure, MAX AVAIL =  AVAIL * k / (m + k)
+			TotalCapacity:	totalCap * maxAvailCap / availCap ,
+			FreeCapacity:	maxAvailCap,
 		}
 		pools = append(pools, pool)
 	}
-	return pools,nil
+	return pools, nil
 }
 
 type CephPlugin struct{}
@@ -584,6 +721,7 @@ func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
 			TotalCapacity:	pl.TotalCapacity,
 			FreeCapacity:	pl.FreeCapacity,
 			StorageType:	pl.StorageType,
+			Parameters:		pl.Parameters,
 		}
 		poolList = append(poolList, pool)
 	}
