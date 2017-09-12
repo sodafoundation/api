@@ -118,7 +118,7 @@ type SnapshotResponse struct {
 }
 
 type PoolResponse struct {
-	ID        string `json:"id"`
+	ID               string                 `json:"id"`
 	Name             string                 `json:"name,omitempty"`
 	Description      string                 `json:"description,omitempty"`
 	AvailabilityZone string                 `json:"availabilityZone,omitempty"`
@@ -391,28 +391,28 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 	}
 	return &snapshots, nil
 }
-func execCmd(cmd string) (string, error){
-	ret , err := exec.Command("bash", "-c", cmd).Output()
+func execCmd(cmd string) (string, error) {
+	ret, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		log.Println(err.Error())
-		return "",err
+		return "", err
 	}
 	return string(ret[:len(ret)-1]), nil
 }
 
-func (imgMgr *ImageMgr) parseCapStr(cap string) int64{
+func (imgMgr *ImageMgr) parseCapStr(cap string) int64 {
 	if cap == "0" {
 		return 0
 	}
 	UnitMapper := map[string]uint64{
-		"K": 0,//shift bit
+		"K": 0, //shift bit
 		"M": 10,
 		"G": 20,
 		"T": 30,
 		"P": 40,
 	}
 	unit := strings.ToUpper(cap[len(cap)-1:])
-	num, err := strconv.ParseInt(cap[:len(cap)-1],10,64)
+	num, err := strconv.ParseInt(cap[:len(cap)-1], 10, 64)
 	if err != nil {
 		log.Println("[Error] Cannot convert this number", err)
 		return 0
@@ -425,43 +425,43 @@ func (imgMgr *ImageMgr) parseCapStr(cap string) int64{
 	}
 }
 
-func (imgMgr *ImageMgr) getPoolsCapInfo()([][]string, error) {
+func (imgMgr *ImageMgr) getPoolsCapInfo() ([][]string, error) {
 	const poolStartLine = 5
-	output, err:= execCmd("ceph df")
-	if err !=nil {
+	output, err := execCmd("ceph df")
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
-	lines := strings.Split(output,"\n")
+	lines := strings.Split(output, "\n")
 	var poolsInfo [][]string
-	for i := poolStartLine; i < len(lines); i++{
+	for i := poolStartLine; i < len(lines); i++ {
 		poolsInfo = append(poolsInfo, strings.Fields(lines[i]))
 	}
-	return  poolsInfo, nil
+	return poolsInfo, nil
 }
 
 func (imgMgr *ImageMgr) getGlobalCapInfo() ([]string, error) {
 	const globalCapInfoLine = 2
-	output, err:= execCmd("ceph df")
-	if err !=nil {
+	output, err := execCmd("ceph df")
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
-	lines := strings.Split(output,"\n")
+	lines := strings.Split(output, "\n")
 	return strings.Fields(lines[globalCapInfoLine]), nil
 }
 
-func (imgMgr *ImageMgr) getPoolsAttr()  (map[string][]string, error){
+func (imgMgr *ImageMgr) getPoolsAttr() (map[string][]string, error) {
 	cmd := "ceph osd pool ls detail | grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
 	output, err := execCmd(cmd)
-	if err !=nil {
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
 	lines := strings.Split(output, "\n")
 	var poolDetail = make(map[string][]string)
 	for i := range lines {
-		if lines[i] == ""{
+		if lines[i] == "" {
 			continue
 		}
 		str := strings.Fields(lines[i])
@@ -472,7 +472,7 @@ func (imgMgr *ImageMgr) getPoolsAttr()  (map[string][]string, error){
 	return poolDetail, nil
 }
 
-func(imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{}{
+func (imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{} {
 	param := make(map[string]interface{})
 	param["redundancyType"] = line[POOL_TYPE]
 	if param["redundancyType"] == "replicated" {
@@ -484,19 +484,19 @@ func(imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{}{
 	return param
 }
 
-func (imgMgr *ImageMgr) ListPools() ([]PoolResponse, error) {
-	pc, err:= imgMgr.getPoolsCapInfo()
-	if err !=nil {
+func (imgMgr *ImageMgr) ListPools() (*[]PoolResponse, error) {
+	pc, err := imgMgr.getPoolsCapInfo()
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
-	gc, err:= imgMgr.getGlobalCapInfo()
-	if err !=nil {
+	gc, err := imgMgr.getGlobalCapInfo()
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
 	pa, err := imgMgr.getPoolsAttr()
-	if err !=nil {
+	if err != nil {
 		log.Println("[Error]:", err)
 		return nil, err
 	}
@@ -509,17 +509,17 @@ func (imgMgr *ImageMgr) ListPools() ([]PoolResponse, error) {
 		maxAvailCap := imgMgr.parseCapStr(pc[i][POOL_MAX_AVAIL])
 		availCap := imgMgr.parseCapStr(gc[GLOBAL_AVAIL])
 		pool := PoolResponse{
-			Name:	name,
-			ID:		uuid.NewV5(uuid.NamespaceOID, name).String(),
-			Parameters:		param,
+			Name:       name,
+			ID:         uuid.NewV5(uuid.NamespaceOID, name).String(),
+			Parameters: param,
 			//if redundancy type is replicate, MAX AVAIL =  AVAIL / relicate number,
 			//and it this is erasure, MAX AVAIL =  AVAIL * k / (m + k)
-			TotalCapacity:	totalCap * maxAvailCap / availCap ,
-			FreeCapacity:	maxAvailCap,
+			TotalCapacity: totalCap * maxAvailCap / availCap,
+			FreeCapacity:  maxAvailCap,
 		}
 		pools = append(pools, pool)
 	}
-	return pools, nil
+	return &pools, nil
 }
 
 type CephPlugin struct{}
@@ -530,7 +530,7 @@ func (plugin *CephPlugin) Unset() {}
 
 func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
-	if err :=imgMgr.Init(); err != nil {
+	if err := imgMgr.Init(); err != nil {
 		log.Println("[Error] Connect ceph error.")
 		return &api.VolumeSpec{}, err
 	}
@@ -706,18 +706,18 @@ func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
 		log.Println("[Error] When get snapshot:", err)
 		return nil, err
 	}
-	for _,pl := range poolsResp{
+	for _, pl := range *poolsResp {
 		pool := api.StoragePoolSpec{
 			BaseModel: &api.BaseModel{
 				Id: pl.ID,
 			},
-			Name:			pl.Name,
-			Description:	pl.Description,
-			AvailabilityZone:	pl.AvailabilityZone,
-			TotalCapacity:	pl.TotalCapacity,
-			FreeCapacity:	pl.FreeCapacity,
-			StorageType:	pl.StorageType,
-			Parameters:		pl.Parameters,
+			Name:             pl.Name,
+			Description:      pl.Description,
+			AvailabilityZone: pl.AvailabilityZone,
+			TotalCapacity:    pl.TotalCapacity,
+			FreeCapacity:     pl.FreeCapacity,
+			StorageType:      pl.StorageType,
+			Parameters:       pl.Parameters,
 		}
 		poolList = append(poolList, pool)
 	}
