@@ -18,8 +18,8 @@ env:
    - TARGET=ppc64le
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev -y 
+  - sudo add-apt-repository ppa:masterminds/glide && sudo apt-get update
+  - sudo apt-get install glide librados-dev librbd-dev -y 
 
 matrix:
   fast_finish: true
@@ -36,7 +36,7 @@ matrix:
     env: TARGET=ppc64le
 
 script:
-  - go get ./cmd/osdslet && go get ./cmd/osdsdock
+  - glide install
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
   - go test -v github.com/opensds/opensds/cmd/osdslet -cover && go test -v github.com/opensds/opensds/cmd/osdsdock -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
