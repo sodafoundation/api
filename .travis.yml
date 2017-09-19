@@ -5,9 +5,7 @@ language: go
 go_import_path: github.com/opensds/opensds
 
 go:
-  - 1.7
-  - 1.8
-  - 1.9
+  - 1.9.x
   - tip
 
 env:
@@ -20,7 +18,7 @@ env:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev libcephfs-dev -y 
+  - sudo apt-get install librados-dev librbd-dev -y 
 
 matrix:
   fast_finish: true
@@ -37,7 +35,6 @@ matrix:
     env: TARGET=ppc64le
 
 script:
-  - go get ./cmd/osdslet && go build ./cmd/osdsdock
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
   - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
