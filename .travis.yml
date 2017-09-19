@@ -20,7 +20,7 @@ env:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev -y 
+  - sudo apt-get install librados-dev librbd-dev libcephfs-dev -y 
 
 matrix:
   fast_finish: true
@@ -37,6 +37,7 @@ matrix:
     env: TARGET=ppc64le
 
 script:
+  - go get ./cmd/osdslet && go build ./cmd/osdsdock
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
   - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
