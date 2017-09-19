@@ -1,22 +1,35 @@
 /*
  *
- * Copyright 2014 gRPC authors.
+ * Copyright 2014, Google Inc.
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-//go:generate protoc --go_out=plugins=grpc:. grpc_testing/test.proto
 
 package interop
 
@@ -379,7 +392,7 @@ func DoPerRPCCreds(tc testpb.TestServiceClient, serviceAccountKeyFile, oauthScop
 	}
 	token := GetToken(serviceAccountKeyFile, oauthScope)
 	kv := map[string]string{"authorization": token.TokenType + " " + token.AccessToken}
-	ctx := metadata.NewOutgoingContext(context.Background(), metadata.MD{"authorization": []string{kv["authorization"]}})
+	ctx := metadata.NewContext(context.Background(), metadata.MD{"authorization": []string{kv["authorization"]}})
 	reply, err := tc.UnaryCall(ctx, req)
 	if err != nil {
 		grpclog.Fatal("/TestService/UnaryCall RPC failed: ", err)
@@ -403,7 +416,7 @@ var (
 
 // DoCancelAfterBegin cancels the RPC after metadata has been sent but before payloads are sent.
 func DoCancelAfterBegin(tc testpb.TestServiceClient, args ...grpc.CallOption) {
-	ctx, cancel := context.WithCancel(metadata.NewOutgoingContext(context.Background(), testMetadata))
+	ctx, cancel := context.WithCancel(metadata.NewContext(context.Background(), testMetadata))
 	stream, err := tc.StreamingInputCall(ctx, args...)
 	if err != nil {
 		grpclog.Fatalf("%v.StreamingInputCall(_) = _, %v", tc, err)
@@ -478,7 +491,7 @@ func DoCustomMetadata(tc testpb.TestServiceClient, args ...grpc.CallOption) {
 		ResponseSize: proto.Int32(int32(1)),
 		Payload:      pl,
 	}
-	ctx := metadata.NewOutgoingContext(context.Background(), customMetadata)
+	ctx := metadata.NewContext(context.Background(), customMetadata)
 	var header, trailer metadata.MD
 	args = append(args, grpc.Header(&header), grpc.Trailer(&trailer))
 	reply, err := tc.UnaryCall(
@@ -614,7 +627,7 @@ func serverNewPayload(t testpb.PayloadType, size int32) (*testpb.Payload, error)
 
 func (s *testServer) UnaryCall(ctx context.Context, in *testpb.SimpleRequest) (*testpb.SimpleResponse, error) {
 	status := in.GetResponseStatus()
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
+	if md, ok := metadata.FromContext(ctx); ok {
 		if initialMetadata, ok := md[initialMetadataKey]; ok {
 			header := metadata.Pairs(initialMetadataKey, initialMetadata[0])
 			grpc.SendHeader(ctx, header)
@@ -673,7 +686,7 @@ func (s *testServer) StreamingInputCall(stream testpb.TestService_StreamingInput
 }
 
 func (s *testServer) FullDuplexCall(stream testpb.TestService_FullDuplexCallServer) error {
-	if md, ok := metadata.FromIncomingContext(stream.Context()); ok {
+	if md, ok := metadata.FromContext(stream.Context()); ok {
 		if initialMetadata, ok := md[initialMetadataKey]; ok {
 			header := metadata.Pairs(initialMetadataKey, initialMetadata[0])
 			stream.SendHeader(header)

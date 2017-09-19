@@ -1,87 +1,49 @@
 /*
  *
- * Copyright 2014 gRPC authors.
+ * Copyright 2014, Google Inc.
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 package grpc
 
 import (
-	"math"
 	"net"
 	"testing"
 	"time"
 
 	"golang.org/x/net/context"
 
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/naming"
-	"google.golang.org/grpc/testdata"
 )
 
-func assertState(wantState connectivity.State, cc *ClientConn) (connectivity.State, bool) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	var state connectivity.State
-	for state = cc.GetState(); state != wantState && cc.WaitForStateChange(ctx, state); state = cc.GetState() {
-	}
-	return state, state == wantState
-}
-
-func TestConnectivityStates(t *testing.T) {
-	servers, resolver := startServers(t, 2, math.MaxUint32)
-	defer func() {
-		for i := 0; i < 2; i++ {
-			servers[i].stop()
-		}
-	}()
-
-	cc, err := Dial("foo.bar.com", WithBalancer(RoundRobin(resolver)), WithInsecure())
-	if err != nil {
-		t.Fatalf("Dial(\"foo.bar.com\", WithBalancer(_)) = _, %v, want _ <nil>", err)
-	}
-	defer cc.Close()
-	wantState := connectivity.Ready
-	if state, ok := assertState(wantState, cc); !ok {
-		t.Fatalf("asserState(%s) = %s, false, want %s, true", wantState, state, wantState)
-	}
-	// Send an update to delete the server connection (tearDown addrConn).
-	update := []*naming.Update{
-		{
-			Op:   naming.Delete,
-			Addr: "localhost:" + servers[0].port,
-		},
-	}
-	resolver.w.inject(update)
-	wantState = connectivity.TransientFailure
-	if state, ok := assertState(wantState, cc); !ok {
-		t.Fatalf("asserState(%s) = %s, false, want %s, true", wantState, state, wantState)
-	}
-	update[0] = &naming.Update{
-		Op:   naming.Add,
-		Addr: "localhost:" + servers[1].port,
-	}
-	resolver.w.inject(update)
-	wantState = connectivity.Ready
-	if state, ok := assertState(wantState, cc); !ok {
-		t.Fatalf("asserState(%s) = %s, false, want %s, true", wantState, state, wantState)
-	}
-
-}
+const tlsDir = "testdata/"
 
 func TestDialTimeout(t *testing.T) {
 	conn, err := Dial("Non-Existent.Server:80", WithTimeout(time.Millisecond), WithBlock(), WithInsecure())
@@ -94,7 +56,7 @@ func TestDialTimeout(t *testing.T) {
 }
 
 func TestTLSDialTimeout(t *testing.T) {
-	creds, err := credentials.NewClientTLSFromFile(testdata.Path("ca.pem"), "x.test.youtube.com")
+	creds, err := credentials.NewClientTLSFromFile(tlsDir+"ca.pem", "x.test.youtube.com")
 	if err != nil {
 		t.Fatalf("Failed to create credentials %v", err)
 	}
@@ -107,21 +69,9 @@ func TestTLSDialTimeout(t *testing.T) {
 	}
 }
 
-func TestDefaultAuthority(t *testing.T) {
-	target := "Non-Existent.Server:8080"
-	conn, err := Dial(target, WithInsecure())
-	if err != nil {
-		t.Fatalf("Dial(_, _) = _, %v, want _, <nil>", err)
-	}
-	conn.Close()
-	if conn.authority != target {
-		t.Fatalf("%v.authority = %v, want %v", conn, conn.authority, target)
-	}
-}
-
 func TestTLSServerNameOverwrite(t *testing.T) {
 	overwriteServerName := "over.write.server.name"
-	creds, err := credentials.NewClientTLSFromFile(testdata.Path("ca.pem"), overwriteServerName)
+	creds, err := credentials.NewClientTLSFromFile(tlsDir+"ca.pem", overwriteServerName)
 	if err != nil {
 		t.Fatalf("Failed to create credentials %v", err)
 	}
@@ -149,7 +99,7 @@ func TestWithAuthority(t *testing.T) {
 
 func TestWithAuthorityAndTLS(t *testing.T) {
 	overwriteServerName := "over.write.server.name"
-	creds, err := credentials.NewClientTLSFromFile(testdata.Path("ca.pem"), overwriteServerName)
+	creds, err := credentials.NewClientTLSFromFile(tlsDir+"ca.pem", overwriteServerName)
 	if err != nil {
 		t.Fatalf("Failed to create credentials %v", err)
 	}
@@ -220,7 +170,7 @@ func (c securePerRPCCredentials) RequireTransportSecurity() bool {
 }
 
 func TestCredentialsMisuse(t *testing.T) {
-	tlsCreds, err := credentials.NewClientTLSFromFile(testdata.Path("ca.pem"), "x.test.youtube.com")
+	tlsCreds, err := credentials.NewClientTLSFromFile(tlsDir+"ca.pem", "x.test.youtube.com")
 	if err != nil {
 		t.Fatalf("Failed to create authenticator %v", err)
 	}
@@ -293,8 +243,7 @@ func nonTemporaryErrorDialer(addr string, timeout time.Duration) (net.Conn, erro
 }
 
 func TestDialWithBlockErrorOnNonTemporaryErrorDialer(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
+	ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	if _, err := DialContext(ctx, "", WithInsecure(), WithDialer(nonTemporaryErrorDialer), WithBlock(), FailOnNonTempDialError(true)); err != nonTemporaryError {
 		t.Fatalf("Dial(%q) = %v, want %v", "", err, nonTemporaryError)
 	}
@@ -302,93 +251,5 @@ func TestDialWithBlockErrorOnNonTemporaryErrorDialer(t *testing.T) {
 	// Without FailOnNonTempDialError, gRPC will retry to connect, and dial should exit with time out error.
 	if _, err := DialContext(ctx, "", WithInsecure(), WithDialer(nonTemporaryErrorDialer), WithBlock()); err != context.DeadlineExceeded {
 		t.Fatalf("Dial(%q) = %v, want %v", "", err, context.DeadlineExceeded)
-	}
-}
-
-// emptyBalancer returns an empty set of servers.
-type emptyBalancer struct {
-	ch chan []Address
-}
-
-func newEmptyBalancer() Balancer {
-	return &emptyBalancer{ch: make(chan []Address, 1)}
-}
-func (b *emptyBalancer) Start(_ string, _ BalancerConfig) error {
-	b.ch <- nil
-	return nil
-}
-func (b *emptyBalancer) Up(_ Address) func(error) {
-	return nil
-}
-func (b *emptyBalancer) Get(_ context.Context, _ BalancerGetOptions) (Address, func(), error) {
-	return Address{}, nil, nil
-}
-func (b *emptyBalancer) Notify() <-chan []Address {
-	return b.ch
-}
-func (b *emptyBalancer) Close() error {
-	close(b.ch)
-	return nil
-}
-
-func TestNonblockingDialWithEmptyBalancer(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	dialDone := make(chan error)
-	go func() {
-		dialDone <- func() error {
-			conn, err := DialContext(ctx, "Non-Existent.Server:80", WithInsecure(), WithBalancer(newEmptyBalancer()))
-			if err != nil {
-				return err
-			}
-			return conn.Close()
-		}()
-	}()
-	if err := <-dialDone; err != nil {
-		t.Fatalf("unexpected error dialing connection: %s", err)
-	}
-}
-
-func TestClientUpdatesParamsAfterGoAway(t *testing.T) {
-	lis, err := net.Listen("tcp", "localhost:0")
-	if err != nil {
-		t.Fatalf("Failed to listen. Err: %v", err)
-	}
-	defer lis.Close()
-	addr := lis.Addr().String()
-	s := NewServer()
-	go s.Serve(lis)
-	defer s.Stop()
-	cc, err := Dial(addr, WithBlock(), WithInsecure(), WithKeepaliveParams(keepalive.ClientParameters{
-		Time:                50 * time.Millisecond,
-		Timeout:             1 * time.Millisecond,
-		PermitWithoutStream: true,
-	}))
-	if err != nil {
-		t.Fatalf("Dial(%s, _) = _, %v, want _, <nil>", addr, err)
-	}
-	defer cc.Close()
-	time.Sleep(1 * time.Second)
-	cc.mu.RLock()
-	defer cc.mu.RUnlock()
-	v := cc.mkp.Time
-	if v < 100*time.Millisecond {
-		t.Fatalf("cc.dopts.copts.Keepalive.Time = %v , want 100ms", v)
-	}
-}
-
-func TestClientLBWatcherWithClosedBalancer(t *testing.T) {
-	b := newBlockingBalancer()
-	cc := &ClientConn{dopts: dialOptions{balancer: b}}
-
-	doneChan := make(chan struct{})
-	go cc.lbWatcher(doneChan)
-	// Balancer closes before any successful connections.
-	b.Close()
-
-	select {
-	case <-doneChan:
-	case <-time.After(100 * time.Millisecond):
-		t.Fatal("lbWatcher with closed balancer didn't close doneChan after 100ms")
 	}
 }

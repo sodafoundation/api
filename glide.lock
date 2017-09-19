@@ -1,5 +1,5 @@
-hash: c384b2526b36f35e5e9c2ae942eda8a6dd1bbcb332970a65bd5158788a934bd5
-updated: 2017-09-18T23:25:43.905205793+08:00
+hash: de4065240b1720544432bcc04db54ebad0f2386b17ab283212a65680c4d12465
+updated: 2017-09-19T11:33:41.061170883+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -43,10 +43,6 @@ imports:
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
-  - ptypes
-  - ptypes/any
-  - ptypes/duration
-  - ptypes/timestamp
 - name: github.com/mailru/easyjson
   version: 2a92e673c9a6302dd05c3a691ae1f24aef46457d
   subpackages:
@@ -75,17 +71,11 @@ imports:
   - transform
   - unicode/bidi
   - unicode/norm
-- name: google.golang.org/genproto
-  version: 1e559d0a00eef8a9a43151db4665280bd8dd5886
-  subpackages:
-  - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: f92cdcd7dcdc69e81b2d7b338479a19a8723cfa3
+  version: 8050b9cbc271307e5a716a9d782803d09b0d6f2d
   subpackages:
   - codes
-  - connectivity
   - credentials
-  - grpclb/grpc_lb_v1/messages
   - grpclog
   - internal
   - keepalive
@@ -93,7 +83,6 @@ imports:
   - naming
   - peer
   - stats
-  - status
   - tap
   - transport
 - name: gopkg.in/mgo.v2

@@ -5,7 +5,9 @@ language: go
 go_import_path: github.com/opensds/opensds
 
 go:
-  - 1.9.x
+  - 1.7
+  - 1.8
+  - 1.9
   - tip
 
 env:
@@ -36,6 +38,6 @@ matrix:
 
 script:
   - go build ./cmd/osdslet && go build ./cmd/osdsdock
-  - go test -v github.com/opensds/opensds/cmd/osdslet -cover && go test -v github.com/opensds/opensds/cmd/osdsdock -cover
+  - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
   - go test -v github.com/opensds/opensds/contrib/... -cover
