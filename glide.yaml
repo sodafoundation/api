@@ -1,0 +1,31 @@
+package: github.com/opensds/opensds
+import:
+- package: github.com/astaxie/beego
+  subpackages:
+  - context
+- package: github.com/ceph/go-ceph
+  subpackages:
+  - rados
+  - rbd
+- package: github.com/coreos/etcd
+  version: ^3.2.7
+  subpackages:
+  - clientv3
+- package: github.com/go-openapi/errors
+- package: github.com/go-openapi/runtime
+  subpackages:
+  - client
+- package: github.com/go-openapi/strfmt
+- package: github.com/go-openapi/swag
+- package: github.com/go-sql-driver/mysql
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
+- package: github.com/satori/go.uuid
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: ^1.2.1
+testImport:
+- package: github.com/bouk/monkey
