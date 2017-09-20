@@ -20,45 +20,31 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/db"
 )
 
-var (
-	// The endpoint of api server, format: "host_ip:port"
-	apiEdp string
-
-	// The driver name of database, for example etcd, mysql etc
-	dbDriver string
-	// Connecting endpoint of database client, only be used in etcd
-	dbEdp string
-	// Connecting credentials of database, only be used in mysql
-	// format: "username:password@tcp(ip:port)/dbname"
-	dbCredential string
-
-	// Path of file for logging, default is "/var/log/opensds/osdslet.log"
-	osdsletLogFile string
-)
-
 func init() {
-	flag.StringVar(&apiEdp, "api-endpoint", "localhost:50040", "Listen endpoint of controller service")
-	flag.StringVar(&dbEdp, "db-endpoint", "localhost:2379,localhost:2380", "Connection endpoint of database service")
-	flag.StringVar(&dbDriver, "db-driver", "etcd", "Driver name of database service")
-	flag.StringVar(&dbCredential, "db-credential", "username:password@tcp(ip:port)/dbname", "Connection credential of database service")
-	flag.StringVar(&osdsletLogFile, "osdsletlog-file", "/var/log/opensds/osdslet.log", "Location of osdslet log file")
-
-	flag.Parse()
+	conf := utils.CONF
+	flag := utils.CONF.Flag
+	flag.StringVar(&conf.OsdsLet.ApiEndpoint, "api-endpoint", conf.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&conf.Database.Endpoint, "db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&conf.Database.Driver, "db-driver", conf.Database.Driver, "Driver name of database service")
+	flag.StringVar(&conf.Database.Credential, "db-credential", conf.Database.Credential, "Connection credential of database service")
+	flag.StringVar(&conf.OsdsLet.LogFile, "osdsletlog-file", conf.OsdsLet.LogFile, "Location of osdslet log file")
+	conf.Load("/etc/opensds/opensds.conf")
 }
 
 func main() {
 	// Open OpenSDS orchestrator service log file.
-	f, err := os.OpenFile(osdsletLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	conf := utils.CONF
+	f, err := os.OpenFile(conf.OsdsLet.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		os.Exit(1)
@@ -71,11 +57,12 @@ func main() {
 
 	// Set up database session.
 	db.Init(&db.DBConfig{
-		DriverName: dbDriver,
-		Endpoints:  strings.Split(dbEdp, ","),
-		Credential: dbCredential,
+		DriverName: conf.Database.Driver,
+		Endpoints:  strings.Split(conf.Database.Endpoint, ","),
+		Credential: conf.Database.Credential,
 	})
 
 	// Start OpenSDS northbound REST service.
-	api.Run(apiEdp)
+	api.Run(conf.OsdsLet.ApiEndpoint)
 }
+

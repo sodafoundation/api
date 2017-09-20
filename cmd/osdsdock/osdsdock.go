@@ -20,46 +20,31 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-
 	"github.com/opensds/opensds/cmd/osdsdock/app"
 	"github.com/opensds/opensds/pkg/db"
+	"github.com/opensds/opensds/pkg/utils"
 	dockServer "github.com/opensds/opensds/pkg/grpc/dock/server"
 )
 
-var (
-	// The endpoint of dock server, format: "host_ip:port"
-	apiEdp string
-
-	// The driver name of database, for example etcd, mysql etc
-	dbDriver string
-	// Connecting endpoint of database client, only be used in etcd
-	dbEdp string
-	// Connecting credentials of database, only be used in mysql
-	// format: "username:password@tcp(ip:port)/dbname"
-	dbCredential string
-
-	// Path of file for logging, default is "/var/log/opensds/osdsdock.log"
-	osdsdockLogFile string
-)
-
 func init() {
-	flag.StringVar(&apiEdp, "api-endpoint", "localhost:50050", "Listen endpoint of controller service")
-	flag.StringVar(&dbEdp, "db-endpoint", "localhost:2379,localhost:2380", "Connection endpoint of database service")
-	flag.StringVar(&dbDriver, "db-driver", "etcd", "Driver name of database service")
-	flag.StringVar(&dbCredential, "db-credential", "username:password@tcp(ip:port)/dbname", "Connection credential of database service")
-	flag.StringVar(&osdsdockLogFile, "osdsdocklog-file", "/var/log/opensds/osdsdock.log", "Location of osdsdock log file")
-
-	flag.Parse()
+	conf := utils.CONF
+	flag := utils.CONF.Flag
+	flag.StringVar(&conf.OsdsDock.ApiEndpoint,"api-endpoint", conf.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&conf.Database.Endpoint,"db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&conf.Database.Driver,"db-driver", conf.Database.Driver, "Driver name of database service")
+	flag.StringVar(&conf.Database.Credential,"db-credential", conf.Database.Credential, "Connection credential of database service")
+	flag.StringVar(&conf.OsdsDock.LogFile,"osdsdocklog-file", conf.OsdsDock.LogFile, "Location of osdsdock log file")
+	conf.Load("/etc/opensds/opensds.conf")
+	fmt.Println(conf.OsdsDock.ApiEndpoint)
 }
 
 func main() {
 	// Open OpenSDS dock service log file.
-	f, err := os.OpenFile(osdsdockLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(utils.CONF.OsdsDock.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		os.Exit(1)
@@ -72,9 +57,9 @@ func main() {
 
 	// Set up database session.
 	db.Init(&db.DBConfig{
-		DriverName: dbDriver,
-		Endpoints:  strings.Split(dbEdp, ","),
-		Credential: dbCredential,
+		DriverName: utils.CONF.Database.Driver,
+		Endpoints:  strings.Split(utils.CONF.Database.Endpoint, ","),
+		Credential: utils.CONF.Database.Credential,
 	})
 
 	// Automatically discover dock and pool resources from backends.
@@ -83,7 +68,8 @@ func main() {
 	}
 
 	// Construct dock module grpc server struct and do some initialization.
-	ds := dockServer.NewDockServer(apiEdp)
+	ds := dockServer.NewDockServer(utils.CONF.OsdsDock.ApiEndpoint)
 	// Start the listen mechanism of dock module.
 	dockServer.ListenAndServe(ds)
 }
+
