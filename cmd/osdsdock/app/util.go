@@ -19,7 +19,7 @@ modify this file.
 
 */
 
-package dock
+package app
 
 import (
 	"encoding/json"
@@ -28,6 +28,16 @@ import (
 
 	api "github.com/opensds/opensds/pkg/model"
 )
+
+func ListDocks() (*[]api.DockSpec, error) {
+	docks, err := readDocksFromFile()
+	if err != nil {
+		log.Println("Could not read dock resource:", err)
+		return &[]api.DockSpec{}, err
+	}
+
+	return &docks, nil
+}
 
 func readDocksFromFile() ([]api.DockSpec, error) {
 	var docks []api.DockSpec
@@ -49,18 +59,4 @@ func readDocksFromFile() ([]api.DockSpec, error) {
 		return docks, err
 	}
 	return docks, nil
-}
-
-func writeDocksToFile(docks []api.DockSpec) bool {
-	body, err := json.Marshal(&docks)
-	if err != nil {
-		log.Println("Marshal json failed:", err)
-		return false
-	}
-
-	if err = ioutil.WriteFile("/etc/opensds/dock.json", body, 0666); err != nil {
-		log.Println("WriteFile json failed:", err)
-		return false
-	}
-	return true
 }

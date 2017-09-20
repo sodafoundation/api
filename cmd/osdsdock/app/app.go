@@ -23,26 +23,13 @@ import (
 	"errors"
 	"log"
 
-	"github.com/opensds/opensds/cmd/osdsdock/app/dock"
-	"github.com/opensds/opensds/cmd/osdsdock/app/pool"
 	"github.com/opensds/opensds/pkg/db"
+	"github.com/opensds/opensds/pkg/dock"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
 func ResourceDiscovery() error {
-	if err := dockResourceDiscovery(); err != nil {
-		log.Println("[Error] When discover dock resource:", err)
-		return err
-	}
-	if err := poolResourceDiscovery(); err != nil {
-		log.Println("[Error] When discover pool resource:", err)
-		return err
-	}
-	return nil
-}
-
-func dockResourceDiscovery() error {
-	dcks, err := dock.ListDocks()
+	dcks, err := ListDocks()
 	if err != nil {
 		log.Println("[Error] When list docks:", err)
 		return err
@@ -71,12 +58,17 @@ func dockResourceDiscovery() error {
 			log.Printf("[Error] When create dock %s in db: %v\n", dck.Id, err)
 			return err
 		}
+
+		if err := poolResourceDiscovery(dck.GetDriverName()); err != nil {
+			log.Printf("[Error] When discovery pool in dock %s: %v\n", dck.Id, err)
+			return err
+		}
 	}
 	return nil
 }
 
-func poolResourceDiscovery() error {
-	pols, err := pool.ListPools()
+func poolResourceDiscovery(driver string) error {
+	pols, err := dock.NewDockHub(driver).ListPools()
 	if err != nil {
 		log.Println("[Error] When list pools:", err)
 		return err

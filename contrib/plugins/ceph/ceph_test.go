@@ -16,12 +16,13 @@ package ceph
 
 import (
 	"errors"
+	"testing"
+	"unsafe"
+
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	"github.com/satori/go.uuid"
-	"testing"
-	"unsafe"
 )
 
 func TestCreateVolume(t *testing.T) {
@@ -347,45 +348,45 @@ func TestListPools(t *testing.T) {
 		t.Errorf("Test List Pools error")
 	}
 
-	if pools[0].Name != "rbd" {
+	if (*pools)[0].Name != "rbd" {
 		t.Errorf("Test List Pools Name error")
 	}
-	if pools[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
+	if (*pools)[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
 		t.Errorf("Test List Pools UUID error")
 	}
-	if pools[0].FreeCapacity != 2 {
+	if (*pools)[0].FreeCapacity != 2 {
 		t.Errorf("Test List Pools FreeCapacity error")
 	}
 
-	if pools[0].TotalCapacity != 6 {
+	if (*pools)[0].TotalCapacity != 6 {
 		t.Errorf("Test List Pools TotalCapacity error")
 	}
 
-	if pools[0].Parameters["redundancyType"] != "replicated" {
+	if (*pools)[0].Parameters["redundancyType"] != "replicated" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if pools[0].Parameters["replicateSize"] != "3" {
+	if (*pools)[0].Parameters["replicateSize"] != "3" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if pools[0].Parameters["crushRuleset"] != "0" {
+	if (*pools)[0].Parameters["crushRuleset"] != "0" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if pools[5].Name != "ecpool" {
+	if (*pools)[5].Name != "ecpool" {
 		t.Errorf("Test List Pools Name error")
 	}
 
-	if pools[5].Parameters["redundancyType"] != "erasure" {
+	if (*pools)[5].Parameters["redundancyType"] != "erasure" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if pools[5].Parameters["erasureSize"] != "5" {
+	if (*pools)[5].Parameters["erasureSize"] != "5" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if pools[5].Parameters["crushRuleset"] != "2" {
+	if (*pools)[5].Parameters["crushRuleset"] != "2" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 }
