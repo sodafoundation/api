@@ -27,5 +27,7 @@ import:
   - context
 - package: google.golang.org/grpc
   version: ^1.2.1
+- package: github.com/go-ini/ini
+  version: ^1.28.2
 testImport:
 - package: github.com/bouk/monkey
