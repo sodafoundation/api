@@ -21,7 +21,15 @@ operations of volume and return a fake value.
 package upsplugin
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+
 	api "github.com/opensds/opensds/pkg/model"
+)
+
+const (
+	upspluginPoolConfig = "/etc/opensds/pool.json"
 )
 
 type Plugin struct{}
@@ -67,4 +75,36 @@ func (p *Plugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 
 func (p *Plugin) DeleteSnapshot(snapID string) error {
 	return nil
+}
+
+func (p *Plugin) ListPools() (*[]api.StoragePoolSpec, error) {
+	pools, err := readPoolsFromFile()
+	if err != nil {
+		log.Println("Could not read pool resource:", err)
+		return &[]api.StoragePoolSpec{}, err
+	}
+
+	return &pools, nil
+}
+
+func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
+	var pools []api.StoragePoolSpec
+
+	userJSON, err := ioutil.ReadFile(upspluginPoolConfig)
+	if err != nil {
+		log.Println("ReadFile json failed:", err)
+		return pools, err
+	}
+
+	// If the pool resource is empty, consider it as a normal condition
+	if len(userJSON) == 0 {
+		return pools, nil
+	}
+
+	// Unmarshal the result
+	if err = json.Unmarshal(userJSON, &pools); err != nil {
+		log.Println("Unmarshal json failed:", err)
+		return pools, err
+	}
+	return pools, nil
 }

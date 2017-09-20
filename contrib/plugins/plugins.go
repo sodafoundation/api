@@ -50,6 +50,8 @@ type VolumePlugin interface {
 	GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error)
 
 	DeleteSnapshot(snapID string) error
+
+	ListPools() (*[]api.StoragePoolSpec, error)
 }
 
 func InitVP(resourceType string) VolumePlugin {

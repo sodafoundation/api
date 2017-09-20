@@ -26,11 +26,12 @@ import (
 
 	api "github.com/opensds/opensds/pkg/model"
 
+	"os/exec"
+	"strconv"
+
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	"github.com/satori/go.uuid"
-	"os/exec"
-	"strconv"
 )
 
 const (
@@ -697,7 +698,7 @@ func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
 	return nil
 }
 
-func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
+func (plugin *CephPlugin) ListPools() (*[]api.StoragePoolSpec, error) {
 	var imgMgr = &ImageMgr{}
 
 	var poolList []api.StoragePoolSpec
@@ -721,5 +722,5 @@ func (plugin *CephPlugin) ListPools() ([]api.StoragePoolSpec, error) {
 		}
 		poolList = append(poolList, pool)
 	}
-	return poolList, nil
+	return &poolList, nil
 }
