@@ -1,16 +1,30 @@
+// Copyright (c) 2016 OpenSDS Authors.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
 package utils
 
 import (
-	"github.com/Unknwon/goconfig"
+	"github.com/go-ini/ini"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
+	gflag "flag"
 )
 
 const (
-	CONF_NAME=iota
-	CONF_DEFULT_VLAUE
+	ConfKeyName = iota
+	ConfDefaultValue
 )
 
 type OsdsLet struct {
@@ -26,7 +40,7 @@ type OsdsDock struct {
 }
 
 type Database struct {
-	Credential string `conf:"credential"`
+	Credential string `conf:"credential,username:password@tcp(ip:port)/dbname"`
 	Driver     string `conf:"driver,etcd"`
 	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
 }
@@ -35,13 +49,14 @@ type Default struct {
 }
 
 type Config struct {
-	Default    `conf:"default"`
-	OsdsLet    `conf:"osdslet"`
-	OsdsDock   `conf:"osdsdock"`
-	Database   `conf:"database"`
+	Default  `conf:"default"`
+	OsdsLet  `conf:"osdslet"`
+	OsdsDock `conf:"osdsdock"`
+	Database `conf:"database"`
+	Flag     FlagSet
 }
 
-func setSectionValue(section string, v reflect.Value, cfg *goconfig.ConfigFile) {
+func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 	for i := 0; i < v.Type().NumField(); i++ {
 
 		field := v.Field(i)
@@ -52,11 +67,13 @@ func setSectionValue(section string, v reflect.Value, cfg *goconfig.ConfigFile) 
 		}
 
 		var strVal = ""
-		if len(tags) > 1 {
-			strVal = tags[CONF_DEFULT_VLAUE]
-		}
 		if cfg != nil {
-			strVal, _ = cfg.GetValue(section, tags[CONF_NAME])
+			key, _ := cfg.Section(section).GetKey(tags[ConfKeyName])
+			strVal = key.Value()
+		} else if len(tags) > 1 {
+			strVal = tags[ConfDefaultValue]
+		} else {
+			continue
 		}
 
 		switch field.Kind() {
@@ -80,8 +97,8 @@ func setSectionValue(section string, v reflect.Value, cfg *goconfig.ConfigFile) 
 }
 
 func initConf(confFile string, conf interface{}) {
-	cfg, err := goconfig.LoadConfigFile(confFile)
-	if err != nil {
+	cfg, err := ini.Load(confFile)
+	if err != nil && confFile != ""{
 		log.Println("[Info] Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
@@ -93,8 +110,19 @@ func initConf(confFile string, conf interface{}) {
 	}
 }
 
-var CONF * Config = new(Config)
-func (conf *Config)Load(confFile string) {
-		initConf(confFile, CONF)
+//New a Config and init default value.
+func newConfig() *Config {
+	var conf *Config = new(Config)
+	initConf("", conf)
+	return conf
 }
+
+func (c *Config) Load(confFile string) {
+	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
+	c.Flag.Parse()
+	initConf(confFile, CONF)
+	c.Flag.AssignValue()
+}
+
+var CONF *Config = newConfig()
 
