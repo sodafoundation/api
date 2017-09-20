@@ -1,5 +1,5 @@
-hash: de4065240b1720544432bcc04db54ebad0f2386b17ab283212a65680c4d12465
-updated: 2017-09-19T11:33:41.061170883+08:00
+hash: ac651241d7eb4b8b21463e3391a1669d3a4fbbb4cbcc2d8ab68fe97eb2cc1cce
+updated: 2017-09-20T16:48:11.713541949+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -27,6 +27,8 @@ imports:
   - etcdserver/api/v3rpc/rpctypes
   - etcdserver/etcdserverpb
   - mvcc/mvccpb
+- name: github.com/go-ini/ini
+  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
 - name: github.com/go-openapi/errors
   version: 03cfca65330da08a5a440053faf994a3c682b5bf
 - name: github.com/go-openapi/runtime
