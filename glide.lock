@@ -1,5 +1,5 @@
-hash: ac651241d7eb4b8b21463e3391a1669d3a4fbbb4cbcc2d8ab68fe97eb2cc1cce
-updated: 2017-09-20T16:48:11.713541949+08:00
+hash: 60bf6121d010e478dad5218bc216ced7f13c9a379c96fc7ad8677a4d821d34f8
+updated: 2017-09-21T11:42:09.34333753+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -45,6 +45,19 @@ imports:
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
+- name: github.com/gophercloud/gophercloud
+  version: b4c2377fa77951a0e08163f52dc9b3e206355194
+  subpackages:
+  - openstack
+  - openstack/blockstorage/extensions/schedulerstats
+  - openstack/blockstorage/extensions/volumeactions
+  - openstack/blockstorage/v2/snapshots
+  - openstack/blockstorage/v2/volumes
+  - openstack/identity/v2/tenants
+  - openstack/identity/v2/tokens
+  - openstack/identity/v3/tokens
+  - openstack/utils
+  - pagination
 - name: github.com/mailru/easyjson
   version: 2a92e673c9a6302dd05c3a691ae1f24aef46457d
   subpackages:

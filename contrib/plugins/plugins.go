@@ -23,6 +23,7 @@ package plugins
 
 import (
 	"github.com/opensds/opensds/contrib/plugins/ceph"
+	"github.com/opensds/opensds/contrib/plugins/openstack/cinder"
 	"github.com/opensds/opensds/contrib/plugins/upsplugin"
 	api "github.com/opensds/opensds/pkg/model"
 )
@@ -56,6 +57,11 @@ type VolumePlugin interface {
 
 func InitVP(resourceType string) VolumePlugin {
 	switch resourceType {
+	case "cinder":
+		var d = &cinder.Driver{}
+
+		d.Setup()
+		return d
 	case "ceph":
 		return &ceph.CephPlugin{}
 	default:
