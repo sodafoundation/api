@@ -24,20 +24,21 @@ import (
 	"log"
 	"os"
 	"strings"
+
 	"github.com/opensds/opensds/cmd/osdsdock/app"
 	"github.com/opensds/opensds/pkg/db"
+	dockServer "github.com/opensds/opensds/pkg/dock/server"
 	"github.com/opensds/opensds/pkg/utils"
-	dockServer "github.com/opensds/opensds/pkg/grpc/dock/server"
 )
 
 func init() {
 	conf := utils.CONF
 	flag := utils.CONF.Flag
-	flag.StringVar(&conf.OsdsDock.ApiEndpoint,"api-endpoint", conf.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
-	flag.StringVar(&conf.Database.Endpoint,"db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&conf.Database.Driver,"db-driver", conf.Database.Driver, "Driver name of database service")
-	flag.StringVar(&conf.Database.Credential,"db-credential", conf.Database.Credential, "Connection credential of database service")
-	flag.StringVar(&conf.OsdsDock.LogFile,"osdsdocklog-file", conf.OsdsDock.LogFile, "Location of osdsdock log file")
+	flag.StringVar(&conf.OsdsDock.ApiEndpoint, "api-endpoint", conf.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&conf.Database.Endpoint, "db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&conf.Database.Driver, "db-driver", conf.Database.Driver, "Driver name of database service")
+	flag.StringVar(&conf.Database.Credential, "db-credential", conf.Database.Credential, "Connection credential of database service")
+	flag.StringVar(&conf.OsdsDock.LogFile, "osdsdocklog-file", conf.OsdsDock.LogFile, "Location of osdsdock log file")
 	conf.Load("/etc/opensds/opensds.conf")
 	fmt.Println(conf.OsdsDock.ApiEndpoint)
 }
@@ -72,4 +73,3 @@ func main() {
 	// Start the listen mechanism of dock module.
 	dockServer.ListenAndServe(ds)
 }
-

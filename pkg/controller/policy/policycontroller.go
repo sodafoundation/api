@@ -22,7 +22,7 @@ package policy
 
 import (
 	"github.com/opensds/opensds/pkg/controller/policy/executor"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
 )
 

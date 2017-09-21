@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"log"
 
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
 	"google.golang.org/grpc"
 )

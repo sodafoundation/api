@@ -46,7 +46,7 @@ import (
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 
