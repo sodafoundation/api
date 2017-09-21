@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/grpc/dock/client"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	"github.com/opensds/opensds/pkg/dock/client"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"golang.org/x/net/context"
 )
 

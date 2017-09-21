@@ -24,7 +24,7 @@ import (
 	"errors"
 	"log"
 
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 )
 
 type AsynchronizedExecutor interface {
