@@ -22,34 +22,33 @@ package main
 import (
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
 	"strings"
 )
 
 func init() {
-	conf := utils.CONF
-	flag := utils.CONF.Flag
-	flag.StringVar(&conf.OsdsLet.ApiEndpoint, "api-endpoint", conf.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
-	flag.StringVar(&conf.Database.Endpoint, "db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&conf.Database.Driver, "db-driver", conf.Database.Driver, "Driver name of database service")
-	flag.StringVar(&conf.Database.Credential, "db-credential", conf.Database.Credential, "Connection credential of database service")
-	conf.Load("/etc/opensds/opensds.conf")
+	def := GetDefaultConfig()
+	flag := CONF.Flag
+	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", def.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
+	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	CONF.Load("/etc/opensds/opensds.conf")
 }
 
 func main() {
 	// Open OpenSDS orchestrator service log file.
-	conf := utils.CONF
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
 	// Set up database session.
 	db.Init(&db.DBConfig{
-		DriverName: conf.Database.Driver,
-		Endpoints:  strings.Split(conf.Database.Endpoint, ","),
-		Credential: conf.Database.Credential,
+		DriverName: CONF.Database.Driver,
+		Endpoints:  strings.Split(CONF.Database.Endpoint, ","),
+		Credential: CONF.Database.Credential,
 	})
 
 	// Start OpenSDS northbound REST service.
-	api.Run(conf.OsdsLet.ApiEndpoint)
+	api.Run(CONF.OsdsLet.ApiEndpoint)
 }

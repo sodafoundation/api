@@ -12,19 +12,19 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
-package utils
+package config
 
 import (
 	gflag "flag"
-	"testing"
 	"os"
+	"testing"
 
 	"fmt"
 )
 
 func ResetForTesting(usage func()) {
 	gflag.CommandLine = gflag.NewFlagSet(os.Args[0], gflag.ContinueOnError)
-	gflag.CommandLine.Usage = func () {	}
+	gflag.CommandLine.Usage = func() {}
 	gflag.Usage = usage
 }
 
