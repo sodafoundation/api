@@ -22,7 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
@@ -46,7 +46,7 @@ func (this *VolumePortal) CreateVolume() {
 		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -57,7 +57,7 @@ func (this *VolumePortal) CreateVolume() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (this *VolumePortal) CreateVolume() {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (this *VolumePortal) CreateVolume() {
 		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (this *VolumePortal) ListVolumes() {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -103,7 +103,7 @@ func (this *VolumePortal) ListVolumes() {
 		reason := fmt.Sprintf("Marshal volumes listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (this *SpecifiedVolumePortal) GetVolume() {
 		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -135,7 +135,7 @@ func (this *SpecifiedVolumePortal) GetVolume() {
 		reason := fmt.Sprintf("Marshal volume showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -159,7 +159,7 @@ func (this *SpecifiedVolumePortal) DeleteVolume() {
 		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 	volume.Id = volId
@@ -169,7 +169,7 @@ func (this *SpecifiedVolumePortal) DeleteVolume() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -178,7 +178,7 @@ func (this *SpecifiedVolumePortal) DeleteVolume() {
 		reason := fmt.Sprintf("Delete volume failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -188,7 +188,7 @@ func (this *SpecifiedVolumePortal) DeleteVolume() {
 		reason := fmt.Sprintf("Marshal volume deleted result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -210,7 +210,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -219,7 +219,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -228,7 +228,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -238,7 +238,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		reason := fmt.Sprintf("Marshal volume attachment created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -255,7 +255,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -265,7 +265,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 		reason := fmt.Sprintf("Marshal volume attachments listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -287,7 +287,7 @@ func (this *SpecifiedVolumeAttachmentPortal) GetVolumeAttachment() {
 		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -297,7 +297,7 @@ func (this *SpecifiedVolumeAttachmentPortal) GetVolumeAttachment() {
 		reason := fmt.Sprintf("Marshal volume attachment showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -316,7 +316,7 @@ func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
 		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 	attachment.Id = id
@@ -326,7 +326,7 @@ func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -335,7 +335,7 @@ func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
 		reason := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -345,7 +345,7 @@ func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
 		reason := fmt.Sprintf("Marshal volume attachment updated result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -364,7 +364,7 @@ func (this *SpecifiedVolumeAttachmentPortal) DeleteVolumeAttachment() {
 		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 	attachment.Id = id
@@ -374,7 +374,7 @@ func (this *SpecifiedVolumeAttachmentPortal) DeleteVolumeAttachment() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -383,7 +383,7 @@ func (this *SpecifiedVolumeAttachmentPortal) DeleteVolumeAttachment() {
 		reason := fmt.Sprintf("Delete volume attachment failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -393,7 +393,7 @@ func (this *SpecifiedVolumeAttachmentPortal) DeleteVolumeAttachment() {
 		reason := fmt.Sprintf("Marshal volume attachment deleted result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -415,7 +415,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -424,7 +424,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -433,7 +433,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -443,7 +443,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		reason := fmt.Sprintf("Marshal volume snapshot created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -458,7 +458,7 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -468,7 +468,7 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 		reason := fmt.Sprintf("Marshal volume snapshots listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -489,7 +489,7 @@ func (this *SpecifiedVolumeSnapshotPortal) GetVolumeSnapshot() {
 		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -499,7 +499,7 @@ func (this *SpecifiedVolumeSnapshotPortal) GetVolumeSnapshot() {
 		reason := fmt.Sprintf("Marshal volume snapshot showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -522,7 +522,7 @@ func (this *SpecifiedVolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 	snapshot.Id = id
@@ -532,7 +532,7 @@ func (this *SpecifiedVolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -541,7 +541,7 @@ func (this *SpecifiedVolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -551,7 +551,7 @@ func (this *SpecifiedVolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		reason := fmt.Sprintf("Marshal volume snapshot deleted result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 

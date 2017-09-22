@@ -24,7 +24,7 @@ package app
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	log "github.com/golang/glog"
 
 	api "github.com/opensds/opensds/pkg/model"
 )
@@ -32,7 +32,7 @@ import (
 func ListDocks() (*[]api.DockSpec, error) {
 	docks, err := readDocksFromFile()
 	if err != nil {
-		log.Println("Could not read dock resource:", err)
+		log.Error("Could not read dock resource:", err)
 		return &[]api.DockSpec{}, err
 	}
 
@@ -44,7 +44,7 @@ func readDocksFromFile() ([]api.DockSpec, error) {
 
 	userJSON, err := ioutil.ReadFile("/etc/opensds/dock.json")
 	if err != nil {
-		log.Println("ReadFile json failed:", err)
+		log.Error("ReadFile json failed:", err)
 		return docks, err
 	}
 
@@ -55,7 +55,7 @@ func readDocksFromFile() ([]api.DockSpec, error) {
 
 	// Unmarshal the result
 	if err = json.Unmarshal(userJSON, &docks); err != nil {
-		log.Println("Unmarshal json failed:", err)
+		log.Error("Unmarshal json failed:", err)
 		return docks, err
 	}
 	return docks, nil

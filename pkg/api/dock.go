@@ -22,7 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
@@ -40,7 +40,7 @@ func (this *DockPortal) ListDocks() {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (this *DockPortal) ListDocks() {
 		reason := fmt.Sprintf("Marshal docks listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (this *SpecifiedDockPortal) GetDock() {
 		reason := fmt.Sprintf("Get docks failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (this *SpecifiedDockPortal) GetDock() {
 		reason := fmt.Sprintf("Marshal dock showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 

@@ -15,7 +15,7 @@
 package etcd
 
 import (
-	"log"
+	log "github.com/golang/glog"
 
 	"golang.org/x/net/context"
 
@@ -43,7 +43,7 @@ func (c *client) Create(req *Request) *Response {
 
 	_, err := c.cli.Put(ctx, req.Url, req.Content)
 	if err != nil {
-		log.Println("[Error] When create db request:", err)
+		log.Error("When create db request:", err)
 		return &Response{
 			Status: "Failure",
 			Error:  err.Error(),
@@ -65,7 +65,7 @@ func (c *client) Get(req *Request) *Response {
 
 	resp, err := c.cli.Get(ctx, req.Url)
 	if err != nil {
-		log.Println("[Error] When get db request:", err)
+		log.Error("When get db request:", err)
 		return &Response{
 			Status: "Failure",
 			Error:  err.Error(),
@@ -93,7 +93,7 @@ func (c *client) List(req *Request) *Response {
 
 	resp, err := c.cli.Get(ctx, req.Url, clientv3.WithPrefix())
 	if err != nil {
-		log.Println("[Error] When get db request:", err)
+		log.Error("When get db request:", err)
 		return &Response{
 			Status: "Failure",
 			Error:  err.Error(),
@@ -119,7 +119,7 @@ func (c *client) Update(req *Request) *Response {
 
 	_, err := c.cli.Put(ctx, req.Url, req.NewContent)
 	if err != nil {
-		log.Println("[Error] When update db request:", err)
+		log.Error("When update db request:", err)
 		return &Response{
 			Status: "Failure",
 			Error:  err.Error(),
@@ -141,7 +141,7 @@ func (c *client) Delete(req *Request) *Response {
 
 	_, err := c.cli.Delete(ctx, req.Url)
 	if err != nil {
-		log.Println("[Error] When delete db request:", err)
+		log.Error("When delete db request:", err)
 		return &Response{
 			Status: "Failure",
 			Error:  err.Error(),

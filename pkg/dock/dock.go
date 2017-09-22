@@ -21,7 +21,7 @@ storage plugins.
 package dock
 
 import (
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/contrib/plugins"
 	api "github.com/opensds/opensds/pkg/model"
@@ -47,7 +47,7 @@ func (d *DockHub) CreateVolume(name string, size int64) (*api.VolumeSpec, error)
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to create volume...")
+	log.Info("Calling volume plugin to create volume...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.CreateVolume(name, size)
@@ -57,7 +57,7 @@ func (d *DockHub) GetVolume(volID string) (*api.VolumeSpec, error) {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to get volume...")
+	log.Info("Calling volume plugin to get volume...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.GetVolume(volID)
@@ -67,7 +67,7 @@ func (d *DockHub) DeleteVolume(volID string) error {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to delete volume...")
+	log.Info("Calling volume plugin to delete volume...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.DeleteVolume(volID)
@@ -77,12 +77,12 @@ func (d *DockHub) CreateVolumeAttachment(volID string, doLocalAttach, multiPath 
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to initialize connection...")
+	log.Info("Calling volume plugin to initialize connection...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	connInfo, err := d.VolumePlugin.InitializeConnection(volID, doLocalAttach, multiPath, hostInfo)
 	if err != nil {
-		log.Println("Call plugin to initialize volume connection failed:", err)
+		log.Error("Call plugin to initialize volume connection failed:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 
@@ -96,7 +96,7 @@ func (d *DockHub) UpdateVolumeAttachment(volID, host, mountpoint string) error {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to attach volume...")
+	log.Info("Calling volume plugin to attach volume...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.AttachVolume(volID, host, mountpoint)
@@ -106,7 +106,7 @@ func (d *DockHub) DeleteVolumeAttachment(volID string) error {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to detach volume...")
+	log.Info("Calling volume plugin to detach volume...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.DetachVolume(volID)
@@ -116,7 +116,7 @@ func (d *DockHub) CreateSnapshot(name, volID, description string) (*api.VolumeSn
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to create snapshot...")
+	log.Info("Calling volume plugin to create snapshot...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.CreateSnapshot(name, volID, description)
@@ -126,7 +126,7 @@ func (d *DockHub) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to get snapshot...")
+	log.Info("Calling volume plugin to get snapshot...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.GetSnapshot(snapID)
@@ -136,7 +136,7 @@ func (d *DockHub) DeleteSnapshot(snapID string) error {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to delete snapshot...")
+	log.Info("Calling volume plugin to delete snapshot...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.DeleteSnapshot(snapID)
@@ -146,7 +146,7 @@ func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
 	//Get the storage plugins and do some initializations.
 	d.VolumePlugin = plugins.InitVP(d.ResourceType)
 
-	log.Println("[Info] Calling volume plugin to list pools...")
+	log.Info("Calling volume plugin to list pools...")
 
 	//Call function of StoragePlugins configured by storage plugins.
 	return d.VolumePlugin.ListPools()

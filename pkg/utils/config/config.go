@@ -15,7 +15,7 @@ package config
 
 import (
 	"github.com/go-ini/ini"
-	"log"
+	log "github.com/golang/glog"
 	"reflect"
 	"strconv"
 	"strings"
@@ -69,7 +69,7 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 func initConf(confFile string, conf interface{}) {
 	cfg, err := ini.Load(confFile)
 	if err != nil && confFile != "" {
-		log.Println("[Info] Read configuration failed, use default value")
+		log.Info("Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
 	v := reflect.ValueOf(conf)

@@ -23,7 +23,7 @@ package executor
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 	"strconv"
 	"strings"
 	"time"
@@ -61,7 +61,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 	}
 	num, err := ParseInterval(ise.Interval)
 	if err != nil {
-		log.Println("[Error] When parse snapshot interval:", err)
+		log.Error("When parse snapshot interval:", err)
 		return err
 	}
 
@@ -71,7 +71,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 			time.Sleep(time.Second)
 		}
 		if _, err = ise.Client.CreateVolumeSnapshot(context.Background(), ise.Request); err != nil {
-			log.Printf("[Error] When %dth create volume snapshot: %v\n", i+1, err)
+			log.Errorf("When %dth create volume snapshot: %v\n", i+1, err)
 			return err
 		}
 	}

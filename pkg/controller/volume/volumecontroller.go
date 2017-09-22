@@ -22,7 +22,7 @@ package volume
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/dock/client"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -61,20 +61,20 @@ type controller struct {
 
 func (c *controller) CreateVolume() (*api.VolumeSpec, error) {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil, err
 	}
 
 	result, err := c.Client.CreateVolume(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Create volume failed in volume controller:", err)
+		log.Error("Create volume failed in volume controller:", err)
 		return &api.VolumeSpec{}, err
 	}
 	defer c.Client.Close()
 
 	var vol = &api.VolumeSpec{}
 	if err = json.Unmarshal([]byte(result.GetMessage()), vol); err != nil {
-		log.Println("[Error] Create volume failed in volume controller:", err)
+		log.Error("Create volume failed in volume controller:", err)
 		return &api.VolumeSpec{}, err
 	}
 	return vol, nil
@@ -82,13 +82,13 @@ func (c *controller) CreateVolume() (*api.VolumeSpec, error) {
 
 func (c *controller) DeleteVolume() *api.Response {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil
 	}
 
 	result, err := c.Client.DeleteVolume(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Delete volume failed in volume controller:", err)
+		log.Error("Delete volume failed in volume controller:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
@@ -104,20 +104,20 @@ func (c *controller) DeleteVolume() *api.Response {
 
 func (c *controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil, err
 	}
 
 	result, err := c.Client.CreateVolumeAttachment(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Create volume failed in volume controller:", err)
+		log.Error("Create volume failed in volume controller:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	defer c.Client.Close()
 
 	var atc = &api.VolumeAttachmentSpec{}
 	if err = json.Unmarshal([]byte(result.GetMessage()), atc); err != nil {
-		log.Println("[Error] Create volume failed in volume controller:", err)
+		log.Error("Create volume failed in volume controller:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	return atc, nil
@@ -125,20 +125,20 @@ func (c *controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 
 func (c *controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil, err
 	}
 
 	result, err := c.Client.UpdateVolumeAttachment(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Update volume attachment failed in volume controller:", err)
+		log.Error("Update volume attachment failed in volume controller:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	defer c.Client.Close()
 
 	var atc = &api.VolumeAttachmentSpec{}
 	if err = json.Unmarshal([]byte(result.GetMessage()), atc); err != nil {
-		log.Println("[Error] Update volume attachment failed in volume controller:", err)
+		log.Error("Update volume attachment failed in volume controller:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	return atc, nil
@@ -146,13 +146,13 @@ func (c *controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 
 func (c *controller) DeleteVolumeAttachment() *api.Response {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil
 	}
 
 	result, err := c.Client.DeleteVolumeAttachment(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Delete volume attachment failed in volume controller:", err)
+		log.Error("Delete volume attachment failed in volume controller:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
@@ -168,20 +168,20 @@ func (c *controller) DeleteVolumeAttachment() *api.Response {
 
 func (c *controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil, err
 	}
 
 	result, err := c.Client.CreateVolumeSnapshot(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Create volume snapshot failed in volume controller:", err)
+		log.Error("Create volume snapshot failed in volume controller:", err)
 		return &api.VolumeSnapshotSpec{}, err
 	}
 	defer c.Client.Close()
 
 	var snp = &api.VolumeSnapshotSpec{}
 	if err = json.Unmarshal([]byte(result.GetMessage()), snp); err != nil {
-		log.Println("[Error] Create volume snapshot failed in volume controller:", err)
+		log.Error("Create volume snapshot failed in volume controller:", err)
 		return &api.VolumeSnapshotSpec{}, err
 	}
 	return snp, nil
@@ -189,13 +189,13 @@ func (c *controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
 
 func (c *controller) DeleteVolumeSnapshot() *api.Response {
 	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return nil
 	}
 
 	result, err := c.Client.DeleteVolumeSnapshot(context.Background(), c.Request)
 	if err != nil {
-		log.Println("[Error] Delete volume snapshot failed in volume controller:", err)
+		log.Error("Delete volume snapshot failed in volume controller:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
