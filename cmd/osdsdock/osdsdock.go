@@ -25,7 +25,6 @@ import (
 	dockServer "github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
-	"strings"
 )
 
 func init() {
@@ -44,11 +43,7 @@ func main() {
 	defer logs.FlushLogs()
 
 	// Set up database session.
-	db.Init(&db.DBConfig{
-		DriverName: CONF.Database.Driver,
-		Endpoints:  strings.Split(CONF.Database.Endpoint, ","),
-		Credential: CONF.Database.Credential,
-	})
+	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
 	if err := app.ResourceDiscovery(); err != nil {

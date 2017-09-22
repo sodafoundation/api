@@ -22,29 +22,25 @@ package db
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
 	_ "github.com/opensds/opensds/pkg/db/drivers/mysql"
 	api "github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/pkg/utils/config"
 )
 
 var C Client
 
-type DBConfig struct {
-	DriverName string
-	Endpoints  []string
-	Credential string
-}
-
-func Init(conf *DBConfig) {
-	switch conf.DriverName {
+func Init(db *Database) {
+	switch db.Driver {
 	case "mysql":
-		// C = mysql.Init(conf.DriverName, conf.Crendential)
+		// C = mysql.Init(db.Driver, db.Crendential)
 		fmt.Errorf("mysql is not implemented right now!")
 	case "etcd":
-		C = etcd.Init(conf.Endpoints)
+		C = etcd.Init(strings.Split(db.Endpoint, ","))
 	default:
-		fmt.Errorf("Can't find database driver %s!\n", conf.DriverName)
+		fmt.Errorf("Can't find database driver %s!\n", db.Driver)
 	}
 }
 
