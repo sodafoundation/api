@@ -39,20 +39,12 @@ import (
 
 var conf = CinderConfig{}
 
-func init() {
-	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
-	if err != nil {
-		panic(err)
-	}
-	if err = json.Unmarshal(userJSON, &conf); err != nil {
-		panic(err)
-	}
-}
-
 type Driver struct {
+	// Current block storage version
 	blockStoragev2 *gophercloud.ServiceClient
 	blockStoragev3 *gophercloud.ServiceClient
-	config         CinderConfig
+
+	config CinderConfig
 }
 
 type CinderConfig struct {
@@ -66,7 +58,16 @@ type CinderConfig struct {
 }
 
 func (d *Driver) Setup() {
-	var err error
+	// Read cinder config file
+	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
+	if err != nil {
+		panic(err)
+	}
+
+	// Marshal the result
+	if err = json.Unmarshal(userJSON, &conf); err != nil {
+		panic(err)
+	}
 
 	d.config = conf
 
