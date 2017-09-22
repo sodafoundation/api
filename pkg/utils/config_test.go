@@ -140,16 +140,10 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.OsdsLet.Graceful != true {
 		t.Error("Test OsdsLet.Graceful error")
 	}
-	if CONF.OsdsLet.LogFile != "/var/log/opensds/osdslet.log" {
-		t.Error("Test OsdsLet.LogFile error")
-	}
 	if CONF.OsdsLet.SocketOrder != "inc" {
 		t.Error("Test OsdsLet.SocketOrder error")
 	}
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
-		t.Error("Test OsdsLet.ApiEndpoint error")
-	}
-	if CONF.OsdsDock.LogFile != "/var/log/opensds/osdsdock.log" {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {

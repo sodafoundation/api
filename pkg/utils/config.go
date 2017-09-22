@@ -14,12 +14,12 @@
 package utils
 
 import (
+	gflag "flag"
 	"github.com/go-ini/ini"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
-	gflag "flag"
 )
 
 const (
@@ -30,13 +30,11 @@ const (
 type OsdsLet struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
 	Graceful    bool   `conf:"graceful,true"`
-	LogFile     string `conf:"log_file,/var/log/opensds/osdslet.log"`
 	SocketOrder string `conf:"socket_order"`
 }
 
 type OsdsDock struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50050"`
-	LogFile     string `conf:"log_file,/var/log/opensds/osdsdock.log"`
 }
 
 type Database struct {
@@ -98,7 +96,7 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 
 func initConf(confFile string, conf interface{}) {
 	cfg, err := ini.Load(confFile)
-	if err != nil && confFile != ""{
+	if err != nil && confFile != "" {
 		log.Println("[Info] Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
@@ -125,4 +123,3 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = newConfig()
-
