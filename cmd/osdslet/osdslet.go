@@ -24,7 +24,6 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/logs"
-	"log"
 	"strings"
 )
 
