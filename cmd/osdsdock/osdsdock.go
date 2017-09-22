@@ -23,19 +23,19 @@ import (
 	"github.com/opensds/opensds/cmd/osdsdock/app"
 	"github.com/opensds/opensds/pkg/db"
 	dockServer "github.com/opensds/opensds/pkg/dock/server"
-	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
 	"strings"
 )
 
 func init() {
-	conf := utils.CONF
-	flag := utils.CONF.Flag
-	flag.StringVar(&conf.OsdsDock.ApiEndpoint, "api-endpoint", conf.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
-	flag.StringVar(&conf.Database.Endpoint, "db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&conf.Database.Driver, "db-driver", conf.Database.Driver, "Driver name of database service")
-	flag.StringVar(&conf.Database.Credential, "db-credential", conf.Database.Credential, "Connection credential of database service")
-	conf.Load("/etc/opensds/opensds.conf")
+	def := GetDefaultConfig()
+	flag := CONF.Flag
+	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
+	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	CONF.Load("/etc/opensds/opensds.conf")
 }
 
 func main() {
@@ -45,9 +45,9 @@ func main() {
 
 	// Set up database session.
 	db.Init(&db.DBConfig{
-		DriverName: utils.CONF.Database.Driver,
-		Endpoints:  strings.Split(utils.CONF.Database.Endpoint, ","),
-		Credential: utils.CONF.Database.Credential,
+		DriverName: CONF.Database.Driver,
+		Endpoints:  strings.Split(CONF.Database.Endpoint, ","),
+		Credential: CONF.Database.Credential,
 	})
 
 	// Automatically discover dock and pool resources from backends.
@@ -56,7 +56,8 @@ func main() {
 	}
 
 	// Construct dock module grpc server struct and do some initialization.
-	ds := dockServer.NewDockServer(utils.CONF.OsdsDock.ApiEndpoint)
+	ds := dockServer.NewDockServer(CONF.OsdsDock.ApiEndpoint)
 	// Start the listen mechanism of dock module.
 	dockServer.ListenAndServe(ds)
 }
+

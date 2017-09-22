@@ -11,10 +11,9 @@
 //    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 //    License for the specific language governing permissions and limitations
 //    under the License.
-package utils
+package config
 
 import (
-	gflag "flag"
 	"github.com/go-ini/ini"
 	"log"
 	"reflect"
@@ -26,33 +25,6 @@ const (
 	ConfKeyName = iota
 	ConfDefaultValue
 )
-
-type OsdsLet struct {
-	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
-	Graceful    bool   `conf:"graceful,true"`
-	SocketOrder string `conf:"socket_order"`
-}
-
-type OsdsDock struct {
-	ApiEndpoint string `conf:"api_endpoint,localhost:50050"`
-}
-
-type Database struct {
-	Credential string `conf:"credential,username:password@tcp(ip:port)/dbname"`
-	Driver     string `conf:"driver,etcd"`
-	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
-}
-
-type Default struct {
-}
-
-type Config struct {
-	Default  `conf:"default"`
-	OsdsLet  `conf:"osdslet"`
-	OsdsDock `conf:"osdsdock"`
-	Database `conf:"database"`
-	Flag     FlagSet
-}
 
 func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 	for i := 0; i < v.Type().NumField(); i++ {
@@ -96,7 +68,7 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 
 func initConf(confFile string, conf interface{}) {
 	cfg, err := ini.Load(confFile)
-	if err != nil && confFile != "" {
+	if err != nil && confFile != ""{
 		log.Println("[Info] Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
@@ -108,18 +80,3 @@ func initConf(confFile string, conf interface{}) {
 	}
 }
 
-//New a Config and init default value.
-func newConfig() *Config {
-	var conf *Config = new(Config)
-	initConf("", conf)
-	return conf
-}
-
-func (c *Config) Load(confFile string) {
-	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
-	c.Flag.Parse()
-	initConf(confFile, CONF)
-	c.Flag.AssignValue()
-}
-
-var CONF *Config = newConfig()
