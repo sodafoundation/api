@@ -46,4 +46,3 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = new(Config)
-

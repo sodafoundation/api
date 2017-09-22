@@ -52,4 +52,3 @@ func main() {
 	// Start OpenSDS northbound REST service.
 	api.Run(CONF.OsdsLet.ApiEndpoint)
 }
-

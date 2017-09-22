@@ -68,7 +68,7 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 
 func initConf(confFile string, conf interface{}) {
 	cfg, err := ini.Load(confFile)
-	if err != nil && confFile != ""{
+	if err != nil && confFile != "" {
 		log.Println("[Info] Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
@@ -79,4 +79,3 @@ func initConf(confFile string, conf interface{}) {
 		setSectionValue(section, field, cfg)
 	}
 }
-

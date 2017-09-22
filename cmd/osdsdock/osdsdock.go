@@ -60,4 +60,3 @@ func main() {
 	// Start the listen mechanism of dock module.
 	dockServer.ListenAndServe(ds)
 }
-

@@ -156,4 +156,3 @@ func TestOpensdsConfig(t *testing.T) {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
 }
-
