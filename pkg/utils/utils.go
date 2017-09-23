@@ -17,14 +17,17 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/golang/glog"
 	"net/http"
 	"reflect"
 	"time"
 
+	log "github.com/golang/glog"
+
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/satori/go.uuid"
 )
+
+var S = NewSetter()
 
 type Setter interface {
 	SetUuid(m model.Modeler) error
@@ -117,6 +120,26 @@ func ErrorStatus(code int, message string) []byte {
 		return []byte("Failed to mashal error response: " + err.Error())
 	}
 	return body
+}
+
+func ValidateData(m model.Modeler, s Setter) error {
+	// If uuid is null, generate it randomly.
+	if m.GetId() == "" {
+		if ok := s.SetUuid(m); ok != nil {
+			log.Error("When set uuid:", ok)
+			return ok
+		}
+	}
+
+	// If created time is null, set dock created time.
+	if m.GetCreatedTime() == "" {
+		if ok := s.SetCreatedTimeStamp(m); ok != nil {
+			log.Error("When set created time:", ok)
+			return ok
+		}
+	}
+
+	return nil
 }
 
 func Contained(obj, target interface{}) bool {

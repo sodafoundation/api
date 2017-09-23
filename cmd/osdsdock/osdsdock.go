@@ -20,8 +20,8 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"github.com/opensds/opensds/cmd/osdsdock/app"
 	"github.com/opensds/opensds/pkg/db"
+	app "github.com/opensds/opensds/pkg/dock/discovery"
 	dockServer "github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -46,7 +46,7 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	if err := app.ResourceDiscovery(); err != nil {
+	if err := app.Discovery(app.NewDiscover()); err != nil {
 		panic(err)
 	}
 
