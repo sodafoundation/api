@@ -21,7 +21,7 @@ operation requests about volume to go-ceph module.
 package ceph
 
 import (
-	"log"
+	log "github.com/golang/glog"
 	"strings"
 
 	api "github.com/opensds/opensds/pkg/model"
@@ -137,23 +137,23 @@ type ImageMgr struct {
 func (imgMgr *ImageMgr) Init() error {
 	conn, err := rados.NewConn()
 	if err != nil {
-		log.Println("[Error] New connect failed:", err)
+		log.Error("New connect failed:", err)
 		return err
 	}
 	if err = conn.ReadDefaultConfigFile(); err != nil {
-		log.Println("[Error] Read config file failed:", err)
+		log.Error("Read config file failed:", err)
 		return err
 	}
 	if err = conn.Connect(); err != nil {
-		log.Println("[Error] Connect failed:", err)
+		log.Error("Connect failed:", err)
 		return err
 	}
 
-	log.Println("[Info] Connect ceph cluster ok!")
+	log.Info("Connect ceph cluster ok!")
 
 	imgMgr.Ioctx, err = conn.OpenIOContext("rbd")
 	if err != nil {
-		log.Println("[Error] Open IO context failed:", err)
+		log.Error("Open IO context failed:", err)
 		return err
 	}
 
@@ -171,7 +171,7 @@ func (imgMgr *ImageMgr) CreateImage(name string, size int64) (*Response, error) 
 
 	_, err := rbd.Create(imgMgr.Ioctx, imageName.GetFullName(), uint64(size)<<SIZE_SHIFT_BIT, 20)
 	if err != nil {
-		log.Println("[Error] When create rbd image:", err)
+		log.Error("When create rbd image:", err)
 		return &Response{}, err
 	}
 
@@ -186,7 +186,7 @@ func (imgMgr *ImageMgr) CreateImage(name string, size int64) (*Response, error) 
 func (imgMgr *ImageMgr) getImage(volID string) (*rbd.Image, *Name, error) {
 	imageNames, err := rbd.GetImageNames(imgMgr.Ioctx)
 	if err != nil {
-		log.Println("[Error] When getImageNames:", err)
+		log.Error("When getImageNames:", err)
 		return nil, nil, err
 	}
 	for _, fullName := range imageNames {
@@ -200,14 +200,14 @@ func (imgMgr *ImageMgr) getImage(volID string) (*rbd.Image, *Name, error) {
 
 func (imgMgr *ImageMgr) getSize(img *rbd.Image) int64 {
 	if img.Open() != nil {
-		log.Println("[Error] When open image!")
+		log.Error("When open image!")
 		return 0
 	}
 	defer img.Close()
 
 	size, err := img.GetSize()
 	if err != nil {
-		log.Println("[Error] When get image size:", err)
+		log.Error("When get image size:", err)
 		return 0
 	}
 	return int64(size >> SIZE_SHIFT_BIT)
@@ -219,18 +219,18 @@ func (imgMgr *ImageMgr) RemoveImage(volID string) error {
 		return err
 	}
 	if err = img.Remove(); err != nil {
-		log.Println("[Error] When remove image:", err)
+		log.Error("When remove image:", err)
 		return err
 	}
 
-	log.Println("[Info] Remove image success, volume id =", volID)
+	log.Info("Remove image success, volume id =", volID)
 	return nil
 }
 
 func (imgMgr *ImageMgr) GetImage(volID string) (*Response, error) {
 	img, name, err := imgMgr.getImage(volID)
 	if err != nil {
-		log.Println("[Error] When get image:", err)
+		log.Error("When get image:", err)
 		return &Response{}, err
 	}
 
@@ -244,7 +244,7 @@ func (imgMgr *ImageMgr) GetImage(volID string) (*Response, error) {
 func (imgMgr *ImageMgr) GetImages() (*[]Response, error) {
 	imageNames, err := rbd.GetImageNames(imgMgr.Ioctx)
 	if err != nil {
-		log.Println("[Error] When getImageNames:", err)
+		log.Error("When getImageNames:", err)
 		return &[]Response{}, err
 	}
 
@@ -269,19 +269,19 @@ func (imgMgr *ImageMgr) GetImages() (*[]Response, error) {
 func (imgMgr *ImageMgr) CreateSnapshot(volID, snapshotName string) (*SnapshotResponse, error) {
 	img, _, err := imgMgr.getImage(volID)
 	if err != nil {
-		log.Println("[Error] When get image:", err)
+		log.Error("When get image:", err)
 		return &SnapshotResponse{}, err
 	}
 
 	if err = img.Open(); err != nil {
-		log.Println("[Error] When open image:", err)
+		log.Error("When open image:", err)
 		return &SnapshotResponse{}, err
 	}
 	defer img.Close()
 
 	name := NewName(snapshotName)
 	if _, err = img.CreateSnapshot(name.GetFullName()); err != nil {
-		log.Println("[Error] When create snapshot:", err)
+		log.Error("When create snapshot:", err)
 		return &SnapshotResponse{}, err
 	}
 	return &SnapshotResponse{
@@ -295,7 +295,7 @@ func (imgMgr *ImageMgr) CreateSnapshot(volID, snapshotName string) (*SnapshotRes
 func (imgMgr *ImageMgr) RemoveSnapshot(id string) error {
 	imageNames, err := rbd.GetImageNames(imgMgr.Ioctx)
 	if err != nil {
-		log.Println("[Error] When getImageNames:", err)
+		log.Error("When getImageNames:", err)
 		return err
 	}
 
@@ -311,13 +311,13 @@ EXIT:
 		}
 		img = rbd.GetImage(imgMgr.Ioctx, name)
 		if err = img.Open(); err != nil {
-			log.Println("[Error] When open image:", err)
+			log.Error("When open image:", err)
 			return err
 		}
 		snapInfos, err := img.GetSnapshotNames()
 		img.Close()
 		if err != nil {
-			log.Println("[Error] When GetSnapshotNames:", err)
+			log.Error("When GetSnapshotNames:", err)
 			continue
 		}
 		for _, snapInfo = range snapInfos {
@@ -329,16 +329,16 @@ EXIT:
 	}
 
 	if err = img.Open(snapInfo.Name); err != nil {
-		log.Println("[Error] When open image:", err)
+		log.Error("When open image:", err)
 	}
 	defer img.Close()
 
 	snapshot := img.GetSnapshot(snapInfo.Name)
 	if err = snapshot.Remove(); err != nil {
-		log.Println("[Error] When remove snapshot:", err)
+		log.Error("When remove snapshot:", err)
 		return err
 	}
-	log.Printf("[Info] Delete snapshot {%s} success", ParseName(snapInfo.Name).GetUUID())
+	log.Info("Delete snapshot {%s} success", ParseName(snapInfo.Name).GetUUID())
 	return nil
 }
 
@@ -358,7 +358,7 @@ func (imgMgr *ImageMgr) GetSnapshot(id string) (*SnapshotResponse, error) {
 func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 	imageNames, err := rbd.GetImageNames(imgMgr.Ioctx)
 	if err != nil {
-		log.Println("[Error] When getImageNames:", err)
+		log.Error("When getImageNames:", err)
 		return &[]SnapshotResponse{}, err
 	}
 
@@ -370,13 +370,13 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 		}
 		img := rbd.GetImage(imgMgr.Ioctx, name)
 		if err = img.Open(); err != nil {
-			log.Println("[Error] When open image:", err)
+			log.Error("When open image:", err)
 			return &[]SnapshotResponse{}, err
 		}
 		snapInfos, err := img.GetSnapshotNames()
 		img.Close()
 		if err != nil {
-			log.Println("[Error] When GetSnapshotNames:", err)
+			log.Error("When GetSnapshotNames:", err)
 			continue
 		}
 		for _, snapInfo := range snapInfos {
@@ -395,7 +395,7 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 func execCmd(cmd string) (string, error) {
 	ret, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err.Error())
 		return "", err
 	}
 	return string(ret[:len(ret)-1]), nil
@@ -415,13 +415,13 @@ func (imgMgr *ImageMgr) parseCapStr(cap string) int64 {
 	unit := strings.ToUpper(cap[len(cap)-1:])
 	num, err := strconv.ParseInt(cap[:len(cap)-1], 10, 64)
 	if err != nil {
-		log.Println("[Error] Cannot convert this number", err)
+		log.Error("Cannot convert this number", err)
 		return 0
 	}
 	if val, ok := UnitMapper[unit]; ok {
 		return num << val >> SIZE_SHIFT_BIT
 	} else {
-		log.Println("[Error] strage unit is not found.")
+		log.Error("strage unit is not found.")
 		return 0
 	}
 }
@@ -430,7 +430,7 @@ func (imgMgr *ImageMgr) getPoolsCapInfo() ([][]string, error) {
 	const poolStartLine = 5
 	output, err := execCmd("ceph df")
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 	lines := strings.Split(output, "\n")
@@ -445,7 +445,7 @@ func (imgMgr *ImageMgr) getGlobalCapInfo() ([]string, error) {
 	const globalCapInfoLine = 2
 	output, err := execCmd("ceph df")
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 	lines := strings.Split(output, "\n")
@@ -456,7 +456,7 @@ func (imgMgr *ImageMgr) getPoolsAttr() (map[string][]string, error) {
 	cmd := "ceph osd pool ls detail | grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
 	output, err := execCmd(cmd)
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 	lines := strings.Split(output, "\n")
@@ -488,17 +488,17 @@ func (imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{} {
 func (imgMgr *ImageMgr) ListPools() (*[]PoolResponse, error) {
 	pc, err := imgMgr.getPoolsCapInfo()
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 	gc, err := imgMgr.getGlobalCapInfo()
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 	pa, err := imgMgr.getPoolsAttr()
 	if err != nil {
-		log.Println("[Error]:", err)
+		log.Error("[Error]:", err)
 		return nil, err
 	}
 
@@ -532,7 +532,7 @@ func (plugin *CephPlugin) Unset() {}
 func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if err := imgMgr.Init(); err != nil {
-		log.Println("[Error] Connect ceph error.")
+		log.Error("Connect ceph error.")
 		return &api.VolumeSpec{}, err
 	}
 
@@ -540,11 +540,11 @@ func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec
 
 	vol, err := imgMgr.CreateImage(name, size)
 	if err != nil {
-		log.Println("[Error] When create volume:", err)
+		log.Error("When create volume:", err)
 		return &api.VolumeSpec{}, err
 	}
 
-	log.Println("[Info] Create volume success, dls =", vol)
+	log.Info("Create volume success, dls =", vol)
 	return &api.VolumeSpec{
 		BaseModel: &api.BaseModel{
 			Id: vol.Id,
@@ -559,18 +559,18 @@ func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec
 func (plugin *CephPlugin) GetVolume(volID string) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	vol, err := imgMgr.GetImage(volID)
 	if err != nil {
-		log.Println("[Error] When get volume:", err)
+		log.Error("When get volume:", err)
 		return &api.VolumeSpec{}, err
 	}
 
-	log.Println("[Info] Get volume success, dls =", vol)
+	log.Info("Get volume success, dls =", vol)
 	return &api.VolumeSpec{
 		BaseModel: &api.BaseModel{
 			Id: vol.Id,
@@ -585,13 +585,13 @@ func (plugin *CephPlugin) GetVolume(volID string) (*api.VolumeSpec, error) {
 func (plugin *CephPlugin) DeleteVolume(volID string) error {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	if err := imgMgr.RemoveImage(volID); err != nil {
-		log.Println("[Error] When delete volume:", err)
+		log.Error("When delete volume:", err)
 		return err
 	}
 	return nil
@@ -600,14 +600,14 @@ func (plugin *CephPlugin) DeleteVolume(volID string) error {
 func (plugin *CephPlugin) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	img, err := imgMgr.GetImage(volID)
 	if err != nil {
-		log.Println("[Error] When get image:", err)
+		log.Error("When get image:", err)
 		return nil, err
 	}
 
@@ -636,18 +636,18 @@ func (plugin *CephPlugin) DetachVolume(volID string) error {
 func (plugin *CephPlugin) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	snapshot, err := imgMgr.CreateSnapshot(volID, name)
 	if err != nil {
-		log.Println("[Error] When create snapshot:", err)
+		log.Error("When create snapshot:", err)
 		return &api.VolumeSnapshotSpec{}, err
 	}
 
-	log.Println("[Info] Create snapshot success, dls =", snapshot)
+	log.Info("Create snapshot success, dls =", snapshot)
 	return &api.VolumeSnapshotSpec{
 		BaseModel: &api.BaseModel{
 			Id: snapshot.ID,
@@ -662,18 +662,18 @@ func (plugin *CephPlugin) CreateSnapshot(name, volID, description string) (*api.
 func (plugin *CephPlugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	snapshot, err := imgMgr.GetSnapshot(snapID)
 	if err != nil {
-		log.Println("[Error] When get snapshot:", err)
+		log.Error("When get snapshot:", err)
 		return &api.VolumeSnapshotSpec{}, err
 	}
 
-	log.Println("[Info] Get volume snapshot success, dls =", snapshot)
+	log.Info("Get volume snapshot success, dls =", snapshot)
 	return &api.VolumeSnapshotSpec{
 		BaseModel: &api.BaseModel{
 			Id: snapshot.ID,
@@ -686,13 +686,13 @@ func (plugin *CephPlugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, e
 func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
-		log.Println("[Error] When ceph connection")
+		log.Error("When ceph connection")
 	}
 
 	defer imgMgr.Destory()
 
 	if err := imgMgr.RemoveSnapshot(snapID); err != nil {
-		log.Println("[Error] When delete snapshot:", err)
+		log.Error("When delete snapshot:", err)
 		return err
 	}
 	return nil
@@ -704,7 +704,7 @@ func (plugin *CephPlugin) ListPools() (*[]api.StoragePoolSpec, error) {
 	var poolList []api.StoragePoolSpec
 	poolsResp, err := imgMgr.ListPools()
 	if err != nil {
-		log.Println("[Error] When get snapshot:", err)
+		log.Error("When get snapshot:", err)
 		return nil, err
 	}
 	for _, pl := range *poolsResp {

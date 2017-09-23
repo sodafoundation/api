@@ -21,7 +21,7 @@ profiles configured by admin.
 package executor
 
 import (
-	"log"
+	log "github.com/golang/glog"
 	"time"
 
 	"github.com/opensds/opensds/pkg/db"
@@ -56,7 +56,7 @@ func (dse *DeleteSnapshotExecutor) Asynchronized() error {
 	for i, snapId := range remainSnaps {
 		dse.Request.SnapshotId = snapId
 		if _, err = dse.Client.DeleteVolumeSnapshot(context.Background(), dse.Request); err != nil {
-			log.Printf("[Error] When %dth delete volume snapshot: %v\n", i+1, err)
+			log.Errorf("When %dth delete volume snapshot: %v\n", i+1, err)
 			return err
 		}
 	}
@@ -86,7 +86,7 @@ func findRemainingSnapshot(vr *pb.DockRequest) ([]string, error) {
 	var remainingSnapshots = []string{}
 	snapshots, err := db.C.ListVolumeSnapshots()
 	if err != nil {
-		log.Println("[Error] When list volume snapshots:", err)
+		log.Error("When list volume snapshots:", err)
 		return remainingSnapshots, err
 	}
 

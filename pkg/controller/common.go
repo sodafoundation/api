@@ -22,7 +22,7 @@ package controller
 
 import (
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	api "github.com/opensds/opensds/pkg/model"
@@ -52,7 +52,7 @@ func NewDbSearcher() Searcher {
 func (s *DbSearcher) SearchProfile(prfId string) (*api.ProfileSpec, error) {
 	prfs, err := s.Client.ListProfiles()
 	if err != nil {
-		log.Println("[Error] When list profiles:", err)
+		log.Error("When list profiles:", err)
 		return &api.ProfileSpec{}, err
 	}
 
@@ -78,7 +78,7 @@ func (s *DbSearcher) SearchProfile(prfId string) (*api.ProfileSpec, error) {
 func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error) {
 	pols, err := s.Client.ListPools()
 	if err != nil {
-		log.Println("[Error] When list pool resources in db:", err)
+		log.Error("When list pool resources in db:", err)
 		return &api.StoragePoolSpec{}, err
 	}
 
@@ -106,7 +106,7 @@ func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePo
 func (s *DbSearcher) SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, error) {
 	dcks, err := s.Client.ListDocks()
 	if err != nil {
-		log.Println("[Error] When list dock resources in db:", err)
+		log.Error("When list dock resources in db:", err)
 		return &api.DockSpec{}, err
 	}
 
@@ -121,16 +121,16 @@ func (s *DbSearcher) SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, 
 func (s *DbSearcher) SearchDockByVolume(volId string) (*api.DockSpec, error) {
 	vol, err := s.Client.GetVolume(volId)
 	if err != nil {
-		log.Printf("[Error] When get volume %s in db: %v\n", volId, err)
+		log.Errorf("When get volume %s in db: %v\n", volId, err)
 	}
 	pols, err := s.Client.ListPools()
 	if err != nil {
-		log.Println("[Error] When list pool resources in db:", err)
+		log.Error("When list pool resources in db:", err)
 		return &api.DockSpec{}, err
 	}
 	dcks, err := s.Client.ListDocks()
 	if err != nil {
-		log.Println("[Error] When list dock resources in db:", err)
+		log.Error("When list dock resources in db:", err)
 		return &api.DockSpec{}, err
 	}
 

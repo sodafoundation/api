@@ -23,7 +23,7 @@ package upsplugin
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	log "github.com/golang/glog"
 
 	api "github.com/opensds/opensds/pkg/model"
 )
@@ -80,7 +80,7 @@ func (p *Plugin) DeleteSnapshot(snapID string) error {
 func (p *Plugin) ListPools() (*[]api.StoragePoolSpec, error) {
 	pools, err := readPoolsFromFile()
 	if err != nil {
-		log.Println("Could not read pool resource:", err)
+		log.Error("Could not read pool resource:", err)
 		return &[]api.StoragePoolSpec{}, err
 	}
 
@@ -92,7 +92,7 @@ func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
 
 	userJSON, err := ioutil.ReadFile(upspluginPoolConfig)
 	if err != nil {
-		log.Println("ReadFile json failed:", err)
+		log.Error("ReadFile json failed:", err)
 		return pools, err
 	}
 
@@ -103,7 +103,7 @@ func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
 
 	// Unmarshal the result
 	if err = json.Unmarshal(userJSON, &pools); err != nil {
-		log.Println("Unmarshal json failed:", err)
+		log.Error("Unmarshal json failed:", err)
 		return pools, err
 	}
 	return pools, nil

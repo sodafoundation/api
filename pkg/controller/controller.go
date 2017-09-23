@@ -22,7 +22,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -53,7 +53,7 @@ func NewControllerWithVolumeConfig(
 	if vol != nil {
 		prf, err := c.searcher.SearchProfile(vol.GetProfileId())
 		if err != nil {
-			log.Println("[Error] when search profiles in db:", err)
+			log.Error("when search profiles in db:", err)
 			return nil, err
 		}
 
@@ -101,14 +101,14 @@ func (c *Controller) CreateVolume() (*api.VolumeSpec, error) {
 
 	polInfo, err := c.searcher.SearchSupportedPool(c.policyController.StorageTag().GetSyncTag())
 	if err != nil {
-		log.Println("[Error] When search supported pool resource:", err)
+		log.Error("When search supported pool resource:", err)
 		return &api.VolumeSpec{}, err
 	}
 	c.request.PoolId = polInfo.GetId()
 
 	dckInfo, err := c.searcher.SearchDockByPool(polInfo)
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.VolumeSpec{}, err
 	}
 	dckBody, _ := json.Marshal(dckInfo)
@@ -132,7 +132,7 @@ func (c *Controller) DeleteVolume() *api.Response {
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
@@ -145,7 +145,7 @@ func (c *Controller) DeleteVolume() *api.Response {
 	go c.policyController.ExecuteAsyncPolicy(c.request, "", errChan)
 
 	if err := <-errChan; err != nil {
-		log.Println("[Error] When execute async policy:", err)
+		log.Error("When execute async policy:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
@@ -159,7 +159,7 @@ func (c *Controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	dckBody, _ := json.Marshal(dckInfo)
@@ -172,7 +172,7 @@ func (c *Controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error)
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.VolumeAttachmentSpec{}, err
 	}
 	dckBody, _ := json.Marshal(dckInfo)
@@ -185,7 +185,7 @@ func (c *Controller) DeleteVolumeAttachment() *api.Response {
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
@@ -201,7 +201,7 @@ func (c *Controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.VolumeSnapshotSpec{}, err
 	}
 	dckBody, _ := json.Marshal(dckInfo)
@@ -214,7 +214,7 @@ func (c *Controller) DeleteVolumeSnapshot() *api.Response {
 
 	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
+		log.Error("When search supported dock resource:", err)
 		return &api.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),

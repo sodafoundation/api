@@ -22,7 +22,7 @@ package executor
 
 import (
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 )
@@ -46,7 +46,7 @@ func RegisterAsynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string, i
 			}
 
 			if err := ise.Init(in); err != nil {
-				log.Printf("[Error] When register async policy %s: %v\n", key, err)
+				log.Errorf("When register async policy %s: %v\n", key, err)
 				return asynWorkflow, err
 			} else {
 				asynWorkflow[key] = ise
@@ -57,7 +57,7 @@ func RegisterAsynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string, i
 			}
 
 			if err := ise.Init(in); err != nil {
-				log.Printf("[Error] When register async policy %s: %v\n", key, err)
+				log.Errorf("When register async policy %s: %v\n", key, err)
 				return asynWorkflow, err
 			} else {
 				asynWorkflow[key] = ise
@@ -65,7 +65,7 @@ func RegisterAsynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string, i
 		}
 	}
 
-	log.Println("[Info] Register asynchronized work flow success, awf =", asynWorkflow)
+	log.Info("Register asynchronized work flow success, awf =", asynWorkflow)
 	return asynWorkflow, nil
 }
 

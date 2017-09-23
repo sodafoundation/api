@@ -23,7 +23,7 @@ package etcd
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 	"sync"
 	"time"
 
@@ -69,7 +69,7 @@ func (c *client) CreateDock(dck *api.DockSpec) (*api.DockSpec, error) {
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create dock in db:", dbRes.Error)
+		log.Error("When create dock in db:", dbRes.Error)
 		return &api.DockSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -82,13 +82,13 @@ func (c *client) GetDock(dckID string) (*api.DockSpec, error) {
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get dock in db:", dbRes.Error)
+		log.Error("When get dock in db:", dbRes.Error)
 		return &api.DockSpec{}, errors.New(dbRes.Error)
 	}
 
 	var dck = &api.DockSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), dck); err != nil {
-		log.Println("[Error] When parsing dock in db:", dbRes.Error)
+		log.Error("When parsing dock in db:", dbRes.Error)
 		return &api.DockSpec{}, errors.New(dbRes.Error)
 	}
 	return dck, nil
@@ -100,7 +100,7 @@ func (c *client) ListDocks() (*[]api.DockSpec, error) {
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list docks in db:", dbRes.Error)
+		log.Error("When list docks in db:", dbRes.Error)
 		return &[]api.DockSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -111,7 +111,7 @@ func (c *client) ListDocks() (*[]api.DockSpec, error) {
 	for _, msg := range dbRes.Message {
 		var dck = api.DockSpec{}
 		if err := json.Unmarshal([]byte(msg), &dck); err != nil {
-			log.Println("[Error] When parsing dock in db:", dbRes.Error)
+			log.Error("When parsing dock in db:", dbRes.Error)
 			return &[]api.DockSpec{}, errors.New(dbRes.Error)
 		}
 		dcks = append(dcks, dck)
@@ -141,7 +141,7 @@ func (c *client) UpdateDock(dckID, name, desp string) (*api.DockSpec, error) {
 	}
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When update dock in db:", dbRes.Error)
+		log.Error("When update dock in db:", dbRes.Error)
 		return &api.DockSpec{}, errors.New(dbRes.Error)
 	}
 	return dck, nil
@@ -153,7 +153,7 @@ func (c *client) DeleteDock(dckID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete dock in db:", dbRes.Error)
+		log.Error("When delete dock in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -171,7 +171,7 @@ func (c *client) CreatePool(pol *api.StoragePoolSpec) (*api.StoragePoolSpec, err
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create pol in db:", dbRes.Error)
+		log.Error("When create pol in db:", dbRes.Error)
 		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -184,13 +184,13 @@ func (c *client) GetPool(polID string) (*api.StoragePoolSpec, error) {
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get pool in db:", dbRes.Error)
+		log.Error("When get pool in db:", dbRes.Error)
 		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
 	var pol = &api.StoragePoolSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), pol); err != nil {
-		log.Println("[Error] When parsing pool in db:", dbRes.Error)
+		log.Error("When parsing pool in db:", dbRes.Error)
 		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 	return pol, nil
@@ -202,7 +202,7 @@ func (c *client) ListPools() (*[]api.StoragePoolSpec, error) {
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list pools in db:", dbRes.Error)
+		log.Error("When list pools in db:", dbRes.Error)
 		return &[]api.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -213,7 +213,7 @@ func (c *client) ListPools() (*[]api.StoragePoolSpec, error) {
 	for _, msg := range dbRes.Message {
 		var pol = api.StoragePoolSpec{}
 		if err := json.Unmarshal([]byte(msg), &pol); err != nil {
-			log.Println("[Error] When parsing pool in db:", dbRes.Error)
+			log.Error("When parsing pool in db:", dbRes.Error)
 			return &[]api.StoragePoolSpec{}, errors.New(dbRes.Error)
 		}
 		pols = append(pols, pol)
@@ -243,7 +243,7 @@ func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	}
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When update pool in db:", dbRes.Error)
+		log.Error("When update pool in db:", dbRes.Error)
 		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 	return pol, nil
@@ -255,7 +255,7 @@ func (c *client) DeletePool(polID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete pool in db:", dbRes.Error)
+		log.Error("When delete pool in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -273,7 +273,7 @@ func (c *client) CreateProfile(prf *api.ProfileSpec) (*api.ProfileSpec, error) {
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create profile in db:", dbRes.Error)
+		log.Error("When create profile in db:", dbRes.Error)
 		return &api.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -286,13 +286,13 @@ func (c *client) GetProfile(prfID string) (*api.ProfileSpec, error) {
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get profile in db:", dbRes.Error)
+		log.Error("When get profile in db:", dbRes.Error)
 		return &api.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
 	var prf = &api.ProfileSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), prf); err != nil {
-		log.Println("[Error] When parsing profile in db:", dbRes.Error)
+		log.Error("When parsing profile in db:", dbRes.Error)
 		return &api.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 	return prf, nil
@@ -304,7 +304,7 @@ func (c *client) ListProfiles() (*[]api.ProfileSpec, error) {
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list profiles in db:", dbRes.Error)
+		log.Error("When list profiles in db:", dbRes.Error)
 		return &[]api.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -315,7 +315,7 @@ func (c *client) ListProfiles() (*[]api.ProfileSpec, error) {
 	for _, msg := range dbRes.Message {
 		var prf = api.ProfileSpec{}
 		if err := json.Unmarshal([]byte(msg), &prf); err != nil {
-			log.Println("[Error] When parsing profile in db:", dbRes.Error)
+			log.Error("When parsing profile in db:", dbRes.Error)
 			return &[]api.ProfileSpec{}, errors.New(dbRes.Error)
 		}
 		prfs = append(prfs, prf)
@@ -349,7 +349,7 @@ func (c *client) UpdateProfile(prfID string, input *api.ProfileSpec) (*api.Profi
 	}
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When update profile in db:", dbRes.Error)
+		log.Error("When update profile in db:", dbRes.Error)
 		return &api.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 	return prf, nil
@@ -361,7 +361,7 @@ func (c *client) DeleteProfile(prfID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete profile in db:", dbRes.Error)
+		log.Error("When delete profile in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -418,7 +418,7 @@ func (c *client) CreateVolume(vol *api.VolumeSpec) (*api.VolumeSpec, error) {
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create volume in db:", dbRes.Error)
+		log.Error("When create volume in db:", dbRes.Error)
 		return &api.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -431,13 +431,13 @@ func (c *client) GetVolume(volID string) (*api.VolumeSpec, error) {
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get volume in db:", dbRes.Error)
+		log.Error("When get volume in db:", dbRes.Error)
 		return &api.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
 	var vol = &api.VolumeSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), vol); err != nil {
-		log.Println("[Error] When parsing volume in db:", dbRes.Error)
+		log.Error("When parsing volume in db:", dbRes.Error)
 		return &api.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 	return vol, nil
@@ -449,7 +449,7 @@ func (c *client) ListVolumes() (*[]api.VolumeSpec, error) {
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list volumes in db:", dbRes.Error)
+		log.Error("When list volumes in db:", dbRes.Error)
 		return &[]api.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -460,7 +460,7 @@ func (c *client) ListVolumes() (*[]api.VolumeSpec, error) {
 	for _, msg := range dbRes.Message {
 		var vol = api.VolumeSpec{}
 		if err := json.Unmarshal([]byte(msg), &vol); err != nil {
-			log.Println("[Error] When parsing volume in db:", dbRes.Error)
+			log.Error("When parsing volume in db:", dbRes.Error)
 			return &[]api.VolumeSpec{}, errors.New(dbRes.Error)
 		}
 		vols = append(vols, vol)
@@ -474,7 +474,7 @@ func (c *client) DeleteVolume(volID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete volume in db:", dbRes.Error)
+		log.Error("When delete volume in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -492,7 +492,7 @@ func (c *client) CreateVolumeAttachment(volID string, atc *api.VolumeAttachmentS
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create volume attachment in db:", dbRes.Error)
+		log.Error("When create volume attachment in db:", dbRes.Error)
 		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -505,13 +505,13 @@ func (c *client) GetVolumeAttachment(volID, atcID string) (*api.VolumeAttachment
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get volume attachment in db:", dbRes.Error)
+		log.Error("When get volume attachment in db:", dbRes.Error)
 		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
 	var atc = &api.VolumeAttachmentSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), atc); err != nil {
-		log.Println("[Error] When parsing volume attachment in db:", dbRes.Error)
+		log.Error("When parsing volume attachment in db:", dbRes.Error)
 		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 	return atc, nil
@@ -523,7 +523,7 @@ func (c *client) ListVolumeAttachments(volID string) (*[]api.VolumeAttachmentSpe
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list volume attachments in db:", dbRes.Error)
+		log.Error("When list volume attachments in db:", dbRes.Error)
 		return &[]api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -534,7 +534,7 @@ func (c *client) ListVolumeAttachments(volID string) (*[]api.VolumeAttachmentSpe
 	for _, msg := range dbRes.Message {
 		var atc = api.VolumeAttachmentSpec{}
 		if err := json.Unmarshal([]byte(msg), &atc); err != nil {
-			log.Println("[Error] When parsing volume attachment in db:", dbRes.Error)
+			log.Error("When parsing volume attachment in db:", dbRes.Error)
 			return &[]api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 		}
 		atcs = append(atcs, atc)
@@ -561,7 +561,7 @@ func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInf
 	}
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When update volume attachment in db:", dbRes.Error)
+		log.Error("When update volume attachment in db:", dbRes.Error)
 		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 	return atc, nil
@@ -573,7 +573,7 @@ func (c *client) DeleteVolumeAttachment(volID, atcID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete volume attachment in db:", dbRes.Error)
+		log.Error("When delete volume attachment in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -591,7 +591,7 @@ func (c *client) CreateVolumeSnapshot(snp *api.VolumeSnapshotSpec) (*api.VolumeS
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When create volume snapshot in db:", dbRes.Error)
+		log.Error("When create volume snapshot in db:", dbRes.Error)
 		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -604,13 +604,13 @@ func (c *client) GetVolumeSnapshot(snpID string) (*api.VolumeSnapshotSpec, error
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When get volume attachment in db:", dbRes.Error)
+		log.Error("When get volume attachment in db:", dbRes.Error)
 		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
 	var vs = &api.VolumeSnapshotSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), vs); err != nil {
-		log.Println("[Error] When parsing volume snapshot in db:", dbRes.Error)
+		log.Error("When parsing volume snapshot in db:", dbRes.Error)
 		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 	return vs, nil
@@ -622,7 +622,7 @@ func (c *client) ListVolumeSnapshots() (*[]api.VolumeSnapshotSpec, error) {
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When list volume snapshots in db:", dbRes.Error)
+		log.Error("When list volume snapshots in db:", dbRes.Error)
 		return &[]api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
@@ -633,7 +633,7 @@ func (c *client) ListVolumeSnapshots() (*[]api.VolumeSnapshotSpec, error) {
 	for _, msg := range dbRes.Message {
 		var vs = api.VolumeSnapshotSpec{}
 		if err := json.Unmarshal([]byte(msg), &vs); err != nil {
-			log.Println("[Error] When parsing volume snapshot in db:", dbRes.Error)
+			log.Error("When parsing volume snapshot in db:", dbRes.Error)
 			return &[]api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 		}
 		vss = append(vss, vs)
@@ -647,7 +647,7 @@ func (c *client) DeleteVolumeSnapshot(snpID string) error {
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Println("[Error] When delete volume snapshot in db:", dbRes.Error)
+		log.Error("When delete volume snapshot in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil

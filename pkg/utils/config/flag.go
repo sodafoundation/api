@@ -16,7 +16,7 @@ package config
 
 import (
 	gflag "flag"
-	"log"
+	log "github.com/golang/glog"
 	"reflect"
 )
 
@@ -120,7 +120,7 @@ func (f *FlagSet) AssignValue() {
 		case reflect.Float64:
 			*f.flagMap[name].Value.(*float64) = val.Elem().Float()
 		default:
-			log.Println("[Error] Flag do not support this type.")
+			log.Error("Flag do not support this type.")
 		}
 	}
 }

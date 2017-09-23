@@ -23,7 +23,7 @@ package policy
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 	"strconv"
 
 	"github.com/opensds/opensds/pkg/utils"
@@ -93,7 +93,7 @@ func NewStorageTag(in map[string]interface{}, flag int) *StorageTag {
 	for key := range tags {
 		pType, err := FindPolicyType(key)
 		if err != nil {
-			log.Println("[Error] When parse storage tag:", err)
+			log.Error("When parse storage tag:", err)
 		}
 		switch pType {
 		case "feature":

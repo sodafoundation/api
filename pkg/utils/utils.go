@@ -17,7 +17,7 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	log "github.com/golang/glog"
 	"net/http"
 	"reflect"
 	"time"
@@ -113,7 +113,7 @@ func ErrorStatus(code int, message string) []byte {
 	// Mashal the status.
 	body, err := json.Marshal(status)
 	if err != nil {
-		log.Println("Failed to mashal error response:", err.Error())
+		log.Error("Failed to mashal error response:", err.Error())
 		return []byte("Failed to mashal error response: " + err.Error())
 	}
 	return body

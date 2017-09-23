@@ -16,7 +16,7 @@ package client
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/golang/glog"
 
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
@@ -42,14 +42,14 @@ func (c *client) Update(dockInfo string) error {
 	// Get Dock endpoint from dock info.
 	var dck = &api.DockSpec{}
 	if err := json.Unmarshal([]byte(dockInfo), dck); err != nil {
-		log.Println("[Error] When parsing dock info:", err)
+		log.Error("When parsing dock info:", err)
 		return err
 	}
 
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(dck.GetEndpoint(), grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %+v\n", err)
+		log.Errorf("did not connect: %+v\n", err)
 		return err
 	}
 	// Create a dock client via the connection.
