@@ -13,21 +13,21 @@
 //    under the License.
 
 /*
-This module defines an standard table of storage plugin. The default storage
-plugin is ups plugin. If you want to use other storage plugin, just modify
-Init() method.
+This module defines an standard table of storage driver. The default storage
+driver is sample driver used for testing. If you want to use other storage
+plugin, just modify Init() method.
 
 */
 
-package plugins
+package drivers
 
 import (
-	"github.com/opensds/opensds/contrib/plugins/ceph"
-	"github.com/opensds/opensds/contrib/plugins/upsplugin"
+	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/sample"
 	api "github.com/opensds/opensds/pkg/model"
 )
 
-type VolumePlugin interface {
+type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
 	Setup()
 	//Any operation the volume driver does while stoping.
@@ -54,11 +54,11 @@ type VolumePlugin interface {
 	ListPools() (*[]api.StoragePoolSpec, error)
 }
 
-func InitVP(resourceType string) VolumePlugin {
+func Init(resourceType string) VolumeDriver {
 	switch resourceType {
 	case "ceph":
-		return &ceph.CephPlugin{}
+		return &ceph.Driver{}
 	default:
-		return &upsplugin.Plugin{}
+		return &sample.Driver{}
 	}
 }

@@ -18,66 +18,67 @@ operations of volume and return a fake value.
 
 */
 
-package upsplugin
+package sample
 
 import (
 	"encoding/json"
 	"io/ioutil"
+
 	log "github.com/golang/glog"
 
 	api "github.com/opensds/opensds/pkg/model"
 )
 
 const (
-	upspluginPoolConfig = "/etc/opensds/pool.json"
+	upsPoolConfig = "/etc/opensds/pool.json"
 )
 
-type Plugin struct{}
+type Driver struct{}
 
-func (p *Plugin) Setup() {}
+func (d *Driver) Setup() {}
 
-func (p *Plugin) Unset() {}
+func (d *Driver) Unset() {}
 
-func (p *Plugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
+func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
-func (p *Plugin) GetVolume(volID string) (*api.VolumeSpec, error) {
+func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
 	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
-func (p *Plugin) DeleteVolume(volID string) error {
+func (d *Driver) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (p *Plugin) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
 	return &api.ConnectionInfo{}, nil
 }
 
-func (p *Plugin) AttachVolume(volID, host, mountpoint string) error {
+func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
 	return nil
 }
 
-func (p *Plugin) DetachVolume(volID string) error {
+func (d *Driver) DetachVolume(volID string) error {
 	return nil
 }
 
-func (p *Plugin) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
 	return &api.VolumeSnapshotSpec{
 		BaseModel: &api.BaseModel{},
 		VolumeId:  volID,
 	}, nil
 }
 
-func (p *Plugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	return &api.VolumeSnapshotSpec{BaseModel: &api.BaseModel{}}, nil
 }
 
-func (p *Plugin) DeleteSnapshot(snapID string) error {
+func (d *Driver) DeleteSnapshot(snapID string) error {
 	return nil
 }
 
-func (p *Plugin) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 	pools, err := readPoolsFromFile()
 	if err != nil {
 		log.Error("Could not read pool resource:", err)
@@ -90,7 +91,7 @@ func (p *Plugin) ListPools() (*[]api.StoragePoolSpec, error) {
 func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
 	var pools []api.StoragePoolSpec
 
-	userJSON, err := ioutil.ReadFile(upspluginPoolConfig)
+	userJSON, err := ioutil.ReadFile(upsPoolConfig)
 	if err != nil {
 		log.Error("ReadFile json failed:", err)
 		return pools, err

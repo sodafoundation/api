@@ -21,8 +21,9 @@ operation requests about volume to go-ceph module.
 package ceph
 
 import (
-	log "github.com/golang/glog"
 	"strings"
+
+	log "github.com/golang/glog"
 
 	api "github.com/opensds/opensds/pkg/model"
 
@@ -523,13 +524,13 @@ func (imgMgr *ImageMgr) ListPools() (*[]PoolResponse, error) {
 	return &pools, nil
 }
 
-type CephPlugin struct{}
+type Driver struct{}
 
-func (plugin *CephPlugin) Setup() {}
+func (d *Driver) Setup() {}
 
-func (plugin *CephPlugin) Unset() {}
+func (d *Driver) Unset() {}
 
-func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
+func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if err := imgMgr.Init(); err != nil {
 		log.Error("Connect ceph error.")
@@ -556,7 +557,7 @@ func (plugin *CephPlugin) CreateVolume(name string, size int64) (*api.VolumeSpec
 	}, nil
 }
 
-func (plugin *CephPlugin) GetVolume(volID string) (*api.VolumeSpec, error) {
+func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -582,7 +583,7 @@ func (plugin *CephPlugin) GetVolume(volID string) (*api.VolumeSpec, error) {
 	}, nil
 }
 
-func (plugin *CephPlugin) DeleteVolume(volID string) error {
+func (d *Driver) DeleteVolume(volID string) error {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -597,7 +598,7 @@ func (plugin *CephPlugin) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (plugin *CephPlugin) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -625,15 +626,15 @@ func (plugin *CephPlugin) InitializeConnection(volID string, doLocalAttach, mult
 	}, nil
 }
 
-func (plugin *CephPlugin) AttachVolume(volID, host, mountpoint string) error {
+func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
 	return nil
 }
 
-func (plugin *CephPlugin) DetachVolume(volID string) error {
+func (d *Driver) DetachVolume(volID string) error {
 	return nil
 }
 
-func (plugin *CephPlugin) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -659,7 +660,7 @@ func (plugin *CephPlugin) CreateSnapshot(name, volID, description string) (*api.
 	}, nil
 }
 
-func (plugin *CephPlugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -683,7 +684,7 @@ func (plugin *CephPlugin) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, e
 	}, nil
 }
 
-func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
+func (d *Driver) DeleteSnapshot(snapID string) error {
 	var imgMgr = &ImageMgr{}
 	if imgMgr.Init() != nil {
 		log.Error("When ceph connection")
@@ -698,7 +699,7 @@ func (plugin *CephPlugin) DeleteSnapshot(snapID string) error {
 	return nil
 }
 
-func (plugin *CephPlugin) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 	var imgMgr = &ImageMgr{}
 
 	var poolList []api.StoragePoolSpec
