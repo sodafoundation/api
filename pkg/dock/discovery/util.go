@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -19,44 +19,28 @@ modify this file.
 
 */
 
-package app
+package discovery
 
 import (
-	"encoding/json"
 	"io/ioutil"
-	log "github.com/golang/glog"
 
-	api "github.com/opensds/opensds/pkg/model"
+	log "github.com/golang/glog"
 )
 
-func ListDocks() (*[]api.DockSpec, error) {
-	docks, err := readDocksFromFile()
-	if err != nil {
-		log.Error("Could not read dock resource:", err)
-		return &[]api.DockSpec{}, err
+const (
+	defaultConfigFile = "/etc/opensds/dock.json"
+)
+
+func loadFromFile(path string) (interface{}, error) {
+	if path == "" {
+		path = defaultConfigFile
 	}
 
-	return &docks, nil
-}
-
-func readDocksFromFile() ([]api.DockSpec, error) {
-	var docks []api.DockSpec
-
-	userJSON, err := ioutil.ReadFile("/etc/opensds/dock.json")
+	userJSON, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error("ReadFile json failed:", err)
-		return docks, err
+		return nil, err
 	}
 
-	// If the dock resource is empty, consider it as a normal condition
-	if len(userJSON) == 0 {
-		return docks, nil
-	}
-
-	// Unmarshal the result
-	if err = json.Unmarshal(userJSON, &docks); err != nil {
-		log.Error("Unmarshal json failed:", err)
-		return docks, err
-	}
-	return docks, nil
+	return userJSON, nil
 }

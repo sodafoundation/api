@@ -40,9 +40,10 @@ package server
 
 import (
 	"encoding/json"
-	log "github.com/golang/glog"
 	"net"
 	"strings"
+
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
@@ -95,14 +96,14 @@ func (ds *dockServer) CreateVolume(ctx context.Context, req *pb.DockRequest) (*p
 
 	// If volume uuid is null, generate it randomly.
 	if vol.GetId() == "" {
-		if ok := utils.NewSetter().SetUuid(vol); ok != nil {
+		if ok := utils.S.SetUuid(vol); ok != nil {
 			log.Error("When set volume uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume created time.
-	if ok := utils.NewSetter().SetCreatedTimeStamp(vol); ok != nil {
+	if ok := utils.S.SetCreatedTimeStamp(vol); ok != nil {
 		log.Error("When set volume created time:", ok)
 		return &pb.DockResponse{}, err
 	}
@@ -195,14 +196,14 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, req *pb.DockRe
 
 	// If volume attachment uuid is null, generate it randomly.
 	if atc.GetId() == "" {
-		if ok := utils.NewSetter().SetUuid(atc); ok != nil {
+		if ok := utils.S.SetUuid(atc); ok != nil {
 			log.Error("When set volume attachment uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume attachment created time.
-	if ok := utils.NewSetter().SetCreatedTimeStamp(atc); ok != nil {
+	if ok := utils.S.SetCreatedTimeStamp(atc); ok != nil {
 		log.Error("When set volume attachment created time:", ok)
 		return &pb.DockResponse{}, err
 	}
@@ -310,14 +311,14 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, req *pb.DockRequ
 
 	// If volume snapshot uuid is null, generate it randomly.
 	if snp.GetId() == "" {
-		if ok := utils.NewSetter().SetUuid(snp); ok != nil {
+		if ok := utils.S.SetUuid(snp); ok != nil {
 			log.Error("When set volume snapshot uuid:", ok)
 			return &pb.DockResponse{}, err
 		}
 	}
 
 	// Set volume snapshot created time.
-	if ok := utils.NewSetter().SetCreatedTimeStamp(snp); ok != nil {
+	if ok := utils.S.SetCreatedTimeStamp(snp); ok != nil {
 		log.Error("When set volume snapshot created time:", ok)
 		return &pb.DockResponse{}, err
 	}
