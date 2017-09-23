@@ -1,4 +1,4 @@
-// Copyright (c) 2017 OpenSDS Authors.
+// Copyright (c) 2016 OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -37,8 +37,8 @@ func TestCreateVolume(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	resp, err := plugin.CreateVolume("volume001", 1)
+	d := Driver{}
+	resp, err := d.CreateVolume("volume001", 1)
 	if err != nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -57,8 +57,8 @@ func TestCreateVolume(t *testing.T) {
 	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
 		return errors.New("Fake error")
 	})
-	plugin = CephPlugin{}
-	_, err = plugin.CreateVolume("volume001", 1)
+	d = Driver{}
+	_, err = d.CreateVolume("volume001", 1)
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -69,7 +69,7 @@ func TestCreateVolume(t *testing.T) {
 		args ...uint64) (*rbd.Image, error) {
 		return nil, errors.New("Fake error")
 	})
-	_, err = plugin.CreateVolume("volume001", 1)
+	_, err = d.CreateVolume("volume001", 1)
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -97,8 +97,8 @@ func TestGetVolume(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	resp, err := plugin.GetVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	d := Driver{}
+	resp, err := d.GetVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
 	if err != nil {
 		t.Errorf("Test Get volume error")
 	}
@@ -112,7 +112,7 @@ func TestGetVolume(t *testing.T) {
 		t.Errorf("Test Get volume uuid error")
 	}
 
-	resp, err = plugin.GetVolume("11111111-1111-1111-1111-111111111111")
+	resp, err = d.GetVolume("11111111-1111-1111-1111-111111111111")
 	if err != rbd.RbdErrorNotFound {
 		t.Errorf("Test Get volume error")
 	}
@@ -138,16 +138,16 @@ func TestDeleteVolme(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	err := plugin.DeleteVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	d := Driver{}
+	err := d.DeleteVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
 	if err != nil {
 		t.Errorf("Test Delete volume error")
 	}
 }
 
 func TestAttachVolume(t *testing.T) {
-	plugin := CephPlugin{}
-	err := plugin.AttachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19",
+	d := Driver{}
+	err := d.AttachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19",
 		"opensds-server", "/mnt")
 	if err != nil {
 		t.Errorf("Test attach volume error")
@@ -155,8 +155,8 @@ func TestAttachVolume(t *testing.T) {
 }
 
 func TestDetachVolume(t *testing.T) {
-	plugin := CephPlugin{}
-	err := plugin.DetachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	d := Driver{}
+	err := d.DetachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
 	if err != nil {
 		t.Errorf("Test detach volume error")
 	}
@@ -194,8 +194,8 @@ func TestCreateSnapshot(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	resp, err := plugin.CreateSnapshot("snapshot001", "7ee11866-1f40-4f3c-b093-7a3684523a19",
+	d := Driver{}
+	resp, err := d.CreateSnapshot("snapshot001", "7ee11866-1f40-4f3c-b093-7a3684523a19",
 		"unite test")
 	if err != nil {
 		t.Errorf("Test Create snapshot error")
@@ -250,8 +250,8 @@ func TestGetSnapshot(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	resp, err := plugin.GetSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	d := Driver{}
+	resp, err := d.GetSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -263,7 +263,7 @@ func TestGetSnapshot(t *testing.T) {
 	}
 
 	// case 2
-	_, err = plugin.GetSnapshot("11111111-1111-1111-1111-111111111111")
+	_, err = d.GetSnapshot("11111111-1111-1111-1111-111111111111")
 	if err != rbd.RbdErrorNotFound {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -304,8 +304,8 @@ func TestDeleteSnapshot(t *testing.T) {
 	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
 
 	// case 1
-	plugin := CephPlugin{}
-	err := plugin.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	d := Driver{}
+	err := d.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
 	}
@@ -342,8 +342,8 @@ func TestListPools(t *testing.T) {
 		return poolAttrInfo, nil
 	})
 
-	plugin := CephPlugin{}
-	pools, err := plugin.ListPools()
+	d := Driver{}
+	pools, err := d.ListPools()
 	if err != nil {
 		t.Errorf("Test List Pools error")
 	}

@@ -12,23 +12,23 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
-package plugins
+package drivers
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/contrib/plugins/ceph"
-	"github.com/opensds/opensds/contrib/plugins/upsplugin"
+	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/sample"
 )
 
-func TestInitVP(t *testing.T) {
+func TestInit(t *testing.T) {
 	var rsList = []string{"ceph", "others"}
-	var expectedVp = []VolumePlugin{&ceph.CephPlugin{}, &upsplugin.Plugin{}}
+	var expectedVd = []VolumeDriver{&ceph.Driver{}, &sample.Driver{}}
 
 	for i, rs := range rsList {
-		if vp := InitVP(rs); !reflect.DeepEqual(vp, expectedVp[i]) {
-			t.Errorf("Expected %v, got %v\n", expectedVp, vp)
+		if vp := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
+			t.Errorf("Expected %v, got %v\n", expectedVd, vp)
 		}
 	}
 }
