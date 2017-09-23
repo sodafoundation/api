@@ -31,54 +31,114 @@ syntax = "proto3";
 
 package proto;
 
-// The dock service definition.
+
 service Dock {
-  // Create a volume
-  rpc CreateVolume (DockRequest) returns (DockResponse) {}
-  // Get a volume
-  rpc GetVolume (DockRequest) returns (DockResponse) {}
-  // Delete a volume
-  rpc DeleteVolume (DockRequest) returns (DockResponse) {}
-  // Create a volume attachment
-  rpc CreateVolumeAttachment (DockRequest) returns (DockResponse) {}
-  // Update a volume attachment
-  rpc UpdateVolumeAttachment (DockRequest) returns (DockResponse) {}
-  // Delete a volume attachment
-  rpc DeleteVolumeAttachment (DockRequest) returns (DockResponse) {}
-  // Create a volume snapshot
-  rpc CreateVolumeSnapshot (DockRequest) returns (DockResponse) {}
-  // Get a volume snapshot
-  rpc GetVolumeSnapshot (DockRequest) returns (DockResponse) {}
-  // Delete a volume snapshot
-  rpc DeleteVolumeSnapshot (DockRequest) returns (DockResponse) {}
+    // Create a volume
+    rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
+	
+    // Delete a volume
+    rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
+	
+    // Create a volume snapshot
+    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts) 
+	  returns (GenericResponse){}
+	
+    // Delete a volume snapshot
+    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts) 
+	  returns (GenericResponse){}	
+	
+    // Create a volume attachment
+    rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
 }
 
-// The DockRequest message containing all properties of
-// a request to dock service.
-message DockRequest {
-  string volumeId = 1;
-  string volumeName = 2;
-  string volumeDescription = 3;
-  int64 volumeSize = 4;
-  string attachmentId = 5;
-  string attachmentName = 6;
-  string attachmentDescription = 7;
-  bool doLocalAttach = 8;
-  bool multiPath = 9;
-  string hostInfo = 10;
-  string mountpoint = 11;
-  string snapshotId = 12;
-  string snapshotName = 13;
-  string snapshotDescription = 14;  
-  string dockInfo = 15;
-  string poolId = 16;
-  string profileId = 17;
+message CreateVolumeOpts {
+    // The uuid of the volume, optional when creating.
+    string id = 1;
+    // The name of the volume, required.
+    string name = 2;
+    // The requested capacity of the volume, required.
+    uint64 size = 3;
+    // The description of the volume, optional.
+    string description = 4;
+    // When create volume from snapshot, this field is required.
+    string snapshotId = 5;
+    // The locality that volume belongs to, required.
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;	
+    // The metadata of the volume, optional.
+    map<string, string> metadata = 10;
 }
 
-// The DockResponse message containing all properties of
-// resource response from dock service.
-message DockResponse {
-  string status = 1;
-  string message = 2;
-  string error = 3;
+message DeleteVolumeOpts {
+    // The uuid of the volume, required.
+    string id = 1;
+}
+
+message CreateVolumeSnapshotOpts {
+    // The uuid of the volume snapshot, optional.
+    string id = 1;
+    // The name of the volume snapshot, required.
+    string name = 2;
+    // The size of the volume that snapshot belongs to, required.
+    uint64 size = 3;
+    // The description of the volume snapshot, optional.
+    string description = 4;
+    // The uuid of the volume that snapshot belongs to, required.
+    string volumeId = 5;
+}
+
+message DeleteVolumeSnapshotOpts {
+    // The uuid of the volume snapshot, required.
+    string id = 1;
+}
+
+message CreateAttachmentOpts {
+    // The uuid of the volume attachment, optional.
+    string id = 1;	
+    // The uuid of the volume, required.
+    string volumeId = 2;
+    // This field indicates if the volume is attached locally, optional.
+    bool doLocalAttach = 3;
+    // This field indicates if the volume is attached multiple times, optional.
+    bool multiPath = 4;
+    // The infomation of the host node on which the volume will be attached.
+    HostInfo hostInfo = 5;
+}
+
+message HostInfo {
+    // The platform of the host, such as "x86_64"
+    string platform = 1;
+    // The type of OS, such as "linux","windows", etc.
+    string osType = 2;
+    // The name of the host
+    string host = 3;
+    // The ip address of the host
+    string ip = 4;
+    // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
+    string initiator = 5;
+}
+
+// Generic response, it return:
+// 1. Return result with id when create/update resource successfully.
+// 2. Return result without id when delete resource successfully.
+// 3. Return Error with error code and message when operate unsuccessfully.
+message GenericResponse {
+    message Result {
+        string id = 1;
+	}
+	
+    message Error {
+        string code = 1;
+        string description = 2;
+    }
+	
+    oneof reply {
+        Result result = 1;
+        Error error = 2;
+    }
 }
