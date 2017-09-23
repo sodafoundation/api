@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2017 OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -21,8 +21,9 @@ operation requests about volume to go-ceph module.
 package ceph
 
 import (
-	log "github.com/golang/glog"
 	"strings"
+
+	log "github.com/golang/glog"
 
 	api "github.com/opensds/opensds/pkg/model"
 

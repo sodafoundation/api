@@ -1,4 +1,4 @@
-// Copyright (c) 2016 OpenSDS Authors.
+// Copyright (c) 2017 OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -16,9 +16,10 @@ package logs
 
 import (
 	"flag"
-	"github.com/golang/glog"
 	"log"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 const DefaultLogDir = "/var/log/opensds"
