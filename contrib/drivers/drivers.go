@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -22,42 +22,38 @@ plugin, just modify Init() method.
 package drivers
 
 import (
-	"github.com/opensds/opensds/contrib/drivers/ceph"
+	_ "github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/sample"
-	api "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 )
 
 type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
-	Setup()
+	Setup() error
 	//Any operation the volume driver does while stoping.
-	Unset()
+	Unset() error
 
-	CreateVolume(name string, size int64) (*api.VolumeSpec, error)
+	CreateVolume(opt *pb.CreateVolumeOpts) (*pb.Volume, error)
 
-	GetVolume(volID string) (*api.VolumeSpec, error)
+	PullVolume(volIdentifier string) (*pb.Volume, error)
 
-	DeleteVolume(volID string) error
+	DeleteVolume(volIdentifier string) error
 
-	InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error)
+	InitializeConnection(opt *pb.CreateAttachmentOpts) (*pb.VolumeConnection, error)
 
-	AttachVolume(volID, host, mountpoint string) error
+	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*pb.VolumeSnapshot, error)
 
-	DetachVolume(volID string) error
+	PullSnapshot(snapIdentifier string) (*pb.VolumeSnapshot, error)
 
-	CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error)
+	DeleteSnapshot(snapIdentifier string) error
 
-	GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error)
-
-	DeleteSnapshot(snapID string) error
-
-	ListPools() (*[]api.StoragePoolSpec, error)
+	ListPools() (*[]pb.StoragePool, error)
 }
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
-	case "ceph":
-		return &ceph.Driver{}
+	// case "ceph":
+	// 	return &ceph.Driver{}
 	default:
 		return &sample.Driver{}
 	}

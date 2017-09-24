@@ -8,8 +8,17 @@ It is generated from these files:
 	dock.proto
 
 It has these top-level messages:
-	DockRequest
-	DockResponse
+	CreateVolumeOpts
+	DeleteVolumeOpts
+	CreateVolumeSnapshotOpts
+	DeleteVolumeSnapshotOpts
+	CreateAttachmentOpts
+	GenericResponse
+	ClassOfService
+	StoragePool
+	Volume
+	VolumeConnection
+	VolumeSnapshot
 */
 package proto
 
@@ -33,189 +42,771 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto1.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// The DockRequest message containing all properties of
-// a request to dock service.
-type DockRequest struct {
-	VolumeId              string `protobuf:"bytes,1,opt,name=volumeId" json:"volumeId,omitempty"`
-	VolumeName            string `protobuf:"bytes,2,opt,name=volumeName" json:"volumeName,omitempty"`
-	VolumeDescription     string `protobuf:"bytes,3,opt,name=volumeDescription" json:"volumeDescription,omitempty"`
-	VolumeSize            int64  `protobuf:"varint,4,opt,name=volumeSize" json:"volumeSize,omitempty"`
-	AttachmentId          string `protobuf:"bytes,5,opt,name=attachmentId" json:"attachmentId,omitempty"`
-	AttachmentName        string `protobuf:"bytes,6,opt,name=attachmentName" json:"attachmentName,omitempty"`
-	AttachmentDescription string `protobuf:"bytes,7,opt,name=attachmentDescription" json:"attachmentDescription,omitempty"`
-	DoLocalAttach         bool   `protobuf:"varint,8,opt,name=doLocalAttach" json:"doLocalAttach,omitempty"`
-	MultiPath             bool   `protobuf:"varint,9,opt,name=multiPath" json:"multiPath,omitempty"`
-	HostInfo              string `protobuf:"bytes,10,opt,name=hostInfo" json:"hostInfo,omitempty"`
-	Mountpoint            string `protobuf:"bytes,11,opt,name=mountpoint" json:"mountpoint,omitempty"`
-	SnapshotId            string `protobuf:"bytes,12,opt,name=snapshotId" json:"snapshotId,omitempty"`
-	SnapshotName          string `protobuf:"bytes,13,opt,name=snapshotName" json:"snapshotName,omitempty"`
-	SnapshotDescription   string `protobuf:"bytes,14,opt,name=snapshotDescription" json:"snapshotDescription,omitempty"`
-	DockInfo              string `protobuf:"bytes,15,opt,name=dockInfo" json:"dockInfo,omitempty"`
-	PoolId                string `protobuf:"bytes,16,opt,name=poolId" json:"poolId,omitempty"`
-	ProfileId             string `protobuf:"bytes,17,opt,name=profileId" json:"profileId,omitempty"`
+// CreateVolumeOpts is a structure which indicates all required properties
+// for creating a volume.
+type CreateVolumeOpts struct {
+	// The uuid of the volume, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the volume, required.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The requested capacity of the volume, required.
+	Size uint64 `protobuf:"varint,3,opt,name=size" json:"size,omitempty"`
+	// The description of the volume, optional.
+	Description string `protobuf:"bytes,4,opt,name=description" json:"description,omitempty"`
+	// When create volume from snapshot, this field is required.
+	SnapshotId string `protobuf:"bytes,5,opt,name=snapshotId" json:"snapshotId,omitempty"`
+	// The locality that volume belongs to, required.
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the volume, optional.
+	Metadata map[string]string `protobuf:"bytes,10,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 }
 
-func (m *DockRequest) Reset()                    { *m = DockRequest{} }
-func (m *DockRequest) String() string            { return proto1.CompactTextString(m) }
-func (*DockRequest) ProtoMessage()               {}
-func (*DockRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (m *CreateVolumeOpts) Reset()                    { *m = CreateVolumeOpts{} }
+func (m *CreateVolumeOpts) String() string            { return proto1.CompactTextString(m) }
+func (*CreateVolumeOpts) ProtoMessage()               {}
+func (*CreateVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *DockRequest) GetVolumeId() string {
+func (m *CreateVolumeOpts) GetId() string {
 	if m != nil {
-		return m.VolumeId
+		return m.Id
 	}
 	return ""
 }
 
-func (m *DockRequest) GetVolumeName() string {
+func (m *CreateVolumeOpts) GetName() string {
 	if m != nil {
-		return m.VolumeName
+		return m.Name
 	}
 	return ""
 }
 
-func (m *DockRequest) GetVolumeDescription() string {
+func (m *CreateVolumeOpts) GetSize() uint64 {
 	if m != nil {
-		return m.VolumeDescription
-	}
-	return ""
-}
-
-func (m *DockRequest) GetVolumeSize() int64 {
-	if m != nil {
-		return m.VolumeSize
+		return m.Size
 	}
 	return 0
 }
 
-func (m *DockRequest) GetAttachmentId() string {
+func (m *CreateVolumeOpts) GetDescription() string {
 	if m != nil {
-		return m.AttachmentId
+		return m.Description
 	}
 	return ""
 }
 
-func (m *DockRequest) GetAttachmentName() string {
-	if m != nil {
-		return m.AttachmentName
-	}
-	return ""
-}
-
-func (m *DockRequest) GetAttachmentDescription() string {
-	if m != nil {
-		return m.AttachmentDescription
-	}
-	return ""
-}
-
-func (m *DockRequest) GetDoLocalAttach() bool {
-	if m != nil {
-		return m.DoLocalAttach
-	}
-	return false
-}
-
-func (m *DockRequest) GetMultiPath() bool {
-	if m != nil {
-		return m.MultiPath
-	}
-	return false
-}
-
-func (m *DockRequest) GetHostInfo() string {
-	if m != nil {
-		return m.HostInfo
-	}
-	return ""
-}
-
-func (m *DockRequest) GetMountpoint() string {
-	if m != nil {
-		return m.Mountpoint
-	}
-	return ""
-}
-
-func (m *DockRequest) GetSnapshotId() string {
+func (m *CreateVolumeOpts) GetSnapshotId() string {
 	if m != nil {
 		return m.SnapshotId
 	}
 	return ""
 }
 
-func (m *DockRequest) GetSnapshotName() string {
+func (m *CreateVolumeOpts) GetAvailabilityZone() string {
 	if m != nil {
-		return m.SnapshotName
+		return m.AvailabilityZone
 	}
 	return ""
 }
 
-func (m *DockRequest) GetSnapshotDescription() string {
-	if m != nil {
-		return m.SnapshotDescription
-	}
-	return ""
-}
-
-func (m *DockRequest) GetDockInfo() string {
-	if m != nil {
-		return m.DockInfo
-	}
-	return ""
-}
-
-func (m *DockRequest) GetPoolId() string {
-	if m != nil {
-		return m.PoolId
-	}
-	return ""
-}
-
-func (m *DockRequest) GetProfileId() string {
+func (m *CreateVolumeOpts) GetProfileId() string {
 	if m != nil {
 		return m.ProfileId
 	}
 	return ""
 }
 
-// The DockResponse message containing all properties of
-// resource response from dock service.
-type DockResponse struct {
-	Status  string `protobuf:"bytes,1,opt,name=status" json:"status,omitempty"`
-	Message string `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
-	Error   string `protobuf:"bytes,3,opt,name=error" json:"error,omitempty"`
+func (m *CreateVolumeOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
 }
 
-func (m *DockResponse) Reset()                    { *m = DockResponse{} }
-func (m *DockResponse) String() string            { return proto1.CompactTextString(m) }
-func (*DockResponse) ProtoMessage()               {}
-func (*DockResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (m *CreateVolumeOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
 
-func (m *DockResponse) GetStatus() string {
+func (m *CreateVolumeOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// DeleteVolumeOpts is a structure which indicates all required properties
+// for deleting a volume.
+type DeleteVolumeOpts struct {
+	// The uuid of the volume, required.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *DeleteVolumeOpts) Reset()                    { *m = DeleteVolumeOpts{} }
+func (m *DeleteVolumeOpts) String() string            { return proto1.CompactTextString(m) }
+func (*DeleteVolumeOpts) ProtoMessage()               {}
+func (*DeleteVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *DeleteVolumeOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// CreateVolumeSnapshotOpts is a structure which indicates all required
+// properties for creating a volume snapshot.
+type CreateVolumeSnapshotOpts struct {
+	// The uuid of the volume snapshot, optional.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the volume snapshot, required.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The size of the volume that snapshot belongs to, required.
+	Size uint64 `protobuf:"varint,3,opt,name=size" json:"size,omitempty"`
+	// The description of the volume snapshot, optional.
+	Description string `protobuf:"bytes,4,opt,name=description" json:"description,omitempty"`
+	// The uuid of the volume that snapshot belongs to, required.
+	VolumeId string `protobuf:"bytes,5,opt,name=volumeId" json:"volumeId,omitempty"`
+}
+
+func (m *CreateVolumeSnapshotOpts) Reset()                    { *m = CreateVolumeSnapshotOpts{} }
+func (m *CreateVolumeSnapshotOpts) String() string            { return proto1.CompactTextString(m) }
+func (*CreateVolumeSnapshotOpts) ProtoMessage()               {}
+func (*CreateVolumeSnapshotOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *CreateVolumeSnapshotOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateVolumeSnapshotOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateVolumeSnapshotOpts) GetSize() uint64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *CreateVolumeSnapshotOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CreateVolumeSnapshotOpts) GetVolumeId() string {
+	if m != nil {
+		return m.VolumeId
+	}
+	return ""
+}
+
+// DeleteVolumeSnapshotOpts is a structure which indicates all required
+// properties for deleting a volume snapshot.
+type DeleteVolumeSnapshotOpts struct {
+	// The uuid of the volume snapshot, required.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *DeleteVolumeSnapshotOpts) Reset()                    { *m = DeleteVolumeSnapshotOpts{} }
+func (m *DeleteVolumeSnapshotOpts) String() string            { return proto1.CompactTextString(m) }
+func (*DeleteVolumeSnapshotOpts) ProtoMessage()               {}
+func (*DeleteVolumeSnapshotOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *DeleteVolumeSnapshotOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// CreateAttachmentOpts is a structure which indicates all required
+// properties for creating a volume attachment.
+type CreateAttachmentOpts struct {
+	// The uuid of the volume attachment, optional.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The uuid of the volume, required.
+	VolumeId string `protobuf:"bytes,2,opt,name=volumeId" json:"volumeId,omitempty"`
+	// This field indicates if the volume is attached locally, optional.
+	DoLocalAttach bool `protobuf:"varint,3,opt,name=doLocalAttach" json:"doLocalAttach,omitempty"`
+	// This field indicates if the volume is attached multiple times, optional.
+	MultiPath bool `protobuf:"varint,4,opt,name=multiPath" json:"multiPath,omitempty"`
+	// The platform of the host, such as "x86_64"
+	Platform string `protobuf:"bytes,5,opt,name=platform" json:"platform,omitempty"`
+	// The type of OS, such as "linux","windows", etc.
+	OsType string `protobuf:"bytes,6,opt,name=osType" json:"osType,omitempty"`
+	// The name of the host
+	Host string `protobuf:"bytes,7,opt,name=host" json:"host,omitempty"`
+	// The ip address of the host
+	Ip string `protobuf:"bytes,8,opt,name=ip" json:"ip,omitempty"`
+	// The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
+	Initiator string `protobuf:"bytes,9,opt,name=initiator" json:"initiator,omitempty"`
+}
+
+func (m *CreateAttachmentOpts) Reset()                    { *m = CreateAttachmentOpts{} }
+func (m *CreateAttachmentOpts) String() string            { return proto1.CompactTextString(m) }
+func (*CreateAttachmentOpts) ProtoMessage()               {}
+func (*CreateAttachmentOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *CreateAttachmentOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetVolumeId() string {
+	if m != nil {
+		return m.VolumeId
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetDoLocalAttach() bool {
+	if m != nil {
+		return m.DoLocalAttach
+	}
+	return false
+}
+
+func (m *CreateAttachmentOpts) GetMultiPath() bool {
+	if m != nil {
+		return m.MultiPath
+	}
+	return false
+}
+
+func (m *CreateAttachmentOpts) GetPlatform() string {
+	if m != nil {
+		return m.Platform
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetOsType() string {
+	if m != nil {
+		return m.OsType
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetHost() string {
+	if m != nil {
+		return m.Host
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetIp() string {
+	if m != nil {
+		return m.Ip
+	}
+	return ""
+}
+
+func (m *CreateAttachmentOpts) GetInitiator() string {
+	if m != nil {
+		return m.Initiator
+	}
+	return ""
+}
+
+// Generic response, it return:
+// 1. Return result with id when create/update resource successfully.
+// 2. Return result without id when delete resource successfully.
+// 3. Return Error with error code and message when operate unsuccessfully.
+type GenericResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*GenericResponse_Result_
+	//	*GenericResponse_Error_
+	Reply isGenericResponse_Reply `protobuf_oneof:"reply"`
+}
+
+func (m *GenericResponse) Reset()                    { *m = GenericResponse{} }
+func (m *GenericResponse) String() string            { return proto1.CompactTextString(m) }
+func (*GenericResponse) ProtoMessage()               {}
+func (*GenericResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+type isGenericResponse_Reply interface {
+	isGenericResponse_Reply()
+}
+
+type GenericResponse_Result_ struct {
+	Result *GenericResponse_Result `protobuf:"bytes,1,opt,name=result,oneof"`
+}
+type GenericResponse_Error_ struct {
+	Error *GenericResponse_Error `protobuf:"bytes,2,opt,name=error,oneof"`
+}
+
+func (*GenericResponse_Result_) isGenericResponse_Reply() {}
+func (*GenericResponse_Error_) isGenericResponse_Reply()  {}
+
+func (m *GenericResponse) GetReply() isGenericResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *GenericResponse) GetResult() *GenericResponse_Result {
+	if x, ok := m.GetReply().(*GenericResponse_Result_); ok {
+		return x.Result
+	}
+	return nil
+}
+
+func (m *GenericResponse) GetError() *GenericResponse_Error {
+	if x, ok := m.GetReply().(*GenericResponse_Error_); ok {
+		return x.Error
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*GenericResponse) XXX_OneofFuncs() (func(msg proto1.Message, b *proto1.Buffer) error, func(msg proto1.Message, tag, wire int, b *proto1.Buffer) (bool, error), func(msg proto1.Message) (n int), []interface{}) {
+	return _GenericResponse_OneofMarshaler, _GenericResponse_OneofUnmarshaler, _GenericResponse_OneofSizer, []interface{}{
+		(*GenericResponse_Result_)(nil),
+		(*GenericResponse_Error_)(nil),
+	}
+}
+
+func _GenericResponse_OneofMarshaler(msg proto1.Message, b *proto1.Buffer) error {
+	m := msg.(*GenericResponse)
+	// reply
+	switch x := m.Reply.(type) {
+	case *GenericResponse_Result_:
+		b.EncodeVarint(1<<3 | proto1.WireBytes)
+		if err := b.EncodeMessage(x.Result); err != nil {
+			return err
+		}
+	case *GenericResponse_Error_:
+		b.EncodeVarint(2<<3 | proto1.WireBytes)
+		if err := b.EncodeMessage(x.Error); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("GenericResponse.Reply has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _GenericResponse_OneofUnmarshaler(msg proto1.Message, tag, wire int, b *proto1.Buffer) (bool, error) {
+	m := msg.(*GenericResponse)
+	switch tag {
+	case 1: // reply.result
+		if wire != proto1.WireBytes {
+			return true, proto1.ErrInternalBadWireType
+		}
+		msg := new(GenericResponse_Result)
+		err := b.DecodeMessage(msg)
+		m.Reply = &GenericResponse_Result_{msg}
+		return true, err
+	case 2: // reply.error
+		if wire != proto1.WireBytes {
+			return true, proto1.ErrInternalBadWireType
+		}
+		msg := new(GenericResponse_Error)
+		err := b.DecodeMessage(msg)
+		m.Reply = &GenericResponse_Error_{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _GenericResponse_OneofSizer(msg proto1.Message) (n int) {
+	m := msg.(*GenericResponse)
+	// reply
+	switch x := m.Reply.(type) {
+	case *GenericResponse_Result_:
+		s := proto1.Size(x.Result)
+		n += proto1.SizeVarint(1<<3 | proto1.WireBytes)
+		n += proto1.SizeVarint(uint64(s))
+		n += s
+	case *GenericResponse_Error_:
+		s := proto1.Size(x.Error)
+		n += proto1.SizeVarint(2<<3 | proto1.WireBytes)
+		n += proto1.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type GenericResponse_Result struct {
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *GenericResponse_Result) Reset()                    { *m = GenericResponse_Result{} }
+func (m *GenericResponse_Result) String() string            { return proto1.CompactTextString(m) }
+func (*GenericResponse_Result) ProtoMessage()               {}
+func (*GenericResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5, 0} }
+
+func (m *GenericResponse_Result) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+type GenericResponse_Error struct {
+	Code        string `protobuf:"bytes,1,opt,name=code" json:"code,omitempty"`
+	Description string `protobuf:"bytes,2,opt,name=description" json:"description,omitempty"`
+}
+
+func (m *GenericResponse_Error) Reset()                    { *m = GenericResponse_Error{} }
+func (m *GenericResponse_Error) String() string            { return proto1.CompactTextString(m) }
+func (*GenericResponse_Error) ProtoMessage()               {}
+func (*GenericResponse_Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5, 1} }
+
+func (m *GenericResponse_Error) GetCode() string {
+	if m != nil {
+		return m.Code
+	}
+	return ""
+}
+
+func (m *GenericResponse_Error) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+// A class of service represents a choice of utility or warranty offered to
+// customers by a service. NOTICE that this structure can only be called by
+// storage drivers.
+type ClassOfService struct {
+	// The unified identifier of ClassOfService, required.
+	Identifier string `protobuf:"bytes,1,opt,name=identifier" json:"identifier,omitempty"`
+	// The name of ClassOfService, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of ClassOfService, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The parameters of ClassOfService, required.
+	LinesOfService map[string]string `protobuf:"bytes,4,rep,name=linesOfService" json:"linesOfService,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *ClassOfService) Reset()                    { *m = ClassOfService{} }
+func (m *ClassOfService) String() string            { return proto1.CompactTextString(m) }
+func (*ClassOfService) ProtoMessage()               {}
+func (*ClassOfService) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *ClassOfService) GetIdentifier() string {
+	if m != nil {
+		return m.Identifier
+	}
+	return ""
+}
+
+func (m *ClassOfService) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ClassOfService) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *ClassOfService) GetLinesOfService() map[string]string {
+	if m != nil {
+		return m.LinesOfService
+	}
+	return nil
+}
+
+// The StoragePool resource represents unassigned storage capacity that can
+// be used to produce storage volumes or other storage pools, which conform
+// to one or more classes of service. NOTICE that this structure can only
+// be called by storage drivers.
+type StoragePool struct {
+	Identifier       string            `protobuf:"bytes,1,opt,name=identifier" json:"identifier,omitempty"`
+	Name             string            `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Description      string            `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	AvailabilityZone string            `protobuf:"bytes,4,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	TotalCapacity    uint64            `protobuf:"varint,5,opt,name=totalCapacity" json:"totalCapacity,omitempty"`
+	FreeCapacity     uint64            `protobuf:"varint,6,opt,name=freeCapacity" json:"freeCapacity,omitempty"`
+	LinesOfService   map[string]string `protobuf:"bytes,7,rep,name=linesOfService" json:"linesOfService,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *StoragePool) Reset()                    { *m = StoragePool{} }
+func (m *StoragePool) String() string            { return proto1.CompactTextString(m) }
+func (*StoragePool) ProtoMessage()               {}
+func (*StoragePool) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func (m *StoragePool) GetIdentifier() string {
+	if m != nil {
+		return m.Identifier
+	}
+	return ""
+}
+
+func (m *StoragePool) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *StoragePool) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *StoragePool) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *StoragePool) GetTotalCapacity() uint64 {
+	if m != nil {
+		return m.TotalCapacity
+	}
+	return 0
+}
+
+func (m *StoragePool) GetFreeCapacity() uint64 {
+	if m != nil {
+		return m.FreeCapacity
+	}
+	return 0
+}
+
+func (m *StoragePool) GetLinesOfService() map[string]string {
+	if m != nil {
+		return m.LinesOfService
+	}
+	return nil
+}
+
+// Volume resource represents a block-addressable container of storage,
+// sometimes referred to as a "Logical Unit", "LU", "LUN", or "StorageVolume"
+// in the storage industry. Volumes optionally adhere to a ClassOfService,
+// which defines added functionality. NOTICE that this structure can only
+// be called by storage drivers.
+type Volume struct {
+	Identifier               string            `protobuf:"bytes,1,opt,name=identifier" json:"identifier,omitempty"`
+	Name                     string            `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Description              string            `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	Size                     uint64            `protobuf:"varint,4,opt,name=size" json:"size,omitempty"`
+	AvailabilityZone         string            `protobuf:"bytes,5,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	Status                   string            `protobuf:"bytes,6,opt,name=status" json:"status,omitempty"`
+	PoolIdentifier           string            `protobuf:"bytes,7,opt,name=poolIdentifier" json:"poolIdentifier,omitempty"`
+	ClassOfServiceIdentifier string            `protobuf:"bytes,8,opt,name=classOfServiceIdentifier" json:"classOfServiceIdentifier,omitempty"`
+	SnapshotIdentifiers      []string          `protobuf:"bytes,9,rep,name=snapshotIdentifiers" json:"snapshotIdentifiers,omitempty"`
+	Metadata                 map[string]string `protobuf:"bytes,10,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *Volume) Reset()                    { *m = Volume{} }
+func (m *Volume) String() string            { return proto1.CompactTextString(m) }
+func (*Volume) ProtoMessage()               {}
+func (*Volume) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *Volume) GetIdentifier() string {
+	if m != nil {
+		return m.Identifier
+	}
+	return ""
+}
+
+func (m *Volume) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Volume) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *Volume) GetSize() uint64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *Volume) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *Volume) GetStatus() string {
 	if m != nil {
 		return m.Status
 	}
 	return ""
 }
 
-func (m *DockResponse) GetMessage() string {
+func (m *Volume) GetPoolIdentifier() string {
 	if m != nil {
-		return m.Message
+		return m.PoolIdentifier
 	}
 	return ""
 }
 
-func (m *DockResponse) GetError() string {
+func (m *Volume) GetClassOfServiceIdentifier() string {
 	if m != nil {
-		return m.Error
+		return m.ClassOfServiceIdentifier
+	}
+	return ""
+}
+
+func (m *Volume) GetSnapshotIdentifiers() []string {
+	if m != nil {
+		return m.SnapshotIdentifiers
+	}
+	return nil
+}
+
+func (m *Volume) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// VolumeConnection is a structure for all properties of returned volume
+// connection when create a volume attachment. NOTICE that this structure
+// can only be called by storage drivers.
+type VolumeConnection struct {
+	Protocol string `protobuf:"bytes,1,opt,name=protocol" json:"protocol,omitempty"`
+	Value    []byte `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (m *VolumeConnection) Reset()                    { *m = VolumeConnection{} }
+func (m *VolumeConnection) String() string            { return proto1.CompactTextString(m) }
+func (*VolumeConnection) ProtoMessage()               {}
+func (*VolumeConnection) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+
+func (m *VolumeConnection) GetProtocol() string {
+	if m != nil {
+		return m.Protocol
+	}
+	return ""
+}
+
+func (m *VolumeConnection) GetValue() []byte {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+// Volume snapshot resource represents a point-in-time copy of the data
+// that a volume contains. NOTICE that this structure can only be called by
+// storage drivers.
+type VolumeSnapshot struct {
+	Identifier       string `protobuf:"bytes,1,opt,name=identifier" json:"identifier,omitempty"`
+	Name             string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Description      string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	Size             uint64 `protobuf:"varint,4,opt,name=size" json:"size,omitempty"`
+	AvailabilityZone string `protobuf:"bytes,5,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	Status           string `protobuf:"bytes,6,opt,name=status" json:"status,omitempty"`
+	VolumeIdentifier string `protobuf:"bytes,7,opt,name=volumeIdentifier" json:"volumeIdentifier,omitempty"`
+}
+
+func (m *VolumeSnapshot) Reset()                    { *m = VolumeSnapshot{} }
+func (m *VolumeSnapshot) String() string            { return proto1.CompactTextString(m) }
+func (*VolumeSnapshot) ProtoMessage()               {}
+func (*VolumeSnapshot) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+
+func (m *VolumeSnapshot) GetIdentifier() string {
+	if m != nil {
+		return m.Identifier
+	}
+	return ""
+}
+
+func (m *VolumeSnapshot) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *VolumeSnapshot) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *VolumeSnapshot) GetSize() uint64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *VolumeSnapshot) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *VolumeSnapshot) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+func (m *VolumeSnapshot) GetVolumeIdentifier() string {
+	if m != nil {
+		return m.VolumeIdentifier
 	}
 	return ""
 }
 
 func init() {
-	proto1.RegisterType((*DockRequest)(nil), "proto.DockRequest")
-	proto1.RegisterType((*DockResponse)(nil), "proto.DockResponse")
+	proto1.RegisterType((*CreateVolumeOpts)(nil), "proto.CreateVolumeOpts")
+	proto1.RegisterType((*DeleteVolumeOpts)(nil), "proto.DeleteVolumeOpts")
+	proto1.RegisterType((*CreateVolumeSnapshotOpts)(nil), "proto.CreateVolumeSnapshotOpts")
+	proto1.RegisterType((*DeleteVolumeSnapshotOpts)(nil), "proto.DeleteVolumeSnapshotOpts")
+	proto1.RegisterType((*CreateAttachmentOpts)(nil), "proto.CreateAttachmentOpts")
+	proto1.RegisterType((*GenericResponse)(nil), "proto.GenericResponse")
+	proto1.RegisterType((*GenericResponse_Result)(nil), "proto.GenericResponse.Result")
+	proto1.RegisterType((*GenericResponse_Error)(nil), "proto.GenericResponse.Error")
+	proto1.RegisterType((*ClassOfService)(nil), "proto.ClassOfService")
+	proto1.RegisterType((*StoragePool)(nil), "proto.StoragePool")
+	proto1.RegisterType((*Volume)(nil), "proto.Volume")
+	proto1.RegisterType((*VolumeConnection)(nil), "proto.VolumeConnection")
+	proto1.RegisterType((*VolumeSnapshot)(nil), "proto.VolumeSnapshot")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -230,23 +821,15 @@ const _ = grpc.SupportPackageIsVersion4
 
 type DockClient interface {
 	// Create a volume
-	CreateVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
-	// Get a volume
-	GetVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
+	CreateVolume(ctx context.Context, in *CreateVolumeOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete a volume
-	DeleteVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
-	// Create a volume attachment
-	CreateVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
-	// Update a volume attachment
-	UpdateVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
-	// Delete a volume attachment
-	DeleteVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
+	DeleteVolume(ctx context.Context, in *DeleteVolumeOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Create a volume snapshot
-	CreateVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
-	// Get a volume snapshot
-	GetVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
+	CreateVolumeSnapshot(ctx context.Context, in *CreateVolumeSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete a volume snapshot
-	DeleteVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error)
+	DeleteVolumeSnapshot(ctx context.Context, in *DeleteVolumeSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a volume attachment
+	CreateAttachment(ctx context.Context, in *CreateAttachmentOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 }
 
 type dockClient struct {
@@ -257,8 +840,8 @@ func NewDockClient(cc *grpc.ClientConn) DockClient {
 	return &dockClient{cc}
 }
 
-func (c *dockClient) CreateVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
+func (c *dockClient) CreateVolume(ctx context.Context, in *CreateVolumeOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
 	err := grpc.Invoke(ctx, "/proto.Dock/CreateVolume", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -266,17 +849,8 @@ func (c *dockClient) CreateVolume(ctx context.Context, in *DockRequest, opts ...
 	return out, nil
 }
 
-func (c *dockClient) GetVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/GetVolume", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dockClient) DeleteVolume(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
+func (c *dockClient) DeleteVolume(ctx context.Context, in *DeleteVolumeOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
 	err := grpc.Invoke(ctx, "/proto.Dock/DeleteVolume", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -284,35 +858,8 @@ func (c *dockClient) DeleteVolume(ctx context.Context, in *DockRequest, opts ...
 	return out, nil
 }
 
-func (c *dockClient) CreateVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/CreateVolumeAttachment", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dockClient) UpdateVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/UpdateVolumeAttachment", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dockClient) DeleteVolumeAttachment(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/DeleteVolumeAttachment", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dockClient) CreateVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
+func (c *dockClient) CreateVolumeSnapshot(ctx context.Context, in *CreateVolumeSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
 	err := grpc.Invoke(ctx, "/proto.Dock/CreateVolumeSnapshot", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -320,18 +867,18 @@ func (c *dockClient) CreateVolumeSnapshot(ctx context.Context, in *DockRequest, 
 	return out, nil
 }
 
-func (c *dockClient) GetVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/GetVolumeSnapshot", in, out, c.cc, opts...)
+func (c *dockClient) DeleteVolumeSnapshot(ctx context.Context, in *DeleteVolumeSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.Dock/DeleteVolumeSnapshot", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dockClient) DeleteVolumeSnapshot(ctx context.Context, in *DockRequest, opts ...grpc.CallOption) (*DockResponse, error) {
-	out := new(DockResponse)
-	err := grpc.Invoke(ctx, "/proto.Dock/DeleteVolumeSnapshot", in, out, c.cc, opts...)
+func (c *dockClient) CreateAttachment(ctx context.Context, in *CreateAttachmentOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.Dock/CreateAttachment", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -342,23 +889,15 @@ func (c *dockClient) DeleteVolumeSnapshot(ctx context.Context, in *DockRequest, 
 
 type DockServer interface {
 	// Create a volume
-	CreateVolume(context.Context, *DockRequest) (*DockResponse, error)
-	// Get a volume
-	GetVolume(context.Context, *DockRequest) (*DockResponse, error)
+	CreateVolume(context.Context, *CreateVolumeOpts) (*GenericResponse, error)
 	// Delete a volume
-	DeleteVolume(context.Context, *DockRequest) (*DockResponse, error)
-	// Create a volume attachment
-	CreateVolumeAttachment(context.Context, *DockRequest) (*DockResponse, error)
-	// Update a volume attachment
-	UpdateVolumeAttachment(context.Context, *DockRequest) (*DockResponse, error)
-	// Delete a volume attachment
-	DeleteVolumeAttachment(context.Context, *DockRequest) (*DockResponse, error)
+	DeleteVolume(context.Context, *DeleteVolumeOpts) (*GenericResponse, error)
 	// Create a volume snapshot
-	CreateVolumeSnapshot(context.Context, *DockRequest) (*DockResponse, error)
-	// Get a volume snapshot
-	GetVolumeSnapshot(context.Context, *DockRequest) (*DockResponse, error)
+	CreateVolumeSnapshot(context.Context, *CreateVolumeSnapshotOpts) (*GenericResponse, error)
 	// Delete a volume snapshot
-	DeleteVolumeSnapshot(context.Context, *DockRequest) (*DockResponse, error)
+	DeleteVolumeSnapshot(context.Context, *DeleteVolumeSnapshotOpts) (*GenericResponse, error)
+	// Create a volume attachment
+	CreateAttachment(context.Context, *CreateAttachmentOpts) (*GenericResponse, error)
 }
 
 func RegisterDockServer(s *grpc.Server, srv DockServer) {
@@ -366,7 +905,7 @@ func RegisterDockServer(s *grpc.Server, srv DockServer) {
 }
 
 func _Dock_CreateVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
+	in := new(CreateVolumeOpts)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -378,31 +917,13 @@ func _Dock_CreateVolume_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/proto.Dock/CreateVolume",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).CreateVolume(ctx, req.(*DockRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_GetVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).GetVolume(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Dock/GetVolume",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).GetVolume(ctx, req.(*DockRequest))
+		return srv.(DockServer).CreateVolume(ctx, req.(*CreateVolumeOpts))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Dock_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
+	in := new(DeleteVolumeOpts)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -414,67 +935,13 @@ func _Dock_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/proto.Dock/DeleteVolume",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).DeleteVolume(ctx, req.(*DockRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_CreateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).CreateVolumeAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Dock/CreateVolumeAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).CreateVolumeAttachment(ctx, req.(*DockRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_UpdateVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).UpdateVolumeAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Dock/UpdateVolumeAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).UpdateVolumeAttachment(ctx, req.(*DockRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_DeleteVolumeAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).DeleteVolumeAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Dock/DeleteVolumeAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).DeleteVolumeAttachment(ctx, req.(*DockRequest))
+		return srv.(DockServer).DeleteVolume(ctx, req.(*DeleteVolumeOpts))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Dock_CreateVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
+	in := new(CreateVolumeSnapshotOpts)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -486,31 +953,13 @@ func _Dock_CreateVolumeSnapshot_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/proto.Dock/CreateVolumeSnapshot",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).CreateVolumeSnapshot(ctx, req.(*DockRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Dock_GetVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DockServer).GetVolumeSnapshot(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Dock/GetVolumeSnapshot",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).GetVolumeSnapshot(ctx, req.(*DockRequest))
+		return srv.(DockServer).CreateVolumeSnapshot(ctx, req.(*CreateVolumeSnapshotOpts))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Dock_DeleteVolumeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DockRequest)
+	in := new(DeleteVolumeSnapshotOpts)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -522,7 +971,25 @@ func _Dock_DeleteVolumeSnapshot_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/proto.Dock/DeleteVolumeSnapshot",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DockServer).DeleteVolumeSnapshot(ctx, req.(*DockRequest))
+		return srv.(DockServer).DeleteVolumeSnapshot(ctx, req.(*DeleteVolumeSnapshotOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Dock_CreateAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAttachmentOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DockServer).CreateAttachment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Dock/CreateAttachment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DockServer).CreateAttachment(ctx, req.(*CreateAttachmentOpts))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -536,36 +1003,20 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Dock_CreateVolume_Handler,
 		},
 		{
-			MethodName: "GetVolume",
-			Handler:    _Dock_GetVolume_Handler,
-		},
-		{
 			MethodName: "DeleteVolume",
 			Handler:    _Dock_DeleteVolume_Handler,
-		},
-		{
-			MethodName: "CreateVolumeAttachment",
-			Handler:    _Dock_CreateVolumeAttachment_Handler,
-		},
-		{
-			MethodName: "UpdateVolumeAttachment",
-			Handler:    _Dock_UpdateVolumeAttachment_Handler,
-		},
-		{
-			MethodName: "DeleteVolumeAttachment",
-			Handler:    _Dock_DeleteVolumeAttachment_Handler,
 		},
 		{
 			MethodName: "CreateVolumeSnapshot",
 			Handler:    _Dock_CreateVolumeSnapshot_Handler,
 		},
 		{
-			MethodName: "GetVolumeSnapshot",
-			Handler:    _Dock_GetVolumeSnapshot_Handler,
-		},
-		{
 			MethodName: "DeleteVolumeSnapshot",
 			Handler:    _Dock_DeleteVolumeSnapshot_Handler,
+		},
+		{
+			MethodName: "CreateAttachment",
+			Handler:    _Dock_CreateAttachment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -575,34 +1026,60 @@ var _Dock_serviceDesc = grpc.ServiceDesc{
 func init() { proto1.RegisterFile("dock.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 464 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x52, 0xd1, 0x6a, 0x13, 0x41,
-	0x14, 0x35, 0x36, 0x49, 0x93, 0xdb, 0x6d, 0x35, 0xb7, 0xb1, 0x0c, 0x45, 0x24, 0x04, 0x91, 0x3c,
-	0x48, 0x11, 0x15, 0xa1, 0x2f, 0x42, 0x68, 0x40, 0x02, 0x22, 0x92, 0x62, 0xdf, 0xc7, 0xdd, 0xa9,
-	0x59, 0xba, 0xbb, 0x77, 0xdc, 0x99, 0xf5, 0xc1, 0x3f, 0xf4, 0x33, 0xfc, 0x13, 0x99, 0x3b, 0xbb,
-	0xd9, 0x89, 0xf6, 0x25, 0xf1, 0x29, 0x39, 0xe7, 0xdc, 0x39, 0xb9, 0xf7, 0xe4, 0x00, 0x24, 0x14,
-	0xdf, 0x5d, 0xe8, 0x92, 0x2c, 0x61, 0x8f, 0x3f, 0xa6, 0xbf, 0xbb, 0x70, 0xb4, 0xa0, 0xf8, 0x6e,
-	0xa5, 0xbe, 0x57, 0xca, 0x58, 0x3c, 0x87, 0xc1, 0x0f, 0xca, 0xaa, 0x5c, 0x2d, 0x13, 0xd1, 0x99,
-	0x74, 0x66, 0xc3, 0xd5, 0x06, 0xe3, 0x33, 0x00, 0xff, 0xfd, 0x93, 0xcc, 0x95, 0x78, 0xc8, 0x6a,
-	0xc0, 0xe0, 0x4b, 0x18, 0x79, 0xb4, 0x50, 0x26, 0x2e, 0x53, 0x6d, 0x53, 0x2a, 0xc4, 0x01, 0x8f,
-	0xfd, 0x2b, 0xb4, 0x6e, 0xd7, 0xe9, 0x4f, 0x25, 0xba, 0x93, 0xce, 0xec, 0x60, 0x15, 0x30, 0x38,
-	0x85, 0x48, 0x5a, 0x2b, 0xe3, 0x75, 0xae, 0x0a, 0xbb, 0x4c, 0x44, 0x8f, 0x8d, 0xb6, 0x38, 0x7c,
-	0x01, 0x27, 0x2d, 0xe6, 0xad, 0xfa, 0x3c, 0xf5, 0x17, 0x8b, 0x6f, 0xe1, 0x49, 0xcb, 0x84, 0xdb,
-	0x1d, 0xf2, 0xf8, 0xfd, 0x22, 0x3e, 0x87, 0xe3, 0x84, 0x3e, 0x52, 0x2c, 0xb3, 0x39, 0xeb, 0x62,
-	0x30, 0xe9, 0xcc, 0x06, 0xab, 0x6d, 0x12, 0x9f, 0xc2, 0x30, 0xaf, 0x32, 0x9b, 0x7e, 0x96, 0x76,
-	0x2d, 0x86, 0x3c, 0xd1, 0x12, 0x2e, 0xcf, 0x35, 0x19, 0xbb, 0x2c, 0x6e, 0x49, 0x80, 0xcf, 0xb3,
-	0xc1, 0x2e, 0x81, 0x9c, 0xaa, 0xc2, 0x6a, 0x4a, 0x0b, 0x2b, 0x8e, 0x7c, 0x9e, 0x2d, 0xe3, 0x74,
-	0x53, 0x48, 0x6d, 0xd6, 0xe4, 0xee, 0x8f, 0xbc, 0xde, 0x32, 0x2e, 0xa1, 0x06, 0xf1, 0xed, 0xc7,
-	0x3e, 0xa1, 0x90, 0xc3, 0x57, 0x70, 0xda, 0xe0, 0xf0, 0xee, 0x13, 0x1e, 0xbd, 0x4f, 0x72, 0x1b,
-	0xbb, 0x9a, 0xf0, 0xc6, 0x8f, 0xfc, 0xc6, 0x0d, 0xc6, 0x33, 0xe8, 0x6b, 0xa2, 0x6c, 0x99, 0x88,
-	0xc7, 0xac, 0xd4, 0xc8, 0x65, 0xa0, 0x4b, 0xba, 0x4d, 0x33, 0x57, 0x9b, 0x11, 0x4b, 0x2d, 0x31,
-	0xbd, 0x81, 0xc8, 0x57, 0xcc, 0x68, 0x2a, 0x8c, 0x72, 0x2e, 0xc6, 0x4a, 0x5b, 0x99, 0xba, 0x61,
-	0x35, 0x42, 0x01, 0x87, 0xb9, 0x32, 0x46, 0x7e, 0x6b, 0xca, 0xd5, 0x40, 0x1c, 0x43, 0x4f, 0x95,
-	0x25, 0x95, 0x75, 0x9b, 0x3c, 0x78, 0xfd, 0xab, 0x0b, 0x5d, 0x67, 0x8c, 0x97, 0x10, 0x5d, 0x95,
-	0x4a, 0x5a, 0x75, 0xc3, 0xf5, 0x41, 0xf4, 0x1d, 0xbf, 0x08, 0x8a, 0x7d, 0x7e, 0xba, 0xc5, 0xf9,
-	0x4d, 0xa6, 0x0f, 0xf0, 0x1d, 0x0c, 0x3f, 0x28, 0xbb, 0xfb, 0xbb, 0x4b, 0x88, 0x16, 0x2a, 0x53,
-	0xfb, 0xfc, 0xe4, 0x15, 0x9c, 0x85, 0xdb, 0xce, 0x37, 0xdd, 0xdb, 0xd1, 0xe4, 0x8b, 0x4e, 0xfe,
-	0xdf, 0x24, 0x3c, 0x62, 0x3f, 0x93, 0x39, 0x8c, 0xc3, 0x73, 0xae, 0xeb, 0x4a, 0xed, 0x62, 0xf1,
-	0x1e, 0x46, 0x9b, 0x3f, 0x61, 0x9f, 0xf7, 0x73, 0x18, 0x87, 0x77, 0xec, 0x61, 0xf1, 0xb5, 0xcf,
-	0xec, 0x9b, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x3f, 0xfb, 0xe4, 0x25, 0x23, 0x05, 0x00, 0x00,
+	// 875 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xd4, 0x56, 0x5f, 0x8f, 0xe3, 0x34,
+	0x10, 0xdf, 0xa4, 0x69, 0xb6, 0x9d, 0xee, 0x96, 0xca, 0x77, 0x5a, 0xa2, 0xde, 0x01, 0x55, 0x74,
+	0x9c, 0xca, 0x3e, 0x54, 0xa8, 0x20, 0x1d, 0x3a, 0xc4, 0x43, 0xe9, 0x9e, 0xb8, 0x4a, 0xc7, 0xfe,
+	0xc9, 0x22, 0x1e, 0x78, 0xf3, 0x26, 0x2e, 0xb5, 0xd6, 0x8d, 0x23, 0xc7, 0xad, 0x54, 0x3e, 0x02,
+	0x4f, 0x7c, 0x26, 0x3e, 0x0a, 0x8f, 0x88, 0x8f, 0x00, 0x12, 0x8a, 0xe3, 0xa4, 0x49, 0x9a, 0x56,
+	0xe2, 0xa1, 0x48, 0xf7, 0x14, 0xcf, 0x78, 0x32, 0x9e, 0xf9, 0xf9, 0xe7, 0x99, 0x01, 0x08, 0xb8,
+	0xff, 0x38, 0x8a, 0x04, 0x97, 0x1c, 0x35, 0xd5, 0xc7, 0xfd, 0xb5, 0x01, 0xbd, 0xa9, 0x20, 0x58,
+	0x92, 0x1f, 0x39, 0x5b, 0x2d, 0xc9, 0x4d, 0x24, 0x63, 0xd4, 0x05, 0x93, 0x06, 0x8e, 0x31, 0x30,
+	0x86, 0x6d, 0xcf, 0xa4, 0x01, 0x42, 0x60, 0x85, 0x78, 0x49, 0x1c, 0x53, 0x69, 0xd4, 0x3a, 0xd1,
+	0xc5, 0xf4, 0x17, 0xe2, 0x34, 0x06, 0xc6, 0xd0, 0xf2, 0xd4, 0x1a, 0x0d, 0xa0, 0x13, 0x90, 0xd8,
+	0x17, 0x34, 0x92, 0x94, 0x87, 0x8e, 0xa5, 0xcc, 0x8b, 0x2a, 0xf4, 0x31, 0x40, 0x1c, 0xe2, 0x28,
+	0x5e, 0x70, 0x39, 0x0b, 0x9c, 0xa6, 0x32, 0x28, 0x68, 0xd0, 0x25, 0xf4, 0xf0, 0x1a, 0x53, 0x86,
+	0x1f, 0x28, 0xa3, 0x72, 0xf3, 0x13, 0x0f, 0x89, 0x63, 0x2b, 0xab, 0x1d, 0x3d, 0x7a, 0x0e, 0xed,
+	0x48, 0xf0, 0x39, 0x65, 0x64, 0x16, 0x38, 0xa7, 0xca, 0x68, 0xab, 0x40, 0x17, 0x60, 0x47, 0x9c,
+	0xb3, 0x59, 0xe0, 0xb4, 0xd4, 0x96, 0x96, 0x50, 0x1f, 0x5a, 0xc9, 0xea, 0x3a, 0xc9, 0xa7, 0xad,
+	0x76, 0x72, 0x19, 0x4d, 0xa0, 0xb5, 0x24, 0x12, 0x07, 0x58, 0x62, 0x07, 0x06, 0x8d, 0x61, 0x67,
+	0xfc, 0x69, 0x8a, 0xd6, 0xa8, 0x0a, 0xd1, 0xe8, 0x7b, 0x6d, 0xf7, 0x26, 0x94, 0x62, 0xe3, 0xe5,
+	0xbf, 0xf5, 0xbf, 0x86, 0xf3, 0xd2, 0x16, 0xea, 0x41, 0xe3, 0x91, 0x6c, 0x34, 0x98, 0xc9, 0x12,
+	0x3d, 0x85, 0xe6, 0x1a, 0xb3, 0x55, 0x06, 0x67, 0x2a, 0xbc, 0x36, 0xbf, 0x32, 0x5c, 0x17, 0x7a,
+	0x57, 0x84, 0x91, 0x43, 0x77, 0xe1, 0xfe, 0x66, 0x80, 0x53, 0x8c, 0xe6, 0x5e, 0x83, 0x77, 0xe4,
+	0x8b, 0xeb, 0x43, 0x6b, 0xad, 0xce, 0xcb, 0xaf, 0x2d, 0x97, 0xdd, 0x4b, 0x70, 0x8a, 0x61, 0x1f,
+	0x8a, 0xc8, 0xfd, 0xdb, 0x80, 0xa7, 0x69, 0xf8, 0x13, 0x29, 0xb1, 0xbf, 0x58, 0x92, 0xb0, 0x3e,
+	0xf4, 0xe2, 0x81, 0x66, 0xf9, 0x40, 0xf4, 0x02, 0xce, 0x03, 0xfe, 0x8e, 0xfb, 0x98, 0xa5, 0x4e,
+	0x54, 0x2e, 0x2d, 0xaf, 0xac, 0x4c, 0xf8, 0xb1, 0x5c, 0x31, 0x49, 0x6f, 0xb1, 0x5c, 0xa8, 0x94,
+	0x5a, 0xde, 0x56, 0xa1, 0x78, 0xc0, 0xb0, 0x9c, 0x73, 0xb1, 0xcc, 0x12, 0xca, 0xe4, 0x84, 0x3b,
+	0x3c, 0xfe, 0x61, 0x13, 0x65, 0xdc, 0xd3, 0x52, 0x02, 0xdd, 0x82, 0xc7, 0x52, 0x93, 0x4d, 0xad,
+	0x55, 0xdc, 0x91, 0xe6, 0x98, 0x49, 0xa3, 0xe4, 0x54, 0x1a, 0x52, 0x49, 0xb1, 0xe4, 0x42, 0x13,
+	0x6c, 0xab, 0x70, 0xff, 0x30, 0xe0, 0x83, 0xef, 0x48, 0x48, 0x04, 0xf5, 0x3d, 0x12, 0x47, 0x3c,
+	0x8c, 0x09, 0x7a, 0x05, 0xb6, 0x20, 0xf1, 0x8a, 0x49, 0x95, 0x7d, 0x67, 0xfc, 0x91, 0xe6, 0x5c,
+	0xc5, 0x6e, 0xe4, 0x29, 0xa3, 0xb7, 0x27, 0x9e, 0x36, 0x47, 0x5f, 0x42, 0x93, 0x08, 0xc1, 0x85,
+	0xc2, 0xa7, 0x33, 0x7e, 0xbe, 0xe7, 0xbf, 0x37, 0x89, 0xcd, 0xdb, 0x13, 0x2f, 0x35, 0xee, 0x3b,
+	0x60, 0xa7, 0x9e, 0xaa, 0x90, 0xf7, 0xbf, 0x81, 0xa6, 0xb2, 0x4d, 0xf2, 0xf4, 0x79, 0x40, 0xf4,
+	0x96, 0x5a, 0x57, 0x29, 0x62, 0xee, 0x50, 0xe4, 0xdb, 0x53, 0x68, 0x0a, 0x12, 0xb1, 0x4d, 0x72,
+	0xc7, 0xdd, 0x29, 0xc3, 0x71, 0x7c, 0x33, 0xbf, 0x27, 0x62, 0x4d, 0x7d, 0x92, 0xbc, 0x7b, 0x1a,
+	0x90, 0x50, 0xd2, 0x39, 0x25, 0x42, 0xfb, 0x2d, 0x68, 0x6a, 0x89, 0x5a, 0x39, 0xb1, 0xb1, 0x4b,
+	0xca, 0x3b, 0xe8, 0x32, 0x1a, 0x92, 0xed, 0x39, 0x8e, 0xa5, 0x5e, 0xed, 0x67, 0xd9, 0xab, 0x2d,
+	0x05, 0x31, 0x7a, 0x57, 0xb2, 0x4d, 0x5f, 0x6e, 0xc5, 0x41, 0x7f, 0x02, 0x4f, 0x6a, 0xcc, 0xfe,
+	0xd3, 0x2b, 0xfe, 0xcb, 0x84, 0xce, 0xbd, 0xe4, 0x02, 0xff, 0x4c, 0x6e, 0x39, 0x67, 0x47, 0xca,
+	0xbd, 0xae, 0x52, 0x5a, 0x7b, 0x2a, 0xe5, 0x0b, 0x38, 0x97, 0x5c, 0x62, 0x36, 0xc5, 0x11, 0xf6,
+	0xa9, 0xdc, 0x28, 0xc2, 0x5b, 0x5e, 0x59, 0x89, 0x5c, 0x38, 0x9b, 0x0b, 0x42, 0x72, 0x23, 0x5b,
+	0x19, 0x95, 0x74, 0xe8, 0x7a, 0x07, 0xf1, 0x53, 0x85, 0xf8, 0x4b, 0x8d, 0x78, 0x21, 0xef, 0xff,
+	0x0b, 0xee, 0xdf, 0x1b, 0x60, 0xa7, 0x85, 0xe7, 0x48, 0x48, 0x67, 0x05, 0xd3, 0x2a, 0x14, 0xcc,
+	0x3a, 0xf4, 0x9b, 0x7b, 0xd0, 0xbf, 0x00, 0x3b, 0x96, 0x58, 0xae, 0xe2, 0xac, 0x9a, 0xa4, 0x12,
+	0x7a, 0x09, 0xdd, 0xb4, 0x27, 0xe5, 0x11, 0xa7, 0x75, 0xa5, 0xa2, 0x45, 0xaf, 0xc1, 0xf1, 0x4b,
+	0x44, 0x2e, 0xfc, 0x91, 0xd6, 0x9d, 0xbd, 0xfb, 0xe8, 0x73, 0x78, 0xb2, 0xed, 0xae, 0x99, 0x36,
+	0x76, 0xda, 0x83, 0xc6, 0xb0, 0xed, 0xd5, 0x6d, 0xa1, 0x57, 0x3b, 0x3d, 0xf0, 0x99, 0xbe, 0xdb,
+	0x14, 0xe4, 0xe3, 0x74, 0xbe, 0x2b, 0xe8, 0xa5, 0xee, 0xa7, 0x3c, 0x0c, 0x89, 0x9f, 0xb5, 0x1c,
+	0x75, 0xb0, 0xcf, 0x99, 0x76, 0x92, 0xcb, 0x65, 0x4f, 0x67, 0xda, 0x93, 0xfb, 0xa7, 0x01, 0xdd,
+	0x72, 0x0f, 0x7a, 0xcf, 0x28, 0x71, 0x09, 0xbd, 0xac, 0xc9, 0x55, 0x48, 0xb1, 0xa3, 0x1f, 0xff,
+	0x63, 0x82, 0x75, 0xc5, 0xfd, 0x47, 0x34, 0x81, 0xb3, 0xe2, 0x40, 0x80, 0x3e, 0xdc, 0x33, 0xb3,
+	0xf4, 0x2f, 0xea, 0x1b, 0x84, 0x7b, 0x92, 0xb8, 0x28, 0x76, 0xf0, 0xdc, 0x45, 0x75, 0x1a, 0x39,
+	0xe0, 0xe2, 0x2e, 0xeb, 0xeb, 0x95, 0x0b, 0xf8, 0xa4, 0x26, 0x9a, 0xe2, 0x84, 0x70, 0xd8, 0x65,
+	0xdd, 0x5c, 0x91, 0xbb, 0xdc, 0x37, 0x74, 0x1c, 0x70, 0x39, 0xcb, 0xa6, 0xdd, 0xed, 0xf4, 0x81,
+	0x9e, 0x95, 0x22, 0x2c, 0x8f, 0x25, 0xfb, 0x5d, 0x3d, 0xd8, 0x6a, 0xe3, 0x8b, 0x7f, 0x03, 0x00,
+	0x00, 0xff, 0xff, 0xa0, 0x30, 0x25, 0x4b, 0x55, 0x0b, 0x00, 0x00,
 }

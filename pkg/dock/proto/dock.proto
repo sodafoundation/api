@@ -51,6 +51,8 @@ service Dock {
     rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
 }
 
+// CreateVolumeOpts is a structure which indicates all required properties
+// for creating a volume.
 message CreateVolumeOpts {
     // The uuid of the volume, optional when creating.
     string id = 1;
@@ -74,11 +76,15 @@ message CreateVolumeOpts {
     map<string, string> metadata = 10;
 }
 
+// DeleteVolumeOpts is a structure which indicates all required properties
+// for deleting a volume.
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
 }
 
+// CreateVolumeSnapshotOpts is a structure which indicates all required
+// properties for creating a volume snapshot.
 message CreateVolumeSnapshotOpts {
     // The uuid of the volume snapshot, optional.
     string id = 1;
@@ -92,11 +98,15 @@ message CreateVolumeSnapshotOpts {
     string volumeId = 5;
 }
 
+// DeleteVolumeSnapshotOpts is a structure which indicates all required
+// properties for deleting a volume snapshot.
 message DeleteVolumeSnapshotOpts {
     // The uuid of the volume snapshot, required.
     string id = 1;
 }
 
+// CreateAttachmentOpts is a structure which indicates all required
+// properties for creating a volume attachment.
 message CreateAttachmentOpts {
     // The uuid of the volume attachment, optional.
     string id = 1;	
@@ -106,21 +116,16 @@ message CreateAttachmentOpts {
     bool doLocalAttach = 3;
     // This field indicates if the volume is attached multiple times, optional.
     bool multiPath = 4;
-    // The infomation of the host node on which the volume will be attached.
-    HostInfo hostInfo = 5;
-}
-
-message HostInfo {
-    // The platform of the host, such as "x86_64"
-    string platform = 1;
+	// The platform of the host, such as "x86_64"
+    string platform = 5;
     // The type of OS, such as "linux","windows", etc.
-    string osType = 2;
+    string osType = 6;
     // The name of the host
-    string host = 3;
+     string host = 7;
     // The ip address of the host
-    string ip = 4;
+    string ip = 8;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
-    string initiator = 5;
+    string initiator = 9;
 }
 
 // Generic response, it return:
@@ -141,4 +146,71 @@ message GenericResponse {
         Result result = 1;
         Error error = 2;
     }
+}
+
+// A class of service represents a choice of utility or warranty offered to
+// customers by a service. NOTICE that this structure can only be called by
+// storage drivers.
+message ClassOfService {
+	// The unified identifier of ClassOfService, required.
+	string identifier = 1;
+	// The name of ClassOfService, optional.
+	string name = 2;
+	// The description of ClassOfService, optional.
+	string description = 3;
+	// The parameters of ClassOfService, required.
+	map<string, string> linesOfService = 4;
+}
+
+// The StoragePool resource represents unassigned storage capacity that can
+// be used to produce storage volumes or other storage pools, which conform
+// to one or more classes of service. NOTICE that this structure can only
+// be called by storage drivers.
+message StoragePool {
+	string identifier = 1;
+	string name = 2;
+	string description = 3;
+	string availabilityZone = 4;
+	uint64 totalCapacity = 5;
+	uint64 freeCapacity = 6;
+	map<string, string> linesOfService = 7;
+}
+
+// Volume resource represents a block-addressable container of storage,
+// sometimes referred to as a "Logical Unit", "LU", "LUN", or "StorageVolume"
+// in the storage industry. Volumes optionally adhere to a ClassOfService,
+// which defines added functionality. NOTICE that this structure can only
+// be called by storage drivers.
+message Volume {
+	string identifier = 1;
+	string name = 2;
+	string description = 3;
+	uint64 size = 4;
+	string availabilityZone = 5;
+	string status = 6;
+	string poolIdentifier = 7;
+	string classOfServiceIdentifier = 8;
+	repeated string snapshotIdentifiers = 9;
+	map<string, string> metadata = 10;
+}
+
+// VolumeConnection is a structure for all properties of returned volume
+// connection when create a volume attachment. NOTICE that this structure
+// can only be called by storage drivers.
+message VolumeConnection {
+	string protocol = 1;
+	bytes value = 2;
+}
+
+// Volume snapshot resource represents a point-in-time copy of the data
+// that a volume contains. NOTICE that this structure can only be called by
+// storage drivers.
+message VolumeSnapshot {
+	string identifier = 1;
+	string name = 2;
+	string description = 3;
+	uint64 size = 4;
+	string availabilityZone = 5;
+	string status = 6;
+	string volumeIdentifier = 7;	
 }

@@ -21,6 +21,7 @@ import:
 - package: github.com/golang/protobuf
   subpackages:
   - proto
+  - protoc-gen-go
 - package: github.com/satori/go.uuid
 - package: golang.org/x/net
   subpackages:

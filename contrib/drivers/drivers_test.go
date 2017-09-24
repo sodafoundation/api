@@ -18,13 +18,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/contrib/drivers/ceph"
+	_ "github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/sample"
 )
 
 func TestInit(t *testing.T) {
-	var rsList = []string{"ceph", "others"}
-	var expectedVd = []VolumeDriver{&ceph.Driver{}, &sample.Driver{}}
+	var rsList = []string{"others"}
+	var expectedVd = []VolumeDriver{&sample.Driver{}}
 
 	for i, rs := range rsList {
 		if vp := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
