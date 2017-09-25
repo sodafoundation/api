@@ -45,7 +45,7 @@ type VolumeDriver interface {
 
 	PullSnapshot(snapIdentifier string) (*pb.VolumeSnapshot, error)
 
-	DeleteSnapshot(snapIdentifier string) error
+	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
 	ListPools() (*[]pb.StoragePool, error)
 }

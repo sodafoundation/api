@@ -66,7 +66,7 @@ func (d *Driver) PullSnapshot(snapIdentifier string) (*pb.VolumeSnapshot, error)
 	return nil, errors.New("Can't find snapshot " + snapIdentifier)
 }
 
-func (d *Driver) DeleteSnapshot(snapIdentifier string) error {
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
