@@ -23,6 +23,7 @@ import (
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	"github.com/satori/go.uuid"
+	"strings"
 )
 
 func TestCreateVolume(t *testing.T) {
@@ -81,11 +82,11 @@ func TestGetVolume(t *testing.T) {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
-		nameList := []string{OPENSDS_PREFIX + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
 		return nameList, nil
 	})
 	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
-		return 1 << SIZE_SHIFT_BIT, nil
+		return 1 << sizeShiftBit, nil
 	})
 	monkey.Patch((*rbd.Image).Open, func(r *rbd.Image, args ...interface{}) error {
 		return nil
@@ -124,12 +125,12 @@ func TestDeleteVolme(t *testing.T) {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
-		nameList := []string{OPENSDS_PREFIX + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
 		return nameList, nil
 	})
 
 	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
-		return 1 << SIZE_SHIFT_BIT, nil
+		return 1 << sizeShiftBit, nil
 	})
 	monkey.Patch((*rbd.Image).Remove, func(r *rbd.Image) error {
 		return nil
@@ -168,12 +169,12 @@ func TestCreateSnapshot(t *testing.T) {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
-		nameList := []string{OPENSDS_PREFIX + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
 		return nameList, nil
 	})
 
 	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
-		return 1 << SIZE_SHIFT_BIT, nil
+		return 1 << sizeShiftBit, nil
 	})
 	//
 	type Snapshot struct {
@@ -217,19 +218,19 @@ func TestGetSnapshot(t *testing.T) {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
-		nameList := []string{OPENSDS_PREFIX + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
 		return nameList, nil
 	})
 	monkey.Patch((*rbd.Image).GetSnapshotNames, func(*rbd.Image) (snaps []rbd.SnapInfo, err error) {
 		snaps = make([]rbd.SnapInfo, 1)
 		snaps[0] = rbd.SnapInfo{Id: uint64(1),
-			Size: uint64(1 << SIZE_SHIFT_BIT),
-			Name: OPENSDS_PREFIX + ":snapshot001:25f5d7a2-553d-4d6c-904d-179a9e698cf8",
+			Size: uint64(1 << sizeShiftBit),
+			Name: opensdsPrefix + ":snapshot001:25f5d7a2-553d-4d6c-904d-179a9e698cf8",
 		}
 		return snaps, nil
 	})
 	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
-		return 1 << SIZE_SHIFT_BIT, nil
+		return 1 << sizeShiftBit, nil
 	})
 
 	type Snapshot struct {
@@ -275,19 +276,19 @@ func TestDeleteSnapshot(t *testing.T) {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
-		nameList := []string{OPENSDS_PREFIX + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
 		return nameList, nil
 	})
 	monkey.Patch((*rbd.Image).GetSnapshotNames, func(*rbd.Image) (snaps []rbd.SnapInfo, err error) {
 		snaps = make([]rbd.SnapInfo, 1)
 		snaps[0] = rbd.SnapInfo{Id: uint64(1),
-			Size: uint64(1 << SIZE_SHIFT_BIT),
-			Name: OPENSDS_PREFIX + ":snapshot001:25f5d7a2-553d-4d6c-904d-179a9e698cf8",
+			Size: uint64(1 << sizeShiftBit),
+			Name: opensdsPrefix + ":snapshot001:25f5d7a2-553d-4d6c-904d-179a9e698cf8",
 		}
 		return snaps, nil
 	})
 	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
-		return 1 << SIZE_SHIFT_BIT, nil
+		return 1 << sizeShiftBit, nil
 	})
 
 	type Snapshot struct {
@@ -308,6 +309,31 @@ func TestDeleteSnapshot(t *testing.T) {
 	err := d.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
+	}
+}
+
+func TestCephConfig(t *testing.T) {
+	conf := getCephConfig("testdata/ceph.yaml")
+	if conf.ConfigFile != "/etc/ceph/ceph.conf" {
+		t.Error("Test ConfigFile failed!")
+	}
+	if conf.Pool["rbd"].DiskType != "SSD" {
+		t.Error("Test ConfigFile DiskType failed!")
+	}
+	if conf.Pool["rbd"].IOPS != 1000 {
+		t.Error("Test ConfigFile IOPS failed!")
+	}
+	if conf.Pool["rbd"].BandWitdh != "1G" {
+		t.Error("Test ConfigFile BandWitdh failed!")
+	}
+	if conf.Pool["test"].DiskType != "SAS" {
+		t.Error("Test ConfigFile DiskType failed!")
+	}
+	if conf.Pool["test"].IOPS != 800 {
+		t.Error("Test ConfigFile IOPS failed!")
+	}
+	if conf.Pool["test"].BandWitdh != "800M" {
+		t.Error("Test ConfigFile BandWitdh failed!")
 	}
 }
 
@@ -336,12 +362,12 @@ func TestListPools(t *testing.T) {
 			"'NAME' replicated 3 0\n" +
 			"'ecpool' erasure 5 2\n" +
 			"'12' replicated 3 0"
-		if cmd == "ceph df" {
+		if strings.HasPrefix(cmd, "ceph df") {
 			return cephDuInfo, nil
 		}
 		return poolAttrInfo, nil
 	})
-
+	conf = getCephConfig("testdata/ceph.yaml")
 	d := Driver{}
 	pools, err := d.ListPools()
 	if err != nil {
@@ -374,6 +400,18 @@ func TestListPools(t *testing.T) {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
+	if (*pools)[0].Parameters["diskType"] != "SSD" {
+		t.Errorf("Test List Pools diskType error")
+	}
+
+	if (*pools)[0].Parameters["iops"] != 1000 {
+		t.Errorf("Test List Pools ipos error")
+	}
+
+	if (*pools)[0].Parameters["bandWidth"] != "1G" {
+		t.Errorf("Test List Pools bandWidth error")
+	}
+
 	if (*pools)[5].Name != "ecpool" {
 		t.Errorf("Test List Pools Name error")
 	}
@@ -388,5 +426,9 @@ func TestListPools(t *testing.T) {
 
 	if (*pools)[5].Parameters["crushRuleset"] != "2" {
 		t.Errorf("Test List Pools crushRuleset error")
+	}
+
+	if len(*pools) != 6 {
+		t.Errorf("Test List Pools len error")
 	}
 }

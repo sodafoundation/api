@@ -1,0 +1,26 @@
+configFile: /etc/ceph/ceph.conf
+pool:
+  "rbd":
+    diskType: SSD
+    iops: 1000
+    bandWitdh: 1G
+  "test":
+    diskType: SAS
+    iops: 800
+    bandWitdh: 800M
+  "pool001":
+    diskType: NL-SAS
+    iops: 600
+    bandWitdh: 500M
+  "testpoolerasure":
+    diskType: NL-SAS
+    iops: 600
+    bandWitdh: 500M
+  "NAME":
+    diskType: NL-SAS
+    iops: 600
+    bandWitdh: 500M
+  "ecpool":
+    diskType: NL-SAS
+    iops: 600
+    bandWitdh: 500M

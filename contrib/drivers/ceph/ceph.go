@@ -21,47 +21,78 @@ operation requests about volume to go-ceph module.
 package ceph
 
 import (
-	"strings"
-
-	log "github.com/golang/glog"
-
-	api "github.com/opensds/opensds/pkg/model"
-
-	"os/exec"
-	"strconv"
-
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
+	"github.com/go-yaml/yaml"
+	log "github.com/golang/glog"
+	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"io/ioutil"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 const (
-	OPENSDS_PREFIX string = "OPENSDS"
-	SPLIT_CHAR            = ":"
-	SIZE_SHIFT_BIT        = 20
+	opensdsPrefix string = "OPENSDS"
+	splitChar            = ":"
+	sizeShiftBit         = 20
 )
 
 const (
-	GLOBAL_SIZE = iota
-	GLOBAL_AVAIL
-	GLOBAL_RAW_USED
-	GLOBAL_RAW_USED_PERCENTAGE
+	globalSize = iota
+	globalAvail
+	globalRawUsed
+	globalRawUsedPercentage
 )
 
 const (
-	POOL_NAME = iota
-	POOL_ID
-	POOL_USED
-	POOL_USED_PER
-	POOL_MAX_AVAIL
-	POOL_OBJECTS
+	poolName = iota
+	poolId
+	poolUsed
+	poolUsedPer
+	poolMaxAvail
+	poolObjects
 )
 
 const (
-	POOL_TYPE = iota
-	POOL_TYPE_SIZE
-	POOL_CRUSH_RULESET
+	poolType = iota
+	poolTypeSize
+	poolCrushRuleset
 )
+
+type PoolProperties struct {
+	DiskType  string `yaml:"diskType"`
+	IOPS      int    `yaml:"iops"`
+	BandWitdh string `yaml:"bandWitdh"`
+}
+type CephConfig struct {
+	ConfigFile string                    `yaml:"configFile,omitempty"`
+	Pool       map[string]PoolProperties `yaml:"pool,flow"`
+}
+
+func getCephConfig(file string) *CephConfig {
+	// Set /etc/ceph/ceph.conf as default value
+	var ceph = &CephConfig{ConfigFile: "/etc/ceph/ceph.conf"}
+	confYaml, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatalf("Read ceph config yaml file (%s) failed, reason:(%v)", file, err)
+		return nil
+	}
+	err = yaml.Unmarshal([]byte(confYaml), ceph)
+	if err != nil {
+		log.Fatal("Parse error: %v", err)
+		return nil
+	}
+	return ceph
+}
+
+var conf *CephConfig
+
+func init() {
+	conf = getCephConfig(config.CONF.OsdsDock.CephConfig)
+}
 
 type Name struct {
 	Name string
@@ -76,11 +107,11 @@ func NewName(name string) *Name {
 }
 
 func ParseName(fullName string) *Name {
-	if !strings.HasPrefix(fullName, OPENSDS_PREFIX) {
+	if !strings.HasPrefix(fullName, opensdsPrefix) {
 		return nil
 	}
 
-	nameInfo := strings.Split(fullName, SPLIT_CHAR)
+	nameInfo := strings.Split(fullName, splitChar)
 
 	return &Name{
 		Name: nameInfo[1],
@@ -89,7 +120,7 @@ func ParseName(fullName string) *Name {
 }
 
 func (name *Name) GetFullName() string {
-	return OPENSDS_PREFIX + ":" + name.Name + ":" + name.ID
+	return opensdsPrefix + ":" + name.Name + ":" + name.ID
 }
 
 func (name *Name) GetName() string {
@@ -141,7 +172,8 @@ func (imgMgr *ImageMgr) Init() error {
 		log.Error("New connect failed:", err)
 		return err
 	}
-	if err = conn.ReadDefaultConfigFile(); err != nil {
+
+	if err = conn.ReadConfigFile(conf.ConfigFile); err != nil {
 		log.Error("Read config file failed:", err)
 		return err
 	}
@@ -170,7 +202,7 @@ func (imgMgr *ImageMgr) Destory() {
 func (imgMgr *ImageMgr) CreateImage(name string, size int64) (*Response, error) {
 	imageName := NewName(name)
 
-	_, err := rbd.Create(imgMgr.Ioctx, imageName.GetFullName(), uint64(size)<<SIZE_SHIFT_BIT, 20)
+	_, err := rbd.Create(imgMgr.Ioctx, imageName.GetFullName(), uint64(size)<<sizeShiftBit, 20)
 	if err != nil {
 		log.Error("When create rbd image:", err)
 		return &Response{}, err
@@ -211,7 +243,7 @@ func (imgMgr *ImageMgr) getSize(img *rbd.Image) int64 {
 		log.Error("When get image size:", err)
 		return 0
 	}
-	return int64(size >> SIZE_SHIFT_BIT)
+	return int64(size >> sizeShiftBit)
 }
 
 func (imgMgr *ImageMgr) RemoveImage(volID string) error {
@@ -385,7 +417,7 @@ func (imgMgr *ImageMgr) GetSnapshots() (*[]SnapshotResponse, error) {
 			snapshot := SnapshotResponse{
 				Name:      name.GetName(),
 				ID:        name.GetUUID(),
-				Size:      int64(snapInfo.Size >> SIZE_SHIFT_BIT),
+				Size:      int64(snapInfo.Size >> sizeShiftBit),
 				Volume_id: in.ID,
 			}
 			snapshots = append(snapshots, snapshot)
@@ -420,7 +452,7 @@ func (imgMgr *ImageMgr) parseCapStr(cap string) int64 {
 		return 0
 	}
 	if val, ok := UnitMapper[unit]; ok {
-		return num << val >> SIZE_SHIFT_BIT
+		return num << val >> sizeShiftBit
 	} else {
 		log.Error("strage unit is not found.")
 		return 0
@@ -429,7 +461,7 @@ func (imgMgr *ImageMgr) parseCapStr(cap string) int64 {
 
 func (imgMgr *ImageMgr) getPoolsCapInfo() ([][]string, error) {
 	const poolStartLine = 5
-	output, err := execCmd("ceph df")
+	output, err := execCmd("ceph df -c " + conf.ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
 		return nil, err
@@ -474,16 +506,19 @@ func (imgMgr *ImageMgr) getPoolsAttr() (map[string][]string, error) {
 	return poolDetail, nil
 }
 
-func (imgMgr *ImageMgr) getPoolParam(line []string) map[string]interface{} {
+func (imgMgr *ImageMgr) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
 	param := make(map[string]interface{})
-	param["redundancyType"] = line[POOL_TYPE]
+	param["diskType"] = proper.DiskType
+	param["iops"] = proper.IOPS
+	param["bandWidth"] = proper.BandWitdh
+	param["redundancyType"] = line[poolType]
 	if param["redundancyType"] == "replicated" {
-		param["replicateSize"] = line[POOL_TYPE_SIZE]
+		param["replicateSize"] = line[poolTypeSize]
 	} else {
-		param["erasureSize"] = line[POOL_TYPE_SIZE]
+		param["erasureSize"] = line[poolTypeSize]
 	}
-	param["crushRuleset"] = line[POOL_CRUSH_RULESET]
-	return param
+	param["crushRuleset"] = line[poolCrushRuleset]
+	return &param
 }
 
 func (imgMgr *ImageMgr) ListPools() (*[]PoolResponse, error) {
@@ -505,16 +540,19 @@ func (imgMgr *ImageMgr) ListPools() (*[]PoolResponse, error) {
 
 	var pools []PoolResponse
 	for i := range pc {
-		name := pc[i][POOL_NAME]
-		param := imgMgr.getPoolParam(pa[name])
-		totalCap := imgMgr.parseCapStr(gc[GLOBAL_SIZE])
-		maxAvailCap := imgMgr.parseCapStr(pc[i][POOL_MAX_AVAIL])
-		availCap := imgMgr.parseCapStr(gc[GLOBAL_AVAIL])
+		name := pc[i][poolName]
+		if _, ok := conf.Pool[name]; !ok {
+			continue
+		}
+		param := imgMgr.buildPoolParam(pa[name], conf.Pool[name])
+		totalCap := imgMgr.parseCapStr(gc[globalSize])
+		maxAvailCap := imgMgr.parseCapStr(pc[i][poolMaxAvail])
+		availCap := imgMgr.parseCapStr(gc[globalAvail])
 		pool := PoolResponse{
 			Name:       name,
 			ID:         uuid.NewV5(uuid.NamespaceOID, name).String(),
-			Parameters: param,
-			//if redundancy type is replicate, MAX AVAIL =  AVAIL / relicate number,
+			Parameters: *param,
+			//if redundancy type is replicate, MAX AVAIL =  AVAIL / replicate number,
 			//and it this is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity: totalCap * maxAvailCap / availCap,
 			FreeCapacity:  maxAvailCap,
@@ -616,7 +654,7 @@ func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath boo
 		DriverVolumeType: "rbd",
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
-			"name":         "rbd/" + OPENSDS_PREFIX + ":" + img.Name + ":" + img.Id,
+			"name":         "rbd/" + opensdsPrefix + ":" + img.Name + ":" + img.Id,
 			"cluster_name": "ceph",
 			"hosts":        []string{hostInfo.Host},
 			"volume_id":    img.Id,
