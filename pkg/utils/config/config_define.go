@@ -25,7 +25,9 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint string `conf:"api_endpoint,localhost:50050"`
+	ApiEndpoint  string `conf:"api_endpoint,localhost:50050"`
+	CinderConfig string `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
+	CephConfig   string `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
 }
 
 type Database struct {
@@ -59,4 +61,4 @@ func (c *Config) Load(confFile string) {
 	c.Flag.AssignValue()
 }
 
-var CONF *Config = new(Config)
+var CONF *Config = GetDefaultConfig()
