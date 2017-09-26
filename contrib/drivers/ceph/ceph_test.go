@@ -19,17 +19,19 @@ import (
 	"testing"
 	"unsafe"
 
+	"strings"
+
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
+	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"strings"
 )
 
 func TestCreateVolume(t *testing.T) {
 
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error { return nil })
+	monkey.Patch((*Driver).initConn, func(d *Driver) error { return nil })
 	monkey.Patch(rbd.Create, func(ioctx *rados.IOContext, name string, size uint64, order int,
 		args ...uint64) (*rbd.Image, error) {
 		return nil, nil
@@ -54,8 +56,8 @@ func TestCreateVolume(t *testing.T) {
 	}
 
 	//case 2
-	monkey.Unpatch((*ImageMgr).Init)
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Unpatch((*Driver).initConn)
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return errors.New("Fake error")
 	})
 	d = Driver{}
@@ -78,7 +80,7 @@ func TestCreateVolume(t *testing.T) {
 
 func TestGetVolume(t *testing.T) {
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
@@ -121,7 +123,7 @@ func TestGetVolume(t *testing.T) {
 
 func TestDeleteVolme(t *testing.T) {
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
@@ -165,7 +167,7 @@ func TestDetachVolume(t *testing.T) {
 
 func TestCreateSnapshot(t *testing.T) {
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
@@ -214,7 +216,7 @@ func TestCreateSnapshot(t *testing.T) {
 
 func TestGetSnapshot(t *testing.T) {
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
@@ -265,14 +267,14 @@ func TestGetSnapshot(t *testing.T) {
 
 	// case 2
 	_, err = d.GetSnapshot("11111111-1111-1111-1111-111111111111")
-	if err != rbd.RbdErrorNotFound {
+	if err == nil {
 		t.Errorf("Test Get snapshot error")
 	}
 }
 
 func TestDeleteSnapshot(t *testing.T) {
 	defer monkey.UnpatchAll()
-	monkey.Patch((*ImageMgr).Init, func(img *ImageMgr) error {
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
 		return nil
 	})
 	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
@@ -313,7 +315,8 @@ func TestDeleteSnapshot(t *testing.T) {
 }
 
 func TestCephConfig(t *testing.T) {
-	conf := getCephConfig("testdata/ceph.yaml")
+	config.CONF.OsdsDock.CephConfig = "testdata/ceph.yaml"
+	conf := getConfig()
 	if conf.ConfigFile != "/etc/ceph/ceph.conf" {
 		t.Error("Test ConfigFile failed!")
 	}
@@ -367,7 +370,7 @@ func TestListPools(t *testing.T) {
 		}
 		return poolAttrInfo, nil
 	})
-	conf = getCephConfig("testdata/ceph.yaml")
+
 	d := Driver{}
 	pools, err := d.ListPools()
 	if err != nil {
@@ -432,3 +435,4 @@ func TestListPools(t *testing.T) {
 		t.Errorf("Test List Pools len error")
 	}
 }
+
