@@ -191,7 +191,7 @@ func (d *Driver) destroyConn() {
 func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
-		return &api.VolumeSpec{}, err
+		return nil, err
 	}
 	defer d.destroyConn()
 
@@ -199,7 +199,7 @@ func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) 
 	_, err := rbd.Create(d.ioctx, imgName.GetFullName(), uint64(size)<<sizeShiftBit, 20)
 	if err != nil {
 		log.Errorf("Create rbd image (%s) failed, (%v)", name, err)
-		return &api.VolumeSpec{}, err
+		return nil, err
 	}
 
 	log.Infof("Create volume %s (%s) success.", name, imgName.GetUUID())
@@ -247,14 +247,14 @@ func (d *Driver) getSize(img *rbd.Image) int64 {
 func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
-		return &api.VolumeSpec{}, err
+		return nil, err
 	}
 	defer d.destroyConn()
 
 	img, name, err := d.getImage(volID)
 	if err != nil {
 		log.Error("When get image:", err)
-		return &api.VolumeSpec{}, err
+		return nil, err
 	}
 
 	return &api.VolumeSpec{
@@ -332,18 +332,18 @@ func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSna
 	img, _, err := d.getImage(volID)
 	if err != nil {
 		log.Error("When get image:", err)
-		return &api.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 	if err = img.Open(); err != nil {
 		log.Error("When open image:", err)
-		return &api.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 	defer img.Close()
 
 	fullName := NewName(name)
 	if _, err = img.CreateSnapshot(fullName.GetFullName()); err != nil {
 		log.Error("When create snapshot:", err)
-		return &api.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 	log.Infof("Create snapshot success, name:%s, id:%s, volID:%s", name, volID, fullName.GetUUID())
 	return &api.VolumeSnapshotSpec{
@@ -394,7 +394,7 @@ func (d *Driver) visitSnapshot(snapID string, fn func(volName *Name, img *rbd.Im
 func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
-		return &api.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 	defer d.destroyConn()
 	var snapshot *api.VolumeSnapshotSpec
@@ -565,4 +565,5 @@ func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 	}
 	return &poolList, nil
 }
+
 
