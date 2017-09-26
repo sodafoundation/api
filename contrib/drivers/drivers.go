@@ -25,6 +25,7 @@ import (
 	_ "github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/sample"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type VolumeDriver interface {
@@ -33,21 +34,21 @@ type VolumeDriver interface {
 	//Any operation the volume driver does while stoping.
 	Unset() error
 
-	CreateVolume(opt *pb.CreateVolumeOpts) (*pb.Volume, error)
+	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 
-	PullVolume(volIdentifier string) (*pb.Volume, error)
+	PullVolume(volIdentifier string) (*model.VolumeSpec, error)
 
 	DeleteVolume(volIdentifier string) error
 
-	InitializeConnection(opt *pb.CreateAttachmentOpts) (*pb.VolumeConnection, error)
+	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
 
-	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*pb.VolumeSnapshot, error)
+	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
-	PullSnapshot(snapIdentifier string) (*pb.VolumeSnapshot, error)
+	PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error)
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
-	ListPools() (*[]pb.StoragePool, error)
+	ListPools() (*[]model.StoragePoolSpec, error)
 }
 
 func Init(resourceType string) VolumeDriver {

@@ -21,8 +21,6 @@ storage plugins.
 package dock
 
 import (
-	"encoding/json"
-
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/contrib/drivers"
@@ -55,21 +53,10 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error
 	log.Info("Calling volume driver to create volume...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	v, err := d.Driver.CreateVolume(opt)
+	vol, err := d.Driver.CreateVolume(opt)
 	if err != nil {
 		log.Error("When calling volume driver to create volume:", err)
 		return nil, err
-	}
-
-	var vol = &api.VolumeSpec{
-		BaseModel:        &api.BaseModel{},
-		Name:             v.GetName(),
-		Description:      v.GetDescription(),
-		Size:             int64(v.GetSize()),
-		Status:           v.GetStatus(),
-		AvailabilityZone: v.GetAvailabilityZone(),
-		ProfileId:        opt.GetProfileId(),
-		PoolId:           opt.GetPoolId(),
 	}
 
 	// Validate the data.
@@ -122,12 +109,6 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 		return nil, err
 	}
 
-	var data map[string]interface{}
-	if err = json.Unmarshal(connInfo.GetValue(), data); err != nil {
-		log.Error("Failed to unmarshal connection data:", err)
-		return nil, err
-	}
-
 	var atc = &api.VolumeAttachmentSpec{
 		BaseModel: &api.BaseModel{},
 		HostInfo: &api.HostInfo{
@@ -137,10 +118,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 			Host:      opt.GetHost(),
 			Initiator: opt.GetInitiator(),
 		},
-		ConnectionInfo: &api.ConnectionInfo{
-			DriverVolumeType: connInfo.GetProtocol(),
-			ConnectionData:   data,
-		},
+		ConnectionInfo: connInfo,
 	}
 
 	// Validate the data.
@@ -164,19 +142,10 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeS
 	log.Info("Calling volume driver to create snapshot...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	s, err := d.Driver.CreateSnapshot(opt)
+	snp, err := d.Driver.CreateSnapshot(opt)
 	if err != nil {
 		log.Error("Call driver to create volume snashot failed:", err)
 		return nil, err
-	}
-
-	var snp = &api.VolumeSnapshotSpec{
-		BaseModel:   &api.BaseModel{},
-		Name:        s.GetName(),
-		Description: s.GetDescription(),
-		Size:        int64(s.GetSize()),
-		Status:      s.GetStatus(),
-		VolumeId:    opt.GetVolumeId(),
 	}
 
 	// Validate the data.
@@ -221,26 +190,11 @@ func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
 	log.Info("Calling volume driver to list pools...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	ps, err := d.Driver.ListPools()
+	pols, err := d.Driver.ListPools()
 	if err != nil {
 		log.Error("Call driver to list pools failed:", err)
 		return nil, err
 	}
 
-	var pools = []api.StoragePoolSpec{}
-
-	for _, p := range *ps {
-		var pool = api.StoragePoolSpec{
-			BaseModel:        &api.BaseModel{},
-			Name:             p.GetName(),
-			Description:      p.GetDescription(),
-			AvailabilityZone: p.GetAvailabilityZone(),
-			TotalCapacity:    int64(p.GetTotalCapacity()),
-			FreeCapacity:     int64(p.GetFreeCapacity()),
-		}
-
-		pools = append(pools, pool)
-	}
-
-	return &pools, nil
+	return pols, nil
 }
