@@ -326,8 +326,8 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["rbd"].IOPS != 1000 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["rbd"].BandWitdh != "1G" {
-		t.Error("Test ConfigFile BandWitdh failed!")
+	if conf.Pool["rbd"].BandWidth != "1G" {
+		t.Error("Test ConfigFile BandWidth failed!")
 	}
 	if conf.Pool["test"].DiskType != "SAS" {
 		t.Error("Test ConfigFile DiskType failed!")
@@ -335,8 +335,8 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["test"].IOPS != 800 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["test"].BandWitdh != "800M" {
-		t.Error("Test ConfigFile BandWitdh failed!")
+	if conf.Pool["test"].BandWidth != "800M" {
+		t.Error("Test ConfigFile BandWidth failed!")
 	}
 }
 
