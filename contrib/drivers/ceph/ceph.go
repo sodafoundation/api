@@ -32,11 +32,11 @@ import (
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
-	"github.com/go-yaml/yaml"
 	log "github.com/golang/glog"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -70,7 +70,7 @@ const (
 type PoolProperties struct {
 	DiskType  string `yaml:"diskType"`
 	IOPS      int    `yaml:"iops"`
-	BandWitdh string `yaml:"bandWitdh"`
+	BandWidth string `yaml:"bandWidth"`
 }
 
 type CephConfig struct {
@@ -345,7 +345,7 @@ func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSna
 		log.Error("When create snapshot:", err)
 		return nil, err
 	}
-	log.Infof("Create snapshot success, name:%s, id:%s, volID:%s", name, volID, fullName.GetUUID())
+	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", name, volID, fullName.GetUUID())
 	return &api.VolumeSnapshotSpec{
 		BaseModel: &api.BaseModel{
 			Id: fullName.GetUUID(),
@@ -429,7 +429,7 @@ func (d *Driver) DeleteSnapshot(snapID string) error {
 			return err
 		}
 		img.Close()
-		log.Info("Delete snapshot {%s} success", ParseName(snap.Name).GetUUID())
+		log.Infof("Delete snapshot (%s) success", ParseName(snap.Name).GetUUID())
 		return nil
 	})
 	return err
@@ -477,7 +477,7 @@ func (d *Driver) getPoolsCapInfo() ([][]string, error) {
 
 func (d *Driver) getGlobalCapInfo() ([]string, error) {
 	const globalCapInfoLine = 2
-	output, err := execCmd("ceph df")
+	output, err := execCmd("ceph df -c " + getConfig().ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
 		return nil, err
@@ -487,7 +487,7 @@ func (d *Driver) getGlobalCapInfo() ([]string, error) {
 }
 
 func (d *Driver) getPoolsAttr() (map[string][]string, error) {
-	cmd := "ceph osd pool ls detail | grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
+	cmd := "ceph osd pool ls detail -c " + getConfig().ConfigFile + "| grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
 	output, err := execCmd(cmd)
 	if err != nil {
 		log.Error("[Error]:", err)
@@ -511,7 +511,7 @@ func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[strin
 	param := make(map[string]interface{})
 	param["diskType"] = proper.DiskType
 	param["iops"] = proper.IOPS
-	param["bandWidth"] = proper.BandWitdh
+	param["bandWidth"] = proper.BandWidth
 	param["redundancyType"] = line[poolType]
 	if param["redundancyType"] == "replicated" {
 		param["replicateSize"] = line[poolTypeSize]
@@ -556,7 +556,7 @@ func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 			},
 			Name: name,
 			//if redundancy type is replicate, MAX AVAIL =  AVAIL / replicate number,
-			//and it this is erasure, MAX AVAIL =  AVAIL * k / (m + k)
+			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity: totalCap * maxAvailCap / availCap,
 			FreeCapacity:  maxAvailCap,
 			Parameters:    *param,
@@ -565,5 +565,4 @@ func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 	}
 	return &poolList, nil
 }
-
 
