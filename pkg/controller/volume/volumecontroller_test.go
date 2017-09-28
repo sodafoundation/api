@@ -57,16 +57,6 @@ func (fc *fakeClient) CreateVolume(ctx context.Context, in *pb.CreateVolumeOpts,
 	}, nil
 }
 
-// Get a volume
-//func (fc *fakeClient) GetVolume(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
-//	volBody, _ := json.Marshal(&sampleVolume)
-
-//	return &pb.GenericResponse{
-//		Status:  "Success",
-//		Message: string(volBody),
-//	}, nil
-//}
-
 // Delete a volume
 func (fc *fakeClient) DeleteVolume(ctx context.Context, in *pb.DeleteVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
@@ -89,23 +79,6 @@ func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachm
 	}, nil
 }
 
-//// Update a volume attachment
-//func (fc *fakeClient) UpdateVolumeAttachment(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
-//	volBody, _ := json.Marshal(&sampleModifiedAttachment)
-
-//	return &pb.GenericResponse{
-//		Status:  "Success",
-//		Message: string(volBody),
-//	}, nil
-//}
-
-//// Delete a volume attachment
-//func (fc *fakeClient) DeleteVolumeAttachment(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
-//	return &pb.GenericResponse{
-//		Status: "Success",
-//	}, nil
-//}
-
 // Create a volume snapshot
 func (fc *fakeClient) CreateVolumeSnapshot(ctx context.Context, in *pb.CreateVolumeSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	volBody, _ := json.Marshal(&sampleSnapshot)
@@ -118,16 +91,6 @@ func (fc *fakeClient) CreateVolumeSnapshot(ctx context.Context, in *pb.CreateVol
 		},
 	}, nil
 }
-
-//// Get a volume snapshot
-//func (fc *fakeClient) GetVolumeSnapshot(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
-//	volBody, _ := json.Marshal(&sampleSnapshot)
-
-//	return &pb.GenericResponse{
-//		Status:  "Success",
-//		Message: string(volBody),
-//	}, nil
-//}
 
 // Delete a volume snapshot
 func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVolumeSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
@@ -183,31 +146,6 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 }
-
-//func TestUpdateVolumeAttachment(t *testing.T) {
-//	fc := NewFakeController(&pb.DockRequest{})
-//	var expected = &sampleModifiedAttachment
-
-//	result, err := fc.UpdateVolumeAttachment()
-//	if err != nil {
-//		t.Errorf("Failed to update volume attachment, err is %v\n", err)
-//	}
-
-//	if !reflect.DeepEqual(result, expected) {
-//		t.Errorf("Expected %v, got %v\n", expected, result)
-//	}
-//}
-
-//func TestDeleteVolumeAttachment(t *testing.T) {
-//	fc := NewFakeController(&pb.DockRequest{})
-//	var expected = &model.Response{Status: "Success"}
-
-//	result := fc.DeleteVolumeAttachment()
-
-//	if !reflect.DeepEqual(result, expected) {
-//		t.Errorf("Expected %v, got %v\n", expected, result)
-//	}
-//}
 
 func TestCreateVolumeSnapshot(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )

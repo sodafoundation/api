@@ -51,6 +51,8 @@ service Dock {
     rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
 }
 
+// CreateVolumeOpts is a structure which indicates all required properties
+// for creating a volume.
 message CreateVolumeOpts {
     // The uuid of the volume, optional when creating.
     string id = 1;
@@ -74,15 +76,23 @@ message CreateVolumeOpts {
     map<string, string> metadata = 10;
 	// The dock infomation on which the request will be executed
 	string dockId = 11;
+	// The storage driver type.
+	string driverName = 12;
 }
 
+// DeleteVolumeOpts is a structure which indicates all required properties
+// for deleting a volume.
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
 	// The dock infomation on which the request will be executed
 	string dockId = 2;
+	// The storage driver type.
+	string driverName = 3;	
 }
 
+// CreateVolumeSnapshotOpts is a structure which indicates all required
+// properties for creating a volume snapshot.
 message CreateVolumeSnapshotOpts {
     // The uuid of the volume snapshot, optional.
     string id = 1;
@@ -95,19 +105,27 @@ message CreateVolumeSnapshotOpts {
     // The uuid of the volume that snapshot belongs to, required.
     string volumeId = 5;
 	// The dock infomation on which the request will be executed
-	string dockId = 6;	
+	string dockId = 6;
+	// The storage driver type.
+	string driverName = 7;
 }
 
+// DeleteVolumeSnapshotOpts is a structure which indicates all required
+// properties for deleting a volume snapshot.
 message DeleteVolumeSnapshotOpts {
     // The uuid of the volume snapshot, required.
     string id = 1;
 	// The dock infomation on which the request will be executed
-	string dockId = 2;	
+	string dockId = 2;
+	// The storage driver type.
+	string driverName = 3;
 }
 
+// CreateAttachmentOpts is a structure which indicates all required
+// properties for creating a volume attachment.
 message CreateAttachmentOpts {
     // The uuid of the volume attachment, optional.
-    string id = 1;	
+    string id = 1;
     // The uuid of the volume, required.
     string volumeId = 2;
     // This field indicates if the volume is attached locally, optional.
@@ -117,7 +135,9 @@ message CreateAttachmentOpts {
     // The infomation of the host node on which the volume will be attached.
     HostInfo hostInfo = 5;
 	// The dock infomation on which the request will be executed
-	string dockId = 6;	
+	string dockId = 6;
+	// The storage driver type.
+	string driverName = 7;
 }
 
 message HostInfo {
@@ -126,7 +146,7 @@ message HostInfo {
     // The type of OS, such as "linux","windows", etc.
     string osType = 2;
     // The name of the host
-    string host = 3;
+     string host = 3;
     // The ip address of the host
     string ip = 4;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
