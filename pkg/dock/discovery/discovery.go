@@ -20,14 +20,14 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
-	"encoding/json"
-
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/satori/go.uuid"
 )
 
 type Discoverer interface {
@@ -37,8 +37,8 @@ type Discoverer interface {
 }
 
 type DockDiscoverer struct {
-	dcks *[]api.DockSpec
-	pols *[]api.StoragePoolSpec
+	dcks []api.DockSpec
+	pols []api.StoragePoolSpec
 
 	c db.Client
 }
@@ -51,18 +51,26 @@ func NewDiscover() Discoverer {
 
 func (dd *DockDiscoverer) Init() error {
 	// Load resource from specified file
-	value, err := loadFromFile("")
-	if err != nil {
-		log.Error("When list docks:", err)
-		return err
+	name2Backend := map[string]BackendProperties{
+		"ceph":   BackendProperties(CONF.Ceph),
+		"cinder": BackendProperties(CONF.Cinder),
 	}
-
-	// Unmarshal the result
-	if err = json.Unmarshal(value.([]byte), dd.dcks); err != nil {
-		log.Error("Unmarshal json failed:", err)
-		return err
+	for _, v := range CONF.EnableBackends {
+		b := name2Backend[v]
+		if b.Name == "" {
+			continue
+		}
+		dock := api.DockSpec{
+			BaseModel: &api.BaseModel{
+				Id: uuid.NewV5(uuid.NamespaceOID, b.DriverName).String(),
+			},
+			Name:        b.Name,
+			Description: b.Description,
+			Endpoint:    b.Endpoint,
+			DriverName:  b.DriverName,
+		}
+		dd.dcks = append(dd.dcks, dock)
 	}
-
 	return nil
 }
 
@@ -70,7 +78,7 @@ func (dd *DockDiscoverer) Discovery() error {
 	var pols *[]api.StoragePoolSpec
 	var err error
 
-	for _, dock := range *dd.dcks {
+	for _, dock := range dd.dcks {
 		pols, err = dockHub.NewDockHub(dock.GetDriverName()).ListPools()
 		if err != nil {
 			log.Error("When list pools:", err)
@@ -81,7 +89,7 @@ func (dd *DockDiscoverer) Discovery() error {
 			log.Warningf("The pool of dock %s is empty!\n", dock.GetId())
 		}
 
-		*dd.pols = append(*dd.pols, *pols...)
+		dd.pols = append(dd.pols, *pols...)
 	}
 
 	return err
@@ -91,8 +99,8 @@ func (dd *DockDiscoverer) Store() error {
 	var err error
 
 	// Store dock resources in database.
-	for _, dock := range *dd.dcks {
-		if err = utils.ValidateData(dock, utils.S); err != nil {
+	for _, dock := range dd.dcks {
+		if err = utils.ValidateData(&dock, utils.S); err != nil {
 			log.Error("When validate dock structure:", err)
 			return err
 		}
@@ -105,8 +113,8 @@ func (dd *DockDiscoverer) Store() error {
 	}
 
 	// Store pool resources in database.
-	for _, pool := range *dd.pols {
-		if err = utils.ValidateData(pool, utils.S); err != nil {
+	for _, pool := range dd.pols {
+		if err = utils.ValidateData(&pool, utils.S); err != nil {
 			log.Error("When validate pool structure:", err)
 			return err
 		}
@@ -136,3 +144,4 @@ func Discovery(d Discoverer) error {
 
 	return err
 }
+

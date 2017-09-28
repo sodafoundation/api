@@ -15,6 +15,7 @@
 package config
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -35,8 +36,27 @@ type TestStruct struct {
 	String  string  `conf:"string,DefaultValue"`
 }
 
+type TestSliceStruct struct {
+	SliceBool           []bool    `conf:"slice_bool,False,True,False"`
+	SliceString         []string  `conf:"slice_string,slice,string,test"`
+	SliceInt            []int     `conf:"slice_int,4,-5,6"`
+	SliceInt8           []int8    `conf:"slice_int8,4,-5,6"`
+	SliceInt16          []int16   `conf:"slice_int16,4,-5,6"`
+	SliceInt32          []int32   `conf:"slice_int32,4,-5,6"`
+	SliceInt64          []int64   `conf:"slice_int64,4,-5,6"`
+	SliceUint           []uint    `conf:"slice_uint,4,5,6"`
+	SliceUint8          []uint8   `conf:"slice_uint8,4,5,6"`
+	SliceUint16         []uint16  `conf:"slice_uint16,4,5,6"`
+	SliceUint32         []uint32  `conf:"slice_uint32,4,5,6"`
+	SliceUint64         []uint64  `conf:"slice_uint64,4,5,6"`
+	SliceFloat32        []float32 `conf:"slice_float32,4,-0.5,0.6"`
+	SliceFloat64        []float64 `conf:"slice_float64,4,-0.5,0.6"`
+	SliceNotExistString []string  `conf:"slice_not_exist_string,not,exist,string"`
+}
+
 type TestConfig struct {
-	TestStruct `conf:"test_struct"`
+	TestStruct      `conf:"test_struct"`
+	TestSliceStruct `conf:"test_slice_struct"`
 }
 
 func TestFunctionAllType(t *testing.T) {
@@ -84,6 +104,52 @@ func TestFunctionAllType(t *testing.T) {
 	if conf.TestStruct.String != "HelloWorld" {
 		t.Error("Test TestStuct String error")
 	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceString, []string{"slice", "string", "test"}) {
+		t.Error("Test TestSliceStruct String error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceBool, []bool{false, true, false}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt, []int{1, -2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt8, []int8{1, -2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt16, []int16{1, -2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt32, []int32{1, -2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt64, []int64{1, -2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint, []uint{1, 2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint8, []uint8{1, 2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint16, []uint16{1, 2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint32, []uint32{1, 2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint64, []uint64{1, 2, 3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat32, []float32{1, -0.2, 0.3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat64, []float64{1, -0.2, 0.3}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceNotExistString, []string{"not", "exist", "string"}) {
+		t.Error("Test TestSliceStruct String error")
+	}
+
 }
 
 func TestFunctionDefaultValue(t *testing.T) {
@@ -131,6 +197,49 @@ func TestFunctionDefaultValue(t *testing.T) {
 	if conf.TestStruct.String != "DefaultValue" {
 		t.Error("Test TestStuct String error")
 	}
+
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceString, []string{"slice", "string", "test"}) {
+		t.Error("Test TestSliceStruct String error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceBool, []bool{false, true, false}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt, []int{4, -5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt8, []int8{4, -5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt16, []int16{4, -5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt32, []int32{4, -5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt64, []int64{4, -5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint, []uint{4, 5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint8, []uint8{4, 5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint16, []uint16{4, 5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint32, []uint32{4, 5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint64, []uint64{4, 5, 6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat32, []float32{4, -0.5, 0.6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
+	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat64, []float64{4, -0.5, 0.6}) {
+		t.Error("Test TestSliceStruct bool error")
+	}
 }
 
 func TestOpensdsConfig(t *testing.T) {
@@ -147,6 +256,12 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
+	if CONF.OsdsDock.EnableBackends[0] != "ceph" {
+		t.Error("Test OsdsLet.OsdsDock.EnableBackends[0] error")
+	}
+	if CONF.OsdsDock.EnableBackends[1] != "cinder" {
+		t.Error("Test OsdsLet.OsdsDock.EnableBackends[1] error")
+	}
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
@@ -156,4 +271,30 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Database.Driver != "etcd" {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
+	if CONF.Ceph.Name != "ceph" {
+		t.Error("Test Ceph.Name error")
+	}
+	if CONF.Ceph.Endpoint != "127.0.0.1" {
+		t.Error("Test Ceph.Endpoint error")
+	}
+	if CONF.Ceph.Description != "Ceph Test" {
+		t.Error("Test Ceph.Description error")
+	}
+	if CONF.Ceph.DriverName != "CephDriver" {
+		t.Error("Test Ceph.DriverName error")
+	}
+	if CONF.Cinder.Name != "cinder" {
+		t.Error("Test Cinder.Name error")
+	}
+	if CONF.Cinder.Endpoint != "127.0.0.1" {
+		t.Error("Test Cinder.Name error")
+	}
+	if CONF.Cinder.Description != "Cinder Test" {
+		t.Error("Test Cinder.Name error")
+	}
+	if CONF.Cinder.DriverName != "CinderDriver" {
+		t.Error("Test Cinder.Name error")
+	}
+
 }
+
