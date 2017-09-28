@@ -15,17 +15,16 @@
 package client
 
 import (
-	"encoding/json"
 	log "github.com/golang/glog"
 
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 	"google.golang.org/grpc"
 )
 
 type Client interface {
 	pb.DockClient
-	Update(dockInfo string) error
+	Update(dockInfo *model.DockSpec) error
 	Close()
 }
 
@@ -38,16 +37,10 @@ type client struct {
 
 func NewClient() Client { return &client{} }
 
-func (c *client) Update(dockInfo string) error {
-	// Get Dock endpoint from dock info.
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(dockInfo), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-		return err
-	}
+func (c *client) Update(dockInfo *model.DockSpec) error {
 
 	// Set up a connection to the Dock server.
-	conn, err := grpc.Dial(dck.GetEndpoint(), grpc.WithInsecure())
+	conn, err := grpc.Dial(dockInfo.GetEndpoint(), grpc.WithInsecure())
 	if err != nil {
 		log.Errorf("did not connect: %+v\n", err)
 		return err
@@ -57,7 +50,7 @@ func (c *client) Update(dockInfo string) error {
 
 	c.DockClient = dc
 	c.ClientConn = conn
-	c.TargetPlace = dck.GetEndpoint()
+	c.TargetPlace = dockInfo.GetEndpoint()
 
 	return nil
 }
