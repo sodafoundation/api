@@ -25,24 +25,24 @@ import (
 	"reflect"
 	"testing"
 
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type fakeDbClient struct{}
 
-func (fc *fakeDbClient) CreateDock(dck *api.DockSpec) (*api.DockSpec, error) {
+func (fc *fakeDbClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetDock(dckID string) (*api.DockSpec, error) {
+func (fc *fakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListDocks() (*[]api.DockSpec, error) {
+func (fc *fakeDbClient) ListDocks() (*[]model.DockSpec, error) {
 	return &sampleDocks, nil
 }
 
-func (fc *fakeDbClient) UpdateDock(dckID, name, desp string) (*api.DockSpec, error) {
+func (fc *fakeDbClient) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -50,19 +50,19 @@ func (fc *fakeDbClient) DeleteDock(dckID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) CreatePool(pol *api.StoragePoolSpec) (*api.StoragePoolSpec, error) {
+func (fc *fakeDbClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetPool(polID string) (*api.StoragePoolSpec, error) {
+func (fc *fakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListPools() (*[]api.StoragePoolSpec, error) {
+func (fc *fakeDbClient) ListPools() (*[]model.StoragePoolSpec, error) {
 	return &samplePools, nil
 }
 
-func (fc *fakeDbClient) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*api.StoragePoolSpec, error) {
+func (fc *fakeDbClient) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -70,19 +70,19 @@ func (fc *fakeDbClient) DeletePool(polID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) CreateProfile(prf *api.ProfileSpec) (*api.ProfileSpec, error) {
+func (fc *fakeDbClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetProfile(prfID string) (*api.ProfileSpec, error) {
+func (fc *fakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListProfiles() (*[]api.ProfileSpec, error) {
+func (fc *fakeDbClient) ListProfiles() (*[]model.ProfileSpec, error) {
 	return &sampleProfiles, nil
 }
 
-func (fc *fakeDbClient) UpdateProfile(prfID string, input *api.ProfileSpec) (*api.ProfileSpec, error) {
+func (fc *fakeDbClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -90,11 +90,11 @@ func (fc *fakeDbClient) DeleteProfile(prfID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) AddExtraProperty(prfID string, ext api.ExtraSpec) (*api.ExtraSpec, error) {
+func (fc *fakeDbClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListExtraProperties(prfID string) (*api.ExtraSpec, error) {
+func (fc *fakeDbClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -102,15 +102,15 @@ func (fc *fakeDbClient) RemoveExtraProperty(prfID, extraKey string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) CreateVolume(vol *api.VolumeSpec) (*api.VolumeSpec, error) {
+func (fc *fakeDbClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetVolume(volID string) (*api.VolumeSpec, error) {
+func (fc *fakeDbClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return &sampleVolume, nil
 }
 
-func (fc *fakeDbClient) ListVolumes() (*[]api.VolumeSpec, error) {
+func (fc *fakeDbClient) ListVolumes() (*[]model.VolumeSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -118,19 +118,19 @@ func (fc *fakeDbClient) DeleteVolume(volID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) CreateVolumeAttachment(volID string, atc *api.VolumeAttachmentSpec) (*api.VolumeAttachmentSpec, error) {
+func (fc *fakeDbClient) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetVolumeAttachment(volID, attachmentID string) (*api.VolumeAttachmentSpec, error) {
+func (fc *fakeDbClient) GetVolumeAttachment(volID, attachmentID string) (*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListVolumeAttachments(volID string) (*[]api.VolumeAttachmentSpec, error) {
+func (fc *fakeDbClient) ListVolumeAttachments(volID string) (*[]model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error) {
+func (fc *fakeDbClient) UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -138,15 +138,15 @@ func (fc *fakeDbClient) DeleteVolumeAttachment(volID, attachmentID string) error
 	return errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) CreateVolumeSnapshot(vs *api.VolumeSnapshotSpec) (*api.VolumeSnapshotSpec, error) {
+func (fc *fakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) GetVolumeSnapshot(snapshotID string) (*api.VolumeSnapshotSpec, error) {
+func (fc *fakeDbClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *fakeDbClient) ListVolumeSnapshots() (*[]api.VolumeSnapshotSpec, error) {
+func (fc *fakeDbClient) ListVolumeSnapshots() (*[]model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -164,21 +164,21 @@ func NewFakeDbSearcher() Searcher {
 
 func TestSearchProfile(t *testing.T) {
 	s := NewFakeDbSearcher()
-	var expectedDefaultProfile = api.ProfileSpec{
-		BaseModel: &api.BaseModel{
+	var expectedDefaultProfile = model.ProfileSpec{
+		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		Name:        "default",
 		Description: "default policy",
-		Extra:       api.ExtraSpec{},
+		Extra:       model.ExtraSpec{},
 	}
-	var expectedAssignedProfile = api.ProfileSpec{
-		BaseModel: &api.BaseModel{
+	var expectedAssignedProfile = model.ProfileSpec{
+		BaseModel: &model.BaseModel{
 			Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
 		},
 		Name:        "ceph",
 		Description: "ceph policy",
-		Extra: api.ExtraSpec{
+		Extra: model.ExtraSpec{
 			"highAvailability":     "true",
 			"intervalSnapshot":     "10s",
 			"deleteSnapshotPolicy": "true",
@@ -206,8 +206,8 @@ func TestSearchProfile(t *testing.T) {
 
 func TestSearchSupportedPool(t *testing.T) {
 	s := NewFakeDbSearcher()
-	var expectedPool = api.StoragePoolSpec{
-		BaseModel: &api.BaseModel{
+	var expectedPool = model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
 		Name:          "rbd-pool",
@@ -237,8 +237,8 @@ func TestSearchSupportedPool(t *testing.T) {
 
 func TestSearchDockByPool(t *testing.T) {
 	s := NewFakeDbSearcher()
-	var expectedDock = api.DockSpec{
-		BaseModel: &api.BaseModel{
+	var expectedDock = model.DockSpec{
+		BaseModel: &model.BaseModel{
 			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		},
 		Name:        "cinder",
@@ -250,8 +250,8 @@ func TestSearchDockByPool(t *testing.T) {
 			"highAvailability": "false",
 		},
 	}
-	var inputPool = api.StoragePoolSpec{
-		BaseModel: &api.BaseModel{
+	var inputPool = model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
 		Name:          "cinder-pool",
@@ -278,8 +278,8 @@ func TestSearchDockByPool(t *testing.T) {
 
 func TestSearchDockByVolume(t *testing.T) {
 	s := NewFakeDbSearcher()
-	var expectedDock = api.DockSpec{
-		BaseModel: &api.BaseModel{
+	var expectedDock = model.DockSpec{
+		BaseModel: &model.BaseModel{
 			Id: "076454a8-65da-11e7-9a65-5f5d9b935b9f",
 		},
 		Name:        "ceph",
@@ -304,22 +304,22 @@ func TestSearchDockByVolume(t *testing.T) {
 }
 
 var (
-	sampleProfiles = []api.ProfileSpec{
+	sampleProfiles = []model.ProfileSpec{
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 			},
 			Name:        "default",
 			Description: "default policy",
-			Extra:       api.ExtraSpec{},
+			Extra:       model.ExtraSpec{},
 		},
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			},
 			Name:        "ceph",
 			Description: "ceph policy",
-			Extra: api.ExtraSpec{
+			Extra: model.ExtraSpec{
 				"highAvailability":     "true",
 				"intervalSnapshot":     "10s",
 				"deleteSnapshotPolicy": "true",
@@ -327,9 +327,9 @@ var (
 		},
 	}
 
-	sampleDocks = []api.DockSpec{
+	sampleDocks = []model.DockSpec{
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			},
 			Name:        "cinder",
@@ -342,7 +342,7 @@ var (
 			},
 		},
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "076454a8-65da-11e7-9a65-5f5d9b935b9f",
 			},
 			Name:        "ceph",
@@ -356,9 +356,9 @@ var (
 		},
 	}
 
-	samplePools = []api.StoragePoolSpec{
+	samplePools = []model.StoragePoolSpec{
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "6edc7604-7725-11e7-b2b1-1335d0254e7c",
 			},
 			Name:          "cinder-pool",
@@ -373,7 +373,7 @@ var (
 			},
 		},
 		{
-			BaseModel: &api.BaseModel{
+			BaseModel: &model.BaseModel{
 				Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 			},
 			Name:          "rbd-pool",
@@ -389,8 +389,8 @@ var (
 		},
 	}
 
-	sampleVolume = api.VolumeSpec{
-		BaseModel: &api.BaseModel{
+	sampleVolume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
 			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 			CreatedAt: "2017-08-02T09:17:05",
 		},

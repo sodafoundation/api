@@ -39,13 +39,16 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 		}
 
 		var strVal = ""
-		if cfg != nil {
-			key, _ := cfg.Section(section).GetKey(tags[ConfKeyName])
-			strVal = key.Value()
-		} else if len(tags) > 1 {
+		if len(tags) > 1 {
 			strVal = tags[ConfDefaultValue]
-		} else {
-			continue
+		}
+		if cfg != nil {
+			key, err := cfg.Section(section).GetKey(tags[ConfKeyName])
+			if err != nil {
+				log.Warningf("Get key failed, using default key.")
+				continue
+			}
+			strVal = key.Value()
 		}
 
 		switch field.Kind() {

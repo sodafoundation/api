@@ -112,11 +112,11 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 	var atc = &api.VolumeAttachmentSpec{
 		BaseModel: &api.BaseModel{},
 		HostInfo: &api.HostInfo{
-			Platform:  opt.GetPlatform(),
-			OsType:    opt.GetOsType(),
-			Ip:        opt.GetIp(),
-			Host:      opt.GetHost(),
-			Initiator: opt.GetInitiator(),
+			Platform:  opt.HostInfo.GetPlatform(),
+			OsType:    opt.HostInfo.GetOsType(),
+			Ip:        opt.HostInfo.GetIp(),
+			Host:      opt.HostInfo.GetHost(),
+			Initiator: opt.HostInfo.GetInitiator(),
 		},
 		ConnectionInfo: connInfo,
 	}
