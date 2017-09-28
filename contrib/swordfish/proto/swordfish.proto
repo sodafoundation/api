@@ -1,0 +1,294 @@
+// Copyright 2015, Google Inc.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+syntax = "proto3";
+
+package proto;
+
+message Oem {}
+
+message Identifier {
+	string durableName = 1;
+	// DurableNameFormat only contains "NAA","iQN","FC_WWN","UUID" and "EUI".
+	string durableNameFormat = 2;
+}
+
+message Schedule {
+	string name = 1;
+	string lifeTime = 2;
+	int64 maxOccurrences = 3;
+	string initialStartTime = 4;
+	string recurrenceInterval = 5;
+	// EnabledDaysOfWeek only supports "Monday","Tuesday","Wednesday",
+	// "Thursday","Friday","Saturday" and "Sunday".
+	repeated string enabledDaysOfWeek = 6;
+	// EnabledMonthsOfYear only supports "January","February","March","April",
+    // "May","June","July","August","September","October","November" and
+	// "December".
+	repeated string enabledMonthsOfYear = 7;
+}
+
+message Location {
+	string country = 1;
+	string territory = 2;
+	string state = 3;
+	string city = 4;
+	string address1 = 5;
+	string address2 = 6;
+	string address3 = 7;
+	string postalCode = 8;
+	string building = 9;
+	string room = 10;
+	string row = 11;
+	string rack = 12;
+	string shelf = 13;
+	string item = 14;
+	string gpsCoords = 15;
+	string otherLocationInfo = 16;
+}
+
+message IOWorkloadComponent {
+	// IOAccessPattern only supports "ReadWrite","SequentialRead","SequentialWrite",
+    // "RandomReadNew" and "RandomReadAgain".
+	string ioAccessPattern = 1;
+	int64 averageIOBytes = 2;
+	int64 percentOfData = 3;
+	int64 percentOfIOPS = 4;
+	string duration = 5;
+	Schedule schedule = 6;
+}
+
+message IOWorkload {
+	string name = 1;
+	repeated IOWorkloadComponent components = 2;
+}
+
+message DataProtectionLineOfService {
+	string name = 1;
+	// RecoveryGeographicObjective only support "Server","Rack","RackGroup",
+	// "Row","Datacenter" and "Region".
+	string recoveryGeographicObjective = 2;
+	string recoveryPointObjective = 3;
+	// RecoveryTimeObjective only supports "Immediate","Online","Nearline"
+	// and "Offline".
+	string recoveryTimeObjective = 4;
+	// ReplicaType only supports "Mirror","Snapshot","Clone" and
+	// "TokenizedClone".
+	string replicaType = 5;
+	int64 minLifetime = 6;
+	bool isIsolated = 7;
+	Schedule schedule = 8;
+	Location replicaAccessLocation = 9;
+	ClassOfService replicaClassOfService = 10;
+}
+
+message DataSecurityLineOfService {
+	string name = 1;
+	// MediaEncryptionStrength only supports "Bits_0","Bits_112","Bits_128",
+    // "Bits_192" and "Bits_256".
+	string mediaEncryptionStrength = 2;
+	// ChannelEncryptionStrength only supports "Bits_0","Bits_112","Bits_128",
+    // "Bits_192" and "Bits_256".
+	string channelEncryptionStrength = 3;
+	// HostAuthenticationType only supports "None","PKI","Ticket" and
+	// "Password".
+	string hostAuthenticationType = 4;
+	// UserAuthenticationType only supports "None","PKI","Ticket" and
+	// "Password".
+	string userAuthenticationType = 5;
+	// SecureChannelProtocol only supports "None","TLS","IPsec" and "RPCSEC_GSS".
+	string secureChannelProtocol = 6;
+	// AntivirusScanPolicies only supports "None","OnFirstRead","OnPatternUpdate",
+    // "OnUpdate" and "OnRename".
+	repeated string antivirusScanPolicies = 7;
+	string antivirusEngineProvider = 8;
+	// DataSanitizationPolicy only supports "None","Clear" and "CryptographicErase".
+	string dataSanitizationPolicy = 9;
+}
+
+message DataStorageLineOfService {
+	string name = 1;
+	// RecoveryTimeObjectives only supports "Immediate","Online","Nearline"
+    // and "Offline".
+	string recoveryTimeObjectives = 2;
+	// ProvisioningPolicy only supports "Fixed" and "Thin".
+	string provisioningPolicy = 3;
+	bool isSpaceEfficient = 4;
+}
+
+message IOConnectivityLineOfService {
+	string name = 1;
+	// AccessProtocol only supports "FC","FCP","iSCSI","SAS","SMB","NFSv3",
+    // "NFSv4","HTTP","HTTPS","FTP","FTPS","SecureNFS","FICON","FCOE" and
+	// "SMBAndNFS".
+	string accessProtocol = 2;
+	int64 maxIOPS = 3;
+}
+
+message IOPerformanceLineOfService {
+	string name = 1;
+	bool ioOperationsPerSecondIsLimited = 2;
+	string samplePeriod = 3;
+	int64 maxIOOperationsPerSecondPerTerabyte = 4;
+	int64 averageIOOperationLatencyMicroseconds = 5;
+	IOWorkload ioWorkload = 6;
+}
+
+message DataProtectionLoSCapabilitiesLinks {
+	Oem oem = 1;
+	int64 supportedReplicaOptionsOdataCount = 2;
+	string supportedReplicaOptionsOdataNavigationLink = 3;
+	repeated ClassOfService supportedReplicaOptions = 4;
+}
+
+message DataProtectionLoSCapabilities {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	repeated string supportedRecoveryGeographicObjectives = 9;
+	repeated int64 supportedRecoveryPointObjectiveSeconds = 10;
+	repeated string supportedRecoveryTimeObjectives = 11;
+	repeated string supportedReplicaTypes = 12;
+	repeated int64 supportedMinLifetime = 13;
+	bool supportsIsolated = 14;
+	DataProtectionLoSCapabilitiesLinks links = 15;
+	repeated DataProtectionLineOfService supportedDataProtectionLinesOfService = 16;
+}
+
+message DataSecurityLoSCapabilities {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	repeated string supportedMediaEncryptionStrengths = 9;
+	repeated string supportedChannelEncryptionStrengths = 10;
+	repeated string supportedHostAuthenticationTypes = 11;
+	repeated string supportedUserAuthenticationTypes = 12;
+	repeated string supportedSecureChannelProtocols = 13;
+	repeated string supportedSupportedAntivirusScanPolicies = 14;
+	repeated string supportedSupportedAntivirusEngineProviders = 15;
+	repeated string supportedDataSanitizationPolicies = 16;
+	repeated DataSecurityLineOfService supportedDataSecurityLinesOfService = 17;
+}
+
+message DataStorageLoSCapabilities {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	// AccessCapability only supports "Read","WriteMany","WriteOnce",
+	// "AppendOnly" and "Streaming".
+	repeated string supportedAccessCapabilities = 9;
+	repeated string supportedRecoveryTimeObjectives = 10;
+	repeated string supportedProvisioningPolicy = 11;
+	bool supportsSpaceEfficiency = 12;
+	repeated DataStorageLineOfService supportedDataStorageLinesOfService = 13;
+}
+
+message IOConnectivityLoSCapabilities {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	repeated string supportedAccessProtocols = 9;
+	int64 maxSupportedIOPS = 10;
+	repeated IOConnectivityLineOfService supportedIOConnectivityLinesOfService = 11;
+}
+
+message IOPerformanceLoSCapabilities {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	bool ioLimitingIsSupported = 9;
+	string minSamplePeriod = 10;
+	string maxSamplePeriod = 11;
+	int64 minSupportedIoOperationLatencyMicroseconds = 12;
+	repeated IOWorkload supportedIOWorkloads = 13;
+	repeated IOPerformanceLineOfService supportedIOPerformanceLinesOfService = 14;
+}
+
+message LinesOfService {
+	repeated DataProtectionLineOfService dataProtectionLinesOfService = 1;
+	repeated DataSecurityLineOfService dataSecurityLinesOfService = 2;
+	repeated DataStorageLineOfService dataStorageLinesOfService = 3;
+	repeated IOConnectivityLineOfService ioConnectivityLinesOfService = 4;
+	repeated IOPerformanceLineOfService ioPerformanceLinesOfService = 5;
+}
+
+// A class of service represents a choice of utility or warranty offered to
+// customers by a service. NOTICE that this structure can only be called by
+// storage drivers.
+message ClassOfService {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	Oem oem = 4	;
+	string id = 5;
+	string description = 6;
+	string name = 7;
+	Identifier identifier = 8;
+	string classesOfServiceVersion = 9;
+	LinesOfService linesOfService = 10;
+}
+
+// This collection shall contain references to all ClassOfService resource
+// instances sharing the same parent resource.
+message ClassOfServiceCollection {
+	string odataContext = 1;
+	string odataId = 2;
+	string odataType = 3;
+	string name = 4;
+	string description = 5;
+	Oem oem = 6;
+	int64 membersOdataCount = 7;
+	string membersOdataNavigationLink = 8;
+	repeated ClassOfService members = 9;
+}
