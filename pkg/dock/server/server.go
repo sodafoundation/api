@@ -39,18 +39,13 @@ This module implements the entry into operations of storageDock module.
 package server
 
 import (
-	"encoding/json"
+	"fmt"
 	"net"
-	"strings"
 
-	log "github.com/golang/glog"
-
-	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	api "github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 
+	log "github.com/golang/glog"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -77,310 +72,91 @@ func NewDockServer(port string) pb.DockServer {
 }
 
 // CreateVolume implements opensds.DockServer
-func (ds *dockServer) CreateVolume(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive create volume request, vr =", req)
+func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
 
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-		return &pb.DockResponse{}, err
-	}
+	log.Info("Dock server receive create volume request, vr =", opt)
 
-	vol, err := dock.NewDockHub(dck.GetDriverName()).CreateVolume(
-		req.GetVolumeName(),
-		req.GetVolumeSize())
+	vol, err := dock.NewDockHub(opt.GetDriverName()).CreateVolume(opt)
 	if err != nil {
 		log.Error("When create volume in dock module:", err)
-		return &pb.DockResponse{}, err
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
-	// If volume uuid is null, generate it randomly.
-	if vol.GetId() == "" {
-		if ok := utils.S.SetUuid(vol); ok != nil {
-			log.Error("When set volume uuid:", ok)
-			return &pb.DockResponse{}, err
-		}
-	}
-
-	// Set volume created time.
-	if ok := utils.S.SetCreatedTimeStamp(vol); ok != nil {
-		log.Error("When set volume created time:", ok)
-		return &pb.DockResponse{}, err
-	}
-
-	vol.ProfileId = req.GetProfileId()
-	vol.PoolId = req.GetPoolId()
-
-	result, err := db.C.CreateVolume(vol)
-	if err != nil {
-		log.Error("When create volume in db module:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	volBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
-}
-
-// GetVolume implements opensds.DockServer
-func (ds *dockServer) GetVolume(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive get volume request, vr =", req)
-
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
-
-	result, err := dock.NewDockHub(dck.GetDriverName()).GetVolume(req.GetVolumeId())
-	if err != nil {
-		log.Error("When get volume in dock module:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	volBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
+	res.Reply = GenericResponseResult(vol.GetId())
+	return &res, nil
 }
 
 // DeleteVolume implements opensds.DockServer
-func (ds *dockServer) DeleteVolume(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive delete volume request, vr =", req)
+func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
 
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
+	log.Info("Dock server receive delete volume request, vr =", opt)
 
-	if err := dock.NewDockHub(dck.GetDriverName()).DeleteVolume(req.GetVolumeId()); err != nil {
+	if err := dock.NewDockHub(opt.GetDriverName()).DeleteVolume(opt); err != nil {
 		log.Error("Error occured in dock module when delete volume:", err)
-		return &pb.DockResponse{}, err
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
-	if err := db.C.DeleteVolume(req.GetVolumeId()); err != nil {
-		log.Error("Error occured in dock module when delete volume in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: "Delete volume success",
-	}, nil
+	res.Reply = GenericResponseResult("")
+	return &res, nil
 }
 
 // CreateVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive create volume attachment request, vr =", req)
+func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttachmentOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
 
-	var dck, hostInfo = &api.DockSpec{}, &api.HostInfo{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
-	if err := json.Unmarshal([]byte(req.GetHostInfo()), hostInfo); err != nil {
-		log.Error("Error occured in dock module when parsing host info:", err)
-		return &pb.DockResponse{}, err
-	}
+	log.Info("Dock server receive create volume attachment request, vr =", opt)
 
-	atc, err := dock.NewDockHub(dck.GetDriverName()).CreateVolumeAttachment(
-		req.GetVolumeId(),
-		req.GetDoLocalAttach(),
-		req.GetMultiPath(),
-		hostInfo)
+	atc, err := dock.NewDockHub(opt.GetDriverName()).CreateVolumeAttachment(opt)
 	if err != nil {
 		log.Error("Error occured in dock module when create volume attachment:", err)
-		return &pb.DockResponse{}, err
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
-	// If volume attachment uuid is null, generate it randomly.
-	if atc.GetId() == "" {
-		if ok := utils.S.SetUuid(atc); ok != nil {
-			log.Error("When set volume attachment uuid:", ok)
-			return &pb.DockResponse{}, err
-		}
-	}
-
-	// Set volume attachment created time.
-	if ok := utils.S.SetCreatedTimeStamp(atc); ok != nil {
-		log.Error("When set volume attachment created time:", ok)
-		return &pb.DockResponse{}, err
-	}
-
-	result, err := db.C.CreateVolumeAttachment(req.GetVolumeId(), atc)
-	if err != nil {
-		log.Error("Error occured in dock module when create volume attachment in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	atcBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(atcBody),
-	}, nil
-}
-
-// UpdateVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) UpdateVolumeAttachment(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive update volume attachment request, vr =", req)
-
-	var dck, hostInfo = &api.DockSpec{}, &api.HostInfo{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
-	if err := json.Unmarshal([]byte(req.GetHostInfo()), hostInfo); err != nil {
-		log.Error("Error occured in dock module when parsing host info:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	err := dock.NewDockHub(dck.GetDriverName()).UpdateVolumeAttachment(
-		req.GetVolumeId(),
-		hostInfo.Host,
-		req.GetMountpoint())
-	if err != nil {
-		log.Error("Error occured in dock module when update volume attachment:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	result, err := db.C.UpdateVolumeAttachment(
-		req.GetVolumeId(),
-		req.GetAttachmentId(),
-		req.GetMountpoint(),
-		hostInfo)
-	if err != nil {
-		log.Error("Error occured in dock module when update volume attachment in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	atcBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(atcBody),
-	}, nil
-}
-
-// DeleteVolumeAttachment implements opensds.DockServer
-func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive delete volume attachment request, vr =", req)
-
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
-
-	if err := dock.NewDockHub(dck.GetDriverName()).DeleteVolumeAttachment(req.GetVolumeId()); err != nil {
-		log.Error("Error occured in dock module when delete volume attachment:", err)
-		if strings.Contains(err.Error(), "The status of volume is not in-use") {
-			if err = db.C.DeleteVolumeAttachment(req.GetVolumeId(), req.GetAttachmentId()); err != nil {
-				log.Error("Error occured in dock module when delete volume attachment in db:", err)
-				return &pb.DockResponse{}, err
-			}
-		}
-		return &pb.DockResponse{}, err
-	}
-
-	if err := db.C.DeleteVolumeAttachment(req.GetVolumeId(), req.GetAttachmentId()); err != nil {
-		log.Error("Error occured in dock module when delete volume attachment in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: "Delete volume attachment success",
-	}, nil
+	res.Reply = GenericResponseResult(atc.GetId())
+	return &res, nil
 }
 
 // CreateVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive create volume snapshot request, vr =", req)
+func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVolumeSnapshotOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
 
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
+	log.Info("Dock server receive create volume snapshot request, vr =", opt)
 
-	snp, err := dock.NewDockHub(dck.GetDriverName()).CreateSnapshot(
-		req.GetSnapshotName(),
-		req.GetVolumeId(),
-		req.GetSnapshotDescription())
+	snp, err := dock.NewDockHub(opt.GetDriverName()).CreateSnapshot(opt)
 	if err != nil {
 		log.Error("Error occured in dock module when create snapshot:", err)
-		return &pb.DockResponse{}, err
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
-	// If volume snapshot uuid is null, generate it randomly.
-	if snp.GetId() == "" {
-		if ok := utils.S.SetUuid(snp); ok != nil {
-			log.Error("When set volume snapshot uuid:", ok)
-			return &pb.DockResponse{}, err
-		}
-	}
-
-	// Set volume snapshot created time.
-	if ok := utils.S.SetCreatedTimeStamp(snp); ok != nil {
-		log.Error("When set volume snapshot created time:", ok)
-		return &pb.DockResponse{}, err
-	}
-
-	result, err := db.C.CreateVolumeSnapshot(snp)
-	if err != nil {
-		log.Error("Error occured in dock module when create volume snapshot in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	snpBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(snpBody),
-	}, nil
-}
-
-// GetVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) GetVolumeSnapshot(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive get volume snapshot request, vr =", req)
-
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
-
-	result, err := dock.NewDockHub(dck.GetDriverName()).GetSnapshot(req.GetSnapshotId())
-	if err != nil {
-		log.Error("Error occured in dock module when get snapshot:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	snpBody, _ := json.Marshal(result)
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(snpBody),
-	}, nil
+	res.Reply = GenericResponseResult(snp.GetId())
+	return &res, nil
 }
 
 // DeleteVolumeSnapshot implements opensds.DockServer
-func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, req *pb.DockRequest) (*pb.DockResponse, error) {
-	log.Info("Dock server receive delete volume snapshot request, vr =", req)
+func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
 
-	var dck = &api.DockSpec{}
-	if err := json.Unmarshal([]byte(req.GetDockInfo()), dck); err != nil {
-		log.Error("When parsing dock info:", err)
-	}
+	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
-	if err := dock.NewDockHub(dck.GetDriverName()).DeleteSnapshot(req.GetSnapshotId()); err != nil {
+	if err := dock.NewDockHub(opt.GetDriverName()).DeleteSnapshot(opt); err != nil {
 		log.Error("Error occured in dock module when delete snapshot:", err)
-		return &pb.DockResponse{}, err
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
-	if err := db.C.DeleteVolumeSnapshot(req.GetSnapshotId()); err != nil {
-		log.Error("Error occured in dock module when delete volume snapshot in db:", err)
-		return &pb.DockResponse{}, err
-	}
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: "Delete snapshot success",
-	}, nil
+	res.Reply = GenericResponseResult("")
+	return &res, nil
 }
 
 func ListenAndServe(srv pb.DockServer) {
@@ -407,3 +183,21 @@ func ListenAndServe(srv pb.DockServer) {
 		return
 	}
 }
+
+func GenericResponseResult(message string) *pb.GenericResponse_Result_ {
+	return &pb.GenericResponse_Result_{
+		Result: &pb.GenericResponse_Result{
+			Message: message,
+		},
+	}
+}
+
+func GenericResponseError(code, description string) *pb.GenericResponse_Error_ {
+	return &pb.GenericResponse_Error_{
+		Error: &pb.GenericResponse_Error{
+			Code:        code,
+			Description: description,
+		},
+	}
+}
+

@@ -125,14 +125,17 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 		log.Error("When search supported pool resource:", err)
 		return &model.VolumeSpec{}, err
 	}
-	c.createVolumeOpts.PoolId = polInfo.GetId()
 
 	dockInfo, err := c.searcher.SearchDockByPool(polInfo)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return &model.VolumeSpec{}, err
 	}
-	c.createVolumeOpts.DockId = dockInfo.Id
+
+	c.createVolumeOpts.PoolId = polInfo.GetId()
+	c.createVolumeOpts.DockId = dockInfo.GetId()
+	c.createVolumeOpts.DriverName = dockInfo.GetDriverName()
+
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
 
@@ -160,9 +163,12 @@ func (c *Controller) DeleteVolume() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
+
+	c.deleteVolumeOpts.DockId = dockInfo.GetId()
+	c.deleteVolumeOpts.DriverName = dockInfo.GetDriverName()
+
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
-	c.deleteVolumeOpts.DockId = dockInfo.Id
 
 	var errChan = make(chan error, 1)
 	go c.policyController.ExecuteAsyncPolicy(c.deleteVolumeOpts, "", errChan)
@@ -186,7 +192,9 @@ func (c *Controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 		return &model.VolumeAttachmentSpec{}, err
 	}
 
-	c.createAttachmentOpts.DockId = dockInfo.Id
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
 	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.CreateVolumeAttachment()
@@ -200,7 +208,9 @@ func (c *Controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 		return &model.VolumeAttachmentSpec{}, err
 	}
 
-	c.createAttachmentOpts.DockId = dockInfo.Id
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
 	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.UpdateVolumeAttachment()
@@ -217,7 +227,9 @@ func (c *Controller) DeleteVolumeAttachment() *model.Response {
 		}
 	}
 
-	c.createAttachmentOpts.DockId = dockInfo.Id
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
 	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.DeleteVolumeAttachment()
@@ -231,7 +243,9 @@ func (c *Controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
 		return &model.VolumeSnapshotSpec{}, err
 	}
 
-	c.createVolumeSnapshotOpts.DockId = dockInfo.Id
+	c.createVolumeSnapshotOpts.DockId = dockInfo.GetId()
+	c.createVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
+
 	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.CreateVolumeSnapshot()
@@ -248,7 +262,9 @@ func (c *Controller) DeleteVolumeSnapshot() *model.Response {
 		}
 	}
 
-	c.deleteVolumeSnapshotOpts.DockId = dockInfo.Id
+	c.deleteVolumeSnapshotOpts.DockId = dockInfo.GetId()
+	c.deleteVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
+
 	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.DeleteVolumeSnapshot()
