@@ -133,7 +133,6 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 	snp, err := dock.NewDockHub(opt.GetDriverName()).CreateSnapshot(opt)
 	if err != nil {
 		log.Error("Error occured in dock module when create snapshot:", err)
-
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
 	}
