@@ -22,10 +22,12 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
-	"github.com/opensds/opensds/pkg/controller/volume"
+	"github.com/opensds/opensds/pkg/controller/selector"
+	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
 )
@@ -46,14 +48,12 @@ func NewControllerWithVolumeConfig(
 		request: &pb.DockRequest{},
 	}
 
-	c.searcher = NewDbSearcher()
-
 	// If volume input is not null, the controller will add policy orchestration
 	// to manage volume resource.
 	if vol != nil {
-		prf, err := c.searcher.SearchProfile(vol.GetProfileId())
+		prf, err := GetProfile(vol.GetProfileId(), db.C)
 		if err != nil {
-			log.Error("when search profiles in db:", err)
+			log.Errorf("when search profile %s in db: %v\n", vol.GetProfileId(), err)
 			return nil, err
 		}
 
@@ -80,15 +80,14 @@ func NewControllerWithVolumeConfig(
 		c.request.VolumeId = snp.GetVolumeId()
 	}
 
-	// Initialize volume controller.
-	c.volumeController = volume.NewController(c.request)
+	// Initialize selector controller.
+	c.slector = selector.NewSelector()
 
 	return c, nil
 }
 
 type Controller struct {
-	searcher         Searcher
-	volumeController volume.Controller
+	selector         selector.Selector
 	policyController policy.Controller
 
 	profile *api.ProfileSpec
@@ -114,7 +113,7 @@ func (c *Controller) CreateVolume() (*api.VolumeSpec, error) {
 	dckBody, _ := json.Marshal(dckInfo)
 	c.request.DockInfo = string(dckBody)
 
-	result, err := c.volumeController.CreateVolume()
+	result, err := c.selector.CreateVolume()
 	if err != nil {
 		return &api.VolumeSpec{}, err
 	}
