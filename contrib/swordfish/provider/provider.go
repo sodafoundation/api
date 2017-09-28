@@ -37,22 +37,12 @@ type Provider struct {
 
 func NewProvider() *Provider {
 	var (
-		cosc  model.ClassOfServiceCollection
-		dpLos = model.DataProtectionLoSCapabilities{
-			SupportedDataProtectionLinesOfService: []*model.DataProtectionLineOfService{},
-		}
-		dsLos = model.DataSecurityLoSCapabilities{
-			SupportedDataSecurityLinesOfService: []*model.DataSecurityLineOfService{},
-		}
-		dstLos = model.DataStorageLoSCapabilities{
-			SupportedDataStorageLinesOfService: []*model.DataStorageLineOfService{},
-		}
-		icLos = model.IOConnectivityLoSCapabilities{
-			SupportedIOConnectivityLinesOfService: []*model.IOConnectivityLineOfService{},
-		}
-		ipLos = model.IOPerformanceLoSCapabilities{
-			SupportedIOPerformanceLinesOfService: []*model.IOPerformanceLineOfService{},
-		}
+		cosc   model.ClassOfServiceCollection
+		dpLos  model.DataProtectionLoSCapabilities
+		dsLos  model.DataSecurityLoSCapabilities
+		dstLos model.DataStorageLoSCapabilities
+		icLos  model.IOConnectivityLoSCapabilities
+		ipLos  model.IOPerformanceLoSCapabilities
 	)
 
 	return &Provider{
