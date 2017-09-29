@@ -20,14 +20,13 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
-	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/pkg/db"
 	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+
+	log "github.com/golang/glog"
 )
 
 type Discoverer interface {
@@ -60,14 +59,13 @@ func (dd *DockDiscoverer) Init() error {
 		if b.Name == "" {
 			continue
 		}
+
 		dock := api.DockSpec{
-			BaseModel: &api.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, b.DriverName).String(),
-			},
+			BaseModel:   &api.BaseModel{},
 			Name:        b.Name,
 			Description: b.Description,
-			Endpoint:    b.Endpoint,
 			DriverName:  b.DriverName,
+			Endpoint:    CONF.OsdsDock.ApiEndpoint,
 		}
 		dd.dcks = append(dd.dcks, dock)
 	}
@@ -147,4 +145,3 @@ func Discovery(d Discoverer) error {
 
 	return err
 }
-

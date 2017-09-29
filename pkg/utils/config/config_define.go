@@ -18,6 +18,8 @@ import (
 	gflag "flag"
 )
 
+type Default struct{}
+
 type OsdsLet struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
 	Graceful    bool   `conf:"graceful,true"`
@@ -40,16 +42,12 @@ type Database struct {
 type BackendProperties struct {
 	Name        string `conf:"name"`
 	Description string `conf:"description"`
-	Endpoint    string `conf:"endpoint,127.0.0.1"`
 	DriverName  string `conf:"driver_name"`
 }
 
 type Ceph BackendProperties
 
 type Cinder BackendProperties
-
-type Default struct {
-}
 
 type Config struct {
 	Default  `conf:"default"`
@@ -76,4 +74,3 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = GetDefaultConfig()
-

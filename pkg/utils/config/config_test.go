@@ -254,47 +254,40 @@ func TestOpensdsConfig(t *testing.T) {
 		t.Error("Test OsdsLet.SocketOrder error")
 	}
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
-		t.Error("Test OsdsLet.ApiEndpoint error")
+		t.Error("Test OsdsDock.ApiEndpoint error")
 	}
 	if CONF.OsdsDock.EnableBackends[0] != "ceph" {
-		t.Error("Test OsdsLet.OsdsDock.EnableBackends[0] error")
+		t.Error("OsdsDock.EnableBackends[0] error")
 	}
 	if CONF.OsdsDock.EnableBackends[1] != "cinder" {
-		t.Error("Test OsdsLet.OsdsDock.EnableBackends[1] error")
+		t.Error("Test OsdsDock.EnableBackends[1] error")
 	}
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {
-		t.Error("Test OsdsLet.ApiEndpoint error")
+		t.Error("Test Database.Credential error")
 	}
 	if CONF.Database.Endpoint != "localhost:2379,localhost:2380" {
-		t.Error("Test OsdsLet.ApiEndpoint error")
+		t.Error("Test Database.Endpoint error")
 	}
 	if CONF.Database.Driver != "etcd" {
-		t.Error("Test OsdsLet.ApiEndpoint error")
+		t.Error("Test Database.Driver error")
 	}
 	if CONF.Ceph.Name != "ceph" {
 		t.Error("Test Ceph.Name error")
 	}
-	if CONF.Ceph.Endpoint != "127.0.0.1" {
-		t.Error("Test Ceph.Endpoint error")
-	}
 	if CONF.Ceph.Description != "Ceph Test" {
 		t.Error("Test Ceph.Description error")
 	}
-	if CONF.Ceph.DriverName != "CephDriver" {
+	if CONF.Ceph.DriverName != "ceph" {
 		t.Error("Test Ceph.DriverName error")
 	}
 	if CONF.Cinder.Name != "cinder" {
 		t.Error("Test Cinder.Name error")
 	}
-	if CONF.Cinder.Endpoint != "127.0.0.1" {
-		t.Error("Test Cinder.Name error")
-	}
 	if CONF.Cinder.Description != "Cinder Test" {
-		t.Error("Test Cinder.Name error")
+		t.Error("Test Cinder.Description error")
 	}
-	if CONF.Cinder.DriverName != "CinderDriver" {
-		t.Error("Test Cinder.Name error")
+	if CONF.Cinder.DriverName != "cinder" {
+		t.Error("Test Cinder.DriverName error")
 	}
 
 }
-
