@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 )
 
