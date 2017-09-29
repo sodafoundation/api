@@ -25,9 +25,10 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint  string `conf:"api_endpoint,localhost:50050"`
-	CinderConfig string `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
-	CephConfig   string `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
+	ApiEndpoint    string   `conf:"api_endpoint,localhost:50050"`
+	EnableBackends []string `conf:"enabled_backends,ceph"`
+	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
+	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
 }
 
 type Database struct {
@@ -35,6 +36,17 @@ type Database struct {
 	Driver     string `conf:"driver,etcd"`
 	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
 }
+
+type BackendProperties struct {
+	Name        string `conf:"name"`
+	Description string `conf:"description"`
+	Endpoint    string `conf:"endpoint,127.0.0.1"`
+	DriverName  string `conf:"driver_name"`
+}
+
+type Ceph BackendProperties
+
+type Cinder BackendProperties
 
 type Default struct {
 }
@@ -44,6 +56,8 @@ type Config struct {
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
+	Ceph     `conf:"ceph"`
+	Cinder   `conf:"cinder"`
 	Flag     FlagSet
 }
 
@@ -62,3 +76,4 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = GetDefaultConfig()
+
