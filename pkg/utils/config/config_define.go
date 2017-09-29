@@ -18,6 +18,8 @@ import (
 	gflag "flag"
 )
 
+type Default struct{}
+
 type OsdsLet struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
 	Graceful    bool   `conf:"graceful,true"`
@@ -25,9 +27,10 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint  string `conf:"api_endpoint,localhost:50050"`
-	CinderConfig string `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
-	CephConfig   string `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
+	ApiEndpoint    string   `conf:"api_endpoint,localhost:50050"`
+	EnableBackends []string `conf:"enabled_backends,ceph"`
+	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
+	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
 }
 
 type Database struct {
@@ -36,14 +39,23 @@ type Database struct {
 	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
 }
 
-type Default struct {
+type BackendProperties struct {
+	Name        string `conf:"name"`
+	Description string `conf:"description"`
+	DriverName  string `conf:"driver_name"`
 }
+
+type Ceph BackendProperties
+
+type Cinder BackendProperties
 
 type Config struct {
 	Default  `conf:"default"`
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
+	Ceph     `conf:"ceph"`
+	Cinder   `conf:"cinder"`
 	Flag     FlagSet
 }
 
