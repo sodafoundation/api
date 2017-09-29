@@ -25,7 +25,6 @@ import (
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -49,70 +48,4 @@ func SearchProfile(prfId string, dbCli db.Client) (*model.ProfileSpec, error) {
 	}
 
 	return dbCli.GetProfile(prfId)
-}
-
-func GenerateCreateVolumeOpts(vol *model.VolumeSpec) (*pb.CreateVolumeOpts, error) {
-	if vol.GetName() == "" {
-		return nil, errors.New("Name field needed for creating a volume!")
-	}
-	if vol.GetSize() == int64(0) {
-		return nil, errors.New("Size field needed for creating a volume!")
-	}
-
-	return &pb.CreateVolumeOpts{
-		Id:               vol.GetId(),
-		Name:             vol.GetName(),
-		Description:      vol.GetDescription(),
-		Size:             vol.GetSize(),
-		AvailabilityZone: vol.GetAvailabilityZone(),
-		ProfileId:        vol.GetProfileId(),
-	}, nil
-}
-
-func GenerateDeleteVolumeOpts(vol *model.VolumeSpec) (*pb.DeleteVolumeOpts, error) {
-	if vol.GetId() == "" {
-		return nil, errors.New("Id field needed for deleting a volume!")
-	}
-
-	return &pb.DeleteVolumeOpts{
-		Id: vol.GetId(),
-	}, nil
-}
-
-func GenerateCreateAttachmentOpts(atc *model.VolumeAttachmentSpec) (*pb.CreateAttachmentOpts, error) {
-	if atc.GetVolumeId() == "" {
-		return nil, errors.New("Volume id field needed for creating a volume attachment!")
-	}
-
-	return &pb.CreateAttachmentOpts{
-		Id:       atc.GetId(),
-		VolumeId: atc.GetVolumeId(),
-	}, nil
-}
-
-func GenerateCreateVolumeSnapshotOpts(snp *model.VolumeSnapshotSpec) (*pb.CreateVolumeSnapshotOpts, error) {
-	if snp.GetName() == "" {
-		return nil, errors.New("Name field needed for creating a volume snapshot!")
-	}
-	if snp.GetVolumeId() == "" {
-		return nil, errors.New("Volume id field needed for creating a volume snapshot!")
-	}
-
-	return &pb.CreateVolumeSnapshotOpts{
-		Id:          snp.GetId(),
-		Name:        snp.GetName(),
-		Description: snp.GetDescription(),
-		Size:        snp.GetSize(),
-		VolumeId:    snp.GetVolumeId(),
-	}, nil
-}
-
-func GenerateDeleteVolumeSnapshotOpts(snp *model.VolumeSnapshotSpec) (*pb.DeleteVolumeSnapshotOpts, error) {
-	if snp.GetId() == "" {
-		return nil, errors.New("Id field needed for deleting a volume snapshot!")
-	}
-
-	return &pb.DeleteVolumeSnapshotOpts{
-		Id: snp.GetId(),
-	}, nil
 }

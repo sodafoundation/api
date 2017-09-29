@@ -45,7 +45,6 @@ func NewControllerWithVolumeConfig(
 	snp *model.VolumeSnapshotSpec,
 ) (*Controller, error) {
 	var c = &Controller{}
-	var err error
 
 	// If volume input is not null, the controller will add policy orchestration
 	// to manage volume resource.
@@ -60,44 +59,54 @@ func NewControllerWithVolumeConfig(
 		c.profile = prf
 
 		// Generate CreateVolumeOpts by parsing input VolumeSpec.
-		c.createVolumeOpts, err = GenerateCreateVolumeOpts(vol)
-		if err != nil {
-			log.Error("When generating CreateVolumeOpts in controller:", err)
-			return nil, err
-		}
+		c.createVolumeOpts = func(vol *model.VolumeSpec) *pb.CreateVolumeOpts {
+			return &pb.CreateVolumeOpts{
+				Id:               vol.GetId(),
+				Name:             vol.GetName(),
+				Description:      vol.GetDescription(),
+				Size:             vol.GetSize(),
+				AvailabilityZone: vol.GetAvailabilityZone(),
+				ProfileId:        vol.GetProfileId(),
+			}
+		}(vol)
 		// Generate DeleteVolumeOpts by parsing input VolumeSpec.
-		c.deleteVolumeOpts, err = GenerateDeleteVolumeOpts(vol)
-		if err != nil {
-			log.Error("When generating DeleteVolumeOpts in controller:", err)
-			return nil, err
-		}
+		c.deleteVolumeOpts = func(vol *model.VolumeSpec) *pb.DeleteVolumeOpts {
+			return &pb.DeleteVolumeOpts{
+				Id: vol.GetId(),
+			}
+		}(vol)
 
 		// Initialize policy controller when profile is specified.
 		c.policyController = policy.NewController(c.profile)
 	}
 	if atc != nil {
 		// Generate CreateAttachment by parsing input VolumeAttachmentSpec.
-		c.createAttachmentOpts, err = GenerateCreateAttachmentOpts(atc)
-		if err != nil {
-			log.Error("When generating CreateAttachmentOpts in controller:", err)
-			return nil, err
-		}
+		c.createAttachmentOpts = func(atc *model.VolumeAttachmentSpec) *pb.CreateAttachmentOpts {
+			return &pb.CreateAttachmentOpts{
+				Id:       atc.GetId(),
+				VolumeId: atc.GetVolumeId(),
+			}
+		}(atc)
 	}
 	if snp != nil {
 		c.volSnapshot = snp
 
 		// Generate CreateVolumeSnapshotOpts by parsing input VolumeSnapshotSpec.
-		c.createVolumeSnapshotOpts, err = GenerateCreateVolumeSnapshotOpts(snp)
-		if err != nil {
-			log.Error("When generating CreateVolumeSnapshotOpts in controller:", err)
-			return nil, err
-		}
+		c.createVolumeSnapshotOpts = func(snp *model.VolumeSnapshotSpec) *pb.CreateVolumeSnapshotOpts {
+			return &pb.CreateVolumeSnapshotOpts{
+				Id:          snp.GetId(),
+				Name:        snp.GetName(),
+				Description: snp.GetDescription(),
+				Size:        snp.GetSize(),
+				VolumeId:    snp.GetVolumeId(),
+			}
+		}(snp)
 		// Generate DeleteVolumeSnapshotOpts by parsing input VolumeSnapshotSpec.
-		c.deleteVolumeSnapshotOpts, err = GenerateDeleteVolumeSnapshotOpts(snp)
-		if err != nil {
-			log.Error("When generating DeleteVolumeSnapshotOpts in controller:", err)
-			return nil, err
-		}
+		c.deleteVolumeSnapshotOpts = func(snp *model.VolumeSnapshotSpec) *pb.DeleteVolumeSnapshotOpts {
+			return &pb.DeleteVolumeSnapshotOpts{
+				Id: snp.GetId(),
+			}
+		}(snp)
 	}
 
 	// Initialize selector controller.

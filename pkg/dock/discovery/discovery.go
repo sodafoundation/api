@@ -20,6 +20,8 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
+	"os"
+
 	"github.com/opensds/opensds/pkg/db"
 	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
@@ -27,6 +29,7 @@ import (
 	. "github.com/opensds/opensds/pkg/utils/config"
 
 	log "github.com/golang/glog"
+	"github.com/satori/go.uuid"
 )
 
 type Discoverer interface {
@@ -54,6 +57,13 @@ func (dd *DockDiscoverer) Init() error {
 		"ceph":   BackendProperties(CONF.Ceph),
 		"cinder": BackendProperties(CONF.Cinder),
 	}
+
+	host, err := os.Hostname()
+	if err != nil {
+		log.Error("When get os hostname:", err)
+		return err
+	}
+
 	for _, v := range CONF.EnableBackends {
 		b := name2Backend[v]
 		if b.Name == "" {
@@ -61,7 +71,9 @@ func (dd *DockDiscoverer) Init() error {
 		}
 
 		dock := api.DockSpec{
-			BaseModel:   &api.BaseModel{},
+			BaseModel: &api.BaseModel{
+				Id: uuid.NewV5(uuid.NamespaceOID, host+":"+b.DriverName).String(),
+			},
 			Name:        b.Name,
 			Description: b.Description,
 			DriverName:  b.DriverName,
