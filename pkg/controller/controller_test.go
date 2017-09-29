@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
+	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
@@ -59,9 +60,7 @@ func (fvc *fakeVolumeController) DeleteVolumeSnapshot() *model.Response {
 	return &model.Response{Status: "Success"}
 }
 
-func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) {
-
-}
+func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) {}
 
 func TestCreateVolume(t *testing.T) {
 	var req = &pb.CreateVolumeOpts{
@@ -71,7 +70,7 @@ func TestCreateVolume(t *testing.T) {
 		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
+		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
 		profile:          &sampleProfile,
@@ -93,7 +92,7 @@ func TestDeleteVolume(t *testing.T) {
 		Id: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
+		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
 		profile:          &sampleProfile,
@@ -113,7 +112,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		Id:       "80287bf8-66de-11e7-b031-f3b0af1675ba",
 	}
 	var c = &Controller{
-		searcher:             NewFakeDbSearcher(),
+		Selector:             selector.NewFakeSelector(),
 		volumeController:     NewFakeVolumeController(),
 		createAttachmentOpts: req,
 	}
@@ -136,7 +135,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		Size:        int64(1),
 	}
 	var c = &Controller{
-		searcher:                 NewFakeDbSearcher(),
+		Selector:                 selector.NewFakeSelector(),
 		volumeController:         NewFakeVolumeController(),
 		createVolumeSnapshotOpts: req,
 	}
@@ -156,7 +155,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		Id: "8193c3ec-771f-11e7-8ca3-d32c0a8b2727",
 	}
 	var c = &Controller{
-		searcher:                 NewFakeDbSearcher(),
+		Selector:                 selector.NewFakeSelector(),
 		volumeController:         NewFakeVolumeController(),
 		deleteVolumeSnapshotOpts: req,
 		volSnapshot:              &model.VolumeSnapshotSpec{},
@@ -170,6 +169,17 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 }
 
 var (
+	sampleVolume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+			CreatedAt: "2017-08-02T09:17:05",
+		},
+		Name:        "fake-volume",
+		Description: "fake volume for testing",
+		Size:        1,
+		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
+	}
+
 	sampleProfile = model.ProfileSpec{
 		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",

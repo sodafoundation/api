@@ -26,7 +26,6 @@ import (
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/dock/client"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 )
@@ -38,14 +37,18 @@ type Selector interface {
 }
 
 type selector struct {
-	storBox   db.Client
-	dockEntry client.Client
+	storBox db.Client
 }
 
 func NewSelector() Selector {
 	return &selector{
-		storBox:   db.C,
-		dockEntry: client.NewClient(),
+		storBox: db.C,
+	}
+}
+
+func NewFakeSelector() Selector {
+	return &selector{
+		storBox: db.NewFakeDbClient(),
 	}
 }
 
