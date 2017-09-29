@@ -81,6 +81,10 @@ func (dd *DockDiscoverer) Discovery() error {
 			log.Warningf("The pool of dock %s is empty!\n", dock.GetId())
 		}
 
+		for _, pol := range *pols {
+			pol.DockId = dock.GetId()
+		}
+
 		*dd.pols = append(*dd.pols, *pols...)
 	}
 

@@ -23,34 +23,38 @@ package executor
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/golang/glog"
 	"strconv"
 	"strings"
 	"time"
 
+	log "github.com/golang/glog"
+
 	"github.com/opensds/opensds/pkg/dock/client"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 )
 
 type IntervalSnapshotExecutor struct {
 	client.Client
 
-	Request  *pb.DockRequest
+	Request  *pb.CreateVolumeSnapshotOpts
+	DockInfo *model.DockSpec
 	Interval string
 	TotalNum int
 }
 
 func (ise *IntervalSnapshotExecutor) Init(in string) (err error) {
-	var volumeResponse api.VolumeSpec
+	var volumeResponse model.VolumeSpec
 	if err = json.Unmarshal([]byte(in), &volumeResponse); err != nil {
 		return err
 	}
 
 	ise.Request.VolumeId = volumeResponse.Id
-	ise.Request.SnapshotName = "snapshot-" + volumeResponse.Id
+	ise.Request.Name = "snapshot-" + volumeResponse.Id
+	ise.Request.Size = volumeResponse.Size
 	ise.Client = client.NewClient()
+	ise.Client.Update(ise.DockInfo)
 
 	return nil
 }

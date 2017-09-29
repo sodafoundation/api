@@ -21,12 +21,16 @@ profiles configured by admin.
 package executor
 
 import (
-	log "github.com/golang/glog"
 	"time"
+
+	"encoding/json"
+
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/client"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 )
 
@@ -38,23 +42,31 @@ const (
 type DeleteSnapshotExecutor struct {
 	client.Client
 
-	Request *pb.DockRequest
+	VolumeId string
+	Request  *pb.DeleteVolumeSnapshotOpts
+	DockInfo *model.DockSpec
 }
 
 func (dse *DeleteSnapshotExecutor) Init(in string) (err error) {
+	var volumeResponse model.VolumeSpec
+	if err = json.Unmarshal([]byte(in), &volumeResponse); err != nil {
+		return err
+	}
+	dse.VolumeId = volumeResponse.Id
 	dse.Client = client.NewClient()
+	dse.Client.Update(dse.DockInfo)
 
 	return nil
 }
 
 func (dse *DeleteSnapshotExecutor) Asynchronized() error {
-	remainSnaps, err := findRemainingSnapshot(dse.Request)
+	remainSnaps, err := findRemainingSnapshot(dse.VolumeId)
 	if err != nil {
 		return err
 	}
 
 	for i, snapId := range remainSnaps {
-		dse.Request.SnapshotId = snapId
+		dse.Request.Id = snapId
 		if _, err = dse.Client.DeleteVolumeSnapshot(context.Background(), dse.Request); err != nil {
 			log.Errorf("When %dth delete volume snapshot: %v\n", i+1, err)
 			return err
@@ -62,7 +74,7 @@ func (dse *DeleteSnapshotExecutor) Asynchronized() error {
 	}
 	// Waiting for snapshots deleted
 	for i := 0; i < MAX_RETRY_TIME; i++ {
-		if CheckSnapshotDeleted(dse.Request) {
+		if CheckSnapshotDeleted(dse.VolumeId) {
 			break
 		}
 		time.Sleep(RETRY_INTERVAL * time.Second)
@@ -70,8 +82,8 @@ func (dse *DeleteSnapshotExecutor) Asynchronized() error {
 	return nil
 }
 
-func CheckSnapshotDeleted(vr *pb.DockRequest) bool {
-	snaps, err := findRemainingSnapshot(vr)
+func CheckSnapshotDeleted(volumeId string) bool {
+	snaps, err := findRemainingSnapshot(volumeId)
 	if err != nil {
 		return false
 	}
@@ -82,7 +94,7 @@ func CheckSnapshotDeleted(vr *pb.DockRequest) bool {
 	return false
 }
 
-func findRemainingSnapshot(vr *pb.DockRequest) ([]string, error) {
+func findRemainingSnapshot(volumeId string) ([]string, error) {
 	var remainingSnapshots = []string{}
 	snapshots, err := db.C.ListVolumeSnapshots()
 	if err != nil {
@@ -91,7 +103,7 @@ func findRemainingSnapshot(vr *pb.DockRequest) ([]string, error) {
 	}
 
 	for _, snap := range *snapshots {
-		if snap.VolumeId != vr.GetVolumeId() {
+		if snap.VolumeId != volumeId {
 			continue
 		}
 		remainingSnapshots = append(remainingSnapshots, snap.Id)

@@ -23,12 +23,13 @@ package etcd
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/golang/glog"
 	"sync"
 	"time"
 
+	log "github.com/golang/glog"
+
 	"github.com/coreos/etcd/clientv3"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 const (
@@ -57,10 +58,10 @@ type client struct {
 	lock sync.Mutex
 }
 
-func (c *client) CreateDock(dck *api.DockSpec) (*api.DockSpec, error) {
+func (c *client) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	dckBody, err := json.Marshal(dck)
 	if err != nil {
-		return &api.DockSpec{}, err
+		return &model.DockSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -70,59 +71,59 @@ func (c *client) CreateDock(dck *api.DockSpec) (*api.DockSpec, error) {
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create dock in db:", dbRes.Error)
-		return &api.DockSpec{}, errors.New(dbRes.Error)
+		return &model.DockSpec{}, errors.New(dbRes.Error)
 	}
 
 	return dck, nil
 }
 
-func (c *client) GetDock(dckID string) (*api.DockSpec, error) {
+func (c *client) GetDock(dckID string) (*model.DockSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "docks", dckID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get dock in db:", dbRes.Error)
-		return &api.DockSpec{}, errors.New(dbRes.Error)
+		return &model.DockSpec{}, errors.New(dbRes.Error)
 	}
 
-	var dck = &api.DockSpec{}
+	var dck = &model.DockSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), dck); err != nil {
 		log.Error("When parsing dock in db:", dbRes.Error)
-		return &api.DockSpec{}, errors.New(dbRes.Error)
+		return &model.DockSpec{}, errors.New(dbRes.Error)
 	}
 	return dck, nil
 }
 
-func (c *client) ListDocks() (*[]api.DockSpec, error) {
+func (c *client) ListDocks() (*[]model.DockSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "docks"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list docks in db:", dbRes.Error)
-		return &[]api.DockSpec{}, errors.New(dbRes.Error)
+		return &[]model.DockSpec{}, errors.New(dbRes.Error)
 	}
 
-	var dcks = []api.DockSpec{}
+	var dcks = []model.DockSpec{}
 	if len(dbRes.Message) == 0 {
 		return &dcks, nil
 	}
 	for _, msg := range dbRes.Message {
-		var dck = api.DockSpec{}
+		var dck = model.DockSpec{}
 		if err := json.Unmarshal([]byte(msg), &dck); err != nil {
 			log.Error("When parsing dock in db:", dbRes.Error)
-			return &[]api.DockSpec{}, errors.New(dbRes.Error)
+			return &[]model.DockSpec{}, errors.New(dbRes.Error)
 		}
 		dcks = append(dcks, dck)
 	}
 	return &dcks, nil
 }
 
-func (c *client) UpdateDock(dckID, name, desp string) (*api.DockSpec, error) {
+func (c *client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	dck, err := c.GetDock(dckID)
 	if err != nil {
-		return &api.DockSpec{}, err
+		return &model.DockSpec{}, err
 	}
 	if name != "" {
 		dck.Name = name
@@ -132,7 +133,7 @@ func (c *client) UpdateDock(dckID, name, desp string) (*api.DockSpec, error) {
 	}
 	dckBody, err := json.Marshal(dck)
 	if err != nil {
-		return &api.DockSpec{}, err
+		return &model.DockSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -142,7 +143,7 @@ func (c *client) UpdateDock(dckID, name, desp string) (*api.DockSpec, error) {
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update dock in db:", dbRes.Error)
-		return &api.DockSpec{}, errors.New(dbRes.Error)
+		return &model.DockSpec{}, errors.New(dbRes.Error)
 	}
 	return dck, nil
 }
@@ -159,10 +160,10 @@ func (c *client) DeleteDock(dckID string) error {
 	return nil
 }
 
-func (c *client) CreatePool(pol *api.StoragePoolSpec) (*api.StoragePoolSpec, error) {
+func (c *client) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
 	polBody, err := json.Marshal(pol)
 	if err != nil {
-		return &api.StoragePoolSpec{}, err
+		return &model.StoragePoolSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -172,59 +173,59 @@ func (c *client) CreatePool(pol *api.StoragePoolSpec) (*api.StoragePoolSpec, err
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create pol in db:", dbRes.Error)
-		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
+		return &model.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
 	return pol, nil
 }
 
-func (c *client) GetPool(polID string) (*api.StoragePoolSpec, error) {
+func (c *client) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "pools", polID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get pool in db:", dbRes.Error)
-		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
+		return &model.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
-	var pol = &api.StoragePoolSpec{}
+	var pol = &model.StoragePoolSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), pol); err != nil {
 		log.Error("When parsing pool in db:", dbRes.Error)
-		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
+		return &model.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 	return pol, nil
 }
 
-func (c *client) ListPools() (*[]api.StoragePoolSpec, error) {
+func (c *client) ListPools() (*[]model.StoragePoolSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "pools"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list pools in db:", dbRes.Error)
-		return &[]api.StoragePoolSpec{}, errors.New(dbRes.Error)
+		return &[]model.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 
-	var pols = []api.StoragePoolSpec{}
+	var pols = []model.StoragePoolSpec{}
 	if len(dbRes.Message) == 0 {
 		return &pols, nil
 	}
 	for _, msg := range dbRes.Message {
-		var pol = api.StoragePoolSpec{}
+		var pol = model.StoragePoolSpec{}
 		if err := json.Unmarshal([]byte(msg), &pol); err != nil {
 			log.Error("When parsing pool in db:", dbRes.Error)
-			return &[]api.StoragePoolSpec{}, errors.New(dbRes.Error)
+			return &[]model.StoragePoolSpec{}, errors.New(dbRes.Error)
 		}
 		pols = append(pols, pol)
 	}
 	return &pols, nil
 }
 
-func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*api.StoragePoolSpec, error) {
+func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
 	pol, err := c.GetPool(polID)
 	if err != nil {
-		return &api.StoragePoolSpec{}, err
+		return &model.StoragePoolSpec{}, err
 	}
 	if name != "" {
 		pol.Name = name
@@ -234,7 +235,7 @@ func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	}
 	polBody, err := json.Marshal(pol)
 	if err != nil {
-		return &api.StoragePoolSpec{}, err
+		return &model.StoragePoolSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -244,7 +245,7 @@ func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update pool in db:", dbRes.Error)
-		return &api.StoragePoolSpec{}, errors.New(dbRes.Error)
+		return &model.StoragePoolSpec{}, errors.New(dbRes.Error)
 	}
 	return pol, nil
 }
@@ -261,10 +262,10 @@ func (c *client) DeletePool(polID string) error {
 	return nil
 }
 
-func (c *client) CreateProfile(prf *api.ProfileSpec) (*api.ProfileSpec, error) {
+func (c *client) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
-		return &api.ProfileSpec{}, err
+		return &model.ProfileSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -274,59 +275,59 @@ func (c *client) CreateProfile(prf *api.ProfileSpec) (*api.ProfileSpec, error) {
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create profile in db:", dbRes.Error)
-		return &api.ProfileSpec{}, errors.New(dbRes.Error)
+		return &model.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
 	return prf, nil
 }
 
-func (c *client) GetProfile(prfID string) (*api.ProfileSpec, error) {
+func (c *client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "profiles", prfID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get profile in db:", dbRes.Error)
-		return &api.ProfileSpec{}, errors.New(dbRes.Error)
+		return &model.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
-	var prf = &api.ProfileSpec{}
+	var prf = &model.ProfileSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), prf); err != nil {
 		log.Error("When parsing profile in db:", dbRes.Error)
-		return &api.ProfileSpec{}, errors.New(dbRes.Error)
+		return &model.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 	return prf, nil
 }
 
-func (c *client) ListProfiles() (*[]api.ProfileSpec, error) {
+func (c *client) ListProfiles() (*[]model.ProfileSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "profiles"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list profiles in db:", dbRes.Error)
-		return &[]api.ProfileSpec{}, errors.New(dbRes.Error)
+		return &[]model.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 
-	var prfs = []api.ProfileSpec{}
+	var prfs = []model.ProfileSpec{}
 	if len(dbRes.Message) == 0 {
 		return &prfs, nil
 	}
 	for _, msg := range dbRes.Message {
-		var prf = api.ProfileSpec{}
+		var prf = model.ProfileSpec{}
 		if err := json.Unmarshal([]byte(msg), &prf); err != nil {
 			log.Error("When parsing profile in db:", dbRes.Error)
-			return &[]api.ProfileSpec{}, errors.New(dbRes.Error)
+			return &[]model.ProfileSpec{}, errors.New(dbRes.Error)
 		}
 		prfs = append(prfs, prf)
 	}
 	return &prfs, nil
 }
 
-func (c *client) UpdateProfile(prfID string, input *api.ProfileSpec) (*api.ProfileSpec, error) {
+func (c *client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
-		return &api.ProfileSpec{}, err
+		return &model.ProfileSpec{}, err
 	}
 	if name := input.GetName(); name != "" {
 		prf.Name = name
@@ -335,12 +336,12 @@ func (c *client) UpdateProfile(prfID string, input *api.ProfileSpec) (*api.Profi
 		prf.Description = desp
 	}
 	if props := input.Extra; len(props) != 0 {
-		return &api.ProfileSpec{}, errors.New("Failed to update extra properties!")
+		return &model.ProfileSpec{}, errors.New("Failed to update extra properties!")
 	}
 
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
-		return &api.ProfileSpec{}, err
+		return &model.ProfileSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -350,7 +351,7 @@ func (c *client) UpdateProfile(prfID string, input *api.ProfileSpec) (*api.Profi
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update profile in db:", dbRes.Error)
-		return &api.ProfileSpec{}, errors.New(dbRes.Error)
+		return &model.ProfileSpec{}, errors.New(dbRes.Error)
 	}
 	return prf, nil
 }
@@ -367,10 +368,10 @@ func (c *client) DeleteProfile(prfID string) error {
 	return nil
 }
 
-func (c *client) AddExtraProperty(prfID string, ext api.ExtraSpec) (*api.ExtraSpec, error) {
+func (c *client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
-		return &api.ExtraSpec{}, err
+		return &model.ExtraSpec{}, err
 	}
 
 	for k, v := range ext {
@@ -379,15 +380,15 @@ func (c *client) AddExtraProperty(prfID string, ext api.ExtraSpec) (*api.ExtraSp
 
 	prf, err = c.CreateProfile(prf)
 	if err != nil {
-		return &api.ExtraSpec{}, err
+		return &model.ExtraSpec{}, err
 	}
 	return &prf.Extra, nil
 }
 
-func (c *client) ListExtraProperties(prfID string) (*api.ExtraSpec, error) {
+func (c *client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
-		return &api.ExtraSpec{}, err
+		return &model.ExtraSpec{}, err
 	}
 	return &prf.Extra, nil
 }
@@ -406,10 +407,10 @@ func (c *client) RemoveExtraProperty(prfID, extraKey string) error {
 	return nil
 }
 
-func (c *client) CreateVolume(vol *api.VolumeSpec) (*api.VolumeSpec, error) {
+func (c *client) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	volBody, err := json.Marshal(vol)
 	if err != nil {
-		return &api.VolumeSpec{}, err
+		return &model.VolumeSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -419,49 +420,49 @@ func (c *client) CreateVolume(vol *api.VolumeSpec) (*api.VolumeSpec, error) {
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume in db:", dbRes.Error)
-		return &api.VolumeSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
 	return vol, nil
 }
 
-func (c *client) GetVolume(volID string) (*api.VolumeSpec, error) {
+func (c *client) GetVolume(volID string) (*model.VolumeSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volumes", volID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get volume in db:", dbRes.Error)
-		return &api.VolumeSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
-	var vol = &api.VolumeSpec{}
+	var vol = &model.VolumeSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), vol); err != nil {
 		log.Error("When parsing volume in db:", dbRes.Error)
-		return &api.VolumeSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 	return vol, nil
 }
 
-func (c *client) ListVolumes() (*[]api.VolumeSpec, error) {
+func (c *client) ListVolumes() (*[]model.VolumeSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volumes"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list volumes in db:", dbRes.Error)
-		return &[]api.VolumeSpec{}, errors.New(dbRes.Error)
+		return &[]model.VolumeSpec{}, errors.New(dbRes.Error)
 	}
 
-	var vols = []api.VolumeSpec{}
+	var vols = []model.VolumeSpec{}
 	if len(dbRes.Message) == 0 {
 		return &vols, nil
 	}
 	for _, msg := range dbRes.Message {
-		var vol = api.VolumeSpec{}
+		var vol = model.VolumeSpec{}
 		if err := json.Unmarshal([]byte(msg), &vol); err != nil {
 			log.Error("When parsing volume in db:", dbRes.Error)
-			return &[]api.VolumeSpec{}, errors.New(dbRes.Error)
+			return &[]model.VolumeSpec{}, errors.New(dbRes.Error)
 		}
 		vols = append(vols, vol)
 	}
@@ -480,10 +481,10 @@ func (c *client) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (c *client) CreateVolumeAttachment(volID string, atc *api.VolumeAttachmentSpec) (*api.VolumeAttachmentSpec, error) {
+func (c *client) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	atcBody, err := json.Marshal(atc)
 	if err != nil {
-		return &api.VolumeAttachmentSpec{}, err
+		return &model.VolumeAttachmentSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -493,66 +494,66 @@ func (c *client) CreateVolumeAttachment(volID string, atc *api.VolumeAttachmentS
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume attachment in db:", dbRes.Error)
-		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
 	return atc, nil
 }
 
-func (c *client) GetVolumeAttachment(volID, atcID string) (*api.VolumeAttachmentSpec, error) {
+func (c *client) GetVolumeAttachment(volID, atcID string) (*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volume", volID, "attachments", atcID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get volume attachment in db:", dbRes.Error)
-		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
-	var atc = &api.VolumeAttachmentSpec{}
+	var atc = &model.VolumeAttachmentSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), atc); err != nil {
 		log.Error("When parsing volume attachment in db:", dbRes.Error)
-		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 	return atc, nil
 }
 
-func (c *client) ListVolumeAttachments(volID string) (*[]api.VolumeAttachmentSpec, error) {
+func (c *client) ListVolumeAttachments(volID string) (*[]model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volume", volID, "attachments"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list volume attachments in db:", dbRes.Error)
-		return &[]api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+		return &[]model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 
-	var atcs = []api.VolumeAttachmentSpec{}
+	var atcs = []model.VolumeAttachmentSpec{}
 	if len(dbRes.Message) == 0 {
 		return &atcs, nil
 	}
 	for _, msg := range dbRes.Message {
-		var atc = api.VolumeAttachmentSpec{}
+		var atc = model.VolumeAttachmentSpec{}
 		if err := json.Unmarshal([]byte(msg), &atc); err != nil {
 			log.Error("When parsing volume attachment in db:", dbRes.Error)
-			return &[]api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+			return &[]model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 		}
 		atcs = append(atcs, atc)
 	}
 	return &atcs, nil
 }
 
-func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error) {
+func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error) {
 	atc, err := c.GetVolumeAttachment(volID, atcID)
 	if err != nil {
-		return &api.VolumeAttachmentSpec{}, err
+		return &model.VolumeAttachmentSpec{}, err
 	}
 
 	atc.HostInfo = hostInfo
 	atc.Mountpoint = mountpoint
 	atcBody, err := json.Marshal(atc)
 	if err != nil {
-		return &api.VolumeAttachmentSpec{}, err
+		return &model.VolumeAttachmentSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -562,7 +563,7 @@ func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInf
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume attachment in db:", dbRes.Error)
-		return &api.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeAttachmentSpec{}, errors.New(dbRes.Error)
 	}
 	return atc, nil
 }
@@ -579,10 +580,10 @@ func (c *client) DeleteVolumeAttachment(volID, atcID string) error {
 	return nil
 }
 
-func (c *client) CreateVolumeSnapshot(snp *api.VolumeSnapshotSpec) (*api.VolumeSnapshotSpec, error) {
+func (c *client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	snpBody, err := json.Marshal(snp)
 	if err != nil {
-		return &api.VolumeSnapshotSpec{}, err
+		return &model.VolumeSnapshotSpec{}, err
 	}
 
 	dbReq := &Request{
@@ -592,49 +593,49 @@ func (c *client) CreateVolumeSnapshot(snp *api.VolumeSnapshotSpec) (*api.VolumeS
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume snapshot in db:", dbRes.Error)
-		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
 	return snp, nil
 }
 
-func (c *client) GetVolumeSnapshot(snpID string) (*api.VolumeSnapshotSpec, error) {
+func (c *client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volume", "snapshots", snpID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When get volume attachment in db:", dbRes.Error)
-		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
-	var vs = &api.VolumeSnapshotSpec{}
+	var vs = &model.VolumeSnapshotSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), vs); err != nil {
 		log.Error("When parsing volume snapshot in db:", dbRes.Error)
-		return &api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
+		return &model.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 	return vs, nil
 }
 
-func (c *client) ListVolumeSnapshots() (*[]api.VolumeSnapshotSpec, error) {
+func (c *client) ListVolumeSnapshots() (*[]model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "volume", "snapshots"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list volume snapshots in db:", dbRes.Error)
-		return &[]api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
+		return &[]model.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 	}
 
-	var vss = []api.VolumeSnapshotSpec{}
+	var vss = []model.VolumeSnapshotSpec{}
 	if len(dbRes.Message) == 0 {
 		return &vss, nil
 	}
 	for _, msg := range dbRes.Message {
-		var vs = api.VolumeSnapshotSpec{}
+		var vs = model.VolumeSnapshotSpec{}
 		if err := json.Unmarshal([]byte(msg), &vs); err != nil {
 			log.Error("When parsing volume snapshot in db:", dbRes.Error)
-			return &[]api.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
+			return &[]model.VolumeSnapshotSpec{}, errors.New(dbRes.Error)
 		}
 		vss = append(vss, vs)
 	}

@@ -51,13 +51,15 @@ service Dock {
     rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
 }
 
+// CreateVolumeOpts is a structure which indicates all required properties
+// for creating a volume.
 message CreateVolumeOpts {
     // The uuid of the volume, optional when creating.
     string id = 1;
     // The name of the volume, required.
     string name = 2;
     // The requested capacity of the volume, required.
-    uint64 size = 3;
+    int64 size = 3;
     // The description of the volume, optional.
     string description = 4;
     // When create volume from snapshot, this field is required.
@@ -72,34 +74,58 @@ message CreateVolumeOpts {
     string poolName = 9;	
     // The metadata of the volume, optional.
     map<string, string> metadata = 10;
+	// The dock infomation on which the request will be executed
+	string dockId = 11;
+	// The storage driver type.
+	string driverName = 12;
 }
 
+// DeleteVolumeOpts is a structure which indicates all required properties
+// for deleting a volume.
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
+	// The dock infomation on which the request will be executed
+	string dockId = 2;
+	// The storage driver type.
+	string driverName = 3;	
 }
 
+// CreateVolumeSnapshotOpts is a structure which indicates all required
+// properties for creating a volume snapshot.
 message CreateVolumeSnapshotOpts {
     // The uuid of the volume snapshot, optional.
     string id = 1;
     // The name of the volume snapshot, required.
     string name = 2;
     // The size of the volume that snapshot belongs to, required.
-    uint64 size = 3;
+    int64 size = 3;
     // The description of the volume snapshot, optional.
     string description = 4;
     // The uuid of the volume that snapshot belongs to, required.
     string volumeId = 5;
+	// The dock infomation on which the request will be executed
+	string dockId = 6;
+	// The storage driver type.
+	string driverName = 7;
 }
 
+// DeleteVolumeSnapshotOpts is a structure which indicates all required
+// properties for deleting a volume snapshot.
 message DeleteVolumeSnapshotOpts {
     // The uuid of the volume snapshot, required.
     string id = 1;
+	// The dock infomation on which the request will be executed
+	string dockId = 2;
+	// The storage driver type.
+	string driverName = 3;
 }
 
+// CreateAttachmentOpts is a structure which indicates all required
+// properties for creating a volume attachment.
 message CreateAttachmentOpts {
     // The uuid of the volume attachment, optional.
-    string id = 1;	
+    string id = 1;
     // The uuid of the volume, required.
     string volumeId = 2;
     // This field indicates if the volume is attached locally, optional.
@@ -108,6 +134,10 @@ message CreateAttachmentOpts {
     bool multiPath = 4;
     // The infomation of the host node on which the volume will be attached.
     HostInfo hostInfo = 5;
+	// The dock infomation on which the request will be executed
+	string dockId = 6;
+	// The storage driver type.
+	string driverName = 7;
 }
 
 message HostInfo {
@@ -116,7 +146,7 @@ message HostInfo {
     // The type of OS, such as "linux","windows", etc.
     string osType = 2;
     // The name of the host
-    string host = 3;
+     string host = 3;
     // The ip address of the host
     string ip = 4;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
@@ -124,12 +154,12 @@ message HostInfo {
 }
 
 // Generic response, it return:
-// 1. Return result with id when create/update resource successfully.
-// 2. Return result without id when delete resource successfully.
+// 1. Return result with message when create/update resource successfully.
+// 2. Return result without message when delete resource successfully.
 // 3. Return Error with error code and message when operate unsuccessfully.
 message GenericResponse {
     message Result {
-        string id = 1;
+        string message = 1;
 	}
 	
     message Error {

@@ -1,5 +1,5 @@
-hash: 036e24ee2ef7d4a16098b37f0be50e1dba961bc8ea656a40884a377b0eb706df
-updated: 2017-09-22T15:37:18.481721204+08:00
+hash: 7dfd99b8bc259418b6be312de1389193d516ea93964b1b91bf0913505e876deb
+updated: 2017-09-24T15:57:44.535436005+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -47,6 +47,7 @@ imports:
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
+  - protoc-gen-go
 - name: github.com/mailru/easyjson
   version: 2a92e673c9a6302dd05c3a691ae1f24aef46457d
   subpackages:

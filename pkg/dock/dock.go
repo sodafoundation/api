@@ -24,7 +24,10 @@ import (
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/contrib/drivers"
+	"github.com/opensds/opensds/pkg/db"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 // A reference to DockHub structure with fields that represent some required
@@ -43,103 +46,141 @@ func NewDockHub(resourceType string) *DockHub {
 	}
 }
 
-func (d *DockHub) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
+func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 
 	log.Info("Calling volume driver to create volume...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.CreateVolume(name, size)
+	vol, err := d.Driver.CreateVolume(opt)
+	if err != nil {
+		log.Error("When calling volume driver to create volume:", err)
+		return nil, err
+	}
+
+	// Validate the data.
+	if err = utils.ValidateData(vol, utils.S); err != nil {
+		log.Error("When validate volume data:", err)
+		return nil, err
+	}
+
+	// Store the volume data into database.
+	if _, err = db.C.CreateVolume(vol); err != nil {
+		log.Error("When create volume in db module:", err)
+		return nil, err
+	}
+
+	return vol, nil
 }
 
-func (d *DockHub) GetVolume(volID string) (*api.VolumeSpec, error) {
-	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+	var err error
 
-	log.Info("Calling volume driver to get volume...")
-
-	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.GetVolume(volID)
-}
-
-func (d *DockHub) DeleteVolume(volID string) error {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 
 	log.Info("Calling volume driver to delete volume...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.DeleteVolume(volID)
+	if err = d.Driver.DeleteVolume(opt.GetId()); err != nil {
+		log.Error("When calling volume driver to delete volume:", err)
+		return err
+	}
+
+	if err = db.C.DeleteVolume(opt.GetId()); err != nil {
+		log.Error("Error occured in dock module when delete volume in db:", err)
+		return err
+	}
+
+	return nil
 }
 
-func (d *DockHub) CreateVolumeAttachment(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.VolumeAttachmentSpec, error) {
+func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.VolumeAttachmentSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 
 	log.Info("Calling volume driver to initialize volume connection...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	connInfo, err := d.Driver.InitializeConnection(volID, doLocalAttach, multiPath, hostInfo)
+	connInfo, err := d.Driver.InitializeConnection(opt)
 	if err != nil {
 		log.Error("Call driver to initialize volume connection failed:", err)
-		return &api.VolumeAttachmentSpec{}, err
+		return nil, err
 	}
 
-	return &api.VolumeAttachmentSpec{
-		HostInfo:       hostInfo,
+	var atc = &api.VolumeAttachmentSpec{
+		BaseModel: &api.BaseModel{},
+		HostInfo: &api.HostInfo{
+			Platform:  opt.HostInfo.GetPlatform(),
+			OsType:    opt.HostInfo.GetOsType(),
+			Ip:        opt.HostInfo.GetIp(),
+			Host:      opt.HostInfo.GetHost(),
+			Initiator: opt.HostInfo.GetInitiator(),
+		},
 		ConnectionInfo: connInfo,
-	}, nil
+	}
+
+	// Validate the data.
+	if err = utils.ValidateData(atc, utils.S); err != nil {
+		log.Error("When validate volume attachment data:", err)
+		return nil, err
+	}
+
+	if _, err = db.C.CreateVolumeAttachment(opt.GetVolumeId(), atc); err != nil {
+		log.Error("Error occured in dock module when create volume attachment in db:", err)
+		return nil, err
+	}
+
+	return atc, nil
 }
 
-func (d *DockHub) UpdateVolumeAttachment(volID, host, mountpoint string) error {
-	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
-
-	log.Info("Calling volume driver to attach volume...")
-
-	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.AttachVolume(volID, host, mountpoint)
-}
-
-func (d *DockHub) DeleteVolumeAttachment(volID string) error {
-	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
-
-	log.Info("Calling volume driver to detach volume...")
-
-	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.DetachVolume(volID)
-}
-
-func (d *DockHub) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeSnapshotSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 
 	log.Info("Calling volume driver to create snapshot...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.CreateSnapshot(name, volID, description)
+	snp, err := d.Driver.CreateSnapshot(opt)
+	if err != nil {
+		log.Error("Call driver to create volume snashot failed:", err)
+		return nil, err
+	}
+
+	// Validate the data.
+	if err = utils.ValidateData(snp, utils.S); err != nil {
+		log.Error("When validate volume snapshot data:", err)
+	}
+
+	if _, err := db.C.CreateVolumeSnapshot(snp); err != nil {
+		log.Error("Error occured in dock module when create volume snapshot in db:", err)
+		return nil, err
+	}
+
+	return snp, nil
 }
 
-func (d *DockHub) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
-	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+	var err error
 
-	log.Info("Calling volume driver to get snapshot...")
-
-	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.GetSnapshot(snapID)
-}
-
-func (d *DockHub) DeleteSnapshot(snapID string) error {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 
 	log.Info("Calling volume driver to delete snapshot...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.DeleteSnapshot(snapID)
+	if err = d.Driver.DeleteSnapshot(opt); err != nil {
+		log.Error("When calling volume driver to delete volume:", err)
+		return err
+	}
+
+	if err = db.C.DeleteVolumeSnapshot(opt.GetId()); err != nil {
+		log.Error("Error occured in dock module when delete volume snapshot in db:", err)
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
@@ -149,5 +190,11 @@ func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
 	log.Info("Calling volume driver to list pools...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	return d.Driver.ListPools()
+	pols, err := d.Driver.ListPools()
+	if err != nil {
+		log.Error("Call driver to list pools failed:", err)
+		return nil, err
+	}
+
+	return pols, nil
 }
