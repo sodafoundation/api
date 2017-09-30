@@ -15,7 +15,6 @@
 /*
 This module implements the policy-based scheduling by parsing storage
 profiles configured by admin.
-
 */
 
 package controller
@@ -27,124 +26,26 @@ import (
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 )
 
-type Searcher interface {
-	SearchProfile(prfId string) (*model.ProfileSpec, error)
-
-	SearchSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error)
-
-	SearchDockByPool(pol *model.StoragePoolSpec) (*model.DockSpec, error)
-
-	SearchDockByVolume(volId string) (*model.DockSpec, error)
-}
-
-type DbSearcher struct {
-	db.Client
-}
-
-func NewDbSearcher() Searcher {
-	return &DbSearcher{
-		Client: db.C,
-	}
-}
-
-func (s *DbSearcher) SearchProfile(prfId string) (*model.ProfileSpec, error) {
-	prfs, err := s.Client.ListProfiles()
-	if err != nil {
-		log.Error("When list profiles:", err)
-		return &model.ProfileSpec{}, err
-	}
-
+func SearchProfile(prfId string, dbCli db.Client) (*model.ProfileSpec, error) {
 	// If a user doesn't specify profile id, then a default profile will be
 	// automatically assigned.
 	if prfId == "" {
+		prfs, err := dbCli.ListProfiles()
+		if err != nil {
+			log.Error("When list profiles:", err)
+			return nil, err
+		}
+
 		for _, prf := range *prfs {
 			if prf.GetName() == "default" {
 				return &prf, nil
 			}
 		}
-	} else {
-		for _, prf := range *prfs {
-			if prf.GetId() == prfId {
-				return &prf, nil
-			}
-		}
+
+		return nil, errors.New("Can not find default profile in db!")
 	}
 
-	return &model.ProfileSpec{}, errors.New("Can not find default profile in db!")
-}
-
-func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error) {
-	pols, err := s.Client.ListPools()
-	if err != nil {
-		log.Error("When list pool resources in db:", err)
-		return &model.StoragePoolSpec{}, err
-	}
-
-	// Find if the desired storage tags are contained in any profile
-	for _, pol := range *pols {
-		var isSupported = true
-		for tag := range tags {
-			if !utils.Contained(tag, pol.Parameters) {
-				isSupported = false
-				break
-			}
-			if pol.Parameters[tag] != "true" {
-				isSupported = false
-				break
-			}
-		}
-		if isSupported {
-			return &pol, nil
-		}
-	}
-
-	return &model.StoragePoolSpec{}, errors.New("No pool resource supported!")
-}
-
-func (s *DbSearcher) SearchDockByPool(pol *model.StoragePoolSpec) (*model.DockSpec, error) {
-	dcks, err := s.Client.ListDocks()
-	if err != nil {
-		log.Error("When list dock resources in db:", err)
-		return &model.DockSpec{}, err
-	}
-
-	for _, dck := range *dcks {
-		if dck.GetId() == pol.GetDockId() {
-			return &dck, nil
-		}
-	}
-	return &model.DockSpec{}, errors.New("No dock resource supported!")
-}
-
-func (s *DbSearcher) SearchDockByVolume(volId string) (*model.DockSpec, error) {
-	vol, err := s.Client.GetVolume(volId)
-	if err != nil {
-		log.Errorf("When get volume %s in db: %v\n", volId, err)
-	}
-	pols, err := s.Client.ListPools()
-	if err != nil {
-		log.Error("When list pool resources in db:", err)
-		return &model.DockSpec{}, err
-	}
-	dcks, err := s.Client.ListDocks()
-	if err != nil {
-		log.Error("When list dock resources in db:", err)
-		return &model.DockSpec{}, err
-	}
-
-	for _, pol := range *pols {
-		if pol.GetId() == vol.GetPoolId() {
-			for _, dck := range *dcks {
-				if dck.GetId() == pol.GetDockId() {
-					return &dck, nil
-				}
-			}
-			return &model.DockSpec{}, errors.New("No dock resource supported!")
-		}
-	}
-
-	return &model.DockSpec{}, errors.New("No pool resource supported!")
+	return dbCli.GetProfile(prfId)
 }
