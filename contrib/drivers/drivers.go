@@ -53,8 +53,8 @@ type VolumeDriver interface {
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
-	// case "ceph":
-	// 	return &ceph.Driver{}
+	case "ceph":
+		return &ceph.Driver{}
 	default:
 		return &sample.Driver{}
 	}
