@@ -312,7 +312,7 @@ func TestDeleteSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	err := d.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	err := d.DeleteSnapshot(&pb.DeleteVolumeSnapshotOpts{Id: "25f5d7a2-553d-4d6c-904d-179a9e698cf8"})
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
 	}

@@ -156,9 +156,9 @@ type Driver struct {
 	ioctx *rados.IOContext
 }
 
-func (d *Driver) Setup() {}
+func (d *Driver) Setup() error { return nil }
 
-func (d *Driver) Unset() {}
+func (d *Driver) Unset() error { return nil }
 
 func (d *Driver) initConn() error {
 	conn, err := rados.NewConn()
@@ -416,13 +416,13 @@ func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) 
 	return snapshot, err
 }
 
-func (d *Driver) DeleteSnapshot(snapID string) error {
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return err
 	}
 	defer d.destroyConn()
-	err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
+	err := d.visitSnapshot(opt.Id, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
 		if err := img.Open(snap.Name); err != nil {
 			log.Error("When open image:", err)
 		}
