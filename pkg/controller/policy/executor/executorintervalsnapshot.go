@@ -23,34 +23,38 @@ package executor
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/opensds/opensds/pkg/grpc/dock/client"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	api "github.com/opensds/opensds/pkg/model"
+	log "github.com/golang/glog"
+
+	"github.com/opensds/opensds/pkg/dock/client"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 )
 
 type IntervalSnapshotExecutor struct {
 	client.Client
 
-	Request  *pb.DockRequest
+	Request  *pb.CreateVolumeSnapshotOpts
+	DockInfo *model.DockSpec
 	Interval string
 	TotalNum int
 }
 
 func (ise *IntervalSnapshotExecutor) Init(in string) (err error) {
-	var volumeResponse api.VolumeSpec
+	var volumeResponse model.VolumeSpec
 	if err = json.Unmarshal([]byte(in), &volumeResponse); err != nil {
 		return err
 	}
 
 	ise.Request.VolumeId = volumeResponse.Id
-	ise.Request.SnapshotName = "snapshot-" + volumeResponse.Id
+	ise.Request.Name = "snapshot-" + volumeResponse.Id
+	ise.Request.Size = volumeResponse.Size
 	ise.Client = client.NewClient()
+	ise.Client.Update(ise.DockInfo)
 
 	return nil
 }
@@ -61,7 +65,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 	}
 	num, err := ParseInterval(ise.Interval)
 	if err != nil {
-		log.Println("[Error] When parse snapshot interval:", err)
+		log.Error("When parse snapshot interval:", err)
 		return err
 	}
 
@@ -71,7 +75,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 			time.Sleep(time.Second)
 		}
 		if _, err = ise.Client.CreateVolumeSnapshot(context.Background(), ise.Request); err != nil {
-			log.Printf("[Error] When %dth create volume snapshot: %v\n", i+1, err)
+			log.Errorf("When %dth create volume snapshot: %v\n", i+1, err)
 			return err
 		}
 	}

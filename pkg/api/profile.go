@@ -22,7 +22,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	log "github.com/golang/glog"
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
@@ -44,27 +45,27 @@ func (this *ProfilePortal) CreateProfile() {
 		reason := fmt.Sprintf("Parse profile request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
 	// If profile uuid is null, generate it randomly.
 	if profile.GetId() == "" {
-		if ok := utils.NewSetter().SetUuid(profile); ok != nil {
+		if ok := utils.S.SetUuid(profile); ok != nil {
 			reason := fmt.Sprintf("Set profile uuid failed: %s", ok.Error())
 			this.Ctx.Output.SetStatus(StatusInternalServerError)
 			this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-			log.Println(reason)
+			log.Error(reason)
 			return
 		}
 	}
 
 	// Set profile created time.
-	if ok := utils.NewSetter().SetCreatedTimeStamp(profile); ok != nil {
+	if ok := utils.S.SetCreatedTimeStamp(profile); ok != nil {
 		reason := fmt.Sprintf("Set profile created time failed: %s", ok.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (this *ProfilePortal) CreateProfile() {
 		reason := fmt.Sprintf("Create profile failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -84,7 +85,7 @@ func (this *ProfilePortal) CreateProfile() {
 		reason := fmt.Sprintf("Marshal profile created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -99,7 +100,7 @@ func (this *ProfilePortal) ListProfiles() {
 		reason := fmt.Sprintf("List profiles failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -109,7 +110,7 @@ func (this *ProfilePortal) ListProfiles() {
 		reason := fmt.Sprintf("Marshal profiles listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -130,7 +131,7 @@ func (this *SpecifiedProfilePortal) GetProfile() {
 		reason := fmt.Sprintf("Get profiles failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -140,7 +141,7 @@ func (this *SpecifiedProfilePortal) GetProfile() {
 		reason := fmt.Sprintf("Marshal profile showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -159,7 +160,7 @@ func (this *SpecifiedProfilePortal) UpdateProfile() {
 		reason := fmt.Sprintf("Parse profile request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -168,7 +169,7 @@ func (this *SpecifiedProfilePortal) UpdateProfile() {
 		reason := fmt.Sprintf("Update profiles failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -178,7 +179,7 @@ func (this *SpecifiedProfilePortal) UpdateProfile() {
 		reason := fmt.Sprintf("Marshal profile updated result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -194,7 +195,7 @@ func (this *SpecifiedProfilePortal) DeleteProfile() {
 		reason := fmt.Sprintf("Delete profiles failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -212,7 +213,7 @@ func (this *ProfileExtrasPortal) AddExtraProperty() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(extra); err != nil {
-		log.Println("Parse extra request body failed:", err)
+		log.Error("Parse extra request body failed:", err)
 		resBody, _ := json.Marshal("Parse extra request body failed!")
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(resBody)
@@ -221,7 +222,7 @@ func (this *ProfileExtrasPortal) AddExtraProperty() {
 
 	result, err := db.C.AddExtraProperty(id, extra)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		resBody, _ := json.Marshal("Create extra property failed: " + fmt.Sprint(err))
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(resBody)
@@ -239,7 +240,7 @@ func (this *ProfileExtrasPortal) ListExtraProperties() {
 
 	result, err := db.C.ListExtraProperties(id)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		resBody, _ := json.Marshal("List extra properties failed: " + fmt.Sprint(err))
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(resBody)
@@ -257,7 +258,7 @@ func (this *ProfileExtrasPortal) RemoveExtraProperty() {
 	extraKey := this.Ctx.Input.Param(":extraKey")
 
 	if err := db.C.RemoveExtraProperty(id, extraKey); err != nil {
-		log.Println(err)
+		log.Error(err)
 		resBody, _ := json.Marshal("Remove profile extra property failed: " + fmt.Sprint(err))
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(resBody)

@@ -190,6 +190,42 @@ func TestErrorStatus(t *testing.T) {
 	}
 }
 
+func TestValidateData(t *testing.T) {
+	fs := NewFakeSetter()
+
+	// First test.
+	var data1 = &model.StoragePoolSpec{BaseModel: &model.BaseModel{}}
+	var expected1 = &model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        sampleUuid,
+			CreatedAt: sampleCreatedTime,
+		},
+	}
+
+	if err := ValidateData(data1, fs); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected1, data1) {
+		t.Fatalf("Expected %v, get %v\n", expected1, data1)
+	}
+
+	// Second test.
+	var data2 = &model.DockSpec{BaseModel: &model.BaseModel{}}
+	var expected2 = &model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id:        sampleUuid,
+			CreatedAt: sampleCreatedTime,
+		},
+	}
+
+	if err := ValidateData(data2, fs); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected2, data2) {
+		t.Fatalf("Expected %v, get %v\n", expected2, data2)
+	}
+}
+
 func TestContained(t *testing.T) {
 	var targets = []interface{}{
 		[]interface{}{"key01", 123, true},

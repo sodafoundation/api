@@ -22,21 +22,22 @@ package controller
 
 import (
 	"errors"
-	"log"
+
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
 type Searcher interface {
-	SearchProfile(prfId string) (*api.ProfileSpec, error)
+	SearchProfile(prfId string) (*model.ProfileSpec, error)
 
-	SearchSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error)
+	SearchSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error)
 
-	SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, error)
+	SearchDockByPool(pol *model.StoragePoolSpec) (*model.DockSpec, error)
 
-	SearchDockByVolume(volId string) (*api.DockSpec, error)
+	SearchDockByVolume(volId string) (*model.DockSpec, error)
 }
 
 type DbSearcher struct {
@@ -49,11 +50,11 @@ func NewDbSearcher() Searcher {
 	}
 }
 
-func (s *DbSearcher) SearchProfile(prfId string) (*api.ProfileSpec, error) {
+func (s *DbSearcher) SearchProfile(prfId string) (*model.ProfileSpec, error) {
 	prfs, err := s.Client.ListProfiles()
 	if err != nil {
-		log.Println("[Error] When list profiles:", err)
-		return &api.ProfileSpec{}, err
+		log.Error("When list profiles:", err)
+		return &model.ProfileSpec{}, err
 	}
 
 	// If a user doesn't specify profile id, then a default profile will be
@@ -72,14 +73,14 @@ func (s *DbSearcher) SearchProfile(prfId string) (*api.ProfileSpec, error) {
 		}
 	}
 
-	return &api.ProfileSpec{}, errors.New("Can not find default profile in db!")
+	return &model.ProfileSpec{}, errors.New("Can not find default profile in db!")
 }
 
-func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error) {
+func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error) {
 	pols, err := s.Client.ListPools()
 	if err != nil {
-		log.Println("[Error] When list pool resources in db:", err)
-		return &api.StoragePoolSpec{}, err
+		log.Error("When list pool resources in db:", err)
+		return &model.StoragePoolSpec{}, err
 	}
 
 	// Find if the desired storage tags are contained in any profile
@@ -100,14 +101,14 @@ func (s *DbSearcher) SearchSupportedPool(tags map[string]string) (*api.StoragePo
 		}
 	}
 
-	return &api.StoragePoolSpec{}, errors.New("No pool resource supported!")
+	return &model.StoragePoolSpec{}, errors.New("No pool resource supported!")
 }
 
-func (s *DbSearcher) SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, error) {
+func (s *DbSearcher) SearchDockByPool(pol *model.StoragePoolSpec) (*model.DockSpec, error) {
 	dcks, err := s.Client.ListDocks()
 	if err != nil {
-		log.Println("[Error] When list dock resources in db:", err)
-		return &api.DockSpec{}, err
+		log.Error("When list dock resources in db:", err)
+		return &model.DockSpec{}, err
 	}
 
 	for _, dck := range *dcks {
@@ -115,23 +116,23 @@ func (s *DbSearcher) SearchDockByPool(pol *api.StoragePoolSpec) (*api.DockSpec, 
 			return &dck, nil
 		}
 	}
-	return &api.DockSpec{}, errors.New("No dock resource supported!")
+	return &model.DockSpec{}, errors.New("No dock resource supported!")
 }
 
-func (s *DbSearcher) SearchDockByVolume(volId string) (*api.DockSpec, error) {
+func (s *DbSearcher) SearchDockByVolume(volId string) (*model.DockSpec, error) {
 	vol, err := s.Client.GetVolume(volId)
 	if err != nil {
-		log.Printf("[Error] When get volume %s in db: %v\n", volId, err)
+		log.Errorf("When get volume %s in db: %v\n", volId, err)
 	}
 	pols, err := s.Client.ListPools()
 	if err != nil {
-		log.Println("[Error] When list pool resources in db:", err)
-		return &api.DockSpec{}, err
+		log.Error("When list pool resources in db:", err)
+		return &model.DockSpec{}, err
 	}
 	dcks, err := s.Client.ListDocks()
 	if err != nil {
-		log.Println("[Error] When list dock resources in db:", err)
-		return &api.DockSpec{}, err
+		log.Error("When list dock resources in db:", err)
+		return &model.DockSpec{}, err
 	}
 
 	for _, pol := range *pols {
@@ -141,9 +142,9 @@ func (s *DbSearcher) SearchDockByVolume(volId string) (*api.DockSpec, error) {
 					return &dck, nil
 				}
 			}
-			return &api.DockSpec{}, errors.New("No dock resource supported!")
+			return &model.DockSpec{}, errors.New("No dock resource supported!")
 		}
 	}
 
-	return &api.DockSpec{}, errors.New("No pool resource supported!")
+	return &model.DockSpec{}, errors.New("No pool resource supported!")
 }

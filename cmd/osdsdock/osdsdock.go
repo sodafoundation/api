@@ -20,56 +20,38 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"strings"
-	"github.com/opensds/opensds/cmd/osdsdock/app"
 	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/utils"
-	dockServer "github.com/opensds/opensds/pkg/grpc/dock/server"
+	app "github.com/opensds/opensds/pkg/dock/discovery"
+	dockServer "github.com/opensds/opensds/pkg/dock/server"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
-	conf := utils.CONF
-	flag := utils.CONF.Flag
-	flag.StringVar(&conf.OsdsDock.ApiEndpoint,"api-endpoint", conf.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
-	flag.StringVar(&conf.Database.Endpoint,"db-endpoint", conf.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&conf.Database.Driver,"db-driver", conf.Database.Driver, "Driver name of database service")
-	flag.StringVar(&conf.Database.Credential,"db-credential", conf.Database.Credential, "Connection credential of database service")
-	flag.StringVar(&conf.OsdsDock.LogFile,"osdsdocklog-file", conf.OsdsDock.LogFile, "Location of osdsdock log file")
-	conf.Load("/etc/opensds/opensds.conf")
-	fmt.Println(conf.OsdsDock.ApiEndpoint)
+	def := GetDefaultConfig()
+	flag := CONF.Flag
+	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
+	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
+	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	CONF.Load("/etc/opensds/opensds.conf")
 }
 
 func main() {
 	// Open OpenSDS dock service log file.
-	f, err := os.OpenFile(utils.CONF.OsdsDock.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		os.Exit(1)
-	}
-	defer f.Close()
-
-	// assign it to the standard logger.
-	log.SetOutput(f)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	logs.InitLogs()
+	defer logs.FlushLogs()
 
 	// Set up database session.
-	db.Init(&db.DBConfig{
-		DriverName: utils.CONF.Database.Driver,
-		Endpoints:  strings.Split(utils.CONF.Database.Endpoint, ","),
-		Credential: utils.CONF.Database.Credential,
-	})
+	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	if err = app.ResourceDiscovery(); err != nil {
+	if err := app.Discovery(app.NewDiscover()); err != nil {
 		panic(err)
 	}
 
 	// Construct dock module grpc server struct and do some initialization.
-	ds := dockServer.NewDockServer(utils.CONF.OsdsDock.ApiEndpoint)
+	ds := dockServer.NewDockServer(CONF.OsdsDock.ApiEndpoint)
 	// Start the listen mechanism of dock module.
 	dockServer.ListenAndServe(ds)
 }
-

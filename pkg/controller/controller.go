@@ -22,12 +22,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/volume"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	api "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 const (
@@ -38,12 +39,16 @@ const (
 )
 
 func NewControllerWithVolumeConfig(
-	vol *api.VolumeSpec,
-	atc *api.VolumeAttachmentSpec,
-	snp *api.VolumeSnapshotSpec,
+	vol *model.VolumeSpec,
+	atc *model.VolumeAttachmentSpec,
+	snp *model.VolumeSnapshotSpec,
 ) (*Controller, error) {
 	c := &Controller{
-		request: &pb.DockRequest{},
+		createVolumeOpts:         &pb.CreateVolumeOpts{},
+		deleteVolumeOpts:         &pb.DeleteVolumeOpts{},
+		createVolumeSnapshotOpts: &pb.CreateVolumeSnapshotOpts{},
+		deleteVolumeSnapshotOpts: &pb.DeleteVolumeSnapshotOpts{},
+		createAttachmentOpts:     &pb.CreateAttachmentOpts{},
 	}
 
 	c.searcher = NewDbSearcher()
@@ -51,102 +56,126 @@ func NewControllerWithVolumeConfig(
 	// If volume input is not null, the controller will add policy orchestration
 	// to manage volume resource.
 	if vol != nil {
+		c.volume = vol
 		prf, err := c.searcher.SearchProfile(vol.GetProfileId())
 		if err != nil {
-			log.Println("[Error] when search profiles in db:", err)
+			log.Error("when search profiles in db:", err)
 			return nil, err
 		}
 
 		c.profile = prf
-		c.request.VolumeId = vol.GetId()
-		c.request.VolumeName = vol.GetName()
-		c.request.VolumeDescription = vol.GetDescription()
-		c.request.VolumeSize = vol.GetSize()
-		c.request.ProfileId = prf.GetId()
+		c.createVolumeOpts.Id = vol.GetId()
+		c.createVolumeOpts.Name = vol.GetName()
+		c.createVolumeOpts.Description = vol.GetDescription()
+		c.createVolumeOpts.Size = vol.GetSize()
+		c.createVolumeOpts.ProfileId = prf.GetId()
+
+		c.deleteVolumeOpts.Id = vol.GetId()
 
 		// Initialize policy controller when profile is specified.
 		c.policyController = policy.NewController(c.profile)
 	}
 	if atc != nil {
-		c.request.AttachmentId = atc.GetId()
-		c.request.AttachmentName = atc.GetName()
-		c.request.AttachmentDescription = atc.GetDescription()
-		c.request.VolumeId = atc.GetVolumeId()
+
+		c.createAttachmentOpts.VolumeId = atc.GetVolumeId()
+		c.createAttachmentOpts.Id = atc.GetId()
 	}
 	if snp != nil {
-		c.request.SnapshotId = snp.GetId()
-		c.request.SnapshotName = snp.GetName()
-		c.request.SnapshotDescription = snp.GetDescription()
-		c.request.VolumeId = snp.GetVolumeId()
+		c.volSnapshot = snp
+		c.createVolumeSnapshotOpts.Id = snp.GetId()
+		c.createVolumeSnapshotOpts.Name = snp.GetId()
+		c.createVolumeSnapshotOpts.Description = snp.GetDescription()
+		c.createVolumeSnapshotOpts.VolumeId = snp.GetVolumeId()
+		c.createVolumeSnapshotOpts.Size = snp.GetSize()
+
+		c.deleteVolumeSnapshotOpts.Id = snp.GetId()
 	}
 
 	// Initialize volume controller.
-	c.volumeController = volume.NewController(c.request)
+	c.volumeController = volume.NewController(
+		c.createVolumeOpts,
+		c.deleteVolumeOpts,
+		c.createVolumeSnapshotOpts,
+		c.deleteVolumeSnapshotOpts,
+		c.createAttachmentOpts)
 
 	return c, nil
 }
 
 type Controller struct {
-	searcher         Searcher
-	volumeController volume.Controller
-	policyController policy.Controller
-
-	profile *api.ProfileSpec
-	request *pb.DockRequest
+	searcher                 Searcher
+	volumeController         volume.Controller
+	policyController         policy.Controller
+	profile                  *model.ProfileSpec
+	volume                   *model.VolumeSpec
+	volSnapshot              *model.VolumeSnapshotSpec
+	createVolumeOpts         *pb.CreateVolumeOpts
+	deleteVolumeOpts         *pb.DeleteVolumeOpts
+	createVolumeSnapshotOpts *pb.CreateVolumeSnapshotOpts
+	deleteVolumeSnapshotOpts *pb.DeleteVolumeSnapshotOpts
+	createAttachmentOpts     *pb.CreateAttachmentOpts
 }
 
-func (c *Controller) CreateVolume() (*api.VolumeSpec, error) {
+func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 
 	polInfo, err := c.searcher.SearchSupportedPool(c.policyController.StorageTag().GetSyncTag())
 	if err != nil {
-		log.Println("[Error] When search supported pool resource:", err)
-		return &api.VolumeSpec{}, err
+		log.Error("When search supported pool resource:", err)
+		return &model.VolumeSpec{}, err
 	}
-	c.request.PoolId = polInfo.GetId()
 
-	dckInfo, err := c.searcher.SearchDockByPool(polInfo)
+	dockInfo, err := c.searcher.SearchDockByPool(polInfo)
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.VolumeSpec{}, err
+		log.Error("When search supported dock resource:", err)
+		return &model.VolumeSpec{}, err
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.createVolumeOpts.PoolId = polInfo.GetId()
+	c.createVolumeOpts.DockId = dockInfo.GetId()
+	c.createVolumeOpts.DriverName = dockInfo.GetDriverName()
+
+	c.policyController.SetDock(dockInfo)
+	c.volumeController.SetDock(dockInfo)
 
 	result, err := c.volumeController.CreateVolume()
 	if err != nil {
-		return &api.VolumeSpec{}, err
+		return &model.VolumeSpec{}, err
 	}
 
 	var errChan = make(chan error, 1)
 	volBody, _ := json.Marshal(result)
-	go c.policyController.ExecuteAsyncPolicy(c.request, string(volBody), errChan)
+	go c.policyController.ExecuteAsyncPolicy(c.createVolumeOpts, string(volBody), errChan)
 
 	return result, nil
 }
 
-func (c *Controller) DeleteVolume() *api.Response {
+func (c *Controller) DeleteVolume() *model.Response {
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.deleteVolumeOpts.GetId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.Response{
+		log.Error("When search supported dock resource:", err)
+		return &model.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
 		}
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.deleteVolumeOpts.DockId = dockInfo.GetId()
+	c.deleteVolumeOpts.DriverName = dockInfo.GetDriverName()
+
+	c.policyController.SetDock(dockInfo)
+	c.volumeController.SetDock(dockInfo)
 
 	var errChan = make(chan error, 1)
-	go c.policyController.ExecuteAsyncPolicy(c.request, "", errChan)
+	go c.policyController.ExecuteAsyncPolicy(c.deleteVolumeOpts, "", errChan)
 
 	if err := <-errChan; err != nil {
-		log.Println("[Error] When execute async policy:", err)
-		return &api.Response{
+		log.Error("When execute async policy:", err)
+		return &model.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
 		}
@@ -155,73 +184,88 @@ func (c *Controller) DeleteVolume() *api.Response {
 	return c.volumeController.DeleteVolume()
 }
 
-func (c *Controller) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
+func (c *Controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.createAttachmentOpts.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.VolumeAttachmentSpec{}, err
+		log.Error("When search supported dock resource:", err)
+		return &model.VolumeAttachmentSpec{}, err
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
+	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.CreateVolumeAttachment()
 }
 
-func (c *Controller) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
+func (c *Controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.createAttachmentOpts.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.VolumeAttachmentSpec{}, err
+		log.Error("When search supported dock resource:", err)
+		return &model.VolumeAttachmentSpec{}, err
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
+	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.UpdateVolumeAttachment()
 }
 
-func (c *Controller) DeleteVolumeAttachment() *api.Response {
+func (c *Controller) DeleteVolumeAttachment() *model.Response {
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.createAttachmentOpts.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.Response{
+		log.Error("When search supported dock resource:", err)
+		return &model.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
 		}
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.createAttachmentOpts.DockId = dockInfo.GetId()
+	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
+
+	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.DeleteVolumeAttachment()
 }
 
-func (c *Controller) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
+func (c *Controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.createVolumeSnapshotOpts.GetVolumeId())
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.VolumeSnapshotSpec{}, err
+		log.Error("When search supported dock resource:", err)
+		return &model.VolumeSnapshotSpec{}, err
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.createVolumeSnapshotOpts.DockId = dockInfo.GetId()
+	c.createVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
+
+	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.CreateVolumeSnapshot()
 }
 
-func (c *Controller) DeleteVolumeSnapshot() *api.Response {
+func (c *Controller) DeleteVolumeSnapshot() *model.Response {
 
-	dckInfo, err := c.searcher.SearchDockByVolume(c.request.GetVolumeId())
+	dockInfo, err := c.searcher.SearchDockByVolume(c.volSnapshot.VolumeId)
 	if err != nil {
-		log.Println("[Error] When search supported dock resource:", err)
-		return &api.Response{
+		log.Error("When search supported dock resource:", err)
+		return &model.Response{
 			Status: "Failure",
 			Error:  fmt.Sprint(err),
 		}
 	}
-	dckBody, _ := json.Marshal(dckInfo)
-	c.request.DockInfo = string(dckBody)
+
+	c.deleteVolumeSnapshotOpts.DockId = dockInfo.GetId()
+	c.deleteVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
+
+	c.volumeController.SetDock(dockInfo)
 
 	return c.volumeController.DeleteVolumeSnapshot()
 }

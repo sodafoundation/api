@@ -19,9 +19,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/pkg/grpc/dock/client"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/dock/client"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -36,7 +36,7 @@ func NewFakeClient(address string) client.Client {
 	}
 }
 
-func (fc *fakeClient) Update(dockInfo string) error {
+func (fc *fakeClient) Update(dockInfo *model.DockSpec) error {
 	return nil
 }
 
@@ -45,95 +45,71 @@ func (fc *fakeClient) Close() {
 }
 
 // Create a volume
-func (fc *fakeClient) CreateVolume(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
+func (fc *fakeClient) CreateVolume(ctx context.Context, in *pb.CreateVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	volBody, _ := json.Marshal(&sampleVolume)
 
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
-}
-
-// Get a volume
-func (fc *fakeClient) GetVolume(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	volBody, _ := json.Marshal(&sampleVolume)
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: string(volBody),
+			},
+		},
 	}, nil
 }
 
 // Delete a volume
-func (fc *fakeClient) DeleteVolume(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	return &pb.DockResponse{
-		Status: "Success",
+func (fc *fakeClient) DeleteVolume(ctx context.Context, in *pb.DeleteVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
 	}, nil
 }
 
 // Create a volume attachment
-func (fc *fakeClient) CreateVolumeAttachment(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
+func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	volBody, _ := json.Marshal(&sampleAttachment)
 
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
-}
-
-// Update a volume attachment
-func (fc *fakeClient) UpdateVolumeAttachment(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	volBody, _ := json.Marshal(&sampleModifiedAttachment)
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
-}
-
-// Delete a volume attachment
-func (fc *fakeClient) DeleteVolumeAttachment(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	return &pb.DockResponse{
-		Status: "Success",
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: string(volBody),
+			},
+		},
 	}, nil
 }
 
 // Create a volume snapshot
-func (fc *fakeClient) CreateVolumeSnapshot(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
+func (fc *fakeClient) CreateVolumeSnapshot(ctx context.Context, in *pb.CreateVolumeSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	volBody, _ := json.Marshal(&sampleSnapshot)
 
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
-	}, nil
-}
-
-// Get a volume snapshot
-func (fc *fakeClient) GetVolumeSnapshot(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	volBody, _ := json.Marshal(&sampleSnapshot)
-
-	return &pb.DockResponse{
-		Status:  "Success",
-		Message: string(volBody),
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: string(volBody),
+			},
+		},
 	}, nil
 }
 
 // Delete a volume snapshot
-func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DockRequest, opts ...grpc.CallOption) (*pb.DockResponse, error) {
-	return &pb.DockResponse{
-		Status: "Success",
+func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVolumeSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
 	}, nil
 }
 
-func NewFakeController(req *pb.DockRequest) Controller {
+func NewFakeController() Controller {
 	return &controller{
-		Client:  NewFakeClient(""),
-		Request: req,
+		Client: NewFakeClient(""),
+		//Request: req,
 	}
 }
 
 func TestCreateVolume(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleVolume
 
 	result, err := fc.CreateVolume()
@@ -147,8 +123,8 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestDeleteVolume(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
-	var expected = &api.Response{Status: "Success"}
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	var expected = &model.Response{Status: "Success"}
 
 	result := fc.DeleteVolume()
 
@@ -158,7 +134,7 @@ func TestDeleteVolume(t *testing.T) {
 }
 
 func TestCreateVolumeAttachment(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleAttachment
 
 	result, err := fc.CreateVolumeAttachment()
@@ -171,33 +147,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 }
 
-func TestUpdateVolumeAttachment(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
-	var expected = &sampleModifiedAttachment
-
-	result, err := fc.UpdateVolumeAttachment()
-	if err != nil {
-		t.Errorf("Failed to update volume attachment, err is %v\n", err)
-	}
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-}
-
-func TestDeleteVolumeAttachment(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
-	var expected = &api.Response{Status: "Success"}
-
-	result := fc.DeleteVolumeAttachment()
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-}
-
 func TestCreateVolumeSnapshot(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleSnapshot
 
 	result, err := fc.CreateVolumeSnapshot()
@@ -211,8 +162,8 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
-	fc := NewFakeController(&pb.DockRequest{})
-	var expected = &api.Response{Status: "Success"}
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	var expected = &model.Response{Status: "Success"}
 
 	result := fc.DeleteVolumeSnapshot()
 
@@ -222,8 +173,8 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 }
 
 var (
-	sampleVolume = api.VolumeSpec{
-		BaseModel: &api.BaseModel{
+	sampleVolume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
 			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 			CreatedAt: "2017-08-02T09:17:05",
 		},
@@ -233,8 +184,8 @@ var (
 		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
 	}
 
-	sampleAttachment = api.VolumeAttachmentSpec{
-		BaseModel: &api.BaseModel{
+	sampleAttachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
 		Name:        "fake-volume-attachment",
@@ -242,8 +193,8 @@ var (
 		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
-	sampleModifiedAttachment = api.VolumeAttachmentSpec{
-		BaseModel: &api.BaseModel{
+	sampleModifiedAttachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
 		Name:        "modified-fake-volume-attachment",
@@ -251,8 +202,8 @@ var (
 		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
-	sampleSnapshot = api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{
+	sampleSnapshot = model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
 			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		},
 		Name:        "fake-volume-snapshot",

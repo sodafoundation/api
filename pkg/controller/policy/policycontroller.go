@@ -22,8 +22,7 @@ package policy
 
 import (
 	"github.com/opensds/opensds/pkg/controller/policy/executor"
-	pb "github.com/opensds/opensds/pkg/grpc/opensds"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type Controller interface {
@@ -31,20 +30,23 @@ type Controller interface {
 
 	StorageTag() *StorageTag
 
-	ExecuteSyncPolicy(req *pb.DockRequest) error
+	ExecuteSyncPolicy(req interface{}) error
 
-	ExecuteAsyncPolicy(req *pb.DockRequest, in string, errChan chan error)
+	ExecuteAsyncPolicy(req interface{}, in string, errChan chan error)
+
+	SetDock(dockInfo *model.DockSpec)
 }
 
-func NewController(profileSpec *api.ProfileSpec) Controller {
+func NewController(profileSpec *model.ProfileSpec) Controller {
 	return &controller{
 		Profile: profileSpec,
 	}
 }
 
 type controller struct {
-	Profile *api.ProfileSpec
-	Tag     *StorageTag
+	Profile  *model.ProfileSpec
+	DockInfo *model.DockSpec
+	Tag      *StorageTag
 }
 
 func (c *controller) Setup(flag int) {
@@ -55,8 +57,8 @@ func (c *controller) StorageTag() *StorageTag {
 	return c.Tag
 }
 
-func (c *controller) ExecuteSyncPolicy(vr *pb.DockRequest) error {
-	swf, err := executor.RegisterSynchronizedWorkflow(vr, c.Tag.syncTag)
+func (c *controller) ExecuteSyncPolicy(req interface{}) error {
+	swf, err := executor.RegisterSynchronizedWorkflow(req, c.Tag.syncTag)
 	if err != nil {
 		return err
 	}
@@ -67,8 +69,8 @@ func (c *controller) ExecuteSyncPolicy(vr *pb.DockRequest) error {
 	return nil
 }
 
-func (c *controller) ExecuteAsyncPolicy(vr *pb.DockRequest, in string, errChan chan error) {
-	awf, err := executor.RegisterAsynchronizedWorkflow(vr, c.Tag.asyncTag, in)
+func (c *controller) ExecuteAsyncPolicy(req interface{}, in string, errChan chan error) {
+	awf, err := executor.RegisterAsynchronizedWorkflow(req, c.Tag.asyncTag, c.DockInfo, in)
 	if err != nil {
 		errChan <- err
 	}
@@ -79,4 +81,8 @@ func (c *controller) ExecuteAsyncPolicy(vr *pb.DockRequest, in string, errChan c
 		errChan <- err
 	}
 	errChan <- nil
+}
+
+func (c *controller) SetDock(dockInfo *model.DockSpec) {
+	c.DockInfo = dockInfo
 }

@@ -12,20 +12,23 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
-package dock
+package drivers
 
 import (
 	"reflect"
 	"testing"
+
+	_ "github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/sample"
 )
 
-var (
-	fd = &DockHub{ResourceType: "default"}
-)
+func TestInit(t *testing.T) {
+	var rsList = []string{"others"}
+	var expectedVd = []VolumeDriver{&sample.Driver{}}
 
-func TestNewDockHub(t *testing.T) {
-	result := NewDockHub("default")
-	if !reflect.DeepEqual(result, fd) {
-		t.Errorf("Expected %v, got %v\n", fd, result)
+	for i, rs := range rsList {
+		if vp := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
+			t.Errorf("Expected %v, got %v\n", expectedVd, vp)
+		}
 	}
 }

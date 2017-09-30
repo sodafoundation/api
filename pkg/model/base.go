@@ -20,6 +20,10 @@ This module implements the common data structure.
 package model
 
 type Modeler interface {
+	GetId() string
+
+	GetCreatedTime() string
+
 	SetId(uuid string)
 
 	SetCreatedTime(createdAt string)

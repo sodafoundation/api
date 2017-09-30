@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	log "github.com/golang/glog"
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/model"
@@ -63,7 +63,7 @@ func (this *VersionPortal) ListVersions() {
 		reason := fmt.Sprintf("List versions failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (this *VersionPortal) ListVersions() {
 		reason := fmt.Sprintf("Marshal versions listed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -95,7 +95,7 @@ func (this *SpecifiedVersionPortal) GetVersion() {
 		reason := fmt.Sprintf("Get version failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (this *SpecifiedVersionPortal) GetVersion() {
 		reason := fmt.Sprintf("Marshal version showed result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Println(reason)
+		log.Error(reason)
 		return
 	}
 
@@ -119,7 +119,7 @@ func SearchVersions() ([]model.VersionSpec, error) {
 
 	err := json.Unmarshal([]byte(KnownVersions), &versions)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return []model.VersionSpec{}, err
 	}
 	return versions, nil
@@ -128,7 +128,7 @@ func SearchVersions() ([]model.VersionSpec, error) {
 func SearchVersion(versionName string) (model.VersionSpec, error) {
 	versions, err := SearchVersions()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return model.VersionSpec{}, err
 	}
 
@@ -138,6 +138,6 @@ func SearchVersion(versionName string) (model.VersionSpec, error) {
 		}
 	}
 
-	log.Println(errors.New("Can't find v1 in available versions!"))
+	log.Error(errors.New("Can't find v1 in available versions!"))
 	return model.VersionSpec{}, err
 }
