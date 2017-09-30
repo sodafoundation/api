@@ -31,5 +31,6 @@ import:
 - package: github.com/go-ini/ini
   version: ^1.28.2
 - package: github.com/golang/glog
+- package: github.com/gophercloud/gophercloud
 testImport:
 - package: github.com/bouk/monkey

@@ -83,7 +83,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	log.Info("Calling volume driver to delete volume...")
 
 	//Call function of StorageDrivers configured by storage drivers.
-	if err = d.Driver.DeleteVolume(opt.GetId()); err != nil {
+	if err = d.Driver.DeleteVolume(opt); err != nil {
 		log.Error("When calling volume driver to delete volume:", err)
 		return err
 	}

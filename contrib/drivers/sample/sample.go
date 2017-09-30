@@ -45,7 +45,7 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	return nil, errors.New("Can't find volume " + volIdentifier)
 }
 
-func (d *Driver) DeleteVolume(volIdentifier string) error {
+func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 

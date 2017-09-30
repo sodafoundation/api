@@ -23,12 +23,12 @@ package cinder
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
-	"log"
 
-	api "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 
+	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats"
@@ -57,16 +57,17 @@ type CinderConfig struct {
 	TenantName       string `json:"tenantName,omitempty"`
 }
 
-func (d *Driver) Setup() {
+func (d *Driver) Setup() error {
 	// Read cinder config file
 	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
 	if err != nil {
-		panic(err)
+		log.Error("When read cinder config file:", err)
+		return err
 	}
 
 	// Marshal the result
 	if err = json.Unmarshal(userJSON, &conf); err != nil {
-		panic(err)
+		return err
 	}
 
 	d.config = conf
@@ -81,176 +82,132 @@ func (d *Driver) Setup() {
 
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		panic(err)
+		log.Error("When get auth options:", err)
+		return err
 	}
 
 	d.blockStoragev2, err = openstack.NewBlockStorageV2(provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		panic(err)
-	}
-
-	return
-}
-
-func (d *Driver) Unset() { return }
-
-func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
-	//Configure create request body.
-	opts := &volumesv2.CreateOpts{
-		Name: name,
-		Size: int(size),
-	}
-
-	vol, err := volumesv2.Create(d.blockStoragev2, opts).Extract()
-	if err != nil {
-		log.Println("[Error] Cannot create volume:", err)
-		return new(api.VolumeSpec), err
-	}
-
-	return &api.VolumeSpec{
-		BaseModel: &api.BaseModel{
-			Id: vol.ID,
-		},
-		Name:             vol.Name,
-		Description:      vol.Description,
-		Size:             int64(vol.Size),
-		AvailabilityZone: vol.AvailabilityZone,
-		Status:           vol.Status,
-	}, nil
-}
-
-func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
-	vol, err := volumesv2.Get(d.blockStoragev2, volID).Extract()
-	if err != nil {
-		log.Println("[Error] Cannot get volume:", err)
-		return new(api.VolumeSpec), err
-	}
-
-	return &api.VolumeSpec{
-		BaseModel: &api.BaseModel{
-			Id: vol.ID,
-		},
-		Name:             vol.Name,
-		Description:      vol.Description,
-		Size:             int64(vol.Size),
-		AvailabilityZone: vol.AvailabilityZone,
-		Status:           vol.Status,
-	}, nil
-}
-
-func (d *Driver) DeleteVolume(volID string) error {
-	if err := volumesv2.Delete(d.blockStoragev2, volID).ExtractErr(); err != nil {
-		log.Println("[Error] Cannot delete volume:", err)
+		log.Error("When get block storage session:", err)
 		return err
 	}
 
 	return nil
 }
 
-func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
-	opts := &volumeactions.InitializeConnectionOpts{
-		IP:        hostInfo.GetIp(),
-		Host:      hostInfo.GetHost(),
-		Initiator: hostInfo.GetInitiator(),
-		Platform:  hostInfo.GetPlatform(),
-		OSType:    hostInfo.GetOsType(),
-		Multipath: &multiPath,
+func (d *Driver) Unset() error { return nil }
+
+func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	//Configure create request body.
+	opts := &volumesv2.CreateOpts{
+		Name:             req.GetName(),
+		Description:      req.GetDescription(),
+		Size:             int(req.GetSize()),
+		AvailabilityZone: req.GetAvailabilityZone(),
 	}
 
-	conn, err := volumeactions.InitializeConnection(d.blockStoragev2, volID, opts).Extract()
+	vol, err := volumesv2.Create(d.blockStoragev2, opts).Extract()
 	if err != nil {
-		return new(api.ConnectionInfo), err
+		log.Error("Cannot create volume:", err)
+		return nil, err
 	}
 
-	return &api.ConnectionInfo{
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: vol.ID,
+		},
+		Name:             vol.Name,
+		Description:      vol.Description,
+		Size:             int64(vol.Size),
+		AvailabilityZone: vol.AvailabilityZone,
+		Status:           vol.Status,
+	}, nil
+}
+
+func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
+	vol, err := volumesv2.Get(d.blockStoragev2, volID).Extract()
+	if err != nil {
+		log.Error("Cannot get volume:", err)
+		return nil, err
+	}
+
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: vol.ID,
+		},
+		Name:             vol.Name,
+		Description:      vol.Description,
+		Size:             int64(vol.Size),
+		AvailabilityZone: vol.AvailabilityZone,
+		Status:           vol.Status,
+	}, nil
+}
+
+func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+	if err := volumesv2.Delete(d.blockStoragev2, opt.GetId()).ExtractErr(); err != nil {
+		log.Error("Cannot delete volume:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	opts := &volumeactions.InitializeConnectionOpts{
+		IP:        req.HostInfo.GetIp(),
+		Host:      req.HostInfo.GetHost(),
+		Initiator: req.HostInfo.GetInitiator(),
+		Platform:  req.HostInfo.GetPlatform(),
+		OSType:    req.HostInfo.GetOsType(),
+		Multipath: &req.MultiPath,
+	}
+
+	conn, err := volumeactions.InitializeConnection(d.blockStoragev2, req.GetVolumeId(), opts).Extract()
+	if err != nil {
+		log.Error("Cannot initialize volume connection:", err)
+		return nil, err
+	}
+
+	return &model.ConnectionInfo{
 		DriverVolumeType: "iscsi",
 		ConnectionData:   conn,
 	}, nil
 }
 
-func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
-	vol, err := volumesv2.Get(d.blockStoragev2, volID).Extract()
-	if err != nil {
-		return err
-	}
-
-	if vol.Status != "available" && !vol.Multiattach {
-		err = errors.New("The status of volume is not available!")
-		log.Println("Cannot attach volume:", err)
-		return err
-	}
-
-	opts := &volumeactions.AttachOpts{
-		HostName:   host,
-		MountPoint: mountpoint,
-	}
-
-	if err = volumeactions.Attach(d.blockStoragev2, volID, opts).ExtractErr(); err != nil {
-		log.Println("Cannot attach volume:", err)
-		return err
-	}
-
-	return nil
-}
-
-func (d *Driver) DetachVolume(volID string) error {
-	vol, err := volumesv2.Get(d.blockStoragev2, volID).Extract()
-	if err != nil {
-		return err
-	}
-
-	if vol.Status != "in-use" {
-		err = errors.New("The status of volume is not in-use!")
-		log.Println("Cannot detach volume:", err)
-		return err
-	}
-
-	opts := &volumeactions.DetachOpts{
-		AttachmentID: vol.Attachments[0].ID,
-	}
-
-	if err = volumeactions.Detach(d.blockStoragev2, volID, opts).ExtractErr(); err != nil {
-		log.Println("Cannot detach volume:", err)
-		return err
-	}
-
-	return nil
-}
-
-func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) CreateSnapshot(req *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	opts := &snapshotsv2.CreateOpts{
-		VolumeID:    volID,
-		Name:        name,
-		Description: description,
+		VolumeID:    req.GetVolumeId(),
+		Name:        req.GetName(),
+		Description: req.GetDescription(),
 	}
 
 	snp, err := snapshotsv2.Create(d.blockStoragev2, opts).Extract()
 	if err != nil {
-		log.Println("[Error] Cannot create snapshot:", err)
-		return new(api.VolumeSnapshotSpec), err
+		log.Error("Cannot create snapshot:", err)
+		return nil, err
 	}
 
-	return &api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{
+	return &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
 			Id: snp.ID,
 		},
 		Name:        snp.Name,
 		Description: snp.Description,
 		Size:        int64(snp.Size),
 		Status:      snp.Status,
-		VolumeId:    volID,
+		VolumeId:    req.GetVolumeId(),
 	}, nil
 }
 
-func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) {
 	snp, err := snapshotsv2.Get(d.blockStoragev2, snapID).Extract()
 	if err != nil {
-		log.Println("[Error] Cannot get snapshot:", err)
-		return new(api.VolumeSnapshotSpec), err
+		log.Error("Cannot get snapshot:", err)
+		return nil, err
 	}
 
-	return &api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{
+	return &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
 			Id: snp.ID,
 		},
 		Name:        snp.Name,
@@ -261,33 +218,33 @@ func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	}, nil
 }
 
-func (d *Driver) DeleteSnapshot(snapID string) error {
-	if err := snapshotsv2.Delete(d.blockStoragev2, snapID).ExtractErr(); err != nil {
-		log.Println("[Error] Cannot delete snapshot:", err)
+func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
+	if err := snapshotsv2.Delete(d.blockStoragev2, req.GetId()).ExtractErr(); err != nil {
+		log.Error("Cannot delete snapshot:", err)
 		return err
 	}
 
 	return nil
 }
 
-func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 	opts := &schedulerstats.ListOpts{}
 
 	pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
 	if err != nil {
-		log.Println("[Error] Cannot list storage pools:", err)
-		return new([]api.StoragePoolSpec), err
+		log.Error("Cannot list storage pools:", err)
+		return nil, err
 	}
 
 	polpages, err := schedulerstats.ExtractStoragePools(pages)
 	if err != nil {
-		log.Println("[Error] Cannot extract storage pools:", err)
-		return new([]api.StoragePoolSpec), err
+		log.Error("annot extract storage pools:", err)
+		return nil, err
 	}
 
-	var pols []api.StoragePoolSpec
+	var pols []model.StoragePoolSpec
 	for _, page := range polpages {
-		pol := api.StoragePoolSpec{
+		pol := model.StoragePoolSpec{
 			Name:          page.Name,
 			TotalCapacity: int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:  int64(page.Capabilities.FreeCapacityGB),

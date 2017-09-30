@@ -23,6 +23,7 @@ package drivers
 
 import (
 	_ "github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/sample"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
@@ -38,7 +39,7 @@ type VolumeDriver interface {
 
 	PullVolume(volIdentifier string) (*model.VolumeSpec, error)
 
-	DeleteVolume(volIdentifier string) error
+	DeleteVolume(opt *pb.DeleteVolumeOpts) error
 
 	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
 
@@ -53,6 +54,11 @@ type VolumeDriver interface {
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
+	case "cinder":
+		var d = &cinder.Driver{}
+
+		d.Setup()
+		return d
 	// case "ceph":
 	// 	return &ceph.Driver{}
 	default:
