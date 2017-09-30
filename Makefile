@@ -23,4 +23,4 @@ docker:build
 	docker build cmd/osdslet -t opensds/opensds-controller:v1alpha
 
 clean:
-	rm -rf ./build/out/bin/* ./cmd/osdslet ./cmd/osdsdock
+	rm -rf ./build/out/bin/* ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
