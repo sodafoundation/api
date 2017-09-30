@@ -1,5 +1,5 @@
-hash: 7dfd99b8bc259418b6be312de1389193d516ea93964b1b91bf0913505e876deb
-updated: 2017-09-24T15:57:44.535436005+08:00
+hash: ef47cedf6d37cbfdc61604a7d93c9eb501e7d2bbf6c4811bd027565a638207b5
+updated: 2017-09-30T15:24:35.512790892+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -20,7 +20,7 @@ imports:
   - rados
   - rbd
 - name: github.com/coreos/etcd
-  version: bb66589f8cf18960c7f3d56b1b83753caeed9c7a
+  version: e211fb6de3cb306aee245422e599ac521f6e21f7
   subpackages:
   - auth/authpb
   - clientv3
@@ -48,6 +48,19 @@ imports:
   subpackages:
   - proto
   - protoc-gen-go
+- name: github.com/gophercloud/gophercloud
+  version: 849a2e71dd64dbfa2bd4be110ace68881802414b
+  subpackages:
+  - openstack
+  - openstack/blockstorage/extensions/schedulerstats
+  - openstack/blockstorage/extensions/volumeactions
+  - openstack/blockstorage/v2/snapshots
+  - openstack/blockstorage/v2/volumes
+  - openstack/identity/v2/tenants
+  - openstack/identity/v2/tokens
+  - openstack/identity/v3/tokens
+  - openstack/utils
+  - pagination
 - name: github.com/mailru/easyjson
   version: 2a92e673c9a6302dd05c3a691ae1f24aef46457d
   subpackages:
