@@ -33,7 +33,8 @@ import (
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	log "github.com/golang/glog"
-	api "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 	"gopkg.in/yaml.v2"
@@ -155,9 +156,9 @@ type Driver struct {
 	ioctx *rados.IOContext
 }
 
-func (d *Driver) Setup() {}
+func (d *Driver) Setup() error { return nil }
 
-func (d *Driver) Unset() {}
+func (d *Driver) Unset() error { return nil }
 
 func (d *Driver) initConn() error {
 	conn, err := rados.NewConn()
@@ -188,7 +189,9 @@ func (d *Driver) destroyConn() {
 	defer d.ioctx.Destroy()
 }
 
-func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
+func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	name := opt.GetName()
+	size := opt.GetSize()
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
@@ -203,8 +206,8 @@ func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) 
 	}
 
 	log.Infof("Create volume %s (%s) success.", name, imgName.GetUUID())
-	return &api.VolumeSpec{
-		BaseModel: &api.BaseModel{
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
 			Id: imgName.GetUUID(),
 		},
 		Name:             imgName.GetName(),
@@ -244,7 +247,7 @@ func (d *Driver) getSize(img *rbd.Image) int64 {
 	return int64(size >> sizeShiftBit)
 }
 
-func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
+func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
@@ -257,8 +260,8 @@ func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
 		return nil, err
 	}
 
-	return &api.VolumeSpec{
-		BaseModel: &api.BaseModel{
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
 			Id: name.GetUUID(),
 		},
 		Name:             name.GetName(),
@@ -287,26 +290,26 @@ func (d *Driver) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
 	}
 	defer d.destroyConn()
 
-	vol, err := d.GetVolume(volID)
+	vol, err := d.PullVolume(opt.GetId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
 	}
 
-	return &api.ConnectionInfo{
+	return &model.ConnectionInfo{
 		DriverVolumeType: "rbd",
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
 			"name":         "rbd/" + opensdsPrefix + ":" + vol.Name + ":" + vol.Id,
 			"cluster_name": "ceph",
-			"hosts":        []string{hostInfo.Host},
+			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    vol.Id,
 			"access_mode":  "rw",
 			"ports":        []string{"6789"},
@@ -322,14 +325,14 @@ func (d *Driver) DetachVolume(volID string) error {
 	return nil
 }
 
-func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
 	}
 	defer d.destroyConn()
 
-	img, _, err := d.getImage(volID)
+	img, _, err := d.getImage(opt.GetId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
@@ -340,19 +343,19 @@ func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSna
 	}
 	defer img.Close()
 
-	fullName := NewName(name)
+	fullName := NewName(opt.GetName())
 	if _, err = img.CreateSnapshot(fullName.GetFullName()); err != nil {
 		log.Error("When create snapshot:", err)
 		return nil, err
 	}
-	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", name, volID, fullName.GetUUID())
-	return &api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{
+	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", opt.GetName(), opt.GetId(), fullName.GetUUID())
+	return &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
 			Id: fullName.GetUUID(),
 		},
 		Name:        fullName.GetName(),
-		Description: description,
-		VolumeId:    volID,
+		Description: opt.GetDescription(),
+		VolumeId:    opt.GetId(),
 		Size:        d.getSize(img),
 	}, nil
 }
@@ -391,17 +394,17 @@ func (d *Driver) visitSnapshot(snapID string, fn func(volName *Name, img *rbd.Im
 	return errors.New(reason)
 }
 
-func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
+func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
 	}
 	defer d.destroyConn()
-	var snapshot *api.VolumeSnapshotSpec
+	var snapshot *model.VolumeSnapshotSpec
 	err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
 		snapName := ParseName(snap.Name)
-		snapshot = &api.VolumeSnapshotSpec{
-			BaseModel: &api.BaseModel{
+		snapshot = &model.VolumeSnapshotSpec{
+			BaseModel: &model.BaseModel{
 				Id: snapName.GetUUID(),
 			},
 			Name:     snapName.GetName(),
@@ -413,13 +416,13 @@ func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
 	return snapshot, err
 }
 
-func (d *Driver) DeleteSnapshot(snapID string) error {
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return err
 	}
 	defer d.destroyConn()
-	err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
+	err := d.visitSnapshot(opt.GetId(), func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
 		if err := img.Open(snap.Name); err != nil {
 			log.Error("When open image:", err)
 		}
@@ -522,7 +525,7 @@ func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[strin
 	return &param
 }
 
-func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 	pc, err := d.getPoolsCapInfo()
 	if err != nil {
 		log.Error(err)
@@ -539,7 +542,7 @@ func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 		return nil, err
 	}
 
-	var poolList []api.StoragePoolSpec
+	var poolList []model.StoragePoolSpec
 	for i := range pc {
 		name := pc[i][poolName]
 		c := getConfig()
@@ -550,8 +553,8 @@ func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
-		pool := api.StoragePoolSpec{
-			BaseModel: &api.BaseModel{
+		pool := model.StoragePoolSpec{
+			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
 			Name: name,

@@ -24,6 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -41,7 +42,7 @@ func TestCreateVolume(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.CreateVolume("volume001", 1)
+	resp, err := d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err != nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -61,7 +62,7 @@ func TestCreateVolume(t *testing.T) {
 		return errors.New("Fake error")
 	})
 	d = Driver{}
-	_, err = d.CreateVolume("volume001", 1)
+	_, err = d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -72,7 +73,7 @@ func TestCreateVolume(t *testing.T) {
 		args ...uint64) (*rbd.Image, error) {
 		return nil, errors.New("Fake error")
 	})
-	_, err = d.CreateVolume("volume001", 1)
+	_, err = d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -101,7 +102,7 @@ func TestGetVolume(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.GetVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	resp, err := d.PullVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
 	if err != nil {
 		t.Errorf("Test Get volume error")
 	}
@@ -115,7 +116,7 @@ func TestGetVolume(t *testing.T) {
 		t.Errorf("Test Get volume uuid error")
 	}
 
-	resp, err = d.GetVolume("11111111-1111-1111-1111-111111111111")
+	resp, err = d.PullVolume("11111111-1111-1111-1111-111111111111")
 	if err != rbd.RbdErrorNotFound {
 		t.Errorf("Test Get volume error")
 	}
@@ -198,8 +199,11 @@ func TestCreateSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.CreateSnapshot("snapshot001", "7ee11866-1f40-4f3c-b093-7a3684523a19",
-		"unite test")
+	resp, err := d.CreateSnapshot(&pb.CreateVolumeSnapshotOpts{
+		Name:        "snapshot001",
+		Id:          "7ee11866-1f40-4f3c-b093-7a3684523a19",
+		Description: "unite test"})
+
 	if err != nil {
 		t.Errorf("Test Create snapshot error")
 	}
@@ -254,7 +258,7 @@ func TestGetSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.GetSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	resp, err := d.PullSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -266,7 +270,7 @@ func TestGetSnapshot(t *testing.T) {
 	}
 
 	// case 2
-	_, err = d.GetSnapshot("11111111-1111-1111-1111-111111111111")
+	_, err = d.PullSnapshot("11111111-1111-1111-1111-111111111111")
 	if err == nil {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -308,7 +312,7 @@ func TestDeleteSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	err := d.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	err := d.DeleteSnapshot(&pb.DeleteVolumeSnapshotOpts{Id: "25f5d7a2-553d-4d6c-904d-179a9e698cf8"})
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
 	}
@@ -376,7 +380,6 @@ func TestListPools(t *testing.T) {
 	if err != nil {
 		t.Errorf("Test List Pools error")
 	}
-
 	if (*pools)[0].Name != "rbd" {
 		t.Errorf("Test List Pools Name error")
 	}

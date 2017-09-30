@@ -22,7 +22,7 @@ plugin, just modify Init() method.
 package drivers
 
 import (
-	_ "github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/sample"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
@@ -53,8 +53,8 @@ type VolumeDriver interface {
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
-	// case "ceph":
-	// 	return &ceph.Driver{}
+	case "ceph":
+		return &ceph.Driver{}
 	default:
 		return &sample.Driver{}
 	}
