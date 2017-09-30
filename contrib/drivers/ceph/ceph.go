@@ -269,14 +269,14 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 	}, nil
 }
 
-func (d *Driver) DeleteVolume(volID string) error {
+func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return err
 	}
 	defer d.destroyConn()
 
-	img, _, err := d.getImage(volID)
+	img, _, err := d.getImage(opt.GetId())
 	if err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func (d *Driver) DeleteVolume(volID string) error {
 		log.Error("When remove image:", err)
 		return err
 	}
-	log.Info("Remove image success, volume id =", volID)
+	log.Info("Remove image success, volume id =", opt.GetId())
 	return nil
 }
 
@@ -313,14 +313,6 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 			"ports":        []string{"6789"},
 		},
 	}, nil
-}
-
-func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
-	return nil
-}
-
-func (d *Driver) DetachVolume(volID string) error {
-	return nil
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
