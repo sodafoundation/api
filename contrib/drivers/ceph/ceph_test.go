@@ -143,26 +143,10 @@ func TestDeleteVolme(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	err := d.DeleteVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	opt := &pb.DeleteVolumeOpts{Id: "7ee11866-1f40-4f3c-b093-7a3684523a19"}
+	err := d.DeleteVolume(opt)
 	if err != nil {
 		t.Errorf("Test Delete volume error")
-	}
-}
-
-func TestAttachVolume(t *testing.T) {
-	d := Driver{}
-	err := d.AttachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19",
-		"opensds-server", "/mnt")
-	if err != nil {
-		t.Errorf("Test attach volume error")
-	}
-}
-
-func TestDetachVolume(t *testing.T) {
-	d := Driver{}
-	err := d.DetachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
-	if err != nil {
-		t.Errorf("Test detach volume error")
 	}
 }
 
