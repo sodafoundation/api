@@ -1,5 +1,5 @@
-hash: 60bf6121d010e478dad5218bc216ced7f13c9a379c96fc7ad8677a4d821d34f8
-updated: 2017-09-21T11:42:09.34333753+08:00
+hash: 7dfd99b8bc259418b6be312de1389193d516ea93964b1b91bf0913505e876deb
+updated: 2017-09-24T15:57:44.535436005+08:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 73945b6115bfbbcc57d89b7316e28109364124e1
@@ -41,23 +41,13 @@ imports:
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
 - name: github.com/go-sql-driver/mysql
   version: a0583e0143b1624142adab07e0e97fe106d99561
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
-- name: github.com/gophercloud/gophercloud
-  version: b4c2377fa77951a0e08163f52dc9b3e206355194
-  subpackages:
-  - openstack
-  - openstack/blockstorage/extensions/schedulerstats
-  - openstack/blockstorage/extensions/volumeactions
-  - openstack/blockstorage/v2/snapshots
-  - openstack/blockstorage/v2/volumes
-  - openstack/identity/v2/tenants
-  - openstack/identity/v2/tokens
-  - openstack/identity/v3/tokens
-  - openstack/utils
-  - pagination
+  - protoc-gen-go
 - name: github.com/mailru/easyjson
   version: 2a92e673c9a6302dd05c3a691ae1f24aef46457d
   subpackages:
