@@ -190,8 +190,8 @@ func (d *Driver) destroyConn() {
 }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	name := opt.Name
-	size := opt.Size
+	name := opt.GetName()
+	size := opt.GetSize()
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
@@ -297,7 +297,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}
 	defer d.destroyConn()
 
-	vol, err := d.PullVolume(opt.Id)
+	vol, err := d.PullVolume(opt.GetId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
@@ -309,7 +309,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 			"secret_type":  "ceph",
 			"name":         "rbd/" + opensdsPrefix + ":" + vol.Name + ":" + vol.Id,
 			"cluster_name": "ceph",
-			"hosts":        []string{opt.HostInfo.Host},
+			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    vol.Id,
 			"access_mode":  "rw",
 			"ports":        []string{"6789"},
@@ -332,7 +332,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	}
 	defer d.destroyConn()
 
-	img, _, err := d.getImage(opt.Id)
+	img, _, err := d.getImage(opt.GetId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
@@ -343,19 +343,19 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	}
 	defer img.Close()
 
-	fullName := NewName(opt.Name)
+	fullName := NewName(opt.GetName())
 	if _, err = img.CreateSnapshot(fullName.GetFullName()); err != nil {
 		log.Error("When create snapshot:", err)
 		return nil, err
 	}
-	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", opt.Name, opt.Id, fullName.GetUUID())
+	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", opt.GetName(), opt.GetId(), fullName.GetUUID())
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: fullName.GetUUID(),
 		},
 		Name:        fullName.GetName(),
-		Description: opt.Description,
-		VolumeId:    opt.Id,
+		Description: opt.GetDescription(),
+		VolumeId:    opt.GetId(),
 		Size:        d.getSize(img),
 	}, nil
 }
@@ -422,7 +422,7 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		return err
 	}
 	defer d.destroyConn()
-	err := d.visitSnapshot(opt.Id, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
+	err := d.visitSnapshot(opt.GetId(), func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
 		if err := img.Open(snap.Name); err != nil {
 			log.Error("When open image:", err)
 		}
