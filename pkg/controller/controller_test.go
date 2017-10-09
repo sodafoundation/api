@@ -60,7 +60,7 @@ func (fvc *fakeVolumeController) DeleteVolumeSnapshot() *model.Response {
 	return &model.Response{Status: "Success"}
 }
 
-func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) {}
+func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
 	var req = &pb.CreateVolumeOpts{

@@ -144,13 +144,13 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 	polInfo, err := c.SelectSupportedPool(c.policyController.StorageTag().GetSyncTag())
 	if err != nil {
 		log.Error("When search supported pool resource:", err)
-		return &model.VolumeSpec{}, err
+		return nil, err
 	}
 
 	dockInfo, err := c.SelectDock(polInfo)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.VolumeSpec{}, err
+		return nil, err
 	}
 
 	c.createVolumeOpts.PoolId = polInfo.GetId()
@@ -162,7 +162,7 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 
 	result, err := c.volumeController.CreateVolume()
 	if err != nil {
-		return &model.VolumeSpec{}, err
+		return nil, err
 	}
 
 	var errChan = make(chan error, 1)
@@ -209,7 +209,7 @@ func (c *Controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 	dockInfo, err := c.SelectDock(c.createAttachmentOpts.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.VolumeAttachmentSpec{}, err
+		return nil, err
 	}
 
 	c.createAttachmentOpts.DockId = dockInfo.GetId()
@@ -224,7 +224,7 @@ func (c *Controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 	dockInfo, err := c.SelectDock(c.createAttachmentOpts.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.VolumeAttachmentSpec{}, err
+		return nil, err
 	}
 
 	c.createAttachmentOpts.DockId = dockInfo.GetId()
@@ -257,7 +257,7 @@ func (c *Controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
 	dockInfo, err := c.SelectDock(c.createVolumeSnapshotOpts.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 
 	c.createVolumeSnapshotOpts.DockId = dockInfo.GetId()

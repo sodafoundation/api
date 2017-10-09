@@ -518,30 +518,30 @@ func (image *Image) ListLockers() (tag string, lockers []Locker, err error) {
 		nil, (*C.size_t)(&c_clients_len),
 		nil, (*C.size_t)(&c_cookies_len),
 		nil, (*C.size_t)(&c_addrs_len))
-	
-	// no locker held on rbd image when either c_clients_len, 
-	// c_cookies_len or c_addrs_len is *0*, so just quickly returned 
-	if int(c_clients_len) == 0 || int(c_cookies_len) == 0 || 
-		int(c_addrs_len) ==0 {
+
+	// no locker held on rbd image when either c_clients_len,
+	// c_cookies_len or c_addrs_len is *0*, so just quickly returned
+	if int(c_clients_len) == 0 || int(c_cookies_len) == 0 ||
+		int(c_addrs_len) == 0 {
 		lockers = make([]Locker, 0)
-		return "", lockers, nil 
+		return "", lockers, nil
 	}
 
 	tag_buf := make([]byte, c_tag_len)
 	clients_buf := make([]byte, c_clients_len)
 	cookies_buf := make([]byte, c_cookies_len)
 	addrs_buf := make([]byte, c_addrs_len)
-	
+
 	c_locker_cnt = C.rbd_list_lockers(image.image, &c_exclusive,
 		(*C.char)(unsafe.Pointer(&tag_buf[0])), (*C.size_t)(&c_tag_len),
 		(*C.char)(unsafe.Pointer(&clients_buf[0])), (*C.size_t)(&c_clients_len),
 		(*C.char)(unsafe.Pointer(&cookies_buf[0])), (*C.size_t)(&c_cookies_len),
 		(*C.char)(unsafe.Pointer(&addrs_buf[0])), (*C.size_t)(&c_addrs_len))
-	
-	// rbd_list_lockers returns negative value for errors 
+
+	// rbd_list_lockers returns negative value for errors
 	// and *0* means no locker held on rbd image.
-	// but *0* is unexpected here because first rbd_list_lockers already 
-	// dealt with no locker case 
+	// but *0* is unexpected here because first rbd_list_lockers already
+	// dealt with no locker case
 	if int(c_locker_cnt) <= 0 {
 		return "", nil, RBDError(int(c_locker_cnt))
 	}

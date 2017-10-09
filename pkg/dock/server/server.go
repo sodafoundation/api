@@ -199,4 +199,3 @@ func GenericResponseError(code, description string) *pb.GenericResponse_Error_ {
 		},
 	}
 }
-

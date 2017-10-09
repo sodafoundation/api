@@ -162,4 +162,3 @@ func initConf(confFile string, conf interface{}) {
 		setSectionValue(section, field, cfg)
 	}
 }
-

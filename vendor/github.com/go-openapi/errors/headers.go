@@ -79,7 +79,7 @@ func InvalidResponseFormat(value string, allowed []string) *Validation {
 func (e *Validation) ValidateName(name string) *Validation {
 	if e.Name == "" && name != "" {
 		e.Name = name
-		e.message = name+e.message
+		e.message = name + e.message
 	}
 	return e
 }

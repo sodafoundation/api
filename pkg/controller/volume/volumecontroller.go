@@ -84,23 +84,23 @@ func (c *controller) CreateVolume() (*model.VolumeSpec, error) {
 	response, err := c.Client.CreateVolume(context.Background(), c.CreateVolumeOpts)
 	if err != nil {
 		log.Error("create volume failed in volume controller:", err)
-		return &model.VolumeSpec{}, err
+		return nil, err
 	}
 	defer c.Client.Close()
 
-	if result := response.GetResult(); result != nil {
-		var vol = &model.VolumeSpec{}
-		if err = json.Unmarshal([]byte(result.GetMessage()), vol); err != nil {
-			log.Error("create volume failed in volume controller:", err)
-			return &model.VolumeSpec{}, err
-		}
-		return vol, nil
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to create volume in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	errorMsg := response.GetError()
-	return &model.VolumeSpec{},
-		fmt.Errorf("failed to create volume in volume controller, code: %v, message: %v",
-			errorMsg.GetCode(), errorMsg.GetDescription())
+	var vol = &model.VolumeSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vol); err != nil {
+		log.Error("create volume failed in volume controller:", err)
+		return nil, err
+	}
+
+	return vol, nil
 
 }
 
@@ -120,17 +120,16 @@ func (c *controller) DeleteVolume() *model.Response {
 	}
 	defer c.Client.Close()
 
-	if result := response.GetResult(); result != nil {
+	if errorMsg := response.GetError(); errorMsg != nil {
 		return &model.Response{
-			Status:  "Success",
-			Message: "",
+			Status:  "Failure",
+			Message: errorMsg.GetDescription(),
 		}
 	}
 
-	errorMsg := response.GetError()
 	return &model.Response{
-		Status:  errorMsg.GetCode(),
-		Message: errorMsg.GetDescription(),
+		Status:  "Success",
+		Message: response.GetResult().GetMessage(),
 	}
 }
 
@@ -143,23 +142,23 @@ func (c *controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 	response, err := c.Client.CreateAttachment(context.Background(), c.CreateAttachmentOpts)
 	if err != nil {
 		log.Error("Create volume failed in volume controller:", err)
-		return &model.VolumeAttachmentSpec{}, err
+		return nil, err
 	}
 	defer c.Client.Close()
 
-	if result := response.GetResult(); result != nil {
-		var atc = &model.VolumeAttachmentSpec{}
-		if err = json.Unmarshal([]byte(result.GetMessage()), atc); err != nil {
-			log.Error("create attachment failed in volume controller:", err)
-			return &model.VolumeAttachmentSpec{}, err
-		}
-		return atc, nil
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to create volume attachment in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	errorMsg := response.GetError()
-	return &model.VolumeAttachmentSpec{},
-		fmt.Errorf("failed to create attachment in volume controller, code: %v, message: %v",
-			errorMsg.GetCode(), errorMsg.GetDescription())
+	var atc = &model.VolumeAttachmentSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), atc); err != nil {
+		log.Error("create volume attachment failed in volume controller:", err)
+		return nil, err
+	}
+
+	return atc, nil
 }
 
 func (c *controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
@@ -216,24 +215,23 @@ func (c *controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
 	response, err := c.Client.CreateVolumeSnapshot(context.Background(), c.CreateVolumeSnapshotOpts)
 	if err != nil {
 		log.Error("Create volume snapshot failed in volume controller:", err)
-		return &model.VolumeSnapshotSpec{}, err
+		return nil, err
 	}
 	defer c.Client.Close()
 
-	if result := response.GetResult(); result != nil {
-		var snp = &model.VolumeSnapshotSpec{}
-		if err = json.Unmarshal([]byte(result.GetMessage()), snp); err != nil {
-			log.Error("create volume snapshot failed in volume controller:", err)
-			return &model.VolumeSnapshotSpec{}, err
-		}
-		return snp, nil
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to create volume snapshot in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	errorMsg := response.GetError()
-	return &model.VolumeSnapshotSpec{},
-		fmt.Errorf("failed to create volume snapshot in volume controller, code: %v, message: %v",
-			errorMsg.GetCode(), errorMsg.GetDescription())
+	var snp = &model.VolumeSnapshotSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), snp); err != nil {
+		log.Error("create volume snapshot failed in volume controller:", err)
+		return nil, err
+	}
 
+	return snp, nil
 }
 
 func (c *controller) DeleteVolumeSnapshot() *model.Response {
@@ -252,17 +250,16 @@ func (c *controller) DeleteVolumeSnapshot() *model.Response {
 	}
 	defer c.Client.Close()
 
-	if result := response.GetResult(); result != nil {
+	if errorMsg := response.GetError(); errorMsg != nil {
 		return &model.Response{
-			Status:  "Success",
-			Message: "",
+			Status:  "Failure",
+			Message: errorMsg.GetDescription(),
 		}
 	}
 
-	errorMsg := response.GetError()
 	return &model.Response{
-		Status:  errorMsg.GetCode(),
-		Message: errorMsg.GetDescription(),
+		Status:  "Success",
+		Message: response.GetResult().GetMessage(),
 	}
 }
 
