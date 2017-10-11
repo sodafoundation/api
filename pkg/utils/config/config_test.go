@@ -262,6 +262,9 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.OsdsDock.EnableBackends[1] != "cinder" {
 		t.Error("Test OsdsDock.EnableBackends[1] error")
 	}
+	if CONF.OsdsDock.EnableBackends[2] != "sample" {
+		t.Error("Test OsdsDock.EnableBackends[2] error")
+	}
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {
 		t.Error("Test Database.Credential error")
 	}
@@ -289,5 +292,15 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Cinder.DriverName != "cinder" {
 		t.Error("Test Cinder.DriverName error")
 	}
+	if CONF.Sample.Name != "sample" {
+		t.Error("Test Sample.Name error")
+	}
+	if CONF.Sample.Description != "Sample Test" {
+		t.Error("Test Sample.Description error")
+	}
+	if CONF.Sample.DriverName != "sample" {
+		t.Error("Test Sample.DriverName error")
+	}
 
 }
+

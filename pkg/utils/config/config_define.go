@@ -46,8 +46,8 @@ type BackendProperties struct {
 }
 
 type Ceph BackendProperties
-
 type Cinder BackendProperties
+type Sample BackendProperties
 
 type Config struct {
 	Default  `conf:"default"`
@@ -56,6 +56,7 @@ type Config struct {
 	Database `conf:"database"`
 	Ceph     `conf:"ceph"`
 	Cinder   `conf:"cinder"`
+	Sample   `conf:"sample"`
 	Flag     FlagSet
 }
 
@@ -74,3 +75,4 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = GetDefaultConfig()
+
