@@ -49,7 +49,7 @@ type VolumeDriver interface {
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
-	ListPools() (*[]model.StoragePoolSpec, error)
+	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
 func Init(resourceType string) VolumeDriver {

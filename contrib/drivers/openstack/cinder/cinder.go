@@ -227,7 +227,7 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
+func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	opts := &schedulerstats.ListOpts{}
 
 	pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
@@ -242,9 +242,9 @@ func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 		return nil, err
 	}
 
-	var pols []model.StoragePoolSpec
+	var pols []*model.StoragePoolSpec
 	for _, page := range polpages {
-		pol := model.StoragePoolSpec{
+		pol := &model.StoragePoolSpec{
 			Name:          page.Name,
 			TotalCapacity: int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:  int64(page.Capabilities.FreeCapacityGB),
@@ -252,5 +252,5 @@ func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 
 		pols = append(pols, pol)
 	}
-	return &pols, nil
+	return pols, nil
 }

@@ -71,8 +71,13 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
-	return &samplePools, nil
+func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+	var pols []*model.StoragePoolSpec
+
+	for i := range samplePools {
+		pols = append(pols, &samplePools[i])
+	}
+	return pols, nil
 }
 
 var (
@@ -84,11 +89,12 @@ var (
 			Name:             "sample-pool-01",
 			Description:      "This is the first sample storage pool for testing",
 			AvailabilityZone: "nova",
-			TotalCapacity:    int64(10),
-			FreeCapacity:     int64(9),
+			TotalCapacity:    int64(100),
+			FreeCapacity:     int64(90),
 			Parameters: map[string]interface{}{
+				"diskType":  "SSD",
 				"iops":      1000,
-				"disk-type": "ssd",
+				"bandwidth": 1000,
 			},
 		},
 		{
@@ -98,11 +104,12 @@ var (
 			Name:             "sample-pool-02",
 			Description:      "This is the second sample storage pool for testing",
 			AvailabilityZone: "nova",
-			TotalCapacity:    int64(20),
-			FreeCapacity:     int64(17),
+			TotalCapacity:    int64(200),
+			FreeCapacity:     int64(170),
 			Parameters: map[string]interface{}{
-				"disk-type":    "hdd",
-				"replica-sets": 3,
+				"diskType":  "SAS",
+				"iops":      800,
+				"bandwidth": 800,
 			},
 		},
 	}

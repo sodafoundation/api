@@ -48,20 +48,9 @@ func (this *ProfilePortal) CreateProfile() {
 		return
 	}
 
-	// If profile uuid is null, generate it randomly.
-	if profile.GetId() == "" {
-		if ok := utils.S.SetUuid(profile); ok != nil {
-			reason := fmt.Sprintf("Set profile uuid failed: %s", ok.Error())
-			this.Ctx.Output.SetStatus(StatusInternalServerError)
-			this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-			log.Error(reason)
-			return
-		}
-	}
-
-	// Set profile created time.
-	if ok := utils.S.SetCreatedTimeStamp(profile); ok != nil {
-		reason := fmt.Sprintf("Set profile created time failed: %s", ok.Error())
+	// If profile uuid and created time is null, generate it randomly.
+	if err := utils.ValidateData(&profile, utils.S); err != nil {
+		reason := fmt.Sprintf("Validate profile data failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)

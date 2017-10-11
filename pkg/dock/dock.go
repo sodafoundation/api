@@ -183,7 +183,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *DockHub) ListPools() ([]*api.StoragePoolSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 

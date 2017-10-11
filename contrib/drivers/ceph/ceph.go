@@ -68,8 +68,8 @@ const (
 
 type PoolProperties struct {
 	DiskType  string `yaml:"diskType"`
-	IOPS      int    `yaml:"iops"`
-	BandWidth string `yaml:"bandWidth"`
+	IOPS      int64  `yaml:"iops"`
+	BandWidth int64  `yaml:"bandwidth"`
 }
 
 type CephConfig struct {
@@ -504,7 +504,7 @@ func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[strin
 	param := make(map[string]interface{})
 	param["diskType"] = proper.DiskType
 	param["iops"] = proper.IOPS
-	param["bandWidth"] = proper.BandWidth
+	param["bandwidth"] = proper.BandWidth
 	param["redundancyType"] = line[poolType]
 	if param["redundancyType"] == "replicated" {
 		param["replicateSize"] = line[poolTypeSize]
@@ -515,7 +515,7 @@ func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[strin
 	return &param
 }
 
-func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
+func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	pc, err := d.getPoolsCapInfo()
 	if err != nil {
 		log.Error(err)
@@ -532,7 +532,7 @@ func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 		return nil, err
 	}
 
-	var poolList []model.StoragePoolSpec
+	var pols []*model.StoragePoolSpec
 	for i := range pc {
 		name := pc[i][poolName]
 		c := getConfig()
@@ -543,7 +543,7 @@ func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
-		pool := model.StoragePoolSpec{
+		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
@@ -554,7 +554,7 @@ func (d *Driver) ListPools() (*[]model.StoragePoolSpec, error) {
 			FreeCapacity:  maxAvailCap,
 			Parameters:    *param,
 		}
-		poolList = append(poolList, pool)
+		pols = append(pols, pol)
 	}
-	return &poolList, nil
+	return pols, nil
 }
