@@ -16,6 +16,7 @@ package ceph
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"unsafe"
 
@@ -314,7 +315,7 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["rbd"].IOPS != 1000 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["rbd"].BandWidth != "1G" {
+	if conf.Pool["rbd"].BandWidth != 1000 {
 		t.Error("Test ConfigFile BandWidth failed!")
 	}
 	if conf.Pool["test"].DiskType != "SAS" {
@@ -323,7 +324,7 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["test"].IOPS != 800 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["test"].BandWidth != "800M" {
+	if conf.Pool["test"].BandWidth != 800 {
 		t.Error("Test ConfigFile BandWidth failed!")
 	}
 }
@@ -360,65 +361,67 @@ func TestListPools(t *testing.T) {
 	})
 
 	d := Driver{}
-	pools, err := d.ListPools()
+	pols, err := d.ListPools()
 	if err != nil {
 		t.Errorf("Test List Pools error")
 	}
-	if (*pools)[0].Name != "rbd" {
+	if pols[0].Name != "rbd" {
 		t.Errorf("Test List Pools Name error")
 	}
-	if (*pools)[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
+	if pols[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
 		t.Errorf("Test List Pools UUID error")
 	}
-	if (*pools)[0].FreeCapacity != 2 {
+	if pols[0].FreeCapacity != 2 {
 		t.Errorf("Test List Pools FreeCapacity error")
 	}
 
-	if (*pools)[0].TotalCapacity != 6 {
+	if pols[0].TotalCapacity != 6 {
 		t.Errorf("Test List Pools TotalCapacity error")
 	}
 
-	if (*pools)[0].Parameters["redundancyType"] != "replicated" {
+	if pols[0].Parameters["redundancyType"] != "replicated" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if (*pools)[0].Parameters["replicateSize"] != "3" {
+	if pols[0].Parameters["replicateSize"] != "3" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if (*pools)[0].Parameters["crushRuleset"] != "0" {
+	if pols[0].Parameters["crushRuleset"] != "0" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if (*pools)[0].Parameters["diskType"] != "SSD" {
+	if pols[0].Parameters["diskType"] != "SSD" {
 		t.Errorf("Test List Pools diskType error")
 	}
 
-	if (*pools)[0].Parameters["iops"] != 1000 {
-		t.Errorf("Test List Pools ipos error")
+	fmt.Println(pols[0].Parameters["iops"], pols[0].Parameters["bandwidth"])
+
+	if pols[0].Parameters["iops"] != int64(1000) {
+		t.Errorf("Test List Pools iops error")
 	}
 
-	if (*pools)[0].Parameters["bandWidth"] != "1G" {
+	if pols[0].Parameters["bandwidth"] != int64(1000) {
 		t.Errorf("Test List Pools bandWidth error")
 	}
 
-	if (*pools)[5].Name != "ecpool" {
+	if pols[5].Name != "ecpool" {
 		t.Errorf("Test List Pools Name error")
 	}
 
-	if (*pools)[5].Parameters["redundancyType"] != "erasure" {
+	if pols[5].Parameters["redundancyType"] != "erasure" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if (*pools)[5].Parameters["erasureSize"] != "5" {
+	if pols[5].Parameters["erasureSize"] != "5" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if (*pools)[5].Parameters["crushRuleset"] != "2" {
+	if pols[5].Parameters["crushRuleset"] != "2" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if len(*pools) != 6 {
+	if len(pols) != 6 {
 		t.Errorf("Test List Pools len error")
 	}
 }

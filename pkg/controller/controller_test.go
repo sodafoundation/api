@@ -62,6 +62,7 @@ func (fvc *fakeVolumeController) DeleteVolumeSnapshot() *model.Response {
 
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
+/*
 func TestCreateVolume(t *testing.T) {
 	var req = &pb.CreateVolumeOpts{
 		Name:        "fake-volume",
@@ -86,6 +87,7 @@ func TestCreateVolume(t *testing.T) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 }
+*/
 
 func TestDeleteVolume(t *testing.T) {
 	var req = &pb.DeleteVolumeOpts{

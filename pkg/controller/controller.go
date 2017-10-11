@@ -141,7 +141,7 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 
-	polInfo, err := c.SelectSupportedPool(c.policyController.StorageTag().GetSyncTag())
+	polInfo, err := c.SelectSupportedPool(c.profile)
 	if err != nil {
 		log.Error("When search supported pool resource:", err)
 		return nil, err

@@ -27,8 +27,16 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/opa"
 	"github.com/opensds/opensds/pkg/utils"
 )
+
+func init() {
+	var input = []*model.ProfileSpec{}
+	if err := opa.RegisterData(&input); err != nil {
+		panic(err)
+	}
+}
 
 type ProfilePortal struct {
 	beego.Controller
@@ -48,20 +56,9 @@ func (this *ProfilePortal) CreateProfile() {
 		return
 	}
 
-	// If profile uuid is null, generate it randomly.
-	if profile.GetId() == "" {
-		if ok := utils.S.SetUuid(profile); ok != nil {
-			reason := fmt.Sprintf("Set profile uuid failed: %s", ok.Error())
-			this.Ctx.Output.SetStatus(StatusInternalServerError)
-			this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-			log.Error(reason)
-			return
-		}
-	}
-
-	// Set profile created time.
-	if ok := utils.S.SetCreatedTimeStamp(profile); ok != nil {
-		reason := fmt.Sprintf("Set profile created time failed: %s", ok.Error())
+	// If profile uuid and created time is null, generate it randomly.
+	if err := utils.ValidateData(&profile, utils.S); err != nil {
+		reason := fmt.Sprintf("Validate profile data failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -72,6 +69,14 @@ func (this *ProfilePortal) CreateProfile() {
 	result, err := db.C.CreateProfile(&profile)
 	if err != nil {
 		reason := fmt.Sprintf("Create profile failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
+	if err := opa.PatchData(&profile, "add", "-"); err != nil {
+		reason := fmt.Sprintf("Patch profile data failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)

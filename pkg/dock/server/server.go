@@ -39,6 +39,7 @@ This module implements the entry into operations of storageDock module.
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 
@@ -85,7 +86,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 		return &res, err
 	}
 
-	res.Reply = GenericResponseResult(vol.GetId())
+	res.Reply = GenericResponseResult(vol)
 	return &res, nil
 }
 
@@ -120,7 +121,7 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 		return &res, err
 	}
 
-	res.Reply = GenericResponseResult(atc.GetId())
+	res.Reply = GenericResponseResult(atc)
 	return &res, nil
 }
 
@@ -137,7 +138,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 		return &res, err
 	}
 
-	res.Reply = GenericResponseResult(snp.GetId())
+	res.Reply = GenericResponseResult(snp)
 	return &res, nil
 }
 
@@ -183,10 +184,19 @@ func ListenAndServe(srv pb.DockServer) {
 	}
 }
 
-func GenericResponseResult(message string) *pb.GenericResponse_Result_ {
+func GenericResponseResult(message interface{}) *pb.GenericResponse_Result_ {
+	var msg string
+	switch message.(type) {
+	case string:
+		msg = message.(string)
+	default:
+		msgJSON, _ := json.Marshal(message)
+		msg = string(msgJSON)
+	}
+
 	return &pb.GenericResponse_Result_{
 		Result: &pb.GenericResponse_Result{
-			Message: message,
+			Message: msg,
 		},
 	}
 }

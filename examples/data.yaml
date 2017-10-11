@@ -1,0 +1,51 @@
+profiles:
+- name: default
+  description: default policy
+  extra:
+    capacity: 10
+- name: silver
+  description: silver policy
+  extra:
+    iops: 300
+    bandwidth: 500
+    capacity: 50
+    diskType: SAS
+- name: gold
+  description: gold policy
+  extra:
+    iops: 800
+    bandwidth: 800
+    capacity: 50
+    diskType: SSD
+pools:
+- id: 084bf71e-a102-11e7-88a8-e31fe6d52248
+  createAt: 2017-10-11T09:47:30
+  name: sample-pool-01
+  description: This is the first sample storage pool for testing
+  totalCapacity: 100
+  freeCapacity: 90
+  availabilityZone: nova
+  dockId: d6a3ca0c-67a4-5a19-980a-be3c109b8cbf
+  parameters:
+    bandwidth: 1000
+    diskType: SSD
+    iops: 1000
+- id: a594b8ac-a103-11e7-985f-d723bcf01b5f
+  createAt: 2017-10-11T09:47:30
+  name: sample-pool-02
+  description: This is the second sample storage pool for testing
+  totalCapacity: 200
+  freeCapacity: 100
+  availabilityZone: nova
+  dockId: d6a3ca0c-67a4-5a19-980a-be3c109b8cbf
+  parameters:
+    bandwidth: 800
+    diskType: SAS
+    iops: 500
+docks:
+- id: d6a3ca0c-67a4-5a19-980a-be3c109b8cbf
+  createAt: 2017-10-11T09:47:30
+  name: sample
+  description: Sample Test
+  endpoint: localhost:50050
+  driverName: sample

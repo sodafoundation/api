@@ -27,11 +27,11 @@ import (
 
 	"github.com/opensds/opensds/pkg/db"
 	api "github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/opa"
 )
 
 type Selector interface {
-	SelectSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error)
+	SelectSupportedPool(prf *api.ProfileSpec) (*api.StoragePoolSpec, error)
 
 	SelectDock(input interface{}) (*api.DockSpec, error)
 }
@@ -52,32 +52,8 @@ func NewFakeSelector() Selector {
 	}
 }
 
-func (s *selector) SelectSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error) {
-	pols, err := s.storBox.ListPools()
-	if err != nil {
-		log.Error("When list pool resources in db:", err)
-		return nil, err
-	}
-
-	// Find if the desired storage tags are contained in any profile
-	for _, pol := range *pols {
-		var isSupported = true
-		for tag := range tags {
-			if !utils.Contained(tag, pol.Parameters) {
-				isSupported = false
-				break
-			}
-			if pol.Parameters[tag] != "true" {
-				isSupported = false
-				break
-			}
-		}
-		if isSupported {
-			return &pol, nil
-		}
-	}
-
-	return nil, errors.New("No pool resource supported!")
+func (s *selector) SelectSupportedPool(prf *api.ProfileSpec) (*api.StoragePoolSpec, error) {
+	return opa.GetPoolData(prf.GetName())
 }
 
 func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {

@@ -96,7 +96,8 @@ func (c *controller) CreateVolume() (*model.VolumeSpec, error) {
 
 	var vol = &model.VolumeSpec{}
 	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vol); err != nil {
-		log.Error("create volume failed in volume controller:", err)
+		log.Errorf("create volume failed in volume controller, got %v, error: %v\n",
+			response.GetResult().GetMessage(), err)
 		return nil, err
 	}
 

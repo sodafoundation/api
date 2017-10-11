@@ -1,0 +1,14 @@
+configFile: /etc/ceph/ceph.conf
+pool:
+  "rbd":
+    diskType: SSD
+    iops: 1000
+    bandwidth: 1000
+  "pool01":
+    diskType: SAS
+    iops: 800
+    bandwidth: 800
+  "pool02":
+    diskType: SATA
+    iops: 600
+    bandwidth: 500
