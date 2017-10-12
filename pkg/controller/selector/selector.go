@@ -60,7 +60,7 @@ func (s *selector) SelectSupportedPool(tags map[string]string) (*api.StoragePool
 	}
 
 	// Find if the desired storage tags are contained in any profile
-	for _, pol := range *pols {
+	for _, pol := range pols {
 		var isSupported = true
 		for tag := range tags {
 			if !utils.Contained(tag, pol.Parameters) {
@@ -73,7 +73,7 @@ func (s *selector) SelectSupportedPool(tags map[string]string) (*api.StoragePool
 			}
 		}
 		if isSupported {
-			return &pol, nil
+			return pol, nil
 		}
 	}
 
@@ -109,9 +109,9 @@ func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
 		pol = input.(*api.StoragePoolSpec)
 	}
 
-	for _, dck := range *dcks {
+	for _, dck := range dcks {
 		if dck.GetId() == pol.GetDockId() {
-			return &dck, nil
+			return dck, nil
 		}
 	}
 	return nil, errors.New("No dock resource supported!")

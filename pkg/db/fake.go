@@ -26,8 +26,8 @@ func NewFakeDbClient() Client {
 	return &FakeDbClient{}
 }
 
-func (fc *FakeDbClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreateDock(dck *model.DockSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
@@ -40,8 +40,13 @@ func (fc *FakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
 	return nil, errors.New("Can't find this dock resource!")
 }
 
-func (fc *FakeDbClient) ListDocks() (*[]model.DockSpec, error) {
-	return &sampleDocks, nil
+func (fc *FakeDbClient) ListDocks() ([]*model.DockSpec, error) {
+	var dcks []*model.DockSpec
+
+	for i := range sampleDocks {
+		dcks = append(dcks, &sampleDocks[i])
+	}
+	return dcks, nil
 }
 
 func (fc *FakeDbClient) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
@@ -52,8 +57,8 @@ func (fc *FakeDbClient) DeleteDock(dckID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreatePool(pol *model.StoragePoolSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
@@ -66,8 +71,13 @@ func (fc *FakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return nil, errors.New("Can't find this pool resource!")
 }
 
-func (fc *FakeDbClient) ListPools() (*[]model.StoragePoolSpec, error) {
-	return &samplePools, nil
+func (fc *FakeDbClient) ListPools() ([]*model.StoragePoolSpec, error) {
+	var pols []*model.StoragePoolSpec
+
+	for i := range samplePools {
+		pols = append(pols, &samplePools[i])
+	}
+	return pols, nil
 }
 
 func (fc *FakeDbClient) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
@@ -78,8 +88,8 @@ func (fc *FakeDbClient) DeletePool(polID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreateProfile(prf *model.ProfileSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
@@ -92,8 +102,13 @@ func (fc *FakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return nil, errors.New("Can't find this profile resource!")
 }
 
-func (fc *FakeDbClient) ListProfiles() (*[]model.ProfileSpec, error) {
-	return &sampleProfiles, nil
+func (fc *FakeDbClient) ListProfiles() ([]*model.ProfileSpec, error) {
+	var prfs []*model.ProfileSpec
+
+	for i := range sampleProfiles {
+		prfs = append(prfs, &sampleProfiles[i])
+	}
+	return prfs, nil
 }
 
 func (fc *FakeDbClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
@@ -116,15 +131,15 @@ func (fc *FakeDbClient) RemoveExtraProperty(prfID, extraKey string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreateVolume(vol *model.VolumeSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return &sampleVolume, nil
 }
 
-func (fc *FakeDbClient) ListVolumes() (*[]model.VolumeSpec, error) {
+func (fc *FakeDbClient) ListVolumes() ([]*model.VolumeSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -132,15 +147,15 @@ func (fc *FakeDbClient) DeleteVolume(volID string) error {
 	return errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetVolumeAttachment(volID, attachmentID string) (*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) ListVolumeAttachments(volID string) (*[]model.VolumeAttachmentSpec, error) {
+func (fc *FakeDbClient) ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -152,15 +167,15 @@ func (fc *FakeDbClient) DeleteVolumeAttachment(volID, attachmentID string) error
 	return errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	return nil, errors.New("Not implemented!")
+func (fc *FakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error {
+	return errors.New("Not implemented!")
 }
 
 func (fc *FakeDbClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (fc *FakeDbClient) ListVolumeSnapshots() (*[]model.VolumeSnapshotSpec, error) {
+func (fc *FakeDbClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
