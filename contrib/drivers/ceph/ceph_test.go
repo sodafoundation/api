@@ -16,7 +16,6 @@ package ceph
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"unsafe"
 
@@ -394,8 +393,6 @@ func TestListPools(t *testing.T) {
 	if pols[0].Parameters["diskType"] != "SSD" {
 		t.Errorf("Test List Pools diskType error")
 	}
-
-	fmt.Println(pols[0].Parameters["iops"], pols[0].Parameters["bandwidth"])
 
 	if pols[0].Parameters["iops"] != int64(1000) {
 		t.Errorf("Test List Pools iops error")

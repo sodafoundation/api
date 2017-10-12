@@ -58,6 +58,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error
 		log.Error("When calling volume driver to create volume:", err)
 		return nil, err
 	}
+	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Validate the data.
 	if err = utils.ValidateData(vol, utils.S); err != nil {
