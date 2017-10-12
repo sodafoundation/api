@@ -120,8 +120,8 @@ func (dd *DockDiscoverer) Store() error {
 		}
 
 		// Call db module to create dock resource.
-		if err = db.C.CreateDock(&dock); err != nil {
-			log.Error("When create dock %s in db: %v\n", dock.GetId(), err)
+		if err = db.C.CreateDock(dck); err != nil {
+			log.Error("When create dock %s in db: %v\n", dck.GetId(), err)
 			return err
 		}
 	}
@@ -134,8 +134,8 @@ func (dd *DockDiscoverer) Store() error {
 		}
 
 		// Call db module to create pool resource.
-		if err = db.C.CreatePool(&pool); err != nil {
-			log.Error("When create pool %s in db: %v\n", pool.GetId(), err)
+		if err = db.C.CreatePool(pol); err != nil {
+			log.Error("When create pool %s in db: %v\n", pol.GetId(), err)
 			return err
 		}
 	}
