@@ -40,6 +40,7 @@ const (
 )
 
 func Run(host string) {
+
 	ns :=
 		beego.NewNamespace("/api",
 			beego.NSCond(func(ctx *context.Context) bool {
@@ -53,7 +54,7 @@ func Run(host string) {
 			// List all opensds api versions
 			beego.NSRouter("/", &VersionPortal{}, "get:ListVersions"),
 			// Show specified api version
-			beego.NSRouter("/:apiVersion", &SpecifiedVersionPortal{}, "get:GetVersion"),
+			beego.NSRouter("/:apiVersion", &VersionPortal{}, "get:GetVersion"),
 
 			beego.NSNamespace("/v1alpha",
 				// List all dock services, including a list of dock object
