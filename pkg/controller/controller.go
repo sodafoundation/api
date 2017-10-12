@@ -59,8 +59,8 @@ func NewControllerWithVolumeConfig(
 		c.profile = prf
 
 		// Generate CreateVolumeOpts by parsing input VolumeSpec.
-		c.createVolumeOpts = func(vol *model.VolumeSpec) *pb.CreateVolumeOpts {
-			return &pb.CreateVolumeOpts{
+		c.createVolumeOpts = func(c *Controller, vol *model.VolumeSpec) *pb.CreateVolumeOpts {
+			opt := &pb.CreateVolumeOpts{
 				Id:               vol.GetId(),
 				Name:             vol.GetName(),
 				Description:      vol.GetDescription(),
@@ -68,7 +68,12 @@ func NewControllerWithVolumeConfig(
 				AvailabilityZone: vol.GetAvailabilityZone(),
 				ProfileId:        vol.GetProfileId(),
 			}
-		}(vol)
+			if capInterface, ok := c.profile.Extra["capacity"]; ok {
+				opt.Size = int64(capInterface.(float64))
+			}
+			return opt
+		}(c, vol)
+
 		// Generate DeleteVolumeOpts by parsing input VolumeSpec.
 		c.deleteVolumeOpts = func(vol *model.VolumeSpec) *pb.DeleteVolumeOpts {
 			return &pb.DeleteVolumeOpts{

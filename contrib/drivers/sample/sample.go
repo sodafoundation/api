@@ -115,9 +115,7 @@ var (
 	}
 
 	sampleVolume = model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		},
+		BaseModel:        &model.BaseModel{},
 		Name:             "sample-volume",
 		Description:      "This is a sample volume for testing",
 		Size:             int64(1),
