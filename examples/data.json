@@ -4,7 +4,7 @@
 			"name": "default",
 			"description": "default policy",
 			"extra": {
-				"capacity": 10
+				"capacity": 5
 			}
 		},
 		{
@@ -14,7 +14,7 @@
 				"iops": 300,
 				"bandwidth": 500,
 				"diskType":"SAS",
-				"capacity": 50
+				"capacity": 5
 			}
 		},
 		{
@@ -24,7 +24,7 @@
 				"iops": 800,
 				"bandwidth": 800,
 				"diskType":"SSD",
-				"capacity": 50
+				"capacity": 5
 			}
 		}
 	]

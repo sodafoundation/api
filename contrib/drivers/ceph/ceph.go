@@ -210,7 +210,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		},
 		Name:             imgName.GetName(),
 		Size:             size,
-		Description:      "",
+		Description:      opt.GetDescription(),
 		AvailabilityZone: "ceph",
 	}, nil
 }

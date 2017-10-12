@@ -146,14 +146,14 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 		log.Error("When search supported pool resource:", err)
 		return nil, err
 	}
+	c.createVolumeOpts.PoolId = polInfo.GetId()
+	log.Infof("Selected supported pool: %s", polInfo.GetId())
 
 	dockInfo, err := c.SelectDock(polInfo)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-
-	c.createVolumeOpts.PoolId = polInfo.GetId()
 	c.createVolumeOpts.DockId = dockInfo.GetId()
 	c.createVolumeOpts.DriverName = dockInfo.GetDriverName()
 
@@ -184,7 +184,6 @@ func (c *Controller) DeleteVolume() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-
 	c.deleteVolumeOpts.DockId = dockInfo.GetId()
 	c.deleteVolumeOpts.DriverName = dockInfo.GetDriverName()
 
@@ -211,7 +210,6 @@ func (c *Controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-
 	c.createAttachmentOpts.DockId = dockInfo.GetId()
 	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
 
@@ -226,7 +224,6 @@ func (c *Controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-
 	c.createAttachmentOpts.DockId = dockInfo.GetId()
 	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
 
@@ -244,7 +241,6 @@ func (c *Controller) DeleteVolumeAttachment() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-
 	c.createAttachmentOpts.DockId = dockInfo.GetId()
 	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
 
@@ -259,7 +255,6 @@ func (c *Controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-
 	c.createVolumeSnapshotOpts.DockId = dockInfo.GetId()
 	c.createVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
 
@@ -277,7 +272,6 @@ func (c *Controller) DeleteVolumeSnapshot() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-
 	c.deleteVolumeSnapshotOpts.DockId = dockInfo.GetId()
 	c.deleteVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
 

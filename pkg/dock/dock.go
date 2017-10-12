@@ -59,6 +59,8 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error
 		return nil, err
 	}
 
+	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
+
 	// Validate the data.
 	if err = utils.ValidateData(vol, utils.S); err != nil {
 		log.Error("When validate volume data:", err)
