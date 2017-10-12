@@ -85,9 +85,9 @@ func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
 		pol = input.(*api.StoragePoolSpec)
 	}
 
-	for _, dck := range *dcks {
+	for _, dck := range dcks {
 		if dck.GetId() == pol.GetDockId() {
-			return &dck, nil
+			return dck, nil
 		}
 	}
 	return nil, errors.New("No dock resource supported!")

@@ -68,7 +68,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error
 	}
 
 	// Store the volume data into database.
-	if _, err = db.C.CreateVolume(vol); err != nil {
+	if err = db.C.CreateVolume(vol); err != nil {
 		log.Error("When create volume in db module:", err)
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 		return nil, err
 	}
 
-	if _, err = db.C.CreateVolumeAttachment(opt.GetVolumeId(), atc); err != nil {
+	if err = db.C.CreateVolumeAttachment(opt.GetVolumeId(), atc); err != nil {
 		log.Error("Error occured in dock module when create volume attachment in db:", err)
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeS
 		log.Error("When validate volume snapshot data:", err)
 	}
 
-	if _, err := db.C.CreateVolumeSnapshot(snp); err != nil {
+	if err := db.C.CreateVolumeSnapshot(snp); err != nil {
 		log.Error("Error occured in dock module when create volume snapshot in db:", err)
 		return nil, err
 	}

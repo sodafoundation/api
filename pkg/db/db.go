@@ -45,31 +45,31 @@ func Init(db *Database) {
 }
 
 type Client interface {
-	CreateDock(dck *model.DockSpec) (*model.DockSpec, error)
+	CreateDock(dck *model.DockSpec) error
 
 	GetDock(dckID string) (*model.DockSpec, error)
 
-	ListDocks() (*[]model.DockSpec, error)
+	ListDocks() ([]*model.DockSpec, error)
 
 	UpdateDock(dckID, name, desp string) (*model.DockSpec, error)
 
 	DeleteDock(dckID string) error
 
-	CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error)
+	CreatePool(pol *model.StoragePoolSpec) error
 
 	GetPool(polID string) (*model.StoragePoolSpec, error)
 
-	ListPools() (*[]model.StoragePoolSpec, error)
+	ListPools() ([]*model.StoragePoolSpec, error)
 
 	UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
 	DeletePool(polID string) error
 
-	CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error)
+	CreateProfile(prf *model.ProfileSpec) error
 
 	GetProfile(prfID string) (*model.ProfileSpec, error)
 
-	ListProfiles() (*[]model.ProfileSpec, error)
+	ListProfiles() ([]*model.ProfileSpec, error)
 
 	UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
 
@@ -81,29 +81,29 @@ type Client interface {
 
 	RemoveExtraProperty(prfID, extraKey string) error
 
-	CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
+	CreateVolume(vol *model.VolumeSpec) error
 
 	GetVolume(volID string) (*model.VolumeSpec, error)
 
-	ListVolumes() (*[]model.VolumeSpec, error)
+	ListVolumes() ([]*model.VolumeSpec, error)
 
 	DeleteVolume(volID string) error
 
-	CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
+	CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error
 
 	GetVolumeAttachment(volID, attachmentID string) (*model.VolumeAttachmentSpec, error)
 
-	ListVolumeAttachments(volID string) (*[]model.VolumeAttachmentSpec, error)
+	ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error)
 
 	UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error)
 
 	DeleteVolumeAttachment(volID, attachmentID string) error
 
-	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
+	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error
 
 	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
 
-	ListVolumeSnapshots() (*[]model.VolumeSnapshotSpec, error)
+	ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeSnapshot(snapshotID string) error
 }

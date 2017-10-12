@@ -38,9 +38,9 @@ func SearchProfile(prfId string, dbCli db.Client) (*model.ProfileSpec, error) {
 			return nil, err
 		}
 
-		for _, prf := range *prfs {
+		for _, prf := range prfs {
 			if prf.GetName() == "default" {
-				return &prf, nil
+				return prf, nil
 			}
 		}
 

@@ -75,3 +75,4 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = GetDefaultConfig()
+

@@ -102,7 +102,7 @@ func findRemainingSnapshot(volumeId string) ([]string, error) {
 		return remainingSnapshots, err
 	}
 
-	for _, snap := range *snapshots {
+	for _, snap := range snapshots {
 		if snap.VolumeId != volumeId {
 			continue
 		}

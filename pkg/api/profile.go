@@ -66,8 +66,7 @@ func (this *ProfilePortal) CreateProfile() {
 	}
 
 	// Call db api module to handle create profile request.
-	result, err := db.C.CreateProfile(&profile)
-	if err != nil {
+	if err := db.C.CreateProfile(&profile); err != nil {
 		reason := fmt.Sprintf("Create profile failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
@@ -84,7 +83,7 @@ func (this *ProfilePortal) CreateProfile() {
 	}
 
 	// Marshal the result.
-	body, err := json.Marshal(result)
+	body, err := json.Marshal(&profile)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal profile created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
