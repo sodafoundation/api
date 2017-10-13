@@ -1,0 +1,7 @@
+/bin
+*.log
+*.json
+*.yaml
+*.conf
+*.md
+.DS_Store
