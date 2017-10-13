@@ -23,8 +23,9 @@ package policy
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/golang/glog"
 	"strconv"
+
+	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/utils"
 )
@@ -32,12 +33,16 @@ import (
 const (
 	POLICY_TYPE_MAPPING_TABLE = `{
 		"iops": "feature",
+		"bandwidth": "feature",
+		"diskType": "feature",
 		"thinProvision": "feature",
 		"highAvailability": "feature",
 		"intervalSnapshot": "operation",
 		"deleteSnapshotPolicy": "operation"
 	}`
 	POLICY_LIFECIRCLE_TABLE = `{
+		"iops": 1,
+		"bandwidth": 1,
 		"iops": 1,
 		"thinProvision": 1,
 		"highAvailability": 1,

@@ -58,6 +58,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error
 		log.Error("When calling volume driver to create volume:", err)
 		return nil, err
 	}
+	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Validate the data.
 	if err = utils.ValidateData(vol, utils.S); err != nil {
@@ -183,7 +184,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *DockHub) ListPools() (*[]api.StoragePoolSpec, error) {
+func (d *DockHub) ListPools() ([]*api.StoragePoolSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(d.ResourceType)
 

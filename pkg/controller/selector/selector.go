@@ -26,14 +26,14 @@ import (
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
 type Selector interface {
-	SelectSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error)
+	SelectSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error)
 
-	SelectDock(input interface{}) (*api.DockSpec, error)
+	SelectDock(input interface{}) (*model.DockSpec, error)
 }
 
 type selector struct {
@@ -52,7 +52,7 @@ func NewFakeSelector() Selector {
 	}
 }
 
-func (s *selector) SelectSupportedPool(tags map[string]string) (*api.StoragePoolSpec, error) {
+func (s *selector) SelectSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error) {
 	pols, err := s.storBox.ListPools()
 	if err != nil {
 		log.Error("When list pool resources in db:", err)
@@ -80,14 +80,14 @@ func (s *selector) SelectSupportedPool(tags map[string]string) (*api.StoragePool
 	return nil, errors.New("No pool resource supported!")
 }
 
-func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
+func (s *selector) SelectDock(input interface{}) (*model.DockSpec, error) {
 	dcks, err := s.storBox.ListDocks()
 	if err != nil {
 		log.Error("When list dock resources in db:", err)
 		return nil, err
 	}
 
-	var pol *api.StoragePoolSpec
+	var pol *model.StoragePoolSpec
 
 	switch input.(type) {
 	case string:
@@ -105,8 +105,8 @@ func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
 			log.Errorf("When get pool %s in db: %v\n", vol.GetPoolId(), err)
 			return nil, err
 		}
-	case *api.StoragePoolSpec:
-		pol = input.(*api.StoragePoolSpec)
+	case *model.StoragePoolSpec:
+		pol = input.(*model.StoragePoolSpec)
 	}
 
 	for _, dck := range dcks {
