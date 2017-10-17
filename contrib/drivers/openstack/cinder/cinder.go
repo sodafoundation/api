@@ -25,9 +25,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	pb "github.com/opensds/opensds/pkg/dock/proto"
-	"github.com/opensds/opensds/pkg/model"
-
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -35,6 +32,9 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 	snapshotsv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
+	"github.com/satori/go.uuid"
 )
 
 var conf = CinderConfig{}
@@ -74,6 +74,8 @@ func (d *Driver) Setup() error {
 
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: d.config.IdentityEndpoint,
+		DomainID:         d.config.DomainID,
+		DomainName:       d.config.DomainName,
 		Username:         d.config.Username,
 		Password:         d.config.Password,
 		TenantID:         d.config.TenantID,
@@ -245,6 +247,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 	for _, page := range polpages {
 		pol := &model.StoragePoolSpec{
+			BaseModel: &model.BaseModel{
+				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
+			},
 			Name:          page.Name,
 			TotalCapacity: int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:  int64(page.Capabilities.FreeCapacityGB),
@@ -254,3 +259,4 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+
