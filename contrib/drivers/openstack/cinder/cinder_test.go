@@ -20,3 +20,50 @@ Go SDK.
 */
 
 package cinder
+
+import (
+	"github.com/bouk/monkey"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/opensds/opensds/pkg/utils/config"
+	"testing"
+)
+
+func TestSetup(t *testing.T) {
+	var opt gophercloud.AuthOptions
+	defer monkey.UnpatchAll()
+	monkey.Patch(openstack.AuthenticatedClient,
+		func(options gophercloud.AuthOptions) (*gophercloud.ProviderClient, error) {
+			opt = options
+			return &gophercloud.ProviderClient{}, nil
+		})
+	monkey.Patch(openstack.NewBlockStorageV2,
+		func(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+			return &gophercloud.ServiceClient{}, nil
+		})
+
+	config.CONF.OsdsDock.CinderConfig = "testdata/cinder.yaml"
+	d := Driver{}
+	d.Setup()
+	if opt.IdentityEndpoint != "http://192.168.56.104/identity" {
+		t.Error("IdentityEndpoint error.")
+	}
+	if opt.DomainID != "Default" {
+		t.Error("DomainID error.")
+	}
+	if opt.DomainName != "Default" {
+		t.Error("DomainName error.")
+	}
+	if opt.Username != "admin" {
+		t.Error("Username error.")
+	}
+	if opt.Password != "admin" {
+		t.Error("Password error.")
+	}
+	if opt.TenantID != "04154b841eb644a3947506c54fa73c76" {
+		t.Error("TenantID error.")
+	}
+	if opt.TenantName != "admin" {
+		t.Error("TenantName error.")
+	}
+}
