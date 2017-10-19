@@ -22,7 +22,6 @@ Go SDK.
 package cinder
 
 import (
-	"encoding/json"
 	"io/ioutil"
 
 	log "github.com/golang/glog"
@@ -34,7 +33,9 @@ import (
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"gopkg.in/yaml.v2"
 )
 
 var conf = CinderConfig{}
@@ -47,29 +48,32 @@ type Driver struct {
 	config CinderConfig
 }
 
+type AuthOptions struct {
+	IdentityEndpoint string `yaml:"endpoint,omitempty"`
+	DomainID         string `yaml:"domainId,omitempty"`
+	DomainName       string `yaml:"domainName,omitempty"`
+	Username         string `yaml:"username,omitempty"`
+	Password         string `yaml:"password,omitempty"`
+	TenantID         string `yaml:"tenantId,omitempty"`
+	TenantName       string `yaml:"tenantName,omitempty"`
+}
+
 type CinderConfig struct {
-	IdentityEndpoint string `json:"endpoint,omitempty"`
-	DomainID         string `json:"-"`
-	DomainName       string `json:"name,omitempty"`
-	Username         string `json:"username,omitempty"`
-	Password         string `json:"password,omitempty"`
-	TenantID         string `json:"tenantId,omitempty"`
-	TenantName       string `json:"tenantName,omitempty"`
+	AuthOptions `yaml:"authOptions"`
 }
 
 func (d *Driver) Setup() error {
 	// Read cinder config file
-	userJSON, err := ioutil.ReadFile("/etc/opensds/config.json")
+	confYaml, err := ioutil.ReadFile(config.CONF.CinderConfig)
 	if err != nil {
-		log.Error("When read cinder config file:", err)
+		log.Fatalf("Read ceph config yaml file (%s) failed, reason:(%v)", config.CONF.CinderConfig, err)
 		return err
 	}
-
-	// Marshal the result
-	if err = json.Unmarshal(userJSON, &conf); err != nil {
+	err = yaml.Unmarshal([]byte(confYaml), &conf)
+	if err != nil {
+		log.Fatal("Parse error: %v", err)
 		return err
 	}
-
 	d.config = conf
 
 	opts := gophercloud.AuthOptions{
@@ -93,7 +97,6 @@ func (d *Driver) Setup() error {
 		log.Error("When get block storage session:", err)
 		return err
 	}
-
 	return nil
 }
 
