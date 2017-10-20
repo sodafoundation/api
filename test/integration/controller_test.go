@@ -15,6 +15,7 @@
 package integration
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -44,7 +45,8 @@ func TestCreateVolume(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(vol)
+	volBody, _ := json.MarshalIndent(vol, "", "	")
+	fmt.Println(string(volBody))
 }
 
 func TestDeleteVolume(t *testing.T) {
@@ -63,7 +65,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(atc)
+	atcBody, _ := json.MarshalIndent(atc, "", "	")
+	fmt.Println(string(atcBody))
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
@@ -74,7 +77,8 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(snp)
+	snpBody, _ := json.MarshalIndent(snp, "", "	")
+	fmt.Println(string(snpBody))
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
