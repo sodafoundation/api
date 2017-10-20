@@ -1,3 +1,6 @@
+# Build: sudo docker build . -t leonwanghui/osdsdock:integration-test
+# Run: sudo docker run -d --net=host leonwanghui/osdsdock:integration-test
+
 FROM golang:1.9
 
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>
