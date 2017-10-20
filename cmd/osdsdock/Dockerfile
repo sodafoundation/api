@@ -10,7 +10,7 @@ MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 COPY osdsdock /usr/bin
 
 # Install some packages before running command.
-RUN apt-get update && apt-get install -y librados-dev librbd-dev
+RUN apt-get update && apt-get install -y librados-dev librbd-dev ceph-common
 
 # Define default command.
 CMD ["/usr/bin/osdsdock"]

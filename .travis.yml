@@ -39,3 +39,4 @@ script:
   - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
   - go test -v github.com/opensds/opensds/contrib/... -cover
+  - sudo github.com/test/integration.sh

@@ -54,7 +54,8 @@ func NewController(
 	deleteVolumeOpts *pb.DeleteVolumeOpts,
 	createVolumeSnapshotOpts *pb.CreateVolumeSnapshotOpts,
 	deleteVolumeSnapshotOpts *pb.DeleteVolumeSnapshotOpts,
-	createAttachmentOpts *pb.CreateAttachmentOpts) Controller {
+	createAttachmentOpts *pb.CreateAttachmentOpts,
+) Controller {
 	return &controller{
 		Client:                   client.NewClient(),
 		CreateVolumeOpts:         createVolumeOpts,

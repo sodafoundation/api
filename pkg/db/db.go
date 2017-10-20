@@ -39,6 +39,8 @@ func Init(db *Database) {
 		fmt.Errorf("mysql is not implemented right now!")
 	case "etcd":
 		C = etcd.Init(strings.Split(db.Endpoint, ","))
+	case "fake":
+		C = NewFakeDbClient()
 	default:
 		fmt.Errorf("Can't find database driver %s!\n", db.Driver)
 	}
