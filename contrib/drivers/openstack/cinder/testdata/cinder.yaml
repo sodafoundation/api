@@ -6,3 +6,12 @@ authOptions:
   password: "admin"
   tenantId: "04154b841eb644a3947506c54fa73c76"
   tenantName: "admin"
+pool:
+  pool1:
+    diskType: SSD
+    iops: 1000
+    bandwidth: 1000
+  pool2:
+    diskType: SAS
+    iops: 800
+    bandwidth: 800
