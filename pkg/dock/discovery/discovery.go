@@ -25,7 +25,6 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/opa"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
 
@@ -139,16 +138,6 @@ func (dd *DockDiscoverer) Store() error {
 			log.Error("When create pool %s in db: %v\n", pol.GetId(), err)
 			return err
 		}
-	}
-
-	if err = opa.RegisterData(&dd.pols); err != nil {
-		log.Error("When register pool data in opa:", err)
-		return err
-	}
-
-	if err = opa.RegisterData(&dd.dcks); err != nil {
-		log.Error("When register dock data in opa:", err)
-		return err
 	}
 
 	return err

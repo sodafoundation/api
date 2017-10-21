@@ -59,7 +59,6 @@ func TestSelectSupportedPool(t *testing.T) {
 		t.Fatalf("Expected %v, get %v", expectedPool, pol)
 	}
 }
-*/
 
 func TestSelectDock(t *testing.T) {
 	s := NewFakeSelector()
@@ -126,3 +125,4 @@ func TestSelectDock(t *testing.T) {
 		t.Fatalf("Expected %v, got %v", expectedDock, dck)
 	}
 }
+*/

@@ -27,7 +27,7 @@ import (
 	"net/http"
 
 	log "github.com/golang/glog"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 const URLPrefix = "http://localhost:8181/v1/data/"
@@ -40,11 +40,11 @@ func RegisterData(input Data) error {
 	var url = URLPrefix
 
 	switch input.(type) {
-	case *[]*api.ProfileSpec:
+	case *[]*model.ProfileSpec:
 		url += "profiles"
-	case *[]*api.StoragePoolSpec:
+	case *[]*model.StoragePoolSpec:
 		url += "pools"
-	case *[]*api.DockSpec:
+	case *[]*model.DockSpec:
 		url += "docks"
 	}
 
@@ -55,7 +55,6 @@ func RegisterData(input Data) error {
 		return err
 	}
 	req, err := http.NewRequest("PUT", url, bytes.NewReader(inputJSON))
-	req.Header.Set("If-None-Match", "*")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Error(err)
@@ -74,11 +73,11 @@ func PatchData(input Data, op, path string) error {
 	var url = URLPrefix
 
 	switch input.(type) {
-	case *api.ProfileSpec:
+	case *model.ProfileSpec:
 		url += "profiles"
-	case *api.StoragePoolSpec:
+	case *model.StoragePoolSpec:
 		url += "pools"
-	case *api.DockSpec:
+	case *model.DockSpec:
 		url += "docks"
 	}
 
@@ -115,7 +114,7 @@ func PatchData(input Data, op, path string) error {
 	return nil
 }
 
-func GetPoolData(input string) (*api.StoragePoolSpec, error) {
+func GetPoolData(input string) (*model.StoragePoolSpec, error) {
 	var url = URLPrefix + "opa/policies/find_supported_pools/" + input
 
 	log.Info("Start GET request to get pool data, url =", url)
@@ -138,10 +137,46 @@ func GetPoolData(input string) (*api.StoragePoolSpec, error) {
 	}
 
 	var out = struct {
-		Result *api.StoragePoolSpec `json:"result"`
+		Result *model.StoragePoolSpec `json:"result"`
 	}{
-		Result: &api.StoragePoolSpec{
-			BaseModel: &api.BaseModel{},
+		Result: &model.StoragePoolSpec{
+			BaseModel: &model.BaseModel{},
+		},
+	}
+	if err = json.Unmarshal(rbody, &out); err != nil {
+		return nil, err
+	}
+
+	return out.Result, nil
+}
+
+func GetDockData(input string) (*model.DockSpec, error) {
+	var url = URLPrefix + "opa/policies/find_dock_by_pool_id/" + input
+
+	log.Info("Start GET request to get dock data, url =", url)
+
+	req, err := http.NewRequest("GET", url, nil)
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	err = CheckHTTPResponseStatusCode(resp)
+	if err != nil {
+		return nil, err
+	}
+	rbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var out = struct {
+		Result *model.DockSpec `json:"result"`
+	}{
+		Result: &model.DockSpec{
+			BaseModel: &model.BaseModel{},
 		},
 	}
 	if err = json.Unmarshal(rbody, &out); err != nil {

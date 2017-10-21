@@ -21,7 +21,7 @@ profiles configured by admin.
 package selector
 
 import (
-	"errors"
+	"sync"
 
 	log "github.com/golang/glog"
 
@@ -29,6 +29,8 @@ import (
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/opa"
 )
+
+type InputData interface{}
 
 type Selector interface {
 	SelectSupportedPool(prf *api.ProfileSpec) (*api.StoragePoolSpec, error)
@@ -38,6 +40,7 @@ type Selector interface {
 
 type selector struct {
 	storBox db.Client
+	lock    sync.Mutex
 }
 
 func NewSelector() Selector {
@@ -53,6 +56,21 @@ func NewFakeSelector() Selector {
 }
 
 func (s *selector) SelectSupportedPool(prf *api.ProfileSpec) (*api.StoragePoolSpec, error) {
+	prfs, err := s.storBox.ListProfiles()
+	if err != nil {
+		log.Error("When list profiles resources in db:", err)
+		return nil, err
+	}
+	pols, err := s.storBox.ListPools()
+	if err != nil {
+		log.Error("When list pool resources in db:", err)
+		return nil, err
+	}
+
+	if err = s.injectData(&prfs, &pols); err != nil {
+		return nil, err
+	}
+
 	return opa.GetPoolData(prf.GetName())
 }
 
@@ -62,9 +80,17 @@ func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
 		log.Error("When list dock resources in db:", err)
 		return nil, err
 	}
+	pols, err := s.storBox.ListPools()
+	if err != nil {
+		log.Error("When list pool resources in db:", err)
+		return nil, err
+	}
 
-	var pol *api.StoragePoolSpec
+	if err = s.injectData(&dcks, &pols); err != nil {
+		return nil, err
+	}
 
+	var polId string
 	switch input.(type) {
 	case string:
 		// If user specifies a volume id, then the selector will find the
@@ -76,19 +102,28 @@ func (s *selector) SelectDock(input interface{}) (*api.DockSpec, error) {
 			return nil, err
 		}
 
-		pol, err = s.storBox.GetPool(vol.GetPoolId())
-		if err != nil {
-			log.Errorf("When get pool %s in db: %v\n", vol.GetPoolId(), err)
-			return nil, err
-		}
+		polId = vol.GetPoolId()
 	case *api.StoragePoolSpec:
-		pol = input.(*api.StoragePoolSpec)
+		polId = input.(*api.StoragePoolSpec).GetId()
 	}
 
-	for _, dck := range dcks {
-		if dck.GetId() == pol.GetDockId() {
-			return dck, nil
+	return opa.GetDockData(polId)
+}
+
+func (s *selector) injectData(input ...InputData) error {
+	var err error
+
+	log.Info("Waiting for injecting data...")
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	log.Info("Start injecting data...")
+
+	for _, v := range input {
+		if err = opa.RegisterData(v); err != nil {
+			log.Error("Fail to register data in opa:", err)
+			return err
 		}
 	}
-	return nil, errors.New("No dock resource supported!")
+
+	return nil
 }
