@@ -42,7 +42,7 @@ const (
 func Run(host string) {
 
 	ns :=
-		beego.NewNamespace("/api",
+		beego.NewNamespace("",
 			beego.NSCond(func(ctx *context.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -60,7 +60,7 @@ func Run(host string) {
 				// List all dock services, including a list of dock object
 				beego.NSRouter("/docks", &DockPortal{}, "get:ListDocks"),
 				// Show one dock service, including endpoint, driverName and so on
-				beego.NSRouter("/docks/:dockId", &SpecifiedDockPortal{}, "get:GetDock"),
+				beego.NSRouter("/docks/:dockId", &DockPortal{}, "get:GetDock"),
 
 				// Profile is a set of policies configured by admin and provided for users
 				// CreateProfile, UpdateProfile and DeleteProfile are used for admin only

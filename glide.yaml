@@ -34,3 +34,7 @@ import:
 - package: github.com/gophercloud/gophercloud
 testImport:
 - package: github.com/bouk/monkey
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+  subpackages:
+  - mock
