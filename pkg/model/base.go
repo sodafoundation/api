@@ -33,8 +33,8 @@ type Modeler interface {
 
 type BaseModel struct {
 	Id        string `json:"id"`
-	CreatedAt string `json:"createAt"`
-	UpdatedAt string `json:"updateAt"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 func (b *BaseModel) GetId() string {

@@ -113,3 +113,7 @@ imports:
 testImports:
 - name: github.com/bouk/monkey
   version: b96e337f6e5b36906584cd0cf9803bbab09284f7
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - mock

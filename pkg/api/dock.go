@@ -38,7 +38,7 @@ func (this *DockPortal) ListDocks() {
 	result, err := db.C.ListDocks()
 	if err != nil {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -47,8 +47,8 @@ func (this *DockPortal) ListDocks() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal docks listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -59,16 +59,12 @@ func (this *DockPortal) ListDocks() {
 	return
 }
 
-type SpecifiedDockPortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedDockPortal) GetDock() {
+func (this *DockPortal) GetDock() {
 	id := this.Ctx.Input.Param(":dockId")
 
 	result, err := db.C.GetDock(id)
 	if err != nil {
-		reason := fmt.Sprintf("Get docks failed: %s", err.Error())
+		reason := fmt.Sprintf("Get dock failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -78,8 +74,8 @@ func (this *SpecifiedDockPortal) GetDock() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal dock showed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal dock failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
