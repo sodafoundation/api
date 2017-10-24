@@ -22,7 +22,9 @@ env:
 before_install:
   - sudo apt-get update
   - sudo apt-get install librados-dev librbd-dev -y
+  - sudo docker build test/integration/osdslet/ -t opensds/osdslet:integration-test
   - sudo docker build test/integration/osdsdock/ -t opensds/osdsdock:integration-test
+  - sudo docker run -d --net=host opensds/osdslet:integration-test
   - sudo docker run -d --net=host opensds/osdsdock:integration-test
 
 matrix:

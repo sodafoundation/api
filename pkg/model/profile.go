@@ -19,10 +19,6 @@ This module implements the common data structure.
 
 package model
 
-import (
-	"encoding/json"
-)
-
 type ProfileSpec struct {
 	*BaseModel
 	Name        string    `json:"name,omitempty"`
@@ -44,17 +40,3 @@ func (prf *ProfileSpec) GetStorageType() string {
 }
 
 type ExtraSpec map[string]interface{}
-
-func (ext ExtraSpec) EncodeAdditionalProperties() []byte {
-	extBody, _ := json.Marshal(&ext)
-	return extBody
-}
-
-func (ext ExtraSpec) EncodeAdditionalPropertiesValueToString() map[string]string {
-	var extMap map[string]string
-
-	for k, v := range ext {
-		extMap[k] = v.(string)
-	}
-	return extMap
-}
