@@ -85,7 +85,7 @@ func (this *ProfilePortal) ListProfiles() {
 	result, err := db.C.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -95,7 +95,7 @@ func (this *ProfilePortal) ListProfiles() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal profiles listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -106,17 +106,21 @@ func (this *ProfilePortal) ListProfiles() {
 	return
 }
 
-type SpecifiedProfilePortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedProfilePortal) GetProfile() {
+func (this *ProfilePortal) GetProfile() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	result, err := db.C.GetProfile(id)
 	if err != nil {
-		reason := fmt.Sprintf("Get profiles failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Get profile failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
+	if result == nil {
+		reason := fmt.Sprintf("The profile with ID[%s] does not found.", id)
+		this.Ctx.Output.SetStatus(StatusNotFound)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -125,8 +129,8 @@ func (this *SpecifiedProfilePortal) GetProfile() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile showed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal profile failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -137,7 +141,7 @@ func (this *SpecifiedProfilePortal) GetProfile() {
 	return
 }
 
-func (this *SpecifiedProfilePortal) UpdateProfile() {
+func (this *ProfilePortal) UpdateProfile() {
 	var profile = model.ProfileSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -175,7 +179,7 @@ func (this *SpecifiedProfilePortal) UpdateProfile() {
 	return
 }
 
-func (this *SpecifiedProfilePortal) DeleteProfile() {
+func (this *ProfilePortal) DeleteProfile() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	if err := db.C.DeleteProfile(id); err != nil {
@@ -186,16 +190,12 @@ func (this *SpecifiedProfilePortal) DeleteProfile() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body([]byte("Delete profile success!"))
 	return
 }
 
-type ProfileExtrasPortal struct {
-	beego.Controller
-}
-
-func (this *ProfileExtrasPortal) AddExtraProperty() {
+func (this *ProfilePortal) AddExtraProperty() {
 	var extra model.ExtraSpec
 	id := this.Ctx.Input.Param(":profileId")
 
@@ -222,14 +222,14 @@ func (this *ProfileExtrasPortal) AddExtraProperty() {
 	return
 }
 
-func (this *ProfileExtrasPortal) ListExtraProperties() {
+func (this *ProfilePortal) ListExtraProperties() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	result, err := db.C.ListExtraProperties(id)
 	if err != nil {
 		log.Error(err)
 		resBody, _ := json.Marshal("List extra properties failed: " + fmt.Sprint(err))
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(resBody)
 		return
 	}
@@ -240,7 +240,7 @@ func (this *ProfileExtrasPortal) ListExtraProperties() {
 	return
 }
 
-func (this *ProfileExtrasPortal) RemoveExtraProperty() {
+func (this *ProfilePortal) RemoveExtraProperty() {
 	id := this.Ctx.Input.Param(":profileId")
 	extraKey := this.Ctx.Input.Param(":extraKey")
 

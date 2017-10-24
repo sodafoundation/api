@@ -41,8 +41,9 @@ const (
 
 func Run(host string) {
 
+	// add router for v1alpha api
 	ns :=
-		beego.NewNamespace("",
+		beego.NewNamespace("/v1alpha",
 			beego.NSCond(func(ctx *context.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -51,51 +52,50 @@ func Run(host string) {
 				return true
 			}),
 
-			// List all opensds api versions
-			beego.NSRouter("/", &VersionPortal{}, "get:ListVersions"),
-			// Show specified api version
-			beego.NSRouter("/:apiVersion", &VersionPortal{}, "get:GetVersion"),
+			// List all dock services, including a list of dock object
+			beego.NSRouter("/docks", &DockPortal{}, "get:ListDocks"),
+			// Show one dock service, including endpoint, driverName and so on
+			beego.NSRouter("/docks/:dockId", &DockPortal{}, "get:GetDock"),
 
-			beego.NSNamespace("/v1alpha",
-				// List all dock services, including a list of dock object
-				beego.NSRouter("/docks", &DockPortal{}, "get:ListDocks"),
-				// Show one dock service, including endpoint, driverName and so on
-				beego.NSRouter("/docks/:dockId", &DockPortal{}, "get:GetDock"),
+			// Profile is a set of policies configured by admin and provided for users
+			// CreateProfile, UpdateProfile and DeleteProfile are used for admin only
+			// ListProfiles and GetProfile are used for both admin and users
+			beego.NSRouter("/profiles", &ProfilePortal{}, "post:CreateProfile;get:ListProfiles"),
+			beego.NSRouter("/profiles/:profileId", &ProfilePortal{}, "get:GetProfile;put:UpdateProfile;delete:DeleteProfile"),
 
-				// Profile is a set of policies configured by admin and provided for users
-				// CreateProfile, UpdateProfile and DeleteProfile are used for admin only
-				// ListProfiles and GetProfile are used for both admin and users
-				beego.NSRouter("/profiles", &ProfilePortal{}, "post:CreateProfile;get:ListProfiles"),
-				beego.NSRouter("/profiles/:profileId", &SpecifiedProfilePortal{}, "get:GetProfile;put:UpdateProfile;delete:DeleteProfile"),
+			// All operations of extras are used for Admin only
+			beego.NSRouter("/profiles/:profileId/extras", &ProfilePortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
+			beego.NSRouter("/profiles/:profileId/extras/:extraKey", &ProfilePortal{}, "delete:RemoveExtraProperty"),
 
-				// All operations of extras are used for Admin only
-				beego.NSRouter("/profiles/:profileId/extras", &ProfileExtrasPortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
-				beego.NSRouter("/profiles/:profileId/extras/:extraKey", &ProfileExtrasPortal{}, "delete:RemoveExtraProperty"),
+			beego.NSNamespace("/block",
+				// Pool is the virtual description of backend storage, usually divided into block, file and object,
+				// and every pool is atomic, which means every pool contains a specific set of features.
+				// ListPools and GetPool are used for checking the status of backend pool, admin only
+				beego.NSRouter("/pools", &PoolPortal{}, "get:ListPools"),
+				beego.NSRouter("/pools/:poolId", &PoolPortal{}, "get:GetPool"),
 
-				beego.NSNamespace("/block",
-					// Pool is the virtual description of backend storage, usually divided into block, file and object,
-					// and every pool is atomic, which means every pool contains a specific set of features.
-					// ListPools and GetPool are used for checking the status of backend pool, admin only
-					beego.NSRouter("/pools", &PoolPortal{}, "get:ListPools"),
-					beego.NSRouter("/pools/:poolId", &SpecifiedPoolPortal{}, "get:GetPool"),
+				// Volume is the logical description of a piece of storage, which can be directly used by users.
+				// All operations of volume can be used for both admin and users.
+				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
+				beego.NSRouter("/volumes/:volumeId", &SpecifiedVolumePortal{}, "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
 
-					// Volume is the logical description of a piece of storage, which can be directly used by users.
-					// All operations of volume can be used for both admin and users.
-					beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
-					beego.NSRouter("/volumes/:volumeId", &SpecifiedVolumePortal{}, "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
+				// Creates, shows, lists, unpdates and deletes attachment.
+				beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
+				beego.NSRouter("/attachments/:attachmentId", &SpecifiedVolumeAttachmentPortal{}, "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
 
-					// Creates, shows, lists, unpdates and deletes attachment.
-					beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
-					beego.NSRouter("/attachments/:attachmentId", &SpecifiedVolumeAttachmentPortal{}, "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
-
-					// Snapshot is a point-in-time copy of the data that a volume contains.
-					// Creates, shows, lists, unpdates and deletes snapshot.
-					beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
-					beego.NSRouter("/snapshots/:snapshotId", &SpecifiedVolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
-				),
+				// Snapshot is a point-in-time copy of the data that a volume contains.
+				// Creates, shows, lists, unpdates and deletes snapshot.
+				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
+				beego.NSRouter("/snapshots/:snapshotId", &SpecifiedVolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
 			),
 		)
 
 	beego.AddNamespace(ns)
+
+	// add router for api version
+	beego.Router("/", &VersionPortal{}, "get:ListVersions")
+	beego.Router("/:apiVersion", &VersionPortal{}, "get:GetVersion")
+
+	// start service
 	beego.Run(host)
 }
