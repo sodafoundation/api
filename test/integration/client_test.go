@@ -90,7 +90,7 @@ func TestClientAddExtraProperty(t *testing.T) {
 		"bandwidth": 500,
 	}
 
-	ext, err := c.AddExtraProperty(body)
+	ext, err := c.AddExtraProperty(prfID, body)
 	if err != nil {
 		t.Error("add profile extra property in client failed:", err)
 		return
