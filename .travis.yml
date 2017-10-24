@@ -21,8 +21,9 @@ env:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev -y 
-  - sudo docker run -d --net=host leonwanghui/osdsdock:integration-test
+  - sudo apt-get install librados-dev librbd-dev -y
+  - sudo docker build test/integration/osdsdock/ -t opensds/osdsdock:integration-test
+  - sudo docker run -d --net=host opensds/osdsdock:integration-test
 
 matrix:
   fast_finish: true

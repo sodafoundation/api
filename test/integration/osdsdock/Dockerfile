@@ -1,5 +1,5 @@
-# Build: sudo docker build . -t leonwanghui/osdsdock:integration-test
-# Run: sudo docker run -d --net=host leonwanghui/osdsdock:integration-test
+# Build: sudo docker build . -t opensds/osdsdock:integration-test
+# Run: sudo docker run -d --net=host opensds/osdsdock:integration-test
 
 FROM golang:1.9
 

@@ -120,11 +120,13 @@ func (fc *FakeDbClient) DeleteProfile(prfID string) error {
 }
 
 func (fc *FakeDbClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
-	return nil, nil
+	extra := sampleProfiles[0].Extra
+	return &extra, nil
 }
 
 func (fc *FakeDbClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
-	return nil, nil
+	extra := sampleProfiles[0].Extra
+	return &extra, nil
 }
 
 func (fc *FakeDbClient) RemoveExtraProperty(prfID, extraKey string) error {
@@ -136,11 +138,14 @@ func (fc *FakeDbClient) CreateVolume(vol *model.VolumeSpec) error {
 }
 
 func (fc *FakeDbClient) GetVolume(volID string) (*model.VolumeSpec, error) {
-	return &sampleVolume, nil
+	return &sampleVolumes[0], nil
 }
 
 func (fc *FakeDbClient) ListVolumes() ([]*model.VolumeSpec, error) {
-	return nil, nil
+	var vols []*model.VolumeSpec
+
+	vols = append(vols, &sampleVolumes[0])
+	return vols, nil
 }
 
 func (fc *FakeDbClient) DeleteVolume(volID string) error {
@@ -172,11 +177,14 @@ func (fc *FakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error
 }
 
 func (fc *FakeDbClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error) {
-	return nil, nil
+	return &sampleSnapshots[0], nil
 }
 
 func (fc *FakeDbClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
-	return nil, nil
+	var snps []*model.VolumeSnapshotSpec
+
+	snps = append(snps, &sampleSnapshots[0], &sampleSnapshots[1])
+	return snps, nil
 }
 
 func (fc *FakeDbClient) DeleteVolumeSnapshot(snapshotID string) error {
@@ -197,12 +205,12 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			},
-			Name:        "ceph",
-			Description: "ceph policy",
+			Name:        "silver",
+			Description: "silver policy",
 			Extra: model.ExtraSpec{
-				"highAvailability":     "true",
-				"intervalSnapshot":     "10s",
-				"deleteSnapshotPolicy": "true",
+				"diskType":  "SAS",
+				"iops":      300,
+				"bandwidth": 500,
 			},
 		},
 	}
@@ -212,71 +220,80 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			},
-			Name:        "cinder",
-			Description: "cinder backend service",
+			Name:        "sample",
+			Description: "sample backend service",
 			Endpoint:    "localhost:50050",
-			DriverName:  "cinder",
-			Parameters: map[string]interface{}{
-				"thinProvision":    "true",
-				"highAvailability": "false",
-			},
-		},
-		{
-			BaseModel: &model.BaseModel{
-				Id: "076454a8-65da-11e7-9a65-5f5d9b935b9f",
-			},
-			Name:        "ceph",
-			Description: "ceph backend service",
-			Endpoint:    "localhost:50050",
-			DriverName:  "ceph",
-			Parameters: map[string]interface{}{
-				"thinProvision":    "false",
-				"highAvailability": "true",
-			},
+			DriverName:  "sample",
 		},
 	}
 
 	samplePools = []model.StoragePoolSpec{
 		{
 			BaseModel: &model.BaseModel{
-				Id: "6edc7604-7725-11e7-b2b1-1335d0254e7c",
+				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			},
-			Name:          "cinder-pool",
-			Description:   "cinder pool1",
-			StorageType:   "block",
+			Name:          "sample-pool-01",
+			Description:   "This is the first sample storage pool for testing",
+			TotalCapacity: int64(100),
+			FreeCapacity:  int64(90),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			TotalCapacity: 100,
-			FreeCapacity:  100,
 			Parameters: map[string]interface{}{
-				"thinProvision":    "true",
-				"highAvailability": "false",
+				"diskType":  "SSD",
+				"iops":      1000,
+				"bandwidth": 1000,
 			},
 		},
 		{
 			BaseModel: &model.BaseModel{
-				Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
+				Id: "a594b8ac-a103-11e7-985f-d723bcf01b5f",
 			},
-			Name:          "rbd-pool",
-			Description:   "ceph pool1",
-			StorageType:   "block",
-			DockId:        "076454a8-65da-11e7-9a65-5f5d9b935b9f",
-			TotalCapacity: 200,
-			FreeCapacity:  200,
+			Name:          "sample-pool-02",
+			Description:   "This is the second sample storage pool for testing",
+			TotalCapacity: int64(200),
+			FreeCapacity:  int64(170),
+			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			Parameters: map[string]interface{}{
-				"thinProvision":    "false",
-				"highAvailability": "true",
+				"diskType":  "SAS",
+				"iops":      800,
+				"bandwidth": 800,
 			},
 		},
 	}
 
-	sampleVolume = model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-			CreatedAt: "2017-08-02T09:17:05",
+	sampleVolumes = []model.VolumeSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			},
+			Name:        "sample-volume",
+			Description: "This is a sample volume for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
-		Name:        "fake-volume",
-		Description: "fake volume for testing",
-		Size:        1,
-		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
+	}
+
+	sampleSnapshots = []model.VolumeSnapshotSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			},
+			Name:        "sample-snapshot-01",
+			Description: "This is the first sample snapshot for testing",
+			Size:        int64(1),
+			Status:      "created",
+			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			},
+			Name:        "sample-snapshot-02",
+			Description: "This is the second sample snapshot for testing",
+			Size:        int64(1),
+			Status:      "created",
+			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
 	}
 )

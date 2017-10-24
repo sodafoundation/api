@@ -62,12 +62,8 @@ func (s *selector) SelectSupportedPool(tags map[string]string) (*model.StoragePo
 	// Find if the desired storage tags are contained in any profile
 	for _, pol := range pols {
 		var isSupported = true
-		for tag := range tags {
-			if !utils.Contained(tag, pol.Parameters) {
-				isSupported = false
-				break
-			}
-			if pol.Parameters[tag] != "true" {
+		for k := range tags {
+			if !utils.Contained(k, pol.Parameters) {
 				isSupported = false
 				break
 			}

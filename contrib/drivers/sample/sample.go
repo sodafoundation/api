@@ -86,11 +86,10 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			},
-			Name:             "sample-pool-01",
-			Description:      "This is the first sample storage pool for testing",
-			AvailabilityZone: "nova",
-			TotalCapacity:    int64(100),
-			FreeCapacity:     int64(90),
+			Name:          "sample-pool-01",
+			Description:   "This is the first sample storage pool for testing",
+			TotalCapacity: int64(100),
+			FreeCapacity:  int64(90),
 			Parameters: map[string]interface{}{
 				"diskType":  "SSD",
 				"iops":      1000,
@@ -101,11 +100,10 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "a594b8ac-a103-11e7-985f-d723bcf01b5f",
 			},
-			Name:             "sample-pool-02",
-			Description:      "This is the second sample storage pool for testing",
-			AvailabilityZone: "none",
-			TotalCapacity:    int64(200),
-			FreeCapacity:     int64(170),
+			Name:          "sample-pool-02",
+			Description:   "This is the second sample storage pool for testing",
+			TotalCapacity: int64(200),
+			FreeCapacity:  int64(170),
 			Parameters: map[string]interface{}{
 				"diskType":  "SAS",
 				"iops":      800,
@@ -118,11 +116,12 @@ var (
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Name:             "sample-volume",
-		Description:      "This is a sample volume for testing",
-		Size:             int64(1),
-		AvailabilityZone: "nova",
-		Status:           "available",
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
 	sampleConnection = model.ConnectionInfo{
