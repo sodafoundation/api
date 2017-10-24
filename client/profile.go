@@ -40,7 +40,7 @@ func NewProfileMgr(edp string) *ProfileMgr {
 
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := p.Endpoint + "/api/v1alpha/profiles"
+	url := p.Endpoint + "/v1alpha/profiles"
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -52,7 +52,7 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 
 func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID
+	url := p.Endpoint + "/v1alpha/profiles/" + prfID
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -64,7 +64,7 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 
 func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec
-	url := p.Endpoint + "/api/v1alpha/profiles"
+	url := p.Endpoint + "/v1alpha/profiles"
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -76,7 +76,7 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 
 func (p *ProfileMgr) DeleteProfile(prfID string) *model.Response {
 	var res model.Response
-	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID
+	url := p.Endpoint + "/v1alpha/profiles/" + prfID
 
 	if err := p.Recv(request, url, "DELETE", nil, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
@@ -92,7 +92,7 @@ type ExtraBuilder *model.ExtraSpec
 
 func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
-	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID + "/extras"
+	url := p.Endpoint + "/v1alpha/profiles/" + prfID + "/extras"
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -104,7 +104,7 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 
 func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
-	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID + "/extras"
+	url := p.Endpoint + "/v1alpha/profiles/" + prfID + "/extras"
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -116,7 +116,7 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 
 func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) *model.Response {
 	var res model.Response
-	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID + "/extras/" + extraKey
+	url := p.Endpoint + "/v1alpha/profiles/" + prfID + "/extras/" + extraKey
 
 	if err := p.Recv(request, url, "DELETE", nil, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
