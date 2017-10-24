@@ -16,7 +16,6 @@ package integration
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -42,19 +41,25 @@ func TestCreateVolume(t *testing.T) {
 
 	vol, err := vc.CreateVolume()
 	if err != nil {
-		t.Error(err)
+		t.Error("create volume in controller failed:", err)
+		return
 	}
 
 	volBody, _ := json.MarshalIndent(vol, "", "	")
-	fmt.Println(string(volBody))
+	t.Log(string(volBody))
 }
 
 func TestDeleteVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	if res := vc.DeleteVolume(); res.GetStatus() == "Failure" {
-		t.Error(res.GetError())
+	res := vc.DeleteVolume()
+	if res.GetStatus() == "Failure" {
+		t.Error("create volume in controller failed:", res.GetError())
+		return
 	}
+
+	resBody, _ := json.MarshalIndent(res, "", "	")
+	t.Log(string(resBody))
 }
 
 func TestCreateVolumeAttachment(t *testing.T) {
@@ -62,11 +67,12 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 	atc, err := vc.CreateVolumeAttachment()
 	if err != nil {
-		t.Error(err)
+		t.Error("create volume attachment in controller failed:", err)
+		return
 	}
 
 	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	fmt.Println(string(atcBody))
+	t.Log(string(atcBody))
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
@@ -74,17 +80,23 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 
 	snp, err := vc.CreateVolumeSnapshot()
 	if err != nil {
-		t.Error(err)
+		t.Error("create volume snapshot in controller failed:", err)
+		return
 	}
 
 	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	fmt.Println(string(snpBody))
+	t.Log(string(snpBody))
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	if res := vc.DeleteVolumeSnapshot(); res.GetStatus() == "Failure" {
-		t.Error(res.GetError())
+	res := vc.DeleteVolumeSnapshot()
+	if res.GetStatus() == "Failure" {
+		t.Error("create volume snapshot in controller failed:", res.GetError())
+		return
 	}
+
+	resBody, _ := json.MarshalIndent(res, "", "	")
+	t.Log(string(resBody))
 }
