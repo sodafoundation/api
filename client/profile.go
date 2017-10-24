@@ -85,7 +85,12 @@ func (p *ProfileMgr) DeleteProfile(prfID string) *model.Response {
 	return &res
 }
 
-func (p *ProfileMgr) AddExtraProperty(prfID string, body ProfileBuilder) (*model.ExtraSpec, error) {
+// ExtraBuilder contains request body of handling a profile extra request.
+// Currently it's assigned as the pointer of Extra struct, but it
+// could be discussed if it's better to define an interface.
+type ExtraBuilder *model.ExtraSpec
+
+func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
 	url := p.Endpoint + "/api/v1alpha/profiles/" + prfID + "/extras"
 
