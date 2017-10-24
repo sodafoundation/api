@@ -37,8 +37,12 @@ func (r *Response) GetError() string {
 	return r.Error
 }
 
-func (r *Response) TranslateError() error {
-	return errors.New(r.Error)
+func (r *Response) ToError() error {
+	if r.Error != "" {
+		return errors.New(r.Error)
+	}
+
+	return nil
 }
 
 func (r *Response) GetMessage() string {

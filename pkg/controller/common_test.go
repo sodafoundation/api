@@ -58,12 +58,12 @@ func TestSearchProfile(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
 		},
-		Name:        "ceph",
-		Description: "ceph policy",
+		Name:        "silver",
+		Description: "silver policy",
 		Extra: model.ExtraSpec{
-			"highAvailability":     "true",
-			"intervalSnapshot":     "10s",
-			"deleteSnapshotPolicy": "true",
+			"diskType":  "SAS",
+			"iops":      300,
+			"bandwidth": 500,
 		},
 	}
 

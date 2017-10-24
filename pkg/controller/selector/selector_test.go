@@ -32,21 +32,23 @@ func TestSelectSupportedPool(t *testing.T) {
 
 	var expectedPool = &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
-			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
+			Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
-		Name:          "rbd-pool",
-		Description:   "ceph pool1",
-		StorageType:   "block",
-		DockId:        "076454a8-65da-11e7-9a65-5f5d9b935b9f",
-		TotalCapacity: 200,
-		FreeCapacity:  200,
+		Name:          "sample-pool-01",
+		Description:   "This is the first sample storage pool for testing",
+		TotalCapacity: int64(100),
+		FreeCapacity:  int64(90),
+		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		Parameters: map[string]interface{}{
-			"thinProvision":    "false",
-			"highAvailability": "true",
+			"diskType":  "SSD",
+			"iops":      1000,
+			"bandwidth": 1000,
 		},
 	}
 	var inputTag = map[string]string{
-		"highAvailability": "true",
+		"diskType":  "SSD",
+		"iops":      "1000",
+		"bandwidth": "1000",
 	}
 
 	// Test if the method would return correct pool when storage tag assigned.
@@ -64,31 +66,27 @@ func TestSelectDock(t *testing.T) {
 
 	var inputPool = &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
-			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
+			Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
-		Name:          "cinder-pool",
-		Description:   "cinder pool1",
-		StorageType:   "block",
+		Name:          "sample-pool-01",
+		Description:   "This is the first sample storage pool for testing",
+		TotalCapacity: int64(100),
+		FreeCapacity:  int64(90),
 		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		TotalCapacity: 100,
-		FreeCapacity:  100,
 		Parameters: map[string]interface{}{
-			"thinProvision":    "true",
-			"highAvailability": "false",
+			"diskType":  "SSD",
+			"iops":      1000,
+			"bandwidth": 1000,
 		},
 	}
 	var expectedDock = &model.DockSpec{
 		BaseModel: &model.BaseModel{
 			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		},
-		Name:        "cinder",
-		Description: "cinder backend service",
+		Name:        "sample",
+		Description: "sample backend service",
 		Endpoint:    "localhost:50050",
-		DriverName:  "cinder",
-		Parameters: map[string]interface{}{
-			"thinProvision":    "true",
-			"highAvailability": "false",
-		},
+		DriverName:  "sample",
 	}
 
 	// Test if the method would return correct dock when storage pool assigned.
@@ -100,20 +98,7 @@ func TestSelectDock(t *testing.T) {
 		t.Fatalf("Expected %v, got %v", expectedDock, dck)
 	}
 
-	var inputVolID = "9193c3ec-771f-11e7-8ca3-d32c0a8b2725"
-	expectedDock = &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id: "076454a8-65da-11e7-9a65-5f5d9b935b9f",
-		},
-		Name:        "ceph",
-		Description: "ceph backend service",
-		Endpoint:    "localhost:50050",
-		DriverName:  "ceph",
-		Parameters: map[string]interface{}{
-			"thinProvision":    "false",
-			"highAvailability": "true",
-		},
-	}
+	var inputVolID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 
 	// Test if the method would return correct dock when volume id assigned.
 	dck, err = s.SelectDock(inputVolID)

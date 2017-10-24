@@ -53,8 +53,8 @@ func TestDeleteVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	res := vc.DeleteVolume()
-	if res.GetStatus() == "Failure" {
-		t.Error("create volume in controller failed:", res.GetError())
+	if err := res.ToError(); err != nil {
+		t.Error("create volume in controller failed:", err)
 		return
 	}
 
@@ -92,8 +92,8 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	res := vc.DeleteVolumeSnapshot()
-	if res.GetStatus() == "Failure" {
-		t.Error("create volume snapshot in controller failed:", res.GetError())
+	if err := res.ToError(); err != nil {
+		t.Error("create volume snapshot in controller failed:", err)
 		return
 	}
 
