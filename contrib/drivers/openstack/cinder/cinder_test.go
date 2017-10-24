@@ -23,6 +23,8 @@ package cinder
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/bouk/monkey"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -32,7 +34,6 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"testing"
 )
 
 func TestSetup(t *testing.T) {
@@ -71,6 +72,26 @@ func TestSetup(t *testing.T) {
 	}
 	if opt.TenantName != "admin" {
 		t.Error("TenantName error.")
+	}
+
+	if d.config.Pool["pool1"].DiskType != "SSD" {
+		t.Error("Test config pool1 DiskType error")
+	}
+	if d.config.Pool["pool1"].IOPS != 1000 {
+		t.Error("Test config pool1 IOPS error")
+	}
+	if d.config.Pool["pool1"].BandWidth != 1000 {
+		t.Error("Test config pool1 BandWidth error")
+	}
+
+	if d.config.Pool["pool2"].DiskType != "SAS" {
+		t.Error("Test config pool2 DiskType error")
+	}
+	if d.config.Pool["pool2"].IOPS != 800 {
+		t.Error("Test config pool2 IOPS error")
+	}
+	if d.config.Pool["pool2"].BandWidth != 800 {
+		t.Error("Test config pool2 BandWidth error")
 	}
 }
 
@@ -299,6 +320,14 @@ func TestDeleteSnapshot(t *testing.T) {
 
 func TestListPools(t *testing.T) {
 	defer monkey.UnpatchAll()
+	monkey.Patch(openstack.AuthenticatedClient,
+		func(options gophercloud.AuthOptions) (*gophercloud.ProviderClient, error) {
+			return &gophercloud.ProviderClient{}, nil
+		})
+	monkey.Patch(openstack.NewBlockStorageV2,
+		func(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+			return &gophercloud.ServiceClient{}, nil
+		})
 	monkey.Patch(schedulerstats.List,
 		func(client *gophercloud.ServiceClient, opts schedulerstats.ListOptsBuilder) pagination.Pager {
 			return pagination.Pager{}
@@ -311,14 +340,21 @@ func TestListPools(t *testing.T) {
 		func(p pagination.Page) ([]schedulerstats.StoragePool, error) {
 			pools := []schedulerstats.StoragePool{
 				{
-					Name: "CinderPool1",
+					Name: "pool1",
 					Capabilities: schedulerstats.Capabilities{
 						TotalCapacityGB: 100.0,
 						FreeCapacityGB:  50.0,
 					},
 				},
 				{
-					Name: "CinderPool2",
+					Name: "pool2",
+					Capabilities: schedulerstats.Capabilities{
+						TotalCapacityGB: 1000.0,
+						FreeCapacityGB:  500.0,
+					},
+				},
+				{
+					Name: "ShouldBeFilterd",
 					Capabilities: schedulerstats.Capabilities{
 						TotalCapacityGB: 1000.0,
 						FreeCapacityGB:  500.0,
@@ -327,13 +363,14 @@ func TestListPools(t *testing.T) {
 			}
 			return pools, nil
 		})
-
+	config.CONF.OsdsDock.CinderConfig = "testdata/cinder.yaml"
 	d := Driver{}
+	d.Setup()
 	resp, err := d.ListPools()
 	if err != nil {
 		t.Error("Delete volume snapshot error")
 	}
-	if resp[0].Name != "CinderPool1" {
+	if resp[0].Name != "pool1" {
 		t.Error("List pool name error.")
 	}
 	if resp[0].TotalCapacity != 100 {
@@ -342,7 +379,16 @@ func TestListPools(t *testing.T) {
 	if resp[0].FreeCapacity != 50 {
 		t.Error("List pool TotalCapacity error.")
 	}
-	if resp[1].Name != "CinderPool2" {
+	if resp[0].Parameters["diskType"] != "SSD" {
+		t.Error("List pool Parameters diskType error.")
+	}
+	if resp[0].Parameters["iops"].(int64) != 1000 {
+		t.Error("List pool Parameters iops error.")
+	}
+	if resp[0].Parameters["bandwidth"].(int64) != 1000 {
+		t.Error("List pool Parameters bandwidth error.")
+	}
+	if resp[1].Name != "pool2" {
 		t.Error("List pool name error.")
 	}
 	if resp[1].TotalCapacity != 1000 {
@@ -351,4 +397,8 @@ func TestListPools(t *testing.T) {
 	if resp[1].FreeCapacity != 500 {
 		t.Error("List pool TotalCapacity error.")
 	}
+	if len(resp) != 2 {
+		t.Error("List pool number error")
+	}
 }
+

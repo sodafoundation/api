@@ -58,15 +58,22 @@ type AuthOptions struct {
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
 
+type PoolProperties struct {
+	DiskType  string `yaml:"diskType"`
+	IOPS      int64  `yaml:"iops"`
+	BandWidth int64  `yaml:"bandwidth"`
+}
+
 type CinderConfig struct {
 	AuthOptions `yaml:"authOptions"`
+	Pool        map[string]PoolProperties `yaml:"pool,flow"`
 }
 
 func (d *Driver) Setup() error {
 	// Read cinder config file
 	confYaml, err := ioutil.ReadFile(config.CONF.CinderConfig)
 	if err != nil {
-		log.Fatalf("Read ceph config yaml file (%s) failed, reason:(%v)", config.CONF.CinderConfig, err)
+		log.Fatalf("Read cinder config yaml file (%s) failed, reason:(%v)", config.CONF.CinderConfig, err)
 		return err
 	}
 	err = yaml.Unmarshal([]byte(confYaml), &conf)
@@ -232,6 +239,13 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
+func (d *Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
+	param := make(map[string]interface{})
+	param["diskType"] = proper.DiskType
+	param["iops"] = proper.IOPS
+	param["bandwidth"] = proper.BandWidth
+	return &param
+}
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	opts := &schedulerstats.ListOpts{}
 
@@ -249,6 +263,10 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 	var pols []*model.StoragePoolSpec
 	for _, page := range polpages {
+		if _, ok := d.config.Pool[page.Name]; !ok {
+			continue
+		}
+		param := d.buildPoolParam(d.config.Pool[page.Name])
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
@@ -256,8 +274,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:          page.Name,
 			TotalCapacity: int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:  int64(page.Capabilities.FreeCapacityGB),
+			Parameters:    *param,
 		}
-
 		pols = append(pols, pol)
 	}
 	return pols, nil
