@@ -1,5 +1,8 @@
 dist: trusty
-sudo: required 
+sudo: required
+
+services:
+  - docker
 
 language: go
 go_import_path: github.com/opensds/opensds
@@ -19,6 +22,7 @@ env:
 before_install:
   - sudo apt-get update
   - sudo apt-get install librados-dev librbd-dev -y 
+  - sudo docker run -d --net=host leonwanghui/osdsdock:integration-test
 
 matrix:
   fast_finish: true
@@ -39,3 +43,4 @@ script:
   - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
   - go test -v github.com/opensds/opensds/contrib/... -cover
+  - go test -v github.com/opensds/opensds/test/integration
