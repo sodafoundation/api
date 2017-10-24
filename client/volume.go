@@ -40,7 +40,7 @@ func NewVolumeMgr(edp string) *VolumeMgr {
 
 func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := v.Endpoint + "/api/v1alpha/block/volumes"
+	url := v.Endpoint + "/v1alpha/block/volumes"
 
 	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -52,7 +52,7 @@ func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) 
 
 func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := v.Endpoint + "/api/v1alpha/block/volumes/" + volID
+	url := v.Endpoint + "/v1alpha/block/volumes/" + volID
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -64,7 +64,7 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 
 func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 	var res []*model.VolumeSpec
-	url := v.Endpoint + "/api/v1alpha/block/volumes"
+	url := v.Endpoint + "/v1alpha/block/volumes"
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -76,7 +76,7 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 
 func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Response {
 	var res model.Response
-	url := v.Endpoint + "/api/v1alpha/block/volumes" + volID
+	url := v.Endpoint + "/v1alpha/block/volumes" + volID
 
 	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
@@ -89,7 +89,7 @@ type VolumeSnapshotBuilder interface{}
 
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
-	url := v.Endpoint + "/api/v1alpha/block/snapshots"
+	url := v.Endpoint + "/v1alpha/block/snapshots"
 
 	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -101,7 +101,7 @@ func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.Vol
 
 func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
-	url := v.Endpoint + "/api/v1alpha/block/snapshots/" + snpID
+	url := v.Endpoint + "/v1alpha/block/snapshots/" + snpID
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -113,7 +113,7 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 
 func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	var res []*model.VolumeSnapshotSpec
-	url := v.Endpoint + "/api/v1alpha/block/snapshots"
+	url := v.Endpoint + "/v1alpha/block/snapshots"
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -125,7 +125,7 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 
 func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string) *model.Response {
 	var res model.Response
-	url := v.Endpoint + "/api/v1alpha/block/snapshots" + snpID
+	url := v.Endpoint + "/v1alpha/block/snapshots" + snpID
 
 	if err := v.Recv(request, url, "DELETE", nil, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
