@@ -15,10 +15,7 @@
 package client
 
 import (
-	"errors"
-	"fmt"
 	"os"
-	"strings"
 )
 
 type Client struct {
@@ -50,33 +47,6 @@ func NewClient(c *Config) *Client {
 	}
 }
 
-func (c *Client) UpdateRequestContent(resource string, input interface{}) error {
-	var err error
-
-	switch strings.ToLower(resource) {
-	case "profile":
-		if err = c.ResetAndUpdateProfileRequestContent(input); err != nil {
-			return err
-		}
-		break
-	case "dock":
-		if err = c.ResetAndUpdateDockRequestContent(input); err != nil {
-			return err
-		}
-		break
-	case "pool":
-		if err = c.ResetAndUpdatePoolRequestContent(input); err != nil {
-			return err
-		}
-		break
-	case "volume":
-		if err = c.ResetAndUpdateVolumeRequestContent(input); err != nil {
-			return err
-		}
-		break
-	default:
-		err = errors.New(fmt.Sprintf("Resource type %s not supported"))
-	}
-
-	return err
+func (c *Client) Reset() {
+	c = &Client{}
 }

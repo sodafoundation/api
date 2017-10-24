@@ -15,20 +15,20 @@
 package client
 
 import (
-	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/opensds/opensds/pkg/model"
 )
+
+// VolumeBuilder contains request body of handling a volume request.
+// Currently it's assigned as the pointer of VolumeSpec struct, but it
+// could be discussed if it's better to define an interface.
+type VolumeBuilder *model.VolumeSpec
 
 type VolumeMgr struct {
 	Receiver
 
 	Endpoint string
-	Opt      map[string]string
-	Body     interface{}
-	lock     sync.Mutex
 }
 
 func NewVolumeMgr(edp string) *VolumeMgr {
@@ -38,11 +38,11 @@ func NewVolumeMgr(edp string) *VolumeMgr {
 	}
 }
 
-func (v *VolumeMgr) CreateVolume() (*model.VolumeSpec, error) {
+func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := v.Endpoint + "/api/v1alpha/block/volumes"
 
-	if err := v.Recv(request, url, "POST", v.Body, &res); err != nil {
+	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := v.Endpoint + "/api/v1alpha/block/volumes/" + volID
 
-	if err := v.Recv(request, url, "GET", v.Opt, &res); err != nil {
+	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 	var res []*model.VolumeSpec
 	url := v.Endpoint + "/api/v1alpha/block/volumes"
 
-	if err := v.Recv(request, url, "GET", v.Opt, &res); err != nil {
+	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -74,22 +74,24 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 	return res, nil
 }
 
-func (v *VolumeMgr) DeleteVolume(volID string) *model.Response {
+func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Response {
 	var res model.Response
 	url := v.Endpoint + "/api/v1alpha/block/volumes" + volID
 
-	if err := v.Recv(request, url, "DELETE", v.Body, &res); err != nil {
+	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
 	}
 
 	return &res
 }
 
-func (v *VolumeMgr) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
+type VolumeSnapshotBuilder interface{}
+
+func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
 	url := v.Endpoint + "/api/v1alpha/block/snapshots"
 
-	if err := v.Recv(request, url, "POST", v.Body, &res); err != nil {
+	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -101,7 +103,7 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 	var res model.VolumeSnapshotSpec
 	url := v.Endpoint + "/api/v1alpha/block/snapshots/" + snpID
 
-	if err := v.Recv(request, url, "GET", v.Opt, &res); err != nil {
+	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -113,7 +115,7 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	var res []*model.VolumeSnapshotSpec
 	url := v.Endpoint + "/api/v1alpha/block/snapshots"
 
-	if err := v.Recv(request, url, "GET", v.Opt, &res); err != nil {
+	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -125,31 +127,9 @@ func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string) *model.Response {
 	var res model.Response
 	url := v.Endpoint + "/api/v1alpha/block/snapshots" + snpID
 
-	if err := v.Recv(request, url, "DELETE", v.Body, &res); err != nil {
+	if err := v.Recv(request, url, "DELETE", nil, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
 	}
 
 	return &res
-}
-
-func (v *VolumeMgr) ResetAndUpdateVolumeRequestContent(in interface{}) error {
-	var err error
-
-	v.lock.Lock()
-	defer v.lock.Unlock()
-	// Clear all content stored in Opt field.
-	v.Opt, v.Body = make(map[string]string), nil
-	// Valid the input data.
-	switch in.(type) {
-	case map[string]string:
-		v.Opt = in.(map[string]string)
-		break
-	case model.VolumeSpec, *model.VolumeSpec, model.VolumeSnapshotSpec, *model.VolumeSnapshotSpec:
-		v.Body = in
-		break
-	default:
-		err = errors.New("Request content type not supported")
-	}
-
-	return err
 }

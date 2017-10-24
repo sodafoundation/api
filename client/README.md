@@ -17,9 +17,9 @@ import (
 	"github.com/opensds/opensds/client"
 )
 
-func CreateClient() {
-	c1 := NewClient(&client.Config{})
-	c2 := NewClient(&client.Config{
+func main() {
+	c1 := client.NewClient(&client.Config{})
+	c2 := client.NewClient(&client.Config{
 		Endpoint: ":8080",
 	})
 	
@@ -30,34 +30,33 @@ As you can see from code above, user has two ways to create ```Client``` object:
 parsing ```Config``` object or fetching the endpoint from environment variable
 (```os.Getenv("OPENSDS_ENDPOINT")```), you can choose one with your reference.
 
-### Step 2: Update request content in Client object
-It's also easy to understand by looking the example below:
+### Step 2: Call method in Client object
+In the second step, you can just call method in Client object which is created
+in step 1 like this:
 ```go
 package main
 
-import (
+import(
 	"fmt"
 	
 	"github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
 )
 
 func main() {
-	c := NewClient(&client.Config{
-		Endpoint: ":8080",
-	})
+	vol, err := c.CreateVolume(&model.VolumeSpec{Name: "test"})
+	if err != nil {
+		fmt.Println(err)
+	}
 	
-	c.UpdateRequestContent("volume", &modelVolumeSpec{Name: "test"})
-	fmt.Printf("Updated c is %v\n", c)
+	result, err := c.GetVolume(vol.GetId())
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	fmt.Println("Volume created, get result:", result)
 }
 ```
 
-### Step 3: Call method in Client object
-In the last step, you can just call method in Client object which is created
-in step 2 like this:
-```go
-vol, err := c.CreateVolume()
-if err != nil {
-	panic(err)
-}
-```
+### Step 3: Destory Client object
+If you want to reset the Client object, just run ```c.Reset()``` and it will
+clear all data in it and return a empty object.

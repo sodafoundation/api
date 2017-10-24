@@ -20,12 +20,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/astaxie/beego/httplib"
 )
 
-type reqFunc func(string, string, interface{}) (*httplib.BeegoHTTPRequest, error)
+type reqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
 
 type Receiver interface {
 	Recv(reqFunc, string, string, interface{}, interface{}) error
@@ -37,17 +36,14 @@ func NewReceiver() Receiver {
 
 type receiver struct{}
 
-func (r *receiver) Recv(
+func (*receiver) Recv(
 	f reqFunc,
 	url string,
 	method string,
 	input interface{},
 	output interface{},
 ) error {
-	req, err := f(url, method, input)
-	if err != nil {
-		return err
-	}
+	req := f(url, method, input)
 
 	// Get http response.
 	resp, err := req.Response()
@@ -74,35 +70,26 @@ func request(
 	url string,
 	method string,
 	input interface{},
-) (*httplib.BeegoHTTPRequest, error) {
-	var req *httplib.BeegoHTTPRequest
+) *httplib.BeegoHTTPRequest {
+	req := httplib.NewBeegoRequest(url, strings.ToUpper(method))
 
-	switch strings.ToUpper(method) {
-	case "POST":
-		req = httplib.Post(url).SetTimeout(100*time.Second, 50*time.Second)
-		req.JSONBody(input)
-		break
-	case "GET":
-		p, ok := input.(ParamOption)
-		if !ok {
-			return nil, errors.New("Can't translate param into a map!")
-		}
-		req = httplib.Get(url).SetTimeout(100*time.Second, 50*time.Second)
-		for key, value := range p {
-			req.Param(key, value)
-		}
-		break
-	case "PUT":
-		req = httplib.Put(url).SetTimeout(100*time.Second, 50*time.Second)
-		req.JSONBody(input)
-		break
-	case "DELETE":
-		req = httplib.Delete(url).SetTimeout(100*time.Second, 50*time.Second)
-		req.JSONBody(input)
-		break
+	// If input is empty, consider as user doesn't specify any parameter or
+	// request body.
+	if input == nil {
+		return req
 	}
-
-	return req, nil
+	// If input type is a map, it means user tends to send a GET request
+	// and specifiy some parameters.
+	p, ok := input.(ParamOption)
+	if ok {
+		for k := range p {
+			req.Param(k, p[k])
+		}
+		return req
+	}
+	// The other condition will be handled in httplib package.
+	req.JSONBody(input)
+	return req
 }
 
 // CheckHTTPResponseStatusCode compares http response header StatusCode against expected

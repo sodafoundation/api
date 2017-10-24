@@ -15,9 +15,7 @@
 package client
 
 import (
-	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -26,8 +24,6 @@ type PoolMgr struct {
 	Receiver
 
 	Endpoint string
-	Opt      map[string]string
-	lock     sync.Mutex
 }
 
 func NewPoolMgr(edp string) *PoolMgr {
@@ -41,7 +37,7 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	var res model.StoragePoolSpec
 	url := p.Endpoint + "/api/v1alpha/block/pools/" + polID
 
-	if err := p.Recv(request, url, "GET", p.Opt, &res); err != nil {
+	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
@@ -53,29 +49,10 @@ func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
 	url := p.Endpoint + "/api/v1alpha/block/pools"
 
-	if err := p.Recv(request, url, "GET", p.Opt, &res); err != nil {
+	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
 	return res, nil
-}
-
-func (p *PoolMgr) ResetAndUpdatePoolRequestContent(in interface{}) error {
-	var err error
-
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	// Clear all content stored in Opt field.
-	p.Opt = make(map[string]string)
-	// Valid the input data.
-	switch in.(type) {
-	case map[string]string:
-		p.Opt = in.(map[string]string)
-		break
-	default:
-		err = errors.New("Request content type not supported")
-	}
-
-	return err
 }
