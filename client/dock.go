@@ -20,17 +20,17 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-type DockMgr struct {
-	Receiver
-
-	Endpoint string
-}
-
 func NewDockMgr(edp string) *DockMgr {
 	return &DockMgr{
 		Receiver: NewReceiver(),
 		Endpoint: edp,
 	}
+}
+
+type DockMgr struct {
+	Receiver
+
+	Endpoint string
 }
 
 func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {

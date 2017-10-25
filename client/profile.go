@@ -25,17 +25,22 @@ import (
 // could be discussed if it's better to define an interface.
 type ProfileBuilder *model.ProfileSpec
 
-type ProfileMgr struct {
-	Receiver
-
-	Endpoint string
-}
+// ExtraBuilder contains request body of handling a profile extra request.
+// Currently it's assigned as the pointer of Extra struct, but it
+// could be discussed if it's better to define an interface.
+type ExtraBuilder *model.ExtraSpec
 
 func NewProfileMgr(edp string) *ProfileMgr {
 	return &ProfileMgr{
 		Receiver: NewReceiver(),
 		Endpoint: edp,
 	}
+}
+
+type ProfileMgr struct {
+	Receiver
+
+	Endpoint string
 }
 
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
@@ -84,11 +89,6 @@ func (p *ProfileMgr) DeleteProfile(prfID string) *model.Response {
 
 	return &res
 }
-
-// ExtraBuilder contains request body of handling a profile extra request.
-// Currently it's assigned as the pointer of Extra struct, but it
-// could be discussed if it's better to define an interface.
-type ExtraBuilder *model.ExtraSpec
 
 func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
