@@ -76,7 +76,7 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 
 func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Response {
 	var res model.Response
-	url := v.Endpoint + "/v1alpha/block/volumes" + volID
+	url := v.Endpoint + "/v1alpha/block/volumes/" + volID
 
 	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
@@ -85,7 +85,10 @@ func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Respon
 	return &res
 }
 
-type VolumeSnapshotBuilder interface{}
+// VolumeSnapshotBuilder contains request body of handling a volume snapshot
+// request. Currently it's assigned as the pointer of VolumeSnapshotSpec
+// struct, but it could be discussed if it's better to define an interface.
+type VolumeSnapshotBuilder *model.VolumeSnapshotSpec
 
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
@@ -123,11 +126,11 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	return res, nil
 }
 
-func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string) *model.Response {
+func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) *model.Response {
 	var res model.Response
-	url := v.Endpoint + "/v1alpha/block/snapshots" + snpID
+	url := v.Endpoint + "/v1alpha/block/snapshots/" + snpID
 
-	if err := v.Recv(request, url, "DELETE", nil, &res); err != nil {
+	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
 		res.Status, res.Error = "Failure", fmt.Sprint(err)
 	}
 

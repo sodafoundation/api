@@ -69,13 +69,12 @@ func (this *ProfilePortal) CreateProfile() {
 	// Marshal the result.
 	body, err := json.Marshal(&profile)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile created result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal profile created result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
 	}
-
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	this.Ctx.Output.Body(body)
 	return
@@ -84,7 +83,7 @@ func (this *ProfilePortal) CreateProfile() {
 func (this *ProfilePortal) ListProfiles() {
 	result, err := db.C.ListProfiles()
 	if err != nil {
-		reason := fmt.Sprintf("List profiles failed: %s", err.Error())
+		reason := fmt.Sprintf("List profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -94,7 +93,7 @@ func (this *ProfilePortal) ListProfiles() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profiles listed result failed: %s", err.Error())
+		reason := fmt.Sprintf("Marshal profiles listed result failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -111,16 +110,8 @@ func (this *ProfilePortal) GetProfile() {
 
 	result, err := db.C.GetProfile(id)
 	if err != nil {
-		reason := fmt.Sprintf("Get profile failed: %s", err.Error())
+		reason := fmt.Sprintf("Get profile failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	if result == nil {
-		reason := fmt.Sprintf("The profile with ID[%s] does not found.", id)
-		this.Ctx.Output.SetStatus(StatusNotFound)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -129,7 +120,7 @@ func (this *ProfilePortal) GetProfile() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile failed: %s", err.Error())
+		reason := fmt.Sprintf("Marshal profile got result failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -148,7 +139,7 @@ func (this *ProfilePortal) UpdateProfile() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&profile); err != nil {
-		reason := fmt.Sprintf("Parse profile request body failed: %s", err.Error())
+		reason := fmt.Sprintf("Parse profile request body failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -157,7 +148,7 @@ func (this *ProfilePortal) UpdateProfile() {
 
 	result, err := db.C.UpdateProfile(id, &profile)
 	if err != nil {
-		reason := fmt.Sprintf("Update profiles failed: %s", err.Error())
+		reason := fmt.Sprintf("Update profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -167,8 +158,8 @@ func (this *ProfilePortal) UpdateProfile() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile updated result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal profile updated result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -183,15 +174,28 @@ func (this *ProfilePortal) DeleteProfile() {
 	id := this.Ctx.Input.Param(":profileId")
 
 	if err := db.C.DeleteProfile(id); err != nil {
-		reason := fmt.Sprintf("Delete profiles failed: %s", err.Error())
+		reason := fmt.Sprintf("Delete profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body([]byte("Delete profile success!"))
+	// Marshal the result.
+	body, err := json.Marshal(&model.Response{
+		Status:  "Success",
+		Message: "Delete profile success!",
+	})
+	if err != nil {
+		reason := fmt.Sprintf("Marshal profile deleted result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.Body(body)
 	return
 }
 
@@ -199,26 +203,35 @@ func (this *ProfilePortal) AddExtraProperty() {
 	var extra model.ExtraSpec
 	id := this.Ctx.Input.Param(":profileId")
 
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(extra); err != nil {
-		log.Error("Parse extra request body failed:", err)
-		resBody, _ := json.Marshal("Parse extra request body failed!")
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&extra); err != nil {
+		reason := fmt.Sprintf("Parse extra request body failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(resBody)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
 		return
 	}
 
 	result, err := db.C.AddExtraProperty(id, extra)
 	if err != nil {
-		log.Error(err)
-		resBody, _ := json.Marshal("Create extra property failed: " + fmt.Sprint(err))
+		reason := fmt.Sprintf("Create extra property failed: %s", err)
 		this.Ctx.Output.SetStatus(StatusBadRequest)
-		this.Ctx.Output.Body(resBody)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
 		return
 	}
 
-	resBody, _ := json.Marshal(result)
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal extra property added result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
 	this.Ctx.Output.SetStatus(StatusAccepted)
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body(body)
 	return
 }
 
@@ -227,16 +240,25 @@ func (this *ProfilePortal) ListExtraProperties() {
 
 	result, err := db.C.ListExtraProperties(id)
 	if err != nil {
-		log.Error(err)
-		resBody, _ := json.Marshal("List extra properties failed: " + fmt.Sprint(err))
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(resBody)
+		reason := fmt.Sprintf("List extra properties failed: %s", err)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
 		return
 	}
 
-	resBody, _ := json.Marshal(result)
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal extra properties listed result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
 	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body(body)
 	return
 }
 
@@ -245,15 +267,27 @@ func (this *ProfilePortal) RemoveExtraProperty() {
 	extraKey := this.Ctx.Input.Param(":extraKey")
 
 	if err := db.C.RemoveExtraProperty(id, extraKey); err != nil {
-		log.Error(err)
-		resBody, _ := json.Marshal("Remove profile extra property failed: " + fmt.Sprint(err))
+		reason := fmt.Sprintf("Remove extra property failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
-		this.Ctx.Output.Body(resBody)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
 		return
 	}
 
-	resBody, _ := json.Marshal("Remove extra property success!")
+	// Marshal the result.
+	body, err := json.Marshal(&model.Response{
+		Status:  "Success",
+		Message: "Remove extra property success!",
+	})
+	if err != nil {
+		reason := fmt.Sprintf("Marshal extra property removed result failed: %v", err)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
+
 	this.Ctx.Output.SetStatus(StatusAccepted)
-	this.Ctx.Output.Body(resBody)
+	this.Ctx.Output.Body(body)
 	return
 }

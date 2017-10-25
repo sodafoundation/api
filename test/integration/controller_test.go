@@ -12,6 +12,8 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
+// +build integration
+
 package integration
 
 import (
@@ -36,7 +38,7 @@ var dckInfo = &model.DockSpec{
 	DriverName: "default",
 }
 
-func TestCreateVolume(t *testing.T) {
+func TestControllerCreateVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	vol, err := vc.CreateVolume()
@@ -49,7 +51,7 @@ func TestCreateVolume(t *testing.T) {
 	t.Log(string(volBody))
 }
 
-func TestDeleteVolume(t *testing.T) {
+func TestControllerDeleteVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	res := vc.DeleteVolume()
@@ -62,7 +64,7 @@ func TestDeleteVolume(t *testing.T) {
 	t.Log(string(resBody))
 }
 
-func TestCreateVolumeAttachment(t *testing.T) {
+func TestControllerCreateVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	atc, err := vc.CreateVolumeAttachment()
@@ -75,7 +77,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	t.Log(string(atcBody))
 }
 
-func TestCreateVolumeSnapshot(t *testing.T) {
+func TestControllerCreateVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	snp, err := vc.CreateVolumeSnapshot()
@@ -88,7 +90,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	t.Log(string(snpBody))
 }
 
-func TestDeleteVolumeSnapshot(t *testing.T) {
+func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
 	res := vc.DeleteVolumeSnapshot()

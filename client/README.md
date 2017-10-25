@@ -40,9 +40,14 @@ import(
 	"fmt"
 	
 	"github.com/opensds/opensds/client"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 func main() {
+	c := client.NewClient(&client.Config{
+		Endpoint: ":8080",
+	})
+	
 	vol, err := c.CreateVolume(&model.VolumeSpec{Name: "test"})
 	if err != nil {
 		fmt.Println(err)
