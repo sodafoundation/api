@@ -46,4 +46,4 @@ script:
   - go test -v github.com/opensds/opensds/cmd/... -cover
   - go test -v github.com/opensds/opensds/pkg/... -cover
   - go test -v github.com/opensds/opensds/contrib/... -cover
-  - go test -v github.com/opensds/opensds/test/integration
+  - go test -v github.com/opensds/opensds/test/integration -tags integration
