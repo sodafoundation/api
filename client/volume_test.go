@@ -85,9 +85,6 @@ func (*fakeVolumeReceiver) Recv(
 		}
 		break
 	case "DELETE":
-		if err := json.Unmarshal([]byte(sampleVolumeResponse), out); err != nil {
-			return err
-		}
 		break
 	default:
 		return errors.New("inputed method format not supported!")
@@ -176,19 +173,9 @@ func TestListVolumes(t *testing.T) {
 
 func TestDeleteVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	expected := &model.Response{
-		Status:  "Success",
-		Message: "Volume resource has been deleted!",
-	}
 
-	res := fv.DeleteVolume(volID, &model.VolumeSpec{})
-	if err := res.ToError(); err != nil {
+	if err := fv.DeleteVolume(volID, &model.VolumeSpec{}); err != nil {
 		t.Error(err)
-		return
-	}
-
-	if !reflect.DeepEqual(res, expected) {
-		t.Errorf("Expected %v, got %v", expected, res)
 		return
 	}
 }
@@ -282,21 +269,11 @@ func TestListVolumeSnapshots(t *testing.T) {
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	var snpID = "3769855c-a102-11e7-b772-17b880d2f537"
-	expected := &model.Response{
-		Status:  "Success",
-		Message: "Volume resource has been deleted!",
-	}
 
-	res := fv.DeleteVolumeSnapshot(snpID, &model.VolumeSnapshotSpec{
+	if err := fv.DeleteVolumeSnapshot(snpID, &model.VolumeSnapshotSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-	})
-	if err := res.ToError(); err != nil {
+	}); err != nil {
 		t.Error(err)
-		return
-	}
-
-	if !reflect.DeepEqual(res, expected) {
-		t.Errorf("Expected %v, got %v", expected, res)
 		return
 	}
 }
@@ -351,9 +328,4 @@ var (
 			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
 		}
 	]`
-
-	sampleVolumeResponse = `{
-		"Status": "Success",
-		"Message": "Volume resource has been deleted!"
-	}`
 )

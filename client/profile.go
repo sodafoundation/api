@@ -79,15 +79,10 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	return res, nil
 }
 
-func (p *ProfileMgr) DeleteProfile(prfID string) *model.Response {
-	var res model.Response
+func (p *ProfileMgr) DeleteProfile(prfID string) error {
 	url := p.Endpoint + "/v1alpha/profiles/" + prfID
 
-	if err := p.Recv(request, url, "DELETE", nil, &res); err != nil {
-		res.Status, res.Error = "Failure", fmt.Sprint(err)
-	}
-
-	return &res
+	return p.Recv(request, url, "DELETE", nil, nil)
 }
 
 func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
@@ -114,13 +109,8 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 	return &res, nil
 }
 
-func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) *model.Response {
-	var res model.Response
+func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) error {
 	url := p.Endpoint + "/v1alpha/profiles/" + prfID + "/extras/" + extraKey
 
-	if err := p.Recv(request, url, "DELETE", nil, &res); err != nil {
-		res.Status, res.Error = "Failure", fmt.Sprint(err)
-	}
-
-	return &res
+	return p.Recv(request, url, "DELETE", nil, nil)
 }

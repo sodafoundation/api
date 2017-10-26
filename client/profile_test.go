@@ -80,9 +80,6 @@ func (*fakeProfileReceiver) Recv(
 		}
 		break
 	case "DELETE":
-		if err := json.Unmarshal([]byte(sampleProfileResponse), out); err != nil {
-			return err
-		}
 		break
 	default:
 		return errors.New("inputed method format not supported!")
@@ -171,19 +168,9 @@ func TestListProfiles(t *testing.T) {
 
 func TestDeleteProfile(t *testing.T) {
 	var prfID = "1106b972-66ef-11e7-b172-db03f3689c9c"
-	expected := &model.Response{
-		Status:  "Success",
-		Message: "Profile resource has been deleted!",
-	}
 
-	res := fpr.DeleteProfile(prfID)
-	if err := res.ToError(); err != nil {
+	if err := fpr.DeleteProfile(prfID); err != nil {
 		t.Error(err)
-		return
-	}
-
-	if !reflect.DeepEqual(res, expected) {
-		t.Errorf("Expected %v, got %v", expected, res)
 		return
 	}
 }
@@ -230,19 +217,9 @@ func TestListExtraProperties(t *testing.T) {
 
 func TestRemoveExtraProperty(t *testing.T) {
 	var prfID, extraKey = "2f9c0a04-66ef-11e7-ade2-43158893e017", "diskType"
-	expected := &model.Response{
-		Status:  "Success",
-		Message: "Profile resource has been deleted!",
-	}
 
-	res := fpr.RemoveExtraProperty(prfID, extraKey)
-	if err := res.ToError(); err != nil {
+	if err := fpr.RemoveExtraProperty(prfID, extraKey); err != nil {
 		t.Error(err)
-		return
-	}
-
-	if !reflect.DeepEqual(res, expected) {
-		t.Errorf("Expected %v, got %v", expected, res)
 		return
 	}
 }
@@ -276,10 +253,5 @@ var (
 		"diskType":"SAS",
 		"iops": 300,
 		"bandwidth": 500
-	}`
-
-	sampleProfileResponse = `{
-		"Status": "Success",
-		"Message": "Profile resource has been deleted!"
 	}`
 )

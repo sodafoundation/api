@@ -79,15 +79,10 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 	return res, nil
 }
 
-func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Response {
-	var res model.Response
+func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
 	url := v.Endpoint + "/v1alpha/block/volumes/" + volID
 
-	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
-		res.Status, res.Error = "Failure", fmt.Sprint(err)
-	}
-
-	return &res
+	return v.Recv(request, url, "DELETE", body, nil)
 }
 
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
@@ -126,13 +121,8 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	return res, nil
 }
 
-func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) *model.Response {
-	var res model.Response
+func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) error {
 	url := v.Endpoint + "/v1alpha/block/snapshots/" + snpID
 
-	if err := v.Recv(request, url, "DELETE", body, &res); err != nil {
-		res.Status, res.Error = "Failure", fmt.Sprint(err)
-	}
-
-	return &res
+	return v.Recv(request, url, "DELETE", body, nil)
 }
