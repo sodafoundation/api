@@ -53,6 +53,11 @@ func (*receiver) Recv(
 	if err = checkHTTPResponseStatusCode(resp); err != nil {
 		return err
 	}
+	// If the method is DELETE, consider it successfully deleted.
+	if strings.ToUpper(method) == "DELETE" {
+		return nil
+	}
+
 	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err

@@ -74,14 +74,12 @@ func TestClientListProfiles(t *testing.T) {
 func TestClientDeleteProfile(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 
-	res := c.DeleteProfile(prfID)
-	if err := res.ToError(); err != nil {
+	if err := c.DeleteProfile(prfID); err != nil {
 		t.Error("delete profile in client failed:", err)
 		return
 	}
 
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
+	t.Log("Delete profile success!")
 }
 
 func TestClientAddExtraProperty(t *testing.T) {
@@ -119,14 +117,12 @@ func TestClientRemoveExtraProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 	var extraKey = "iops"
 
-	res := c.RemoveExtraProperty(prfID, extraKey)
-	if err := res.ToError(); err != nil {
+	if err := c.RemoveExtraProperty(prfID, extraKey); err != nil {
 		t.Error("remove profile extra property in client failed:", err)
 		return
 	}
 
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
+	t.Log("Remove extra property success!")
 }
 
 func TestClientGetDock(t *testing.T) {
@@ -222,14 +218,12 @@ func TestClientDeleteVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	body := &model.VolumeSpec{}
 
-	res := c.DeleteVolume(volID, body)
-	if err := res.ToError(); err != nil {
+	if err := c.DeleteVolume(volID, body); err != nil {
 		t.Error("delete volume in client failed:", err)
 		return
 	}
 
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
+	t.Log("Delete volume success!")
 }
 
 func TestClientCreateVolumeSnapshot(t *testing.T) {
@@ -279,12 +273,10 @@ func TestClientDeleteVolumeSnapshot(t *testing.T) {
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 
-	res := c.DeleteVolumeSnapshot(snpID, body)
-	if err := res.ToError(); err != nil {
+	if err := c.DeleteVolumeSnapshot(snpID, body); err != nil {
 		t.Error("delete volume snapshot in client failed:", err)
 		return
 	}
 
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
+	t.Log("Delete volume snapshot success!")
 }
