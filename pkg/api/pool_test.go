@@ -107,7 +107,7 @@ func TestListPools(t *testing.T) {
 	}
 }
 
-func TestListPoolsWithInternalError(t *testing.T) {
+func TestListPoolsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("ListPools").Return(nil, errors.New("db error"))
@@ -117,8 +117,8 @@ func TestListPoolsWithInternalError(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
 	}
 }
 
