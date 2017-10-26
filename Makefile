@@ -7,6 +7,7 @@ build:osdsdock osdslet
 package:
 	go get github.com/opensds/opensds/cmd/osdslet
 	go get github.com/opensds/opensds/cmd/osdsdock
+	go get github.com/opensds/opensds/cmd/osdsctl
 
 osdsdock:package
 	mkdir -p  ./build/out/bin/
@@ -15,6 +16,10 @@ osdsdock:package
 osdslet:package
 	mkdir -p  ./build/out/bin/
 	go build -o ./build/out/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+
+osdsctl:package
+	mkdir -p  ./build/out/bin/
+	go build -o ./build/out/bin/osdsctl github.com/opensds/opensds/cmd/osdsctl
 
 docker:build
 	cp ./build/out/bin/osdsdock ./cmd/osdsdock
