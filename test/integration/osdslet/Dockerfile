@@ -1,7 +1,7 @@
 # Build: sudo docker build . -t opensds/osdslet:integration-test
 # Run: sudo docker run -d --net=host opensds/osdslet:integration-test
 
-FROM leonwanghui/golang:1.9
+FROM golang:1.9
 
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
