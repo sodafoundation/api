@@ -38,7 +38,7 @@ func (this *PoolPortal) ListPools() {
 	result, err := db.C.ListPools()
 	if err != nil {
 		reason := fmt.Sprintf("List pools failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return

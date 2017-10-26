@@ -42,7 +42,7 @@ func (this *ProfilePortal) CreateProfile() {
 	// Unmarshal the request body
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&profile); err != nil {
 		reason := fmt.Sprintf("Parse profile request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -75,7 +75,8 @@ func (this *ProfilePortal) CreateProfile() {
 		log.Error(reason)
 		return
 	}
-	this.Ctx.Output.SetStatus(StatusAccepted)
+
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body(body)
 	return
 }
@@ -84,7 +85,7 @@ func (this *ProfilePortal) ListProfiles() {
 	result, err := db.C.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -111,7 +112,7 @@ func (this *ProfilePortal) GetProfile() {
 	result, err := db.C.GetProfile(id)
 	if err != nil {
 		reason := fmt.Sprintf("Get profile failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -140,7 +141,7 @@ func (this *ProfilePortal) UpdateProfile() {
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&profile); err != nil {
 		reason := fmt.Sprintf("Parse profile request body failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -165,7 +166,7 @@ func (this *ProfilePortal) UpdateProfile() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body(body)
 	return
 }
@@ -194,7 +195,7 @@ func (this *ProfilePortal) DeleteProfile() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body(body)
 	return
 }
@@ -205,7 +206,7 @@ func (this *ProfilePortal) AddExtraProperty() {
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&extra); err != nil {
 		reason := fmt.Sprintf("Parse extra request body failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -230,7 +231,7 @@ func (this *ProfilePortal) AddExtraProperty() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body(body)
 	return
 }
@@ -287,7 +288,7 @@ func (this *ProfilePortal) RemoveExtraProperty() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusOK)
 	this.Ctx.Output.Body(body)
 	return
 }
