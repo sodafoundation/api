@@ -1,4 +1,4 @@
-## Qick Start for Learining How OpenSDS Client Works
+## Quick Start for Learning How OpenSDS Client Works
 
 To better learn how opensds client works for connecting with OpenSDS service,
 here is a three-step example showing how to use the client.
