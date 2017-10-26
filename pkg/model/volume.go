@@ -29,7 +29,7 @@ type VolumeSpec struct {
 	Description      string `json:"description,omitempty"`
 	Size             int64  `json:"size,omitempty"`
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
-	Status           string `json:"-"`
+	Status           string `json:"status,omitempty"`
 	PoolId           string `json:"poolId,omitempty"`
 	ProfileId        string `json:"profileId,omitempty"`
 }
@@ -64,7 +64,7 @@ type VolumeAttachmentSpec struct {
 	Description     string `json:"description,omitempty"`
 	VolumeId        string `json:"volumeId,omitempty"`
 	Mountpoint      string `json:"mountpoint,omitempty"`
-	Status          string `json:"-"`
+	Status          string `json:"status,omitempty"`
 	*HostInfo       `json:"hostInfo,omitempty"`
 	*ConnectionInfo `json:"connectionInfo,omitempty"`
 }
@@ -140,7 +140,7 @@ type VolumeSnapshotSpec struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Size        int64  `json:"size,omitempty"`
-	Status      string `json:"-"`
+	Status      string `json:"status,omitempty"`
 	VolumeId    string `json:"volumeId,omitempty"`
 }
 

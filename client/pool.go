@@ -20,17 +20,17 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-type PoolMgr struct {
-	Receiver
-
-	Endpoint string
-}
-
 func NewPoolMgr(edp string) *PoolMgr {
 	return &PoolMgr{
 		Receiver: NewReceiver(),
 		Endpoint: edp,
 	}
+}
+
+type PoolMgr struct {
+	Receiver
+
+	Endpoint string
 }
 
 func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {

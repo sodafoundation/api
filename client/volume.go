@@ -25,17 +25,22 @@ import (
 // could be discussed if it's better to define an interface.
 type VolumeBuilder *model.VolumeSpec
 
-type VolumeMgr struct {
-	Receiver
-
-	Endpoint string
-}
+// VolumeSnapshotBuilder contains request body of handling a volume snapshot
+// request. Currently it's assigned as the pointer of VolumeSnapshotSpec
+// struct, but it could be discussed if it's better to define an interface.
+type VolumeSnapshotBuilder *model.VolumeSnapshotSpec
 
 func NewVolumeMgr(edp string) *VolumeMgr {
 	return &VolumeMgr{
 		Receiver: NewReceiver(),
 		Endpoint: edp,
 	}
+}
+
+type VolumeMgr struct {
+	Receiver
+
+	Endpoint string
 }
 
 func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
@@ -84,11 +89,6 @@ func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) *model.Respon
 
 	return &res
 }
-
-// VolumeSnapshotBuilder contains request body of handling a volume snapshot
-// request. Currently it's assigned as the pointer of VolumeSnapshotSpec
-// struct, but it could be discussed if it's better to define an interface.
-type VolumeSnapshotBuilder *model.VolumeSnapshotSpec
 
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
