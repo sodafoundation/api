@@ -32,6 +32,8 @@ import:
   version: ^1.28.2
 - package: github.com/golang/glog
 - package: github.com/gophercloud/gophercloud
+- package: github.com/spf13/cobra
+  version: v0.0.1
 testImport:
 - package: github.com/bouk/monkey
 - package: github.com/stretchr/testify
