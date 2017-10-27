@@ -102,7 +102,7 @@ func (this *VolumePortal) ListVolumes() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volumes listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -113,11 +113,7 @@ func (this *VolumePortal) ListVolumes() {
 	return
 }
 
-type SpecifiedVolumePortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedVolumePortal) GetVolume() {
+func (this *VolumePortal) GetVolume() {
 	id := this.Ctx.Input.Param(":volumeId")
 
 	// Call db api module to handle get volume request.
@@ -134,7 +130,7 @@ func (this *SpecifiedVolumePortal) GetVolume() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume showed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -145,12 +141,12 @@ func (this *SpecifiedVolumePortal) GetVolume() {
 	return
 }
 
-func (this *SpecifiedVolumePortal) UpdateVolume() {
+func (this *VolumePortal) UpdateVolume() {
 	this.Ctx.Output.SetStatus(StatusNotImplemented)
 	return
 }
 
-func (this *SpecifiedVolumePortal) DeleteVolume() {
+func (this *VolumePortal) DeleteVolume() {
 	var volume = model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -275,11 +271,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 	return
 }
 
-type SpecifiedVolumeAttachmentPortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedVolumeAttachmentPortal) GetVolumeAttachment() {
+func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
 	id := this.Ctx.Input.Param(":attachmentId")
 	volId := this.GetString("volumeId")
 
@@ -307,7 +299,7 @@ func (this *SpecifiedVolumeAttachmentPortal) GetVolumeAttachment() {
 	return
 }
 
-func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
+func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -355,7 +347,7 @@ func (this *SpecifiedVolumeAttachmentPortal) UpdateVolumeAttachment() {
 	return
 }
 
-func (this *SpecifiedVolumeAttachmentPortal) DeleteVolumeAttachment() {
+func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -467,7 +459,7 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume snapshots listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -478,12 +470,8 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	return
 }
 
-type SpecifiedVolumeSnapshotPortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedVolumeSnapshotPortal) GetVolumeSnapshot() {
-	id := this.GetString("volumeId")
+func (this *VolumeSnapshotPortal) GetVolumeSnapshot() {
+	id := this.Ctx.Input.Param(":snapshotId")
 
 	result, err := db.C.GetVolumeSnapshot(id)
 	if err != nil {
@@ -498,7 +486,7 @@ func (this *SpecifiedVolumeSnapshotPortal) GetVolumeSnapshot() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume snapshot showed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -509,11 +497,11 @@ func (this *SpecifiedVolumeSnapshotPortal) GetVolumeSnapshot() {
 	return
 }
 
-func (this *SpecifiedVolumeSnapshotPortal) UpdateVolumeSnapshot() {
+func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 	this.Ctx.Output.SetStatus(StatusNotImplemented)
 }
 
-func (this *SpecifiedVolumeSnapshotPortal) DeleteVolumeSnapshot() {
+func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	var snapshot = model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
