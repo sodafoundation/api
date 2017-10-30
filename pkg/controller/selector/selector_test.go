@@ -45,10 +45,10 @@ func TestSelectSupportedPool(t *testing.T) {
 			"bandwidth": 1000,
 		},
 	}
-	var inputTag = map[string]string{
+	var inputTag = map[string]interface{}{
 		"diskType":  "SSD",
-		"iops":      "1000",
-		"bandwidth": "1000",
+		"iops":      1000,
+		"bandwidth": 1000,
 	}
 
 	// Test if the method would return correct pool when storage tag assigned.

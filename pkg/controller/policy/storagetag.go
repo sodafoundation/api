@@ -23,7 +23,7 @@ package policy
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
+	"fmt"
 
 	log "github.com/golang/glog"
 
@@ -77,17 +77,16 @@ func FindPolicyType(policy string) (string, error) {
 }
 
 type StorageTag struct {
-	syncTag  map[string]string
+	syncTag  map[string]interface{}
 	asyncTag map[string]string
 }
 
-func NewStorageTag(in map[string]interface{}, flag int) *StorageTag {
+func NewStorageTag(tags map[string]interface{}, flag int) *StorageTag {
 	var st = &StorageTag{
-		syncTag:  map[string]string{},
-		asyncTag: map[string]string{},
+		syncTag:  make(map[string]interface{}),
+		asyncTag: make(map[string]string),
 	}
 
-	tags := MapValuetoString(in)
 	// Screen storage tags through life circle flag
 	for key := range tags {
 		if flag != PolicyLifecircleTable[key] {
@@ -104,30 +103,16 @@ func NewStorageTag(in map[string]interface{}, flag int) *StorageTag {
 		case "feature":
 			st.syncTag[key] = tags[key]
 		case "operation":
-			st.asyncTag[key] = tags[key]
+			st.asyncTag[key] = fmt.Sprint(tags[key])
 		}
 	}
 	return st
 }
 
-func (st *StorageTag) GetSyncTag() map[string]string {
+func (st *StorageTag) GetSyncTag() map[string]interface{} {
 	return st.syncTag
 }
 
 func (st *StorageTag) GetAsyncTag() map[string]string {
 	return st.asyncTag
-}
-
-func MapValuetoString(in map[string]interface{}) map[string]string {
-	var out = map[string]string{}
-
-	for k, v := range in {
-		switch v.(type) {
-		case int:
-			out[k] = strconv.Itoa(v.(int))
-		case bool:
-			out[k] = strconv.FormatBool(v.(bool))
-		}
-	}
-	return out
 }
