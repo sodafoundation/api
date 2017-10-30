@@ -94,7 +94,7 @@ type SynchronizedExecutor interface {
 
 type SynchronizedWorkflow map[string]SynchronizedExecutor
 
-func RegisterSynchronizedWorkflow(req interface{}, tags map[string]string) (SynchronizedWorkflow, error) {
+func RegisterSynchronizedWorkflow(req interface{}, tags map[string]interface{}) (SynchronizedWorkflow, error) {
 	return SynchronizedWorkflow{}, nil
 }
 

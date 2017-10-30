@@ -22,16 +22,16 @@ package selector
 
 import (
 	"errors"
+	"strings"
 
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 )
 
 type Selector interface {
-	SelectSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error)
+	SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error)
 
 	SelectDock(input interface{}) (*model.DockSpec, error)
 }
@@ -52,7 +52,7 @@ func NewFakeSelector() Selector {
 	}
 }
 
-func (s *selector) SelectSupportedPool(tags map[string]string) (*model.StoragePoolSpec, error) {
+func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
 	pols, err := s.storBox.ListPools()
 	if err != nil {
 		log.Error("When list pool resources in db:", err)
@@ -62,12 +62,30 @@ func (s *selector) SelectSupportedPool(tags map[string]string) (*model.StoragePo
 	// Find if the desired storage tags are contained in any profile
 	for _, pol := range pols {
 		var isSupported = true
+
 		for k := range tags {
-			if !utils.Contained(k, pol.Parameters) {
+			// Find if the desired feature is contained in pool parameters.
+			p, ok := pol.Parameters[k]
+			if !ok {
 				isSupported = false
 				break
 			}
+
+			// Find if all tag are supported by pool.
+			switch strings.ToLower(k) {
+			case "diskType":
+				if tags[k].(string) != p.(string) {
+					isSupported = false
+					break
+				}
+			case "iops", "latency":
+				if tags[k].(int) > p.(int) {
+					isSupported = false
+					break
+				}
+			}
 		}
+
 		if isSupported {
 			return pol, nil
 		}

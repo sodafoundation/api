@@ -55,7 +55,7 @@ func TestNewStorageTag(t *testing.T) {
 		"deleteSnapshotPolicy": true,
 	}
 	var expectedSt = &StorageTag{
-		syncTag: map[string]string{
+		syncTag: map[string]interface{}{
 			"iops":             "1000",
 			"thinProvision":    "true",
 			"highAvailability": "false",
