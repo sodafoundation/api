@@ -29,15 +29,15 @@ import (
 
 type Driver struct{}
 
-func (d *Driver) Setup() error { return nil }
+func (*Driver) Setup() error { return nil }
 
-func (d *Driver) Unset() error { return nil }
+func (*Driver) Unset() error { return nil }
 
-func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	return &sampleVolume, nil
 }
 
-func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
+func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	if volIdentifier == sampleVolume.GetId() {
 		return &sampleVolume, nil
 	}
@@ -45,19 +45,19 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	return nil, errors.New("Can't find volume " + volIdentifier)
 }
 
-func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+func (*Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	return &sampleConnection, nil
 }
 
-func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
+func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return &sampleSnapshots[0], nil
 }
 
-func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
+func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	for _, snapshot := range sampleSnapshots {
 		if snapIdentifier == snapshot.GetId() {
 			return &snapshot, nil
@@ -67,11 +67,11 @@ func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec,
 	return nil, errors.New("Can't find snapshot " + snapIdentifier)
 }
 
-func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+func (*Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 
 	for i := range samplePools {

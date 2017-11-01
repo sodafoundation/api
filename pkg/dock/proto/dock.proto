@@ -85,10 +85,12 @@ message CreateVolumeOpts {
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
-	// The dock infomation on which the request will be executed
-	string dockId = 2;
+    // The metadata of the volume, optional.
+    map<string, string> metadata = 2;
+	// The dock infomation on which the request will be executed.
+	string dockId = 3;
 	// The storage driver type.
-	string driverName = 3;	
+	string driverName = 4;	
 }
 
 // CreateVolumeSnapshotOpts is a structure which indicates all required
@@ -104,10 +106,12 @@ message CreateVolumeSnapshotOpts {
     string description = 4;
     // The uuid of the volume that snapshot belongs to, required.
     string volumeId = 5;
+    // The metadata of the volume snapshot, optional.
+    map<string, string> metadata = 6;
 	// The dock infomation on which the request will be executed
-	string dockId = 6;
+	string dockId = 7;
 	// The storage driver type.
-	string driverName = 7;
+	string driverName = 8;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
@@ -115,10 +119,14 @@ message CreateVolumeSnapshotOpts {
 message DeleteVolumeSnapshotOpts {
     // The uuid of the volume snapshot, required.
     string id = 1;
+    // The uuid of the volume that snapshot belongs to, required.
+    string volumeId = 2;
+    // The metadata of the volume snapshot, optional.
+    map<string, string> metadata = 3;
 	// The dock infomation on which the request will be executed
-	string dockId = 2;
+	string dockId = 4;
 	// The storage driver type.
-	string driverName = 3;
+	string driverName = 5;
 }
 
 // CreateAttachmentOpts is a structure which indicates all required

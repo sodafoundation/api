@@ -31,6 +31,7 @@ type OsdsDock struct {
 	EnableBackends []string `conf:"enabled_backends,ceph"`
 	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
 	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
+	LVMConfig      string   `conf:"lvm_config,/etc/opensds/driver/lvm.yaml"`
 }
 
 type Database struct {
@@ -48,6 +49,7 @@ type BackendProperties struct {
 type Ceph BackendProperties
 type Cinder BackendProperties
 type Sample BackendProperties
+type LVM BackendProperties
 
 type Config struct {
 	Default  `conf:"default"`
@@ -57,6 +59,7 @@ type Config struct {
 	Ceph     `conf:"ceph"`
 	Cinder   `conf:"cinder"`
 	Sample   `conf:"sample"`
+	LVM      `conf:"lvm"`
 	Flag     FlagSet
 }
 
@@ -75,4 +78,3 @@ func (c *Config) Load(confFile string) {
 }
 
 var CONF *Config = GetDefaultConfig()
-
