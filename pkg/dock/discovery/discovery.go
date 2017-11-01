@@ -57,6 +57,7 @@ func (dd *DockDiscoverer) Init() error {
 		"ceph":   BackendProperties(CONF.Ceph),
 		"cinder": BackendProperties(CONF.Cinder),
 		"sample": BackendProperties(CONF.Sample),
+		"lvm":    BackendProperties(CONF.LVM),
 	}
 
 	host, err := os.Hostname()

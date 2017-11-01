@@ -25,13 +25,14 @@ import (
 
 type VolumeSpec struct {
 	*BaseModel
-	Name             string `json:"name,omitempty"`
-	Description      string `json:"description,omitempty"`
-	Size             int64  `json:"size,omitempty"`
-	AvailabilityZone string `json:"availabilityZone,omitempty"`
-	Status           string `json:"status,omitempty"`
-	PoolId           string `json:"poolId,omitempty"`
-	ProfileId        string `json:"profileId,omitempty"`
+	Name             string            `json:"name,omitempty"`
+	Description      string            `json:"description,omitempty"`
+	Size             int64             `json:"size,omitempty"`
+	AvailabilityZone string            `json:"availabilityZone,omitempty"`
+	Status           string            `json:"status,omitempty"`
+	PoolId           string            `json:"poolId,omitempty"`
+	ProfileId        string            `json:"profileId,omitempty"`
+	Metadata         map[string]string `json:"metadata, omitempty"`
 }
 
 func (vol *VolumeSpec) GetName() string {
@@ -56,6 +57,10 @@ func (vol *VolumeSpec) GetPoolId() string {
 
 func (vol *VolumeSpec) GetProfileId() string {
 	return vol.ProfileId
+}
+
+func (vol *VolumeSpec) GetMetadata() map[string]string {
+	return vol.Metadata
 }
 
 type VolumeAttachmentSpec struct {
@@ -137,11 +142,12 @@ func (con *ConnectionInfo) EncodeConnectionData() []byte {
 
 type VolumeSnapshotSpec struct {
 	*BaseModel
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Size        int64  `json:"size,omitempty"`
-	Status      string `json:"status,omitempty"`
-	VolumeId    string `json:"volumeId,omitempty"`
+	Name        string            `json:"name,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Size        int64             `json:"size,omitempty"`
+	Status      string            `json:"status,omitempty"`
+	VolumeId    string            `json:"volumeId,omitempty"`
+	Metadata    map[string]string `json:"metadata, omitempty"`
 }
 
 func (snp *VolumeSnapshotSpec) GetName() string {
@@ -158,4 +164,8 @@ func (snp *VolumeSnapshotSpec) GetSize() int64 {
 
 func (snp *VolumeSnapshotSpec) GetVolumeId() string {
 	return snp.VolumeId
+}
+
+func (snp *VolumeSnapshotSpec) GetMetadata() map[string]string {
+	return snp.Metadata
 }

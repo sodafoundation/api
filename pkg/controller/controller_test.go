@@ -73,7 +73,6 @@ func TestCreateVolume(t *testing.T) {
 		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
-		profile:          &sampleProfile,
 		createVolumeOpts: req,
 	}
 	var expected = &sampleVolume
@@ -95,7 +94,6 @@ func TestDeleteVolume(t *testing.T) {
 		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
-		profile:          &sampleProfile,
 		deleteVolumeOpts: req,
 	}
 	var expected = &model.Response{Status: "Success"}
@@ -158,7 +156,6 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		Selector:                 selector.NewFakeSelector(),
 		volumeController:         NewFakeVolumeController(),
 		deleteVolumeSnapshotOpts: req,
-		volSnapshot:              &model.VolumeSnapshotSpec{},
 	}
 	var expected = &model.Response{Status: "Success"}
 
