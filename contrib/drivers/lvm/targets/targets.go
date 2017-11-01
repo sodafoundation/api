@@ -15,37 +15,63 @@
 package targets
 
 import (
-	pb "github.com/opensds/opensds/pkg/dock/proto"
-	"github.com/opensds/opensds/pkg/model"
+	"errors"
+)
+
+const (
+	globalTid = 1
+	globalIQN = "iqn.2017-10.io.opensds:volume:00000001"
+	baseNum   = 100
+)
+
+var (
+	globalLun = 1
 )
 
 type Target interface {
-	InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
+	CreateExport(path string) (map[string]interface{}, error)
 
-	TerminateConnection(req *pb.CreateAttachmentOpts) error
+	RemoveExport(path string) error
 }
 
-func NewTarget(name string) Target {
-	switch name {
-	case "iscsi":
-		return &target{
-			ISCSITarget: NewISCSITarget(),
-		}
-	default:
-		break
+func NewTarget() Target {
+	return &iscsiTarget{
+		ISCSITarget: NewISCSITarget(globalTid, globalIQN),
 	}
-
-	return nil
 }
 
-type target struct {
+type iscsiTarget struct {
 	ISCSITarget
 }
 
-func (t *target) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, nil
+func (t *iscsiTarget) CreateExport(path string) (map[string]interface{}, error) {
+	globalLun = (globalLun + 1) % baseNum
+
+	if t.GetISCSITarget() != globalTid {
+		if err := t.CreateISCSITarget(); err != nil {
+			return nil, err
+		}
+	}
+	if err := t.AddLun(globalLun, path); err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"targetDiscovered": true,
+		"targetIQN":        globalIQN,
+		"targetPortal":     "127.0.0.1:2360",
+		"discard":          false,
+	}, nil
 }
 
-func (t *target) TerminateConnection(req *pb.CreateAttachmentOpts) error {
+func (t *iscsiTarget) RemoveExport(path string) error {
+	lun := t.GetLun(path)
+	if lun == -1 {
+		return errors.New("Can't find lun with path " + path)
+	}
+
+	if err := t.RemoveLun(lun); err != nil {
+		return err
+	}
+
 	return nil
 }

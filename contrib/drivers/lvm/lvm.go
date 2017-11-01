@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
@@ -145,8 +146,25 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	// TODO
-	return nil, errors.New("Not implemented")
+	// TODO	Add lvm path in Metadata field.
+	lvPath, ok := opt.GetMetadata()["lvPath"]
+	if !ok {
+		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
+		log.Error(err)
+		return nil, err
+	}
+
+	t := targets.NewTarget()
+	expt, err := t.CreateExport(lvPath)
+	if err != nil {
+		log.Error("Failed to initialize connection of logic volume:", err)
+		return nil, err
+	}
+
+	return &model.ConnectionInfo{
+		DriverVolumeType: "iscsi",
+		ConnectionData:   expt,
+	}, nil
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {

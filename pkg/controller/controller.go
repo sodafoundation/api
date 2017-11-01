@@ -83,6 +83,14 @@ func NewControllerWithVolumeConfig(
 			return &pb.CreateAttachmentOpts{
 				Id:       atc.GetId(),
 				VolumeId: atc.GetVolumeId(),
+				HostInfo: &pb.HostInfo{
+					Platform:  atc.Platform,
+					OsType:    atc.OsType,
+					Ip:        atc.Ip,
+					Host:      atc.Host,
+					Initiator: atc.Initiator,
+				},
+				Metadata: atc.GetMetadata(),
 			}
 		}(atc)
 	}

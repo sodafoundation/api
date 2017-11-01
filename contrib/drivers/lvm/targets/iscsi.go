@@ -15,65 +15,194 @@
 package targets
 
 import (
+	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	log "github.com/golang/glog"
 )
 
 type ISCSITarget interface {
-	CreateISCSITarget(*ISCSITargetOpts) (string, error)
+	CreateISCSITarget() error
+	GetISCSITarget() int
+	RemoveISCSITarget() error
 
-	RemoveISCSITarget(*ISCSITargetOpts) error
+	AddLun(lun int, path string) error
+	GetLun(path string) int
+	RemoveLun(lun int) error
 }
 
-type ISCSITargetOpts struct {
-	Name       string
-	Tid        string
-	Lun        string
-	Path       string
-	VolumeId   string
-	VolumeName string
-	Parameters map[string]interface{}
+func NewISCSITarget(tid int, name string) ISCSITarget {
+	return &tgtTarget{
+		Tid:   tid,
+		TName: name,
+	}
 }
 
-func NewISCSITarget() ISCSITarget {
-	return &tgtTarget{}
+type tgtTarget struct {
+	Tid   int
+	TName string
 }
 
-type tgtTarget struct{}
+func (t *tgtTarget) AddLun(lun int, path string) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "new",
+		"--mode", "logicalunit",
+		"--tid", fmt.Sprint(t.Tid),
+		"--lun", fmt.Sprint(lun),
+		"--backing-store", path,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to add lun into iscsi target:", err)
+		return err
+	}
 
-func (*tgtTarget) CreateISCSITarget(opt *ISCSITargetOpts) (string, error) {
-	return "", nil
-}
-
-func (*tgtTarget) RemoveISCSITarget(opt *ISCSITargetOpts) error {
 	return nil
 }
 
-func (*tgtTarget) getISCSITarget(volumeId string) (string, error) {
-	return "0", nil
-}
-
-func (*tgtTarget) getTarget(iqn string) (string, error) {
-	out, err := execCmd("targetcli iscsi/ ls")
+func (t *tgtTarget) GetLun(path string) int {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "show",
+		"--mode", "target",
+		"-T", t.TName,
+	}
+	out, err := t.execCmd(cmd)
 	if err != nil {
-		log.Error("Fail to exec 'targetcli iscsi/ ls':", err)
-		return "", err
+		log.Error("Fail to exec 'tgtadm' to display iscsi target:", err)
+		return -1
 	}
 
-	for _, line := range strings.Split(out, "\n") {
-		if strings.Contains(line, iqn) {
-			return iqn, nil
+	var lun = -1
+	var lines = strings.Split(out, "\n")
+	for num, line := range lines {
+		if strings.Contains(line, path) {
+			for i := 1; i < num; i++ {
+				if strings.Contains(lines[num-i], "LUN") {
+					lunString := strings.Fields(lines[num-i])[1]
+					lun, err = strconv.Atoi(lunString)
+					if err != nil {
+						return -1
+					}
+					return lun
+				}
+			}
 		}
 	}
 
-	return "", nil
-
+	return -1
 }
 
-func execCmd(cmd string) (string, error) {
-	ret, err := exec.Command("bash", "-c", cmd).Output()
+func (t *tgtTarget) RemoveLun(lun int) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "delete",
+		"--mode", "logicalunit",
+		"--tid", fmt.Sprint(t.Tid),
+		"--lun", fmt.Sprint(lun),
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to remove lun from iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) CreateISCSITarget() error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "new",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+		"-T", t.TName,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to create iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) GetISCSITarget() int {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "show",
+		"--mode", "target",
+	}
+	out, err := t.execCmd(cmd)
+	if err != nil {
+		log.Error("Fail to exec 'tgtadm' to display iscsi target:", err)
+		return -1
+	}
+
+	var tid = -1
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, t.TName) {
+			tidString := strings.Fields(strings.Split(line, ":")[0])[1]
+			tid, err = strconv.Atoi(tidString)
+			if err != nil {
+				return -1
+			}
+			break
+		}
+	}
+	return tid
+}
+
+func (t *tgtTarget) RemoveISCSITarget() error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "delete",
+		"--force",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to forcely remove iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) BindInitiator(initiator string) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "bind",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+		"-I", initiator,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to bind iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) UnbindInitiator(initiator string) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "unbind",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+		"-I", initiator,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to unbind iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (*tgtTarget) execCmd(cmd []string) (string, error) {
+	ret, err := exec.Command("tgtadm", cmd...).Output()
 	if err != nil {
 		log.Error(err.Error())
 		return "", err

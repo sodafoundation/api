@@ -120,6 +120,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 			Initiator: opt.HostInfo.GetInitiator(),
 		},
 		ConnectionInfo: connInfo,
+		Metadata:       opt.GetMetadata(),
 	}
 
 	// Validate the data.
