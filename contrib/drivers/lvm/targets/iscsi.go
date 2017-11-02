@@ -31,6 +31,9 @@ type ISCSITarget interface {
 	AddLun(lun int, path string) error
 	GetLun(path string) int
 	RemoveLun(lun int) error
+
+	BindInitiator(initiator string) error
+	UnbindInitiator(initiator string) error
 }
 
 func NewISCSITarget(tid int, name string) ISCSITarget {
@@ -67,7 +70,6 @@ func (t *tgtTarget) GetLun(path string) int {
 		"--lld", "iscsi",
 		"--op", "show",
 		"--mode", "target",
-		"-T", t.TName,
 	}
 	out, err := t.execCmd(cmd)
 	if err != nil {
@@ -91,6 +93,7 @@ func (t *tgtTarget) GetLun(path string) int {
 			}
 		}
 	}
+	log.Info("Got lun id:", lun)
 
 	return -1
 }

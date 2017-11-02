@@ -107,7 +107,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 	return &res, nil
 }
 
-// CreateVolumeAttachment implements opensds.DockServer
+// CreateAttachment implements opensds.DockServer
 func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -122,6 +122,23 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 	}
 
 	res.Reply = GenericResponseResult(atc)
+	return &res, nil
+}
+
+// DeleteAttachment implements opensds.DockServer
+func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttachmentOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive delete volume attachment request, vr =", opt)
+
+	if err := dock.NewDockHub(opt.GetDriverName()).DeleteVolumeAttachment(opt); err != nil {
+		log.Error("Error occured in dock module when delete volume attachment:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult("")
 	return &res, nil
 }
 

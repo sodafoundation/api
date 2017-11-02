@@ -146,6 +146,10 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	var initiator string
+	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
+		initiator = "ALL"
+	}
 	// TODO	Add lvm path in Metadata field.
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
@@ -155,7 +159,7 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 	}
 
 	t := targets.NewTarget()
-	expt, err := t.CreateExport(lvPath)
+	expt, err := t.CreateExport(lvPath, initiator)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err
@@ -165,6 +169,28 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 		DriverVolumeType: "iscsi",
 		ConnectionData:   expt,
 	}, nil
+}
+
+func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+	var initiator string
+	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
+		initiator = "ALL"
+	}
+	// TODO	Add lvm path in Metadata field.
+	lvPath, ok := opt.GetMetadata()["lvPath"]
+	if !ok {
+		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
+		log.Error(err)
+		return err
+	}
+
+	t := targets.NewTarget()
+	if err := t.RemoveExport(lvPath, initiator); err != nil {
+		log.Error("Failed to initialize connection of logic volume:", err)
+		return err
+	}
+
+	return nil
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {

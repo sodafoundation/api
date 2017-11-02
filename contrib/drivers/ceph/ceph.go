@@ -315,6 +315,8 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}, nil
 }
 
+func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	if err := d.initConn(); err != nil {
 		log.Error("Connect ceph failed.")

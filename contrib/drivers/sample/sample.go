@@ -53,6 +53,8 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 	return &sampleConnection, nil
 }
 
+func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+
 func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return &sampleSnapshots[0], nil
 }

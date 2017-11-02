@@ -44,6 +44,8 @@ type VolumeDriver interface {
 
 	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
 
+	TerminateConnection(opt *pb.DeleteAttachmentOpts) error
+
 	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
 	PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error)

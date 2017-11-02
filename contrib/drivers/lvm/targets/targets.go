@@ -29,9 +29,9 @@ var (
 )
 
 type Target interface {
-	CreateExport(path string) (map[string]interface{}, error)
+	CreateExport(path, initiator string) (map[string]interface{}, error)
 
-	RemoveExport(path string) error
+	RemoveExport(path, initiator string) error
 }
 
 func NewTarget() Target {
@@ -44,7 +44,7 @@ type iscsiTarget struct {
 	ISCSITarget
 }
 
-func (t *iscsiTarget) CreateExport(path string) (map[string]interface{}, error) {
+func (t *iscsiTarget) CreateExport(path, initiator string) (map[string]interface{}, error) {
 	globalLun = (globalLun + 1) % baseNum
 
 	if t.GetISCSITarget() != globalTid {
@@ -55,6 +55,10 @@ func (t *iscsiTarget) CreateExport(path string) (map[string]interface{}, error) 
 	if err := t.AddLun(globalLun, path); err != nil {
 		return nil, err
 	}
+	if err := t.BindInitiator(initiator); err != nil {
+		return nil, err
+	}
+
 	return map[string]interface{}{
 		"targetDiscovered": true,
 		"targetIQN":        globalIQN,
@@ -63,12 +67,15 @@ func (t *iscsiTarget) CreateExport(path string) (map[string]interface{}, error) 
 	}, nil
 }
 
-func (t *iscsiTarget) RemoveExport(path string) error {
+func (t *iscsiTarget) RemoveExport(path, initiator string) error {
+	if err := t.UnbindInitiator(initiator); err != nil {
+		return err
+	}
+
 	lun := t.GetLun(path)
 	if lun == -1 {
 		return errors.New("Can't find lun with path " + path)
 	}
-
 	if err := t.RemoveLun(lun); err != nil {
 		return err
 	}
