@@ -129,11 +129,10 @@ var (
 	sampleConnection = model.ConnectionInfo{
 		DriverVolumeType: "iscsi",
 		ConnectionData: map[string]interface{}{
-			"target_discovered": true,
-			"target_iqn":        "iqn.2010-10.org.openstack:volume-00000001",
-			"target_portal":     "127.0.0.0.1:3260",
-			"volume_id":         "9a0d35d0-175a-11e4-8c21-0800200c9a66",
-			"discard":           false,
+			"targetDiscovered": true,
+			"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+			"targetPortal":     "127.0.0.0.1:3260",
+			"discard":          false,
 		},
 	}
 

@@ -49,6 +49,11 @@ func (*fakeVolumeReceiver) Recv(
 				return err
 			}
 			break
+		case *model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(sampleAttachment), out); err != nil {
+				return err
+			}
+			break
 		case *model.VolumeSnapshotSpec:
 			if err := json.Unmarshal([]byte(sampleSnapshot), out); err != nil {
 				return err
@@ -67,6 +72,16 @@ func (*fakeVolumeReceiver) Recv(
 			break
 		case *[]*model.VolumeSpec:
 			if err := json.Unmarshal([]byte(sampleVolumes), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(sampleAttachment), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(sampleAttachments), out); err != nil {
 				return err
 			}
 			break
@@ -175,6 +190,123 @@ func TestDeleteVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 
 	if err := fv.DeleteVolume(volID, &model.VolumeSpec{}); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestCreateVolumeAttachment(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	expected := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
+		Name:        "sample-volume-attachment",
+		Description: "This is a sample volume attachment for testing",
+		Status:      "available",
+		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo:    &model.HostInfo{},
+		ConnectionInfo: &model.ConnectionInfo{
+			DriverVolumeType: "iscsi",
+			ConnectionData: map[string]interface{}{
+				"targetDiscovered": true,
+				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal":     "127.0.0.0.1:3260",
+				"discard":          false,
+			},
+		},
+	}
+
+	atc, err := fv.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
+		VolumeId: volID,
+		HostInfo: &model.HostInfo{},
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("Expected %v, got %v", expected, atc)
+		return
+	}
+}
+
+func TestGetVolumeAttachment(t *testing.T) {
+	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
+	expected := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
+		Name:        "sample-volume-attachment",
+		Description: "This is a sample volume attachment for testing",
+		Status:      "available",
+		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo:    &model.HostInfo{},
+		ConnectionInfo: &model.ConnectionInfo{
+			DriverVolumeType: "iscsi",
+			ConnectionData: map[string]interface{}{
+				"targetDiscovered": true,
+				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal":     "127.0.0.0.1:3260",
+				"discard":          false,
+			},
+		},
+	}
+
+	atc, err := fv.GetVolumeAttachment(atcID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("Expected %v, got %v", expected, atc)
+		return
+	}
+}
+
+func TestListVolumeAttachments(t *testing.T) {
+	expected := []*model.VolumeAttachmentSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+			},
+			Name:        "sample-volume-attachment",
+			Description: "This is a sample volume attachment for testing",
+			Status:      "available",
+			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			HostInfo:    &model.HostInfo{},
+			ConnectionInfo: &model.ConnectionInfo{
+				DriverVolumeType: "iscsi",
+				ConnectionData: map[string]interface{}{
+					"targetDiscovered": true,
+					"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+					"targetPortal":     "127.0.0.0.1:3260",
+					"discard":          false,
+				},
+			},
+		},
+	}
+
+	atcs, err := fv.ListVolumeAttachments()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(atcs, expected) {
+		t.Errorf("Expected %v, got %v", expected, atcs)
+		return
+	}
+}
+
+func TestDeleteVolumeAttachment(t *testing.T) {
+	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
+
+	if err := fv.DeleteVolumeAttachment(atcID, &model.VolumeAttachmentSpec{
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	}); err != nil {
 		t.Error(err)
 		return
 	}
@@ -298,6 +430,44 @@ var (
 			"status": "available",
 			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+		}
+	]`
+
+	sampleAttachment = `{
+		"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		"name": "sample-volume-attachment",
+		"description": "This is a sample volume attachment for testing",
+		"status": "available",
+		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"hostInfo": {},
+		"connectionInfo": {
+			"driverVolumeType": "iscsi",
+			"data": {
+				"targetDiscovered": true,
+				"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal": "127.0.0.0.1:3260",
+				"discard": false
+			}
+		}
+	}`
+
+	sampleAttachments = `[
+		{
+			"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+			"name": "sample-volume-attachment",
+			"description": "This is a sample volume attachment for testing",
+			"status": "available",
+			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"hostInfo": {},
+			"connectionInfo": {
+				"driverVolumeType": "iscsi",
+				"data": {
+					"targetDiscovered": true,
+					"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+					"targetPortal": "127.0.0.0.1:3260",
+					"discard": false
+				}
+			}
 		}
 	]`
 

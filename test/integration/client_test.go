@@ -226,6 +226,63 @@ func TestClientDeleteVolume(t *testing.T) {
 	t.Log("Delete volume success!")
 }
 
+func TestClientCreateVolumeAttachment(t *testing.T) {
+	var body = &model.VolumeAttachmentSpec{
+		Name:        "test",
+		Description: "This is a test",
+		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo:    &model.HostInfo{},
+	}
+
+	atc, err := c.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("create volume attachment in client failed:", err)
+		return
+	}
+
+	atcBody, _ := json.MarshalIndent(atc, "", "	")
+	t.Log(string(atcBody))
+}
+
+func TestClientGetVolumeAttachment(t *testing.T) {
+	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
+
+	atc, err := c.GetVolumeAttachment(atcID)
+	if err != nil {
+		t.Error("get volume attachment in client failed:", err)
+		return
+	}
+
+	atcBody, _ := json.MarshalIndent(atc, "", "	")
+	t.Log(string(atcBody))
+}
+
+func TestClientListVolumeAttachments(t *testing.T) {
+	atcs, err := c.ListVolumeAttachments()
+	if err != nil {
+		t.Error("list volume attachments in client failed:", err)
+		return
+	}
+
+	atcsBody, _ := json.MarshalIndent(atcs, "", "	")
+	t.Log(string(atcsBody))
+}
+
+func TestClientDeleteVolumeAttachment(t *testing.T) {
+	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
+	body := &model.VolumeAttachmentSpec{
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: &model.HostInfo{},
+	}
+
+	if err := c.DeleteVolumeAttachment(atcID, body); err != nil {
+		t.Error("delete volume attachment in client failed:", err)
+		return
+	}
+
+	t.Log("Delete volume attachment success!")
+}
+
 func TestClientCreateVolumeSnapshot(t *testing.T) {
 	var body = &model.VolumeSnapshotSpec{
 		Name:        "test",
