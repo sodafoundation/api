@@ -55,6 +55,7 @@ func NewController(
 	createVolumeSnapshotOpts *pb.CreateVolumeSnapshotOpts,
 	deleteVolumeSnapshotOpts *pb.DeleteVolumeSnapshotOpts,
 	createAttachmentOpts *pb.CreateAttachmentOpts,
+	deleteAttachmentOpts *pb.DeleteAttachmentOpts,
 ) Controller {
 	return &controller{
 		Client:                   client.NewClient(),
@@ -63,6 +64,7 @@ func NewController(
 		CreateVolumeSnapshotOpts: createVolumeSnapshotOpts,
 		DeleteVolumeSnapshotOpts: deleteVolumeSnapshotOpts,
 		CreateAttachmentOpts:     createAttachmentOpts,
+		DeleteAttachmentOpts:     deleteAttachmentOpts,
 	}
 }
 
@@ -74,6 +76,7 @@ type controller struct {
 	CreateVolumeSnapshotOpts *pb.CreateVolumeSnapshotOpts
 	DeleteVolumeSnapshotOpts *pb.DeleteVolumeSnapshotOpts
 	CreateAttachmentOpts     *pb.CreateAttachmentOpts
+	DeleteAttachmentOpts     *pb.DeleteAttachmentOpts
 }
 
 func (c *controller) CreateVolume() (*model.VolumeSpec, error) {
@@ -163,48 +166,36 @@ func (c *controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, erro
 }
 
 func (c *controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
-	//	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-	//		log.Error("When parsing dock info:", err)
-	//		return nil, err
-	//	}
-
-	//	result, err := c.Client.UpdateVolumeAttachment(context.Background(), c.Request)
-	//	if err != nil {
-	//		log.Error("Update volume attachment failed in volume controller:", err)
-	//		return &model.VolumeAttachmentSpec{}, err
-	//	}
-	//	defer c.Client.Close()
-
-	//	var atc = &model.VolumeAttachmentSpec{}
-	//	if err = json.Unmarshal([]byte(result.GetMessage()), atc); err != nil {
-	//		log.Error("Update volume attachment failed in volume controller:", err)
-	//		return &model.VolumeAttachmentSpec{}, err
-	//	}
-	//	return atc, nil
 	return nil, nil
 }
 
 func (c *controller) DeleteVolumeAttachment() *model.Response {
-	//	if err := c.Client.Update(c.Request.GetDockInfo()); err != nil {
-	//		log.Error("When parsing dock info:", err)
-	//		return nil
-	//	}
+	if err := c.Client.Update(c.DockInfo); err != nil {
+		log.Error("When parsing dock info:", err)
+		return nil
+	}
 
-	//	result, err := c.Client.DeleteVolumeAttachment(context.Background(), c.Request)
-	//	if err != nil {
-	//		log.Error("Delete volume attachment failed in volume controller:", err)
-	//		return &model.Response{
-	//			Status: "Failure",
-	//			Error:  fmt.Sprint(err),
-	//		}
-	//	}
-	//	defer c.Client.Close()
+	response, err := c.Client.DeleteAttachment(context.Background(), c.DeleteAttachmentOpts)
+	if err != nil {
+		log.Error("Delete volume attachment failed in volume controller:", err)
+		return &model.Response{
+			Status: "Failure",
+			Error:  fmt.Sprint(err),
+		}
+	}
+	defer c.Client.Close()
 
-	//	return &model.Response{
-	//		Status:  result.GetStatus(),
-	//		Message: result.GetMessage(),
-	//	}
-	return nil
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return &model.Response{
+			Status:  "Failure",
+			Message: errorMsg.GetDescription(),
+		}
+	}
+
+	return &model.Response{
+		Status:  "Success",
+		Message: response.GetResult().GetMessage(),
+	}
 }
 
 func (c *controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {

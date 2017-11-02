@@ -31,6 +31,7 @@ var vc = volume.NewController(
 	&pb.CreateVolumeSnapshotOpts{},
 	&pb.DeleteVolumeSnapshotOpts{},
 	&pb.CreateAttachmentOpts{},
+	&pb.DeleteAttachmentOpts{},
 )
 
 var dckInfo = &model.DockSpec{
@@ -56,7 +57,7 @@ func TestControllerDeleteVolume(t *testing.T) {
 
 	res := vc.DeleteVolume()
 	if err := res.ToError(); err != nil {
-		t.Error("create volume in controller failed:", err)
+		t.Error("delete volume in controller failed:", err)
 		return
 	}
 
@@ -77,6 +78,19 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 	t.Log(string(atcBody))
 }
 
+func TestControllerDeleteVolumeAttachment(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	res := vc.DeleteVolumeAttachment()
+	if err := res.ToError(); err != nil {
+		t.Error("delete volume attachment in controller failed:", err)
+		return
+	}
+
+	resBody, _ := json.MarshalIndent(res, "", "	")
+	t.Log(string(resBody))
+}
+
 func TestControllerCreateVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
@@ -95,7 +109,7 @@ func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 
 	res := vc.DeleteVolumeSnapshot()
 	if err := res.ToError(); err != nil {
-		t.Error("create volume snapshot in controller failed:", err)
+		t.Error("delete volume snapshot in controller failed:", err)
 		return
 	}
 

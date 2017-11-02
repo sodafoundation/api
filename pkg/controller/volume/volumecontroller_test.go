@@ -79,6 +79,14 @@ func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachm
 	}, nil
 }
 
+func (fc *fakeClient) DeleteAttachment(ctx context.Context, in *pb.DeleteAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 // Create a volume snapshot
 func (fc *fakeClient) CreateVolumeSnapshot(ctx context.Context, in *pb.CreateVolumeSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	volBody, _ := json.Marshal(&sampleSnapshot)

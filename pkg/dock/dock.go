@@ -120,6 +120,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 			Initiator: opt.HostInfo.GetInitiator(),
 		},
 		ConnectionInfo: connInfo,
+		Metadata:       opt.GetMetadata(),
 	}
 
 	// Validate the data.
@@ -134,6 +135,26 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 	}
 
 	return atc, nil
+}
+
+func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
+	//Get the storage drivers and do some initializations.
+	d.Driver = drivers.Init(d.ResourceType)
+
+	log.Info("Calling volume driver to terminate volume connection...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err := d.Driver.TerminateConnection(opt); err != nil {
+		log.Error("Call driver to terminate volume connection failed:", err)
+		return err
+	}
+
+	if err := db.C.DeleteVolumeAttachment(opt.GetVolumeId(), opt.GetId()); err != nil {
+		log.Error("Error occured in dock module when delete volume attachment in db:", err)
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeSnapshotSpec, error) {

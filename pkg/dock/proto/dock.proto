@@ -49,6 +49,9 @@ service Dock {
 	
     // Create a volume attachment
     rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
+	
+	// Delete a volume attachment
+    rpc DeleteAttachment (DeleteAttachmentOpts) returns (GenericResponse){}
 }
 
 // CreateVolumeOpts is a structure which indicates all required properties
@@ -142,10 +145,29 @@ message CreateAttachmentOpts {
     bool multiPath = 4;
     // The infomation of the host node on which the volume will be attached.
     HostInfo hostInfo = 5;
+    // The metadata of the volume attachment, optional.
+    map<string, string> metadata = 6;
 	// The dock infomation on which the request will be executed
-	string dockId = 6;
+	string dockId = 7;
 	// The storage driver type.
-	string driverName = 7;
+	string driverName = 8;
+}
+
+// DeleteAttachmentOpts is a structure which indicates all required
+// properties for deleting a volume attachment.
+message DeleteAttachmentOpts {
+    // The uuid of the volume attachment, optional.
+    string id = 1;
+    // The uuid of the volume, required.
+    string volumeId = 2;
+    // The infomation of the host node on which the volume will be attached.
+    HostInfo hostInfo = 3;
+    // The metadata of the volume attachment, optional.
+    map<string, string> metadata = 4;
+	// The dock infomation on which the request will be executed
+	string dockId = 5;
+	// The storage driver type.
+	string driverName = 6;
 }
 
 message HostInfo {
