@@ -39,7 +39,7 @@ matrix:
     env: TARGET=ppc64le
 
 install:
-  - go build -i ./cmd/osdslet && go build -i ./cmd/osdsdock
+  - go build -i ./cmd/osdsctl && go build -i ./cmd/osdslet && go build -i ./cmd/osdsdock
   - mv ./osdslet ./test/integration/osdslet/ && mv ./osdsdock ./test/integration/osdsdock/
   - sudo docker build test/integration/osdslet/ -t opensds/osdslet:integration-test
   - sudo docker build test/integration/osdsdock/ -t opensds/osdsdock:integration-test
