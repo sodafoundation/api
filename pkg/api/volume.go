@@ -51,19 +51,8 @@ func (this *VolumePortal) CreateVolume() {
 		return
 	}
 
-	// Register controller with different config, including VolumeSpec, VolumeAttachmentSpec
-	// and VolumeSnapshotSpec.
-	c, err := controller.NewControllerWithVolumeConfig(&volume, nil, nil)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	// Call controller to handle create volume request.
-	result, err := c.CreateVolume()
+	// Call global controller variable to handle create volume request.
+	result, err := controller.Brain.CreateVolume(&volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -161,16 +150,8 @@ func (this *VolumePortal) DeleteVolume() {
 	}
 	volume.Id = volId
 
-	c, err := controller.NewControllerWithVolumeConfig(&volume, nil, nil)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result := c.DeleteVolume()
+	// Call global controller variable to handle delete volume request.
+	result := controller.Brain.DeleteVolume(&volume)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -211,16 +192,8 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		return
 	}
 
-	c, err := controller.NewControllerWithVolumeConfig(nil, &attachment, nil)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result, err := c.CreateVolumeAttachment()
+	// Call global controller variable to handle create volume attachment request.
+	result, err := controller.Brain.CreateVolumeAttachment(&attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -300,6 +273,8 @@ func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
+	// TODO Please note that this function has been disabled in controller
+	// module.
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -314,16 +289,7 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	}
 	attachment.Id = id
 
-	c, err := controller.NewControllerWithVolumeConfig(nil, &attachment, nil)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result, err := c.UpdateVolumeAttachment()
+	result, err := controller.Brain.UpdateVolumeAttachment(&attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -362,16 +328,8 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	}
 	attachment.Id = id
 
-	c, err := controller.NewControllerWithVolumeConfig(nil, &attachment, nil)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result := c.DeleteVolumeAttachment()
+	// Call global controller variable to handle delete volume attachment request.
+	result := controller.Brain.DeleteVolumeAttachment(&attachment)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume attachment failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -412,16 +370,8 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
-	c, err := controller.NewControllerWithVolumeConfig(nil, nil, &snapshot)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result, err := c.CreateVolumeSnapshot()
+	// Call global controller variable to handle create volume snapshot request.
+	result, err := controller.Brain.CreateVolumeSnapshot(&snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -516,16 +466,8 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	}
 	snapshot.Id = id
 
-	c, err := controller.NewControllerWithVolumeConfig(nil, nil, &snapshot)
-	if err != nil {
-		reason := fmt.Sprintf("Set up controller failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
-	result := c.DeleteVolumeSnapshot()
+	// Call global controller variable to handle delete volume snapshot request.
+	result := controller.Brain.DeleteVolumeSnapshot(&snapshot)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)

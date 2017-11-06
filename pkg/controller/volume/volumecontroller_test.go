@@ -120,7 +120,7 @@ func TestCreateVolume(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleVolume
 
-	result, err := fc.CreateVolume()
+	result, err := fc.CreateVolume(&pb.CreateVolumeOpts{})
 	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
@@ -134,8 +134,7 @@ func TestDeleteVolume(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &model.Response{Status: "Success"}
 
-	result := fc.DeleteVolume()
-
+	result := fc.DeleteVolume(&pb.DeleteVolumeOpts{})
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
@@ -145,7 +144,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleAttachment
 
-	result, err := fc.CreateVolumeAttachment()
+	result, err := fc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
 	if err != nil {
 		t.Errorf("Failed to create volume attachment, err is %v\n", err)
 	}
@@ -155,11 +154,21 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 }
 
+func TestDeleteVolumeAttachment(t *testing.T) {
+	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	var expected = &model.Response{Status: "Success"}
+
+	result := fc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
+	}
+}
+
 func TestCreateVolumeSnapshot(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &sampleSnapshot
 
-	result, err := fc.CreateVolumeSnapshot()
+	result, err := fc.CreateVolumeSnapshot(&pb.CreateVolumeSnapshotOpts{})
 	if err != nil {
 		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
 	}
@@ -173,8 +182,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
 	var expected = &model.Response{Status: "Success"}
 
-	result := fc.DeleteVolumeSnapshot()
-
+	result := fc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}

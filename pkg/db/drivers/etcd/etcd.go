@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	prefix  = "/api/v1alpha/block"
+	prefix  = "/v1alpha/block"
 	timeOut = 3 * time.Second
 )
 

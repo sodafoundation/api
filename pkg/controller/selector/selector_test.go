@@ -27,6 +27,54 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+func TestSelectProfile(t *testing.T) {
+	s := NewFakeSelector()
+
+	// Test if the method would return default profile when no profile id
+	// assigned.
+	var prfID = ""
+	var expectedDefaultProfile = &model.ProfileSpec{
+		BaseModel: &model.BaseModel{
+			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		},
+		Name:        "default",
+		Description: "default policy",
+		Extra:       model.ExtraSpec{},
+	}
+
+	prf, err := s.SelectProfile(prfID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expectedDefaultProfile, prf) {
+		t.Fatalf("Expected %v, get %v", expectedDefaultProfile, prf)
+	}
+
+	// Test if the method would return specified profile when profile id
+	// assigned.
+	prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
+	var expectedAssignedProfile = &model.ProfileSpec{
+		BaseModel: &model.BaseModel{
+			Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+		},
+		Name:        "silver",
+		Description: "silver policy",
+		Extra: model.ExtraSpec{
+			"diskType":  "SAS",
+			"iops":      300,
+			"bandwidth": 500,
+		},
+	}
+
+	prf, err = s.SelectProfile(prfID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expectedAssignedProfile, prf) {
+		t.Fatalf("Expected %v, get %v", expectedAssignedProfile, prf)
+	}
+}
+
 func TestSelectSupportedPool(t *testing.T) {
 	s := NewFakeSelector()
 

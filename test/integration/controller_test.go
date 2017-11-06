@@ -25,14 +25,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-var vc = volume.NewController(
-	&pb.CreateVolumeOpts{},
-	&pb.DeleteVolumeOpts{},
-	&pb.CreateVolumeSnapshotOpts{},
-	&pb.DeleteVolumeSnapshotOpts{},
-	&pb.CreateAttachmentOpts{},
-	&pb.DeleteAttachmentOpts{},
-)
+var vc = volume.NewController()
 
 var dckInfo = &model.DockSpec{
 	Endpoint:   "localhost:50050",
@@ -42,7 +35,7 @@ var dckInfo = &model.DockSpec{
 func TestControllerCreateVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	vol, err := vc.CreateVolume()
+	vol, err := vc.CreateVolume(&pb.CreateVolumeOpts{})
 	if err != nil {
 		t.Error("create volume in controller failed:", err)
 		return
@@ -55,7 +48,7 @@ func TestControllerCreateVolume(t *testing.T) {
 func TestControllerDeleteVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolume()
+	res := vc.DeleteVolume(&pb.DeleteVolumeOpts{})
 	if err := res.ToError(); err != nil {
 		t.Error("delete volume in controller failed:", err)
 		return
@@ -68,7 +61,7 @@ func TestControllerDeleteVolume(t *testing.T) {
 func TestControllerCreateVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	atc, err := vc.CreateVolumeAttachment()
+	atc, err := vc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
 	if err != nil {
 		t.Error("create volume attachment in controller failed:", err)
 		return
@@ -81,7 +74,7 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 func TestControllerDeleteVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolumeAttachment()
+	res := vc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
 	if err := res.ToError(); err != nil {
 		t.Error("delete volume attachment in controller failed:", err)
 		return
@@ -94,7 +87,7 @@ func TestControllerDeleteVolumeAttachment(t *testing.T) {
 func TestControllerCreateVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	snp, err := vc.CreateVolumeSnapshot()
+	snp, err := vc.CreateVolumeSnapshot(&pb.CreateVolumeSnapshotOpts{})
 	if err != nil {
 		t.Error("create volume snapshot in controller failed:", err)
 		return
@@ -107,7 +100,7 @@ func TestControllerCreateVolumeSnapshot(t *testing.T) {
 func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolumeSnapshot()
+	res := vc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
 	if err := res.ToError(); err != nil {
 		t.Error("delete volume snapshot in controller failed:", err)
 		return
