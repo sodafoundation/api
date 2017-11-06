@@ -23,6 +23,7 @@ package drivers
 
 import (
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/csi"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/sample"
@@ -57,6 +58,10 @@ type VolumeDriver interface {
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
+	case "csi":
+		var d = &csi.Driver{}
+		d.Setup()
+		return d
 	case "cinder":
 		var d = &cinder.Driver{}
 		d.Setup()

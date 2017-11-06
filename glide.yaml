@@ -35,6 +35,9 @@ import:
   version: 1.2.1
 - package: github.com/spf13/cobra
   version: ^0.0.1
+- package: github.com/container-storage-interface/spec
+  subpackages:
+  - lib/go/csi
 testImport:
 - package: github.com/bouk/monkey
   version: b96e337f6e5b36906584cd0cf9803bbab09284f7

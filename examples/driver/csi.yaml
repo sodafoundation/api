@@ -1,0 +1,5 @@
+pool:
+  "pool001":
+    diskType: SSD
+    iops: 1000
+    bandwidth: 1000

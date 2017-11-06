@@ -32,6 +32,7 @@ type OsdsDock struct {
 	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
 	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
 	LVMConfig      string   `conf:"lvm_config,/etc/opensds/driver/lvm.yaml"`
+	CSIConfig      string   `conf:"csi_config,/etc/opensds/driver/csi.yaml"`
 }
 
 type Database struct {
@@ -50,6 +51,7 @@ type Ceph BackendProperties
 type Cinder BackendProperties
 type Sample BackendProperties
 type LVM BackendProperties
+type CSI BackendProperties
 
 type Config struct {
 	Default  `conf:"default"`
@@ -60,7 +62,9 @@ type Config struct {
 	Cinder   `conf:"cinder"`
 	Sample   `conf:"sample"`
 	LVM      `conf:"lvm"`
-	Flag     FlagSet
+	CSI      `conf:"csi"`
+
+	Flag FlagSet
 }
 
 //Create a Config and init default value.
