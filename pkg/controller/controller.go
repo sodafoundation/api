@@ -39,7 +39,7 @@ const (
 	DELETE_LIFECIRCLE_FLAG
 )
 
-var Brain = NewController()
+var Brain *Controller
 
 func NewController() *Controller {
 	return &Controller{

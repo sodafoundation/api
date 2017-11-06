@@ -21,6 +21,7 @@ package main
 
 import (
 	"github.com/opensds/opensds/pkg/api"
+	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -43,6 +44,9 @@ func main() {
 
 	// Set up database session.
 	db.Init(&CONF.Database)
+
+	// Initialize Controller object.
+	c.Brain = c.NewController()
 
 	// Start OpenSDS northbound REST service.
 	api.Run(CONF.OsdsLet.ApiEndpoint)
