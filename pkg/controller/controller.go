@@ -28,7 +28,6 @@ import (
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
-	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -40,128 +39,33 @@ const (
 	DELETE_LIFECIRCLE_FLAG
 )
 
-func NewControllerWithVolumeConfig(
-	vol *model.VolumeSpec,
-	atc *model.VolumeAttachmentSpec,
-	snp *model.VolumeSnapshotSpec,
-) (*Controller, error) {
-	var c = &Controller{}
+var Brain = NewController()
 
-	// If volume input is not null, the controller will add policy orchestration
-	// to manage volume resource.
-	if vol != nil {
-		prf, err := SearchProfile(vol.GetProfileId(), db.C)
-		if err != nil {
-			log.Error("when search profiles in db:", err)
-			return nil, err
-		}
-
-		// Generate CreateVolumeOpts by parsing input VolumeSpec.
-		c.createVolumeOpts = func(vol *model.VolumeSpec) *pb.CreateVolumeOpts {
-			return &pb.CreateVolumeOpts{
-				Id:               vol.GetId(),
-				Name:             vol.GetName(),
-				Description:      vol.GetDescription(),
-				Size:             vol.GetSize(),
-				AvailabilityZone: vol.GetAvailabilityZone(),
-				ProfileId:        vol.GetProfileId(),
-			}
-		}(vol)
-		// Generate DeleteVolumeOpts by parsing input VolumeSpec.
-		c.deleteVolumeOpts = func(vol *model.VolumeSpec) *pb.DeleteVolumeOpts {
-			return &pb.DeleteVolumeOpts{
-				Id:       vol.GetId(),
-				Metadata: vol.GetMetadata(),
-			}
-		}(vol)
-
-		// Initialize policy controller when profile is specified.
-		c.policyController = policy.NewController(prf)
+func NewController() *Controller {
+	return &Controller{
+		Selector:         selector.NewSelector(),
+		volumeController: volume.NewController(),
 	}
-	if atc != nil {
-		// Generate CreateAttachmentOpts by parsing input VolumeAttachmentSpec.
-		c.createAttachmentOpts = func(atc *model.VolumeAttachmentSpec) *pb.CreateAttachmentOpts {
-			return &pb.CreateAttachmentOpts{
-				Id:       atc.GetId(),
-				VolumeId: atc.GetVolumeId(),
-				HostInfo: &pb.HostInfo{
-					Platform:  atc.Platform,
-					OsType:    atc.OsType,
-					Ip:        atc.Ip,
-					Host:      atc.Host,
-					Initiator: atc.Initiator,
-				},
-				Metadata: atc.GetMetadata(),
-			}
-		}(atc)
-		// Generate DeleteAttachmentOpts by parsing input VolumeAttachmentSpec.
-		c.deleteAttachmentOpts = func(atc *model.VolumeAttachmentSpec) *pb.DeleteAttachmentOpts {
-			return &pb.DeleteAttachmentOpts{
-				Id:       atc.GetId(),
-				VolumeId: atc.GetVolumeId(),
-				HostInfo: &pb.HostInfo{
-					Platform:  atc.Platform,
-					OsType:    atc.OsType,
-					Ip:        atc.Ip,
-					Host:      atc.Host,
-					Initiator: atc.Initiator,
-				},
-				Metadata: atc.GetMetadata(),
-			}
-		}(atc)
-	}
-	if snp != nil {
-		// Generate CreateVolumeSnapshotOpts by parsing input VolumeSnapshotSpec.
-		c.createVolumeSnapshotOpts = func(snp *model.VolumeSnapshotSpec) *pb.CreateVolumeSnapshotOpts {
-			return &pb.CreateVolumeSnapshotOpts{
-				Id:          snp.GetId(),
-				Name:        snp.GetName(),
-				Description: snp.GetDescription(),
-				Size:        snp.GetSize(),
-				VolumeId:    snp.GetVolumeId(),
-				Metadata:    snp.GetMetadata(),
-			}
-		}(snp)
-		// Generate DeleteVolumeSnapshotOpts by parsing input VolumeSnapshotSpec.
-		c.deleteVolumeSnapshotOpts = func(snp *model.VolumeSnapshotSpec) *pb.DeleteVolumeSnapshotOpts {
-			return &pb.DeleteVolumeSnapshotOpts{
-				Id:       snp.GetId(),
-				VolumeId: snp.GetVolumeId(),
-				Metadata: snp.GetMetadata(),
-			}
-		}(snp)
-	}
-
-	// Initialize selector controller.
-	c.Selector = selector.NewSelector()
-	// Initialize volume controller.
-	c.volumeController = volume.NewController(
-		c.createVolumeOpts,
-		c.deleteVolumeOpts,
-		c.createVolumeSnapshotOpts,
-		c.deleteVolumeSnapshotOpts,
-		c.createAttachmentOpts,
-		c.deleteAttachmentOpts,
-	)
-
-	return c, nil
 }
 
 type Controller struct {
 	selector.Selector
 
-	volumeController         volume.Controller
-	policyController         policy.Controller
-	createVolumeOpts         *pb.CreateVolumeOpts
-	deleteVolumeOpts         *pb.DeleteVolumeOpts
-	createVolumeSnapshotOpts *pb.CreateVolumeSnapshotOpts
-	deleteVolumeSnapshotOpts *pb.DeleteVolumeSnapshotOpts
-	createAttachmentOpts     *pb.CreateAttachmentOpts
-	deleteAttachmentOpts     *pb.DeleteAttachmentOpts
+	volumeController volume.Controller
+	policyController policy.Controller
 }
 
-func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
+func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
+	var prfID = in.GetProfileId()
+
+	prf, err := c.SelectProfile(prfID)
+	if err != nil {
+		log.Error("when search profiles in db:", err)
+		return nil, err
+	}
+
 	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 
 	polInfo, err := c.SelectSupportedPool(c.policyController.StorageTag().GetSyncTag())
@@ -169,36 +73,52 @@ func (c *Controller) CreateVolume() (*model.VolumeSpec, error) {
 		log.Error("When search supported pool resource:", err)
 		return nil, err
 	}
-	c.createVolumeOpts.PoolId = polInfo.GetId()
-
 	dockInfo, err := c.SelectDock(polInfo)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-	c.createVolumeOpts.DockId = dockInfo.GetId()
-	c.createVolumeOpts.DriverName = dockInfo.GetDriverName()
-
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
 
-	result, err := c.volumeController.CreateVolume()
+	opt := &pb.CreateVolumeOpts{
+		Id:               in.GetId(),
+		Name:             in.GetName(),
+		Description:      in.GetDescription(),
+		Size:             in.GetSize(),
+		AvailabilityZone: in.GetAvailabilityZone(),
+		ProfileId:        prfID,
+		PoolId:           polInfo.GetId(),
+		DockId:           dockInfo.GetId(),
+		DriverName:       dockInfo.GetDriverName(),
+	}
+	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
 		return nil, err
 	}
 
 	var errChan = make(chan error, 1)
 	volBody, _ := json.Marshal(result)
-	go c.policyController.ExecuteAsyncPolicy(c.createVolumeOpts, string(volBody), errChan)
+	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChan)
 
 	return result, nil
 }
 
-func (c *Controller) DeleteVolume() *model.Response {
+func (c *Controller) DeleteVolume(in *model.VolumeSpec) *model.Response {
+	prf, err := c.SelectProfile(in.GetProfileId())
+	if err != nil {
+		log.Error("when search profiles in db:", err)
+		return &model.Response{
+			Status: "Failure",
+			Error:  fmt.Sprint(err),
+		}
+	}
+
 	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dockInfo, err := c.SelectDock(c.deleteVolumeOpts.GetId())
+	dockInfo, err := c.SelectDock(in.GetId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return &model.Response{
@@ -206,14 +126,18 @@ func (c *Controller) DeleteVolume() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-	c.deleteVolumeOpts.DockId = dockInfo.GetId()
-	c.deleteVolumeOpts.DriverName = dockInfo.GetDriverName()
-
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
 
+	opt := &pb.DeleteVolumeOpts{
+		Id:         in.GetId(),
+		Metadata:   in.GetMetadata(),
+		DockId:     dockInfo.GetId(),
+		DriverName: dockInfo.GetDriverName(),
+	}
+
 	var errChan = make(chan error, 1)
-	go c.policyController.ExecuteAsyncPolicy(c.deleteVolumeOpts, "", errChan)
+	go c.policyController.ExecuteAsyncPolicy(opt, "", errChan)
 
 	if err := <-errChan; err != nil {
 		log.Error("When execute async policy:", err)
@@ -223,29 +147,41 @@ func (c *Controller) DeleteVolume() *model.Response {
 		}
 	}
 
-	return c.volumeController.DeleteVolume()
+	return c.volumeController.DeleteVolume(opt)
 }
 
-func (c *Controller) CreateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
-	dockInfo, err := c.SelectDock(c.createAttachmentOpts.GetVolumeId())
+func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-	c.createAttachmentOpts.DockId = dockInfo.GetId()
-	c.createAttachmentOpts.DriverName = dockInfo.GetDriverName()
-
 	c.volumeController.SetDock(dockInfo)
 
-	return c.volumeController.CreateVolumeAttachment()
+	return c.volumeController.CreateVolumeAttachment(
+		&pb.CreateAttachmentOpts{
+			Id:       in.GetId(),
+			VolumeId: in.GetVolumeId(),
+			HostInfo: &pb.HostInfo{
+				Platform:  in.GetPlatform(),
+				OsType:    in.GetOsType(),
+				Ip:        in.GetIp(),
+				Host:      in.GetHost(),
+				Initiator: in.GetInitiator(),
+			},
+			Metadata:   in.GetMetadata(),
+			DockId:     dockInfo.GetId(),
+			DriverName: dockInfo.GetDriverName(),
+		},
+	)
 }
 
-func (c *Controller) UpdateVolumeAttachment() (*model.VolumeAttachmentSpec, error) {
+func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (c *Controller) DeleteVolumeAttachment() *model.Response {
-	dockInfo, err := c.SelectDock(c.deleteAttachmentOpts.GetVolumeId())
+func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) *model.Response {
+	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return &model.Response{
@@ -253,30 +189,48 @@ func (c *Controller) DeleteVolumeAttachment() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-	c.deleteAttachmentOpts.DockId = dockInfo.GetId()
-	c.deleteAttachmentOpts.DriverName = dockInfo.GetDriverName()
-
 	c.volumeController.SetDock(dockInfo)
 
-	return c.volumeController.DeleteVolumeAttachment()
+	return c.volumeController.DeleteVolumeAttachment(
+		&pb.DeleteAttachmentOpts{
+			Id:       in.GetId(),
+			VolumeId: in.GetVolumeId(),
+			HostInfo: &pb.HostInfo{
+				Platform:  in.GetPlatform(),
+				OsType:    in.GetOsType(),
+				Ip:        in.GetIp(),
+				Host:      in.GetHost(),
+				Initiator: in.GetInitiator(),
+			},
+			Metadata:   in.GetMetadata(),
+			DockId:     dockInfo.GetId(),
+			DriverName: dockInfo.GetDriverName(),
+		},
+	)
 }
 
-func (c *Controller) CreateVolumeSnapshot() (*model.VolumeSnapshotSpec, error) {
-	dockInfo, err := c.SelectDock(c.createVolumeSnapshotOpts.GetVolumeId())
+func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-	c.createVolumeSnapshotOpts.DockId = dockInfo.GetId()
-	c.createVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
-
 	c.volumeController.SetDock(dockInfo)
 
-	return c.volumeController.CreateVolumeSnapshot()
+	return c.volumeController.CreateVolumeSnapshot(
+		&pb.CreateVolumeSnapshotOpts{
+			Id:          in.GetId(),
+			Name:        in.GetName(),
+			Description: in.GetDescription(),
+			Size:        in.GetSize(),
+			VolumeId:    in.GetVolumeId(),
+			Metadata:    in.GetMetadata(),
+		},
+	)
 }
 
-func (c *Controller) DeleteVolumeSnapshot() *model.Response {
-	dockInfo, err := c.SelectDock(c.deleteVolumeSnapshotOpts.GetVolumeId())
+func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) *model.Response {
+	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return &model.Response{
@@ -284,10 +238,13 @@ func (c *Controller) DeleteVolumeSnapshot() *model.Response {
 			Error:  fmt.Sprint(err),
 		}
 	}
-	c.deleteVolumeSnapshotOpts.DockId = dockInfo.GetId()
-	c.deleteVolumeSnapshotOpts.DriverName = dockInfo.GetDriverName()
-
 	c.volumeController.SetDock(dockInfo)
 
-	return c.volumeController.DeleteVolumeSnapshot()
+	return c.volumeController.DeleteVolumeSnapshot(
+		&pb.DeleteVolumeSnapshotOpts{
+			Id:       in.GetId(),
+			VolumeId: in.GetVolumeId(),
+			Metadata: in.GetMetadata(),
+		},
+	)
 }

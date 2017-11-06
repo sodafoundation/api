@@ -31,6 +31,8 @@ import (
 )
 
 type Selector interface {
+	SelectProfile(prfID string) (*model.ProfileSpec, error)
+
 	SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error)
 
 	SelectDock(input interface{}) (*model.DockSpec, error)
@@ -50,6 +52,28 @@ func NewFakeSelector() Selector {
 	return &selector{
 		storBox: db.NewFakeDbClient(),
 	}
+}
+
+func (s *selector) SelectProfile(prfID string) (*model.ProfileSpec, error) {
+	// If a user doesn't specify profile id, then a default profile will be
+	// automatically assigned.
+	if prfID == "" {
+		prfs, err := s.storBox.ListProfiles()
+		if err != nil {
+			log.Error("When list profiles:", err)
+			return nil, err
+		}
+
+		for _, prf := range prfs {
+			if prf.GetName() == "default" {
+				return prf, nil
+			}
+		}
+
+		return nil, errors.New("Can not find default profile in db!")
+	}
+
+	return s.storBox.GetProfile(prfID)
 }
 
 func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
