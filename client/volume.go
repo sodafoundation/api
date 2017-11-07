@@ -102,6 +102,18 @@ func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model
 	return &res, nil
 }
 
+func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
+	var res model.VolumeAttachmentSpec
+	url := v.Endpoint + "/v1alpha/block/attachments/" + atcID
+
+	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
 	url := v.Endpoint + "/v1alpha/block/attachments/" + atcID

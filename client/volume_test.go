@@ -42,7 +42,7 @@ func (*fakeVolumeReceiver) Recv(
 	out interface{},
 ) error {
 	switch strings.ToUpper(method) {
-	case "POST":
+	case "POST", "PUT":
 		switch out.(type) {
 		case *model.VolumeSpec:
 			if err := json.Unmarshal([]byte(sampleVolume), out); err != nil {
@@ -201,11 +201,9 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		},
-		Name:        "sample-volume-attachment",
-		Description: "This is a sample volume attachment for testing",
-		Status:      "available",
-		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo:    &model.HostInfo{},
+		Status:   "available",
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: &model.HostInfo{},
 		ConnectionInfo: &model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
@@ -232,17 +230,50 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 }
 
+func TestUpdateVolumeAttachment(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	expected := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
+		Status:   "available",
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: &model.HostInfo{},
+		ConnectionInfo: &model.ConnectionInfo{
+			DriverVolumeType: "iscsi",
+			ConnectionData: map[string]interface{}{
+				"targetDiscovered": true,
+				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal":     "127.0.0.0.1:3260",
+				"discard":          false,
+			},
+		},
+	}
+
+	atc, err := fv.UpdateVolumeAttachment("f2dda3d2-bf79-11e7-8665-f750b088f63e", &model.VolumeAttachmentSpec{
+		VolumeId: volID,
+		HostInfo: &model.HostInfo{},
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("Expected %v, got %v", expected, atc)
+		return
+	}
+}
+
 func TestGetVolumeAttachment(t *testing.T) {
 	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
 	expected := &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
 			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		},
-		Name:        "sample-volume-attachment",
-		Description: "This is a sample volume attachment for testing",
-		Status:      "available",
-		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo:    &model.HostInfo{},
+		Status:   "available",
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: &model.HostInfo{},
 		ConnectionInfo: &model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
@@ -272,11 +303,9 @@ func TestListVolumeAttachments(t *testing.T) {
 			BaseModel: &model.BaseModel{
 				Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 			},
-			Name:        "sample-volume-attachment",
-			Description: "This is a sample volume attachment for testing",
-			Status:      "available",
-			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo:    &model.HostInfo{},
+			Status:   "available",
+			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			HostInfo: &model.HostInfo{},
 			ConnectionInfo: &model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{

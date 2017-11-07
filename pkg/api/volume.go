@@ -233,7 +233,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume attachments listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -246,9 +246,8 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 
 func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
 	id := this.Ctx.Input.Param(":attachmentId")
-	volId := this.GetString("volumeId")
 
-	result, err := db.C.GetVolumeAttachment(volId, id)
+	result, err := db.C.GetVolumeAttachment(id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -273,8 +272,6 @@ func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
-	// TODO Please note that this function has been disabled in controller
-	// module.
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -289,7 +286,7 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	}
 	attachment.Id = id
 
-	result, err := controller.Brain.UpdateVolumeAttachment(&attachment)
+	result, err := db.C.UpdateVolumeAttachment(id, &attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -301,8 +298,8 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal volume attachment updated result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal volume attachment showed result failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -314,22 +311,26 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
-	var attachment = model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{},
-	}
 	id := this.Ctx.Input.Param(":attachmentId")
-
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&attachment); err != nil {
-		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+	attachment, err := db.C.GetVolumeAttachment(id)
+	if err != nil {
+		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
 	}
-	attachment.Id = id
+
+	if attachment.Id == "" {
+		reason := fmt.Sprintf("Get volume attachment failed, id = : %s", attachment.Id)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
 
 	// Call global controller variable to handle delete volume attachment request.
-	result := controller.Brain.DeleteVolumeAttachment(&attachment)
+	result := controller.Brain.DeleteVolumeAttachment(attachment)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume attachment failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)

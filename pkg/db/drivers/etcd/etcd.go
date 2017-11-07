@@ -30,6 +30,8 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
+	"github.com/satori/go.uuid"
 )
 
 const (
@@ -479,28 +481,34 @@ func (c *client) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (c *client) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error {
-	atcBody, err := json.Marshal(atc)
+func (c *client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	if len(attachment.Id) == 0 {
+		attachment.Id = uuid.NewV4().String()
+	}
+
+	attachment.CreatedAt = time.Now().Format(utils.TimeFormat)
+
+	atcBody, err := json.Marshal(attachment)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "volume", volID, "attachments", atc.GetId()),
+		Url:     GenerateUrl(prefix, "volume", "attachments", attachment.Id),
 		Content: string(atcBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume attachment in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return attachment, nil
 }
 
-func (c *client) GetVolumeAttachment(volID, atcID string) (*model.VolumeAttachmentSpec, error) {
+func (c *client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", volID, "attachments", atcID),
+		Url: GenerateUrl(prefix, "volume", "attachments", attachmentId),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -516,9 +524,9 @@ func (c *client) GetVolumeAttachment(volID, atcID string) (*model.VolumeAttachme
 	return atc, nil
 }
 
-func (c *client) ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error) {
+func (c *client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", volID, "attachments"),
+		Url: GenerateUrl(prefix, "volume", "attachments"),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -527,35 +535,68 @@ func (c *client) ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentS
 	}
 
 	var atcs = []*model.VolumeAttachmentSpec{}
-	if len(dbRes.Message) == 0 {
-		return atcs, nil
-	}
 	for _, msg := range dbRes.Message {
 		var atc = &model.VolumeAttachmentSpec{}
 		if err := json.Unmarshal([]byte(msg), atc); err != nil {
 			log.Error("When parsing volume attachment in db:", dbRes.Error)
 			return nil, errors.New(dbRes.Error)
 		}
-		atcs = append(atcs, atc)
+
+		if len(volumeId) == 0 || atc.Id == volumeId {
+			atcs = append(atcs, atc)
+		}
 	}
 	return atcs, nil
+
 }
 
-func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error) {
-	atc, err := c.GetVolumeAttachment(volID, atcID)
+func (c *client) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	result, err := c.GetVolumeAttachment(attachmentId)
 	if err != nil {
 		return nil, err
 	}
+	if len(attachment.Mountpoint) > 0 {
+		result.Mountpoint = attachment.Mountpoint
+	}
+	if len(attachment.Status) > 0 {
+		result.Status = attachment.Status
+	}
+	if len(attachment.Platform) > 0 {
+		result.Platform = attachment.Platform
+	}
+	if len(attachment.OsType) > 0 {
+		result.OsType = attachment.OsType
+	}
+	if len(attachment.Ip) > 0 {
+		result.Ip = attachment.Ip
+	}
+	if len(attachment.Host) > 0 {
+		result.Host = attachment.Host
+	}
+	if len(attachment.Initiator) > 0 {
+		result.Initiator = attachment.Initiator
+	}
+	if len(attachment.DriverVolumeType) > 0 {
+		result.DriverVolumeType = attachment.DriverVolumeType
+	}
+	// Update metadata
+	for k, v := range attachment.Metadata {
+		result.Metadata[k] = v
+	}
+	// Update onnectionData
+	for k, v := range attachment.ConnectionData {
+		result.ConnectionData[k] = v
+	}
+	// Set update time
+	result.UpdatedAt = time.Now().Format(utils.TimeFormat)
 
-	atc.HostInfo = hostInfo
-	atc.Mountpoint = mountpoint
-	atcBody, err := json.Marshal(atc)
+	atcBody, err := json.Marshal(result)
 	if err != nil {
 		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:        GenerateUrl(prefix, "volume", volID, "attachments", atcID),
+		Url:        GenerateUrl(prefix, "volume", "attachments", attachmentId),
 		NewContent: string(atcBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -563,12 +604,12 @@ func (c *client) UpdateVolumeAttachment(volID, atcID, mountpoint string, hostInf
 		log.Error("When update volume attachment in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
-	return atc, nil
+	return result, nil
 }
 
-func (c *client) DeleteVolumeAttachment(volID, atcID string) error {
+func (c *client) DeleteVolumeAttachment(attachmentId string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", volID, "attachments", atcID),
+		Url: GenerateUrl(prefix, "volume", "attachments", attachmentId),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
