@@ -65,6 +65,10 @@ func (*receiver) Recv(
 		return fmt.Errorf("failed to exec this operation, code: %v, message: %v",
 			errorMsg.Code, errorMsg.Message)
 	}
+	// If the format of output is nil, skip unmarshaling the result.
+	if output == nil {
+		return nil
+	}
 	if err = json.Unmarshal(rbody, output); err != nil {
 		return fmt.Errorf("failed to unmarshal result message: %v", err)
 	}
