@@ -58,19 +58,18 @@ type PoolProperties struct {
 }
 
 func (d *Driver) Setup() error {
-	d.Client = NewClient(d.config.AuthOptions.IdentityEndpoint)
-
 	// Read csi config file
 	confYaml, err := ioutil.ReadFile(config.CONF.CSIConfig)
 	if err != nil {
-		log.Fatalf("Read csi config yaml file (%s) failed, reason:(%v)", config.CONF.CSIConfig, err)
+		log.Errorf("Read csi config yaml file (%s) failed, reason:(%v)", config.CONF.CSIConfig, err)
 		return err
 	}
 	if err = yaml.Unmarshal(confYaml, &conf); err != nil {
-		log.Fatal("Parse error: %v", err)
+		log.Errorf("Parse error: %v", err)
 		return err
 	}
 	d.config = conf
+	d.Client = NewClient(d.config.AuthOptions.IdentityEndpoint)
 
 	return nil
 }
@@ -84,11 +83,13 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	in := &csipb.CreateVolumeRequest{
 		Name: opt.GetName(),
 		CapacityRange: &csipb.CapacityRange{
-			RequiredBytes: uint64(opt.Size * 10 << 5),
+			RequiredBytes: uint64(opt.Size),
 		},
 		VolumeCapabilities: []*csipb.VolumeCapability{
 			{
-				AccessType: &csipb.VolumeCapability_Block{},
+				AccessType: &csipb.VolumeCapability_Block{
+					Block: &csipb.VolumeCapability_BlockVolume{},
+				},
 			},
 		},
 	}

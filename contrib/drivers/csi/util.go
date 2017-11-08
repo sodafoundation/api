@@ -3,13 +3,13 @@ package csi
 import (
 	"context"
 	"errors"
-	"log"
 	"net"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 
+	log "github.com/golang/glog"
 	"google.golang.org/grpc"
 )
 
@@ -39,7 +39,7 @@ func GetCSIEndPoint(edp string) (string, error) {
 
 	if csiEndPoint == "" {
 		err := errors.New("CSIEndPoint is empty")
-		log.Fatalf("%v", err)
+		log.Error(err)
 		return csiEndPoint, err
 	}
 
