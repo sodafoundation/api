@@ -30,10 +30,12 @@ func getProtoandAdd(target string) (string, string) {
 }
 
 // GetCSIEndPoint from environment variable
-func GetCSIEndPoint() (string, error) {
+func GetCSIEndPoint(edp string) (string, error) {
 	// example: CSI_ENDPOINT=unix://path/to/unix/domain/socket.sock
-	csiEndPoint := os.Getenv(CSIEndPoint)
-	csiEndPoint = strings.TrimSpace(csiEndPoint)
+	if edp == "" {
+		edp = os.Getenv(CSIEndPoint)
+	}
+	csiEndPoint := strings.TrimSpace(edp)
 
 	if csiEndPoint == "" {
 		err := errors.New("CSIEndPoint is empty")
@@ -44,22 +46,11 @@ func GetCSIEndPoint() (string, error) {
 	return csiEndPoint, nil
 }
 
-// GetCSIEndPointListener from endpoint
-func GetCSIEndPointListener() (net.Listener, error) {
-	target, err := GetCSIEndPoint()
-	if err != nil {
-		return nil, err
-	}
-
-	proto, addr := getProtoandAdd(target)
-	return net.Listen(proto, addr)
-}
-
 // GetCSIClientConn from endpoint
-func GetCSIClientConn() (*grpc.ClientConn, error) {
+func GetCSIClientConn(edp string) (*grpc.ClientConn, error) {
 	// Get parameters for grpc
 	ctx := context.Background()
-	target, err := GetCSIEndPoint()
+	target, err := GetCSIEndPoint(edp)
 	if err != nil {
 		return nil, err
 	}

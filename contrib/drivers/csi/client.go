@@ -32,9 +32,9 @@ type client struct {
 	*grpc.ClientConn
 }
 
-func NewClient() Client {
+func NewClient(edp string) Client {
 	// Set up a connection to the Controller server.
-	conn, err := GetCSIClientConn()
+	conn, err := GetCSIClientConn(edp)
 	if err != nil {
 		log.Errorf("did not connect: %+v\n", err)
 	}

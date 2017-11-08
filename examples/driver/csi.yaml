@@ -1,3 +1,5 @@
+authOptions:
+  endpoint: "unix:///tmp/csi.sock"
 pool:
   "pool001":
     diskType: SSD

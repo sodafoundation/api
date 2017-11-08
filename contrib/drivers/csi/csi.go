@@ -45,6 +45,9 @@ type Driver struct {
 }
 
 type CSIConfig struct {
+	AuthOptions struct {
+		IdentityEndpoint string `yaml:"endpoint,omitempty"`
+	} `yaml:"authOptions"`
 	Pool map[string]PoolProperties `yaml:"pool,flow"`
 }
 
@@ -55,7 +58,7 @@ type PoolProperties struct {
 }
 
 func (d *Driver) Setup() error {
-	d.Client = NewClient()
+	d.Client = NewClient(d.config.AuthOptions.IdentityEndpoint)
 
 	// Read csi config file
 	confYaml, err := ioutil.ReadFile(config.CONF.CSIConfig)
@@ -72,7 +75,10 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-func (*Driver) Unset() error { return nil }
+func (d *Driver) Unset() error {
+	d.Close()
+	return nil
+}
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	in := &csipb.CreateVolumeRequest{
@@ -146,6 +152,9 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	in := &csipb.DeleteVolumeRequest{
 		VolumeId: opt.GetId(),
+		UserCredentials: &csipb.Credentials{
+			Data: opt.GetMetadata(),
+		},
 	}
 
 	response, err := d.Client.DeleteVolume(context.Background(), in)
