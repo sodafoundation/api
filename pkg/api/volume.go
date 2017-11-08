@@ -321,14 +321,6 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		return
 	}
 
-	if attachment.Id == "" {
-		reason := fmt.Sprintf("Get volume attachment failed, id = : %s", attachment.Id)
-		this.Ctx.Output.SetStatus(StatusBadRequest)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
 	// Call global controller variable to handle delete volume attachment request.
 	result := controller.Brain.DeleteVolumeAttachment(attachment)
 	if result.Status != "Success" {
