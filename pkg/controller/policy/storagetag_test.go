@@ -26,7 +26,7 @@ func TestIsStorageTagSupported(t *testing.T) {
 	}
 
 	if !IsStorageTagSupported(tags) {
-		t.Errorf("tags %v are not supported by %v\n", tags)
+		t.Errorf("tags %v are not supported by %v\n", tags, PolicyTypeMappingTable)
 	}
 }
 

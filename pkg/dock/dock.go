@@ -112,6 +112,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 
 	var atc = &api.VolumeAttachmentSpec{
 		BaseModel: &api.BaseModel{},
+		VolumeId:  opt.GetVolumeId(),
 		HostInfo: &api.HostInfo{
 			Platform:  opt.HostInfo.GetPlatform(),
 			OsType:    opt.HostInfo.GetOsType(),
@@ -129,12 +130,13 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 		return nil, err
 	}
 
-	if err = db.C.CreateVolumeAttachment(opt.GetVolumeId(), atc); err != nil {
+	result, err := db.C.CreateVolumeAttachment(atc)
+	if err != nil {
 		log.Error("Error occured in dock module when create volume attachment in db:", err)
 		return nil, err
 	}
 
-	return atc, nil
+	return result, nil
 }
 
 func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
@@ -149,7 +151,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 		return err
 	}
 
-	if err := db.C.DeleteVolumeAttachment(opt.GetVolumeId(), opt.GetId()); err != nil {
+	if err := db.C.DeleteVolumeAttachment(opt.GetId()); err != nil {
 		log.Error("Error occured in dock module when delete volume attachment in db:", err)
 		return err
 	}

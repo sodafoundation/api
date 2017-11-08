@@ -207,18 +207,14 @@ var (
 		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
-		Name:        "fake-volume-attachment",
-		Description: "fake volume attachment for testing",
-		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
 	sampleModifiedAttachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
-		Name:        "modified-fake-volume-attachment",
-		Description: "modified fake volume attachment for testing",
-		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
 	sampleSnapshot = model.VolumeSnapshotSpec{

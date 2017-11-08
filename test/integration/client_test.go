@@ -228,10 +228,8 @@ func TestClientDeleteVolume(t *testing.T) {
 
 func TestClientCreateVolumeAttachment(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
-		Name:        "test",
-		Description: "This is a test",
-		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo:    &model.HostInfo{},
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: &model.HostInfo{},
 	}
 
 	atc, err := c.CreateVolumeAttachment(body)

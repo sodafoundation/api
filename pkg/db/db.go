@@ -91,15 +91,15 @@ type Client interface {
 
 	DeleteVolume(volID string) error
 
-	CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error
+	CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
-	GetVolumeAttachment(volID, attachmentID string) (*model.VolumeAttachmentSpec, error)
+	GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error)
 
-	ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error)
+	ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error)
 
-	UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error)
+	UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
-	DeleteVolumeAttachment(volID, attachmentID string) error
+	DeleteVolumeAttachment(attachmentId string) error
 
 	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error
 

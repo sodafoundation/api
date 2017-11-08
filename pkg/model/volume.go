@@ -65,22 +65,12 @@ func (vol *VolumeSpec) GetMetadata() map[string]string {
 
 type VolumeAttachmentSpec struct {
 	*BaseModel
-	Name            string            `json:"name,omitempty"`
-	Description     string            `json:"description,omitempty"`
 	VolumeId        string            `json:"volumeId,omitempty"`
 	Mountpoint      string            `json:"mountpoint,omitempty"`
 	Status          string            `json:"status,omitempty"`
 	Metadata        map[string]string `json:"metadata, omitempty"`
 	*HostInfo       `json:"hostInfo,omitempty"`
 	*ConnectionInfo `json:"connectionInfo,omitempty"`
-}
-
-func (atc *VolumeAttachmentSpec) GetName() string {
-	return atc.Name
-}
-
-func (atc *VolumeAttachmentSpec) GetDescription() string {
-	return atc.Description
 }
 
 func (atc *VolumeAttachmentSpec) GetVolumeId() string {

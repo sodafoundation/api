@@ -97,17 +97,26 @@ func (_m *MockClient) CreateVolume(vol *model.VolumeSpec) error {
 	return r0
 }
 
-func (_m *MockClient) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error {
-	ret := _m.Called(volID, atc)
+func (_m *MockClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(attachment)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string, *model.VolumeAttachmentSpec) error); ok {
-		r0 = rf(volID, atc)
+	var r0 *model.VolumeAttachmentSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeAttachmentSpec) *model.VolumeAttachmentSpec); ok {
+		r0 = rf(attachment)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeAttachmentSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeAttachmentSpec) error); ok {
+		r1 = rf(attachment)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 func (_m *MockClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error {
@@ -175,12 +184,12 @@ func (_m *MockClient) DeleteVolume(volID string) error {
 	return r0
 }
 
-func (_m *MockClient) DeleteVolumeAttachment(volID string, attachmentID string) error {
-	ret := _m.Called(volID, attachmentID)
+func (_m *MockClient) DeleteVolumeAttachment(attachmentId string) error {
+	ret := _m.Called(attachmentId)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(volID, attachmentID)
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(attachmentId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -289,12 +298,12 @@ func (_m *MockClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return r0, r1
 }
 
-func (_m *MockClient) GetVolumeAttachment(volID string, attachmentID string) (*model.VolumeAttachmentSpec, error) {
-	ret := _m.Called(volID, attachmentID)
+func (_m *MockClient) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(attachmentId)
 
 	var r0 *model.VolumeAttachmentSpec
-	if rf, ok := ret.Get(0).(func(string, string) *model.VolumeAttachmentSpec); ok {
-		r0 = rf(volID, attachmentID)
+	if rf, ok := ret.Get(0).(func(string) *model.VolumeAttachmentSpec); ok {
+		r0 = rf(attachmentId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeAttachmentSpec)
@@ -302,8 +311,8 @@ func (_m *MockClient) GetVolumeAttachment(volID string, attachmentID string) (*m
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(volID, attachmentID)
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(attachmentId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -421,12 +430,12 @@ func (_m *MockClient) ListProfiles() ([]*model.ProfileSpec, error) {
 	return r0, r1
 }
 
-func (_m *MockClient) ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error) {
-	ret := _m.Called(volID)
+func (_m *MockClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(volumeId)
 
 	var r0 []*model.VolumeAttachmentSpec
 	if rf, ok := ret.Get(0).(func(string) []*model.VolumeAttachmentSpec); ok {
-		r0 = rf(volID)
+		r0 = rf(volumeId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.VolumeAttachmentSpec)
@@ -435,7 +444,7 @@ func (_m *MockClient) ListVolumeAttachments(volID string) ([]*model.VolumeAttach
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(volID)
+		r1 = rf(volumeId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -566,12 +575,12 @@ func (_m *MockClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*mo
 	return r0, r1
 }
 
-func (_m *MockClient) UpdateVolumeAttachment(volID string, attachmentID string, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error) {
-	ret := _m.Called(volID, attachmentID, mountpoint, hostInfo)
+func (_m *MockClient) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(attachmentId, attachment)
 
 	var r0 *model.VolumeAttachmentSpec
-	if rf, ok := ret.Get(0).(func(string, string, string, *model.HostInfo) *model.VolumeAttachmentSpec); ok {
-		r0 = rf(volID, attachmentID, mountpoint, hostInfo)
+	if rf, ok := ret.Get(0).(func(string, *model.VolumeAttachmentSpec) *model.VolumeAttachmentSpec); ok {
+		r0 = rf(attachmentId, attachment)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeAttachmentSpec)
@@ -579,8 +588,8 @@ func (_m *MockClient) UpdateVolumeAttachment(volID string, attachmentID string, 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, *model.HostInfo) error); ok {
-		r1 = rf(volID, attachmentID, mountpoint, hostInfo)
+	if rf, ok := ret.Get(1).(func(string, *model.VolumeAttachmentSpec) error); ok {
+		r1 = rf(attachmentId, attachment)
 	} else {
 		r1 = ret.Error(1)
 	}
