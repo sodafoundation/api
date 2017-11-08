@@ -174,10 +174,74 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, errors.New("Not implemented!")
+	lvPath, ok := opt.Metadata["lvPath"]
+	if !ok {
+		return nil, fmt.Errorf("can't find lvPath in metadata filed")
+	}
+	in := &csipb.ControllerPublishVolumeRequest{
+		VolumeId: opt.GetVolumeId(),
+		VolumeCapability: &csipb.VolumeCapability{
+			{
+				AccessType: &csipb.VolumeCapability_Block{
+					Block: &csipb.VolumeCapability_BlockVolume{},
+				},
+			},
+		},
+		VolumeAttributes: map[string]string{
+			"lvPath":    lvPath,
+			"platform":  opt.HostInfo.GetPlatform(),
+			"osType":    opt.HostInfo.GetOsType(),
+			"host":      opt.HostInfo.GetHost(),
+			"ip":        opt.HostInfo.GetIp(),
+			"initiator": opt.HostInfo.GetInitiator(),
+		},
+	}
+
+	response, err := d.Client.ControllerPublishVolume(context.Background(), in)
+	if err != nil {
+		log.Error("controller publish volume failed in csi driver:", err)
+		return nil, err
+	}
+	defer d.Client.Close()
+
+	if errorMsg := response.GetError().GetControllerPublishVolumeError(); errorMsg != nil {
+		return nil, fmt.Errorf("failed to publish volume in csi driver, code: %v, message: %v",
+			errorMsg.GetErrorCode(), errorMsg.GetErrorDescription())
+	}
+	info := response.GetResult().GetPublishVolumeInfo()
+	dType, ok := info["driverVolumeType"]
+	if !ok {
+		return nil, fmt.Errorf("can't find driverVolumeType in info filed")
+	}
+
+	return &model.ConnectionInfo{
+		DriverVolumeType: dType,
+		ConnectionData:   info,
+	}, nil
 }
 
-func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+	in := &csipb.ControllerUnpublishVolumeRequest{
+		VolumeId: opt.GetId(),
+		UserCredentials: &csipb.Credentials{
+			Data: opt.GetMetadata(),
+		},
+	}
+
+	response, err := d.Client.ControllerUnpublishVolume(context.Background(), in)
+	if err != nil {
+		log.Error("controller unpublish volume failed in csi driver:", err)
+		return err
+	}
+	defer d.Client.Close()
+
+	if errorMsg := response.GetError().GetControllerUnpublishVolumeError(); errorMsg != nil {
+		return fmt.Errorf("failed to unpublish volume in csi driver, code: %v, message: %v",
+			errorMsg.GetErrorCode(), errorMsg.GetErrorDescription())
+	}
+
+	return nil
+}
 
 func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return nil, errors.New("Not implemented!")
