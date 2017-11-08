@@ -152,26 +152,26 @@ func (fc *FakeDbClient) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (fc *FakeDbClient) CreateVolumeAttachment(volID string, atc *model.VolumeAttachmentSpec) error {
-	return nil
+func (fc *FakeDbClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	return nil, nil
 }
 
-func (fc *FakeDbClient) GetVolumeAttachment(volID, attachmentID string) (*model.VolumeAttachmentSpec, error) {
+func (fc *FakeDbClient) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	return &sampleAttachments[0], nil
 }
 
-func (fc *FakeDbClient) ListVolumeAttachments(volID string) ([]*model.VolumeAttachmentSpec, error) {
+func (fc *FakeDbClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	var atcs []*model.VolumeAttachmentSpec
 
 	atcs = append(atcs, &sampleAttachments[0])
 	return atcs, nil
 }
 
-func (fc *FakeDbClient) UpdateVolumeAttachment(volID, attachmentID, mountpoint string, hostInfo *model.HostInfo) (*model.VolumeAttachmentSpec, error) {
+func (fc *FakeDbClient) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	return nil, nil
 }
 
-func (fc *FakeDbClient) DeleteVolumeAttachment(volID, attachmentID string) error {
+func (fc *FakeDbClient) DeleteVolumeAttachment(attachmentId string) error {
 	return nil
 }
 
@@ -282,11 +282,9 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 			},
-			Name:        "sample-volume-attachment",
-			Description: "This is a sample volume attachment for testing",
-			Status:      "available",
-			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo:    &model.HostInfo{},
+			Status:   "available",
+			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			HostInfo: &model.HostInfo{},
 			ConnectionInfo: &model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{

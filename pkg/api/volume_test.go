@@ -15,15 +15,12 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	//	"strings"
-	"errors"
-	//	"fmt"
 	"testing"
-
-	"encoding/json"
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
@@ -300,4 +297,115 @@ func TestGetVolumeSnapshotWithBadRequest(t *testing.T) {
 	if w.Code != 400 {
 		t.Errorf("Expected 400, actual %v", w.Code)
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                         Tests for volume attachment                          //
+////////////////////////////////////////////////////////////////////////////////
+
+var (
+	fakeAttachment = &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+			CreatedAt: "2017-10-24T16:21:32",
+		},
+		Status:   "available",
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ConnectionInfo: &model.ConnectionInfo{
+			DriverVolumeType: "iscsi",
+			ConnectionData: map[string]interface{}{
+				"targetDiscovered": true,
+				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal":     "127.0.0.0.1:3260",
+				"discard":          false,
+			},
+		},
+	}
+	fakeAttachments = []*model.VolumeAttachmentSpec{fakeAttachment}
+)
+
+func TestListVolumeAttachments(t *testing.T) {
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("ListVolumeAttachments", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(fakeAttachments, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1alpha/block/attachments?volumeId=bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	var output []model.VolumeAttachmentSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+
+	expectedJson := `[
+	  {
+	    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+	    "createdAt": "2017-10-24T16:21:32",
+	    "volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	    "status": "available",
+	    "connectionInfo": {
+	      "driverVolumeType": "iscsi",
+	      "data": {
+	        "discard": false,
+	        "targetDiscovered": true,
+	        "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+	        "targetPortal": "127.0.0.0.1:3260"
+	      }
+	    }
+	  }
+	]`
+
+	var expected []model.VolumeAttachmentSpec
+	json.Unmarshal([]byte(expectedJson), &expected)
+
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
+	}
+
+	if !reflect.DeepEqual(expected, output) {
+		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+
+}
+
+func TestGetVolumeAttachment(t *testing.T) {
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolumeAttachment", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeAttachment, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1alpha/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	var output model.VolumeAttachmentSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+
+	expectedJson := `{
+	    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+	    "createdAt": "2017-10-24T16:21:32",
+	    "volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	    "status": "available",
+	    "connectionInfo": {
+	      "driverVolumeType": "iscsi",
+	      "data": {
+	        "discard": false,
+	        "targetDiscovered": true,
+	        "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+	        "targetPortal": "127.0.0.0.1:3260"
+	      }
+	    }
+	  }`
+
+	var expected model.VolumeAttachmentSpec
+	json.Unmarshal([]byte(expectedJson), &expected)
+
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
+	}
+
+	if !reflect.DeepEqual(expected, output) {
+		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+
 }
