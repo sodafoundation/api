@@ -136,22 +136,19 @@ func (this *VolumePortal) UpdateVolume() {
 }
 
 func (this *VolumePortal) DeleteVolume() {
-	var volume = model.VolumeSpec{
-		BaseModel: &model.BaseModel{},
-	}
-	volId := this.Ctx.Input.Param(":volumeId")
+	id := this.Ctx.Input.Param(":volumeId")
 
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&volume); err != nil {
-		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+	volume, err := db.C.GetVolume(id)
+	if err != nil {
+		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
 	}
-	volume.Id = volId
 
 	// Call global controller variable to handle delete volume request.
-	result := controller.Brain.DeleteVolume(&volume)
+	result := controller.Brain.DeleteVolume(volume)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
@@ -445,22 +442,19 @@ func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
-	var snapshot = model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{},
-	}
 	id := this.Ctx.Input.Param(":snapshotId")
 
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&snapshot); err != nil {
-		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+	snapshot, err := db.C.GetVolumeSnapshot(id)
+	if err != nil {
+		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
 	}
-	snapshot.Id = id
 
 	// Call global controller variable to handle delete volume snapshot request.
-	result := controller.Brain.DeleteVolumeSnapshot(&snapshot)
+	result := controller.Brain.DeleteVolumeSnapshot(snapshot)
 	if result.Status != "Success" {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %s", result.GetError())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
