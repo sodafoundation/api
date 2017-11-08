@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	csipb "github.com/container-storage-interface/spec/lib/go/csi"
 	log "github.com/golang/glog"
@@ -173,7 +174,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	lvPath, ok := opt.Metadata["lvPath"]
 	if !ok {
 		return nil, fmt.Errorf("can't find lvPath in metadata filed")
@@ -181,10 +182,8 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 	in := &csipb.ControllerPublishVolumeRequest{
 		VolumeId: opt.GetVolumeId(),
 		VolumeCapability: &csipb.VolumeCapability{
-			{
-				AccessType: &csipb.VolumeCapability_Block{
-					Block: &csipb.VolumeCapability_BlockVolume{},
-				},
+			AccessType: &csipb.VolumeCapability_Block{
+				Block: &csipb.VolumeCapability_BlockVolume{},
 			},
 		},
 		VolumeAttributes: map[string]string{
@@ -213,14 +212,29 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 	if !ok {
 		return nil, fmt.Errorf("can't find driverVolumeType in info filed")
 	}
+	delete(info, "driverVolumeType")
+
+	// Translate map[string]string to map[string]interface{}.
+	var data = make(map[string]interface{})
+	for k, v := range info {
+		if v == "true" || v == "false" {
+			data[k], _ = strconv.ParseBool(v)
+			continue
+		}
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			data[k] = f
+			continue
+		}
+		data[k] = v
+	}
 
 	return &model.ConnectionInfo{
 		DriverVolumeType: dType,
-		ConnectionData:   info,
+		ConnectionData:   data,
 	}, nil
 }
 
-func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 	in := &csipb.ControllerUnpublishVolumeRequest{
 		VolumeId: opt.GetId(),
 		UserCredentials: &csipb.Credentials{
