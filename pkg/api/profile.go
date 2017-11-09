@@ -182,21 +182,7 @@ func (this *ProfilePortal) DeleteProfile() {
 		return
 	}
 
-	// Marshal the result.
-	body, err := json.Marshal(&model.Response{
-		Status:  "Success",
-		Message: "Delete profile success!",
-	})
-	if err != nil {
-		reason := fmt.Sprintf("Marshal profile deleted result failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
 	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
 	return
 }
 
@@ -275,20 +261,6 @@ func (this *ProfilePortal) RemoveExtraProperty() {
 		return
 	}
 
-	// Marshal the result.
-	body, err := json.Marshal(&model.Response{
-		Status:  "Success",
-		Message: "Remove extra property success!",
-	})
-	if err != nil {
-		reason := fmt.Sprintf("Marshal extra property removed result failed: %v", err)
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
-		log.Error(reason)
-		return
-	}
-
 	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
 	return
 }

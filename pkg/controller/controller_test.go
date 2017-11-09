@@ -36,24 +36,24 @@ func (fvc *fakeVolumeController) CreateVolume(*pb.CreateVolumeOpts) (*model.Volu
 	return &sampleVolume, nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolume(*pb.DeleteVolumeOpts) *model.Response {
-	return &model.Response{Status: "Success"}
+func (fvc *fakeVolumeController) DeleteVolume(*pb.DeleteVolumeOpts) error {
+	return nil
 }
 
 func (fvc *fakeVolumeController) CreateVolumeAttachment(*pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	return &sampleAttachment, nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolumeAttachment(*pb.DeleteAttachmentOpts) *model.Response {
-	return &model.Response{Status: "Success"}
+func (fvc *fakeVolumeController) DeleteVolumeAttachment(*pb.DeleteAttachmentOpts) error {
+	return nil
 }
 
 func (fvc *fakeVolumeController) CreateVolumeSnapshot(*pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return &sampleSnapshot, nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolumeSnapshot(*pb.DeleteVolumeSnapshotOpts) *model.Response {
-	return &model.Response{Status: "Success"}
+func (fvc *fakeVolumeController) DeleteVolumeSnapshot(*pb.DeleteVolumeSnapshotOpts) error {
+	return nil
 }
 
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
@@ -93,11 +93,10 @@ func TestDeleteVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
 	}
-	var expected = &model.Response{Status: "Success"}
 
 	result := c.DeleteVolume(req)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
@@ -133,11 +132,10 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
-	var expected = &model.Response{Status: "Success"}
 
 	result := c.DeleteVolumeAttachment(req)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
@@ -174,11 +172,10 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
-	var expected = &model.Response{Status: "Success"}
 
 	result := c.DeleteVolumeSnapshot(req)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 

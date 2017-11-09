@@ -21,7 +21,6 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	log "github.com/golang/glog"
 
@@ -104,14 +103,11 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	return result, nil
 }
 
-func (c *Controller) DeleteVolume(in *model.VolumeSpec) *model.Response {
+func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 	prf, err := c.SelectProfile(in.GetProfileId())
 	if err != nil {
 		log.Error("when search profiles in db:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 
 	// Select the storage tag according to the lifecycle flag.
@@ -121,10 +117,7 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) *model.Response {
 	dockInfo, err := c.SelectDock(in.GetId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
@@ -141,10 +134,7 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) *model.Response {
 
 	if err := <-errChan; err != nil {
 		log.Error("When execute async policy:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 
 	return c.volumeController.DeleteVolume(opt)
@@ -180,14 +170,11 @@ func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 	return nil, errors.New("Not implemented!")
 }
 
-func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) *model.Response {
+func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) error {
 	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	c.volumeController.SetDock(dockInfo)
 
@@ -229,14 +216,11 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 	)
 }
 
-func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) *model.Response {
+func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 	dockInfo, err := c.SelectDock(in.GetVolumeId())
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	c.volumeController.SetDock(dockInfo)
 
