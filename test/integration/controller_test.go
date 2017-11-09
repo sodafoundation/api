@@ -48,14 +48,10 @@ func TestControllerCreateVolume(t *testing.T) {
 func TestControllerDeleteVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolume(&pb.DeleteVolumeOpts{})
-	if err := res.ToError(); err != nil {
+	err := vc.DeleteVolume(&pb.DeleteVolumeOpts{})
+	if err != nil {
 		t.Error("delete volume in controller failed:", err)
-		return
 	}
-
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
 }
 
 func TestControllerCreateVolumeAttachment(t *testing.T) {
@@ -74,14 +70,10 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 func TestControllerDeleteVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
-	if err := res.ToError(); err != nil {
+	err := vc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
+	if err != nil {
 		t.Error("delete volume attachment in controller failed:", err)
-		return
 	}
-
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
 }
 
 func TestControllerCreateVolumeSnapshot(t *testing.T) {
@@ -100,12 +92,8 @@ func TestControllerCreateVolumeSnapshot(t *testing.T) {
 func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	res := vc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
-	if err := res.ToError(); err != nil {
+	err := vc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
+	if err != nil {
 		t.Error("delete volume snapshot in controller failed:", err)
-		return
 	}
-
-	resBody, _ := json.MarshalIndent(res, "", "	")
-	t.Log(string(resBody))
 }
