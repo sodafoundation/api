@@ -422,7 +422,7 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	id := this.Ctx.Input.Param(":snapshotId")
 
 	snapshot, err := db.C.GetVolumeSnapshot(id)
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&snapshot); err != nil {
+	if err != nil {
 		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))

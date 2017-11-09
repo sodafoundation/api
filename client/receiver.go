@@ -17,11 +17,13 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 type reqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
@@ -50,22 +52,27 @@ func (*receiver) Recv(
 	if err != nil {
 		return err
 	}
-	if err = checkHTTPResponseStatusCode(resp); err != nil {
-		return err
-	}
-	// If the method is DELETE, consider it successfully deleted.
-	if strings.ToUpper(method) == "DELETE" {
-		return nil
-	}
-
 	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
-	if err = json.Unmarshal(rbody, output); err != nil {
-		return err
+	if err = checkHTTPResponseStatusCode(resp); err != nil {
+		var errorMsg utils.ErrorRes
+		if err = json.Unmarshal(rbody, &errorMsg); err != nil {
+			return fmt.Errorf("failed to unmarshal error message: %v", err)
+		}
+		return fmt.Errorf("failed to exec this operation, code: %v, message: %v",
+			errorMsg.Code, errorMsg.Message)
 	}
+	// If the format of output is nil, skip unmarshaling the result.
+	if output == nil {
+		return nil
+	}
+	if err = json.Unmarshal(rbody, output); err != nil {
+		return fmt.Errorf("failed to unmarshal result message: %v", err)
+	}
+
 	return nil
 }
 
