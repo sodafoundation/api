@@ -21,6 +21,7 @@ package volume
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	log "github.com/golang/glog"
@@ -34,15 +35,15 @@ import (
 type Controller interface {
 	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 
-	DeleteVolume(opt *pb.DeleteVolumeOpts) *model.Response
+	DeleteVolume(opt *pb.DeleteVolumeOpts) error
 
 	CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error)
 
-	DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) *model.Response
+	DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error
 
 	CreateVolumeSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
-	DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) *model.Response
+	DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
 	SetDock(dockInfo *model.DockSpec)
 }
@@ -87,33 +88,24 @@ func (c *controller) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, 
 
 }
 
-func (c *controller) DeleteVolume(opt *pb.DeleteVolumeOpts) *model.Response {
+func (c *controller) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	if err := c.Client.Update(c.DockInfo); err != nil {
 		log.Error("When parsing dock info:", err)
-		return nil
+		return err
 	}
 
 	response, err := c.Client.DeleteVolume(context.Background(), opt)
 	if err != nil {
 		log.Error("Delete volume failed in volume controller:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
-		return &model.Response{
-			Status:  "Failure",
-			Message: errorMsg.GetDescription(),
-		}
+		return errors.New(errorMsg.GetDescription())
 	}
 
-	return &model.Response{
-		Status:  "Success",
-		Message: response.GetResult().GetMessage(),
-	}
+	return nil
 }
 
 func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
@@ -144,33 +136,24 @@ func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*mode
 	return atc, nil
 }
 
-func (c *controller) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) *model.Response {
+func (c *controller) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	if err := c.Client.Update(c.DockInfo); err != nil {
 		log.Error("When parsing dock info:", err)
-		return nil
+		return err
 	}
 
 	response, err := c.Client.DeleteAttachment(context.Background(), opt)
 	if err != nil {
 		log.Error("Delete volume attachment failed in volume controller:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
-		return &model.Response{
-			Status:  "Failure",
-			Message: errorMsg.GetDescription(),
-		}
+		return errors.New(errorMsg.GetDescription())
 	}
 
-	return &model.Response{
-		Status:  "Success",
-		Message: response.GetResult().GetMessage(),
-	}
+	return nil
 }
 
 func (c *controller) CreateVolumeSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
@@ -201,33 +184,24 @@ func (c *controller) CreateVolumeSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*mo
 	return snp, nil
 }
 
-func (c *controller) DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) *model.Response {
+func (c *controller) DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	if err := c.Client.Update(c.DockInfo); err != nil {
 		log.Error("When parsing dock info:", err)
-		return nil
+		return err
 	}
 
 	response, err := c.Client.DeleteVolumeSnapshot(context.Background(), opt)
 	if err != nil {
 		log.Error("Delete volume snapshot failed in volume controller:", err)
-		return &model.Response{
-			Status: "Failure",
-			Error:  fmt.Sprint(err),
-		}
+		return err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
-		return &model.Response{
-			Status:  "Failure",
-			Message: errorMsg.GetDescription(),
-		}
+		return errors.New(errorMsg.GetDescription())
 	}
 
-	return &model.Response{
-		Status:  "Success",
-		Message: response.GetResult().GetMessage(),
-	}
+	return nil
 }
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {

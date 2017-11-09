@@ -132,11 +132,10 @@ func TestCreateVolume(t *testing.T) {
 
 func TestDeleteVolume(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
-	var expected = &model.Response{Status: "Success"}
 
 	result := fc.DeleteVolume(&pb.DeleteVolumeOpts{})
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
@@ -156,11 +155,10 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 func TestDeleteVolumeAttachment(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
-	var expected = &model.Response{Status: "Success"}
 
 	result := fc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
@@ -180,11 +178,10 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	fc := NewFakeController( /*&pb.DockRequest{}*/ )
-	var expected = &model.Response{Status: "Success"}
 
 	result := fc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
