@@ -31,7 +31,6 @@ syntax = "proto3";
 
 package proto;
 
-
 service Dock {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
