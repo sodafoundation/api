@@ -15,6 +15,7 @@
 package config
 
 import (
+	gflag "flag"
 	"reflect"
 	"strconv"
 	"strings"
@@ -149,11 +150,7 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 	}
 }
 
-func initConf(confFile string, conf interface{}) {
-	cfg, err := ini.Load(confFile)
-	if err != nil && confFile != "" {
-		log.Info("Read configuration failed, use default value")
-	}
+func doInit(cfg *ini.File, conf interface{}) {
 	t := reflect.TypeOf(conf)
 	v := reflect.ValueOf(conf)
 	for i := 0; i < t.Elem().NumField(); i++ {
@@ -162,3 +159,44 @@ func initConf(confFile string, conf interface{}) {
 		setSectionValue(section, field, cfg)
 	}
 }
+
+func initConf(confFile string, conf interface{}) {
+	cfg, err := ini.Load(confFile)
+	if err != nil && confFile != "" {
+		log.Info("Read configuration failed, use default value")
+	}
+	doInit(cfg, conf)
+	// All driver configuration structures were packaged together
+	doInit(cfg, &(conf.(*Config).Backends))
+}
+
+// Global Configuration Variable
+var CONF *Config = GetDefaultConfig()
+
+//Create a Config and init default value.
+func GetDefaultConfig() *Config {
+	var conf *Config = new(Config)
+	initConf("", conf)
+	return conf
+}
+
+func (c *Config) Load(confFile string) {
+	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
+	c.Flag.Parse()
+	initConf(confFile, CONF)
+	c.Flag.AssignValue()
+}
+
+func GetBackendsMap() map[string]BackendProperties {
+	backendsMap := map[string]BackendProperties{}
+	v := reflect.ValueOf(CONF.Backends)
+	t := reflect.TypeOf(CONF.Backends)
+
+	for i := 0; i < t.NumField(); i++ {
+		feild := v.Field(i)
+		name := t.Field(i).Tag.Get("conf")
+		backendsMap[name] = feild.Interface().(BackendProperties)
+	}
+	return backendsMap
+}
+
