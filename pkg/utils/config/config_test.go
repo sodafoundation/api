@@ -17,6 +17,8 @@ package config
 import (
 	"reflect"
 	"testing"
+
+	"github.com/go-ini/ini"
 )
 
 type TestStruct struct {
@@ -61,7 +63,8 @@ type TestConfig struct {
 
 func TestFunctionAllType(t *testing.T) {
 	conf := &TestConfig{}
-	initConf("testdata/opensds.conf", conf)
+	cfg, _ := ini.Load("testdata/opensds.conf")
+	doInit(cfg, conf)
 	if conf.TestStruct.Bool != true {
 		t.Error("Test TestStuct Bool error")
 	}
@@ -154,7 +157,8 @@ func TestFunctionAllType(t *testing.T) {
 
 func TestFunctionDefaultValue(t *testing.T) {
 	conf := &TestConfig{}
-	initConf("NotExistFile", conf)
+	cfg, _ := ini.Load("NotExistFile")
+	doInit(cfg, conf)
 	if conf.TestStruct.Bool != true {
 		t.Error("Test TestStuct Bool error")
 	}
@@ -274,6 +278,9 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Database.Driver != "etcd" {
 		t.Error("Test Database.Driver error")
 	}
+	if CONF.Backends.Ceph.Name != "ceph" {
+		t.Error("Test Ceph.Backends.Name error")
+	}
 	if CONF.Ceph.Name != "ceph" {
 		t.Error("Test Ceph.Name error")
 	}
@@ -301,6 +308,18 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Sample.DriverName != "sample" {
 		t.Error("Test Sample.DriverName error")
 	}
-
+	bm := GetBackendsMap()
+	if bm["ceph"].Name != "ceph" {
+		t.Error("Test bm[\"ceph\"].Name error")
+	}
+	if bm["cinder"].Name != "cinder" {
+		t.Error("Test bm[\"cinder\"].Name error")
+	}
+	if bm["sample"].Name != "sample" {
+		t.Error("Test bm[\"sample\"].Name error")
+	}
+	if _, ok := bm["lvm"]; !ok {
+		t.Error("Test bm[\"lvm\"].Name error")
+	}
 }
 

@@ -14,10 +14,6 @@
 
 package config
 
-import (
-	gflag "flag"
-)
-
 type Default struct{}
 
 type OsdsLet struct {
@@ -46,35 +42,19 @@ type BackendProperties struct {
 	DriverName  string `conf:"driver_name"`
 }
 
-type Ceph BackendProperties
-type Cinder BackendProperties
-type Sample BackendProperties
-type LVM BackendProperties
+type Backends struct {
+	Ceph   BackendProperties `conf:"ceph"`
+	Cinder BackendProperties `conf:"cinder"`
+	Sample BackendProperties `conf:"sample"`
+	LVM    BackendProperties `conf:"lvm"`
+}
 
 type Config struct {
 	Default  `conf:"default"`
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
-	Ceph     `conf:"ceph"`
-	Cinder   `conf:"cinder"`
-	Sample   `conf:"sample"`
-	LVM      `conf:"lvm"`
-	Flag     FlagSet
+	Backends
+	Flag FlagSet
 }
 
-//Create a Config and init default value.
-func GetDefaultConfig() *Config {
-	var conf *Config = new(Config)
-	initConf("", conf)
-	return conf
-}
-
-func (c *Config) Load(confFile string) {
-	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
-	c.Flag.Parse()
-	initConf(confFile, CONF)
-	c.Flag.AssignValue()
-}
-
-var CONF *Config = GetDefaultConfig()
