@@ -24,6 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
@@ -303,8 +304,10 @@ func TestDeleteSnapshot(t *testing.T) {
 }
 
 func TestCephConfig(t *testing.T) {
-	config.CONF.OsdsDock.CephConfig = "testdata/ceph.yaml"
-	conf := getConfig()
+	config.CONF.OsdsDock.Backends.Ceph.ConfigPath = "testdata/ceph.yaml"
+	d := Driver{}
+	d.Setup()
+	conf := d.conf
 	if conf.ConfigFile != "/etc/ceph/ceph.conf" {
 		t.Error("Test ConfigFile failed!")
 	}
@@ -360,6 +363,8 @@ func TestListPools(t *testing.T) {
 	})
 
 	d := Driver{}
+	d.conf = &CephConfig{ConfigFile: "/etc/ceph/ceph.conf"}
+	Parse(d.conf, "testdata/ceph.yaml")
 	pols, err := d.ListPools()
 	if err != nil {
 		t.Errorf("Test List Pools error")
@@ -422,3 +427,4 @@ func TestListPools(t *testing.T) {
 		t.Errorf("Test List Pools len error")
 	}
 }
+

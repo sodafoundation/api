@@ -108,11 +108,14 @@ func setSlice(v reflect.Value, str string) {
 	v.Set(s)
 }
 
-func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
+func parseItems(section string, v reflect.Value, cfg *ini.File) {
 	for i := 0; i < v.Type().NumField(); i++ {
 
 		field := v.Field(i)
 		tag := v.Type().Field(i).Tag.Get("conf")
+		if "" == tag {
+			parseSections(cfg, field.Type(), field)
+		}
 		tags := strings.SplitN(tag, ",", 2)
 		if !field.CanSet() {
 			continue
@@ -150,13 +153,21 @@ func setSectionValue(section string, v reflect.Value, cfg *ini.File) {
 	}
 }
 
-func doInit(cfg *ini.File, conf interface{}) {
-	t := reflect.TypeOf(conf)
-	v := reflect.ValueOf(conf)
-	for i := 0; i < t.Elem().NumField(); i++ {
-		field := v.Elem().Field(i)
-		section := t.Elem().Field(i).Tag.Get("conf")
-		setSectionValue(section, field, cfg)
+func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		t = t.Elem()
+	}
+	for i := 0; i < t.NumField(); i++ {
+		field := v.Field(i)
+		section := t.Field(i).Tag.Get("conf")
+		if "FlagSet" == field.Type().Name() {
+			continue
+		}
+		if "" == section {
+			parseSections(cfg, field.Type(), field)
+		}
+		parseItems(section, field, cfg)
 	}
 }
 
@@ -165,9 +176,10 @@ func initConf(confFile string, conf interface{}) {
 	if err != nil && confFile != "" {
 		log.Info("Read configuration failed, use default value")
 	}
-	doInit(cfg, conf)
-	// All driver configuration structures were packaged together
-	doInit(cfg, &(conf.(*Config).Backends))
+	t := reflect.TypeOf(conf)
+	v := reflect.ValueOf(conf)
+	parseSections(cfg, t, v)
+
 }
 
 // Global Configuration Variable
