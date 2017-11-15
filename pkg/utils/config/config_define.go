@@ -23,11 +23,9 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint    string   `conf:"api_endpoint,localhost:50050"`
-	EnableBackends []string `conf:"enabled_backends,ceph"`
-	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
-	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
-	LVMConfig      string   `conf:"lvm_config,/etc/opensds/driver/lvm.yaml"`
+	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
+	EnabledBackends []string `conf:"enabled_backends,ceph"`
+	Backends
 }
 
 type Database struct {
@@ -40,6 +38,7 @@ type BackendProperties struct {
 	Name        string `conf:"name"`
 	Description string `conf:"description"`
 	DriverName  string `conf:"driver_name"`
+	ConfigPath  string `conf:"config_path"`
 }
 
 type Backends struct {
@@ -54,7 +53,6 @@ type Config struct {
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
-	Backends
-	Flag FlagSet
+	Flag     FlagSet
 }
 

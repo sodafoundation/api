@@ -22,8 +22,6 @@ Go SDK.
 package cinder
 
 import (
-	"io/ioutil"
-
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -31,11 +29,15 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 	snapshotsv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"gopkg.in/yaml.v2"
+)
+
+const (
+	defaultConfPath = "/etc/opensds/driver/cinder.yaml"
 )
 
 var conf = CinderConfig{}
@@ -45,7 +47,7 @@ type Driver struct {
 	blockStoragev2 *gophercloud.ServiceClient
 	blockStoragev3 *gophercloud.ServiceClient
 
-	config CinderConfig
+	conf *CinderConfig
 }
 
 type AuthOptions struct {
@@ -58,12 +60,6 @@ type AuthOptions struct {
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
 
-type PoolProperties struct {
-	DiskType  string `yaml:"diskType"`
-	IOPS      int64  `yaml:"iops"`
-	BandWidth int64  `yaml:"bandwidth"`
-}
-
 type CinderConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`
@@ -71,26 +67,21 @@ type CinderConfig struct {
 
 func (d *Driver) Setup() error {
 	// Read cinder config file
-	confYaml, err := ioutil.ReadFile(config.CONF.CinderConfig)
-	if err != nil {
-		log.Fatalf("Read cinder config yaml file (%s) failed, reason:(%v)", config.CONF.CinderConfig, err)
-		return err
+	d.conf = &CinderConfig{}
+	p := config.CONF.OsdsDock.Backends.Cinder.ConfigPath
+	if "" == p {
+		p = defaultConfPath
 	}
-	err = yaml.Unmarshal([]byte(confYaml), &conf)
-	if err != nil {
-		log.Fatal("Parse error: %v", err)
-		return err
-	}
-	d.config = conf
+	Parse(d.conf, p)
 
 	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: d.config.IdentityEndpoint,
-		DomainID:         d.config.DomainID,
-		DomainName:       d.config.DomainName,
-		Username:         d.config.Username,
-		Password:         d.config.Password,
-		TenantID:         d.config.TenantID,
-		TenantName:       d.config.TenantName,
+		IdentityEndpoint: d.conf.IdentityEndpoint,
+		DomainID:         d.conf.DomainID,
+		DomainName:       d.conf.DomainName,
+		Username:         d.conf.Username,
+		Password:         d.conf.Password,
+		TenantID:         d.conf.TenantID,
+		TenantName:       d.conf.TenantName,
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
@@ -265,10 +256,10 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 	var pols []*model.StoragePoolSpec
 	for _, page := range polpages {
-		if _, ok := d.config.Pool[page.Name]; !ok {
+		if _, ok := d.conf.Pool[page.Name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(d.config.Pool[page.Name])
+		param := d.buildPoolParam(d.conf.Pool[page.Name])
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
@@ -282,3 +273,4 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+

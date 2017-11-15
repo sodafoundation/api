@@ -17,8 +17,6 @@ package config
 import (
 	"reflect"
 	"testing"
-
-	"github.com/go-ini/ini"
 )
 
 type TestStruct struct {
@@ -55,16 +53,19 @@ type TestSliceStruct struct {
 	SliceFloat64        []float64 `conf:"slice_float64,4,-0.5,0.6"`
 	SliceNotExistString []string  `conf:"slice_not_exist_string,not,exist,string"`
 }
-
+type TestEmbedSectionStruct struct {
+	TestStruct      `conf:"test_struct"`
+	TestSliceStruct `conf:"test_slice_struct"`
+}
 type TestConfig struct {
 	TestStruct      `conf:"test_struct"`
 	TestSliceStruct `conf:"test_slice_struct"`
+	TestEmbedSectionStruct
 }
 
 func TestFunctionAllType(t *testing.T) {
 	conf := &TestConfig{}
-	cfg, _ := ini.Load("testdata/opensds.conf")
-	doInit(cfg, conf)
+	initConf("testdata/opensds.conf", conf)
 	if conf.TestStruct.Bool != true {
 		t.Error("Test TestStuct Bool error")
 	}
@@ -114,51 +115,56 @@ func TestFunctionAllType(t *testing.T) {
 		t.Error("Test TestSliceStruct bool error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt, []int{1, -2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct int error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt8, []int8{1, -2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct int8 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt16, []int16{1, -2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct int16 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt32, []int32{1, -2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct int32 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceInt64, []int64{1, -2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct int64 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint, []uint{1, 2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct uint error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint8, []uint8{1, 2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct uint8 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint16, []uint16{1, 2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct uint16 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint32, []uint32{1, 2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct uint32 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceUint64, []uint64{1, 2, 3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct uint64 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat32, []float32{1, -0.2, 0.3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct float32 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceFloat64, []float64{1, -0.2, 0.3}) {
-		t.Error("Test TestSliceStruct bool error")
+		t.Error("Test TestSliceStruct float64 error")
 	}
 	if !reflect.DeepEqual(conf.TestSliceStruct.SliceNotExistString, []string{"not", "exist", "string"}) {
 		t.Error("Test TestSliceStruct String error")
 	}
-
+	if conf.TestEmbedSectionStruct.TestStruct.String != "HelloWorld" {
+		t.Error("Test TestEmbedSectionStruct.TestStuct String error")
+	}
+	if !reflect.DeepEqual(conf.TestEmbedSectionStruct.TestSliceStruct.SliceString, []string{"slice", "string", "test"}) {
+		t.Error("Test TestEmbedSectionStruct.TestSliceStruct String error")
+	}
 }
 
 func TestFunctionDefaultValue(t *testing.T) {
 	conf := &TestConfig{}
-	cfg, _ := ini.Load("NotExistFile")
-	doInit(cfg, conf)
+	initConf("NotExistFile", conf)
+
 	if conf.TestStruct.Bool != true {
 		t.Error("Test TestStuct Bool error")
 	}
@@ -260,14 +266,14 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
 		t.Error("Test OsdsDock.ApiEndpoint error")
 	}
-	if CONF.OsdsDock.EnableBackends[0] != "ceph" {
-		t.Error("OsdsDock.EnableBackends[0] error")
+	if CONF.OsdsDock.EnabledBackends[0] != "ceph" {
+		t.Error("OsdsDock.EnabledBackends[0] error")
 	}
-	if CONF.OsdsDock.EnableBackends[1] != "cinder" {
-		t.Error("Test OsdsDock.EnableBackends[1] error")
+	if CONF.OsdsDock.EnabledBackends[1] != "cinder" {
+		t.Error("Test OsdsDock.EnabledBackends[1] error")
 	}
-	if CONF.OsdsDock.EnableBackends[2] != "sample" {
-		t.Error("Test OsdsDock.EnableBackends[2] error")
+	if CONF.OsdsDock.EnabledBackends[2] != "sample" {
+		t.Error("Test OsdsDock.EnabledBackends[2] error")
 	}
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {
 		t.Error("Test Database.Credential error")
@@ -290,6 +296,9 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Ceph.DriverName != "ceph" {
 		t.Error("Test Ceph.DriverName error")
 	}
+	if CONF.Ceph.ConfigPath != "/etc/opensds/driver/ceph.yaml" {
+		t.Error("Test Ceph.ConfigPath error")
+	}
 	if CONF.Cinder.Name != "cinder" {
 		t.Error("Test Cinder.Name error")
 	}
@@ -299,6 +308,9 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Cinder.DriverName != "cinder" {
 		t.Error("Test Cinder.DriverName error")
 	}
+	if CONF.Cinder.ConfigPath != "/etc/opensds/driver/cinder.yaml" {
+		t.Error("Test Cinder.ConfigPath error")
+	}
 	if CONF.Sample.Name != "sample" {
 		t.Error("Test Sample.Name error")
 	}
@@ -307,6 +319,21 @@ func TestOpensdsConfig(t *testing.T) {
 	}
 	if CONF.Sample.DriverName != "sample" {
 		t.Error("Test Sample.DriverName error")
+	}
+	if CONF.Sample.ConfigPath != "/etc/opensds/driver/sample.yaml" {
+		t.Error("Test Sample.ConfigPath error")
+	}
+	if CONF.LVM.Name != "lvm" {
+		t.Error("Test LVM.Name error")
+	}
+	if CONF.LVM.Description != "LVM Test" {
+		t.Error("Test Sample.Description error")
+	}
+	if CONF.LVM.DriverName != "lvm" {
+		t.Error("Test LVM.DriverName error")
+	}
+	if CONF.LVM.ConfigPath != "/etc/opensds/driver/lvm.yaml" {
+		t.Error("Test LVM.ConfigPath error")
 	}
 	bm := GetBackendsMap()
 	if bm["ceph"].Name != "ceph" {

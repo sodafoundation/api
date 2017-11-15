@@ -49,7 +49,7 @@ func TestSetup(t *testing.T) {
 			return &gophercloud.ServiceClient{}, nil
 		})
 
-	config.CONF.OsdsDock.CinderConfig = "testdata/cinder.yaml"
+	config.CONF.OsdsDock.Backends.Cinder.ConfigPath = "testdata/cinder.yaml"
 	d := Driver{}
 	d.Setup()
 	if opt.IdentityEndpoint != "http://192.168.56.104/identity" {
@@ -74,23 +74,23 @@ func TestSetup(t *testing.T) {
 		t.Error("TenantName error.")
 	}
 
-	if d.config.Pool["pool1"].DiskType != "SSD" {
+	if d.conf.Pool["pool1"].DiskType != "SSD" {
 		t.Error("Test config pool1 DiskType error")
 	}
-	if d.config.Pool["pool1"].IOPS != 1000 {
+	if d.conf.Pool["pool1"].IOPS != 1000 {
 		t.Error("Test config pool1 IOPS error")
 	}
-	if d.config.Pool["pool1"].BandWidth != 1000 {
+	if d.conf.Pool["pool1"].BandWidth != 1000 {
 		t.Error("Test config pool1 BandWidth error")
 	}
 
-	if d.config.Pool["pool2"].DiskType != "SAS" {
+	if d.conf.Pool["pool2"].DiskType != "SAS" {
 		t.Error("Test config pool2 DiskType error")
 	}
-	if d.config.Pool["pool2"].IOPS != 800 {
+	if d.conf.Pool["pool2"].IOPS != 800 {
 		t.Error("Test config pool2 IOPS error")
 	}
-	if d.config.Pool["pool2"].BandWidth != 800 {
+	if d.conf.Pool["pool2"].BandWidth != 800 {
 		t.Error("Test config pool2 BandWidth error")
 	}
 }
@@ -363,7 +363,7 @@ func TestListPools(t *testing.T) {
 			}
 			return pools, nil
 		})
-	config.CONF.OsdsDock.CinderConfig = "testdata/cinder.yaml"
+	config.CONF.OsdsDock.Backends.Cinder.ConfigPath = "testdata/cinder.yaml"
 	d := Driver{}
 	d.Setup()
 	resp, err := d.ListPools()
