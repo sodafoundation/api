@@ -22,26 +22,25 @@ package ceph
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"gopkg.in/yaml.v2"
 )
 
 const (
-	opensdsPrefix string = "OPENSDS"
-	splitChar            = ":"
-	sizeShiftBit         = 20
+	opensdsPrefix   string = "OPENSDS"
+	splitChar              = ":"
+	sizeShiftBit           = 20
+	defaultConfPath        = "/etc/opensds/driver/ceph.yaml"
 )
 
 const (
@@ -66,41 +65,9 @@ const (
 	poolCrushRuleset
 )
 
-type PoolProperties struct {
-	DiskType  string `yaml:"diskType"`
-	IOPS      int64  `yaml:"iops"`
-	BandWidth int64  `yaml:"bandwidth"`
-}
-
 type CephConfig struct {
 	ConfigFile string                    `yaml:"configFile,omitempty"`
 	Pool       map[string]PoolProperties `yaml:"pool,flow"`
-}
-
-var cephConfig *CephConfig
-var once sync.Once
-
-func (c *CephConfig) Load(file string) error {
-	// Set /etc/ceph/ceph.conf as default value
-	confYaml, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatalf("Read ceph config yaml file (%s) failed, reason:(%v)", file, err)
-		return err
-	}
-	err = yaml.Unmarshal([]byte(confYaml), c)
-	if err != nil {
-		log.Fatal("Parse error: %v", err)
-		return err
-	}
-	return nil
-}
-
-func getConfig() *CephConfig {
-	once.Do(func() {
-		cephConfig = &CephConfig{ConfigFile: "/etc/ceph/ceph.conf"}
-		cephConfig.Load(config.CONF.OsdsDock.CephConfig)
-	})
-	return cephConfig
 }
 
 type Name struct {
@@ -152,9 +119,18 @@ func execCmd(cmd string) (string, error) {
 type Driver struct {
 	conn  *rados.Conn
 	ioctx *rados.IOContext
+	conf  *CephConfig
 }
 
-func (d *Driver) Setup() error { return nil }
+func (d *Driver) Setup() error {
+	d.conf = &CephConfig{ConfigFile: "/etc/ceph/ceph.conf"}
+	p := config.CONF.OsdsDock.Backends.Ceph.ConfigPath
+	if "" == p {
+		p = defaultConfPath
+	}
+	_, err := Parse(d.conf, p)
+	return err
+}
 
 func (d *Driver) Unset() error { return nil }
 
@@ -165,7 +141,7 @@ func (d *Driver) initConn() error {
 		return err
 	}
 
-	if err = conn.ReadConfigFile(getConfig().ConfigFile); err != nil {
+	if err = conn.ReadConfigFile(d.conf.ConfigFile); err != nil {
 		log.Error("Read config file failed:", err)
 		return err
 	}
@@ -457,7 +433,7 @@ func (d *Driver) parseCapStr(cap string) int64 {
 
 func (d *Driver) getPoolsCapInfo() ([][]string, error) {
 	const poolStartLine = 5
-	output, err := execCmd("ceph df -c " + getConfig().ConfigFile)
+	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
 		return nil, err
@@ -472,7 +448,7 @@ func (d *Driver) getPoolsCapInfo() ([][]string, error) {
 
 func (d *Driver) getGlobalCapInfo() ([]string, error) {
 	const globalCapInfoLine = 2
-	output, err := execCmd("ceph df -c " + getConfig().ConfigFile)
+	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
 		return nil, err
@@ -482,7 +458,7 @@ func (d *Driver) getGlobalCapInfo() ([]string, error) {
 }
 
 func (d *Driver) getPoolsAttr() (map[string][]string, error) {
-	cmd := "ceph osd pool ls detail -c " + getConfig().ConfigFile + "| grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
+	cmd := "ceph osd pool ls detail -c " + d.conf.ConfigFile + "| grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
 	output, err := execCmd(cmd)
 	if err != nil {
 		log.Error("[Error]:", err)
@@ -537,7 +513,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 	for i := range pc {
 		name := pc[i][poolName]
-		c := getConfig()
+		c := d.conf
 		if _, ok := c.Pool[name]; !ok {
 			continue
 		}
@@ -560,3 +536,4 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+

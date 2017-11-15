@@ -17,54 +17,41 @@ package lvm
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"gopkg.in/yaml.v2"
 )
 
 const (
-	vgName = "vg001"
+	vgName          = "vg001"
+	defaultConfPath = "/etc/opensds/driver/lvm.yaml"
 )
-
-var conf = LVMConfig{}
-
-type Driver struct {
-	config LVMConfig
-}
 
 type LVMConfig struct {
 	Pool map[string]PoolProperties `yaml:"pool,flow"`
 }
 
-type PoolProperties struct {
-	DiskType  string `yaml:"diskType"`
-	IOPS      int64  `yaml:"iops"`
-	BandWidth int64  `yaml:"bandwidth"`
+type Driver struct {
+	conf *LVMConfig
 }
 
 func (d *Driver) Setup() error {
 	// Read lvm config file
-	confYaml, err := ioutil.ReadFile(config.CONF.LVMConfig)
-	if err != nil {
-		log.Fatalf("Read lvm config yaml file (%s) failed, reason:(%v)", config.CONF.LVMConfig, err)
-		return err
+	d.conf = &LVMConfig{}
+	p := config.CONF.OsdsDock.Backends.LVM.ConfigPath
+	if "" == p {
+		p = defaultConfPath
 	}
-	if err = yaml.Unmarshal(confYaml, &conf); err != nil {
-		log.Fatal("Parse error: %v", err)
-		return err
-	}
-	d.config = conf
-
-	return nil
+	_, err := Parse(d.conf, p)
+	return err
 }
 
 func (*Driver) Unset() error { return nil }
@@ -297,10 +284,10 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 
 	var pols []*model.StoragePoolSpec
-	if _, ok := d.config.Pool[vgName]; !ok {
+	if _, ok := d.conf.Pool[vgName]; !ok {
 		return pols, nil
 	}
-	param := d.buildPoolParam(d.config.Pool[vgName])
+	param := d.buildPoolParam(d.conf.Pool[vgName])
 	pol := &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
 			Id: uuid.NewV5(uuid.NamespaceOID, vgName).String(),
@@ -332,3 +319,4 @@ func (*Driver) execCmd(cmd string) (string, error) {
 	}
 	return string(ret), nil
 }
+

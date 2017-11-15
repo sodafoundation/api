@@ -53,21 +53,15 @@ func NewDiscover() Discoverer {
 
 func (dd *DockDiscoverer) Init() error {
 	// Load resource from specified file
-	name2Backend := map[string]BackendProperties{
-		"ceph":   BackendProperties(CONF.Ceph),
-		"cinder": BackendProperties(CONF.Cinder),
-		"sample": BackendProperties(CONF.Sample),
-		"lvm":    BackendProperties(CONF.LVM),
-	}
-
+	bm := GetBackendsMap()
 	host, err := os.Hostname()
 	if err != nil {
 		log.Error("When get os hostname:", err)
 		return err
 	}
 
-	for _, v := range CONF.EnableBackends {
-		b := name2Backend[v]
+	for _, v := range CONF.EnabledBackends {
+		b := bm[v]
 		if b.Name == "" {
 			continue
 		}
@@ -159,3 +153,4 @@ func Discovery(d Discoverer) error {
 
 	return err
 }
+
