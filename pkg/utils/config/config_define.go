@@ -14,10 +14,6 @@
 
 package config
 
-import (
-	gflag "flag"
-)
-
 type Default struct{}
 
 type OsdsLet struct {
@@ -27,12 +23,9 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint    string   `conf:"api_endpoint,localhost:50050"`
-	EnableBackends []string `conf:"enabled_backends,ceph"`
-	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
-	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
-	LVMConfig      string   `conf:"lvm_config,/etc/opensds/driver/lvm.yaml"`
-	CSIConfig      string   `conf:"csi_config,/etc/opensds/driver/csi.yaml"`
+	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
+	EnabledBackends []string `conf:"enabled_backends,ceph"`
+	Backends
 }
 
 type Database struct {
@@ -45,40 +38,22 @@ type BackendProperties struct {
 	Name        string `conf:"name"`
 	Description string `conf:"description"`
 	DriverName  string `conf:"driver_name"`
+	ConfigPath  string `conf:"config_path"`
 }
 
-type Ceph BackendProperties
-type Cinder BackendProperties
-type Sample BackendProperties
-type LVM BackendProperties
-type CSI BackendProperties
+type Backends struct {
+	Ceph   BackendProperties `conf:"ceph"`
+	Cinder BackendProperties `conf:"cinder"`
+	Sample BackendProperties `conf:"sample"`
+	LVM    BackendProperties `conf:"lvm"`
+	CSI    BackendProperties `conf:"csi"`
+}
 
 type Config struct {
 	Default  `conf:"default"`
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
-	Ceph     `conf:"ceph"`
-	Cinder   `conf:"cinder"`
-	Sample   `conf:"sample"`
-	LVM      `conf:"lvm"`
-	CSI      `conf:"csi"`
 
 	Flag FlagSet
 }
-
-//Create a Config and init default value.
-func GetDefaultConfig() *Config {
-	var conf *Config = new(Config)
-	initConf("", conf)
-	return conf
-}
-
-func (c *Config) Load(confFile string) {
-	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
-	c.Flag.Parse()
-	initConf(confFile, CONF)
-	c.Flag.AssignValue()
-}
-
-var CONF *Config = GetDefaultConfig()

@@ -57,22 +57,22 @@ type VolumeDriver interface {
 }
 
 func Init(resourceType string) VolumeDriver {
+	var d VolumeDriver
 	switch resourceType {
 	case "csi":
 		var d = &csi.Driver{}
 		d.Setup()
 		return d
 	case "cinder":
-		var d = &cinder.Driver{}
-		d.Setup()
-		return d
+		d = &cinder.Driver{}
 	case "ceph":
-		return &ceph.Driver{}
+		d = &ceph.Driver{}
 	case "lvm":
-		var d = &lvm.Driver{}
-		d.Setup()
-		return d
+		d = &lvm.Driver{}
 	default:
-		return &sample.Driver{}
+		d = &sample.Driver{}
 	}
+	d.Setup()
+	return d
 }
+

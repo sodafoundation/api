@@ -23,27 +23,21 @@ package csi
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strconv"
 
 	csipb "github.com/container-storage-interface/spec/lib/go/csi"
 	log "github.com/golang/glog"
-	"github.com/satori/go.uuid"
-	"golang.org/x/net/context"
-	"gopkg.in/yaml.v2"
-
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/satori/go.uuid"
+	"golang.org/x/net/context"
 )
 
-var conf = CSIConfig{}
-
-type Driver struct {
-	Client
-
-	config CSIConfig
-}
+const (
+	defaultConfPath = "/etc/opensds/driver/csi.yaml"
+)
 
 type CSIConfig struct {
 	AuthOptions struct {
@@ -52,25 +46,22 @@ type CSIConfig struct {
 	Pool map[string]PoolProperties `yaml:"pool,flow"`
 }
 
-type PoolProperties struct {
-	DiskType  string `yaml:"diskType"`
-	IOPS      int64  `yaml:"iops"`
-	BandWidth int64  `yaml:"bandwidth"`
+type Driver struct {
+	Client
+
+	conf *CSIConfig
 }
 
 func (d *Driver) Setup() error {
-	// Read csi config file
-	confYaml, err := ioutil.ReadFile(config.CONF.CSIConfig)
-	if err != nil {
-		log.Errorf("Read csi config yaml file (%s) failed, reason:(%v)", config.CONF.CSIConfig, err)
+	d.conf = &CSIConfig{}
+	p := config.CONF.OsdsDock.Backends.CSI.ConfigPath
+	if "" == p {
+		p = defaultConfPath
+	}
+	if _, err := Parse(d.conf, p); err != nil {
 		return err
 	}
-	if err = yaml.Unmarshal(confYaml, &conf); err != nil {
-		log.Errorf("Parse error: %v", err)
-		return err
-	}
-	d.config = conf
-	d.Client = NewClient(d.config.AuthOptions.IdentityEndpoint)
+	d.Client = NewClient(d.conf.AuthOptions.IdentityEndpoint)
 
 	return nil
 }
@@ -272,14 +263,14 @@ func (*Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 
-	for name := range d.config.Pool {
+	for name := range d.conf.Pool {
 		var param = func(proper PoolProperties) map[string]interface{} {
 			var param = make(map[string]interface{})
 			param["diskType"] = proper.DiskType
 			param["iops"] = proper.IOPS
 			param["bandwidth"] = proper.BandWidth
 			return param
-		}(d.config.Pool[name])
+		}(d.conf.Pool[name])
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
