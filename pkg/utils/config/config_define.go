@@ -14,9 +14,7 @@
 
 package config
 
-import (
-	gflag "flag"
-)
+type Default struct{}
 
 type OsdsLet struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
@@ -25,9 +23,11 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint  string `conf:"api_endpoint,localhost:50050"`
-	CinderConfig string `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
-	CephConfig   string `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
+	ApiEndpoint    string   `conf:"api_endpoint,localhost:50050"`
+	EnableBackends []string `conf:"enabled_backends,ceph"`
+	CinderConfig   string   `conf:"cinder_config,/etc/opensds/driver/cinder.yaml"`
+	CephConfig     string   `conf:"ceph_config,/etc/opensds/driver/ceph.yaml"`
+	LVMConfig      string   `conf:"lvm_config,/etc/opensds/driver/lvm.yaml"`
 }
 
 type Database struct {
@@ -36,7 +36,17 @@ type Database struct {
 	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
 }
 
-type Default struct {
+type BackendProperties struct {
+	Name        string `conf:"name"`
+	Description string `conf:"description"`
+	DriverName  string `conf:"driver_name"`
+}
+
+type Backends struct {
+	Ceph   BackendProperties `conf:"ceph"`
+	Cinder BackendProperties `conf:"cinder"`
+	Sample BackendProperties `conf:"sample"`
+	LVM    BackendProperties `conf:"lvm"`
 }
 
 type Config struct {
@@ -44,21 +54,7 @@ type Config struct {
 	OsdsLet  `conf:"osdslet"`
 	OsdsDock `conf:"osdsdock"`
 	Database `conf:"database"`
-	Flag     FlagSet
+	Backends
+	Flag FlagSet
 }
 
-//Create a Config and init default value.
-func GetDefaultConfig() *Config {
-	var conf *Config = new(Config)
-	initConf("", conf)
-	return conf
-}
-
-func (c *Config) Load(confFile string) {
-	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
-	c.Flag.Parse()
-	initConf(confFile, CONF)
-	c.Flag.AssignValue()
-}
-
-var CONF *Config = GetDefaultConfig()

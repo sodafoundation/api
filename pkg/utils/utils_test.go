@@ -176,7 +176,6 @@ func TestErrorStatus(t *testing.T) {
 	var fakeErrorRes = ErrorRes{
 		Code:    http.StatusAccepted,
 		Message: "this is a test",
-		Title:   http.StatusText(http.StatusAccepted),
 	}
 
 	expected, err := json.Marshal(fakeErrorRes)

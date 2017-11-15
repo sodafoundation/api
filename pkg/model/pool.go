@@ -27,12 +27,13 @@ type StoragePoolSpec struct {
 	*BaseModel
 	Name             string                 `json:"name,omitempty"`
 	Description      string                 `json:"description,omitempty"`
+	Status           string                 `json:"status,omitempty"`
 	DockId           string                 `json:"dockId,omitempty"`
 	AvailabilityZone string                 `json:"availabilityZone,omitempty"`
 	TotalCapacity    int64                  `json:"totalCapacity,omitempty"`
 	FreeCapacity     int64                  `json:"freeCapacity,omitempty"`
 	StorageType      string                 `json:"-"`
-	Parameters       map[string]interface{} `json:"parameters,omitempty"`
+	Parameters       map[string]interface{} `json:"extras,omitempty"`
 }
 
 func (pol *StoragePoolSpec) GetName() string {
@@ -41,6 +42,10 @@ func (pol *StoragePoolSpec) GetName() string {
 
 func (pol *StoragePoolSpec) GetDescription() string {
 	return pol.Description
+}
+
+func (pol *StoragePoolSpec) GetStatus() string {
+	return pol.Status
 }
 
 func (pol *StoragePoolSpec) GetDockId() string {

@@ -17,7 +17,6 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"reflect"
 	"time"
 
@@ -103,14 +102,12 @@ func (s *setter) SetUpdatedTimeStamp(m model.Modeler) error {
 type ErrorRes struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Title   string `json:"title"`
 }
 
 func ErrorStatus(code int, message string) []byte {
 	status := &ErrorRes{
 		Code:    code,
 		Message: message,
-		Title:   http.StatusText(code),
 	}
 
 	// Mashal the status.

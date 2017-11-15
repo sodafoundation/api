@@ -27,6 +27,8 @@ type DockSpec struct {
 	*BaseModel
 	Name        string                 `json:"name,omitempty"`
 	Description string                 `json:"description,omitempty"`
+	Status      string                 `json:"status,omitempty"`
+	StorageType string                 `json:"storageType,omitempty"`
 	Endpoint    string                 `json:"endpoint,omitempty"`
 	DriverName  string                 `json:"driverName,omitempty"`
 	Parameters  map[string]interface{} `json:"parameters,omitempty"`
@@ -38,6 +40,14 @@ func (dck *DockSpec) GetName() string {
 
 func (dck *DockSpec) GetDescription() string {
 	return dck.Description
+}
+
+func (dck *DockSpec) GetStatus() string {
+	return dck.Status
+}
+
+func (dck *DockSpec) GetStorageType() string {
+	return dck.StorageType
 }
 
 func (dck *DockSpec) GetEndpoint() string {

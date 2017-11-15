@@ -20,14 +20,16 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
-	"encoding/json"
-
-	log "github.com/golang/glog"
+	"os"
 
 	"github.com/opensds/opensds/pkg/db"
 	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
+
+	log "github.com/golang/glog"
+	"github.com/satori/go.uuid"
 )
 
 type Discoverer interface {
@@ -37,8 +39,8 @@ type Discoverer interface {
 }
 
 type DockDiscoverer struct {
-	dcks *[]api.DockSpec
-	pols *[]api.StoragePoolSpec
+	dcks []*api.DockSpec
+	pols []*api.StoragePoolSpec
 
 	c db.Client
 }
@@ -51,37 +53,58 @@ func NewDiscover() Discoverer {
 
 func (dd *DockDiscoverer) Init() error {
 	// Load resource from specified file
-	value, err := loadFromFile("")
+	name2Backend := map[string]BackendProperties{
+		"ceph":   BackendProperties(CONF.Ceph),
+		"cinder": BackendProperties(CONF.Cinder),
+		"sample": BackendProperties(CONF.Sample),
+		"lvm":    BackendProperties(CONF.LVM),
+	}
+
+	host, err := os.Hostname()
 	if err != nil {
-		log.Error("When list docks:", err)
+		log.Error("When get os hostname:", err)
 		return err
 	}
 
-	// Unmarshal the result
-	if err = json.Unmarshal(value.([]byte), dd.dcks); err != nil {
-		log.Error("Unmarshal json failed:", err)
-		return err
-	}
+	for _, v := range CONF.EnableBackends {
+		b := name2Backend[v]
+		if b.Name == "" {
+			continue
+		}
 
+		dck := &api.DockSpec{
+			BaseModel: &api.BaseModel{
+				Id: uuid.NewV5(uuid.NamespaceOID, host+":"+b.DriverName).String(),
+			},
+			Name:        b.Name,
+			Description: b.Description,
+			DriverName:  b.DriverName,
+			Endpoint:    CONF.OsdsDock.ApiEndpoint,
+		}
+		dd.dcks = append(dd.dcks, dck)
+	}
 	return nil
 }
 
 func (dd *DockDiscoverer) Discovery() error {
-	var pols *[]api.StoragePoolSpec
+	var pols []*api.StoragePoolSpec
 	var err error
 
-	for _, dock := range *dd.dcks {
-		pols, err = dockHub.NewDockHub(dock.GetDriverName()).ListPools()
+	for _, dck := range dd.dcks {
+		pols, err = dockHub.NewDockHub(dck.GetDriverName()).ListPools()
 		if err != nil {
 			log.Error("When list pools:", err)
 			return err
 		}
 
-		if len(*pols) == 0 {
-			log.Warningf("The pool of dock %s is empty!\n", dock.GetId())
+		if len(pols) == 0 {
+			log.Warningf("The pool of dock %s is empty!\n", dck.GetId())
 		}
 
-		*dd.pols = append(*dd.pols, *pols...)
+		for _, pol := range pols {
+			pol.DockId = dck.GetId()
+		}
+		dd.pols = append(dd.pols, pols...)
 	}
 
 	return err
@@ -91,29 +114,29 @@ func (dd *DockDiscoverer) Store() error {
 	var err error
 
 	// Store dock resources in database.
-	for _, dock := range *dd.dcks {
-		if err = utils.ValidateData(dock, utils.S); err != nil {
+	for _, dck := range dd.dcks {
+		if err = utils.ValidateData(dck, utils.S); err != nil {
 			log.Error("When validate dock structure:", err)
 			return err
 		}
 
 		// Call db module to create dock resource.
-		if _, err = db.C.CreateDock(&dock); err != nil {
-			log.Error("When create dock %s in db: %v\n", dock.GetId(), err)
+		if err = db.C.CreateDock(dck); err != nil {
+			log.Errorf("When create dock %s in db: %v\n", dck.GetId(), err)
 			return err
 		}
 	}
 
 	// Store pool resources in database.
-	for _, pool := range *dd.pols {
-		if err = utils.ValidateData(pool, utils.S); err != nil {
+	for _, pol := range dd.pols {
+		if err = utils.ValidateData(pol, utils.S); err != nil {
 			log.Error("When validate pool structure:", err)
 			return err
 		}
 
 		// Call db module to create pool resource.
-		if _, err = db.C.CreatePool(&pool); err != nil {
-			log.Error("When create pool %s in db: %v\n", pool.GetId(), err)
+		if err = db.C.CreatePool(pol); err != nil {
+			log.Errorf("When create pool %s in db: %v\n", pol.GetId(), err)
 			return err
 		}
 	}

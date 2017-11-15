@@ -19,153 +19,61 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
+	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
-	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
-func NewFakeVolumeController(req *pb.DockRequest) volume.Controller {
-	return &fakeVolumeController{
-		Request: req,
-	}
+func NewFakeVolumeController() volume.Controller {
+	return &fakeVolumeController{}
 }
 
 type fakeVolumeController struct {
-	Request *pb.DockRequest
 }
 
-func (fvc *fakeVolumeController) CreateVolume() (*api.VolumeSpec, error) {
+func (fvc *fakeVolumeController) CreateVolume(*pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	return &sampleVolume, nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolume() *api.Response {
-	return &api.Response{Status: "Success"}
+func (fvc *fakeVolumeController) DeleteVolume(*pb.DeleteVolumeOpts) error {
+	return nil
 }
 
-func (fvc *fakeVolumeController) CreateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
+func (fvc *fakeVolumeController) CreateVolumeAttachment(*pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	return &sampleAttachment, nil
 }
 
-func (fvc *fakeVolumeController) UpdateVolumeAttachment() (*api.VolumeAttachmentSpec, error) {
-	return &sampleModifiedAttachment, nil
+func (fvc *fakeVolumeController) DeleteVolumeAttachment(*pb.DeleteAttachmentOpts) error {
+	return nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolumeAttachment() *api.Response {
-	return &api.Response{Status: "Success"}
-}
-
-func (fvc *fakeVolumeController) CreateVolumeSnapshot() (*api.VolumeSnapshotSpec, error) {
+func (fvc *fakeVolumeController) CreateVolumeSnapshot(*pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return &sampleSnapshot, nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolumeSnapshot() *api.Response {
-	return &api.Response{Status: "Success"}
+func (fvc *fakeVolumeController) DeleteVolumeSnapshot(*pb.DeleteVolumeSnapshotOpts) error {
+	return nil
 }
 
-func TestNewControllerWithVolumeConfig(t *testing.T) {
-	db.C = &fakeDbClient{}
-
-	/*
-		CASE 1:
-		Test the case that user only specifies volume request.
-	*/
-	var expectedController = &Controller{
-		request: &pb.DockRequest{
-			VolumeId:          "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-			VolumeName:        "fake-volume",
-			VolumeDescription: "fake volume for testing",
-			VolumeSize:        int64(1),
-			ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
-		},
-		profile: &api.ProfileSpec{
-			BaseModel: &api.BaseModel{
-				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
-			},
-			Name:        "default",
-			Description: "default policy",
-			Extra:       api.ExtraSpec{},
-		},
-	}
-	expectedController.searcher = NewDbSearcher()
-	expectedController.policyController = policy.NewController(expectedController.profile)
-	expectedController.volumeController = volume.NewController(expectedController.request)
-
-	c, err := NewControllerWithVolumeConfig(&sampleVolume, nil, nil)
-	if err != nil {
-		t.Errorf("Failed to create controller, err is %v\n", err)
-	}
-
-	if !reflect.DeepEqual(c, expectedController) {
-		t.Errorf("Expected %v, got %v\n", expectedController, c)
-	}
-
-	/*
-		CASE 2:
-		Test the case that user only specifies volume attachment request.
-	*/
-	expectedController = &Controller{
-		request: &pb.DockRequest{
-			AttachmentId:          "80287bf8-66de-11e7-b031-f3b0af1675ba",
-			AttachmentName:        "fake-volume-attachment",
-			AttachmentDescription: "fake volume attachment for testing",
-			VolumeId:              "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-		},
-	}
-	expectedController.searcher = NewDbSearcher()
-	expectedController.volumeController = volume.NewController(expectedController.request)
-
-	c, err = NewControllerWithVolumeConfig(nil, &sampleAttachment, nil)
-	if err != nil {
-		t.Errorf("Failed to create controller, err is %v\n", err)
-	}
-
-	if !reflect.DeepEqual(c, expectedController) {
-		t.Errorf("Expected %v, got %v\n", expectedController, c)
-	}
-
-	/*
-		CASE 3:
-		Test the case that user only specifies volume snapshot request.
-	*/
-	expectedController = &Controller{
-		request: &pb.DockRequest{
-			SnapshotId:          "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			SnapshotName:        "fake-volume-snapshot",
-			SnapshotDescription: "fake volume snapshot for testing",
-			VolumeId:            "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-		},
-	}
-	expectedController.searcher = NewDbSearcher()
-	expectedController.volumeController = volume.NewController(expectedController.request)
-
-	c, err = NewControllerWithVolumeConfig(nil, nil, &sampleSnapshot)
-	if err != nil {
-		t.Errorf("Failed to create controller, err is %v\n", err)
-	}
-
-	if !reflect.DeepEqual(c, expectedController) {
-		t.Errorf("Expected %v, got %v\n", expectedController, c)
-	}
-}
+func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
-	var req = &pb.DockRequest{
-		VolumeName:        "fake-volume",
-		VolumeDescription: "fake volume for testing",
-		VolumeSize:        int64(1),
-		ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
+	var req = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "fake-volume",
+		Description: "fake volume for testing",
+		Size:        int64(1),
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
-		profile:          &sampleProfile,
-		request:          req,
 	}
 	var expected = &sampleVolume
 
-	result, err := c.CreateVolume()
+	result, err := c.CreateVolume(req)
 	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
@@ -175,39 +83,36 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestDeleteVolume(t *testing.T) {
-	var req = &pb.DockRequest{
-		VolumeId:  "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+	var req = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		},
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
-		profile:          &sampleProfile,
-		request:          req,
 	}
-	var expected = &api.Response{Status: "Success"}
 
-	result := c.DeleteVolume()
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	result := c.DeleteVolume(req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
 func TestCreateVolumeAttachment(t *testing.T) {
-	var req = &pb.DockRequest{
-		AttachmentName:        "fake-volume-attachment",
-		AttachmentDescription: "fake volume attachment for testing",
-		VolumeId:              "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+	var req = &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+		VolumeId:  "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		HostInfo:  &model.HostInfo{},
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
-		request:          req,
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &sampleAttachment
 
-	result, err := c.CreateVolumeAttachment()
+	result, err := c.CreateVolumeAttachment(req)
 	if err != nil {
 		t.Errorf("Failed to create volume attachment, err is %v\n", err)
 	}
@@ -216,61 +121,39 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 }
 
-func TestUpdateVolumeAttachment(t *testing.T) {
-	var req = &pb.DockRequest{
-		AttachmentId:          "80287bf8-66de-11e7-b031-f3b0af1675ba",
-		AttachmentName:        "modified-fake-volume-attachment",
-		AttachmentDescription: "modified fake volume attachment for testing",
-		VolumeId:              "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-	}
-	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
-		request:          req,
-	}
-	var expected = &sampleModifiedAttachment
-
-	result, err := c.UpdateVolumeAttachment()
-	if err != nil {
-		t.Errorf("Failed to update volume attachment, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-}
-
 func TestDeleteVolumeAttachment(t *testing.T) {
-	var req = &pb.DockRequest{
-		AttachmentId: "80287bf8-66de-11e7-b031-f3b0af1675ba",
-		VolumeId:     "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+	var req = &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
+		},
+		HostInfo: &model.HostInfo{},
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
-		request:          req,
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 	}
-	var expected = &api.Response{Status: "Success"}
 
-	result := c.DeleteVolumeAttachment()
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	result := c.DeleteVolumeAttachment(req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
-	var req = &pb.DockRequest{
-		SnapshotName:        "fake-volume-snapshot",
-		SnapshotDescription: "fake volume snapshot for testing",
-		VolumeId:            "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+	var req = &model.VolumeSnapshotSpec{
+		BaseModel:   &model.BaseModel{},
+		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		Name:        "fake-volumesnapshot",
+		Description: "fake volumesnapshot for testing",
+		Size:        int64(1),
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
-		request:          req,
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &sampleSnapshot
 
-	result, err := c.CreateVolumeSnapshot()
+	result, err := c.CreateVolumeSnapshot(req)
 	if err != nil {
 		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
 	}
@@ -280,53 +163,59 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
-	var req = &pb.DockRequest{
-		SnapshotId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		VolumeId:   "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+	var req = &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "8193c3ec-771f-11e7-8ca3-d32c0a8b2727",
+		},
 	}
 	var c = &Controller{
-		searcher:         NewFakeDbSearcher(),
-		volumeController: NewFakeVolumeController(req),
-		request:          req,
+		Selector:         selector.NewFakeSelector(),
+		volumeController: NewFakeVolumeController(),
 	}
-	var expected = &api.Response{Status: "Success"}
 
-	result := c.DeleteVolumeSnapshot()
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	result := c.DeleteVolumeSnapshot(req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
 
 var (
-	sampleProfile = api.ProfileSpec{
-		BaseModel: &api.BaseModel{
+	sampleVolume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+			CreatedAt: "2017-08-02T09:17:05",
+		},
+		Name:        "fake-volume",
+		Description: "fake volume for testing",
+		Size:        1,
+		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
+	}
+
+	sampleProfile = model.ProfileSpec{
+		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		Name:        "default",
 		Description: "default policy",
-		Extra:       api.ExtraSpec{},
+		Extra:       model.ExtraSpec{},
 	}
 
-	sampleAttachment = api.VolumeAttachmentSpec{
-		BaseModel: &api.BaseModel{
+	sampleAttachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
-		Name:        "fake-volume-attachment",
-		Description: "fake volume attachment for testing",
-		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
-	sampleModifiedAttachment = api.VolumeAttachmentSpec{
-		BaseModel: &api.BaseModel{
+	sampleModifiedAttachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
-		Name:        "modified-fake-volume-attachment",
-		Description: "modified fake volume attachment for testing",
-		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 
-	sampleSnapshot = api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{
+	sampleSnapshot = model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
 			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		},
 		Name:        "fake-volume-snapshot",

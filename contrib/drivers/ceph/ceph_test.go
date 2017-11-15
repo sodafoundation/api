@@ -1,4 +1,4 @@
-// Copyright (c) 2016 OpenSDS Authors.
+// Copyright (c) 2017 OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -24,6 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -41,7 +42,7 @@ func TestCreateVolume(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.CreateVolume("volume001", 1)
+	resp, err := d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err != nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -61,7 +62,7 @@ func TestCreateVolume(t *testing.T) {
 		return errors.New("Fake error")
 	})
 	d = Driver{}
-	_, err = d.CreateVolume("volume001", 1)
+	_, err = d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -72,7 +73,7 @@ func TestCreateVolume(t *testing.T) {
 		args ...uint64) (*rbd.Image, error) {
 		return nil, errors.New("Fake error")
 	})
-	_, err = d.CreateVolume("volume001", 1)
+	_, err = d.CreateVolume(&pb.CreateVolumeOpts{Name: "volume001", Size: 1})
 	if err == nil {
 		t.Errorf("Test Create volume error")
 	}
@@ -101,7 +102,7 @@ func TestGetVolume(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.GetVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	resp, err := d.PullVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
 	if err != nil {
 		t.Errorf("Test Get volume error")
 	}
@@ -115,7 +116,7 @@ func TestGetVolume(t *testing.T) {
 		t.Errorf("Test Get volume uuid error")
 	}
 
-	resp, err = d.GetVolume("11111111-1111-1111-1111-111111111111")
+	resp, err = d.PullVolume("11111111-1111-1111-1111-111111111111")
 	if err != rbd.RbdErrorNotFound {
 		t.Errorf("Test Get volume error")
 	}
@@ -142,26 +143,10 @@ func TestDeleteVolme(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	err := d.DeleteVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
+	opt := &pb.DeleteVolumeOpts{Id: "7ee11866-1f40-4f3c-b093-7a3684523a19"}
+	err := d.DeleteVolume(opt)
 	if err != nil {
 		t.Errorf("Test Delete volume error")
-	}
-}
-
-func TestAttachVolume(t *testing.T) {
-	d := Driver{}
-	err := d.AttachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19",
-		"opensds-server", "/mnt")
-	if err != nil {
-		t.Errorf("Test attach volume error")
-	}
-}
-
-func TestDetachVolume(t *testing.T) {
-	d := Driver{}
-	err := d.DetachVolume("7ee11866-1f40-4f3c-b093-7a3684523a19")
-	if err != nil {
-		t.Errorf("Test detach volume error")
 	}
 }
 
@@ -198,8 +183,11 @@ func TestCreateSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.CreateSnapshot("snapshot001", "7ee11866-1f40-4f3c-b093-7a3684523a19",
-		"unite test")
+	resp, err := d.CreateSnapshot(&pb.CreateVolumeSnapshotOpts{
+		Name:        "snapshot001",
+		Id:          "7ee11866-1f40-4f3c-b093-7a3684523a19",
+		Description: "unite test"})
+
 	if err != nil {
 		t.Errorf("Test Create snapshot error")
 	}
@@ -254,7 +242,7 @@ func TestGetSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	resp, err := d.GetSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	resp, err := d.PullSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
 	if err != nil {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -266,7 +254,7 @@ func TestGetSnapshot(t *testing.T) {
 	}
 
 	// case 2
-	_, err = d.GetSnapshot("11111111-1111-1111-1111-111111111111")
+	_, err = d.PullSnapshot("11111111-1111-1111-1111-111111111111")
 	if err == nil {
 		t.Errorf("Test Get snapshot error")
 	}
@@ -308,7 +296,7 @@ func TestDeleteSnapshot(t *testing.T) {
 
 	// case 1
 	d := Driver{}
-	err := d.DeleteSnapshot("25f5d7a2-553d-4d6c-904d-179a9e698cf8")
+	err := d.DeleteSnapshot(&pb.DeleteVolumeSnapshotOpts{Id: "25f5d7a2-553d-4d6c-904d-179a9e698cf8"})
 	if err != nil {
 		t.Errorf("Test Delete snapshot error")
 	}
@@ -326,7 +314,7 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["rbd"].IOPS != 1000 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["rbd"].BandWidth != "1G" {
+	if conf.Pool["rbd"].BandWidth != 1000 {
 		t.Error("Test ConfigFile BandWidth failed!")
 	}
 	if conf.Pool["test"].DiskType != "SAS" {
@@ -335,7 +323,7 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["test"].IOPS != 800 {
 		t.Error("Test ConfigFile IOPS failed!")
 	}
-	if conf.Pool["test"].BandWidth != "800M" {
+	if conf.Pool["test"].BandWidth != 800 {
 		t.Error("Test ConfigFile BandWidth failed!")
 	}
 }
@@ -372,67 +360,65 @@ func TestListPools(t *testing.T) {
 	})
 
 	d := Driver{}
-	pools, err := d.ListPools()
+	pols, err := d.ListPools()
 	if err != nil {
 		t.Errorf("Test List Pools error")
 	}
-
-	if (*pools)[0].Name != "rbd" {
+	if pols[0].Name != "rbd" {
 		t.Errorf("Test List Pools Name error")
 	}
-	if (*pools)[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
+	if pols[0].Id != "0517f561-85b3-5f6a-a38d-8b5a08bff7df" {
 		t.Errorf("Test List Pools UUID error")
 	}
-	if (*pools)[0].FreeCapacity != 2 {
+	if pols[0].FreeCapacity != 2 {
 		t.Errorf("Test List Pools FreeCapacity error")
 	}
 
-	if (*pools)[0].TotalCapacity != 6 {
+	if pols[0].TotalCapacity != 6 {
 		t.Errorf("Test List Pools TotalCapacity error")
 	}
 
-	if (*pools)[0].Parameters["redundancyType"] != "replicated" {
+	if pols[0].Parameters["redundancyType"] != "replicated" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if (*pools)[0].Parameters["replicateSize"] != "3" {
+	if pols[0].Parameters["replicateSize"] != "3" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if (*pools)[0].Parameters["crushRuleset"] != "0" {
+	if pols[0].Parameters["crushRuleset"] != "0" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if (*pools)[0].Parameters["diskType"] != "SSD" {
+	if pols[0].Parameters["diskType"] != "SSD" {
 		t.Errorf("Test List Pools diskType error")
 	}
 
-	if (*pools)[0].Parameters["iops"] != 1000 {
-		t.Errorf("Test List Pools ipos error")
+	if pols[0].Parameters["iops"] != int64(1000) {
+		t.Errorf("Test List Pools iops error")
 	}
 
-	if (*pools)[0].Parameters["bandWidth"] != "1G" {
+	if pols[0].Parameters["bandwidth"] != int64(1000) {
 		t.Errorf("Test List Pools bandWidth error")
 	}
 
-	if (*pools)[5].Name != "ecpool" {
+	if pols[5].Name != "ecpool" {
 		t.Errorf("Test List Pools Name error")
 	}
 
-	if (*pools)[5].Parameters["redundancyType"] != "erasure" {
+	if pols[5].Parameters["redundancyType"] != "erasure" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if (*pools)[5].Parameters["erasureSize"] != "5" {
+	if pols[5].Parameters["erasureSize"] != "5" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if (*pools)[5].Parameters["crushRuleset"] != "2" {
+	if pols[5].Parameters["crushRuleset"] != "2" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if len(*pools) != 6 {
+	if len(pols) != 6 {
 		t.Errorf("Test List Pools len error")
 	}
 }
-

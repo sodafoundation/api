@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -23,41 +23,50 @@ package drivers
 
 import (
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/lvm"
+	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/sample"
-	api "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
-	Setup()
+	Setup() error
 	//Any operation the volume driver does while stoping.
-	Unset()
+	Unset() error
 
-	CreateVolume(name string, size int64) (*api.VolumeSpec, error)
+	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 
-	GetVolume(volID string) (*api.VolumeSpec, error)
+	PullVolume(volIdentifier string) (*model.VolumeSpec, error)
 
-	DeleteVolume(volID string) error
+	DeleteVolume(opt *pb.DeleteVolumeOpts) error
 
-	InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error)
+	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
 
-	AttachVolume(volID, host, mountpoint string) error
+	TerminateConnection(opt *pb.DeleteAttachmentOpts) error
 
-	DetachVolume(volID string) error
+	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
-	CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error)
+	PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error)
 
-	GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error)
+	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
-	DeleteSnapshot(snapID string) error
-
-	ListPools() (*[]api.StoragePoolSpec, error)
+	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
 func Init(resourceType string) VolumeDriver {
 	switch resourceType {
+	case "cinder":
+		var d = &cinder.Driver{}
+		d.Setup()
+		return d
 	case "ceph":
 		return &ceph.Driver{}
+	case "lvm":
+		var d = &lvm.Driver{}
+		d.Setup()
+		return d
 	default:
 		return &sample.Driver{}
 	}

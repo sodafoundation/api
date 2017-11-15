@@ -22,9 +22,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/golang/glog"
 
 	"github.com/astaxie/beego"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/utils"
 )
@@ -47,8 +47,8 @@ func (this *PoolPortal) ListPools() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal pools listed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal pools failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -59,16 +59,12 @@ func (this *PoolPortal) ListPools() {
 	return
 }
 
-type SpecifiedPoolPortal struct {
-	beego.Controller
-}
-
-func (this *SpecifiedPoolPortal) GetPool() {
+func (this *PoolPortal) GetPool() {
 	id := this.Ctx.Input.Param(":poolId")
 
 	result, err := db.C.GetPool(id)
 	if err != nil {
-		reason := fmt.Sprintf("Get docks failed: %s", err.Error())
+		reason := fmt.Sprintf("Get pool failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
@@ -78,8 +74,8 @@ func (this *SpecifiedPoolPortal) GetPool() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal dock showed result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		reason := fmt.Sprintf("Marshal pool failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return

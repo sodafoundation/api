@@ -21,91 +21,141 @@ operations of volume and return a fake value.
 package sample
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"errors"
 
-	log "github.com/golang/glog"
-
-	api "github.com/opensds/opensds/pkg/model"
-)
-
-const (
-	upsPoolConfig = "/etc/opensds/pool.json"
+	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type Driver struct{}
 
-func (d *Driver) Setup() {}
+func (*Driver) Setup() error { return nil }
 
-func (d *Driver) Unset() {}
+func (*Driver) Unset() error { return nil }
 
-func (d *Driver) CreateVolume(name string, size int64) (*api.VolumeSpec, error) {
-	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
+func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	return &sampleVolume, nil
 }
 
-func (d *Driver) GetVolume(volID string) (*api.VolumeSpec, error) {
-	return &api.VolumeSpec{BaseModel: &api.BaseModel{}}, nil
+func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
+	if volIdentifier == sampleVolume.GetId() {
+		return &sampleVolume, nil
+	}
+
+	return nil, errors.New("Can't find volume " + volIdentifier)
 }
 
-func (d *Driver) DeleteVolume(volID string) error {
+func (*Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (d *Driver) InitializeConnection(volID string, doLocalAttach, multiPath bool, hostInfo *api.HostInfo) (*api.ConnectionInfo, error) {
-	return &api.ConnectionInfo{}, nil
+func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	return &sampleConnection, nil
 }
 
-func (d *Driver) AttachVolume(volID, host, mountpoint string) error {
+func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+
+func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
+	return &sampleSnapshots[0], nil
+}
+
+func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
+	for _, snapshot := range sampleSnapshots {
+		if snapIdentifier == snapshot.GetId() {
+			return &snapshot, nil
+		}
+	}
+
+	return nil, errors.New("Can't find snapshot " + snapIdentifier)
+}
+
+func (*Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) DetachVolume(volID string) error {
-	return nil
+func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+	var pols []*model.StoragePoolSpec
+
+	for i := range samplePools {
+		pols = append(pols, &samplePools[i])
+	}
+	return pols, nil
 }
 
-func (d *Driver) CreateSnapshot(name, volID, description string) (*api.VolumeSnapshotSpec, error) {
-	return &api.VolumeSnapshotSpec{
-		BaseModel: &api.BaseModel{},
-		VolumeId:  volID,
-	}, nil
-}
-
-func (d *Driver) GetSnapshot(snapID string) (*api.VolumeSnapshotSpec, error) {
-	return &api.VolumeSnapshotSpec{BaseModel: &api.BaseModel{}}, nil
-}
-
-func (d *Driver) DeleteSnapshot(snapID string) error {
-	return nil
-}
-
-func (d *Driver) ListPools() (*[]api.StoragePoolSpec, error) {
-	pools, err := readPoolsFromFile()
-	if err != nil {
-		log.Error("Could not read pool resource:", err)
-		return &[]api.StoragePoolSpec{}, err
+var (
+	samplePools = []model.StoragePoolSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			},
+			Name:          "sample-pool-01",
+			Description:   "This is the first sample storage pool for testing",
+			TotalCapacity: int64(100),
+			FreeCapacity:  int64(90),
+			Parameters: map[string]interface{}{
+				"diskType":  "SSD",
+				"iops":      1000,
+				"bandwidth": 1000,
+			},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "a594b8ac-a103-11e7-985f-d723bcf01b5f",
+			},
+			Name:          "sample-pool-02",
+			Description:   "This is the second sample storage pool for testing",
+			TotalCapacity: int64(200),
+			FreeCapacity:  int64(170),
+			Parameters: map[string]interface{}{
+				"diskType":  "SAS",
+				"iops":      800,
+				"bandwidth": 800,
+			},
+		},
 	}
 
-	return &pools, nil
-}
-
-func readPoolsFromFile() ([]api.StoragePoolSpec, error) {
-	var pools []api.StoragePoolSpec
-
-	userJSON, err := ioutil.ReadFile(upsPoolConfig)
-	if err != nil {
-		log.Error("ReadFile json failed:", err)
-		return pools, err
+	sampleVolume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
-	// If the pool resource is empty, consider it as a normal condition
-	if len(userJSON) == 0 {
-		return pools, nil
+	sampleConnection = model.ConnectionInfo{
+		DriverVolumeType: "iscsi",
+		ConnectionData: map[string]interface{}{
+			"targetDiscovered": true,
+			"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+			"targetPortal":     "127.0.0.0.1:3260",
+			"discard":          false,
+		},
 	}
 
-	// Unmarshal the result
-	if err = json.Unmarshal(userJSON, &pools); err != nil {
-		log.Error("Unmarshal json failed:", err)
-		return pools, err
+	sampleSnapshots = []model.VolumeSnapshotSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			},
+			Name:        "sample-snapshot-01",
+			Description: "This is the first sample snapshot for testing",
+			Size:        int64(1),
+			Status:      "created",
+			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			},
+			Name:        "sample-snapshot-02",
+			Description: "This is the second sample snapshot for testing",
+			Size:        int64(1),
+			Status:      "created",
+			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
 	}
-	return pools, nil
-}
+)

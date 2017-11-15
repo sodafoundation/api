@@ -26,7 +26,7 @@ func TestIsStorageTagSupported(t *testing.T) {
 	}
 
 	if !IsStorageTagSupported(tags) {
-		t.Errorf("tags %v are not supported by %v\n", tags)
+		t.Errorf("tags %v are not supported by %v\n", tags, PolicyTypeMappingTable)
 	}
 }
 
@@ -55,13 +55,14 @@ func TestNewStorageTag(t *testing.T) {
 		"deleteSnapshotPolicy": true,
 	}
 	var expectedSt = &StorageTag{
-		syncTag: map[string]string{
-			"iops":             "1000",
-			"thinProvision":    "true",
-			"highAvailability": "false",
+		syncTag: map[string]interface{}{
+			"iops":             1000,
+			"thinProvision":    true,
+			"highAvailability": false,
 		},
 		asyncTag: map[string]string{
-			"intervalSnapshot": "1d",
+			"intervalSnapshot":     "1d",
+			"deleteSnapshotPolicy": "true",
 		},
 	}
 

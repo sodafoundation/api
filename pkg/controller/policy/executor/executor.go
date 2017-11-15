@@ -22,9 +22,10 @@ package executor
 
 import (
 	"errors"
-	log "github.com/golang/glog"
 
+	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type AsynchronizedExecutor interface {
@@ -34,15 +35,21 @@ type AsynchronizedExecutor interface {
 
 type AsynchronizedWorkflow map[string]AsynchronizedExecutor
 
-func RegisterAsynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string, in string) (AsynchronizedWorkflow, error) {
-	var asynWorkflow = AsynchronizedWorkflow{}
+func RegisterAsynchronizedWorkflow(
+	req interface{},
+	tags map[string]string,
+	dockInfo *model.DockSpec,
+	in string) (
+	AsynchronizedWorkflow, error) {
 
+	var asynWorkflow = AsynchronizedWorkflow{}
 	for key := range tags {
 		switch key {
 		case "intervalSnapshot":
 			ise := &IntervalSnapshotExecutor{
-				Request:  vr,
+				Request:  req.(*pb.CreateVolumeSnapshotOpts),
 				Interval: tags[key],
+				DockInfo: dockInfo,
 			}
 
 			if err := ise.Init(in); err != nil {
@@ -53,7 +60,8 @@ func RegisterAsynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string, i
 			}
 		case "deleteSnapshotPolicy":
 			ise := &DeleteSnapshotExecutor{
-				Request: vr,
+				Request:  req.(*pb.DeleteVolumeSnapshotOpts),
+				DockInfo: dockInfo,
 			}
 
 			if err := ise.Init(in); err != nil {
@@ -86,7 +94,7 @@ type SynchronizedExecutor interface {
 
 type SynchronizedWorkflow map[string]SynchronizedExecutor
 
-func RegisterSynchronizedWorkflow(vr *pb.DockRequest, tags map[string]string) (SynchronizedWorkflow, error) {
+func RegisterSynchronizedWorkflow(req interface{}, tags map[string]interface{}) (SynchronizedWorkflow, error) {
 	return SynchronizedWorkflow{}, nil
 }
 
