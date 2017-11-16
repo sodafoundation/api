@@ -1,51 +1,62 @@
 This installation document assumes that you use [CEPH](https://github.com/ceph/ceph) as the default driver,and use the [ETCD](https://github.com/coreos/etcd) as the default database.So,
 before you start up the OpenSDS,the ceph cluster and etcd should be start up firstly.Then you can excute the followings step by step.
 
-* Download the OpenSDS source code and change it to the development branch.
+## Pre-configuration
 
-```bash
+### Download and install Golang
+```
+wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+mkdir -p $HOME/gopath/src
+mkdir -p $HOME/gopath/bin
+echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/gopath/bin' >> /etc/profile
+echo 'export GOPATH=$HOME/gopath' >> /etc/profile
+source /etc/profile
+go version (check if go has been installed)
+```
+
+### Download the OpenSDS source code and change it to the development branch.
+```
+mkdir -p $HOME/gopath/src/github.com/opensds
+cd $HOME/gopath/src/github.com/opensds
 git clone https://github.com/opensds/opensds.git -b development
 ```
 
-* Install the ceph driver dependent packet.
-
+### Install the ceph driver dependent packet.
 ```bash
-sudo apt-get install -y librados-dev librbd-dev
+sudo apt-get install -y librados-dev librbd-dev ceph-common
 ```
 
-* Enter the source code directory and build the source code.
+### Enter the source code directory and build the source code.
+```
+cd opensds/ && make
+```
 
+Then you will find the output below:
 ```bash
-root@opensds-worker-1:~# cd opensds/
-root@opensds-worker-1:~/opensds# make
 go get github.com/opensds/opensds/cmd/osdslet
 go get github.com/opensds/opensds/cmd/osdsdock
+go get github.com/opensds/opensds/cmd/osdsctl
 mkdir -p  ./build/out/bin/
 go build -o ./build/out/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 mkdir -p  ./build/out/bin/
 go build -o ./build/out/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 ```
-* The binary file will be generated to 
+Then the binary file will be generated to ```./build/out/bin```
 
-```
-./build/out/bin
-```
-* Config the configuration file, you can refer to the following configuration
-
-```
+### Config the configuration file, you can refer to the following configuration
+```conf
 [osdsdock]
 enabled_backends = ceph
-ceph_config = /etc/opensds/driver/ceph.yaml
 
 [ceph]
 name = ceph
 description = Ceph Test
-endpoint = 127.0.0.1
 driver_name = ceph
+ceph_config = /etc/opensds/driver/ceph.yaml
 ```
-If you want to test ceph driver,you should config the ```/etc/opensds/driver/ceph.yaml``` too, you can refer to the following configuration
-
-```
+If you want to test ceph driver,you should config the ```/etc/opensds/driver/ceph.yaml``` too, you can refer to the following configuration:
+```yaml
 configFile: /etc/ceph/ceph.conf
 pool:
   "rbd":
@@ -54,30 +65,40 @@ pool:
     bandWitdh: 1G
 ```
 
-* Start up the osdslet and osdsdock. 
+The configuration process would be as follows:(```Suppose you are under opensds root directory```)
+```
+vim examples/opensds.conf (modify sample opensds config file)
+vim examples/driver/ceph.yaml (modify sample ceph backend config file)
+sudo mkdir -p /etc/opensds/driver
+cp examples/opensds.conf /etc/opensds/
+cp examples/driver/ceph.yaml /etc/opensds/driver/
+```
 
+## Run OpenSDS Service
+
+### Start up the osdslet and osdsdock daemon. 
 ```bash
-./osdslet
+sudo ./osdslet
 
-./osdsock
+sudo ./osdsock
 ```
-* Test the OpenSDS if it is work well by getting the api versions and the ceph storage pools.
 
-```
-root@opensds-worker-1:~# curl localhost:50040/api| python -m json.tool
+### Test the OpenSDS if it is work well by getting the api versions and the ceph storage pools.
+```bash
+root@opensds-worker-1:~# curl localhost:50040| python -m json.tool
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   110  100   110    0     0  20715      0 --:--:-- --:--:-- --:--:-- 22000
 [
     {
-        "description": "v1alpha version",
-        "name": "v1alpha",
-        "status": "CURRENT",
-        "updatedAt": "2017-07-10T14:36:58.014Z"
+		"name":        "v1alpha",
+		"description": "v1alpha version",
+		"status":      "CURRENT",
+		"updatedAt":   "2017-07-10T14:36:58.014Z"
     }
 ]
 
-root@opensds-worker-1:~# curl localhost:50040/api/v1alpha/block/pools| python -m json.tool
+root@opensds-worker-1:~# curl localhost:50040/v1alpha/block/pools| python -m json.tool
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   317  100   317    0     0  26665      0 --:--:-- --:--:-- --:--:-- 28818
@@ -100,4 +121,26 @@ root@opensds-worker-1:~# curl localhost:50040/api/v1alpha/block/pools| python -m
         "updateAt": ""
     }
 ]
-``` 
+```
+
+## OpenSDS Usage Tutorial
+
+### Create a default profile firstly.
+```
+curl -X POST "http://localhost:50040/v1alpha/profiles" -H "Content-Type: application/json" -d '{"name": "default", "description": "default policy", "extra": {}}'
+```
+
+### Create a volume.
+```
+curl -X POST "http://localhost:50040/v1alpha/block/volumes" -H "Content-Type: application/json" -d '{"name": "test001", "description": "this is a test", "size": 1, "profileId": ""}'
+```
+
+### List all volumes.
+```
+curl http://localhost:50040/v1alpha/block/volumes| python -m json.tool
+```
+
+### Delete the volume.
+```
+curl -X DELETE "http://localhost:50040/v1alpha/block/volumes/volume_id" -H "Content-Type: application/json"
+```
