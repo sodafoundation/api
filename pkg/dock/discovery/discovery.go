@@ -20,7 +20,6 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/opensds/opensds/contrib/drivers"
@@ -101,7 +100,6 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		dd.pols = append(dd.pols, pols...)
 	}
 
-	fmt.Println("pool is", dd.pols)
 	return err
 }
 
