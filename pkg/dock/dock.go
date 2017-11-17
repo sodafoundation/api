@@ -25,30 +25,51 @@ import (
 
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
+	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
+var Brain *DockHub
+
 // A reference to DockHub structure with fields that represent some required
 // parameters for initializing and controlling the volume driver.
 type DockHub struct {
-	// ResourceType represents the type of backend resources. This field is used
+	// Discoverer represents the mechanism of DockHub discovering the storage
+	// capabilities from different backends.
+	Discoverer *discovery.DockDiscoverer
+	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
-	ResourceType string
-
 	Driver drivers.VolumeDriver
 }
 
-func NewDockHub(resourceType string) *DockHub {
+func NewDockHub() *DockHub {
 	return &DockHub{
-		ResourceType: resourceType,
+		Discoverer: discovery.NewDiscoverer(),
 	}
+}
+
+func (d *DockHub) TriggerDiscovery() error {
+	var err error
+
+	if err = d.Discoverer.Init(); err != nil {
+		return err
+	}
+	if err = d.Discoverer.Discover(d.Driver); err != nil {
+		return err
+	}
+	if err = d.Discoverer.Store(); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error) {
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to create volume...")
 
@@ -79,7 +100,8 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to delete volume...")
 
@@ -99,7 +121,8 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
 func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.VolumeAttachmentSpec, error) {
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to initialize volume connection...")
 
@@ -141,7 +164,8 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 
 func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to terminate volume connection...")
 
@@ -161,7 +185,8 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 
 func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeSnapshotSpec, error) {
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to create snapshot...")
 
@@ -189,7 +214,8 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
 
 	log.Info("Calling volume driver to delete snapshot...")
 
@@ -205,20 +231,4 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	}
 
 	return nil
-}
-
-func (d *DockHub) ListPools() ([]*api.StoragePoolSpec, error) {
-	//Get the storage drivers and do some initializations.
-	d.Driver = drivers.Init(d.ResourceType)
-
-	log.Info("Calling volume driver to list pools...")
-
-	//Call function of StorageDrivers configured by storage drivers.
-	pols, err := d.Driver.ListPools()
-	if err != nil {
-		log.Error("Call driver to list pools failed:", err)
-		return nil, err
-	}
-
-	return pols, nil
 }

@@ -20,10 +20,11 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
-	dockHub "github.com/opensds/opensds/pkg/dock"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
@@ -32,10 +33,10 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type Discoverer interface {
-	Init() error
-	Discovery() error
-	Store() error
+func NewDiscoverer() *DockDiscoverer {
+	return &DockDiscoverer{
+		c: db.C,
+	}
 }
 
 type DockDiscoverer struct {
@@ -43,12 +44,6 @@ type DockDiscoverer struct {
 	pols []*api.StoragePoolSpec
 
 	c db.Client
-}
-
-func NewDiscover() Discoverer {
-	return &DockDiscoverer{
-		c: db.C,
-	}
 }
 
 func (dd *DockDiscoverer) Init() error {
@@ -77,17 +72,22 @@ func (dd *DockDiscoverer) Init() error {
 		}
 		dd.dcks = append(dd.dcks, dck)
 	}
+
 	return nil
 }
 
-func (dd *DockDiscoverer) Discovery() error {
+func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 	var pols []*api.StoragePoolSpec
 	var err error
 
 	for _, dck := range dd.dcks {
-		pols, err = dockHub.NewDockHub(dck.GetDriverName()).ListPools()
+		//Call function of StorageDrivers configured by storage drivers.
+		d = drivers.Init(dck.GetDriverName())
+		defer drivers.Clean(d)
+
+		pols, err = d.ListPools()
 		if err != nil {
-			log.Error("When list pools:", err)
+			log.Error("Call driver to list pools failed:", err)
 			return err
 		}
 
@@ -101,6 +101,7 @@ func (dd *DockDiscoverer) Discovery() error {
 		dd.pols = append(dd.pols, pols...)
 	}
 
+	fmt.Println("pool is", dd.pols)
 	return err
 }
 
@@ -133,22 +134,6 @@ func (dd *DockDiscoverer) Store() error {
 			log.Errorf("When create pool %s in db: %v\n", pol.GetId(), err)
 			return err
 		}
-	}
-
-	return err
-}
-
-func Discovery(d Discoverer) error {
-	var err error
-
-	if err = d.Init(); err != nil {
-		return err
-	}
-	if err = d.Discovery(); err != nil {
-		return err
-	}
-	if err = d.Store(); err != nil {
-		return err
 	}
 
 	return err

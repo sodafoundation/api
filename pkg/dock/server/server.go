@@ -78,7 +78,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 
 	log.Info("Dock server receive create volume request, vr =", opt)
 
-	vol, err := dock.NewDockHub(opt.GetDriverName()).CreateVolume(opt)
+	vol, err := dock.Brain.CreateVolume(opt)
 	if err != nil {
 		log.Error("When create volume in dock module:", err)
 
@@ -96,7 +96,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 
 	log.Info("Dock server receive delete volume request, vr =", opt)
 
-	if err := dock.NewDockHub(opt.GetDriverName()).DeleteVolume(opt); err != nil {
+	if err := dock.Brain.DeleteVolume(opt); err != nil {
 		log.Error("Error occured in dock module when delete volume:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
@@ -113,7 +113,7 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 
 	log.Info("Dock server receive create volume attachment request, vr =", opt)
 
-	atc, err := dock.NewDockHub(opt.GetDriverName()).CreateVolumeAttachment(opt)
+	atc, err := dock.Brain.CreateVolumeAttachment(opt)
 	if err != nil {
 		log.Error("Error occured in dock module when create volume attachment:", err)
 
@@ -131,7 +131,7 @@ func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttach
 
 	log.Info("Dock server receive delete volume attachment request, vr =", opt)
 
-	if err := dock.NewDockHub(opt.GetDriverName()).DeleteVolumeAttachment(opt); err != nil {
+	if err := dock.Brain.DeleteVolumeAttachment(opt); err != nil {
 		log.Error("Error occured in dock module when delete volume attachment:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
@@ -148,7 +148,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 
 	log.Info("Dock server receive create volume snapshot request, vr =", opt)
 
-	snp, err := dock.NewDockHub(opt.GetDriverName()).CreateSnapshot(opt)
+	snp, err := dock.Brain.CreateSnapshot(opt)
 	if err != nil {
 		log.Error("Error occured in dock module when create snapshot:", err)
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
@@ -165,7 +165,7 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 
 	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
-	if err := dock.NewDockHub(opt.GetDriverName()).DeleteSnapshot(opt); err != nil {
+	if err := dock.Brain.DeleteSnapshot(opt); err != nil {
 		log.Error("Error occured in dock module when delete snapshot:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
