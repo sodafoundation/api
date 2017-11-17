@@ -13,19 +13,3 @@
 // limitations under the License.
 
 package dock
-
-import (
-	"reflect"
-	"testing"
-)
-
-var (
-	fd = &DockHub{ResourceType: "default"}
-)
-
-func TestNewDockHub(t *testing.T) {
-	result := NewDockHub("default")
-	if !reflect.DeepEqual(result, fd) {
-		t.Errorf("Expected %v, got %v\n", fd, result)
-	}
-}

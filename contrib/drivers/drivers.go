@@ -15,7 +15,7 @@
 /*
 This module defines an standard table of storage driver. The default storage
 driver is sample driver used for testing. If you want to use other storage
-plugin, just modify Init() method.
+plugin, just modify Init() and Clean() method.
 
 */
 
@@ -60,13 +60,32 @@ func Init(resourceType string) VolumeDriver {
 	switch resourceType {
 	case "cinder":
 		d = &cinder.Driver{}
+		break
 	case "ceph":
 		d = &ceph.Driver{}
+		break
 	case "lvm":
 		d = &lvm.Driver{}
+		break
 	default:
 		d = &sample.Driver{}
+		break
 	}
 	d.Setup()
 	return d
+}
+
+func Clean(d VolumeDriver) {
+	// Execute diffrent clean operations according to the VolumeDriver type.
+	switch d.(type) {
+	case *cinder.Driver:
+		break
+	case *ceph.Driver:
+		break
+	case *lvm.Driver:
+		break
+	default:
+		break
+	}
+	d = nil
 }

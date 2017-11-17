@@ -21,7 +21,7 @@ package main
 
 import (
 	"github.com/opensds/opensds/pkg/db"
-	app "github.com/opensds/opensds/pkg/dock/discovery"
+	"github.com/opensds/opensds/pkg/dock"
 	dockServer "github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -46,7 +46,8 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	if err := app.Discovery(app.NewDiscover()); err != nil {
+	dock.Brain = dock.NewDockHub()
+	if err := dock.Brain.TriggerDiscovery(); err != nil {
 		panic(err)
 	}
 
