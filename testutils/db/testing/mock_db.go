@@ -232,6 +232,28 @@ func (_m *MockClient) GetDock(dckID string) (*model.DockSpec, error) {
 	return r0, r1
 }
 
+func (_m *MockClient) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
+	ret := _m.Called(poolId)
+
+	var r0 *model.DockSpec
+	if rf, ok := ret.Get(0).(func(string) *model.DockSpec); ok {
+		r0 = rf(poolId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.DockSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(poolId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 func (_m *MockClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	ret := _m.Called(polID)
 
@@ -269,6 +291,28 @@ func (_m *MockClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(prfID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *MockClient) GetDefaultProfile() (*model.ProfileSpec, error) {
+	ret := _m.Called()
+
+	var r0 *model.ProfileSpec
+	if rf, ok := ret.Get(0).(func() *model.ProfileSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -39,6 +39,18 @@ func (fc *FakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
 
 	return nil, errors.New("Can't find this dock resource!")
 }
+func (fc *FakeDbClient) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
+	pool, err := fc.GetPool(poolId)
+	if err != nil {
+		return nil, err
+	}
+	for _, dock := range sampleDocks {
+		if dock.Id == pool.DockId {
+			return &dock, nil
+		}
+	}
+	return nil, errors.New("Can't find this dock resource by pool id!")
+}
 
 func (fc *FakeDbClient) ListDocks() ([]*model.DockSpec, error) {
 	var dcks []*model.DockSpec
@@ -100,6 +112,16 @@ func (fc *FakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	}
 
 	return nil, errors.New("Can't find this profile resource!")
+}
+
+func (fc *FakeDbClient) GetDefaultProfile() (*model.ProfileSpec, error) {
+	for i := range sampleProfiles {
+		if sampleProfiles[i].Name == "default" {
+			return &sampleProfiles[i], nil
+		}
+	}
+
+	return nil, errors.New("Can't find default profile resource!")
 }
 
 func (fc *FakeDbClient) ListProfiles() ([]*model.ProfileSpec, error) {
@@ -235,11 +257,12 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			},
-			Name:          "sample-pool-01",
-			Description:   "This is the first sample storage pool for testing",
-			TotalCapacity: int64(100),
-			FreeCapacity:  int64(90),
-			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			Name:             "sample-pool-01",
+			Description:      "This is the first sample storage pool for testing",
+			TotalCapacity:    int64(100),
+			FreeCapacity:     int64(90),
+			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			AvailabilityZone: "default",
 			Parameters: map[string]interface{}{
 				"diskType":  "SSD",
 				"iops":      1000,
@@ -250,11 +273,12 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "a594b8ac-a103-11e7-985f-d723bcf01b5f",
 			},
-			Name:          "sample-pool-02",
-			Description:   "This is the second sample storage pool for testing",
-			TotalCapacity: int64(200),
-			FreeCapacity:  int64(170),
-			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			Name:             "sample-pool-02",
+			Description:      "This is the second sample storage pool for testing",
+			TotalCapacity:    int64(200),
+			FreeCapacity:     int64(170),
+			AvailabilityZone: "default",
+			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			Parameters: map[string]interface{}{
 				"diskType":  "SAS",
 				"iops":      800,

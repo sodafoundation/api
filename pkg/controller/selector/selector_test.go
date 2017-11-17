@@ -12,148 +12,92 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-This module implements the policy-based scheduling by parsing storage
-profiles configured by admin.
-
-*/
-
 package selector
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
-func TestSelectProfile(t *testing.T) {
-	s := NewFakeSelector()
-
-	// Test if the method would return default profile when no profile id
-	// assigned.
-	var prfID = ""
-	var expectedDefaultProfile = &model.ProfileSpec{
+var (
+	fakePool1 = &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
-			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+			CreatedAt: "2017-10-24T15:04:05",
 		},
-		Name:        "default",
-		Description: "default policy",
-		Extra:       model.ExtraSpec{},
+		Name:             "fakePool",
+		Description:      "fake pool for testing",
+		Status:           "available",
+		AvailabilityZone: "az1",
+		TotalCapacity:    99999,
+		FreeCapacity:     5000,
+		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
+		Parameters: map[string]interface{}{
+			"thin":     true,
+			"dedupe":   false,
+			"compress": false,
+			"diskType": "SSD",
+		},
 	}
 
-	prf, err := s.SelectProfile(prfID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expectedDefaultProfile, prf) {
-		t.Fatalf("Expected %v, get %v", expectedDefaultProfile, prf)
-	}
-
-	// Test if the method would return specified profile when profile id
-	// assigned.
-	prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	var expectedAssignedProfile = &model.ProfileSpec{
+	fakePool2 = &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
-			Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+			CreatedAt: "2017-10-24T15:04:05",
 		},
-		Name:        "silver",
-		Description: "silver policy",
-		Extra: model.ExtraSpec{
-			"diskType":  "SAS",
-			"iops":      300,
-			"bandwidth": 500,
+		Name:             "fakePool",
+		Description:      "fake pool for testing",
+		Status:           "available",
+		AvailabilityZone: "az1",
+		TotalCapacity:    99999,
+		FreeCapacity:     6999,
+		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
+		Parameters: map[string]interface{}{
+			"thin":     true,
+			"dedupe":   true,
+			"compress": true,
+			"diskType": "SATA",
 		},
 	}
-
-	prf, err = s.SelectProfile(prfID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expectedAssignedProfile, prf) {
-		t.Fatalf("Expected %v, get %v", expectedAssignedProfile, prf)
-	}
-}
+	fakePools = []*model.StoragePoolSpec{fakePool1, fakePool2}
+)
 
 func TestSelectSupportedPool(t *testing.T) {
-	s := NewFakeSelector()
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("ListPools").Return(fakePools, nil)
+	db.C = mockClient
 
-	var expectedPool = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	testCases := []struct {
+		request  map[string]interface{}
+		expected *model.StoragePoolSpec
+	}{
+		{
+			request: map[string]interface{}{
+				"size":             int64(5001),
+				"availabilityZone": "az1",
+				"thin":             true,
+			},
+			expected: fakePool2,
 		},
-		Name:          "sample-pool-01",
-		Description:   "This is the first sample storage pool for testing",
-		TotalCapacity: int64(100),
-		FreeCapacity:  int64(90),
-		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		Parameters: map[string]interface{}{
-			"diskType":  "SSD",
-			"iops":      1000,
-			"bandwidth": 1000,
-		},
-	}
-	var inputTag = map[string]interface{}{
-		"diskType":  "SSD",
-		"iops":      1000,
-		"bandwidth": 1000,
-	}
-
-	// Test if the method would return correct pool when storage tag assigned.
-	pol, err := s.SelectSupportedPool(inputTag)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expectedPool, pol) {
-		t.Fatalf("Expected %v, get %v", expectedPool, pol)
-	}
-}
-
-func TestSelectDock(t *testing.T) {
-	s := NewFakeSelector()
-
-	var inputPool = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		},
-		Name:          "sample-pool-01",
-		Description:   "This is the first sample storage pool for testing",
-		TotalCapacity: int64(100),
-		FreeCapacity:  int64(90),
-		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		Parameters: map[string]interface{}{
-			"diskType":  "SSD",
-			"iops":      1000,
-			"bandwidth": 1000,
+		{
+			request: map[string]interface{}{
+				"size":             int64(400),
+				"availabilityZone": "default",
+				"diskType":         "SSD",
+			},
+			expected: nil,
 		},
 	}
-	var expectedDock = &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		},
-		Name:        "sample",
-		Description: "sample backend service",
-		Endpoint:    "localhost:50050",
-		DriverName:  "sample",
-	}
 
-	// Test if the method would return correct dock when storage pool assigned.
-	dck, err := s.SelectDock(inputPool)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expectedDock, dck) {
-		t.Fatalf("Expected %v, got %v", expectedDock, dck)
-	}
-
-	var inputVolID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-
-	// Test if the method would return correct dock when volume id assigned.
-	dck, err = s.SelectDock(inputVolID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(expectedDock, dck) {
-		t.Fatalf("Expected %v, got %v", expectedDock, dck)
+	s := NewSelector()
+	for _, testCase := range testCases {
+		result, _ := s.SelectSupportedPool(testCase.request)
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
 	}
 }

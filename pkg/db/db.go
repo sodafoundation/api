@@ -58,6 +58,8 @@ type Client interface {
 
 	DeleteDock(dckID string) error
 
+	GetDockByPoolId(poolId string) (*model.DockSpec, error)
+
 	CreatePool(pol *model.StoragePoolSpec) error
 
 	GetPool(polID string) (*model.StoragePoolSpec, error)
@@ -71,6 +73,8 @@ type Client interface {
 	CreateProfile(prf *model.ProfileSpec) error
 
 	GetProfile(prfID string) (*model.ProfileSpec, error)
+
+	GetDefaultProfile() (*model.ProfileSpec, error)
 
 	ListProfiles() ([]*model.ProfileSpec, error)
 

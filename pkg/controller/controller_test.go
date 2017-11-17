@@ -19,11 +19,24 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
-	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
+	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
+
+type fakeSelector struct {
+	res *model.StoragePoolSpec
+	err error
+}
+
+func (s *fakeSelector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
+	return s.res, nil
+}
 
 func NewFakeVolumeController() volume.Controller {
 	return &fakeVolumeController{}
@@ -59,6 +72,13 @@ func (fvc *fakeVolumeController) DeleteVolumeSnapshot(*pb.DeleteVolumeSnapshotOp
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetDefaultProfile").Return(&sampleProfile, nil)
+	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&sampleProfile, nil)
+	mockClient.On("GetDock", "9193c3ec-771f-11e7-8ca3-d32c0a8b2725").Return(&sampleDock, nil)
+	db.C = mockClient
+
 	var req = &model.VolumeSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "fake-volume",
@@ -67,7 +87,10 @@ func TestCreateVolume(t *testing.T) {
 		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725"},
+			err: nil,
+		},
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
 	}
@@ -83,13 +106,23 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestDeleteVolume(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&sampleProfile, nil)
+	mockClient.On("GetDockByPoolId", "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1").Return(&sampleDock, nil)
+	db.C = mockClient
+
 	var req = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 		},
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1",
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725"},
+			err: nil,
+		},
 		volumeController: NewFakeVolumeController(),
 		policyController: policy.NewController(&sampleProfile),
 	}
@@ -101,13 +134,16 @@ func TestDeleteVolume(t *testing.T) {
 }
 
 func TestCreateVolumeAttachment(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "9193c3ec-771f-11e7-8ca3-d32c0a8b2725").Return(&sampleVolume, nil)
+	mockClient.On("GetDockByPoolId", "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1").Return(&sampleDock, nil)
+	db.C = mockClient
 	var req = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 		VolumeId:  "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 		HostInfo:  &model.HostInfo{},
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &sampleAttachment
@@ -122,14 +158,19 @@ func TestCreateVolumeAttachment(t *testing.T) {
 }
 
 func TestDeleteVolumeAttachment(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "9193c3ec-771f-11e7-8ca3-d32c0a8b2725").Return(&sampleVolume, nil)
+	mockClient.On("GetDockByPoolId", "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1").Return(&sampleDock, nil)
+	db.C = mockClient
+
 	var req = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 		HostInfo: &model.HostInfo{},
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
 
@@ -140,6 +181,11 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "9193c3ec-771f-11e7-8ca3-d32c0a8b2725").Return(&sampleVolume, nil)
+	mockClient.On("GetDockByPoolId", "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1").Return(&sampleDock, nil)
+	db.C = mockClient
+
 	var req = &model.VolumeSnapshotSpec{
 		BaseModel:   &model.BaseModel{},
 		VolumeId:    "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
@@ -148,7 +194,6 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		Size:        int64(1),
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &sampleSnapshot
@@ -163,13 +208,18 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "9193c3ec-771f-11e7-8ca3-d32c0a8b2725").Return(&sampleVolume, nil)
+	mockClient.On("GetDockByPoolId", "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1").Return(&sampleDock, nil)
+	db.C = mockClient
+
 	var req = &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: "8193c3ec-771f-11e7-8ca3-d32c0a8b2727",
 		},
+		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
 	}
 	var c = &Controller{
-		Selector:         selector.NewFakeSelector(),
 		volumeController: NewFakeVolumeController(),
 	}
 
@@ -180,6 +230,15 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 }
 
 var (
+	sampleDock = model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "7ea922da-774b-417a-a226-f8717a4c3cc3",
+			CreatedAt: "2017-08-02T09:17:05",
+		},
+		Name:        "fake-volume",
+		Description: "fake volume for testing",
+	}
+
 	sampleVolume = model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id:        "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
@@ -188,7 +247,7 @@ var (
 		Name:        "fake-volume",
 		Description: "fake volume for testing",
 		Size:        1,
-		PoolId:      "80287bf8-66de-11e7-b031-f3b0af1675ba",
+		PoolId:      "71a9e23b-2b46-4331-88bc-c13fcf0cc7b1",
 	}
 
 	sampleProfile = model.ProfileSpec{
