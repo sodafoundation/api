@@ -31,7 +31,7 @@ fi
 
 if [ ! -b /dev/loop1 ]; then
 	# Create a new physical volume and add it in volume group.
-	cd ${HOME} && dd if=/dev/zero of=/home/lvm.img bs=1GB count=20
+	dd if=/dev/zero of=${HOME}/lvm.img bs=1GB count=20
 	losetup /dev/loop1 ${HOME}/lvm.img
 	pvcreate /dev/loop1
 	vgcreate ${VG_NAME} /dev/loop1
