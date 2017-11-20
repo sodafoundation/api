@@ -10,7 +10,7 @@
 
 The [OpenSDS Project](https://opensds.io/) is a collaborative project under Linux
 Foundation supported by storage users and vendors, including
-EMC, Intel, Huawei, Fujitsu, Western Digital, Vodafone and Oregon State University. The project
+Dell EMC, Intel, Huawei, Fujitsu, Western Digital, Vodafone, NTT and Oregon State University. The project
 will also seek to collaborate with other upstream open source communities
 such as Cloud Native Computing Foundation, Docker, OpenStack, and Open
 Container Initiative. 
@@ -44,8 +44,8 @@ now, please refer to the Contributing sections below.
 
 See [COMMUNITY](COMMUNITY.md) for details on discussion of the OpenSDS architecture design and feature development.
 
-- The meeting will be held on every Tuesday at 1:00 UTC. Join in at [here](https://zoom.us/j/933703258).
-- Meeting notes and agenda can be found at [here](https://docs.google.com/document/d/1OKDp7iDw_l_5kGyniqTKtrwRFAZMvItGghsxfrCqr5c/edit#).
+* The meeting will be held on every Tuesday at 1:00 UTC. Join in at [here](https://zoom.us/j/933703258).
+* Meeting notes and agenda can be found at [here](https://docs.google.com/document/d/1OKDp7iDw_l_5kGyniqTKtrwRFAZMvItGghsxfrCqr5c/edit#).
 
 If you are interested at work trackings on the meeting, please visit [WG Planning](https://docs.google.com/spreadsheets/d/1eFZsYCqTW8-zc8K6IMFUVhmzrZQKpOeO8Br0cCraPlU/edit#gid=0).
 
