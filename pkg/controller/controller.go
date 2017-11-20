@@ -111,6 +111,7 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		AvailabilityZone: in.GetAvailabilityZone(),
 		ProfileId:        profile.GetId(),
 		PoolId:           polInfo.GetId(),
+		PoolName:         polInfo.GetName(),
 		DockId:           dockInfo.GetId(),
 		DriverName:       dockInfo.GetDriverName(),
 	}
