@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -31,7 +32,6 @@ import (
 )
 
 const (
-	vgName          = "vg001"
 	defaultConfPath = "/etc/opensds/driver/lvm.yaml"
 )
 
@@ -41,6 +41,8 @@ type LVMConfig struct {
 
 type Driver struct {
 	conf *LVMConfig
+
+	handler func(script string, cmd []string) (string, error)
 }
 
 func (d *Driver) Setup() error {
@@ -50,25 +52,33 @@ func (d *Driver) Setup() error {
 	if "" == p {
 		p = defaultConfPath
 	}
-	_, err := Parse(d.conf, p)
-	return err
+	if _, err := Parse(d.conf, p); err != nil {
+		return err
+	}
+	d.handler = execCmd
+
+	return nil
 }
 
 func (*Driver) Unset() error { return nil }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
+	var polName = opt.GetPoolName()
 
-	cmd := strings.Join([]string{"lvcreate", "-n", opt.GetName(), "-L", size, vgName}, " ")
-	if _, err := d.execCmd(cmd); err != nil {
+	if _, err := d.handler("lvcreate", []string{
+		"-n", opt.GetName(),
+		"-L", size,
+		polName,
+	}); err != nil {
 		log.Error("Failed to create logic volume:", err)
 		return nil, err
 	}
 
 	var lvPath, lvStatus string
 	// Display and parse some metadata in logic volume returned.
-	lvPath = strings.Join([]string{"/dev", vgName, opt.GetName()}, "/")
-	lv, err := d.execCmd("lvdisplay " + lvPath)
+	lvPath = path.Join("/dev", polName, opt.GetName())
+	lv, err := d.handler("lvdisplay", []string{lvPath})
 	if err != nil {
 		log.Error("Failed to display logic volume:", err)
 		return nil, err
@@ -99,7 +109,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	// Display and parse some metadata in logic volume returned.
-	lv, err := d.execCmd("lvmdisplay " + volIdentifier)
+	lv, err := d.handler("lvdisplay", []string{volIdentifier})
 	if err != nil {
 		log.Error("Failed to display logic volume:", err)
 		return nil, err
@@ -123,8 +133,9 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		log.Error(err)
 		return err
 	}
-	cmd := strings.Join([]string{"lvremove", "-f", lvPath}, " ")
-	if _, err := d.execCmd(cmd); err != nil {
+	if _, err := d.handler("lvremove", []string{
+		"-f", lvPath,
+	}); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -189,24 +200,27 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		return nil, err
 	}
 
-	cmd := strings.Join([]string{"lvcreate", "-n", opt.GetName(), "-L", size, "-p r", "-s", lvPath}, " ")
-	if _, err := d.execCmd(cmd); err != nil {
+	if _, err := d.handler("lvcreate", []string{
+		"-n", opt.GetName(),
+		"-L", size,
+		"-p", "r",
+		"-s", lvPath,
+	}); err != nil {
 		log.Error("Failed to create logic volume snapshot:", err)
 		return nil, err
 	}
 
-	var lvsPath, lvStatus string
-	lvsPath = strings.Join([]string{"/dev", vgName, opt.GetName()}, "/")
+	var lvsDir, lvsPath string
+	lvsDir, _ = path.Split(lvPath)
+	lvsPath = path.Join(lvsDir, opt.GetName())
 	// Display and parse some metadata in logic volume snapshot returned.
-	lvs, err := d.execCmd("lvdisplay " + lvsPath)
+	lvs, err := d.handler("lvdisplay", []string{lvsPath})
 	if err != nil {
 		log.Error("Failed to display logic volume snapshot:", err)
 		return nil, err
 	}
+	var lvStatus string
 	for _, line := range strings.Split(lvs, "\n") {
-		if strings.Contains(line, "LV Path") {
-			lvsPath = strings.Fields(line)[2]
-		}
 		if strings.Contains(line, "LV Status") {
 			lvStatus = strings.Fields(line)[2]
 		}
@@ -229,7 +243,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 
 func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	// Display and parse some metadata in logic volume snapshot returned.
-	lv, err := d.execCmd("lvmdisplay " + snapIdentifier)
+	lv, err := d.handler("lvdisplay", []string{snapIdentifier})
 	if err != nil {
 		log.Error("Failed to display logic volume snapshot:", err)
 		return nil, err
@@ -253,8 +267,9 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		log.Error(err)
 		return err
 	}
-	cmd := strings.Join([]string{"lvremove", "-f", lvsPath}, " ")
-	if _, err := d.execCmd(cmd); err != nil {
+	if _, err := d.handler("lvremove", []string{
+		"-f", lvsPath,
+	}); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -263,14 +278,19 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	vgs, err := d.execCmd("vgdisplay")
+	vgs, err := d.handler("vgdisplay", []string{})
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Got vgs info:", vgs)
 
+	var polName string
 	var tCapacity, fCapacity int64
 	for _, line := range strings.Split(vgs, "\n") {
+		if strings.Contains(line, "VG Name") {
+			slice := strings.Fields(line)
+			polName = slice[2]
+		}
 		if strings.Contains(line, "VG Size") {
 			slice := strings.Fields(line)
 			cap, _ := strconv.ParseFloat(slice[2], 64)
@@ -284,15 +304,15 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 
 	var pols []*model.StoragePoolSpec
-	if _, ok := d.conf.Pool[vgName]; !ok {
+	if _, ok := d.conf.Pool[polName]; !ok {
 		return pols, nil
 	}
-	param := d.buildPoolParam(d.conf.Pool[vgName])
+	param := d.buildPoolParam(d.conf.Pool[polName])
 	pol := &model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
-			Id: uuid.NewV5(uuid.NamespaceOID, vgName).String(),
+			Id: uuid.NewV5(uuid.NamespaceOID, polName).String(),
 		},
-		Name:          vgName,
+		Name:          polName,
 		TotalCapacity: tCapacity,
 		FreeCapacity:  fCapacity,
 		Parameters:    *param,
@@ -311,12 +331,11 @@ func (*Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 	return &param
 }
 
-func (*Driver) execCmd(cmd string) (string, error) {
-	ret, err := exec.Command("bash", "-c", cmd).Output()
+func execCmd(script string, cmd []string) (string, error) {
+	ret, err := exec.Command(script, cmd...).Output()
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
 	}
 	return string(ret), nil
 }
-
