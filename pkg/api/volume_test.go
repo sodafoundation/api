@@ -24,10 +24,10 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
-	dbtest "github.com/opensds/opensds/pkg/db/testing"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
-	mockSetter "github.com/opensds/opensds/pkg/utils/testing"
+	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	mockSetter "github.com/opensds/opensds/testutils/utils/testing"
 )
 
 func init() {

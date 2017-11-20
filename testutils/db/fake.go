@@ -22,7 +22,7 @@ import (
 
 type FakeDbClient struct{}
 
-func NewFakeDbClient() Client {
+func NewFakeDbClient() *FakeDbClient {
 	return &FakeDbClient{}
 }
 

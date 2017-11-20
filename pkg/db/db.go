@@ -28,6 +28,7 @@ import (
 	_ "github.com/opensds/opensds/pkg/db/drivers/mysql"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	fakedb "github.com/opensds/opensds/testutils/db"
 )
 
 var C Client
@@ -40,7 +41,7 @@ func Init(db *Database) {
 	case "etcd":
 		C = etcd.Init(strings.Split(db.Endpoint, ","))
 	case "fake":
-		C = NewFakeDbClient()
+		C = fakedb.NewFakeDbClient()
 	default:
 		fmt.Errorf("Can't find database driver %s!\n", db.Driver)
 	}
