@@ -18,8 +18,10 @@ import (
 	"reflect"
 	"testing"
 
-	_ "github.com/opensds/opensds/contrib/drivers/ceph"
-	"github.com/opensds/opensds/contrib/drivers/sample"
+	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/lvm"
+	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
+	sample "github.com/opensds/opensds/testutils/driver"
 )
 
 func TestInit(t *testing.T) {
@@ -29,6 +31,21 @@ func TestInit(t *testing.T) {
 	for i, rs := range rsList {
 		if vp := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
 			t.Errorf("Expected %v, got %v\n", expectedVd, vp)
+		}
+	}
+}
+
+func TestClean(t *testing.T) {
+	var driverList = []VolumeDriver{
+		&ceph.Driver{},
+		&lvm.Driver{},
+		&cinder.Driver{},
+		&sample.Driver{},
+	}
+
+	for _, driver := range driverList {
+		if d := Clean(driver); !reflect.DeepEqual(d, nil) {
+			t.Errorf("Expected %v, got %v\n", nil, d)
 		}
 	}
 }

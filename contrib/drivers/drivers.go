@@ -25,9 +25,9 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
-	"github.com/opensds/opensds/contrib/drivers/sample"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	sample "github.com/opensds/opensds/testutils/driver"
 )
 
 type VolumeDriver interface {
@@ -75,7 +75,7 @@ func Init(resourceType string) VolumeDriver {
 	return d
 }
 
-func Clean(d VolumeDriver) {
+func Clean(d VolumeDriver) VolumeDriver {
 	// Execute diffrent clean operations according to the VolumeDriver type.
 	switch d.(type) {
 	case *cinder.Driver:
@@ -88,4 +88,6 @@ func Clean(d VolumeDriver) {
 		break
 	}
 	d = nil
+
+	return d
 }
