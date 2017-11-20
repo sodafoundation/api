@@ -24,8 +24,8 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
-	dbtest "github.com/opensds/opensds/pkg/db/testing"
 	"github.com/opensds/opensds/pkg/model"
+	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
 func init() {

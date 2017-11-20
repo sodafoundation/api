@@ -28,6 +28,7 @@ import (
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	fake "github.com/opensds/opensds/testutils/db"
 )
 
 type Selector interface {
@@ -50,7 +51,7 @@ func NewSelector() Selector {
 
 func NewFakeSelector() Selector {
 	return &selector{
-		storBox: db.NewFakeDbClient(),
+		storBox: fake.NewFakeDbClient(),
 	}
 }
 
