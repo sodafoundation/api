@@ -42,6 +42,7 @@ matrix:
 
 install:
   - go get github.com/mattn/goveralls
+  - go get github.com/wadey/gocovmerge
   - go build -i ./cmd/osdsctl && go build -i ./cmd/osdslet && go build -i ./cmd/osdsdock
   - mv ./osdslet ./test/integration/osdslet/ && mv ./osdsdock ./test/integration/osdsdock/
   - sudo docker build test/integration/osdslet/ -t opensds/osdslet:integration-test
@@ -50,9 +51,8 @@ install:
   - sudo docker run -d --net=host opensds/osdsdock:integration-test
 
 script:
-  - go test -v github.com/opensds/opensds/pkg/... -cover
-  - go test -v github.com/opensds/opensds/contrib/... -cover
-  - go test -v github.com/opensds/opensds/test/integration -tags integration
+  - ./script/coverage
+  - ./script/test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
