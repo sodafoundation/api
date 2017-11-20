@@ -21,12 +21,14 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
+	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -42,37 +44,58 @@ var Brain *Controller
 
 func NewController() *Controller {
 	return &Controller{
-		Selector:         selector.NewSelector(),
+		selector:         selector.NewSelector(),
 		volumeController: volume.NewController(),
 	}
 }
 
 type Controller struct {
-	selector.Selector
-
+	selector         selector.Selector
 	volumeController volume.Controller
 	policyController policy.Controller
 }
 
 func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
-	var prfID = in.GetProfileId()
 
-	prf, err := c.SelectProfile(prfID)
+	var profile *model.ProfileSpec
+	var err error
+
+	if in.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		profile, err = db.C.GetDefaultProfile()
+	} else {
+		profile, err = db.C.GetProfile(in.ProfileId)
+	}
 	if err != nil {
-		log.Error("when search profiles in db:", err)
+		log.Error("Get profile failed: ", err)
 		return nil, err
 	}
 
+	if in.Size <= 0 {
+		errMsg := fmt.Sprintf("Invalid volume size: %d", in.Size)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+
 	// Select the storage tag according to the lifecycle flag.
-	c.policyController = policy.NewController(prf)
+	c.policyController = policy.NewController(profile)
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 
-	polInfo, err := c.SelectSupportedPool(c.policyController.StorageTag().GetSyncTag())
+	filterRequest := profile.Extra
+	filterRequest["size"] = in.Size
+	filterRequest["availabilityZone"] = in.AvailabilityZone
+
+	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
 	if err != nil {
 		log.Error("When search supported pool resource:", err)
 		return nil, err
 	}
-	dockInfo, err := c.SelectDock(polInfo)
+	dockInfo, err := db.C.GetDock(polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -86,7 +109,7 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		Description:      in.GetDescription(),
 		Size:             in.GetSize(),
 		AvailabilityZone: in.GetAvailabilityZone(),
-		ProfileId:        prfID,
+		ProfileId:        profile.GetId(),
 		PoolId:           polInfo.GetId(),
 		DockId:           dockInfo.GetId(),
 		DriverName:       dockInfo.GetDriverName(),
@@ -104,9 +127,9 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 }
 
 func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
-	prf, err := c.SelectProfile(in.GetProfileId())
+	prf, err := db.C.GetProfile(in.ProfileId)
 	if err != nil {
-		log.Error("when search profiles in db:", err)
+		log.Error("when search profile in db:", err)
 		return err
 	}
 
@@ -114,9 +137,9 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dockInfo, err := c.SelectDock(in.GetId())
+	dockInfo, err := db.C.GetDockByPoolId(in.PoolId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err)
+		log.Error("When search dock in db by pool id: ", err)
 		return err
 	}
 	c.policyController.SetDock(dockInfo)
@@ -141,7 +164,12 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 }
 
 func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	dockInfo, err := c.SelectDock(in.GetVolumeId())
+	volume, err := db.C.GetVolume(in.VolumeId)
+	if err != nil {
+		log.Error("Get volume failed in create volume attachment method: ", err)
+		return nil, err
+	}
+	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -171,7 +199,12 @@ func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 }
 
 func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) error {
-	dockInfo, err := c.SelectDock(in.GetVolumeId())
+	volume, err := db.C.GetVolume(in.VolumeId)
+	if err != nil {
+		log.Error("Get volume failed in create volume attachment method: ", err)
+		return err
+	}
+	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err
@@ -197,7 +230,13 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 }
 
 func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	dockInfo, err := c.SelectDock(in.GetVolumeId())
+	volume, err := db.C.GetVolume(in.VolumeId)
+	if err != nil {
+		log.Error("Get volume failed in create volume attachment method: ", err)
+		return nil, err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -217,7 +256,12 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 }
 
 func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
-	dockInfo, err := c.SelectDock(in.GetVolumeId())
+	volume, err := db.C.GetVolume(in.VolumeId)
+	if err != nil {
+		log.Error("Get volume failed in create volume attachment method: ", err)
+		return err
+	}
+	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err

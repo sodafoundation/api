@@ -97,6 +97,26 @@ func (c *client) GetDock(dckID string) (*model.DockSpec, error) {
 	return dck, nil
 }
 
+func (c *client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
+	pool, err := c.GetPool(poolId)
+	if err != nil {
+		log.Error("Get pool failed in db: ", err)
+		return nil, err
+	}
+
+	docks, err := c.ListDocks()
+	if err != nil {
+		log.Error("List docks failed failed in db: ", err)
+		return nil, err
+	}
+	for _, dock := range docks {
+		if pool.DockId == dock.Id {
+			return dock, nil
+		}
+	}
+	return nil, errors.New("Get dock failed by pool id: " + poolId)
+}
+
 func (c *client) ListDocks() ([]*model.DockSpec, error) {
 	dbReq := &Request{
 		Url: GenerateUrl(prefix, "docks"),
@@ -299,6 +319,21 @@ func (c *client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 		return nil, errors.New(dbRes.Error)
 	}
 	return prf, nil
+}
+
+func (c *client) GetDefaultProfile() (*model.ProfileSpec, error) {
+	profiles, err := c.ListProfiles()
+	if err != nil {
+		log.Error("Get default profile failed in db: ", err)
+		return nil, err
+	}
+
+	for _, profile := range profiles {
+		if profile.Name == "default" {
+			return profile, nil
+		}
+	}
+	return nil, errors.New("No default profile in db.")
 }
 
 func (c *client) ListProfiles() ([]*model.ProfileSpec, error) {

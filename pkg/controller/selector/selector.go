@@ -21,137 +21,50 @@ profiles configured by admin.
 package selector
 
 import (
-	"errors"
-	"strings"
-
 	log "github.com/golang/glog"
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	fake "github.com/opensds/opensds/testutils/db"
 )
 
 type Selector interface {
-	SelectProfile(prfID string) (*model.ProfileSpec, error)
-
 	SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error)
-
-	SelectDock(input interface{}) (*model.DockSpec, error)
 }
 
-type selector struct {
-	storBox db.Client
+type selector struct{}
+
+var filterChain Filter
+
+func init() {
+	diskTypeFilter := &DiskTypeFilter{}
+	compressFilter := &CompressFilter{Next: diskTypeFilter}
+	dedupeFilter := &DedupeFilter{Next: compressFilter}
+	thinFilter := &ThinFilter{Next: dedupeFilter}
+	capacityFilter := &CapacityFilter{Next: thinFilter}
+	azFilter := &AZFilter{Next: capacityFilter}
+
+	filterChain = azFilter
 }
 
 func NewSelector() Selector {
-	return &selector{
-		storBox: db.C,
-	}
-}
-
-func NewFakeSelector() Selector {
-	return &selector{
-		storBox: fake.NewFakeDbClient(),
-	}
-}
-
-func (s *selector) SelectProfile(prfID string) (*model.ProfileSpec, error) {
-	// If a user doesn't specify profile id, then a default profile will be
-	// automatically assigned.
-	if prfID == "" {
-		prfs, err := s.storBox.ListProfiles()
-		if err != nil {
-			log.Error("When list profiles:", err)
-			return nil, err
-		}
-
-		for _, prf := range prfs {
-			if prf.GetName() == "default" {
-				return prf, nil
-			}
-		}
-
-		return nil, errors.New("Can not find default profile in db!")
-	}
-
-	return s.storBox.GetProfile(prfID)
+	return &selector{}
 }
 
 func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
-	pols, err := s.storBox.ListPools()
+	pools, err := db.C.ListPools()
 	if err != nil {
-		log.Error("When list pool resources in db:", err)
+		log.Error("When list pools in resources SelectSupportedPool: ", err)
 		return nil, err
 	}
 
-	// Find if the desired storage tags are contained in any profile
-	for _, pol := range pols {
-		var isSupported = true
-
-		for k := range tags {
-			// Find if the desired feature is contained in pool parameters.
-			p, ok := pol.Parameters[k]
-			if !ok {
-				isSupported = false
-				break
-			}
-
-			// Find if all tag are supported by pool.
-			switch strings.ToLower(k) {
-			case "diskType":
-				if tags[k].(string) != p.(string) {
-					isSupported = false
-					break
-				}
-			case "iops", "latency":
-				if tags[k].(int) > p.(int) {
-					isSupported = false
-					break
-				}
-			}
-		}
-
-		if isSupported {
-			return pol, nil
-		}
-	}
-
-	return nil, errors.New("No pool resource supported!")
-}
-
-func (s *selector) SelectDock(input interface{}) (*model.DockSpec, error) {
-	dcks, err := s.storBox.ListDocks()
+	supportedPools, err := filterChain.Handle(tags, pools)
 	if err != nil {
-		log.Error("When list dock resources in db:", err)
+		log.Error("Filter supported pools failed: ", err)
 		return nil, err
 	}
 
-	var pol *model.StoragePoolSpec
+	// Now, we just return the firt supported pool which will be improved in
+	// the future.
+	return supportedPools[0], nil
 
-	switch input.(type) {
-	case string:
-		// If user specifies a volume id, then the selector will find the
-		// storage pool by calling database.
-		volID := input.(string)
-		vol, err := s.storBox.GetVolume(volID)
-		if err != nil {
-			log.Errorf("When get volume %v in db: %v\n", input, err)
-			return nil, err
-		}
-
-		pol, err = s.storBox.GetPool(vol.GetPoolId())
-		if err != nil {
-			log.Errorf("When get pool %s in db: %v\n", vol.GetPoolId(), err)
-			return nil, err
-		}
-	case *model.StoragePoolSpec:
-		pol = input.(*model.StoragePoolSpec)
-	}
-
-	for _, dck := range dcks {
-		if dck.GetId() == pol.GetDockId() {
-			return dck, nil
-		}
-	}
-	return nil, errors.New("No dock resource supported!")
 }
