@@ -61,7 +61,7 @@ func (d *Driver) gb2Sector(gb int64) int64 {
 }
 
 func (d *Driver) Setup() error {
-	// Read lvm config file
+	// Read huawei dorado config file
 	conf := &DoradoConfig{}
 	d.conf = conf
 	path := config.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath
@@ -80,7 +80,10 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-func (d *Driver) Unset() error { return nil }
+func (d *Driver) Unset() error {
+	d.client.logout()
+	return nil
+}
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	//Convert the storage unit Giga to sector
