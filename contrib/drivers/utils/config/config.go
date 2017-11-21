@@ -25,6 +25,7 @@ type PoolProperties struct {
 	DiskType  string `yaml:"diskType"`
 	IOPS      int64  `yaml:"iops"`
 	BandWidth int64  `yaml:"bandwidth"`
+	AZ        string `yaml:"AZ,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
