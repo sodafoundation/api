@@ -23,6 +23,7 @@ package drivers
 
 import (
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -67,6 +68,9 @@ func Init(resourceType string) VolumeDriver {
 	case "lvm":
 		d = &lvm.Driver{}
 		break
+	case "huawei_dorado":
+		d = &dorado.Driver{}
+		break
 	default:
 		d = &sample.Driver{}
 		break
@@ -84,10 +88,14 @@ func Clean(d VolumeDriver) VolumeDriver {
 		break
 	case *lvm.Driver:
 		break
+	case *dorado.Driver:
+		break
 	default:
 		break
 	}
+	d.Unset()
 	d = nil
 
 	return d
 }
+
