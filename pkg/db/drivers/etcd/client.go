@@ -75,7 +75,7 @@ func (c *client) Get(req *Request) *Response {
 	if len(resp.Kvs) == 0 {
 		return &Response{
 			Status: "Failure",
-			Error:  "Wrong volume_id or attachment_id provided!",
+			Error:  "Wrong resource uuid provided!",
 		}
 	}
 	return &Response{
