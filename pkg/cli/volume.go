@@ -106,6 +106,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	resp, err := client.CreateVolume(vol)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
@@ -123,6 +124,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 	resp, err := client.GetVolume(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
@@ -139,6 +141,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	resp, err := client.ListVolumes()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
@@ -157,6 +160,8 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	err := client.DeleteVolume(args[0], vol)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	fmt.Printf("Delete volume(%s) sucess.\n", args[0])
 }
+

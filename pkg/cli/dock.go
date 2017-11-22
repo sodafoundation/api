@@ -63,6 +63,7 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 	resp, err := client.GetDock(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintDict(resp, keys, FormatterList{})
@@ -78,7 +79,9 @@ func dockListAction(cmd *cobra.Command, args []string) {
 	resp, err := client.ListDocks()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintList(resp, keys, FormatterList{})
 }
+
