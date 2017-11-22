@@ -3,3 +3,4 @@ pool:
     diskType: SSD
     iops: 1000
     bandwidth: 1000
+    AZ: default
