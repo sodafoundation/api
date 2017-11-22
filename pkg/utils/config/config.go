@@ -129,7 +129,7 @@ func parseItems(section string, v reflect.Value, cfg *ini.File) {
 			if err == nil {
 				strVal = key.Value()
 			}
-			log.Warningf("Get key failed, using default key.")
+			log.Warningf("Get key(%s.%s) failed, using default key(%s).", section, tags[ConfKeyName], strVal)
 		}
 		switch field.Kind() {
 		case reflect.Bool:
@@ -211,3 +211,4 @@ func GetBackendsMap() map[string]BackendProperties {
 	}
 	return backendsMap
 }
+

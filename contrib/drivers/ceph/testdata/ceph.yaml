@@ -4,23 +4,30 @@ pool:
     diskType: SSD
     iops: 1000
     bandwidth: 1000
+    AZ: ceph
   "test":
     diskType: SAS
     iops: 800
     bandwidth: 800
+    AZ: ceph
   "pool001":
     diskType: NL-SAS
     iops: 600
     bandwidth: 500
+    AZ: ceph
   "testpoolerasure":
     diskType: NL-SAS
     iops: 600
     bandwidth: 500
+    AZ: ceph
   "NAME":
     diskType: NL-SAS
     iops: 600
     bandwidth: 500
+    AZ: ceph
   "ecpool":
     diskType: NL-SAS
     iops: 600
     bandwidth: 500
+    AZ: ceph
+

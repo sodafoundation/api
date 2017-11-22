@@ -37,10 +37,11 @@ import (
 )
 
 const (
-	opensdsPrefix   string = "OPENSDS"
-	splitChar              = ":"
-	sizeShiftBit           = 20
-	defaultConfPath        = "/etc/opensds/driver/ceph.yaml"
+	opensdsPrefix   = "OPENSDS"
+	splitChar       = ":"
+	sizeShiftBit    = 20
+	defaultConfPath = "/etc/opensds/driver/ceph.yaml"
+	defaultAZ       = "default"
 )
 
 const (
@@ -432,7 +433,6 @@ func (d *Driver) parseCapStr(cap string) int64 {
 }
 
 func (d *Driver) getPoolsCapInfo() ([][]string, error) {
-	const poolStartLine = 5
 	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
@@ -440,20 +440,33 @@ func (d *Driver) getPoolsCapInfo() ([][]string, error) {
 	}
 	lines := strings.Split(output, "\n")
 	var poolsInfo [][]string
-	for i := poolStartLine; i < len(lines); i++ {
-		poolsInfo = append(poolsInfo, strings.Fields(lines[i]))
+	var started = false
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		if started {
+			poolsInfo = append(poolsInfo, strings.Fields(line))
+		}
+		if strings.HasPrefix(line, "POOLS:") {
+			started = true
+			i++
+		}
 	}
 	return poolsInfo, nil
 }
 
 func (d *Driver) getGlobalCapInfo() ([]string, error) {
-	const globalCapInfoLine = 2
 	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
 	if err != nil {
 		log.Error("[Error]:", err)
 		return nil, err
 	}
 	lines := strings.Split(output, "\n")
+	var globalCapInfoLine int
+	for i, line := range lines {
+		if strings.HasPrefix(line, "GLOBAL:") {
+			globalCapInfoLine = i + 2
+		}
+	}
 	return strings.Fields(lines[globalCapInfoLine]), nil
 }
 
@@ -528,9 +541,13 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name: name,
 			//if redundancy type is replicate, MAX AVAIL =  AVAIL / replicate number,
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
-			TotalCapacity: totalCap * maxAvailCap / availCap,
-			FreeCapacity:  maxAvailCap,
-			Parameters:    *param,
+			TotalCapacity:    totalCap * maxAvailCap / availCap,
+			FreeCapacity:     maxAvailCap,
+			Parameters:       *param,
+			AvailabilityZone: c.Pool[name].AZ,
+		}
+		if pol.AvailabilityZone == "" {
+			pol.AvailabilityZone = defaultAZ
 		}
 		pols = append(pols, pol)
 	}
