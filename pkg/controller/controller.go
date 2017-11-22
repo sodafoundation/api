@@ -82,11 +82,12 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		in.AvailabilityZone = "default"
 	}
 
-	// Select the storage tag according to the lifecycle flag.
-	c.policyController = policy.NewController(profile)
-	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
-
-	filterRequest := profile.Extra
+	var filterRequest map[string]interface{}
+	if profile.Extra != nil {
+		filterRequest = profile.Extra
+	} else {
+		filterRequest = make(map[string]interface{})
+	}
 	filterRequest["size"] = in.Size
 	filterRequest["availabilityZone"] = in.AvailabilityZone
 
@@ -100,9 +101,8 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		log.Error("When search supported dock resource:", err)
 		return nil, err
 	}
-	c.policyController.SetDock(dockInfo)
-	c.volumeController.SetDock(dockInfo)
 
+	c.volumeController.SetDock(dockInfo)
 	opt := &pb.CreateVolumeOpts{
 		Id:               in.GetId(),
 		Name:             in.GetName(),
@@ -119,6 +119,11 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	if err != nil {
 		return nil, err
 	}
+
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(profile)
+	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
+	c.policyController.SetDock(dockInfo)
 
 	var errChan = make(chan error, 1)
 	volBody, _ := json.Marshal(result)

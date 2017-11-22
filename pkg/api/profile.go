@@ -173,8 +173,16 @@ func (this *ProfilePortal) UpdateProfile() {
 
 func (this *ProfilePortal) DeleteProfile() {
 	id := this.Ctx.Input.Param(":profileId")
+	profile, err := db.C.GetProfile(id)
+	if err != nil {
+		reason := fmt.Sprintf("Get profile failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		log.Error(reason)
+		return
+	}
 
-	if err := db.C.DeleteProfile(id); err != nil {
+	if err := db.C.DeleteProfile(profile.Id); err != nil {
 		reason := fmt.Sprintf("Delete profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))

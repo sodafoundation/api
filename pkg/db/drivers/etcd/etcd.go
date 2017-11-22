@@ -411,6 +411,10 @@ func (c *client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 		return nil, err
 	}
 
+	if prf.Extra == nil {
+		prf.Extra = make(map[string]interface{})
+	}
+
 	for k, v := range ext {
 		prf.Extra[k] = v
 	}

@@ -294,6 +294,8 @@ func TestGetProfileWithBadRequest(t *testing.T) {
 func TestDeleteProfile(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
+		fakeProfile, nil)
 	mockClient.On("DeleteProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil)
 	db.C = mockClient
 
@@ -304,6 +306,23 @@ func TestDeleteProfile(t *testing.T) {
 
 	if w.Code != 200 {
 		t.Errorf("Expected 200, actual %v", w.Code)
+	}
+}
+
+func TestDeleteProfileWithBadrequest(t *testing.T) {
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
+		nil, errors.New("Invalid resource uuid"))
+	db.C = mockClient
+
+	r, _ := http.NewRequest("DELETE",
+		"/v1alpha/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
 	}
 }
 
