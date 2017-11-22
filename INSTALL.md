@@ -4,7 +4,7 @@ This installation document assumes that you use [CEPH](https://github.com/ceph/c
 
 ### Bootstrap
 If you have a clean environment (suggest Ubuntu16.04+), please run the script
-to install all dependencies of this project:
+to install all dependencies of this project (except ceph cluster):
 ```
 script/cluster/bootstrap.sh
 ```
