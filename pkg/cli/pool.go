@@ -62,6 +62,7 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 	pols, err := client.GetPool(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintDict(pols, keys, FormatterList{})
@@ -76,7 +77,9 @@ func poolListAction(cmd *cobra.Command, args []string) {
 	pols, err := client.ListPools()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintList(pols, keys, FormatterList{})
 }
+

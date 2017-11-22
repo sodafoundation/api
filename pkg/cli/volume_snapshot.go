@@ -92,6 +92,7 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 	resp, err := client.CreateVolumeSnapshot(snp)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
 	PrintDict(resp, keys, FormatterList{})
@@ -107,6 +108,7 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 	resp, err := client.GetVolumeSnapshot(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
 	PrintDict(resp, keys, FormatterList{})
@@ -122,6 +124,7 @@ func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 	resp, err := client.ListVolumeSnapshots()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "VolumeId"}
 	PrintList(resp, keys, FormatterList{})
@@ -139,6 +142,8 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 	err := client.DeleteVolumeSnapshot(args[1], snp)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	fmt.Printf("Delete snapshot(%s) sucess.\n", args[1])
 }
+

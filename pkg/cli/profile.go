@@ -87,6 +87,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 	resp, err := client.CreateProfile(prf)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
 	PrintDict(resp, keys, FormatterList{})
@@ -102,6 +103,7 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 	resp, err := client.GetProfile(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
 	PrintDict(resp, keys, FormatterList{})
@@ -117,6 +119,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 	resp, err := client.ListProfiles()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Extra"}
 	PrintList(resp, keys, FormatterList{})
@@ -132,6 +135,8 @@ func profileDeleteAction(cmd *cobra.Command, args []string) {
 	err := client.DeleteProfile(args[0])
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 	fmt.Printf("Delete profile(%s) sucess.\n", args[0])
 }
+

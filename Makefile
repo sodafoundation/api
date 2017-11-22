@@ -2,7 +2,7 @@
 
 all:build
 
-build:osdsdock osdslet
+build:osdsdock osdslet osdsctl
 
 package:
 	go get github.com/opensds/opensds/cmd/osdslet
