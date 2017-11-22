@@ -83,6 +83,9 @@ func TestSetup(t *testing.T) {
 	if d.conf.Pool["pool1"].BandWidth != 1000 {
 		t.Error("Test config pool1 BandWidth error")
 	}
+	if d.conf.Pool["pool1"].AZ != "nova-01" {
+		t.Error("Test config pool1 AZ error")
+	}
 
 	if d.conf.Pool["pool2"].DiskType != "SAS" {
 		t.Error("Test config pool2 DiskType error")
@@ -92,6 +95,9 @@ func TestSetup(t *testing.T) {
 	}
 	if d.conf.Pool["pool2"].BandWidth != 800 {
 		t.Error("Test config pool2 BandWidth error")
+	}
+	if d.conf.Pool["pool2"].AZ != "nova-02" {
+		t.Error("Test config pool2 AZ error")
 	}
 }
 
