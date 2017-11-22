@@ -11,7 +11,9 @@ pool:
     diskType: SSD
     iops: 1000
     bandwidth: 1000
+    AZ: nova-01
   pool2:
     diskType: SAS
     iops: 800
     bandwidth: 800
+    AZ: nova-02

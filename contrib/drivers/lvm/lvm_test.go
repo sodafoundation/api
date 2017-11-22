@@ -35,6 +35,7 @@ func TestSetup(t *testing.T) {
 					DiskType:  "SSD",
 					IOPS:      int64(1000),
 					BandWidth: int64(1000),
+					AZ:        "default",
 				},
 			},
 		},
