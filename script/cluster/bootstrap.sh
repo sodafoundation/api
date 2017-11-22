@@ -14,28 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This script helps new contributors or users set up their local workstation
+# for opensds installation and development.
+
+OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
+OPENSDS_ROOT=${OPENSDS_DIR}/opensds
 ETCD_URL=https://github.com/coreos/etcd/releases/download/v3.2.0
 ETCD_TARBALL=etcd-v3.2.0-linux-amd64.tar.gz
-ETCD_DIR=etcd-v3.2.0-linux-amd64
-GO_PATH=${HOME}/gopath
-OPENSDS_DIR=${GO_PATH}/src/github.com/opensds/opensds
-VG_NAME=vg001
 
-# Install some lvm tools.
-sudo apt-get install -y lvm2
-
-if [ -z $HOME ];then
-	echo "home path not exist"
-	exit
-fi
-
-if [ ! -b /dev/loop1 ]; then
-	# Create a new physical volume and add it in volume group.
-	dd if=/dev/zero of=${HOME}/lvm.img bs=1GB count=20
-	losetup /dev/loop1 ${HOME}/lvm.img
-	pvcreate /dev/loop1
-	vgcreate ${VG_NAME} /dev/loop1
-fi
+# Install Golang environment
+wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+echo 'export GOROOT=/usr/local/go' >> /etc/profile
+echo 'export GOPATH=$HOME/gopath' >> /etc/profile
+echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
+source /etc/profile
 
 # If etcd file not exists, download it from etcd release url.
 if [ ! -d ${HOME}/${ETCD_DIR} ]; then
@@ -43,12 +36,12 @@ if [ ! -d ${HOME}/${ETCD_DIR} ]; then
 	tar xzvf ${HOME}/${ETCD_TARBALL} ${HOME}
 fi
 
-# Run etcd daemon in background.
-cd ${HOME}/${ETCD_DIR}
-nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
-
-# Run osdsdock and osdslet daemon in background.
-source /etc/profile
-cd ${OPENSDS_DIR} && make
-nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
-nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
+# OpenSDS Download and Build
+if [ ! -d $OPENSDS_DIR ]; then
+	mkdir -p ${OPENSDS_DIR}
+fi
+cd ${OPENSDS_DIR}
+if [ ! -d $OPENSDS_ROOT ]; then
+	git clone https://github.com/opensds/opensds.git -b development
+fi
+cd ${OPENSDS_ROOT}
