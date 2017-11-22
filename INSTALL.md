@@ -1,25 +1,18 @@
-This installation document assumes that you use [CEPH](https://github.com/ceph/ceph) as the default driver,and use the [ETCD](https://github.com/coreos/etcd) as the default database.So,
-before you start up the OpenSDS,the ceph cluster and etcd should be start up firstly.Then you can excute the followings step by step.
+This installation document assumes that you use [CEPH](https://github.com/ceph/ceph) as the default driver,and use the [ETCD](https://github.com/coreos/etcd) as the default database.
 
 ## Pre-configuration
 
-### Download and install Golang
+### Bootstrap
+If you have a clean environment (suggest Ubuntu16.04+), please run the script
+to install all dependencies of this project:
 ```
-wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
-tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
-mkdir -p $HOME/gopath/src
-mkdir -p $HOME/gopath/bin
-echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/gopath/bin' >> /etc/profile
-echo 'export GOPATH=$HOME/gopath' >> /etc/profile
-source /etc/profile
-go version (check if go has been installed)
+script/cluster/bootstrap.sh
 ```
 
-### Download the OpenSDS source code and change it to the development branch.
+### Run etcd daemon in background.
 ```
-mkdir -p $HOME/gopath/src/github.com/opensds
-cd $HOME/gopath/src/github.com/opensds
-git clone https://github.com/opensds/opensds.git -b development
+cd $HOME/etcd-v3.2.0-linux-amd64
+nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
 ```
 
 ### Install the ceph driver dependent packet.
@@ -41,6 +34,8 @@ mkdir -p  ./build/out/bin/
 go build -o ./build/out/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 mkdir -p  ./build/out/bin/
 go build -o ./build/out/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+mkdir -p  ./build/out/bin/
+go build -o ./build/out/bin/osdsctl github.com/opensds/opensds/cmd/osdsctl
 ```
 Then the binary file will be generated to ```./build/out/bin```
 
@@ -62,7 +57,8 @@ pool:
   "rbd":
     diskType: SSD
     iops: 1000
-    bandWitdh: 1G
+    bandwidth: 1000
+    AZ: default
 ```
 
 The configuration process would be as follows:(```Suppose you are under opensds root directory```)
