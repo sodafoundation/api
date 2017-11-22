@@ -320,6 +320,9 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["rbd"].BandWidth != 1000 {
 		t.Error("Test ConfigFile BandWidth failed!")
 	}
+	if conf.Pool["rbd"].AZ != "ceph" {
+		t.Error("Test ConfigFile BandWidth failed!")
+	}
 	if conf.Pool["test"].DiskType != "SAS" {
 		t.Error("Test ConfigFile DiskType failed!")
 	}
@@ -335,27 +338,27 @@ func TestListPools(t *testing.T) {
 
 	defer monkey.UnpatchAll()
 	monkey.Patch(execCmd, func(cmd string) (string, error) {
-		cephDuInfo := "" +
-			"GLOBAL:\n" +
-			"    SIZE       AVAIL     RAW USED     %RAW USED\n" +
-			"    19053M     6859M       12194M         64.00\n" +
-			"POOLS:\n" +
-			"    NAME                ID     USED     %USED     MAX AVAIL     OBJECTS\n" +
-			"    rbd                 0      942M     12.21         2286M         245\n" +
-			"    test                1         0         0         2286M           1\n" +
-			"    pool001             2         0         0         2286M           0\n" +
-			"    testpoolerasure     3         0         0         4572M           0\n" +
-			"    NAME                9         0         0         2286M           0\n" +
-			"    ecpool              10        0         0         4115M           0\n" +
-			"    12                  11        0         0         2286M           0"
-		poolAttrInfo := "" +
-			"'rbd' replicated 3 0\n" +
-			"'test' replicated 3 0\n" +
-			"'pool001' replicated 3 0\n" +
-			"'testpoolerasure' erasure 3 1\n" +
-			"'NAME' replicated 3 0\n" +
-			"'ecpool' erasure 5 2\n" +
-			"'12' replicated 3 0"
+		cephDuInfo := `2017-11-17 17:43:29.396606 7f05b6234700 -1 WARNING: the following dangerous and experimental features are enabled: *
+2017-11-17 17:43:29.400235 7f05b6234700 -1 WARNING: the following dangerous and experimental features are enabled: *
+GLOBAL:
+    SIZE       AVAIL     RAW USED     %RAW USED
+    19053M     6857M       12195M         64.01
+POOLS:
+    NAME                ID     USED     %USED     MAX AVAIL     OBJECTS
+    rbd                 0      942M     21.50         2285M         249
+    test                1         0         0         2285M           1
+    pool001             2         0         0         2285M           0
+    testpoolerasure     3         0         0         4571M           0
+    NAME                9         0         0         2285M           0
+    ecpool              10        0         0         4114M           0
+    12                  11        0         0         2285M           0`
+		poolAttrInfo := `'rbd' replicated 3 0
+'test' replicated 3 0
+'pool001' replicated 3 0
+'testpoolerasure' erasure 3 1
+'NAME' replicated 3 0
+'ecpool' erasure 5 2
+'12' replicated 3 0`
 		if strings.HasPrefix(cmd, "ceph df") {
 			return cephDuInfo, nil
 		}
@@ -380,6 +383,9 @@ func TestListPools(t *testing.T) {
 	}
 
 	if pols[0].TotalCapacity != 6 {
+		t.Errorf("Test List Pools TotalCapacity error")
+	}
+	if pols[0].AvailabilityZone != "ceph" {
 		t.Errorf("Test List Pools TotalCapacity error")
 	}
 

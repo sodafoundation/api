@@ -110,7 +110,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -127,7 +127,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
