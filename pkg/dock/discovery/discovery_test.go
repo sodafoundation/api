@@ -26,11 +26,7 @@ import (
 	fakesetter "github.com/opensds/opensds/testutils/utils/testing"
 )
 
-var expectedSetter = &fakesetter.MockSetter{
-	Uuid:        "a0ca7c0a-d013-11e7-93aa-4b20d0b341b4",
-	CreatedTime: "2017-08-26T11:01:09",
-	UpdatedTime: "2017-08-26T11:01:55",
-}
+var expectedSetter = fakesetter.NewFakeSetter()
 
 func init() {
 	CONF.OsdsDock = OsdsDock{
