@@ -61,6 +61,7 @@ var fd = &Driver{
 				DiskType:  "SSD",
 				IOPS:      int64(1000),
 				BandWidth: int64(1000),
+				AZ:        "lvm",
 			},
 		},
 	},
@@ -197,13 +198,14 @@ func TestListPools(t *testing.T) {
 		{
 			BaseModel:     &model.BaseModel{},
 			Name:          "vg001",
-			TotalCapacity: int64(2),
-			FreeCapacity:  int64(1),
+			TotalCapacity: int64(18),
+			FreeCapacity:  int64(18),
 			Parameters: map[string]interface{}{
 				"diskType":  "SSD",
 				"iops":      int64(1000),
 				"bandwidth": int64(1000),
 			},
+			AvailabilityZone: "lvm",
 		},
 	}
 	pols, err := fd.ListPools()
@@ -240,24 +242,45 @@ var (
 	sampleVG = `
 		--- Volume group ---
 		VG Name               vg001
-		System ID             
+		System ID
 		Format                lvm2
 		Metadata Areas        1
-		Metadata Sequence No  2
+		Metadata Sequence No  3
 		VG Access             read/write
 		VG Status             resizable
 		MAX LV                0
-		Cur LV                1
+		Cur LV                0
 		Open LV               0
 		Max PV                0
 		Cur PV                1
 		Act PV                1
-		VG Size               2.79 GiB
+		VG Size               18.62 GiB
 		PE Size               4.00 MiB
-		Total PE              715
-		Alloc PE / Size       256 / 1.00 GiB
-		Free  PE / Size       459 / 1.79 GiB
-		VG UUID               t6WpPM-Qefq-HmiZ-JmOX-GJ9E-3Bft-yzEtAF
+		Total PE              4768
+		Alloc PE / Size       0 / 0
+		Free  PE / Size       4768 / 18.62 GiB
+		VG UUID               Yn9utl-eqjH-1sJG-0fdb-dGTX-PLJI-FjMO0v
+
+		--- Volume group ---
+		VG Name               ubuntu-vg
+		System ID
+		Format                lvm2
+		Metadata Areas        1
+		Metadata Sequence No  3
+		VG Access             read/write
+		VG Status             resizable
+		MAX LV                0
+		Cur LV                2
+		Open LV               2
+		Max PV                0
+		Cur PV                1
+		Act PV                1
+		VG Size               127.52 GiB
+		PE Size               4.00 MiB
+		Total PE              32645
+		Alloc PE / Size       32638 / 127.49 GiB
+		Free  PE / Size       7 / 28.00 MiB
+		VG UUID               fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
 	`
 	sampleLVS = `
 		--- Logical volume ---
@@ -283,3 +306,4 @@ var (
 		Block device           253:3
 	`
 )
+

@@ -277,48 +277,75 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	vgs, err := d.handler("vgdisplay", []string{})
+type VolumeGroup struct {
+	Name          string
+	TotalCapacity int64
+	FreeCapacity  int64
+}
+
+func (d *Driver) getVGList() (*[]VolumeGroup, error) {
+	const vgInfoLineCount = 10
+	info, err := d.handler("vgdisplay", []string{})
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Got vgs info:", vgs)
 
-	var polName string
-	var tCapacity, fCapacity int64
-	for _, line := range strings.Split(vgs, "\n") {
+	log.Info("Got vgs info:", info)
+	lines := strings.Split(info, "\n")
+	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
+
+	var vgIdx = -1
+	for _, line := range lines {
+		if strings.Contains(line, "--- Volume group ---") {
+			vgIdx++
+			continue
+		}
 		if strings.Contains(line, "VG Name") {
 			slice := strings.Fields(line)
-			polName = slice[2]
+			vgs[vgIdx].Name = slice[2]
 		}
 		if strings.Contains(line, "VG Size") {
 			slice := strings.Fields(line)
-			cap, _ := strconv.ParseFloat(slice[2], 64)
-			tCapacity = int64(cap)
+			capa, _ := strconv.ParseFloat(slice[2], 64)
+			vgs[vgIdx].TotalCapacity = int64(capa)
 		}
 		if strings.Contains(line, "Free  PE / Size") {
 			slice := strings.Fields(line)
-			cap, _ := strconv.ParseFloat(slice[len(slice)-2], 64)
-			fCapacity = int64(cap)
+			capa, _ := strconv.ParseFloat(slice[len(slice)-2], 64)
+			vgs[vgIdx].FreeCapacity = int64(capa)
 		}
+	}
+	return &vgs, nil
+}
+
+func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+
+	vgs, err := d.getVGList()
+	if err != nil {
+		return nil, err
 	}
 
 	var pols []*model.StoragePoolSpec
-	if _, ok := d.conf.Pool[polName]; !ok {
-		return pols, nil
+	for _, vg := range *vgs {
+		if _, ok := d.conf.Pool[vg.Name]; !ok {
+			continue
+		}
+		param := d.buildPoolParam(d.conf.Pool[vg.Name])
+		pol := &model.StoragePoolSpec{
+			BaseModel: &model.BaseModel{
+				Id: uuid.NewV5(uuid.NamespaceOID, vg.Name).String(),
+			},
+			Name:             vg.Name,
+			TotalCapacity:    vg.TotalCapacity,
+			FreeCapacity:     vg.FreeCapacity,
+			Parameters:       *param,
+			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
+		}
+		if pol.AvailabilityZone == "" {
+			pol.AvailabilityZone = "default"
+		}
+		pols = append(pols, pol)
 	}
-	param := d.buildPoolParam(d.conf.Pool[polName])
-	pol := &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id: uuid.NewV5(uuid.NamespaceOID, polName).String(),
-		},
-		Name:          polName,
-		TotalCapacity: tCapacity,
-		FreeCapacity:  fCapacity,
-		Parameters:    *param,
-	}
-	pols = append(pols, pol)
-
 	return pols, nil
 }
 
@@ -339,3 +366,4 @@ func execCmd(script string, cmd []string) (string, error) {
 	}
 	return string(ret), nil
 }
+
