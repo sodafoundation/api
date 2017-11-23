@@ -48,7 +48,7 @@ enabled_backends = ceph
 name = ceph
 description = Ceph Test
 driver_name = ceph
-ceph_config = /etc/opensds/driver/ceph.yaml
+config_path = /etc/opensds/driver/ceph.yaml
 ```
 If you want to test ceph driver,you should config the ```/etc/opensds/driver/ceph.yaml``` too, you can refer to the following configuration:
 ```yaml
