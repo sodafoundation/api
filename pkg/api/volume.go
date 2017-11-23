@@ -331,7 +331,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&snapshot); err != nil {
 		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -351,7 +351,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume snapshot created result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
+		this.Ctx.Output.SetStatus(StatusInternalServerError)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return
@@ -423,8 +423,8 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 
 	snapshot, err := db.C.GetVolumeSnapshot(id)
 	if err != nil {
-		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
+		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(StatusBadRequest)
 		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
 		log.Error(reason)
 		return

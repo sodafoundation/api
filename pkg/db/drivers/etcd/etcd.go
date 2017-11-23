@@ -372,9 +372,17 @@ func (c *client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	if desp := input.GetDescription(); desp != "" {
 		prf.Description = desp
 	}
+
 	if props := input.Extra; len(props) != 0 {
-		return nil, errors.New("Failed to update extra properties!")
+		if prf.Extra == nil {
+			prf.Extra = make(map[string]interface{})
+		}
+		for k, v := range props {
+			prf.Extra[k] = v
+		}
 	}
+
+	prf.UpdatedAt = time.Now().Format(utils.TimeFormat)
 
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
@@ -418,6 +426,8 @@ func (c *client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 	for k, v := range ext {
 		prf.Extra[k] = v
 	}
+
+	prf.UpdatedAt = time.Now().Format(utils.TimeFormat)
 
 	if err = c.CreateProfile(prf); err != nil {
 		return nil, err
