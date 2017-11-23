@@ -13,4 +13,3 @@ pool:
     iops: 800
     bandwidth: 800
     AZ: dorado2
-
