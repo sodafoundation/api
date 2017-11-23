@@ -22,13 +22,12 @@ package discovery
 import (
 	"os"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
 	api "github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
-
-	log "github.com/golang/glog"
 	"github.com/satori/go.uuid"
 )
 
@@ -114,7 +113,7 @@ func (dd *DockDiscoverer) Store() error {
 		}
 
 		// Call db module to create dock resource.
-		if err = db.C.CreateDock(dck); err != nil {
+		if err = dd.c.CreateDock(dck); err != nil {
 			log.Errorf("When create dock %s in db: %v\n", dck.GetId(), err)
 			return err
 		}
@@ -128,7 +127,7 @@ func (dd *DockDiscoverer) Store() error {
 		}
 
 		// Call db module to create pool resource.
-		if err = db.C.CreatePool(pol); err != nil {
+		if err = dd.c.CreatePool(pol); err != nil {
 			log.Errorf("When create pool %s in db: %v\n", pol.GetId(), err)
 			return err
 		}
@@ -136,4 +135,3 @@ func (dd *DockDiscoverer) Store() error {
 
 	return err
 }
-

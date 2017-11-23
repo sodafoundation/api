@@ -15,8 +15,18 @@
 package testing
 
 import (
+	"errors"
+
 	"github.com/opensds/opensds/pkg/model"
 )
+
+func NewFakeSetter() *MockSetter {
+	return &MockSetter{
+		Uuid:        "0e9c3c68-8a0b-11e7-94a7-67f755e235cb",
+		CreatedTime: "2017-08-26T11:01:09",
+		UpdatedTime: "2017-08-26T11:01:55",
+	}
+}
 
 type MockSetter struct {
 	Uuid        string
@@ -25,16 +35,49 @@ type MockSetter struct {
 }
 
 func (_m *MockSetter) SetCreatedTimeStamp(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		break
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		break
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+
 	m.SetCreatedTime(_m.CreatedTime)
 	return nil
 }
 
 func (_m *MockSetter) SetUpdatedTimeStamp(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		break
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		break
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+
 	m.SetUpdatedTime(_m.UpdatedTime)
 	return nil
 }
 
 func (_m *MockSetter) SetUuid(m model.Modeler) error {
+	switch m.(type) {
+	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
+		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
+		break
+	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
+		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
+		break
+	default:
+		return errors.New("Unexpected input object format!")
+	}
+
 	m.SetId(_m.Uuid)
 	return nil
 }
