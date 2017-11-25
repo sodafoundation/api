@@ -9,23 +9,7 @@ to install all dependencies of this project (except ceph cluster):
 script/cluster/bootstrap.sh
 ```
 
-### Run etcd daemon in background.
-```
-cd $HOME/etcd-v3.2.0-linux-amd64
-nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
-```
-
-### Install the ceph driver dependent packet.
-```bash
-sudo apt-get install -y librados-dev librbd-dev ceph-common
-```
-
-### Enter the source code directory and build the source code.
-```
-cd opensds/ && make
-```
-
-Then you will find the output below:
+If everything works well, in the end you will find the output below:
 ```bash
 go get github.com/opensds/opensds/cmd/osdslet
 go get github.com/opensds/opensds/cmd/osdsdock
@@ -37,11 +21,33 @@ go build -o ./build/out/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 mkdir -p  ./build/out/bin/
 go build -o ./build/out/bin/osdsctl github.com/opensds/opensds/cmd/osdsctl
 ```
-Then the binary file will be generated to ```./build/out/bin```
+Then the binary file will be generated to ```./build/out/bin```.
 
-### Config the configuration file, you can refer to the following configuration
-```conf
+### Run etcd daemon in background.
+```
+cd $HOME/etcd-v3.2.0-linux-amd64
+nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
+```
+
+### Install the ceph driver dependent packet.
+```bash
+sudo apt-get install -y librados-dev librbd-dev ceph-common
+```
+
+### Config the configuration file, you can refer to the following configuration.
+To simplify the configuration, you can just run these two commands below:
+```
+echo '
+[osdslet]
+api_endpoint = localhost:50040
+graceful = True
+log_file = /var/log/opensds/osdslet.log
+socket_order = inc
+
 [osdsdock]
+api_endpoint = localhost:50050
+log_file = /var/log/opensds/osdsdock.log
+# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = ceph
 
 [ceph]
@@ -49,9 +55,13 @@ name = ceph
 description = Ceph Test
 driver_name = ceph
 config_path = /etc/opensds/driver/ceph.yaml
-```
-If you want to test ceph driver,you should config the ```/etc/opensds/driver/ceph.yaml``` too, you can refer to the following configuration:
-```yaml
+
+[database]
+endpoint = localhost:2379,localhost:2380
+driver = etcd
+' >> /etc/opensds/opensds.conf
+
+echo '
 configFile: /etc/ceph/ceph.conf
 pool:
   "rbd":
@@ -59,24 +69,24 @@ pool:
     iops: 1000
     bandwidth: 1000
     AZ: default
-```
-
-The configuration process would be as follows:(```Suppose you are under opensds root directory```)
-```
-vim examples/opensds.conf (modify sample opensds config file)
-vim examples/driver/ceph.yaml (modify sample ceph backend config file)
-sudo mkdir -p /etc/opensds/driver
-cp examples/opensds.conf /etc/opensds/
-cp examples/driver/ceph.yaml /etc/opensds/driver/
+' >> /etc/opensds/driver/ceph.yaml
 ```
 
 ## Run OpenSDS Service
 
 ### Start up the osdslet and osdsdock daemon. 
 ```bash
-sudo ./osdslet
+cd $GOPATH/src/github.com/opensds/opensds
 
-sudo ./osdsock
+sudo build/out/bin/osdslet
+sudo build/out/bin/osdsock
+```
+Or you can run them in background.
+```bash
+cd $GOPATH/src/github.com/opensds/opensds
+
+nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
+nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
 ```
 
 ### Test the OpenSDS if it is work well by getting the api versions and the ceph storage pools.

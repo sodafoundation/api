@@ -23,59 +23,61 @@ cd ${OPENSDS_ROOT}
 script/cluster/bootstrap.sh
 
 # Config backend info.
-echo '
-[osdslet]
-api_endpoint = localhost:50040
-graceful = True
-log_file = /var/log/opensds/osdslet.log
-socket_order = inc
+if [ ! -f /etc/opensds/opensds.conf ]; then
+	echo '
+	[osdslet]
+	api_endpoint = localhost:50040
+	graceful = True
+	log_file = /var/log/opensds/osdslet.log
+	socket_order = inc
 
-[osdsdock]
-api_endpoint = localhost:50050
-log_file = /var/log/opensds/osdsdock.log
-# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-enabled_backends = cinder
+	[osdsdock]
+	api_endpoint = localhost:50050
+	log_file = /var/log/opensds/osdsdock.log
+	# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+	enabled_backends = cinder
 
-[cinder]
-name = cinder
-description = Cinder Test
-driver_name = cinder
-config_path = /etc/opensds/driver/cinder.yaml
+	[cinder]
+	name = cinder
+	description = Cinder Test
+	driver_name = cinder
+	config_path = /etc/opensds/driver/cinder.yaml
 
-[database]
-endpoint = localhost:2379,localhost:2380
-driver = etcd
-' >> /etc/opensds/opensds.conf
-
-echo '
-authOptions:
-  endpoint: "http://192.168.56.104/identity"
-  domainId: "Default"
-  domainName: "Default"
-  username: "admin"
-  password: "admin"
-  tenantId: "04154b841eb644a3947506c54fa73c76"
-  tenantName: "admin"
-pool:
-  pool1:
-    diskType: SSD
-    iops: 1000
-    bandwidth: 1000
-    AZ: nova-01
-  pool2:
-    diskType: SAS
-    iops: 800
-    bandwidth: 800
-    AZ: nova-01
-' >> /etc/opensds/driver/cinder.yaml
+	[database]
+	endpoint = localhost:2379,localhost:2380
+	driver = etcd
+	' >> /etc/opensds/opensds.conf
+fi
+if [ ! -f /etc/opensds/driver/cinder.yaml ]; then
+	echo '
+	authOptions:
+	  endpoint: "http://192.168.56.104/identity"
+	  domainId: "Default"
+	  domainName: "Default"
+	  username: "admin"
+	  password: "admin"
+	  tenantId: "04154b841eb644a3947506c54fa73c76"
+	  tenantName: "admin"
+	pool:
+	  pool1:
+	    diskType: SSD
+	    iops: 1000
+	    bandwidth: 1000
+	    AZ: nova-01
+	  pool2:
+	    diskType: SAS
+	    iops: 800
+	    bandwidth: 800
+	    AZ: nova-01
+	' >> /etc/opensds/driver/cinder.yaml
+fi
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
 nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
 
 # Run osdsdock and osdslet daemon in background.
-source /etc/profile
-cd ${OPENSDS_DIR} && make
+cd ${OPENSDS_ROOT}
 nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
 nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
 

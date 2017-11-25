@@ -21,19 +21,23 @@ OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
 OPENSDS_ROOT=${OPENSDS_DIR}/opensds
 ETCD_URL=https://github.com/coreos/etcd/releases/download/v3.2.0
 ETCD_TARBALL=etcd-v3.2.0-linux-amd64.tar.gz
+ETCD_DIR=etcd-v3.2.0-linux-amd64
 
 # Install Golang environment
-wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
-tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
-echo 'export GOROOT=/usr/local/go' >> /etc/profile
-echo 'export GOPATH=$HOME/gopath' >> /etc/profile
-echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
+if [ ! -d /usr/local/go ]; then
+	wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+	tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+	echo 'export GOROOT=/usr/local/go' >> /etc/profile
+	echo 'export GOPATH=$HOME/gopath' >> /etc/profile
+	echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
+fi
 source /etc/profile
 
 # If etcd file not exists, download it from etcd release url.
 if [ ! -d ${HOME}/${ETCD_DIR} ]; then
 	curl -L ${ETCD_URL}/${ETCD_TARBALL} -o ${HOME}/${ETCD_TARBALL}
-	tar xzvf ${HOME}/${ETCD_TARBALL} ${HOME}
+	cd ${HOME}
+	tar xzvf ${HOME}/${ETCD_TARBALL}
 fi
 
 # OpenSDS Download and Build
@@ -45,3 +49,6 @@ if [ ! -d $OPENSDS_ROOT ]; then
 	git clone https://github.com/opensds/opensds.git -b development
 fi
 cd ${OPENSDS_ROOT}
+if [ ! -d $OPENSDS_ROOT/build ]; then
+	make
+fi
