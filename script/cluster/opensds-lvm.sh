@@ -15,8 +15,9 @@
 # limitations under the License.
 
 ETCD_DIR=etcd-v3.2.0-linux-amd64
-GO_PATH=${HOME}/gopath
-OPENSDS_DIR=${GO_PATH}/src/github.com/opensds/opensds
+OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds/opensds
+IMAGE_PATH=${HOME}/lvm.img
+DEIVCE_PATH=/dev/loop1
 VG_NAME=vg001
 
 # Install some lvm tools.
@@ -27,20 +28,64 @@ if [ -z $HOME ];then
 	exit
 fi
 
-if [ ! -b /dev/loop1 ]; then
-	# Create a new physical volume and add it in volume group.
-	dd if=/dev/zero of=${HOME}/lvm.img bs=1GB count=20
-	losetup /dev/loop1 ${HOME}/lvm.img
-	pvcreate /dev/loop1
-	vgcreate ${VG_NAME} /dev/loop1
+pvoutput=`pvdisplay`
+vgoutput=`vgdisplay`
+
+if [ ! -f ${IMAGE_PATH} ]; then
+	dd if=/dev/zero of=${IMAGE_PATH} bs=1GB count=20
+fi
+if [ ! -n "$pvoutput" ]; then
+	# Create a new physical volume.
+	losetup ${DEIVCE_PATH} ${IMAGE_PATH}
+	pvcreate ${DEIVCE_PATH}
+fi
+if [ ! -n "$vgoutput" ]; then
+	# Add pv in volume group.
+	vgcreate ${VG_NAME} ${DEIVCE_PATH}
 fi
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
 nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
 
+# Config opensds backend info.
+if [ ! -f /etc/opensds/opensds.conf ]; then
+	echo '
+	[osdslet]
+	api_endpoint = localhost:50040
+	graceful = True
+	log_file = /var/log/opensds/osdslet.log
+	socket_order = inc
+	
+	[osdsdock]
+	api_endpoint = localhost:50050
+	log_file = /var/log/opensds/osdsdock.log
+	# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+	enabled_backends = lvm
+
+	[lvm]
+	name = lvm
+	description = LVM Test
+	driver_name = lvm
+	config_path = /etc/opensds/driver/lvm.yaml
+
+	[database]
+	endpoint = localhost:2379,localhost:2380
+	driver = etcd
+	' >> /etc/opensds/opensds.conf
+fi
+if [ ! -f /etc/opensds/driver/lvm.yaml ]; then
+	echo '
+	pool:
+	  vg001:
+	    diskType: SSD
+	    iops: 1000
+	    bandwidth: 1000
+	    AZ: default
+	' >> /etc/opensds/driver/lvm.yaml
+fi
+
 # Run osdsdock and osdslet daemon in background.
-source /etc/profile
-cd ${OPENSDS_DIR} && make
+cd ${OPENSDS_DIR}
 nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
 nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
