@@ -78,8 +78,8 @@ pool:
 ```bash
 cd $GOPATH/src/github.com/opensds/opensds
 
-sudo ./osdslet
-sudo ./osdsock
+sudo build/out/bin/osdslet
+sudo build/out/bin/osdsock
 ```
 Or you can run them in background.
 ```bash
