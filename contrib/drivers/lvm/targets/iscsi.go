@@ -36,16 +36,18 @@ type ISCSITarget interface {
 	UnbindInitiator(initiator string) error
 }
 
-func NewISCSITarget(tid int, name string) ISCSITarget {
+func NewISCSITarget(tid int, name string, bip string) ISCSITarget {
 	return &tgtTarget{
-		Tid:   tid,
-		TName: name,
+		Tid:    tid,
+		TName:  name,
+		BindIp: bip,
 	}
 }
 
 type tgtTarget struct {
-	Tid   int
-	TName string
+	Tid    int
+	TName  string
+	BindIp string
 }
 
 func (t *tgtTarget) AddLun(lun int, path string) error {
@@ -212,3 +214,4 @@ func (*tgtTarget) execCmd(cmd []string) (string, error) {
 	}
 	return string(ret), nil
 }
+

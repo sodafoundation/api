@@ -34,9 +34,9 @@ type Target interface {
 	RemoveExport(path, initiator string) error
 }
 
-func NewTarget() Target {
+func NewTarget(bip string) Target {
 	return &iscsiTarget{
-		ISCSITarget: NewISCSITarget(globalTid, globalIQN),
+		ISCSITarget: NewISCSITarget(globalTid, globalIQN, bip),
 	}
 }
 
@@ -62,8 +62,9 @@ func (t *iscsiTarget) CreateExport(path, initiator string) (map[string]interface
 	return map[string]interface{}{
 		"targetDiscovered": true,
 		"targetIQN":        globalIQN,
-		"targetPortal":     "127.0.0.1:2360",
+		"targetPortal":     t.ISCSITarget.(*tgtTarget).BindIp + ":3260",
 		"discard":          false,
+		"targetLun":        globalLun,
 	}, nil
 }
 
@@ -82,3 +83,4 @@ func (t *iscsiTarget) RemoveExport(path, initiator string) error {
 
 	return nil
 }
+
