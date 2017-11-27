@@ -38,6 +38,7 @@ func TestSetup(t *testing.T) {
 					AZ:        "default",
 				},
 			},
+			TgtBindIp: "192.168.56.105",
 		},
 		handler: execCmd,
 	}

@@ -36,7 +36,8 @@ const (
 )
 
 type LVMConfig struct {
-	Pool map[string]PoolProperties `yaml:"pool,flow"`
+	TgtBindIp string                    `yaml:"tgtBindIp"`
+	Pool      map[string]PoolProperties `yaml:"pool,flow"`
 }
 
 type Driver struct {
@@ -47,7 +48,7 @@ type Driver struct {
 
 func (d *Driver) Setup() error {
 	// Read lvm config file
-	d.conf = &LVMConfig{}
+	d.conf = &LVMConfig{TgtBindIp: "127.0.0.1"}
 	p := config.CONF.OsdsDock.Backends.LVM.ConfigPath
 	if "" == p {
 		p = defaultConfPath
@@ -143,7 +144,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	var initiator string
 	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
 		initiator = "ALL"
@@ -156,7 +157,7 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 		return nil, err
 	}
 
-	t := targets.NewTarget()
+	t := targets.NewTarget(d.conf.TgtBindIp)
 	expt, err := t.CreateExport(lvPath, initiator)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
@@ -169,7 +170,7 @@ func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Connec
 	}, nil
 }
 
-func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 	var initiator string
 	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
 		initiator = "ALL"
@@ -182,7 +183,7 @@ func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 		return err
 	}
 
-	t := targets.NewTarget()
+	t := targets.NewTarget(d.conf.TgtBindIp)
 	if err := t.RemoveExport(lvPath, initiator); err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return err
