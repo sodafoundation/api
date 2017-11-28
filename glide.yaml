@@ -27,14 +27,13 @@ import:
   - context
 - package: github.com/go-ini/ini
   version: ^1.28.2
-- package: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - package: github.com/gophercloud/gophercloud
   version: 754e57e7867bfa48062ff2a237caad538085700a
 - package: google.golang.org/grpc
-  version: 1.2.1
+  version: ^1.7.3
+- package: github.com/golang/glog
 - package: github.com/spf13/cobra
-  version: ^0.0.1
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
 testImport:
 - package: github.com/bouk/monkey
   version: b96e337f6e5b36906584cd0cf9803bbab09284f7

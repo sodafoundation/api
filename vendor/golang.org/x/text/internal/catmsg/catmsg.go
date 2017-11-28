@@ -41,8 +41,9 @@
 //   message.Set(language.English, "You are %d minute(s) late.",
 //       catalog.Var("minutes", plural.Select(1, "one", "minute")),
 //       catalog.String("You are %[1]d ${minutes} late."))
-//
+
 //   p := message.NewPrinter(language.English)
+//
 //   p.Printf("You are %d minute(s) late.", 5) // always 5 minutes late.
 //
 // To evaluate the Printf, package message wraps the arguments in a Renderer
@@ -294,7 +295,7 @@ func (r Raw) Compile(e *Encoder) (err error) {
 //   d.Arg(1)
 //   d.Render(resultOfInvites)
 //   d.Render(" %[2]v to ")
-//   d.Arg(2)
+//   d.Arg(1)
 //   d.Render(resultOfTheir)
 //   d.Render(" party.")
 // where the messages for "invites" and "their" both use a plural.Select

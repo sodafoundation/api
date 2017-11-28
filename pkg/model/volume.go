@@ -32,7 +32,7 @@ type VolumeSpec struct {
 	Status           string            `json:"status,omitempty"`
 	PoolId           string            `json:"poolId,omitempty"`
 	ProfileId        string            `json:"profileId,omitempty"`
-	Metadata         map[string]string `json:"metadata, omitempty"`
+	Metadata         map[string]string `json:"metadata,omitempty"`
 }
 
 func (vol *VolumeSpec) GetName() string {
@@ -68,7 +68,7 @@ type VolumeAttachmentSpec struct {
 	VolumeId        string            `json:"volumeId,omitempty"`
 	Mountpoint      string            `json:"mountpoint,omitempty"`
 	Status          string            `json:"status,omitempty"`
-	Metadata        map[string]string `json:"metadata, omitempty"`
+	Metadata        map[string]string `json:"metadata,omitempty"`
 	*HostInfo       `json:"hostInfo,omitempty"`
 	*ConnectionInfo `json:"connectionInfo,omitempty"`
 }
@@ -142,7 +142,7 @@ type VolumeSnapshotSpec struct {
 	Size        int64             `json:"size,omitempty"`
 	Status      string            `json:"status,omitempty"`
 	VolumeId    string            `json:"volumeId,omitempty"`
-	Metadata    map[string]string `json:"metadata, omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
 }
 
 func (snp *VolumeSnapshotSpec) GetName() string {
