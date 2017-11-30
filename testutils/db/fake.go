@@ -175,7 +175,7 @@ func (fc *FakeDbClient) DeleteVolume(volID string) error {
 }
 
 func (fc *FakeDbClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	return nil, nil
+	return &sampleAttachments[0], nil
 }
 
 func (fc *FakeDbClient) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
