@@ -22,7 +22,6 @@ package dock
 
 import (
 	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
