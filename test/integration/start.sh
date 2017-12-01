@@ -52,3 +52,4 @@ nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
 
 # Start integration test.
 go test -v github.com/opensds/opensds/test/integration/... -tags integration
+
