@@ -20,7 +20,7 @@ OPENSDS_CONF=/etc/opensds/opensds.conf
 
 # Config backend info.
 if [ ! -f ${OPENSDS_CONF} ]; then
-	touch ${OPENSDS_CONF}
+    mkdir -p /etc/opensds
 	echo '
 	[osdslet]
 	api_endpoint = localhost:50040
@@ -49,6 +49,3 @@ fi
 cd ${OPENSDS_ROOT}
 nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
 nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
-
-# Start integration test.
-go test -v github.com/opensds/opensds/test/integration/... -tags integration

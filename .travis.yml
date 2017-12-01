@@ -43,11 +43,11 @@ install:
   - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
   - make
+  - sudo ./test/integration/prepare.sh
 
 script:
   - ./script/coverage
-  - ./script/unittest
-  - sudo ./test/integration/start.sh
+  - ./script/test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
