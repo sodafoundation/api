@@ -35,7 +35,7 @@ func Parse(conf interface{}, p string) (interface{}, error) {
 		return nil, err
 	}
 	if err = yaml.Unmarshal(confYaml, conf); err != nil {
-		log.Fatal("Parse error: %v", err)
+		log.Fatal("Parse error: ", err)
 		return nil, err
 	}
 	return conf, nil

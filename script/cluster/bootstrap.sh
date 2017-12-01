@@ -24,7 +24,8 @@ ETCD_TARBALL=etcd-v3.2.0-linux-amd64.tar.gz
 ETCD_DIR=etcd-v3.2.0-linux-amd64
 
 # Install Golang environment
-if [ ! -d /usr/local/go ]; then
+
+if ! which go &>/dev/null; then
 	wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
 	tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
 	echo 'export GOROOT=/usr/local/go' >> /etc/profile
@@ -50,5 +51,7 @@ if [ ! -d $OPENSDS_ROOT ]; then
 fi
 cd ${OPENSDS_ROOT}
 if [ ! -d $OPENSDS_ROOT/build ]; then
+	sudo apt-get install librados-dev librbd-dev -y
 	make
 fi
+
