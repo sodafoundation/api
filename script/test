@@ -1,6 +1,8 @@
 #!/bin/bash
 
+# Start unit test.
 go test -v github.com/opensds/opensds/client/... -cover
 go test -v github.com/opensds/opensds/pkg/... -cover
 go test -v github.com/opensds/opensds/contrib/... -cover
-go test -v github.com/opensds/opensds/test/integration -tags integration
+# Start integration test.
+go test -v github.com/opensds/opensds/test/integration/... -tags integration

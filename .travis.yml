@@ -24,7 +24,6 @@ env:
 before_install:
   - sudo apt-get update
   - sudo apt-get install librados-dev librbd-dev ceph-common lvm2 -y
-  - travis_wait sudo docker pull golang:1.9
 
 matrix:
   fast_finish: true
@@ -43,12 +42,8 @@ matrix:
 install:
   - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
-  - go build -i ./cmd/osdsctl && go build -i ./cmd/osdslet && go build -i ./cmd/osdsdock
-  - mv ./osdslet ./test/integration/osdslet/ && mv ./osdsdock ./test/integration/osdsdock/
-  - sudo docker build test/integration/osdslet/ -t opensds/osdslet:integration-test
-  - sudo docker build test/integration/osdsdock/ -t opensds/osdsdock:integration-test
-  - sudo docker run -d --net=host opensds/osdslet:integration-test
-  - sudo docker run -d --net=host opensds/osdsdock:integration-test
+  - make
+  - sudo ./test/integration/prepare.sh
 
 script:
   - ./script/coverage
