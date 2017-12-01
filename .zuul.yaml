@@ -1,0 +1,7 @@
+project:
+  name: opensds/opensds
+  check:
+    jobs:
+    - opensds-unittest
+    - opensds-acceptance-test
+
