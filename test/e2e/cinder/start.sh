@@ -82,4 +82,4 @@ nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
 nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
 
 # Start e2e test.
-go test github.com/opensds/opensds/test/e2e/... -tags e2e:cinder
+go test -v github.com/opensds/opensds/test/e2e/... -tags e2e:cinder
