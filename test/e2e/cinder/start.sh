@@ -16,70 +16,112 @@
 
 OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
 OPENSDS_ROOT=${OPENSDS_DIR}/opensds
+OPENSDS_LOG_DIR=/var/log/opensds
+OPENSDS_CONFIG_DIR=/etc/opensds/driver
+OPENSTACK_OPENRC=/home/devstack/openrc
+ETCD_DIR=etcd-v3.2.0-linux-amd64
+
+if [[ -n "$1" ]]; then
+    OPENSTACK_OPENRC=$1
+fi
+
+function log() {
+DATE=`date "+%Y-%m-%d %H:%M:%S"`
+USER=$(whoami)
+echo "${DATE} ${USER} execute $0 [INFO] $@"
+}
+
+function log_error ()
+{
+DATE=`date "+%Y-%m-%d %H:%M:%S"`
+USER=$(whoami)
+echo "${DATE} ${USER} execute $0 [ERROR] $@" 2>&1
+}
+
+function cleanup(){
+    rm ${HOME}/${ETCD_DIR}/default.etcd -rf
+    killall osdslet osdsdock etcd &>/dev/null
+}
 
 cd ${OPENSDS_ROOT}
 
 # OpenSDS cluster installation.
 script/cluster/bootstrap.sh
 
+[ ! -d OPENSDS_CONFIG_DIR ] && mkdir -p OPENSDS_CONFIG_DIR
+[ ! -d OPENSDS_LOG_DIR ] && mkdir -p OPENSDS_LOG_DIR
+
 # Config backend info.
-if [ ! -f /etc/opensds/opensds.conf ]; then
-	echo '
-	[osdslet]
-	api_endpoint = localhost:50040
-	graceful = True
-	log_file = /var/log/opensds/osdslet.log
-	socket_order = inc
+cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
+[osdslet]
+api_endpoint = localhost:50040
+graceful = True
+log_file = /var/log/opensds/osdslet.log
+socket_order = inc
 
-	[osdsdock]
-	api_endpoint = localhost:50050
-	log_file = /var/log/opensds/osdsdock.log
-	# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-	enabled_backends = cinder
+[osdsdock]
+api_endpoint = localhost:50050
+log_file = /var/log/opensds/osdsdock.log
+# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+enabled_backends = cinder
 
-	[cinder]
-	name = cinder
-	description = Cinder Test
-	driver_name = cinder
-	config_path = /etc/opensds/driver/cinder.yaml
+[cinder]
+name = cinder
+description = Cinder Test
+driver_name = cinder
+config_path = /etc/opensds/driver/cinder.yaml
 
-	[database]
-	endpoint = localhost:2379,localhost:2380
-	driver = etcd
-	' >> /etc/opensds/opensds.conf
-fi
-if [ ! -f /etc/opensds/driver/cinder.yaml ]; then
-	echo '
-	authOptions:
-	  endpoint: "http://192.168.56.104/identity"
-	  domainId: "Default"
-	  domainName: "Default"
-	  username: "admin"
-	  password: "admin"
-	  tenantId: "04154b841eb644a3947506c54fa73c76"
-	  tenantName: "admin"
-	pool:
-	  pool1:
-	    diskType: SSD
-	    iops: 1000
-	    bandwidth: 1000
-	    AZ: nova-01
-	  pool2:
-	    diskType: SAS
-	    iops: 800
-	    bandwidth: 800
-	    AZ: nova-01
-	' >> /etc/opensds/driver/cinder.yaml
-fi
+[database]
+endpoint = localhost:2379,localhost:2380
+driver = etcd
+OPENSDS_GLOABL_CONFIG_DOC
+
+
+source $OPENSTACK_OPENRC >/dev/null
+POOL_NAME=`cinder get-pools| grep -v "^+"| sed -n '2p' | tr -d "|" | awk '{print $2}'`
+cat > /etc/opensds/driver/cinder.yaml <<OPENSDS_CINDER_DIRVER_CONFIG_DOC
+authOptions:
+  endpoint: $KEYSTONE_AUTH_URI
+  domainId: $OS_PROJECT_DOMAIN_ID
+  username: $OS_USERNAME
+  password: $OS_PASSWORD
+  tenantName: $OS_TENANT_NAME
+pool:
+  $POOL_NAME:
+    diskType: SSD
+    iops: 1000
+    bandwidth: 1000
+    AZ: nova-01
+OPENSDS_CINDER_DIRVER_CONFIG_DOC
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
-nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
+./etcd &>>$OPENSDS_LOG_DIR/etcd.log &
+# Waiting for the etcd up.
+n=1
+export ETCDCTL_API=3
+while  ! etcdctl endpoint status &>/dev/null
+do
+    echo try $n times
+    let n++
+    if [ $n -ge 10 ]; then
+        log_error "The etcd is not up exited"
+        cleanup
+        exit 1
+    fi
+    sleep 1
+done
+
 
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_ROOT}
-nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
-nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
+build/out/bin/osdsdock &>> $OPENSDS_LOG_DIR/osdsdock.log &
+build/out/bin/osdslet &>> $OPENSDS_LOG_DIR/osdslet.log &
 
 # Start e2e test.
-go test -v github.com/opensds/opensds/test/e2e/... -tags e2e:cinder
+go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
+
+cleanup
+exit 0
+
+
