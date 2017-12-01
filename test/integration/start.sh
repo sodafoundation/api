@@ -16,11 +16,11 @@
 
 OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
 OPENSDS_ROOT=${OPENSDS_DIR}/opensds
-
-cd ${OPENSDS_ROOT}
+OPENSDS_CONF=/etc/opensds/opensds.conf
 
 # Config backend info.
-if [ ! -f /etc/opensds/opensds.conf ]; then
+if [ ! -f ${OPENSDS_CONF} ]; then
+	touch ${OPENSDS_CONF}
 	echo '
 	[osdslet]
 	api_endpoint = localhost:50040
@@ -42,7 +42,7 @@ if [ ! -f /etc/opensds/opensds.conf ]; then
 	[database]
 	# Enabled database types, such as etcd, mysql, fake, etc.
 	driver = fake
-	' >> /etc/opensds/opensds.conf
+	' >> ${OPENSDS_CONF}
 fi
 
 # Run osdsdock and osdslet daemon in background.
@@ -52,4 +52,3 @@ nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
 
 # Start integration test.
 go test -v github.com/opensds/opensds/test/integration/... -tags integration
-
