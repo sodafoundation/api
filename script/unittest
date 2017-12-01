@@ -3,4 +3,3 @@
 go test -v github.com/opensds/opensds/client/... -cover
 go test -v github.com/opensds/opensds/pkg/... -cover
 go test -v github.com/opensds/opensds/contrib/... -cover
-go test -v github.com/opensds/opensds/test/integration -tags integration
