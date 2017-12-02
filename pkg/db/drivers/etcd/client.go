@@ -15,11 +15,16 @@
 package etcd
 
 import (
-	log "github.com/golang/glog"
-
-	"golang.org/x/net/context"
+	"sync"
+	"time"
 
 	"github.com/coreos/etcd/clientv3"
+	log "github.com/golang/glog"
+	"golang.org/x/net/context"
+)
+
+var (
+	timeOut = 3 * time.Second
 )
 
 type Request struct {
@@ -32,6 +37,36 @@ type Response struct {
 	Status  string   `json:"status"`
 	Message []string `json:"message"`
 	Error   string   `json:"error"`
+}
+
+type clientInterface interface {
+	Create(req *Request) *Response
+
+	Get(req *Request) *Response
+
+	List(req *Request) *Response
+
+	Update(req *Request) *Response
+
+	Delete(req *Request) *Response
+}
+
+func Init(edps []string) *client {
+	cliv3, err := clientv3.New(clientv3.Config{
+		Endpoints:   edps,
+		DialTimeout: timeOut,
+	})
+	if err != nil {
+		cliv3.Close()
+		panic(err)
+	}
+
+	return &client{cli: cliv3}
+}
+
+type client struct {
+	cli  *clientv3.Client
+	lock sync.Mutex
 }
 
 func (c *client) Create(req *Request) *Response {

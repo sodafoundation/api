@@ -18,6 +18,37 @@ import (
 	"strings"
 )
 
-func GenerateUrl(in ...string) string {
-	return strings.Join(in, "/")
+func GenerateDockURL(in ...string) string {
+	return generateURL("docks", in...)
+}
+
+func GeneratePoolURL(in ...string) string {
+	return generateURL("pools", in...)
+}
+
+func GenerateProfileURL(in ...string) string {
+	return generateURL("profiles", in...)
+}
+
+func GenerateVolumeURL(in ...string) string {
+	return generateURL("volumes", in...)
+}
+
+func GenerateAttachmentURL(in ...string) string {
+	return generateURL("volume/attachments", in...)
+}
+
+func GenerateSnapshotURL(in ...string) string {
+	return generateURL("volume/snapshots", in...)
+}
+
+func generateURL(resource string, in ...string) string {
+	value := []string{CurrentVersion(), resource}
+	value = append(value, in...)
+
+	return strings.Join(value, "/")
+}
+
+func CurrentVersion() string {
+	return "v1alpha"
 }

@@ -23,51 +23,31 @@ package etcd
 import (
 	"encoding/json"
 	"errors"
-	"sync"
 	"time"
 
 	log "github.com/golang/glog"
-
-	"github.com/coreos/etcd/clientv3"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
-	"github.com/satori/go.uuid"
 )
 
-const (
-	prefix  = "/v1alpha/block"
-	timeOut = 3 * time.Second
-)
-
-var c = &client{}
-
-func Init(edps []string) *client {
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   edps,
-		DialTimeout: timeOut,
-	})
-	if err != nil {
-		cli.Close()
-		panic(err)
+func NewClient(edps []string) *Client {
+	return &Client{
+		clientInterface: Init(edps),
 	}
-
-	c.cli = cli
-	return c
 }
 
-type client struct {
-	cli  *clientv3.Client
-	lock sync.Mutex
+type Client struct {
+	clientInterface
 }
 
-func (c *client) CreateDock(dck *model.DockSpec) error {
+func (c *Client) CreateDock(dck *model.DockSpec) error {
 	dckBody, err := json.Marshal(dck)
 	if err != nil {
 		return err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "docks", dck.GetId()),
+		Url:     GenerateDockURL(dck.GetId()),
 		Content: string(dckBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -79,9 +59,9 @@ func (c *client) CreateDock(dck *model.DockSpec) error {
 	return nil
 }
 
-func (c *client) GetDock(dckID string) (*model.DockSpec, error) {
+func (c *Client) GetDock(dckID string) (*model.DockSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "docks", dckID),
+		Url: GenerateDockURL(dckID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -97,7 +77,7 @@ func (c *client) GetDock(dckID string) (*model.DockSpec, error) {
 	return dck, nil
 }
 
-func (c *client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
+func (c *Client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	pool, err := c.GetPool(poolId)
 	if err != nil {
 		log.Error("Get pool failed in db: ", err)
@@ -117,9 +97,9 @@ func (c *client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	return nil, errors.New("Get dock failed by pool id: " + poolId)
 }
 
-func (c *client) ListDocks() ([]*model.DockSpec, error) {
+func (c *Client) ListDocks() ([]*model.DockSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "docks"),
+		Url: GenerateDockURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -142,7 +122,7 @@ func (c *client) ListDocks() ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
-func (c *client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
+func (c *Client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	dck, err := c.GetDock(dckID)
 	if err != nil {
 		return nil, err
@@ -159,7 +139,7 @@ func (c *client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	}
 
 	dbReq := &Request{
-		Url:        GenerateUrl(prefix, "docks", dckID),
+		Url:        GenerateDockURL(dckID),
 		NewContent: string(dckBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -170,9 +150,9 @@ func (c *client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	return dck, nil
 }
 
-func (c *client) DeleteDock(dckID string) error {
+func (c *Client) DeleteDock(dckID string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "docks", dckID),
+		Url: GenerateDockURL(dckID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -182,14 +162,14 @@ func (c *client) DeleteDock(dckID string) error {
 	return nil
 }
 
-func (c *client) CreatePool(pol *model.StoragePoolSpec) error {
+func (c *Client) CreatePool(pol *model.StoragePoolSpec) error {
 	polBody, err := json.Marshal(pol)
 	if err != nil {
 		return err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "pools", pol.GetId()),
+		Url:     GeneratePoolURL(pol.GetId()),
 		Content: string(polBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -201,9 +181,9 @@ func (c *client) CreatePool(pol *model.StoragePoolSpec) error {
 	return nil
 }
 
-func (c *client) GetPool(polID string) (*model.StoragePoolSpec, error) {
+func (c *Client) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "pools", polID),
+		Url: GeneratePoolURL(polID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -219,9 +199,9 @@ func (c *client) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return pol, nil
 }
 
-func (c *client) ListPools() ([]*model.StoragePoolSpec, error) {
+func (c *Client) ListPools() ([]*model.StoragePoolSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "pools"),
+		Url: GeneratePoolURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -244,7 +224,7 @@ func (c *client) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
+func (c *Client) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
 	pol, err := c.GetPool(polID)
 	if err != nil {
 		return nil, err
@@ -261,7 +241,7 @@ func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	}
 
 	dbReq := &Request{
-		Url:        GenerateUrl(prefix, "pools", polID),
+		Url:        GeneratePoolURL(polID),
 		NewContent: string(polBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -272,9 +252,9 @@ func (c *client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	return pol, nil
 }
 
-func (c *client) DeletePool(polID string) error {
+func (c *Client) DeletePool(polID string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "pools", polID),
+		Url: GeneratePoolURL(polID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -284,14 +264,14 @@ func (c *client) DeletePool(polID string) error {
 	return nil
 }
 
-func (c *client) CreateProfile(prf *model.ProfileSpec) error {
+func (c *Client) CreateProfile(prf *model.ProfileSpec) error {
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "profiles", prf.GetId()),
+		Url:     GenerateProfileURL(prf.GetId()),
 		Content: string(prfBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -303,9 +283,9 @@ func (c *client) CreateProfile(prf *model.ProfileSpec) error {
 	return nil
 }
 
-func (c *client) GetProfile(prfID string) (*model.ProfileSpec, error) {
+func (c *Client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "profiles", prfID),
+		Url: GenerateProfileURL(prfID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -321,7 +301,7 @@ func (c *client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return prf, nil
 }
 
-func (c *client) GetDefaultProfile() (*model.ProfileSpec, error) {
+func (c *Client) GetDefaultProfile() (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles()
 	if err != nil {
 		log.Error("Get default profile failed in db: ", err)
@@ -336,9 +316,9 @@ func (c *client) GetDefaultProfile() (*model.ProfileSpec, error) {
 	return nil, errors.New("No default profile in db.")
 }
 
-func (c *client) ListProfiles() ([]*model.ProfileSpec, error) {
+func (c *Client) ListProfiles() ([]*model.ProfileSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "profiles"),
+		Url: GenerateProfileURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -361,7 +341,7 @@ func (c *client) ListProfiles() ([]*model.ProfileSpec, error) {
 	return prfs, nil
 }
 
-func (c *client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
+func (c *Client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
 		return nil, err
@@ -390,7 +370,7 @@ func (c *client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	}
 
 	dbReq := &Request{
-		Url:        GenerateUrl(prefix, "profiles", prfID),
+		Url:        GenerateProfileURL(prfID),
 		NewContent: string(prfBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -401,9 +381,9 @@ func (c *client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	return prf, nil
 }
 
-func (c *client) DeleteProfile(prfID string) error {
+func (c *Client) DeleteProfile(prfID string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "profiles", prfID),
+		Url: GenerateProfileURL(prfID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -413,7 +393,7 @@ func (c *client) DeleteProfile(prfID string) error {
 	return nil
 }
 
-func (c *client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
+func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
 		return nil, err
@@ -435,7 +415,7 @@ func (c *client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 	return &prf.Extra, nil
 }
 
-func (c *client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
+func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
 		return nil, err
@@ -443,7 +423,7 @@ func (c *client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	return &prf.Extra, nil
 }
 
-func (c *client) RemoveExtraProperty(prfID, extraKey string) error {
+func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
 		return err
@@ -456,14 +436,14 @@ func (c *client) RemoveExtraProperty(prfID, extraKey string) error {
 	return nil
 }
 
-func (c *client) CreateVolume(vol *model.VolumeSpec) error {
+func (c *Client) CreateVolume(vol *model.VolumeSpec) error {
 	volBody, err := json.Marshal(vol)
 	if err != nil {
 		return err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "volumes", vol.GetId()),
+		Url:     GenerateVolumeURL(vol.GetId()),
 		Content: string(volBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -475,9 +455,9 @@ func (c *client) CreateVolume(vol *model.VolumeSpec) error {
 	return nil
 }
 
-func (c *client) GetVolume(volID string) (*model.VolumeSpec, error) {
+func (c *Client) GetVolume(volID string) (*model.VolumeSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volumes", volID),
+		Url: GenerateVolumeURL(volID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -493,9 +473,9 @@ func (c *client) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return vol, nil
 }
 
-func (c *client) ListVolumes() ([]*model.VolumeSpec, error) {
+func (c *Client) ListVolumes() ([]*model.VolumeSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volumes"),
+		Url: GenerateVolumeURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -518,9 +498,9 @@ func (c *client) ListVolumes() ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
-func (c *client) DeleteVolume(volID string) error {
+func (c *Client) DeleteVolume(volID string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volumes", volID),
+		Url: GenerateVolumeURL(volID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -530,20 +510,14 @@ func (c *client) DeleteVolume(volID string) error {
 	return nil
 }
 
-func (c *client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	if len(attachment.Id) == 0 {
-		attachment.Id = uuid.NewV4().String()
-	}
-
-	attachment.CreatedAt = time.Now().Format(utils.TimeFormat)
-
+func (c *Client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	atcBody, err := json.Marshal(attachment)
 	if err != nil {
 		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "volume", "attachments", attachment.Id),
+		Url:     GenerateAttachmentURL(attachment.Id),
 		Content: string(atcBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -555,9 +529,9 @@ func (c *client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) 
 	return attachment, nil
 }
 
-func (c *client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
+func (c *Client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "attachments", attachmentId),
+		Url: GenerateAttachmentURL(attachmentId),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -573,9 +547,9 @@ func (c *client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachme
 	return atc, nil
 }
 
-func (c *client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+func (c *Client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "attachments"),
+		Url: GenerateAttachmentURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -599,7 +573,7 @@ func (c *client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachme
 
 }
 
-func (c *client) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	result, err := c.GetVolumeAttachment(attachmentId)
 	if err != nil {
 		return nil, err
@@ -645,7 +619,7 @@ func (c *client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 	}
 
 	dbReq := &Request{
-		Url:        GenerateUrl(prefix, "volume", "attachments", attachmentId),
+		Url:        GenerateAttachmentURL(attachmentId),
 		NewContent: string(atcBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -656,9 +630,9 @@ func (c *client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 	return result, nil
 }
 
-func (c *client) DeleteVolumeAttachment(attachmentId string) error {
+func (c *Client) DeleteVolumeAttachment(attachmentId string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "attachments", attachmentId),
+		Url: GenerateAttachmentURL(attachmentId),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -668,14 +642,14 @@ func (c *client) DeleteVolumeAttachment(attachmentId string) error {
 	return nil
 }
 
-func (c *client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) error {
+func (c *Client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) error {
 	snpBody, err := json.Marshal(snp)
 	if err != nil {
 		return err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateUrl(prefix, "volume", "snapshots", snp.GetId()),
+		Url:     GenerateSnapshotURL(snp.GetId()),
 		Content: string(snpBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -687,9 +661,9 @@ func (c *client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) error {
 	return nil
 }
 
-func (c *client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
+func (c *Client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "snapshots", snpID),
+		Url: GenerateSnapshotURL(snpID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -705,9 +679,9 @@ func (c *client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, err
 	return vs, nil
 }
 
-func (c *client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
+func (c *Client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "snapshots"),
+		Url: GenerateSnapshotURL(),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -730,9 +704,9 @@ func (c *client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	return vss, nil
 }
 
-func (c *client) DeleteVolumeSnapshot(snpID string) error {
+func (c *Client) DeleteVolumeSnapshot(snpID string) error {
 	dbReq := &Request{
-		Url: GenerateUrl(prefix, "volume", "snapshots", snpID),
+		Url: GenerateSnapshotURL(snpID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
