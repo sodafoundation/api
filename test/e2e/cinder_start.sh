@@ -56,20 +56,20 @@ cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
 [osdslet]
 api_endpoint = localhost:50040
 graceful = True
-log_file = /var/log/opensds/osdslet.log
+log_file = $OPENSDS_LOG_DIR/osdslet.log
 socket_order = inc
 
 [osdsdock]
 api_endpoint = localhost:50050
-log_file = /var/log/opensds/osdsdock.log
+log_file = $OPENSDS_LOG_DIR/osdsdock.log
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = cinder
 
 [cinder]
 name = cinder
-description = Cinder Test
+description = Cinder E2E Test
 driver_name = cinder
-config_path = /etc/opensds/driver/cinder.yaml
+config_path = $OPENSDS_CONFIG_DIR/cinder.yaml
 
 [database]
 endpoint = localhost:2379,localhost:2380
@@ -79,7 +79,7 @@ OPENSDS_GLOABL_CONFIG_DOC
 
 source $OPENSTACK_OPENRC >/dev/null
 POOL_NAME=`cinder get-pools| grep -v "^+"| sed -n '2p' | tr -d "|" | awk '{print $2}'`
-cat > /etc/opensds/driver/cinder.yaml <<OPENSDS_CINDER_DIRVER_CONFIG_DOC
+cat > $OPENSDS_CONFIG_DIR/cinder.yaml <<OPENSDS_CINDER_DIRVER_CONFIG_DOC
 authOptions:
   endpoint: $KEYSTONE_AUTH_URI
   domainId: $OS_PROJECT_DOMAIN_ID
