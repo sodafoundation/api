@@ -186,12 +186,11 @@ func TestGetVolumeAttachment(t *testing.T) {
 		return
 	}
 	// TODO Test the return value.
-	/*
-		if !reflect.DeepEqual(atc, result) {
-			t.Errorf("Expected %+v, got %+v", atc, result)
-			return
-		}
-	*/
+	// if !reflect.DeepEqual(atc, result) {
+	// 	t.Errorf("Expected %+v, got %+v", atc, result)
+	// 	return
+	// }
+
 	atcBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume attachment success, got:", string(atcBody))
 }

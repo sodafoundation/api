@@ -20,6 +20,24 @@ OPENSDS_LOG_DIR=/var/log/opensds
 OPENSDS_CONFIG_DIR=/etc/opensds/driver
 ETCD_DIR=etcd-v3.2.0-linux-amd64
 
+function log() {
+DATE=`date "+%Y-%m-%d %H:%M:%S"`
+USER=$(whoami)
+echo "${DATE} ${USER} execute $0 [INFO] $@"
+}
+
+function log_error ()
+{
+DATE=`date "+%Y-%m-%d %H:%M:%S"`
+USER=$(whoami)
+echo "${DATE} ${USER} execute $0 [ERROR] $@" 2>&1
+}
+
+function cleanup(){
+    rm ${HOME}/${ETCD_DIR}/default.etcd -rf
+    killall osdslet osdsdock etcd &>/dev/null
+}
+
 cd ${OPENSDS_ROOT}
 
 # OpenSDS cluster installation.
@@ -92,5 +110,3 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
 cleanup
 exit 0
-
-

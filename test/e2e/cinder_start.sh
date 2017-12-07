@@ -123,5 +123,3 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
 cleanup
 exit 0
-
-
