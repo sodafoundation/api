@@ -14,7 +14,7 @@
 
 // +build e2e
 
-package cinder
+package e2e
 
 import (
 	"encoding/json"
@@ -186,12 +186,11 @@ func TestGetVolumeAttachment(t *testing.T) {
 		return
 	}
 	// TODO Test the return value.
-	/*
-		if !reflect.DeepEqual(atc, result) {
-			t.Errorf("Expected %+v, got %+v", atc, result)
-			return
-		}
-	*/
+	// if !reflect.DeepEqual(atc, result) {
+	// 	t.Errorf("Expected %+v, got %+v", atc, result)
+	// 	return
+	// }
+
 	atcBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume attachment success, got:", string(atcBody))
 }
@@ -220,7 +219,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 		t.Error("Failed to run volume attachment prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.GetVolumeId(), atc.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, atc.GetVolumeId())
 
 	t.Log("Start deleting volume attachment...")
 	if err := c.DeleteVolumeAttachment(atc.GetId(), nil); err != nil {
@@ -309,7 +308,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume snapshot prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.GetVolumeId(), snp.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, snp.GetVolumeId())
 
 	t.Log("Start deleting volume snapshot...")
 	if err := c.DeleteVolumeSnapshot(snp.GetId(), nil); err != nil {

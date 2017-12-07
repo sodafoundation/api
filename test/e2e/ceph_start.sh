@@ -18,12 +18,7 @@ OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
 OPENSDS_ROOT=${OPENSDS_DIR}/opensds
 OPENSDS_LOG_DIR=/var/log/opensds
 OPENSDS_CONFIG_DIR=/etc/opensds/driver
-OPENSTACK_OPENRC=/home/devstack/openrc
 ETCD_DIR=etcd-v3.2.0-linux-amd64
-
-if [[ -n "$1" ]]; then
-    OPENSTACK_OPENRC=$1
-fi
 
 function log() {
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
@@ -56,43 +51,35 @@ cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
 [osdslet]
 api_endpoint = localhost:50040
 graceful = True
-log_file = /var/log/opensds/osdslet.log
+log_file = $OPENSDS_LOG_DIR/osdslet.log
 socket_order = inc
 
 [osdsdock]
 api_endpoint = localhost:50050
-log_file = /var/log/opensds/osdsdock.log
+log_file = $OPENSDS_LOG_DIR/osdsdock.log
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-enabled_backends = cinder
+enabled_backends = ceph
 
-[cinder]
-name = cinder
-description = Cinder Test
-driver_name = cinder
-config_path = /etc/opensds/driver/cinder.yaml
+[ceph]
+name = ceph
+description = Ceph Test
+driver_name = ceph
+config_path = $OPENSDS_CONFIG_DIR/ceph.yaml
 
 [database]
 endpoint = localhost:2379,localhost:2380
 driver = etcd
 OPENSDS_GLOABL_CONFIG_DOC
 
-
-source $OPENSTACK_OPENRC >/dev/null
-POOL_NAME=`cinder get-pools| grep -v "^+"| sed -n '2p' | tr -d "|" | awk '{print $2}'`
-cat > /etc/opensds/driver/cinder.yaml <<OPENSDS_CINDER_DIRVER_CONFIG_DOC
-authOptions:
-  endpoint: $KEYSTONE_AUTH_URI
-  domainId: $OS_PROJECT_DOMAIN_ID
-  username: $OS_USERNAME
-  password: $OS_PASSWORD
-  tenantName: $OS_TENANT_NAME
+cat > /etc/opensds/driver/ceph.yaml <<OPENSDS_CEPH_DIRVER_CONFIG_DOC
+configFile: /etc/ceph/ceph.conf
 pool:
-  $POOL_NAME:
+  "rbd":
     diskType: SSD
     iops: 1000
     bandwidth: 1000
-    AZ: nova-01
-OPENSDS_CINDER_DIRVER_CONFIG_DOC
+    AZ: default
+OPENSDS_CEPH_DIRVER_CONFIG_DOC
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
@@ -123,5 +110,3 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
 cleanup
 exit 0
-
-

@@ -56,7 +56,6 @@ type Controller struct {
 }
 
 func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
-
 	var profile *model.ProfileSpec
 	var err error
 
@@ -207,7 +206,7 @@ func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) error {
 	volume, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
-		log.Error("Get volume failed in create volume attachment method: ", err)
+		log.Error("Get volume failed in delete volume attachment method: ", err)
 		return err
 	}
 	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
@@ -238,7 +237,7 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	volume, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
-		log.Error("Get volume failed in create volume attachment method: ", err)
+		log.Error("Get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
 
@@ -264,7 +263,7 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 	volume, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
-		log.Error("Get volume failed in create volume attachment method: ", err)
+		log.Error("Get volume failed in delete volume snapshot method: ", err)
 		return err
 	}
 	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
