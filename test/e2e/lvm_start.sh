@@ -19,6 +19,8 @@ OPENSDS_ROOT=${OPENSDS_DIR}/opensds
 OPENSDS_LOG_DIR=/var/log/opensds
 OPENSDS_CONFIG_DIR=/etc/opensds/driver
 ETCD_DIR=etcd-v3.2.0-linux-amd64
+VG_NAME=vg001
+TGT_BINDIP=127.0.0.1
 
 function log() {
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
@@ -58,28 +60,28 @@ socket_order = inc
 api_endpoint = localhost:50050
 log_file = $OPENSDS_LOG_DIR/osdsdock.log
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-enabled_backends = ceph
+enabled_backends = lvm
 
-[ceph]
-name = ceph
-description = Ceph E2E Test
-driver_name = ceph
-config_path = $OPENSDS_CONFIG_DIR/ceph.yaml
+[lvm]
+name = lvm
+description = LVM E2E Test
+driver_name = lvm
+config_path = $OPENSDS_CONFIG_DIR/lvm.yaml
 
 [database]
 endpoint = localhost:2379,localhost:2380
 driver = etcd
 OPENSDS_GLOABL_CONFIG_DOC
 
-cat > $OPENSDS_CONFIG_DIR/ceph.yaml <<OPENSDS_CEPH_DIRVER_CONFIG_DOC
-configFile: /etc/ceph/ceph.conf
+cat > $OPENSDS_CONFIG_DIR/lvm.yaml <<OPENSDS_LVM_DIRVER_CONFIG_DOC
+tgtBindIp: $TGT_BINDIP
 pool:
-  "rbd":
+  $VG_NAME:
     diskType: SSD
     iops: 1000
     bandwidth: 1000
     AZ: default
-OPENSDS_CEPH_DIRVER_CONFIG_DOC
+OPENSDS_LVM_DIRVER_CONFIG_DOC
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
