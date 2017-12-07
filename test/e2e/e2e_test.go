@@ -14,7 +14,7 @@
 
 // +build e2e
 
-package cinder
+package e2e
 
 import (
 	"encoding/json"
