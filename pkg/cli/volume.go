@@ -164,4 +164,3 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	}
 	fmt.Printf("Delete volume(%s) sucess.\n", args[0])
 }
-

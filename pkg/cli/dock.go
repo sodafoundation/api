@@ -84,4 +84,3 @@ func dockListAction(cmd *cobra.Command, args []string) {
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintList(resp, keys, FormatterList{})
 }
-

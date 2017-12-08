@@ -214,4 +214,3 @@ func (*tgtTarget) execCmd(cmd []string) (string, error) {
 	}
 	return string(ret), nil
 }
-

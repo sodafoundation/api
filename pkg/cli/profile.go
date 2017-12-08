@@ -139,4 +139,3 @@ func profileDeleteAction(cmd *cobra.Command, args []string) {
 	}
 	fmt.Printf("Delete profile(%s) sucess.\n", args[0])
 }
-

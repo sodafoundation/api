@@ -83,4 +83,3 @@ func (t *iscsiTarget) RemoveExport(path, initiator string) error {
 
 	return nil
 }
-
