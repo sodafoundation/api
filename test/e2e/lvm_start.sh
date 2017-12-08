@@ -14,18 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
+OPENSDS_DIR=${GOPATH}/src/github.com/opensds
 OPENSDS_ROOT=${OPENSDS_DIR}/opensds
 OPENSDS_LOG_DIR=/var/log/opensds
 OPENSDS_CONFIG_DIR=/etc/opensds/driver
 ETCD_DIR=etcd-v3.2.0-linux-amd64
 VG_NAME=vg001
 TGT_BINDIP=127.0.0.1
-
-function change_root() {
-	su root
-	source /etc/profile
-}
 
 function log() {
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
@@ -47,11 +42,11 @@ function cleanup() {
 # OpenSDS cluster installation.
 cd ${OPENSDS_ROOT} && script/cluster/bootstrap.sh
 
-# Change to root access.
-change_root
+# Import some pre-defined environment variables.
+source /etc/profile
 
-[ ! -d OPENSDS_CONFIG_DIR ] && mkdir -p OPENSDS_CONFIG_DIR
-[ ! -d OPENSDS_LOG_DIR ] && mkdir -p OPENSDS_LOG_DIR
+[ ! -d $OPENSDS_CONFIG_DIR ] && mkdir -p ${OPENSDS_CONFIG_DIR}
+[ ! -d $OPENSDS_LOG_DIR ] && mkdir -p ${OPENSDS_LOG_DIR}
 
 # Config backend info.
 cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
@@ -78,7 +73,7 @@ endpoint = localhost:2379,localhost:2380
 driver = etcd
 OPENSDS_GLOABL_CONFIG_DOC
 
-cat > $OPENSDS_CONFIG_DIR/lvm.yaml <<OPENSDS_LVM_DIRVER_CONFIG_DOC
+cat > ${OPENSDS_CONFIG_DIR}/lvm.yaml <<OPENSDS_LVM_DIRVER_CONFIG_DOC
 tgtBindIp: $TGT_BINDIP
 pool:
   $VG_NAME:
@@ -89,7 +84,8 @@ pool:
 OPENSDS_LVM_DIRVER_CONFIG_DOC
 
 # Run etcd daemon in background.
-cd ${HOME}/${ETCD_DIR} && ./etcd &>>$OPENSDS_LOG_DIR/etcd.log &
+cd ${HOME}/${ETCD_DIR}
+./etcd &>>${OPENSDS_LOG_DIR}/etcd.log &
 # Waiting for the etcd up.
 n=1
 export ETCDCTL_API=3
@@ -108,8 +104,8 @@ done
 
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_ROOT}
-build/out/bin/osdsdock &>> $OPENSDS_LOG_DIR/osdsdock.log &
-build/out/bin/osdslet &>> $OPENSDS_LOG_DIR/osdslet.log &
+build/out/bin/osdsdock &>> ${OPENSDS_LOG_DIR}/osdsdock.log &
+build/out/bin/osdslet &>> ${OPENSDS_LOG_DIR}/osdslet.log &
 
 # Start e2e test.
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e

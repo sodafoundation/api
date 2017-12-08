@@ -239,8 +239,8 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 
 	t.Log("Start creating volume snapshot...")
 	var body = &model.VolumeSnapshotSpec{
-		Name:        "test",
-		Description: "This is a test",
+		Name:        "test-snapshot",
+		Description: "This is a snapshot test",
 		VolumeId:    vol.GetId(),
 	}
 	snp, err := c.CreateVolumeSnapshot(body)
@@ -366,8 +366,8 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 
 	t.Log("Start preparing volume snapshot...")
 	var body = &model.VolumeSnapshotSpec{
-		Name:        "test",
-		Description: "This is a test",
+		Name:        "test-snapshot",
+		Description: "This is a snapshot test",
 		VolumeId:    vol.GetId(),
 	}
 	snp, err := c.CreateVolumeSnapshot(body)

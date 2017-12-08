@@ -175,3 +175,47 @@ func TestContained(t *testing.T) {
 		}
 	}
 }
+
+func TestMergeGeneralMaps(t *testing.T) {
+	input := []map[string]interface{}{
+		map[string]interface{}{
+			"Lee": 100,
+			"fat": false,
+		},
+		map[string]interface{}{
+			"Ming": 50,
+			"tall": true,
+		},
+	}
+	var expected = map[string]interface{}{
+		"Lee":  100,
+		"fat":  false,
+		"Ming": 50,
+		"tall": true,
+	}
+
+	result := MergeGeneralMaps(input...)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, get %v\n", expected, result)
+	}
+}
+
+func TestMergeStringMaps(t *testing.T) {
+	input := []map[string]string{
+		map[string]string{
+			"Lee": "fat",
+		},
+		map[string]string{
+			"Ming": "thin",
+		},
+	}
+	var expected = map[string]string{
+		"Lee":  "fat",
+		"Ming": "thin",
+	}
+
+	result := MergeStringMaps(input...)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, get %v\n", expected, result)
+	}
+}

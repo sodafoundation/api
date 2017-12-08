@@ -31,6 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 const (
@@ -192,7 +193,7 @@ func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 				Host:      in.GetHost(),
 				Initiator: in.GetInitiator(),
 			},
-			Metadata:   in.GetMetadata(),
+			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.GetId(),
 			DriverName: dockInfo.GetDriverName(),
 		},
@@ -227,7 +228,7 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 				Host:      in.GetHost(),
 				Initiator: in.GetInitiator(),
 			},
-			Metadata:   in.GetMetadata(),
+			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.GetId(),
 			DriverName: dockInfo.GetDriverName(),
 		},
@@ -255,7 +256,7 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 			Description: in.GetDescription(),
 			Size:        in.GetSize(),
 			VolumeId:    in.GetVolumeId(),
-			Metadata:    in.GetMetadata(),
+			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:      dockInfo.GetId(),
 			DriverName:  dockInfo.GetDriverName(),
 		},
@@ -279,7 +280,7 @@ func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 		&pb.DeleteVolumeSnapshotOpts{
 			Id:         in.GetId(),
 			VolumeId:   in.GetVolumeId(),
-			Metadata:   in.GetMetadata(),
+			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.GetId(),
 			DriverName: dockInfo.GetDriverName(),
 		},
