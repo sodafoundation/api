@@ -225,7 +225,7 @@ func TestClientDeleteVolume(t *testing.T) {
 func TestClientCreateVolumeAttachment(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	}
 
 	atc, err := c.CreateVolumeAttachment(body)
@@ -266,7 +266,7 @@ func TestClientDeleteVolumeAttachment(t *testing.T) {
 	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
 	body := &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	}
 
 	if err := c.DeleteVolumeAttachment(atcID, body); err != nil {

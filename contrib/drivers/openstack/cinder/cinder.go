@@ -265,7 +265,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:          page.Name,
 			TotalCapacity: int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:  int64(page.Capabilities.FreeCapacityGB),
-			Parameters:    *param,
+			Extras:        *param,
 		}
 		pols = append(pols, pol)
 	}

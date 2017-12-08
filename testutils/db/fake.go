@@ -32,7 +32,7 @@ func (fc *FakeDbClient) CreateDock(dck *model.DockSpec) error {
 
 func (fc *FakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
 	for i := range sampleDocks {
-		if sampleDocks[i].GetId() == dckID {
+		if sampleDocks[i].Id == dckID {
 			return &sampleDocks[i], nil
 		}
 	}
@@ -75,7 +75,7 @@ func (fc *FakeDbClient) CreatePool(pol *model.StoragePoolSpec) error {
 
 func (fc *FakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	for i := range samplePools {
-		if samplePools[i].GetId() == polID {
+		if samplePools[i].Id == polID {
 			return &samplePools[i], nil
 		}
 	}
@@ -106,7 +106,7 @@ func (fc *FakeDbClient) CreateProfile(prf *model.ProfileSpec) error {
 
 func (fc *FakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	for i := range sampleProfiles {
-		if sampleProfiles[i].GetId() == prfID {
+		if sampleProfiles[i].Id == prfID {
 			return &sampleProfiles[i], nil
 		}
 	}
@@ -142,12 +142,12 @@ func (fc *FakeDbClient) DeleteProfile(prfID string) error {
 }
 
 func (fc *FakeDbClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
-	extra := sampleProfiles[0].Extra
+	extra := sampleProfiles[0].Extras
 	return &extra, nil
 }
 
 func (fc *FakeDbClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
-	extra := sampleProfiles[0].Extra
+	extra := sampleProfiles[0].Extras
 	return &extra, nil
 }
 
@@ -224,7 +224,7 @@ var (
 			},
 			Name:        "default",
 			Description: "default policy",
-			Extra:       model.ExtraSpec{},
+			Extras:      model.ExtraSpec{},
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -232,7 +232,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extra: model.ExtraSpec{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
@@ -262,7 +262,7 @@ var (
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -277,7 +277,7 @@ var (
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
@@ -305,8 +305,8 @@ var (
 			},
 			Status:   "available",
 			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: &model.HostInfo{},
-			ConnectionInfo: &model.ConnectionInfo{
+			HostInfo: model.HostInfo{},
+			ConnectionInfo: model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{
 					"targetDiscovered": true,

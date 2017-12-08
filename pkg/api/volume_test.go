@@ -311,7 +311,7 @@ var (
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		ConnectionInfo: &model.ConnectionInfo{
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,

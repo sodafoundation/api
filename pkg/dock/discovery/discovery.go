@@ -80,7 +80,7 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 
 	for _, dck := range dd.dcks {
 		//Call function of StorageDrivers configured by storage drivers.
-		d = drivers.Init(dck.GetDriverName())
+		d = drivers.Init(dck.DriverName)
 		defer drivers.Clean(d)
 		pols, err = d.ListPools()
 		if err != nil {
@@ -93,7 +93,7 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		}
 
 		for _, pol := range pols {
-			log.Infof("Backend %s discovered pool %s", dck.GetDriverName(), pol.Name)
+			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 			pol.DockId = dck.GetId()
 		}
 		dd.pols = append(dd.pols, pols...)

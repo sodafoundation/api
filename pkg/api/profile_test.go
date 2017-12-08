@@ -63,7 +63,7 @@ var (
 		},
 		Name:        "Gold",
 		Description: "Gold service",
-		Extra:       fakeExtras,
+		Extras:      fakeExtras,
 	}
 	fakeProfiles = []*model.ProfileSpec{fakeProfile}
 )

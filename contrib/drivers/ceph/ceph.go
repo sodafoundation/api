@@ -541,7 +541,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity:    totalCap * maxAvailCap / availCap,
 			FreeCapacity:     maxAvailCap,
-			Parameters:       *param,
+			Extras:           *param,
 			AvailabilityZone: c.Pool[name].AZ,
 		}
 		if pol.AvailabilityZone == "" {

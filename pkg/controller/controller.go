@@ -83,8 +83,8 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	}
 
 	var filterRequest map[string]interface{}
-	if profile.Extra != nil {
-		filterRequest = profile.Extra
+	if profile.Extras != nil {
+		filterRequest = profile.Extras
 	} else {
 		filterRequest = make(map[string]interface{})
 	}
@@ -104,16 +104,16 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 
 	c.volumeController.SetDock(dockInfo)
 	opt := &pb.CreateVolumeOpts{
-		Id:               in.GetId(),
-		Name:             in.GetName(),
-		Description:      in.GetDescription(),
-		Size:             in.GetSize(),
-		AvailabilityZone: in.GetAvailabilityZone(),
-		ProfileId:        profile.GetId(),
-		PoolId:           polInfo.GetId(),
-		PoolName:         polInfo.GetName(),
-		DockId:           dockInfo.GetId(),
-		DriverName:       dockInfo.GetDriverName(),
+		Id:               in.Id,
+		Name:             in.Name,
+		Description:      in.Description,
+		Size:             in.Size,
+		AvailabilityZone: in.AvailabilityZone,
+		ProfileId:        profile.Id,
+		PoolId:           polInfo.Id,
+		PoolName:         polInfo.Name,
+		DockId:           dockInfo.Id,
+		DriverName:       dockInfo.DriverName,
 	}
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
@@ -152,10 +152,10 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 	c.volumeController.SetDock(dockInfo)
 
 	opt := &pb.DeleteVolumeOpts{
-		Id:         in.GetId(),
-		Metadata:   in.GetMetadata(),
-		DockId:     dockInfo.GetId(),
-		DriverName: dockInfo.GetDriverName(),
+		Id:         in.Id,
+		Metadata:   in.Metadata,
+		DockId:     dockInfo.Id,
+		DriverName: dockInfo.DriverName,
 	}
 
 	var errChan = make(chan error, 1)
@@ -184,18 +184,18 @@ func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 
 	return c.volumeController.CreateVolumeAttachment(
 		&pb.CreateAttachmentOpts{
-			Id:       in.GetId(),
-			VolumeId: in.GetVolumeId(),
+			Id:       in.Id,
+			VolumeId: in.VolumeId,
 			HostInfo: &pb.HostInfo{
-				Platform:  in.GetPlatform(),
-				OsType:    in.GetOsType(),
-				Ip:        in.GetIp(),
-				Host:      in.GetHost(),
-				Initiator: in.GetInitiator(),
+				Platform:  in.Platform,
+				OsType:    in.OsType,
+				Ip:        in.Ip,
+				Host:      in.Host,
+				Initiator: in.Initiator,
 			},
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.GetId(),
-			DriverName: dockInfo.GetDriverName(),
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
 		},
 	)
 }
@@ -219,18 +219,18 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 
 	return c.volumeController.DeleteVolumeAttachment(
 		&pb.DeleteAttachmentOpts{
-			Id:       in.GetId(),
-			VolumeId: in.GetVolumeId(),
+			Id:       in.Id,
+			VolumeId: in.VolumeId,
 			HostInfo: &pb.HostInfo{
-				Platform:  in.GetPlatform(),
-				OsType:    in.GetOsType(),
-				Ip:        in.GetIp(),
-				Host:      in.GetHost(),
-				Initiator: in.GetInitiator(),
+				Platform:  in.Platform,
+				OsType:    in.OsType,
+				Ip:        in.Ip,
+				Host:      in.Host,
+				Initiator: in.Initiator,
 			},
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.GetId(),
-			DriverName: dockInfo.GetDriverName(),
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
 		},
 	)
 }
@@ -251,14 +251,14 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 
 	return c.volumeController.CreateVolumeSnapshot(
 		&pb.CreateVolumeSnapshotOpts{
-			Id:          in.GetId(),
-			Name:        in.GetName(),
-			Description: in.GetDescription(),
-			Size:        in.GetSize(),
-			VolumeId:    in.GetVolumeId(),
+			Id:          in.Id,
+			Name:        in.Name,
+			Description: in.Description,
+			Size:        in.Size,
+			VolumeId:    in.VolumeId,
 			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:      dockInfo.GetId(),
-			DriverName:  dockInfo.GetDriverName(),
+			DockId:      dockInfo.Id,
+			DriverName:  dockInfo.DriverName,
 		},
 	)
 }
@@ -278,11 +278,11 @@ func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 
 	return c.volumeController.DeleteVolumeSnapshot(
 		&pb.DeleteVolumeSnapshotOpts{
-			Id:         in.GetId(),
-			VolumeId:   in.GetVolumeId(),
+			Id:         in.Id,
+			VolumeId:   in.VolumeId,
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.GetId(),
-			DriverName: dockInfo.GetDriverName(),
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
 		},
 	)
 }

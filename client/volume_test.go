@@ -203,8 +203,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
-		ConnectionInfo: &model.ConnectionInfo{
+		HostInfo: model.HostInfo{},
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
@@ -217,7 +217,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 	atc, err := fv.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: volID,
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	})
 	if err != nil {
 		t.Error(err)
@@ -238,8 +238,8 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
-		ConnectionInfo: &model.ConnectionInfo{
+		HostInfo: model.HostInfo{},
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
@@ -252,7 +252,7 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 
 	atc, err := fv.UpdateVolumeAttachment("f2dda3d2-bf79-11e7-8665-f750b088f63e", &model.VolumeAttachmentSpec{
 		VolumeId: volID,
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	})
 	if err != nil {
 		t.Error(err)
@@ -273,8 +273,8 @@ func TestGetVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
-		ConnectionInfo: &model.ConnectionInfo{
+		HostInfo: model.HostInfo{},
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
@@ -305,8 +305,8 @@ func TestListVolumeAttachments(t *testing.T) {
 			},
 			Status:   "available",
 			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: &model.HostInfo{},
-			ConnectionInfo: &model.ConnectionInfo{
+			HostInfo: model.HostInfo{},
+			ConnectionInfo: model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{
 					"targetDiscovered": true,

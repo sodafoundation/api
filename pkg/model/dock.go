@@ -19,50 +19,16 @@ This module implements the common data structure.
 
 package model
 
-import (
-	"encoding/json"
-)
-
+// DockSpec is initialized by specific driver configuration. Each backend
+// can be regarded as a docking service between SDS controller and storage
+// service.
 type DockSpec struct {
 	*BaseModel
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Status      string                 `json:"status,omitempty"`
-	StorageType string                 `json:"storageType,omitempty"`
-	Endpoint    string                 `json:"endpoint,omitempty"`
-	DriverName  string                 `json:"driverName,omitempty"`
-	Parameters  map[string]interface{} `json:"parameters,omitempty"`
-}
-
-func (dck *DockSpec) GetName() string {
-	return dck.Name
-}
-
-func (dck *DockSpec) GetDescription() string {
-	return dck.Description
-}
-
-func (dck *DockSpec) GetStatus() string {
-	return dck.Status
-}
-
-func (dck *DockSpec) GetStorageType() string {
-	return dck.StorageType
-}
-
-func (dck *DockSpec) GetEndpoint() string {
-	return dck.Endpoint
-}
-
-func (dck *DockSpec) GetDriverName() string {
-	return dck.DriverName
-}
-
-func (dck *DockSpec) GetParameters() map[string]interface{} {
-	return dck.Parameters
-}
-
-func (dck *DockSpec) EncodeParameters() []byte {
-	parmBody, _ := json.Marshal(&dck.Parameters)
-	return parmBody
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	// +readOnly:true
+	Status      string `json:"status,omitempty"`
+	StorageType string `json:"storageType,omitempty"`
+	Endpoint    string `json:"endpoint,omitempty"`
+	DriverName  string `json:"driverName,omitempty"`
 }

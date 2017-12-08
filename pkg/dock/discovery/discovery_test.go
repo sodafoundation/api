@@ -94,7 +94,7 @@ func TestDiscover(t *testing.T) {
 			FreeCapacity:     int64(90),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -107,7 +107,7 @@ func TestDiscover(t *testing.T) {
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
@@ -145,7 +145,7 @@ func TestStore(t *testing.T) {
 			FreeCapacity:     int64(90),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -158,7 +158,7 @@ func TestStore(t *testing.T) {
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},

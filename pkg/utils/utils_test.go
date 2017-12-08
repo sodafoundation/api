@@ -15,8 +15,6 @@
 package utils
 
 import (
-	"encoding/json"
-	"net/http"
 	"reflect"
 	"testing"
 
@@ -102,23 +100,6 @@ func TestSetUpdatedTimeStamp(t *testing.T) {
 		if !reflect.DeepEqual(model, expectedModelers[i]) {
 			t.Errorf("Expected %v, got %v\n", expectedModelers[i], model)
 		}
-	}
-}
-
-func TestErrorStatus(t *testing.T) {
-	var fakeErrorRes = ErrorRes{
-		Code:    http.StatusAccepted,
-		Message: "this is a test",
-	}
-
-	expected, err := json.Marshal(fakeErrorRes)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	result := ErrorStatus(fakeErrorRes.Code, fakeErrorRes.Message)
-	if !reflect.DeepEqual(expected, result) {
-		t.Fatalf("Expected %v, get %v\n", expected, result)
 	}
 }
 

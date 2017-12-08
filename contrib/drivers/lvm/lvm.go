@@ -339,7 +339,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
 			FreeCapacity:     vg.FreeCapacity,
-			Parameters:       *param,
+			Extras:           *param,
 			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
 		}
 		if pol.AvailabilityZone == "" {

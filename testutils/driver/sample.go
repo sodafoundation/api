@@ -93,7 +93,7 @@ var (
 			TotalCapacity:    int64(100),
 			FreeCapacity:     int64(90),
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -107,7 +107,7 @@ var (
 			TotalCapacity:    int64(200),
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
