@@ -77,24 +77,12 @@ func TestSetup(t *testing.T) {
 	if d.conf.Pool["pool1"].DiskType != "SSD" {
 		t.Error("Test config pool1 DiskType error")
 	}
-	if d.conf.Pool["pool1"].IOPS != 1000 {
-		t.Error("Test config pool1 IOPS error")
-	}
-	if d.conf.Pool["pool1"].BandWidth != 1000 {
-		t.Error("Test config pool1 BandWidth error")
-	}
 	if d.conf.Pool["pool1"].AZ != "nova-01" {
 		t.Error("Test config pool1 AZ error")
 	}
 
 	if d.conf.Pool["pool2"].DiskType != "SAS" {
 		t.Error("Test config pool2 DiskType error")
-	}
-	if d.conf.Pool["pool2"].IOPS != 800 {
-		t.Error("Test config pool2 IOPS error")
-	}
-	if d.conf.Pool["pool2"].BandWidth != 800 {
-		t.Error("Test config pool2 BandWidth error")
 	}
 	if d.conf.Pool["pool2"].AZ != "nova-02" {
 		t.Error("Test config pool2 AZ error")
@@ -387,12 +375,6 @@ func TestListPools(t *testing.T) {
 	}
 	if resp[0].Parameters["diskType"] != "SSD" {
 		t.Error("List pool Parameters diskType error.")
-	}
-	if resp[0].Parameters["iops"].(int64) != 1000 {
-		t.Error("List pool Parameters iops error.")
-	}
-	if resp[0].Parameters["bandwidth"].(int64) != 1000 {
-		t.Error("List pool Parameters bandwidth error.")
 	}
 	if resp[1].Name != "pool2" {
 		t.Error("List pool name error.")

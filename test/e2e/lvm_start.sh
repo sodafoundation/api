@@ -78,8 +78,6 @@ tgtBindIp: $TGT_BINDIP
 pool:
   $VG_NAME:
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: default
 OPENSDS_LVM_DIRVER_CONFIG_DOC
 

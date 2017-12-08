@@ -262,4 +262,3 @@ type SimpleResp struct {
 	Data  []SimpleStruct `json:"data"`
 	Error Error          `json:"error"`
 }
-
