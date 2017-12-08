@@ -83,4 +83,3 @@ func poolListAction(cmd *cobra.Command, args []string) {
 	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "TotalCapacity", "FreeCapacity"}
 	PrintList(pols, keys, FormatterList{})
 }
-

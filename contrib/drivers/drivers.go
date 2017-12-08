@@ -98,4 +98,3 @@ func Clean(d VolumeDriver) VolumeDriver {
 
 	return d
 }
-

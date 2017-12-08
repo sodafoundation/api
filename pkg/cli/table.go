@@ -298,4 +298,3 @@ func table(coln []string, colw []int, rows [][]string, b bd) (table string) {
 	table += string(bttm)
 	return table
 }
-
