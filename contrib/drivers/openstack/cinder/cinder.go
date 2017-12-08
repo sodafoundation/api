@@ -235,8 +235,6 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 func (d *Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 	param := make(map[string]interface{})
 	param["diskType"] = proper.DiskType
-	param["iops"] = proper.IOPS
-	param["bandwidth"] = proper.BandWidth
 	return &param
 }
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {

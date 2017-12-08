@@ -2,7 +2,5 @@ tgtBindIp: 192.168.56.105
 pool:
   "vg001":
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: default
 

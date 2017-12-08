@@ -66,8 +66,6 @@ configFile: /etc/ceph/ceph.conf
 pool:
   "rbd":
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: default
 ' >> /etc/opensds/driver/ceph.yaml
 ```

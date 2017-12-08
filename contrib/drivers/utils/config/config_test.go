@@ -30,10 +30,8 @@ func TestParse(t *testing.T) {
 		ConfigFile: "/etc/ceph/ceph.conf",
 		Pool: map[string]PoolProperties{
 			"rbd": {
-				DiskType:  "SSD",
-				IOPS:      int64(1000),
-				BandWidth: int64(1000),
-				AZ:        "ceph",
+				DiskType: "SSD",
+				AZ:       "ceph",
 			},
 		},
 	}

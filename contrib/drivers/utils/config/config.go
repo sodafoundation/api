@@ -22,13 +22,11 @@ import (
 )
 
 type PoolProperties struct {
-	DiskType  string `yaml:"diskType,omitempty"`
-	IOPS      int64  `yaml:"iops,omitempty"`
-	BandWidth int64  `yaml:"bandwidth,omitempty"`
-	AZ        string `yaml:"AZ,omitempty"`
-	Thin      bool   `yaml:"thin,omitempty"`
-	Compress  bool   `yaml:"compress,omitempty"`
-	Dedupe    bool   `yaml:"dedupe,omitempty"`
+	DiskType string `yaml:"diskType,omitempty"`
+	AZ       string `yaml:"AZ,omitempty"`
+	Thin     bool   `yaml:"thin,omitempty"`
+	Compress bool   `yaml:"compress,omitempty"`
+	Dedupe   bool   `yaml:"dedupe,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
@@ -43,4 +41,3 @@ func Parse(conf interface{}, p string) (interface{}, error) {
 	}
 	return conf, nil
 }
-

@@ -353,9 +353,6 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 func (*Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 	var param = make(map[string]interface{})
 	param["diskType"] = proper.DiskType
-	param["iops"] = proper.IOPS
-	param["bandwidth"] = proper.BandWidth
-
 	return &param
 }
 
@@ -367,4 +364,3 @@ func execCmd(script string, cmd []string) (string, error) {
 	}
 	return string(ret), nil
 }
-

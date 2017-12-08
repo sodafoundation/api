@@ -89,8 +89,6 @@ authOptions:
 pool:
   $POOL_NAME:
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: nova-01
 OPENSDS_CINDER_DIRVER_CONFIG_DOC
 

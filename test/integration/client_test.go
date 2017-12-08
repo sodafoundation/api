@@ -31,9 +31,7 @@ func TestClientCreateProfile(t *testing.T) {
 		Name:        "silver",
 		Description: "silver policy",
 		Extra: model.ExtraSpec{
-			"diskType":  "SAS",
-			"iops":      300,
-			"bandwidth": 500,
+			"diskType": "SAS",
 		},
 	}
 
@@ -85,9 +83,7 @@ func TestClientDeleteProfile(t *testing.T) {
 func TestClientAddExtraProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 	var body = &model.ExtraSpec{
-		"diskType":  "SAS",
-		"iops":      300,
-		"bandwidth": 500,
+		"diskType": "SAS",
 	}
 
 	ext, err := c.AddExtraProperty(prfID, body)

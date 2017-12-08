@@ -6,8 +6,6 @@ authOptions:
 pool:
   StoragePool001:
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: dorado1
     thin: true
     compress: true
