@@ -19,6 +19,11 @@ type Error struct {
 	Description string `json:"description"`
 }
 
+type GenericResult struct {
+	Data  interface{} `json:"data"`
+	Error Error       `json:"error"`
+}
+
 type Auth struct {
 	AccountState  int    `json:"accountstate"`
 	DeviceId      string `json:"deviceid"`
@@ -38,41 +43,11 @@ type AuthResp struct {
 }
 
 type StoragePool struct {
-	CompressedCapacity              string `json:"COMPRESSEDCAPACITY"`
-	CompressInvolvedCapacity        string `json:"COMPRESSINVOLVEDCAPACITY"`
-	CompressionRate                 string `json:"COMPRESSIONRATE"`
-	DataSpace                       string `json:"DATASPACE"`
-	DedupedCapacity                 string `json:"DEDUPEDCAPACITY"`
-	DedupInvolvedCapacity           string `json:"DEDUPINVOLVEDCAPACITY"`
-	DeduplicationRate               string `json:"DEDUPLICATIONRATE"`
-	Description                     string `json:"DESCRIPTION"`
-	EndingUpThreshold               string `json:"ENDINGUPTHRESHOLD"`
-	HealthStatus                    string `json:"HEALTHSTATUS"`
-	Id                              string `json:"ID"`
-	LunConfigedCapacity             string `json:"LUNCONFIGEDCAPACITY"`
-	Name                            string `json:"NAME"`
-	ParentId                        string `json:"PARENTID"`
-	ParentName                      string `json:"PARENTNAME"`
-	ParentType                      int    `json:"PARENTTYPE"`
-	ReductionInvolvedCapacity       string `json:"REDUCTIONINVOLVEDCAPACITY"`
-	ReplicationCapacity             string `json:"REPLICATIONCAPACITY"`
-	RunningStatus                   string `json:"RUNNINGSTATUS"`
-	SaveCapacityRate                string `json:"SAVECAPACITYRATE"`
-	SpaceReductionRate              string `json:"SPACEREDUCTIONRATE"`
-	ThinProvisionSavePercentage     string `json:"THINPROVISIONSAVEPERCENTAGE"`
-	Tier0Capacity                   string `json:"TIER0CAPACITY"`
-	Tier0Disktype                   string `json:"TIER0DISKTYPE"`
-	Tier0RaidLv                     string `json:"TIER0RAIDLV"`
-	TotalLunWriteCapacity           string `json:"TOTALLUNWRITECAPACITY"`
-	Type                            int    `json:"TYPE"`
-	UsageType                       string `json:"USAGETYPE"`
-	UserConsumedCapacity            string `json:"USERCONSUMEDCAPACITY"`
-	UserConsumedCapacityPercentage  string `json:"USERCONSUMEDCAPACITYPERCENTAGE"`
-	UserConsumedCapacityThreshold   string `json:"USERCONSUMEDCAPACITYTHRESHOLD"`
-	UserConsumedCapacityWithoutMeta string `json:"USERCONSUMEDCAPACITYWITHOUTMETA"`
-	UserFreeCapacity                string `json:"USERFREECAPACITY"`
-	UserTotalCapacity               string `json:"USERTOTALCAPACITY"`
-	UserWriteAllocCapacity          string `json:"USERWRITEALLOCCAPACITY"`
+	Description       string `json:"DESCRIPTION"`
+	Id                string `json:"ID"`
+	Name              string `json:"NAME"`
+	UserFreeCapacity  string `json:"USERFREECAPACITY"`
+	UserTotalCapacity string `json:"USERTOTALCAPACITY"`
 }
 type StoragePoolsResp struct {
 	Data  []StoragePool `json:"data"`
@@ -128,6 +103,11 @@ type LunResp struct {
 	Error Error `json:"error"`
 }
 
+type LunsResp struct {
+	Data  []Lun `json:"data"`
+	Error Error `json:"error"`
+}
+
 type Snapshot struct {
 	CascadedLevel         string `json:"CASCADEDLEVEL"`
 	CascadedNum           string `json:"CASCADEDNUM"`
@@ -164,5 +144,122 @@ type Snapshot struct {
 type SnapshotResp struct {
 	Data  Snapshot `json:"data"`
 	Error Error    `json:"error"`
+}
+
+type Initiator struct {
+	Id         string `json:"ID"`
+	Name       string `json:"NAME"`
+	ParentId   string `json:"PARENTID"`
+	ParentType string `json:"PARENTTYPE"`
+	ParentName string `json:"PARENTNAME"`
+}
+
+type InitiatorResp struct {
+	Data  Initiator `json:"data"`
+	Error Error     `json:"error"`
+}
+
+type InitiatorsResp struct {
+	Data  []Initiator `json:"data"`
+	Error Error       `json:"error"`
+}
+
+type Host struct {
+	Id     string `json:"ID"`
+	Name   string `json:"NAME"`
+	OsType string `json:"OPERATIONSYSTEM"`
+	Ip     string `json:"IP"`
+}
+
+type HostResp struct {
+	Data  Host  `json:"data"`
+	Error Error `json:"error"`
+}
+
+type HostsResp struct {
+	Data  []Host `json:"data"`
+	Error Error  `json:"error"`
+}
+
+type HostGroup struct {
+	Id                string `json:"ID"`
+	Name              string `json:"NAME"`
+	Description       string `json:"DESCRIPTION"`
+	IsAdd2MappingView string `json:"ISADD2MAPPINGVIEW"`
+}
+
+type HostGroupResp struct {
+	Data  HostGroup `json:"data"`
+	Error Error     `json:"error"`
+}
+
+type HostGroupsResp struct {
+	Data  []HostGroup `json:"data"`
+	Error Error       `json:"error"`
+}
+
+type LunGroup struct {
+	Id                string `json:"ID"`
+	Name              string `json:"NAME"`
+	Description       string `json:"DESCRIPTION"`
+	IsAdd2MappingView string `json:"ISADD2MAPPINGVIEW"`
+}
+
+type LunGroupResp struct {
+	Data  LunGroup `json:"data"`
+	Error Error    `json:"error"`
+}
+
+type LunGroupsResp struct {
+	Data  []LunGroup `json:"data"`
+	Error Error      `json:"error"`
+}
+
+type MappingView struct {
+	Id          string `json:"ID"`
+	Name        string `json:"NAME"`
+	Description string `json:"DESCRIPTION"`
+}
+
+type MappingViewResp struct {
+	Data  MappingView `json:"data"`
+	Error Error       `json:"error"`
+}
+
+type MappingViewsResp struct {
+	Data  []MappingView `json:"data"`
+	Error Error         `json:"error"`
+}
+
+type IscsiTgtPort struct {
+	EthPortId string `json:"ETHPORTID"`
+	Id        string `json:"ID"`
+	Tpgt      string `json:"TPGT"`
+	Type      int    `json:"TYPE"`
+}
+
+type IscsiTgtPortsResp struct {
+	Data  []IscsiTgtPort `json:"data"`
+	Error Error          `json:"error"`
+}
+
+type HostAssociateLun struct {
+	Id                string `json:"ID"`
+	AssociateMetadata string `json:"ASSOCIATEMETADATA"`
+}
+
+type HostAssociateLunsResp struct {
+	Data  []HostAssociateLun `json:"data"`
+	Error Error              `json:"error"`
+}
+
+type SimpleStruct struct {
+	Id   string `json:"ID"`
+	Name string `json:"NAME"`
+}
+
+type SimpleResp struct {
+	Data  []SimpleStruct `json:"data"`
+	Error Error          `json:"error"`
 }
 
