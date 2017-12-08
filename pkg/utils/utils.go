@@ -157,3 +157,23 @@ func Contained(obj, target interface{}) bool {
 	}
 	return false
 }
+
+func MergeGeneralMaps(maps ...map[string]interface{}) map[string]interface{} {
+	var out = make(map[string]interface{})
+	for _, m := range maps {
+		for k, v := range m {
+			out[k] = v
+		}
+	}
+	return out
+}
+
+func MergeStringMaps(maps ...map[string]string) map[string]string {
+	var out = make(map[string]string)
+	for _, m := range maps {
+		for k, v := range m {
+			out[k] = v
+		}
+	}
+	return out
+}
