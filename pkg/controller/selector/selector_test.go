@@ -36,7 +36,7 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     5000,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"thin":     true,
 			"dedupe":   false,
 			"compress": false,
@@ -56,7 +56,7 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     6999,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"thin":     true,
 			"dedupe":   true,
 			"compress": true,

@@ -180,7 +180,7 @@ func TestGetPool(t *testing.T) {
 		FreeCapacity:     int64(90),
 		DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		AvailabilityZone: "default",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"diskType": "SSD",
 			"thin":     true,
 		},
@@ -202,7 +202,7 @@ func TestGetProfile(t *testing.T) {
 		},
 		Name:        "default",
 		Description: "default policy",
-		Extra:       model.ExtraSpec{},
+		Extras:      model.ExtraSpec{},
 	}
 	if !reflect.DeepEqual(prf, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, prf)
@@ -243,8 +243,8 @@ func TestGetVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
-		ConnectionInfo: &model.ConnectionInfo{
+		HostInfo: model.HostInfo{},
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
@@ -319,7 +319,7 @@ func TestListPools(t *testing.T) {
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -334,7 +334,7 @@ func TestListPools(t *testing.T) {
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
@@ -358,7 +358,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "default",
 			Description: "default policy",
-			Extra:       model.ExtraSpec{},
+			Extras:      model.ExtraSpec{},
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -366,7 +366,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extra: model.ExtraSpec{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},
@@ -414,8 +414,8 @@ func TestListVolumeAttachments(t *testing.T) {
 			},
 			Status:   "available",
 			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: &model.HostInfo{},
-			ConnectionInfo: &model.ConnectionInfo{
+			HostInfo: model.HostInfo{},
+			ConnectionInfo: model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{
 					"targetDiscovered": true,

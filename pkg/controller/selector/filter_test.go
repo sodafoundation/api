@@ -126,17 +126,17 @@ func TestAZFilter(t *testing.T) {
 func TestThinFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"thin": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"thin": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"thin": false,
 			},
 		},
@@ -153,12 +153,12 @@ func TestThinFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"thin": true,
 					},
 				},
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"thin": true,
 					},
 				},
@@ -171,7 +171,7 @@ func TestThinFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"thin": false,
 					},
 				},
@@ -190,17 +190,17 @@ func TestThinFilter(t *testing.T) {
 func TestDedupeFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"dedupe": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"dedupe": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"dedupe": false,
 			},
 		},
@@ -217,12 +217,12 @@ func TestDedupeFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"dedupe": true,
 					},
 				},
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"dedupe": true,
 					},
 				},
@@ -235,7 +235,7 @@ func TestDedupeFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"dedupe": false,
 					},
 				},
@@ -254,17 +254,17 @@ func TestDedupeFilter(t *testing.T) {
 func TestCompressFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"compress": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"compress": true,
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"compress": false,
 			},
 		},
@@ -281,12 +281,12 @@ func TestCompressFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"compress": true,
 					},
 				},
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"compress": true,
 					},
 				},
@@ -299,7 +299,7 @@ func TestCompressFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"compress": false,
 					},
 				},
@@ -318,17 +318,17 @@ func TestCompressFilter(t *testing.T) {
 func TestDiskTypeFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 			},
 		},
 		&model.StoragePoolSpec{
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SATA",
 			},
 		},
@@ -345,7 +345,7 @@ func TestDiskTypeFilter(t *testing.T) {
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Parameters: map[string]interface{}{
+					Extras: model.ExtraSpec{
 						"diskType": "SSD",
 					},
 				},

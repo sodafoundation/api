@@ -26,7 +26,7 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type DockPortal struct {
@@ -38,8 +38,8 @@ func (this *DockPortal) ListDocks() {
 	result, err := db.C.ListDocks()
 	if err != nil {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -48,8 +48,8 @@ func (this *DockPortal) ListDocks() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal docks failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -65,8 +65,8 @@ func (this *DockPortal) GetDock() {
 	result, err := db.C.GetDock(id)
 	if err != nil {
 		reason := fmt.Sprintf("Get dock failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusBadRequest)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -75,8 +75,8 @@ func (this *DockPortal) GetDock() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal dock failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}

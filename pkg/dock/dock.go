@@ -26,7 +26,7 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	api "github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
@@ -65,7 +65,7 @@ func (d *DockHub) TriggerDiscovery() error {
 	return err
 }
 
-func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*api.VolumeSpec, error) {
+func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(d.Driver)
@@ -118,7 +118,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.VolumeAttachmentSpec, error) {
+func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(d.Driver)
@@ -132,17 +132,17 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*api.Vol
 		return nil, err
 	}
 
-	var atc = &api.VolumeAttachmentSpec{
-		BaseModel: &api.BaseModel{},
+	var atc = &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
 		VolumeId:  opt.GetVolumeId(),
-		HostInfo: &api.HostInfo{
+		HostInfo: model.HostInfo{
 			Platform:  opt.HostInfo.GetPlatform(),
 			OsType:    opt.HostInfo.GetOsType(),
 			Ip:        opt.HostInfo.GetIp(),
 			Host:      opt.HostInfo.GetHost(),
 			Initiator: opt.HostInfo.GetInitiator(),
 		},
-		ConnectionInfo: connInfo,
+		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
 
@@ -182,7 +182,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
-func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*api.VolumeSnapshotSpec, error) {
+func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(d.Driver)

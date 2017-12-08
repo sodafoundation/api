@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"errors"
 	"reflect"
 	"time"
@@ -97,26 +96,6 @@ func (s *setter) SetUpdatedTimeStamp(m model.Modeler) error {
 	default:
 		return errors.New("Unexpected input object format!")
 	}
-}
-
-type ErrorRes struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-func ErrorStatus(code int, message string) []byte {
-	status := &ErrorRes{
-		Code:    code,
-		Message: message,
-	}
-
-	// Mashal the status.
-	body, err := json.Marshal(status)
-	if err != nil {
-		log.Error("Failed to mashal error response:", err.Error())
-		return []byte("Failed to mashal error response: " + err.Error())
-	}
-	return body
 }
 
 func ValidateData(m model.Modeler, s Setter) error {

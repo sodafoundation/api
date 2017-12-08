@@ -47,7 +47,7 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     6999,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"key1": "val1",
 			"key2": "val2",
 			"key3": map[string]string{

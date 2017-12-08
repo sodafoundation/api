@@ -146,7 +146,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extra: model.ExtraSpec{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 			},
 		},

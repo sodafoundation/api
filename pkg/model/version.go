@@ -19,25 +19,35 @@ This module implements the common data structure.
 
 package model
 
+const (
+	version    = "v1alpha"
+	current    = "CURRENT"
+	supported  = "SUPPORTED"
+	deprecated = "DEPRECATED"
+)
+
+// Lists information for all SDS controller API versions. An API version is
+// a string that consists of a ‘v’ + number, or ‘v’ + number + ‘alpha’ or
+// ‘beta’ + number.
 type VersionSpec struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Status      string `json:"status,omitempty"`
-	UpdatedAt   string `json:"updatedAt,omitempty"`
+	Name string `json:"name,omitempty"`
+	// +readOnly:true
+	Status    string `json:"status,omitempty"`
+	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
-func (ver *VersionSpec) GetName() string {
-	return ver.Name
+func Current() string {
+	return current
 }
 
-func (ver *VersionSpec) GetDescription() string {
-	return ver.Description
+func Supported() string {
+	return supported
 }
 
-func (ver *VersionSpec) GetStatus() string {
-	return ver.Status
+func Deprecated() string {
+	return deprecated
 }
 
-func (ver *VersionSpec) GetUpdatedTime() string {
-	return ver.UpdatedAt
+func CurrentVersion() string {
+	return version
 }

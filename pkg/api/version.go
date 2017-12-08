@@ -25,7 +25,7 @@ import (
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 var KnownVersions = []map[string]string{
@@ -45,8 +45,8 @@ func (this *VersionPortal) ListVersions() {
 	body, err := json.Marshal(KnownVersions)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal versions failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -69,8 +69,8 @@ func (this *VersionPortal) GetVersion() {
 	}
 	if result == nil {
 		reason := fmt.Sprintf("Can't find the version: %s", apiVersion)
-		this.Ctx.Output.SetStatus(StatusNotFound)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorNotFound)
+		this.Ctx.Output.Body(model.ErrorNotFoundStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -79,8 +79,8 @@ func (this *VersionPortal) GetVersion() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal version failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(StatusInternalServerError)
-		this.Ctx.Output.Body(utils.ErrorStatus(this.Ctx.Output.Status, reason))
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}

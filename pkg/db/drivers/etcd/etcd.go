@@ -346,19 +346,19 @@ func (c *Client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	if err != nil {
 		return nil, err
 	}
-	if name := input.GetName(); name != "" {
+	if name := input.Name; name != "" {
 		prf.Name = name
 	}
-	if desp := input.GetDescription(); desp != "" {
+	if desp := input.Description; desp != "" {
 		prf.Description = desp
 	}
 
-	if props := input.Extra; len(props) != 0 {
-		if prf.Extra == nil {
-			prf.Extra = make(map[string]interface{})
+	if props := input.Extras; len(props) != 0 {
+		if prf.Extras == nil {
+			prf.Extras = make(map[string]interface{})
 		}
 		for k, v := range props {
-			prf.Extra[k] = v
+			prf.Extras[k] = v
 		}
 	}
 
@@ -399,12 +399,12 @@ func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 		return nil, err
 	}
 
-	if prf.Extra == nil {
-		prf.Extra = make(map[string]interface{})
+	if prf.Extras == nil {
+		prf.Extras = make(map[string]interface{})
 	}
 
 	for k, v := range ext {
-		prf.Extra[k] = v
+		prf.Extras[k] = v
 	}
 
 	prf.UpdatedAt = time.Now().Format(utils.TimeFormat)
@@ -412,7 +412,7 @@ func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 	if err = c.CreateProfile(prf); err != nil {
 		return nil, err
 	}
-	return &prf.Extra, nil
+	return &prf.Extras, nil
 }
 
 func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
@@ -420,7 +420,7 @@ func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &prf.Extra, nil
+	return &prf.Extras, nil
 }
 
 func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
@@ -429,7 +429,7 @@ func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
 		return err
 	}
 
-	delete(prf.Extra, extraKey)
+	delete(prf.Extras, extraKey)
 	if err = c.CreateProfile(prf); err != nil {
 		return err
 	}

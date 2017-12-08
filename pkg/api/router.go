@@ -29,14 +29,6 @@ import (
 const (
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
-
-	StatusBadRequest   = http.StatusBadRequest
-	StatusUnauthorized = http.StatusUnauthorized
-	StatusForbidden    = http.StatusForbidden
-	StatusNotFound     = http.StatusNotFound
-
-	StatusInternalServerError = http.StatusInternalServerError
-	StatusNotImplemented      = http.StatusNotImplemented
 )
 
 func Run(host string) {

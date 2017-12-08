@@ -73,7 +73,7 @@ func TestGetPool(t *testing.T) {
 		TotalCapacity: int64(100),
 		FreeCapacity:  int64(90),
 		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"diskType": "SSD",
 		},
 	}
@@ -101,7 +101,7 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(100),
 			FreeCapacity:  int64(90),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 			},
 		},
@@ -114,7 +114,7 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(200),
 			FreeCapacity:  int64(170),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 			},
 		},
