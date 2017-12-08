@@ -169,12 +169,12 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 }
 
 func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	volume, err := db.C.GetVolume(in.VolumeId)
+	vol, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume attachment method: ", err)
 		return nil, err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -204,12 +204,12 @@ func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 }
 
 func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) error {
-	volume, err := db.C.GetVolume(in.VolumeId)
+	vol, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume attachment method: ", err)
 		return err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err
@@ -235,13 +235,13 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 }
 
 func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	volume, err := db.C.GetVolume(in.VolumeId)
+	vol, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
 
-	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -256,17 +256,19 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 			Size:        in.GetSize(),
 			VolumeId:    in.GetVolumeId(),
 			Metadata:    in.GetMetadata(),
+			DockId:      dockInfo.GetId(),
+			DriverName:  dockInfo.GetDriverName(),
 		},
 	)
 }
 
 func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
-	volume, err := db.C.GetVolume(in.VolumeId)
+	vol, err := db.C.GetVolume(in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume snapshot method: ", err)
 		return err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(volume.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err
@@ -275,9 +277,11 @@ func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 
 	return c.volumeController.DeleteVolumeSnapshot(
 		&pb.DeleteVolumeSnapshotOpts{
-			Id:       in.GetId(),
-			VolumeId: in.GetVolumeId(),
-			Metadata: in.GetMetadata(),
+			Id:         in.GetId(),
+			VolumeId:   in.GetVolumeId(),
+			Metadata:   in.GetMetadata(),
+			DockId:     dockInfo.GetId(),
+			DriverName: dockInfo.GetDriverName(),
 		},
 	)
 }

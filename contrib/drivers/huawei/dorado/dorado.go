@@ -15,6 +15,8 @@
 package dorado
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -32,14 +34,16 @@ const (
 )
 
 type AuthOptions struct {
-	Username  string `yaml:"userName,omitempty"`
+	Username  string `yaml:"username,omitempty"`
 	Password  string `yaml:"password,omitempty"`
 	Endpoints string `yaml:"endpoints,omitempty"`
+	Insecure  bool   `yaml:"insecure,omitempty"`
 }
 
 type DoradoConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+	TargetIp    string                    `yaml:"targetIp,omitempty"`
 }
 
 type Driver struct {
@@ -71,7 +75,7 @@ func (d *Driver) Setup() error {
 	}
 	Parse(conf, path)
 	dp := strings.Split(conf.Endpoints, ",")
-	client, err := NewClient(conf.Username, conf.Password, dp)
+	client, err := NewClient(conf.Username, conf.Password, dp, conf.Insecure)
 	d.client = client
 	if err != nil {
 		log.Errorf("Get new client failed, %v", err)
@@ -131,11 +135,104 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	return &model.ConnectionInfo{}, nil
+func (d *Driver) getTargetInfo() (string, string, error) {
+	tgtIp := d.conf.TargetIp
+	resp, err := d.client.ListTgtPort()
+	if err != nil {
+		return "", "", err
+	}
+	for _, itp := range resp.Data {
+		items := strings.Split(itp.Id, ",")
+		iqn := strings.Split(items[0], "+")[1]
+		items = strings.Split(iqn, ":")
+		ip := items[len(items)-1]
+		if tgtIp == ip {
+			return iqn, ip, nil
+		}
+	}
+	msg := fmt.Sprintf("Not find configuration targetIp: %v in device", tgtIp)
+	return "", "", errors.New(msg)
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+
+	hostInfo := opt.GetHostInfo()
+	// Create host if not exist.
+	hostId, err := d.client.AddHostWithCheck(hostInfo)
+	if err != nil {
+		log.Errorf("Add host failed, host name =%s, error: %v", hostInfo.Host, err)
+		return nil, err
+	}
+
+	// Add initiator to the host.
+	if err = d.client.AddInitiatorToHostWithCheck(hostId, hostInfo.Initiator); err != nil {
+		log.Errorf("Add initiator to host failed, host id=%s, initiator=%s, error: %v", hostId, hostInfo.Initiator, err)
+		return nil, err
+	}
+
+	// Add host to hostgroup.
+	hostGrpId, err := d.client.AddHostToHostGroup(hostId)
+	if err != nil {
+		log.Errorf("Add host to group failed, host id=%s, error: %v", hostId, err)
+		return nil, err
+	}
+
+	// Mapping lungroup and hostgroup to view.
+	if err = d.client.DoMapping(opt.GetVolumeId(), hostGrpId, hostId); err != nil {
+		log.Errorf("Do mapping failed, lun id=%s, hostGrpId=%s, hostId=%s, error: %v",
+			opt.GetVolumeId(), hostGrpId, hostId, err)
+		return nil, err
+	}
+
+	tgtIqn, tgtIp, err := d.getTargetInfo()
+	if err != nil {
+		log.Error("Get the target info failed,", err)
+		return nil, err
+	}
+	tgtLun, err := d.client.GetHostLunId(hostId, opt.GetVolumeId())
+	if err != nil {
+		log.Error("Get the get host lun id failed,", err)
+		return nil, err
+	}
+	connInfo := &model.ConnectionInfo{
+		DriverVolumeType: "iscsi",
+		ConnectionData: map[string]interface{}{
+			"targetDiscovered": true,
+			"targetIQN":        tgtIqn,
+			"targetPortal":     tgtIp + ":3260",
+			"discard":          false,
+			"targetLun":        tgtLun,
+		},
+	}
+	return connInfo, nil
+}
+
+func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+	lunId := opt.GetVolumeId()
+	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
+	if err != nil {
+		return err
+	}
+	lunGrpId, _ := d.client.FindLunGroup(LunGroupPrefix + hostId)
+	hostGrpId, _ := d.client.FindHostGroup(HostGroupPrefix + hostId)
+	viewId, _ := d.client.FindMappingView(MappingViewPrefix + hostId)
+	if viewId != "" {
+		d.client.RemoveLunGroupFromMappingView(viewId, lunGrpId)
+		d.client.RemoveHostGroupFromMappingView(viewId, hostGrpId)
+		d.client.DeleteMappingView(viewId)
+	}
+	if hostGrpId != "" {
+		d.client.RemoveHostFromHostGroup(hostGrpId, hostId)
+		d.client.DeleteHostGroup(hostGrpId)
+	}
+	if lunGrpId != "" {
+		d.client.RemoveLunFromLunGroup(lunGrpId, lunId)
+		d.client.DeleteLunGroup(lunGrpId)
+	}
+	d.client.RemoveIscsiFromHost(opt.GetHostInfo().GetInitiator())
+	d.client.DeleteHost(hostId)
+	return nil
+}
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	snap, err := d.client.CreateSnapshot(opt.GetVolumeId(), opt.GetName(), opt.GetDescription())
@@ -172,9 +269,10 @@ func (d *Driver) PullSnapshot(id string) (*model.VolumeSnapshotSpec, error) {
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	err := d.client.DeleteSnapshot(opt.GetId())
 	if err != nil {
-		log.Errorf("Delete volume snapshot failed, volume id =%s , Error:%s", opt.GetId())
+		log.Errorf("Delete volume snapshot failed, volume snapshot id = %s , error: %v", opt.GetId(), err)
+		return err
 	}
-	log.Info("Remove volume snapshot success, volume id =", opt.GetId())
+	log.Info("Remove volume snapshot success, volume snapshot id =", opt.GetId())
 	return nil
 }
 
@@ -183,6 +281,9 @@ func (d *Driver) buildPoolParam(proper PoolProperties) map[string]interface{} {
 	param["diskType"] = proper.DiskType
 	param["iops"] = proper.IOPS
 	param["bandwidth"] = proper.BandWidth
+	param["thin"] = proper.Thin
+	param["compress"] = proper.Compress
+	param["dedupe"] = proper.Dedupe
 	return param
 }
 

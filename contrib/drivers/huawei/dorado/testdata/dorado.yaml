@@ -1,15 +1,16 @@
 authOptions:
-  endpoints: "http://192.168.56.104:8080,http://192.168.56.105:8080"
-  username: "admin"
-  password: "Admin@dorado"
+  endpoints: "https://8.46.185.114:8088/deviceManager/rest"
+  username: "opensds"
+  password: "Opensds@123"
+  insecure: true
 pool:
-  pool1:
+  StoragePool001:
     diskType: SSD
     iops: 1000
     bandwidth: 1000
     AZ: dorado1
-  pool2:
-    diskType: SAS
-    iops: 800
-    bandwidth: 800
-    AZ: dorado2
+    thin: true
+    compress: true
+    dedupe: true
+targetIp: 8.46.192.247
+
