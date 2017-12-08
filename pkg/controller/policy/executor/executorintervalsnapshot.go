@@ -54,7 +54,7 @@ func (ise *IntervalSnapshotExecutor) Init(in string) (err error) {
 	ise.Request.Name = "snapshot-" + volumeResponse.Id
 	ise.Request.Size = volumeResponse.Size
 	ise.Client = client.NewClient()
-	ise.Client.Update(ise.DockInfo)
+	ise.Client.Connect(ise.DockInfo.Endpoint)
 
 	return nil
 }

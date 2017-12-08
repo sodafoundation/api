@@ -18,29 +18,34 @@ import (
 	log "github.com/golang/glog"
 
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-	"github.com/opensds/opensds/pkg/model"
 	"google.golang.org/grpc"
 )
 
+// Client interface provides an abstract description about how to interact
+// with gRPC client. Besides some nested methods defined in pb.DockClient,
+// Client also exposes two methods: Connect() and Close(), for which callers
+// can easily open and close gRPC connection.
 type Client interface {
 	pb.DockClient
-	Update(dockInfo *model.DockSpec) error
+
+	Connect(edp string) error
+
 	Close()
 }
 
+// client structure is one implementation of Client interface and will be
+// called in real environment. There would be more other kind of connection
+// in the long run.
 type client struct {
 	pb.DockClient
 	*grpc.ClientConn
-
-	TargetPlace string
 }
 
 func NewClient() Client { return &client{} }
 
-func (c *client) Update(dockInfo *model.DockSpec) error {
-
+func (c *client) Connect(edp string) error {
 	// Set up a connection to the Dock server.
-	conn, err := grpc.Dial(dockInfo.GetEndpoint(), grpc.WithInsecure())
+	conn, err := grpc.Dial(edp, grpc.WithInsecure())
 	if err != nil {
 		log.Errorf("did not connect: %+v\n", err)
 		return err
@@ -50,7 +55,6 @@ func (c *client) Update(dockInfo *model.DockSpec) error {
 
 	c.DockClient = dc
 	c.ClientConn = conn
-	c.TargetPlace = dockInfo.GetEndpoint()
 
 	return nil
 }
