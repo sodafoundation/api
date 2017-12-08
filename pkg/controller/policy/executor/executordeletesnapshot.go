@@ -54,7 +54,7 @@ func (dse *DeleteSnapshotExecutor) Init(in string) (err error) {
 	}
 	dse.VolumeId = volumeResponse.Id
 	dse.Client = client.NewClient()
-	dse.Client.Update(dse.DockInfo)
+	dse.Client.Connect(dse.DockInfo.Endpoint)
 
 	return nil
 }
