@@ -22,28 +22,33 @@ ETCD_DIR=etcd-v3.2.0-linux-amd64
 VG_NAME=vg001
 TGT_BINDIP=127.0.0.1
 
+function change_root() {
+	su root
+	source /etc/profile
+}
+
 function log() {
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
 USER=$(whoami)
 echo "${DATE} ${USER} execute $0 [INFO] $@"
 }
 
-function log_error ()
-{
+function log_error() {
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
 USER=$(whoami)
 echo "${DATE} ${USER} execute $0 [ERROR] $@" 2>&1
 }
 
-function cleanup(){
+function cleanup() {
     rm ${HOME}/${ETCD_DIR}/default.etcd -rf
     killall osdslet osdsdock etcd &>/dev/null
 }
 
-cd ${OPENSDS_ROOT}
-
 # OpenSDS cluster installation.
-script/cluster/bootstrap.sh
+cd ${OPENSDS_ROOT} && script/cluster/bootstrap.sh
+
+# Change to root access.
+change_root
 
 [ ! -d OPENSDS_CONFIG_DIR ] && mkdir -p OPENSDS_CONFIG_DIR
 [ ! -d OPENSDS_LOG_DIR ] && mkdir -p OPENSDS_LOG_DIR
@@ -84,12 +89,11 @@ pool:
 OPENSDS_LVM_DIRVER_CONFIG_DOC
 
 # Run etcd daemon in background.
-cd ${HOME}/${ETCD_DIR}
-./etcd &>>$OPENSDS_LOG_DIR/etcd.log &
+cd ${HOME}/${ETCD_DIR} && ./etcd &>>$OPENSDS_LOG_DIR/etcd.log &
 # Waiting for the etcd up.
 n=1
 export ETCDCTL_API=3
-while  ! etcdctl endpoint status &>/dev/null
+while ! ./etcdctl endpoint status &>/dev/null
 do
     echo try $n times
     let n++
