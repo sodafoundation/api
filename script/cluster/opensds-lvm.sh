@@ -79,8 +79,6 @@ if [ ! -f /etc/opensds/driver/lvm.yaml ]; then
 	pool:
 	  vg001:
 	    diskType: SSD
-	    iops: 1000
-	    bandwidth: 1000
 	    AZ: default
 	' >> /etc/opensds/driver/lvm.yaml
 fi

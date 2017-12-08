@@ -31,8 +31,8 @@ func TestIsStorageTagSupported(t *testing.T) {
 }
 
 func TestFindPolicyType(t *testing.T) {
-	var policys = []string{"iops", "thinProvision", "intervalSnapshot"}
-	var expectedTypes = []string{"feature", "feature", "operation"}
+	var policys = []string{"thinProvision", "intervalSnapshot"}
+	var expectedTypes = []string{"feature", "operation"}
 
 	for i, policy := range policys {
 		pType, err := FindPolicyType(policy)
@@ -48,7 +48,6 @@ func TestFindPolicyType(t *testing.T) {
 
 func TestNewStorageTag(t *testing.T) {
 	var tags = map[string]interface{}{
-		"iops":                 1000,
 		"thinProvision":        true,
 		"highAvailability":     false,
 		"intervalSnapshot":     "1d",
@@ -56,7 +55,6 @@ func TestNewStorageTag(t *testing.T) {
 	}
 	var expectedSt = &StorageTag{
 		syncTag: map[string]interface{}{
-			"iops":             1000,
 			"thinProvision":    true,
 			"highAvailability": false,
 		},

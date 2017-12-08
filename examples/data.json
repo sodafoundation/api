@@ -11,8 +11,6 @@
 			"name": "silver",
 			"description": "silver policy plan",
 			"extra": {
-				"iops": 300,
-				"bandwidth": 500,
 				"diskType":"SAS",
 				"capacity": 50
 			}
@@ -21,8 +19,6 @@
 			"name": "gold",
 			"description": "gold policy plan",
 			"extra": {
-				"iops": 800,
-				"bandwidth": 800,
 				"diskType":"SSD",
 				"capacity": 50
 			}
