@@ -373,7 +373,7 @@ func TestListPools(t *testing.T) {
 	if resp[0].FreeCapacity != 50 {
 		t.Error("List pool TotalCapacity error.")
 	}
-	if resp[0].Parameters["diskType"] != "SSD" {
+	if resp[0].Extras["diskType"] != "SSD" {
 		t.Error("List pool Parameters diskType error.")
 	}
 	if resp[1].Name != "pool2" {

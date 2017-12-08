@@ -30,7 +30,7 @@ func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{
 		Name:        "silver",
 		Description: "silver policy",
-		Extra: model.ExtraSpec{
+		Extras: model.ExtraSpec{
 			"diskType": "SAS",
 		},
 	}

@@ -197,7 +197,7 @@ func TestListPools(t *testing.T) {
 			Name:          "vg001",
 			TotalCapacity: int64(18),
 			FreeCapacity:  int64(18),
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 			},
 			AvailabilityZone: "lvm",
