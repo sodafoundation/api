@@ -26,17 +26,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-type fakeClient struct {
-	TargetPlace string
+type fakeClient struct{}
+
+func NewFakeClient() client.Client {
+	return &fakeClient{}
 }
 
-func NewFakeClient(address string) client.Client {
-	return &fakeClient{
-		TargetPlace: address,
-	}
-}
-
-func (fc *fakeClient) Update(dockInfo *model.DockSpec) error {
+func (fc *fakeClient) Connect(edp string) error {
 	return nil
 }
 
@@ -111,13 +107,13 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 
 func NewFakeController() Controller {
 	return &controller{
-		Client: NewFakeClient(""),
-		//Request: req,
+		Client:   NewFakeClient(),
+		DockInfo: &model.DockSpec{},
 	}
 }
 
 func TestCreateVolume(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 	var expected = &sampleVolume
 
 	result, err := fc.CreateVolume(&pb.CreateVolumeOpts{})
@@ -131,7 +127,7 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestDeleteVolume(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 
 	result := fc.DeleteVolume(&pb.DeleteVolumeOpts{})
 	if result != nil {
@@ -140,7 +136,7 @@ func TestDeleteVolume(t *testing.T) {
 }
 
 func TestCreateVolumeAttachment(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 	var expected = &sampleAttachment
 
 	result, err := fc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
@@ -154,7 +150,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 }
 
 func TestDeleteVolumeAttachment(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 
 	result := fc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
 	if result != nil {
@@ -163,7 +159,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 	var expected = &sampleSnapshot
 
 	result, err := fc.CreateVolumeSnapshot(&pb.CreateVolumeSnapshotOpts{})
@@ -177,7 +173,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
-	fc := NewFakeController( /*&pb.DockRequest{}*/ )
+	fc := NewFakeController()
 
 	result := fc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
 	if result != nil {
