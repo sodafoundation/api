@@ -33,9 +33,12 @@ type Config struct {
 
 func NewClient(c *Config) *Client {
 	// If endpoint field not specified, the info will be fetched from
-	// environment variable.
+	// environment variable.Otherwise using local host.
 	if c.Endpoint == "" {
-		c.Endpoint = os.Getenv("OPENSDS_ENDPOINT")
+		c.Endpoint = "http://127.0.0.1:50040"
+		if v, ok := os.LookupEnv("OPENSDS_ENDPOINT"); ok {
+			c.Endpoint = v
+		}
 	}
 
 	return &Client{
