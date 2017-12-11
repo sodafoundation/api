@@ -17,3 +17,4 @@ package constants
 // It's RFC 8601 format that decodes and encodes with
 // exactly precision to seconds.
 const TimeFormat = `2006-01-02T15:04:05`
+const DefaultOpensdsEndpoint = "http://localhost:50040"

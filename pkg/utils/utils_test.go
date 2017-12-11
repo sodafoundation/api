@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
@@ -81,4 +82,18 @@ func TestMergeStringMaps(t *testing.T) {
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, get %v\n", expected, result)
 	}
+}
+
+func TestPathExists(t *testing.T) {
+	testDir := "./testDir"
+	isExist, _ := PathExists(testDir)
+	if isExist {
+		t.Errorf("Expected false, get %v\n", isExist)
+	}
+	os.MkdirAll(testDir, 0755)
+	isExist, _ = PathExists(testDir)
+	if !isExist {
+		t.Errorf("Expected true, get %v\n", isExist)
+	}
+	os.RemoveAll(testDir)
 }
