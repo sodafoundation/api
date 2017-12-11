@@ -45,56 +45,92 @@ func (_m *MockClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*mode
 	return r0, r1
 }
 
-func (_m *MockClient) CreateDock(dck *model.DockSpec) error {
+func (_m *MockClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	ret := _m.Called(dck)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.DockSpec) error); ok {
+	var r0 *model.DockSpec
+	if rf, ok := ret.Get(0).(func(*model.DockSpec) *model.DockSpec); ok {
 		r0 = rf(dck)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.DockSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.DockSpec) error); ok {
+		r1 = rf(dck)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
-func (_m *MockClient) CreatePool(pol *model.StoragePoolSpec) error {
+func (_m *MockClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
 	ret := _m.Called(pol)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.StoragePoolSpec) error); ok {
+	var r0 *model.StoragePoolSpec
+	if rf, ok := ret.Get(0).(func(*model.StoragePoolSpec) *model.StoragePoolSpec); ok {
 		r0 = rf(pol)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.StoragePoolSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.StoragePoolSpec) error); ok {
+		r1 = rf(pol)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
-func (_m *MockClient) CreateProfile(prf *model.ProfileSpec) error {
+func (_m *MockClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 	ret := _m.Called(prf)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.ProfileSpec) error); ok {
+	var r0 *model.ProfileSpec
+	if rf, ok := ret.Get(0).(func(*model.ProfileSpec) *model.ProfileSpec); ok {
 		r0 = rf(prf)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ProfileSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.ProfileSpec) error); ok {
+		r1 = rf(prf)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
-func (_m *MockClient) CreateVolume(vol *model.VolumeSpec) error {
+func (_m *MockClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	ret := _m.Called(vol)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.VolumeSpec) error); ok {
+	var r0 *model.VolumeSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeSpec) *model.VolumeSpec); ok {
 		r0 = rf(vol)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeSpec) error); ok {
+		r1 = rf(vol)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 func (_m *MockClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
@@ -119,17 +155,26 @@ func (_m *MockClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentS
 	return r0, r1
 }
 
-func (_m *MockClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error {
+func (_m *MockClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(vs)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.VolumeSnapshotSpec) error); ok {
+	var r0 *model.VolumeSnapshotSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeSnapshotSpec) *model.VolumeSnapshotSpec); ok {
 		r0 = rf(vs)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeSnapshotSpec)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeSnapshotSpec) error); ok {
+		r1 = rf(vs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 func (_m *MockClient) DeleteDock(dckID string) error {

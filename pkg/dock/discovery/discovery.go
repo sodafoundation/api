@@ -25,8 +25,7 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
-	api "github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -38,8 +37,8 @@ func NewDiscoverer() *DockDiscoverer {
 }
 
 type DockDiscoverer struct {
-	dcks []*api.DockSpec
-	pols []*api.StoragePoolSpec
+	dcks []*model.DockSpec
+	pols []*model.StoragePoolSpec
 
 	c db.Client
 }
@@ -59,8 +58,8 @@ func (dd *DockDiscoverer) Init() error {
 			continue
 		}
 
-		dck := &api.DockSpec{
-			BaseModel: &api.BaseModel{
+		dck := &model.DockSpec{
+			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, host+":"+b.DriverName).String(),
 			},
 			Name:        b.Name,
@@ -75,7 +74,7 @@ func (dd *DockDiscoverer) Init() error {
 }
 
 func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
-	var pols []*api.StoragePoolSpec
+	var pols []*model.StoragePoolSpec
 	var err error
 
 	for _, dck := range dd.dcks {
@@ -89,12 +88,12 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		}
 
 		if len(pols) == 0 {
-			log.Warningf("The pool of dock %s is empty!\n", dck.GetId())
+			log.Warningf("The pool of dock %s is empty!\n", dck.Id)
 		}
 
 		for _, pol := range pols {
 			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
-			pol.DockId = dck.GetId()
+			pol.DockId = dck.Id
 		}
 		dd.pols = append(dd.pols, pols...)
 	}
@@ -107,28 +106,18 @@ func (dd *DockDiscoverer) Store() error {
 
 	// Store dock resources in database.
 	for _, dck := range dd.dcks {
-		if err = utils.ValidateData(dck, utils.S); err != nil {
-			log.Error("When validate dock structure:", err)
-			return err
-		}
-
 		// Call db module to create dock resource.
-		if err = dd.c.CreateDock(dck); err != nil {
-			log.Errorf("When create dock %s in db: %v\n", dck.GetId(), err)
+		if _, err = dd.c.CreateDock(dck); err != nil {
+			log.Errorf("When create dock %s in db: %v\n", dck.Name, err)
 			return err
 		}
 	}
 
 	// Store pool resources in database.
 	for _, pol := range dd.pols {
-		if err = utils.ValidateData(pol, utils.S); err != nil {
-			log.Error("When validate pool structure:", err)
-			return err
-		}
-
 		// Call db module to create pool resource.
-		if err = dd.c.CreatePool(pol); err != nil {
-			log.Errorf("When create pool %s in db: %v\n", pol.GetId(), err)
+		if _, err = dd.c.CreatePool(pol); err != nil {
+			log.Errorf("When create pool %s in db: %v\n", pol.Name, err)
 			return err
 		}
 	}

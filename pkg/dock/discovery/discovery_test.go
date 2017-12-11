@@ -19,14 +19,16 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	fakedb "github.com/opensds/opensds/testutils/db"
+	dbtest "github.com/opensds/opensds/testutils/db/testing"
 	fakedriver "github.com/opensds/opensds/testutils/driver"
-	fakesetter "github.com/opensds/opensds/testutils/utils/testing"
 )
 
-var expectedSetter = fakesetter.NewFakeSetter()
+const (
+	expectedUuid      = "0e9c3c68-8a0b-11e7-94a7-67f755e235cb"
+	expectedCreatedAt = "2017-08-26T11:01:09"
+	expectedUpdatedAt = "2017-08-26T11:01:55"
+)
 
 func init() {
 	CONF.OsdsDock = OsdsDock{
@@ -40,12 +42,11 @@ func init() {
 			},
 		},
 	}
-	utils.S = expectedSetter
 }
 
 func NewFakeDiscoverer() *DockDiscoverer {
 	return &DockDiscoverer{
-		c: fakedb.NewFakeDbClient(),
+	//		c: fakedb.NewFakeDbClient(),
 	}
 }
 
@@ -165,31 +166,13 @@ func TestStore(t *testing.T) {
 		},
 	}
 
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("CreateDock", dd.dcks[0]).Return(nil, nil)
+	mockClient.On("CreatePool", dd.pols[0]).Return(nil, nil)
+	mockClient.On("CreatePool", dd.pols[1]).Return(nil, nil)
+	dd.c = mockClient
+
 	if err := dd.Store(); err != nil {
 		t.Errorf("Failed to store docks and pools into database: %v\n", err)
-	}
-	for _, dck := range dd.dcks {
-		if !reflect.DeepEqual(dck.Id, expectedSetter.Uuid) {
-			t.Errorf("Assert dock id: expected %v, got %v\n", expectedSetter.Uuid, dck.Id)
-		}
-		if !reflect.DeepEqual(dck.CreatedAt, expectedSetter.CreatedTime) {
-			t.Errorf("Assert dock create time: expected %v, got %v\n",
-				expectedSetter.CreatedTime, dck.CreatedAt)
-		}
-		if !reflect.DeepEqual(dck.Id, expectedSetter.Uuid) {
-			t.Errorf("Assert dock update time: expected %v, got %v\n", expectedSetter.UpdatedTime, dck.UpdatedAt)
-		}
-	}
-	for _, pol := range dd.pols {
-		if !reflect.DeepEqual(pol.Id, expectedSetter.Uuid) {
-			t.Errorf("Assert pool id: expected %v, got %v\n", expectedSetter.Uuid, pol.Id)
-		}
-		if !reflect.DeepEqual(pol.CreatedAt, expectedSetter.CreatedTime) {
-			t.Errorf("Assert pool create time: expected %v, got %v\n",
-				expectedSetter.CreatedTime, pol.CreatedAt)
-		}
-		if !reflect.DeepEqual(pol.Id, expectedSetter.Uuid) {
-			t.Errorf("Assert pool update time: expected %v, got %v\n", expectedSetter.UpdatedTime, pol.UpdatedAt)
-		}
 	}
 }

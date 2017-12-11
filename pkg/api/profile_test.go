@@ -27,9 +27,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	mockSetter "github.com/opensds/opensds/testutils/utils/testing"
 )
 
 func init() {
@@ -38,13 +36,6 @@ func init() {
 	beego.Router("/v1alpha/profiles/:profileId", &profilePortal, "get:GetProfile;put:UpdateProfile;delete:DeleteProfile")
 	beego.Router("/v1alpha/profiles/:profileId/extras", &profilePortal, "post:AddExtraProperty;get:ListExtraProperties")
 	beego.Router("/v1alpha/profiles/:profileId/extras/:extraKey", &profilePortal, "delete:RemoveExtraProperty")
-	mockSetter := &mockSetter.MockSetter{
-		Uuid:        "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-		CreatedTime: "2017-10-24T16:21:32",
-		UpdatedTime: "2017-10-25T11:01:55",
-	}
-
-	utils.S = mockSetter
 }
 
 var (
@@ -80,12 +71,15 @@ func TestCreateProfile(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("CreateProfile", &model.ProfileSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "Gold",
+		Description: "Gold service"}).Return(&model.ProfileSpec{
 		BaseModel: &model.BaseModel{
 			Id:        "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
 			CreatedAt: "2017-10-24T16:21:32",
 		},
 		Name:        "Gold",
-		Description: "Gold service"}).Return(nil)
+		Description: "Gold service"}, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("POST", "/v1alpha/profiles", strings.NewReader(fakeBody))

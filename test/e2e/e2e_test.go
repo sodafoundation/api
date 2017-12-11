@@ -81,7 +81,7 @@ func TestCreateVolume(t *testing.T) {
 	volBody, _ := json.MarshalIndent(vol, "", "	")
 	t.Log("Create volume success, got:", string(volBody))
 
-	cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	cleanVolumeIfFailedOrFinished(t, vol.Id)
 }
 
 func TestGetVolume(t *testing.T) {
@@ -90,10 +90,10 @@ func TestGetVolume(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking volume...")
-	result, err := c.GetVolume(vol.GetId())
+	result, err := c.GetVolume(vol.Id)
 	if err != nil {
 		t.Error("Check volume failed:", err)
 		return
@@ -115,7 +115,7 @@ func TestListVolumes(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
 	vols, err := c.ListVolumes()
@@ -148,7 +148,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume attachment...")
 	var body = &model.VolumeAttachmentSpec{
@@ -235,7 +235,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume snapshot...")
 	var body = &model.VolumeSnapshotSpec{

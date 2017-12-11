@@ -27,7 +27,6 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 )
 
 type ProfilePortal struct {
@@ -48,17 +47,9 @@ func (this *ProfilePortal) CreateProfile() {
 		return
 	}
 
-	// If profile uuid and created time is null, generate it randomly.
-	if err := utils.ValidateData(&profile, utils.S); err != nil {
-		reason := fmt.Sprintf("Validate profile data failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
-		return
-	}
-
 	// Call db api module to handle create profile request.
-	if err := db.C.CreateProfile(&profile); err != nil {
+	result, err := db.C.CreateProfile(&profile)
+	if err != nil {
 		reason := fmt.Sprintf("Create profile failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -67,7 +58,7 @@ func (this *ProfilePortal) CreateProfile() {
 	}
 
 	// Marshal the result.
-	body, err := json.Marshal(&profile)
+	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal profile created result failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
