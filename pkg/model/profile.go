@@ -24,8 +24,20 @@ package model
 // capabilities which are desirable features for a class of applications.
 type ProfileSpec struct {
 	*BaseModel
-	Name        string    `json:"name,omitempty"`
-	Description string    `json:"description,omitempty"`
-	StorageType string    `json:"storageType,omitempty"`
-	Extras      ExtraSpec `json:"extras,omitempty"`
+
+	// The name of the profile.
+	Name string `json:"name,omitempty"`
+
+	// The description of the profile.
+	// +optional
+	Description string `json:"description,omitempty"`
+
+	// The storage type of the profile.
+	// One of: "block", "file" or "object".
+	StorageType string `json:"storageType,omitempty"`
+
+	// Map of keys and json object that represents the extra epecs
+	// of the profile, such as requested capabilities.
+	// +optional
+	Extras ExtraSpec `json:"extras,omitempty"`
 }

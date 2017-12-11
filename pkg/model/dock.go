@@ -24,11 +24,25 @@ package model
 // service.
 type DockSpec struct {
 	*BaseModel
-	Name        string `json:"name,omitempty"`
+
+	// The name of the dock.
+	Name string `json:"name,omitempty"`
+
+	// The description of the dock.
+	// +optional
 	Description string `json:"description,omitempty"`
-	// +readOnly:true
-	Status      string `json:"status,omitempty"`
+
+	// The status of the dock.
+	// One of: "available" or "unavailable".
+	Status string `json:"status,omitempty"`
+
+	// The storage type of the dock.
+	// One of: "block", "file" or "object".
 	StorageType string `json:"storageType,omitempty"`
-	Endpoint    string `json:"endpoint,omitempty"`
-	DriverName  string `json:"driverName,omitempty"`
+
+	// Endpoint represents the dock server's access address.
+	Endpoint string `json:"endpoint,omitempty"`
+
+	// DriverName represents the dock provider, such as Ceph, LVM and etc.
+	DriverName string `json:"driverName,omitempty"`
 }

@@ -27,17 +27,39 @@ import (
 // to physical machine or virtual machine instance.
 type VolumeSpec struct {
 	*BaseModel
-	ProjectId   string `json:"projectId,omitempty"`
-	UserId      string `json:"userId,omitempty"`
-	Name        string `json:"name,omitempty"`
+
+	// The uuid of the project that the volume belongs to.
+	ProjectId string `json:"projectId,omitempty"`
+
+	// The uuid of the user that the volume belongs to.
+	// +optional
+	UserId string `json:"userId,omitempty"`
+
+	// The name of the volume.
+	Name string `json:"name,omitempty"`
+
+	// The description of the volume.
+	// +optional
 	Description string `json:"description,omitempty"`
+
+	// The size of the volume requested by the user.
 	// Default unit of volume Size is GB.
-	Size             int64  `json:"size,omitempty"`
+	Size int64 `json:"size,omitempty"`
+
+	// The locality that volume belongs to.
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
-	// +readOnly:true
-	Status    string `json:"status,omitempty"`
-	PoolId    string `json:"poolId,omitempty"`
+
+	// The status of the volume.
+	// One of: "available", "error", "in-use", etc.
+	Status string `json:"status,omitempty"`
+
+	// The uuid of the pool which the volume belongs to.
+	// +readOnly
+	PoolId string `json:"poolId,omitempty"`
+
+	// The uuid of the profile which the volume belongs to.
 	ProfileId string `json:"profileId,omitempty"`
+
 	// Metadata should be kept until the scemantics between opensds volume
 	// and backend storage resouce description are clear.
 	// +optional
@@ -46,17 +68,32 @@ type VolumeSpec struct {
 
 type VolumeAttachmentSpec struct {
 	*BaseModel
-	ProjectId  string `json:"projectId,omitempty"`
-	UserId     string `json:"userId,omitempty"`
-	VolumeId   string `json:"volumeId,omitempty"`
+	// The uuid of the project that the volume belongs to.
+	ProjectId string `json:"projectId,omitempty"`
+
+	// The uuid of the user that the volume belongs to.
+	// +optional
+	UserId string `json:"userId,omitempty"`
+
+	// The uuid of the volume which the attachment belongs to.
+	VolumeId string `json:"volumeId,omitempty"`
+
+	// The locaility when the volume was attached to a host.
 	Mountpoint string `json:"mountpoint,omitempty"`
-	// +readOnly:true
+
+	// The status of the attachment.
+	// One of: "attaching", "attached", "error", etc.
 	Status string `json:"status,omitempty"`
+
 	// Metadata should be kept until the scemantics between opensds volume
 	// attachment and backend attached storage resouce description are clear.
 	// +optional
-	Metadata       map[string]string `json:"metadata,omitempty"`
-	HostInfo       `json:"hostInfo,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
+
+	// See details in `HostInfo`
+	HostInfo `json:"hostInfo,omitempty"`
+
+	// See details in `ConnectionInfo`
 	ConnectionInfo `json:"connectionInfo,omitempty"`
 }
 
@@ -85,14 +122,32 @@ func (con *ConnectionInfo) EncodeConnectionData() []byte {
 
 type VolumeSnapshotSpec struct {
 	*BaseModel
-	ProjectId   string `json:"projectId,omitempty"`
-	UserId      string `json:"userId,omitempty"`
-	Name        string `json:"name,omitempty"`
+
+	// The uuid of the project that the volume snapshot belongs to.
+	ProjectId string `json:"projectId,omitempty"`
+
+	// The uuid of the user that the volume snapshot belongs to.
+	// +optional
+	UserId string `json:"userId,omitempty"`
+
+	// The name of the volume snapshot.
+	Name string `json:"name,omitempty"`
+
+	// The description of the volume snapshot.
+	// +optional
 	Description string `json:"description,omitempty"`
-	// Default unit of snapshot Size is GB.
-	Size     int64  `json:"size,omitempty"`
-	Status   string `json:"status,omitempty"`
+
+	// The size of the volume which the snapshot belongs to.
+	// Default unit of volume Size is GB.
+	Size int64 `json:"size,omitempty"`
+
+	// The status of the volume snapshot.
+	// One of: "available", "error", etc.
+	Status string `json:"status,omitempty"`
+
+	// The uuid of the volume which the snapshot belongs to.
 	VolumeId string `json:"volumeId,omitempty"`
+
 	// Metadata should be kept until the scemantics between opensds volume
 	// snapshot and backend storage resouce snapshot description are clear.
 	// +optional

@@ -732,9 +732,9 @@ definitions:
             type: string
   Pool:
     description: >-
-      A backend is initialized by specific driver configuration. Each backend
-      can be regarded as a docking service between SDS controller and storage
-      service.
+      A pool is discoveried and updated by a dock servie. Each pool can be regarded
+      as a physical storage pool or a virtual storage pool. It's a logical and 
+      atomic pool and can be abstracted from any storage platform.
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
