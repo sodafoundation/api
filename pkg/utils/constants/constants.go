@@ -12,31 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-This module implements the common data structure.
+package constants
 
-*/
-
-package model
-
-import (
-	"encoding/json"
-)
-
-type BaseModel struct {
-	// +readOnly:true
-	Id string `json:"id"`
-	// +readOnly:true
-	CreatedAt string `json:"createdAt"`
-	// +readOnly:true
-	UpdatedAt string `json:"updatedAt"`
-}
-
-// ExtraSpec is a dictionary object that contains unique keys and json
-// objects.
-type ExtraSpec map[string]interface{}
-
-func (ext ExtraSpec) Encode() []byte {
-	parmBody, _ := json.Marshal(&ext)
-	return parmBody
-}
+// It's RFC 8601 format that decodes and encodes with
+// exactly precision to seconds.
+const TimeFormat = `2006-01-02T15:04:05`

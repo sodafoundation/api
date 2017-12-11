@@ -38,7 +38,7 @@ func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 }
 
 func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
-	if volIdentifier == sampleVolume.GetId() {
+	if volIdentifier == sampleVolume.Id {
 		return &sampleVolume, nil
 	}
 
@@ -61,7 +61,7 @@ func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSn
 
 func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	for _, snapshot := range sampleSnapshots {
-		if snapIdentifier == snapshot.GetId() {
+		if snapIdentifier == snapshot.Id {
 			return &snapshot, nil
 		}
 	}

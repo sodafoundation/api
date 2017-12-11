@@ -26,8 +26,8 @@ func NewFakeDbClient() *FakeDbClient {
 	return &FakeDbClient{}
 }
 
-func (fc *FakeDbClient) CreateDock(dck *model.DockSpec) error {
-	return nil
+func (fc *FakeDbClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
+	return &sampleDocks[0], nil
 }
 
 func (fc *FakeDbClient) GetDock(dckID string) (*model.DockSpec, error) {
@@ -69,8 +69,8 @@ func (fc *FakeDbClient) DeleteDock(dckID string) error {
 	return nil
 }
 
-func (fc *FakeDbClient) CreatePool(pol *model.StoragePoolSpec) error {
-	return nil
+func (fc *FakeDbClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
+	return &samplePools[0], nil
 }
 
 func (fc *FakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
@@ -100,8 +100,8 @@ func (fc *FakeDbClient) DeletePool(polID string) error {
 	return nil
 }
 
-func (fc *FakeDbClient) CreateProfile(prf *model.ProfileSpec) error {
-	return nil
+func (fc *FakeDbClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
+	return &sampleProfiles[0], nil
 }
 
 func (fc *FakeDbClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
@@ -155,8 +155,8 @@ func (fc *FakeDbClient) RemoveExtraProperty(prfID, extraKey string) error {
 	return nil
 }
 
-func (fc *FakeDbClient) CreateVolume(vol *model.VolumeSpec) error {
-	return nil
+func (fc *FakeDbClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	return &sampleVolumes[0], nil
 }
 
 func (fc *FakeDbClient) GetVolume(volID string) (*model.VolumeSpec, error) {
@@ -197,8 +197,8 @@ func (fc *FakeDbClient) DeleteVolumeAttachment(attachmentId string) error {
 	return nil
 }
 
-func (fc *FakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error {
-	return nil
+func (fc *FakeDbClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	return &sampleSnapshots[0], nil
 }
 
 func (fc *FakeDbClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error) {
