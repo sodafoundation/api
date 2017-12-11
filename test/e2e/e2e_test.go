@@ -33,7 +33,7 @@ func init() {
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
-		Extra:       model.ExtraSpec{},
+		Extras:      model.ExtraSpec{},
 	}
 	prf, err := c.CreateProfile(body)
 	if err != nil {
@@ -81,7 +81,7 @@ func TestCreateVolume(t *testing.T) {
 	volBody, _ := json.MarshalIndent(vol, "", "	")
 	t.Log("Create volume success, got:", string(volBody))
 
-	cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	cleanVolumeIfFailedOrFinished(t, vol.Id)
 }
 
 func TestGetVolume(t *testing.T) {
@@ -90,10 +90,10 @@ func TestGetVolume(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking volume...")
-	result, err := c.GetVolume(vol.GetId())
+	result, err := c.GetVolume(vol.Id)
 	if err != nil {
 		t.Error("Check volume failed:", err)
 		return
@@ -115,7 +115,7 @@ func TestListVolumes(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
 	vols, err := c.ListVolumes()
@@ -135,7 +135,7 @@ func TestDeleteVolume(t *testing.T) {
 	}
 
 	t.Log("Start deleting volume...")
-	if err := c.DeleteVolume(vol.GetId(), nil); err != nil {
+	if err := c.DeleteVolume(vol.Id, nil); err != nil {
 		t.Error("delete volume failed:", err)
 		return
 	}
@@ -148,12 +148,12 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume attachment...")
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.GetId(),
-		HostInfo: &model.HostInfo{},
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{},
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -164,7 +164,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	t.Log("create volume attachment success, got", string(atcBody))
 
 	t.Log("Start cleaning volume attachment...")
-	if err := c.DeleteVolumeAttachment(atc.GetId(), nil); err != nil {
+	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
 		t.Error("Clean volume attachment failed:", err)
 		return
 	}
@@ -177,10 +177,10 @@ func TestGetVolumeAttachment(t *testing.T) {
 		t.Error("Failed to run volume attachment prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.GetVolumeId(), atc.GetId())
+	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking volume attachment...")
-	result, err := c.GetVolumeAttachment(atc.GetId())
+	result, err := c.GetVolumeAttachment(atc.Id)
 	if err != nil {
 		t.Error("Check volume attachment failed:", err)
 		return
@@ -201,7 +201,7 @@ func TestListVolumeAttachments(t *testing.T) {
 		t.Error("Failed to run volume attachment prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.GetVolumeId(), atc.GetId())
+	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking all volume attachments...")
 	atcs, err := c.ListVolumeAttachments()
@@ -219,10 +219,10 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 		t.Error("Failed to run volume attachment prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, atc.GetVolumeId())
+	defer cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
 
 	t.Log("Start deleting volume attachment...")
-	if err := c.DeleteVolumeAttachment(atc.GetId(), nil); err != nil {
+	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
 		t.Error("delete volume attachment failed:", err)
 		return
 	}
@@ -235,13 +235,13 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.GetId())
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume snapshot...")
 	var body = &model.VolumeSnapshotSpec{
 		Name:        "test-snapshot",
 		Description: "This is a snapshot test",
-		VolumeId:    vol.GetId(),
+		VolumeId:    vol.Id,
 	}
 	snp, err := c.CreateVolumeSnapshot(body)
 	if err != nil {
@@ -252,7 +252,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	t.Log("create volume snapshot success, got:", string(snpBody))
 
 	t.Log("Start cleaing volume snapshot...")
-	if err := c.DeleteVolumeSnapshot(snp.GetId(), nil); err != nil {
+	if err := c.DeleteVolumeSnapshot(snp.Id, nil); err != nil {
 		t.Error("Clean volume snapshot failed:", err)
 		return
 	}
@@ -265,10 +265,10 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume snapshot prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.GetVolumeId(), snp.GetId())
+	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking volume snapshot...")
-	result, err := c.GetVolumeSnapshot(snp.GetId())
+	result, err := c.GetVolumeSnapshot(snp.Id)
 	if err != nil {
 		t.Error("Check volume snapshot failed:", err)
 		return
@@ -290,7 +290,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 		t.Error("Failed to run volume snapshot prepare function:", err)
 		return
 	}
-	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.GetVolumeId(), snp.GetId())
+	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking all volume snapshots...")
 	snps, err := c.ListVolumeSnapshots()
@@ -308,10 +308,10 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume snapshot prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, snp.GetVolumeId())
+	defer cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
 
 	t.Log("Start deleting volume snapshot...")
-	if err := c.DeleteVolumeSnapshot(snp.GetId(), nil); err != nil {
+	if err := c.DeleteVolumeSnapshot(snp.Id, nil); err != nil {
 		t.Error("delete volume snapshot failed:", err)
 		return
 	}
@@ -343,14 +343,14 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 
 	t.Log("Start preparing volume attachment...")
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.GetId(),
-		HostInfo: &model.HostInfo{},
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{},
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
 		t.Error("prepare volume attachment failed:", err)
 		// Run volume clean function if failed to prepare volume attachment.
-		cleanVolumeIfFailedOrFinished(t, atc.GetVolumeId())
+		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
 		return nil, err
 	}
 	t.Log("End preparing volume attachment...")
@@ -368,13 +368,13 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 	var body = &model.VolumeSnapshotSpec{
 		Name:        "test-snapshot",
 		Description: "This is a snapshot test",
-		VolumeId:    vol.GetId(),
+		VolumeId:    vol.Id,
 	}
 	snp, err := c.CreateVolumeSnapshot(body)
 	if err != nil {
 		t.Error("prepare volume snapshot failed:", err)
 		// Run volume clean function if failed to prepare volume snapshot.
-		cleanVolumeIfFailedOrFinished(t, snp.GetVolumeId())
+		cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
 		return nil, err
 	}
 	t.Log("End preparing volume snapshot...")

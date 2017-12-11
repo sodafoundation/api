@@ -29,14 +29,6 @@ import (
 const (
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
-
-	StatusBadRequest   = http.StatusBadRequest
-	StatusUnauthorized = http.StatusUnauthorized
-	StatusForbidden    = http.StatusForbidden
-	StatusNotFound     = http.StatusNotFound
-
-	StatusInternalServerError = http.StatusInternalServerError
-	StatusNotImplemented      = http.StatusNotImplemented
 )
 
 func Run(host string) {
@@ -67,12 +59,13 @@ func Run(host string) {
 			beego.NSRouter("/profiles/:profileId/extras", &ProfilePortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
 			beego.NSRouter("/profiles/:profileId/extras/:extraKey", &ProfilePortal{}, "delete:RemoveExtraProperty"),
 
+			// Pool is the virtual description of backend storage, usually divided into block, file and object,
+			// and every pool is atomic, which means every pool contains a specific set of features.
+			// ListPools and GetPool are used for checking the status of backend pool, admin only
+			beego.NSRouter("/pools", &PoolPortal{}, "get:ListPools"),
+			beego.NSRouter("/pools/:poolId", &PoolPortal{}, "get:GetPool"),
+
 			beego.NSNamespace("/block",
-				// Pool is the virtual description of backend storage, usually divided into block, file and object,
-				// and every pool is atomic, which means every pool contains a specific set of features.
-				// ListPools and GetPool are used for checking the status of backend pool, admin only
-				beego.NSRouter("/pools", &PoolPortal{}, "get:ListPools"),
-				beego.NSRouter("/pools/:poolId", &PoolPortal{}, "get:GetPool"),
 
 				// Volume is the logical description of a piece of storage, which can be directly used by users.
 				// All operations of volume can be used for both admin and users.

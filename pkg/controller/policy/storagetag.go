@@ -32,8 +32,6 @@ import (
 
 const (
 	POLICY_TYPE_MAPPING_TABLE = `{
-		"iops": "feature",
-		"bandwidth": "feature",
 		"diskType": "feature",
 		"thinProvision": "feature",
 		"highAvailability": "feature",
@@ -41,9 +39,6 @@ const (
 		"deleteSnapshotPolicy": "operation"
 	}`
 	POLICY_LIFECIRCLE_TABLE = `{
-		"iops": 1,
-		"bandwidth": 1,
-		"iops": 1,
 		"thinProvision": 1,
 		"highAvailability": 1,
 		"intervalSnapshot": 1,

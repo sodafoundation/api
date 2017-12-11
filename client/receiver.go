@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type reqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
@@ -58,7 +58,7 @@ func (*receiver) Recv(
 	}
 
 	if err = checkHTTPResponseStatusCode(resp); err != nil {
-		var errorMsg utils.ErrorRes
+		var errorMsg model.ErrorSpec
 		if err = json.Unmarshal(rbody, &errorMsg); err != nil {
 			return fmt.Errorf("failed to unmarshal error message: %v", err)
 		}

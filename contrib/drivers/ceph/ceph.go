@@ -494,8 +494,6 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
 	param := make(map[string]interface{})
 	param["diskType"] = proper.DiskType
-	param["iops"] = proper.IOPS
-	param["bandwidth"] = proper.BandWidth
 	param["redundancyType"] = line[poolType]
 	if param["redundancyType"] == "replicated" {
 		param["replicateSize"] = line[poolTypeSize]
@@ -543,7 +541,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity:    totalCap * maxAvailCap / availCap,
 			FreeCapacity:     maxAvailCap,
-			Parameters:       *param,
+			Extras:           *param,
 			AvailabilityZone: c.Pool[name].AZ,
 		}
 		if pol.AvailabilityZone == "" {
@@ -553,4 +551,3 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
-

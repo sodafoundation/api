@@ -27,7 +27,8 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/satori/go.uuid"
 )
 
 func NewClient(edps []string) *Client {
@@ -40,23 +41,31 @@ type Client struct {
 	clientInterface
 }
 
-func (c *Client) CreateDock(dck *model.DockSpec) error {
+func (c *Client) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
+	if dck.Id == "" {
+		dck.Id = uuid.NewV4().String()
+	}
+
+	if dck.CreatedAt == "" {
+		dck.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
 	dckBody, err := json.Marshal(dck)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateDockURL(dck.GetId()),
+		Url:     GenerateDockURL(dck.Id),
 		Content: string(dckBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create dock in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return dck, nil
 }
 
 func (c *Client) GetDock(dckID string) (*model.DockSpec, error) {
@@ -133,6 +142,8 @@ func (c *Client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	if desp != "" {
 		dck.Description = desp
 	}
+	dck.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
 	dckBody, err := json.Marshal(dck)
 	if err != nil {
 		return nil, err
@@ -162,23 +173,30 @@ func (c *Client) DeleteDock(dckID string) error {
 	return nil
 }
 
-func (c *Client) CreatePool(pol *model.StoragePoolSpec) error {
+func (c *Client) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
+	if pol.Id == "" {
+		pol.Id = uuid.NewV4().String()
+	}
+
+	if pol.CreatedAt == "" {
+		pol.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
 	polBody, err := json.Marshal(pol)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GeneratePoolURL(pol.GetId()),
+		Url:     GeneratePoolURL(pol.Id),
 		Content: string(polBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create pol in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return pol, nil
 }
 
 func (c *Client) GetPool(polID string) (*model.StoragePoolSpec, error) {
@@ -235,6 +253,8 @@ func (c *Client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	if desp != "" {
 		pol.Description = desp
 	}
+	pol.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
 	polBody, err := json.Marshal(pol)
 	if err != nil {
 		return nil, err
@@ -264,23 +284,32 @@ func (c *Client) DeletePool(polID string) error {
 	return nil
 }
 
-func (c *Client) CreateProfile(prf *model.ProfileSpec) error {
+func (c *Client) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
+
+	if prf.Id == "" {
+		prf.Id = uuid.NewV4().String()
+	}
+
+	if prf.CreatedAt == "" {
+		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateProfileURL(prf.GetId()),
+		Url:     GenerateProfileURL(prf.Id),
 		Content: string(prfBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create profile in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return prf, nil
 }
 
 func (c *Client) GetProfile(prfID string) (*model.ProfileSpec, error) {
@@ -346,23 +375,24 @@ func (c *Client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	if err != nil {
 		return nil, err
 	}
-	if name := input.GetName(); name != "" {
+	if name := input.Name; name != "" {
 		prf.Name = name
 	}
-	if desp := input.GetDescription(); desp != "" {
+	if desp := input.Description; desp != "" {
 		prf.Description = desp
 	}
+	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if props := input.Extra; len(props) != 0 {
-		if prf.Extra == nil {
-			prf.Extra = make(map[string]interface{})
+	if props := input.Extras; len(props) != 0 {
+		if prf.Extras == nil {
+			prf.Extras = make(map[string]interface{})
 		}
 		for k, v := range props {
-			prf.Extra[k] = v
+			prf.Extras[k] = v
 		}
 	}
 
-	prf.UpdatedAt = time.Now().Format(utils.TimeFormat)
+	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
@@ -399,20 +429,20 @@ func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 		return nil, err
 	}
 
-	if prf.Extra == nil {
-		prf.Extra = make(map[string]interface{})
+	if prf.Extras == nil {
+		prf.Extras = make(map[string]interface{})
 	}
 
 	for k, v := range ext {
-		prf.Extra[k] = v
+		prf.Extras[k] = v
 	}
 
-	prf.UpdatedAt = time.Now().Format(utils.TimeFormat)
+	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if err = c.CreateProfile(prf); err != nil {
+	if _, err = c.CreateProfile(prf); err != nil {
 		return nil, err
 	}
-	return &prf.Extra, nil
+	return &prf.Extras, nil
 }
 
 func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
@@ -420,7 +450,7 @@ func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &prf.Extra, nil
+	return &prf.Extras, nil
 }
 
 func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
@@ -429,30 +459,37 @@ func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
 		return err
 	}
 
-	delete(prf.Extra, extraKey)
-	if err = c.CreateProfile(prf); err != nil {
+	delete(prf.Extras, extraKey)
+	if _, err = c.CreateProfile(prf); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Client) CreateVolume(vol *model.VolumeSpec) error {
+func (c *Client) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	if vol.Id == "" {
+		vol.Id = uuid.NewV4().String()
+	}
+
+	if vol.CreatedAt == "" {
+		vol.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
 	volBody, err := json.Marshal(vol)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateVolumeURL(vol.GetId()),
+		Url:     GenerateVolumeURL(vol.Id),
 		Content: string(volBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return vol, nil
 }
 
 func (c *Client) GetVolume(volID string) (*model.VolumeSpec, error) {
@@ -511,6 +548,14 @@ func (c *Client) DeleteVolume(volID string) error {
 }
 
 func (c *Client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	if attachment.Id == "" {
+		attachment.Id = uuid.NewV4().String()
+	}
+
+	if attachment.CreatedAt == "" {
+		attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
 	atcBody, err := json.Marshal(attachment)
 	if err != nil {
 		return nil, err
@@ -611,7 +656,7 @@ func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 		result.ConnectionData[k] = v
 	}
 	// Set update time
-	result.UpdatedAt = time.Now().Format(utils.TimeFormat)
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
 	atcBody, err := json.Marshal(result)
 	if err != nil {
@@ -642,23 +687,30 @@ func (c *Client) DeleteVolumeAttachment(attachmentId string) error {
 	return nil
 }
 
-func (c *Client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) error {
+func (c *Client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	if snp.Id == "" {
+		snp.Id = uuid.NewV4().String()
+	}
+
+	if snp.CreatedAt == "" {
+		snp.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
 	snpBody, err := json.Marshal(snp)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:     GenerateSnapshotURL(snp.GetId()),
+		Url:     GenerateSnapshotURL(snp.Id),
 		Content: string(snpBody),
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create volume snapshot in db:", dbRes.Error)
-		return errors.New(dbRes.Error)
+		return nil, errors.New(dbRes.Error)
 	}
 
-	return nil
+	return snp, nil
 }
 
 func (c *Client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {

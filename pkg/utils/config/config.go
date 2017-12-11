@@ -211,4 +211,3 @@ func GetBackendsMap() map[string]BackendProperties {
 	}
 	return backendsMap
 }
-

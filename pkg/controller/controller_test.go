@@ -141,7 +141,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	var req = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 		VolumeId:  "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-		HostInfo:  &model.HostInfo{},
+		HostInfo:  model.HostInfo{},
 	}
 	var c = &Controller{
 		volumeController: NewFakeVolumeController(),
@@ -168,7 +168,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 			Id: "80287bf8-66de-11e7-b031-f3b0af1675ba",
 		},
 		VolumeId: "9193c3ec-771f-11e7-8ca3-d32c0a8b2725",
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	}
 	var c = &Controller{
 		volumeController: NewFakeVolumeController(),
@@ -256,7 +256,7 @@ var (
 		},
 		Name:        "default",
 		Description: "default policy",
-		Extra:       model.ExtraSpec{},
+		Extras:      model.ExtraSpec{},
 	}
 
 	sampleAttachment = model.VolumeAttachmentSpec{

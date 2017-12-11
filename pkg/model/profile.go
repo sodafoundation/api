@@ -19,24 +19,13 @@ This module implements the common data structure.
 
 package model
 
+// An OpenSDS profile is identified by a unique name and ID. With adding
+// extra properties, each profile can contains a set of tags of storage
+// capabilities which are desirable features for a class of applications.
 type ProfileSpec struct {
 	*BaseModel
 	Name        string    `json:"name,omitempty"`
 	Description string    `json:"description,omitempty"`
 	StorageType string    `json:"storageType,omitempty"`
-	Extra       ExtraSpec `json:"extras,omitempty"`
+	Extras      ExtraSpec `json:"extras,omitempty"`
 }
-
-func (prf *ProfileSpec) GetName() string {
-	return prf.Name
-}
-
-func (prf *ProfileSpec) GetDescription() string {
-	return prf.Description
-}
-
-func (prf *ProfileSpec) GetStorageType() string {
-	return prf.StorageType
-}
-
-type ExtraSpec map[string]interface{}

@@ -32,10 +32,8 @@ func TestSetup(t *testing.T) {
 		conf: &LVMConfig{
 			Pool: map[string]PoolProperties{
 				"vg001": {
-					DiskType:  "SSD",
-					IOPS:      int64(1000),
-					BandWidth: int64(1000),
-					AZ:        "default",
+					DiskType: "SSD",
+					AZ:       "default",
 				},
 			},
 			TgtBindIp: "192.168.56.105",
@@ -59,10 +57,8 @@ var fd = &Driver{
 	conf: &LVMConfig{
 		Pool: map[string]PoolProperties{
 			"vg001": {
-				DiskType:  "SSD",
-				IOPS:      int64(1000),
-				BandWidth: int64(1000),
-				AZ:        "lvm",
+				DiskType: "SSD",
+				AZ:       "lvm",
 			},
 		},
 	},
@@ -201,10 +197,8 @@ func TestListPools(t *testing.T) {
 			Name:          "vg001",
 			TotalCapacity: int64(18),
 			FreeCapacity:  int64(18),
-			Parameters: map[string]interface{}{
-				"diskType":  "SSD",
-				"iops":      int64(1000),
-				"bandwidth": int64(1000),
+			Extras: model.ExtraSpec{
+				"diskType": "SSD",
 			},
 			AvailabilityZone: "lvm",
 		},
@@ -307,4 +301,3 @@ var (
 		Block device           253:3
 	`
 )
-

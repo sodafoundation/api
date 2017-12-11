@@ -30,8 +30,8 @@ import (
 
 func init() {
 	var poolPortal PoolPortal
-	beego.Router("/v1alpha/block/pools", &poolPortal, "get:ListPools")
-	beego.Router("/v1alpha/block/pools/:poolId", &poolPortal, "get:GetPool")
+	beego.Router("/v1alpha/pools", &poolPortal, "get:ListPools")
+	beego.Router("/v1alpha/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
 var (
@@ -47,7 +47,7 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     6999,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Parameters: map[string]interface{}{
+		Extras: model.ExtraSpec{
 			"key1": "val1",
 			"key2": "val2",
 			"key3": map[string]string{
@@ -65,7 +65,7 @@ func TestListPools(t *testing.T) {
 	mockClient.On("ListPools").Return(fakePools, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/pools", nil)
+	r, _ := http.NewRequest("GET", "/v1alpha/pools", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -113,7 +113,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 	mockClient.On("ListPools").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/pools", nil)
+	r, _ := http.NewRequest("GET", "/v1alpha/pools", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -128,7 +128,7 @@ func TestGetPool(t *testing.T) {
 	mockClient.On("GetPool", "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
+	r, _ := http.NewRequest("GET", "/v1alpha/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -177,7 +177,7 @@ func TestGetPoolWithBadRequest(t *testing.T) {
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET",
-		"/v1alpha/block/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
+		"/v1alpha/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

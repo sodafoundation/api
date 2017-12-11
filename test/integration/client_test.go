@@ -30,10 +30,8 @@ func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{
 		Name:        "silver",
 		Description: "silver policy",
-		Extra: model.ExtraSpec{
-			"diskType":  "SAS",
-			"iops":      300,
-			"bandwidth": 500,
+		Extras: model.ExtraSpec{
+			"diskType": "SAS",
 		},
 	}
 
@@ -85,9 +83,7 @@ func TestClientDeleteProfile(t *testing.T) {
 func TestClientAddExtraProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 	var body = &model.ExtraSpec{
-		"diskType":  "SAS",
-		"iops":      300,
-		"bandwidth": 500,
+		"diskType": "SAS",
 	}
 
 	ext, err := c.AddExtraProperty(prfID, body)
@@ -229,7 +225,7 @@ func TestClientDeleteVolume(t *testing.T) {
 func TestClientCreateVolumeAttachment(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	}
 
 	atc, err := c.CreateVolumeAttachment(body)
@@ -270,7 +266,7 @@ func TestClientDeleteVolumeAttachment(t *testing.T) {
 	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
 	body := &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: &model.HostInfo{},
+		HostInfo: model.HostInfo{},
 	}
 
 	if err := c.DeleteVolumeAttachment(atcID, body); err != nil {

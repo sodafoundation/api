@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: v1alpha1
+  version: "v1alpha"
   title: OpenSDS Controller API
   description: OpenSDS Controller API to manage mutliple backend storages.
   termsOfService: 'https://www.linuxfoundation.org/terms'
@@ -37,13 +37,9 @@ paths:
                   $ref: '#/definitions/Version'
           examples:
             application/json:
-              versions:
-                - name: v1alpha1
-                  status: SUPPORTED
-                  updated: '2017-04-10T14:36:58.014Z'
-                - name: v1alpha2
-                  status: CURRENT
-                  updated: '2017-07-10T14:36:58.014Z'
+              - name: v1alpha
+                status: CURRENT
+                updated: '2017-07-10T14:36:58.014Z'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/{apiVersion}':
@@ -63,53 +59,46 @@ paths:
                 $ref: '#/definitions/Version'
           examples:
             application/json:
-              version:
-                name: v1alpha1
-                status: SUPPORTED
-                updated: '2017-04-10T14:36:58.014Z'
+              name: v1alpha
+              status: SUPPORTED
+              updated: '2017-04-10T14:36:58.014Z'
         '404':
           description: The resource does not exist
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/backends':
+  '/v1alpha/{projectId}/docks':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
       tags:
-        - Block backend
-      description: Lists information for all storage backends.
+        - Dock
+      description: Lists information for all storage docks.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              backends:
-                type: array
-                items:
-                  $ref: '#/definitions/Backend'
+            type: array
+            items:
+              $ref: '#/definitions/Dock'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/backends/{backendId}':
+  '/v1alpha/{projectId}/docks/{dockId}':
     parameters:
       - $ref: '#/parameters/projectId'
-      - $ref: '#/parameters/backendId'
+      - $ref: '#/parameters/dockId'
     get:
       tags:
-        - Block backend
-      description: Gets storage backend detail by backend ID.
+        - Dock
+      description: Gets storage dock detail by dock ID.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              backend:
-                $ref: '#/definitions/Backend'
+            $ref: '#/definitions/Dock'
         '401':
           description: Unauthorized
         '403':
@@ -118,45 +107,39 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/pools':
+  '/v1alpha/{projectId}/pools':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
       tags:
-        - Block pool
+        - Pool
       description: Lists information for all block storage pool.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              pools:
-                type: array
-                items:
-                  $ref: '#/definitions/Pool'
+            type: array
+            items:
+              $ref: '#/definitions/Pool'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/pools/{poolId}':
+  '/v1alpha/{projectId}/pools/{poolId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/poolId'
     get:
       tags:
-        - Block pool
+        - Pool
       description: Gets storage pool detail by pool ID.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              pool:
-                $ref: '#/definitions/Pool'
+            $ref: '#/definitions/Pool'
         '401':
           description: Unauthorized
         '403':
@@ -165,41 +148,37 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/profiles':
+  '/v1alpha/{projectId}/profiles':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
       tags:
-        - Block profiles
+        - Profiles
       description: Lists information for all profiles.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              profiles:
-                type: array
-                items:
-                  $ref: '#/definitions/Profile'
+            type: array
+            items:
+              $ref: '#/definitions/Profile'
           examples:
             application/json:
-              profiles:
-                - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-                  name: Gold
-                  description: provide gold storage service
-                  extraSpecs:
-                    key1: value1
-                    key2:
-                      subKey1: subValue1
-                      subKey2: subValue2
-                    key3: value3
-                - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-                  name: Silver
-                  description: provide silver storage service
-                  extraSpecs:
-                    key1: value1
-                    key2: value2
+            - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
+              name: Gold
+              description: provide gold storage service
+              extras:
+                key1: value1
+                key2:
+                  subKey1: subValue1
+                  subKey2: subValue2
+                key3: value3
+            - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+              name: Silver
+              description: provide silver storage service
+              extras:
+                key1: value1
+                key2: value2
         '401':
           description: Unauthorized
         '403':
@@ -208,71 +187,60 @@ paths:
           $ref: '#/responses/HTTPStatus500'
     post:
       tags:
-        - Block profiles
+        - Profiles
       description: Creates a profile.
       parameters:
         - name: body
           in: body
           required: true
           schema:
-            type: object
-            properties:
-              profile:
-                $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Profile'
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              profile:
-                $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Profile'
           examples:
             application/json:
-              profile:
-                id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-                name: Gold
-                description: provide gold storage service
-                extraSpecs:
-                  key1: value1
-                  key2:
-                    subKey1: subValue1
-                    subKey2: subValue2
-                  key3: value3
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
+              name: Gold
+              description: provide gold storage service
+              extras:
+                key1: value1
+                key2:
+                  subKey1: subValue1
+                  subKey2: subValue2
+                key3: value3
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/profiles/{profileId}':
+  '/v1alpha/{projectId}/profiles/{profileId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
     get:
       tags:
-        - Block profiles
+        - Profiles
       description: Gets profile detail by profile ID.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              profile:
-                $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Profile'
           examples:
             application/json:
-              profile:
-                id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-                name: Gold
-                description: provide gold storage service
-                extraSpecs:
-                  key1: value1
-                  key2:
-                    subKey1: subValue1
-                    subKey2: subValue2
-                  key3: value3
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
+              name: Gold
+              description: provide gold storage service
+              extras:
+                key1: value1
+                key2:
+                  subKey1: subValue1
+                  subKey2: subValue2
+                key3: value3
         '401':
           description: Unauthorized
         '403':
@@ -281,37 +249,30 @@ paths:
           $ref: '#/responses/HTTPStatus500'
     put:
       tags:
-        - Block profiles
+        - Profiles
       description: Updates a profile.
       parameters:
         - name: body
           in: body
           required: true
           schema:
-            type: object
-            properties:
-              profile:
-                $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Profile'
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              profile:
-                $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Profile'
           examples:
             application/json:
-              profiles:
-                id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-                name: Gold
-                description: provide gold storage service
-                extraSpecs:
-                  key1: value1
-                  key2:
-                    subKey1: subValue1
-                    subKey2: subValue2
-                  key3: value3
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
+              name: Gold
+              description: provide gold storage service
+              extras:
+                key1: value1
+                key2:
+                  subKey1: subValue1
+                  subKey2: subValue2
+                key3: value3
         '401':
           description: Unauthorized
         '403':
@@ -320,7 +281,7 @@ paths:
           $ref: '#/responses/HTTPStatus500'
     delete:
       tags:
-        - Block profiles
+        - Profiles
       description: Deletes a profile.
       responses:
         '200':
@@ -333,38 +294,31 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/profiles/{profileId}/extraSpecs':
+  '/v1alpha/{projectId}/profiles/{profileId}/extras':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
     post:
       tags:
-        - Block profiles
+        - Profiles
       description: Adds an extra property to the profile.
       parameters:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              extraSpecs:
-                $ref: '#/definitions/ExtraSpecs'
+            $ref: '#/definitions/Extras'
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              extraSpecs:
-                $ref: '#definitions/ExtraSpecs'
+            $ref: '#definitions/Extras'
           examples:
             application/json:
-              extraSpecs:
-                key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
+              key1: value1
+              key2:
+                subKey1: subValue1
+                subKey2: subValue2
+              key3: value3
         '401':
           description: Unauthorized
         '403':
@@ -375,24 +329,20 @@ paths:
           $ref: '#/responses/HTTPStatus500'
     get:
       tags:
-        - Block profiles
+        - Profiles
       description: Lists all extra properties for the profile.
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              extraSpecs:
-                $ref: '#definitions/ExtraSpecs'
+              $ref: '#definitions/Extras'
           examples:
             application/json:
-              extraSpecs:
-                key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
+              key1: value1
+              key2:
+                subKey1: subValue1
+                subKey2: subValue2
+              key3: value3
         '401':
           description: Unauthorized
         '403':
@@ -401,14 +351,14 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/profiles/{profileId}/extraSpecs/{extraSpecKey}':
+  '/v1alpha/{projectId}/profiles/{profileId}/extras/{extraKey}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
-      - $ref: '#/parameters/extraSpecKey'
+      - $ref: '#/parameters/extraKey'
     delete:
       tags:
-        - Block profiles
+        - Profiles
       description: Remove an extra property from profile.
       responses:
         '200':
@@ -421,7 +371,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/volumes':
+  '/v1alpha/{projectId}/block/volumes':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -432,12 +382,9 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              volumes:
-                type: array
-                items:
-                  $ref: '#/definitions/Volume'
+            type: array
+            items:
+              $ref: '#/definitions/Volume'
         '401':
           description: Unauthorized
         '403':
@@ -452,25 +399,19 @@ paths:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              volume:
-                $ref: '#/definitions/Volume'
+            $ref: '#/definitions/Volume'
       responses:
         '202':
           description: OK
           schema:
-            type: object
-            properties:
-              volume:
-                $ref: '#/definitions/Volume'
+            $ref: '#/definitions/Volume'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/volumes/{volumeId}':
+  '/v1alpha/{projectId}/block/volumes/{volumeId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeId'
@@ -482,10 +423,7 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              volume:
-                $ref: '#/definitions/Volume'
+            $ref: '#/definitions/Volume'
         '401':
           description: Unauthorized
         '403':
@@ -503,24 +441,18 @@ paths:
           in: body
           schema:
             type: object
+            required:
+              - name
             properties:
-              volume:
-                type: object
-                required:
-                  - name
-                properties:
-                  name:
-                    type: string
-                  description:
-                    type: string
+              name:
+                type: string
+              description:
+                type: string
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              volume:
-                $ref: '#/definitions/Volume'
+            $ref: '#/definitions/Volume'
         '401':
           description: Unauthorized
         '403':
@@ -544,7 +476,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/attachments':
+  '/v1alpha/{projectId}/block/attachments':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -561,12 +493,9 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              attachments:
-                type: array
-                items:
-                  $ref: '#/definitions/Attachment'
+            type: array
+            items:
+              $ref: '#/definitions/Attachment'
         '401':
           description: Unauthorized
         '403':
@@ -581,10 +510,7 @@ paths:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              attachment:
-                $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/Attachment'
       responses:
         '202':
           description: OK
@@ -599,7 +525,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/attachments/{attachmentId}':
+  '/v1alpha/{projectId}/block/attachments/{attachmentId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/attachmentId'
@@ -611,10 +537,7 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              attachment:
-                $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/Attachment'
         '401':
           description: Unauthorized
         '403':
@@ -631,18 +554,12 @@ paths:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              attachment:
-                $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/Attachment'
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              attachment:
-                $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/Attachment'
         '401':
           description: Unauthorized
         '403':
@@ -666,7 +583,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/snapshots':
+  '/v1alpha/{projectId}/block/snapshots':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -683,12 +600,9 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              snapshots:
-                type: array
-                items:
-                  $ref: '#/definitions/Snapshot'
+            type: array
+            items:
+              $ref: '#/definitions/Snapshot'
         '401':
           description: Unauthorized
         '403':
@@ -703,25 +617,19 @@ paths:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              snapshot:
-                $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/Snapshot'
       responses:
         '202':
           description: OK
           schema:
-            type: object
-            properties:
-              snapshot:
-                $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/Snapshot'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha1/{projectId}/block/snapshots/{snapshotId}':
+  '/v1alpha/{projectId}/block/snapshots/{snapshotId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/snapshotId'
@@ -733,10 +641,7 @@ paths:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              snapshot:
-                $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/Snapshot'
         '401':
           description: Unauthorized
         '403':
@@ -755,23 +660,17 @@ paths:
           schema:
             type: object
             properties:
-              snapshot:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  description:
-                    type: string
-                required:
-                  - name
+              name:
+                type: string
+              description:
+                type: string
+            required:
+              - name
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              snapshot:
-                $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/Snapshot'
         '401':
           description: Unauthorized
         '403':
@@ -810,7 +709,7 @@ definitions:
         type: string
         format: date-time
         readOnly: true
-  Backend:
+  Dock:
     description: >-
       A backend is initialized by specific driver configuration. Each backend
       can be regarded as a docking service between SDS controller and storage
@@ -820,6 +719,8 @@ definitions:
       - type: object
         properties:
           name:
+            type: string
+          storageType:
             type: string
           description:
             type: string
@@ -840,6 +741,8 @@ definitions:
         properties:
           name:
             type: string
+          storageType:
+            type: string            
           description:
             type: string
           status:
@@ -850,8 +753,12 @@ definitions:
             type: integer
           freeCapacity:
             type: integer
-          backendId:
+          dockId:
             type: string
+          extras:
+            type: object
+            additionalProperties:
+              type: object            
   Profile:
     description: >-
       An OpenSDS profile is identified by a unique name and ID. With adding
@@ -862,19 +769,22 @@ definitions:
       - type: object
         required:
           - name
+          - storageType
         properties:
           id:
             type: string
             readOnly: true
           name:
             type: string
+          storageType:
+            type: string            
           description:
             type: string
-          extraSpecs:
+          extras:
             type: object
             additionalProperties:
               type: object
-  ExtraSpecs:
+  Extras:
     description: Extra is a dictionary object that contains unique keys and json objects.
     allOf:
       - $ref: '#/definitions/BaseModel'
@@ -925,7 +835,6 @@ definitions:
           - hostInfo
           - connectionInfo
           - mountpoint
-          - attachMode
           - volumeId
         properties:
           projectId:
@@ -939,8 +848,6 @@ definitions:
           connectionInfo:
             $ref: '#/definitions/ConnectionInfo'
           mountpoint:
-            type: string
-          attachMode:
             type: string
           status:
             type: string
@@ -1025,7 +932,7 @@ definitions:
     properties:
       name:
         type: string
-        example: v1alpha1
+        example: v1alpha
       status:
         type: string
         enum:
@@ -1050,11 +957,11 @@ parameters:
     required: true
     description: The project UUID in a multi-tenancy environment.
     type: string
-  backendId:
-    name: backendId
+  dockId:
+    name: dockId
     in: path
     required: true
-    description: The UUID of the storage backend service.
+    description: The UUID of the storage backend (dock) service.
     type: string
   poolId:
     name: poolId
@@ -1074,8 +981,8 @@ parameters:
     required: true
     description: The UUID of the volume.
     type: string
-  extraSpecKey:
-    name: extraSpecKey
+  extraKey:
+    name: extraKey
     in: path
     required: true
     description: The key of the extra properties.

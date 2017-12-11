@@ -66,8 +66,6 @@ configFile: /etc/ceph/ceph.conf
 pool:
   "rbd":
     diskType: SSD
-    iops: 1000
-    bandwidth: 1000
     AZ: default
 ' >> /etc/opensds/driver/ceph.yaml
 ```
@@ -116,10 +114,8 @@ root@opensds-worker-1:~# curl localhost:50040/v1alpha/block/pools| python -m jso
         "id": "0517f561-85b3-5f6a-a38d-8b5a08bff7df",
         "name": "rbd",
         "parameters": {
-            "bandwidth": 0,
             "crushRuleset": "0",
             "diskType": "SSD",
-            "iops": 1000,
             "redundancyType": "replicated",
             "replicateSize": "3"
         },

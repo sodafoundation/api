@@ -12,28 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-This module implements the common data structure.
+package constants
 
-*/
-
-package model
-
-type QuotaSpec struct {
-	*BaseModel
-	Name         string           `json:"name,omitempty"`
-	Description  string           `json:"description,omitempty"`
-	ResourceList map[string]int64 `json:"resourceList,omitempty"`
-}
-
-func (quota *QuotaSpec) GetName() string {
-	return quota.Name
-}
-
-func (quota *QuotaSpec) GetDescription() string {
-	return quota.Description
-}
-
-func (quota *QuotaSpec) GetResourceList() map[string]int64 {
-	return quota.ResourceList
-}
+// It's RFC 8601 format that decodes and encodes with
+// exactly precision to seconds.
+const TimeFormat = `2006-01-02T15:04:05`
+const DefaultOpensdsEndpoint = "http://localhost:50040"

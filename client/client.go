@@ -15,7 +15,8 @@
 package client
 
 import (
-	"os"
+	"github.com/opensds/opensds/pkg/utils/constants"
+	"log"
 )
 
 type Client struct {
@@ -32,13 +33,10 @@ type Config struct {
 }
 
 func NewClient(c *Config) *Client {
-	// If endpoint field not specified, the info will be fetched from
-	// environment variable.Otherwise using local host.
+	// If endpoint field not specified,use the default value localhost.
 	if c.Endpoint == "" {
-		c.Endpoint = "http://127.0.0.1:50040"
-		if v, ok := os.LookupEnv("OPENSDS_ENDPOINT"); ok {
-			c.Endpoint = v
-		}
+		c.Endpoint = constants.DefaultOpensdsEndpoint
+		log.Printf("OpenSDS Endpoint is not specified using the default value(%s)", c.Endpoint)
 	}
 
 	return &Client{

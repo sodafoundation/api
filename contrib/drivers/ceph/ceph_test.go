@@ -314,23 +314,11 @@ func TestCephConfig(t *testing.T) {
 	if conf.Pool["rbd"].DiskType != "SSD" {
 		t.Error("Test ConfigFile DiskType failed!")
 	}
-	if conf.Pool["rbd"].IOPS != 1000 {
-		t.Error("Test ConfigFile IOPS failed!")
-	}
-	if conf.Pool["rbd"].BandWidth != 1000 {
-		t.Error("Test ConfigFile BandWidth failed!")
-	}
 	if conf.Pool["rbd"].AZ != "ceph" {
-		t.Error("Test ConfigFile BandWidth failed!")
+		t.Error("Test ConfigFile AZ failed!")
 	}
 	if conf.Pool["test"].DiskType != "SAS" {
 		t.Error("Test ConfigFile DiskType failed!")
-	}
-	if conf.Pool["test"].IOPS != 800 {
-		t.Error("Test ConfigFile IOPS failed!")
-	}
-	if conf.Pool["test"].BandWidth != 800 {
-		t.Error("Test ConfigFile BandWidth failed!")
 	}
 }
 
@@ -389,43 +377,35 @@ POOLS:
 		t.Errorf("Test List Pools TotalCapacity error")
 	}
 
-	if pols[0].Parameters["redundancyType"] != "replicated" {
+	if pols[0].Extras["redundancyType"] != "replicated" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if pols[0].Parameters["replicateSize"] != "3" {
+	if pols[0].Extras["replicateSize"] != "3" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if pols[0].Parameters["crushRuleset"] != "0" {
+	if pols[0].Extras["crushRuleset"] != "0" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
-	if pols[0].Parameters["diskType"] != "SSD" {
+	if pols[0].Extras["diskType"] != "SSD" {
 		t.Errorf("Test List Pools diskType error")
-	}
-
-	if pols[0].Parameters["iops"] != int64(1000) {
-		t.Errorf("Test List Pools iops error")
-	}
-
-	if pols[0].Parameters["bandwidth"] != int64(1000) {
-		t.Errorf("Test List Pools bandWidth error")
 	}
 
 	if pols[5].Name != "ecpool" {
 		t.Errorf("Test List Pools Name error")
 	}
 
-	if pols[5].Parameters["redundancyType"] != "erasure" {
+	if pols[5].Extras["redundancyType"] != "erasure" {
 		t.Errorf("Test List Pools redundancyType error")
 	}
 
-	if pols[5].Parameters["erasureSize"] != "5" {
+	if pols[5].Extras["erasureSize"] != "5" {
 		t.Errorf("Test List Pools replicateSize error")
 	}
 
-	if pols[5].Parameters["crushRuleset"] != "2" {
+	if pols[5].Extras["crushRuleset"] != "2" {
 		t.Errorf("Test List Pools crushRuleset error")
 	}
 
@@ -433,4 +413,3 @@ POOLS:
 		t.Errorf("Test List Pools len error")
 	}
 }
-

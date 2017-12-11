@@ -88,7 +88,7 @@ func TestListDocks(t *testing.T) {
 	}
 }
 
-func TestListDocksWithInternalError(t *testing.T) {
+func TestListDocksWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("ListDocks").Return(nil, errors.New("db error"))
@@ -98,8 +98,8 @@ func TestListDocksWithInternalError(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
 	}
 }
 

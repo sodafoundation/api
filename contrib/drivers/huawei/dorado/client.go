@@ -934,4 +934,3 @@ func (c *DoradoClient) DeleteHost(id string) error {
 func (c *DoradoClient) DeleteMappingView(id string) error {
 	return c.request("DELETE", "/mappingview/"+id, nil, nil)
 }
-

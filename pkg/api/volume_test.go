@@ -25,9 +25,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	mockSetter "github.com/opensds/opensds/testutils/utils/testing"
 )
 
 func init() {
@@ -45,14 +43,6 @@ func init() {
 		"post:CreateVolumeSnapshot;get:ListVolumeSnapshots")
 	beego.Router("/v1alpha/block/snapshots/:snapshotId", &VolumeSnapshotPortal{},
 		"get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot")
-
-	mockSetter := &mockSetter.MockSetter{
-		Uuid:        "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-		CreatedTime: "2017-10-24T16:21:32",
-		UpdatedTime: "2017-10-25T11:01:55",
-	}
-
-	utils.S = mockSetter
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -311,7 +301,7 @@ var (
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		ConnectionInfo: &model.ConnectionInfo{
+		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,

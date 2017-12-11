@@ -146,10 +146,8 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extra: model.ExtraSpec{
-				"diskType":  "SAS",
-				"iops":      float64(300),
-				"bandwidth": float64(500),
+			Extras: model.ExtraSpec{
+				"diskType": "SAS",
 			},
 		},
 	}
@@ -178,9 +176,7 @@ func TestDeleteProfile(t *testing.T) {
 func TestAddExtraProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 	expected := &model.ExtraSpec{
-		"diskType":  "SAS",
-		"iops":      float64(300),
-		"bandwidth": float64(500),
+		"diskType": "SAS",
 	}
 
 	exts, err := fpr.AddExtraProperty(prfID, &model.ExtraSpec{})
@@ -198,9 +194,7 @@ func TestAddExtraProperty(t *testing.T) {
 func TestListExtraProperties(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 	expected := &model.ExtraSpec{
-		"diskType":  "SAS",
-		"iops":      float64(300),
-		"bandwidth": float64(500),
+		"diskType": "SAS",
 	}
 
 	exts, err := fpr.ListExtraProperties(prfID)
@@ -242,16 +236,12 @@ var (
 			"name": "silver",
 			"description": "silver policy",
 			"extras": {
-				"diskType":"SAS",
-				"iops": 300,
-				"bandwidth": 500
+				"diskType":"SAS"
 			}
 		}
 	]`
 
 	sampleExtras = `{
-		"diskType":"SAS",
-		"iops": 300,
-		"bandwidth": 500
+		"diskType":"SAS"
 	}`
 )

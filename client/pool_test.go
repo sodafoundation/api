@@ -73,10 +73,8 @@ func TestGetPool(t *testing.T) {
 		TotalCapacity: int64(100),
 		FreeCapacity:  int64(90),
 		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		Parameters: map[string]interface{}{
-			"diskType":  "SSD",
-			"iops":      float64(1000),
-			"bandwidth": float64(1000),
+		Extras: model.ExtraSpec{
+			"diskType": "SSD",
 		},
 	}
 
@@ -103,10 +101,8 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(100),
 			FreeCapacity:  int64(90),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
-				"diskType":  "SSD",
-				"iops":      float64(1000),
-				"bandwidth": float64(1000),
+			Extras: model.ExtraSpec{
+				"diskType": "SSD",
 			},
 		},
 		{
@@ -118,10 +114,8 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(200),
 			FreeCapacity:  int64(170),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Parameters: map[string]interface{}{
-				"diskType":  "SAS",
-				"iops":      float64(800),
-				"bandwidth": float64(800),
+			Extras: model.ExtraSpec{
+				"diskType": "SAS",
 			},
 		},
 	}
@@ -147,9 +141,7 @@ var (
 		"freeCapacity": 90,
 		"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 		"extras": {
-			"diskType": "SSD",
-			"iops": 1000,
-			"bandwidth": 1000
+			"diskType": "SSD"
 		}
 	}`
 
@@ -162,9 +154,7 @@ var (
 			"freeCapacity": 90,
 			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			"extras": {
-				"diskType": "SSD",
-				"iops": 1000,
-				"bandwidth": 1000
+				"diskType": "SSD"
 			}
 		},
 		{
@@ -175,9 +165,7 @@ var (
 			"freeCapacity": 170,
 			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			"extras": {
-				"diskType": "SAS",
-				"iops": 800,
-				"bandwidth": 800
+				"diskType": "SAS"
 			}
 		}
 	]`

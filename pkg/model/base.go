@@ -19,44 +19,24 @@ This module implements the common data structure.
 
 package model
 
-type Modeler interface {
-	GetId() string
-
-	GetCreatedTime() string
-
-	SetId(uuid string)
-
-	SetCreatedTime(createdAt string)
-
-	SetUpdatedTime(updatedAt string)
-}
+import (
+	"encoding/json"
+)
 
 type BaseModel struct {
-	Id        string `json:"id"`
+	// +readOnly:true
+	Id string `json:"id"`
+	// +readOnly:true
 	CreatedAt string `json:"createdAt"`
+	// +readOnly:true
 	UpdatedAt string `json:"updatedAt"`
 }
 
-func (b *BaseModel) GetId() string {
-	return b.Id
-}
+// ExtraSpec is a dictionary object that contains unique keys and json
+// objects.
+type ExtraSpec map[string]interface{}
 
-func (b *BaseModel) GetCreatedTime() string {
-	return b.CreatedAt
-}
-
-func (b *BaseModel) GetUpdatedTime() string {
-	return b.UpdatedAt
-}
-
-func (b *BaseModel) SetId(uuid string) {
-	b.Id = uuid
-}
-
-func (b *BaseModel) SetCreatedTime(createdAt string) {
-	b.CreatedAt = createdAt
-}
-
-func (b *BaseModel) SetUpdatedTime(updatedAt string) {
-	b.UpdatedAt = updatedAt
+func (ext ExtraSpec) Encode() []byte {
+	parmBody, _ := json.Marshal(&ext)
+	return parmBody
 }

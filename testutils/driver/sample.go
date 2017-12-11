@@ -38,7 +38,7 @@ func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 }
 
 func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
-	if volIdentifier == sampleVolume.GetId() {
+	if volIdentifier == sampleVolume.Id {
 		return &sampleVolume, nil
 	}
 
@@ -61,7 +61,7 @@ func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSn
 
 func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	for _, snapshot := range sampleSnapshots {
-		if snapIdentifier == snapshot.GetId() {
+		if snapIdentifier == snapshot.Id {
 			return &snapshot, nil
 		}
 	}
@@ -93,7 +93,7 @@ var (
 			TotalCapacity:    int64(100),
 			FreeCapacity:     int64(90),
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SSD",
 				"thin":     true,
 			},
@@ -107,7 +107,7 @@ var (
 			TotalCapacity:    int64(200),
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
-			Parameters: map[string]interface{}{
+			Extras: model.ExtraSpec{
 				"diskType": "SAS",
 				"thin":     true,
 			},

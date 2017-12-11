@@ -35,7 +35,7 @@ type PoolMgr struct {
 
 func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	var res model.StoragePoolSpec
-	url := p.Endpoint + "/v1alpha/block/pools/" + polID
+	url := p.Endpoint + "/v1alpha/pools/" + polID
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -47,7 +47,7 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 
 func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
-	url := p.Endpoint + "/v1alpha/block/pools"
+	url := p.Endpoint + "/v1alpha/pools"
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)

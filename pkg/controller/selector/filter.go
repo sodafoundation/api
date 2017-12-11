@@ -92,7 +92,7 @@ func (filter *ThinFilter) Handle(request map[string]interface{}, pools []*model.
 		availablePools = pools
 	} else {
 		for _, pool := range pools {
-			thinSupport, ok := pool.Parameters["thin"]
+			thinSupport, ok := pool.Extras["thin"]
 			if !ok {
 				thinSupport = false
 			}
@@ -123,7 +123,7 @@ func (filter *CompressFilter) Handle(request map[string]interface{}, pools []*mo
 		availablePools = pools
 	} else {
 		for _, pool := range pools {
-			compressSupport, ok := pool.Parameters["compress"]
+			compressSupport, ok := pool.Extras["compress"]
 			if !ok {
 				compressSupport = false
 			}
@@ -154,7 +154,7 @@ func (filter *DedupeFilter) Handle(request map[string]interface{}, pools []*mode
 		availablePools = pools
 	} else {
 		for _, pool := range pools {
-			dedupeSupport, ok := pool.Parameters["dedupe"]
+			dedupeSupport, ok := pool.Extras["dedupe"]
 			if !ok {
 				dedupeSupport = false
 			}
@@ -185,7 +185,7 @@ func (filter *DiskTypeFilter) Handle(request map[string]interface{}, pools []*mo
 		availablePools = pools
 	} else {
 		for _, pool := range pools {
-			diskTypeSupport, ok := pool.Parameters["diskType"]
+			diskTypeSupport, ok := pool.Extras["diskType"]
 			if !ok {
 				diskTypeSupport = false
 			}
