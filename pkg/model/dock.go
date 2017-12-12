@@ -43,6 +43,7 @@ type DockSpec struct {
 	// Endpoint represents the dock server's access address.
 	Endpoint string `json:"endpoint,omitempty"`
 
-	// DriverName represents the dock provider, such as Ceph, LVM and etc.
+	// DriverName represents the dock provider.
+	// Currently One of: "cinder", "ceph", "lvm", "default".
 	DriverName string `json:"driverName,omitempty"`
 }
