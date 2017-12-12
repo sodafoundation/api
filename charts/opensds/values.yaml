@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository1: leonwanghui/opensds-controller
   repository2: leonwanghui/opensds-dock
-  tag: v1alpha
+  tag: v1beta
   pullPolicy: IfNotPresent
 restartPolicy: Never
 service:

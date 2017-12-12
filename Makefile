@@ -24,8 +24,8 @@ osdsctl:package
 docker:build
 	cp ./build/out/bin/osdsdock ./cmd/osdsdock
 	cp ./build/out/bin/osdslet ./cmd/osdslet
-	docker build cmd/osdsdock -t opensds/opensds-dock:v1alpha
-	docker build cmd/osdslet -t opensds/opensds-controller:v1alpha
+	docker build cmd/osdsdock -t opensds/opensds-dock:v1beta
+	docker build cmd/osdslet -t opensds/opensds-controller:v1beta
 
 clean:
 	rm -rf ./build/out/bin/* ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock

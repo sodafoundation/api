@@ -95,14 +95,14 @@ root@opensds-worker-1:~# curl localhost:50040| python -m json.tool
 100   110  100   110    0     0  20715      0 --:--:-- --:--:-- --:--:-- 22000
 [
     {
-		"name":        "v1alpha",
-		"description": "v1alpha version",
+		"name":        "v1beta",
+		"description": "v1beta version",
 		"status":      "CURRENT",
 		"updatedAt":   "2017-07-10T14:36:58.014Z"
     }
 ]
 
-root@opensds-worker-1:~# curl localhost:50040/v1alpha/block/pools| python -m json.tool
+root@opensds-worker-1:~# curl localhost:50040/v1beta/pools| python -m json.tool
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   317  100   317    0     0  26665      0 --:--:-- --:--:-- --:--:-- 28818
@@ -129,20 +129,20 @@ root@opensds-worker-1:~# curl localhost:50040/v1alpha/block/pools| python -m jso
 
 ### Create a default profile firstly.
 ```
-curl -X POST "http://localhost:50040/v1alpha/profiles" -H "Content-Type: application/json" -d '{"name": "default", "description": "default policy", "extra": {}}'
+curl -X POST "http://localhost:50040/v1beta/profiles" -H "Content-Type: application/json" -d '{"name": "default", "description": "default policy", "extra": {}}'
 ```
 
 ### Create a volume.
 ```
-curl -X POST "http://localhost:50040/v1alpha/block/volumes" -H "Content-Type: application/json" -d '{"name": "test001", "description": "this is a test", "size": 1, "profileId": ""}'
+curl -X POST "http://localhost:50040/v1beta/block/volumes" -H "Content-Type: application/json" -d '{"name": "test001", "description": "this is a test", "size": 1, "profileId": ""}'
 ```
 
 ### List all volumes.
 ```
-curl http://localhost:50040/v1alpha/block/volumes| python -m json.tool
+curl http://localhost:50040/v1beta/block/volumes| python -m json.tool
 ```
 
 ### Delete the volume.
 ```
-curl -X DELETE "http://localhost:50040/v1alpha/block/volumes/volume_id" -H "Content-Type: application/json"
+curl -X DELETE "http://localhost:50040/v1beta/block/volumes/volume_id" -H "Content-Type: application/json"
 ```

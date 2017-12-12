@@ -35,7 +35,7 @@ type DockMgr struct {
 
 func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	var res model.DockSpec
-	url := d.Endpoint + "/v1alpha/docks/" + dckID
+	url := d.Endpoint + "/v1beta/docks/" + dckID
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -47,7 +47,7 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 
 func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
-	url := d.Endpoint + "/v1alpha/docks"
+	url := d.Endpoint + "/v1beta/docks"
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
