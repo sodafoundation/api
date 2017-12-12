@@ -44,7 +44,7 @@ func TestListVersions(t *testing.T) {
 }
 
 func TestGetVersion(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v1alpha", nil)
+	r, _ := http.NewRequest("GET", "/v1beta", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -52,8 +52,8 @@ func TestGetVersion(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	var expected = map[string]string{
-		"name":        "v1alpha",
-		"description": "v1alpha version",
+		"name":        "v1beta",
+		"description": "v1beta version",
 		"status":      "CURRENT",
 		"updatedAt":   "2017-07-10T14:36:58.014Z",
 	}

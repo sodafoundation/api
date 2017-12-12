@@ -30,8 +30,8 @@ import (
 
 func init() {
 	var dockPortal DockPortal
-	beego.Router("/v1alpha/docks", &dockPortal, "get:ListDocks")
-	beego.Router("/v1alpha/docks/:dockId", &dockPortal, "get:GetDock")
+	beego.Router("/v1beta/docks", &dockPortal, "get:ListDocks")
+	beego.Router("/v1beta/docks/:dockId", &dockPortal, "get:GetDock")
 }
 
 func TestListDocks(t *testing.T) {
@@ -55,7 +55,7 @@ func TestListDocks(t *testing.T) {
 	mockClient.On("ListDocks").Return(fakeDocks, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/docks", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/docks", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -94,7 +94,7 @@ func TestListDocksWithBadRequest(t *testing.T) {
 	mockClient.On("ListDocks").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/docks", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/docks", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -123,7 +123,7 @@ func TestGetDock(t *testing.T) {
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET",
-		"/v1alpha/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
+		"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -163,7 +163,7 @@ func TestGetDockWithBadRequestError(t *testing.T) {
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET",
-		"/v1alpha/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
+		"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

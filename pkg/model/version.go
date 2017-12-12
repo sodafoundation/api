@@ -20,7 +20,7 @@ This module implements the common data structure.
 package model
 
 const (
-	version    = "v1alpha"
+	version    = "v1beta"
 	current    = "CURRENT"
 	supported  = "SUPPORTED"
 	deprecated = "DEPRECATED"

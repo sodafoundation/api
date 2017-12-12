@@ -1,8 +1,8 @@
-# Docker build usage: docker build . -t opensds/opensds-dock:v1alpha
+# Docker build usage: docker build . -t opensds/opensds-dock:v1beta
 # Docker run usage:	docker run -it --net=host -v /var/log/opensds:/var/log/opensds \
 #											 -v /etc/opensds:/etc/opensds \
 #											 -v /etc/ceph:/etc/ceph	\
-#	                                          opensds/opensds-dock:v1alpha
+#	                                          opensds/opensds-dock:v1beta
 
 FROM golang:1.7.1
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>

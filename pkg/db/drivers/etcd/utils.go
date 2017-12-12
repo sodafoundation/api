@@ -50,5 +50,5 @@ func generateURL(resource string, in ...string) string {
 }
 
 func CurrentVersion() string {
-	return "v1alpha"
+	return "v1beta"
 }

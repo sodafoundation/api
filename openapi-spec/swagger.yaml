@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: "v1alpha"
+  version: "v1beta"
   title: OpenSDS Controller API
   description: OpenSDS Controller API to manage mutliple backend storages.
   termsOfService: 'https://www.linuxfoundation.org/terms'
@@ -37,7 +37,7 @@ paths:
                   $ref: '#/definitions/Version'
           examples:
             application/json:
-              - name: v1alpha
+              - name: v1beta
                 status: CURRENT
                 updated: '2017-07-10T14:36:58.014Z'
         '500':
@@ -59,14 +59,14 @@ paths:
                 $ref: '#/definitions/Version'
           examples:
             application/json:
-              name: v1alpha
+              name: v1beta
               status: SUPPORTED
               updated: '2017-04-10T14:36:58.014Z'
         '404':
           description: The resource does not exist
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/docks':
+  '/v1beta/{projectId}/docks':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -86,7 +86,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/docks/{dockId}':
+  '/v1beta/{projectId}/docks/{dockId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/dockId'
@@ -107,7 +107,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/pools':
+  '/v1beta/{projectId}/pools':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -127,7 +127,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/pools/{poolId}':
+  '/v1beta/{projectId}/pools/{poolId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/poolId'
@@ -148,7 +148,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/profiles':
+  '/v1beta/{projectId}/profiles':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -217,7 +217,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/profiles/{profileId}':
+  '/v1beta/{projectId}/profiles/{profileId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
@@ -294,7 +294,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/profiles/{profileId}/extras':
+  '/v1beta/{projectId}/profiles/{profileId}/extras':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
@@ -351,7 +351,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/profiles/{profileId}/extras/{extraKey}':
+  '/v1beta/{projectId}/profiles/{profileId}/extras/{extraKey}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/profileId'
@@ -371,7 +371,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/volumes':
+  '/v1beta/{projectId}/block/volumes':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -411,7 +411,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/volumes/{volumeId}':
+  '/v1beta/{projectId}/block/volumes/{volumeId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeId'
@@ -476,7 +476,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/attachments':
+  '/v1beta/{projectId}/block/attachments':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -525,7 +525,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/attachments/{attachmentId}':
+  '/v1beta/{projectId}/block/attachments/{attachmentId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/attachmentId'
@@ -583,7 +583,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/snapshots':
+  '/v1beta/{projectId}/block/snapshots':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -629,7 +629,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1alpha/{projectId}/block/snapshots/{snapshotId}':
+  '/v1beta/{projectId}/block/snapshots/{snapshotId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/snapshotId'
@@ -932,7 +932,7 @@ definitions:
     properties:
       name:
         type: string
-        example: v1alpha
+        example: v1beta
       status:
         type: string
         enum:
