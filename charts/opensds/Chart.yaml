@@ -3,4 +3,4 @@ description: A Helm chart for Kubernetes
 name: opensds
 name1: opensds-controller
 name2: opensds-dock
-version: v1alpha1
+version: v1beta

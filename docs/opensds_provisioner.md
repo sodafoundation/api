@@ -130,7 +130,7 @@ StorageTag:
 REST API impact
 ---------------
 
-URL: /apis/opensds.io/v1alpha1/profiles
+URL: /apis/opensds.io/v1beta/profiles
 Method: POST, GET and DELETE
 Description: add create, get, list and delete operations of Profile resource.
 

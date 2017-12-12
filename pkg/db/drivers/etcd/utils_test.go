@@ -19,7 +19,7 @@ import (
 )
 
 func TestCurrentVersion(t *testing.T) {
-	var expected = "v1alpha"
+	var expected = "v1beta"
 
 	if version := CurrentVersion(); version != expected {
 		t.Errorf("Expected %v, got %v\n", expected, version)
@@ -27,12 +27,12 @@ func TestCurrentVersion(t *testing.T) {
 }
 
 func TestGenerateURL(t *testing.T) {
-	var expected = "v1alpha/docks"
+	var expected = "v1beta/docks"
 	if url := generateURL("docks"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}
 
-	expected = "v1alpha/pools/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	expected = "v1beta/pools/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
 	if url := generateURL("pools", "8e5e92ca-d673-11e7-bca8-2ba95b86eb06"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}

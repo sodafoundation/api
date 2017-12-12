@@ -33,9 +33,9 @@ const (
 
 func Run(host string) {
 
-	// add router for v1alpha api
+	// add router for v1beta api
 	ns :=
-		beego.NewNamespace("/v1alpha",
+		beego.NewNamespace("/v1beta",
 			beego.NSCond(func(ctx *context.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {

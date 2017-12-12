@@ -29,19 +29,19 @@ import (
 )
 
 func init() {
-	beego.Router("/v1alpha/block/volumes", &VolumePortal{},
+	beego.Router("/v1beta/block/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
-	beego.Router("/v1alpha/block/volumes/:volumeId", &VolumePortal{},
+	beego.Router("/v1beta/block/volumes/:volumeId", &VolumePortal{},
 		"get:GetVolume;put:UpdateVolume;delete:DeleteVolume")
 
-	beego.Router("/v1alpha/block/attachments", &VolumeAttachmentPortal{},
+	beego.Router("/v1beta/block/attachments", &VolumeAttachmentPortal{},
 		"post:CreateVolumeAttachment;get:ListVolumeAttachments")
-	beego.Router("/v1alpha/block/attachments/:attachmentId", &VolumeAttachmentPortal{},
+	beego.Router("/v1beta/block/attachments/:attachmentId", &VolumeAttachmentPortal{},
 		"get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment")
 
-	beego.Router("/v1alpha/block/snapshots", &VolumeSnapshotPortal{},
+	beego.Router("/v1beta/block/snapshots", &VolumeSnapshotPortal{},
 		"post:CreateVolumeSnapshot;get:ListVolumeSnapshots")
-	beego.Router("/v1alpha/block/snapshots/:snapshotId", &VolumeSnapshotPortal{},
+	beego.Router("/v1beta/block/snapshots/:snapshotId", &VolumeSnapshotPortal{},
 		"get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot")
 }
 
@@ -72,7 +72,7 @@ func TestListVolumes(t *testing.T) {
 	mockClient.On("ListVolumes").Return(fakeVolumes, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/volumes", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -109,7 +109,7 @@ func TestListVolumesWithBadRequest(t *testing.T) {
 	mockClient.On("ListVolumes").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/volumes", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -124,7 +124,7 @@ func TestGetVolume(t *testing.T) {
 	mockClient.On("GetVolume", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolume, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -161,7 +161,7 @@ func TestGetVolumeWithBadRequest(t *testing.T) {
 	mockClient.On("GetVolume", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -195,7 +195,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 	mockClient.On("ListVolumeSnapshots").Return(fakeSnapshots, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/snapshots", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -230,7 +230,7 @@ func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 	mockClient.On("ListVolumeSnapshots").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/snapshots", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -245,7 +245,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 	mockClient.On("GetVolumeSnapshot", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeSnapshot, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -280,7 +280,7 @@ func TestGetVolumeSnapshotWithBadRequest(t *testing.T) {
 	mockClient.On("GetVolumeSnapshot", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -320,7 +320,7 @@ func TestListVolumeAttachments(t *testing.T) {
 	mockClient.On("ListVolumeAttachments", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(fakeAttachments, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/attachments?volumeId=bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/attachments?volumeId=bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -364,7 +364,7 @@ func TestGetVolumeAttachment(t *testing.T) {
 	mockClient.On("GetVolumeAttachment", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeAttachment, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1alpha/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

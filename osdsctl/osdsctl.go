@@ -40,14 +40,7 @@ var (
 )
 
 func init() {
-	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
-	if !ok {
-		fmt.Println("ERROR: You must provide the endpoint by setting " +
-			"the environment variable OPENSDS_ENDPOINT")
-		os.Exit(1)
-	}
-	client = c.NewClient(&c.Config{Endpoint: ep})
-	//	rootCommand.AddCommand(versionCommand)
+	// rootCommand.AddCommand(versionCommand)
 	rootCommand.AddCommand(volumeCommand)
 	rootCommand.AddCommand(dockCommand)
 	rootCommand.AddCommand(poolCommand)
@@ -55,5 +48,13 @@ func init() {
 }
 
 func Run() error {
+	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+	if !ok {
+		fmt.Println("ERROR: You must provide the endpoint by setting " +
+			    "the environment variable OPENSDS_ENDPOINT")
+		os.Exit(1)
+	}
+	client = c.NewClient(&c.Config{Endpoint: ep})
+
 	return rootCommand.Execute()
 }

@@ -30,8 +30,8 @@ import (
 
 var KnownVersions = []map[string]string{
 	{
-		"name":        "v1alpha",
-		"description": "v1alpha version",
+		"name":        "v1beta",
+		"description": "v1beta version",
 		"status":      "CURRENT",
 		"updatedAt":   "2017-07-10T14:36:58.014Z",
 	},
