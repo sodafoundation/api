@@ -26,13 +26,22 @@ const (
 	deprecated = "DEPRECATED"
 )
 
-// Lists information for all SDS controller API versions. An API version is
-// a string that consists of a ‘v’ + number, or ‘v’ + number + ‘alpha’ or
-// ‘beta’ + number.
+// An API version is a string that consists of a ‘v’ + number,
+// or ‘v’ + number + ‘alpha’ or ‘beta’ + number.
 type VersionSpec struct {
+	// Name is an API version string that consists of a ‘v’ + number,
+	// or ‘v’ + number + ‘alpha’ or ‘beta’ + number.
+	// +readOnly
 	Name string `json:"name,omitempty"`
+
+	// The status of the api version.
+	// One of: "CURRENT", "SUPPORTED", "DEPRECATED".
 	// +readOnly:true
-	Status    string `json:"status,omitempty"`
+	Status string `json:"status,omitempty"`
+
+	// UpdatedAt representing the server time when the api version was updated
+	// successfully. Now, it's represented as a time string in RFC8601 format.
+	// +readOnly
 	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
