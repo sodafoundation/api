@@ -19,22 +19,42 @@ This module implements the common data structure.
 
 package model
 
-// A backend is initialized by specific driver configuration. Each backend
-// can be regarded as a docking service between SDS controller and storage
-// service.
+// A pool is discoveried and updated by a dock service. Each pool can be regarded
+// as a physical storage pool or a virtual storage pool. It's a logical and
+// atomic pool and can be abstracted from any storage platform.
 type StoragePoolSpec struct {
 	*BaseModel
-	Name        string `json:"name,omitempty"`
+	// The name of the pool.
+	Name string `json:"name,omitempty"`
+
+	// The description of the pool.
+	// +optional
 	Description string `json:"description,omitempty"`
-	// +readOnly:true
-	Status           string `json:"status,omitempty"`
-	DockId           string `json:"dockId,omitempty"`
+
+	// The status of the pool.
+	// One of: "available" or "unavailable".
+	Status string `json:"status,omitempty"`
+
+	// The uuid of the dock which the pool belongs to.
+	DockId string `json:"dockId,omitempty"`
+
+	// The locality that pool belongs to.
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
+
+	// The total capacity of the pool.
 	// Default unit of TotalCapacity is GB.
 	TotalCapacity int64 `json:"totalCapacity,omitempty"`
+
+	// The free capaicty of the pool.
 	// Default unit of FreeCapacity is GB.
-	FreeCapacity int64  `json:"freeCapacity,omitempty"`
-	StorageType  string `json:"storageType,omitempty"`
+	FreeCapacity int64 `json:"freeCapacity,omitempty"`
+
+	// The storage type of the dock.
+	// One of: "block", "file" or "object".
+	StorageType string `json:"storageType,omitempty"`
+
+	// Map of keys and json object that represents the extra epecs
+	// of the pool, such as supported capabilities.
 	// +optional
 	Extras ExtraSpec `json:"extras,omitempty"`
 }

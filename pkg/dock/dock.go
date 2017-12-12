@@ -27,7 +27,6 @@ import (
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 )
 
 var Brain *DockHub
@@ -80,19 +79,14 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 	}
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
-	// Validate the data.
-	if err = utils.ValidateData(vol, utils.S); err != nil {
-		log.Error("When validate volume data:", err)
-		return nil, err
-	}
-
 	// Store the volume data into database.
-	if err = db.C.CreateVolume(vol); err != nil {
+	result, err := db.C.CreateVolume(vol)
+	if err != nil {
 		log.Error("When create volume in db module:", err)
 		return nil, err
 	}
 
-	return vol, nil
+	return result, nil
 }
 
 func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
@@ -146,12 +140,6 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 		Metadata:       opt.GetMetadata(),
 	}
 
-	// Validate the data.
-	if err = utils.ValidateData(atc, utils.S); err != nil {
-		log.Error("When validate volume attachment data:", err)
-		return nil, err
-	}
-
 	result, err := db.C.CreateVolumeAttachment(atc)
 	if err != nil {
 		log.Error("Error occured in dock module when create volume attachment in db:", err)
@@ -196,17 +184,13 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 		return nil, err
 	}
 
-	// Validate the data.
-	if err = utils.ValidateData(snp, utils.S); err != nil {
-		log.Error("When validate volume snapshot data:", err)
-	}
-
-	if err := db.C.CreateVolumeSnapshot(snp); err != nil {
+	result, err := db.C.CreateVolumeSnapshot(snp)
+	if err != nil {
 		log.Error("Error occured in dock module when create volume snapshot in db:", err)
 		return nil, err
 	}
 
-	return snp, nil
+	return result, nil
 }
 
 func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {

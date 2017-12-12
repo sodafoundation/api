@@ -15,108 +15,9 @@
 package utils
 
 import (
-	"errors"
+	"os"
 	"reflect"
-	"time"
-
-	log "github.com/golang/glog"
-
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/satori/go.uuid"
 )
-
-var S = NewSetter()
-
-type Setter interface {
-	SetUuid(m model.Modeler) error
-
-	SetCreatedTimeStamp(m model.Modeler) error
-
-	SetUpdatedTimeStamp(m model.Modeler) error
-}
-
-type setter struct{}
-
-func NewSetter() Setter {
-	return &setter{}
-}
-
-func (s *setter) SetUuid(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set uuid.
-		m.SetId(uuid.NewV4().String())
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set uuid.
-		m.SetId(uuid.NewV4().String())
-
-		return nil
-	default:
-		return errors.New("Unexpected input object format!")
-	}
-}
-
-func (s *setter) SetCreatedTimeStamp(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set created time.
-		m.SetCreatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set created time.
-		m.SetCreatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	default:
-		return errors.New("Unexpected input object format!")
-	}
-}
-
-func (s *setter) SetUpdatedTimeStamp(m model.Modeler) error {
-	switch m.(type) {
-	case model.VolumeSpec, model.VolumeSnapshotSpec, model.VolumeAttachmentSpec,
-		model.ProfileSpec, model.DockSpec, model.StoragePoolSpec:
-		// Set updated time.
-		m.SetUpdatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	case *model.VolumeSpec, *model.VolumeSnapshotSpec, *model.VolumeAttachmentSpec,
-		*model.ProfileSpec, *model.DockSpec, *model.StoragePoolSpec:
-		// Set updated time.
-		m.SetUpdatedTime(time.Now().Format(TimeFormat))
-
-		return nil
-	default:
-		return errors.New("Unexpected input object format!")
-	}
-}
-
-func ValidateData(m model.Modeler, s Setter) error {
-	// If uuid is null, generate it randomly.
-	if m.GetId() == "" {
-		if ok := s.SetUuid(m); ok != nil {
-			log.Error("When set uuid:", ok)
-			return ok
-		}
-	}
-
-	// If created time is null, set dock created time.
-	if m.GetCreatedTime() == "" {
-		if ok := s.SetCreatedTimeStamp(m); ok != nil {
-			log.Error("When set created time:", ok)
-			return ok
-		}
-	}
-
-	return nil
-}
 
 func Contained(obj, target interface{}) bool {
 	targetValue := reflect.ValueOf(target)
@@ -155,4 +56,15 @@ func MergeStringMaps(maps ...map[string]string) map[string]string {
 		}
 	}
 	return out
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

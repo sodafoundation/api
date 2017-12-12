@@ -129,7 +129,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	err := d.client.DeleteVolume(opt.Id)
 	if err != nil {
-		log.Errorf("Delete volume failed, volume id =%s , Error:%s", opt.GetId())
+		log.Errorf("Delete volume failed, volume id =%s , Error:%s", opt.GetId(), err)
 	}
 	log.Info("Remove volume success, volume id =", opt.GetId())
 	return nil

@@ -109,25 +109,25 @@ var fc = &Client{
 }
 
 func TestCreateDock(t *testing.T) {
-	if err := fc.CreateDock(&model.DockSpec{BaseModel: &model.BaseModel{}}); err != nil {
+	if _, err := fc.CreateDock(&model.DockSpec{BaseModel: &model.BaseModel{}}); err != nil {
 		t.Error("Create dock failed:", err)
 	}
 }
 
 func TestCreatePool(t *testing.T) {
-	if err := fc.CreatePool(&model.StoragePoolSpec{BaseModel: &model.BaseModel{}}); err != nil {
+	if _, err := fc.CreatePool(&model.StoragePoolSpec{BaseModel: &model.BaseModel{}}); err != nil {
 		t.Error("Create pool failed:", err)
 	}
 }
 
 func TestCreateProfile(t *testing.T) {
-	if err := fc.CreateProfile(&model.ProfileSpec{BaseModel: &model.BaseModel{}}); err != nil {
+	if _, err := fc.CreateProfile(&model.ProfileSpec{BaseModel: &model.BaseModel{}}); err != nil {
 		t.Error("Create profile failed:", err)
 	}
 }
 
 func TestCreateVolume(t *testing.T) {
-	if err := fc.CreateVolume(&model.VolumeSpec{BaseModel: &model.BaseModel{}}); err != nil {
+	if _, err := fc.CreateVolume(&model.VolumeSpec{BaseModel: &model.BaseModel{}}); err != nil {
 		t.Error("Create volume failed:", err)
 	}
 }
@@ -139,7 +139,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
-	if err := fc.CreateVolumeSnapshot(&model.VolumeSnapshotSpec{BaseModel: &model.BaseModel{}}); err != nil {
+	if _, err := fc.CreateVolumeSnapshot(&model.VolumeSnapshotSpec{BaseModel: &model.BaseModel{}}); err != nil {
 		t.Error("Create volume snapshot failed:", err)
 	}
 }

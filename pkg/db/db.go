@@ -37,7 +37,7 @@ func Init(db *Database) {
 	switch db.Driver {
 	case "mysql":
 		// C = mysql.Init(db.Driver, db.Crendential)
-		fmt.Errorf("mysql is not implemented right now!")
+		fmt.Printf("mysql is not implemented right now!")
 		return
 	case "etcd":
 		C = etcd.NewClient(strings.Split(db.Endpoint, ","))
@@ -46,12 +46,12 @@ func Init(db *Database) {
 		C = fakedb.NewFakeDbClient()
 		return
 	default:
-		fmt.Errorf("Can't find database driver %s!\n", db.Driver)
+		fmt.Printf("Can't find database driver %s!\n", db.Driver)
 	}
 }
 
 type Client interface {
-	CreateDock(dck *model.DockSpec) error
+	CreateDock(dck *model.DockSpec) (*model.DockSpec, error)
 
 	GetDock(dckID string) (*model.DockSpec, error)
 
@@ -63,7 +63,7 @@ type Client interface {
 
 	GetDockByPoolId(poolId string) (*model.DockSpec, error)
 
-	CreatePool(pol *model.StoragePoolSpec) error
+	CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error)
 
 	GetPool(polID string) (*model.StoragePoolSpec, error)
 
@@ -73,7 +73,7 @@ type Client interface {
 
 	DeletePool(polID string) error
 
-	CreateProfile(prf *model.ProfileSpec) error
+	CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error)
 
 	GetProfile(prfID string) (*model.ProfileSpec, error)
 
@@ -91,7 +91,7 @@ type Client interface {
 
 	RemoveExtraProperty(prfID, extraKey string) error
 
-	CreateVolume(vol *model.VolumeSpec) error
+	CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	GetVolume(volID string) (*model.VolumeSpec, error)
 
@@ -109,7 +109,7 @@ type Client interface {
 
 	DeleteVolumeAttachment(attachmentId string) error
 
-	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) error
+	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
 	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
 
