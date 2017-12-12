@@ -38,7 +38,7 @@ func main() {
 	// Open OpenSDS CLI service log file
 	f, err := os.OpenFile(logDir+"/osdsctl.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Errorf("Error opening file:%v", err)
+		fmt.Printf("Error opening file:%v", err)
 		os.Exit(1)
 	}
 	defer f.Close()
