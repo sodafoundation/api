@@ -24,7 +24,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/opensds/opensds/osdsctl"
+	"github.com/opensds/opensds/osdsctl/cli"
 	"github.com/opensds/opensds/pkg/utils"
 )
 

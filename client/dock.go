@@ -16,8 +16,10 @@ package client
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
 func NewDockMgr(edp string) *DockMgr {
@@ -35,7 +37,9 @@ type DockMgr struct {
 
 func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	var res model.DockSpec
-	url := d.Endpoint + "/v1beta/docks/" + dckID
+	url := strings.Join([]string{
+		d.Endpoint,
+		urls.GenerateDockURL(dckID)}, "/")
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -47,7 +51,9 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 
 func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
-	url := d.Endpoint + "/v1beta/docks"
+	url := strings.Join([]string{
+		d.Endpoint,
+		urls.GenerateDockURL()}, "/")
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)

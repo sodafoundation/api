@@ -16,8 +16,10 @@ package client
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
 // ProfileBuilder contains request body of handling a profile request.
@@ -45,7 +47,9 @@ type ProfileMgr struct {
 
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := p.Endpoint + "/v1beta/profiles"
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL()}, "/")
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -57,7 +61,9 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 
 func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := p.Endpoint + "/v1beta/profiles/" + prfID
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(prfID)}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -69,7 +75,9 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 
 func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec
-	url := p.Endpoint + "/v1beta/profiles"
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL()}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -80,14 +88,19 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 }
 
 func (p *ProfileMgr) DeleteProfile(prfID string) error {
-	url := p.Endpoint + "/v1beta/profiles/" + prfID
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(prfID)}, "/")
 
 	return p.Recv(request, url, "DELETE", nil, nil)
 }
 
 func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
-	url := p.Endpoint + "/v1beta/profiles/" + prfID + "/extras"
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(prfID),
+		"extras"}, "/")
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -99,7 +112,10 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 
 func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
-	url := p.Endpoint + "/v1beta/profiles/" + prfID + "/extras"
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(prfID),
+		"extras"}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -110,7 +126,10 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 }
 
 func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) error {
-	url := p.Endpoint + "/v1beta/profiles/" + prfID + "/extras/" + extraKey
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(prfID),
+		"extras", extraKey}, "/")
 
 	return p.Recv(request, url, "DELETE", nil, nil)
 }
