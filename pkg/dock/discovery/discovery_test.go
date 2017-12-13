@@ -20,6 +20,7 @@ import (
 
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 	fakedriver "github.com/opensds/opensds/testutils/driver"
 )
@@ -37,133 +38,65 @@ func init() {
 		Backends: Backends{
 			Sample: BackendProperties{
 				Name:        "sample",
-				Description: "Sample Test",
-				DriverName:  "default",
+				Description: "sample backend service",
+				DriverName:  "sample",
 			},
 		},
 	}
 }
 
 func NewFakeDiscoverer() *DockDiscoverer {
-	return &DockDiscoverer{
-	//		c: fakedb.NewFakeDbClient(),
-	}
+	return &DockDiscoverer{}
 }
 
 func TestInit(t *testing.T) {
 	var dd = NewFakeDiscoverer()
-	var expectedDocks = []*model.DockSpec{
-		{
-			BaseModel:   &model.BaseModel{},
-			Name:        "sample",
-			Description: "Sample Test",
-			Endpoint:    "localhost:50050",
-			DriverName:  "default",
-		},
-	}
+	var expected []*model.DockSpec
 
+	for i := range SampleDocks {
+		expected = append(expected, &SampleDocks[i])
+	}
 	if err := dd.Init(); err != nil {
 		t.Errorf("Failed to init discoverer struct: %v\n", err)
 	}
-	for _, dck := range dd.dcks {
-		dck.Id = ""
+	for i := range dd.dcks {
+		dd.dcks[i].Id = ""
+		expected[i].Id = ""
 	}
-	if !reflect.DeepEqual(dd.dcks, expectedDocks) {
-		t.Errorf("Expected %+v, got %+v\n", expectedDocks, dd.dcks)
+	if !reflect.DeepEqual(dd.dcks, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, dd.dcks)
 	}
 }
 
 func TestDiscover(t *testing.T) {
 	var dd = NewFakeDiscoverer()
-	dd.dcks = []*model.DockSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			},
-			Name:        "sample",
-			Description: "Sample Test",
-			Endpoint:    "localhost:50050",
-			DriverName:  "default",
-		},
-	}
-	var expectedPools = []*model.StoragePoolSpec{
-		{
-			BaseModel:        &model.BaseModel{},
-			Name:             "sample-pool-01",
-			Description:      "This is the first sample storage pool for testing",
-			TotalCapacity:    int64(100),
-			FreeCapacity:     int64(90),
-			AvailabilityZone: "default",
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
-			},
-		},
-		{
-			BaseModel:        &model.BaseModel{},
-			Name:             "sample-pool-02",
-			Description:      "This is the second sample storage pool for testing",
-			TotalCapacity:    int64(200),
-			FreeCapacity:     int64(170),
-			AvailabilityZone: "default",
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
-			},
-		},
-	}
+	var expected []*model.StoragePoolSpec
 
+	for i := range SampleDocks {
+		dd.dcks = append(dd.dcks, &SampleDocks[i])
+	}
+	for i := range SamplePools {
+		expected = append(expected, &SamplePools[i])
+	}
 	if err := dd.Discover(&fakedriver.Driver{}); err != nil {
 		t.Errorf("Failed to discoverer pools: %v\n", err)
 	}
 	for _, pol := range dd.pols {
 		pol.Id = ""
 	}
-	if !reflect.DeepEqual(dd.pols, expectedPools) {
-		t.Errorf("Expected %+v, got %+v\n", expectedPools, dd.pols)
+	if !reflect.DeepEqual(dd.pols, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, dd.pols)
 	}
 }
 
 func TestStore(t *testing.T) {
 	var dd = NewFakeDiscoverer()
-	dd.dcks = []*model.DockSpec{
-		{
-			BaseModel:   &model.BaseModel{},
-			Name:        "sample",
-			Description: "Sample Test",
-			Endpoint:    "localhost:50050",
-			DriverName:  "default",
-		},
+
+	for i := range SampleDocks {
+		dd.dcks = append(dd.dcks, &SampleDocks[i])
 	}
-	dd.pols = []*model.StoragePoolSpec{
-		{
-			BaseModel:        &model.BaseModel{},
-			Name:             "sample-pool-01",
-			Description:      "This is the first sample storage pool for testing",
-			TotalCapacity:    int64(100),
-			FreeCapacity:     int64(90),
-			AvailabilityZone: "default",
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
-			},
-		},
-		{
-			BaseModel:        &model.BaseModel{},
-			Name:             "sample-pool-02",
-			Description:      "This is the second sample storage pool for testing",
-			TotalCapacity:    int64(200),
-			FreeCapacity:     int64(170),
-			AvailabilityZone: "default",
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
-			},
-		},
+	for i := range SamplePools {
+		dd.pols = append(dd.pols, &SamplePools[i])
 	}
 
 	mockClient := new(dbtest.MockClient)

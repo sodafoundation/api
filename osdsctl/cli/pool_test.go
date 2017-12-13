@@ -25,45 +25,7 @@ import (
 	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
-)
-
-var (
-	samplePool = `{
-		"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		"name": "sample-pool-01",
-		"description": "This is the first sample storage pool for testing",
-		"totalCapacity": 100,
-		"freeCapacity": 90,
-		"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		"extras": {
-			"diskType": "SSD"
-		}
-	}`
-
-	samplePools = `[
-		{
-			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"name": "sample-pool-01",
-			"description": "This is the first sample storage pool for testing",
-			"totalCapacity": 100,
-			"freeCapacity": 90,
-			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"diskType": "SSD"
-			}
-		},
-		{
-			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			"name": "sample-pool-02",
-			"description": "This is the second sample storage pool for testing",
-			"totalCapacity": 200,
-			"freeCapacity": 170,
-			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"diskType": "SAS"
-			}
-		}
-	]`
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -106,7 +68,7 @@ func TestPoolShowAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.PoolMgr), "GetPool",
 		func(_ *c.PoolMgr, _ string) (*model.StoragePoolSpec, error) {
 			var res model.StoragePoolSpec
-			if err := json.Unmarshal([]byte(samplePool), &res); err != nil {
+			if err := json.Unmarshal([]byte(BytePool), &res); err != nil {
 				return &res, err
 			}
 			return &res, nil
@@ -123,7 +85,7 @@ func TestPoolListAction(t *testing.T) {
 		func(_ *c.PoolMgr) ([]*model.StoragePoolSpec, error) {
 			var res []*model.StoragePoolSpec
 
-			if err := json.Unmarshal([]byte(samplePools), &res); err != nil {
+			if err := json.Unmarshal([]byte(BytePools), &res); err != nil {
 				fmt.Println(err)
 				return res, err
 			}

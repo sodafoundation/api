@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 type fakeClientCaller struct{}
@@ -40,22 +41,22 @@ func (*fakeClientCaller) Get(req *Request) *Response {
 	var resp []string
 
 	if strings.Contains(req.Url, "docks") {
-		resp = append(resp, sampleDocks[0])
+		resp = append(resp, StringSliceDocks[0])
 	}
 	if strings.Contains(req.Url, "pools") {
-		resp = append(resp, samplePools[0])
+		resp = append(resp, StringSlicePools[0])
 	}
 	if strings.Contains(req.Url, "profiles") {
-		resp = append(resp, sampleProfiles[0])
+		resp = append(resp, StringSliceProfiles[0])
 	}
 	if strings.Contains(req.Url, "volumes") {
-		resp = append(resp, sampleVolumes[0])
+		resp = append(resp, StringSliceVolumes[0])
 	}
 	if strings.Contains(req.Url, "attachments") {
-		resp = append(resp, sampleAttachments[0])
+		resp = append(resp, StringSliceAttachments[0])
 	}
 	if strings.Contains(req.Url, "snapshots") {
-		resp = append(resp, sampleSnapshots[0])
+		resp = append(resp, StringSliceSnapshots[0])
 	}
 
 	return &Response{
@@ -68,22 +69,22 @@ func (*fakeClientCaller) List(req *Request) *Response {
 	var resp []string
 
 	if strings.Contains(req.Url, "docks") {
-		resp = sampleDocks
+		resp = StringSliceDocks
 	}
 	if strings.Contains(req.Url, "pools") {
-		resp = samplePools
+		resp = StringSlicePools
 	}
 	if strings.Contains(req.Url, "profiles") {
-		resp = sampleProfiles
+		resp = StringSliceProfiles
 	}
 	if strings.Contains(req.Url, "volumes") {
-		resp = sampleVolumes
+		resp = StringSliceVolumes
 	}
 	if strings.Contains(req.Url, "attachments") {
-		resp = sampleAttachments
+		resp = StringSliceAttachments
 	}
 	if strings.Contains(req.Url, "snapshots") {
-		resp = sampleSnapshots
+		resp = StringSliceSnapshots
 	}
 
 	return &Response{
@@ -150,15 +151,7 @@ func TestGetDock(t *testing.T) {
 		t.Error("Get dock failed:", err)
 	}
 
-	var expected = &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		},
-		Name:        "sample",
-		Description: "sample backend service",
-		Endpoint:    "localhost:50050",
-		DriverName:  "sample",
-	}
+	var expected = &SampleDocks[0]
 	if !reflect.DeepEqual(dck, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, dck)
 	}
@@ -170,21 +163,7 @@ func TestGetPool(t *testing.T) {
 		t.Error("Get pool failed:", err)
 	}
 
-	var expected = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		},
-		Name:             "sample-pool-01",
-		Description:      "This is the first sample storage pool for testing",
-		TotalCapacity:    int64(100),
-		FreeCapacity:     int64(90),
-		DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		AvailabilityZone: "default",
-		Extras: model.ExtraSpec{
-			"diskType": "SSD",
-			"thin":     true,
-		},
-	}
+	var expected = &SamplePools[0]
 	if !reflect.DeepEqual(pol, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, pol)
 	}
@@ -196,14 +175,7 @@ func TestGetProfile(t *testing.T) {
 		t.Error("Get profile failed:", err)
 	}
 
-	var expected = &model.ProfileSpec{
-		BaseModel: &model.BaseModel{
-			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
-		},
-		Name:        "default",
-		Description: "default policy",
-		Extras:      model.ExtraSpec{},
-	}
+	var expected = &SampleProfiles[0]
 	if !reflect.DeepEqual(prf, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, prf)
 	}
@@ -215,17 +187,7 @@ func TesGetVolume(t *testing.T) {
 		t.Error("Get volume failed:", err)
 	}
 
-	var expected = &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "available",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-	}
+	var expected = &SampleVolumes[0]
 	if !reflect.DeepEqual(vol, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, vol)
 	}
@@ -237,23 +199,7 @@ func TestGetVolumeAttachment(t *testing.T) {
 		t.Error("Get volume attachment failed:", err)
 	}
 
-	var expected = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{
-			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		},
-		Status:   "available",
-		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
-		ConnectionInfo: model.ConnectionInfo{
-			DriverVolumeType: "iscsi",
-			ConnectionData: map[string]interface{}{
-				"targetDiscovered": true,
-				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal":     "127.0.0.0.1:3260",
-				"discard":          false,
-			},
-		},
-	}
+	var expected = &SampleAttachments[0]
 	if !reflect.DeepEqual(atc, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, atc)
 	}
@@ -265,16 +211,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		t.Error("Get volume snapshot failed:", err)
 	}
 
-	var expected = &model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{
-			Id: "3769855c-a102-11e7-b772-17b880d2f537",
-		},
-		Name:        "sample-snapshot-01",
-		Description: "This is the first sample snapshot for testing",
-		Size:        int64(1),
-		Status:      "created",
-		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-	}
+	var expected = &SampleSnapshots[0]
 	if !reflect.DeepEqual(snp, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, snp)
 	}
@@ -286,16 +223,9 @@ func TestListDocks(t *testing.T) {
 		t.Error("List docks failed:", err)
 	}
 
-	var expected = []*model.DockSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			},
-			Name:        "sample",
-			Description: "sample backend service",
-			Endpoint:    "localhost:50050",
-			DriverName:  "sample",
-		},
+	var expected []*model.DockSpec
+	for i := range SampleDocks {
+		expected = append(expected, &SampleDocks[i])
 	}
 	if !reflect.DeepEqual(dcks, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, dcks)
@@ -308,37 +238,9 @@ func TestListPools(t *testing.T) {
 		t.Error("List pools failed:", err)
 	}
 
-	var expected = []*model.StoragePoolSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			},
-			Name:             "sample-pool-01",
-			Description:      "This is the first sample storage pool for testing",
-			TotalCapacity:    int64(100),
-			FreeCapacity:     int64(90),
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			AvailabilityZone: "default",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
-			},
-		},
-		{
-			BaseModel: &model.BaseModel{
-				Id: "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			},
-			Name:             "sample-pool-02",
-			Description:      "This is the second sample storage pool for testing",
-			TotalCapacity:    int64(200),
-			FreeCapacity:     int64(170),
-			AvailabilityZone: "default",
-			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
-			},
-		},
+	var expected []*model.StoragePoolSpec
+	for i := range SamplePools {
+		expected = append(expected, &SamplePools[i])
 	}
 	if !reflect.DeepEqual(pols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, pols)
@@ -351,26 +253,9 @@ func TestListProfiles(t *testing.T) {
 		t.Error("List profiles failed:", err)
 	}
 
-	var expected = []*model.ProfileSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
-			},
-			Name:        "default",
-			Description: "default policy",
-			Extras:      model.ExtraSpec{},
-		},
-		{
-			BaseModel: &model.BaseModel{
-				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
-			},
-			Name:        "silver",
-			Description: "silver policy",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
-			},
-		},
+	var expected []*model.ProfileSpec
+	for i := range SampleProfiles {
+		expected = append(expected, &SampleProfiles[i])
 	}
 	if !reflect.DeepEqual(prfs, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, prfs)
@@ -383,18 +268,9 @@ func TestListVolumes(t *testing.T) {
 		t.Error("List volumes failed:", err)
 	}
 
-	var expected = []*model.VolumeSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			},
-			Name:        "sample-volume",
-			Description: "This is a sample volume for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-		},
+	var expected []*model.VolumeSpec
+	for i := range SampleVolumes {
+		expected = append(expected, &SampleVolumes[i])
 	}
 	if !reflect.DeepEqual(vols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, vols)
@@ -407,24 +283,9 @@ func TestListVolumeAttachments(t *testing.T) {
 		t.Error("List volume attachments failed:", err)
 	}
 
-	var expected = []*model.VolumeAttachmentSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			},
-			Status:   "available",
-			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: model.HostInfo{},
-			ConnectionInfo: model.ConnectionInfo{
-				DriverVolumeType: "iscsi",
-				ConnectionData: map[string]interface{}{
-					"targetDiscovered": true,
-					"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
-					"targetPortal":     "127.0.0.0.1:3260",
-					"discard":          false,
-				},
-			},
-		},
+	var expected []*model.VolumeAttachmentSpec
+	for i := range SampleAttachments {
+		expected = append(expected, &SampleAttachments[i])
 	}
 	if !reflect.DeepEqual(atcs, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, atcs)
@@ -437,27 +298,9 @@ func TestListVolumeSnapshots(t *testing.T) {
 		t.Error("List volume snapshots failed:", err)
 	}
 
-	var expected = []*model.VolumeSnapshotSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id: "3769855c-a102-11e7-b772-17b880d2f537",
-			},
-			Name:        "sample-snapshot-01",
-			Description: "This is the first sample snapshot for testing",
-			Size:        int64(1),
-			Status:      "created",
-			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		},
-		{
-			BaseModel: &model.BaseModel{
-				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			},
-			Name:        "sample-snapshot-02",
-			Description: "This is the second sample snapshot for testing",
-			Size:        int64(1),
-			Status:      "created",
-			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		},
+	var expected []*model.VolumeSnapshotSpec
+	for i := range SampleSnapshots {
+		expected = append(expected, &SampleSnapshots[i])
 	}
 	if !reflect.DeepEqual(snps, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, snps)
@@ -499,111 +342,3 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		t.Error("Delete volume snapshot failed:", err)
 	}
 }
-
-var (
-	sampleProfiles = []string{
-		`{
-			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-			"name":        "default",
-			"description": "default policy",
-			"extras": {}
-		}`,
-		`{
-			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
-			"name":        "silver",
-			"description": "silver policy",
-			"extras": {
-				"diskType": "SAS",
-				"thin":     true
-			}
-		}`,
-	}
-
-	sampleDocks = []string{
-		`{
-			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"name":        "sample",
-			"description": "sample backend service",
-			"endpoint":    "localhost:50050",
-			"driverName":  "sample"
-		}`,
-	}
-
-	samplePools = []string{
-		`{
-			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"name":             "sample-pool-01",
-			"description":      "This is the first sample storage pool for testing",
-			"totalCapacity":    100,
-			"freeCapacity":     90,
-			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"availabilityZone": "default",
-			"extras": {
-				"diskType": "SSD",
-				"thin":     true
-			}
-		}`,
-		`{
-			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			"name":             "sample-pool-02",
-			"description":      "This is the second sample storage pool for testing",
-			"totalCapacity":    200,
-			"freeCapacity":     170,
-			"availabilityZone": "default",
-			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"diskType": "SAS",
-				"thin":     true
-			}
-		}`,
-	}
-
-	sampleVolumes = []string{
-		`{
-			"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"name":        "sample-volume",
-			"description": "This is a sample volume for testing",
-			"size":        1,
-			"status":      "available",
-			"poolId":      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"
-		}`,
-	}
-
-	sampleAttachments = []string{
-		`{
-			"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"status":   "available",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"hostInfo": {},
-			"connectionInfo": {
-				"driverVolumeType": "iscsi",
-				"data": {
-					"targetDiscovered": true,
-					"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
-					"targetPortal":     "127.0.0.0.1:3260",
-					"discard":          false
-				}
-			}
-		}`,
-	}
-
-	sampleSnapshots = []string{
-		`{
-			"id": "3769855c-a102-11e7-b772-17b880d2f537",
-			"name":        "sample-snapshot-01",
-			"description": "This is the first sample snapshot for testing",
-			"size":        1,
-			"status":      "created",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		}`,
-		`{
-			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			"name":        "sample-snapshot-02",
-			"description": "This is the second sample snapshot for testing",
-			"size":        1,
-			"status":      "created",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		}`,
-	}
-)
