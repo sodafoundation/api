@@ -24,6 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -66,7 +67,7 @@ func TestVolumeSnapshotCreateAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "CreateVolumeSnapshot",
 		func(_ *c.VolumeMgr, body c.VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 			var res model.VolumeSnapshotSpec
-			if err := json.Unmarshal([]byte(sampleSnapshot), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshot), &res); err != nil {
 				return nil, err
 			}
 
@@ -84,7 +85,7 @@ func TestVolumeSnapshotShowAction(t *testing.T) {
 		func(_ *c.VolumeMgr, snpID string) (*model.VolumeSnapshotSpec, error) {
 			var res model.VolumeSnapshotSpec
 
-			if err := json.Unmarshal([]byte(sampleSnapshot), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshot), &res); err != nil {
 				return nil, err
 			}
 
@@ -101,7 +102,7 @@ func TestVolumeSnapshotListAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "ListVolumeSnapshots",
 		func(_ *c.VolumeMgr) ([]*model.VolumeSnapshotSpec, error) {
 			var res []*model.VolumeSnapshotSpec
-			if err := json.Unmarshal([]byte(sampleSnapshots), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshots), &res); err != nil {
 				return nil, err
 			}
 

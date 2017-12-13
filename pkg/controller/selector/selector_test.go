@@ -23,49 +23,6 @@ import (
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
-var (
-	fakePool1 = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
-			CreatedAt: "2017-10-24T15:04:05",
-		},
-		Name:             "fakePool",
-		Description:      "fake pool for testing",
-		Status:           "available",
-		AvailabilityZone: "az1",
-		TotalCapacity:    99999,
-		FreeCapacity:     5000,
-		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   false,
-			"compress": false,
-			"diskType": "SSD",
-		},
-	}
-
-	fakePool2 = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
-			CreatedAt: "2017-10-24T15:04:05",
-		},
-		Name:             "fakePool",
-		Description:      "fake pool for testing",
-		Status:           "available",
-		AvailabilityZone: "az1",
-		TotalCapacity:    99999,
-		FreeCapacity:     6999,
-		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   true,
-			"compress": true,
-			"diskType": "SATA",
-		},
-	}
-	fakePools = []*model.StoragePoolSpec{fakePool1, fakePool2}
-)
-
 func TestSelectSupportedPool(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("ListPools").Return(fakePools, nil)
@@ -81,7 +38,7 @@ func TestSelectSupportedPool(t *testing.T) {
 				"availabilityZone": "az1",
 				"thin":             true,
 			},
-			expected: fakePool2,
+			expected: fakePools[1],
 		},
 		{
 			request: map[string]interface{}{
@@ -101,3 +58,46 @@ func TestSelectSupportedPool(t *testing.T) {
 		}
 	}
 }
+
+var (
+	fakePools = []*model.StoragePoolSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+				CreatedAt: "2017-10-24T15:04:05",
+			},
+			Name:             "fakePool",
+			Description:      "fake pool for testing",
+			Status:           "available",
+			AvailabilityZone: "az1",
+			TotalCapacity:    99999,
+			FreeCapacity:     5000,
+			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
+			Extras: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   false,
+				"compress": false,
+				"diskType": "SSD",
+			},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+				CreatedAt: "2017-10-24T15:04:05",
+			},
+			Name:             "fakePool",
+			Description:      "fake pool for testing",
+			Status:           "available",
+			AvailabilityZone: "az1",
+			TotalCapacity:    99999,
+			FreeCapacity:     6999,
+			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
+			Extras: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SATA",
+			},
+		},
+	}
+)

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func NewFakePoolReceiver() Receiver {
@@ -42,12 +43,12 @@ func (*fakePoolReceiver) Recv(
 
 	switch out.(type) {
 	case *model.StoragePoolSpec:
-		if err := json.Unmarshal([]byte(samplePool), out); err != nil {
+		if err := json.Unmarshal([]byte(BytePool), out); err != nil {
 			return err
 		}
 		break
 	case *[]*model.StoragePoolSpec:
-		if err := json.Unmarshal([]byte(samplePools), out); err != nil {
+		if err := json.Unmarshal([]byte(BytePools), out); err != nil {
 			return err
 		}
 		break
@@ -131,42 +132,3 @@ func TestListPools(t *testing.T) {
 		return
 	}
 }
-
-var (
-	samplePool = `{
-		"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		"name": "sample-pool-01",
-		"description": "This is the first sample storage pool for testing",
-		"totalCapacity": 100,
-		"freeCapacity": 90,
-		"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		"extras": {
-			"diskType": "SSD"
-		}
-	}`
-
-	samplePools = `[
-		{
-			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"name": "sample-pool-01",
-			"description": "This is the first sample storage pool for testing",
-			"totalCapacity": 100,
-			"freeCapacity": 90,
-			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"diskType": "SSD"
-			}
-		},
-		{
-			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			"name": "sample-pool-02",
-			"description": "This is the second sample storage pool for testing",
-			"totalCapacity": 200,
-			"freeCapacity": 170,
-			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"diskType": "SAS"
-			}
-		}
-	]`
-)

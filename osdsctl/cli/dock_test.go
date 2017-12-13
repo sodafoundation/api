@@ -24,26 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
-)
-
-var (
-	sampleDock = `{
-		"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		"name":        "sample",
-		"description": "sample backend service",
-		"endpoint":    "localhost:50050",
-		"driverName":  "sample"
-	}`
-
-	sampleDocks = `[
-		{
-			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"name":        "sample",
-			"description": "sample backend service",
-			"endpoint":    "localhost:50050",
-			"driverName":  "sample"
-		}
-	]`
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -87,7 +68,7 @@ func TestDockShowAction(t *testing.T) {
 		func(_ *c.DockMgr, _ string) (*model.DockSpec, error) {
 			var res model.DockSpec
 
-			if err := json.Unmarshal([]byte(sampleDock), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteDock), &res); err != nil {
 				return &res, err
 			}
 
@@ -105,7 +86,7 @@ func TestDockListAction(t *testing.T) {
 		func(_ *c.DockMgr) ([]*model.DockSpec, error) {
 			var res []*model.DockSpec
 
-			if err := json.Unmarshal([]byte(sampleDocks), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteDocks), &res); err != nil {
 				return res, err
 			}
 

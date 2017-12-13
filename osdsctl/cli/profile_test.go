@@ -24,34 +24,7 @@ import (
 	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
-)
-
-var (
-	sampleProfile = `{
-		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-		"name": "default",
-		"description": "default policy"
-	}`
-
-	sampleProfiles = `[
-		{
-			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-			"name": "default",
-			"description": "default policy"
-		},
-		{
-			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
-			"name": "silver",
-			"description": "silver policy",
-			"extras": {
-				"diskType":"SAS"
-			}
-		}
-	]`
-
-	sampleExtras = `{
-		"diskType":"SAS"
-	}`
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -97,7 +70,7 @@ func TestProfileCreateAction(t *testing.T) {
 		})
 
 	var args []string
-	args = append(args, sampleProfile)
+	args = append(args, ByteProfile)
 	profileCreateAction(profileCreateCommand, args)
 }
 
@@ -106,7 +79,7 @@ func TestProfileShowAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.ProfileMgr), "GetProfile",
 		func(_ *c.ProfileMgr, prfID string) (*model.ProfileSpec, error) {
 			var res model.ProfileSpec
-			if err := json.Unmarshal([]byte(sampleProfile), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteProfile), &res); err != nil {
 				return nil, err
 			}
 			res.Id = prfID
@@ -124,7 +97,7 @@ func TestProfileListAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.ProfileMgr), "ListProfiles",
 		func(_ *c.ProfileMgr) ([]*model.ProfileSpec, error) {
 			var res []*model.ProfileSpec
-			if err := json.Unmarshal([]byte(sampleProfiles), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteProfiles), &res); err != nil {
 				return nil, err
 			}
 

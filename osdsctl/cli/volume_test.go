@@ -25,96 +25,7 @@ import (
 	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
-)
-
-var (
-	sampleVolume = `{
-		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"name": "sample-volume",
-		"description": "This is a sample volume for testing",
-		"size": 1,
-		"status": "available",
-		"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
-	}`
-
-	sampleVolumes = `[
-		{
-			"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"name": "sample-volume",
-			"description": "This is a sample volume for testing",
-			"size": 1,
-			"status": "available",
-			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
-		}
-	]`
-
-	sampleAttachment = `{
-		"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		"name": "sample-volume-attachment",
-		"description": "This is a sample volume attachment for testing",
-		"status": "available",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"hostInfo": {},
-		"connectionInfo": {
-			"driverVolumeType": "iscsi",
-			"data": {
-				"targetDiscovered": true,
-				"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal": "127.0.0.0.1:3260",
-				"discard": false
-			}
-		}
-	}`
-
-	sampleAttachments = `[
-		{
-			"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"name": "sample-volume-attachment",
-			"description": "This is a sample volume attachment for testing",
-			"status": "available",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"hostInfo": {},
-			"connectionInfo": {
-				"driverVolumeType": "iscsi",
-				"data": {
-					"targetDiscovered": true,
-					"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
-					"targetPortal": "127.0.0.0.1:3260",
-					"discard": false
-				}
-			}
-		}
-	]`
-
-	sampleSnapshot = `{
-		"id": "3769855c-a102-11e7-b772-17b880d2f537",
-		"name": "sample-snapshot-01",
-		"description": "This is the first sample snapshot for testing",
-		"size": 1,
-		"status": "created",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	}`
-
-	sampleSnapshots = `[
-		{
-			"id": "3769855c-a102-11e7-b772-17b880d2f537",
-			"name": "sample-snapshot-01",
-			"description": "This is the first sample snapshot for testing",
-			"size": 1,
-			"status": "created",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		},
-		{
-			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			"name": "sample-snapshot-02",
-			"description": "This is the second sample snapshot for testing",
-			"size": 1,
-			"status": "created",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		}
-	]`
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -157,7 +68,7 @@ func TestVolumeCreateAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "CreateVolume",
 		func(_ *c.VolumeMgr, body c.VolumeBuilder) (*model.VolumeSpec, error) {
 			var res model.VolumeSpec
-			if err := json.Unmarshal([]byte(sampleVolume), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolume), &res); err != nil {
 				return nil, err
 			}
 
@@ -175,7 +86,7 @@ func TestVolumeShowAction(t *testing.T) {
 		func(_ *c.VolumeMgr, volID string) (*model.VolumeSpec, error) {
 			var res model.VolumeSpec
 
-			if err := json.Unmarshal([]byte(sampleVolume), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolume), &res); err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
@@ -195,7 +106,7 @@ func TestVolumeListAction(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "ListVolumes",
 		func(_ *c.VolumeMgr) ([]*model.VolumeSpec, error) {
 			var res []*model.VolumeSpec
-			if err := json.Unmarshal([]byte(sampleVolumes), &res); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolumes), &res); err != nil {
 				return nil, err
 			}
 

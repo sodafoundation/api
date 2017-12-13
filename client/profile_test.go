@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var fpr = &ProfileMgr{
@@ -45,12 +46,12 @@ func (*fakeProfileReceiver) Recv(
 	case "POST":
 		switch out.(type) {
 		case *model.ProfileSpec:
-			if err := json.Unmarshal([]byte(sampleProfile), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
 				return err
 			}
 			break
 		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(sampleExtras), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
 				return err
 			}
 			break
@@ -61,17 +62,17 @@ func (*fakeProfileReceiver) Recv(
 	case "GET":
 		switch out.(type) {
 		case *model.ProfileSpec:
-			if err := json.Unmarshal([]byte(sampleProfile), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
 				return err
 			}
 			break
 		case *[]*model.ProfileSpec:
-			if err := json.Unmarshal([]byte(sampleProfiles), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteProfiles), out); err != nil {
 				return err
 			}
 			break
 		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(sampleExtras), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
 				return err
 			}
 			break
@@ -217,31 +218,3 @@ func TestRemoveExtraProperty(t *testing.T) {
 		return
 	}
 }
-
-var (
-	sampleProfile = `{
-		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-		"name": "default",
-		"description": "default policy"
-	}`
-
-	sampleProfiles = `[
-		{
-			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-			"name": "default",
-			"description": "default policy"
-		},
-		{
-			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
-			"name": "silver",
-			"description": "silver policy",
-			"extras": {
-				"diskType":"SAS"
-			}
-		}
-	]`
-
-	sampleExtras = `{
-		"diskType":"SAS"
-	}`
-)

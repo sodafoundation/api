@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func NewFakeDockReceiver() Receiver {
@@ -43,12 +44,12 @@ func (*fakeDockReceiver) Recv(
 
 	switch out.(type) {
 	case *model.DockSpec:
-		if err := json.Unmarshal([]byte(sampleDock), out); err != nil {
+		if err := json.Unmarshal([]byte(ByteDock), out); err != nil {
 			return err
 		}
 		break
 	case *[]*model.DockSpec:
-		if err := json.Unmarshal([]byte(sampleDocks), out); err != nil {
+		if err := json.Unmarshal([]byte(ByteDocks), out); err != nil {
 			return err
 		}
 		break
@@ -111,23 +112,3 @@ func TestListDocks(t *testing.T) {
 		return
 	}
 }
-
-var (
-	sampleDock = `{
-		"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		"name":        "sample",
-		"description": "sample backend service",
-		"endpoint":    "localhost:50050",
-		"driverName":  "sample"
-	}`
-
-	sampleDocks = `[
-		{
-			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"name":        "sample",
-			"description": "sample backend service",
-			"endpoint":    "localhost:50050",
-			"driverName":  "sample"
-		}
-	]`
-)

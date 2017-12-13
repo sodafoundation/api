@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var fv = &VolumeMgr{
@@ -45,17 +46,17 @@ func (*fakeVolumeReceiver) Recv(
 	case "POST", "PUT":
 		switch out.(type) {
 		case *model.VolumeSpec:
-			if err := json.Unmarshal([]byte(sampleVolume), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
 				return err
 			}
 			break
 		case *model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(sampleAttachment), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
 				return err
 			}
 			break
 		case *model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(sampleSnapshot), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
 				return err
 			}
 			break
@@ -66,32 +67,32 @@ func (*fakeVolumeReceiver) Recv(
 	case "GET":
 		switch out.(type) {
 		case *model.VolumeSpec:
-			if err := json.Unmarshal([]byte(sampleVolume), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
 				return err
 			}
 			break
 		case *[]*model.VolumeSpec:
-			if err := json.Unmarshal([]byte(sampleVolumes), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteVolumes), out); err != nil {
 				return err
 			}
 			break
 		case *model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(sampleAttachment), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
 				return err
 			}
 			break
 		case *[]*model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(sampleAttachments), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteAttachments), out); err != nil {
 				return err
 			}
 			break
 		case *model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(sampleSnapshot), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
 				return err
 			}
 			break
 		case *[]*model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(sampleSnapshots), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteSnapshots), out); err != nil {
 				return err
 			}
 			break
@@ -438,93 +439,3 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		return
 	}
 }
-
-var (
-	sampleVolume = `{
-		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"name": "sample-volume",
-		"description": "This is a sample volume for testing",
-		"size": 1,
-		"status": "available",
-		"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
-	}`
-
-	sampleVolumes = `[
-		{
-			"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"name": "sample-volume",
-			"description": "This is a sample volume for testing",
-			"size": 1,
-			"status": "available",
-			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
-		}
-	]`
-
-	sampleAttachment = `{
-		"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		"name": "sample-volume-attachment",
-		"description": "This is a sample volume attachment for testing",
-		"status": "available",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"hostInfo": {},
-		"connectionInfo": {
-			"driverVolumeType": "iscsi",
-			"data": {
-				"targetDiscovered": true,
-				"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal": "127.0.0.0.1:3260",
-				"discard": false
-			}
-		}
-	}`
-
-	sampleAttachments = `[
-		{
-			"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"name": "sample-volume-attachment",
-			"description": "This is a sample volume attachment for testing",
-			"status": "available",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"hostInfo": {},
-			"connectionInfo": {
-				"driverVolumeType": "iscsi",
-				"data": {
-					"targetDiscovered": true,
-					"targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
-					"targetPortal": "127.0.0.0.1:3260",
-					"discard": false
-				}
-			}
-		}
-	]`
-
-	sampleSnapshot = `{
-		"id": "3769855c-a102-11e7-b772-17b880d2f537",
-		"name": "sample-snapshot-01",
-		"description": "This is the first sample snapshot for testing",
-		"size": 1,
-		"status": "created",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"		
-	}`
-
-	sampleSnapshots = `[
-		{
-			"id": "3769855c-a102-11e7-b772-17b880d2f537",
-			"name": "sample-snapshot-01",
-			"description": "This is the first sample snapshot for testing",
-			"size": 1,
-			"status": "created",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
-		},
-		{
-			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			"name": "sample-snapshot-02",
-			"description": "This is the second sample snapshot for testing",
-			"size": 1,
-			"status": "created",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
-		}
-	]`
-)
