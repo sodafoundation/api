@@ -15,8 +15,9 @@
 package client
 
 import (
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"log"
+
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 type Client struct {

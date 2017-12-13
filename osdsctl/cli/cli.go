@@ -19,9 +19,9 @@ This module implements a entry into the OpenSDS CLI service.
 package cli
 
 import (
+	"fmt"
 	"os"
 
-	"fmt"
 	c "github.com/opensds/opensds/client"
 	"github.com/spf13/cobra"
 )
@@ -50,9 +50,8 @@ func init() {
 func Run() error {
 	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
 	if !ok {
-		fmt.Println("ERROR: You must provide the endpoint by setting " +
-			    "the environment variable OPENSDS_ENDPOINT")
-		os.Exit(1)
+		return fmt.Errorf("ERROR: You must provide the endpoint by setting " +
+			"the environment variable OPENSDS_ENDPOINT")
 	}
 	client = c.NewClient(&c.Config{Endpoint: ep})
 

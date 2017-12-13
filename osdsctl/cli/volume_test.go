@@ -17,13 +17,14 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bouk/monkey"
-	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
 	"os"
 	"os/exec"
 	"reflect"
 	"testing"
+
+	"github.com/bouk/monkey"
+	c "github.com/opensds/opensds/client"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 var (
