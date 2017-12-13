@@ -45,6 +45,19 @@ var (
 	]`
 )
 
+func init() {
+	if nil == client {
+		ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+
+		if !ok {
+			ep = "TestEndPoint"
+			os.Setenv("OPENSDS_ENDPOINT", ep)
+		}
+
+		client = c.NewClient(&c.Config{Endpoint: ep})
+	}
+}
+
 func TestDockAction(t *testing.T) {
 	beBrasher := os.Getenv("BE_CRASHER")
 
