@@ -16,8 +16,10 @@ package client
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
 // VolumeBuilder contains request body of handling a volume request.
@@ -50,7 +52,9 @@ type VolumeMgr struct {
 
 func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := v.Endpoint + "/v1beta/block/volumes"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateVolumeURL()}, "/")
 
 	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -62,7 +66,9 @@ func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) 
 
 func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := v.Endpoint + "/v1beta/block/volumes/" + volID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateVolumeURL(volID)}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -74,7 +80,9 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 
 func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 	var res []*model.VolumeSpec
-	url := v.Endpoint + "/v1beta/block/volumes"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateVolumeURL()}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -85,14 +93,18 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 }
 
 func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
-	url := v.Endpoint + "/v1beta/block/volumes/" + volID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateVolumeURL(volID)}, "/")
 
 	return v.Recv(request, url, "DELETE", body, nil)
 }
 
 func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
-	url := v.Endpoint + "/v1beta/block/attachments"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateAttachmentURL()}, "/")
 
 	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -104,7 +116,9 @@ func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model
 
 func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
-	url := v.Endpoint + "/v1beta/block/attachments/" + atcID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateAttachmentURL(atcID)}, "/")
 
 	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
 		fmt.Println(err)
@@ -116,7 +130,9 @@ func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBu
 
 func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
-	url := v.Endpoint + "/v1beta/block/attachments/" + atcID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateAttachmentURL(atcID)}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -128,7 +144,9 @@ func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSp
 
 func (v *VolumeMgr) ListVolumeAttachments() ([]*model.VolumeAttachmentSpec, error) {
 	var res []*model.VolumeAttachmentSpec
-	url := v.Endpoint + "/v1beta/block/attachments"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateAttachmentURL()}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -139,14 +157,18 @@ func (v *VolumeMgr) ListVolumeAttachments() ([]*model.VolumeAttachmentSpec, erro
 }
 
 func (v *VolumeMgr) DeleteVolumeAttachment(atcID string, body VolumeAttachmentBuilder) error {
-	url := v.Endpoint + "/v1beta/block/attachments/" + atcID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateAttachmentURL(atcID)}, "/")
 
 	return v.Recv(request, url, "DELETE", body, nil)
 }
 
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
-	url := v.Endpoint + "/v1beta/block/snapshots"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateSnapshotURL()}, "/")
 
 	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		fmt.Println(err)
@@ -158,7 +180,9 @@ func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.Vol
 
 func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
-	url := v.Endpoint + "/v1beta/block/snapshots/" + snpID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateSnapshotURL(snpID)}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -170,7 +194,9 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 
 func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	var res []*model.VolumeSnapshotSpec
-	url := v.Endpoint + "/v1beta/block/snapshots"
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateSnapshotURL()}, "/")
 
 	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
 		fmt.Println(err)
@@ -181,7 +207,9 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 }
 
 func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) error {
-	url := v.Endpoint + "/v1beta/block/snapshots/" + snpID
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateSnapshotURL(snpID)}, "/")
 
 	return v.Recv(request, url, "DELETE", body, nil)
 }

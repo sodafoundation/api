@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package etcd
+package urls
 
 import (
 	"strings"
@@ -31,15 +31,15 @@ func GenerateProfileURL(in ...string) string {
 }
 
 func GenerateVolumeURL(in ...string) string {
-	return generateURL("volumes", in...)
+	return generateURL("block/volumes", in...)
 }
 
 func GenerateAttachmentURL(in ...string) string {
-	return generateURL("volume/attachments", in...)
+	return generateURL("block/attachments", in...)
 }
 
 func GenerateSnapshotURL(in ...string) string {
-	return generateURL("volume/snapshots", in...)
+	return generateURL("block/snapshots", in...)
 }
 
 func generateURL(resource string, in ...string) string {
