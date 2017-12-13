@@ -311,7 +311,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#definitions/Extras'
+            $ref: '#/definitions/Extras'
           examples:
             application/json:
               key1: value1
@@ -335,7 +335,7 @@ paths:
         '200':
           description: OK
           schema:
-              $ref: '#definitions/Extras'
+              $ref: '#/definitions/Extras'
           examples:
             application/json:
               key1: value1
