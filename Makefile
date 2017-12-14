@@ -28,4 +28,4 @@ docker:build
 	docker build cmd/osdslet -t opensdsio/opensds-controller:v1beta
 
 clean:
-	rm -rf ./build/out/bin/* ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
+	rm -rf ./build ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock

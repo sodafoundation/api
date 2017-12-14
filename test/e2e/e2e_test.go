@@ -99,12 +99,11 @@ func TestGetVolume(t *testing.T) {
 		return
 	}
 	// TODO Test the return value.
-	/*
-		if !reflect.DeepEqual(vol, result) {
-			t.Errorf("Expected %+v, got %+v", vol, result)
-			return
-		}
-	*/
+	// if !reflect.DeepEqual(vol, result) {
+	// 		t.Errorf("Expected %+v, got %+v", vol, result)
+	// 		return
+	// }
+
 	volBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume success, got:", string(volBody))
 }
@@ -274,12 +273,12 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		return
 	}
 	// TODO Test the return value.
-	/*
-		if !reflect.DeepEqual(snp, result) {
-			t.Errorf("Expected %+v, got %+v", snp, result)
-			return
-		}
-	*/
+	//
+	//	if !reflect.DeepEqual(snp, result) {
+	//		t.Errorf("Expected %+v, got %+v", snp, result)
+	//		return
+	//	}
+
 	snpBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume snapshot success, got:", string(snpBody))
 }
@@ -414,7 +413,7 @@ func cleanVolumeAndSnapshotIfFailedOrFinished(t *testing.T, volID, snpID string)
 		t.Error("Clean volume snapshot failed:", err)
 		return err
 	}
-	t.Log("End cleaing volume snapshot...")
+	t.Log("End cleaning volume snapshot...")
 
 	t.Log("Start cleaning volume...")
 	if err := c.DeleteVolume(volID, nil); err != nil {

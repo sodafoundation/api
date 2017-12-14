@@ -272,7 +272,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}
 	defer d.destroyConn()
 
-	vol, err := d.PullVolume(opt.GetId())
+	vol, err := d.PullVolume(opt.GetVolumeId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
@@ -301,7 +301,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	}
 	defer d.destroyConn()
 
-	img, _, err := d.getImage(opt.GetId())
+	img, _, err := d.getImage(opt.GetVolumeId())
 	if err != nil {
 		log.Error("When get image:", err)
 		return nil, err
@@ -317,14 +317,17 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		log.Error("When create snapshot:", err)
 		return nil, err
 	}
-	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success", opt.GetName(), opt.GetId(), fullName.GetUUID())
+
+	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success",
+		opt.GetName(), fullName.GetUUID(), opt.GetId())
+
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: fullName.GetUUID(),
 		},
 		Name:        fullName.GetName(),
 		Description: opt.GetDescription(),
-		VolumeId:    opt.GetId(),
+		VolumeId:    opt.GetVolumeId(),
 		Size:        d.getSize(img),
 	}, nil
 }
