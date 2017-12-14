@@ -186,7 +186,7 @@ func TestCreateSnapshot(t *testing.T) {
 	d := Driver{}
 	resp, err := d.CreateSnapshot(&pb.CreateVolumeSnapshotOpts{
 		Name:        "snapshot001",
-		Id:          "7ee11866-1f40-4f3c-b093-7a3684523a19",
+		VolumeId:    "7ee11866-1f40-4f3c-b093-7a3684523a19",
 		Description: "unite test"})
 
 	if err != nil {
