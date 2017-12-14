@@ -48,22 +48,17 @@ spec:
         ports:
         - containerPort: {{ .Values.service.internalPort2 }}
         - containerPort: {{ .Values.service.internalPort3 }}
-		volumeMounts:
-        - mountPath: /var/log/opensds
-          name: log-file
-		- mountPath: /etc/opensds
-          name: opensds-conf-file
+	volumeMounts:
+	- mountPath: /etc/opensds
+          name: opensds-conf-dir
         - mountPath: /etc/ceph
-          name: ceph-conf-file
+          name: ceph-conf-dir
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       volumes:
-      - name: log-file
-        hostPath:
-          path: /var/log/opensds
-      - name: opensds-conf-file
+      - name: opensds-conf-dir
         hostPath:
           path: /etc/opesds
-      - name: ceph-conf-file
+      - name: ceph-conf-dir
         hostPath:
           path: /etc/ceph
