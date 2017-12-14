@@ -48,8 +48,8 @@ spec:
         ports:
         - containerPort: {{ .Values.service.internalPort2 }}
         - containerPort: {{ .Values.service.internalPort3 }}
-		volumeMounts:
-		- mountPath: /etc/opensds
+	volumeMounts:
+	- mountPath: /etc/opensds
           name: opensds-conf-dir
         - mountPath: /etc/ceph
           name: ceph-conf-dir
