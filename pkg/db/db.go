@@ -97,6 +97,8 @@ type Client interface {
 
 	ListVolumes() ([]*model.VolumeSpec, error)
 
+	UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error)
+
 	DeleteVolume(volID string) error
 
 	CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
@@ -114,6 +116,8 @@ type Client interface {
 	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
 
 	ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
+
+	UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeSnapshot(snapshotID string) error
 }

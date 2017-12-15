@@ -128,8 +128,43 @@ func (this *VolumePortal) GetVolume() {
 }
 
 func (this *VolumePortal) UpdateVolume() {
-	this.Ctx.Output.SetStatus(model.ErrorNotImplemented)
-	this.Ctx.Output.Body(model.ErrorNotImplementedStatus("Not implemented!"))
+	var volume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	id := this.Ctx.Input.Param(":volumeId")
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&volume); err != nil {
+		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	volume.Id = id
+	result, err := db.C.UpdateVolume(id, &volume)
+
+	if err != nil {
+		reason := fmt.Sprintf("Update volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal volume updated result failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusOK)
+	this.Ctx.Output.Body(body)
+
 	return
 }
 
@@ -281,7 +316,7 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal volume attachment showed result failed: %s", err.Error())
+		reason := fmt.Sprintf("Marshal volume attachment updated result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
 		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
@@ -413,8 +448,43 @@ func (this *VolumeSnapshotPortal) GetVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
-	this.Ctx.Output.SetStatus(model.ErrorNotImplemented)
-	this.Ctx.Output.Body(model.ErrorNotImplementedStatus("NOt implemented!"))
+	var snapshot = model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	id := this.Ctx.Input.Param(":snapshotId")
+
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&snapshot); err != nil {
+		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+	snapshot.Id = id
+
+	result, err := db.C.UpdateVolumeSnapshot(id, &snapshot)
+	if err != nil {
+		reason := fmt.Sprintf("Update volume snapshot failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal volume snapshot updated result failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusOK)
+	this.Ctx.Output.Body(body)
+	return
 }
 
 func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
