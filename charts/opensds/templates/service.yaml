@@ -1,31 +1,37 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-osdslet
   labels:
-    chart: "{{ .Chart.Name1 }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "fullname" . }}-osdslet
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - port: {{ .Values.service.externalPort1 }}
-    targetPort: {{ .Values.service.internalPort1 }}
-    protocol: TCP
-    name: {{ .Values.service.name1 }}
+  type: {{ .Values.osdslet.service.type }}
   selector:
-    app: {{ template "fullname" . }}
+    app: {{ template "fullname" . }}-osdslet
+  ports:
+  - name: osdslet-server
+    protocol: TCP
+    port: 50040
+    targetPort: 50040
 ------
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-osdsdock
   labels:
-    chart: "{{ .Chart.Name2 }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "fullname" . }}-osdsdock
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - port: {{ .Values.service.externalPort2 }}
-    targetPort: {{ .Values.service.internalPort2 }}
-    protocol: TCP
-    name: {{ .Values.service.name2 }}
+  type: {{ .Values.osdsdock.service.type }}
   selector:
-    app: {{ template "fullname" . }}
+    app: {{ template "fullname" . }}-osdsdock
+  ports:
+  - name: osdsdock-server
+    protocol: TCP
+    port: 50050
+    targetPort: 50050
