@@ -310,7 +310,6 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		log.Error("When open image:", err)
 		return nil, err
 	}
-	defer img.Close()
 
 	fullName := NewName(opt.GetName())
 	if _, err = img.CreateSnapshot(fullName.GetFullName()); err != nil {
@@ -318,8 +317,10 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		return nil, err
 	}
 
+	img.Close()
+
 	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success",
-		opt.GetName(), fullName.GetUUID(), opt.GetId())
+		opt.GetName(), fullName.GetUUID(), opt.GetVolumeId())
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
