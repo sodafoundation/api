@@ -171,6 +171,10 @@ func (fc *FakeDbClient) ListVolumes() ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
+func (fc *FakeDbClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	return &SampleVolumes[0], nil
+}
+
 func (fc *FakeDbClient) DeleteVolume(volID string) error {
 	return nil
 }
@@ -211,6 +215,10 @@ func (fc *FakeDbClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, erro
 
 	snps = append(snps, &SampleSnapshots[0], &SampleSnapshots[1])
 	return snps, nil
+}
+
+func (fc *FakeDbClient) UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	return &SampleSnapshots[0], nil
 }
 
 func (fc *FakeDbClient) DeleteVolumeSnapshot(snapshotID string) error {
