@@ -265,12 +265,6 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	if err := d.initConn(); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroyConn()
-
 	vol, err := d.PullVolume(opt.GetVolumeId())
 	if err != nil {
 		log.Error("When get image:", err)
