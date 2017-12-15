@@ -241,7 +241,6 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 		},
 		Name:             name.GetName(),
 		Size:             d.getSize(img),
-		Description:      "",
 		AvailabilityZone: "ceph",
 	}, nil
 }
