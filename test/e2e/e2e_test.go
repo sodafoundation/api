@@ -19,6 +19,7 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	_ "reflect"
 	"testing"
 
@@ -150,9 +151,12 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume attachment...")
+	host, _ := os.Hostname()
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		HostInfo: model.HostInfo{
+			Host: host,
+		},
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -341,9 +345,12 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	}
 
 	t.Log("Start preparing volume attachment...")
+	host, _ := os.Hostname()
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		HostInfo: model.HostInfo{
+			Host: host,
+		},
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
