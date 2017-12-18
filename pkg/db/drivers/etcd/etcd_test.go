@@ -277,6 +277,34 @@ func TestListVolumes(t *testing.T) {
 	}
 }
 
+func TestUpdateVolume(t *testing.T) {
+	var vol = model.VolumeSpec{
+		Name:        "Test Name",
+		Description: "Test Description",
+	}
+
+	atc, err := fc.UpdateVolume("bd5b12a8-a101-11e7-941e-d77981b584d8", &vol)
+	if err != nil {
+		t.Error("Update volumes failed:", err)
+	}
+
+	if atc.Id != "bd5b12a8-a101-11e7-941e-d77981b584d8" {
+		t.Errorf("Expected %+v, got %+v\n", "bd5b12a8-a101-11e7-941e-d77981b584d8", atc.Id)
+	}
+
+	if atc.Name != "Test Name" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Name", atc.Name)
+	}
+
+	if atc.Description != "Test Description" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Description", atc.Description)
+	}
+
+	if atc.PoolId != "084bf71e-a102-11e7-88a8-e31fe6d52248" {
+		t.Errorf("Expected %+v, got %+v\n", "084bf71e-a102-11e7-88a8-e31fe6d52248", atc.PoolId)
+	}
+}
+
 func TestListVolumeAttachments(t *testing.T) {
 	atcs, err := fc.ListVolumeAttachments("")
 	if err != nil {
@@ -292,6 +320,68 @@ func TestListVolumeAttachments(t *testing.T) {
 	}
 }
 
+func TestUpdateVolumeAttachment(t *testing.T) {
+	var attachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
+		Mountpoint: "Test Mountpoint",
+		Status:     "Test Status",
+		VolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		HostInfo: model.HostInfo{Platform: "Test Platform",
+			OsType:    "Test OsType",
+			Ip:        "Test Ip",
+			Host:      "Test Host",
+			Initiator: "Test Initiator"},
+		ConnectionInfo: model.ConnectionInfo{
+			DriverVolumeType: "Test DriverVolumeType",
+			ConnectionData: map[string]interface{}{
+				"targetDiscovered": true,
+				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
+				"targetPortal":     "127.0.0.0.1:3260",
+				"discard":          false,
+			},
+		},
+	}
+
+	atc, err := fc.UpdateVolumeAttachment("f2dda3d2-bf79-11e7-8665-f750b088f63e", &attachment)
+	if err != nil {
+		t.Error("Update volumes failed:", err)
+	}
+
+	if atc.Mountpoint != "Test Mountpoint" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Mountpoint", atc.Mountpoint)
+	}
+
+	if atc.Status != "Test Status" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Status", atc.Status)
+	}
+
+	if atc.Platform != "Test Platform" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Platform", atc.Platform)
+	}
+
+	if atc.OsType != "Test OsType" {
+		t.Errorf("Expected %+v, got %+v\n", "Test OsType", atc.OsType)
+	}
+
+	if atc.Ip != "Test Ip" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Ip", atc.Ip)
+	}
+
+	if atc.Host != "Test Host" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Host", atc.Host)
+	}
+
+	if atc.Initiator != "Test Initiator" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Initiator", atc.Initiator)
+	}
+
+	if atc.DriverVolumeType != "Test DriverVolumeType" {
+		t.Errorf("Expected %+v, got %+v\n", "Test DriverVolumeType", atc.DriverVolumeType)
+	}
+}
+
 func TestListVolumeSnapshots(t *testing.T) {
 	snps, err := fc.ListVolumeSnapshots()
 	if err != nil {
@@ -304,6 +394,34 @@ func TestListVolumeSnapshots(t *testing.T) {
 	}
 	if !reflect.DeepEqual(snps, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, snps)
+	}
+}
+
+func TestUpdateVolumeSnapshot(t *testing.T) {
+	var snp = model.VolumeSnapshotSpec{
+		Name:        "Test Name",
+		Description: "Test Description",
+	}
+
+	atc, err := fc.UpdateVolumeSnapshot("3769855c-a102-11e7-b772-17b880d2f537", &snp)
+	if err != nil {
+		t.Error("Update volumes failed:", err)
+	}
+
+	if atc.Id != "3769855c-a102-11e7-b772-17b880d2f537" {
+		t.Errorf("Expected %+v, got %+v\n", "3769855c-a102-11e7-b772-17b880d2f537", atc.Id)
+	}
+
+	if atc.Name != "Test Name" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Name", atc.Name)
+	}
+
+	if atc.Description != "Test Description" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Description", atc.Description)
+	}
+
+	if atc.VolumeId != "bd5b12a8-a101-11e7-941e-d77981b584d8" {
+		t.Errorf("Expected %+v, got %+v\n", "bd5b12a8-a101-11e7-941e-d77981b584d8", atc.VolumeId)
 	}
 }
 
