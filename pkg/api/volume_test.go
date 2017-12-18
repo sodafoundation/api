@@ -216,6 +216,41 @@ func TestUpdateVolume(t *testing.T) {
 	}
 }
 
+func TestUpdateVolumeWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(``)
+	r, _ := http.NewRequest("PUT",
+		"/v1beta/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+
+	jsonStr = []byte(`{"name":"fake Vol","description":"fake Vol"}`)
+	r, _ = http.NewRequest("PUT",
+		"/v1beta/block/volumes/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	var volume = model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+	volume.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("UpdateVolume", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+		&volume).Return(nil, errors.New("db error"))
+	db.C = mockClient
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                         Tests for volume snapshot                          //
 ////////////////////////////////////////////////////////////////////////////////
@@ -378,6 +413,40 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 	}
 }
 
+func TestUpdateVolumeSnapshotWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(``)
+	r, _ := http.NewRequest("PUT",
+		"/v1beta/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+
+	jsonStr = []byte(`{"name":"fake snapshot","description":"fake snapshot"}`)
+	r, _ = http.NewRequest("PUT",
+		"/v1beta/block/snapshots/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	var snapshot = model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
+	snapshot.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("UpdateVolumeSnapshot", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+		&snapshot).Return(nil, errors.New("db error"))
+	db.C = mockClient
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                         Tests for volume attachment                          //
 ////////////////////////////////////////////////////////////////////////////////
@@ -486,5 +555,89 @@ func TestGetVolumeAttachment(t *testing.T) {
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
 	}
+}
 
+func TestUpdateVolumeAttachment(t *testing.T) {
+	var jsonStr = []byte(`{"status": "available"}`)
+	r, _ := http.NewRequest("PUT",
+		"/v1beta/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	var attachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&attachment)
+	attachment.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("UpdateVolumeAttachment", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+		&attachment).Return(fakeAttachment, nil)
+	db.C = mockClient
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	var output model.VolumeAttachmentSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+
+	expectedJson := `{
+	    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+	    "createdAt": "2017-10-24T16:21:32",
+	    "volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	    "status": "available",
+	    "connectionInfo": {
+	      "driverVolumeType": "iscsi",
+	      "data": {
+	        "discard": false,
+	        "targetDiscovered": true,
+	        "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+	        "targetPortal": "127.0.0.0.1:3260"
+	      }
+	    }
+	  }`
+
+	var expected model.VolumeAttachmentSpec
+	json.Unmarshal([]byte(expectedJson), &expected)
+
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
+	}
+
+	if !reflect.DeepEqual(expected, output) {
+		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(``)
+	r, _ := http.NewRequest("PUT",
+		"/v1beta/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+
+	jsonStr = []byte(`{"status": "available"}`)
+	r, _ = http.NewRequest("PUT",
+		"/v1beta/block/attachments/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	var attachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&attachment)
+	attachment.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("UpdateVolumeAttachment", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+		&attachment).Return(nil, errors.New("db error"))
+	db.C = mockClient
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
 }
