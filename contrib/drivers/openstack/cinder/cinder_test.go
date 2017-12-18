@@ -92,7 +92,7 @@ func TestSetup(t *testing.T) {
 var volumeResp = `
 {
     "volume": {
-        "status": "creating",
+        "status": "available",
         "migration_status": null,
         "user_id": "0eea4eabcf184061a3b6db1e0daaf010",
         "attachments": [],
@@ -132,6 +132,11 @@ func TestCreateVolume(t *testing.T) {
 			json.Unmarshal([]byte(volumeResp), &r.Body)
 			return
 		})
+	monkey.Patch(volumesv2.Get,
+		func(client *gophercloud.ServiceClient, id string) (r volumesv2.GetResult) {
+			json.Unmarshal([]byte(volumeResp), &r.Body)
+			return
+		})
 
 	opt := &pb.CreateVolumeOpts{
 		Name:             "test1",
@@ -160,7 +165,7 @@ func TestCreateVolume(t *testing.T) {
 	if resp.AvailabilityZone != "nova" {
 		t.Error("Create volume AvailabilityZone error.")
 	}
-	if resp.Status != "creating" {
+	if resp.Status != "available" {
 		t.Error("Create volume Status error.")
 	}
 }
@@ -192,7 +197,7 @@ func TestPullVolume(t *testing.T) {
 	if resp.AvailabilityZone != "nova" {
 		t.Error("Get volume AvailabilityZone error.")
 	}
-	if resp.Status != "creating" {
+	if resp.Status != "available" {
 		t.Error("Get volume Status error.")
 	}
 }
@@ -235,6 +240,11 @@ func TestCreateSnapshot(t *testing.T) {
 	defer monkey.UnpatchAll()
 	monkey.Patch(snapshotsv2.Create,
 		func(client *gophercloud.ServiceClient, opts snapshotsv2.CreateOptsBuilder) (r snapshotsv2.CreateResult) {
+			json.Unmarshal([]byte(snapshotResp), &r.Body)
+			return
+		})
+	monkey.Patch(snapshotsv2.Get,
+		func(client *gophercloud.ServiceClient, id string) (r snapshotsv2.GetResult) {
 			json.Unmarshal([]byte(snapshotResp), &r.Body)
 			return
 		})
