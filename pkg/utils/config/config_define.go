@@ -20,11 +20,13 @@ type OsdsLet struct {
 	ApiEndpoint string `conf:"api_endpoint,localhost:50040"`
 	Graceful    bool   `conf:"graceful,true"`
 	SocketOrder string `conf:"socket_order"`
+	Daemon      bool   `conf:"daemon,false"`
 }
 
 type OsdsDock struct {
 	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
 	EnabledBackends []string `conf:"enabled_backends,ceph"`
+	Daemon          bool     `conf:"daemon,false"`
 	Backends
 }
 
@@ -56,3 +58,4 @@ type Config struct {
 	Database `conf:"database"`
 	Flag     FlagSet
 }
+
