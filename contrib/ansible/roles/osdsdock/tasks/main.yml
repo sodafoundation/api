@@ -15,7 +15,7 @@
   when: enabled_backend == "cinder"
 
 - name: run osdsdock daemon service
-  shell: nohup build/out/bin/osdsdock > build/out/osdsdock.out 2> build/out/osdsdock.err < /dev/null &
+  shell: build/out/bin/osdsdock -daemon
   become: True
   args:
     chdir: "{{ opensds_root }}"
