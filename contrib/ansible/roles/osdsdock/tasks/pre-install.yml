@@ -1,0 +1,20 @@
+---
+- name: install lvm2 external package when lvm backend enabled
+  apt:
+    name: lvm2
+  when: enabled_backend == "lvm"
+
+- name: install librados-dev external package when ceph backend enabled
+  apt:
+    name: librados-dev
+  when: enabled_backend == "ceph"
+
+- name: install librbd-dev external package when ceph backend enabled
+  apt:
+    name: librbd-dev
+  when: enabled_backend == "ceph"
+
+- name: install ceph-common external package when ceph backend enabled
+  apt:
+    name: ceph-common
+  when: enabled_backend == "ceph"
