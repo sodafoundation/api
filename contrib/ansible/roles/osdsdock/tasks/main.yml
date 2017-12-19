@@ -1,0 +1,21 @@
+---
+- name: include pre-install.yml
+  include: pre-install.yml
+
+- name: include scenarios/lvm.yml
+  include: scenarios/lvm.yml
+  when: enabled_backend == "lvm"
+
+- name: include scenarios/ceph.yml
+  include: scenarios/ceph.yml
+  when: enabled_backend == "ceph"
+
+- name: include scenarios/cinder.yml
+  include: scenarios/cinder.yml
+  when: enabled_backend == "cinder"
+
+- name: run osdsdock daemon service
+  shell: nohup build/out/bin/osdsdock > build/out/osdsdock.out 2> build/out/osdsdock.err < /dev/null &
+  become: True
+  args:
+    chdir: "{{ opensds_root }}"
