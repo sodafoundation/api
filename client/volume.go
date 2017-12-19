@@ -100,6 +100,20 @@ func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
 	return v.Recv(request, url, "DELETE", body, nil)
 }
 
+func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.VolumeSpec, error) {
+	var res model.VolumeSpec
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateVolumeURL(volID)}, "/")
+
+	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
 	url := strings.Join([]string{
@@ -212,4 +226,18 @@ func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilde
 		urls.GenerateSnapshotURL(snpID)}, "/")
 
 	return v.Recv(request, url, "DELETE", body, nil)
+}
+
+func (v *VolumeMgr) UpdateVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
+	var res model.VolumeSnapshotSpec
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateSnapshotURL(snpID)}, "/")
+
+	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return &res, nil
 }
