@@ -373,12 +373,12 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 		t.Errorf("Expected %+v, got %+v\n", "Test Host", result.Host)
 	}
 
-	if atc.Initiator != "Test Initiator" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Initiator", atc.Initiator)
+	if result.Initiator != "Test Initiator" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Initiator", result.Initiator)
 	}
 
-	if atc.DriverVolumeType != "Test DriverVolumeType" {
-		t.Errorf("Expected %+v, got %+v\n", "Test DriverVolumeType", atc.DriverVolumeType)
+	if result.DriverVolumeType != "Test DriverVolumeType" {
+		t.Errorf("Expected %+v, got %+v\n", "Test DriverVolumeType", result.DriverVolumeType)
 	}
 }
 
