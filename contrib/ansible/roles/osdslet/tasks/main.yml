@@ -1,6 +1,6 @@
 ---
 - name: run osdslet daemon service
-  shell: build/out/bin/osdslet -daemon
+  shell: nohup bin/osdslet > osdslet.out 2> osdslet.err < /dev/null &
   become: True
   args:
-    chdir: "{{ opensds_root }}"
+    chdir: "{{ opensds_root }}/build/out"
