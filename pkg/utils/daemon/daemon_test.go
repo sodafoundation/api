@@ -34,7 +34,7 @@ func TestDaemon(t *testing.T) {
 
 	SetDaemonFlag(&godaemon, false)
 
-	cmdCmdHandler = mockCmdHandler
+	execCmdHandler = mockCmdHandler
 
 	var bakArgs = make([]string, len(os.Args))
 	copy(bakArgs, os.Args)

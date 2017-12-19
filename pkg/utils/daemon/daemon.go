@@ -23,7 +23,7 @@ import (
 	"runtime"
 )
 
-var cmdCmdHandler = execCmd
+var execCmdHandler = execCmd
 
 func SetDaemonFlag(isDaemon *bool, defaultVal bool) {
 	config.CONF.Flag.BoolVar(isDaemon, "daemon", defaultVal, "run app as a daemon with -daemon=true")
@@ -55,6 +55,6 @@ func CheckAndRunDaemon(isDaemon bool) {
 		}
 		args = append(args, arg)
 	}
-	cmdCmdHandler(os.Args[0], args...)
+	execCmdHandler(os.Args[0], args...)
 }
 
