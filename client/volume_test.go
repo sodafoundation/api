@@ -203,7 +203,7 @@ func TestUpdateVolume(t *testing.T) {
 		Description: "This is a sample volume for testing",
 	}
 
-	atc, err := fv.UpdateVolume(volID, &vol)
+	result, err := fv.UpdateVolume(volID, &vol)
 	if err != nil {
 		t.Error(err)
 		return
@@ -221,8 +221,8 @@ func TestUpdateVolume(t *testing.T) {
 		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
-	if !reflect.DeepEqual(atc, expected) {
-		t.Errorf("Expected %v, got %v", expected, atc)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v", expected, result)
 		return
 	}
 }
@@ -478,7 +478,7 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		Description: "This is the first sample snapshot for testing",
 	}
 
-	atc, err := fv.UpdateVolumeSnapshot(snpID, &snp)
+	result, err := fv.UpdateVolumeSnapshot(snpID, &snp)
 	if err != nil {
 		t.Error(err)
 		return
@@ -495,8 +495,8 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 
-	if !reflect.DeepEqual(atc, expected) {
-		t.Errorf("Expected %v, got %v", expected, atc)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v", expected, result)
 		return
 	}
 }
