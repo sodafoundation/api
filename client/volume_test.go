@@ -196,6 +196,37 @@ func TestDeleteVolume(t *testing.T) {
 	}
 }
 
+func TestUpdateVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	vol := model.VolumeSpec{
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+	}
+
+	atc, err := fv.UpdateVolume(volID, &vol)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
+
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("Expected %v, got %v", expected, atc)
+		return
+	}
+}
+
 func TestCreateVolumeAttachment(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected := &model.VolumeAttachmentSpec{
@@ -436,6 +467,36 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}); err != nil {
 		t.Error(err)
+		return
+	}
+}
+
+func TestUpdateVolumeSnapshot(t *testing.T) {
+	var snpID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	snp := model.VolumeSnapshotSpec{
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+	}
+
+	atc, err := fv.UpdateVolumeSnapshot(snpID, &snp)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Size:        1,
+		Status:      "created",
+		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	}
+
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("Expected %v, got %v", expected, atc)
 		return
 	}
 }
