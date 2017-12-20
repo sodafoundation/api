@@ -22,6 +22,9 @@ package main
 import (
 	"log"
 
+	"fmt"
+	"os"
+
 	"github.com/opensds/opensds/osdsctl/cli"
 )
 
@@ -30,6 +33,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	if err := cli.Run(); err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }

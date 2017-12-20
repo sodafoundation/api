@@ -72,21 +72,21 @@ func profileAction(cmd *cobra.Command, args []string) {
 
 func profileCreateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	prf := &model.ProfileSpec{}
 	if err := json.Unmarshal([]byte(args[0]), prf); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.CreateProfile(prf)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
@@ -95,14 +95,14 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 
 func profileShowAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.GetProfile(args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
@@ -111,14 +111,14 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 
 func profileListAction(cmd *cobra.Command, args []string) {
 	if len(args) != 0 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.ListProfiles()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Extra"}
@@ -127,14 +127,14 @@ func profileListAction(cmd *cobra.Command, args []string) {
 
 func profileDeleteAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	err := client.DeleteProfile(args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	fmt.Printf("Delete profile(%s) sucess.\n", args[0])

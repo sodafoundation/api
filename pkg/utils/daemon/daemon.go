@@ -16,11 +16,12 @@ package daemon
 
 import (
 	"fmt"
-	"github.com/opensds/opensds/pkg/utils/config"
 	"os"
 	"os/exec"
 	"regexp"
 	"runtime"
+
+	"github.com/opensds/opensds/pkg/utils/config"
 )
 
 var execCmdHandler = execCmd
@@ -57,4 +58,3 @@ func CheckAndRunDaemon(isDaemon bool) {
 	}
 	execCmdHandler(os.Args[0], args...)
 }
-

@@ -58,4 +58,3 @@ type Config struct {
 	Database `conf:"database"`
 	Flag     FlagSet
 }
-

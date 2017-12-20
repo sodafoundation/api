@@ -15,7 +15,6 @@
 package client
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -42,7 +41,6 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 		urls.GenerateDockURL(dckID)}, "/")
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -56,7 +54,6 @@ func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
 		urls.GenerateDockURL()}, "/")
 
 	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

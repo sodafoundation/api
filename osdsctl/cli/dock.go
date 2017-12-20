@@ -56,13 +56,13 @@ func dockAction(cmd *cobra.Command, args []string) {
 
 func dockShowAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 	resp, err := client.GetDock(args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
@@ -71,14 +71,14 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 
 func dockListAction(cmd *cobra.Command, args []string) {
 	if len(args) != 0 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.ListDocks()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
