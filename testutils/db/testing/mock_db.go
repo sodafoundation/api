@@ -664,7 +664,7 @@ func (_m *MockClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*mo
 	return r0, r1
 }
 
-func (_m *MockClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error){
+func (_m *MockClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	ret := _m.Called(volID, vol)
 
 	var r0 *model.VolumeSpec
@@ -708,7 +708,7 @@ func (_m *MockClient) UpdateVolumeAttachment(attachmentId string, attachment *mo
 	return r0, r1
 }
 
-func (_m *MockClient) UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error){
+func (_m *MockClient) UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(snapshotID, vs)
 
 	var r0 *model.VolumeSnapshotSpec

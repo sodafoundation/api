@@ -86,7 +86,7 @@ func volumeAction(cmd *cobra.Command, args []string) {
 
 func volumeCreateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
@@ -105,7 +105,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 
 	resp, err := client.CreateVolume(vol)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -116,14 +116,14 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 
 func volumeShowAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.GetVolume(args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
@@ -133,14 +133,14 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 
 func volumeListAction(cmd *cobra.Command, args []string) {
 	if len(args) != 0 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.ListVolumes()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
@@ -150,7 +150,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 
 func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
@@ -159,7 +159,7 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	}
 	err := client.DeleteVolume(args[0], vol)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	fmt.Printf("Delete volume(%s) sucess.\n", args[0])

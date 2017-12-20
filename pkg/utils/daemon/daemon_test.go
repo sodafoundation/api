@@ -111,4 +111,3 @@ func TestHelperProcess(t *testing.T) {
 
 	writeToTestFile(t, strings.Join(args, " "))
 }
-

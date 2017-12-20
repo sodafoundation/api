@@ -15,7 +15,6 @@
 package client
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -52,7 +51,6 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 		urls.GenerateProfileURL()}, "/")
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -66,7 +64,6 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 		urls.GenerateProfileURL(prfID)}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -80,7 +77,6 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 		urls.GenerateProfileURL()}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -103,7 +99,6 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 		"extras"}, "/")
 
 	if err := p.Recv(request, url, "POST", body, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -118,7 +113,6 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 		"extras"}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
