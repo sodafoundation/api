@@ -65,11 +65,6 @@ osd_scenario: collocated
 ansible all -m ping -i local.hosts
 ```
 
-### Update ansible configuration
-```bash
-ansible-config dump -c ansible.cfg
-```
-
 ### Check if the hosts could be reached
 ```bash
 ansible-playbook site.yml -i local.hosts
