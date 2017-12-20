@@ -1,0 +1,71 @@
+---
+
+- name: install lvm2
+  apt:
+    name: lvm2
+
+- name: install thin-provisioning-tools
+  apt:
+    name: thin-provisioning-tools
+
+- name: set cinder-volumes in thin mode
+  shell:
+    _raw_params: |
+      function _create_lvm_volume_group {
+          local vg=$1
+          local size=$2
+
+          local backing_file=/root/cinder/${vg}.img
+          if ! sudo vgs $vg; then
+              # Only create if the file doesn't already exists
+              [[ -f $backing_file ]] || truncate -s $size $backing_file
+              local vg_dev
+              vg_dev=`sudo losetup -f --show $backing_file`
+
+              # Only create volume group if it doesn't already exist
+              if ! sudo vgs $vg; then
+                  sudo vgcreate $vg $vg_dev
+              fi
+          fi
+      }
+      modprobe dm_thin_pool
+      _create_lvm_volume_group cinder-volumes 10G
+  args:
+    executable: /bin/bash
+  become: true
+
+- name: install python-cinderclient python-brick-cinderclient-ext docker-compose
+  pip:
+    name: python-cinderclient python-brick-cinderclient-ext docker-compose
+
+- name: check for cinder source code existed
+  stat:
+    path: /root/cinder
+  ignore_errors: yes
+  register: cinder_existed
+
+- name: download cinder source code
+  git:
+    repo: https://github.com/openstack/cinder.git
+    dest: /root/cinder
+  when:
+    - cinder_existed.stat.exists is undefined or cinder_existed.stat.exists == false
+
+- name: make blockbox
+  shell: make blockbox
+  become: true
+  args:
+    chdir: /root/cinder/contrib/block-box
+
+- name: start cinder-standalone service
+  shell: docker-compose up -d
+  become: true
+  args:
+    chdir: /root/cinder/contrib/block-box
+
+- name: wait for cinder service to start normally
+  wait_for:
+    host: 127.0.0.1
+    port: 8776
+    delay: 2
+    timeout: 20

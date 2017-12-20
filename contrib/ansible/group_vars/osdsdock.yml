@@ -16,7 +16,9 @@ dummy:
 ###########
 dock_endpoint: localhost:50050
 dock_log_file: /var/log/opensds/osdsdock.log
-enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph'
+
+# Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
+enabled_backend: lvm
 
 ###########
 #   LVM   #
@@ -42,6 +44,20 @@ ceph_name: ceph backend
 ceph_description: This is a ceph backend service
 ceph_driver_name: ceph
 ceph_config_path: /etc/opensds/driver/ceph.yaml
+
+###########
+# CINDER  #
+###########
+
+# Use block-box install cinder_standalone if true, see details in:
+# https://github.com/openstack/cinder/tree/master/contrib/block-box
+use_cinder_standalone: true
+
+# These fields are not suggested to be modified
+cinder_name: cinder backend
+cinder_description: This is a cinder backend service
+cinder_driver_name: cinder
+cinder_config_path: /etc/opensds/driver/cinder.yaml
 
 ###########
 # DOCKER  #
