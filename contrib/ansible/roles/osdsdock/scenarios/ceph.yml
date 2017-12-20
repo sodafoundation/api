@@ -43,3 +43,22 @@
   become: true
   args:
     chdir: $HOME/ceph-ansible
+
+- name: Check if ceph osd is running
+  shell: ps aux | grep ceph-osd | grep -v grep
+  ignore_errors: false
+  changed_when: false
+  register: service_ceph_osd_status
+
+- name: Check if ceph mon is running
+  shell: ps aux | grep ceph-mon | grep -v grep
+  ignore_errors: false
+  changed_when: false
+  register: service_ceph_mon_status
+
+- name: Create a pool and initialize it.
+  shell: ceph osd pool create rbd 100 && ceph osd pool set rbd size 1
+  ignore_errors: yes
+  changed_when: false
+  register: ceph_init_pool
+  when: service_ceph_mon_status.rc == 0 and service_ceph_osd_status.rc == 0
