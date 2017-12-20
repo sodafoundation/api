@@ -62,7 +62,7 @@ osd_scenario: collocated
 
 ### Check if the hosts could be reached
 ```bash
-ansible-playbook all -m ping -i local.hosts
+ansible all -m ping -i local.hosts
 ```
 
 ### Check if the hosts could be reached
