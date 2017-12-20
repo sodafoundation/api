@@ -47,7 +47,7 @@
   register: opensdsbuilt
 
 - name: build opensds binary file
-  command: make
+  shell: . /etc/profile; make
   args:
     chdir: "{{ opensds_root }}"
   when:
