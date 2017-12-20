@@ -62,7 +62,7 @@
   register: service_ceph_mon_status
 
 - name: Create a pool and initialize it.
-  shell: ceph osd pool create rbd 100 && ceph osd pool set rbd size 1
+  shell: ceph osd pool create {{ ceph_pool_name }} 100 && ceph osd pool set {{ ceph_pool_name }} size 1
   ignore_errors: yes
   changed_when: false
   register: ceph_init_pool

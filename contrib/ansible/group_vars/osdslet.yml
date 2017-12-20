@@ -15,7 +15,7 @@ dummy:
 # GENERAL #
 ###########
 
-# These fields are not suggested to be modified
+# These fields are NOT suggested to be modified
 
 controller_endpoint: localhost:50040
 controller_log_file: /var/log/opensds/osdslet.log

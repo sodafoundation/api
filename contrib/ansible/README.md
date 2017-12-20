@@ -30,7 +30,9 @@ modify ```group_vars/osdsdock.yml```:
 ```yaml
 enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph'
 pv_device: "your_pv_device_path" # Ensure this device existed if you choose lvm
-vg_name: "specified_vg_name" # Specify a name randomly
+vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose ceph backend
+
+ceph_pool_name: "specified_pool_name" # Specify a name randomly, but don't change it if you choose lvm backend
 ```
 modify ```group_vars/lvm/lvm.yaml``` if you specify lvm as your backend:
 ```yaml
@@ -48,9 +50,9 @@ modify ```group_vars/ceph/all.yml```:
 ceph_origin: repository
 ceph_repository: community
 ceph_stable_release: luminous
-public_network: "192.168.3.0/24"
+public_network: "192.168.3.0/24" # run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
-monitor_interface: eth1
+monitor_interface: eth1 # change to your network interface
 ```
 modify ```group_vars/ceph/osds.yml```:
 ```yml

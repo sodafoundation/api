@@ -25,7 +25,7 @@ enabled_backend: lvm # Change it according to your backend, currently support 'l
 pv_device: /dev/loop1 # Ensure this device existed if you choose lvm
 vg_name: vg001 # Specify a name randomly
 
-# These fields are not suggested to be modified
+# These fields are NOT suggested to be modified
 lvm_name: lvm backend
 lvm_description: This is a lvm backend service
 lvm_driver_name: lvm
@@ -35,7 +35,9 @@ lvm_config_path: /etc/opensds/driver/lvm.yaml
 #  CEPH   #
 ###########
 
-# These fields are not suggested to be modified
+ceph_pool_name: rbd # Specify a name randomly
+
+# These fields are NOT suggested to be modified
 ceph_name: ceph backend
 ceph_description: This is a ceph backend service
 ceph_driver_name: ceph
