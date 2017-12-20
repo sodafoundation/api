@@ -16,7 +16,7 @@ dummy:
 ###########
 dock_endpoint: localhost:50050
 dock_log_file: /var/log/opensds/osdsdock.log
-enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph'
+enabled_backend: ceph # Change it according to your backend, currently support 'lvm', 'ceph'
 
 ###########
 #   LVM   #
