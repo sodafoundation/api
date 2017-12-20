@@ -1,4 +1,9 @@
 ---
+- name: install ceph-common external package when ceph backend enabled
+  apt:
+    name: ceph-common
+  when: enabled_backend == "ceph"
+
 - name: check for ceph-ansible source code existed
   stat:
     path: $HOME/ceph-ansible

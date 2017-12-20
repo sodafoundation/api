@@ -1,7 +1,4 @@
 ---
-- name: include pre-install.yml
-  include: pre-install.yml
-
 - name: include scenarios/lvm.yml
   include: scenarios/lvm.yml
   when: enabled_backend == "lvm"

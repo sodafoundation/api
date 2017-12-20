@@ -9,6 +9,10 @@
 #  ignore_errors: yes
 #  register: vg_existed
 
+- name: install lvm2 external package when lvm backend enabled
+  apt:
+    name: lvm2
+
 - name: create a physical volume
   shell: pvcreate {{ pv_device }}
   ignore_errors: yes
