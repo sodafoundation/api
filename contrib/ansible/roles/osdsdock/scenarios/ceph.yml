@@ -1,14 +1,14 @@
 ---
 - name: check for ceph-ansible source code existed
   stat:
-    path: $HOME/ceph-ansible
+    path: /root/ceph-ansible
   ignore_errors: yes
   register: cephansibleexisted
 
 - name: download ceph-ansible source code
   git:
     repo: https://github.com/ceph/ceph-ansible.git
-    dest: $HOME/ceph-ansible
+    dest: /root/ceph-ansible
   when:
     - cephansibleexisted.stat.exists is undefined or cephansibleexisted.stat.exists == false
 
@@ -36,10 +36,30 @@
   shell: ansible all -m ping -i ceph.hosts
   become: true
   args:
-    chdir: $HOME/ceph-ansible
+    chdir: /root/ceph-ansible
 
-- name: run ceph-ansible playbook
-  shell: ansible-playbook site.yml -i ceph.hosts
-  become: true
-  args:
-    chdir: $HOME/ceph-ansible
+#- name: run ceph-ansible playbook
+#  shell: ansible-playbook site.yml -i ceph.hosts
+#  become: true
+#  args:
+#    chdir: /root/ceph-ansible
+
+- name: include ceph-defaults role to set up ceph cluster
+  include_role:
+    name: ceph-defaults
+
+- name: include ceph-common role to set up ceph cluster
+  include_role:
+    name: ceph-common
+
+- name: include ceph-config role to set up ceph cluster
+  include_role:
+    name: ceph-config
+
+- name: include ceph-mon role to set up ceph cluster
+  include_role:
+    name: ceph-mon
+
+- name: include ceph-mon role to set up ceph cluster
+  include_role:
+    name: ceph-mon
