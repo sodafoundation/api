@@ -15,7 +15,7 @@ dummy:
 # GENERAL #
 ###########
 
-# These fields are not suggested to be modified
+# These fields are NOT suggested to be modified
 
 remote_url: https://github.com/opensds/opensds.git
 opensds_dir: $HOME/gopath/src/github.com/opensds
