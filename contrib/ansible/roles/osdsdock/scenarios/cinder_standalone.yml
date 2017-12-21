@@ -15,7 +15,8 @@
           local vg=$1
           local size=$2
 
-          local backing_file=/root/cinder/${vg}.img
+          sudo mkdir -p /root/tmp_data
+          local backing_file=/root/tmp_data/${vg}.img
           if ! sudo vgs $vg; then
               # Only create if the file doesn't already exists
               [[ -f $backing_file ]] || truncate -s $size $backing_file
