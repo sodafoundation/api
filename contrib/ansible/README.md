@@ -67,7 +67,7 @@ osd_scenario: collocated
 ansible all -m ping -i local.hosts
 ```
 
-### Check if the hosts could be reached
+### Run opensds-ansible playbook to start deploy
 ```bash
 ansible-playbook site.yml -i local.hosts
 ```

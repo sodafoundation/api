@@ -15,13 +15,12 @@
 
       wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
       tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
-      cat > /etc/profile <<GOLANG__CONFIG_DOC
+      cat >> /etc/profile <<GOLANG__CONFIG_DOC
       export GOROOT=/usr/local/go
-      export GOPATH=$HOME/gopath
-      export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+      export GOPATH=\$HOME/gopath
+      export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
       GOLANG__CONFIG_DOC
       
-      source /etc/profile
     executable: /bin/bash
   ignore_errors: yes
   when:
