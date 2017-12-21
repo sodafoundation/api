@@ -42,6 +42,13 @@
   shell: pvremove {{ pv_device }}
   when: enabled_backend == "lvm"
 
+- name: stop cinder-standalone service
+  shell: docker-compose down
+  become: true
+  args:
+    chdir: /root/cinder/contrib/block-box
+  when: enabled_backend == "cinder"    
+
 #- name: purge ceph cluster if ceph backend specified
 #  shell: ansible-playbook purge-cluster.yml -i ceph.hosts
 #  become: true

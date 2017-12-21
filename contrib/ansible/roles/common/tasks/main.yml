@@ -20,7 +20,7 @@
       export GOPATH=\$HOME/gopath
       export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
       GOLANG__CONFIG_DOC
-      
+
     executable: /bin/bash
   ignore_errors: yes
   when:
@@ -103,6 +103,12 @@
     driver_name = {{ ceph_driver_name }}
     config_path = {{ ceph_config_path }}
 
+    [cinder]
+    name = {{ cinder_name }}
+    description = {{ cinder_description }}
+    driver_name = {{ cinder_driver_name }}
+    config_path = {{ cinder_config_path }}
+
     [database]
     endpoint = {{ db_endpoint }}
     driver = {{ db_driver }}
@@ -121,3 +127,9 @@
     src: ../../../group_vars/ceph/ceph.yaml
     dest: "{{ ceph_config_path }}"
   when: enabled_backend == "ceph"
+
+- name: copy opensds cinder backend file if specify cinder backend
+  copy:
+    src: ../../../group_vars/cinder/cinder.yaml
+    dest: "{{ cinder_config_path }}"
+  when: enabled_backend == "cinder"
