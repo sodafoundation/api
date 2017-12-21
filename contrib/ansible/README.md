@@ -25,6 +25,12 @@ sudo apt-get update
 sudo apt-get install ansible
 ```
 
+### Download opensds source code
+```bash
+git clone https://github.com/opensds/opensds.git
+cd opensds/contrib/ansible
+```
+
 ### Configure opensds cluster variables:
 modify ```group_vars/osdsdock.yml```:
 ```yaml
@@ -36,11 +42,11 @@ ceph_pool_name: "specified_pool_name" # Specify a name randomly, but don't chang
 ```
 modify ```group_vars/lvm/lvm.yaml``` if you specify lvm as your backend:
 ```yaml
-    "vg001" # change pool name same to vg_name, but don't change it if you choose ceph backend
+    "vg001" # Change pool name same to vg_name, but don't change it if you choose ceph backend
 ```
 modify ```group_vars/ceph/ceph.yaml``` if you specify ceph as your backend:
 ```yaml
-    "rbd" # change pool name same to ceph pool, but don't change it if you choose lvm backend
+    "rbd" # Change pool name same to ceph pool, but don't change it if you choose lvm backend
 ```
 
 If you choose ceph, you also need to configure two files under ```group_vars/ceph```: all.yml and osds.yml. And here is an example:
@@ -49,10 +55,10 @@ modify ```group_vars/ceph/all.yml```:
 ```yml
 ceph_origin: repository
 ceph_repository: community
-ceph_stable_release: luminous
-public_network: "192.168.3.0/24" # run 'ip -4 address' to check the ip address
+ceph_stable_release: kraken # Change ceph version to 'kraken' as the default version, due to 'luminous' version has some bugs
+public_network: "192.168.3.0/24" # Run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
-monitor_interface: eth1 # change to your network interface
+monitor_interface: eth1 # Change to your network interface
 ```
 modify ```group_vars/ceph/osds.yml```:
 ```yml
