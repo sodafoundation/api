@@ -8,6 +8,14 @@
   apt:
     name: thin-provisioning-tools
 
+- name: install docker-compose
+  pip:
+    name: docker-compose
+
+- name: create dir to save temp data
+  shell: mkdir -p /root/tmp_data
+  become: true
+
 - name: set cinder-volumes in thin mode
   shell:
     _raw_params: |
@@ -35,34 +43,78 @@
     executable: /bin/bash
   become: true
 
-- name: install python-cinderclient python-brick-cinderclient-ext docker-compose
-  pip:
-    name: python-cinderclient python-brick-cinderclient-ext docker-compose
+- name: check for python-cinderclient source code existed
+  stat:
+    path: /root/tmp_data/python-cinderclient
+  ignore_errors: yes
+  register: cinderclient_existed
+
+- name: download python-cinderclient source code
+  git:
+    repo: https://github.com/openstack/python-cinderclient.git
+    dest: /root/tmp_data/python-cinderclient
+  when:
+    - cinderclient_existed.stat.exists is undefined or cinderclient_existed.stat.exists == false
+
+# Tested successfully in this version `ab0185bfc6e8797a35a2274c2a5ee03afb03dd60`
+# git checkout -b ab0185bfc6e8797a35a2274c2a5ee03afb03dd60
+- name: pip install cinderclinet
+  shell: |
+    pip install -e .
+  become: true
+  args:
+    chdir: /root/tmp_data/python-cinderclient
+
+- name: check for python-brick-cinderclient-ext source code existed
+  stat:
+    path: /root/tmp_data/python-brick-cinderclient-ext
+  ignore_errors: yes
+  register: brick_existed
+
+- name: download python-brick-cinderclient-ext source code
+  git:
+    repo: https://github.com/openstack/python-brick-cinderclient-ext.git
+    dest: /root/tmp_data/python-brick-cinderclient-ext
+  when:
+    - brick_existed.stat.exists is undefined or brick_existed.stat.exists == false
+
+# Tested successfully in this version `a281e67bf9c12521ea5433f86cec913854826a33`
+# git checkout -b a281e67bf9c12521ea5433f86cec913854826a33
+- name: pip install python-brick-cinderclient-ext
+  shell: |
+    pip install -e .
+  become: true
+  args:
+    chdir: /root/tmp_data/python-brick-cinderclient-ext
+
 
 - name: check for cinder source code existed
   stat:
-    path: /root/cinder
+    path: /root/tmp_data/cinder
   ignore_errors: yes
   register: cinder_existed
 
 - name: download cinder source code
   git:
     repo: https://github.com/openstack/cinder.git
-    dest: /root/cinder
+    dest: /root/tmp_data/cinder
   when:
     - cinder_existed.stat.exists is undefined or cinder_existed.stat.exists == false
 
+# Tested successfully in this version `7bbc95344d3961d0bf059252723fa40b33d4b3fe`
+# git checkout -b 7bbc95344d3961d0bf059252723fa40b33d4b3fe
 - name: make blockbox
-  shell: make blockbox
+  shell: |
+    make blockbox
   become: true
   args:
-    chdir: /root/cinder/contrib/block-box
+    chdir: /root/tmp_data/cinder/contrib/block-box
 
 - name: start cinder-standalone service
   shell: docker-compose up -d
   become: true
   args:
-    chdir: /root/cinder/contrib/block-box
+    chdir: /root/tmp_data/cinder/contrib/block-box
 
 - name: wait for cinder service to start normally
   wait_for:
