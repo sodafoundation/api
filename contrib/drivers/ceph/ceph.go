@@ -39,7 +39,7 @@ import (
 const (
 	opensdsPrefix   = "OPENSDS"
 	splitChar       = ":"
-	sizeShiftBit    = 20
+	sizeShiftBit    = 30
 	defaultConfPath = "/etc/opensds/driver/ceph.yaml"
 	defaultAZ       = "default"
 )
@@ -188,7 +188,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Name:             imgName.GetName(),
 		Size:             size,
 		Description:      opt.GetDescription(),
-		AvailabilityZone: "ceph",
+		AvailabilityZone: opt.GetAvailabilityZone(),
 	}, nil
 }
 
@@ -239,9 +239,8 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 		BaseModel: &model.BaseModel{
 			Id: name.GetUUID(),
 		},
-		Name:             name.GetName(),
-		Size:             d.getSize(img),
-		AvailabilityZone: "ceph",
+		Name: name.GetName(),
+		Size: d.getSize(img),
 	}, nil
 }
 
@@ -422,7 +421,7 @@ func (d *Driver) parseCapStr(cap string) int64 {
 		return 0
 	}
 	if val, ok := UnitMapper[unit]; ok {
-		return num << val >> sizeShiftBit
+		return num << val >> 20 //Convert to unit GB
 	} else {
 		log.Error("strage unit is not found.")
 		return 0
@@ -548,3 +547,4 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+
