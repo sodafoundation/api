@@ -684,6 +684,9 @@ func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
 	// Update metadata
+	if result.Metadata == nil {
+		result.Metadata = make(map[string]string)
+	}
 	for k, v := range attachment.Metadata {
 		result.Metadata[k] = v
 	}
