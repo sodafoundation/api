@@ -32,41 +32,54 @@ cd opensds/contrib/ansible
 ```
 
 ### Configure opensds cluster variables:
-modify ```group_vars/osdsdock.yml```:
+##### LVM
+If choose `lvm` as storage backend, you should modify `group_vars/osdsdock.yml`:
 ```yaml
-enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph'
+enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
 pv_device: "your_pv_device_path" # Ensure this device existed if you choose lvm
-vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose ceph backend
-
-ceph_pool_name: "specified_pool_name" # Specify a name randomly, but don't change it if you choose lvm backend
+vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose other backends
 ```
-modify ```group_vars/lvm/lvm.yaml``` if you specify lvm as your backend:
+And modify ```group_vars/lvm/lvm.yaml```, change pool name same to `vg_name`:
 ```yaml
-    "vg001" # Change pool name same to vg_name, but don't change it if you choose ceph backend
+"vg001" # change pool name same to vg_name
 ```
-modify ```group_vars/ceph/ceph.yaml``` if you specify ceph as your backend:
+##### Ceph
+If choose `ceph` as storage backend, you should modify `group_vars/osdsdock.yml`:
 ```yaml
-    "rbd" # Change pool name same to ceph pool, but don't change it if you choose lvm backend
+enabled_backend: ceph # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
+ceph_pool_name: "specified_pool_name" # Specify a name randomly, but don't change it if you choose other backends
 ```
+And modify ```group_vars/ceph/ceph.yaml```, change pool name same to `ceph_pool_name`:
+```yaml
+"rbd" # change pool name same to ceph pool
+```
+Then you also need to configure two files under ```group_vars/ceph```: `all.yml` and `osds.yml`. And here is an example:
 
-If you choose ceph, you also need to configure two files under ```group_vars/ceph```: all.yml and osds.yml. And here is an example:
-
-modify ```group_vars/ceph/all.yml```:
+```group_vars/ceph/all.yml```:
 ```yml
 ceph_origin: repository
 ceph_repository: community
-ceph_stable_release: luminous # Choose luminous version as default
+ceph_stable_release: luminous # Choose luminous version as defaul
 public_network: "192.168.3.0/24" # Run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
 monitor_interface: eth1 # Change to your network interface
 ```
-modify ```group_vars/ceph/osds.yml```:
+```group_vars/ceph/osds.yml```:
 ```yml
 devices:
     - '/dev/sda' # Ensure this device existed if you choose ceph
     - '/dev/sdb' # Ensure this device existed if you choose ceph
 osd_scenario: collocated
 ```
+
+##### Cinder
+If choose `cinder` as storage backend, you should modify `group_vars/osdsdock.yml`:
+```yaml
+enabled_backend: cinder # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
+use_cinder_standalone: true # if use cinder standalone
+```
+
+And configure the auth and pool options to access cinder in `group_vars/cinder/cinder.yaml`. Don't need to do anything if use cinder standalone.
 
 ### Check if the hosts could be reached
 ```bash
