@@ -3,3 +3,6 @@ localhost
 
 [osds]
 localhost
+
+[mgrs]
+localhost

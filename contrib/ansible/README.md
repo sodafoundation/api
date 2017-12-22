@@ -55,7 +55,7 @@ modify ```group_vars/ceph/all.yml```:
 ```yml
 ceph_origin: repository
 ceph_repository: community
-ceph_stable_release: kraken # Change ceph version to 'kraken' as the default version, due to 'luminous' version has some bugs
+ceph_stable_release: luminous # Choose luminous version as default
 public_network: "192.168.3.0/24" # Run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
 monitor_interface: eth1 # Change to your network interface

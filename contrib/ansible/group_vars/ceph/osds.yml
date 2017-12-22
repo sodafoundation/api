@@ -73,7 +73,7 @@ dummy:
 # All scenario(except 3rd) inherit from the following device declaration
 
 devices:
-  - /dev/loop1
+#  - /dev/sda
 #  - /dev/sdc
 #  - /dev/sdd
 #  - /dev/sde
