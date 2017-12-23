@@ -536,6 +536,41 @@ func (c *Client) ListVolumes() ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
+func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	result, err := c.GetVolume(volID)
+	if err != nil {
+		return nil, err
+	}
+	
+	if vol.Name != "" {
+		result.Name = vol.Name
+	}
+	
+	if vol.Description != "" {
+		result.Description = vol.Description
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	atcBody, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateVolumeURL(volID),
+		NewContent: string(atcBody),
+	}
+	
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update volume in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
 func (c *Client) DeleteVolume(volID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateVolumeURL(volID),
@@ -649,6 +684,9 @@ func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
 	// Update metadata
+	if result.Metadata == nil {
+		result.Metadata = make(map[string]string)
+	}
 	for k, v := range attachment.Metadata {
 		result.Metadata[k] = v
 	}
@@ -755,6 +793,41 @@ func (c *Client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 		vss = append(vss, vs)
 	}
 	return vss, nil
+}
+
+func (c *Client) UpdateVolumeSnapshot(snpID string, snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	result, err := c.GetVolumeSnapshot(snpID)
+	if err != nil {
+		return nil, err
+	}
+	
+	if snp.Name != "" {
+		result.Name = snp.Name
+	}
+	
+	if snp.Description != "" {
+		result.Description = snp.Description
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	atcBody, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateSnapshotURL(snpID),
+		NewContent: string(atcBody),
+	}
+	
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update volume snapshot in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
 }
 
 func (c *Client) DeleteVolumeSnapshot(snpID string) error {

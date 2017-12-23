@@ -1,0 +1,57 @@
+---
+- name: kill etcd daemon service
+  shell: killall etcd
+  ignore_errors: yes
+  when: db_driver == "etcd"
+
+- name: remove etcd service data
+  file:
+    path: $HOME/{{ etcd_dir }}/default.etcd
+    state: absent
+    force: yes
+  ignore_errors: yes
+  when: db_driver == "etcd"
+
+- name: kill osdslet daemon service
+  shell: killall osdslet
+  ignore_errors: yes
+
+- name: kill osdsdock daemon service
+  shell: killall osdsdock
+  ignore_errors: yes
+
+- name: clean all opensds configuration files
+  file:
+    path: "{{ opensds_config_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean all opensds log files
+  file:
+    path: "{{ opensds_log_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: remove a volume group if lvm backend specified
+  shell: vgremove {{ vg_name }}
+  when: enabled_backend == "lvm"
+
+- name: remove a physical volume if lvm backend specified
+  shell: pvremove {{ pv_device }}
+  when: enabled_backend == "lvm"
+
+- name: stop cinder-standalone service
+  shell: docker-compose down
+  become: true
+  args:
+    chdir: /root/cinder/contrib/block-box
+  when: enabled_backend == "cinder"    
+
+#- name: purge ceph cluster if ceph backend specified
+#  shell: ansible-playbook purge-cluster.yml -i ceph.hosts
+#  become: true
+#  args:
+#    chdir: $HOME/ceph-ansible/infrastructure-playbooks
+#  when: enabled_backend == "ceph"

@@ -24,6 +24,7 @@ import (
 	"github.com/opensds/opensds/pkg/dock"
 	dockServer "github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
@@ -34,7 +35,9 @@ func init() {
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
 	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	daemon.SetDaemonFlag(&CONF.OsdsDock.Daemon, def.OsdsDock.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
+	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
 }
 
 func main() {

@@ -78,7 +78,7 @@ func volumeSnapshotAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
@@ -91,7 +91,7 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 
 	resp, err := client.CreateVolumeSnapshot(snp)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
@@ -100,14 +100,14 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.GetVolumeSnapshot(args[0])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
@@ -116,14 +116,14 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 	if len(args) != 0 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
 
 	resp, err := client.ListVolumeSnapshots()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "VolumeId"}
@@ -132,7 +132,7 @@ func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 	if len(args) != 2 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
@@ -141,7 +141,7 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 	}
 	err := client.DeleteVolumeSnapshot(args[1], snp)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	fmt.Printf("Delete snapshot(%s) sucess.\n", args[1])

@@ -1,0 +1,15 @@
+---
+- name: run osdslet daemon service
+  shell:
+    cmd: |
+      i=0
+      while
+        i="$((i+1))"
+        [ "$i" -lt 4 ]
+      do
+        nohup bin/osdslet > osdslet.out 2> osdslet.err < /dev/null &
+        sleep 5
+        ps aux | grep osdslet | grep -v grep && break
+      done
+  args:
+    chdir: "{{ opensds_root }}/build/out"

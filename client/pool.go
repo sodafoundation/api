@@ -15,7 +15,6 @@
 package client
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -42,7 +41,6 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 		urls.GeneratePoolURL(polID)}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -56,7 +54,6 @@ func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
 		urls.GeneratePoolURL()}, "/")
 
 	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

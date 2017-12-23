@@ -1,0 +1,69 @@
+---
+- name: install ceph-common external package when ceph backend enabled
+  apt:
+    name: ceph-common
+  when: enabled_backend == "ceph"
+
+- name: check for ceph-ansible source code existed
+  stat:
+    path: $HOME/ceph-ansible
+  ignore_errors: yes
+  register: cephansibleexisted
+
+- name: download ceph-ansible source code
+  git:
+    repo: https://github.com/ceph/ceph-ansible.git
+    dest: $HOME/ceph-ansible
+  when:
+    - cephansibleexisted.stat.exists is undefined or cephansibleexisted.stat.exists == false
+
+- name: copy ceph inventory host into ceph-ansible directory
+  copy:
+    src: ../../../group_vars/ceph/ceph.hosts
+    dest: /root/ceph-ansible/ceph.hosts
+
+- name: copy ceph all.yml file into ceph-ansible group_vars directory
+  copy:
+    src: ../../../group_vars/ceph/all.yml
+    dest: /root/ceph-ansible/group_vars/all.yml
+
+- name: copy ceph osds.yml file into ceph-ansible group_vars directory
+  copy:
+    src: ../../../group_vars/ceph/osds.yml
+    dest: /root/ceph-ansible/group_vars/osds.yml
+
+- name: copy site.yml.sample to site.yml in ceph-ansible
+  copy:
+    src: /root/ceph-ansible/site.yml.sample
+    dest: /root/ceph-ansible/site.yml
+
+- name: ping all hosts
+  shell: ansible all -m ping -i ceph.hosts
+  become: true
+  args:
+    chdir: $HOME/ceph-ansible
+
+- name: run ceph-ansible playbook
+  shell: ansible-playbook site.yml -i ceph.hosts
+  become: true
+  args:
+    chdir: $HOME/ceph-ansible
+
+- name: Check if ceph osd is running
+  shell: ps aux | grep ceph-osd | grep -v grep
+  ignore_errors: false
+  changed_when: false
+  register: service_ceph_osd_status
+
+- name: Check if ceph mon is running
+  shell: ps aux | grep ceph-mon | grep -v grep
+  ignore_errors: false
+  changed_when: false
+  register: service_ceph_mon_status
+
+- name: Create a pool and initialize it.
+  shell: ceph osd pool create {{ ceph_pool_name }} 100 && ceph osd pool set {{ ceph_pool_name }} size 1
+  ignore_errors: yes
+  changed_when: false
+  register: ceph_init_pool
+  when: service_ceph_mon_status.rc == 0 and service_ceph_osd_status.rc == 0

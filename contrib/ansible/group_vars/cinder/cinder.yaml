@@ -1,0 +1,14 @@
+authOptions:
+  noAuth: true
+  endpoint: "http://127.0.0.1/identity"
+  cinderEndpoint: "http://127.0.0.1:8776/v2"
+  domainId: "Default"
+  domainName: "Default"
+  username: ""
+  password: ""
+  tenantId: "myproject"
+  tenantName: "myproject"
+pool:
+  "cinder-lvm@lvm#lvm":
+    AZ: nova
+    thin: true

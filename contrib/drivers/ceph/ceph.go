@@ -39,7 +39,7 @@ import (
 const (
 	opensdsPrefix   = "OPENSDS"
 	splitChar       = ":"
-	sizeShiftBit    = 20
+	sizeShiftBit    = 30
 	defaultConfPath = "/etc/opensds/driver/ceph.yaml"
 	defaultAZ       = "default"
 )
@@ -188,7 +188,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Name:             imgName.GetName(),
 		Size:             size,
 		Description:      opt.GetDescription(),
-		AvailabilityZone: "ceph",
+		AvailabilityZone: opt.GetAvailabilityZone(),
 	}, nil
 }
 
@@ -239,10 +239,8 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 		BaseModel: &model.BaseModel{
 			Id: name.GetUUID(),
 		},
-		Name:             name.GetName(),
-		Size:             d.getSize(img),
-		Description:      "",
-		AvailabilityZone: "ceph",
+		Name: name.GetName(),
+		Size: d.getSize(img),
 	}, nil
 }
 
@@ -266,12 +264,6 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	if err := d.initConn(); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroyConn()
-
 	vol, err := d.PullVolume(opt.GetVolumeId())
 	if err != nil {
 		log.Error("When get image:", err)
@@ -310,7 +302,6 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		log.Error("When open image:", err)
 		return nil, err
 	}
-	defer img.Close()
 
 	fullName := NewName(opt.GetName())
 	if _, err = img.CreateSnapshot(fullName.GetFullName()); err != nil {
@@ -318,8 +309,10 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		return nil, err
 	}
 
+	img.Close()
+
 	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success",
-		opt.GetName(), fullName.GetUUID(), opt.GetId())
+		opt.GetName(), fullName.GetUUID(), opt.GetVolumeId())
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
@@ -428,7 +421,7 @@ func (d *Driver) parseCapStr(cap string) int64 {
 		return 0
 	}
 	if val, ok := UnitMapper[unit]; ok {
-		return num << val >> sizeShiftBit
+		return num << val >> 20 //Convert to unit GB
 	} else {
 		log.Error("strage unit is not found.")
 		return 0
@@ -554,3 +547,4 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+
