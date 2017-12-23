@@ -87,7 +87,7 @@ func NewStorageTag(tags map[string]interface{}, flag int) *StorageTag {
 			delete(tags, key)
 		}
 	}
-	// Devide all tags into sync and async part
+	// Divide all tags into sync and async part
 	for key := range tags {
 		pType, err := FindPolicyType(key)
 		if err != nil {

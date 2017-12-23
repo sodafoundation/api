@@ -137,5 +137,5 @@ func profileDeleteAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Delete profile(%s) sucess.\n", args[0])
+	fmt.Printf("Delete profile(%s) success.\n", args[0])
 }
