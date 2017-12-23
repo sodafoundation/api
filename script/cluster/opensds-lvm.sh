@@ -85,5 +85,5 @@ fi
 
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_DIR}
-nohup sudo build/out/bin/osdsdock > nohup.out 2> nohup.err < /dev/null &
-nohup sudo build/out/bin/osdslet > nohup.out 2> nohup.err < /dev/null &
+sudo build/out/bin/osdsdock -daemon
+sudo build/out/bin/osdslet -daemon

@@ -20,9 +20,8 @@ This module implements a entry into the OpenSDS CLI service.
 package main
 
 import (
-	"log"
-
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/opensds/opensds/osdsctl/cli"

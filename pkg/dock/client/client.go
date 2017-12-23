@@ -16,7 +16,6 @@ package client
 
 import (
 	log "github.com/golang/glog"
-
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"google.golang.org/grpc"
 )

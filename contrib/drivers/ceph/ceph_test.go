@@ -16,10 +16,9 @@ package ceph
 
 import (
 	"errors"
+	"strings"
 	"testing"
 	"unsafe"
-
-	"strings"
 
 	"github.com/bouk/monkey"
 	"github.com/ceph/go-ceph/rados"

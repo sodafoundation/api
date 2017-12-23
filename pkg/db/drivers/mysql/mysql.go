@@ -21,9 +21,8 @@ defined in api module.
 package mysql
 
 import (
-	"sync"
-
 	"database/sql"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 )

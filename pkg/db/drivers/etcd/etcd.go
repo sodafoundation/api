@@ -541,11 +541,11 @@ func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.Volum
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if vol.Name != "" {
 		result.Name = vol.Name
 	}
-	
+
 	if vol.Description != "" {
 		result.Description = vol.Description
 	}
@@ -562,7 +562,7 @@ func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.Volum
 		Url:        urls.GenerateVolumeURL(volID),
 		NewContent: string(atcBody),
 	}
-	
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume in db:", dbRes.Error)
@@ -800,11 +800,11 @@ func (c *Client) UpdateVolumeSnapshot(snpID string, snp *model.VolumeSnapshotSpe
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if snp.Name != "" {
 		result.Name = snp.Name
 	}
-	
+
 	if snp.Description != "" {
 		result.Description = snp.Description
 	}
@@ -821,7 +821,7 @@ func (c *Client) UpdateVolumeSnapshot(snpID string, snp *model.VolumeSnapshotSpe
 		Url:        urls.GenerateSnapshotURL(snpID),
 		NewContent: string(atcBody),
 	}
-	
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume snapshot in db:", dbRes.Error)

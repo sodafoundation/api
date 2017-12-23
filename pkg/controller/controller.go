@@ -24,7 +24,6 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"

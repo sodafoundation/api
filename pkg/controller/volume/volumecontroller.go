@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/pkg/dock/client"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"

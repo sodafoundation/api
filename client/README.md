@@ -48,17 +48,23 @@ func main() {
 		Endpoint: ":8080",
 	})
 	
-	vol, err := c.CreateVolume(&model.VolumeSpec{Name: "test"})
+	vol, err := c.CreateVolume(&model.VolumeSpec{
+		Name: "test",
+		Description: "This is a volume for test",
+	})
 	if err != nil {
 		fmt.Println(err)
 	}
 	
-	result, err := c.GetVolume(vol.GetId())
+	result, err := c.GetVolume(vol.Id)
 	if err != nil {
 		fmt.Println(err)
 	}
-	
 	fmt.Println("Volume created, get result:", result)
+	
+	if err = c.DeleteVolume(vol.Id, nil); err != nil {
+		fmt.Println(err)
+	}
 }
 ```
 

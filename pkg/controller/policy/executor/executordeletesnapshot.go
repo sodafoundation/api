@@ -21,12 +21,10 @@ profiles configured by admin.
 package executor
 
 import (
+	"encoding/json"
 	"time"
 
-	"encoding/json"
-
 	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/client"
 	pb "github.com/opensds/opensds/pkg/dock/proto"

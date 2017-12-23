@@ -23,8 +23,10 @@ ETCD_URL=https://github.com/coreos/etcd/releases/download/v3.2.0
 ETCD_TARBALL=etcd-v3.2.0-linux-amd64.tar.gz
 ETCD_DIR=etcd-v3.2.0-linux-amd64
 
-# Install Golang environment
+# Run apt-get update to update the system packages.
+sudo apt-get update
 
+# Install Golang environment
 if ! which go &>/dev/null; then
 	wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
 	tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/

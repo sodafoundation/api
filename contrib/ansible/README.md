@@ -1,7 +1,13 @@
 # opensds-ansible
 It's an installation tool of opensds through ansible.
 
-## How to install an opensds local cluster
+## 1. How to install an opensds local cluster
+This installation document assumes you have a clean Ubuntu16.04 environment, so if you have installed golang environment, please make sure some parameters configured at ```/etc/profile```:
+```conf
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/gopath
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
 
 ### Pre-config (Ubuntu 16.04)
 Firstly download some ssh packages:
@@ -15,14 +21,15 @@ PermitRootLogin yes
 Next generate ssh-token:
 ```bash
 ssh-keygen -t rsa
-ssh-copy-id -i ~/.ssh/id_rsa.pub <romte_ip>
+ssh-copy-id -i ~/.ssh/id_rsa.pub <remote_ip> # Choose an ip address which can login your target machine
 ```
 
 ### Download ansible tool
 ```bash
-sudo add-apt-repository ppa:ansible/ansible
+sudo add-apt-repository ppa:ansible/ansible # It doesn't matter if failed
 sudo apt-get update
 sudo apt-get install ansible
+ansible --version # Make sure your ansible version is 2.x.x
 ```
 
 ### Download opensds source code
@@ -36,7 +43,7 @@ cd opensds/contrib/ansible
 If choose `lvm` as storage backend, you should modify `group_vars/osdsdock.yml`:
 ```yaml
 enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
-pv_device: "your_pv_device_path" # Ensure this device existed if you choose lvm
+pv_device: "your_pv_device_path" # Ensure this device existed and available if you choose lvm
 vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose other backends
 ```
 And modify ```group_vars/lvm/lvm.yaml```, change pool name same to `vg_name`:
@@ -59,16 +66,16 @@ Then you also need to configure two files under ```group_vars/ceph```: `all.yml`
 ```yml
 ceph_origin: repository
 ceph_repository: community
-ceph_stable_release: luminous # Choose luminous version as defaul
+ceph_stable_release: luminous # Choose luminous as default version
 public_network: "192.168.3.0/24" # Run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
-monitor_interface: eth1 # Change to your network interface
+monitor_interface: eth1 # Change to your own network interface
 ```
 ```group_vars/ceph/osds.yml```:
 ```yml
 devices:
-    - '/dev/sda' # Ensure this device existed if you choose ceph
-    - '/dev/sdb' # Ensure this device existed if you choose ceph
+    - '/dev/sda' # Ensure this device existed and available if you choose ceph
+    - '/dev/sdb' # Ensure this device existed and available if you choose ceph
 osd_scenario: collocated
 ```
 
@@ -91,8 +98,37 @@ ansible all -m ping -i local.hosts
 ansible-playbook site.yml -i local.hosts
 ```
 
+## 2. How to test opensds cluster
 
-## How to purge and clean opensds cluster
+### Configure opensds CLI tool
+```bash
+cp $GOPATH/src/github.com/opensds/opensds/build/out/bin/osdsctl /usr/local/bin
+export OPENSDS_ENDPOINT=http://127.0.0.1:50040
+osdsctl pool list # Check if the pool resource is available
+```
+
+### Create a default profile firstly.
+```
+osdsctl profile create '{"name": "default", "description": "default policy"}'
+```
+
+### Create a volume.
+```
+osdsctl volume create 1 --name=test-001
+```
+
+### List all volumes.
+```
+osdsctl volume list
+```
+
+### Delete the volume.
+```
+osdsctl volume delete <your_volume_id>
+```
+
+
+## 3. How to purge and clean opensds cluster
 
 ### Run opensds-ansible playbook to clean the environment
 ```bash
@@ -104,6 +140,8 @@ ansible-playbook clean.yml -i local.hosts
 cd /root/ceph-ansible
 ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
 ```
+
+Besides, you will also need to clean the logical partition on the physical block device, suggest using ```fdisk``` tool.
 
 ### Remove ceph-ansible source code (optionally)
 ```bash
