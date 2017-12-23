@@ -105,7 +105,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	}
 
 	if err = db.C.DeleteVolume(opt.GetId()); err != nil {
-		log.Error("Error occured in dock module when delete volume in db:", err)
+		log.Error("Error occurred in dock module when delete volume in db:", err)
 		return err
 	}
 
@@ -142,7 +142,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 
 	result, err := db.C.CreateVolumeAttachment(atc)
 	if err != nil {
-		log.Error("Error occured in dock module when create volume attachment in db:", err)
+		log.Error("Error occurred in dock module when create volume attachment in db:", err)
 		return nil, err
 	}
 
@@ -163,7 +163,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	}
 
 	if err := db.C.DeleteVolumeAttachment(opt.GetId()); err != nil {
-		log.Error("Error occured in dock module when delete volume attachment in db:", err)
+		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
 		return err
 	}
 
@@ -186,7 +186,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 
 	result, err := db.C.CreateVolumeSnapshot(snp)
 	if err != nil {
-		log.Error("Error occured in dock module when create volume snapshot in db:", err)
+		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
 		return nil, err
 	}
 
@@ -209,7 +209,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	}
 
 	if err = db.C.DeleteVolumeSnapshot(opt.GetId()); err != nil {
-		log.Error("Error occured in dock module when delete volume snapshot in db:", err)
+		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
 		return err
 	}
 

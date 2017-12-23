@@ -49,6 +49,7 @@ func NewClient(c *Config) *Client {
 	}
 }
 
-func (c *Client) Reset() {
+func (c *Client) Reset() *Client {
 	c = &Client{}
+	return c
 }

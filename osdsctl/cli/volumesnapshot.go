@@ -144,5 +144,5 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Delete snapshot(%s) sucess.\n", args[1])
+	fmt.Printf("Delete snapshot(%s) success.\n", args[1])
 }

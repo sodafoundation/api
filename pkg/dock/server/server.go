@@ -97,7 +97,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 	log.Info("Dock server receive delete volume request, vr =", opt)
 
 	if err := dock.Brain.DeleteVolume(opt); err != nil {
-		log.Error("Error occured in dock module when delete volume:", err)
+		log.Error("Error occurred in dock module when delete volume:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
@@ -115,7 +115,7 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 
 	atc, err := dock.Brain.CreateVolumeAttachment(opt)
 	if err != nil {
-		log.Error("Error occured in dock module when create volume attachment:", err)
+		log.Error("Error occurred in dock module when create volume attachment:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
@@ -132,7 +132,7 @@ func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttach
 	log.Info("Dock server receive delete volume attachment request, vr =", opt)
 
 	if err := dock.Brain.DeleteVolumeAttachment(opt); err != nil {
-		log.Error("Error occured in dock module when delete volume attachment:", err)
+		log.Error("Error occurred in dock module when delete volume attachment:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
@@ -150,7 +150,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 
 	snp, err := dock.Brain.CreateSnapshot(opt)
 	if err != nil {
-		log.Error("Error occured in dock module when create snapshot:", err)
+		log.Error("Error occurred in dock module when create snapshot:", err)
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
 	}
@@ -166,7 +166,7 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
 	if err := dock.Brain.DeleteSnapshot(opt); err != nil {
-		log.Error("Error occured in dock module when delete snapshot:", err)
+		log.Error("Error occurred in dock module when delete snapshot:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err

@@ -34,7 +34,7 @@ import (
 type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
 	Setup() error
-	//Any operation the volume driver does while stoping.
+	//Any operation the volume driver does while stopping.
 	Unset() error
 
 	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
@@ -80,7 +80,7 @@ func Init(resourceType string) VolumeDriver {
 }
 
 func Clean(d VolumeDriver) VolumeDriver {
-	// Execute diffrent clean operations according to the VolumeDriver type.
+	// Execute different clean operations according to the VolumeDriver type.
 	switch d.(type) {
 	case *cinder.Driver:
 		break

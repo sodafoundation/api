@@ -91,7 +91,7 @@ func request(
 		return req
 	}
 	// If input type is a map, it means user tends to send a GET request
-	// and specifiy some parameters.
+	// and specify some parameters.
 	p, ok := input.(ParamOption)
 	if ok {
 		for k := range p {

@@ -71,7 +71,7 @@ func init() {
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
-	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availabilty zone of created volume")
+	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
@@ -162,5 +162,5 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Delete volume(%s) sucess.\n", args[0])
+	fmt.Printf("Delete volume(%s) success.\n", args[0])
 }
