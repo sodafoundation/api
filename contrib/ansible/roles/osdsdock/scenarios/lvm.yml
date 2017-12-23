@@ -1,0 +1,24 @@
+---
+#- name: check if physical volume existed
+#  shell: pvscan
+#  ignore_errors: yes
+#  register: pv_existed
+
+#- name: check if volume group existed
+#  shell: vgscan
+#  ignore_errors: yes
+#  register: vg_existed
+
+- name: install lvm2 external package when lvm backend enabled
+  apt:
+    name: lvm2
+
+- name: create a physical volume
+  shell: pvcreate {{ pv_device }}
+  ignore_errors: yes
+  when: pv_existed is undefined or pv_existed == ""
+
+- name: create a volume group
+  shell: vgcreate {{ vg_name }} {{ pv_device }}
+  ignore_errors: yes
+  when: vg_existed is undefined or vg_existed == ""

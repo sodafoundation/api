@@ -1,69 +1,85 @@
-apiVersion: extensions/v1beta1
 kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-osdslet
   labels:
-    chart: "{{ .Chart.Name1 }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "fullname" . }}-osdslet
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}-osdslet
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ template "fullname" . }}-osdslet
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
     spec:
       containers:
-      - name: {{ .Chart.Name1 }}
-        image: "{{ .Values.image.repository1 }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+      - name: osdslet
+        image: {{ .Values.image.osdslet }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 30Mi
         ports:
-        - containerPort: {{ .Values.service.internalPort1 }}
-        - containerPort: {{ .Values.service.internalPort3 }}
+        - containerPort: 50040
         volumeMounts:
-        - mountPath: /var/log/opensds
-          name: log-file
-        resources:
-{{ toYaml .Values.resources | indent 10 }}
+        - mountPath: /etc/opensds
+          name: config-dir
       volumes:
-      - name: log-file
+      - name: config-dir
         hostPath:
-          path: /var/log/opensds
+          path: /etc/opensds
 ------
-apiVersion: extensions/v1beta1
 kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-osdsdock
   labels:
-    chart: "{{ .Chart.Name2 }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "fullname" . }}-osdsdock
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}-osdsdock
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ template "fullname" . }}-osdsdock
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
     spec:
       containers:
-      - name: {{ .Chart.Name2 }}
-        image: "{{ .Values.image.repository2 }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: {{ .Values.service.internalPort2 }}
-        - containerPort: {{ .Values.service.internalPort3 }}
-		volumeMounts:
-        - mountPath: /var/log/opensds
-          name: log-file
-		- mountPath: /etc/opensds
-          name: opensds-conf-file
-        - mountPath: /etc/ceph
-          name: ceph-conf-file
+      - name: osdsdock
+        image: {{ .Values.image.osdsdock }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 30Mi
+        ports:
+        - containerPort: 50050
+        volumeMounts:
+        - mountPath: /etc/opensds
+          name: config-dir
       volumes:
-      - name: log-file
+      - name: config-dir
         hostPath:
-          path: /var/log/opensds
-      - name: opensds-conf-file
-        hostPath:
-          path: /etc/opesds
-      - name: ceph-conf-file
-        hostPath:
-          path: /etc/ceph
+          path: /etc/opensds

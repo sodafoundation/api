@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+MODEL_PACKAGE=github.com/opensds/opensds/pkg/model
+PROTOBUF_PACKAGE=github.com/opensds/opensds/pkg/dock/proto
+
+n=1
+for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/... ./contrib/...); do
+  test $testpkg == "$MODEL_PACKAGE" && continue
+  test $testpkg == "$PROTOBUF_PACKAGE" && continue
+  covpkg="${testpkg/"/testing"/}"
+  go test -covermode count -coverprofile "testing_"$n.coverprofile -coverpkg $covpkg $testpkg 2>/dev/null
+  n=$((n+1))
+done
+gocovmerge `ls *.coverprofile` > cover.out
+rm *.coverprofile

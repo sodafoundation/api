@@ -1,0 +1,11 @@
+configFile: /etc/ceph/ceph.conf
+pool:
+  "rbd":
+    diskType: SSD
+    AZ: default
+  "pool01":
+    diskType: SAS
+    AZ: default
+  "pool02":
+    diskType: SATA
+    AZ: default

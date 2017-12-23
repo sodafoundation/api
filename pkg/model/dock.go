@@ -1,16 +1,16 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 /*
 This module implements the common data structure.
@@ -19,40 +19,31 @@ This module implements the common data structure.
 
 package model
 
-import (
-	"encoding/json"
-)
-
+// DockSpec is initialized by specific driver configuration. Each backend
+// can be regarded as a docking service between SDS controller and storage
+// service.
 type DockSpec struct {
 	*BaseModel
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Endpoint    string                 `json:"endpoint,omitempty"`
-	DriverName  string                 `json:"driverName,omitempty"`
-	Parameters  map[string]interface{} `json:"parameters,omitempty"`
-}
 
-func (dck *DockSpec) GetName() string {
-	return dck.Name
-}
+	// The name of the dock.
+	Name string `json:"name,omitempty"`
 
-func (dck *DockSpec) GetDescription() string {
-	return dck.Description
-}
+	// The description of the dock.
+	// +optional
+	Description string `json:"description,omitempty"`
 
-func (dck *DockSpec) GetEndpoint() string {
-	return dck.Endpoint
-}
+	// The status of the dock.
+	// One of: "available" or "unavailable".
+	Status string `json:"status,omitempty"`
 
-func (dck *DockSpec) GetDriverName() string {
-	return dck.DriverName
-}
+	// The storage type of the dock.
+	// One of: "block", "file" or "object".
+	StorageType string `json:"storageType,omitempty"`
 
-func (dck *DockSpec) GetParameters() map[string]interface{} {
-	return dck.Parameters
-}
+	// Endpoint represents the dock server's access address.
+	Endpoint string `json:"endpoint,omitempty"`
 
-func (dck *DockSpec) EncodeParameters() []byte {
-	parmBody, _ := json.Marshal(&dck.Parameters)
-	return parmBody
+	// DriverName represents the dock provider.
+	// Currently One of: "cinder", "ceph", "lvm", "default".
+	DriverName string `json:"driverName,omitempty"`
 }

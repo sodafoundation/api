@@ -1,0 +1,14 @@
+authOptions:
+  endpoints: "https://8.46.185.114:8088/deviceManager/rest"
+  username: "opensds"
+  password: "Opensds@123"
+  insecure: true
+pool:
+  StoragePool001:
+    diskType: SSD
+    AZ: dorado1
+    thin: true
+    compress: true
+    dedupe: true
+targetIp: 8.46.192.247
+

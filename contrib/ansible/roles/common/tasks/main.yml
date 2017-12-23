@@ -1,0 +1,135 @@
+---
+# If we can't get golang installed before any module is used we will fail
+# so just try what we can to get it installed
+- name: check for golang
+  stat:
+    path: /usr/local/go
+  ignore_errors: yes
+  register: systemgolang
+
+- name: install golang for debian based systems
+  shell:
+    cmd: |
+      set -e
+      set -x
+
+      wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+      tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+      cat >> /etc/profile <<GOLANG__CONFIG_DOC
+      export GOROOT=/usr/local/go
+      export GOPATH=\$HOME/gopath
+      export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
+      GOLANG__CONFIG_DOC
+
+    executable: /bin/bash
+  ignore_errors: yes
+  when:
+    - systemgolang.stat.exists is undefined or systemgolang.stat.exists == false
+
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+
+- name: install librados-dev external package
+  apt:
+    name: librados-dev
+
+- name: install librbd-dev external package
+  apt:
+    name: librbd-dev
+
+- name: check for opensds source code existed
+  stat:
+    path: "{{ opensds_root }}"
+  ignore_errors: yes
+  register: opensdsexisted
+
+- name: download opensds source code
+  git:
+    repo: "{{ remote_url }}"
+    dest: "{{ opensds_dir }}"
+  when:
+    - opensdsexisted.stat.exists is undefined or opensdsexisted.stat.exists == false
+
+- name: check for opensds binary file existed
+  stat:
+    path: "{{ opensds_build_dir }}"
+  ignore_errors: yes
+  register: opensdsbuilt
+
+- name: build opensds binary file
+  shell: . /etc/profile; make
+  args:
+    chdir: "{{ opensds_root }}"
+  when:
+    - opensdsbuilt.stat.exists is undefined or opensdsbuilt.stat.exists == false
+
+- name: create opensds global config directory if it doesn't exist
+  file:
+    path: "{{ opensds_config_dir }}/driver"
+    state: directory
+    mode: 0755
+
+- name: create opensds log directory if it doesn't exist
+  file:
+    path: "{{ opensds_log_dir }}"
+    state: directory
+    mode: 0755
+
+- name: configure opensds global info
+  shell: |
+    cat > opensds.conf <<OPENSDS_GLOABL_CONFIG_DOC
+    [osdslet]
+    api_endpoint = {{ controller_endpoint }}
+    graceful = True
+    log_file = {{ controller_log_file }}
+    socket_order = inc
+
+    [osdsdock]
+    api_endpoint = {{ dock_endpoint }}
+    log_file = {{ dock_log_file }}
+    # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+    enabled_backends = {{ enabled_backend }}
+
+    [lvm]
+    name = {{ lvm_name }}
+    description = {{ lvm_description }}
+    driver_name = {{ lvm_driver_name }}
+    config_path = {{ lvm_config_path }}
+
+    [ceph]
+    name = {{ ceph_name }}
+    description = {{ ceph_description }}
+    driver_name = {{ ceph_driver_name }}
+    config_path = {{ ceph_config_path }}
+
+    [cinder]
+    name = {{ cinder_name }}
+    description = {{ cinder_description }}
+    driver_name = {{ cinder_driver_name }}
+    config_path = {{ cinder_config_path }}
+
+    [database]
+    endpoint = {{ db_endpoint }}
+    driver = {{ db_driver }}
+  args:
+    chdir: "{{ opensds_config_dir }}"
+  ignore_errors: yes
+
+- name: copy opensds lvm backend file if specify lvm backend
+  copy:
+    src: ../../../group_vars/lvm/lvm.yaml
+    dest: "{{ lvm_config_path }}"
+  when: enabled_backend == "lvm"
+
+- name: copy opensds ceph backend file if specify ceph backend
+  copy:
+    src: ../../../group_vars/ceph/ceph.yaml
+    dest: "{{ ceph_config_path }}"
+  when: enabled_backend == "ceph"
+
+- name: copy opensds cinder backend file if specify cinder backend
+  copy:
+    src: ../../../group_vars/cinder/cinder.yaml
+    dest: "{{ cinder_config_path }}"
+  when: enabled_backend == "cinder"

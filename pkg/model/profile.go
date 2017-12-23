@@ -1,16 +1,16 @@
-// Copyright (c) 2016 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 /*
 This module implements the common data structure.
@@ -19,37 +19,25 @@ This module implements the common data structure.
 
 package model
 
-import (
-	"encoding/json"
-)
-
+// An OpenSDS profile is identified by a unique name and ID. With adding
+// extra properties, each profile can contains a set of tags of storage
+// capabilities which are desirable features for a class of applications.
 type ProfileSpec struct {
 	*BaseModel
-	Name        string    `json:"name,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Extra       ExtraSpec `json:"extra,omitempty"`
-}
 
-func (prf *ProfileSpec) GetName() string {
-	return prf.Name
-}
+	// The name of the profile.
+	Name string `json:"name,omitempty"`
 
-func (prf *ProfileSpec) GetDescription() string {
-	return prf.Description
-}
+	// The description of the profile.
+	// +optional
+	Description string `json:"description,omitempty"`
 
-type ExtraSpec map[string]interface{}
+	// The storage type of the profile.
+	// One of: "block", "file" or "object".
+	StorageType string `json:"storageType,omitempty"`
 
-func (ext ExtraSpec) EncodeAdditionalProperties() []byte {
-	extBody, _ := json.Marshal(&ext)
-	return extBody
-}
-
-func (ext ExtraSpec) EncodeAdditionalPropertiesValueToString() map[string]string {
-	var extMap map[string]string
-
-	for k, v := range ext {
-		extMap[k] = v.(string)
-	}
-	return extMap
+	// Map of keys and json object that represents the extra epecs
+	// of the profile, such as requested capabilities.
+	// +optional
+	Extras ExtraSpec `json:"extras,omitempty"`
 }

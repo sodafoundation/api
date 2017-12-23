@@ -1,0 +1,21 @@
+configFile: /etc/ceph/ceph.conf
+pool:
+  "rbd":
+    diskType: SSD
+    AZ: ceph
+  "test":
+    diskType: SAS
+    AZ: ceph
+  "pool001":
+    diskType: NL-SAS
+    AZ: ceph
+  "testpoolerasure":
+    diskType: NL-SAS
+    AZ: ceph
+  "NAME":
+    diskType: NL-SAS
+    AZ: ceph
+  "ecpool":
+    diskType: NL-SAS
+    AZ: ceph
+

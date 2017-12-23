@@ -1,26 +1,34 @@
 dist: trusty
-sudo: false
+sudo: required
+
+services:
+  - docker
 
 language: go
 go_import_path: github.com/opensds/opensds
 
 go:
-  - 1.7
-  - 1.8
+  - 1.9.x
   - tip
 
 env:
   matrix:
-   - TARGET=amd64
-   - TARGET=arm64
-   - TARGET=arm
-   - TARGET=386
-   - TARGET=ppc64le
+  - TARGET=amd64
+  - TARGET=arm64
+  - TARGET=arm
+  - TARGET=386
+  - TARGET=ppc64le
+  global:
+  - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install librados-dev librbd-dev ceph-common lvm2 -y
 
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tip
+  - go: tip
   exclude:
   - go: tip
     env: TARGET=arm
@@ -31,6 +39,15 @@ matrix:
   - go: tip
     env: TARGET=ppc64le
 
+install:
+  - go get github.com/mattn/goveralls
+  - go get github.com/wadey/gocovmerge
+  - make
+  - sudo ./test/integration/prepare.sh
+
 script:
-  - go get ./cmd/osdslet && go get ./cmd/osdsdock
-  - go build ./cmd/osdslet && go build ./cmd/osdsdock
+  - ./script/coverage
+  - ./script/test
+
+after_success:
+  - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out

@@ -1,0 +1,38 @@
+---
+- name: check for etcd existed
+  stat:
+    path: $HOME/{{ etcd_dir }}/etcd
+  ignore_errors: yes
+  register: etcdexisted
+
+- name: download etcd 
+  get_url:
+    url={{ etcd_download_url }}
+    dest=$HOME/{{ etcd_tarball }}
+  when:
+    - etcdexisted.stat.exists is undefined or etcdexisted.stat.exists == false
+
+- name: extract the etcd tarball
+  unarchive:
+    src=/root/{{ etcd_tarball }}
+    dest=/root/
+  when:
+    - etcdexisted.stat.exists is undefined or etcdexisted.stat.exists == false
+
+- name: Check if etcd is running
+  shell: ps aux | grep etcd | grep -v grep
+  ignore_errors: true
+  register: service_etcd_status
+
+- name: run etcd daemon service
+  shell: nohup ./etcd &>>etcd.log &
+  become: true
+  args:
+    chdir: $HOME/{{ etcd_dir }}
+  when: service_etcd_status.rc != 0
+
+- name: check etcd cluster health
+  shell: ./etcdctl cluster-health
+  become: true
+  args:
+    chdir: $HOME/{{ etcd_dir }}

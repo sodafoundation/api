@@ -1,0 +1,5 @@
+configFile: /etc/ceph/ceph.conf
+pool:
+  "rbd":
+    diskType: SSD
+    AZ: ceph
