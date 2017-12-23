@@ -38,7 +38,7 @@ func init() {
 	}
 	prf, err := c.CreateProfile(body)
 	if err != nil {
-		fmt.Println("create profile failed: %v\n", err)
+		fmt.Printf("create profile failed: %v\n", err)
 		return
 	}
 	prfBody, _ := json.MarshalIndent(prf, "", "	")
