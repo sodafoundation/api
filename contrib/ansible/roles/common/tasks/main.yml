@@ -26,9 +26,9 @@
   when:
     - systemgolang.stat.exists is undefined or systemgolang.stat.exists == false
 
-- name: Run the equivalent of "apt-get update" as a separate step
-  apt:
-    update_cache: yes
+#- name: Run the equivalent of "apt-get update" as a separate step
+#  apt:
+#    update_cache: yes
 
 - name: install librados-dev external package
   apt:
@@ -40,14 +40,14 @@
 
 - name: check for opensds source code existed
   stat:
-    path: "{{ opensds_root }}"
+    path: "{{ opensds_root_dir }}"
   ignore_errors: yes
   register: opensdsexisted
 
 - name: download opensds source code
   git:
     repo: "{{ remote_url }}"
-    dest: "{{ opensds_dir }}"
+    dest: "{{ opensds_root_dir }}"
   when:
     - opensdsexisted.stat.exists is undefined or opensdsexisted.stat.exists == false
 
@@ -60,7 +60,7 @@
 - name: build opensds binary file
   shell: . /etc/profile; make
   args:
-    chdir: "{{ opensds_root }}"
+    chdir: "{{ opensds_root_dir }}"
   when:
     - opensdsbuilt.stat.exists is undefined or opensdsbuilt.stat.exists == false
 

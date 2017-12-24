@@ -24,7 +24,8 @@ db_endpoint: localhost:2379,localhost:2380
 ###########
 
 etcd_release: v3.2.0
+
+# These fields are not suggested to be modified
 etcd_tarball: etcd-{{ etcd_release }}-linux-amd64.tar.gz
 etcd_download_url: https://github.com/coreos/etcd/releases/download/{{ etcd_release }}/{{ etcd_tarball }}
-etcd_dir: etcd-{{ etcd_release }}-linux-amd64
-etcd_log: $HOME/{{ etcd_dir }}/etcd.log
+etcd_dir: /tmp/etcd-{{ etcd_release }}-linux-amd64

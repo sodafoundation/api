@@ -15,11 +15,11 @@ dummy:
 # GENERAL #
 ###########
 
-# These fields are NOT suggested to be modified
+workplace: /home/krej # Change this field according to your username
 
+# These fields are NOT suggested to be modified
 remote_url: https://github.com/opensds/opensds.git
-opensds_dir: $HOME/gopath/src/github.com/opensds
-opensds_root: "{{ opensds_dir }}/opensds"
-opensds_build_dir: "{{ opensds_root }}/build"
+opensds_root_dir: "{{ workplace }}/gopath/src/github.com/opensds/opensds"
+opensds_build_dir: "{{ opensds_root_dir }}/build"
 opensds_config_dir: /etc/opensds
 opensds_log_dir: /var/log/opensds
