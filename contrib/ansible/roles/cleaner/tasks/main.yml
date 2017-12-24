@@ -57,17 +57,17 @@
     chdir: /root/cinder/contrib/block-box
   when: enabled_backend == "cinder"
 
-- name: purge ceph cluster if ceph backend specified
-  shell: ansible-playbook purge-cluster.yml -i ceph.hosts
-  become: true
-  args:
-    chdir: /tmp/ceph-ansible/infrastructure-playbooks
-  when: enabled_backend == "ceph"
+#- name: purge ceph cluster if ceph backend specified
+#  shell: ansible-playbook purge-cluster.yml -i ceph.hosts
+#  become: true
+#  args:
+#    chdir: /tmp/ceph-ansible/infrastructure-playbooks
+#  when: enabled_backend == "ceph"
 
-- name: remove ceph-ansible source code
-  file:
-    path: /tmp/ceph-ansible
-    state: absent
-    force: yes
-  ignore_errors: yes
-  when: enabled_backend == "ceph"
+#- name: remove ceph-ansible source code
+#  file:
+#    path: /tmp/ceph-ansible
+#    state: absent
+#    force: yes
+#  ignore_errors: yes
+#  when: enabled_backend == "ceph"

@@ -141,3 +141,17 @@ osdsctl volume delete <your_volume_id>
 ```bash
 sudo ansible-playbook clean.yml -i local.hosts
 ```
+
+### Run ceph-ansible playbook to clean ceph cluster if you deployed ceph
+```bash
+cd /tmp/ceph-ansible
+sudo ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
+```
+
+Besides, you will also need to clean the logical partition on the physical block device, suggest using ```fdisk``` tool.
+
+### Remove ceph-ansible source code (optionally)
+```bash
+cd ..
+sudo rm -rf /tmp/ceph-ansible
+```
