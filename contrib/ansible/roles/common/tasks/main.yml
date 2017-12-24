@@ -26,9 +26,9 @@
   when:
     - systemgolang.stat.exists is undefined or systemgolang.stat.exists == false
 
-#- name: Run the equivalent of "apt-get update" as a separate step
-#  apt:
-#    update_cache: yes
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
 
 - name: install librados-dev external package
   apt:
