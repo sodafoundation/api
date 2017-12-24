@@ -10,9 +10,9 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 ```
 
 ### Pre-config (Ubuntu 16.04)
-Firstly download some ssh packages:
+Firstly download some system packages:
 ```
-sudo apt-get install openssh-server
+sudo apt-get install -y openssh-server git make gcc
 ```
 Then config ```/etc/ssh/sshd_config``` file and change one line:
 ```conf
@@ -34,11 +34,18 @@ ansible --version # Make sure your ansible version is 2.x.x
 
 ### Download opensds source code
 ```bash
+mkdir -p $GOPATH/src/github.com/opensds && cd $GOPATH/src/github.com/opensds
 git clone https://github.com/opensds/opensds.git
 cd opensds/contrib/ansible
 ```
 
 ### Configure opensds cluster variables:
+##### System environment:
+Since it's hard to configure your username, you need to configure your ```workplace``` at `group_vars/common.yml`:
+```yaml
+workplace: /home/your_username # Change this field according to your username, if you login as root, please configure this parameter to '/root'
+```
+
 ##### LVM
 If choose `lvm` as storage backend, you should modify `group_vars/osdsdock.yml`:
 ```yaml
@@ -90,12 +97,12 @@ And configure the auth and pool options to access cinder in `group_vars/cinder/c
 
 ### Check if the hosts could be reached
 ```bash
-ansible all -m ping -i local.hosts
+sudo ansible all -m ping -i local.hosts
 ```
 
 ### Run opensds-ansible playbook to start deploy
 ```bash
-ansible-playbook site.yml -i local.hosts
+sudo ansible-playbook site.yml -i local.hosts
 ```
 
 ## 2. How to test opensds cluster
@@ -132,19 +139,5 @@ osdsctl volume delete <your_volume_id>
 
 ### Run opensds-ansible playbook to clean the environment
 ```bash
-ansible-playbook clean.yml -i local.hosts
-```
-
-### Run ceph-ansible playbook to clean ceph cluster if you deployed ceph
-```bash
-cd /root/ceph-ansible
-ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
-```
-
-Besides, you will also need to clean the logical partition on the physical block device, suggest using ```fdisk``` tool.
-
-### Remove ceph-ansible source code (optionally)
-```bash
-cd ..
-rm -rf ceph-ansible
+sudo ansible-playbook clean.yml -i local.hosts
 ```
