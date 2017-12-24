@@ -19,9 +19,8 @@ dummy:
 enabled_backend: lvm
 
 # These fields are NOT suggested to be modified
-
 dock_endpoint: localhost:50050
-dock_log_file: /var/log/opensds/osdsdock.log
+dock_log_file: "{{ opensds_log_dir }}/osdsdock.log"
 
 ###########
 #   LVM   #
@@ -34,7 +33,7 @@ vg_name: vg001 # Specify a name randomly
 lvm_name: lvm backend
 lvm_description: This is a lvm backend service
 lvm_driver_name: lvm
-lvm_config_path: /etc/opensds/driver/lvm.yaml
+lvm_config_path: "{{ opensds_config_dir }}/driver/lvm.yaml"
 
 ###########
 #  CEPH   #
@@ -46,7 +45,7 @@ ceph_pool_name: rbd # Specify a name randomly
 ceph_name: ceph backend
 ceph_description: This is a ceph backend service
 ceph_driver_name: ceph
-ceph_config_path: /etc/opensds/driver/ceph.yaml
+ceph_config_path: "{{ opensds_config_dir }}/driver/ceph.yaml"
 
 ###########
 # CINDER  #
@@ -60,10 +59,10 @@ use_cinder_standalone: true
 cinder_name: cinder backend
 cinder_description: This is a cinder backend service
 cinder_driver_name: cinder
-cinder_config_path: /etc/opensds/driver/cinder.yaml
+cinder_config_path: "{{ opensds_config_dir }}/driver/cinder.yaml"
 
 ###########
 # DOCKER  #
 ###########
 
-dock_docker_image: dockerio/opensds-dock:v1beta
+dock_docker_image: dockerio/opensds-dock:zealand

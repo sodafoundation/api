@@ -16,12 +16,11 @@ dummy:
 ###########
 
 # These fields are NOT suggested to be modified
-
 controller_endpoint: localhost:50040
-controller_log_file: /var/log/opensds/osdslet.log
+controller_log_file: "{{ opensds_log_dir }}/osdslet.log"
 
 ###########
 # DOCKER  #
 ###########
 
-controller_docker_image: dockerio/opensds-controller:v1beta
+controller_docker_image: dockerio/opensds-controller:zealand

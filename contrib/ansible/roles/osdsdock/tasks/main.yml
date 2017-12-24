@@ -28,4 +28,4 @@
         ps aux | grep osdsdock | grep -v grep && break
       done
   args:
-    chdir: "{{ opensds_root }}/build/out"
+    chdir: "{{ opensds_build_dir }}/out"

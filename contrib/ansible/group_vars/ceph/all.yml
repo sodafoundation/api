@@ -314,7 +314,7 @@ ceph_stable_release: luminous
 # Eg. If you want to specify for each monitor which address the monitor will bind to you can set it in your **inventory host file** by using 'monitor_address' variable.
 # Preference will go to monitor_address if both monitor_address and monitor_interface are defined.
 # To use an IPv6 address, use the monitor_address setting instead (and set ip_version to ipv6)
-monitor_interface: wlp8s0
+monitor_interface: ens3
 #monitor_address: 0.0.0.0
 #monitor_address_block: subnet
 # set to either ipv4 or ipv6, whichever your network is using

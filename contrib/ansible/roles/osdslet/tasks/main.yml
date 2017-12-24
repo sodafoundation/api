@@ -12,4 +12,4 @@
         ps aux | grep osdslet | grep -v grep && break
       done
   args:
-    chdir: "{{ opensds_root }}/build/out"
+    chdir: "{{ opensds_build_dir }}/out"
