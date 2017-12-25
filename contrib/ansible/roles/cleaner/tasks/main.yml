@@ -28,6 +28,13 @@
   shell: killall osdsdock
   ignore_errors: yes
 
+- name: clean all opensds build files
+  file:
+    path: "{{ opensds_build_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
 - name: clean all opensds configuration files
   file:
     path: "{{ opensds_config_dir }}"
@@ -42,13 +49,25 @@
     force: yes
   ignore_errors: yes
 
+- name: check if it existed before cleaning a volume group
+  shell: vgdisplay {{ vg_name }}
+  ignore_errors: yes
+  register: vg_existed
+  when: enabled_backend == "lvm"
+
 - name: remove a volume group if lvm backend specified
   shell: vgremove {{ vg_name }}
+  when: enabled_backend == "lvm" and vg_existed.rc == 0
+
+- name: check if it existed before cleaning a physical volume
+  shell: pvdisplay {{ pv_device }}
+  ignore_errors: yes
+  register: pv_existed
   when: enabled_backend == "lvm"
 
 - name: remove a physical volume if lvm backend specified
   shell: pvremove {{ pv_device }}
-  when: enabled_backend == "lvm"
+  when: enabled_backend == "lvm" and pv_existed.rc == 0
 
 - name: stop cinder-standalone service
   shell: docker-compose down

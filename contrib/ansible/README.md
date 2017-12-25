@@ -34,7 +34,7 @@ ansible --version # Make sure your ansible version is 2.x.x
 
 ### Download opensds source code
 ```bash
-mkdir -p $GOPATH/src/github.com/opensds && cd $GOPATH/src/github.com/opensds
+mkdir -p $HOME/gopath/src/github.com/opensds && cd $HOME/gopath/src/github.com/opensds
 git clone https://github.com/opensds/opensds.git
 cd opensds/contrib/ansible
 ```
@@ -50,7 +50,7 @@ workplace: /home/your_username # Change this field according to your username, i
 If choose `lvm` as storage backend, you should modify `group_vars/osdsdock.yml`:
 ```yaml
 enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
-pv_device: "your_pv_device_path" # Ensure this device existed and available if you choose lvm
+pv_device: "your_pv_device_path" # Specify a block device and ensure it existed if you choose lvm
 vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose other backends
 ```
 And modify ```group_vars/lvm/lvm.yaml```, change pool name same to `vg_name`:
@@ -80,7 +80,7 @@ monitor_interface: eth1 # Change to your own network interface
 ```
 ```group_vars/ceph/osds.yml```:
 ```yml
-devices:
+devices: # For ceph devices, you can append multiple devices like example below
     - '/dev/sda' # Ensure this device existed and available if you choose ceph
     - '/dev/sdb' # Ensure this device existed and available if you choose ceph
 osd_scenario: collocated
