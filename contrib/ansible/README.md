@@ -1,8 +1,8 @@
 # opensds-ansible
-It's an installation tool of opensds through ansible.
+This is an installation tool for opensds using ansible.
 
 ## 1. How to install an opensds local cluster
-This installation document assumes you have a clean Ubuntu16.04 environment, so if you have installed golang environment, please make sure some parameters configured at ```/etc/profile```:
+This installation document assumes there is a clean Ubuntu 16.04 environment. If golang is already installed in the environment, make sure the following parameters are configured in ```/etc/profile``` and run ``source /etc/profile``:
 ```conf
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/gopath
@@ -10,7 +10,7 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 ```
 
 ### Pre-config (Ubuntu 16.04)
-Firstly download some system packages:
+First download some system packages:
 ```
 sudo apt-get install -y openssh-server git make gcc
 ```
@@ -21,15 +21,15 @@ PermitRootLogin yes
 Next generate ssh-token:
 ```bash
 ssh-keygen -t rsa
-ssh-copy-id -i ~/.ssh/id_rsa.pub <remote_ip> # Choose an ip address which can login your target machine
+ssh-copy-id -i ~/.ssh/id_rsa.pub <ip_address> # IP address of the target machine of the installation
 ```
 
 ### Download ansible tool
 ```bash
-sudo add-apt-repository ppa:ansible/ansible # It doesn't matter if failed
+sudo add-apt-repository ppa:ansible/ansible # This step is needed to upgrade ansible to version 2.4.2 which is required for the ceph backend.
 sudo apt-get update
 sudo apt-get install ansible
-ansible --version # Make sure your ansible version is 2.x.x
+ansible --version # Ansible version 2.4.2 or higher is required for ceph; 2.0.0.2 or higher is needed for other backends.
 ```
 
 ### Download opensds source code
@@ -41,33 +41,33 @@ cd opensds/contrib/ansible
 
 ### Configure opensds cluster variables:
 ##### System environment:
-Since it's hard to configure your username, you need to configure your ```workplace``` at `group_vars/common.yml`:
+Configure the ```workplace``` in `group_vars/common.yml`:
 ```yaml
-workplace: /home/your_username # Change this field according to your username, if you login as root, please configure this parameter to '/root'
+workplace: /home/your_username # Change this field according to your username. If login as root, configure this parameter to '/root'
 ```
 
 ##### LVM
-If choose `lvm` as storage backend, you should modify `group_vars/osdsdock.yml`:
+If `lvm` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
-enabled_backend: lvm # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
-pv_device: "your_pv_device_path" # Specify a block device and ensure it existed if you choose lvm
-vg_name: "specified_vg_name" # Specify a name randomly, but don't change it if you choose other backends
+enabled_backend: lvm # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'
+pv_device: "your_pv_device_path" # Specify a block device and ensure it exists if lvm is chosen
+vg_name: "specified_vg_name" # Specify a name for VG if choosing lvm
 ```
-And modify ```group_vars/lvm/lvm.yaml```, change pool name same to `vg_name`:
+Modify ```group_vars/lvm/lvm.yaml```, change pool name to be the same as `vg_name` above:
 ```yaml
-"vg001" # change pool name same to vg_name
+"vg001" # change pool name to be the same as vg_name
 ```
 ##### Ceph
-If choose `ceph` as storage backend, you should modify `group_vars/osdsdock.yml`:
+If `ceph` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
-enabled_backend: ceph # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
-ceph_pool_name: "specified_pool_name" # Specify a name randomly, but don't change it if you choose other backends
+enabled_backend: ceph # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'.
+ceph_pool_name: "specified_pool_name" # Specify a name for ceph pool if choosing ceph
 ```
-And modify ```group_vars/ceph/ceph.yaml```, change pool name same to `ceph_pool_name`:
+Modify ```group_vars/ceph/ceph.yaml```, change pool name to be the same as `ceph_pool_name`:
 ```yaml
-"rbd" # change pool name same to ceph pool
+"rbd" # change pool name to be the same as ceph pool
 ```
-Then you also need to configure two files under ```group_vars/ceph```: `all.yml` and `osds.yml`. And here is an example:
+Configure two files under ```group_vars/ceph```: `all.yml` and `osds.yml`. Here is an example:
 
 ```group_vars/ceph/all.yml```:
 ```yml
@@ -76,26 +76,26 @@ ceph_repository: community
 ceph_stable_release: luminous # Choose luminous as default version
 public_network: "192.168.3.0/24" # Run 'ip -4 address' to check the ip address
 cluster_network: "{{ public_network }}"
-monitor_interface: eth1 # Change to your own network interface
+monitor_interface: eth1 # Change to the network interface on the target machine
 ```
 ```group_vars/ceph/osds.yml```:
 ```yml
-devices: # For ceph devices, you can append multiple devices like example below
-    - '/dev/sda' # Ensure this device existed and available if you choose ceph
-    - '/dev/sdb' # Ensure this device existed and available if you choose ceph
+devices: # For ceph devices, append one or multiple devices like the example below:
+    - '/dev/sda' # Ensure this device exists and available if ceph is chosen
+    - '/dev/sdb' # Ensure this device exists and available if ceph is chosen
 osd_scenario: collocated
 ```
 
 ##### Cinder
-If choose `cinder` as storage backend, you should modify `group_vars/osdsdock.yml`:
+If `cinder` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
-enabled_backend: cinder # Change it according to your backend, currently support 'lvm', 'ceph', 'cinder'
-use_cinder_standalone: true # if use cinder standalone
+enabled_backend: cinder # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'
+use_cinder_standalone: true # if using cinder standalone
 ```
 
-And configure the auth and pool options to access cinder in `group_vars/cinder/cinder.yaml`. Don't need to do anything if use cinder standalone.
+Configure the auth and pool options to access cinder in `group_vars/cinder/cinder.yaml`. Do not need to make additional configure changes if using cinder standalone.
 
-### Check if the hosts could be reached
+### Check if the hosts can be reached
 ```bash
 sudo ansible all -m ping -i local.hosts
 ```
@@ -109,12 +109,12 @@ sudo ansible-playbook site.yml -i local.hosts
 
 ### Configure opensds CLI tool
 ```bash
-cp $GOPATH/src/github.com/opensds/opensds/build/out/bin/osdsctl /usr/local/bin
+sudo cp $GOPATH/src/github.com/opensds/opensds/build/out/bin/osdsctl /usr/local/bin
 export OPENSDS_ENDPOINT=http://127.0.0.1:50040
 osdsctl pool list # Check if the pool resource is available
 ```
 
-### Create a default profile firstly.
+### Create a default profile first.
 ```
 osdsctl profile create '{"name": "default", "description": "default policy"}'
 ```
@@ -122,6 +122,10 @@ osdsctl profile create '{"name": "default", "description": "default policy"}'
 ### Create a volume.
 ```
 osdsctl volume create 1 --name=test-001
+```
+For cinder, az needs to be specified.
+```
+osdsctl volume create 1 --name=test-001 --az nova
 ```
 
 ### List all volumes.
@@ -142,15 +146,15 @@ osdsctl volume delete <your_volume_id>
 sudo ansible-playbook clean.yml -i local.hosts
 ```
 
-### Run ceph-ansible playbook to clean ceph cluster if you deployed ceph
+### Run ceph-ansible playbook to clean ceph cluster if ceph is deployed
 ```bash
 cd /tmp/ceph-ansible
 sudo ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
 ```
 
-Besides, you will also need to clean the logical partition on the physical block device, suggest using ```fdisk``` tool.
+In addition, clean up the logical partition on the physical block device used by ceph, using the ```fdisk``` tool.
 
-### Remove ceph-ansible source code (optionally)
+### Remove ceph-ansible source code (optional)
 ```bash
 cd ..
 sudo rm -rf /tmp/ceph-ansible
