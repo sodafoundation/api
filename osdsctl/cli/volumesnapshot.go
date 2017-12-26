@@ -57,6 +57,12 @@ var volumeSnapshotDeleteCommand = &cobra.Command{
 	Run:   volumeSnapshotDeleteAction,
 }
 
+var volumeSnapshotUpdateCommand = &cobra.Command{
+	Use:   "update <snapshot id>",
+	Short: "update a volume snapshot in the cluster",
+	Run:   volumeSnapshotUpdateAction,
+}
+
 var (
 	volSnapshotName string
 	volSnapshotDesp string
@@ -65,10 +71,13 @@ var (
 func init() {
 	volumeSnapshotCommand.AddCommand(volumeSnapshotCreateCommand)
 	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotName, "name", "n", "", "the name of created volume snapshot")
-	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotDesp, "description", "d", "", "description of created volume snapshot")
+	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotDesp, "description", "d", "", "the description of created volume snapshot")
 	volumeSnapshotCommand.AddCommand(volumeSnapshotShowCommand)
 	volumeSnapshotCommand.AddCommand(volumeSnapshotListCommand)
 	volumeSnapshotCommand.AddCommand(volumeSnapshotDeleteCommand)
+	volumeSnapshotCommand.AddCommand(volumeSnapshotUpdateCommand)
+	volumeSnapshotUpdateCommand.Flags().StringVarP(&volSnapshotName, "name", "n", "", "the name of updated volume snapshot")
+	volumeSnapshotUpdateCommand.Flags().StringVarP(&volSnapshotDesp, "description", "d", "", "the description of updated volume snapshot")
 }
 
 func volumeSnapshotAction(cmd *cobra.Command, args []string) {
@@ -145,4 +154,25 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	fmt.Printf("Delete snapshot(%s) success.\n", args[1])
+}
+
+func volumeSnapshotUpdateAction(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	snp := &model.VolumeSnapshotSpec{
+		Name:        volSnapshotName,
+		Description: volSnapshotDesp,
+	}
+
+	resp, err := client.UpdateVolumeSnapshot(args[0], snp)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
+	PrintDict(resp, keys, FormatterList{})
 }
