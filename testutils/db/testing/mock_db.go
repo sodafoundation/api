@@ -19,10 +19,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// MockClient is a fake database client for testing.
 type MockClient struct {
 	mock.Mock
 }
 
+// AddExtraProperty
 func (_m *MockClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
 	ret := _m.Called(prfID, ext)
 
@@ -45,6 +47,7 @@ func (_m *MockClient) AddExtraProperty(prfID string, ext model.ExtraSpec) (*mode
 	return r0, r1
 }
 
+// CreateDock
 func (_m *MockClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	ret := _m.Called(dck)
 
@@ -67,6 +70,7 @@ func (_m *MockClient) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	return r0, r1
 }
 
+// CreatePool
 func (_m *MockClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
 	ret := _m.Called(pol)
 
@@ -89,6 +93,7 @@ func (_m *MockClient) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePool
 	return r0, r1
 }
 
+// CreateProfile
 func (_m *MockClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 	ret := _m.Called(prf)
 
@@ -111,6 +116,7 @@ func (_m *MockClient) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec,
 	return r0, r1
 }
 
+// CreateVolume
 func (_m *MockClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	ret := _m.Called(vol)
 
@@ -133,6 +139,7 @@ func (_m *MockClient) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, er
 	return r0, r1
 }
 
+// CreateVolumeAttachment
 func (_m *MockClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(attachment)
 
@@ -155,6 +162,7 @@ func (_m *MockClient) CreateVolumeAttachment(attachment *model.VolumeAttachmentS
 	return r0, r1
 }
 
+// CreateVolumeSnapshot
 func (_m *MockClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(vs)
 
@@ -177,6 +185,7 @@ func (_m *MockClient) CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model
 	return r0, r1
 }
 
+// DeleteDock
 func (_m *MockClient) DeleteDock(dckID string) error {
 	ret := _m.Called(dckID)
 
@@ -190,6 +199,7 @@ func (_m *MockClient) DeleteDock(dckID string) error {
 	return r0
 }
 
+// DeletePool
 func (_m *MockClient) DeletePool(polID string) error {
 	ret := _m.Called(polID)
 
@@ -203,6 +213,7 @@ func (_m *MockClient) DeletePool(polID string) error {
 	return r0
 }
 
+// DeleteProfile
 func (_m *MockClient) DeleteProfile(prfID string) error {
 	ret := _m.Called(prfID)
 
@@ -216,6 +227,7 @@ func (_m *MockClient) DeleteProfile(prfID string) error {
 	return r0
 }
 
+// DeleteVolume
 func (_m *MockClient) DeleteVolume(volID string) error {
 	ret := _m.Called(volID)
 
@@ -229,6 +241,7 @@ func (_m *MockClient) DeleteVolume(volID string) error {
 	return r0
 }
 
+// DeleteVolumeAttachment
 func (_m *MockClient) DeleteVolumeAttachment(attachmentId string) error {
 	ret := _m.Called(attachmentId)
 
@@ -242,6 +255,7 @@ func (_m *MockClient) DeleteVolumeAttachment(attachmentId string) error {
 	return r0
 }
 
+// DeleteVolumeSnapshot
 func (_m *MockClient) DeleteVolumeSnapshot(snapshotID string) error {
 	ret := _m.Called(snapshotID)
 
@@ -255,6 +269,7 @@ func (_m *MockClient) DeleteVolumeSnapshot(snapshotID string) error {
 	return r0
 }
 
+// GetDock
 func (_m *MockClient) GetDock(dckID string) (*model.DockSpec, error) {
 	ret := _m.Called(dckID)
 
@@ -277,6 +292,7 @@ func (_m *MockClient) GetDock(dckID string) (*model.DockSpec, error) {
 	return r0, r1
 }
 
+// GetDockByPoolId
 func (_m *MockClient) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	ret := _m.Called(poolId)
 
@@ -299,6 +315,7 @@ func (_m *MockClient) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	return r0, r1
 }
 
+// GetPool
 func (_m *MockClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	ret := _m.Called(polID)
 
@@ -321,6 +338,7 @@ func (_m *MockClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return r0, r1
 }
 
+// GetProfile
 func (_m *MockClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	ret := _m.Called(prfID)
 
@@ -343,6 +361,7 @@ func (_m *MockClient) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return r0, r1
 }
 
+// GetDefaultProfile
 func (_m *MockClient) GetDefaultProfile() (*model.ProfileSpec, error) {
 	ret := _m.Called()
 
@@ -365,6 +384,7 @@ func (_m *MockClient) GetDefaultProfile() (*model.ProfileSpec, error) {
 	return r0, r1
 }
 
+// GetVolume
 func (_m *MockClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 	ret := _m.Called(volID)
 
@@ -387,6 +407,7 @@ func (_m *MockClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return r0, r1
 }
 
+// GetVolumeAttachment
 func (_m *MockClient) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(attachmentId)
 
@@ -409,6 +430,7 @@ func (_m *MockClient) GetVolumeAttachment(attachmentId string) (*model.VolumeAtt
 	return r0, r1
 }
 
+// GetVolumeSnapshot
 func (_m *MockClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(snapshotID)
 
@@ -431,6 +453,7 @@ func (_m *MockClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapsho
 	return r0, r1
 }
 
+// ListDocks
 func (_m *MockClient) ListDocks() ([]*model.DockSpec, error) {
 	ret := _m.Called()
 
@@ -453,6 +476,7 @@ func (_m *MockClient) ListDocks() ([]*model.DockSpec, error) {
 	return r0, r1
 }
 
+// ListExtraProperties
 func (_m *MockClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	ret := _m.Called(prfID)
 
@@ -475,6 +499,7 @@ func (_m *MockClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error
 	return r0, r1
 }
 
+// ListPools
 func (_m *MockClient) ListPools() ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called()
 
@@ -497,6 +522,7 @@ func (_m *MockClient) ListPools() ([]*model.StoragePoolSpec, error) {
 	return r0, r1
 }
 
+// ListProfiles
 func (_m *MockClient) ListProfiles() ([]*model.ProfileSpec, error) {
 	ret := _m.Called()
 
@@ -519,6 +545,7 @@ func (_m *MockClient) ListProfiles() ([]*model.ProfileSpec, error) {
 	return r0, r1
 }
 
+// ListVolumeAttachments
 func (_m *MockClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(volumeId)
 
@@ -541,6 +568,7 @@ func (_m *MockClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAtt
 	return r0, r1
 }
 
+// ListVolumeSnapshots
 func (_m *MockClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called()
 
@@ -563,6 +591,7 @@ func (_m *MockClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
 	return r0, r1
 }
 
+// ListVolumes
 func (_m *MockClient) ListVolumes() ([]*model.VolumeSpec, error) {
 	ret := _m.Called()
 
@@ -585,6 +614,7 @@ func (_m *MockClient) ListVolumes() ([]*model.VolumeSpec, error) {
 	return r0, r1
 }
 
+// RemoveExtraProperty
 func (_m *MockClient) RemoveExtraProperty(prfID string, extraKey string) error {
 	ret := _m.Called(prfID, extraKey)
 
@@ -598,6 +628,7 @@ func (_m *MockClient) RemoveExtraProperty(prfID string, extraKey string) error {
 	return r0
 }
 
+// UpdateDock
 func (_m *MockClient) UpdateDock(dckID string, name string, desp string) (*model.DockSpec, error) {
 	ret := _m.Called(dckID, name, desp)
 
@@ -620,6 +651,7 @@ func (_m *MockClient) UpdateDock(dckID string, name string, desp string) (*model
 	return r0, r1
 }
 
+// UpdatePool
 func (_m *MockClient) UpdatePool(polID string, name string, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
 	ret := _m.Called(polID, name, desp, usedCapacity, used)
 
@@ -642,6 +674,7 @@ func (_m *MockClient) UpdatePool(polID string, name string, desp string, usedCap
 	return r0, r1
 }
 
+// UpdateProfile
 func (_m *MockClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
 	ret := _m.Called(prfID, input)
 
@@ -664,6 +697,7 @@ func (_m *MockClient) UpdateProfile(prfID string, input *model.ProfileSpec) (*mo
 	return r0, r1
 }
 
+// UpdateVolume
 func (_m *MockClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	ret := _m.Called(volID, vol)
 
@@ -686,6 +720,7 @@ func (_m *MockClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.
 	return r0, r1
 }
 
+// UpdateVolumeAttachment
 func (_m *MockClient) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(attachmentId, attachment)
 
@@ -708,6 +743,7 @@ func (_m *MockClient) UpdateVolumeAttachment(attachmentId string, attachment *mo
 	return r0, r1
 }
 
+// UpdateVolumeSnapshot
 func (_m *MockClient) UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(snapshotID, vs)
 

@@ -29,6 +29,7 @@ import (
 
 var c = &client{}
 
+// Init
 func Init(driver, credential string) *client {
 	// driver equals "mysql", and credential is "krej:Wh199582@tcp(100.64.128.40:3306)/db"
 	db, err := sql.Open(driver, credential)

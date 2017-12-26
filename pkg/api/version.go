@@ -28,6 +28,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// KnownVersions
 var KnownVersions = []map[string]string{
 	{
 		"name":        "v1beta",
@@ -37,10 +38,12 @@ var KnownVersions = []map[string]string{
 	},
 }
 
+// VersionPortal
 type VersionPortal struct {
 	beego.Controller
 }
 
+// ListVersions
 func (this *VersionPortal) ListVersions() {
 	body, err := json.Marshal(KnownVersions)
 	if err != nil {
@@ -56,6 +59,7 @@ func (this *VersionPortal) ListVersions() {
 	return
 }
 
+// GetVersion
 func (this *VersionPortal) GetVersion() {
 	apiVersion := this.Ctx.Input.Param(":apiVersion")
 

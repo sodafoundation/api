@@ -28,16 +28,21 @@ import (
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
+// Driver
 type Driver struct{}
 
+// Setup
 func (*Driver) Setup() error { return nil }
 
+// Unset
 func (*Driver) Unset() error { return nil }
 
+// CreateVolume
 func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	return &SampleVolumes[0], nil
 }
 
+// PullVolume
 func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	for _, volume := range SampleVolumes {
 		if volIdentifier == volume.Id {
@@ -48,20 +53,25 @@ func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	return nil, errors.New("Can't find volume " + volIdentifier)
 }
 
+// DeleteVolume
 func (*Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// InitializeConnection
 func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	return &SampleConnection, nil
 }
 
+// TerminateConnection
 func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
 
+// CreateSnapshot
 func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	return &SampleSnapshots[0], nil
 }
 
+// PullSnapshot
 func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	for _, snapshot := range SampleSnapshots {
 		if snapIdentifier == snapshot.Id {
@@ -72,10 +82,12 @@ func (*Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, e
 	return nil, errors.New("Can't find snapshot " + snapIdentifier)
 }
 
+// DeleteSnapshot
 func (*Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
+// ListPools
 func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 

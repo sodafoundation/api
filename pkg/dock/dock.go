@@ -29,9 +29,10 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// Brain is a global variable that controls the dock module.
 var Brain *DockHub
 
-// A reference to DockHub structure with fields that represent some required
+// DockHub is a reference structure with fields that represent some required
 // parameters for initializing and controlling the volume driver.
 type DockHub struct {
 	// Discoverer represents the mechanism of DockHub discovering the storage
@@ -42,12 +43,14 @@ type DockHub struct {
 	Driver drivers.VolumeDriver
 }
 
+// NewDockHub method creates a new DockHub and returns its pointer.
 func NewDockHub() *DockHub {
 	return &DockHub{
 		Discoverer: discovery.NewDiscoverer(),
 	}
 }
 
+// TriggerDiscovery
 func (d *DockHub) TriggerDiscovery() error {
 	var err error
 
@@ -57,13 +60,11 @@ func (d *DockHub) TriggerDiscovery() error {
 	if err = d.Discoverer.Discover(d.Driver); err != nil {
 		return err
 	}
-	if err = d.Discoverer.Store(); err != nil {
-		return err
-	}
 
-	return err
+	return d.Discoverer.Store()
 }
 
+// CreateVolume
 func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
@@ -89,6 +90,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 	return result, nil
 }
 
+// DeleteVolume
 func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	var err error
 
@@ -112,6 +114,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// CreateVolumeAttachment
 func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
@@ -149,6 +152,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 	return result, nil
 }
 
+// DeleteVolumeAttachment
 func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
@@ -170,6 +174,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
+// CreateSnapshot
 func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	//Get the storage drivers and do some initializations.
 	d.Driver = drivers.Init(opt.GetDriverName())
@@ -193,6 +198,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 	return result, nil
 }
 
+// DeleteSnapshot
 func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	var err error
 

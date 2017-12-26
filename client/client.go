@@ -20,6 +20,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
+// Client is a struct for exposing some operations of opensds resources.
 type Client struct {
 	*ProfileMgr
 	*DockMgr
@@ -29,10 +30,12 @@ type Client struct {
 	cfg *Config
 }
 
+// Config is a struct that defines some options for calling the Client.
 type Config struct {
 	Endpoint string
 }
 
+// NewClient method creates a new Client.
 func NewClient(c *Config) *Client {
 	// If endpoint field not specified,use the default value localhost.
 	if c.Endpoint == "" {
@@ -49,6 +52,7 @@ func NewClient(c *Config) *Client {
 	}
 }
 
+// Reset method is defined to clean Client struct.
 func (c *Client) Reset() *Client {
 	c = &Client{}
 	return c

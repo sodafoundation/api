@@ -21,6 +21,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
+// NewPoolMgr
 func NewPoolMgr(edp string) *PoolMgr {
 	return &PoolMgr{
 		Receiver: NewReceiver(),
@@ -28,12 +29,14 @@ func NewPoolMgr(edp string) *PoolMgr {
 	}
 }
 
+// PoolMgr
 type PoolMgr struct {
 	Receiver
 
 	Endpoint string
 }
 
+// GetPool
 func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	var res model.StoragePoolSpec
 	url := strings.Join([]string{
@@ -47,6 +50,7 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return &res, nil
 }
 
+// ListPools
 func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
 	url := strings.Join([]string{

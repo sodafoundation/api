@@ -28,12 +28,15 @@ var (
 	globalLun = 1
 )
 
+// Target is an interface for exposing some operations of different targets,
+// currently support iscsiTarget.
 type Target interface {
 	CreateExport(path, initiator string) (map[string]interface{}, error)
 
 	RemoveExport(path, initiator string) error
 }
 
+// NewTarget method creates a new iscsi target.
 func NewTarget(bip string) Target {
 	return &iscsiTarget{
 		ISCSITarget: NewISCSITarget(globalTid, globalIQN, bip),
@@ -72,14 +75,10 @@ func (t *iscsiTarget) RemoveExport(path, initiator string) error {
 	if err := t.UnbindInitiator(initiator); err != nil {
 		return err
 	}
-
 	lun := t.GetLun(path)
 	if lun == -1 {
 		return errors.New("Can't find lun with path " + path)
 	}
-	if err := t.RemoveLun(lun); err != nil {
-		return err
-	}
 
-	return nil
+	return t.RemoveLun(lun)
 }

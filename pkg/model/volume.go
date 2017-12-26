@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 )
 
-// Volume is an block device created by storage service, it can be attached
+// VolumeSpec is an block device created by storage service, it can be attached
 // to physical machine or virtual machine instance.
 type VolumeSpec struct {
 	*BaseModel
@@ -66,6 +66,7 @@ type VolumeSpec struct {
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
+// VolumeAttachmentSpec is a description of volume attached resource.
 type VolumeAttachmentSpec struct {
 	*BaseModel
 	// The uuid of the project that the volume belongs to.
@@ -120,6 +121,7 @@ func (con *ConnectionInfo) EncodeConnectionData() []byte {
 	return conBody
 }
 
+// VolumeSnapshotSpec is a description of volume snapshot resource.
 type VolumeSnapshotSpec struct {
 	*BaseModel
 

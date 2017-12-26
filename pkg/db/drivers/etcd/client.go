@@ -27,12 +27,14 @@ var (
 	timeOut = 3 * time.Second
 )
 
+// Request
 type Request struct {
 	Url        string `json:"url"`
 	Content    string `json:"content"`
 	NewContent string `json:"newContent"`
 }
 
+// Response
 type Response struct {
 	Status  string   `json:"status"`
 	Message []string `json:"message"`
@@ -51,6 +53,7 @@ type clientInterface interface {
 	Delete(req *Request) *Response
 }
 
+// Init
 func Init(edps []string) *client {
 	cliv3, err := clientv3.New(clientv3.Config{
 		Endpoints:   edps,
