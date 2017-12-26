@@ -1,6 +1,6 @@
 # OpenSDS
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds)](https://goreportcard.com/report/github.com/opensds/opensds)
+[![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds)](https://goreportcard.com/report/github.com/opensds/opensds?branch=master)
 [![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
 [![Coverage Status](https://coveralls.io/repos/github/opensds/opensds/badge.svg?branch=master)](https://coveralls.io/github/opensds/opensds?branch=master)
 
