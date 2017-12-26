@@ -45,7 +45,10 @@ const (
 	}`
 )
 
+// PolicyTypeMappingTable
 var PolicyTypeMappingTable map[string]string
+
+// PolicyLifecircleTable
 var PolicyLifecircleTable map[string]int
 
 func init() {
@@ -53,6 +56,7 @@ func init() {
 	json.Unmarshal([]byte(POLICY_LIFECIRCLE_TABLE), &PolicyLifecircleTable)
 }
 
+// IsStorageTagSupported
 func IsStorageTagSupported(tags map[string]string) bool {
 	for key := range tags {
 		if PolicyTypeMappingTable[key] != "operation" {
@@ -62,6 +66,7 @@ func IsStorageTagSupported(tags map[string]string) bool {
 	return true
 }
 
+// FindPolicyType
 func FindPolicyType(policy string) (string, error) {
 	if !utils.Contained(policy, PolicyTypeMappingTable) {
 		return "", errors.New("The policy type of " + policy + " not supported")
@@ -70,11 +75,13 @@ func FindPolicyType(policy string) (string, error) {
 	return PolicyTypeMappingTable[policy], nil
 }
 
+// StorageTag
 type StorageTag struct {
 	syncTag  map[string]interface{}
 	asyncTag map[string]string
 }
 
+// NewStorageTag
 func NewStorageTag(tags map[string]interface{}, flag int) *StorageTag {
 	var st = &StorageTag{
 		syncTag:  make(map[string]interface{}),
@@ -103,10 +110,12 @@ func NewStorageTag(tags map[string]interface{}, flag int) *StorageTag {
 	return st
 }
 
+// GetSyncTag
 func (st *StorageTag) GetSyncTag() map[string]interface{} {
 	return st.syncTag
 }
 
+// GetAsyncTag
 func (st *StorageTag) GetAsyncTag() map[string]string {
 	return st.asyncTag
 }

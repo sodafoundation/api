@@ -32,16 +32,19 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// NewClient
 func NewClient(edps []string) *Client {
 	return &Client{
 		clientInterface: Init(edps),
 	}
 }
 
+// Client
 type Client struct {
 	clientInterface
 }
 
+// CreateDock
 func (c *Client) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	if dck.Id == "" {
 		dck.Id = uuid.NewV4().String()
@@ -69,6 +72,7 @@ func (c *Client) CreateDock(dck *model.DockSpec) (*model.DockSpec, error) {
 	return dck, nil
 }
 
+// GetDock
 func (c *Client) GetDock(dckID string) (*model.DockSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateDockURL(dckID),
@@ -87,6 +91,7 @@ func (c *Client) GetDock(dckID string) (*model.DockSpec, error) {
 	return dck, nil
 }
 
+// GetDockByPoolId
 func (c *Client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	pool, err := c.GetPool(poolId)
 	if err != nil {
@@ -107,6 +112,7 @@ func (c *Client) GetDockByPoolId(poolId string) (*model.DockSpec, error) {
 	return nil, errors.New("Get dock failed by pool id: " + poolId)
 }
 
+// ListDocks
 func (c *Client) ListDocks() ([]*model.DockSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateDockURL(),
@@ -132,6 +138,7 @@ func (c *Client) ListDocks() ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
+// UpdateDock
 func (c *Client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	dck, err := c.GetDock(dckID)
 	if err != nil {
@@ -162,6 +169,7 @@ func (c *Client) UpdateDock(dckID, name, desp string) (*model.DockSpec, error) {
 	return dck, nil
 }
 
+// DeleteDock
 func (c *Client) DeleteDock(dckID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateDockURL(dckID),
@@ -174,6 +182,7 @@ func (c *Client) DeleteDock(dckID string) error {
 	return nil
 }
 
+// CreatePool
 func (c *Client) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error) {
 	if pol.Id == "" {
 		pol.Id = uuid.NewV4().String()
@@ -200,6 +209,7 @@ func (c *Client) CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec,
 	return pol, nil
 }
 
+// GetPool
 func (c *Client) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	dbReq := &Request{
 		Url: urls.GeneratePoolURL(polID),
@@ -218,6 +228,7 @@ func (c *Client) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	return pol, nil
 }
 
+// ListPools
 func (c *Client) ListPools() ([]*model.StoragePoolSpec, error) {
 	dbReq := &Request{
 		Url: urls.GeneratePoolURL(),
@@ -243,6 +254,7 @@ func (c *Client) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
+// UpdatePool
 func (c *Client) UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error) {
 	pol, err := c.GetPool(polID)
 	if err != nil {
@@ -273,6 +285,7 @@ func (c *Client) UpdatePool(polID, name, desp string, usedCapacity int64, used b
 	return pol, nil
 }
 
+// DeletePool
 func (c *Client) DeletePool(polID string) error {
 	dbReq := &Request{
 		Url: urls.GeneratePoolURL(polID),
@@ -285,6 +298,7 @@ func (c *Client) DeletePool(polID string) error {
 	return nil
 }
 
+// CreateProfile
 func (c *Client) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 
 	if prf.Id == "" {
@@ -313,6 +327,7 @@ func (c *Client) CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, erro
 	return prf, nil
 }
 
+// GetProfile
 func (c *Client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateProfileURL(prfID),
@@ -331,6 +346,7 @@ func (c *Client) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return prf, nil
 }
 
+// GetDefaultProfile
 func (c *Client) GetDefaultProfile() (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles()
 	if err != nil {
@@ -346,6 +362,7 @@ func (c *Client) GetDefaultProfile() (*model.ProfileSpec, error) {
 	return nil, errors.New("No default profile in db.")
 }
 
+// ListProfiles
 func (c *Client) ListProfiles() ([]*model.ProfileSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateProfileURL(),
@@ -371,6 +388,7 @@ func (c *Client) ListProfiles() ([]*model.ProfileSpec, error) {
 	return prfs, nil
 }
 
+// UpdateProfile
 func (c *Client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
@@ -412,6 +430,7 @@ func (c *Client) UpdateProfile(prfID string, input *model.ProfileSpec) (*model.P
 	return prf, nil
 }
 
+// DeleteProfile
 func (c *Client) DeleteProfile(prfID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateProfileURL(prfID),
@@ -424,6 +443,7 @@ func (c *Client) DeleteProfile(prfID string) error {
 	return nil
 }
 
+// AddExtraProperty
 func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
@@ -446,6 +466,7 @@ func (c *Client) AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.Ext
 	return &prf.Extras, nil
 }
 
+// ListExtraProperties
 func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
@@ -454,6 +475,7 @@ func (c *Client) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	return &prf.Extras, nil
 }
 
+// RemoveExtraProperty
 func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
 	prf, err := c.GetProfile(prfID)
 	if err != nil {
@@ -467,6 +489,7 @@ func (c *Client) RemoveExtraProperty(prfID, extraKey string) error {
 	return nil
 }
 
+// CreateVolume
 func (c *Client) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	if vol.Id == "" {
 		vol.Id = uuid.NewV4().String()
@@ -493,6 +516,7 @@ func (c *Client) CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) 
 	return vol, nil
 }
 
+// GetVolume
 func (c *Client) GetVolume(volID string) (*model.VolumeSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateVolumeURL(volID),
@@ -511,6 +535,7 @@ func (c *Client) GetVolume(volID string) (*model.VolumeSpec, error) {
 	return vol, nil
 }
 
+// ListVolumes
 func (c *Client) ListVolumes() ([]*model.VolumeSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateVolumeURL(),
@@ -536,6 +561,7 @@ func (c *Client) ListVolumes() ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
+// UpdateVolume
 func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	result, err := c.GetVolume(volID)
 	if err != nil {
@@ -571,6 +597,7 @@ func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.Volum
 	return result, nil
 }
 
+// DeleteVolume
 func (c *Client) DeleteVolume(volID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateVolumeURL(volID),
@@ -583,6 +610,7 @@ func (c *Client) DeleteVolume(volID string) error {
 	return nil
 }
 
+// CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	if attachment.Id == "" {
 		attachment.Id = uuid.NewV4().String()
@@ -610,6 +638,7 @@ func (c *Client) CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) 
 	return attachment, nil
 }
 
+// GetVolumeAttachment
 func (c *Client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateAttachmentURL(attachmentId),
@@ -628,6 +657,7 @@ func (c *Client) GetVolumeAttachment(attachmentId string) (*model.VolumeAttachme
 	return atc, nil
 }
 
+// ListVolumeAttachments
 func (c *Client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateAttachmentURL(),
@@ -654,6 +684,7 @@ func (c *Client) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachme
 
 }
 
+// UpdateVolumeAttachment
 func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	result, err := c.GetVolumeAttachment(attachmentId)
 	if err != nil {
@@ -714,6 +745,7 @@ func (c *Client) UpdateVolumeAttachment(attachmentId string, attachment *model.V
 	return result, nil
 }
 
+// DeleteVolumeAttachment
 func (c *Client) DeleteVolumeAttachment(attachmentId string) error {
 	dbReq := &Request{
 		Url: urls.GenerateAttachmentURL(attachmentId),
@@ -726,6 +758,7 @@ func (c *Client) DeleteVolumeAttachment(attachmentId string) error {
 	return nil
 }
 
+// CreateVolumeSnapshot
 func (c *Client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	if snp.Id == "" {
 		snp.Id = uuid.NewV4().String()
@@ -752,6 +785,7 @@ func (c *Client) CreateVolumeSnapshot(snp *model.VolumeSnapshotSpec) (*model.Vol
 	return snp, nil
 }
 
+// GetVolumeSnapshot
 func (c *Client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateSnapshotURL(snpID),
@@ -770,6 +804,7 @@ func (c *Client) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, err
 	return vs, nil
 }
 
+// ListVolumeSnapshots
 func (c *Client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateSnapshotURL(),
@@ -795,6 +830,7 @@ func (c *Client) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	return vss, nil
 }
 
+// UpdateVolumeSnapshot
 func (c *Client) UpdateVolumeSnapshot(snpID string, snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	result, err := c.GetVolumeSnapshot(snpID)
 	if err != nil {
@@ -830,6 +866,7 @@ func (c *Client) UpdateVolumeSnapshot(snpID string, snp *model.VolumeSnapshotSpe
 	return result, nil
 }
 
+// DeleteVolumeSnapshot
 func (c *Client) DeleteVolumeSnapshot(snpID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateSnapshotURL(snpID),

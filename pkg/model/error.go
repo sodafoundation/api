@@ -24,11 +24,17 @@ import (
 )
 
 const (
-	ErrorBadRequest     = 400
-	ErrorUnauthorized   = 401
-	ErrorForbidden      = 403
-	ErrorNotFound       = 404
+	// ErrorBadRequest
+	ErrorBadRequest = 400
+	// ErrorUnauthorized
+	ErrorUnauthorized = 401
+	// ErrorForbidden
+	ErrorForbidden = 403
+	// ErrorNotFound
+	ErrorNotFound = 404
+	// ErrorInternalServer
 	ErrorInternalServer = 500
+	// ErrorNotImplemented
 	ErrorNotImplemented = 501
 )
 
@@ -39,26 +45,32 @@ type ErrorSpec struct {
 	Message string `json:"message,omitempty"`
 }
 
+// ErrorBadRequestStatus
 func ErrorBadRequestStatus(message string) []byte {
 	return errorStatus(ErrorBadRequest, message)
 }
 
+// ErrorForbiddenStatus
 func ErrorForbiddenStatus(message string) []byte {
 	return errorStatus(ErrorForbidden, message)
 }
 
+// ErrorUnauthorizedStatus
 func ErrorUnauthorizedStatus(message string) []byte {
 	return errorStatus(ErrorUnauthorized, message)
 }
 
+// ErrorNotFoundStatus
 func ErrorNotFoundStatus(message string) []byte {
 	return errorStatus(ErrorNotFound, message)
 }
 
+// ErrorInternalServerStatus
 func ErrorInternalServerStatus(message string) []byte {
 	return errorStatus(ErrorInternalServer, message)
 }
 
+// ErrorNotImplementedStatus
 func ErrorNotImplementedStatus(message string) []byte {
 	return errorStatus(ErrorNotImplemented, message)
 }

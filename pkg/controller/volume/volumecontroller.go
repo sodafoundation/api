@@ -31,6 +31,8 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Controller is an interface for exposing some operations of different volume
+// controllers.
 type Controller interface {
 	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 
@@ -47,6 +49,7 @@ type Controller interface {
 	SetDock(dockInfo *model.DockSpec)
 }
 
+// NewController method creates a controller structure and expose its pointer.
 func NewController() Controller {
 	return &controller{
 		Client: client.NewClient(),

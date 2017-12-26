@@ -29,10 +29,12 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// DockPortal
 type DockPortal struct {
 	beego.Controller
 }
 
+// ListDocks
 func (this *DockPortal) ListDocks() {
 	// Call db api module to handle list docks request.
 	result, err := db.C.ListDocks()
@@ -59,6 +61,7 @@ func (this *DockPortal) ListDocks() {
 	return
 }
 
+// GetDock
 func (this *DockPortal) GetDock() {
 	id := this.Ctx.Input.Param(":dockId")
 

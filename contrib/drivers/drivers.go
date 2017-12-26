@@ -31,6 +31,8 @@ import (
 	sample "github.com/opensds/opensds/testutils/driver"
 )
 
+// VolumeDriver is an interface for exposing some operations of different volume
+// drivers, currently support sample, lvm, ceph, cinder and so forth.
 type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
 	Setup() error
@@ -56,6 +58,7 @@ type VolumeDriver interface {
 	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
+// Init
 func Init(resourceType string) VolumeDriver {
 	var d VolumeDriver
 	switch resourceType {
@@ -79,6 +82,7 @@ func Init(resourceType string) VolumeDriver {
 	return d
 }
 
+// Clean
 func Clean(d VolumeDriver) VolumeDriver {
 	// Execute different clean operations according to the VolumeDriver type.
 	switch d.(type) {

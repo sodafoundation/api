@@ -28,13 +28,16 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// AsynchronizedExecutor
 type AsynchronizedExecutor interface {
 	Init(in string) error
 	Asynchronized() error
 }
 
+// AsynchronizedWorkflow
 type AsynchronizedWorkflow map[string]AsynchronizedExecutor
 
+// RegisterAsynchronizedWorkflow
 func RegisterAsynchronizedWorkflow(
 	req interface{},
 	tags map[string]string,
@@ -77,6 +80,7 @@ func RegisterAsynchronizedWorkflow(
 	return asynWorkflow, nil
 }
 
+// ExecuteAsynchronizedWorkflow
 func ExecuteAsynchronizedWorkflow(asynWorkflow AsynchronizedWorkflow) error {
 	for key := range asynWorkflow {
 		if asynWorkflow[key] == nil {
@@ -87,17 +91,21 @@ func ExecuteAsynchronizedWorkflow(asynWorkflow AsynchronizedWorkflow) error {
 	return nil
 }
 
+// SynchronizedExecutor
 type SynchronizedExecutor interface {
 	Init() error
 	Synchronized() error
 }
 
+// SynchronizedWorkflow
 type SynchronizedWorkflow map[string]SynchronizedExecutor
 
+// RegisterSynchronizedWorkflow
 func RegisterSynchronizedWorkflow(req interface{}, tags map[string]interface{}) (SynchronizedWorkflow, error) {
 	return SynchronizedWorkflow{}, nil
 }
 
+// ExecuteSynchronizedWorkflow
 func ExecuteSynchronizedWorkflow(synWorkflow SynchronizedWorkflow) error {
 	for key := range synWorkflow {
 		if synWorkflow[key] == nil {

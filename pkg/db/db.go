@@ -25,14 +25,16 @@ import (
 	"strings"
 
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
-	_ "github.com/opensds/opensds/pkg/db/drivers/mysql"
+	_ "github.com/opensds/opensds/pkg/db/drivers/mysql" // mysql NOT supported
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	fakedb "github.com/opensds/opensds/testutils/db"
 )
 
+// C is a global variable that controls database module.
 var C Client
 
+// Init function can perform some initialization work of different databases.
 func Init(db *Database) {
 	switch db.Driver {
 	case "mysql":
@@ -50,6 +52,8 @@ func Init(db *Database) {
 	}
 }
 
+// Client is an interface for exposing some operations of managing database
+// client.
 type Client interface {
 	CreateDock(dck *model.DockSpec) (*model.DockSpec, error)
 

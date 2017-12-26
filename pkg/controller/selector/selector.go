@@ -26,6 +26,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// Selector is an interface that exposes some operation of different selectors.
 type Selector interface {
 	SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error)
 }
@@ -45,10 +46,12 @@ func init() {
 	filterChain = azFilter
 }
 
+// NewSelector method creates a new selector structure and return its pointer.
 func NewSelector() Selector {
 	return &selector{}
 }
 
+// SelectSupportedPool
 func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
 	pools, err := db.C.ListPools()
 	if err != nil {
