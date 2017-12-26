@@ -54,6 +54,21 @@ ceph_config_path: "{{ opensds_config_dir }}/driver/ceph.yaml"
 # Use block-box install cinder_standalone if true, see details in:
 # https://github.com/openstack/cinder/tree/master/contrib/block-box
 use_cinder_standalone: true
+# If true, you can configure cinder_container_platform,  cinder_image_tag,
+# cinder_volume_group.
+
+# Default: debian:stretch, and ubuntu:xenial, centos:7 is also supported.
+cinder_container_platform: debian:stretch
+# The image tag can be arbitrarily modified, as long as follow the image naming
+# conventions, default: debian-cinder
+cinder_image_tag: debian-cinder
+# The cinder standalone use lvm driver as default driver, therefore `volume_group`
+# should be configured, the default is: cinder-volumes. The volume group will be
+# removed when use ansible script clean environment.
+cinder_volume_group: cinder-volumes
+# All source code and volume group file will be placed in the cinder_data_dir:
+cinder_data_dir: "{{ workplace }}/cinder_data_dir"
+
 
 # These fields are not suggested to be modified
 cinder_name: cinder backend
