@@ -1,5 +1,9 @@
 ---
 
+- name: install python-pip
+  apt:
+    name: python-pip
+
 - name: install lvm2
   apt:
     name: lvm2
@@ -12,19 +16,20 @@
   pip:
     name: docker-compose
 
-- name: create dir to save temp data
-  shell: mkdir -p /root/tmp_data
-  become: true
+- name: create directory to save source code and volume group file
+  file:
+    path: "{{ cinder_data_dir }}"
+    state: directory
+    recurse: yes
 
-- name: set cinder-volumes in thin mode
+- name: create volume group in thin mode
   shell:
     _raw_params: |
       function _create_lvm_volume_group {
           local vg=$1
           local size=$2
 
-          sudo mkdir -p /root/tmp_data
-          local backing_file=/root/tmp_data/${vg}.img
+          local backing_file={{ cinder_data_dir }}/${vg}.img
           if ! sudo vgs $vg; then
               # Only create if the file doesn't already exists
               [[ -f $backing_file ]] || truncate -s $size $backing_file
@@ -38,21 +43,21 @@
           fi
       }
       modprobe dm_thin_pool
-      _create_lvm_volume_group cinder-volumes 10G
+      _create_lvm_volume_group {{ cinder_volume_group }} 10G
   args:
     executable: /bin/bash
   become: true
 
 - name: check for python-cinderclient source code existed
   stat:
-    path: /root/tmp_data/python-cinderclient
+    path: "{{ cinder_data_dir }}/python-cinderclient"
   ignore_errors: yes
   register: cinderclient_existed
 
 - name: download python-cinderclient source code
   git:
     repo: https://github.com/openstack/python-cinderclient.git
-    dest: /root/tmp_data/python-cinderclient
+    dest: "{{ cinder_data_dir }}/python-cinderclient"
   when:
     - cinderclient_existed.stat.exists is undefined or cinderclient_existed.stat.exists == false
 
@@ -63,18 +68,18 @@
     pip install -e .
   become: true
   args:
-    chdir: /root/tmp_data/python-cinderclient
+    chdir: "{{ cinder_data_dir }}/python-cinderclient"
 
 - name: check for python-brick-cinderclient-ext source code existed
   stat:
-    path: /root/tmp_data/python-brick-cinderclient-ext
+    path: "{{ cinder_data_dir }}/python-brick-cinderclient-ext"
   ignore_errors: yes
   register: brick_existed
 
 - name: download python-brick-cinderclient-ext source code
   git:
     repo: https://github.com/openstack/python-brick-cinderclient-ext.git
-    dest: /root/tmp_data/python-brick-cinderclient-ext
+    dest: "{{ cinder_data_dir }}/python-brick-cinderclient-ext"
   when:
     - brick_existed.stat.exists is undefined or brick_existed.stat.exists == false
 
@@ -85,40 +90,52 @@
     pip install -e .
   become: true
   args:
-    chdir: /root/tmp_data/python-brick-cinderclient-ext
+    chdir: "{{ cinder_data_dir }}/python-brick-cinderclient-ext"
 
 
 - name: check for cinder source code existed
   stat:
-    path: /root/tmp_data/cinder
+    path: "{{ cinder_data_dir }}/cinder"
   ignore_errors: yes
   register: cinder_existed
 
 - name: download cinder source code
   git:
     repo: https://github.com/openstack/cinder.git
-    dest: /root/tmp_data/cinder
+    dest: "{{ cinder_data_dir }}/cinder"
   when:
     - cinder_existed.stat.exists is undefined or cinder_existed.stat.exists == false
 
 # Tested successfully in this version `7bbc95344d3961d0bf059252723fa40b33d4b3fe`
 # git checkout -b 7bbc95344d3961d0bf059252723fa40b33d4b3fe
-- name: make blockbox
+- name: update blockbox configuration
   shell: |
-    make blockbox
+    sed -i "s/PLATFORM ?= debian:stretch/PLATFORM ?= {{ cinder_container_platform }}/g" Makefile
+    sed -i "s/TAG ?= debian-cinder:latest/TAG ?= {{ cinder_image_tag }}:latest/g" Makefile
+
+    sed -i "s/image: debian-cinder/image: {{ cinder_image_tag }}/g" docker-compose.yml
+    sed -i "s/image: lvm-debian-cinder/image: {{ cinder_image_tag }}/g" docker-compose.yml
+
+    sed -i "s/volume_group = cinder-volumes /volume_group = {{ cinder_volume_group }}/g" etc/cinder.conf
   become: true
   args:
-    chdir: /root/tmp_data/cinder/contrib/block-box
+    chdir: "{{ cinder_data_dir }}/cinder/contrib/block-box"
+
+- name: make blockbox
+  shell: make blockbox
+  become: true
+  args:
+    chdir: "{{ cinder_data_dir }}/cinder/contrib/block-box"
 
 - name: start cinder-standalone service
   shell: docker-compose up -d
   become: true
   args:
-    chdir: /root/tmp_data/cinder/contrib/block-box
+    chdir: "{{ cinder_data_dir }}/cinder/contrib/block-box"
 
 - name: wait for cinder service to start normally
   wait_for:
     host: 127.0.0.1
     port: 8776
     delay: 2
-    timeout: 20
+    timeout: 120
