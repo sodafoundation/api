@@ -68,6 +68,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	var polName = opt.GetPoolName()
 
 	if _, err := d.handler("lvcreate", []string{
+		"-Z", "n",
 		"-n", opt.GetName(),
 		"-L", size,
 		polName,
