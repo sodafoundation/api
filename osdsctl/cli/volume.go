@@ -176,7 +176,7 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 
 func volumeUpdateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
-		fmt.Println("The number of args is not correct!")
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
@@ -188,7 +188,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 
 	resp, err := client.UpdateVolume(args[0], vol)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
