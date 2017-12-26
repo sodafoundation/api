@@ -15,28 +15,28 @@
 package cli
 
 import (
-	"encoding/json"
 	"os"
 	"os/exec"
-	"reflect"
 	"testing"
 
-	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
-	if nil == client {
-		ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
 
-		if !ok {
-			ep = "TestEndPoint"
-			os.Setenv("OPENSDS_ENDPOINT", ep)
-		}
+	if !ok {
+		ep = "TestEndPoint"
+		os.Setenv("OPENSDS_ENDPOINT", ep)
+	}
 
-		client = c.NewClient(&c.Config{Endpoint: ep})
+	testVolumeMgr := c.VolumeMgr{
+		Receiver: NewFakeVolumeReceiver(),
+		Endpoint: ep,
+	}
+
+	client = &c.Client{
+		VolumeMgr: &testVolumeMgr,
 	}
 }
 
@@ -63,65 +63,31 @@ func TestVolumeSnapshotAction(t *testing.T) {
 }
 
 func TestVolumeSnapshotCreateAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "CreateVolumeSnapshot",
-		func(_ *c.VolumeMgr, body c.VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
-			var res model.VolumeSnapshotSpec
-			if err := json.Unmarshal([]byte(ByteSnapshot), &res); err != nil {
-				return nil, err
-			}
-
-			return &res, nil
-		})
-
 	var args []string
 	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	volumeSnapshotCreateAction(volumeSnapshotCreateCommand, args)
 }
 
 func TestVolumeSnapshotShowAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "GetVolumeSnapshot",
-		func(_ *c.VolumeMgr, snpID string) (*model.VolumeSnapshotSpec, error) {
-			var res model.VolumeSnapshotSpec
-
-			if err := json.Unmarshal([]byte(ByteSnapshot), &res); err != nil {
-				return nil, err
-			}
-
-			return &res, nil
-		})
-
 	var args []string
 	args = append(args, "3769855c-a102-11e7-b772-17b880d2f537")
 	volumeSnapshotShowAction(volumeSnapshotShowCommand, args)
 }
 
 func TestVolumeSnapshotListAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "ListVolumeSnapshots",
-		func(_ *c.VolumeMgr) ([]*model.VolumeSnapshotSpec, error) {
-			var res []*model.VolumeSnapshotSpec
-			if err := json.Unmarshal([]byte(ByteSnapshots), &res); err != nil {
-				return nil, err
-			}
-
-			return res, nil
-		})
-
 	var args []string
 	volumeSnapshotListAction(volumeSnapshotListCommand, args)
 }
 
 func TestVolumeSnapshotDeleteAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "DeleteVolumeSnapshot",
-		func(_ *c.VolumeMgr, snpID string, body c.VolumeSnapshotBuilder) error {
-			return nil
-		})
-
 	var args []string
 	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	args = append(args, "3769855c-a102-11e7-b772-17b880d2f537")
 	volumeSnapshotDeleteAction(volumeSnapshotDeleteCommand, args)
+}
+
+func TestVolumeSnapshotUpdateAction(t *testing.T) {
+	var args []string
+	args = append(args, "3769855c-a102-11e7-b772-17b880d2f537")
+	volumeSnapshotUpdateAction(volumeSnapshotDeleteCommand, args)
 }

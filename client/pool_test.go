@@ -31,7 +31,7 @@ func NewFakePoolReceiver() Receiver {
 type fakePoolReceiver struct{}
 
 func (*fakePoolReceiver) Recv(
-	f reqFunc,
+	f ReqFunc,
 	string,
 	method string,
 	in interface{},

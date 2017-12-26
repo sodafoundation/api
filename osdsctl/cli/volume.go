@@ -58,6 +58,12 @@ var volumeDeleteCommand = &cobra.Command{
 	Run:   volumeDeleteAction,
 }
 
+var volumeUpdateCommand = &cobra.Command{
+	Use:   "update <id>",
+	Short: "update a volume in the cluster",
+	Run:   volumeUpdateAction,
+}
+
 var (
 	profileId string
 	volName   string
@@ -69,12 +75,15 @@ func init() {
 	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the name of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
-	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "null", "the name of created volume")
+	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
+	volumeCommand.AddCommand(volumeUpdateCommand)
+	volumeUpdateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of updated volume")
+	volumeUpdateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of updated volume")
 
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 }
@@ -163,4 +172,26 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	fmt.Printf("Delete volume(%s) success.\n", args[0])
+}
+
+func volumeUpdateAction(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		fmt.Println("The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	vol := &model.VolumeSpec{
+		Name:        volName,
+		Description: volDesp,
+	}
+
+	resp, err := client.UpdateVolume(args[0], vol)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+	PrintDict(resp, keys, FormatterList{})
 }

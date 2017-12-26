@@ -26,10 +26,10 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-type reqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
+type ReqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
 
 type Receiver interface {
-	Recv(reqFunc, string, string, interface{}, interface{}) error
+	Recv(ReqFunc, string, string, interface{}, interface{}) error
 }
 
 func NewReceiver() Receiver {
@@ -39,7 +39,7 @@ func NewReceiver() Receiver {
 type receiver struct{}
 
 func (*receiver) Recv(
-	f reqFunc,
+	f ReqFunc,
 	url string,
 	method string,
 	input interface{},
