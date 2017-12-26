@@ -28,10 +28,12 @@ import (
 
 type ReqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
 
+// Receiver
 type Receiver interface {
 	Recv(ReqFunc, string, string, interface{}, interface{}) error
 }
 
+// NewReceiver
 func NewReceiver() Receiver {
 	return &receiver{}
 }
@@ -76,6 +78,7 @@ func (*receiver) Recv(
 	return nil
 }
 
+// ParamOption
 type ParamOption map[string]string
 
 func request(

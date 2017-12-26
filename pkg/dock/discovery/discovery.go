@@ -30,12 +30,14 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// NewDiscoverer method creates a new DockDiscoverer and return its pointer.
 func NewDiscoverer() *DockDiscoverer {
 	return &DockDiscoverer{
 		c: db.C,
 	}
 }
 
+// DockDiscoverer is a struct for exposing some operations of service discovery.
 type DockDiscoverer struct {
 	dcks []*model.DockSpec
 	pols []*model.StoragePoolSpec
@@ -43,6 +45,7 @@ type DockDiscoverer struct {
 	c db.Client
 }
 
+// Init
 func (dd *DockDiscoverer) Init() error {
 	// Load resource from specified file
 	bm := GetBackendsMap()
@@ -73,6 +76,7 @@ func (dd *DockDiscoverer) Init() error {
 	return nil
 }
 
+// Discover
 func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 	var pols []*model.StoragePoolSpec
 	var err error
@@ -101,6 +105,7 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 	return err
 }
 
+// Store
 func (dd *DockDiscoverer) Store() error {
 	var err error
 

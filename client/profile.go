@@ -31,6 +31,7 @@ type ProfileBuilder *model.ProfileSpec
 // could be discussed if it's better to define an interface.
 type ExtraBuilder *model.ExtraSpec
 
+// NewProfileMgr
 func NewProfileMgr(edp string) *ProfileMgr {
 	return &ProfileMgr{
 		Receiver: NewReceiver(),
@@ -38,12 +39,14 @@ func NewProfileMgr(edp string) *ProfileMgr {
 	}
 }
 
+// ProfileMgr
 type ProfileMgr struct {
 	Receiver
 
 	Endpoint string
 }
 
+// CreateProfile
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
 	url := strings.Join([]string{
@@ -57,6 +60,7 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 	return &res, nil
 }
 
+// GetProfile
 func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
 	url := strings.Join([]string{
@@ -70,6 +74,7 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return &res, nil
 }
 
+// ListProfiles
 func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec
 	url := strings.Join([]string{
@@ -83,6 +88,7 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	return res, nil
 }
 
+// DeleteProfile
 func (p *ProfileMgr) DeleteProfile(prfID string) error {
 	url := strings.Join([]string{
 		p.Endpoint,
@@ -91,6 +97,7 @@ func (p *ProfileMgr) DeleteProfile(prfID string) error {
 	return p.Recv(request, url, "DELETE", nil, nil)
 }
 
+// AddExtraProperty
 func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
 	url := strings.Join([]string{
@@ -105,6 +112,7 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 	return &res, nil
 }
 
+// ListExtraProperties
 func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
 	var res model.ExtraSpec
 	url := strings.Join([]string{
@@ -119,6 +127,7 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 	return &res, nil
 }
 
+// RemoveExtraProperty
 func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) error {
 	url := strings.Join([]string{
 		p.Endpoint,

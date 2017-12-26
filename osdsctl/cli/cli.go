@@ -47,6 +47,7 @@ func init() {
 	rootCommand.AddCommand(profileCommand)
 }
 
+// Run method indicates how to start a cli tool through cobra.
 func Run() error {
 	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
 	if !ok {

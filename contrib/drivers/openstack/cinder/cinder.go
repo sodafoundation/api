@@ -45,6 +45,8 @@ const (
 
 var conf = CinderConfig{}
 
+// Driver is a struct of Cinder backend, which can be called to manage block
+// storage service defined in gophercloud.
 type Driver struct {
 	// Current block storage version
 	blockStoragev2 *gophercloud.ServiceClient
@@ -53,6 +55,7 @@ type Driver struct {
 	conf *CinderConfig
 }
 
+// AuthOptions
 type AuthOptions struct {
 	NoAuth           bool   `yaml:"noAuth,omitempty"`
 	CinderEndpoint   string `yaml:"cinderEndpoint,omitempty"`
@@ -65,11 +68,13 @@ type AuthOptions struct {
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
 
+// CinderConfig
 type CinderConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`
 }
 
+// Setup
 func (d *Driver) Setup() error {
 	// Read cinder config file
 	d.conf = &CinderConfig{}
@@ -120,8 +125,10 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
+// Unset
 func (d *Driver) Unset() error { return nil }
 
+// CreateVolume
 func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	//Configure create request body.
 	opts := &volumesv2.CreateOpts{
@@ -177,6 +184,7 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	}, nil
 }
 
+// PullVolume
 func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 	vol, err := volumesv2.Get(d.blockStoragev2, volID).Extract()
 	if err != nil {
@@ -196,6 +204,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 	}, nil
 }
 
+// DeleteVolume
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	if err := volumesv2.Delete(d.blockStoragev2, opt.GetId()).ExtractErr(); err != nil {
 		log.Error("Cannot delete volume:", err)
@@ -205,6 +214,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// InitializeConnection
 func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	opts := &volumeactions.InitializeConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
@@ -227,8 +237,10 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 	}, nil
 }
 
+// TerminateConnection
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
 
+// CreateSnapshot
 func (d *Driver) CreateSnapshot(req *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	opts := &snapshotsv2.CreateOpts{
 		VolumeID:    req.GetVolumeId(),
@@ -282,6 +294,7 @@ func (d *Driver) CreateSnapshot(req *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	}, nil
 }
 
+// PullSnapshot
 func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) {
 	snp, err := snapshotsv2.Get(d.blockStoragev2, snapID).Extract()
 	if err != nil {
@@ -301,6 +314,7 @@ func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) 
 	}, nil
 }
 
+// DeleteSnapshot
 func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 	if err := snapshotsv2.Delete(d.blockStoragev2, req.GetId()).ExtractErr(); err != nil {
 		log.Error("Cannot delete snapshot:", err)
@@ -316,6 +330,8 @@ func (d *Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 	param["thin"] = proper.Thin
 	return &param
 }
+
+// ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	log.Info("Starting list pools in cinder drivers.")
 	opts := &schedulerstats.ListOpts{Detail: true}

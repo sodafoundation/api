@@ -25,6 +25,8 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+// Controller is an interface for exposing some operations of different policy
+// controllers.
 type Controller interface {
 	Setup(flag int)
 
@@ -37,6 +39,7 @@ type Controller interface {
 	SetDock(dockInfo *model.DockSpec)
 }
 
+// NewController method creates a new policy controller.
 func NewController(profileSpec *model.ProfileSpec) Controller {
 	return &controller{
 		Profile: profileSpec,
@@ -63,10 +66,7 @@ func (c *controller) ExecuteSyncPolicy(req interface{}) error {
 		return err
 	}
 
-	if err = executor.ExecuteSynchronizedWorkflow(swf); err != nil {
-		return err
-	}
-	return nil
+	return executor.ExecuteSynchronizedWorkflow(swf)
 }
 
 func (c *controller) ExecuteAsyncPolicy(req interface{}, in string, errChan chan error) {
