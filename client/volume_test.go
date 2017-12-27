@@ -36,7 +36,7 @@ func NewFakeVolumeReceiver() Receiver {
 type fakeVolumeReceiver struct{}
 
 func (*fakeVolumeReceiver) Recv(
-	f reqFunc,
+	f ReqFunc,
 	string,
 	method string,
 	in interface{},

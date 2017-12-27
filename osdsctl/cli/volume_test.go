@@ -16,28 +16,116 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
 	"os/exec"
-	"reflect"
+	"strings"
 	"testing"
 
-	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
-func init() {
-	if nil == client {
-		ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+var fv = &c.VolumeMgr{
+	Receiver: NewFakeVolumeReceiver(),
+}
 
-		if !ok {
-			ep = "TestEndPoint"
-			os.Setenv("OPENSDS_ENDPOINT", ep)
+func NewFakeVolumeReceiver() c.Receiver {
+	return &fakeVolumeReceiver{}
+}
+
+type fakeVolumeReceiver struct{}
+
+func (*fakeVolumeReceiver) Recv(
+	f c.ReqFunc,
+	string,
+	method string,
+	in interface{},
+	out interface{},
+) error {
+	switch strings.ToUpper(method) {
+	case "POST", "PUT":
+		switch out.(type) {
+		case *model.VolumeSpec:
+			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported!")
 		}
+		break
+	case "GET":
+		switch out.(type) {
+		case *model.VolumeSpec:
+			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeSpec:
+			if err := json.Unmarshal([]byte(ByteVolumes), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeAttachmentSpec:
+			if err := json.Unmarshal([]byte(ByteAttachments), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteSnapshots), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported!")
+		}
+		break
+	case "DELETE":
+		break
+	default:
+		return errors.New("inputed method format not supported!")
+	}
 
-		client = c.NewClient(&c.Config{Endpoint: ep})
+	return nil
+}
+
+func init() {
+	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+
+	if !ok {
+		ep = "TestEndPoint"
+		os.Setenv("OPENSDS_ENDPOINT", ep)
+	}
+
+	testVolumeMgr := c.VolumeMgr{
+		Receiver: NewFakeVolumeReceiver(),
+		Endpoint: ep,
+	}
+
+	client = &c.Client{
+		VolumeMgr: &testVolumeMgr,
 	}
 }
 
@@ -64,67 +152,30 @@ func TestVolumeAction(t *testing.T) {
 }
 
 func TestVolumeCreateAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "CreateVolume",
-		func(_ *c.VolumeMgr, body c.VolumeBuilder) (*model.VolumeSpec, error) {
-			var res model.VolumeSpec
-			if err := json.Unmarshal([]byte(ByteVolume), &res); err != nil {
-				return nil, err
-			}
-
-			return &res, nil
-		})
-
 	var args []string
 	args = append(args, "1")
 	volumeCreateAction(volumeCreateCommand, args)
 }
 
 func TestVolumeShowAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "GetVolume",
-		func(_ *c.VolumeMgr, volID string) (*model.VolumeSpec, error) {
-			var res model.VolumeSpec
-
-			if err := json.Unmarshal([]byte(ByteVolume), &res); err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-
-			res.Id = volID
-
-			return &res, nil
-		})
-
 	var args []string
 	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	volumeShowAction(volumeShowCommand, args)
 }
 
 func TestVolumeListAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "ListVolumes",
-		func(_ *c.VolumeMgr) ([]*model.VolumeSpec, error) {
-			var res []*model.VolumeSpec
-			if err := json.Unmarshal([]byte(ByteVolumes), &res); err != nil {
-				return nil, err
-			}
-
-			return res, nil
-		})
-
 	var args []string
 	volumeListAction(volumeListCommand, args)
 }
 
 func TestVolumeDeleteAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.VolumeMgr), "DeleteVolume",
-		func(_ *c.VolumeMgr, volID string, body c.VolumeBuilder) error {
-			return nil
-		})
-
 	var args []string
 	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	volumeDeleteAction(volumeDeleteCommand, args)
+}
+
+func TestVolumeUpdateAction(t *testing.T) {
+	var args []string
+	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
+	volumeUpdateAction(volumeDeleteCommand, args)
 }
