@@ -48,6 +48,9 @@ fi
 cd ${HOME}/${ETCD_DIR}
 nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
 
+# Create opensds config dir.
+mkdir -p /etc/opensds
+
 # Config opensds backend info.
 if [ ! -f /etc/opensds/opensds.conf ]; then
 	echo '
