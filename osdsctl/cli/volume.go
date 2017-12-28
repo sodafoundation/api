@@ -86,6 +86,7 @@ func init() {
 	volumeUpdateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of updated volume")
 
 	volumeCommand.AddCommand(volumeSnapshotCommand)
+	volumeCommand.AddCommand(volumeAttachmentCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
