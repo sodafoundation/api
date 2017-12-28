@@ -101,8 +101,8 @@ done
 
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_ROOT}
-build/out/bin/osdsdock &>> ${OPENSDS_LOG_DIR}/osdsdock.log &
-build/out/bin/osdslet &>> ${OPENSDS_LOG_DIR}/osdslet.log &
+sudo build/out/bin/osdsdock -daemon
+sudo build/out/bin/osdslet -daemon
 
 # Start e2e test.
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
