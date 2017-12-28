@@ -24,7 +24,10 @@ ssh-keygen -t rsa
 ssh-copy-id -i ~/.ssh/id_rsa.pub <ip_address> # IP address of the target machine of the installation
 ```
 
-### Download ansible tool
+### Install docker
+If use a standalone cinder as backend, you also need to install docker to run cinder service. Please see the [docker installation document](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/) for details.
+
+### Install ansible tool
 ```bash
 sudo add-apt-repository ppa:ansible/ansible # This step is needed to upgrade ansible to version 2.4.2 which is required for the ceph backend.
 sudo apt-get update
@@ -90,7 +93,21 @@ osd_scenario: collocated
 If `cinder` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
 enabled_backend: cinder # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'
-use_cinder_standalone: true # if using cinder standalone
+
+# Use block-box install cinder_standalone if true, see details in:
+use_cinder_standalone: true
+# If true, you can configure cinder_container_platform,  cinder_image_tag,
+# cinder_volume_group.
+
+# Default: debian:stretch, and ubuntu:xenial, centos:7 is also supported.
+cinder_container_platform: debian:stretch
+# The image tag can be arbitrarily modified, as long as follow the image naming
+# conventions, default: debian-cinder
+cinder_image_tag: debian-cinder
+# The cinder standalone use lvm driver as default driver, therefore `volume_group`
+# should be configured, the default is: cinder-volumes. The volume group will be
+# removed when use ansible script clean environment.
+cinder_volume_group: cinder-volumes
 ```
 
 Configure the auth and pool options to access cinder in `group_vars/cinder/cinder.yaml`. Do not need to make additional configure changes if using cinder standalone.
