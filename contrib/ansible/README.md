@@ -38,7 +38,7 @@ ansible --version # Ansible version 2.4.2 or higher is required for ceph; 2.0.0.
 ### Download opensds source code
 ```bash
 mkdir -p $HOME/gopath/src/github.com/opensds && cd $HOME/gopath/src/github.com/opensds
-git clone https://github.com/opensds/opensds.git
+git clone https://github.com/opensds/opensds.git -b <specified_branch_name>
 cd opensds/contrib/ansible
 ```
 
