@@ -20,8 +20,10 @@ IMAGE_PATH=${HOME}/lvm.img
 DEIVCE_PATH=$(losetup -f)
 VG_NAME=opensds-vg001
 
-# Install some lvm tools.
+# Install some lvm tgt and open-iscsi tools.
 sudo apt-get install -y lvm2
+sudo apt-get install -y tgt
+sudo apt-get install -y open-iscsi
 
 if [ -z $HOME ];then
 	echo "home path not exist"
@@ -59,7 +61,7 @@ mkdir -p /etc/opensds/driver
 
 cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
 [osdslet]
-api_endpoint = localhost:50040
+api_endpoint = 0.0.0.0:50040
 graceful = True
 log_file = /var/log/opensds/osdslet.log
 socket_order = inc
