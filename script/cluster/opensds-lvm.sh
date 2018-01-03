@@ -17,29 +17,34 @@
 ETCD_DIR=etcd-v3.2.0-linux-amd64
 OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds/opensds
 IMAGE_PATH=${HOME}/lvm.img
-DEIVCE_PATH=/dev/loop1
-VG_NAME=vg001
+DEIVCE_PATH=$(losetup -f)
+VG_NAME=opensds-vg001
 
-# Install some lvm tools.
+# Install some lvm tgt and open-iscsi tools.
 sudo apt-get install -y lvm2
+sudo apt-get install -y tgt
+sudo apt-get install -y open-iscsi
 
 if [ -z $HOME ];then
 	echo "home path not exist"
 	exit
 fi
 
-pvoutput=`pvdisplay`
-vgoutput=`vgdisplay`
-
 if [ ! -f ${IMAGE_PATH} ]; then
 	dd if=/dev/zero of=${IMAGE_PATH} bs=1GB count=20
 fi
-if [ ! -n "$pvoutput" ]; then
+
+if losetup -a|grep -w "${HOME}/lvm.img"; then
+    DEIVCE_PATH=$(losetup -a|grep "${HOME}/lvm.img"| awk -F ':' '{print $1}')
+fi
+
+if ! pvs $DEIVCE_PATH; then
 	# Create a new physical volume.
 	losetup ${DEIVCE_PATH} ${IMAGE_PATH}
 	pvcreate ${DEIVCE_PATH}
 fi
-if [ ! -n "$vgoutput" ]; then
+
+if ! vgs $VG_NAME; then
 	# Add pv in volume group.
 	vgcreate ${VG_NAME} ${DEIVCE_PATH}
 fi
@@ -50,41 +55,40 @@ nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
 
 # Create opensds config dir.
 mkdir -p /etc/opensds
+mkdir -p /etc/opensds/driver
 
 # Config opensds backend info.
-if [ ! -f /etc/opensds/opensds.conf ]; then
-	echo '
-	[osdslet]
-	api_endpoint = localhost:50040
-	graceful = True
-	log_file = /var/log/opensds/osdslet.log
-	socket_order = inc
-	
-	[osdsdock]
-	api_endpoint = localhost:50050
-	log_file = /var/log/opensds/osdsdock.log
-	# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-	enabled_backends = lvm
 
-	[lvm]
-	name = lvm
-	description = LVM Test
-	driver_name = lvm
-	config_path = /etc/opensds/driver/lvm.yaml
+cat > /etc/opensds/opensds.conf << OPENSDS_GLOABL_CONFIG_DOC
+[osdslet]
+api_endpoint = 0.0.0.0:50040
+graceful = True
+log_file = /var/log/opensds/osdslet.log
+socket_order = inc
 
-	[database]
-	endpoint = localhost:2379,localhost:2380
-	driver = etcd
-	' >> /etc/opensds/opensds.conf
-fi
-if [ ! -f /etc/opensds/driver/lvm.yaml ]; then
-	echo '
-	pool:
-	  vg001:
-	    diskType: SSD
-	    AZ: default
-	' >> /etc/opensds/driver/lvm.yaml
-fi
+[osdsdock]
+api_endpoint = localhost:50050
+log_file = /var/log/opensds/osdsdock.log
+# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+enabled_backends = lvm
+
+[lvm]
+name = lvm
+description = LVM Test
+driver_name = lvm
+config_path = /etc/opensds/driver/lvm.yaml
+
+[database]
+endpoint = localhost:2379,localhost:2380
+driver = etcd
+OPENSDS_GLOABL_CONFIG_DOC
+
+cat > /etc/opensds/driver/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
+pool:
+  $VG_NAME:
+    diskType: NL-SAS
+    AZ: default
+OPENSDS_LVM_CONFIG_DOC
 
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_DIR}
