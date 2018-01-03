@@ -25,22 +25,22 @@ ETCD_DIR=etcd-v3.2.0-linux-amd64
 
 # Run apt-get update to update the system packages.
 sudo apt-get update
+source /etc/profile
 
 # Install Golang environment
 if ! which go &>/dev/null; then
-	wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
-	tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+	wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
+	tar xzf go1.9.linux-amd64.tar.gz -C /usr/local/
 	echo 'export GOROOT=/usr/local/go' >> /etc/profile
 	echo 'export GOPATH=$HOME/gopath' >> /etc/profile
 	echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
 fi
-source /etc/profile
 
 # If etcd file not exists, download it from etcd release url.
 if [ ! -d ${HOME}/${ETCD_DIR} ]; then
 	curl -L ${ETCD_URL}/${ETCD_TARBALL} -o ${HOME}/${ETCD_TARBALL}
 	cd ${HOME}
-	tar xzvf ${HOME}/${ETCD_TARBALL}
+	tar xzf ${HOME}/${ETCD_TARBALL}
 fi
 
 # OpenSDS Download and Build
@@ -49,7 +49,7 @@ if [ ! -d $OPENSDS_DIR ]; then
 fi
 cd ${OPENSDS_DIR}
 if [ ! -d $OPENSDS_ROOT ]; then
-	git clone https://github.com/opensds/opensds.git -b development
+	git clone https://github.com/opensds/opensds.git -b master
 fi
 cd ${OPENSDS_ROOT}
 if [ ! -d $OPENSDS_ROOT/build ]; then
