@@ -23,20 +23,8 @@ import (
 )
 
 func init() {
-	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
-
-	if !ok {
-		ep = "TestEndPoint"
-		os.Setenv("OPENSDS_ENDPOINT", ep)
-	}
-
-	testVolumeMgr := c.VolumeMgr{
-		Receiver: NewFakeVolumeReceiver(),
-		Endpoint: ep,
-	}
-
-	client = &c.Client{
-		VolumeMgr: &testVolumeMgr,
+	if false == IsFakeClient {
+		client = NewFakeClient(&c.Config{Endpoint: TestEp})
 	}
 }
 

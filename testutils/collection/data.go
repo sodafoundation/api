@@ -331,6 +331,20 @@ var (
 			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
 		}
 	]`
+
+	ByteVersion = `{
+		"name": "v1beta",
+		"status": "SUPPORTED",
+		"updatedAt": "2017-04-10T14:36:58.014Z"
+	}`
+
+	ByteVersions= `[
+		{
+			"name": "v1beta",
+			"status": "CURRENT",
+			"updatedAt": "2017-07-10T14:36:58.014Z"
+		}
+	]`
 )
 
 // The StringSlice*** variable here is designed for unit test in etcd package.
