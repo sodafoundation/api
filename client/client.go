@@ -26,6 +26,7 @@ type Client struct {
 	*DockMgr
 	*PoolMgr
 	*VolumeMgr
+	*VersionMgr
 
 	cfg *Config
 }
@@ -49,6 +50,7 @@ func NewClient(c *Config) *Client {
 		DockMgr:    NewDockMgr(c.Endpoint),
 		PoolMgr:    NewPoolMgr(c.Endpoint),
 		VolumeMgr:  NewVolumeMgr(c.Endpoint),
+		VersionMgr: NewVersionMgr(c.Endpoint),
 	}
 }
 

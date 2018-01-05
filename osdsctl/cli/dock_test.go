@@ -15,28 +15,16 @@
 package cli
 
 import (
-	"encoding/json"
 	"os"
 	"os/exec"
-	"reflect"
 	"testing"
 
-	"github.com/bouk/monkey"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
-	if nil == client {
-		ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
-
-		if !ok {
-			ep = "TestEndPoint"
-			os.Setenv("OPENSDS_ENDPOINT", ep)
-		}
-
-		client = c.NewClient(&c.Config{Endpoint: ep})
+	if false == IsFakeClient {
+		client = NewFakeClient(&c.Config{Endpoint: TestEp})
 	}
 }
 
@@ -63,36 +51,12 @@ func TestDockAction(t *testing.T) {
 }
 
 func TestDockShowAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.DockMgr), "GetDock",
-		func(_ *c.DockMgr, _ string) (*model.DockSpec, error) {
-			var res model.DockSpec
-
-			if err := json.Unmarshal([]byte(ByteDock), &res); err != nil {
-				return &res, err
-			}
-
-			return &res, nil
-		})
-
 	var args []string
 	args = append(args, "b7602e18-771e-11e7-8f38-dbd6d291f4e0")
 	dockShowAction(dockShowCommand, args)
 }
 
 func TestDockListAction(t *testing.T) {
-	defer monkey.UnpatchAll()
-	monkey.PatchInstanceMethod(reflect.TypeOf(client.DockMgr), "ListDocks",
-		func(_ *c.DockMgr) ([]*model.DockSpec, error) {
-			var res []*model.DockSpec
-
-			if err := json.Unmarshal([]byte(ByteDocks), &res); err != nil {
-				return res, err
-			}
-
-			return res, nil
-		})
-
 	var args []string
 	dockListAction(dockListCommand, args)
 }

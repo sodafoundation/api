@@ -1,0 +1,13 @@
+version: '2'
+services:
+  osdslet:
+    image: 'opensdsio/opensds-controller:latest'
+    network_mode: "host"
+    volumes:
+    - /etc/opensds:/etc/opensds
+  osdsdock:
+    image: 'opensdsio/opensds-dock:latest'
+    network_mode: "host"
+    privileged: true
+    volumes:
+    - /etc/opensds:/etc/opensds
