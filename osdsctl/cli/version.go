@@ -66,7 +66,7 @@ func versionShowAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Name", "Status", "Updated"}
+	keys := KeyList{"Name", "Status", "UpdatedAt"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -82,6 +82,6 @@ func versionListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Name", "Status", "Updated"}
+	keys := KeyList{"Name", "Status", "UpdatedAt"}
 	PrintList(resp, keys, FormatterList{})
 }
