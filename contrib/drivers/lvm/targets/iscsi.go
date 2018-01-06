@@ -32,8 +32,11 @@ type ISCSITarget interface {
 	GetLun(path string) int
 	RemoveLun(lun int) error
 
-	BindInitiator(initiator string) error
-	UnbindInitiator(initiator string) error
+	BindInitiatorName(initiator string) error
+	UnbindInitiatorName(initiator string) error
+
+	BindInitiatorAddress(initiator string) error
+	UnbindInitiatorAddress(initiator string) error
 }
 
 func NewISCSITarget(tid int, name string, bip string) ISCSITarget {
@@ -174,13 +177,13 @@ func (t *tgtTarget) RemoveISCSITarget() error {
 	return nil
 }
 
-func (t *tgtTarget) BindInitiator(initiator string) error {
+func (t *tgtTarget) BindInitiatorName(initiator string) error {
 	var cmd = []string{
 		"--lld", "iscsi",
 		"--op", "bind",
 		"--mode", "target",
 		"--tid", fmt.Sprint(t.Tid),
-		"-I", initiator,
+		"--initiator-name", initiator,
 	}
 	if _, err := t.execCmd(cmd); err != nil {
 		log.Error("Fail to exec 'tgtadm' to bind iscsi target:", err)
@@ -190,13 +193,45 @@ func (t *tgtTarget) BindInitiator(initiator string) error {
 	return nil
 }
 
-func (t *tgtTarget) UnbindInitiator(initiator string) error {
+func (t *tgtTarget) UnbindInitiatorName(initiator string) error {
 	var cmd = []string{
 		"--lld", "iscsi",
 		"--op", "unbind",
 		"--mode", "target",
 		"--tid", fmt.Sprint(t.Tid),
-		"-I", initiator,
+		"--initiator-name", initiator,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to unbind iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) BindInitiatorAddress(initiator string) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "bind",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+		"--initiator-address", initiator,
+	}
+	if _, err := t.execCmd(cmd); err != nil {
+		log.Error("Fail to exec 'tgtadm' to bind iscsi target:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *tgtTarget) UnbindInitiatorAddress(initiator string) error {
+	var cmd = []string{
+		"--lld", "iscsi",
+		"--op", "unbind",
+		"--mode", "target",
+		"--tid", fmt.Sprint(t.Tid),
+		"--initiator-address", initiator,
 	}
 	if _, err := t.execCmd(cmd); err != nil {
 		log.Error("Fail to exec 'tgtadm' to unbind iscsi target:", err)

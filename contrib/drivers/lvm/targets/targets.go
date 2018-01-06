@@ -54,11 +54,14 @@ func (t *iscsiTarget) CreateExport(path, initiator string) (map[string]interface
 		if err := t.CreateISCSITarget(); err != nil {
 			return nil, err
 		}
+		if err := t.BindInitiatorAddress("ALL"); err != nil {
+			return nil, err
+		}
 	}
 	if err := t.AddLun(globalLun, path); err != nil {
 		return nil, err
 	}
-	if err := t.BindInitiator(initiator); err != nil {
+	if err := t.BindInitiatorName(initiator); err != nil {
 		return nil, err
 	}
 
@@ -72,7 +75,7 @@ func (t *iscsiTarget) CreateExport(path, initiator string) (map[string]interface
 }
 
 func (t *iscsiTarget) RemoveExport(path, initiator string) error {
-	if err := t.UnbindInitiator(initiator); err != nil {
+	if err := t.UnbindInitiatorName(initiator); err != nil {
 		return err
 	}
 	lun := t.GetLun(path)
