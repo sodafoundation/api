@@ -44,7 +44,7 @@ now, please refer to the Contributing sections below.
 
 See [COMMUNITY](COMMUNITY.md) for details on discussion of the OpenSDS architecture design and feature development.
 
-* The meeting will be held on every Tuesday at 1:00 UTC. Join in at [here](https://zoom.us/j/933703258).
+* The meeting will be held on Biweekly Tuesday at 1:00 UTC. Join in at [here](https://zoom.us/j/933703258).
 * Meeting notes and agenda can be found at [here](https://docs.google.com/document/d/1OKDp7iDw_l_5kGyniqTKtrwRFAZMvItGghsxfrCqr5c/edit#).
 
 If you are interested at work trackings on the meeting, please visit [WG Planning](https://docs.google.com/spreadsheets/d/1eFZsYCqTW8-zc8K6IMFUVhmzrZQKpOeO8Br0cCraPlU/edit#gid=0).
