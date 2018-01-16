@@ -1,5 +1,6 @@
 dist: trusty
 sudo: required
+group: deprecated-2017Q4
 
 services:
   - docker
@@ -40,7 +41,7 @@ matrix:
     env: TARGET=ppc64le
 
 install:
-  - go get github.com/mattn/goveralls
+  - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
   - make
   - sudo ./test/integration/prepare.sh
