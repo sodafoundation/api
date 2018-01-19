@@ -15,6 +15,7 @@
 # limitations under the License.
 
 ETCD_DIR=etcd-v3.2.0-linux-amd64
+ETCD_ENDPOINT=localhost:2379,localhost:2380
 OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds/opensds
 IMAGE_PATH=${HOME}/lvm.img
 DEIVCE_PATH=$(losetup -f)
@@ -51,8 +52,14 @@ fi
 
 # Run etcd daemon in background.
 cd ${HOME}/${ETCD_DIR}
-nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
-
+if lsof -i:2380 || lsof -i:2379 ;then
+    etcd -initial-advertise-peer-urls http://127.0.0.1:52380  -listen-client-urls http://127.0.0.1:52379  \
+    -advertise-client-urls http://127.0.0.1:52379 -listen-peer-urls http://127.0.0.1:52380 > nohup.out 2> nohup.err < /dev/null &
+    ETCD_ENDPOINT=localhost:52379,localhost:52380
+else
+    nohup sudo ./etcd > nohup.out 2> nohup.err < /dev/null &
+    ETCD_ENDPOINT=localhost:2379,localhost:2380
+fi
 # Create opensds config dir.
 mkdir -p /etc/opensds
 mkdir -p /etc/opensds/driver
@@ -79,7 +86,7 @@ driver_name = lvm
 config_path = /etc/opensds/driver/lvm.yaml
 
 [database]
-endpoint = localhost:2379,localhost:2380
+endpoint = $ETCD_ENDPOINT
 driver = etcd
 OPENSDS_GLOABL_CONFIG_DOC
 
