@@ -47,8 +47,8 @@ install:
   - sudo ./test/integration/prepare.sh
 
 script:
-  - ./script/coverage
-  - ./script/test
+  - ./script/CI/coverage
+  - ./script/CI/test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out

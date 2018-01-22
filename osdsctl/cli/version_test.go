@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	c "github.com/opensds/opensds/client"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 func init() {
@@ -29,17 +28,17 @@ func init() {
 	}
 }
 
-func TestProfileAction(t *testing.T) {
+func TestVersionAction(t *testing.T) {
 	beBrasher := os.Getenv("BE_CRASHER")
 
 	if beBrasher == "1" {
 		var args []string
-		profileAction(profileCommand, args)
+		versionAction(versionCommand, args)
 
 		return
 	}
 
-	cmd := exec.Command(os.Args[0], "-test.run=TestProfileAction")
+	cmd := exec.Command(os.Args[0], "-test.run=TestVersionAction")
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 	err := cmd.Run()
 	e, ok := err.(*exec.ExitError)
@@ -51,25 +50,13 @@ func TestProfileAction(t *testing.T) {
 	t.Fatalf("process ran with %s, want exit status 1", e.Error())
 }
 
-func TestProfileCreateAction(t *testing.T) {
+func TestVersionShowAction(t *testing.T) {
 	var args []string
-	args = append(args, ByteProfile)
-	profileCreateAction(profileCreateCommand, args)
+	args = append(args, "v1beta")
+	versionShowAction(versionShowCommand, args)
 }
 
-func TestProfileShowAction(t *testing.T) {
+func TestVersionListAction(t *testing.T) {
 	var args []string
-	args = append(args, "1106b972-66ef-11e7-b172-db03f3689c9c")
-	profileShowAction(profileShowCommand, args)
-}
-
-func TestProfileListAction(t *testing.T) {
-	var args []string
-	profileListAction(profileListCommand, args)
-}
-
-func TestProfileDeleteAction(t *testing.T) {
-	var args []string
-	args = append(args, "1106b972-66ef-11e7-b172-db03f3689c9c")
-	profileDeleteAction(profileDeleteCommand, args)
+	versionListAction(versionListCommand, args)
 }
