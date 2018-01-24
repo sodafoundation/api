@@ -27,7 +27,9 @@ DEFAULT_VOLUME_GROUP_NAME=$VOLUME_GROUP_NAME-default
 BACKING_FILE_SUFFIX=-backing-file
 # Default volume size
 VOLUME_BACKING_FILE_SIZE=${VOLUME_BACKING_FILE_SIZE:-20G}
-DATA_DIR=$OPT_DIR
+LVM_DIR=$OPT_DIR/lvm
+DATA_DIR=$LVM_DIR
+mkdir -p $LVM_DIR
 
 osds::lvm::pkg_install(){
     sudo apt-get install -y lvm2 tgt open-iscsi
@@ -55,9 +57,26 @@ osds::lvm::create_volume_group(){
     fi
 }
 
+osds::lvm::set_configuration(){
+cat > $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
+pool:
+  $DEFAULT_VOLUME_GROUP_NAME:
+    diskType: NL-SAS
+    AZ: default
+OPENSDS_LVM_CONFIG_DOC
+
+cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_LVM_GLOBAL_CONFIG_DOC
+[lvm]
+name = lvm
+description = LVM Test
+driver_name = lvm
+config_path = /etc/opensds/driver/lvm.yaml
+OPENSDS_LVM_GLOBAL_CONFIG_DOC
+}
+
 osds::lvm::init() {
-    local vg=$1
-    local size=$2
+    local vg=$DEFAULT_VOLUME_GROUP_NAME
+    local size=$VOLUME_BACKING_FILE_SIZE
 
     # Install lvm relative packages.
     osds::lvm::pkg_install
@@ -67,6 +86,7 @@ osds::lvm::init() {
     sudo tgtadm --op show --mode target | awk '/Target/ {print $3}' | sudo xargs -r -n1 tgt-admin --delete
     # Remove volumes that already exist.
     osds::lvm::remove_volumes $vg
+    osds::lvm::set_configuration
 }
 
 osds::lvm::remove_volumes() {
@@ -109,10 +129,6 @@ osds::lvm::clean_volume_group() {
 
 osds::lvm::cleanup(){
     osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
-}
-
-osds::lvm::init_default(){
-    osds::lvm::init $DEFAULT_VOLUME_GROUP_NAME $VOLUME_BACKING_FILE_SIZE
 }
 
 # Restore xtrace
