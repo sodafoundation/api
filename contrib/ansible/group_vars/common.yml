@@ -15,7 +15,7 @@ dummy:
 # GENERAL #
 ###########
 
-workplace: /home/krej # Change this field according to your username
+workplace: /home/krej # Change this field according to your username, use '/root' if you login as root.
 
 # These fields are NOT suggested to be modified
 remote_url: https://github.com/opensds/opensds.git

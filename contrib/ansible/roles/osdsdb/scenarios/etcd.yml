@@ -8,14 +8,14 @@
 - name: download etcd
   get_url:
     url={{ etcd_download_url }}
-    dest=/tmp/{{ etcd_tarball }}
+    dest=/opt/{{ etcd_tarball }}
   when:
     - etcdexisted.stat.exists is undefined or etcdexisted.stat.exists == false
 
 - name: extract the etcd tarball
   unarchive:
-    src=/tmp/{{ etcd_tarball }}
-    dest=/tmp/
+    src=/opt/{{ etcd_tarball }}
+    dest=/opt/
   when:
     - etcdexisted.stat.exists is undefined or etcdexisted.stat.exists == false
 
