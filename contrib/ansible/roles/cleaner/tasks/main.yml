@@ -14,7 +14,7 @@
 
 - name: remove etcd tarball
   file:
-    path: "/tmp/{{ etcd_tarball }}"
+    path: "/opt/{{ etcd_tarball }}"
     state: absent
     force: yes
   ignore_errors: yes
