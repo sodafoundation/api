@@ -37,14 +37,16 @@ set -o xtrace
 
 # Keep track of the script directory
 TOP_DIR=$(cd $(dirname "$0") && pwd)
-# Temp dir for testing
+# Temporary dir for testing
 OPT_DIR=/opt/opensds
-OPT_BIN=/opt/opensds/bin
+OPT_BIN=$OPT_DIR/bin
+
 source $TOP_DIR/lib/util.sh
 source $TOP_DIR/lib/etcd.sh
 source $TOP_DIR/lib/lvm.sh
+source $TOP_DIR/lib/ceph.sh
 
-osds::opensds::stop()
+osds::stop()
 {
     OSDSLET_PID=$(pgrep osdslet)
     OSDSDOCK_PID=$(pgrep osdsdock)
@@ -56,10 +58,21 @@ osds::opensds::stop()
     fi
 }
 
+osds::lvm_enabled(){
+    cat $OPT_DIR/backend.list | grep lvm
+    return $?
+}
+
+osds::ceph_enabled(){
+    cat $OPT_DIR/backend.list | grep ceph
+    return $?
+}
+
 osds::cleanup(){
     osds::etcd::cleanup
-    osds::lvm::cleanup
-    osds::opensds::stop
+    osds::lvm_enabled && osds::lvm::cleanup
+    osds::ceph_enabled && osds::ceph::cleanup
+    osds::stop
 }
 
 osds::purge_cleanup(){
