@@ -13,8 +13,8 @@
       set -e
       set -x
 
-      wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
-      tar xvf go1.9.linux-amd64.tar.gz -C /usr/local/
+      wget {{ golang_download_url }} -P /opt/
+      tar xvf /opt/{{ golang_tarball }} -C /usr/local/
       cat >> /etc/profile <<GOLANG__CONFIG_DOC
       export GOROOT=/usr/local/go
       export GOPATH=\$HOME/gopath
