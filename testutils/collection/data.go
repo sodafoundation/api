@@ -338,7 +338,7 @@ var (
 		"updatedAt": "2017-04-10T14:36:58.014Z"
 	}`
 
-	ByteVersions= `[
+	ByteVersions = `[
 		{
 			"name": "v1beta",
 			"status": "CURRENT",
