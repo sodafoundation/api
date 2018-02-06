@@ -150,6 +150,41 @@ func TestDeleteVolme(t *testing.T) {
 	}
 }
 
+func TestExtendVolume(t *testing.T) {
+	defer monkey.UnpatchAll()
+	monkey.Patch((*Driver).initConn, func(d *Driver) error {
+		return nil
+	})
+	monkey.Patch(rbd.GetImageNames, func(ioctx *rados.IOContext) (names []string, err error) {
+		nameList := []string{opensdsPrefix + ":volume001:7ee11866-1f40-4f3c-b093-7a3684523a19"}
+		return nameList, nil
+	})
+
+	monkey.Patch((*rbd.Image).GetSize, func(r *rbd.Image) (size uint64, err error) {
+		return 1 << sizeShiftBit, nil
+	})
+	monkey.Patch((*rbd.Image).Remove, func(r *rbd.Image) error {
+		return nil
+	})
+	monkey.Patch((*rados.Conn).Shutdown, func(c *rados.Conn) {})
+	monkey.Patch((*rados.IOContext).Destroy, func(ioctx *rados.IOContext) {})
+	monkey.Patch((*rbd.Image).Resize, func(r *rbd.Image, size uint64) error {
+		return nil
+	})
+
+	d := Driver{}
+	opt := &pb.ExtendVolumeOpts{Name: "volume001", Id: "7ee11866-1f40-4f3c-b093-7a3684523a19", Size: 123}
+	resp, err := d.ExtendVolume(opt)
+
+	if err != nil {
+		t.Errorf("Test Extend volume error")
+	}
+
+	if resp.Size != 123 {
+		t.Errorf("Test Extend volume size error")
+	}
+}
+
 func TestCreateSnapshot(t *testing.T) {
 	defer monkey.UnpatchAll()
 	monkey.Patch((*Driver).initConn, func(d *Driver) error {
