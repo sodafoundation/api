@@ -279,11 +279,14 @@ func TestListVolumes(t *testing.T) {
 
 func TestUpdateVolume(t *testing.T) {
 	var vol = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
 		Name:        "Test Name",
 		Description: "Test Description",
 	}
 
-	result, err := fc.UpdateVolume("bd5b12a8-a101-11e7-941e-d77981b584d8", &vol)
+	result, err := fc.UpdateVolume(&vol)
 	if err != nil {
 		t.Error("Update volumes failed:", err)
 	}
@@ -458,5 +461,29 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	if err := fc.DeleteVolumeSnapshot(""); err != nil {
 		t.Error("Delete volume snapshot failed:", err)
+	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	var vol = model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        9,
+	}
+
+	result, err := fc.ExtendVolume(&vol)
+	if err != nil {
+		t.Error("Extend volumes failed:", err)
+	}
+
+	if result.Id != "bd5b12a8-a101-11e7-941e-d77981b584d8" {
+		t.Errorf("Expected %+v, got %+v\n", "bd5b12a8-a101-11e7-941e-d77981b584d8", result.Id)
+	}
+
+	if result.Size != 9 {
+		t.Errorf("Expected %+v, got %+v\n", 9, result.Size)
 	}
 }

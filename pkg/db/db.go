@@ -101,9 +101,11 @@ type Client interface {
 
 	ListVolumes() ([]*model.VolumeSpec, error)
 
-	UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error)
+	UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	DeleteVolume(volID string) error
+
+	ExtendVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
