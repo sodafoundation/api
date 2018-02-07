@@ -55,16 +55,21 @@ type clientInterface interface {
 
 // Init
 func Init(edps []string) *client {
-	cliv3, err := clientv3.New(clientv3.Config{
-		Endpoints:   edps,
-		DialTimeout: timeOut,
-	})
-	if err != nil {
-		cliv3.Close()
-		panic(err)
+	var err error
+	var cliv3 *clientv3.Client
+	for i := 0; i < 3; i++ {
+		cliv3, err = clientv3.New(clientv3.Config{
+			Endpoints:   edps,
+			DialTimeout: timeOut,
+		})
+		if err != nil {
+			log.Infof("Get etcd client failed: %s , retry %d times", err, i+1)
+			continue
+		}
+		return &client{cli: cliv3}
 	}
-
-	return &client{cli: cliv3}
+	// retry failed raise panic
+	panic(err)
 }
 
 type client struct {
