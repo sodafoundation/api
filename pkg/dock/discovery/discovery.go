@@ -20,9 +20,9 @@ This module implements the entry into operations of storageDock module.
 package discovery
 
 import (
+	"fmt"
 	"os"
 
-	"fmt"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"

@@ -16,9 +16,10 @@ package utils
 
 import (
 	"fmt"
-	log "github.com/golang/glog"
 	"os"
 	"reflect"
+
+	log "github.com/golang/glog"
 )
 
 func Contained(obj, target interface{}) bool {
@@ -71,15 +72,15 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func Retry(cnt int, desc string, fn func() error) error {
-	for i := 0; i < cnt; i++ {
+func Retry(retryNum int, desc string, fn func() error) error {
+	for i := 0; i < retryNum; i++ {
 		if err := fn(); err != nil {
 			log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
 		} else {
 			return nil
 		}
 	}
-	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, cnt)
+	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
 	log.Error(err)
 	return err
 }
