@@ -54,6 +54,19 @@ func TestControllerDeleteVolume(t *testing.T) {
 	}
 }
 
+func TestControllerExtendVolume(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	vol, err := vc.ExtendVolume(&pb.ExtendVolumeOpts{})
+	if err != nil {
+		t.Error("extend volume in controller failed:", err)
+		return
+	}
+
+	volBody, _ := json.MarshalIndent(vol, "", "	")
+	t.Log(string(volBody))
+}
+
 func TestControllerCreateVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 

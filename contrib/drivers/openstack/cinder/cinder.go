@@ -214,6 +214,30 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// ExtendVolume ...
+func (d *Driver) ExtendVolume(req *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	//Configure create request body.
+	opts := &volumeactions.ExtendSizeOpts{
+		NewSize: int(req.GetSize()),
+	}
+
+	err := volumeactions.ExtendSize(d.blockStoragev2, req.GetId(), opts).ExtractErr()
+	if err != nil {
+		log.Error("Cannot extend volume:", err)
+		return nil, err
+	}
+
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: req.GetId(),
+		},
+		Name:             req.GetName(),
+		Description:      req.GetDescription(),
+		Size:             int64(req.GetSize()),
+		AvailabilityZone: req.GetAvailabilityZone(),
+	}, nil
+}
+
 // InitializeConnection
 func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	opts := &volumeactions.InitializeConnectionOpts{

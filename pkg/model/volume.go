@@ -155,3 +155,13 @@ type VolumeSnapshotSpec struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
+
+// ExtendSpec ...
+type ExtendSpec struct {
+	NewSize int64 `json:"newSize,omitempty"`
+}
+
+// ExtendVolumeSpec ...
+type ExtendVolumeSpec struct {
+	Extend ExtendSpec `json:"extend,omitempty"`
+}

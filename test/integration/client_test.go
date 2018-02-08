@@ -222,6 +222,46 @@ func TestClientDeleteVolume(t *testing.T) {
 	t.Log("Delete volume success!")
 }
 
+func TestClientUpdateVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	body := &model.VolumeSpec{
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+	}
+
+	vol, err := c.UpdateVolume(volID, body)
+	if err != nil {
+		t.Error("update volume in client failed:", err)
+		return
+	}
+
+	volBody, _ := json.MarshalIndent(vol, "", "	")
+	t.Log(string(volBody))
+}
+
+func TestClientExtendVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	oldVol, err := c.GetVolume(volID)
+
+	if err != nil {
+		t.Error("get volume in client failed:", err)
+		return
+	}
+
+	body := &model.ExtendVolumeSpec{
+		Extend: model.ExtendSpec{NewSize: int64(oldVol.Size + 1)},
+	}
+	vol, err := c.ExtendVolume(volID, body)
+
+	if err != nil {
+		t.Error("extend volume in client failed:", err)
+		return
+	}
+
+	volBody, _ := json.MarshalIndent(vol, "", "	")
+	t.Log(string(volBody))
+}
+
 func TestClientCreateVolumeAttachment(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
@@ -330,4 +370,21 @@ func TestClientDeleteVolumeSnapshot(t *testing.T) {
 	}
 
 	t.Log("Delete volume snapshot success!")
+}
+
+func TestClientUpdateVolumeSnapshot(t *testing.T) {
+	var snpID = "3769855c-a102-11e7-b772-17b880d2f537"
+	body := &model.VolumeSnapshotSpec{
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+	}
+
+	snp, err := c.UpdateVolumeSnapshot(snpID, body)
+	if err != nil {
+		t.Error("update volume snapshot in client failed:", err)
+		return
+	}
+
+	snpBody, _ := json.MarshalIndent(snp, "", "	")
+	t.Log(string(snpBody))
 }
