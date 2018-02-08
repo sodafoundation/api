@@ -87,6 +87,7 @@ osds::lvm::init() {
     # Remove volumes that already exist.
     osds::lvm::remove_volumes $vg
     osds::lvm::set_configuration
+    osds::lvm::set_lvm_filter
 }
 
 osds::lvm::remove_volumes() {
@@ -129,6 +130,38 @@ osds::lvm::clean_volume_group() {
 
 osds::lvm::cleanup(){
     osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
+    osds::lvm::clean_lvm_filter
+}
+
+# osds::lvm::clean_lvm_filter() Remove the filter rule set in set_lvm_filter()
+
+osds::lvm::clean_lvm_filter() {
+    sudo sed -i "s/^.*# from devsds$//" /etc/lvm/lvm.conf
+}
+
+# osds::lvm::set_lvm_filter() Gather all devices configured for LVM and
+# use them to build a global device filter
+# osds::lvm::set_lvm_filter() Create a device filter
+# and add to /etc/lvm.conf.  Note this uses
+# all current PV's in use by LVM on the
+# system to build it's filter.
+osds::lvm::set_lvm_filter() {
+    local filter_suffix='"r|.*|" ]  # from devsds'
+    local filter_string="global_filter = [ "
+    local pv
+    local vg
+    local line
+
+    for pv_info in $(sudo pvs --noheadings -o name); do
+        pv=$(echo -e "${pv_info}" | sed 's/ //g' | sed 's/\/dev\///g')
+        new="\"a|$pv|\", "
+        filter_string=$filter_string$new
+    done
+    filter_string=$filter_string$filter_suffix
+
+    osds::lvm::clean_lvm_filter
+    sudo sed -i "/# global_filter = \[.*\]/a\    $global_filter$filter_string" /etc/lvm/lvm.conf
+    osds::echo_summary "set lvm.conf device global_filter to: $filter_string"
 }
 
 # Restore xtrace

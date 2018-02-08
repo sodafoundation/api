@@ -142,7 +142,7 @@ func (this *VolumePortal) UpdateVolume() {
 	}
 
 	volume.Id = id
-	result, err := db.C.UpdateVolume(id, &volume)
+	result, err := db.C.UpdateVolume(&volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update volume failed: %s", err.Error())
@@ -156,6 +156,63 @@ func (this *VolumePortal) UpdateVolume() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("Marshal volume updated result failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusOK)
+	this.Ctx.Output.Body(body)
+
+	return
+}
+
+// ExtendVolume ...
+func (this *VolumePortal) ExtendVolume() {
+	var extendRequestBody = model.ExtendVolumeSpec{}
+
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&extendRequestBody); err != nil {
+		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	id := this.Ctx.Input.Param(":volumeId")
+	volume, err := db.C.GetVolume(id)
+	if err != nil {
+		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	if extendRequestBody.Extend.NewSize > volume.Size {
+		volume.Size = extendRequestBody.Extend.NewSize
+	} else {
+		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
+			extendRequestBody.Extend.NewSize, volume.Size)
+		log.Error(reason)
+		return
+	}
+
+	// Call global controller variable to handle extend volume request.
+	result, err := controller.Brain.ExtendVolume(volume)
+	if err != nil {
+		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal volume extended result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
 		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)

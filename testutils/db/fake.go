@@ -197,13 +197,18 @@ func (fc *FakeDbClient) ListVolumes() ([]*model.VolumeSpec, error) {
 }
 
 // UpdateVolume
-func (fc *FakeDbClient) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+func (fc *FakeDbClient) UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	return &SampleVolumes[0], nil
 }
 
 // DeleteVolume
 func (fc *FakeDbClient) DeleteVolume(volID string) error {
 	return nil
+}
+
+// ExtendVolume ...
+func (fc *FakeDbClient) ExtendVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	return &SampleVolumes[0], nil
 }
 
 // CreateVolumeAttachment

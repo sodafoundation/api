@@ -29,6 +29,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/schedulerstats"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
 	snapshotsv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -200,6 +201,28 @@ func TestPullVolume(t *testing.T) {
 	if resp.Status != "available" {
 		t.Error("Get volume Status error.")
 	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	defer monkey.UnpatchAll()
+	monkey.Patch(volumeactions.ExtendSize,
+		func(client *gophercloud.ServiceClient, id string, opts volumeactions.ExtendSizeOptsBuilder) (r volumeactions.ExtendSizeResult) {
+			return
+		})
+
+	opt := &pb.ExtendVolumeOpts{
+		Name:             "test1",
+		Description:      "OpenSDS testing volume",
+		AvailabilityZone: "nova",
+		Size:             2,
+	}
+	d := Driver{}
+	_, err := d.ExtendVolume(opt)
+
+	if err != nil {
+		t.Error("Extend volume error")
+	}
+
 }
 
 func TestDeleteVolume(t *testing.T) {
