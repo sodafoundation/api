@@ -171,6 +171,9 @@ func TestExtendVolume(t *testing.T) {
 	monkey.Patch((*rbd.Image).Resize, func(r *rbd.Image, size uint64) error {
 		return nil
 	})
+	monkey.Patch((*rbd.Image).Open, func(r *rbd.Image, args ...interface{}) error {
+		return nil
+	})
 
 	d := Driver{}
 	opt := &pb.ExtendVolumeOpts{Name: "volume001", Id: "7ee11866-1f40-4f3c-b093-7a3684523a19", Size: 123}

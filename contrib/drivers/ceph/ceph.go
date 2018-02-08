@@ -202,8 +202,15 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 
 	img, _, err := d.getImage(opt.GetId())
 	if err != nil {
+		log.Error("When get image:", err)
 		return nil, err
 	}
+
+	if err = img.Open(); err != nil {
+		log.Error("When open image:", err)
+		return nil, err
+	}
+	defer img.Close()
 
 	size := opt.GetSize()
 	if err = img.Resize(uint64(size) << sizeShiftBit); err != nil {
