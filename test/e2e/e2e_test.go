@@ -127,6 +127,53 @@ func TestListVolumes(t *testing.T) {
 	t.Log("Check all volumes success, got", string(volsBody))
 }
 
+func TestUpdateVolume(t *testing.T) {
+	vol, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function:", err)
+		return
+	}
+
+	t.Log("Start updating volume...")
+	var body = &model.VolumeSpec{
+		Name:        "Update Volume Name",
+		Description: "Update Volume Description",
+	}
+
+	newVol, err := c.UpdateVolume(vol.Id, body)
+	if err != nil {
+		t.Error("update volume failed:", err)
+		return
+	}
+
+	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
+	cleanVolumeIfFailedOrFinished(t, newVol.Id)
+	t.Log("Update volume success, got:", string(newVolBody))
+}
+
+func TestExtendVolume(t *testing.T) {
+	vol, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function:", err)
+		return
+	}
+
+	t.Log("Start extending volume...")
+	body := &model.ExtendVolumeSpec{
+		Extend: model.ExtendSpec{NewSize: int64(vol.Size + 1)},
+	}
+
+	newVol, err := c.ExtendVolume(vol.Id, body)
+	if err != nil {
+		t.Error("extend volume failed:", err)
+		return
+	}
+
+	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
+	cleanVolumeIfFailedOrFinished(t, newVol.Id)
+	t.Log("Extend volume success, got:", string(newVolBody))
+}
+
 func TestDeleteVolume(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
@@ -142,6 +189,7 @@ func TestDeleteVolume(t *testing.T) {
 	t.Log("Delete volume success!")
 }
 
+/*
 func TestCreateVolumeAttachment(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
@@ -231,6 +279,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	}
 	t.Log("Delete volume attachment success!")
 }
+*/
 
 func TestCreateVolumeSnapshot(t *testing.T) {
 	vol, err := prepareVolume(t)
@@ -319,6 +368,30 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		return
 	}
 	t.Log("Delete volume snapshot success!")
+}
+
+func TestUpdateVolumeSnapshot(t *testing.T) {
+	snp, err := prepareVolumeSnapshot(t)
+	if err != nil {
+		t.Error("Failed to run volume snapshot prepare function:", err)
+		return
+	}
+	defer cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
+
+	t.Log("Start updating volume snapshot...")
+	var body = &model.VolumeSnapshotSpec{
+		Name:        "Update Volume Snapshot Name",
+		Description: "Update Volume Snapshot Description",
+	}
+
+	newSnp, err := c.UpdateVolumeSnapshot(snp.Id, body)
+	if err != nil {
+		t.Error("update volume snapshot failed:", err)
+		return
+	}
+
+	newSnpBody, _ := json.MarshalIndent(newSnp, "", "	")
+	t.Log("Update volume snapshot success, got:", string(newSnpBody))
 }
 
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {

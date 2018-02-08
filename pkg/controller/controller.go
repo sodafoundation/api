@@ -38,6 +38,7 @@ const (
 	GET_LIFECIRCLE_FLAG
 	LIST_LIFECIRCLE_FLAG
 	DELETE_LIFECIRCLE_FLAG
+	EXTEND_LIFECIRCLE_FLAG
 )
 
 var Brain *Controller
@@ -166,6 +167,51 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 	}
 
 	return c.volumeController.DeleteVolume(opt)
+}
+
+// ExtendVolume ...
+func (c *Controller) ExtendVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
+	prf, err := db.C.GetProfile(in.ProfileId)
+	if err != nil {
+		log.Error("when search profile in db:", err)
+		return nil, err
+	}
+
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
+	c.policyController.Setup(EXTEND_LIFECIRCLE_FLAG)
+
+	dockInfo, err := db.C.GetDockByPoolId(in.PoolId)
+	if err != nil {
+		log.Error("When search dock in db by pool id: ", err)
+		return nil, err
+	}
+	c.policyController.SetDock(dockInfo)
+	c.volumeController.SetDock(dockInfo)
+
+	opt := &pb.ExtendVolumeOpts{
+		Id:         in.Id,
+		Size:       in.Size,
+		Metadata:   in.Metadata,
+		DockId:     dockInfo.Id,
+		DriverName: dockInfo.DriverName,
+	}
+
+	result, err := c.volumeController.ExtendVolume(opt)
+	if err != nil {
+		return nil, err
+	}
+
+	volBody, _ := json.Marshal(result)
+	var errChan = make(chan error, 1)
+	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChan)
+
+	if err := <-errChan; err != nil {
+		log.Error("When execute async policy:", err)
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {

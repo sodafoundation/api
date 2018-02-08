@@ -166,8 +166,8 @@ done
 # Run osdsdock and osdslet daemon in background.
 (
 cd ${OPENSDS_DIR}
-sudo build/out/bin/osdslet -daemon
-sudo build/out/bin/osdsdock -daemon
+sudo build/out/bin/osdslet --daemon --alsologtostderr
+sudo build/out/bin/osdsdock --daemon --alsologtostderr
 
 osds::echo_summary "Waiting for osdslet to come up."
 osds::util::wait_for_url localhost:50040 "osdslet" 0.25 80

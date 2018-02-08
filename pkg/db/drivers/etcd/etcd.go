@@ -561,9 +561,9 @@ func (c *Client) ListVolumes() ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
-// UpdateVolume
-func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	result, err := c.GetVolume(volID)
+// UpdateVolume ...
+func (c *Client) UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	result, err := c.GetVolume(vol.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -579,14 +579,14 @@ func (c *Client) UpdateVolume(volID string, vol *model.VolumeSpec) (*model.Volum
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	atcBody, err := json.Marshal(result)
+	body, err := json.Marshal(result)
 	if err != nil {
 		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateVolumeURL(volID),
-		NewContent: string(atcBody),
+		Url:        urls.GenerateVolumeURL(vol.Id),
+		NewContent: string(body),
 	}
 
 	dbRes := c.Update(dbReq)
@@ -608,6 +608,38 @@ func (c *Client) DeleteVolume(volID string) error {
 		return errors.New(dbRes.Error)
 	}
 	return nil
+}
+
+// ExtendVolume ...
+func (c *Client) ExtendVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	result, err := c.GetVolume(vol.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if vol.Size > 0 {
+		result.Size = vol.Size
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	body, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateVolumeURL(vol.Id),
+		NewContent: string(body),
+	}
+
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When extend volume in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
 }
 
 // CreateVolumeAttachment

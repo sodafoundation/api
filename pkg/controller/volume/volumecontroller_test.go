@@ -60,6 +60,17 @@ func (fc *fakeClient) DeleteVolume(ctx context.Context, in *pb.DeleteVolumeOpts,
 	}, nil
 }
 
+// Extend a volume
+func (fc *fakeClient) ExtendVolume(ctx context.Context, in *pb.ExtendVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteVolume,
+			},
+		},
+	}, nil
+}
+
 // Create a volume attachment
 func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
@@ -126,6 +137,20 @@ func TestDeleteVolume(t *testing.T) {
 	result := fc.DeleteVolume(&pb.DeleteVolumeOpts{})
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	fc := NewFakeController()
+	var expected = &SampleVolumes[0]
+
+	result, err := fc.ExtendVolume(&pb.ExtendVolumeOpts{})
+	if err != nil {
+		t.Errorf("Failed to extend volume, err is %v\n", err)
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 }
 

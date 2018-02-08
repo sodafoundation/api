@@ -114,6 +114,32 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// ExtendVolume ...
+func (d *DockHub) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	//Get the storage drivers and do some initializations.
+	d.Driver = drivers.Init(opt.GetDriverName())
+	defer drivers.Clean(d.Driver)
+
+	log.Info("Calling volume driver to extend volume...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	vol, err := d.Driver.ExtendVolume(opt)
+	if err != nil {
+		log.Error("When calling volume driver to extend volume:", err)
+		return nil, err
+	}
+
+	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
+	// Store the volume data into database.
+	result, err := db.C.ExtendVolume(vol)
+	if err != nil {
+		log.Error("When extend volume in db module:", err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // CreateVolumeAttachment
 func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	//Get the storage drivers and do some initializations.
