@@ -3,6 +3,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds?branch=master)](https://goreportcard.com/report/github.com/opensds/opensds)
 [![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
 [![Coverage Status](https://coveralls.io/repos/github/opensds/opensds/badge.svg?branch=master)](https://coveralls.io/github/opensds/opensds?branch=master)
+[![Releases](https://img.shields.io/github/release/opensds/opensds/all.svg?style=flat-square)](https://github.com/opensds/opensds/releases)
+[![LICENSE](https://img.shields.io/github/license/opensds/opensds.svg?style=flat-square)]
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
