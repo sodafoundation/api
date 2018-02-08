@@ -47,6 +47,8 @@ log_error ()
 }
 log OpenSDS bootstrap starting ...
 
+# load profile
+source /etc/profile
 # Install Golang environment
 if ! which go &>/dev/null; then
     log "Golang is not exist, downloading..."
@@ -65,17 +67,17 @@ OPENSDS_DIR=${GOPATH}/src/github.com/opensds/opensds
 mkdir -p ${OPENSDS_ROOT}
 
 cd ${OPENSDS_ROOT}
-if [ ! -d OPENSDS_DIR ]; then
+if [ ! -d ${OPENSDS_DIR} ]; then
     log "Download the OpenSDS source code."
 	git clone https://github.com/opensds/opensds.git -b master
 fi
 
 cd ${OPENSDS_DIR}
-if [ ! -d OPENSDS_DIR/build ]; then
+if [ ! -d ${OPENSDS_DIR}/build ]; then
     sudo apt-get update > /dev/null
 	sudo apt-get install librados-dev librbd-dev -y > /dev/null
 	log "Build OpenSDS ..."
 	make
 fi
 
-log OpenSDS bootstrapped successfully. you can execute 'source /etc/profile.d/goenv.sh' to load golang ENV.
+log OpenSDS bootstrapped successfully. you can execute 'source /etc/profile' to load golang ENV.
