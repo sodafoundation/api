@@ -142,6 +142,7 @@ func TestDeleteVolume(t *testing.T) {
 	t.Log("Delete volume success!")
 }
 
+/*
 func TestCreateVolumeAttachment(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
@@ -231,6 +232,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	}
 	t.Log("Delete volume attachment success!")
 }
+*/
 
 func TestCreateVolumeSnapshot(t *testing.T) {
 	vol, err := prepareVolume(t)

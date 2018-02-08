@@ -17,43 +17,65 @@
 # This script helps new contributors or users set up their local workstation
 # for opensds installation and development.
 
-OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
-OPENSDS_ROOT=${OPENSDS_DIR}/opensds
-ETCD_URL=https://github.com/coreos/etcd/releases/download/v3.2.0
-ETCD_TARBALL=etcd-v3.2.0-linux-amd64.tar.gz
-ETCD_DIR=etcd-v3.2.0-linux-amd64
+# Temporary directory
+OPT_DIR=/opt/opensds
+mkdir -p $OPT_DIR
 
-# Run apt-get update to update the system packages.
-sudo apt-get update
-source /etc/profile
+# Golang version
+GOLANG_VERSION=${GOLANG_VERSION:-1.9.2}
+GOENV_PROFILE=${GOENV_PROFILE:-/etc/profile.d/goenv.sh}
+
+# Log file
+LOG_DIR=/var/log/opensds
+LOGFILE=${LOGFILE:-/var/log/opensds/bootstrap.log}
+mkdir -p $LOG_DIR
+
+# Log function
+log() {
+    DATE=`date "+%Y-%m-%d %H:%M:%S"`
+    USER=$(whoami)
+    echo "${DATE} [INFO] $@"
+    echo "${DATE} ${USER} execute $0 [INFO] $@" > $LOGFILE
+}
+
+log_error ()
+{
+    DATE=`date "+%Y-%m-%d %H:%M:%S"`
+    USER=$(whoami)
+    echo "${DATE} [ERROR] $@" 2>&1
+    echo "${DATE} ${USER} execute $0 [ERROR] $@" > $LOGFILE
+}
+log OpenSDS bootstrap starting ...
 
 # Install Golang environment
 if ! which go &>/dev/null; then
-	wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
-	tar xzf go1.9.linux-amd64.tar.gz -C /usr/local/
-	echo 'export GOROOT=/usr/local/go' >> /etc/profile
-	echo 'export GOPATH=$HOME/gopath' >> /etc/profile
-	echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
+    log "Golang is not exist, downloading..."
+	wget https://storage.googleapis.com/golang/go${GOLANG_VERSION}.linux-amd64.tar.gz -O $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz > /dev/null
+	log "tar xzf $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/"
+	tar xzf $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/
+	echo 'export GOROOT=/usr/local/go' > $GOENV_PROFILE
+	echo 'export GOPATH=$HOME/gopath' >> $GOENV_PROFILE
+	echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> $GOENV_PROFILE
+	source $GOENV_PROFILE
 fi
 
-# If etcd file not exists, download it from etcd release url.
-if [ ! -d ${HOME}/${ETCD_DIR} ]; then
-	curl -L ${ETCD_URL}/${ETCD_TARBALL} -o ${HOME}/${ETCD_TARBALL}
-	cd ${HOME}
-	tar xzf ${HOME}/${ETCD_TARBALL}
-fi
+GOPATH=${GOPATH:-$HOME/gopath}
+OPENSDS_ROOT=${GOPATH}/src/github.com/opensds
+OPENSDS_DIR=${GOPATH}/src/github.com/opensds/opensds
+mkdir -p ${OPENSDS_ROOT}
 
-# OpenSDS Download and Build
-if [ ! -d $OPENSDS_DIR ]; then
-	mkdir -p ${OPENSDS_DIR}
-fi
-cd ${OPENSDS_DIR}
-if [ ! -d $OPENSDS_ROOT ]; then
+cd ${OPENSDS_ROOT}
+if [ ! -d OPENSDS_DIR ]; then
+    log "Download the OpenSDS source code."
 	git clone https://github.com/opensds/opensds.git -b master
 fi
-cd ${OPENSDS_ROOT}
-if [ ! -d $OPENSDS_ROOT/build ]; then
-	sudo apt-get install librados-dev librbd-dev -y
+
+cd ${OPENSDS_DIR}
+if [ ! -d OPENSDS_DIR/build ]; then
+    sudo apt-get update > /dev/null
+	sudo apt-get install librados-dev librbd-dev -y > /dev/null
+	log "Build OpenSDS ..."
 	make
 fi
 
+log OpenSDS bootstrapped successfully. you can execute 'source /etc/profile.d/goenv.sh' to load golang ENV.

@@ -14,38 +14,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-OPENSDS_DIR=${HOME}/gopath/src/github.com/opensds
-OPENSDS_ROOT=${OPENSDS_DIR}/opensds
+# Keep track of the script directory
+TOP_DIR=$(cd $(dirname "$0") && pwd)
+
+# OpenSDS Root directory
+OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
 OPENSDS_CONF=/etc/opensds/opensds.conf
 
 # Config backend info.
-if [ ! -f ${OPENSDS_CONF} ]; then
-    mkdir -p /etc/opensds
-	echo '
-	[osdslet]
-	api_endpoint = localhost:50040
-	graceful = True
-	log_file = /var/log/opensds/osdslet.log
-	socket_order = inc
+mkdir -p /etc/opensds
+cat > ${OPENSDS_CONF} << OPENSDS_GLOBAL_CONFIG_DOC
+[osdslet]
+api_endpoint = localhost:50040
+graceful = True
+log_file = /var/log/opensds/osdslet.log
+socket_order = inc
 
-	[osdsdock]
-	api_endpoint = localhost:50050
-	log_file = /var/log/opensds/osdsdock.log
-	# Enabled backend types, such as sample, ceph, cinder, etc.
-	enabled_backends = sample
+[osdsdock]
+api_endpoint = localhost:50050
+log_file = /var/log/opensds/osdsdock.log
+# Enabled backend types, such as sample, ceph, cinder, etc.
+enabled_backends = sample
 
-	[sample]
-	name = sample
-	description = Sample backend for testing
-	driver_name = default
+[sample]
+name = sample
+description = Sample backend for testing
+driver_name = default
 
-	[database]
-	# Enabled database types, such as etcd, mysql, fake, etc.
-	driver = fake
-	' >> ${OPENSDS_CONF}
-fi
+[database]
+# Enabled database types, such as etcd, mysql, fake, etc.
+driver = fake
+OPENSDS_GLOBAL_CONFIG_DOC
 
 # Run osdsdock and osdslet daemon in background.
-cd ${OPENSDS_ROOT}
-sudo build/out/bin/osdsdock -daemon
-sudo build/out/bin/osdslet -daemon
+cd ${OPENSDS_DIR}
+sudo ${OPENSDS_DIR}/build/out/bin/osdsdock -daemon
+sudo ${OPENSDS_DIR}/build/out/bin/osdslet -daemon
