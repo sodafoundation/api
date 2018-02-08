@@ -135,6 +135,27 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// ExtendVolume ...
+func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	//Convert the storage unit Giga to sector
+	err := d.client.ExtendVolume(d.gb2Sector(opt.GetSize()), opt.GetId())
+	if err != nil {
+		log.Error("Extend Volume Failed:", err)
+		return nil, err
+	}
+
+	log.Infof("Extend volume %s (%s) success.", opt.GetName(), opt.GetId())
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             opt.GetSize(),
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+	}, nil
+}
+
 func (d *Driver) getTargetInfo() (string, string, error) {
 	tgtIp := d.conf.TargetIp
 	resp, err := d.client.ListTgtPort()

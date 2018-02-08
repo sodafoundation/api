@@ -81,6 +81,8 @@ func Run(host string) {
 				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
 				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
 			),
+			// Extend Volume
+			beego.NSRouter("/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
 		)
 
 	beego.AddNamespace(ns)

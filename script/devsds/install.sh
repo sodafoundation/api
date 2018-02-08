@@ -72,7 +72,7 @@ OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
 
 # OpenSDS configuration directory
 OPENSDS_CONFIG_DIR=${OPENSDS_CONFIG_DIR:-/etc/opensds}
-OPENSDS_DRIVER_CONFIG_DIR=${OPENSDS_DRIVER_CONFIG_DIR}/driver
+OPENSDS_DRIVER_CONFIG_DIR=${OPENSDS_CONFIG_DIR}/driver
 
 mkdir -p $OPENSDS_DRIVER_CONFIG_DIR
 
@@ -166,8 +166,8 @@ done
 # Run osdsdock and osdslet daemon in background.
 (
 cd ${OPENSDS_DIR}
-sudo build/out/bin/osdslet -daemon
-sudo build/out/bin/osdsdock -daemon
+sudo build/out/bin/osdslet --daemon --alsologtostderr
+sudo build/out/bin/osdsdock --daemon --alsologtostderr
 
 osds::echo_summary "Waiting for osdslet to come up."
 osds::util::wait_for_url localhost:50040 "osdslet" 0.25 80
