@@ -25,7 +25,7 @@ type OsdsLet struct {
 
 type OsdsDock struct {
 	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
-	EnabledBackends []string `conf:"enabled_backends,ceph"`
+	EnabledBackends []string `conf:"enabled_backends,lvm"`
 	Daemon          bool     `conf:"daemon,false"`
 	Backends
 }
