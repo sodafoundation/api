@@ -192,6 +192,44 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	}, nil
 }
 
+// ExtendVolume ...
+func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	if err := d.initConn(); err != nil {
+		log.Error("Connect ceph failed.")
+		return nil, err
+	}
+	defer d.destroyConn()
+
+	img, _, err := d.getImage(opt.GetId())
+	if err != nil {
+		log.Error("When get image:", err)
+		return nil, err
+	}
+
+	if err = img.Open(); err != nil {
+		log.Error("When open image:", err)
+		return nil, err
+	}
+	defer img.Close()
+
+	size := opt.GetSize()
+	if err = img.Resize(uint64(size) << sizeShiftBit); err != nil {
+		log.Error("When resize image:", err)
+		return nil, err
+	}
+	log.Info("Resize image success, volume id =", opt.GetId())
+
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             size,
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+	}, nil
+}
+
 func (d *Driver) getImage(volID string) (*rbd.Image, *Name, error) {
 	imgNames, err := rbd.GetImageNames(d.ioctx)
 	if err != nil {

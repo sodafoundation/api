@@ -26,6 +26,11 @@ import (
 // could be discussed if it's better to define an interface.
 type VolumeBuilder *model.VolumeSpec
 
+// ExtendVolumeBuilder contains request body of handling a extend volume request.
+// Currently it's assigned as the pointer of ExtendVolumeSpec struct, but it
+// could be discussed if it's better to define an interface.
+type ExtendVolumeBuilder *model.ExtendVolumeSpec
+
 // VolumeAttachmentBuilder contains request body of handling a volume request.
 // Currently it's assigned as the pointer of VolumeSpec struct, but it
 // could be discussed if it's better to define an interface.
@@ -110,6 +115,20 @@ func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.Volum
 		urls.GenerateVolumeURL(volID)}, "/")
 
 	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+// ExtendVolume ...
+func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model.VolumeSpec, error) {
+	var res model.VolumeSpec
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateNewVolumeURL(volID + "/action")}, "/")
+
+	if err := v.Recv(request, url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 

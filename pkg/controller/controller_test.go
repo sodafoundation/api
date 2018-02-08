@@ -53,6 +53,10 @@ func (fvc *fakeVolumeController) DeleteVolume(*pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+func (fvc *fakeVolumeController) ExtendVolume(*pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	return &SampleVolumes[0], nil
+}
+
 func (fvc *fakeVolumeController) CreateVolumeAttachment(*pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	return &SampleAttachments[0], nil
 }
@@ -127,6 +131,40 @@ func TestDeleteVolume(t *testing.T) {
 	result := c.DeleteVolume(req)
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var req = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+	var c = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			err: nil,
+		},
+		volumeController: NewFakeVolumeController(),
+	}
+	var expected = &SampleVolumes[0]
+
+	result, err := c.ExtendVolume(req)
+	if err != nil {
+		t.Errorf("Failed to create volume, err is %v\n", err)
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 }
 

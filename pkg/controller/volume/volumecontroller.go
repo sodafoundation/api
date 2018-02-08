@@ -38,6 +38,8 @@ type Controller interface {
 
 	DeleteVolume(opt *pb.DeleteVolumeOpts) error
 
+	ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
+
 	CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error)
 
 	DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error
@@ -108,6 +110,34 @@ func (c *controller) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	}
 
 	return nil
+}
+
+func (c *controller) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return nil, err
+	}
+
+	response, err := c.Client.ExtendVolume(context.Background(), opt)
+	if err != nil {
+		log.Error("extend volume failed in volume controller:", err)
+		return nil, err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to extend volume in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	var vol = &model.VolumeSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vol); err != nil {
+		log.Error("extend volume failed in volume controller:", err)
+		return nil, err
+	}
+
+	return vol, nil
 }
 
 func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
