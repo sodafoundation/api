@@ -25,19 +25,19 @@ split_line(){
     echo "================================================================================================"
 }
 
-## Start unit test.
-#split_line "Start unit test"
-#go test -v github.com/opensds/opensds/osdsctl/... -cover
-#go test -v github.com/opensds/opensds/client/... -cover
-#go test -v github.com/opensds/opensds/pkg/... -cover
-#go test -v github.com/opensds/opensds/contrib/... -cover
-#
-## Start integration test.
-#split_line "Start integration test"
-#sudo $OPENSDS_DIR/test/integration/prepare.sh
-#go test -v github.com/opensds/opensds/test/integration/... -tags integration
-#sudo killall -9 osdslet osdsdock
-#sudo rm /etc/opensds/opensds.conf -rf
+# Start unit test.
+split_line "Start unit test"
+go test -v github.com/opensds/opensds/osdsctl/... -cover
+go test -v github.com/opensds/opensds/client/... -cover
+go test -v github.com/opensds/opensds/pkg/... -cover
+go test -v github.com/opensds/opensds/contrib/... -cover
+
+# Start integration test.
+split_line "Start integration test"
+sudo $OPENSDS_DIR/test/integration/prepare.sh
+go test -v github.com/opensds/opensds/test/integration/... -tags integration
+sudo killall -9 osdslet osdsdock
+sudo rm /etc/opensds/opensds.conf -rf
 
 # Start lvm e2e test
 split_line "Start lvm e2e test"
@@ -45,6 +45,3 @@ sudo $OPENSDS_DIR/script/devsds/install.sh -b lvm
 ps -ef|grep osds
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 sudo $OPENSDS_DIR/script/devsds/uninstall.sh
-
-cat /var/log/opensds/osdsdock.INFO
-

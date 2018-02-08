@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"fmt"
+	log "github.com/golang/glog"
 	"os"
 	"reflect"
 )
@@ -67,4 +69,17 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func Retry(cnt int, desc string, fn func() error) error {
+	for i := 0; i < cnt; i++ {
+		if err := fn(); err != nil {
+			log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
+		} else {
+			return nil
+		}
+	}
+	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, cnt)
+	log.Error(err)
+	return err
 }

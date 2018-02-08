@@ -20,6 +20,7 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/utils"
 	"golang.org/x/net/context"
 )
 
@@ -55,21 +56,16 @@ type clientInterface interface {
 
 // Init
 func Init(edps []string) *client {
-	var err error
 	var cliv3 *clientv3.Client
-	for i := 0; i < 3; i++ {
-		cliv3, err = clientv3.New(clientv3.Config{
-			Endpoints:   edps,
-			DialTimeout: timeOut,
-		})
-		if err != nil {
-			log.Infof("Get etcd client failed: %s , retry %d times", err, i+1)
-			continue
-		}
-		return &client{cli: cliv3}
+	err := utils.Retry(3, "Get etcd client", func() error {
+		var err error
+		cliv3, err = clientv3.New(clientv3.Config{Endpoints: edps, DialTimeout: timeOut})
+		return err
+	})
+	if err != nil {
+		panic(err)
 	}
-	// retry failed raise panic
-	panic(err)
+	return &client{cli: cliv3}
 }
 
 type client struct {
@@ -84,7 +80,11 @@ func (c *client) Create(req *Request) *Response {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	_, err := c.cli.Put(ctx, req.Url, req.Content)
+	err := utils.Retry(3, "Etcd put", func() error {
+		_, err := c.cli.Put(ctx, req.Url, req.Content)
+		return err
+	})
+
 	if err != nil {
 		log.Error("When create db request:", err)
 		return &Response{

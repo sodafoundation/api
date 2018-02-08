@@ -22,6 +22,7 @@ package discovery
 import (
 	"os"
 
+	"fmt"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/db"
@@ -78,17 +79,15 @@ func (dd *DockDiscoverer) Init() error {
 
 // Discover
 func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
-	var pols []*model.StoragePoolSpec
-	var err error
 
 	for _, dck := range dd.dcks {
 		//Call function of StorageDrivers configured by storage drivers.
 		d = drivers.Init(dck.DriverName)
 		defer drivers.Clean(d)
-		pols, err = d.ListPools()
+		pols, err := d.ListPools()
 		if err != nil {
 			log.Error("Call driver to list pools failed:", err)
-			return err
+			continue
 		}
 
 		if len(pols) == 0 {
@@ -101,8 +100,10 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		}
 		dd.pols = append(dd.pols, pols...)
 	}
-
-	return err
+	if len(dd.pols) == 0 {
+		return fmt.Errorf("There is no pool can be found.")
+	}
+	return nil
 }
 
 // Store
