@@ -1,9 +1,6 @@
 dist: trusty
 sudo: required
 
-services:
-  - docker
-
 language: go
 go_import_path: github.com/opensds/opensds
 
@@ -40,10 +37,9 @@ matrix:
     env: TARGET=ppc64le
 
 install:
-  - go get github.com/mattn/goveralls
+  - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
   - make
-  - sudo ./test/integration/prepare.sh
 
 script:
   - ./script/CI/coverage
