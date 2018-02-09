@@ -322,7 +322,6 @@ func (d *Driver) getVGList() (*[]VolumeGroup, error) {
 		return nil, err
 	}
 
-	log.Info("Got vgs info:", info)
 	lines := strings.Split(info, "\n")
 	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
 
@@ -388,10 +387,12 @@ func (*Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 }
 
 func execCmd(script string, cmd []string) (string, error) {
+	log.Infof("Command: %s %s", script, strings.Join(cmd, " "))
 	ret, err := exec.Command(script, cmd...).Output()
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
 	}
+	log.Infof("Command Result:\n%s", string(ret))
 	return string(ret), nil
 }

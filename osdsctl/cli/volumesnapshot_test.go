@@ -69,7 +69,6 @@ func TestVolumeSnapshotListAction(t *testing.T) {
 
 func TestVolumeSnapshotDeleteAction(t *testing.T) {
 	var args []string
-	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	args = append(args, "3769855c-a102-11e7-b772-17b880d2f537")
 	volumeSnapshotDeleteAction(volumeSnapshotDeleteCommand, args)
 }
