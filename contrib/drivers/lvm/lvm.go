@@ -145,6 +145,36 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	return nil
 }
 
+// ExtendVolume ...
+func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	lvPath, ok := opt.GetMetadata()["lvPath"]
+	if !ok {
+		err := errors.New("failed to find logic volume path in volume metadata")
+		log.Error(err)
+		return nil, err
+	}
+
+	var size = fmt.Sprint(opt.GetSize()) + "G"
+
+	if _, err := d.handler("lvresize", []string{
+		"-L", size,
+		lvPath,
+	}); err != nil {
+		log.Error("Failed to extend logic volume:", err)
+		return nil, err
+	}
+
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:        opt.GetName(),
+		Size:        opt.GetSize(),
+		Description: opt.GetDescription(),
+		Metadata:    opt.GetMetadata(),
+	}, nil
+}
+
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 	var initiator string
 	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
@@ -292,7 +322,6 @@ func (d *Driver) getVGList() (*[]VolumeGroup, error) {
 		return nil, err
 	}
 
-	log.Info("Got vgs info:", info)
 	lines := strings.Split(info, "\n")
 	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
 
@@ -358,10 +387,12 @@ func (*Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
 }
 
 func execCmd(script string, cmd []string) (string, error) {
+	log.Infof("Command: %s %s", script, strings.Join(cmd, " "))
 	ret, err := exec.Command(script, cmd...).Output()
 	if err != nil {
 		log.Error(err.Error())
 		return "", err
 	}
+	log.Infof("Command Result:\n%s", string(ret))
 	return string(ret), nil
 }

@@ -52,7 +52,7 @@ var volumeSnapshotListCommand = &cobra.Command{
 }
 
 var volumeSnapshotDeleteCommand = &cobra.Command{
-	Use:   "delete <volume id> <snapshot id>",
+	Use:   "delete <snapshot id>",
 	Short: "delete a volume snapshot of specified volume in the cluster",
 	Run:   volumeSnapshotDeleteAction,
 }
@@ -140,20 +140,18 @@ func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
+	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
 	}
-	snp := &model.VolumeSnapshotSpec{
-		VolumeId: args[0],
-	}
-	err := client.DeleteVolumeSnapshot(args[1], snp)
+	snapID := args[0]
+	err := client.DeleteVolumeSnapshot(snapID, nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Delete snapshot(%s) success.\n", args[1])
+	fmt.Printf("Delete snapshot(%s) success.\n", snapID)
 }
 
 func volumeSnapshotUpdateAction(cmd *cobra.Command, args []string) {
