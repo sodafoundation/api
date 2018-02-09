@@ -15,7 +15,7 @@ dummy:
 # GENERAL #
 ###########
 
-workplace: /home/krej # Change this field according to your username
+workplace: /home/krej # Change this field according to your username, use '/root' if you login as root.
 
 # These fields are NOT suggested to be modified
 remote_url: https://github.com/opensds/opensds.git
@@ -23,3 +23,13 @@ opensds_root_dir: "{{ workplace }}/gopath/src/github.com/opensds/opensds"
 opensds_build_dir: "{{ opensds_root_dir }}/build"
 opensds_config_dir: /etc/opensds
 opensds_log_dir: /var/log/opensds
+
+###########
+# GOLANG  #
+###########
+
+golang_release: 1.9.2
+
+# These fields are NOT suggested to be modified
+golang_tarball: go{{ golang_release }}.linux-amd64.tar.gz
+golang_download_url: https://storage.googleapis.com/golang/{{ golang_tarball }}

@@ -165,7 +165,7 @@ sudo ansible-playbook clean.yml -i local.hosts
 
 ### Run ceph-ansible playbook to clean ceph cluster if ceph is deployed
 ```bash
-cd /tmp/ceph-ansible
+cd /opt/ceph-ansible
 sudo ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
 ```
 
@@ -174,5 +174,5 @@ In addition, clean up the logical partition on the physical block device used by
 ### Remove ceph-ansible source code (optional)
 ```bash
 cd ..
-sudo rm -rf /tmp/ceph-ansible
+sudo rm -rf /opt/ceph-ansible
 ```

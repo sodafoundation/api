@@ -6,48 +6,48 @@
 
 - name: check for ceph-ansible source code existed
   stat:
-    path: /tmp/ceph-ansible
+    path: /opt/ceph-ansible
   ignore_errors: yes
   register: cephansibleexisted
 
 - name: download ceph-ansible source code
   git:
     repo: https://github.com/ceph/ceph-ansible.git
-    dest: /tmp/ceph-ansible
+    dest: /opt/ceph-ansible
   when:
     - cephansibleexisted.stat.exists is undefined or cephansibleexisted.stat.exists == false
 
 - name: copy ceph inventory host into ceph-ansible directory
   copy:
     src: ../../../group_vars/ceph/ceph.hosts
-    dest: /tmp/ceph-ansible/ceph.hosts
+    dest: /opt/ceph-ansible/ceph.hosts
 
 - name: copy ceph all.yml file into ceph-ansible group_vars directory
   copy:
     src: ../../../group_vars/ceph/all.yml
-    dest: /tmp/ceph-ansible/group_vars/all.yml
+    dest: /opt/ceph-ansible/group_vars/all.yml
 
 - name: copy ceph osds.yml file into ceph-ansible group_vars directory
   copy:
     src: ../../../group_vars/ceph/osds.yml
-    dest: /tmp/ceph-ansible/group_vars/osds.yml
+    dest: /opt/ceph-ansible/group_vars/osds.yml
 
 - name: copy site.yml.sample to site.yml in ceph-ansible
   copy:
-    src: /tmp/ceph-ansible/site.yml.sample
-    dest: /tmp/ceph-ansible/site.yml
+    src: /opt/ceph-ansible/site.yml.sample
+    dest: /opt/ceph-ansible/site.yml
 
 - name: ping all hosts
   shell: ansible all -m ping -i ceph.hosts
   become: true
   args:
-    chdir: /tmp/ceph-ansible
+    chdir: /opt/ceph-ansible
 
 - name: run ceph-ansible playbook
   shell: ansible-playbook site.yml -i ceph.hosts
   become: true
   args:
-    chdir: /tmp/ceph-ansible
+    chdir: /opt/ceph-ansible
 
 - name: Check if ceph osd is running
   shell: ps aux | grep ceph-osd | grep -v grep
