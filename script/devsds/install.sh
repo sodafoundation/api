@@ -174,6 +174,9 @@ osds::util::wait_for_url localhost:50040 "osdslet" 0.25 80
 
 export OPENSDS_ENDPOINT=http://localhost:50040
 build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
+# Copy bash completion script to system.
+cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/
+
 if [ $? == 0 ]; then
 osds::echo_summary devsds installed successfully !!
 fi
