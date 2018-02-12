@@ -81,6 +81,7 @@ osds::purge_cleanup(){
     rm /opt/opensds -rf
     rm /etc/opensds -rf
     rm /var/log/opensds -rf
+    rm /etc/bash_completion.d/osdsctl.bash_completion
 }
 
 case "$# $*" in

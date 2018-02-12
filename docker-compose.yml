@@ -15,6 +15,7 @@ services:
     privileged: true
     volumes:
     - /etc/opensds:/etc/opensds
+    - /etc/ceph:/etc/ceph
     depends_on:
     - osdsdb
   osdsdb:
