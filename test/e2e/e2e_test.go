@@ -376,7 +376,7 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		t.Error("Failed to run volume snapshot prepare function:", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
+	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start updating volume snapshot...")
 	var body = &model.VolumeSnapshotSpec{

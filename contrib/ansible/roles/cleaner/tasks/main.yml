@@ -1,4 +1,11 @@
 ---
+- name: remove golang tarball
+  file:
+    path: "/opt/{{ golang_tarball }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
 - name: kill etcd daemon service
   shell: killall etcd
   ignore_errors: yes
@@ -14,7 +21,7 @@
 
 - name: remove etcd tarball
   file:
-    path: "/tmp/{{ etcd_tarball }}"
+    path: "/opt/{{ etcd_tarball }}"
     state: absent
     force: yes
   ignore_errors: yes
@@ -29,11 +36,9 @@
   ignore_errors: yes
 
 - name: clean all opensds build files
-  file:
-    path: "{{ opensds_build_dir }}"
-    state: absent
-    force: yes
-  ignore_errors: yes
+  shell: . /etc/profile; make clean
+  args:
+    chdir: "{{ opensds_root_dir }}"
 
 - name: clean all opensds configuration files
   file:
