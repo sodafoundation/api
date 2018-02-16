@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# bash completion for openstack nova-manage
+_osdsctl() {
+    COMPREPLY=()
+    local cur=${COMP_WORDS[COMP_CWORD]};
+    local pre=${COMP_WORDS[COMP_CWORD-1]};
+    case "$COMP_CWORD $pre" in
+    '1 osdsctl')
+          COMPREPLY=($(compgen -W 'dock pool profile version volume' -- $cur)) ;;
+    '2 dock')
+          COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
+    '2 pool')
+          COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
+    '2 profile')
+          COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
+    '2 version')
+          COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
+    '2 volume')
+          COMPREPLY=($(compgen -W 'attachment create delete list show snapshot update' -- $cur)) ;;
+    '3 snapshot')
+          COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+    '3 attachment')
+          COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+    '*')
+          ;;
+    esac
+
+    [ $COMP_CWORD == 1 ] && {
+        COMPREPLY=($(compgen -W 'dock pool profile version volume' -- $cur))
+    }
+    return 0
+}
+complete -o bashdefault -o default -F _osdsctl osdsctl
