@@ -17,7 +17,9 @@ _osdsctl() {
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     '2 volume')
           COMPREPLY=($(compgen -W 'attachment create delete list show snapshot update' -- $cur)) ;;
-    '3 volume snapshot')
+    '3 snapshot')
+          COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+    '3 attachment')
           COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
     '*')
           ;;
@@ -28,4 +30,4 @@ _osdsctl() {
     }
     return 0
 }
-complete -o bashdefault -o default -o nospace -F _osdsctl osdsctl
+complete -o bashdefault -o default -F _osdsctl osdsctl
