@@ -476,6 +476,32 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/volumes/{volumeId}/action':
+    parameters:
+      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/volumeId'
+    post:
+      tags:
+        - Block volumes
+      description: Extends a volume.
+      parameters:
+        - name: ExtendVolumeRequest
+          in: body
+          schema:
+            $ref: '#/definitions/ExtendVolumeRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Volume'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/attachments':
     parameters:
       - $ref: '#/parameters/projectId'
@@ -816,6 +842,7 @@ definitions:
             type: string
           size:
             type: integer
+            example: 2
           availabilityZone:
             type: string
           status:
@@ -943,6 +970,20 @@ definitions:
         type: string
         format: date-time
         example: '2017-04-10T14:36:58.014Z'
+  ExtendVolumeRequest:
+    description: >-
+      Extends the size of a volume to a requested size, in gibibytes (GiB).
+    type: object
+    properties:
+      extend:
+        type: object
+        required:
+          - newSize
+        properties:
+          newSize:
+            type: integer
+            example: 2
+
 parameters:
   apiVersion:
     name: apiVersion
