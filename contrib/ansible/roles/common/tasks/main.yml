@@ -38,6 +38,10 @@
   apt:
     name: librbd-dev
 
+- pip:
+    name: docker-py
+  when: container_enabled == true
+
 - name: check for opensds source code existed
   stat:
     path: "{{ opensds_root_dir }}"
