@@ -1,0 +1,9 @@
+---
+- name: run etcd containerized service
+  docker:
+    name: myetcd
+    image: quay.io/coreos/etcd:latest
+    state: started
+    net: host
+    volumes:
+    - "/usr/share/ca-certificates/:/etc/ssl/certs"
