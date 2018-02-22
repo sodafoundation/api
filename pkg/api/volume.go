@@ -195,6 +195,8 @@ func (this *VolumePortal) ExtendVolume() {
 	} else {
 		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
 			extendRequestBody.Extend.NewSize, volume.Size)
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
 		return
 	}
