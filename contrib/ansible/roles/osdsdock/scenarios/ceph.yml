@@ -4,6 +4,11 @@
     name: ceph-common
   when: enabled_backend == "ceph"
 
+- name: copy opensds ceph backend file if specify ceph backend
+  copy:
+    src: ../../../group_vars/ceph/ceph.yaml
+    dest: "{{ ceph_config_path }}"
+
 - name: check for ceph-ansible source code existed
   stat:
     path: /opt/ceph-ansible

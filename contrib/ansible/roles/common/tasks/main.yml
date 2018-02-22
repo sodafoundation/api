@@ -38,6 +38,10 @@
   apt:
     name: librbd-dev
 
+- pip:
+    name: docker-py
+  when: container_enabled == true
+
 - name: check for opensds source code existed
   stat:
     path: "{{ opensds_root_dir }}"
@@ -115,21 +119,3 @@
   args:
     chdir: "{{ opensds_config_dir }}"
   ignore_errors: yes
-
-- name: copy opensds lvm backend file if specify lvm backend
-  copy:
-    src: ../../../group_vars/lvm/lvm.yaml
-    dest: "{{ lvm_config_path }}"
-  when: enabled_backend == "lvm"
-
-- name: copy opensds ceph backend file if specify ceph backend
-  copy:
-    src: ../../../group_vars/ceph/ceph.yaml
-    dest: "{{ ceph_config_path }}"
-  when: enabled_backend == "ceph"
-
-- name: copy opensds cinder backend file if specify cinder backend
-  copy:
-    src: ../../../group_vars/cinder/cinder.yaml
-    dest: "{{ cinder_config_path }}"
-  when: enabled_backend == "cinder"

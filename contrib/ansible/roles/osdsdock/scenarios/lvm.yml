@@ -3,6 +3,11 @@
   apt:
     name: lvm2
 
+- name: copy opensds lvm backend file if specify lvm backend
+  copy:
+    src: ../../../group_vars/lvm/lvm.yaml
+    dest: "{{ lvm_config_path }}"
+
 - name: check if physical volume existed
   shell: pvdisplay {{ pv_device }}
   ignore_errors: yes

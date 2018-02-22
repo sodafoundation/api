@@ -9,7 +9,13 @@
 - name: kill etcd daemon service
   shell: killall etcd
   ignore_errors: yes
-  when: db_driver == "etcd"
+  when: db_driver == "etcd" and container_enabled == false
+
+- name: kill etcd containerized service
+  docker:
+    image: quay.io/coreos/etcd:latest
+    state: stopped
+  when: container_enabled == true
 
 - name: remove etcd service data
   file:
@@ -30,10 +36,24 @@
 - name: kill osdslet daemon service
   shell: killall osdslet
   ignore_errors: yes
+  when: container_enabled == false
+
+- name: kill osdslet containerized service
+  docker:
+    image: opensdsio/opensds-controller:latest
+    state: stopped
+  when: container_enabled == true
 
 - name: kill osdsdock daemon service
   shell: killall osdsdock
   ignore_errors: yes
+  when: container_enabled == false
+
+- name: kill osdsdock containerized service
+  docker:
+    image: opensdsio/opensds-dock:latest
+    state: stopped
+  when: container_enabled == true
 
 - name: clean all opensds build files
   shell: . /etc/profile; make clean
