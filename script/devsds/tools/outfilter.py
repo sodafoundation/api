@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 #
-# This source file has been modified by Huawei Technologies Co., Ltd.
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 # Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
