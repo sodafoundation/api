@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
-	_ "github.com/opensds/opensds/pkg/db/drivers/mysql" // mysql NOT supported
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	fakedb "github.com/opensds/opensds/testutils/db"
