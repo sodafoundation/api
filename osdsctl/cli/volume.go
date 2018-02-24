@@ -64,6 +64,12 @@ var volumeUpdateCommand = &cobra.Command{
 	Run:   volumeUpdateAction,
 }
 
+var volumeExtendCommand = &cobra.Command{
+	Use:   "extend <id> <new size>",
+	Short: "extend a volume in the cluster",
+	Run:   volumeExtendAction,
+}
+
 var (
 	profileId string
 	volName   string
@@ -84,6 +90,7 @@ func init() {
 	volumeCommand.AddCommand(volumeUpdateCommand)
 	volumeUpdateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of updated volume")
 	volumeUpdateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of updated volume")
+	volumeCommand.AddCommand(volumeExtendCommand)
 
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 	volumeCommand.AddCommand(volumeAttachmentCommand)
@@ -188,6 +195,32 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.UpdateVolume(args[0], vol)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+	PrintDict(resp, keys, FormatterList{})
+}
+
+func volumeExtendAction(cmd *cobra.Command, args []string) {
+	if len(args) != 2 {
+		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	newSize, err := strconv.Atoi(args[1])
+	if err != nil {
+		log.Fatalf("error parsing new size %s: %+v", args[1], err)
+	}
+
+	body := &model.ExtendVolumeSpec{
+		Extend: model.ExtendSpec{NewSize: int64(newSize)},
+	}
+
+	resp, err := client.ExtendVolume(args[0], body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

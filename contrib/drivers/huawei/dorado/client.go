@@ -232,6 +232,17 @@ func (c *DoradoClient) DeleteVolume(id string) error {
 	return err
 }
 
+// ExtendVolume ...
+func (c *DoradoClient) ExtendVolume(capacity int64, id string) error {
+	data := map[string]interface{}{
+		"CAPACITY": capacity,
+		"ID":       id,
+	}
+
+	err := c.request("PUT", "/lun/expand", data, nil)
+	return err
+}
+
 func (c *DoradoClient) CreateSnapshot(volId, name, desc string) (*Snapshot, error) {
 	data := map[string]interface{}{
 		"PARENTTYPE":  11,

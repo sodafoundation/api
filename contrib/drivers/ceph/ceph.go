@@ -135,7 +135,7 @@ func (d *Driver) Setup() error {
 
 func (d *Driver) Unset() error { return nil }
 
-func (d *Driver) initConn() error {
+func (d *Driver) initConn(poolName string) error {
 	conn, err := rados.NewConn()
 	if err != nil {
 		log.Error("New connect failed:", err)
@@ -150,7 +150,7 @@ func (d *Driver) initConn() error {
 		log.Error("Connect failed:", err)
 		return err
 	}
-	d.ioctx, err = conn.OpenIOContext("rbd")
+	d.ioctx, err = conn.OpenIOContext(poolName)
 	if err != nil {
 		log.Error("Open IO context failed:", err)
 		return err
@@ -167,7 +167,7 @@ func (d *Driver) destroyConn() {
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	name := opt.GetName()
 	size := opt.GetSize()
-	if err := d.initConn(); err != nil {
+	if err := d.initConn(opt.GetPoolName()); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
 	}
@@ -186,6 +186,47 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 			Id: imgName.GetUUID(),
 		},
 		Name:             imgName.GetName(),
+		Size:             size,
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+		Metadata: map[string]string{
+			"poolName": opt.GetPoolName(),
+		},
+	}, nil
+}
+
+// ExtendVolume ...
+func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+	if err := d.initConn(opt.GetPoolName()); err != nil {
+		log.Error("Connect ceph failed.")
+		return nil, err
+	}
+	defer d.destroyConn()
+
+	img, _, err := d.getImage(opt.GetId())
+	if err != nil {
+		log.Error("When get image:", err)
+		return nil, err
+	}
+
+	if err = img.Open(); err != nil {
+		log.Error("When open image:", err)
+		return nil, err
+	}
+	defer img.Close()
+
+	size := opt.GetSize()
+	if err = img.Resize(uint64(size) << sizeShiftBit); err != nil {
+		log.Error("When resize image:", err)
+		return nil, err
+	}
+	log.Info("Resize image success, volume id =", opt.GetId())
+
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
 		Size:             size,
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
@@ -223,29 +264,38 @@ func (d *Driver) getSize(img *rbd.Image) int64 {
 }
 
 func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
-	if err := d.initConn(); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroyConn()
+	return nil, fmt.Errorf("Ceph PullVolume has not implemented yet.")
+	/*
+		if err := d.initConn(); err != nil {
+			log.Error("Connect ceph failed.")
+			return nil, err
+		}
+		defer d.destroyConn()
 
-	img, name, err := d.getImage(volID)
-	if err != nil {
-		log.Error("When get image:", err)
-		return nil, err
-	}
+		img, name, err := d.getImage(volID)
+		if err != nil {
+			log.Error("When get image:", err)
+			return nil, err
+		}
 
-	return &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: name.GetUUID(),
-		},
-		Name: name.GetName(),
-		Size: d.getSize(img),
-	}, nil
+		return &model.VolumeSpec{
+			BaseModel: &model.BaseModel{
+				Id: name.GetUUID(),
+			},
+			Name: name.GetName(),
+			Size: d.getSize(img),
+		}, nil
+	*/
 }
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
-	if err := d.initConn(); err != nil {
+	poolName, ok := opt.GetMetadata()["poolName"]
+	if !ok {
+		err := errors.New("Failed to find poolName in volume metadata!")
+		log.Error(err)
+		return err
+	}
+	if err := d.initConn(poolName); err != nil {
 		log.Error("Connect ceph failed.")
 		return err
 	}
@@ -287,7 +337,13 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
-	if err := d.initConn(); err != nil {
+	poolName, ok := opt.GetMetadata()["poolName"]
+	if !ok {
+		err := errors.New("Failed to find poolName in volume metadata!")
+		log.Error(err)
+		return nil, err
+	}
+	if err := d.initConn(poolName); err != nil {
 		log.Error("Connect ceph failed.")
 		return nil, err
 	}
@@ -322,6 +378,9 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		Description: opt.GetDescription(),
 		VolumeId:    opt.GetVolumeId(),
 		Size:        d.getSize(img),
+		Metadata: map[string]string{
+			"poolName": poolName,
+		},
 	}, nil
 }
 
@@ -360,29 +419,38 @@ func (d *Driver) visitSnapshot(snapID string, fn func(volName *Name, img *rbd.Im
 }
 
 func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) {
-	if err := d.initConn(); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroyConn()
-	var snapshot *model.VolumeSnapshotSpec
-	err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
-		snapName := ParseName(snap.Name)
-		snapshot = &model.VolumeSnapshotSpec{
-			BaseModel: &model.BaseModel{
-				Id: snapName.GetUUID(),
-			},
-			Name:     snapName.GetName(),
-			Size:     int64(snap.Size >> sizeShiftBit),
-			VolumeId: volName.ID,
+	return nil, fmt.Errorf("Ceph PullSnapshot has not implemented yet.")
+	/*
+		if err := d.initConn(); err != nil {
+			log.Error("Connect ceph failed.")
+			return nil, err
 		}
-		return nil
-	})
-	return snapshot, err
+		defer d.destroyConn()
+		var snapshot *model.VolumeSnapshotSpec
+		err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
+			snapName := ParseName(snap.Name)
+			snapshot = &model.VolumeSnapshotSpec{
+				BaseModel: &model.BaseModel{
+					Id: snapName.GetUUID(),
+				},
+				Name:     snapName.GetName(),
+				Size:     int64(snap.Size >> sizeShiftBit),
+				VolumeId: volName.ID,
+			}
+			return nil
+		})
+		return snapshot, err
+	*/
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	if err := d.initConn(); err != nil {
+	poolName, ok := opt.GetMetadata()["poolName"]
+	if !ok {
+		err := errors.New("Failed to find poolName in volume metadata!")
+		log.Error(err)
+		return err
+	}
+	if err := d.initConn(poolName); err != nil {
 		log.Error("Connect ceph failed.")
 		return err
 	}

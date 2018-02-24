@@ -227,6 +227,36 @@ func TestUpdateVolume(t *testing.T) {
 	}
 }
 
+func TestExtendVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	body := model.ExtendVolumeSpec{
+		Extend: model.ExtendSpec{NewSize: 1},
+	}
+
+	result, err := fv.ExtendVolume(volID, &body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v", expected, result)
+		return
+	}
+}
+
 func TestCreateVolumeAttachment(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected := &model.VolumeAttachmentSpec{

@@ -73,6 +73,8 @@ func fakeHandler(script string, cmd []string) (string, error) {
 		return string(sampleLV), nil
 	case "lvremove":
 		return "", nil
+	case "lvresize":
+		return "", nil
 	case "vgdisplay":
 		return string(sampleVG), nil
 	default:
@@ -131,6 +133,33 @@ func TestDeleteVolume(t *testing.T) {
 	}
 	if err := fd.DeleteVolume(opt); err != nil {
 		t.Error("Failed to delete volume:", err)
+	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	opt := &pb.ExtendVolumeOpts{
+		Metadata: map[string]string{
+			"lvPath": "/dev/vg001/test001",
+		},
+		Size: int64(1),
+	}
+
+	vol, err := fd.ExtendVolume(opt)
+	if err != nil {
+		t.Error("Failed to extend volume:", err)
+	}
+
+	if vol.Size != 1 {
+		t.Errorf("Expected %+v, got %+v\n", 1, vol.Size)
+	}
+
+	opt = &pb.ExtendVolumeOpts{
+		Size: int64(1),
+	}
+
+	vol, err = fd.ExtendVolume(opt)
+	if err.Error() != "failed to find logic volume path in volume metadata" {
+		t.Error("Error strings is not the same as expected:", err)
 	}
 }
 

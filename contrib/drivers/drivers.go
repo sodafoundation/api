@@ -45,6 +45,8 @@ type VolumeDriver interface {
 
 	DeleteVolume(opt *pb.DeleteVolumeOpts) error
 
+	ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
+
 	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
 
 	TerminateConnection(opt *pb.DeleteAttachmentOpts) error

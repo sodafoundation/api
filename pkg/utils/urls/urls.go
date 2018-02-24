@@ -34,6 +34,11 @@ func GenerateVolumeURL(in ...string) string {
 	return generateURL("block/volumes", in...)
 }
 
+// GenerateNewVolumeURL ...
+func GenerateNewVolumeURL(in ...string) string {
+	return generateURL("volumes", in...)
+}
+
 func GenerateAttachmentURL(in ...string) string {
 	return generateURL("block/attachments", in...)
 }

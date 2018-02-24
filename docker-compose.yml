@@ -2,12 +2,25 @@ version: '2'
 services:
   osdslet:
     image: 'opensdsio/opensds-controller:latest'
+    tty: true
     network_mode: "host"
     volumes:
     - /etc/opensds:/etc/opensds
+    depends_on:
+    - osdsdb
   osdsdock:
     image: 'opensdsio/opensds-dock:latest'
+    tty: true
     network_mode: "host"
     privileged: true
     volumes:
     - /etc/opensds:/etc/opensds
+    - /etc/ceph:/etc/ceph
+    depends_on:
+    - osdsdb
+  osdsdb:
+    image: 'quay.io/coreos/etcd:latest'
+    tty: true
+    network_mode: "host"
+    volumes:
+    - /usr/share/ca-certificates/:/etc/ssl/certs
