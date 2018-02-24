@@ -1,4 +1,5 @@
 # Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+
 swagger: '2.0'
 info:
   version: "v1beta"

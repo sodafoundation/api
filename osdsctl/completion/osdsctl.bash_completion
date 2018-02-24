@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+
 # bash completion for openstack nova-manage
 _osdsctl() {
     COMPREPLY=()

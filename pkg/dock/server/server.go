@@ -1,6 +1,7 @@
 /*
  * This source file has been modified by Huawei Technologies Co., Ltd.
  * Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+ *
  * Copyright 2015, Google Inc.
  * All rights reserved.
  *

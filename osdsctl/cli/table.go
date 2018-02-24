@@ -1,7 +1,9 @@
-// Copyright 2017 modood. All rights reserved.
-// license that can be found in the LICENSE file.
 // This source file has been modified by Huawei Technologies Co., Ltd.
 // Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+
+// Copyright 2017 modood. All rights reserved.
+// license that can be found in the LICENSE file.
+
 // Package table produces a string that represents slice of structs data in a text table
 package cli
 
