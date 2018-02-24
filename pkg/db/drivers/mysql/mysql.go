@@ -23,8 +23,6 @@ package mysql
 import (
 	"database/sql"
 	"sync"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var c = &client{}
