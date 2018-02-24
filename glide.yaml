@@ -32,8 +32,6 @@ import:
 - package: golang.org/x/net
   subpackages:
   - context
-- package: google.golang.org/grpc
-  version: ^1.7.3
 - package: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 - package: github.com/spf13/pflag
@@ -42,5 +40,5 @@ import:
   version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
 - package: github.com/ceph/go-ceph
   version: 81e4191e131b21e282a9289621383237677d2437
-testImport:
-- package: github.com/bouk/monkey
+- package: google.golang.org/grpc
+  version: ^1.7.5
