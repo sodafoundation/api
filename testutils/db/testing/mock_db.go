@@ -454,9 +454,31 @@ func (_m *MockClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapsho
 }
 
 // ListDocks
-func (_m *MockClient) ListDocks() ([]*model.DockSpec, error) {
+func (_m *MockClient) GetDocks() ([]*model.DockSpec, error) {
 	ret := _m.Called()
 
+	var r0 []*model.DockSpec
+	if rf, ok := ret.Get(0).(func() []*model.DockSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.DockSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListDocks
+func (_m *MockClient) ListDocks(m map[string][]string) ([]*model.DockSpec, error) {
+	ret := _m.Called(m)
 	var r0 []*model.DockSpec
 	if rf, ok := ret.Get(0).(func() []*model.DockSpec); ok {
 		r0 = rf()
@@ -500,7 +522,7 @@ func (_m *MockClient) ListExtraProperties(prfID string) (*model.ExtraSpec, error
 }
 
 // ListPools
-func (_m *MockClient) ListPools() ([]*model.StoragePoolSpec, error) {
+func (_m *MockClient) GetPools() ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called()
 
 	var r0 []*model.StoragePoolSpec
@@ -522,8 +544,31 @@ func (_m *MockClient) ListPools() ([]*model.StoragePoolSpec, error) {
 	return r0, r1
 }
 
+// ListPools
+func (_m *MockClient) ListPools(m map[string][]string) ([]*model.StoragePoolSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.StoragePoolSpec
+	if rf, ok := ret.Get(0).(func() []*model.StoragePoolSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.StoragePoolSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListProfiles
-func (_m *MockClient) ListProfiles() ([]*model.ProfileSpec, error) {
+func (_m *MockClient) GetProfiles() ([]*model.ProfileSpec, error) {
 	ret := _m.Called()
 
 	var r0 []*model.ProfileSpec
@@ -545,8 +590,31 @@ func (_m *MockClient) ListProfiles() ([]*model.ProfileSpec, error) {
 	return r0, r1
 }
 
+// ListProfiles
+func (_m *MockClient) ListProfiles(m map[string][]string) ([]*model.ProfileSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.ProfileSpec
+	if rf, ok := ret.Get(0).(func() []*model.ProfileSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumeAttachments
-func (_m *MockClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+func (_m *MockClient) GetVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(volumeId)
 
 	var r0 []*model.VolumeAttachmentSpec
@@ -568,8 +636,30 @@ func (_m *MockClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAtt
 	return r0, r1
 }
 
+func (_m *MockClient) ListVolumeAttachments(m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.VolumeAttachmentSpec
+	if rf, ok := ret.Get(0).(func(string) []*model.VolumeAttachmentSpec); ok {
+		r0 = rf(m["volumeId"][0])
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeAttachmentSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(m["volumeId"][0])
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumeSnapshots
-func (_m *MockClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
+func (_m *MockClient) GetVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called()
 
 	var r0 []*model.VolumeSnapshotSpec
@@ -591,9 +681,54 @@ func (_m *MockClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
 	return r0, r1
 }
 
+func (_m *MockClient) ListVolumeSnapshots(m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.VolumeSnapshotSpec
+	if rf, ok := ret.Get(0).(func() []*model.VolumeSnapshotSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSnapshotSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumes
-func (_m *MockClient) ListVolumes() ([]*model.VolumeSpec, error) {
+func (_m *MockClient) GetVolumes() ([]*model.VolumeSpec, error) {
 	ret := _m.Called()
+
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func() []*model.VolumeSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumes
+func (_m *MockClient) ListVolumes(m map[string][]string) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(m)
 
 	var r0 []*model.VolumeSpec
 	if rf, ok := ret.Get(0).(func() []*model.VolumeSpec); ok {

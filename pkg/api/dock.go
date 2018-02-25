@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
@@ -31,13 +30,13 @@ import (
 
 // DockPortal
 type DockPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 // ListDocks
 func (this *DockPortal) ListDocks() {
 	// Call db api module to handle list docks request.
-	result, err := db.C.ListDocks()
+	result, err := db.C.ListDocks(this.GetParameters())
 	if err != nil {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
