@@ -30,13 +30,13 @@
   apt:
     update_cache: yes
 
-- name: install librados-dev external package
+- name: install librados-dev librbd-dev external package
   apt:
-    name: librados-dev
-
-- name: install librbd-dev external package
-  apt:
-    name: librbd-dev
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - librados-dev
+    - librbd-dev
 
 - pip:
     name: docker-py
