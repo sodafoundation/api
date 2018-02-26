@@ -49,16 +49,16 @@
     chdir: /opt/ceph-ansible
 
 - name: run ceph-ansible playbook
-  shell: ansible-playbook site.yml -i ceph.hosts
+  shell: ansible-playbook site.yml -i ceph.hosts | tee /var/log/ceph_ansible.log
   become: true
   args:
     chdir: /opt/ceph-ansible
 
-- name: Check if ceph osd is running
-  shell: ps aux | grep ceph-osd | grep -v grep
-  ignore_errors: false
-  changed_when: false
-  register: service_ceph_osd_status
+#- name: Check if ceph osd is running
+#  shell: ps aux | grep ceph-osd | grep -v grep
+#  ignore_errors: false
+#  changed_when: false
+#  register: service_ceph_osd_status
 
 - name: Check if ceph mon is running
   shell: ps aux | grep ceph-mon | grep -v grep
@@ -71,4 +71,4 @@
   ignore_errors: yes
   changed_when: false
   register: ceph_init_pool
-  when: service_ceph_mon_status.rc == 0 and service_ceph_osd_status.rc == 0
+  when: service_ceph_mon_status.rc == 0 # and service_ceph_osd_status.rc == 0

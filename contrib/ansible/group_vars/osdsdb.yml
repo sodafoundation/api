@@ -17,6 +17,9 @@ db_endpoint: localhost:2379,localhost:2380
 ###########
 
 etcd_release: v3.2.0
+etcd_host: 127.0.0.1
+etcd_port: 2379
+etcd_peer_port: 2380
 
 # These fields are not suggested to be modified
 etcd_tarball: etcd-{{ etcd_release }}-linux-amd64.tar.gz
