@@ -84,15 +84,10 @@
   shell: vgremove {{ vg_name }}
   when: enabled_backend == "lvm" and vg_existed.rc == 0
 
-- name: check if it existed before cleaning a physical volume
-  shell: pvdisplay {{ pv_device }}
-  ignore_errors: yes
-  register: pv_existed
+- name: remove physical volumes if lvm backend specified
+  shell: pvremove {{ item }}
+  with_items: "{{ pv_devices }}"
   when: enabled_backend == "lvm"
-
-- name: remove a physical volume if lvm backend specified
-  shell: pvremove {{ pv_device }}
-  when: enabled_backend == "lvm" and pv_existed.rc == 0
 
 - name: stop cinder-standalone service
   shell: docker-compose down

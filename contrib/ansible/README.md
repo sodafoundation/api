@@ -44,16 +44,30 @@ cd opensds/contrib/ansible
 
 ### Configure opensds cluster variables:
 ##### System environment:
-Configure the ```workplace``` in `group_vars/common.yml`:
+Configure the `workplace` and `container_enabled` in `group_vars/common.yml`:
 ```yaml
 workplace: /home/your_username # Change this field according to your username. If login as root, configure this parameter to '/root'
+
+container_enabled: <false_or_true>
+```
+
+#### Database configuration
+Currently OpenSDS adopts `etcd` as database backend, and the default db endpoint is `localhost:2379,localhost:2380`. But to avoid some conflicts with existing environment (k8s local cluster), we suggest you change the port of etcd cluster in `group_vars/osdsdb.yml`:
+```yaml
+db_endpoint: localhost:62379,localhost:62380
+
+etcd_host: 127.0.0.1
+etcd_port: 62379
+etcd_peer_port: 62380
 ```
 
 ##### LVM
 If `lvm` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
 enabled_backend: lvm # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'
-pv_device: "your_pv_device_path" # Specify a block device and ensure it exists if lvm is chosen
+pv_devices: # Specify block devices and ensure them existed if you choose lvm
+  #- /dev/sdc
+  #- /dev/sdd
 vg_name: "specified_vg_name" # Specify a name for VG if choosing lvm
 ```
 Modify ```group_vars/lvm/lvm.yaml```, change pool name to be the same as `vg_name` above:
@@ -83,7 +97,7 @@ monitor_interface: eth1 # Change to the network interface on the target machine
 ```
 ```group_vars/ceph/osds.yml```:
 ```yml
-devices: # For ceph devices, append one or multiple devices like the example below:
+devices: # For ceph devices, append ONE or MULTIPLE devices like the example below:
     - '/dev/sda' # Ensure this device exists and available if ceph is chosen
     - '/dev/sdb' # Ensure this device exists and available if ceph is chosen
 osd_scenario: collocated
