@@ -28,6 +28,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <ip_address> # IP address of the target machine
 If use a standalone cinder as backend, you also need to install docker to run cinder service. Please see the [docker installation document](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/) for details.
 
 ### Install ansible tool
+To install ansible, you can run `install_ansible.sh` directly or input these commands below:
 ```bash
 sudo add-apt-repository ppa:ansible/ansible # This step is needed to upgrade ansible to version 2.4.2 which is required for the ceph backend.
 sudo apt-get update
