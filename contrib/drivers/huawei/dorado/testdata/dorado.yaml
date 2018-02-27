@@ -7,8 +7,10 @@ pool:
   StoragePool001:
     diskType: SSD
     AZ: dorado1
-    thin: true
+    provisioningPolicy:
+    - thin
+    accessProtocol: iscsi
+    maxIOPS: 1000
     compress: true
     dedupe: true
 targetIp: 8.46.192.247
-

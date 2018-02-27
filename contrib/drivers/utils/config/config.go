@@ -22,11 +22,14 @@ import (
 )
 
 type PoolProperties struct {
-	DiskType string `yaml:"diskType,omitempty"`
-	AZ       string `yaml:"AZ,omitempty"`
-	Thin     bool   `yaml:"thin,omitempty"`
-	Compress bool   `yaml:"compress,omitempty"`
-	Dedupe   bool   `yaml:"dedupe,omitempty"`
+	DiskType              string   `yaml:"diskType,omitempty"`
+	AZ                    string   `yaml:"AZ,omitempty"`
+	RecoveryTimeObjective int      `yaml:"recoveryTimeObjective,omitempty"`
+	ProvisioningPolicy    []string `yaml:"provisioningPolicy,omitempty"`
+	AccessProtocol        string   `yaml:"accessProtocol,omitempty"`
+	MaxIOPS               int      `yaml:"maxIOPS,omitempty"`
+	Compress              bool     `yaml:"compress,omitempty"`
+	Dedupe                bool     `yaml:"dedupe,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
@@ -40,4 +43,31 @@ func Parse(conf interface{}, p string) (interface{}, error) {
 		return nil, err
 	}
 	return conf, nil
+}
+
+func BuildDefaultPoolParam(proper PoolProperties) map[string]interface{} {
+	param := make(map[string]interface{})
+	if proper.DiskType != "" {
+		param["diskType"] = proper.DiskType
+	}
+	if proper.RecoveryTimeObjective != 0 {
+		param["recoveryTimeObjective"] = proper.RecoveryTimeObjective
+	}
+	if len(proper.ProvisioningPolicy) != 0 {
+		param["provisioningPolicy"] = proper.ProvisioningPolicy
+	}
+	if proper.AccessProtocol != "" {
+		param["accessProtocol"] = proper.AccessProtocol
+	}
+	if proper.MaxIOPS != 0 {
+		param["maxIOPS"] = proper.MaxIOPS
+	}
+	if proper.Compress {
+		param["compress"] = proper.Compress
+	}
+	if proper.Dedupe {
+		param["dedupe"] = proper.Dedupe
+	}
+
+	return param
 }

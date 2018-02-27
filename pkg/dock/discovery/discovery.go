@@ -22,6 +22,7 @@ package discovery
 import (
 	"fmt"
 	"os"
+	"time"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
@@ -78,13 +79,13 @@ func (dd *DockDiscoverer) Init() error {
 }
 
 // Discover
-func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
+func (dd *DockDiscoverer) Discover() error {
+	// Clear existing pool info
+	dd.pols = dd.pols[:0]
 
 	for _, dck := range dd.dcks {
-		//Call function of StorageDrivers configured by storage drivers.
-		d = drivers.Init(dck.DriverName)
-		defer drivers.Clean(d)
-		pols, err := d.ListPools()
+		// Call function of StorageDrivers configured by storage drivers.
+		pols, err := drivers.Init(dck.DriverName).ListPools()
 		if err != nil {
 			log.Error("Call driver to list pools failed:", err)
 			continue
@@ -129,4 +130,29 @@ func (dd *DockDiscoverer) Store() error {
 	}
 
 	return err
+}
+
+type Context struct {
+	StopChan chan bool
+	ErrChan  chan error
+	MetaChan chan string
+}
+
+func DiscoveryAndReport(dd *DockDiscoverer, ctx *Context) {
+	for {
+		select {
+		case <-ctx.StopChan:
+			return
+		default:
+			if err := dd.Discover(); err != nil {
+				ctx.ErrChan <- err
+			}
+
+			if err := dd.Store(); err != nil {
+				ctx.ErrChan <- err
+			}
+		}
+
+		time.Sleep(60 * time.Second)
+	}
 }

@@ -32,6 +32,12 @@ func TestParse(t *testing.T) {
 			"rbd": {
 				DiskType: "SSD",
 				AZ:       "ceph",
+				RecoveryTimeObjective: 0,
+				ProvisioningPolicy:    []string{"thin", "fixed"},
+				AccessProtocol:        "rbd",
+				MaxIOPS:               1000,
+				Compress:              true,
+				Dedupe:                false,
 			},
 		},
 	}

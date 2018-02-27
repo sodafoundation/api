@@ -32,8 +32,11 @@ func TestSetup(t *testing.T) {
 		conf: &LVMConfig{
 			Pool: map[string]PoolProperties{
 				"vg001": {
-					DiskType: "SSD",
-					AZ:       "default",
+					DiskType:           "SSD",
+					AZ:                 "default",
+					ProvisioningPolicy: []string{"fixed"},
+					AccessProtocol:     "iscsi",
+					MaxIOPS:            500,
 				},
 			},
 			TgtBindIp: "192.168.56.105",
@@ -57,8 +60,10 @@ var fd = &Driver{
 	conf: &LVMConfig{
 		Pool: map[string]PoolProperties{
 			"vg001": {
-				DiskType: "SSD",
-				AZ:       "lvm",
+				DiskType:           "SSD",
+				ProvisioningPolicy: []string{"fixed"},
+				AccessProtocol:     "iscsi",
+				MaxIOPS:            500,
 			},
 		},
 	},
@@ -227,9 +232,12 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(18),
 			FreeCapacity:  int64(18),
 			Extras: model.ExtraSpec{
-				"diskType": "SSD",
+				"diskType":           "SSD",
+				"provisioningPolicy": []string{"fixed"},
+				"accessProtocol":     "iscsi",
+				"maxIOPS":            500,
 			},
-			AvailabilityZone: "lvm",
+			AvailabilityZone: "default",
 		},
 	}
 	pols, err := fd.ListPools()
@@ -240,7 +248,7 @@ func TestListPools(t *testing.T) {
 		pols[i].Id = ""
 	}
 	if !reflect.DeepEqual(pols, expected) {
-		t.Errorf("Expected %+v, got %+v\n", expected, pols)
+		t.Errorf("Expected %+v, got %+v\n", expected[0], pols[0])
 	}
 }
 
