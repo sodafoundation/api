@@ -19,7 +19,9 @@ dock_log_file: "{{ opensds_log_dir }}/osdsdock.log"
 #   LVM   #
 ###########
 
-pv_device: /dev/sdb # Specify a block device and ensure it existed if you choose lvm
+pv_devices: # Specify block devices and ensure them existed if you choose lvm
+  #- /dev/sdc
+  #- /dev/sdd
 vg_name: vg001 # Specify a name randomly
 
 # These fields are NOT suggested to be modified
