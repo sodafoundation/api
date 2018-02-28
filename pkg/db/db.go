@@ -58,7 +58,9 @@ type Client interface {
 
 	GetDock(dckID string) (*model.DockSpec, error)
 
-	ListDocks() ([]*model.DockSpec, error)
+	GetDocks() ([]*model.DockSpec, error)
+
+	ListDocks(m map[string][]string) ([]*model.DockSpec, error)
 
 	UpdateDock(dckID, name, desp string) (*model.DockSpec, error)
 
@@ -70,7 +72,9 @@ type Client interface {
 
 	GetPool(polID string) (*model.StoragePoolSpec, error)
 
-	ListPools() ([]*model.StoragePoolSpec, error)
+	GetPools() ([]*model.StoragePoolSpec, error)
+
+	ListPools(m map[string][]string) ([]*model.StoragePoolSpec, error)
 
 	UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
@@ -82,7 +86,9 @@ type Client interface {
 
 	GetDefaultProfile() (*model.ProfileSpec, error)
 
-	ListProfiles() ([]*model.ProfileSpec, error)
+	GetProfiles() ([]*model.ProfileSpec, error)
+
+	ListProfiles(m map[string][]string) ([]*model.ProfileSpec, error)
 
 	UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
 
@@ -98,7 +104,9 @@ type Client interface {
 
 	GetVolume(volID string) (*model.VolumeSpec, error)
 
-	ListVolumes() ([]*model.VolumeSpec, error)
+	GetVolumes() ([]*model.VolumeSpec, error)
+
+	ListVolumes(m map[string][]string) ([]*model.VolumeSpec, error)
 
 	UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
@@ -110,7 +118,9 @@ type Client interface {
 
 	GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error)
 
-	ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error)
+	GetVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error)
+
+	ListVolumeAttachments(m map[string][]string) ([]*model.VolumeAttachmentSpec, error)
 
 	UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
@@ -120,7 +130,9 @@ type Client interface {
 
 	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
 
-	ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
+	GetVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
+
+	ListVolumeSnapshots(m map[string][]string) ([]*model.VolumeSnapshotSpec, error)
 
 	UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 

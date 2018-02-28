@@ -94,7 +94,7 @@ func CheckSnapshotDeleted(volumeId string) bool {
 
 func findRemainingSnapshot(volumeId string) ([]string, error) {
 	var remainingSnapshots = []string{}
-	snapshots, err := db.C.ListVolumeSnapshots()
+	snapshots, err := db.C.GetVolumeSnapshots()
 	if err != nil {
 		log.Error("When list volume snapshots:", err)
 		return remainingSnapshots, err
