@@ -89,7 +89,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -105,7 +105,7 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -121,7 +121,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "Name", "Description", "Extras"}
 	PrintList(resp, keys, FormatterList{})
 }
 

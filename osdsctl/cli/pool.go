@@ -65,7 +65,7 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "DockId",
-		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Parameters"}
+		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Extras"}
 	PrintDict(pols, keys, FormatterList{})
 }
 
