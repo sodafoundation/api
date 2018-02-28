@@ -15,7 +15,6 @@
 /*
 This module implements the database operation of data structure
 defined in api module.
-
 */
 
 package db
