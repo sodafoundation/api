@@ -23,19 +23,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 type PoolPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *PoolPortal) ListPools() {
 	// Call db api module to handle list pools request.
-	result, err := db.C.ListPools()
+	result, err := db.C.ListPools(this.GetParameters())
 	if err != nil {
 		reason := fmt.Sprintf("List pools failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

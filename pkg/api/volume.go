@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
@@ -31,7 +30,7 @@ import (
 )
 
 type VolumePortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumePortal) CreateVolume() {
@@ -75,7 +74,7 @@ func (this *VolumePortal) CreateVolume() {
 
 func (this *VolumePortal) ListVolumes() {
 	// Call db api module to handle list volumes request.
-	result, err := db.C.ListVolumes()
+	result, err := db.C.ListVolumes(this.GetParameters())
 	if err != nil {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -253,7 +252,7 @@ func (this *VolumePortal) DeleteVolume() {
 }
 
 type VolumeAttachmentPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
@@ -295,9 +294,8 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
-	volId := this.GetString("volumeId")
 
-	result, err := db.C.ListVolumeAttachments(volId)
+	result, err := db.C.ListVolumeAttachments(this.GetParameters())
 	if err != nil {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -413,7 +411,7 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 }
 
 type VolumeSnapshotPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
@@ -455,7 +453,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
-	result, err := db.C.ListVolumeSnapshots()
+	result, err := db.C.ListVolumeSnapshots(this.GetParameters())
 	if err != nil {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
