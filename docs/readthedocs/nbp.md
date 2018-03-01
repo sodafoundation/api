@@ -1,4 +1,4 @@
-# NBP
+# OpenSDS Northbound Plugin
 
 ## Introduction
 

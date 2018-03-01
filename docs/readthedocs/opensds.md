@@ -42,4 +42,5 @@ development for opensds.
 ## REST API
 
 ### OpenAPI
+
 * [OpenAPI](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)
