@@ -39,6 +39,7 @@ now, please refer to the Contributing sections below.
 Please refer to [INSTALL](https://github.com/opensds/opensds/wiki) for any requirements when you want to perform code
 development for opensds.
 
-## License
+## REST API
 
-Opensds is under the Apache 2.0 license. See the [LICENSE](../../LICENSE) file for details.
+### OpenAPI
+* [OpenAPI](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)

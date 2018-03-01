@@ -10,7 +10,7 @@ Welcome to OpenSDS's documentation!
       :width: 150px
       :align: right
 
-OpenSDS is a software defined storage controller that provides unified block, file, object storage services. Mainly includes two items of OpenSDS and NBP.
+OpenSDS is a software defined storage controller that provides unified block, file, object storage services. Mainly includes two projects of OpenSDS and NBP.
 
 
 
