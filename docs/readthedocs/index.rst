@@ -7,20 +7,38 @@ Welcome to OpenSDS's documentation!
 ===================================
 
 .. figure:: https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png
-      :width: 200px
-      :align: left
+      :width: 150px
+      :align: right
 
-OpenSDS is a software defined storage controller that provides unified block, file, object storage services and focuses on:
-Simple: well-defined API that follows the OpenAPI specification.
-Lightweight: no external dependencies, deployed once in binary file or container.
-Extensible: pluggable framework available for different storage systems, identity services, capability filters, etc.
+OpenSDS is a software defined storage controller that provides unified block, file, object storage services. Mainly includes two items of OpenSDS and NBP.
+
+
 
 .. toctree::
    :maxdepth: 2
-   :glob:
+   :caption: OpenSDS
 
-   ./*
-   other/aout
+   opensds   
+
+.. toctree::
+   :maxdepth: 2
+   :caption: NBP
+
+   nbp   
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Design-specs
+
+   desigin-specs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: tsc
+
+   tsc
+
+   
 
 
 
