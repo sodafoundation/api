@@ -1,0 +1,10 @@
+---
+- name: run etcd containerized service
+  docker:
+    name: myetcd
+    image: quay.io/coreos/etcd:latest
+    command: /usr/local/bin/etcd --advertise-client-urls http://{{ etcd_host }}:{{ etcd_port }} --listen-client-urls http://{{ etcd_host }}:{{ etcd_port }} -advertise-client-urls http://{{ etcd_host }}:{{ etcd_peer_port }} -listen-peer-urls http://{{ etcd_host }}:{{ etcd_peer_port }}
+    state: started
+    net: host
+    volumes:
+    - "/usr/share/ca-certificates/:/etc/ssl/certs"

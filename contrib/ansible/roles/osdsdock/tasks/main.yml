@@ -29,3 +29,16 @@
       done
   args:
     chdir: "{{ opensds_build_dir }}/out"
+  when: container_enabled == false
+
+- name: run osdsdock containerized service
+  docker:
+    name: osdsdock
+    image: opensdsio/opensds-dock:latest
+    state: started
+    net: host
+    privileged: true
+    volumes:
+    - "/etc/opensds/:/etc/opensds"
+    - "/etc/ceph/:/etc/ceph"
+  when: container_enabled == true
