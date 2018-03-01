@@ -1,4 +1,4 @@
-# OpenSDS Northbound Plugin
+# OpenSDS Northbound Plugin Project
 
 ## Introduction
 
