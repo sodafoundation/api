@@ -15,25 +15,25 @@ OpenSDS is a software defined storage controller that provides unified block, fi
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: OpenSDS
 
    opensds   
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: NBP
 
    nbp   
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Design-specs
 
-   desigin-specs
+   design-specs
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: tsc
 
    tsc
