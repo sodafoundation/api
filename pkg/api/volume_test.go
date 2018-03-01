@@ -1,4 +1,4 @@
-// Copyright 2017 The OpenSDS Authors.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -680,7 +680,7 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	controller.Brain = controller.NewController()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
 	}
 }

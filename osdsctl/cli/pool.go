@@ -1,4 +1,4 @@
-// Copyright 2017 The OpenSDS Authors.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "DockId",
-		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Parameters"}
+		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Extras"}
 	PrintDict(pols, keys, FormatterList{})
 }
 

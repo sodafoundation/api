@@ -3,14 +3,14 @@
   apt:
     name: lvm2
 
-- name: check if physical volume existed
-  shell: pvdisplay {{ pv_device }}
-  ignore_errors: yes
-  register: pv_existed
+- name: copy opensds lvm backend file if specify lvm backend
+  copy:
+    src: ../../../group_vars/lvm/lvm.yaml
+    dest: "{{ lvm_config_path }}"
 
 - name: create a physical volume
-  shell: pvcreate {{ pv_device }}
-  when: pv_existed is undefined or pv_existed.rc != 0
+  shell: pvcreate {{ item }}
+  with_items: "{{ pv_devices }}"
 
 - name: check if volume group existed
   shell: vgdisplay {{ vg_name }}
@@ -18,5 +18,6 @@
   register: vg_existed
 
 - name: create a volume group
-  shell: vgcreate {{ vg_name }} {{ pv_device }}
+  shell: vgcreate {{ vg_name }} {{ item }}
+  with_items: "{{ pv_devices }}"
   when: vg_existed is undefined or vg_existed.rc != 0

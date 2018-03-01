@@ -1,4 +1,4 @@
-// Copyright 2017 The OpenSDS Authors.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -195,6 +195,8 @@ func (this *VolumePortal) ExtendVolume() {
 	} else {
 		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
 			extendRequestBody.Extend.NewSize, volume.Size)
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
 		return
 	}

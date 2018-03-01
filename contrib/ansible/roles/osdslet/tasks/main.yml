@@ -13,3 +13,14 @@
       done
   args:
     chdir: "{{ opensds_build_dir }}/out"
+  when: container_enabled == false
+
+- name: run osdslet containerized service
+  docker:
+    name: osdslet
+    image: opensdsio/opensds-controller:latest
+    state: started
+    net: host
+    volumes:
+    - "/etc/opensds/:/etc/opensds"
+  when: container_enabled == true
