@@ -7,8 +7,8 @@ Welcome to OpenSDS's documentation!
 ===================================
 
 .. figure:: https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png
-      :width: 100px
-      :align: right
+      :width: 200px
+      :align: left
 
 OpenSDS is a software defined storage controller that provides unified block, file, object storage services and focuses on:
 Simple: well-defined API that follows the OpenAPI specification.
