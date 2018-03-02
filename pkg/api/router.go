@@ -24,6 +24,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
+	"github.com/opensds/opensds/pkg/api/filter/auth"
 )
 
 const (
@@ -85,6 +86,7 @@ func Run(host string) {
 			beego.NSRouter("/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
 		)
 
+	ns.Filter("before", auth.Factory())
 	beego.AddNamespace(ns)
 
 	// add router for api version
