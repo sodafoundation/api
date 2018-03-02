@@ -1,4 +1,8 @@
 ---
 - name: include scenarios/etcd.yml
   include: scenarios/etcd.yml
-  when: db_driver == "etcd"
+  when: db_driver == "etcd" and container_enabled == false
+
+- name: include scenarios/container.yml
+  include: scenarios/container.yml
+  when: db_driver == "etcd" and container_enabled == true

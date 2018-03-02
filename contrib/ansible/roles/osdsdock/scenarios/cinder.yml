@@ -1,1 +1,5 @@
 ---
+- name: copy opensds cinder backend file if specify cinder backend
+  copy:
+    src: ../../../group_vars/cinder/cinder.yaml
+    dest: "{{ cinder_config_path }}"

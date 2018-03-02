@@ -1,4 +1,4 @@
-// Copyright 2017 The OpenSDS Authors.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -105,7 +105,7 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -121,7 +121,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "Name", "Description", "Extra"}
+	keys := KeyList{"Id", "Name", "Description", "Extras"}
 	PrintList(resp, keys, FormatterList{})
 }
 

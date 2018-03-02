@@ -16,6 +16,11 @@
   pip:
     name: docker-compose
 
+- name: copy opensds cinder backend file if specify cinder backend
+  copy:
+    src: ../../../group_vars/cinder/cinder.yaml
+    dest: "{{ cinder_config_path }}"
+
 - name: create directory to save source code and volume group file
   file:
     path: "{{ cinder_data_dir }}"
