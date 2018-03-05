@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -101,7 +101,7 @@ func (e *Enforcer) LoadPolicyFile(path string, forcedReload bool, overWrite bool
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		msg := fmt.Sprintf("Read policy file file (%s) failed, reason:(%v)", path, err)
+		msg := fmt.Sprintf("Read policy file (%s) failed, reason:(%v)", path, err)
 		log.Error(msg)
 		return fmt.Errorf(msg)
 	}
@@ -162,7 +162,7 @@ func Authorize(ctx *filter.Context, action string) bool {
 	}
 	log.V(8).Infof("Action: %v", action)
 	log.V(8).Infof("Target: %v", target)
-	log.V(8).Infof("credentials: %v", credentials)
+	log.V(8).Infof("Credentials: %v", credentials)
 	ok, err := enforcer.Authorize(action, target, credentials)
 	if err != nil {
 		log.Error("Authorize failed, %s", err)
