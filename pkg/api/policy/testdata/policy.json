@@ -8,3 +8,4 @@
     "volume:get": "rule:admin_api",
     "volume:get_all": "rule:default"
 }
+

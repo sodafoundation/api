@@ -107,12 +107,12 @@ func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 func (k *Keystone) validateToken(token string) error {
 	r := tokens.Get(k.identity, token)
 	if r.Err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Get token failed,%s", r.Err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "Get token failed,%v", r.Err)
 	}
 
 	t, err := r.ExtractToken()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract token failed,%s", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract token failed,%v", err)
 
 	}
 	log.V(8).Infof("token: %v", t)
