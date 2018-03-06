@@ -55,7 +55,6 @@ func (dd *DockDiscoverer) Init() error {
 		log.Error("When get os hostname:", err)
 		return err
 	}
-
 	for _, v := range CONF.EnabledBackends {
 		b := bm[v]
 		if b.Name == "" {
@@ -71,6 +70,7 @@ func (dd *DockDiscoverer) Init() error {
 			DriverName:  b.DriverName,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
 		}
+
 		dd.dcks = append(dd.dcks, dck)
 	}
 
@@ -85,6 +85,7 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		d = drivers.Init(dck.DriverName)
 		defer drivers.Clean(d)
 		pols, err := d.ListPools()
+
 		if err != nil {
 			log.Error("Call driver to list pools failed:", err)
 			continue
@@ -97,9 +98,12 @@ func (dd *DockDiscoverer) Discover(d drivers.VolumeDriver) error {
 		for _, pol := range pols {
 			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 			pol.DockId = dck.Id
+
 		}
 		dd.pols = append(dd.pols, pols...)
+
 	}
+
 	if len(dd.pols) == 0 {
 		return fmt.Errorf("There is no pool can be found.")
 	}

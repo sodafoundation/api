@@ -53,7 +53,7 @@ func NewSelector() Selector {
 
 // SelectSupportedPool
 func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
-	pools, err := db.C.ListPools()
+	pools, err := db.C.GetPools()
 	if err != nil {
 		log.Error("When list pools in resources SelectSupportedPool: ", err)
 		return nil, err

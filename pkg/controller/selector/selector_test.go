@@ -25,7 +25,7 @@ import (
 
 func TestSelectSupportedPool(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListPools").Return(fakePools, nil)
+	mockClient.On("GetPools").Return(fakePools, nil)
 	db.C = mockClient
 
 	testCases := []struct {

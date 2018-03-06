@@ -53,9 +53,8 @@ func TestInit(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 	var expected []*model.DockSpec
 
-	for i := range SampleDocks {
-		expected = append(expected, &SampleDocks[i])
-	}
+	expected = append(expected, &SampleDocks_discover[0])
+
 	if err := dd.Init(); err != nil {
 		t.Errorf("Failed to init discoverer struct: %v\n", err)
 	}
@@ -72,18 +71,20 @@ func TestDiscover(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 	var expected []*model.StoragePoolSpec
 
-	for i := range SampleDocks {
-		dd.dcks = append(dd.dcks, &SampleDocks[i])
+	for i := range SampleDocks_discover {
+		dd.dcks = append(dd.dcks, &SampleDocks_discover[i])
 	}
-	for i := range SamplePools {
-		expected = append(expected, &SamplePools[i])
+	for i := range SamplePools_discovery {
+		expected = append(expected, &SamplePools_discovery[i])
 	}
 	if err := dd.Discover(&fakedriver.Driver{}); err != nil {
-		t.Errorf("Failed to discoverer pools: %v\n", err)
+		t.Errorf("Failed to discover pools: %v\n", err)
 	}
+
 	for _, pol := range dd.pols {
 		pol.Id = ""
 	}
+
 	if !reflect.DeepEqual(dd.pols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, dd.pols)
 	}
@@ -92,11 +93,11 @@ func TestDiscover(t *testing.T) {
 func TestStore(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 
-	for i := range SampleDocks {
-		dd.dcks = append(dd.dcks, &SampleDocks[i])
+	for i := range SampleDocks_discover {
+		dd.dcks = append(dd.dcks, &SampleDocks_discover[i])
 	}
-	for i := range SamplePools {
-		dd.pols = append(dd.pols, &SamplePools[i])
+	for i := range SamplePools_discovery {
+		dd.pols = append(dd.pols, &SamplePools_discovery[i])
 	}
 
 	mockClient := new(dbtest.MockClient)
