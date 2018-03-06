@@ -21,24 +21,33 @@ import (
 	"strings"
 	"time"
 
-	"github.com/astaxie/beego/context"
+	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
-	"github.com/opensds/opensds/pkg/api/filter"
+	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 )
 
 const (
-	Auth_Token_Header    = "X-Auth-Token"
-	Subject_Token_Header = "X-Subject-Token"
+	authTokenHeader    = "X-Auth-Token"
+	subjectTokenHeader = "X-Subject-Token"
 )
+
+func NewKeystone() AuthBase {
+	k := &Keystone{}
+	if err := k.SetUp(); err != nil {
+		// If auth set up failed, raise panic.
+		panic(err)
+	}
+	return k
+}
 
 type Keystone struct {
 	identity *gophercloud.ServiceClient
-	ctx      *context.Context
+	ctx      *bctx.Context
 }
 
 func (k *Keystone) SetUp() error {
@@ -67,7 +76,7 @@ func (k *Keystone) SetUp() error {
 func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 	roles, err := r.ExtractRoles()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract roles failed,%s", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract roles failed,%v", err)
 	}
 
 	var roleNames []string
@@ -77,15 +86,15 @@ func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 
 	project, err := r.ExtractProject()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract project failed,%s", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract project failed,%v", err)
 	}
 
 	user, err := r.ExtractUser()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract user failed,%s", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract user failed,%v", err)
 	}
 
-	policyCtx := &filter.Context{
+	policyCtx := &context.Context{
 		ProjectId:      project.ID,
 		Roles:          roleNames,
 		UserId:         user.ID,
@@ -115,18 +124,9 @@ func (k *Keystone) validateToken(token string) error {
 	return k.setPolicyContext(r)
 }
 
-func (k *Keystone) Filter(ctx *context.Context) {
+func (k *Keystone) Filter(ctx *bctx.Context) {
 	// Strip the spaces around the token
-	token := strings.TrimSpace(ctx.Input.Header(Auth_Token_Header))
+	token := strings.TrimSpace(ctx.Input.Header(authTokenHeader))
 	k.ctx = ctx
 	k.validateToken(token)
-}
-
-func NewKeystone() AuthBase {
-	k := &Keystone{}
-	if err := k.SetUp(); err != nil {
-		// If auth set up failed, raise panic.
-		panic(err)
-	}
-	return k
 }

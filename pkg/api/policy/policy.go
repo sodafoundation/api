@@ -21,9 +21,12 @@ import (
 	"os"
 	"strings"
 
+	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/api/filter"
+	"github.com/opensds/opensds/pkg/context"
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
+	"net/http"
 )
 
 var enforcer *Enforcer
@@ -154,18 +157,24 @@ func (r *Rules) String() string {
 	return string(b)
 }
 
-func Authorize(ctx *filter.Context, action string) bool {
+func Authorize(httpCtx *bctx.Context, action string) bool {
+	ctx := context.GetContext(httpCtx)
 	credentials := ctx.ToPolicyValue()
+	ProjectId := httpCtx.Input.Param(":projectId")
+
 	target := map[string]string{
-		"project_id": ctx.ProjectId,
-		"user_id":    ctx.UserId,
+		"project_id": ProjectId,
 	}
+
 	log.V(8).Infof("Action: %v", action)
 	log.V(8).Infof("Target: %v", target)
 	log.V(8).Infof("Credentials: %v", credentials)
 	ok, err := enforcer.Authorize(action, target, credentials)
 	if err != nil {
-		log.Error("Authorize failed, %s", err)
+		log.Errorf("Authorize failed, %s", err)
+	}
+	if !ok {
+		model.HttpError(httpCtx, http.StatusForbidden, "Operation is not permitted")
 	}
 	return ok
 }

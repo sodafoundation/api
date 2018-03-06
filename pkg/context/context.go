@@ -12,11 +12,13 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
-// This is self defined context which is stored in context.Input.data.It is used to transport data in the pipe line.
+// This is self defined context which is stored in context.Input.data.
+// It is used to transport data in the pipe line.
 
-package filter
+package context
 
 import (
+	"github.com/astaxie/beego/context"
 	"reflect"
 )
 
@@ -71,4 +73,22 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 		ctxMap[name] = field.Interface()
 	}
 	return ctxMap
+}
+
+func CreateAdminContext() *Context {
+	return &Context{
+		IsAdmin: true,
+	}
+}
+
+func CreateInternalTenantContext(projectId, userId string) *Context {
+	return &Context{
+		ProjectId: projectId,
+		UserId:    userId,
+		IsAdmin:   true,
+	}
+}
+
+func GetContext(httpCtx *context.Context) *Context {
+	return httpCtx.Input.GetData("context").(*Context)
 }

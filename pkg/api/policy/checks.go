@@ -26,12 +26,16 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 )
 
+func init() {
+	registerAll()
+}
+
 type NewCheckFunc func(kind string, match string) BaseCheck
 
 var registeredChecks map[string]NewCheckFunc
 
-func register(name string, fun NewCheckFunc) {
-	registeredChecks[name] = fun
+func register(name string, f NewCheckFunc) {
+	registeredChecks[name] = f
 }
 
 func registerAll() {
@@ -41,9 +45,6 @@ func registerAll() {
 	register("rule", NewRuleCheck)
 	register("role", NewRoleCheck)
 	register("generic", NewGenericCheck)
-}
-func init() {
-	registerAll()
 }
 
 type BaseCheck interface {
