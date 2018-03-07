@@ -30,14 +30,16 @@ func TestParse(t *testing.T) {
 		ConfigFile: "/etc/ceph/ceph.conf",
 		Pool: map[string]PoolProperties{
 			"rbd": {
-				DiskType: "SSD",
-				AZ:       "ceph",
-				RecoveryTimeObjective: 0,
-				ProvisioningPolicy:    []string{"thin", "fixed"},
-				AccessProtocol:        "rbd",
-				MaxIOPS:               1000,
-				Compress:              true,
-				Dedupe:                false,
+				DiskType:        "SSD",
+				AZ:              "ceph",
+				AccessProtocol:  "rbd",
+				ThinProvisioned: true,
+				Compressed:      true,
+				Advanced: map[string]interface{}{
+					"recoveryTimeObjective": 0,
+					"maxIOPS":               1000,
+					"deduped":               false,
+				},
 			},
 		},
 	}

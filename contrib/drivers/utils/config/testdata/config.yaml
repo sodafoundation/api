@@ -3,11 +3,10 @@ pool:
   "rbd":
     diskType: SSD
     AZ: ceph
-    recoveryTimeObjective: 0
-    provisioningPolicy:
-    - thin
-    - fixed
-    accessProtocol: rbd
-    maxIOPS: 1000
-    compress: true
-    dedupe: false
+    accessProtocol: rbd	
+    thinProvisioned: true
+    compressed: true
+    advanced:
+      recoveryTimeObjective: 0
+      maxIOPS: 1000
+      deduped: false

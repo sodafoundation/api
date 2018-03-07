@@ -3,4 +3,3 @@ pool:
   "vg001":
     diskType: SSD
     AZ: default
-

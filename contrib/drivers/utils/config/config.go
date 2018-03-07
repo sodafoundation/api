@@ -22,14 +22,16 @@ import (
 )
 
 type PoolProperties struct {
-	DiskType              string   `yaml:"diskType,omitempty"`
-	AZ                    string   `yaml:"AZ,omitempty"`
-	RecoveryTimeObjective int      `yaml:"recoveryTimeObjective,omitempty"`
-	ProvisioningPolicy    []string `yaml:"provisioningPolicy,omitempty"`
-	AccessProtocol        string   `yaml:"accessProtocol,omitempty"`
-	MaxIOPS               int      `yaml:"maxIOPS,omitempty"`
-	Compress              bool     `yaml:"compress,omitempty"`
-	Dedupe                bool     `yaml:"dedupe,omitempty"`
+	DiskType        string `yaml:"diskType,omitempty"`
+	AZ              string `yaml:"AZ,omitempty"`
+	AccessProtocol  string `yaml:"accessProtocol,omitempty"`
+	ThinProvisioned bool   `yaml:"thinProvisioned,omitempty"`
+	Compressed      bool   `yaml:"compressed,omitempty"`
+	// Besides those basic pool properties above, vendors can configure some
+	// advanced features (IOPS, throughout, latency, etc) themselves, all these
+	// properties can be exposed to controller scheduler and filtered by
+	// selector in a extensible way.
+	Advanced map[string]interface{} `yaml:"advanced,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
@@ -50,23 +52,17 @@ func BuildDefaultPoolParam(proper PoolProperties) map[string]interface{} {
 	if proper.DiskType != "" {
 		param["diskType"] = proper.DiskType
 	}
-	if proper.RecoveryTimeObjective != 0 {
-		param["recoveryTimeObjective"] = proper.RecoveryTimeObjective
-	}
-	if len(proper.ProvisioningPolicy) != 0 {
-		param["provisioningPolicy"] = proper.ProvisioningPolicy
-	}
 	if proper.AccessProtocol != "" {
 		param["accessProtocol"] = proper.AccessProtocol
 	}
-	if proper.MaxIOPS != 0 {
-		param["maxIOPS"] = proper.MaxIOPS
+	if proper.ThinProvisioned {
+		param["thinProvisioned"] = proper.ThinProvisioned
 	}
-	if proper.Compress {
-		param["compress"] = proper.Compress
+	if proper.Compressed {
+		param["compressed"] = proper.Compressed
 	}
-	if proper.Dedupe {
-		param["dedupe"] = proper.Dedupe
+	if len(proper.Advanced) != 0 {
+		param["advanced"] = proper.Advanced
 	}
 
 	return param
