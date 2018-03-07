@@ -3,7 +3,6 @@ pool:
   vg001:
     diskType: SSD
     AZ: default
-    provisioningPolicy:
-    - fixed
     accessProtocol: iscsi
-    maxIOPS: 500
+    thinProvisioned: false
+    compressed: false

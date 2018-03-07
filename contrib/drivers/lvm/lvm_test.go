@@ -32,11 +32,9 @@ func TestSetup(t *testing.T) {
 		conf: &LVMConfig{
 			Pool: map[string]PoolProperties{
 				"vg001": {
-					DiskType:           "SSD",
-					AZ:                 "default",
-					ProvisioningPolicy: []string{"fixed"},
-					AccessProtocol:     "iscsi",
-					MaxIOPS:            500,
+					DiskType:       "SSD",
+					AZ:             "default",
+					AccessProtocol: "iscsi",
 				},
 			},
 			TgtBindIp: "192.168.56.105",
@@ -60,10 +58,9 @@ var fd = &Driver{
 	conf: &LVMConfig{
 		Pool: map[string]PoolProperties{
 			"vg001": {
-				DiskType:           "SSD",
-				ProvisioningPolicy: []string{"fixed"},
-				AccessProtocol:     "iscsi",
-				MaxIOPS:            500,
+				DiskType:       "SSD",
+				AZ:             "default",
+				AccessProtocol: "iscsi",
 			},
 		},
 	},
@@ -232,10 +229,8 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(18),
 			FreeCapacity:  int64(18),
 			Extras: model.ExtraSpec{
-				"diskType":           "SSD",
-				"provisioningPolicy": []string{"fixed"},
-				"accessProtocol":     "iscsi",
-				"maxIOPS":            500,
+				"diskType":       "SSD",
+				"accessProtocol": "iscsi",
 			},
 			AvailabilityZone: "default",
 		},
