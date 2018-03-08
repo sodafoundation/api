@@ -361,7 +361,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := d.conf.Pool[vg.Name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(d.conf.Pool[vg.Name])
+
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, vg.Name).String(),
@@ -369,7 +369,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
 			FreeCapacity:     vg.FreeCapacity,
-			Extras:           *param,
+			Extras:           BuildDefaultPoolParam(d.conf.Pool[vg.Name]),
 			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
 		}
 		if pol.AvailabilityZone == "" {
@@ -378,12 +378,6 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
-}
-
-func (*Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
-	var param = make(map[string]interface{})
-	param["diskType"] = proper.DiskType
-	return &param
 }
 
 func execCmd(script string, cmd []string) (string, error) {

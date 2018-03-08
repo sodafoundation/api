@@ -7,8 +7,9 @@ pool:
   StoragePool001:
     diskType: SSD
     AZ: dorado1
-    thin: true
-    compress: true
-    dedupe: true
+    accessProtocol: iscsi
+    thinProvisioned: true
+    compressed: true
+    advanced:
+      deduped: true
 targetIp: 8.46.192.247
-

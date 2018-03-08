@@ -1,6 +1,8 @@
 tgtBindIp: 192.168.56.105
 pool:
-  "vg001":
+  vg001:
     diskType: SSD
     AZ: default
-
+    accessProtocol: iscsi
+    thinProvisioned: false
+    compressed: false

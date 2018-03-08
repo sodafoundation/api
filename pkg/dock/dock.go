@@ -57,11 +57,21 @@ func (d *DockHub) TriggerDiscovery() error {
 	if err = d.Discoverer.Init(); err != nil {
 		return err
 	}
-	if err = d.Discoverer.Discover(d.Driver); err != nil {
-		return err
-	}
 
-	return d.Discoverer.Store()
+	ctx := &discovery.Context{
+		StopChan: make(chan bool),
+		ErrChan:  make(chan error),
+		MetaChan: make(chan string),
+	}
+	go discovery.DiscoveryAndReport(d.Discoverer, ctx)
+	go func(ctx *discovery.Context) {
+		if err = <-ctx.ErrChan; err != nil {
+			log.Error("When calling capabilty report method:", err)
+			ctx.StopChan <- true
+		}
+	}(ctx)
+
+	return nil
 }
 
 // CreateVolume
