@@ -46,7 +46,7 @@ func TestCapacityFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"size": int64(66),
+				"freeCapacity": ">= 66",
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -60,15 +60,17 @@ func TestCapacityFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"size": 101,
+				"freeCapacity": ">= 101",
 			},
 			pools:    fakePools,
 			expected: nil,
 		},
 	}
-	filter := &CapacityFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -114,9 +116,11 @@ func TestAZFilter(t *testing.T) {
 			expected: nil,
 		},
 	}
-	filter := &AZFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -148,7 +152,7 @@ func TestThinFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"thin": true,
+				"extras.thin": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -166,7 +170,7 @@ func TestThinFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"thin": false,
+				"extras.thin": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -178,9 +182,11 @@ func TestThinFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &ThinFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -212,7 +218,7 @@ func TestDedupeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"dedupe": true,
+				"extras.dedupe": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -230,7 +236,7 @@ func TestDedupeFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"dedupe": false,
+				"extras.dedupe": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -242,9 +248,11 @@ func TestDedupeFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &DedupeFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -276,7 +284,7 @@ func TestCompressFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"compress": true,
+				"extras.compress": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -294,7 +302,7 @@ func TestCompressFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"compress": false,
+				"extras.compress": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -306,9 +314,11 @@ func TestCompressFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &CompressFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -340,7 +350,7 @@ func TestDiskTypeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"diskType": "SSD",
+				"extras.diskType": "SSD",
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -353,15 +363,17 @@ func TestDiskTypeFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"diskType": "NVMe SSD",
+				"extras.diskType": "NVMe SSD",
 			},
 			pools:    fakePools,
 			expected: nil,
 		},
 	}
-	filter := &DiskTypeFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}

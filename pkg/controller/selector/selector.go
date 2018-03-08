@@ -21,6 +21,8 @@ profiles configured by admin.
 package selector
 
 import (
+	"errors"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
@@ -32,19 +34,6 @@ type Selector interface {
 }
 
 type selector struct{}
-
-var filterChain Filter
-
-func init() {
-	diskTypeFilter := &DiskTypeFilter{}
-	compressFilter := &CompressFilter{Next: diskTypeFilter}
-	dedupeFilter := &DedupeFilter{Next: compressFilter}
-	thinFilter := &ThinFilter{Next: dedupeFilter}
-	capacityFilter := &CapacityFilter{Next: thinFilter}
-	azFilter := &AZFilter{Next: capacityFilter}
-
-	filterChain = azFilter
-}
 
 // NewSelector method creates a new selector structure and return its pointer.
 func NewSelector() Selector {
@@ -59,7 +48,7 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 		return nil, err
 	}
 
-	supportedPools, err := filterChain.Handle(tags, pools)
+	supportedPools, err := SelectSupportedPools(1, tags, pools)
 	if err != nil {
 		log.Error("Filter supported pools failed: ", err)
 		return nil, err
@@ -69,4 +58,30 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 	// the future.
 	return supportedPools[0], nil
 
+}
+
+// SelectSupportedPools ...
+func SelectSupportedPools(maxNum int, filterReq map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
+	supportedPools := []*model.StoragePoolSpec{}
+
+	for _, pool := range pools {
+		if len(supportedPools) < maxNum {
+			isAvailable, err := IsAvailablePool(filterReq, pool)
+			if nil != err {
+				return nil, err
+			}
+
+			if isAvailable {
+				supportedPools = append(supportedPools, pool)
+			}
+		} else {
+			break
+		}
+	}
+
+	if len(supportedPools) > 0 {
+		return supportedPools, nil
+	}
+
+	return nil, errors.New("No available pool to meet user's requirement")
 }
