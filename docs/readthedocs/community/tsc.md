@@ -1,8 +1,8 @@
 # TSC
-OpenSDS Technical Steering Commitee
+OpenSDS Technical Steering Committee
 
 ## Mission
-To provide technical guidance for OpenSDS community development.
+The primary decision makeing forum for OpenSDS projects and servers to set the overall technical direction and strategy for OpenSDS.
 
 ## Members
 * Anjaneya Chagam (Intel)
