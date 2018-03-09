@@ -87,6 +87,8 @@ message CreateVolumeOpts {
     string dockId = 11;
     // The storage driver type.
     string driverName = 12;
+    // The Context
+    string context = 13;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties
@@ -99,7 +101,9 @@ message DeleteVolumeOpts {
     // The dock infomation on which the request will be executed.
     string dockId = 3;
     // The storage driver type.
-    string driverName = 4;    
+    string driverName = 4;
+    // The Context
+    string context = 5;
 }
 
 // ExtendVolumeOpts is a structure which indicates all required properties
@@ -128,7 +132,9 @@ message ExtendVolumeOpts {
     // The dock infomation on which the request will be executed
     string dockId = 11;
     // The storage driver type.
-    string driverName = 12;   
+    string driverName = 12;
+    // The Context
+    string context = 13;
 }
 
 // CreateVolumeSnapshotOpts is a structure which indicates all required
@@ -150,6 +156,8 @@ message CreateVolumeSnapshotOpts {
     string dockId = 7;
     // The storage driver type.
     string driverName = 8;
+    // The Context
+    string context = 9;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
@@ -165,6 +173,8 @@ message DeleteVolumeSnapshotOpts {
     string dockId = 4;
     // The storage driver type.
     string driverName = 5;
+    // The Context
+    string context = 6;
 }
 
 // CreateAttachmentOpts is a structure which indicates all required
@@ -186,6 +196,8 @@ message CreateAttachmentOpts {
     string dockId = 7;
     // The storage driver type.
     string driverName = 8;
+    // The Context
+    string context = 9;
 }
 
 // DeleteAttachmentOpts is a structure which indicates all required
@@ -203,6 +215,8 @@ message DeleteAttachmentOpts {
     string dockId = 5;
     // The storage driver type.
     string driverName = 6;
+    // The Context
+    string context = 7;
 }
 
 message HostInfo {

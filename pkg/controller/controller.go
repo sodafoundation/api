@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -56,15 +57,15 @@ type Controller struct {
 	policyController policy.Controller
 }
 
-func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
+func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
 	var profile *model.ProfileSpec
 	var err error
 
 	if in.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
-		profile, err = db.C.GetDefaultProfile()
+		profile, err = db.C.GetDefaultProfile(ctx)
 	} else {
-		profile, err = db.C.GetProfile(in.ProfileId)
+		profile, err = db.C.GetProfile(ctx, in.ProfileId)
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
@@ -96,7 +97,7 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		log.Error("When search supported pool resource:", err)
 		return nil, err
 	}
-	dockInfo, err := db.C.GetDock(polInfo.DockId)
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -114,6 +115,7 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		PoolName:         polInfo.Name,
 		DockId:           dockInfo.Id,
 		DriverName:       dockInfo.DriverName,
+		Context:          ctx.ToJson(),
 	}
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
@@ -132,8 +134,8 @@ func (c *Controller) CreateVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	return result, nil
 }
 
-func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
-	prf, err := db.C.GetProfile(in.ProfileId)
+func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec) error {
+	prf, err := db.C.GetProfile(ctx, in.ProfileId)
 	if err != nil {
 		log.Error("when search profile in db:", err)
 		return err
@@ -143,7 +145,7 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(in.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err)
 		return err
@@ -156,6 +158,7 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 		Metadata:   in.Metadata,
 		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
+		Context:    ctx.ToJson(),
 	}
 
 	var errChan = make(chan error, 1)
@@ -170,8 +173,8 @@ func (c *Controller) DeleteVolume(in *model.VolumeSpec) error {
 }
 
 // ExtendVolume ...
-func (c *Controller) ExtendVolume(in *model.VolumeSpec) (*model.VolumeSpec, error) {
-	prf, err := db.C.GetProfile(in.ProfileId)
+func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
+	prf, err := db.C.GetProfile(ctx, in.ProfileId)
 	if err != nil {
 		log.Error("when search profile in db:", err)
 		return nil, err
@@ -181,7 +184,7 @@ func (c *Controller) ExtendVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(EXTEND_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(in.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err)
 		return nil, err
@@ -195,6 +198,7 @@ func (c *Controller) ExtendVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 		Metadata:   in.Metadata,
 		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
+		Context:    ctx.ToJson(),
 	}
 
 	result, err := c.volumeController.ExtendVolume(opt)
@@ -214,13 +218,13 @@ func (c *Controller) ExtendVolume(in *model.VolumeSpec) (*model.VolumeSpec, erro
 	return result, nil
 }
 
-func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	vol, err := db.C.GetVolume(in.VolumeId)
+func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume attachment method: ", err)
 		return nil, err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -241,6 +245,7 @@ func (c *Controller) CreateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
 		},
 	)
 }
@@ -249,13 +254,13 @@ func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*mo
 	return nil, errors.New("Not implemented!")
 }
 
-func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) error {
-	vol, err := db.C.GetVolume(in.VolumeId)
+func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
+	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume attachment method: ", err)
 		return err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err
@@ -276,18 +281,19 @@ func (c *Controller) DeleteVolumeAttachment(in *model.VolumeAttachmentSpec) erro
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
 		},
 	)
 }
 
-func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	vol, err := db.C.GetVolume(in.VolumeId)
+func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
 
-	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return nil, err
@@ -304,17 +310,18 @@ func (c *Controller) CreateVolumeSnapshot(in *model.VolumeSnapshotSpec) (*model.
 			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:      dockInfo.Id,
 			DriverName:  dockInfo.DriverName,
+			Context:     ctx.ToJson(),
 		},
 	)
 }
 
-func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
-	vol, err := db.C.GetVolume(in.VolumeId)
+func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
+	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume snapshot method: ", err)
 		return err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return err
@@ -328,6 +335,7 @@ func (c *Controller) DeleteVolumeSnapshot(in *model.VolumeSnapshotSpec) error {
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
 		},
 	)
 }

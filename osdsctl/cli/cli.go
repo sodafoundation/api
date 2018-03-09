@@ -23,7 +23,23 @@ import (
 	"os"
 
 	c "github.com/opensds/opensds/client"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/spf13/cobra"
+)
+
+const (
+	// Opensds Auth EVNs
+	OpensdsEndpoint     = "OPENSDS_ENDPOINT"
+	OpensdsAuthStrategy = "OPENSDS_AUTH_STRATEGY"
+	OpensdsTenantId     = "OPENSDS_TENANT_ID"
+
+	// Keystone Auth ENVs
+	OsAuthUrl      = "OS_AUTH_URL"
+	OsUsername     = "OS_USERNAME"
+	OsPassword     = "OS_PASSWORD"
+	OsTenantName   = "OS_TENANT_NAME"
+	OsProjectName  = "OS_PROJECT_NAME"
+	OsUserDomainId = "OS_USER_DOMAIN_ID"
 )
 
 var (
@@ -47,14 +63,53 @@ func init() {
 	rootCommand.AddCommand(profileCommand)
 }
 
+func LoadKeystoneAuthOptionsFromEnv() *c.KeystoneAuthOptions {
+	opt := c.NewKeystoneAuthOpotions()
+	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
+	opt.Username = os.Getenv(OsUsername)
+	opt.Password = os.Getenv(OsPassword)
+	opt.TenantName = os.Getenv(OsTenantName)
+	projectName := os.Getenv(OsProjectName)
+	opt.DomainID = os.Getenv(OsUserDomainId)
+	if opt.TenantName == "" {
+		opt.TenantName = projectName
+	}
+	return opt
+}
+
+func LoadNoAuthOptionsFromEnv() *c.NoAuthOptions {
+	tenantId, ok := os.LookupEnv(OpensdsTenantId)
+	if !ok {
+		return c.NewNoauthOptions(constants.DefaultTenantId)
+	}
+	return c.NewNoauthOptions(tenantId)
+}
+
 // Run method indicates how to start a cli tool through cobra.
 func Run() error {
-	ep, ok := os.LookupEnv("OPENSDS_ENDPOINT")
+	ep, ok := os.LookupEnv(OpensdsEndpoint)
 	if !ok {
 		return fmt.Errorf("ERROR: You must provide the endpoint by setting " +
 			"the environment variable OPENSDS_ENDPOINT")
 	}
-	client = c.NewClient(&c.Config{Endpoint: ep})
+	cfg := &c.Config{Endpoint: ep}
+
+	authStrategy, ok := os.LookupEnv(OpensdsAuthStrategy)
+	if !ok {
+		authStrategy = c.Noauth
+		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)\n")
+	}
+
+	switch authStrategy {
+	case c.Keystone:
+		cfg.AuthOptions = LoadKeystoneAuthOptionsFromEnv()
+	case c.Noauth:
+		cfg.AuthOptions = LoadNoAuthOptionsFromEnv()
+	default:
+		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
+	}
+
+	client = c.NewClient(cfg)
 
 	return rootCommand.Execute()
 }

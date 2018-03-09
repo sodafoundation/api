@@ -28,12 +28,9 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-)
-
-const (
-	authTokenHeader    = "X-Auth-Token"
-	subjectTokenHeader = "X-Subject-Token"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func NewKeystone() AuthBase {
@@ -70,13 +67,14 @@ func (k *Keystone) SetUp() error {
 		log.Error("When get identity session:", err)
 		return err
 	}
+	log.V(4).Infof("Service Token Info: %s", provider.TokenID)
 	return nil
 }
 
 func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 	roles, err := r.ExtractRoles()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract roles failed,%v", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract roles failed,%v", err)
 	}
 
 	var roleNames []string
@@ -86,47 +84,65 @@ func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 
 	project, err := r.ExtractProject()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract project failed,%v", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract project failed,%v", err)
 	}
 
 	user, err := r.ExtractUser()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract user failed,%v", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract user failed,%v", err)
 	}
 
-	policyCtx := &context.Context{
+	ctx := &context.Context{
 		ProjectId:      project.ID,
+		TenantId:       project.ID,
 		Roles:          roleNames,
 		UserId:         user.ID,
 		IsAdminProject: project.Name == "admin",
 	}
-	k.ctx.Input.SetData("context", policyCtx)
+	k.ctx.Input.SetData("context", ctx)
 	return nil
 }
 
 func (k *Keystone) validateToken(token string) error {
-	r := tokens.Get(k.identity, token)
-	if r.Err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Get token failed,%v", r.Err)
+	if token == "" {
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "token not found in header")
+	}
+
+	var r tokens.GetResult
+	// The service token may be expired or revoked, so retry to get new token.
+	err := utils.Retry(2, "verify token", false, func(retryIdx int, lastErr error) error {
+		if retryIdx > 0 {
+			// Fixme: Is there any better method ?
+			if lastErr.Error() == "Authentication failed" {
+				k.SetUp()
+			} else {
+				return lastErr
+			}
+		}
+		r = tokens.Get(k.identity, token)
+		return r.Err
+	})
+	if err != nil {
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "get token failed,%v", r.Err)
 	}
 
 	t, err := r.ExtractToken()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "Extract token failed,%v", err)
+		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract token failed,%v", err)
 
 	}
 	log.V(8).Infof("token: %v", t)
 
 	if time.Now().After(t.ExpiresAt) {
 		return model.HttpError(k.ctx, http.StatusUnauthorized,
-			"Token has expired, expire time %v", t.ExpiresAt)
+			"token has expired, expire time %v", t.ExpiresAt)
 	}
 	return k.setPolicyContext(r)
 }
 
 func (k *Keystone) Filter(ctx *bctx.Context) {
 	// Strip the spaces around the token
-	token := strings.TrimSpace(ctx.Input.Header(authTokenHeader))
+	token := strings.TrimSpace(ctx.Input.Header(constants.AuthTokenHeader))
 	k.ctx = ctx
 	k.validateToken(token)
 }

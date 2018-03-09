@@ -158,12 +158,15 @@ func (r *Rules) String() string {
 }
 
 func Authorize(httpCtx *bctx.Context, action string) bool {
+	if config.CONF.AuthStrategy != "keystone" {
+		return true
+	}
 	ctx := context.GetContext(httpCtx)
 	credentials := ctx.ToPolicyValue()
-	ProjectId := httpCtx.Input.Param(":projectId")
+	TenantId := httpCtx.Input.Param(":tenantId")
 
 	target := map[string]string{
-		"project_id": ProjectId,
+		"tenant_id": TenantId,
 	}
 
 	log.V(8).Infof("Action: %v", action)
