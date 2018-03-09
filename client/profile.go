@@ -53,7 +53,7 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 		p.Endpoint,
 		urls.GenerateProfileURL()}, "/")
 
-	if err := p.Recv(request, url, "POST", body, &res); err != nil {
+	if err := p.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +67,7 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 		p.Endpoint,
 		urls.GenerateProfileURL(prfID)}, "/")
 
-	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 		p.Endpoint,
 		urls.GenerateProfileURL()}, "/")
 
-	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -94,7 +94,7 @@ func (p *ProfileMgr) DeleteProfile(prfID string) error {
 		p.Endpoint,
 		urls.GenerateProfileURL(prfID)}, "/")
 
-	return p.Recv(request, url, "DELETE", nil, nil)
+	return p.Recv(url, "DELETE", nil, nil)
 }
 
 // AddExtraProperty
@@ -105,7 +105,7 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 		urls.GenerateProfileURL(prfID),
 		"extras"}, "/")
 
-	if err := p.Recv(request, url, "POST", body, &res); err != nil {
+	if err := p.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 		urls.GenerateProfileURL(prfID),
 		"extras"}, "/")
 
-	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -134,5 +134,5 @@ func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) error {
 		urls.GenerateProfileURL(prfID),
 		"extras", extraKey}, "/")
 
-	return p.Recv(request, url, "DELETE", nil, nil)
+	return p.Recv(url, "DELETE", nil, nil)
 }
