@@ -40,7 +40,7 @@ type AuthOptions interface {
 	GetTenantId() string
 }
 
-func NewKeystoneAuthOpotions() *KeystoneAuthOptions {
+func NewKeystoneAuthOptions() *KeystoneAuthOptions {
 	return &KeystoneAuthOptions{}
 }
 

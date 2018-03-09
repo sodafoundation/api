@@ -64,7 +64,7 @@ func init() {
 }
 
 func LoadKeystoneAuthOptionsFromEnv() *c.KeystoneAuthOptions {
-	opt := c.NewKeystoneAuthOpotions()
+	opt := c.NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
 	opt.Password = os.Getenv(OsPassword)

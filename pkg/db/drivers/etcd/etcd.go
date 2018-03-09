@@ -327,7 +327,7 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 	}
 
 	dbReq := &Request{
-		Url:     urls.GenerateProfileURL(urls.Etcd, ctx.TenantId, prf.Id),
+		Url:     urls.GenerateProfileURL(urls.Etcd, "", prf.Id),
 		Content: string(prfBody),
 	}
 	dbRes := c.Create(dbReq)
@@ -342,7 +342,7 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 // GetProfile
 func (c *Client) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, error) {
 	dbReq := &Request{
-		Url: urls.GenerateProfileURL(urls.Etcd, ctx.TenantId, prfID),
+		Url: urls.GenerateProfileURL(urls.Etcd, "", prfID),
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
@@ -377,11 +377,9 @@ func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
 // ListProfiles
 func (c *Client) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	dbReq := &Request{
-		Url: urls.GenerateProfileURL(urls.Etcd, ctx.TenantId),
+		Url: urls.GenerateProfileURL(urls.Etcd, ""),
 	}
-	if IsAdminContext(ctx) {
-		dbReq.Url = urls.GenerateProfileURL(urls.Etcd, "")
-	}
+
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When list profiles in db:", dbRes.Error)
@@ -434,7 +432,7 @@ func (c *Client) UpdateProfile(ctx *c.Context, prfID string, input *model.Profil
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateProfileURL(urls.Etcd, ctx.TenantId, prfID),
+		Url:        urls.GenerateProfileURL(urls.Etcd, "", prfID),
 		NewContent: string(prfBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -448,7 +446,7 @@ func (c *Client) UpdateProfile(ctx *c.Context, prfID string, input *model.Profil
 // DeleteProfile
 func (c *Client) DeleteProfile(ctx *c.Context, prfID string) error {
 	dbReq := &Request{
-		Url: urls.GenerateProfileURL(urls.Etcd, ctx.TenantId, prfID),
+		Url: urls.GenerateProfileURL(urls.Etcd, "", prfID),
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
