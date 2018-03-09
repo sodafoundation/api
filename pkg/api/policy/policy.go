@@ -21,12 +21,13 @@ import (
 	"os"
 	"strings"
 
+	"net/http"
+
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"net/http"
 )
 
 var enforcer *Enforcer

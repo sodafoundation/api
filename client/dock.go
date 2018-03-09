@@ -41,7 +41,7 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 		d.Endpoint,
 		urls.GenerateDockURL(urls.Client, d.TenantId, dckID)}, "/")
 
-	if err := d.Recv(url, "GET", "", &res); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 

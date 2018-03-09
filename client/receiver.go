@@ -17,6 +17,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/astaxie/beego/httplib"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -24,10 +29,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
 )
 
 func checkHTTPResponseStatusCode(resp *http.Response) error {
