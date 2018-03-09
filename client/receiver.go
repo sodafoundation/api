@@ -17,11 +17,12 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego/httplib"
-	"github.com/opensds/opensds/pkg/model"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/astaxie/beego/httplib"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 func checkHTTPResponseStatusCode(resp *http.Response) error {
