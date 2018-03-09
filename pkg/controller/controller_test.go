@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -98,7 +99,7 @@ func TestCreateVolume(t *testing.T) {
 	}
 	var expected = &SampleVolumes[0]
 
-	result, err := c.CreateVolume(req)
+	result, err := c.CreateVolume(context.NewAdminContext(), req)
 	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
@@ -128,7 +129,7 @@ func TestDeleteVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	result := c.DeleteVolume(req)
+	result := c.DeleteVolume(context.NewAdminContext(), req)
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
@@ -159,7 +160,7 @@ func TestExtendVolume(t *testing.T) {
 	}
 	var expected = &SampleVolumes[0]
 
-	result, err := c.ExtendVolume(req)
+	result, err := c.ExtendVolume(context.NewAdminContext(), req)
 	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
@@ -183,7 +184,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 	var expected = &SampleAttachments[0]
 
-	result, err := c.CreateVolumeAttachment(req)
+	result, err := c.CreateVolumeAttachment(context.NewAdminContext(), req)
 	if err != nil {
 		t.Errorf("Failed to create volume attachment, err is %v\n", err)
 	}
@@ -209,7 +210,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	result := c.DeleteVolumeAttachment(req)
+	result := c.DeleteVolumeAttachment(context.NewAdminContext(), req)
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
@@ -233,7 +234,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	}
 	var expected = &SampleSnapshots[0]
 
-	result, err := c.CreateVolumeSnapshot(req)
+	result, err := c.CreateVolumeSnapshot(context.NewAdminContext(), req)
 	if err != nil {
 		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
 	}
@@ -258,7 +259,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	result := c.DeleteVolumeSnapshot(req)
+	result := c.DeleteVolumeSnapshot(context.NewAdminContext(), req)
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}

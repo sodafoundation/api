@@ -18,11 +18,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func checkHTTPResponseStatusCode(resp *http.Response) error {
@@ -103,4 +109,73 @@ type receiver struct{}
 
 func (*receiver) Recv(url string, method string, input interface{}, output interface{}) error {
 	return request(url, method, nil, input, output)
+}
+
+func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
+	k := &KeystoneReciver{auth: auth}
+	k.GetToken()
+	return k
+}
+
+type KeystoneReciver struct {
+	auth *KeystoneAuthOptions
+}
+
+func (k *KeystoneReciver) GetToken() error {
+	opts := gophercloud.AuthOptions{
+		IdentityEndpoint: k.auth.IdentityEndpoint,
+		Username:         k.auth.Username,
+		UserID:           k.auth.UserID,
+		Password:         k.auth.Password,
+		DomainID:         k.auth.DomainID,
+		DomainName:       k.auth.DomainName,
+		TenantID:         k.auth.TenantID,
+		TenantName:       k.auth.TenantName,
+		AllowReauth:      k.auth.AllowReauth,
+	}
+
+	provider, err := openstack.AuthenticatedClient(opts)
+	if err != nil {
+		log.Printf("When get auth client:", err)
+		return err
+	}
+
+	// Only support keystone v3
+	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
+	if err != nil {
+		log.Printf("When get identity session:", err)
+		return err
+	}
+	r := tokens.Create(identity, &opts)
+	token, err := r.ExtractToken()
+	if err != nil {
+		log.Printf("When get extract token session:", err)
+		return err
+	}
+	project, err := r.ExtractProject()
+	if err != nil {
+		log.Printf("When get extract project session:", err)
+		return err
+	}
+	k.auth.TenantID = project.ID
+	k.auth.TokenID = token.ID
+	return nil
+}
+
+func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
+	desc := fmt.Sprintf("%s %s", method, url)
+	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
+		if retryIdx > 0 {
+			err, ok := lastErr.(*HttpError)
+			if ok && err.Code == http.StatusUnauthorized {
+				k.GetToken()
+			} else {
+				return lastErr
+			}
+		}
+
+		headers := HeaderOption{}
+		headers[constants.AuthTokenHeader] = k.auth.TokenID
+		return request(url, method, headers, body, output)
+	})
 }

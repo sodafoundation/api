@@ -82,7 +82,7 @@ func TestPolicy(t *testing.T) {
 	}
 	// The golang testing framework dosen't invoke init function in linux system,so invoke it.
 	registerAll()
-	rules, _ := NewRules(data, "default")
+	rules, _ := NewRules(data, listRules())
 	enforcer := NewEnforcer(false)
 	enforcer.Rules = rules.Rules
 	expected := map[string]bool{

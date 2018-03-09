@@ -18,49 +18,87 @@
 package context
 
 import (
+	"encoding/json"
 	"github.com/astaxie/beego/context"
+	"github.com/golang/glog"
 	"reflect"
 )
 
+func NewAdminContext() *Context {
+	return &Context{
+		IsAdmin: true,
+	}
+}
+
+func NewInternalTenantContext(tenantId, userId string) *Context {
+	return &Context{
+		TenantId: tenantId,
+		UserId:   userId,
+		IsAdmin:  true,
+	}
+}
+
+func NewContextFormJson(s string) *Context {
+	ctx := &Context{}
+	err := json.Unmarshal([]byte(s), ctx)
+	glog.Errorf(s)
+	if err != nil {
+		glog.Errorf("Unmarshal json to context failed, reason:%v", err)
+	}
+	return ctx
+}
+
+func GetContext(httpCtx *context.Context) *Context {
+	ctx, _ := httpCtx.Input.GetData("context").(*Context)
+	return ctx
+}
+
 type Context struct {
-	AuthToken                string   `json:"auth_token"`
-	UserId                   string   `json:"user_id"`
-	ProjectId                string   `json:"project_id"`
-	DomainId                 string   `json:"domain_id"`
-	UserDomainId             string   `json:"user_domain_id"`
-	ProjectDomainId          string   `json:"project_domain_id"`
-	IsAdmin                  bool     `json:"is_admin"`
-	ReadOnly                 string   `json:"read_only"`
-	ShowDeleted              string   `json:"show_deleted"`
-	RequestId                string   `json:"request_id"`
-	ResourceUuid             string   `json:"resource_uuid"`
-	Overwrite                string   `json:"overwrite"`
-	Roles                    []string `json:"roles"`
-	UserName                 string   `json:"user_name"`
-	ProjectName              string   `json:"project_name"`
-	DomainName               string   `json:"domain_name"`
-	UserDomainName           string   `json:"user_domain_name"`
-	ProjectDomainName        string   `json:"project_domain_name"`
-	IsAdminProject           bool     `json:"is_admin_project"`
-	ServiceToken             string   `json:"service_token"`
-	ServiceUserId            string   `json:"service_user_id"`
-	ServiceUserName          string   `json:"service_user_name"`
-	ServiceUserDomainId      string   `json:"service_user_domain_id"`
-	ServiceUserDomainName    string   `json:"service_user_domain_name"`
-	ServiceProjectId         string   `json:"service_project_id"`
-	ServiceProjectName       string   `json:"service_project_name"`
-	ServiceProjectDomainId   string   `json:"service_project_domain_id"`
-	ServiceProjectDomainName string   `json:"service_project_domain_name"`
-	ServiceRoles             string   `json:"service_roles"`
+	AuthToken                string   `policy:"true" json:"auth_token"`
+	UserId                   string   `policy:"true" json:"user_id"`
+	ProjectId                string   `policy:"true" json:"project_id"`
+	TenantId                 string   `policy:"true" json:"tenant_id"`
+	DomainId                 string   `policy:"true" json:"domain_id"`
+	UserDomainId             string   `policy:"true" json:"user_domain_id"`
+	ProjectDomainId          string   `policy:"true" json:"project_domain_id"`
+	IsAdmin                  bool     `policy:"true" json:"is_admin"`
+	ReadOnly                 string   `policy:"true" json:"read_only"`
+	ShowDeleted              string   `policy:"true" json:"show_deleted"`
+	RequestId                string   `policy:"true" json:"request_id"`
+	ResourceUuid             string   `policy:"true" json:"resource_uuid"`
+	Overwrite                string   `policy:"true" json:"overwrite"`
+	Roles                    []string `policy:"true" json:"roles"`
+	UserName                 string   `policy:"true" json:"user_name"`
+	ProjectName              string   `policy:"true" json:"project_name"`
+	DomainName               string   `policy:"true" json:"domain_name"`
+	UserDomainName           string   `policy:"true" json:"user_domain_name"`
+	ProjectDomainName        string   `policy:"true" json:"project_domain_name"`
+	IsAdminProject           bool     `policy:"true" json:"is_admin_project"`
+	ServiceToken             string   `policy:"true" json:"service_token"`
+	ServiceUserId            string   `policy:"true" json:"service_user_id"`
+	ServiceUserName          string   `policy:"true" json:"service_user_name"`
+	ServiceUserDomainId      string   `policy:"true" json:"service_user_domain_id"`
+	ServiceUserDomainName    string   `policy:"true" json:"service_user_domain_name"`
+	ServiceProjectId         string   `policy:"true" json:"service_project_id"`
+	ServiceProjectName       string   `policy:"true" json:"service_project_name"`
+	ServiceProjectDomainId   string   `policy:"true" json:"service_project_domain_id"`
+	ServiceProjectDomainName string   `policy:"true" json:"service_project_domain_name"`
+	ServiceRoles             string   `policy:"true" json:"service_roles"`
+	Token                    string   `policy:"false" json:"token"`
+	Uri                      string   `policy:"false" json:"uri"`
 }
 
 func (ctx *Context) ToPolicyValue() map[string]interface{} {
+
 	ctxMap := map[string]interface{}{}
 	t := reflect.TypeOf(ctx).Elem()
 	v := reflect.ValueOf(ctx).Elem()
 	for i := 0; i < t.NumField(); i++ {
 		field := v.Field(i)
 		name := t.Field(i).Tag.Get("json")
+		if t.Field(i).Tag.Get("policy") == "false" {
+			continue
+		}
 		if field.Kind() == reflect.String && field.String() == "" {
 			continue
 		}
@@ -75,20 +113,10 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 	return ctxMap
 }
 
-func CreateAdminContext() *Context {
-	return &Context{
-		IsAdmin: true,
+func (ctx *Context) ToJson() string {
+	b, err := json.Marshal(ctx)
+	if err != nil {
+		glog.Errorf("Context convert to json failed, %v", err)
 	}
-}
-
-func CreateInternalTenantContext(projectId, userId string) *Context {
-	return &Context{
-		ProjectId: projectId,
-		UserId:    userId,
-		IsAdmin:   true,
-	}
-}
-
-func GetContext(httpCtx *context.Context) *Context {
-	return httpCtx.Input.GetData("context").(*Context)
+	return string(b)
 }

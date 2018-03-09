@@ -26,6 +26,7 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
@@ -110,11 +111,11 @@ func (dd *DockDiscoverer) Discover() error {
 // Store
 func (dd *DockDiscoverer) Store() error {
 	var err error
-
+	ctx := c.NewAdminContext()
 	// Store dock resources in database.
 	for _, dck := range dd.dcks {
 		// Call db module to create dock resource.
-		if _, err = dd.c.CreateDock(dck); err != nil {
+		if _, err = dd.c.CreateDock(ctx, dck); err != nil {
 			log.Errorf("When create dock %s in db: %v\n", dck.Name, err)
 			return err
 		}
@@ -123,7 +124,7 @@ func (dd *DockDiscoverer) Store() error {
 	// Store pool resources in database.
 	for _, pol := range dd.pols {
 		// Call db module to create pool resource.
-		if _, err = dd.c.CreatePool(pol); err != nil {
+		if _, err = dd.c.CreatePool(ctx, pol); err != nil {
 			log.Errorf("When create pool %s in db: %v\n", pol.Name, err)
 			return err
 		}

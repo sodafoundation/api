@@ -18,6 +18,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/utils/config"
 )
 
@@ -28,7 +29,11 @@ type AuthBase interface {
 type NoAuth struct {
 }
 
-func (auth *NoAuth) Filter(ctx *context.Context) {
+func (auth *NoAuth) Filter(httpCtx *context.Context) {
+	ctx := c.GetContext(httpCtx)
+	ctx.IsAdmin = true
+	ctx.TenantId = httpCtx.Input.Param(":tenantId")
+	httpCtx.Input.SetData("context", ctx)
 }
 
 func NewNoAuth() AuthBase {
