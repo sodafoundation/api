@@ -60,6 +60,15 @@ func (fc *FakeDbClient) GetDockByPoolId(poolId string) (*model.DockSpec, error) 
 }
 
 // ListDocks
+func (fc *FakeDbClient) ListDocksWithFilter(m map[string][]string) ([]*model.DockSpec, error) {
+	var dcks []*model.DockSpec
+
+	for i := range SampleDocks {
+		dcks = append(dcks, &SampleDocks[i])
+	}
+	return dcks, nil
+}
+
 func (fc *FakeDbClient) ListDocks() ([]*model.DockSpec, error) {
 	var dcks []*model.DockSpec
 
@@ -95,6 +104,15 @@ func (fc *FakeDbClient) GetPool(polID string) (*model.StoragePoolSpec, error) {
 }
 
 // ListPools
+func (fc *FakeDbClient) ListPoolsWithFilter(m map[string][]string) ([]*model.StoragePoolSpec, error) {
+	var pols []*model.StoragePoolSpec
+
+	for i := range SamplePools {
+		pols = append(pols, &SamplePools[i])
+	}
+	return pols, nil
+}
+
 func (fc *FakeDbClient) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 
@@ -142,6 +160,15 @@ func (fc *FakeDbClient) GetDefaultProfile() (*model.ProfileSpec, error) {
 }
 
 // ListProfiles
+func (fc *FakeDbClient) ListProfilesWithFilter(m map[string][]string) ([]*model.ProfileSpec, error) {
+	var prfs []*model.ProfileSpec
+
+	for i := range SampleProfiles {
+		prfs = append(prfs, &SampleProfiles[i])
+	}
+	return prfs, nil
+}
+
 func (fc *FakeDbClient) ListProfiles() ([]*model.ProfileSpec, error) {
 	var prfs []*model.ProfileSpec
 
@@ -189,6 +216,13 @@ func (fc *FakeDbClient) GetVolume(volID string) (*model.VolumeSpec, error) {
 }
 
 // ListVolumes
+func (fc *FakeDbClient) ListVolumesWithFilter(m map[string][]string) ([]*model.VolumeSpec, error) {
+	var vols []*model.VolumeSpec
+
+	vols = append(vols, &SampleVolumes[0])
+	return vols, nil
+}
+
 func (fc *FakeDbClient) ListVolumes() ([]*model.VolumeSpec, error) {
 	var vols []*model.VolumeSpec
 
@@ -222,6 +256,13 @@ func (fc *FakeDbClient) GetVolumeAttachment(attachmentId string) (*model.VolumeA
 }
 
 // ListVolumeAttachments
+func (fc *FakeDbClient) ListVolumeAttachmentsWithFilter(m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
+	var atcs []*model.VolumeAttachmentSpec
+
+	atcs = append(atcs, &SampleAttachments[0])
+	return atcs, nil
+}
+
 func (fc *FakeDbClient) ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	var atcs []*model.VolumeAttachmentSpec
 
@@ -250,6 +291,13 @@ func (fc *FakeDbClient) GetVolumeSnapshot(snapshotID string) (*model.VolumeSnaps
 }
 
 // ListVolumeSnapshots
+func (fc *FakeDbClient) ListVolumeSnapshotsWithFilter(m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
+	var snps []*model.VolumeSnapshotSpec
+
+	snps = append(snps, &SampleSnapshots[0], &SampleSnapshots[1])
+	return snps, nil
+}
+
 func (fc *FakeDbClient) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 	var snps []*model.VolumeSnapshotSpec
 

@@ -96,8 +96,8 @@ func (*Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
 
-	for i := range SamplePools {
-		pols = append(pols, &SamplePools[i])
+	for i := range SamplePools_discovery {
+		pols = append(pols, &SamplePools_discovery[i])
 	}
 	return pols, nil
 }

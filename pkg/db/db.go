@@ -15,7 +15,6 @@
 /*
 This module implements the database operation of data structure
 defined in api module.
-
 */
 
 package db
@@ -60,6 +59,8 @@ type Client interface {
 
 	ListDocks() ([]*model.DockSpec, error)
 
+	ListDocksWithFilter(m map[string][]string) ([]*model.DockSpec, error)
+
 	UpdateDock(dckID, name, desp string) (*model.DockSpec, error)
 
 	DeleteDock(dckID string) error
@@ -72,6 +73,8 @@ type Client interface {
 
 	ListPools() ([]*model.StoragePoolSpec, error)
 
+	ListPoolsWithFilter(m map[string][]string) ([]*model.StoragePoolSpec, error)
+
 	UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
 	DeletePool(polID string) error
@@ -83,6 +86,8 @@ type Client interface {
 	GetDefaultProfile() (*model.ProfileSpec, error)
 
 	ListProfiles() ([]*model.ProfileSpec, error)
+
+	ListProfilesWithFilter(m map[string][]string) ([]*model.ProfileSpec, error)
 
 	UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
 
@@ -100,6 +105,8 @@ type Client interface {
 
 	ListVolumes() ([]*model.VolumeSpec, error)
 
+	ListVolumesWithFilter(m map[string][]string) ([]*model.VolumeSpec, error)
+
 	UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	DeleteVolume(volID string) error
@@ -112,6 +119,8 @@ type Client interface {
 
 	ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error)
 
+	ListVolumeAttachmentsWithFilter(m map[string][]string) ([]*model.VolumeAttachmentSpec, error)
+
 	UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
 	DeleteVolumeAttachment(attachmentId string) error
@@ -121,6 +130,8 @@ type Client interface {
 	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
 
 	ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
+
+	ListVolumeSnapshotsWithFilter(m map[string][]string) ([]*model.VolumeSnapshotSpec, error)
 
 	UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
