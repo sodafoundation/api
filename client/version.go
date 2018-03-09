@@ -46,7 +46,7 @@ func (v *VersionMgr) GetVersion(apiVersion string) (*model.VersionSpec, error) {
 	url := strings.Join([]string{
 		v.Endpoint, apiVersion}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func (v *VersionMgr) ListVersions() ([]*model.VersionSpec, error) {
 	var res []*model.VersionSpec
 	url := v.Endpoint
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 

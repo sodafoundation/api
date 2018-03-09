@@ -43,7 +43,7 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 		p.Endpoint,
 		urls.GeneratePoolURL(polID)}, "/")
 
-	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -57,7 +57,7 @@ func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
 		p.Endpoint,
 		urls.GeneratePoolURL()}, "/")
 
-	if err := p.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 

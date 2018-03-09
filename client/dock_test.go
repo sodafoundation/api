@@ -32,7 +32,6 @@ func NewFakeDockReceiver() Receiver {
 type fakeDockReceiver struct{}
 
 func (*fakeDockReceiver) Recv(
-	f ReqFunc,
 	string,
 	method string,
 	in interface{},

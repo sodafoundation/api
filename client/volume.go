@@ -63,7 +63,7 @@ func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) 
 		v.Endpoint,
 		urls.GenerateVolumeURL()}, "/")
 
-	if err := v.Recv(request, url, "POST", body, &res); err != nil {
+	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -77,7 +77,7 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 		v.Endpoint,
 		urls.GenerateVolumeURL(volID)}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
 		v.Endpoint,
 		urls.GenerateVolumeURL()}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -104,7 +104,7 @@ func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
 		v.Endpoint,
 		urls.GenerateVolumeURL(volID)}, "/")
 
-	return v.Recv(request, url, "DELETE", body, nil)
+	return v.Recv(url, "DELETE", body, nil)
 }
 
 // UpdateVolume
@@ -114,7 +114,7 @@ func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.Volum
 		v.Endpoint,
 		urls.GenerateVolumeURL(volID)}, "/")
 
-	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -128,7 +128,7 @@ func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model
 		v.Endpoint,
 		urls.GenerateNewVolumeURL(volID + "/action")}, "/")
 
-	if err := v.Recv(request, url, "POST", body, &res); err != nil {
+	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model
 		v.Endpoint,
 		urls.GenerateAttachmentURL()}, "/")
 
-	if err := v.Recv(request, url, "POST", body, &res); err != nil {
+	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -156,7 +156,7 @@ func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBu
 		v.Endpoint,
 		urls.GenerateAttachmentURL(atcID)}, "/")
 
-	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -170,7 +170,7 @@ func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSp
 		v.Endpoint,
 		urls.GenerateAttachmentURL(atcID)}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -184,7 +184,7 @@ func (v *VolumeMgr) ListVolumeAttachments() ([]*model.VolumeAttachmentSpec, erro
 		v.Endpoint,
 		urls.GenerateAttachmentURL()}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -197,7 +197,7 @@ func (v *VolumeMgr) DeleteVolumeAttachment(atcID string, body VolumeAttachmentBu
 		v.Endpoint,
 		urls.GenerateAttachmentURL(atcID)}, "/")
 
-	return v.Recv(request, url, "DELETE", body, nil)
+	return v.Recv(url, "DELETE", body, nil)
 }
 
 // CreateVolumeSnapshot
@@ -207,7 +207,7 @@ func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.Vol
 		v.Endpoint,
 		urls.GenerateSnapshotURL()}, "/")
 
-	if err := v.Recv(request, url, "POST", body, &res); err != nil {
+	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -221,7 +221,7 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 		v.Endpoint,
 		urls.GenerateSnapshotURL(snpID)}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -235,7 +235,7 @@ func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
 		v.Endpoint,
 		urls.GenerateSnapshotURL()}, "/")
 
-	if err := v.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -248,7 +248,7 @@ func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilde
 		v.Endpoint,
 		urls.GenerateSnapshotURL(snpID)}, "/")
 
-	return v.Recv(request, url, "DELETE", body, nil)
+	return v.Recv(url, "DELETE", body, nil)
 }
 
 // UpdateVolumeSnapshot
@@ -258,7 +258,7 @@ func (v *VolumeMgr) UpdateVolumeSnapshot(snpID string, body VolumeSnapshotBuilde
 		v.Endpoint,
 		urls.GenerateSnapshotURL(snpID)}, "/")
 
-	if err := v.Recv(request, url, "PUT", body, &res); err != nil {
+	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
 	}
 

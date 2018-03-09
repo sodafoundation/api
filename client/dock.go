@@ -40,7 +40,7 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 		d.Endpoint,
 		urls.GenerateDockURL(dckID)}, "/")
 
-	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
 		d.Endpoint,
 		urls.GenerateDockURL()}, "/")
 
-	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
