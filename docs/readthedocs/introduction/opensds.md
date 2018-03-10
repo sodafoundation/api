@@ -34,11 +34,6 @@ now, please refer to the Contributing sections below.
 * slack: #[opensds](https://opensds.slack.com)
 * Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
 
-## Installation
-
-Please refer to [INSTALL](https://github.com/opensds/opensds/wiki) for any requirements when you want to perform code
-development for opensds.
-
 ## REST API
 
 ### OpenAPI
