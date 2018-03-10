@@ -10,12 +10,27 @@ dummy:
 
 workplace: /home/krej # Change this field according to your username, use '/root' if you login as root.
 
-# These fields are NOT suggested to be modified
-remote_url: https://github.com/opensds/opensds.git
-opensds_root_dir: "{{ workplace }}/gopath/src/github.com/opensds/opensds"
-opensds_build_dir: "{{ opensds_root_dir }}/build"
+opensds_release: v0.1.4 # The version should be at least v0.1.4.
+nbp_release: v0.1.0
+
+# These fields are not suggested to be modified
+opensds_download_url: https://github.com/opensds/opensds/releases/download/{{ opensds_release }}/opensds-{{ opensds_release }}-linux-amd64.tar.gz
+opensds_tarball_url: /opt/opensds-{{ opensds_release }}-linux-amd64.tar.gz
+opensds_dir: /opt/opensds-{{ opensds_release }}-linux-amd64
+nbp_download_url: https://github.com/opensds/nbp/releases/download/{{ nbp_release }}/opensds-k8s-{{ nbp_release }}-linux-amd64.tar.gz
+nbp_tarball_url: /opt/opensds-k8s-{{ nbp_release }}-linux-amd64.tar.gz
+nbp_dir: /opt/opensds-k8s-{{ nbp_release }}-linux-amd64
+
 opensds_config_dir: /etc/opensds
 opensds_log_dir: /var/log/opensds
+
+###########
+# PLUGIN  #
+###########
+
+nbp_plugin_type: standalone # standalone is the default integration way, but you can change it to 'csi', 'flexvolume'
+
+flexvolume_plugin_dir: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/opensds.io~opensds
 
 ###########
 # GOLANG  #

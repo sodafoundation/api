@@ -1,0 +1,8 @@
+---
+- name: include scenarios/flexvolume.yml
+  include: scenarios/flexvolume.yml
+  when: nbp_plugin_type == "flexvolume"
+
+- name: include scenarios/csi.yml
+  include: scenarios/csi.yml
+  when: nbp_plugin_type == "csi"

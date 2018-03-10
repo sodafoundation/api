@@ -3,3 +3,6 @@ localhost ansible_connection=local
 
 [docks]
 localhost ansible_connection=local
+
+[worker-nodes]
+localhost ansible_connection=local
