@@ -36,7 +36,6 @@ func NewFakeProfileReceiver() Receiver {
 type fakeProfileReceiver struct{}
 
 func (*fakeProfileReceiver) Recv(
-	f ReqFunc,
 	string,
 	method string,
 	in interface{},

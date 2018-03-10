@@ -35,7 +35,6 @@ func init() {
 }
 
 func TestListDocks(t *testing.T) {
-
 	var fakeDocks = []*model.DockSpec{
 		&model.DockSpec{
 			BaseModel: &model.BaseModel{

@@ -24,7 +24,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-var c = client.NewClient(&client.Config{"http://localhost:50040"})
+var c = client.NewClient(&client.Config{"http://localhost:50040", nil})
 
 func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{

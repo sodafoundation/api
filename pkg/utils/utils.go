@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 
@@ -72,15 +71,19 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func Retry(retryNum int, desc string, fn func() error) error {
+func Retry(retryNum int, desc string, silent bool, fn func(retryIdx int, lastErr error) error) error {
+	var err error
 	for i := 0; i < retryNum; i++ {
-		if err := fn(); err != nil {
-			log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
+		if err = fn(i, err); err != nil {
+			if !silent {
+				log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
+			}
 		} else {
 			return nil
 		}
 	}
-	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
-	log.Error(err)
+	if !silent {
+		log.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
+	}
 	return err
 }

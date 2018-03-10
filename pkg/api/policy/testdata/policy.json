@@ -1,0 +1,10 @@
+{
+    "admin_or_owner": "is_admin:True or (role:admin and is_admin_project:True) or  project_id:%(project_id)s",
+    "default": "rule:admin_or_owner",
+    "admin_api": "is_admin:True or (role:admin and is_admin_project:True)",
+
+    "volume:create": "",
+    "volume:delete": "rule:admin_or_owner",
+    "volume:get": "rule:admin_api",
+    "volume:get_all": "rule:default"
+}

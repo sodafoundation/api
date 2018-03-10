@@ -24,6 +24,9 @@ package model
 // capabilities which are desirable features for a class of applications.
 type ProfileSpec struct {
 	*BaseModel
+	// The uuid of project
+	// + readOnly
+	TenantId string `json:"TenantId"`
 
 	// The name of the profile.
 	Name string `json:"name,omitempty"`
@@ -36,7 +39,7 @@ type ProfileSpec struct {
 	// One of: "block", "file" or "object".
 	StorageType string `json:"storageType,omitempty"`
 
-	// Map of keys and json object that represents the extra epecs
+	// Map of keys and json object that represents the extra specs
 	// of the profile, such as requested capabilities.
 	// +optional
 	Extras ExtraSpec `json:"extras,omitempty"`
