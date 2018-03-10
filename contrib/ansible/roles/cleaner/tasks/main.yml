@@ -15,7 +15,7 @@
   docker:
     image: quay.io/coreos/etcd:latest
     state: stopped
-  when: container_enabled == true
+  when: db_driver == "etcd" and container_enabled == true
 
 - name: remove etcd service data
   file:
@@ -55,10 +55,41 @@
     state: stopped
   when: container_enabled == true
 
-- name: clean all opensds build files
-  shell: . /etc/profile; make clean
-  args:
-    chdir: "{{ opensds_root_dir }}"
+- name: clean opensds release files
+  file:
+    path: "{{ opensds_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean opensds release tarball file
+  file:
+    path: "{{ opensds_tarball_url }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean opensds flexvolume plugins binary file
+  file:
+    path: "{{ flexvolume_plugin_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+  when: nbp_plugin_type == "flexvolume"
+
+- name: clean nbp release files
+  file:
+    path: "{{ nbp_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean nbp release tarball file
+  file:
+    path: "{{ nbp_tarball_url }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
 
 - name: clean all opensds configuration files
   file:

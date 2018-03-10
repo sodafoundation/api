@@ -12,7 +12,7 @@
         ps aux | grep osdslet | grep -v grep && break
       done
   args:
-    chdir: "{{ opensds_build_dir }}/out"
+    chdir: "{{ opensds_dir }}"
   when: container_enabled == false
 
 - name: run osdslet containerized service

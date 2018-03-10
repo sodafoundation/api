@@ -23,12 +23,12 @@
         i="$((i+1))"
         [ "$i" -lt 4 ]
       do
-        nohup bin/osdsdock &>/dev/null &
+        nohup bin/osdsdock > osdsdock.out 2> osdsdock.err < /dev/null &
         sleep 5
         ps aux | grep osdsdock | grep -v grep && break
       done
   args:
-    chdir: "{{ opensds_build_dir }}/out"
+    chdir: "{{ opensds_dir }}"
   when: container_enabled == false
 
 - name: run osdsdock containerized service

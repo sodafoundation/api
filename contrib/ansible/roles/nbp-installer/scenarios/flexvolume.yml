@@ -1,0 +1,11 @@
+---
+- name: Create flexvolume plugin directory if not existed
+  file:
+    path: "{{ flexvolume_plugin_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Copy opensds flexvolume plugin binary file into flexvolume plugin dir
+  copy:
+    src: "{{ nbp_dir }}/flexvolume/opensds"
+    dest: "{{ flexvolume_plugin_dir }}/opensds"
