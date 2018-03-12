@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -83,4 +85,88 @@ func Retry(retryNum int, desc string, fn func() error) error {
 	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
 	log.Error(err)
 	return err
+}
+
+// StructToMap ...
+func StructToMap(structObj interface{}) (map[string]interface{}, error) {
+	jsonStr, err := json.Marshal(structObj)
+	if nil != err {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(jsonStr, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range result {
+		valueMap, ok := value.(map[string]interface{})
+		if ok {
+			for k, v := range valueMap {
+				result[key+"."+k] = v
+			}
+			delete(result, key)
+		}
+	}
+
+	return result, nil
+}
+
+// Epsilon ...
+const Epsilon float64 = 0.00000001
+
+// IsFloatEqual ...
+func IsFloatEqual(a, b float64) bool {
+	if (a-b) < Epsilon && (b-a) < Epsilon {
+		return true
+	}
+
+	return false
+}
+
+// IsEqual ...
+func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) {
+	switch value.(type) {
+	case bool:
+		v, ok1 := value.(bool)
+		r, ok2 := reqValue.(bool)
+
+		if ok1 && ok2 {
+			if v == r {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be bool")
+	case float64:
+		v, ok1 := value.(float64)
+		r, ok2 := reqValue.(float64)
+
+		if ok1 && ok2 {
+			if IsFloatEqual(v, r) {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be float64")
+	case string:
+		v, ok1 := value.(string)
+		r, ok2 := reqValue.(string)
+		if ok1 && ok2 {
+			if v == r {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be string")
+	default:
+		return false, errors.New("the type of " + key + " must be bool or float64 or string")
+	}
 }

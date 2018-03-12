@@ -15,7 +15,6 @@
 package selector
 
 import (
-	"encoding/json"
 	"errors"
 	"regexp"
 	"strconv"
@@ -23,49 +22,12 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
-
-// StructToMap ...
-func StructToMap(structObj interface{}) (map[string]interface{}, error) {
-	jsonStr, err := json.Marshal(structObj)
-	if nil != err {
-		return nil, err
-	}
-
-	var result map[string]interface{}
-	err = json.Unmarshal(jsonStr, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	for key, value := range result {
-		valueMap, ok := value.(map[string]interface{})
-		if ok {
-			for k, v := range valueMap {
-				result[key+"."+k] = v
-			}
-			delete(result, key)
-		}
-	}
-
-	return result, nil
-}
-
-// Epsilon ...
-const Epsilon float64 = 0.00000001
-
-// IsFloatEqual ...
-func IsFloatEqual(a, b float64) bool {
-	if (a-b) < Epsilon && (b-a) < Epsilon {
-		return true
-	}
-
-	return false
-}
 
 // IsAvailablePool ...
 func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSpec) (bool, error) {
-	poolMap, err := StructToMap(pool)
+	poolMap, err := utils.StructToMap(pool)
 	if nil != err {
 		return false, err
 	}
@@ -94,7 +56,7 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 func match(key string, value interface{}, reqValue interface{}) (bool, error) {
 	reqValueStr, ok := reqValue.(string)
 	if !ok {
-		return IsEqual(key, value, reqValue)
+		return utils.IsEqual(key, value, reqValue)
 	}
 
 	words := strings.Split(reqValueStr, " ")
@@ -155,52 +117,6 @@ func InOperator(key string, reqValue string, value interface{}) (bool, error) {
 	}
 
 	return false, nil
-}
-
-// IsEqual ...
-func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) {
-	switch value.(type) {
-	case bool:
-		v, ok1 := value.(bool)
-		r, ok2 := reqValue.(bool)
-
-		if ok1 && ok2 {
-			if v == r {
-				return true, nil
-			}
-
-			return false, nil
-		}
-
-		return false, errors.New("the type of " + key + " must be bool")
-	case float64:
-		v, ok1 := value.(float64)
-		r, ok2 := reqValue.(float64)
-
-		if ok1 && ok2 {
-			if IsFloatEqual(v, r) {
-				return true, nil
-			}
-
-			return false, nil
-		}
-
-		return false, errors.New("the type of " + key + " must be float64")
-	case string:
-		v, ok1 := value.(string)
-		r, ok2 := reqValue.(string)
-		if ok1 && ok2 {
-			if v == r {
-				return true, nil
-			}
-
-			return false, nil
-		}
-
-		return false, errors.New("the type of " + key + " must be string")
-	default:
-		return false, errors.New("the type of " + key + " must be bool or float64 or string")
-	}
 }
 
 // CompareOperator ...
@@ -273,13 +189,13 @@ func ParseFloat64AndCompare(op string, key string, a interface{}, b string) (boo
 	if ok {
 		switch op {
 		case "<=":
-			return ((A < B) || IsFloatEqual(A, B)), nil
+			return ((A < B) || utils.IsFloatEqual(A, B)), nil
 		case ">=":
-			return ((A > B) || IsFloatEqual(A, B)), nil
+			return ((A > B) || utils.IsFloatEqual(A, B)), nil
 		case "==", "":
-			return IsFloatEqual(A, B), nil
+			return utils.IsFloatEqual(A, B), nil
 		case "!=":
-			return (!IsFloatEqual(A, B)), nil
+			return (!utils.IsFloatEqual(A, B)), nil
 		default:
 			return false, errors.New("the operator of float64 can not be " + op)
 		}

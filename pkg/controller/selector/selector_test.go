@@ -148,24 +148,6 @@ var (
 	}
 )
 
-func TestStructToMap(t *testing.T) {
-	poolMap, err := StructToMap(PoolA)
-
-	if nil != err {
-		t.Errorf(err.Error())
-	}
-
-	_, ok := poolMap["freeCapacity"]
-	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
-	}
-
-	_, ok = poolMap["extras.thin"]
-	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
-	}
-}
-
 func TestSelectSupportedPools_00(t *testing.T) {
 	request := make(map[string]interface{})
 	request["extras.thin"] = true

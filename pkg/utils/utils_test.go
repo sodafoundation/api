@@ -18,6 +18,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/opensds/opensds/pkg/model"
 )
 
 func TestContained(t *testing.T) {
@@ -96,4 +98,102 @@ func TestPathExists(t *testing.T) {
 		t.Errorf("Expected true, get %v\n", isExist)
 	}
 	os.RemoveAll(testDir)
+}
+
+func TestStructToMap(t *testing.T) {
+	PoolA := model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+			CreatedAt: "2017-10-24T15:04:05",
+		},
+		FreeCapacity:     int64(50),
+		AvailabilityZone: "az1",
+		Extras: model.ExtraSpec{
+			"thin":     true,
+			"dedupe":   true,
+			"compress": true,
+			"diskType": "SSD",
+		},
+	}
+
+	poolMap, err := StructToMap(PoolA)
+
+	if nil != err {
+		t.Errorf(err.Error())
+	}
+
+	_, ok := poolMap["freeCapacity"]
+	if !ok {
+		t.Errorf("Expected ok, get %v", ok)
+	}
+
+	_, ok = poolMap["extras.thin"]
+	if !ok {
+		t.Errorf("Expected ok, get %v", ok)
+	}
+}
+
+func TestIsFloatEqual(t *testing.T) {
+	isEqual := IsFloatEqual(0.0, 0.00)
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual = IsFloatEqual(1.00, 1)
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual = IsFloatEqual(-1.00, -1)
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual = IsFloatEqual(2.00, 1)
+	if false != isEqual {
+		t.Errorf("Expected false, get %v", isEqual)
+	}
+
+	isEqual = IsFloatEqual(-1.00, -2)
+	if false != isEqual {
+		t.Errorf("Expected false, get %v", isEqual)
+	}
+}
+
+func TestIsEqual(t *testing.T) {
+	isEqual, err := IsEqual("", true, true)
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("", false, true)
+	if false != isEqual {
+		t.Errorf("Expected false, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("", -1.00, -1.000)
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("", 2.00, 1)
+	if false != isEqual {
+		t.Errorf("Expected false, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("", "abc", "abc")
+	if true != isEqual {
+		t.Errorf("Expected true, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("", "abc", "ABC")
+	if false != isEqual {
+		t.Errorf("Expected false, get %v", isEqual)
+	}
+
+	isEqual, err = IsEqual("keyA", "abc", true)
+	expectedErr := "the type of keyA must be string"
+	if expectedErr != err.Error() {
+		t.Errorf("Expected %v, get %v", expectedErr, err.Error())
+	}
 }
