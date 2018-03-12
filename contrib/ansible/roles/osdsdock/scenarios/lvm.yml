@@ -22,16 +22,13 @@
     src: ../../../group_vars/lvm/lvm.yaml
     dest: "{{ lvm_config_path }}"
 
-- name: create a physical volume
-  shell: pvcreate {{ item }}
-  with_items: "{{ pv_devices }}"
-
 - name: check if volume group existed
   shell: vgdisplay {{ vg_name }}
   ignore_errors: yes
   register: vg_existed
 
-- name: create a volume group
-  shell: vgcreate {{ vg_name }} {{ item }}
-  with_items: "{{ pv_devices }}"
+- name: create a volume group and initialize it
+  lvg:
+    vg: "{{ vg_name }}"
+    pvs: "{{ pv_devices }}"
   when: vg_existed is undefined or vg_existed.rc != 0
