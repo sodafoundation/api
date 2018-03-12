@@ -70,9 +70,12 @@ Modify ```group_vars/lvm/lvm.yaml```, change pool name to be the same as `vg_nam
 If `ceph` is chosen as storage backend, modify `group_vars/osdsdock.yml`:
 ```yaml
 enabled_backend: ceph # Change it according to the chosen backend. Supported backends include 'lvm', 'ceph', and 'cinder'.
-ceph_pool_name: "specified_pool_name" # Specify a name for ceph pool if choosing ceph
+ceph_pools: # Specify pool name randomly if choosing ceph
+  - rbd
+  #- ssd
+  #- sas
 ```
-Modify ```group_vars/ceph/ceph.yaml```, change pool name to be the same as `ceph_pool_name`:
+Modify ```group_vars/ceph/ceph.yaml```, change pool name to be the same as `ceph_pool_name`. But if you enable multiple pools, please append the current pool format:
 ```yaml
 "rbd" # change pool name to be the same as ceph pool
 ```
@@ -176,8 +179,6 @@ sudo ansible-playbook clean.yml -i local.hosts
 cd /opt/ceph-ansible
 sudo ansible-playbook infrastructure-playbooks/purge-cluster.yml -i ceph.hosts
 ```
-
-In addition, clean up the logical partition on the physical block device used by ceph, using the ```fdisk``` tool.
 
 ### Remove ceph-ansible source code (optional)
 ```bash
