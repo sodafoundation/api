@@ -62,10 +62,16 @@ var (
 func TestListPools(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListPools").Return(fakePools, nil)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListPoolsWithFilter", m).Return(fakePools, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/pools", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -110,10 +116,16 @@ func TestListPools(t *testing.T) {
 func TestListPoolsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListPools").Return(nil, errors.New("db error"))
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListPoolsWithFilter", m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/pools", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

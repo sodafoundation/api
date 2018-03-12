@@ -171,10 +171,16 @@ func TestUpdateProfile(t *testing.T) {
 func TestListProfiles(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListProfiles").Return(fakeProfiles, nil)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListProfilesWithFilter", m).Return(fakeProfiles, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/profiles", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -214,10 +220,16 @@ func TestListProfiles(t *testing.T) {
 func TestListProfilesWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListProfiles").Return(nil, errors.New("db error"))
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListProfilesWithFilter", m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/profiles", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
