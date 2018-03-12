@@ -51,14 +51,22 @@ func TestListDocks(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListDocks").Return(fakeDocks, nil)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListDocksWithFilter", m).Return(fakeDocks, nil)
+
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/docks", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output []model.DockSpec
+
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJson := `[
@@ -90,10 +98,16 @@ func TestListDocks(t *testing.T) {
 func TestListDocksWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListDocks").Return(nil, errors.New("db error"))
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListDocksWithFilter", m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/docks", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -155,7 +169,6 @@ func TestGetDock(t *testing.T) {
 }
 
 func TestGetDockWithBadRequestError(t *testing.T) {
-
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(
 		nil, errors.New("db error"))

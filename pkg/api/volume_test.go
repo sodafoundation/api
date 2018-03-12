@@ -75,10 +75,16 @@ var (
 func TestListVolumes(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListVolumes").Return(fakeVolumes, nil)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumesWithFilter", m).Return(fakeVolumes, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/volumes", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -112,10 +118,16 @@ func TestListVolumes(t *testing.T) {
 func TestListVolumesWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListVolumes").Return(nil, errors.New("db error"))
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumesWithFilter", m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/volumes", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumes?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -278,10 +290,16 @@ var (
 func TestListVolumeSnapshots(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListVolumeSnapshots").Return(fakeSnapshots, nil)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumeSnapshotsWithFilter", m).Return(fakeSnapshots, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -313,10 +331,16 @@ func TestListVolumeSnapshots(t *testing.T) {
 func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListVolumeSnapshots").Return(nil, errors.New("db error"))
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumeSnapshotsWithFilter", m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/snapshots?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -480,10 +504,17 @@ var (
 func TestListVolumeAttachments(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListVolumeAttachments", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(fakeAttachments, nil)
+	m := map[string][]string{
+		"volumeId": []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
+		"offset":   []string{"0"},
+		"limit":    []string{"1"},
+		"sortDir":  []string{"asc"},
+		"sortKey":  []string{"name"},
+	}
+	mockClient.On("ListVolumeAttachmentsWithFilter", m).Return(fakeAttachments, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/attachments?volumeId=bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/attachments?volumeId=bd5b12a8-a101-11e7-941e-d77981b584d8&offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
