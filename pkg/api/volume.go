@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
@@ -33,7 +32,7 @@ import (
 )
 
 type VolumePortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumePortal) CreateVolume() {
@@ -83,7 +82,8 @@ func (this *VolumePortal) ListVolumes() {
 		return
 	}
 	// Call db api module to handle list volumes request.
-	result, err := db.C.ListVolumes(c.GetContext(this.Ctx))
+	this.GetParameters()
+	result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), this.queryPara)
 	if err != nil {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -273,7 +273,7 @@ func (this *VolumePortal) DeleteVolume() {
 }
 
 type VolumeAttachmentPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
@@ -321,9 +321,9 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 	if !policy.Authorize(this.Ctx, "volume:list_attachments") {
 		return
 	}
-	volId := this.GetString("volumeId")
 
-	result, err := db.C.ListVolumeAttachments(c.GetContext(this.Ctx), volId)
+	this.GetParameters()
+	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), this.queryPara)
 	if err != nil {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -448,7 +448,7 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 }
 
 type VolumeSnapshotPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
@@ -496,7 +496,8 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	if !policy.Authorize(this.Ctx, "snapshot:list") {
 		return
 	}
-	result, err := db.C.ListVolumeSnapshots(c.GetContext(this.Ctx))
+	this.GetParameters()
+	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), this.queryPara)
 	if err != nil {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

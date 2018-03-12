@@ -477,6 +477,27 @@ func (_m *MockClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return r0, r1
 }
 
+// ListDocks
+func (_m *MockClient) ListDocksWithFilter(ctx *c.Context,m map[string][]string) ([]*model.DockSpec, error) {
+	ret := _m.Called(m)
+	var r0 []*model.DockSpec
+	if rf, ok := ret.Get(0).(func() []*model.DockSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.DockSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
 // ListExtraProperties
 func (_m *MockClient) ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error) {
 	ret := _m.Called(prfID)
@@ -523,9 +544,53 @@ func (_m *MockClient) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error
 	return r0, r1
 }
 
+// ListPools
+func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.StoragePoolSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.StoragePoolSpec
+	if rf, ok := ret.Get(0).(func() []*model.StoragePoolSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.StoragePoolSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
 // ListProfiles
 func (_m *MockClient) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	ret := _m.Called()
+
+	var r0 []*model.ProfileSpec
+	if rf, ok := ret.Get(0).(func() []*model.ProfileSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.ProfileSpec, error) {
+	ret := _m.Called(m)
 
 	var r0 []*model.ProfileSpec
 	if rf, ok := ret.Get(0).(func() []*model.ProfileSpec); ok {
@@ -569,6 +634,27 @@ func (_m *MockClient) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]
 	return r0, r1
 }
 
+func (_m *MockClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.VolumeAttachmentSpec
+	if rf, ok := ret.Get(0).(func(string) []*model.VolumeAttachmentSpec); ok {
+		r0 = rf(m["volumeId"][0])
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeAttachmentSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(m["volumeId"][0])
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
 // ListVolumeSnapshots
 func (_m *MockClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called()
@@ -592,6 +678,27 @@ func (_m *MockClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapsh
 	return r0, r1
 }
 
+func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.VolumeSnapshotSpec
+	if rf, ok := ret.Get(0).(func() []*model.VolumeSnapshotSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSnapshotSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
 // ListVolumes
 func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	ret := _m.Called()
@@ -615,6 +722,27 @@ func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	return r0, r1
 }
 
+func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(m)
+
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func() []*model.VolumeSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
 // RemoveExtraProperty
 func (_m *MockClient) RemoveExtraProperty(ctx *c.Context, prfID string, extraKey string) error {
 	ret := _m.Called(prfID, extraKey)

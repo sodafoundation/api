@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
@@ -32,7 +31,7 @@ import (
 )
 
 type ProfilePortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *ProfilePortal) CreateProfile() {
@@ -82,7 +81,8 @@ func (this *ProfilePortal) ListProfiles() {
 	if !policy.Authorize(this.Ctx, "profile:list") {
 		return
 	}
-	result, err := db.C.ListProfiles(c.GetContext(this.Ctx))
+	this.GetParameters()
+	result, err := db.C.ListProfilesWithFilter(c.GetContext(this.Ctx), this.queryPara)
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

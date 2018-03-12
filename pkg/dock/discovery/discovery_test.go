@@ -52,8 +52,8 @@ func TestInit(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 	var expected []*model.DockSpec
 
-	for i := range SampleDocks {
-		expected = append(expected, &SampleDocks[i])
+	for i := range SampleDocks_discover {
+		expected = append(expected, &SampleDocks_discover[i])
 	}
 	if err := dd.Init(); err != nil {
 		t.Errorf("Failed to init discoverer struct: %v\n", err)
@@ -71,7 +71,7 @@ func TestDiscover(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 	var expected []*model.StoragePoolSpec
 
-	for i := range SampleDocks {
+	for i := range SampleDocks_discover {
 		dd.dcks = append(dd.dcks, &SampleDocks[i])
 	}
 	for i := range SamplePools {
@@ -92,10 +92,10 @@ func TestStore(t *testing.T) {
 	var dd = NewFakeDiscoverer()
 
 	for i := range SampleDocks {
-		dd.dcks = append(dd.dcks, &SampleDocks[i])
+		dd.dcks = append(dd.dcks, &SampleDocks_discover[i])
 	}
 	for i := range SamplePools {
-		dd.pols = append(dd.pols, &SamplePools[i])
+		dd.pols = append(dd.pols, &SamplePools_discovery[i])
 	}
 
 	mockClient := new(dbtest.MockClient)
