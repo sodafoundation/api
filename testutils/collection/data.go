@@ -46,6 +46,38 @@ var (
 		},
 	}
 
+SampleDocksWithFilter= []model.DockSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
+			},
+			Name:        "sample1",
+			Description: "sample backend service",
+			Endpoint:    "localhost:50050",
+			DriverName:  "docktest",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e3",
+			},
+			Name:        "sample1",
+			Description: "sample backend service",
+			Endpoint:    "localhost:50050",
+			DriverName:  "docktest",
+		},
+	}
+	SampleDocks_discover = []model.DockSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			Name:        "sample",
+			Description: "sample backend service",
+			Endpoint:    "localhost:50050",
+			DriverName:  "sample",
+		},
+	}
+
 	SampleDocks = []model.DockSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -55,6 +87,39 @@ var (
 			Description: "sample backend service",
 			Endpoint:    "localhost:50050",
 			DriverName:  "sample",
+		},
+	}
+
+SamplePoolsWithFilter = []model.StoragePoolSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			},
+			Name:             "sample-pool-01",
+			Description:      "This is the first sample storage pool for testing",
+			TotalCapacity:    int64(100),
+			FreeCapacity:     int64(90),
+			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e1",
+			AvailabilityZone: "default",
+			Extras: model.ExtraSpec{
+				"diskType": "SSD",
+				"thin":     true,
+			},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			},
+			Name:             "sample-pool-01",
+			Description:      "This is the first sample storage pool for testing",
+			TotalCapacity:    int64(100),
+			FreeCapacity:     int64(90),
+			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			AvailabilityZone: "default",
+			Extras: model.ExtraSpec{
+				"diskType": "SSD",
+				"thin":     true,
+			},
 		},
 	}
 
@@ -368,6 +433,66 @@ var (
 			}
 		}`,
 	}
+		StringSliceDocksWithFilter = []string{
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "docktest"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "sample"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"name":        "sample2",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "sample"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"name":        "sample3",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "sample"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e2",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "sample1"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e3",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "docktest"
+		}`,
+
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e5",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "docktest"
+		}`,
+		`{
+			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e6",
+			"name":        "sample1",
+			"description": "sample backend service",
+			"endpoint":    "localhost:50050",
+			"driverName":  "docktest"
+		}`,
+	}
+
 
 	StringSliceDocks = []string{
 		`{
@@ -378,6 +503,62 @@ var (
 			"driverName":  "sample"
 		}`,
 	}
+		StringSlicePoolsWithFilter = []string{
+		`{
+			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"name":             "sample-pool-01",
+			"description":      "This is the first sample storage pool for testing",
+			"totalCapacity":    100,
+			"freeCapacity":     90,
+			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e1",
+			"availabilityZone": "default",
+			"extras": {
+				"diskType": "SSD",
+				"thin":     true
+			}
+		}`,
+
+		`{
+			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"name":             "sample-pool-01",
+			"description":      "This is the first sample storage pool for testing",
+			"totalCapacity":    100,
+			"freeCapacity":     90,
+			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"availabilityZone": "default",
+			"extras": {
+				"diskType": "SSD",
+				"thin":     true
+			}
+		}`,
+		`{
+			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
+			"name":             "sample-pool-02",
+			"description":      "This is the second sample storage pool for testing",
+			"totalCapacity":    200,
+			"freeCapacity":     170,
+			"availabilityZone": "default",
+			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"extras": {
+				"diskType": "SAS",
+				"thin":     true
+			}
+		}`,
+		`{
+			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
+			"name":             "sample-pool-03",
+			"description":      "This is the second sample storage pool for testing",
+			"totalCapacity":    200,
+			"freeCapacity":     170,
+			"availabilityZone": "default",
+			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			"extras": {
+				"diskType": "SAS",
+				"thin":     true
+			}
+		}`,
+	}
+
 
 	StringSlicePools = []string{
 		`{

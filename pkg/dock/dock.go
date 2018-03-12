@@ -23,6 +23,7 @@ package dock
 import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -57,11 +58,21 @@ func (d *DockHub) TriggerDiscovery() error {
 	if err = d.Discoverer.Init(); err != nil {
 		return err
 	}
-	if err = d.Discoverer.Discover(d.Driver); err != nil {
-		return err
-	}
 
-	return d.Discoverer.Store()
+	ctx := &discovery.Context{
+		StopChan: make(chan bool),
+		ErrChan:  make(chan error),
+		MetaChan: make(chan string),
+	}
+	go discovery.DiscoveryAndReport(d.Discoverer, ctx)
+	go func(ctx *discovery.Context) {
+		if err = <-ctx.ErrChan; err != nil {
+			log.Error("When calling capabilty report method:", err)
+			ctx.StopChan <- true
+		}
+	}(ctx)
+
+	return nil
 }
 
 // CreateVolume
@@ -81,7 +92,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Store the volume data into database.
-	result, err := db.C.CreateVolume(vol)
+	result, err := db.C.CreateVolume(c.NewContextFormJson(opt.GetContext()), vol)
 	if err != nil {
 		log.Error("When create volume in db module:", err)
 		return nil, err
@@ -106,7 +117,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		return err
 	}
 
-	if err = db.C.DeleteVolume(opt.GetId()); err != nil {
+	if err = db.C.DeleteVolume(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume in db:", err)
 		return err
 	}
@@ -131,7 +142,7 @@ func (d *DockHub) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, err
 
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(vol)
+	result, err := db.C.ExtendVolume(c.NewContextFormJson(opt.GetContext()), vol)
 	if err != nil {
 		log.Error("When extend volume in db module:", err)
 		return nil, err
@@ -169,7 +180,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 		Metadata:       opt.GetMetadata(),
 	}
 
-	result, err := db.C.CreateVolumeAttachment(atc)
+	result, err := db.C.CreateVolumeAttachment(c.NewContextFormJson(opt.GetContext()), atc)
 	if err != nil {
 		log.Error("Error occurred in dock module when create volume attachment in db:", err)
 		return nil, err
@@ -192,7 +203,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 		return err
 	}
 
-	if err := db.C.DeleteVolumeAttachment(opt.GetId()); err != nil {
+	if err := db.C.DeleteVolumeAttachment(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
 		return err
 	}
@@ -215,7 +226,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 		return nil, err
 	}
 
-	result, err := db.C.CreateVolumeSnapshot(snp)
+	result, err := db.C.CreateVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), snp)
 	if err != nil {
 		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
 		return nil, err
@@ -240,7 +251,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		return err
 	}
 
-	if err = db.C.DeleteVolumeSnapshot(opt.GetId()); err != nil {
+	if err = db.C.DeleteVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
 		return err
 	}

@@ -24,6 +24,3 @@ now, please refer to the Contributing sections below.
 * Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
 * slack: #[opensds](https://opensds.slack.com)
 * Ideas/Bugs: [issues](https://github.com/opensds/nbp/issues)
-
-## Installation and Testing
-See [Installation](https://github.com/opensds/nbp/wiki) for details.

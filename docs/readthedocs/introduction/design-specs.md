@@ -28,3 +28,9 @@ Design proposals are drafted here:
 [OpenSDS and OpenStack Integration](https://docs.google.com/document/d/1xZWMlVSd1ove-N-xWv3ZmRbiauzBmdgiQu2C6HRSJKI/edit#)
 
 [Enhance Cinder with OpenSDS](https://docs.google.com/presentation/d/1Vn5dBLyUXlcTyNCdw-hgTqX5bMd4VDpCQNk7SgfipXA/edit#)
+
+## Contact
+
+* Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
+* slack: #[opensds](https://opensds.slack.com)
+* Ideas/Bugs: [issues](https://github.com/opensds/design-specs/issues)

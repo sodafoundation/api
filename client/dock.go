@@ -21,26 +21,27 @@ import (
 	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
-func NewDockMgr(edp string) *DockMgr {
+func NewDockMgr(r Receiver, edp string, tenantId string) *DockMgr {
 	return &DockMgr{
-		Receiver: NewReceiver(),
+		Receiver: r,
 		Endpoint: edp,
+		TenantId: tenantId,
 	}
 }
 
 type DockMgr struct {
 	Receiver
-
 	Endpoint string
+	TenantId string
 }
 
 func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	var res model.DockSpec
 	url := strings.Join([]string{
 		d.Endpoint,
-		urls.GenerateDockURL(dckID)}, "/")
+		urls.GenerateDockURL(urls.Client, d.TenantId, dckID)}, "/")
 
-	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -51,9 +52,9 @@ func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
 	url := strings.Join([]string{
 		d.Endpoint,
-		urls.GenerateDockURL()}, "/")
+		urls.GenerateDockURL(urls.Client, d.TenantId)}, "/")
 
-	if err := d.Recv(request, url, "GET", nil, &res); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 

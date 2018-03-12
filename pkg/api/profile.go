@@ -23,17 +23,22 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/api/policy"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 type ProfilePortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *ProfilePortal) CreateProfile() {
+	if !policy.Authorize(this.Ctx, "profile:create") {
+		return
+	}
+
 	var profile = model.ProfileSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -48,7 +53,7 @@ func (this *ProfilePortal) CreateProfile() {
 	}
 
 	// Call db api module to handle create profile request.
-	result, err := db.C.CreateProfile(&profile)
+	result, err := db.C.CreateProfile(c.GetContext(this.Ctx), &profile)
 	if err != nil {
 		reason := fmt.Sprintf("Create profile failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -73,7 +78,20 @@ func (this *ProfilePortal) CreateProfile() {
 }
 
 func (this *ProfilePortal) ListProfiles() {
-	result, err := db.C.ListProfiles()
+	if !policy.Authorize(this.Ctx, "profile:list") {
+		return
+	}
+
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListProfilesWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -98,9 +116,12 @@ func (this *ProfilePortal) ListProfiles() {
 }
 
 func (this *ProfilePortal) GetProfile() {
+	if !policy.Authorize(this.Ctx, "profile:get") {
+		return
+	}
 	id := this.Ctx.Input.Param(":profileId")
 
-	result, err := db.C.GetProfile(id)
+	result, err := db.C.GetProfile(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get profile failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -125,6 +146,9 @@ func (this *ProfilePortal) GetProfile() {
 }
 
 func (this *ProfilePortal) UpdateProfile() {
+	if !policy.Authorize(this.Ctx, "profile:update") {
+		return
+	}
 	var profile = model.ProfileSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -138,7 +162,7 @@ func (this *ProfilePortal) UpdateProfile() {
 		return
 	}
 
-	result, err := db.C.UpdateProfile(id, &profile)
+	result, err := db.C.UpdateProfile(c.GetContext(this.Ctx), id, &profile)
 	if err != nil {
 		reason := fmt.Sprintf("Update profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -163,8 +187,12 @@ func (this *ProfilePortal) UpdateProfile() {
 }
 
 func (this *ProfilePortal) DeleteProfile() {
+	if !policy.Authorize(this.Ctx, "profile:delete") {
+		return
+	}
 	id := this.Ctx.Input.Param(":profileId")
-	profile, err := db.C.GetProfile(id)
+	ctx := c.GetContext(this.Ctx)
+	profile, err := db.C.GetProfile(ctx, id)
 	if err != nil {
 		reason := fmt.Sprintf("Get profile failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -173,7 +201,7 @@ func (this *ProfilePortal) DeleteProfile() {
 		return
 	}
 
-	if err := db.C.DeleteProfile(profile.Id); err != nil {
+	if err := db.C.DeleteProfile(ctx, profile.Id); err != nil {
 		reason := fmt.Sprintf("Delete profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -186,6 +214,9 @@ func (this *ProfilePortal) DeleteProfile() {
 }
 
 func (this *ProfilePortal) AddExtraProperty() {
+	if !policy.Authorize(this.Ctx, "profile:add_extra_property") {
+		return
+	}
 	var extra model.ExtraSpec
 	id := this.Ctx.Input.Param(":profileId")
 
@@ -197,7 +228,7 @@ func (this *ProfilePortal) AddExtraProperty() {
 		return
 	}
 
-	result, err := db.C.AddExtraProperty(id, extra)
+	result, err := db.C.AddExtraProperty(c.GetContext(this.Ctx), id, extra)
 	if err != nil {
 		reason := fmt.Sprintf("Create extra property failed: %s", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -222,9 +253,12 @@ func (this *ProfilePortal) AddExtraProperty() {
 }
 
 func (this *ProfilePortal) ListExtraProperties() {
+	if !policy.Authorize(this.Ctx, "profile:list_extra_properties") {
+		return
+	}
 	id := this.Ctx.Input.Param(":profileId")
 
-	result, err := db.C.ListExtraProperties(id)
+	result, err := db.C.ListExtraProperties(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("List extra properties failed: %s", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -249,10 +283,13 @@ func (this *ProfilePortal) ListExtraProperties() {
 }
 
 func (this *ProfilePortal) RemoveExtraProperty() {
+	if !policy.Authorize(this.Ctx, "profile:remove_extra_property") {
+		return
+	}
 	id := this.Ctx.Input.Param(":profileId")
 	extraKey := this.Ctx.Input.Param(":extraKey")
 
-	if err := db.C.RemoveExtraProperty(id, extraKey); err != nil {
+	if err := db.C.RemoveExtraProperty(c.GetContext(this.Ctx), id, extraKey); err != nil {
 		reason := fmt.Sprintf("Remove extra property failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))

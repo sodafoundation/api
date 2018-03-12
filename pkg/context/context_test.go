@@ -24,6 +24,7 @@ func TestContext(t *testing.T) {
 		AuthToken: "token-123456789",
 		UserId:    "ebf133af8beb474f962869ec0d362b1e",
 		IsAdmin:   true,
+		Uri:       "/version",
 	}
 	expect := map[string]interface{}{
 		"auth_token":       "token-123456789",

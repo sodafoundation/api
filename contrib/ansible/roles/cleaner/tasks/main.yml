@@ -1,38 +1,18 @@
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
-- name: remove golang tarball
-  file:
-    path: "/opt/{{ golang_tarball }}"
-    state: absent
-    force: yes
-  ignore_errors: yes
-
-- name: kill etcd daemon service
-  shell: killall etcd
-  ignore_errors: yes
-  when: db_driver == "etcd" and container_enabled == false
-
-- name: kill etcd containerized service
-  docker:
-    image: quay.io/coreos/etcd:latest
-    state: stopped
-  when: container_enabled == true
-
-- name: remove etcd service data
-  file:
-    path: "{{ etcd_dir }}"
-    state: absent
-    force: yes
-  ignore_errors: yes
-  when: db_driver == "etcd"
-
-- name: remove etcd tarball
-  file:
-    path: "/opt/{{ etcd_tarball }}"
-    state: absent
-    force: yes
-  ignore_errors: yes
-  when: db_driver == "etcd"
-
 - name: kill osdslet daemon service
   shell: killall osdslet
   ignore_errors: yes
@@ -55,10 +35,68 @@
     state: stopped
   when: container_enabled == true
 
-- name: clean all opensds build files
-  shell: . /etc/profile; make clean
-  args:
-    chdir: "{{ opensds_root_dir }}"
+- name: kill etcd daemon service
+  shell: killall etcd
+  ignore_errors: yes
+  when: db_driver == "etcd" and container_enabled == false
+
+- name: kill etcd containerized service
+  docker:
+    image: quay.io/coreos/etcd:latest
+    state: stopped
+  when: db_driver == "etcd" and container_enabled == true
+
+- name: remove etcd service data
+  file:
+    path: "{{ etcd_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+  when: db_driver == "etcd"
+
+- name: remove etcd tarball
+  file:
+    path: "/opt/{{ etcd_tarball }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+  when: db_driver == "etcd"
+
+- name: clean opensds release files
+  file:
+    path: "{{ opensds_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean opensds release tarball file
+  file:
+    path: "{{ opensds_tarball_url }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean opensds flexvolume plugins binary file
+  file:
+    path: "{{ flexvolume_plugin_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+  when: nbp_plugin_type == "flexvolume"
+
+- name: clean nbp release files
+  file:
+    path: "{{ nbp_dir }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
+
+- name: clean nbp release tarball file
+  file:
+    path: "{{ nbp_tarball_url }}"
+    state: absent
+    force: yes
+  ignore_errors: yes
 
 - name: clean all opensds configuration files
   file:
@@ -81,7 +119,9 @@
   when: enabled_backend == "lvm"
 
 - name: remove a volume group if lvm backend specified
-  shell: vgremove {{ vg_name }}
+  lvg:
+    vg: "{{ vg_name }}"
+    state: absent
   when: enabled_backend == "lvm" and vg_existed.rc == 0
 
 - name: remove physical volumes if lvm backend specified

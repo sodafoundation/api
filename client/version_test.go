@@ -36,7 +36,6 @@ func NewFakeVersionReceiver() Receiver {
 type fakeVersionReceiver struct{}
 
 func (*fakeVersionReceiver) Recv(
-	f ReqFunc,
 	string,
 	method string,
 	in interface{},

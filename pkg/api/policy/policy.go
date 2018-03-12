@@ -21,27 +21,51 @@ import (
 	"os"
 	"strings"
 
+	"net/http"
+
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"net/http"
 )
 
 var enforcer *Enforcer
 
 func init() {
 	enforcer = NewEnforcer(false)
+	RegisterRules(enforcer)
+	enforcer.LoadRules(false)
 }
+
+type DefaultRule struct {
+	Name     string
+	CheckStr string
+}
+
+func listRules() []DefaultRule {
+	return []DefaultRule{
+		{Name: "context_is_admin", CheckStr: "role:admin"},
+	}
+}
+
+func RegisterRules(e *Enforcer) {
+	e.RegisterDefaults(listRules())
+}
+
 func NewEnforcer(overWrite bool) *Enforcer {
 	return &Enforcer{OverWrite: overWrite}
 }
 
 type Enforcer struct {
-	Rules       map[string]BaseCheck
-	DefaultRule string
-	OverWrite   bool
+	Rules        map[string]BaseCheck
+	DefaultRules []DefaultRule
+	OverWrite    bool
+}
+
+func (e *Enforcer) RegisterDefaults(rules []DefaultRule) {
+	e.DefaultRules = rules
 }
 
 func (e *Enforcer) Enforce(rule string, target map[string]string, cred map[string]interface{}) (bool, error) {
@@ -51,7 +75,7 @@ func (e *Enforcer) Enforce(rule string, target map[string]string, cred map[strin
 
 	toRule, ok := e.Rules[rule]
 	if !ok {
-		err := fmt.Errorf("Rule [%s] does not exist", rule)
+		err := fmt.Errorf("rule [%s] does not exist", rule)
 		return false, err
 	}
 	return check(toRule, target, cred, *e, ""), nil
@@ -109,37 +133,45 @@ func (e *Enforcer) LoadPolicyFile(path string, forcedReload bool, overWrite bool
 		return fmt.Errorf(msg)
 	}
 
-	rules, err := NewRules(data, e.DefaultRule)
+	r, err := NewRules(data, e.DefaultRules)
 	if err != nil {
 		return err
 	}
 
 	if overWrite {
-		e.Rules = rules.Rules
+		e.Rules = r.Rules
 	} else {
-		e.UpdateRules(rules.Rules)
+		e.UpdateRules(r.Rules)
 	}
 	return nil
 }
 
-func NewRules(data []byte, defaultRule string) (*Rules, error) {
-	rules := &Rules{}
-	err := rules.Load(data, defaultRule)
-	return rules, err
+func NewRules(data []byte, defaultRule []DefaultRule) (*Rules, error) {
+	r := &Rules{}
+	err := r.Load(data, defaultRule)
+	return r, err
 }
 
 type Rules struct {
-	Rules       map[string]BaseCheck
-	DefaultRule string
+	Rules map[string]BaseCheck
 }
 
-func (r *Rules) Load(data []byte, defaultRule string) error {
+func (r *Rules) Load(data []byte, defaultRules []DefaultRule) error {
 	rulesMap := map[string]string{}
 	err := json.Unmarshal(data, &rulesMap)
 	if err != nil {
 		err := fmt.Errorf("Json unmarshal failed:", err)
 		log.Errorf(err.Error())
 		return err
+	}
+	// add default value
+	for _, r := range defaultRules {
+		if v, ok := rulesMap[r.Name]; ok {
+			log.Warning("Policy rule (%s:%s) has conflict with default rule(%s:%s),abandon default value",
+				r.Name, v, r.Name, r.CheckStr)
+		} else {
+			rulesMap[r.Name] = r.CheckStr
+		}
 	}
 
 	if r.Rules == nil {
@@ -148,7 +180,6 @@ func (r *Rules) Load(data []byte, defaultRule string) error {
 	for k, v := range rulesMap {
 		r.Rules[k] = parseRule(v)
 	}
-	r.DefaultRule = defaultRule
 	return nil
 }
 
@@ -158,12 +189,15 @@ func (r *Rules) String() string {
 }
 
 func Authorize(httpCtx *bctx.Context, action string) bool {
+	if config.CONF.AuthStrategy != "keystone" {
+		return true
+	}
 	ctx := context.GetContext(httpCtx)
 	credentials := ctx.ToPolicyValue()
-	ProjectId := httpCtx.Input.Param(":projectId")
+	TenantId := httpCtx.Input.Param(":tenantId")
 
 	target := map[string]string{
-		"project_id": ProjectId,
+		"tenant_id": TenantId,
 	}
 
 	log.V(8).Infof("Action: %v", action)
@@ -175,6 +209,8 @@ func Authorize(httpCtx *bctx.Context, action string) bool {
 	}
 	if !ok {
 		model.HttpError(httpCtx, http.StatusForbidden, "Operation is not permitted")
+	} else {
+		ctx.IsAdmin = utils.Contained("admin", ctx.Roles)
 	}
 	return ok
 }

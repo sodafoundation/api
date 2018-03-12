@@ -69,6 +69,7 @@ type VolumeSpec struct {
 // VolumeAttachmentSpec is a description of volume attached resource.
 type VolumeAttachmentSpec struct {
 	*BaseModel
+
 	// The uuid of the project that the volume belongs to.
 	ProjectId string `json:"projectId,omitempty"`
 
