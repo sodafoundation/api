@@ -18,25 +18,21 @@ import (
 	"net/url"
 
 	"github.com/astaxie/beego"
-	log "github.com/golang/glog"
 )
 
 type BasePortal struct {
 	beego.Controller
-	queryPara map[string][]string
 }
 
-func (this *BasePortal) GetParameters() {
+func (this *BasePortal) GetParameters() (map[string][]string, error) {
 
 	u, err := url.Parse(this.Ctx.Request.URL.String())
 	if err != nil {
-		log.Error(err.Error())
-		return
+		return nil, err
 	}
 	m, err := url.ParseQuery(u.RawQuery)
 	if err != nil {
-		log.Error(err.Error())
-		return
+		return nil, err
 	}
-	this.queryPara = m
+	return m, nil
 }

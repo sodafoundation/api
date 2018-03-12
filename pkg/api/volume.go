@@ -82,8 +82,16 @@ func (this *VolumePortal) ListVolumes() {
 		return
 	}
 	// Call db api module to handle list volumes request.
-	this.GetParameters()
-	result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), this.queryPara)
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -322,8 +330,16 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 		return
 	}
 
-	this.GetParameters()
-	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), this.queryPara)
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -496,8 +512,16 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	if !policy.Authorize(this.Ctx, "snapshot:list") {
 		return
 	}
-	this.GetParameters()
-	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), this.queryPara)
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

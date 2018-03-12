@@ -81,8 +81,17 @@ func (this *ProfilePortal) ListProfiles() {
 	if !policy.Authorize(this.Ctx, "profile:list") {
 		return
 	}
-	this.GetParameters()
-	result, err := db.C.ListProfilesWithFilter(c.GetContext(this.Ctx), this.queryPara)
+
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListProfilesWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
