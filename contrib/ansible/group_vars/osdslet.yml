@@ -26,6 +26,7 @@ dummy:
 controller_endpoint: 0.0.0.0:50040
 controller_log_file: "{{ opensds_log_dir }}/osdslet.log"
 
+
 ###########
 # DOCKER  #
 ###########

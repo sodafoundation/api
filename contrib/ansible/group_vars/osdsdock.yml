@@ -48,7 +48,10 @@ lvm_config_path: "{{ opensds_config_dir }}/driver/lvm.yaml"
 #  CEPH   #
 ###########
 
-ceph_pool_name: rbd # Specify a name randomly
+ceph_pools: # Specify pool name randomly
+  - rbd
+  #- ssd
+  #- sas
 
 # These fields are NOT suggested to be modified
 ceph_name: ceph backend

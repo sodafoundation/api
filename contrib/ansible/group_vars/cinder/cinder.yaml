@@ -26,3 +26,6 @@ pool:
   "cinder-lvm@lvm#lvm":
     AZ: nova
     thin: true
+    accessProtocol: iscsi
+    thinProvisioned: true
+    compressed: true

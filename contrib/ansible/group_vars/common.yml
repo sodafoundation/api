@@ -38,6 +38,7 @@ nbp_dir: /opt/opensds-k8s-{{ nbp_release }}-linux-amd64
 opensds_config_dir: /etc/opensds
 opensds_log_dir: /var/log/opensds
 
+
 ###########
 # PLUGIN  #
 ###########
@@ -46,15 +47,6 @@ nbp_plugin_type: standalone # standalone is the default integration way, but you
 
 flexvolume_plugin_dir: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/opensds.io~opensds
 
-###########
-# GOLANG  #
-###########
-
-golang_release: 1.9.2
-
-# These fields are NOT suggested to be modified
-golang_tarball: go{{ golang_release }}.linux-amd64.tar.gz
-golang_download_url: https://storage.googleapis.com/golang/{{ golang_tarball }}
 
 ###########
 #CONTAINER#
