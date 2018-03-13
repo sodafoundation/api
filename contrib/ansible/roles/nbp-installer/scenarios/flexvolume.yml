@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-sudo add-apt-repository ppa:ansible/ansible # This step is needed to upgrade ansible to version 2.4.2 which is required for the ceph backend.
+---
+- name: Create flexvolume plugin directory if not existed
+  file:
+    path: "{{ flexvolume_plugin_dir }}"
+    state: directory
+    mode: 0755
 
-sudo apt-get update
-sudo apt-get install -y ansible
-sleep 3
-
-ansible --version # Ansible version 2.4.2 or higher is required for ceph; 2.0.0.2 or higher is needed for other backends.
+- name: Copy opensds flexvolume plugin binary file into flexvolume plugin dir
+  copy:
+    src: "{{ nbp_dir }}/flexvolume/opensds"
+    dest: "{{ flexvolume_plugin_dir }}/opensds"

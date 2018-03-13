@@ -61,6 +61,7 @@ type Client interface {
 
 	ListDocks(ctx *c.Context) ([]*model.DockSpec, error)
 
+        ListDocksWithFilter(ctx *c.Context,m map[string][]string) ([]*model.DockSpec, error)
 	UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error)
 
 	DeleteDock(ctx *c.Context, dckID string) error
@@ -73,6 +74,7 @@ type Client interface {
 
 	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
+ListPoolsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.StoragePoolSpec, error)
 	UpdatePool(ctx *c.Context, polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
 	DeletePool(ctx *c.Context, polID string) error
@@ -85,6 +87,7 @@ type Client interface {
 
 	ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 
+ListProfilesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.ProfileSpec, error)
 	UpdateProfile(ctx *c.Context, prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
 
 	DeleteProfile(ctx *c.Context, prfID string) error
@@ -101,6 +104,7 @@ type Client interface {
 
 	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 
+ListVolumesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSpec, error)
 	UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	DeleteVolume(ctx *c.Context, volID string) error
@@ -113,6 +117,7 @@ type Client interface {
 
 	ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error)
 
+ListVolumeAttachmentsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeAttachmentSpec, error)
 	UpdateVolumeAttachment(ctx *c.Context, attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
 	DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error
@@ -123,6 +128,7 @@ type Client interface {
 
 	ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpec, error)
 
+ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSnapshotSpec, error)
 	UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error

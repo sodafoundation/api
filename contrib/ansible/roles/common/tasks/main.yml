@@ -1,36 +1,23 @@
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
-# If we can't get golang installed before any module is used we will fail
-# so just try what we can to get it installed
-- name: check for golang
-  stat:
-    path: /usr/local/go
-  ignore_errors: yes
-  register: systemgolang
-
-- name: install golang for debian based systems
-  shell:
-    cmd: |
-      set -e
-      set -x
-
-      wget {{ golang_download_url }} -P /opt/
-      tar xvf /opt/{{ golang_tarball }} -C /usr/local/
-      cat >> /etc/profile <<GOLANG__CONFIG_DOC
-      export GOROOT=/usr/local/go
-      export GOPATH=\$HOME/gopath
-      export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
-      GOLANG__CONFIG_DOC
-
-    executable: /bin/bash
-  ignore_errors: yes
-  when:
-    - systemgolang.stat.exists is undefined or systemgolang.stat.exists == false
-
-- name: Run the equivalent of "apt-get update" as a separate step
+- name: run the equivalent of "apt-get update" as a separate step
   apt:
     update_cache: yes
 
-- name: install librados-dev librbd-dev external package
+- name: install librados-dev and librbd-dev external packages
   apt:
     name: "{{ item }}"
     state: present
@@ -38,35 +25,62 @@
     - librados-dev
     - librbd-dev
 
-- pip:
+- name: install docker-py package with pip when enabling containerized deployment
+  pip:
     name: docker-py
   when: container_enabled == true
 
-- name: check for opensds source code existed
+- name: check for opensds release files existed
   stat:
-    path: "{{ opensds_root_dir }}"
+    path: "{{ opensds_dir }}"
   ignore_errors: yes
-  register: opensdsexisted
+  register: opensdsreleasesexisted
 
-- name: download opensds source code
-  git:
-    repo: "{{ remote_url }}"
-    dest: "{{ opensds_root_dir }}"
+- name: download opensds release files
+  get_url:
+    url={{ opensds_download_url }}
+    dest={{ opensds_tarball_url }}
   when:
-    - opensdsexisted.stat.exists is undefined or opensdsexisted.stat.exists == false
+    - opensdsreleasesexisted.stat.exists is undefined or opensdsreleasesexisted.stat.exists == false
 
-- name: check for opensds binary file existed
+- name: extract the opensds release tarball
+  unarchive:
+    src={{ opensds_tarball_url }}
+    dest=/opt/
+  when:
+    - opensdsreleasesexisted.stat.exists is undefined or opensdsreleasesexisted.stat.exists == false
+
+- name: check for nbp release files existed
   stat:
-    path: "{{ opensds_build_dir }}"
+    path: "{{ nbp_dir }}"
   ignore_errors: yes
-  register: opensdsbuilt
+  register: nbpreleasesexisted
 
-- name: build opensds binary file
-  shell: . /etc/profile; make
-  args:
-    chdir: "{{ opensds_root_dir }}"
+- name: download nbp release files
+  get_url:
+    url={{ nbp_download_url }}
+    dest={{ nbp_tarball_url }}
   when:
-    - opensdsbuilt.stat.exists is undefined or opensdsbuilt.stat.exists == false
+    - nbpreleasesexisted.stat.exists is undefined or nbpreleasesexisted.stat.exists == false
+
+- name: extract the nbp release tarball
+  unarchive:
+    src={{ nbp_tarball_url }}
+    dest=/opt/
+  when:
+    - nbpreleasesexisted.stat.exists is undefined or nbpreleasesexisted.stat.exists == false
+
+- name: change the mode of all binary files in opensds release
+  file:
+    path: "{{ opensds_dir }}/bin"
+    mode: 0755
+    recurse: yes
+
+- name: change the mode of all binary files in nbp release
+  file:
+    path: "{{ nbp_dir }}/flexvolume"
+    mode: 0755
+    recurse: yes
 
 - name: create opensds global config directory if it doesn't exist
   file:

@@ -1,3 +1,17 @@
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
 - name: install lvm2 external package when lvm backend enabled
   apt:
@@ -8,16 +22,13 @@
     src: ../../../group_vars/lvm/lvm.yaml
     dest: "{{ lvm_config_path }}"
 
-- name: create a physical volume
-  shell: pvcreate {{ item }}
-  with_items: "{{ pv_devices }}"
-
 - name: check if volume group existed
   shell: vgdisplay {{ vg_name }}
   ignore_errors: yes
   register: vg_existed
 
-- name: create a volume group
-  shell: vgcreate {{ vg_name }} {{ item }}
-  with_items: "{{ pv_devices }}"
+- name: create a volume group and initialize it
+  lvg:
+    vg: "{{ vg_name }}"
+    pvs: "{{ pv_devices }}"
   when: vg_existed is undefined or vg_existed.rc != 0

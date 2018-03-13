@@ -11,18 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
----
-# Defines some clean processes when banishing the cluster.
-
-- name: destory an opensds cluster
-  hosts: all
-  remote_user: root
-  vars_files:
-    - group_vars/common.yml
-    - group_vars/osdsdb.yml
-    - group_vars/osdsdock.yml
-  gather_facts: false
-  become: True
-  roles:
-    - cleaner
