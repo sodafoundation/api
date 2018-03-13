@@ -96,7 +96,7 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "ProjectId", "UserId", "HostInfo", "ConnectionInfo",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
 	PrintDict(resp, keys, FormatterList{})
 }
@@ -113,7 +113,7 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "ProjectId", "UserId", "HostInfo", "ConnectionInfo",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
 	PrintDict(resp, keys, FormatterList{})
 }
@@ -130,7 +130,7 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "ProjectId", "UserId", "HostInfo", "ConnectionInfo",
+	keys := KeyList{"Id", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
 	PrintList(resp, keys, FormatterList{})
 }
@@ -171,7 +171,7 @@ func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "ProjectId", "UserId", "HostInfo", "ConnectionInfo",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
 	PrintDict(resp, keys, FormatterList{})
 }
