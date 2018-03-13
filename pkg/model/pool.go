@@ -26,7 +26,7 @@ type StoragePoolSpec struct {
 	*BaseModel
 	// The uuid of project
 	// + readOnly
-	ProjectId string `json:"projectId"`
+	TenantId string `json:"tenantId"`
 
 	// The name of the pool.
 	Name string `json:"name,omitempty"`
