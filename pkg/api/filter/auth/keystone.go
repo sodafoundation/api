@@ -93,7 +93,6 @@ func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 	}
 
 	ctx := &context.Context{
-		ProjectId:      project.ID,
 		TenantId:       project.ID,
 		Roles:          roleNames,
 		UserId:         user.ID,
