@@ -100,7 +100,7 @@ func TestCreateVolume(t *testing.T) {
 		Size:        int64(1),
 		Status:      "available",
 		Metadata: map[string]string{
-			"lvPath": "/dev/vg001/test001",
+			"lvPath": "/dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71",
 		},
 	}
 	vol, err := fd.CreateVolume(opt)
@@ -183,7 +183,7 @@ func TestCreateSnapshot(t *testing.T) {
 		Status:      "available",
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		Metadata: map[string]string{
-			"lvsPath": "/dev/vg001/snap001",
+			"lvsPath": "/dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3",
 		},
 	}
 	snp, err := fd.CreateSnapshot(opt)
@@ -191,6 +191,7 @@ func TestCreateSnapshot(t *testing.T) {
 		t.Error("Failed to create volume snapshot:", err)
 	}
 	snp.Id = ""
+	snp.Metadata["lvsPath"] = "/dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3"
 	if !reflect.DeepEqual(snp, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, snp)
 	}
@@ -250,7 +251,7 @@ func TestListPools(t *testing.T) {
 var (
 	sampleLV = `
 		--- Logical volume ---
-		LV Path                /dev/vg001/test001
+		LV Path                /dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71
 		LV Name                test001
 		VG Name                vg001
 		LV UUID                mFdrHm-uiQS-TRK2-Iwua-jdQr-7sYd-ReayKW
@@ -311,7 +312,7 @@ var (
 	`
 	sampleLVS = `
 		--- Logical volume ---
-		LV Path                /dev/vg001/snap001
+		LV Path                /dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3
 		LV Name                snap001
 		VG Name                vg001
 		LV UUID                We6GmQ-H675-mfQv-iQkO-rVUI-LuBx-YBIBwr
