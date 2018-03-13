@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -89,7 +90,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec) (*model.
 	} else {
 		filterRequest = make(map[string]interface{})
 	}
-	filterRequest["size"] = in.Size
+	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
 	filterRequest["availabilityZone"] = in.AvailabilityZone
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
