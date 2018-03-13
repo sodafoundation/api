@@ -1034,8 +1034,8 @@ func (volume VolumeSlice) Less(i, j int) bool {
 		return volume[i].AvailabilityZone < volume[j].AvailabilityZone
 	case "PROFILEID":
 		return volume[i].ProfileId < volume[j].ProfileId
-	case "PROJECTID":
-		return volume[i].ProjectId < volume[j].ProjectId
+	case "TENANTID":
+		return volume[i].TenantId < volume[j].TenantId
 	case "SIZE":
 		return volume[i].Size < volume[j].Size
 	case "POOLID":
@@ -1056,8 +1056,8 @@ func (c *Client) FindVolumeValue(k string, p *model.VolumeSpec) string {
 		return p.CreatedAt
 	case "UpdatedAt":
 		return p.UpdatedAt
-	case "ProjectId":
-		return p.ProjectId
+	case "TenantId":
+		return p.TenantId
 	case "UserId":
 		return p.UserId
 	case "Name":
@@ -1324,8 +1324,8 @@ func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
 		return volumeAttachment[i].Status < volumeAttachment[j].Status
 	case "USERID":
 		return volumeAttachment[i].UserId < volumeAttachment[j].UserId
-	case "PROJECTID":
-		return volumeAttachment[i].ProjectId < volumeAttachment[j].ProjectId
+	case "TENANTID":
+		return volumeAttachment[i].TenantId < volumeAttachment[j].TenantId
 	}
 	return false
 }
@@ -1338,8 +1338,8 @@ func (c *Client) FindAttachmentValue(k string, p *model.VolumeAttachmentSpec) st
 		return p.CreatedAt
 	case "UpdatedAte":
 		return p.UpdatedAt
-	case "ProjectId":
-		return p.ProjectId
+	case "TenantId":
+		return p.TenantId
 	case "UserId":
 		return p.UserId
 	case "VolumeId":
@@ -1589,8 +1589,8 @@ func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
 		return volumeSnapshot[i].Status < volumeSnapshot[j].Status
 	case "USERID":
 		return volumeSnapshot[i].UserId < volumeSnapshot[j].UserId
-	case "PROJECTID":
-		return volumeSnapshot[i].ProjectId < volumeSnapshot[j].ProjectId
+	case "TENANTID":
+		return volumeSnapshot[i].TenantId < volumeSnapshot[j].TenantId
 	case "SIZE":
 		return volumeSnapshot[i].Size < volumeSnapshot[j].Size
 		//TODO:case "GroupSnapshotId"
@@ -1606,8 +1606,8 @@ func (c *Client) FindSnapshotsValue(k string, p *model.VolumeSnapshotSpec) strin
 		return p.CreatedAt
 	case "UpdatedAte":
 		return p.UpdatedAt
-	case "ProjectId":
-		return p.ProjectId
+	case "TenantId":
+		return p.TenantId
 	case "UserId":
 		return p.UserId
 	case "Name":

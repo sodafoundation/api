@@ -29,7 +29,7 @@ type VolumeSpec struct {
 	*BaseModel
 
 	// The uuid of the project that the volume belongs to.
-	ProjectId string `json:"projectId,omitempty"`
+	TenantId string `json:"tenantId,omitempty"`
 
 	// The uuid of the user that the volume belongs to.
 	// +optional
@@ -71,7 +71,7 @@ type VolumeAttachmentSpec struct {
 	*BaseModel
 
 	// The uuid of the project that the volume belongs to.
-	ProjectId string `json:"projectId,omitempty"`
+	TenantId string `json:"tenantId,omitempty"`
 
 	// The uuid of the user that the volume belongs to.
 	// +optional
@@ -127,7 +127,7 @@ type VolumeSnapshotSpec struct {
 	*BaseModel
 
 	// The uuid of the project that the volume snapshot belongs to.
-	ProjectId string `json:"projectId,omitempty"`
+	TenantId string `json:"tenantId,omitempty"`
 
 	// The uuid of the user that the volume snapshot belongs to.
 	// +optional
