@@ -1,8 +1,15 @@
 tgtBindIp: 192.168.56.105
 pool:
   vg001:
-    diskType: SSD
-    AZ: default
-    accessProtocol: iscsi
-    thinProvisioned: false
-    compressed: false
+    storageType: block
+    availabilityZone: default
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 1000
+      advanced:
+        diskType: SSD
+        throughput: 1000

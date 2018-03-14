@@ -555,6 +555,7 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 	return poolDetail, nil
 }
 
+/*
 func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
 	param := BuildDefaultPoolParam(proper)
 
@@ -567,6 +568,7 @@ func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[strin
 	param["crushRuleset"] = line[poolCrushRuleset]
 	return &param
 }
+*/
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	pc, err := d.getPoolsCapInfo()
@@ -592,7 +594,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := c.Pool[name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(pa[name], c.Pool[name])
+		// param := d.buildPoolParam(pa[name], c.Pool[name])
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
@@ -605,8 +607,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity:    totalCap * maxAvailCap / availCap,
 			FreeCapacity:     maxAvailCap,
-			Extras:           *param,
-			AvailabilityZone: c.Pool[name].AZ,
+			StorageType:      c.Pool[name].StorageType,
+			Extras:           c.Pool[name].Extras,
+			AvailabilityZone: c.Pool[name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ
