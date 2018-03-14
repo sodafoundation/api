@@ -8,8 +8,28 @@ authOptions:
   tenantName: "admin"
 pool:
   pool1:
-    diskType: SSD
-    AZ: nova-01
+    storageType: block
+    availabilityZone: nova-01
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 1000
+      advanced:
+        diskType: SSD
+        throughput: 1000
   pool2:
-    diskType: SAS
-    AZ: nova-01
+    storageType: block
+    availabilityZone: nova-01
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 5000
+      advanced:
+        diskType: SAS
+        throughput: 5000
