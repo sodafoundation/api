@@ -108,16 +108,23 @@ func TestStructToMap(t *testing.T) {
 		},
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   true,
-			"compress": true,
-			"diskType": "SSD",
+		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				ProvisioningPolicy: "Thin",
+				IsSpaceEfficient:   true,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "rbd",
+				MaxIOPS:        1000,
+			},
+			Advanced: map[string]interface{}{
+				"diskType":   "SSD",
+				"throughput": float64(1000),
+			},
 		},
 	}
 
 	poolMap, err := StructToMap(PoolA)
-
 	if nil != err {
 		t.Errorf(err.Error())
 	}
@@ -126,8 +133,7 @@ func TestStructToMap(t *testing.T) {
 	if !ok {
 		t.Errorf("Expected ok, get %v", ok)
 	}
-
-	_, ok = poolMap["extras.thin"]
+	_, ok = poolMap["extras.dataStorage"]
 	if !ok {
 		t.Errorf("Expected ok, get %v", ok)
 	}
