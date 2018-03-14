@@ -26,9 +26,6 @@ import:
   version: v1.1.0
 - package: github.com/spf13/cobra
   version: a1e4933ab784095895e33dbe9f001ba10cfe2060
-- package: github.com/stretchr/testify
-  subpackages:
-  - mock
 - package: golang.org/x/net
   subpackages:
   - context
@@ -42,3 +39,5 @@ import:
   version: 81e4191e131b21e282a9289621383237677d2437
 - package: google.golang.org/grpc
   version: ^1.7.5
+- package: github.com/stretchr/testify
+  version: v1.2.1
