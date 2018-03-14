@@ -19,6 +19,10 @@ This module implements the common data structure.
 
 package model
 
+import (
+	"encoding/json"
+)
+
 // An OpenSDS profile is identified by a unique name and ID. With adding
 // extra properties, each profile can contains a set of tags of storage
 // capabilities which are desirable features for a class of applications.
@@ -43,4 +47,13 @@ type ProfileSpec struct {
 	// of the profile, such as requested capabilities.
 	// +optional
 	Extras ExtraSpec `json:"extras,omitempty"`
+}
+
+// ExtraSpec is a dictionary object that contains unique keys and json
+// objects.
+type ExtraSpec map[string]interface{}
+
+func (ext ExtraSpec) Encode() []byte {
+	parmBody, _ := json.Marshal(&ext)
+	return parmBody
 }

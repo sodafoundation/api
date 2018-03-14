@@ -40,13 +40,19 @@ var (
 			Name:        "silver",
 			Description: "silver policy",
 			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
+				"dataStorage": map[string]interface{}{
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true,
+				},
+				"ioConnectivity": map[string]interface{}{
+					"accessProtocol": "iscsi",
+					"maxIOPS":        1000,
+				},
 			},
 		},
 	}
 
-SampleDocksWithFilter= []model.DockSpec{
+	SampleDocksWithFilter = []model.DockSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
@@ -90,7 +96,7 @@ SampleDocksWithFilter= []model.DockSpec{
 		},
 	}
 
-SamplePoolsWithFilter = []model.StoragePoolSpec{
+	SamplePoolsWithFilter = []model.StoragePoolSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
@@ -101,9 +107,19 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e1",
 			AvailabilityZone: "default",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1000,
+				},
+				Advanced: map[string]interface{}{
+					"diskType":   "SSD",
+					"throughput": 1000,
+				},
 			},
 		},
 		{
@@ -116,9 +132,19 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			AvailabilityZone: "default",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1000,
+				},
+				Advanced: map[string]interface{}{
+					"diskType":   "SSD",
+					"throughput": 1000,
+				},
 			},
 		},
 	}
@@ -134,9 +160,19 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			AvailabilityZone: "default",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
-				"thin":     true,
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1000,
+				},
+				Advanced: map[string]interface{}{
+					"diskType":   "SSD",
+					"throughput": 1000,
+				},
 			},
 		},
 		{
@@ -149,9 +185,19 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
-				"thin":     true,
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1000,
+				},
+				Advanced: map[string]interface{}{
+					"diskType":   "SSD",
+					"throughput": 1000,
+				},
 			},
 		},
 	}
@@ -433,7 +479,7 @@ var (
 			}
 		}`,
 	}
-		StringSliceDocksWithFilter = []string{
+	StringSliceDocksWithFilter = []string{
 		`{
 			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
 			"name":        "sample1",
@@ -493,7 +539,6 @@ var (
 		}`,
 	}
 
-
 	StringSliceDocks = []string{
 		`{
 			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -503,7 +548,7 @@ var (
 			"driverName":  "sample"
 		}`,
 	}
-		StringSlicePoolsWithFilter = []string{
+	StringSlicePoolsWithFilter = []string{
 		`{
 			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"name":             "sample-pool-01",
@@ -558,7 +603,6 @@ var (
 			}
 		}`,
 	}
-
 
 	StringSlicePools = []string{
 		`{
