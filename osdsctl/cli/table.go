@@ -195,14 +195,14 @@ func parseDict(u interface{}, keys KeyList, fmts FormatterList) (
 		bmHead := getHead(bm, keys)
 		bmRow := getRow(bm, keys, fmts)
 		for i := 0; i < len(bmHead); i++ {
-			rows = append(rows, []string{bmHead[i], bmRow[i]})
+			rows = appendRow(rows, []string{bmHead[i], bmRow[i]})
 		}
 	}
 
 	head := getHead(u, keys)
 	row := getRow(u, keys, fmts)
 	for i := 0; i < len(head); i++ {
-		rows = append(rows, []string{head[i], row[i]})
+		rows = appendRow(rows, []string{head[i], row[i]})
 	}
 	coln = []string{"Property", "Value"}
 	colw = getColw(coln, rows)
