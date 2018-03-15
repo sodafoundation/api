@@ -22,10 +22,8 @@ dummy:
 # GENERAL #
 ###########
 
-workplace: /home/krej # Change this field according to your username, use '/root' if you login as root.
-
 opensds_release: v0.1.4 # The version should be at least v0.1.4.
-nbp_release: v0.1.0
+nbp_release: v0.1.0 # The version should be at least v0.1.0.
 
 # These fields are not suggested to be modified
 opensds_download_url: https://github.com/opensds/opensds/releases/download/{{ opensds_release }}/opensds-{{ opensds_release }}-linux-amd64.tar.gz
