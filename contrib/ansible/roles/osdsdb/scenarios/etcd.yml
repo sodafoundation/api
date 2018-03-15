@@ -39,7 +39,7 @@
   register: service_etcd_status
 
 - name: run etcd daemon service
-  shell: nohup ./etcd --advertise-client-urls http://{{ etcd_host }}:{{ etcd_port }} --listen-client-urls http://{{ etcd_host }}:{{ etcd_port }} -advertise-client-urls http://{{ etcd_host }}:{{ etcd_peer_port }} -listen-peer-urls http://{{ etcd_host }}:{{ etcd_peer_port }} &>>etcd.log &
+  shell: nohup ./etcd --advertise-client-urls http://{{ etcd_host }}:{{ etcd_port }} --listen-client-urls http://{{ etcd_host }}:{{ etcd_port }}  --listen-peer-urls http://{{ etcd_host }}:{{ etcd_peer_port }} &>>etcd.log &
   become: true
   args:
     chdir: "{{ etcd_dir }}"

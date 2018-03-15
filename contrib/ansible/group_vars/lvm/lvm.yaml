@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-tgtBindIp: 127.0.0.1
+tgtBindIp: 127.0.0.1 # change tgtBindIp to your real host ip, run 'ifconfig' to check
 pool:
   "vg001": # change pool name same to vg_name, but don't change it if you choose ceph backend
     diskType: SSD

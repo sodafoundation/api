@@ -1,5 +1,5 @@
-hash: e82ed280f256471eac32e0d88876f8ab39d5e13ddee066d343537b090f3e3c53
-updated: 2018-02-24T03:36:40.047658438Z
+hash: b3c4035bb92bcf7f61eebf111dafb29acec4a65b7d4da2be367d40355f9bab26
+updated: 2018-03-14T12:42:49.031276378Z
 imports:
 - name: github.com/astaxie/beego
   version: bf5c5626ab429e66d88602e1ab1ab5fbf4629a01
@@ -19,7 +19,7 @@ imports:
   - rados
   - rbd
 - name: github.com/coreos/etcd
-  version: 28f3f26c0e303392556035b694f75768d449d33d
+  version: c9d46ab3799b7f2174268e75f72d01e6d6aac953
   subpackages:
   - auth/authpb
   - clientv3
@@ -32,7 +32,7 @@ imports:
   subpackages:
   - spew
 - name: github.com/go-ini/ini
-  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
+  version: 6333e38ac20b8949a8dd68baa3650f4dee8f39f0
 - name: github.com/gogo/protobuf
   version: 342cbe0a04158f6dcb03ca0079991a51a4248c02
   subpackages:
@@ -78,7 +78,7 @@ imports:
 - name: github.com/stretchr/objx
   version: 8a3f7159479fbc75b30357fbc48f380b7320f08e
 - name: github.com/stretchr/testify
-  version: be8372ae8ec5c6daaed3cc28ebf73c54b737c240
+  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
   subpackages:
   - assert
   - mock
