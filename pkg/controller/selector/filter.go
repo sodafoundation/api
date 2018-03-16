@@ -25,9 +25,59 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 )
 
+// simplifyPoolCapabilityMap ...
+func simplifyPoolCapabilityMap(input map[string]interface{}) (map[string]interface{}, map[string]interface{}) {
+	simpleMap := make(map[string]interface{})
+	unSimpleMap := make(map[string]interface{})
+
+	for key, value := range input {
+		valueMap, ok := value.(map[string]interface{})
+		if ok {
+			for k, v := range valueMap {
+				_, ok = v.(map[string]interface{})
+				if ok {
+					unSimpleMap[key+"."+k] = v
+				} else {
+					simpleMap[key+"."+k] = v
+				}
+			}
+
+		} else {
+			simpleMap[key] = value
+		}
+	}
+
+	return simpleMap, unSimpleMap
+}
+
+// GetPoolCapabilityMap ...
+func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, error) {
+	temMap, err := utils.StructToMap(pool)
+	if nil != err {
+		return nil, err
+	}
+
+	lastSimpleMap := make(map[string]interface{})
+
+	for {
+		simpleMap, unSimpleMap := simplifyPoolCapabilityMap(temMap)
+
+		if 0 == len(unSimpleMap) {
+			for key, value := range lastSimpleMap {
+				simpleMap[key] = value
+			}
+
+			return simpleMap, nil
+		}
+
+		lastSimpleMap = simpleMap
+		temMap = unSimpleMap
+	}
+}
+
 // IsAvailablePool ...
 func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSpec) (bool, error) {
-	poolMap, err := utils.StructToMap(pool)
+	poolMap, err := GetPoolCapabilityMap(pool)
 	if nil != err {
 		return false, err
 	}

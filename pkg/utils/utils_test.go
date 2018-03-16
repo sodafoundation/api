@@ -122,73 +122,82 @@ func TestStructToMap(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, ok := poolMap["freeCapacity"]
+	value, ok := poolMap["freeCapacity"]
 	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
+		t.Errorf("Expected %v, get %v", true, ok)
 	}
 
-	_, ok = poolMap["extras.thin"]
+	freeCapacity, ok := value.(float64)
+	if !ok || !IsFloatEqual(freeCapacity, 50) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, 50.0, ok, freeCapacity)
+	}
+
+	value, ok = poolMap["extras"]
 	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
+		t.Errorf("Expected %v, get %v", true, ok)
+	}
+	_, ok = value.(map[string]interface{})
+	if !ok {
+		t.Errorf("Expected %v, get %v", true, ok)
 	}
 }
 
 func TestIsFloatEqual(t *testing.T) {
 	isEqual := IsFloatEqual(0.0, 0.00)
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual = IsFloatEqual(1.00, 1)
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual = IsFloatEqual(-1.00, -1)
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual = IsFloatEqual(2.00, 1)
 	if false != isEqual {
-		t.Errorf("Expected false, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", false, isEqual)
 	}
 
 	isEqual = IsFloatEqual(-1.00, -2)
 	if false != isEqual {
-		t.Errorf("Expected false, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", false, isEqual)
 	}
 }
 
 func TestIsEqual(t *testing.T) {
 	isEqual, err := IsEqual("", true, true)
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual, err = IsEqual("", false, true)
 	if false != isEqual {
-		t.Errorf("Expected false, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", false, isEqual)
 	}
 
 	isEqual, err = IsEqual("", -1.00, -1.000)
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual, err = IsEqual("", 2.00, 1)
 	if false != isEqual {
-		t.Errorf("Expected false, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", false, isEqual)
 	}
 
 	isEqual, err = IsEqual("", "abc", "abc")
 	if true != isEqual {
-		t.Errorf("Expected true, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", true, isEqual)
 	}
 
 	isEqual, err = IsEqual("", "abc", "ABC")
 	if false != isEqual {
-		t.Errorf("Expected false, get %v", isEqual)
+		t.Errorf("Expected %v, get %v", false, isEqual)
 	}
 
 	isEqual, err = IsEqual("keyA", "abc", true)
