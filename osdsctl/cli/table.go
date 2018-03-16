@@ -8,6 +8,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -34,6 +35,11 @@ type KeyList []string
 type StructElemCb func(name string, value reflect.Value) error
 
 var m = bd{'-', '|', '+', '+', '+', '+', '+', '+', '+', '+', '+'}
+
+func JsonFormatter(v interface{}) string {
+	b, _ := json.MarshalIndent(v, "", " ")
+	return string(b)
+}
 
 // Output formats slice of structs data and writes to standard output.(Using box drawing characters)
 func PrintList(slice interface{}, keys KeyList, fmts FormatterList) {
