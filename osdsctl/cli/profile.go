@@ -70,6 +70,8 @@ func profileAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
+var profileFormatters = FormatterList{"Extras": JsonFormatter}
+
 func profileCreateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
@@ -90,7 +92,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, profileFormatters)
 }
 
 func profileShowAction(cmd *cobra.Command, args []string) {
@@ -106,7 +108,7 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, profileFormatters)
 }
 
 func profileListAction(cmd *cobra.Command, args []string) {
@@ -121,7 +123,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "Name", "Description", "Extras"}
+	keys := KeyList{"Id", "Name", "Description"}
 	PrintList(resp, keys, FormatterList{})
 }
 

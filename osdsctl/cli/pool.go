@@ -66,7 +66,7 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "DockId",
 		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Extras"}
-	PrintDict(pols, keys, FormatterList{})
+	PrintDict(pols, keys, FormatterList{"Extras": JsonFormatter})
 }
 
 func poolListAction(cmd *cobra.Command, args []string) {

@@ -8,6 +8,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -34,6 +35,11 @@ type KeyList []string
 type StructElemCb func(name string, value reflect.Value) error
 
 var m = bd{'-', '|', '+', '+', '+', '+', '+', '+', '+', '+', '+'}
+
+func JsonFormatter(v interface{}) string {
+	b, _ := json.MarshalIndent(v, "", " ")
+	return string(b)
+}
 
 // Output formats slice of structs data and writes to standard output.(Using box drawing characters)
 func PrintList(slice interface{}, keys KeyList, fmts FormatterList) {
@@ -195,14 +201,14 @@ func parseDict(u interface{}, keys KeyList, fmts FormatterList) (
 		bmHead := getHead(bm, keys)
 		bmRow := getRow(bm, keys, fmts)
 		for i := 0; i < len(bmHead); i++ {
-			rows = append(rows, []string{bmHead[i], bmRow[i]})
+			rows = appendRow(rows, []string{bmHead[i], bmRow[i]})
 		}
 	}
 
 	head := getHead(u, keys)
 	row := getRow(u, keys, fmts)
 	for i := 0; i < len(head); i++ {
-		rows = append(rows, []string{head[i], row[i]})
+		rows = appendRow(rows, []string{head[i], row[i]})
 	}
 	coln = []string{"Property", "Value"}
 	colw = getColw(coln, rows)
