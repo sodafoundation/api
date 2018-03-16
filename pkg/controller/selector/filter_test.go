@@ -405,26 +405,26 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 
 	result, err := GetPoolCapabilityMap(&Pool)
 	if nil != err {
-		t.Errorf("Expected nil, get %v", result)
+		t.Errorf("Expected %v, get %v", nil, result)
 	}
 
 	CreatedAt, ok := result["createdAt"].(string)
 	if (!ok) || (Pool.CreatedAt != CreatedAt) {
-		t.Errorf("Expected true/%v, get %v/%v ", Pool.CreatedAt, ok, CreatedAt)
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.CreatedAt, ok, CreatedAt)
 	}
 
 	FreeCapacity, ok := result["freeCapacity"].(float64)
-	if (!ok) || (!utils.IsFloatEqual(FreeCapacity, 50)) {
-		t.Errorf("Expected true/%v, get %v/%v ", Pool.FreeCapacity, ok, FreeCapacity)
+	if (!ok) || (!utils.IsFloatEqual(FreeCapacity, float64(Pool.FreeCapacity))) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.FreeCapacity), ok, FreeCapacity)
 	}
 
 	thin, ok := result["extras.thin"].(bool)
 	if (!ok) || (Pool.Extras["thin"] != thin) {
-		t.Errorf("Expected true/%v, get %v/%v ", Pool.Extras["thin"], ok, thin)
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras["thin"], ok, thin)
 	}
 
 	value1, ok := result["extras.mapA.key1"].(string)
 	if (!ok) || ("value1" != value1) {
-		t.Errorf("Expected true/'value1', get %v/%v ", ok, value1)
+		t.Errorf("Expected %v/%v, get %v/%v", true, "value1", ok, value1)
 	}
 }
