@@ -20,7 +20,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -55,32 +54,22 @@ func versionAction(cmd *cobra.Command, args []string) {
 }
 
 func versionShowAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVersion(args[0])
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Name", "Status", "UpdatedAt"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
 func versionListAction(cmd *cobra.Command, args []string) {
-	if len(args) != 0 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 0)
 	resp, err := client.ListVersions()
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Name", "Status", "UpdatedAt"}
 	PrintList(resp, keys, FormatterList{})
