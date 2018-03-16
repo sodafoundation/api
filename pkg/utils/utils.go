@@ -103,16 +103,6 @@ func StructToMap(structObj interface{}) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	for key, value := range result {
-		valueMap, ok := value.(map[string]interface{})
-		if ok {
-			for k, v := range valueMap {
-				result[key+"."+k] = v
-			}
-			delete(result, key)
-		}
-	}
-
 	return result, nil
 }
 

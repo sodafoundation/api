@@ -122,14 +122,23 @@ func TestStructToMap(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, ok := poolMap["freeCapacity"]
+	value, ok := poolMap["freeCapacity"]
 	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
+		t.Errorf("Expected true, get %v", ok)
 	}
 
-	_, ok = poolMap["extras.thin"]
+	freeCapacity, ok := value.(float64)
+	if !ok || !IsFloatEqual(freeCapacity, 50) {
+		t.Errorf("Expected true/50, get %v/%v", ok, freeCapacity)
+	}
+
+	value, ok = poolMap["extras"]
 	if !ok {
-		t.Errorf("Expected ok, get %v", ok)
+		t.Errorf("Expected true, get %v", ok)
+	}
+	_, ok = value.(map[string]interface{})
+	if !ok {
+		t.Errorf("Expected true, get %v", ok)
 	}
 }
 

@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 func TestCapacityFilter(t *testing.T) {
@@ -377,5 +378,53 @@ func TestDiskTypeFilter(t *testing.T) {
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
+	}
+}
+
+func TestGetPoolCapabilityMap(t *testing.T) {
+	Pool := model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+			CreatedAt: "2017-10-24T15:04:05",
+		},
+		FreeCapacity:     int64(50),
+		AvailabilityZone: "az1",
+		Extras: model.ExtraSpec{
+			"thin":     true,
+			"dedupe":   true,
+			"compress": true,
+			"diskType": "SSD",
+		},
+	}
+
+	var mapA map[string]interface{}
+	mapA = make(map[string]interface{})
+	mapA["key1"] = "value1"
+	mapA["key2"] = "value2"
+	Pool.Extras["mapA"] = mapA
+
+	result, err := GetPoolCapabilityMap(&Pool)
+	if nil != err {
+		t.Errorf("Expected nil, get %v", result)
+	}
+
+	CreatedAt, ok := result["createdAt"].(string)
+	if (!ok) || (Pool.CreatedAt != CreatedAt) {
+		t.Errorf("Expected true/%v, get %v/%v ", Pool.CreatedAt, ok, CreatedAt)
+	}
+
+	FreeCapacity, ok := result["freeCapacity"].(float64)
+	if (!ok) || (!utils.IsFloatEqual(FreeCapacity, 50)) {
+		t.Errorf("Expected true/%v, get %v/%v ", Pool.FreeCapacity, ok, FreeCapacity)
+	}
+
+	thin, ok := result["extras.thin"].(bool)
+	if (!ok) || (Pool.Extras["thin"] != thin) {
+		t.Errorf("Expected true/%v, get %v/%v ", Pool.Extras["thin"], ok, thin)
+	}
+
+	value1, ok := result["extras.mapA.key1"].(string)
+	if (!ok) || ("value1" != value1) {
+		t.Errorf("Expected true/'value1', get %v/%v ", ok, value1)
 	}
 }
