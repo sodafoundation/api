@@ -82,6 +82,9 @@ func (t *iscsiTarget) RemoveExport(path, initiator string) error {
 	if lun == -1 {
 		return errors.New("Can't find lun with path " + path)
 	}
+	if err := t.RemoveLun(lun); err != nil {
+		return nil, err
+	}
 
-	return t.RemoveLun(lun)
+	return t.RemoveISCSITarget()
 }
