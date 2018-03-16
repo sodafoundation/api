@@ -41,7 +41,7 @@ func (this *PoolPortal) ListPools() {
 	// Call db api module to handle list pools request.
 	m, err := this.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		reason := fmt.Sprintf("List pools failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)

@@ -47,13 +47,17 @@ type HttpError struct {
 	Msg  string
 }
 
-func (e *HttpError) Error() string {
+func (e *HttpError) Decode() {
 	errSpec := model.ErrorSpec{}
 	err := json.Unmarshal([]byte(e.Msg), &errSpec)
-	if err != nil {
-		return fmt.Sprintf("Code: %v, Desc: %s, Msg: %v", e.Code, http.StatusText(e.Code), e.Msg)
+	if err == nil {
+		e.Msg = errSpec.Message
 	}
-	return fmt.Sprintf("Code: %v, Desc: %s, Msg: %v", e.Code, http.StatusText(e.Code), errSpec.Message)
+}
+
+func (e *HttpError) Error() string {
+	e.Decode()
+	return fmt.Sprintf("Code: %v, Desc: %s, Msg: %v", e.Code, http.StatusText(e.Code), e.Msg)
 }
 
 // ParamOption
