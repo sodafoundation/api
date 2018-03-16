@@ -77,6 +77,8 @@ func volumeAttachmentAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
+var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionInfo": JsonFormatter}
+
 func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
@@ -98,7 +100,7 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, attachmentFormatters)
 }
 
 func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
@@ -115,7 +117,7 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, attachmentFormatters)
 }
 
 func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
@@ -130,9 +132,8 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	keys := KeyList{"Id", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
-	PrintList(resp, keys, FormatterList{})
+	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId"}
+	PrintList(resp, keys, attachmentFormatters)
 }
 
 func volumeAttachmentDeleteAction(cmd *cobra.Command, args []string) {
@@ -173,5 +174,5 @@ func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
 		"Mountpoint", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, attachmentFormatters)
 }
