@@ -84,7 +84,7 @@ func (this *VolumePortal) ListVolumes() {
 	// Call db api module to handle list volumes request.
 	m, err := this.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
@@ -332,7 +332,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 
 	m, err := this.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
@@ -514,7 +514,7 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	}
 	m, err := this.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)

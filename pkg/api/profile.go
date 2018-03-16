@@ -84,7 +84,7 @@ func (this *ProfilePortal) ListProfiles() {
 
 	m, err := this.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		reason := fmt.Sprintf("List profiles failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)

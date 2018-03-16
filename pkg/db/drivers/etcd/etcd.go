@@ -38,6 +38,13 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+const (
+	defaultLimit   = -1
+	defaultOffset  = 0
+	defaultSortDir = "desc"
+	defaultSortKey = "ID"
+)
+
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
 }
@@ -84,8 +91,6 @@ func (c *Client) SelectOrNot(m map[string][]string) bool {
 	return false
 }
 
-var LIMIT = 50
-
 //Get parameter limit
 func (c *Client) GetLimit(m map[string][]string) int {
 	var limit int
@@ -95,16 +100,14 @@ func (c *Client) GetLimit(m map[string][]string) int {
 		limit, err = strconv.Atoi(v[0])
 		if err != nil || limit < 0 {
 			log.Warning("Invalid input limit:", limit, ",use default value instead:50")
-			return LIMIT
+			return defaultLimit
 		}
 	} else {
 		log.Warning("The parameter limit is not present,use default value instead:50")
-		return LIMIT
+		return defaultLimit
 	}
 	return limit
 }
-
-var OFFSET = 0
 
 //Get parameter offset
 func (c *Client) GetOffset(m map[string][]string, size int) int {
@@ -118,17 +121,15 @@ func (c *Client) GetOffset(m map[string][]string, size int) int {
 		if err != nil || offset < 0 || offset > size {
 			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ",use default value instead:0")
 
-			return OFFSET
+			return defaultOffset
 		}
 
 	} else {
 		log.Warning("The parameter offset is not present,use default value instead:0")
-		return OFFSET
+		return defaultOffset
 	}
 	return offset
 }
-
-var SORTDIR = "desc"
 
 //Get parameter sortDir
 func (c *Client) GetSortDir(m map[string][]string) string {
@@ -138,37 +139,35 @@ func (c *Client) GetSortDir(m map[string][]string) string {
 		sortDir = v[0]
 		if !strings.EqualFold(sortDir, "desc") && !strings.EqualFold(sortDir, "asc") {
 			log.Warning("Invalid input sortDir:", sortDir, ",use default value instead:desc")
-			return SORTDIR
+			return defaultSortDir
 		}
 	} else {
 		log.Warning("The parameter sortDir is not present,use default value instead:desc")
-		return SORTDIR
+		return defaultSortDir
 	}
 	return sortDir
 }
 
-var SORTKEY = "ID"
-
 //Get parameter sortKey
-func (c *Client) GetSortKey(m map[string][]string, sort_keys []string) string {
+func (c *Client) GetSortKey(m map[string][]string, sortKeys []string) string {
 	var sortKey string
 	v, ok := m["sortKey"]
 	if ok {
 		sortKey = strings.ToUpper(v[0])
-		if !c.IsInArray(sortKey, sort_keys) {
+		if !c.IsInArray(sortKey, sortKeys) {
 			log.Warning("Invalid input sortKey:", sortKey, ",use default value instead:ID")
-			return SORTKEY
+			return defaultSortKey
 		}
 
 	} else {
 		log.Warning("The parameter sortKey is not present,use default value instead:ID")
-		return SORTKEY
+		return defaultSortKey
 	}
 	return sortKey
 }
 
 //ParameterFilter
-func (c *Client) ParameterFilter(m map[string][]string, size int, sort_keys []string) *Parameter {
+func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []string) *Parameter {
 
 	limit := c.GetLimit(m)
 	offset := c.GetOffset(m, size)
@@ -176,12 +175,13 @@ func (c *Client) ParameterFilter(m map[string][]string, size int, sort_keys []st
 	beginIdx := offset
 	endIdx := limit + offset
 
-	if endIdx > size {
+	// If use not specified the limit return all the items.
+	if limit == defaultLimit || endIdx > size {
 		endIdx = size
 	}
 
 	sortDir := c.GetSortDir(m)
-	sortKey := c.GetSortKey(m, sort_keys)
+	sortKey := c.GetSortKey(m, sortKeys)
 
 	return &Parameter{beginIdx, endIdx, sortDir, sortKey}
 }
@@ -1390,7 +1390,10 @@ func (c *Client) SortVolumeAttachments(attachments []*model.VolumeAttachmentSpec
 }
 
 func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
-	volumeId := m["VolumeId"][0]
+	var volumeId string
+	if v, ok := m["VolumeId"]; ok {
+		volumeId = v[0]
+	}
 	volumeAttachments, err := c.ListVolumeAttachments(ctx, volumeId)
 	if err != nil {
 		log.Error("List volumes failed: ", err)
