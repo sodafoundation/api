@@ -77,7 +77,41 @@ var (
 	volAz     string
 )
 
+var (
+	volLimit     string
+	volOffset    string
+	volSortDir   string
+	volSortKey   string
+	volId        string
+	volCreatedAt string
+	volUpdatedAt string
+	volTenantId  string
+	volUserId    string
+	volSize      string
+	volStatus    string
+	volPoolId    string
+	volProfileId string
+)
+
 func init() {
+	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeListCommand.Flags().StringVarP(&volOffset, "offset", "", "0", "all requested data offsets")
+	volumeListCommand.Flags().StringVarP(&volSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	volumeListCommand.Flags().StringVarP(&volSortKey, "sortKey", "", "id",
+		"the sort key of all requested data. supports id(default), name, status, availabilityzone, profileid, tenantid, size, poolid, description")
+	volumeListCommand.Flags().StringVarP(&volId, "id", "", "", "list volume by id")
+	volumeListCommand.Flags().StringVarP(&volCreatedAt, "createdAt", "", "", "list volume by created time")
+	volumeListCommand.Flags().StringVarP(&volName, "name", "", "", "list volume by name")
+	volumeListCommand.Flags().StringVarP(&volUpdatedAt, "updatedAt", "", "", "list volume by updated time")
+	volumeListCommand.Flags().StringVarP(&volDesp, "description", "", "", "list volume by description")
+	volumeListCommand.Flags().StringVarP(&volTenantId, "tenantId", "", "", "list volume by tenantId")
+	volumeListCommand.Flags().StringVarP(&volUserId, "userId", "", "", "list volume by storage userId")
+	volumeListCommand.Flags().StringVarP(&volSize, "size", "", "", "list volume by size")
+	volumeListCommand.Flags().StringVarP(&volStatus, "status", "", "", "list volume by status")
+	volumeListCommand.Flags().StringVarP(&volPoolId, "poolId", "", "", "list volume by poolId")
+	volumeListCommand.Flags().StringVarP(&volAz, "availabilityZone", "", "", "list volume by availability zone")
+	volumeListCommand.Flags().StringVarP(&volProfileId, "profileId", "", "", "list volume by profile id")
+
 	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the name of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
@@ -141,7 +175,26 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 
 func volumeListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListVolumes()
+	size, _ := strconv.ParseInt(volSize, 10, 64)
+	v := []string{volLimit, volOffset, volSortDir, volSortKey}
+
+	var vol = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id:        volId,
+			CreatedAt: volCreatedAt,
+			UpdatedAt: volUpdatedAt,
+		},
+		Name:             volName,
+		Description:      volDesp,
+		UserId:           volUserId,
+		Size:             size,
+		AvailabilityZone: volAz,
+		Status:           volStatus,
+		PoolId:           volPoolId,
+		ProfileId:        volProfileId,
+	}
+
+	resp, err := client.ListVolumes(v, vol)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

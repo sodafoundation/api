@@ -15,6 +15,7 @@
 package client
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -86,11 +87,80 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 }
 
 // ListVolumes
-func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
+func (v *VolumeMgr) ListVolumes(p []string, vol *model.VolumeSpec) ([]*model.VolumeSpec, error) {
 	var res []*model.VolumeSpec
+	var u string
+
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
+
+	var limit, offset, sortDir, sortKey, id, createdAt, updatedAt, name, description, userId, availabilityZone, size, status, poolId, profileId string
+	var urlpara []string
+	if p[0] != "" {
+		limit = "limit=" + p[0]
+		urlpara = append(urlpara, limit)
+	}
+	if p[1] != "" {
+		offset = "offset=" + p[1]
+		urlpara = append(urlpara, offset)
+	}
+	if p[2] != "" {
+		sortDir = "sortDir=" + p[2]
+		urlpara = append(urlpara, sortDir)
+	}
+	if p[3] != "" {
+		sortKey = "sortKey=" + p[3]
+		urlpara = append(urlpara, sortKey)
+	}
+	if vol.Id != "" {
+		id = "Id=" + vol.Id
+		urlpara = append(urlpara, id)
+	}
+	if vol.CreatedAt != "" {
+		createdAt = "CreatedAt=" + vol.CreatedAt
+		urlpara = append(urlpara, createdAt)
+	}
+	if vol.UpdatedAt != "" {
+		updatedAt = "UpdatedAt=" + vol.UpdatedAt
+		urlpara = append(urlpara, updatedAt)
+	}
+	if vol.Name != "" {
+		name = "Name=" + vol.Name
+		urlpara = append(urlpara, name)
+	}
+	if vol.Description != "" {
+		description = "Description=" + vol.Description
+		urlpara = append(urlpara, description)
+	}
+	if vol.UserId != "" {
+		userId = "UserId=" + vol.UserId
+		urlpara = append(urlpara, userId)
+	}
+	if vol.AvailabilityZone != "" {
+		availabilityZone = "AvailabilityZone=" + vol.AvailabilityZone
+		urlpara = append(urlpara, availabilityZone)
+	}
+	if vol.Size != 0 {
+		size = "Size=" + strconv.FormatInt(vol.Size, 10)
+		urlpara = append(urlpara, size)
+	}
+	if vol.Status != "" {
+		status = "Status=" + vol.Status
+		urlpara = append(urlpara, status)
+	}
+	if vol.PoolId != "" {
+		poolId = "PoolId=" + vol.PoolId
+		urlpara = append(urlpara, poolId)
+	}
+	if vol.ProfileId != "" {
+		profileId = "ProfileId=" + vol.ProfileId
+		urlpara = append(urlpara, profileId)
+	}
+	if len(urlpara) > 0 {
+		u = strings.Join(urlpara, "&")
+		url += "?" + u
+	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -179,16 +249,73 @@ func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSp
 }
 
 // ListVolumeAttachments
-func (v *VolumeMgr) ListVolumeAttachments() ([]*model.VolumeAttachmentSpec, error) {
+func (v *VolumeMgr) ListVolumeAttachments(p []string, volAtm *model.VolumeAttachmentSpec) ([]*model.VolumeAttachmentSpec, error) {
 	var res []*model.VolumeAttachmentSpec
+	var u string
+
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateAttachmentURL(urls.Client, v.TenantId)}, "/")
 
+	var limit, offset, sortDir, sortKey, id, createdAt, updatedAt, userId, tenantId, volumeId, status, mountpoint string
+	var urlpara []string
+
+	if p[0] != "" {
+		limit = "limit=" + p[0]
+		urlpara = append(urlpara, limit)
+	}
+	if p[1] != "" {
+		offset = "offset=" + p[1]
+		urlpara = append(urlpara, offset)
+	}
+	if p[2] != "" {
+		sortDir = "sortDir=" + p[2]
+		urlpara = append(urlpara, sortDir)
+	}
+	if p[3] != "" {
+		sortKey = "sortKey=" + p[3]
+		urlpara = append(urlpara, sortKey)
+	}
+	if volAtm.Id != "" {
+		id = "Id" + volAtm.Id
+		urlpara = append(urlpara, id)
+	}
+	if volAtm.CreatedAt != "" {
+		createdAt = "CreatedAt=" + volAtm.CreatedAt
+		urlpara = append(urlpara, createdAt)
+	}
+	if volAtm.UpdatedAt != "" {
+		updatedAt = "UpdatedAt=" + volAtm.UpdatedAt
+		urlpara = append(urlpara, updatedAt)
+	}
+	if volAtm.UserId != "" {
+		userId = "UserId=" + volAtm.UserId
+		urlpara = append(urlpara, userId)
+	}
+	if volAtm.TenantId != "" {
+		tenantId = "TenantId=" + volAtm.TenantId
+		urlpara = append(urlpara, tenantId)
+	}
+	if volAtm.VolumeId != "" {
+		volumeId = "VolumeId=" + volAtm.VolumeId
+		urlpara = append(urlpara, volumeId)
+	}
+	if volAtm.Status != "" {
+		status = "Status=" + volAtm.Status
+		urlpara = append(urlpara, status)
+	}
+	if volAtm.Mountpoint != "" {
+		mountpoint = "Mountpoint=" + volAtm.Mountpoint
+		urlpara = append(urlpara, mountpoint)
+	}
+	if len(urlpara) > 0 {
+		u = strings.Join(urlpara, "&")
+		url += "?" + u
+	}
+
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
-
 	return res, nil
 }
 
@@ -230,11 +357,79 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 }
 
 // ListVolumeSnapshots
-func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
+func (v *VolumeMgr) ListVolumeSnapshots(p []string, volSnap *model.VolumeSnapshotSpec) ([]*model.VolumeSnapshotSpec, error) {
 	var res []*model.VolumeSnapshotSpec
+	var u string
+
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateSnapshotURL(urls.Client, v.TenantId)}, "/")
+
+	var limit, offset, sortDir, sortKey, id, createdAt string
+	var updatedAt, userId, tenantId, name, description, status, volumeId, size string
+	var urlpara []string
+
+	if p[0] != "" {
+		limit = "limit=" + p[0]
+		urlpara = append(urlpara, limit)
+	}
+	if p[1] != "" {
+		offset = "offset=" + p[1]
+		urlpara = append(urlpara, offset)
+	}
+	if p[2] != "" {
+		sortDir = "sortDir=" + p[2]
+		urlpara = append(urlpara, sortDir)
+	}
+	if p[3] != "" {
+		sortKey = "sortKey=" + p[3]
+		urlpara = append(urlpara, sortKey)
+	}
+	if volSnap.Id != "" {
+		id = "Id=" + volSnap.Id
+		urlpara = append(urlpara, id)
+	}
+	if volSnap.CreatedAt != "" {
+		createdAt = "CreatedAt=" + volSnap.CreatedAt
+		urlpara = append(urlpara, createdAt)
+	}
+	if volSnap.UpdatedAt != "" {
+		updatedAt = "UpdatedAt=" + volSnap.UpdatedAt
+		urlpara = append(urlpara, updatedAt)
+	}
+
+	if volSnap.UserId != "" {
+		userId = "UserId=" + volSnap.UserId
+		urlpara = append(urlpara, userId)
+	}
+	if volSnap.TenantId != "" {
+		tenantId = "TenantId=" + volSnap.TenantId
+		urlpara = append(urlpara, tenantId)
+	}
+	if volSnap.Name != "" {
+		name = "Name=" + volSnap.Name
+		urlpara = append(urlpara, name)
+	}
+	if volSnap.Description != "" {
+		description = "Description=" + volSnap.Description
+		urlpara = append(urlpara, description)
+	}
+	if volSnap.Status != "" {
+		status = "Status=" + volSnap.Status
+		urlpara = append(urlpara, status)
+	}
+	if volSnap.Size != 0 {
+		size = "Size=" + strconv.FormatInt(volSnap.Size, 10)
+		urlpara = append(urlpara, size)
+	}
+	if volSnap.VolumeId != "" {
+		volumeId = "VolumeId=" + volSnap.VolumeId
+		urlpara = append(urlpara, volumeId)
+	}
+	if len(urlpara) > 0 {
+		u = strings.Join(urlpara, "&")
+		url += "?" + u
+	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

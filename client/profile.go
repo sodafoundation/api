@@ -76,11 +76,61 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 }
 
 // ListProfiles
-func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
+func (p *ProfileMgr) ListProfiles(v []string, prof *model.ProfileSpec) ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec
+	var u string
+
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
+
+	var limit, offset, sortDir, sortKey, createdAt, description, name, storageType, updatedAt, id string
+	var urlpara []string
+
+	if v[0] != "" {
+		limit = "limit=" + v[0]
+		urlpara = append(urlpara, limit)
+	}
+	if v[1] != "" {
+		offset = "offset=" + v[1]
+		urlpara = append(urlpara, offset)
+	}
+	if v[2] != "" {
+		sortDir = "sortDir=" + v[2]
+		urlpara = append(urlpara, sortDir)
+	}
+	if v[3] != "" {
+		sortKey = "sortKey=" + v[3]
+		urlpara = append(urlpara, sortKey)
+	}
+	if prof.CreatedAt != "" {
+		createdAt = "CreatedAt=" + prof.CreatedAt
+		urlpara = append(urlpara, createdAt)
+	}
+	if prof.Description != "" {
+		description = "Description=" + prof.Description
+		urlpara = append(urlpara, description)
+	}
+	if prof.Name != "" {
+		name = "Name=" + prof.Name
+		urlpara = append(urlpara, name)
+	}
+	if prof.StorageType != "" {
+		storageType = "StorageType=" + prof.StorageType
+		urlpara = append(urlpara, storageType)
+	}
+	if prof.UpdatedAt != "" {
+		updatedAt = "UpdatedAt=" + prof.UpdatedAt
+		urlpara = append(urlpara, updatedAt)
+	}
+	if prof.Id != "" {
+		id = "Id=" + prof.Id
+		urlpara = append(urlpara, id)
+	}
+	if len(urlpara) > 0 {
+		u = strings.Join(urlpara, "&")
+		url += "?" + u
+	}
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

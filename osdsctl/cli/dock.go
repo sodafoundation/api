@@ -22,6 +22,7 @@ package cli
 import (
 	"os"
 
+	"github.com/opensds/opensds/pkg/model"
 	"github.com/spf13/cobra"
 )
 
@@ -43,9 +44,40 @@ var dockListCommand = &cobra.Command{
 	Run:   dockListAction,
 }
 
+var (
+	dockLimit       string
+	dockOffset      string
+	dockSortDir     string
+	dockSortKey     string
+	dockId          string
+	dockCreatedAt   string
+	dockName        string
+	dockUpdatedAt   string
+	dockDescription string
+	dockStatus      string
+	dockStorageType string
+	dockEndpoint    string
+	dockDriverName  string
+)
+
 func init() {
+	dockListCommand.Flags().StringVarP(&dockLimit, "limit", "", "50", "the number of ertries displayed per page")
+	dockListCommand.Flags().StringVarP(&dockOffset, "offset", "", "0", "all requested data offsets")
+	dockListCommand.Flags().StringVarP(&dockSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	dockListCommand.Flags().StringVarP(&dockSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, status, endpoint, drivername, description")
+	dockListCommand.Flags().StringVarP(&dockId, "id", "", "", "list docks by id")
+	dockListCommand.Flags().StringVarP(&dockCreatedAt, "createdAt", "", "", "list docks by created time")
+	dockListCommand.Flags().StringVarP(&dockName, "name", "", "", "list docks by name")
+	dockListCommand.Flags().StringVarP(&dockUpdatedAt, "updatedAt", "", "", "list docks by updated time")
+	dockListCommand.Flags().StringVarP(&dockDescription, "description", "", "", "list docks by description")
+	dockListCommand.Flags().StringVarP(&dockStatus, "status", "", "", "list docks by status")
+	dockListCommand.Flags().StringVarP(&dockStorageType, "storageType", "", "", "list docks by storage type")
+	dockListCommand.Flags().StringVarP(&dockEndpoint, "endpoint", "", "", "list docks by endpoint")
+	dockListCommand.Flags().StringVarP(&dockDriverName, "driverName", "", "", "list docks by driver name")
+
 	dockCommand.AddCommand(dockShowCommand)
 	dockCommand.AddCommand(dockListCommand)
+
 }
 
 func dockAction(cmd *cobra.Command, args []string) {
@@ -66,7 +98,22 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 
 func dockListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListDocks()
+	v := []string{dockLimit, dockOffset, dockSortDir, dockSortKey}
+	var dock = &model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id:        dockId,
+			CreatedAt: dockCreatedAt,
+			UpdatedAt: dockUpdatedAt,
+		},
+		Name:        dockName,
+		Description: dockDescription,
+		Status:      dockStatus,
+		StorageType: dockStorageType,
+		Endpoint:    dockEndpoint,
+		DriverName:  dockDriverName,
+	}
+
+	resp, err := client.ListDocks(v, dock)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

@@ -99,8 +99,22 @@ func TestListDocks(t *testing.T) {
 			DriverName:  "sample",
 		},
 	}
+	v := []string{"10", "3", "asc", "status"}
+	var dock = &model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			CreatedAt: "20120903",
+			UpdatedAt: "20150823",
+		},
+		Name:        "sample",
+		Description: "sample backend service",
+		Status:      "creating",
+		StorageType: "B",
+		Endpoint:    "localhost:50050",
+		DriverName:  "sample",
+	}
 
-	dcks, err := fd.ListDocks()
+	dcks, err := fd.ListDocks(v, dock)
 	if err != nil {
 		t.Error(err)
 		return

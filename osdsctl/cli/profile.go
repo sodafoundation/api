@@ -58,7 +58,31 @@ var profileDeleteCommand = &cobra.Command{
 	Run:   profileDeleteAction,
 }
 
+var (
+	profLimit       string
+	profOffset      string
+	profSortDir     string
+	profSortKey     string
+	profId          string
+	profCreatedAt   string
+	profName        string
+	profUpdatedAt   string
+	profDescription string
+	profStorageType string
+)
+
 func init() {
+	profileListCommand.Flags().StringVarP(&profLimit, "limit", "", "50", "the number of ertries displayed per page")
+	profileListCommand.Flags().StringVarP(&profOffset, "offset", "", "0", "all requested data offsets")
+	profileListCommand.Flags().StringVarP(&profSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	profileListCommand.Flags().StringVarP(&profSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, description")
+	profileListCommand.Flags().StringVarP(&profId, "id", "", "", "list profile by id")
+	profileListCommand.Flags().StringVarP(&profCreatedAt, "createdAt", "", "", "list profile by created time")
+	profileListCommand.Flags().StringVarP(&profName, "name", "", "", "list profile by name")
+	profileListCommand.Flags().StringVarP(&profUpdatedAt, "updatedAt", "", "", "list profile by updated time")
+	profileListCommand.Flags().StringVarP(&profDescription, "description", "", "", "list profile by description")
+	profileListCommand.Flags().StringVarP(&profStorageType, "storageType", "", "", "list profile by storage type")
+
 	profileCommand.AddCommand(profileCreateCommand)
 	profileCommand.AddCommand(profileShowCommand)
 	profileCommand.AddCommand(profileListCommand)
@@ -103,7 +127,20 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 
 func profileListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListProfiles()
+	v := []string{profLimit, profOffset, profSortDir, profSortKey}
+
+	var prof = &model.ProfileSpec{
+		BaseModel: &model.BaseModel{
+			Id:        profId,
+			CreatedAt: profCreatedAt,
+			UpdatedAt: profUpdatedAt,
+		},
+		Name:        profName,
+		Description: profDescription,
+		StorageType: profStorageType,
+	}
+
+	resp, err := client.ListProfiles(v, prof)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

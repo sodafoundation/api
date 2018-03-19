@@ -1123,7 +1123,7 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 	}
 	vols := c.SelectVolumes(m, volumes)
 
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION"})
+	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION"})
 
 	return c.SortVolumes(vols, p)[p.beginIdx:p.endIdx], nil
 }
@@ -1400,7 +1400,7 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		return nil, err
 	}
 	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
-	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
+	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID"})
 
 	return c.SortVolumeAttachments(atcs, p)[p.beginIdx:p.endIdx], nil
 }
@@ -1671,7 +1671,7 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		return nil, err
 	}
 	snps := c.SelectSnapshots(m, volumeSnapshots)
-	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
+	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID"})
 
 	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
 }

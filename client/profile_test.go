@@ -151,8 +151,18 @@ func TestListProfiles(t *testing.T) {
 			},
 		},
 	}
+	v := []string{"50", "0", "asc", "id"}
 
-	prfs, err := fpr.ListProfiles()
+	var prof = &model.ProfileSpec{
+		BaseModel: &model.BaseModel{
+			Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+		},
+		Name:        "silver",
+		Description: "silver policy",
+		StorageType: "DD",
+	}
+
+	prfs, err := fpr.ListProfiles(v, prof)
 	if err != nil {
 		t.Error(err)
 		return
