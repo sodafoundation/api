@@ -75,18 +75,10 @@ var (
 			FreeCapacity:     5000,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
 			Extras: model.ExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1000,
-				},
-				Advanced: map[string]interface{}{
-					"diskType":   "SSD",
-					"throughput": float64(1000),
-				},
+				"thin":     true,
+				"dedupe":   false,
+				"compress": false,
+				"diskType": "SSD",
 			},
 		},
 		{
@@ -102,18 +94,10 @@ var (
 			FreeCapacity:     6999,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
 			Extras: model.ExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        500,
-				},
-				Advanced: map[string]interface{}{
-					"diskType":   "SAS",
-					"throughput": float64(500),
-				},
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SATA",
 			},
 		},
 	}
@@ -213,7 +197,7 @@ func TestSelectSupportedPools_01(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	fmt.Println(err.Error())
@@ -228,7 +212,7 @@ func TestSelectSupportedPools_01(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -293,7 +277,7 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	fmt.Println(err.Error())
@@ -308,7 +292,7 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	delete(request, "freeCapacity")
@@ -321,7 +305,7 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -343,7 +327,7 @@ func TestSelectSupportedPools_05(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	request["freeCapacity"] = ">= z"
@@ -355,7 +339,7 @@ func TestSelectSupportedPools_05(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	request["freeCapacity"] = "== 1 2"
@@ -367,7 +351,7 @@ func TestSelectSupportedPools_05(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	delete(request, "freeCapacity")
@@ -380,7 +364,7 @@ func TestSelectSupportedPools_05(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -453,7 +437,7 @@ func TestSelectSupportedPools_07(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	request["availabilityZone"] = "<in> a az"
@@ -465,7 +449,7 @@ func TestSelectSupportedPools_07(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	delete(request, "availabilityZone")
@@ -478,7 +462,7 @@ func TestSelectSupportedPools_07(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -542,7 +526,7 @@ func TestSelectSupportedPools_09(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	request["availabilityZone"] = "<or> az1 <in> az"
@@ -554,7 +538,7 @@ func TestSelectSupportedPools_09(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -619,7 +603,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	request["extras.dedupe"] = "<is> 2"
@@ -631,7 +615,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	delete(request, "extras.dedupe")
@@ -644,7 +628,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -697,7 +681,7 @@ func TestSelectSupportedPools_13(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
 	delete(request, "availabilityZone")
@@ -710,7 +694,7 @@ func TestSelectSupportedPools_13(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -804,7 +788,7 @@ func TestSelectSupportedPools_15(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }
 
@@ -826,6 +810,6 @@ func TestSelectSupportedPools_16(t *testing.T) {
 	}
 
 	if nil != supportedPools {
-		t.Errorf("Expected nil, get %v", supportedPools[0])
+		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 }

@@ -102,11 +102,7 @@ func volumeAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeCreateAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
+	ArgsNumCheck(cmd, args, 1)
 	size, err := strconv.Atoi(args[0])
 	if err != nil {
 		log.Fatalf("error parsing size %s: %+v", args[0], err)
@@ -121,9 +117,9 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.CreateVolume(vol)
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
@@ -132,16 +128,11 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeShowAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVolume(args[0])
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
@@ -149,16 +140,11 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeListAction(cmd *cobra.Command, args []string) {
-	if len(args) != 0 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 0)
 	resp, err := client.ListVolumes()
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
@@ -166,38 +152,28 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeDeleteAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
+	ArgsNumCheck(cmd, args, 1)
 	vol := &model.VolumeSpec{
 		ProfileId: profileId,
 	}
 	err := client.DeleteVolume(args[0], vol)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	fmt.Printf("Delete volume(%s) success.\n", args[0])
 }
 
 func volumeUpdateAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 1)
 	vol := &model.VolumeSpec{
 		Name:        volName,
 		Description: volDesp,
 	}
 
 	resp, err := client.UpdateVolume(args[0], vol)
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
@@ -205,12 +181,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeExtendAction(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 2)
 	newSize, err := strconv.Atoi(args[1])
 	if err != nil {
 		log.Fatalf("error parsing new size %s: %+v", args[1], err)
@@ -221,9 +192,9 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.ExtendVolume(args[0], body)
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
