@@ -216,7 +216,27 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	if extendRequestBody.Extend.NewSize > volume.Size {
-		volume.Size = extendRequestBody.Extend.NewSize
+		poolId := volume.PoolId
+		pool, err := db.C.GetPool(c.GetContext(this.Ctx), poolId)
+		if nil != err {
+			reason := fmt.Sprintf("Get pool failed: %s", err.Error())
+			this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+			this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+			log.Error(reason)
+			return
+		}
+
+		if pool.FreeCapacity >= extendRequestBody.Extend.NewSize-volume.Size {
+			volume.Size = extendRequestBody.Extend.NewSize
+		} else {
+			reason := fmt.Sprintf("Extend volume failed: pool free capacity(%d) < new size(%d) - old size(%d)",
+				pool.FreeCapacity, extendRequestBody.Extend.NewSize, volume.Size)
+			this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+			this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+			log.Error(reason)
+			return
+		}
+
 	} else {
 		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
 			extendRequestBody.Extend.NewSize, volume.Size)
