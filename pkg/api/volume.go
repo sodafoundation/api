@@ -206,48 +206,8 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	id := this.Ctx.Input.Param(":volumeId")
-	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
-	if err != nil {
-		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
-		return
-	}
-
-	if extendRequestBody.Extend.NewSize > volume.Size {
-		poolId := volume.PoolId
-		pool, err := db.C.GetPool(c.GetContext(this.Ctx), poolId)
-		if nil != err {
-			reason := fmt.Sprintf("Get pool failed: %s", err.Error())
-			this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-			this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-			log.Error(reason)
-			return
-		}
-
-		if pool.FreeCapacity >= extendRequestBody.Extend.NewSize-volume.Size {
-			volume.Size = extendRequestBody.Extend.NewSize
-		} else {
-			reason := fmt.Sprintf("Extend volume failed: pool free capacity(%d) < new size(%d) - old size(%d)",
-				pool.FreeCapacity, extendRequestBody.Extend.NewSize, volume.Size)
-			this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-			this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-			log.Error(reason)
-			return
-		}
-
-	} else {
-		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
-			extendRequestBody.Extend.NewSize, volume.Size)
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
-		return
-	}
-
 	// Call global controller variable to handle extend volume request.
-	result, err := controller.Brain.ExtendVolume(c.GetContext(this.Ctx), volume)
+	result, err := controller.Brain.ExtendVolume(c.GetContext(this.Ctx), id, extendRequestBody.Extend.NewSize)
 	if err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
