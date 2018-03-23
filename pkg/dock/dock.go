@@ -86,19 +86,40 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 	//Call function of StorageDrivers configured by storage drivers.
 	vol, err := d.Driver.CreateVolume(opt)
 	if err != nil {
+		//Change the status of the volume to error when the creation faild
+		err = d.UpdateVolumeStatus(c.NewContextFormJson(opt.GetContext()), opt.GetId(), model.VOLUME_ERROR)
+		if err != nil {
+			log.Error("When update volume in db:", err)
+			return nil, err
+		}
 		log.Error("When calling volume driver to create volume:", err)
 		return nil, err
 	}
+
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
-	// Store the volume data into database.
-	result, err := db.C.CreateVolume(c.NewContextFormJson(opt.GetContext()), vol)
+	// Update the volume data in database.
+	vol.Status = model.VOLUME_AVAILABLE
+
+	result, err := db.C.UpdateVolume(c.NewContextFormJson(opt.GetContext()), vol)
 	if err != nil {
-		log.Error("When create volume in db module:", err)
+		log.Error("When update volume in db:", err)
 		return nil, err
 	}
 
 	return result, nil
+}
+
+func (d *DockHub) UpdateVolumeStatus(ctx *c.Context, VolumeId string, status string) error {
+	var vol = &model.VolumeSpec{
+		Status: status,
+	}
+	_, err := db.C.UpdateVolume(ctx, vol)
+	if err != nil {
+		log.Error("When update volume in db:", err)
+		return err
+	}
+	return nil
 }
 
 // DeleteVolume
@@ -114,6 +135,10 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	//Call function of StorageDrivers configured by storage drivers.
 	if err = d.Driver.DeleteVolume(opt); err != nil {
 		log.Error("When calling volume driver to delete volume:", err)
+		errdel := d.UpdateVolumeStatus(c.NewContextFormJson(opt.GetContext()), opt.GetId(), model.VOLUEM_ERROR_DELETING)
+		if errdel != nil {
+			return errdel
+		}
 		return err
 	}
 
@@ -136,15 +161,22 @@ func (d *DockHub) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, err
 	//Call function of StorageDrivers configured by storage drivers.
 	vol, err := d.Driver.ExtendVolume(opt)
 	if err != nil {
+		vol.Status = model.VOLUME_ERROR
+		_, err := db.C.UpdateVolume(c.NewContextFormJson(opt.GetContext()), vol)
+		if err != nil {
+			log.Error("When update volume in db:", err)
+			return nil, err
+		}
 		log.Error("When calling volume driver to extend volume:", err)
 		return nil, err
 	}
 
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
-	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(c.NewContextFormJson(opt.GetContext()), vol)
+	// Update the volume data in database.
+	vol.Status = model.VOLUME_AVAILABLE
+	result, err := db.C.UpdateVolume(c.NewContextFormJson(opt.GetContext()), vol)
 	if err != nil {
-		log.Error("When extend volume in db module:", err)
+		log.Error("When update volume in db:", err)
 		return nil, err
 	}
 
@@ -167,8 +199,11 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 	}
 
 	var atc = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{},
-		VolumeId:  opt.GetVolumeId(),
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Status:   model.VOLUMEATM_AVAILABLE,
+		VolumeId: opt.GetVolumeId(),
 		HostInfo: model.HostInfo{
 			Platform:  opt.HostInfo.GetPlatform(),
 			OsType:    opt.HostInfo.GetOsType(),
@@ -179,10 +214,9 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
-
-	result, err := db.C.CreateVolumeAttachment(c.NewContextFormJson(opt.GetContext()), atc)
+	result, err := db.C.UpdateVolumeAttachment(c.NewContextFormJson(opt.GetContext()), atc.Id, atc)
 	if err != nil {
-		log.Error("Error occurred in dock module when create volume attachment in db:", err)
+		log.Error("Error occurred in dock module when update volume attachment in db:", err)
 		return nil, err
 	}
 
@@ -199,6 +233,17 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 
 	//Call function of StorageDrivers configured by storage drivers.
 	if err := d.Driver.TerminateConnection(opt); err != nil {
+		var atc = &model.VolumeAttachmentSpec{
+			BaseModel: &model.BaseModel{
+				Id: opt.GetId(),
+			},
+			Status: model.VOLUMEATM_ERROR_DELETING,
+		}
+		_, err := db.C.UpdateVolumeAttachment(c.NewContextFormJson(opt.GetContext()), atc.Id, atc)
+		if err != nil {
+			log.Error("Error occurred in dock module when update volume attachment in db:", err)
+			return err
+		}
 		log.Error("Call driver to terminate volume connection failed:", err)
 		return err
 	}
@@ -222,17 +267,33 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 	//Call function of StorageDrivers configured by storage drivers.
 	snp, err := d.Driver.CreateSnapshot(opt)
 	if err != nil {
+		err = d.UpdateSnapshotStatus(c.NewContextFormJson(opt.GetContext()), opt.GetId(), model.VOLUMESNAP_ERROR)
+		if err != nil {
+			log.Error("When update volume snapshot in db:", err)
+			return nil, err
+		}
 		log.Error("Call driver to create volume snashot failed:", err)
 		return nil, err
 	}
-
-	result, err := db.C.CreateVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), snp)
+	snp.Status = model.VOLUMESNAP_AVAILABLE
+	result, err := db.C.UpdateVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), opt.GetId(), snp)
 	if err != nil {
-		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
+		log.Error("When update volume snapshot in db:", err)
 		return nil, err
 	}
 
 	return result, nil
+}
+
+func (d *DockHub) UpdateSnapshotStatus(ctx *c.Context, snapId string, status string) error {
+	var snap = &model.VolumeSnapshotSpec{
+		Status: status,
+	}
+	_, err := db.C.UpdateVolumeSnapshot(ctx, snapId, snap)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // DeleteSnapshot
@@ -247,6 +308,11 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 
 	//Call function of StorageDrivers configured by storage drivers.
 	if err = d.Driver.DeleteSnapshot(opt); err != nil {
+		errDel := d.UpdateSnapshotStatus(c.NewContextFormJson(opt.GetContext()), opt.GetId(), model.VOLUMESNAP_ERROR_DELETING)
+		if errDel != nil {
+			log.Error("Error occurs when deleting volume snapshot from driver:", err)
+			return errDel
+		}
 		log.Error("When calling volume driver to delete volume:", err)
 		return err
 	}

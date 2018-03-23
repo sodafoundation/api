@@ -100,7 +100,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	log.Infof("Create volume %s (%s) success.", opt.GetName(), lun.Id)
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: lun.Id,
+			Id: opt.GetId(),
 		},
 		Name:             lun.Name,
 		Size:             d.sector2Gb(lun.Capacity),

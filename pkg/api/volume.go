@@ -24,6 +24,7 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
+
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
@@ -52,8 +53,7 @@ func (this *VolumePortal) CreateVolume() {
 		return
 	}
 
-	// Call global controller variable to handle create volume request.
-	result, err := controller.Brain.CreateVolume(c.GetContext(this.Ctx), &volume)
+	result, pol, profile, err := controller.Brain.AsynCreateVolume(c.GetContext(this.Ctx), &volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -74,6 +74,18 @@ func (this *VolumePortal) CreateVolume() {
 
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	this.Ctx.Output.Body(body)
+
+	// Call global controller variable to handle create volume request.
+	var errchan = make(chan error, 1)
+	go controller.Brain.CreateVolume(c.GetContext(this.Ctx), result, pol, profile, errchan)
+	if err := <-errchan; err != nil {
+		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
 	return
 }
 
@@ -227,8 +239,19 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	// Call global controller variable to handle extend volume request.
-	result, err := controller.Brain.ExtendVolume(c.GetContext(this.Ctx), volume)
+	result, err := controller.Brain.AsynExtendVolume(c.GetContext(this.Ctx), volume)
 	if err != nil {
+		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Call global controller variable to handle extend volume request asynchronously.
+	var errchan = make(chan error, 1)
+	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), volume, errchan)
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -256,6 +279,7 @@ func (this *VolumePortal) DeleteVolume() {
 	if !policy.Authorize(this.Ctx, "volume:delete") {
 		return
 	}
+	var err error
 	id := this.Ctx.Input.Param(":volumeId")
 	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
 	if err != nil {
@@ -267,8 +291,20 @@ func (this *VolumePortal) DeleteVolume() {
 	}
 
 	// Call global controller variable to handle delete volume request.
-	err = controller.Brain.DeleteVolume(c.GetContext(this.Ctx), volume)
+	err = controller.Brain.AsynDeleteVolume(c.GetContext(this.Ctx), volume)
 	if err != nil {
+		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Call global controller variable to handle delete volume request asynchronously.
+	var errchan = make(chan error, 1)
+	go controller.Brain.DeleteVolume(c.GetContext(this.Ctx), volume, errchan)
+
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -301,8 +337,19 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	}
 
 	// Call global controller variable to handle create volume attachment request.
-	result, err := controller.Brain.CreateVolumeAttachment(c.GetContext(this.Ctx), &attachment)
+	result, err := controller.Brain.AsynCreateVolumeAttachment(c.GetContext(this.Ctx), &attachment)
 	if err != nil {
+		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Call global controller variable to hand create volume attachment request asynchronously.
+	errchan := make(chan error, 1)
+	go controller.Brain.CreateVolumeAttachment(c.GetContext(this.Ctx), result, errchan)
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -449,9 +496,11 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume attachment request.
-	err = controller.Brain.DeleteVolumeAttachment(c.GetContext(this.Ctx), attachment)
-	if err != nil {
+	// Call global controller variable to handle delete volume attachment request asynchronously.
+	var errchan = make(chan error, 1)
+	go controller.Brain.DeleteVolumeAttachment(c.GetContext(this.Ctx), attachment, errchan)
+
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume attachment failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -484,8 +533,20 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	}
 
 	// Call global controller variable to handle create volume snapshot request.
-	result, err := controller.Brain.CreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot)
+	result, err := controller.Brain.AsynCreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot)
 	if err != nil {
+		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+	log.Info("snap的信息是", &snapshot)
+	log.Info("snap的结果是", result)
+	// Call global controller variable to handle create volume snapshot request asynchronously.
+	var errchan = make(chan error, 1)
+	go controller.Brain.CreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot, errchan)
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -634,8 +695,19 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	}
 
 	// Call global controller variable to handle delete volume snapshot request.
-	err = controller.Brain.DeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot)
+	err = controller.Brain.AsynDeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot)
 	if err != nil {
+		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	// Call global controller variable to handle delete volume snapshot request asynchronously.
+	var errchan = make(chan error, 1)
+	go controller.Brain.DeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot, errchan)
+	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
