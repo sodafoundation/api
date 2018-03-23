@@ -58,6 +58,9 @@ service Dock {
     
     // Delete a volume attachment
     rpc DeleteAttachment (DeleteAttachmentOpts) returns (GenericResponse){}
+
+    // Create a replication
+    rpc CreateReplication (CreateReplicationOpts) returns (GenericResponse){}
 }
 
 // CreateVolumeOpts is a structure which indicates all required properties
@@ -230,6 +233,28 @@ message HostInfo {
     string ip = 4;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
     string initiator = 5;
+}
+
+// CreateReplicationOpts is a structure which indicates all required properties
+// for creating a replication.
+// NOTE: Need to figure out how to handle more than 2 sites.
+message CreateReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string dockId = 6;
+    // The replication driver type.
+    string driverName = 7;
+    // The Context
+    string context = 8;
 }
 
 // Generic response, it return:
