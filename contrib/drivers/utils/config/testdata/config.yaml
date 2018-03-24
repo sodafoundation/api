@@ -9,7 +9,8 @@ pool:
         isSpaceEfficient: true
       ioConnectivity:
         accessProtocol: rbd
-        maxIOPS: 1000
+        maxIOPS: 8000000
+        maxBWS: 700
       advanced:
         diskType: SSD
-        throughput: 1000
+        latency: 3ms

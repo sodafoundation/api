@@ -46,7 +46,8 @@ var (
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
-					"maxIOPS":        float64(1000),
+					"maxIOPS":        float64(5000000),
+					"maxBWS":         float64(500),
 				},
 			},
 		},
@@ -59,7 +60,8 @@ var (
 		},
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
-			"maxIOPS":        float64(1000),
+			"maxIOPS":        float64(5000000),
+			"maxBWS":         float64(500),
 		},
 	}
 
@@ -93,11 +95,12 @@ var (
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
-					MaxIOPS:        1000,
+					MaxIOPS:        8000000,
+					MaxBWS:         700,
 				},
 				Advanced: map[string]interface{}{
-					"diskType":   "SSD",
-					"throughput": float64(1000),
+					"diskType": "SSD",
+					"latency":  "3ms",
 				},
 			},
 		},
@@ -118,11 +121,12 @@ var (
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
-					MaxIOPS:        500,
+					MaxIOPS:        3000000,
+					MaxBWS:         350,
 				},
 				Advanced: map[string]interface{}{
-					"diskType":   "SAS",
-					"throughput": float64(500),
+					"diskType": "SAS",
+					"latency":  "500ms",
 				},
 			},
 		},
@@ -223,7 +227,8 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        1000
+					"maxIOPS":        5000000,
+					"maxBWS":         500
 				}
 			}
 		}
@@ -236,7 +241,8 @@ var (
 		},
 		"ioConnectivity": {
 			"accessProtocol": "rbd",
-			"maxIOPS":        1000
+			"maxIOPS":        5000000,
+			"maxBWS":         500
 		}
 	}`
 
@@ -296,11 +302,12 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        1000
+					"maxIOPS":        8000000,
+					"maxBWS": 	      700
 				},
 				"advanced": {
-					"diskType":   "SSD",
-					"throughput": 1000
+					"diskType": "SSD",
+					"latency":  "3ms"
 				}
 			}
 		},
@@ -318,11 +325,12 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        500
+					"maxIOPS":        3000000,
+					"maxBWS": 	      350
 				},
 				"advanced": {
-					"diskType":   "SAS",
-					"throughput": 500
+					"diskType": "SAS",
+					"latency":  "500ms"
 				}
 			}
 		}
@@ -453,7 +461,8 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        1000
+					"maxIOPS":        5000000,
+					"maxBWS":         500
 				}
 			}
 		}`,
@@ -485,11 +494,12 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        1000
+					"maxIOPS":        8000000,
+					"maxBWS": 	      700
 				},
 				"advanced": {
-					"diskType":   "SSD",
-					"throughput": 1000
+					"diskType": "SSD",
+					"latency":  "3ms"
 				}
 			}
 		}`,
@@ -508,11 +518,12 @@ var (
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
-					"maxIOPS":        500
+					"maxIOPS":        3000000,
+					"maxBWS": 	      350
 				},
 				"advanced": {
-					"diskType":   "SAS",
-					"throughput": 500
+					"diskType": "SAS",
+					"latency":  "500ms"
 				}
 			}
 		}`,

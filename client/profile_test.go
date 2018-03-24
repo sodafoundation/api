@@ -153,7 +153,8 @@ func TestListProfiles(t *testing.T) {
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
-					"maxIOPS":        float64(1000),
+					"maxIOPS":        float64(5000000),
+					"maxBWS":         float64(500),
 				},
 			},
 		},

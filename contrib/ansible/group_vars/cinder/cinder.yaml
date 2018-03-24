@@ -29,10 +29,11 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: true
+        isSpaceEfficient: false
       ioConnectivity:
         accessProtocol: iscsi
-        maxIOPS: 1000
+        maxIOPS: 7000000
+        maxBWS: 600
       advanced:
         diskType: SSD
-        throughput: 1000
+        latency: 3ms

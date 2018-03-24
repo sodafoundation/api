@@ -42,10 +42,10 @@ type BaseModel struct {
 type DataStorageLoS struct {
 	// The enumeration literal specifies the time after a disaster that the
 	// client shall regain conformant service level access to the primary
-	// store, currently it only supports "OnlineActive","OnlinePassive",
-	// "Nearline" and "Offline".
+	// store.
 	// The expectation is that the services required to implement this
 	// capability are part of the advertising system.
+	// +units:min
 	RecoveryTimeObjective int64 `json:"recoveryTimeObjective,omitempty" yaml:"recoveryTimeObjective,omitempty"`
 
 	// ProvisioningPolicy only supports "Fixed" and "Thin".
@@ -67,6 +67,11 @@ type IOConnectivityLoS struct {
 	// allow for the selected access protocol.
 	// +units:[IO]/s
 	MaxIOPS int64 `json:"maxIOPS,omitempty" yaml:"maxIOPS,omitempty"`
+
+	// MaxBWS shall be the maximum amount of data that can be transmitted in a
+	// fixed amount of time.
+	// +units:[MB]/s
+	MaxBWS int64 `json:"maxBWS,omitempty" yaml:"maxBWS,omitempty"`
 }
 
 // DataProtectionLoS describes a replica that protects data from loss. The

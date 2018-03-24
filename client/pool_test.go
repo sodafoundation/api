@@ -119,11 +119,12 @@ func TestListPools(t *testing.T) {
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
-					MaxIOPS:        1000,
+					MaxIOPS:        8000000,
+					MaxBWS:         700,
 				},
 				Advanced: map[string]interface{}{
-					"diskType":   "SSD",
-					"throughput": float64(1000),
+					"diskType": "SSD",
+					"latency":  "3ms",
 				},
 			},
 		},
@@ -143,11 +144,12 @@ func TestListPools(t *testing.T) {
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
-					MaxIOPS:        500,
+					MaxIOPS:        3000000,
+					MaxBWS:         350,
 				},
 				Advanced: map[string]interface{}{
-					"diskType":   "SAS",
-					"throughput": float64(500),
+					"diskType": "SAS",
+					"latency":  "500ms",
 				},
 			},
 		},

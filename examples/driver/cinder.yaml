@@ -27,23 +27,25 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: true
+        isSpaceEfficient: false
       ioConnectivity:
         accessProtocol: iscsi
-        maxIOPS: 1000
+        maxIOPS: 7000000
+        maxBWS: 600
       advanced:
         diskType: SSD
-        throughput: 1000
+        latency: 3ms
   pool2:
     storageType: block
     availabilityZone: nova-01
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: true
+        isSpaceEfficient: false
       ioConnectivity:
         accessProtocol: iscsi
-        maxIOPS: 5000
+        maxIOPS: 3000000
+        maxBWS: 300
       advanced:
-        diskType: SAS
-        throughput: 5000
+        diskType: SSD
+        latency: 500ms

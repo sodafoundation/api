@@ -36,11 +36,12 @@ var fp = map[string]PoolProperties{
 			},
 			IOConnectivity: model.IOConnectivityLoS{
 				AccessProtocol: "iscsi",
-				MaxIOPS:        1000,
+				MaxIOPS:        7000000,
+				MaxBWS:         600,
 			},
 			Advanced: map[string]interface{}{
-				"diskType":   "SSD",
-				"throughput": 1000,
+				"diskType": "SSD",
+				"latency":  "5ms",
 			},
 		},
 	},
@@ -247,11 +248,12 @@ func TestListPools(t *testing.T) {
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
-					MaxIOPS:        1000,
+					MaxIOPS:        7000000,
+					MaxBWS:         600,
 				},
 				Advanced: map[string]interface{}{
-					"diskType":   "SSD",
-					"throughput": 1000,
+					"diskType": "SSD",
+					"latency":  "5ms",
 				},
 			},
 		},
