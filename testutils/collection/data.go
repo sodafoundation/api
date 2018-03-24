@@ -46,7 +46,7 @@ var (
 		},
 	}
 
-SampleDocksWithFilter= []model.DockSpec{
+	SampleDocksWithFilter = []model.DockSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
@@ -90,7 +90,7 @@ SampleDocksWithFilter= []model.DockSpec{
 		},
 	}
 
-SamplePoolsWithFilter = []model.StoragePoolSpec{
+	SamplePoolsWithFilter = []model.StoragePoolSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
@@ -223,15 +223,15 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 		},
 	}
 
-        SampleReplications = []model.ReplicationSpec{
-                {
-                        BaseModel: &model.BaseModel{
-                                Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-                        },
-                        PrimaryVolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-                        SecondaryVolumeId:  "bd5b12a8-a101-11e7-941e-d77981b584d9",
-                },
-        }
+	SampleReplications = []model.ReplicationSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			},
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+		},
+	}
 )
 
 // The Byte*** variable here is designed for unit test in client package.
@@ -388,6 +388,14 @@ var (
 		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"		
 	}`
 
+	ByteReplication = `{
+		"id": "3769855c-a102-11e7-b772-17b880d2f537",
+		"name": "sample-replication-01",
+		"status": "created",
+		"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"		
+		"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d9"		
+	}`
+
 	ByteSnapshots = `[
 		{
 			"id": "3769855c-a102-11e7-b772-17b880d2f537",
@@ -443,7 +451,7 @@ var (
 			}
 		}`,
 	}
-		StringSliceDocksWithFilter = []string{
+	StringSliceDocksWithFilter = []string{
 		`{
 			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e4",
 			"name":        "sample1",
@@ -503,7 +511,6 @@ var (
 		}`,
 	}
 
-
 	StringSliceDocks = []string{
 		`{
 			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -513,7 +520,7 @@ var (
 			"driverName":  "sample"
 		}`,
 	}
-		StringSlicePoolsWithFilter = []string{
+	StringSlicePoolsWithFilter = []string{
 		`{
 			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"name":             "sample-pool-01",
@@ -568,7 +575,6 @@ var (
 			}
 		}`,
 	}
-
 
 	StringSlicePools = []string{
 		`{
