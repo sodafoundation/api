@@ -110,6 +110,17 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 	}, nil
 }
 
+// Create a volume attachment
+func (fc *fakeClient) CreateReplication(ctx context.Context, in *pb.CreateReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteReplication,
+			},
+		},
+	}, nil
+}
+
 func NewFakeController() Controller {
 	return &controller{
 		Client:   NewFakeClient(),

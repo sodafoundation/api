@@ -74,6 +74,10 @@ func (fvc *fakeVolumeController) DeleteVolumeSnapshot(*pb.DeleteVolumeSnapshotOp
 	return nil
 }
 
+func (fvc *fakeVolumeController) CreateReplication(opts *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
