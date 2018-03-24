@@ -18,15 +18,10 @@ This module implements the common data structure.
 
 package model
 
-//import (
-//	"encoding/json"
-//)
-
 // ReplicationSpec represents a replication relationship between the volumes
 // on the primary and secondary sites.
 type ReplicationSpec struct {
 	*BaseModel
-
 	// The uuid of the tenant that the replication belongs to.
 	TenantId string `json:"tenantId,omitempty"`
 
@@ -52,4 +47,30 @@ type ReplicationSpec struct {
 
 	// NOTE: Need to figure out how to represent the relationship
 	// when there are more than 2 sites. May need to use array.
+	AvailabilityZone               string            `json:"availabilityZone,omitempty"`
+	// region
+	Region                         string            `json:"region,omitempty"`
+	// group id
+	GroupId                        string            `json:"groupId,omitempty"`
+	// primary replication driver data
+	PrimaryReplicationDriverData   map[string]string `json:"primaryReplicationDriverData,omitempty"`
+	// secondary replication driver data
+	SecondaryReplicationDriverData map[string]string `json:"secondaryReplicationDriverData,omitempty"`
+	// replication status
+	ReplicationStatus              string            `json:"replicationStatus,omitempty"`
+	// supports "async" or "sync" now
+	ReplicationModel string `json:"replicationModel,omitempty"`
+	// 0 means sync replication.
+	ReplicationPeriod    int    `json:"replicationPeriod,omitempty"`
+	// replication period
+	ReplicationBandwidth int    `json:"replicationBandwidth,omitempty"`
+	// profile id
+	ProfileId            string `json:"profileId,omitempty"`
+}
+
+type FailoverReplicationSpec struct {
+	Failover struct {
+		AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
+		SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
+	} `json:"failoverReplication"`
 }

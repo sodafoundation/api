@@ -22,6 +22,7 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
+	"github.com/opensds/opensds/contrib/drivers/drbd"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
@@ -39,11 +40,11 @@ type ReplicationDriver interface {
 }
 
 // Init
-func Init(resourceType string) ReplicationDriver {
+func InitReplicationDriver(resourceType string) ReplicationDriver {
 	var d ReplicationDriver
 	switch resourceType {
 	case "drbd":
-		d = &drbd.Driver{}
+		d = &drbd.ReplicationDriver{}
 		break
 	default:
 		d = &replication_sample.ReplicationDriver{}
@@ -54,10 +55,10 @@ func Init(resourceType string) ReplicationDriver {
 }
 
 // Clean
-func Clean(d ReplicationDriver) ReplicationDriver {
+func CleanReplicationDriver(d ReplicationDriver) ReplicationDriver {
 	// Execute different clean operations according to the ReplicationDriver type.
 	switch d.(type) {
-	case *drbd.Driver:
+	case *drbd.ReplicationDriver:
 		break
 	default:
 		break

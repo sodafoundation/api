@@ -58,8 +58,6 @@ type VolumeDriver interface {
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
 	ListPools() ([]*model.StoragePoolSpec, error)
-
-	CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error)
 }
 
 // Init

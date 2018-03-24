@@ -258,3 +258,22 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 
 	return nil
 }
+
+// DeleteVolumeAttachment
+func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
+	//Get the storage drivers and do some initializations.
+	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling volume driver to terminate volume connection...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	replica, err := driver.CreateReplication(opt)
+	if err != nil {
+		log.Error("Call driver to terminate volume connection failed:", err)
+		return nil, err
+	}
+
+	// TODO:  storage replication in db.
+	return replica, nil
+}

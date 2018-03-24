@@ -196,6 +196,24 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 	return &res, nil
 }
 
+// CreateReplication implements opensds.DockServer
+func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateReplicationOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive create replication request, vr =", opt)
+	relica, err := dock.Brain.CreateReplication(opt);
+	if  err != nil {
+		log.Error("Error occurred in dock module when create replication:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult(relica)
+	return &res, nil
+}
+
+
 func ListenAndServe(srv pb.DockServer) {
 	// Find whether the type of input is supported.
 	switch srv.(type) {
