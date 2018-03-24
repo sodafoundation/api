@@ -222,6 +222,16 @@ SamplePoolsWithFilter = []model.StoragePoolSpec{
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
 	}
+
+        SampleReplications = []model.ReplicationSpec{
+                {
+                        BaseModel: &model.BaseModel{
+                                Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+                        },
+                        PrimaryVolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+                        SecondaryVolumeId:  "bd5b12a8-a101-11e7-941e-d77981b584d9",
+                },
+        }
 )
 
 // The Byte*** variable here is designed for unit test in client package.
