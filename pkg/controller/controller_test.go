@@ -137,20 +137,14 @@ func TestDeleteVolume(t *testing.T) {
 
 func TestExtendVolume(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetPool", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SamplePools[0], nil)
 	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
-	var req = &model.VolumeSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-	}
 	var c = &Controller{
 		selector: &fakeSelector{
 			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
@@ -158,14 +152,39 @@ func TestExtendVolume(t *testing.T) {
 		},
 		volumeController: NewFakeVolumeController(),
 	}
-	var expected = &SampleVolumes[0]
 
-	result, err := c.ExtendVolume(context.NewAdminContext(), req)
+	newSize := int64(1)
+	result, err := c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize)
+	expectedError := "new size(1) <= old size(1)"
+
+	if nil == err {
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
+	}
+
+	newSize = int64(92)
+	result, err = c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize)
+	expectedError = "pool free capacity(90) < new size(92) - old size(1)"
+
+	if nil == err {
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
+	}
+
+	newSize = int64(2)
+	result, err = c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize)
+
 	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
+	if newSize != result.Size {
+		t.Errorf("Expected %v, got %v\n", newSize, result.Size)
 	}
 }
 

@@ -174,8 +174,34 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec) error {
 }
 
 // ExtendVolume ...
-func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
-	prf, err := db.C.GetProfile(ctx, in.ProfileId)
+func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64) (*model.VolumeSpec, error) {
+	volume, err := db.C.GetVolume(ctx, volID)
+	if err != nil {
+		log.Error("Get volume failed in extend volume method: ", err)
+		return nil, err
+	}
+
+	if newSize > volume.Size {
+		pool, err := db.C.GetPool(ctx, volume.PoolId)
+		if nil != err {
+			log.Error("Get pool failed in extend volume method: ", err)
+			return nil, err
+		}
+
+		if pool.FreeCapacity >= (newSize - volume.Size) {
+			volume.Size = newSize
+		} else {
+			reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
+				pool.FreeCapacity, newSize, volume.Size)
+			return nil, errors.New(reason)
+		}
+	} else {
+		reason := fmt.Sprintf("new size(%d) <= old size(%d)", newSize, volume.Size)
+		log.Error(reason)
+		return nil, errors.New(reason)
+	}
+
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
 	if err != nil {
 		log.Error("when search profile in db:", err)
 		return nil, err
@@ -185,7 +211,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*model.
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(EXTEND_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, volume.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err)
 		return nil, err
@@ -194,9 +220,9 @@ func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*model.
 	c.volumeController.SetDock(dockInfo)
 
 	opt := &pb.ExtendVolumeOpts{
-		Id:         in.Id,
-		Size:       in.Size,
-		Metadata:   in.Metadata,
+		Id:         volume.Id,
+		Size:       volume.Size,
+		Metadata:   volume.Metadata,
 		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
