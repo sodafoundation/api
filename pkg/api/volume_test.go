@@ -714,4 +714,19 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	if w.Code != 400 {
 		t.Errorf("Expected 400, actual %v", w.Code)
 	}
+
+	jsonStr = []byte(`{"extend":{"newSize": 92}}`)
+	r, _ = http.NewRequest("POST",
+		"/v1beta/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/action", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
+
+	mockClient.On("GetPool", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SamplePools[0], nil)
+
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
 }
