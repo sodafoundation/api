@@ -478,7 +478,7 @@ func (_m *MockClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 }
 
 // ListDocks
-func (_m *MockClient) ListDocksWithFilter(ctx *c.Context,m map[string][]string) ([]*model.DockSpec, error) {
+func (_m *MockClient) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*model.DockSpec, error) {
 	ret := _m.Called(m)
 	var r0 []*model.DockSpec
 	if rf, ok := ret.Get(0).(func() []*model.DockSpec); ok {
@@ -498,6 +498,7 @@ func (_m *MockClient) ListDocksWithFilter(ctx *c.Context,m map[string][]string) 
 
 	return r0, r1
 }
+
 // ListExtraProperties
 func (_m *MockClient) ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error) {
 	ret := _m.Called(prfID)
@@ -545,7 +546,7 @@ func (_m *MockClient) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error
 }
 
 // ListPools
-func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.StoragePoolSpec, error) {
+func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.StoragePoolSpec
@@ -566,6 +567,7 @@ func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context,m map[string][]string) 
 
 	return r0, r1
 }
+
 // ListProfiles
 func (_m *MockClient) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	ret := _m.Called()
@@ -589,7 +591,7 @@ func (_m *MockClient) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 	return r0, r1
 }
 
-func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.ProfileSpec, error) {
+func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.ProfileSpec
@@ -655,6 +657,7 @@ func (_m *MockClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[stri
 
 	return r0, r1
 }
+
 // ListVolumeSnapshots
 func (_m *MockClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called()
@@ -678,7 +681,7 @@ func (_m *MockClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapsh
 	return r0, r1
 }
 
-func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
+func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.VolumeSnapshotSpec
@@ -699,6 +702,7 @@ func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string]
 
 	return r0, r1
 }
+
 // ListVolumes
 func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	ret := _m.Called()
@@ -722,7 +726,7 @@ func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	return r0, r1
 }
 
-func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSpec, error) {
+func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.VolumeSpec
@@ -743,6 +747,7 @@ func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context,m map[string][]string
 
 	return r0, r1
 }
+
 // RemoveExtraProperty
 func (_m *MockClient) RemoveExtraProperty(ctx *c.Context, prfID string, extraKey string) error {
 	ret := _m.Called(prfID, extraKey)
@@ -897,7 +902,7 @@ func (_m *MockClient) UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs
 
 // ExtendVolume ...
 func (_m *MockClient) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	ret := _m.Called(vol.Id, vol)
+	ret := _m.Called(vol)
 
 	var r0 *model.VolumeSpec
 	if rf, ok := ret.Get(0).(func(string, *model.VolumeSpec) *model.VolumeSpec); ok {

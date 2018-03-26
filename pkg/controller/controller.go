@@ -62,7 +62,7 @@ type Controller struct {
 	policyController policy.Controller
 }
 
-func (c *Controller) AsynCreateVolume(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, *model.StoragePoolSpec, *model.ProfileSpec, error) {
+func (c *Controller) CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, *model.StoragePoolSpec, *model.ProfileSpec, error) {
 	var profile *model.ProfileSpec
 	var err error
 
@@ -188,7 +188,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, args ...interface{}) {
 }
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
-func (c *Controller) AsynDeleteVolume(ctx *c.Context, in *model.VolumeSpec) error {
+func (c *Controller) DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	if in.Status != model.VOLUME_AVAILABLE {
 		errMsg := "Only the volume with the status available can be deleted"
 		log.Error(errMsg)
@@ -251,10 +251,40 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 }
 
 // ExtendVolume ...
-func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec, errchanVolume chan error) {
-	prf, err := db.C.GetProfile(ctx, in.ProfileId)
+func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, errchanVolume chan error) {
+	volume, err := db.C.GetVolume(ctx, volID)
 	if err != nil {
-		log.Error("when search profile in db:", err.Error())
+		log.Error("Get volume failed in extend volume method: ", err)
+		errchanVolume <- err
+		return
+	}
+
+	if newSize > volume.Size {
+		pool, err := db.C.GetPool(ctx, volume.PoolId)
+		if nil != err {
+			log.Error("Get pool failed in extend volume method: ", err)
+			errchanVolume <- err
+			return
+		}
+
+		if pool.FreeCapacity >= (newSize - volume.Size) {
+			volume.Size = newSize
+		} else {
+			reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
+				pool.FreeCapacity, newSize, volume.Size)
+			errchanVolume <- errors.New(reason)
+			return
+		}
+	} else {
+		reason := fmt.Sprintf("new size(%d) <= old size(%d)", newSize, volume.Size)
+		errchanVolume <- errors.New(reason)
+		log.Error(reason)
+		return
+	}
+
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	if err != nil {
+		log.Error("when search profile in db:", err)
 		errchanVolume <- err
 		return
 	}
@@ -263,7 +293,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(EXTEND_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, volume.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err.Error())
 		errchanVolume <- err
@@ -274,9 +304,9 @@ func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	c.volumeController.SetDock(dockInfo)
 
 	opt := &pb.ExtendVolumeOpts{
-		Id:         in.Id,
-		Size:       in.Size,
-		Metadata:   in.Metadata,
+		Id:         volume.Id,
+		Size:       volume.Size,
+		Metadata:   volume.Metadata,
 		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
@@ -298,19 +328,25 @@ func (c *Controller) ExtendVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		return
 	}
 
-	errchanVolume <- err
+	errchanVolume <- nil
 }
 
 // AsynExtendVolume ...
-func (c *Controller) AsynExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
-	if in.Status != model.VOLUME_AVAILABLE {
+func (c *Controller) ExtendVolumeDBEntry(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
+	volume, err := db.C.GetVolume(ctx, volID)
+	if err != nil {
+		log.Error("Get volume failed in extend volume method: ", err)
+		return nil, err
+	}
+
+	if volume.Status != model.VOLUME_AVAILABLE {
 		errMsg := "The status of the volume to be extended must be available"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	in.Status = model.VOLUME_EXTENDING
+	volume.Status = model.VOLUME_EXTENDING
 	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(ctx, in)
+	result, err := db.C.ExtendVolume(ctx, volume)
 	if err != nil {
 		log.Error("When extend volume in db module:", err)
 		return nil, err
@@ -318,7 +354,7 @@ func (c *Controller) AsynExtendVolume(ctx *c.Context, in *model.VolumeSpec) (*mo
 	return result, nil
 }
 
-func (c *Controller) AsynCreateVolumeAttachment(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+func (c *Controller) CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume attachment method: ", err)
@@ -468,7 +504,7 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 	errchan <- nil
 }
 
-func (c *Controller) AsynCreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+func (c *Controller) CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in create volume snapshot method: ", err)
@@ -546,7 +582,7 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 	errchan <- nil
 }
 
-func (c *Controller) AsynDeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
+func (c *Controller) DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
 	if in.Status != model.VOLUMESNAP_AVAILABLE {
 		errMsg := "Only the volume snapshot with the status available can be deleted"
 		log.Error(errMsg)

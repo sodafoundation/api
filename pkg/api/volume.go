@@ -24,7 +24,6 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
-
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
@@ -53,7 +52,10 @@ func (this *VolumePortal) CreateVolume() {
 		return
 	}
 
-	result, pol, profile, err := controller.Brain.AsynCreateVolume(c.GetContext(this.Ctx), &volume)
+	// NOTE:It will create a volume entry into the database and initialize its status
+	// as "creating". It will not wait for the real volume creation to complete
+	// and will return result immediately.
+	result, pool, profile, err := controller.Brain.CreateVolumeDBEntry(c.GetContext(this.Ctx), &volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -75,9 +77,11 @@ func (this *VolumePortal) CreateVolume() {
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	this.Ctx.Output.Body(body)
 
-	// Call global controller variable to handle create volume request.
+	// NOTE:The real volume creation process.
+	// CreateVolume request is sent to the Dock. Dock will update volume status to "available"
+	// after volume creation is completed.
 	var errchan = make(chan error, 1)
-	go controller.Brain.CreateVolume(c.GetContext(this.Ctx), result, pol, profile, errchan)
+	go controller.Brain.CreateVolume(c.GetContext(this.Ctx), result, pool, profile, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -218,28 +222,9 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	id := this.Ctx.Input.Param(":volumeId")
-	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
-	if err != nil {
-		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
-		return
-	}
-
-	if extendRequestBody.Extend.NewSize > volume.Size {
-		volume.Size = extendRequestBody.Extend.NewSize
-	} else {
-		reason := fmt.Sprintf("Extend volume failed: new size(%d) <= old size(%d)",
-			extendRequestBody.Extend.NewSize, volume.Size)
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
-		return
-	}
-
-	// Call global controller variable to handle extend volume request.
-	result, err := controller.Brain.AsynExtendVolume(c.GetContext(this.Ctx), volume)
+	// NOTE:It will update the the status of the volume waiting for expansion in
+	// the database to "extending" and return the result immediately.
+	result, err := controller.Brain.ExtendVolumeDBEntry(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -248,9 +233,11 @@ func (this *VolumePortal) ExtendVolume() {
 		return
 	}
 
-	// Call global controller variable to handle extend volume request asynchronously.
+	// NOTE:The real volume extension process.
+	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
+	// after volume extension is completed.
 	var errchan = make(chan error, 1)
-	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), volume, errchan)
+	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), id, extendRequestBody.Extend.NewSize, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -290,8 +277,9 @@ func (this *VolumePortal) DeleteVolume() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume request.
-	err = controller.Brain.AsynDeleteVolume(c.GetContext(this.Ctx), volume)
+	// NOTE:It will update the the status of the volume waiting for deletion in
+	// the database to "deleting" and return the result immediately.
+	err = controller.Brain.DeleteVolumeDBEntry(c.GetContext(this.Ctx), volume)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -300,7 +288,9 @@ func (this *VolumePortal) DeleteVolume() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume request asynchronously.
+	// NOTE:The real volume deletion process.
+	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
+	// and database or update volume status to "errorDeleting" if deletion from driver faild.
 	var errchan = make(chan error, 1)
 	go controller.Brain.DeleteVolume(c.GetContext(this.Ctx), volume, errchan)
 
@@ -336,8 +326,10 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		return
 	}
 
-	// Call global controller variable to handle create volume attachment request.
-	result, err := controller.Brain.AsynCreateVolumeAttachment(c.GetContext(this.Ctx), &attachment)
+	// NOTE:It will create a volume attachment entry into the database and initialize its status
+	// as "creating". It will not wait for the real volume attachment creation to complete
+	// and will return result immediately.
+	result, err := controller.Brain.CreateVolumeAttachmentDBEntry(c.GetContext(this.Ctx), &attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -346,7 +338,9 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		return
 	}
 
-	// Call global controller variable to hand create volume attachment request asynchronously.
+	// NOTE:The real volume attachment creation process.
+	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
+	// after volume attachment creation is completed.
 	errchan := make(chan error, 1)
 	go controller.Brain.CreateVolumeAttachment(c.GetContext(this.Ctx), result, errchan)
 	if err := <-errchan; err != nil {
@@ -496,7 +490,9 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume attachment request asynchronously.
+	// NOTE:The real volume attachment deletion process.
+	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
+	// or update its status to "errorDeleting" if volume connection termination failed.
 	var errchan = make(chan error, 1)
 	go controller.Brain.DeleteVolumeAttachment(c.GetContext(this.Ctx), attachment, errchan)
 
@@ -508,6 +504,8 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		return
 	}
 
+	// NOTE:It will not wait for the real volume attachment deletion to complete
+	// and will return ok immediately.
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }
@@ -532,8 +530,10 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
-	// Call global controller variable to handle create volume snapshot request.
-	result, err := controller.Brain.AsynCreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot)
+	// NOTE:It will create a volume snapshot entry into the database and initialize its status
+	// as "creating". It will not wait for the real volume snapshot creation to complete
+	// and will return result immediately.
+	result, err := controller.Brain.CreateVolumeSnapshotDBEntry(c.GetContext(this.Ctx), &snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -541,9 +541,10 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		log.Error(reason)
 		return
 	}
-	log.Info("snap的信息是", &snapshot)
-	log.Info("snap的结果是", result)
-	// Call global controller variable to handle create volume snapshot request asynchronously.
+
+	// NOTE:The real volume snapshot creation process.
+	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
+	// after volume snapshot creation complete.
 	var errchan = make(chan error, 1)
 	go controller.Brain.CreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot, errchan)
 	if err := <-errchan; err != nil {
@@ -694,8 +695,9 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume snapshot request.
-	err = controller.Brain.AsynDeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot)
+	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
+	// the database to "deleting" and return the result immediately.
+	err = controller.Brain.DeleteVolumeSnapshotDBEntry(c.GetContext(this.Ctx), snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -704,7 +706,9 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		return
 	}
 
-	// Call global controller variable to handle delete volume snapshot request asynchronously.
+	// NOTE:The real volume snapshot deletion process.
+	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
+	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
 	var errchan = make(chan error, 1)
 	go controller.Brain.DeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot, errchan)
 	if err := <-errchan; err != nil {

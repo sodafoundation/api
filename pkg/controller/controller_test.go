@@ -134,20 +134,14 @@ func TestDeleteVolume(t *testing.T) {
 
 func TestExtendVolume(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetPool", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SamplePools[0], nil)
 	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
-	var req = &model.VolumeSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-	}
 	var c = &Controller{
 		selector: &fakeSelector{
 			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
@@ -156,10 +150,38 @@ func TestExtendVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
+	newSize := int64(1)
 	var errchan = make(chan error, 1)
+	c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize, errchan)
+	expectedError := "new size(1) <= old size(1)"
 
-	c.ExtendVolume(context.NewAdminContext(), req, errchan)
-	if err := <-errchan; err != nil {
+	if err := <-errchan; err == nil {
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
+	}
+
+	newSize = int64(92)
+	var errchan2 = make(chan error, 1)
+	c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize, errchan2)
+	expectedError = "pool free capacity(90) < new size(92) - old size(1)"
+
+	if err := <-errchan2; err == nil {
+
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
+	}
+
+	newSize = int64(2)
+	var errchan3 = make(chan error, 1)
+	c.ExtendVolume(context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", newSize, errchan3)
+
+	if err := <-errchan3; err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
 }
@@ -260,7 +282,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 	}
 }
 
-func TestAsynCreateVolume(t *testing.T) {
+func TestCreateVolumeDBEntry(t *testing.T) {
 	var req = &model.VolumeSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "volume sample",
@@ -284,7 +306,7 @@ func TestAsynCreateVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &SampleVolumes[0]
-	result, _, _, err := c.AsynCreateVolume(context.NewAdminContext(), req)
+	result, _, _, err := c.CreateVolumeDBEntry(context.NewAdminContext(), req)
 
 	if err != nil {
 		t.Errorf("Failed to create volume asynchronously, err is %v\n", err)
@@ -294,7 +316,7 @@ func TestAsynCreateVolume(t *testing.T) {
 	}
 }
 
-func TestAsynDeleteVolume(t *testing.T) {
+func TestDeleteVolumeDBEntry(t *testing.T) {
 	var vol = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 		Status:    "available"}
@@ -307,34 +329,37 @@ func TestAsynDeleteVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	err := c.AsynDeleteVolume(context.NewAdminContext(), vol)
+	err := c.DeleteVolumeDBEntry(context.NewAdminContext(), vol)
 	if err != nil {
 		t.Errorf("Failed to delete volume, err is %v\n", err)
 	}
 }
 
-func TestAsynExtendVolume(t *testing.T) {
+func TestExtendVolumeDBEntry(t *testing.T) {
 	var vol = &model.VolumeSpec{
-		BaseModel: &model.BaseModel{},
-		Status:    "available",
-		Size:      2,
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status: "available",
+		Size:   2,
 	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ExtendVolume", "", vol).Return(nil, nil)
+	mockClient.On("ExtendVolume", vol).Return(nil, nil)
+	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 	db.C = mockClient
 
 	var c = &Controller{
 		volumeController: NewFakeVolumeController(),
 	}
 
-	_, err := c.AsynExtendVolume(context.NewAdminContext(), vol)
+	_, err := c.ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
 	if err != nil {
 		t.Errorf("Failed to delete volume, err is %v\n", err)
 	}
 }
 
-func TestAsynCreateVolumeAttachment(t *testing.T) {
+func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 	var m = map[string]string{"a": "a"}
 
 	var req = &model.VolumeAttachmentSpec{
@@ -359,7 +384,7 @@ func TestAsynCreateVolumeAttachment(t *testing.T) {
 	}
 	var expected = &SampleAttachments[0]
 
-	result, err := c.AsynCreateVolumeAttachment(context.NewAdminContext(), req)
+	result, err := c.CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
 
 	if err != nil {
 		t.Errorf("Failed to create volume attachment, err is %v\n", err)
@@ -369,7 +394,7 @@ func TestAsynCreateVolumeAttachment(t *testing.T) {
 	}
 }
 
-func TestAsynCreateVolumeSnapshot(t *testing.T) {
+func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 	var m = map[string]string{"a": "a"}
 	var vol = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
@@ -397,7 +422,7 @@ func TestAsynCreateVolumeSnapshot(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 	var expected = &SampleSnapshots[0]
-	result, err := c.AsynCreateVolumeSnapshot(context.NewAdminContext(), req)
+	result, err := c.CreateVolumeSnapshotDBEntry(context.NewAdminContext(), req)
 
 	if err != nil {
 		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
@@ -407,7 +432,7 @@ func TestAsynCreateVolumeSnapshot(t *testing.T) {
 	}
 }
 
-func TestAsynDeleteVolumeSnapshot(t *testing.T) {
+func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 	var req = &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: "3769855c-a102-11e7-b772-17b880d2f537",
@@ -423,7 +448,7 @@ func TestAsynDeleteVolumeSnapshot(t *testing.T) {
 	var c = &Controller{
 		volumeController: NewFakeVolumeController(),
 	}
-	err := c.AsynDeleteVolumeSnapshot(context.NewAdminContext(), req)
+	err := c.DeleteVolumeSnapshotDBEntry(context.NewAdminContext(), req)
 
 	if err != nil {
 		t.Errorf("Failed to delete volume snapshot, err is %v\n", err)
