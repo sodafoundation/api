@@ -1,5 +1,5 @@
 # Community-Contributing
-# OpenSDS
+## OpenSDS
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds?branch=master)](https://goreportcard.com/report/github.com/opensds/opensds)
 [![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
