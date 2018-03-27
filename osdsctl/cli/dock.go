@@ -20,7 +20,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -55,31 +54,22 @@ func dockAction(cmd *cobra.Command, args []string) {
 }
 
 func dockShowAction(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
+	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetDock(args[0])
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
 func dockListAction(cmd *cobra.Command, args []string) {
-	if len(args) != 0 {
-		fmt.Fprintln(os.Stderr, "The number of args is not correct!")
-		cmd.Usage()
-		os.Exit(1)
-	}
-
+	ArgsNumCheck(cmd, args, 0)
 	resp, err := client.ListDocks()
+	PrintResponse(resp)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
 	PrintList(resp, keys, FormatterList{})

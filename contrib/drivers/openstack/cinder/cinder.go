@@ -348,13 +348,6 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) buildPoolParam(proper PoolProperties) *map[string]interface{} {
-	param := make(map[string]interface{})
-	param["diskType"] = proper.DiskType
-	param["thin"] = proper.Thin
-	return &param
-}
-
 // ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	log.Info("Starting list pools in cinder drivers.")
@@ -376,7 +369,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := d.conf.Pool[page.Name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(d.conf.Pool[page.Name])
+
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
@@ -385,7 +378,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			TotalCapacity:    int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:     int64(page.Capabilities.FreeCapacityGB),
 			AvailabilityZone: d.conf.Pool[page.Name].AZ,
-			Extras:           *param,
+			Extras:           BuildDefaultPoolParam(d.conf.Pool[page.Name]),
 		}
 		pols = append(pols, pol)
 	}

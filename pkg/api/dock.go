@@ -23,21 +23,33 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/api/policy"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 // DockPortal
 type DockPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 // ListDocks
 func (this *DockPortal) ListDocks() {
+	if !policy.Authorize(this.Ctx, "dock:list") {
+		return
+	}
 	// Call db api module to handle list docks request.
-	result, err := db.C.ListDocks()
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List docks failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+	result, err := db.C.ListDocksWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -63,9 +75,11 @@ func (this *DockPortal) ListDocks() {
 
 // GetDock
 func (this *DockPortal) GetDock() {
+	if !policy.Authorize(this.Ctx, "dock:get") {
+		return
+	}
 	id := this.Ctx.Input.Param(":dockId")
-
-	result, err := db.C.GetDock(id)
+	result, err := db.C.GetDock(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get dock failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

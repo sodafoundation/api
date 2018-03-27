@@ -7,6 +7,7 @@
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
+
 ## How to contribute
 
 opensds is Apache 2.0 licensed and accepts contributions via GitHub pull requests. This document outlines some of the conventions on commit message formatting, contact points for developers and other resources to make getting your contribution into opensds easier.
@@ -25,7 +26,7 @@ provided for customers and users. So all code modifications SHOULD be submitted 
 - Fork the repository on GitHub.
 - Read the README.md and INSTALL.md for project information and build instructions.
 
-For those who just get in touch with this project recently, here is a proposed contributing [tutorial](https://github.com/opensds/opensds/wiki/OpenSDS-Controller-Project-Contribution-Tutorial).
+For those who just get in touch with this project recently, here is a proposed contributing [tutorial](https://github.com/leonwanghui/installation-note/blob/master/opensds_fork_contribute_tutorial.md).
 
 ## Contribution Workflow
 
@@ -47,10 +48,11 @@ When reporting issues, refer to this format:
 - What you expected to happen?
 - How to reproduce it?(as minimally and precisely as possible)
 
-### Propose blueprints
+### Propose PRs
 
-- Raise your idea as an [issues](https://github.com/opensds/opensds/issues)
-- After reaching consensus in the issue discussion, complete the development on the forked repo and submit a PR. 
+- Raise your idea as an [issue](https://github.com/opensds/opensds/issues)
+- If it is a new feature that needs lots of design details, a design proposal should also be submitted [here](https://github.com/opensds/design-specs/pulls).
+- After reaching consensus in the issue discussions and design proposal reviews, complete the development on the forked repo and submit a PR. 
   Here are the [PRs](https://github.com/opensds/opensds/pulls?q=is%3Apr+is%3Aclosed) that are already closed.
 - If a PR is submitted by one of the core members, it has to be merged by a different core member.
 - After PR is sufficiently discussed, it will get merged, abondoned or rejected depending on the outcome of the discussion.

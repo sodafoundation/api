@@ -23,18 +23,22 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/api/policy"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 type VolumePortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumePortal) CreateVolume() {
+	if !policy.Authorize(this.Ctx, "volume:create") {
+		return
+	}
 	var volume = model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -49,7 +53,7 @@ func (this *VolumePortal) CreateVolume() {
 	}
 
 	// Call global controller variable to handle create volume request.
-	result, err := controller.Brain.CreateVolume(&volume)
+	result, err := controller.Brain.CreateVolume(c.GetContext(this.Ctx), &volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -74,8 +78,20 @@ func (this *VolumePortal) CreateVolume() {
 }
 
 func (this *VolumePortal) ListVolumes() {
+	if !policy.Authorize(this.Ctx, "volume:list") {
+		return
+	}
 	// Call db api module to handle list volumes request.
-	result, err := db.C.ListVolumes()
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -100,10 +116,13 @@ func (this *VolumePortal) ListVolumes() {
 }
 
 func (this *VolumePortal) GetVolume() {
+	if !policy.Authorize(this.Ctx, "volume:get") {
+		return
+	}
 	id := this.Ctx.Input.Param(":volumeId")
 
 	// Call db api module to handle get volume request.
-	result, err := db.C.GetVolume(id)
+	result, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -128,6 +147,9 @@ func (this *VolumePortal) GetVolume() {
 }
 
 func (this *VolumePortal) UpdateVolume() {
+	if !policy.Authorize(this.Ctx, "volume:update") {
+		return
+	}
 	var volume = model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -142,7 +164,7 @@ func (this *VolumePortal) UpdateVolume() {
 	}
 
 	volume.Id = id
-	result, err := db.C.UpdateVolume(&volume)
+	result, err := db.C.UpdateVolume(c.GetContext(this.Ctx), &volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update volume failed: %s", err.Error())
@@ -170,6 +192,9 @@ func (this *VolumePortal) UpdateVolume() {
 
 // ExtendVolume ...
 func (this *VolumePortal) ExtendVolume() {
+	if !policy.Authorize(this.Ctx, "volume:extend") {
+		return
+	}
 	var extendRequestBody = model.ExtendVolumeSpec{}
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&extendRequestBody); err != nil {
@@ -181,7 +206,7 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	id := this.Ctx.Input.Param(":volumeId")
-	volume, err := db.C.GetVolume(id)
+	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -202,7 +227,7 @@ func (this *VolumePortal) ExtendVolume() {
 	}
 
 	// Call global controller variable to handle extend volume request.
-	result, err := controller.Brain.ExtendVolume(volume)
+	result, err := controller.Brain.ExtendVolume(c.GetContext(this.Ctx), volume)
 	if err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -228,8 +253,11 @@ func (this *VolumePortal) ExtendVolume() {
 }
 
 func (this *VolumePortal) DeleteVolume() {
+	if !policy.Authorize(this.Ctx, "volume:delete") {
+		return
+	}
 	id := this.Ctx.Input.Param(":volumeId")
-	volume, err := db.C.GetVolume(id)
+	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -239,7 +267,7 @@ func (this *VolumePortal) DeleteVolume() {
 	}
 
 	// Call global controller variable to handle delete volume request.
-	err = controller.Brain.DeleteVolume(volume)
+	err = controller.Brain.DeleteVolume(c.GetContext(this.Ctx), volume)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -253,10 +281,13 @@ func (this *VolumePortal) DeleteVolume() {
 }
 
 type VolumeAttachmentPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
+	if !policy.Authorize(this.Ctx, "volume:create_attachment") {
+		return
+	}
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -270,7 +301,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	}
 
 	// Call global controller variable to handle create volume attachment request.
-	result, err := controller.Brain.CreateVolumeAttachment(&attachment)
+	result, err := controller.Brain.CreateVolumeAttachment(c.GetContext(this.Ctx), &attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -295,9 +326,20 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
-	volId := this.GetString("volumeId")
+	if !policy.Authorize(this.Ctx, "volume:list_attachments") {
+		return
+	}
 
-	result, err := db.C.ListVolumeAttachments(volId)
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -322,9 +364,12 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 }
 
 func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
+	if !policy.Authorize(this.Ctx, "volume:get_attachment") {
+		return
+	}
 	id := this.Ctx.Input.Param(":attachmentId")
 
-	result, err := db.C.GetVolumeAttachment(id)
+	result, err := db.C.GetVolumeAttachment(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -349,6 +394,9 @@ func (this *VolumeAttachmentPortal) GetVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
+	if !policy.Authorize(this.Ctx, "volume:update_attachment") {
+		return
+	}
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -363,7 +411,7 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	}
 	attachment.Id = id
 
-	result, err := db.C.UpdateVolumeAttachment(id, &attachment)
+	result, err := db.C.UpdateVolumeAttachment(c.GetContext(this.Ctx), id, &attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -388,8 +436,11 @@ func (this *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 }
 
 func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
+	if !policy.Authorize(this.Ctx, "volume:delete_attachment") {
+		return
+	}
 	id := this.Ctx.Input.Param(":attachmentId")
-	attachment, err := db.C.GetVolumeAttachment(id)
+	attachment, err := db.C.GetVolumeAttachment(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -399,7 +450,7 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	}
 
 	// Call global controller variable to handle delete volume attachment request.
-	err = controller.Brain.DeleteVolumeAttachment(attachment)
+	err = controller.Brain.DeleteVolumeAttachment(c.GetContext(this.Ctx), attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume attachment failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -413,10 +464,13 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 }
 
 type VolumeSnapshotPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
+	if !policy.Authorize(this.Ctx, "snapshot:create") {
+		return
+	}
 	var snapshot = model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -430,7 +484,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	}
 
 	// Call global controller variable to handle create volume snapshot request.
-	result, err := controller.Brain.CreateVolumeSnapshot(&snapshot)
+	result, err := controller.Brain.CreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -455,7 +509,19 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
-	result, err := db.C.ListVolumeSnapshots()
+	if !policy.Authorize(this.Ctx, "snapshot:list") {
+		return
+	}
+	m, err := this.GetParameters()
+	if err != nil {
+		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -480,9 +546,12 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 }
 
 func (this *VolumeSnapshotPortal) GetVolumeSnapshot() {
+	if !policy.Authorize(this.Ctx, "snapshot:get") {
+		return
+	}
 	id := this.Ctx.Input.Param(":snapshotId")
 
-	result, err := db.C.GetVolumeSnapshot(id)
+	result, err := db.C.GetVolumeSnapshot(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -507,6 +576,9 @@ func (this *VolumeSnapshotPortal) GetVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
+	if !policy.Authorize(this.Ctx, "snapshot:update") {
+		return
+	}
 	var snapshot = model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -522,7 +594,7 @@ func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 	}
 	snapshot.Id = id
 
-	result, err := db.C.UpdateVolumeSnapshot(id, &snapshot)
+	result, err := db.C.UpdateVolumeSnapshot(c.GetContext(this.Ctx), id, &snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Update volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -547,9 +619,12 @@ func (this *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 }
 
 func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
+	if !policy.Authorize(this.Ctx, "snapshot:delete") {
+		return
+	}
 	id := this.Ctx.Input.Param(":snapshotId")
 
-	snapshot, err := db.C.GetVolumeSnapshot(id)
+	snapshot, err := db.C.GetVolumeSnapshot(c.GetContext(this.Ctx), id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -559,7 +634,7 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	}
 
 	// Call global controller variable to handle delete volume snapshot request.
-	err = controller.Brain.DeleteVolumeSnapshot(snapshot)
+	err = controller.Brain.DeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

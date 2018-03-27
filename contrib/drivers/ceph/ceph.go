@@ -556,8 +556,8 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 }
 
 func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
-	param := make(map[string]interface{})
-	param["diskType"] = proper.DiskType
+	param := BuildDefaultPoolParam(proper)
+
 	param["redundancyType"] = line[poolType]
 	if param["redundancyType"] == "replicated" {
 		param["replicateSize"] = line[poolTypeSize]

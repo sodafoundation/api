@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 func TestCapacityFilter(t *testing.T) {
@@ -46,7 +47,7 @@ func TestCapacityFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"size": int64(66),
+				"freeCapacity": ">= 66",
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -60,15 +61,17 @@ func TestCapacityFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"size": 101,
+				"freeCapacity": ">= 101",
 			},
 			pools:    fakePools,
 			expected: nil,
 		},
 	}
-	filter := &CapacityFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -114,9 +117,11 @@ func TestAZFilter(t *testing.T) {
 			expected: nil,
 		},
 	}
-	filter := &AZFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -148,7 +153,7 @@ func TestThinFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"thin": true,
+				"extras.thin": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -166,7 +171,7 @@ func TestThinFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"thin": false,
+				"extras.thin": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -178,9 +183,11 @@ func TestThinFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &ThinFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -212,7 +219,7 @@ func TestDedupeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"dedupe": true,
+				"extras.dedupe": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -230,7 +237,7 @@ func TestDedupeFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"dedupe": false,
+				"extras.dedupe": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -242,9 +249,11 @@ func TestDedupeFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &DedupeFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -276,7 +285,7 @@ func TestCompressFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"compress": true,
+				"extras.compress": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -294,7 +303,7 @@ func TestCompressFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"compress": false,
+				"extras.compress": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -306,9 +315,11 @@ func TestCompressFilter(t *testing.T) {
 			},
 		},
 	}
-	filter := &CompressFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -340,7 +351,7 @@ func TestDiskTypeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"diskType": "SSD",
+				"extras.diskType": "SSD",
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
@@ -353,17 +364,67 @@ func TestDiskTypeFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"diskType": "NVMe SSD",
+				"extras.diskType": "NVMe SSD",
 			},
 			pools:    fakePools,
 			expected: nil,
 		},
 	}
-	filter := &DiskTypeFilter{}
+
 	for _, testCase := range testCases {
-		result, _ := filter.Handle(testCase.request, testCase.pools)
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
+	}
+}
+
+func TestGetPoolCapabilityMap(t *testing.T) {
+	Pool := model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+			CreatedAt: "2017-10-24T15:04:05",
+		},
+		FreeCapacity:     int64(50),
+		AvailabilityZone: "az1",
+		Extras: model.ExtraSpec{
+			"thin":     true,
+			"dedupe":   true,
+			"compress": true,
+			"diskType": "SSD",
+		},
+	}
+
+	var mapA map[string]interface{}
+	mapA = make(map[string]interface{})
+	mapA["key1"] = "value1"
+	mapA["key2"] = "value2"
+	Pool.Extras["mapA"] = mapA
+
+	result, err := GetPoolCapabilityMap(&Pool)
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, result)
+	}
+
+	CreatedAt, ok := result["createdAt"].(string)
+	if (!ok) || (Pool.CreatedAt != CreatedAt) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.CreatedAt, ok, CreatedAt)
+	}
+
+	FreeCapacity, ok := result["freeCapacity"].(float64)
+	if (!ok) || (!utils.IsFloatEqual(FreeCapacity, float64(Pool.FreeCapacity))) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.FreeCapacity), ok, FreeCapacity)
+	}
+
+	thin, ok := result["extras.thin"].(bool)
+	if (!ok) || (Pool.Extras["thin"] != thin) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras["thin"], ok, thin)
+	}
+
+	value1, ok := result["extras.mapA.key1"].(string)
+	if (!ok) || ("value1" != value1) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, "value1", ok, value1)
 	}
 }

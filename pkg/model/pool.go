@@ -24,6 +24,10 @@ package model
 // atomic pool and can be abstracted from any storage platform.
 type StoragePoolSpec struct {
 	*BaseModel
+	// The uuid of project
+	// + readOnly
+	TenantId string `json:"tenantId"`
+
 	// The name of the pool.
 	Name string `json:"name,omitempty"`
 

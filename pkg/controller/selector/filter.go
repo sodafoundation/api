@@ -16,190 +16,269 @@ package selector
 
 import (
 	"errors"
+	"regexp"
+	"strconv"
+	"strings"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
-type Filter interface {
-	Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error)
-}
+// simplifyPoolCapabilityMap ...
+func simplifyPoolCapabilityMap(input map[string]interface{}) (map[string]interface{}, map[string]interface{}) {
+	simpleMap := make(map[string]interface{})
+	unSimpleMap := make(map[string]interface{})
 
-type AZFilter struct {
-	Next Filter
-}
-
-func (filter *AZFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-	availabilityZone, ok := request["availabilityZone"]
-	if !ok {
-		return nil, errors.New("The request doesn't contain availability zone property when filter pools in AZFilter.")
-	}
-
-	availablePools := []*model.StoragePoolSpec{}
-	for _, pool := range pools {
-		if availabilityZone == pool.AvailabilityZone {
-			availablePools = append(availablePools, pool)
-		}
-	}
-
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's availability zone requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
-	}
-	return availablePools, nil
-}
-
-type CapacityFilter struct {
-	Next Filter
-}
-
-func (filter *CapacityFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-
-	size, ok := request["size"]
-	if !ok {
-		return nil, errors.New("The request doesn't contain size property when filter pools in CapacityFilter.")
-	}
-
-	availablePools := []*model.StoragePoolSpec{}
-	for _, pool := range pools {
-		if val, ok := size.(int64); ok {
-			if val <= pool.FreeCapacity {
-				availablePools = append(availablePools, pool)
+	for key, value := range input {
+		valueMap, ok := value.(map[string]interface{})
+		if ok {
+			for k, v := range valueMap {
+				_, ok = v.(map[string]interface{})
+				if ok {
+					unSimpleMap[key+"."+k] = v
+				} else {
+					simpleMap[key+"."+k] = v
+				}
 			}
+
 		} else {
-			return nil, errors.New("Invalid parameter when filter pools in CapacityFilter.")
+			simpleMap[key] = value
+		}
+	}
+
+	return simpleMap, unSimpleMap
+}
+
+// GetPoolCapabilityMap ...
+func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, error) {
+	temMap, err := utils.StructToMap(pool)
+	if nil != err {
+		return nil, err
+	}
+
+	lastSimpleMap := make(map[string]interface{})
+
+	for {
+		simpleMap, unSimpleMap := simplifyPoolCapabilityMap(temMap)
+
+		if 0 == len(unSimpleMap) {
+			for key, value := range lastSimpleMap {
+				simpleMap[key] = value
+			}
+
+			return simpleMap, nil
 		}
 
+		lastSimpleMap = simpleMap
+		temMap = unSimpleMap
 	}
-
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's capacity requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
-	}
-	return availablePools, nil
 }
 
-type ThinFilter struct {
-	Next Filter
+// IsAvailablePool ...
+func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSpec) (bool, error) {
+	poolMap, err := GetPoolCapabilityMap(pool)
+	if nil != err {
+		return false, err
+	}
+
+	for key, reqValue := range filterReq {
+		poolValue, ok := poolMap[key]
+		if !ok {
+			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)
+			return false, nil
+		}
+
+		ismatch, err := match(key, poolValue, reqValue)
+		if nil != err {
+			return false, err
+		}
+
+		if false == ismatch {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
-func (filter *ThinFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-
-	availablePools := []*model.StoragePoolSpec{}
-	thinRequired, ok := request["thin"]
+// match ...
+func match(key string, value interface{}, reqValue interface{}) (bool, error) {
+	reqValueStr, ok := reqValue.(string)
 	if !ok {
-		availablePools = pools
-	} else {
-		for _, pool := range pools {
-			thinSupport, ok := pool.Extras["thin"]
-			if !ok {
-				thinSupport = false
-			}
+		return utils.IsEqual(key, value, reqValue)
+	}
 
-			if thinRequired == thinSupport {
-				availablePools = append(availablePools, pool)
-			}
+	words := strings.Split(reqValueStr, " ")
+	wordsLen := len(words)
+
+	switch words[0] {
+	case "<or>":
+		return OrOperator(key, words, value)
+	case "=", "==", "!=", ">=", "<=":
+		if 2 == wordsLen {
+			return ParseFloat64AndCompare(words[0], key, value, words[1])
 		}
-	}
 
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's thin requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
+		return false, errors.New("the format of " + key + ": " + reqValueStr + " is incorrect")
+	case "<in>":
+		if 2 == wordsLen {
+			return InOperator(key, words[1], value)
+		}
+
+		return false, errors.New("the format of " + key + ": " + reqValueStr + " is incorrect")
+	case "<is>":
+		if 2 == wordsLen {
+			return ParseBoolAndCompare(key, value, words[1])
+		}
+
+		return false, errors.New("the format of " + key + ": " + reqValueStr + " is incorrect")
+	case "s==", "s!=", "s<", "s<=", "s>", "s>=":
+		if 2 == wordsLen {
+			valueStr, ok := value.(string)
+			if ok {
+				return StringCompare(words[0], key, valueStr, words[1])
+			}
+
+			return false, errors.New(key + "is not a string")
+		}
+
+		return false, errors.New("the format of " + key + ": " + reqValueStr + " is incorrect")
+	default:
+		return CompareOperator("", key, words[0], value)
 	}
-	return availablePools, nil
 }
 
-type CompressFilter struct {
-	Next Filter
-}
-
-func (filter *CompressFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-
-	availablePools := []*model.StoragePoolSpec{}
-	compressRequired, ok := request["compress"]
+// InOperator ...
+func InOperator(key string, reqValue string, value interface{}) (bool, error) {
+	valueStr, ok := value.(string)
 	if !ok {
-		availablePools = pools
-	} else {
-		for _, pool := range pools {
-			compressSupport, ok := pool.Extras["compress"]
-			if !ok {
-				compressSupport = false
-			}
+		return false, errors.New(key + " is not a string, so <in> can not be used")
+	}
 
-			if compressRequired == compressSupport {
-				availablePools = append(availablePools, pool)
+	isIn, err := regexp.MatchString(reqValue, valueStr)
+
+	if nil != err {
+		return false, err
+	}
+
+	if isIn {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+// CompareOperator ...
+func CompareOperator(op string, key string, reqValue string, value interface{}) (bool, error) {
+	switch value.(type) {
+	case bool:
+		return ParseBoolAndCompare(key, value, reqValue)
+	case float64:
+		return ParseFloat64AndCompare(op, key, value, reqValue)
+	case string:
+		valueStr, ok := value.(string)
+		if ok {
+			return StringCompare(op, key, valueStr, reqValue)
+		}
+
+		log.Error("unknown .(string) error")
+		return false, nil
+	default:
+		return false, errors.New("The type of " + key + " must be bool or float64 or string")
+	}
+}
+
+// StringCompare ...
+func StringCompare(op string, key string, a string, b string) (bool, error) {
+	switch op {
+	case "s==", "":
+		return a == b, nil
+	case "s!=":
+		return a != b, nil
+	case "s>=":
+		return a >= b, nil
+	case "s>":
+		return a > b, nil
+	case "s<=":
+		return a <= b, nil
+	case "s<":
+		return a < b, nil
+	default:
+		return false, errors.New("the operator of string can not be " + op)
+	}
+}
+
+// ParseBoolAndCompare ...
+func ParseBoolAndCompare(key string, a interface{}, b string) (bool, error) {
+	B, err := strconv.ParseBool(b)
+	if err != nil {
+		return false, errors.New("capability is: " + key + ", " + b + " is not bool")
+	}
+
+	A, ok := a.(bool)
+	if ok {
+		if A == B {
+			return true, nil
+		}
+
+		return false, nil
+	}
+
+	return false, errors.New("the value of " + key + " is not bool")
+}
+
+// ParseFloat64AndCompare ...
+func ParseFloat64AndCompare(op string, key string, a interface{}, b string) (bool, error) {
+	B, err := strconv.ParseFloat(b, 64)
+	if err != nil {
+		return false, errors.New("capability is: " + key + ", " + b + " is not float64")
+	}
+
+	A, ok := a.(float64)
+	if ok {
+		switch op {
+		case "<=":
+			return ((A < B) || utils.IsFloatEqual(A, B)), nil
+		case ">=":
+			return ((A > B) || utils.IsFloatEqual(A, B)), nil
+		case "==", "":
+			return utils.IsFloatEqual(A, B), nil
+		case "!=":
+			return (!utils.IsFloatEqual(A, B)), nil
+		default:
+			return false, errors.New("the operator of float64 can not be " + op)
+		}
+	} else {
+		return false, errors.New("the value of " + key + " is not float64")
+	}
+}
+
+// OrOperator ...
+func OrOperator(key string, words []string, value interface{}) (bool, error) {
+	wordsLen := len(words)
+
+	if 0 == (wordsLen%2) && wordsLen >= 2 {
+		for i := 0; i < wordsLen; i = i + 2 {
+			if "<or>" != words[i] {
+				return false, errors.New("the first operator is <or>, the following operators must be <or>")
 			}
 		}
-	}
 
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's compress requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
-	}
-	return availablePools, nil
-}
+		for i := 1; i < wordsLen; i = i + 2 {
+			isOk, err := CompareOperator("", key, words[i], value)
 
-type DedupeFilter struct {
-	Next Filter
-}
-
-func (filter *DedupeFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-
-	availablePools := []*model.StoragePoolSpec{}
-	dedupeRequired, ok := request["dedupe"]
-	if !ok {
-		availablePools = pools
-	} else {
-		for _, pool := range pools {
-			dedupeSupport, ok := pool.Extras["dedupe"]
-			if !ok {
-				dedupeSupport = false
+			if nil != err {
+				return false, err
 			}
 
-			if dedupeRequired == dedupeSupport {
-				availablePools = append(availablePools, pool)
+			if isOk {
+				return true, nil
 			}
 		}
-	}
-
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's dedupe requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
-	}
-	return availablePools, nil
-}
-
-type DiskTypeFilter struct {
-	Next Filter
-}
-
-func (filter *DiskTypeFilter) Handle(request map[string]interface{}, pools []*model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
-
-	availablePools := []*model.StoragePoolSpec{}
-	diskTypeRequired, ok := request["diskType"]
-	if !ok {
-		availablePools = pools
 	} else {
-		for _, pool := range pools {
-			diskTypeSupport, ok := pool.Extras["diskType"]
-			if !ok {
-				diskTypeSupport = false
-			}
-
-			if diskTypeRequired == diskTypeSupport {
-				availablePools = append(availablePools, pool)
-			}
-		}
+		return false, errors.New("when using <or> as an operator, the <or> and value must appear in pairs")
 	}
 
-	if len(availablePools) == 0 {
-		return nil, errors.New("No available pools to meet user's diskType requirement.")
-	} else if filter.Next != nil {
-		return filter.Next.Handle(request, availablePools)
-	}
-	return availablePools, nil
+	return false, nil
 }

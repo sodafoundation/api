@@ -16,21 +16,56 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-type ReqFunc func(string, string, interface{}) *httplib.BeegoHTTPRequest
+func checkHTTPResponseStatusCode(resp *http.Response) error {
+	if 400 <= resp.StatusCode && resp.StatusCode <= 599 {
+		return fmt.Errorf("response == %d, %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+	return nil
+}
+
+func NewHttpError(code int, msg string) error {
+	return &HttpError{Code: code, Msg: msg}
+}
+
+type HttpError struct {
+	Code int
+	Msg  string
+}
+
+func (e *HttpError) Decode() {
+	errSpec := model.ErrorSpec{}
+	err := json.Unmarshal([]byte(e.Msg), &errSpec)
+	if err == nil {
+		e.Msg = errSpec.Message
+	}
+}
+
+func (e *HttpError) Error() string {
+	e.Decode()
+	return fmt.Sprintf("Code: %v, Desc: %s, Msg: %v", e.Code, http.StatusText(e.Code), e.Msg)
+}
+
+// ParamOption
+type HeaderOption map[string]string
 
 // Receiver
 type Receiver interface {
-	Recv(ReqFunc, string, string, interface{}, interface{}) error
+	Recv(url string, method string, input interface{}, output interface{}) error
 }
 
 // NewReceiver
@@ -38,17 +73,18 @@ func NewReceiver() Receiver {
 	return &receiver{}
 }
 
-type receiver struct{}
-
-func (*receiver) Recv(
-	f ReqFunc,
-	url string,
-	method string,
-	input interface{},
-	output interface{},
-) error {
-	req := f(url, method, input)
-
+func request(url string, method string, headers HeaderOption, input interface{}, output interface{}) error {
+	req := httplib.NewBeegoRequest(url, strings.ToUpper(method))
+	// init body
+	if input != nil {
+		req.JSONBody(input)
+	}
+	//init header
+	if headers != nil {
+		for k, v := range headers {
+			req.Header(k, v)
+		}
+	}
 	// Get http response.
 	resp, err := req.Response()
 	if err != nil {
@@ -59,14 +95,10 @@ func (*receiver) Recv(
 		return err
 	}
 
-	if err = checkHTTPResponseStatusCode(resp); err != nil {
-		var errorMsg model.ErrorSpec
-		if err = json.Unmarshal(rbody, &errorMsg); err != nil {
-			return fmt.Errorf("failed to unmarshal error message: %v", err)
-		}
-		return fmt.Errorf("failed to exec this operation, code: %v, message: %v",
-			errorMsg.Code, errorMsg.Message)
+	if 400 <= resp.StatusCode && resp.StatusCode <= 599 {
+		return NewHttpError(resp.StatusCode, string(rbody))
 	}
+
 	// If the format of output is nil, skip unmarshaling the result.
 	if output == nil {
 		return nil
@@ -74,73 +106,80 @@ func (*receiver) Recv(
 	if err = json.Unmarshal(rbody, output); err != nil {
 		return fmt.Errorf("failed to unmarshal result message: %v", err)
 	}
-
 	return nil
 }
 
-// ParamOption
-type ParamOption map[string]string
+type receiver struct{}
 
-func request(
-	url string,
-	method string,
-	input interface{},
-) *httplib.BeegoHTTPRequest {
-	req := httplib.NewBeegoRequest(url, strings.ToUpper(method))
-
-	// If input is empty, consider as user doesn't specify any parameter or
-	// request body.
-	if input == nil {
-		return req
-	}
-	// If input type is a map, it means user tends to send a GET request
-	// and specify some parameters.
-	p, ok := input.(ParamOption)
-	if ok {
-		for k := range p {
-			req.Param(k, p[k])
-		}
-		return req
-	}
-	// The other condition will be handled in httplib package.
-	req.JSONBody(input)
-	return req
+func (*receiver) Recv(url string, method string, input interface{}, output interface{}) error {
+	return request(url, method, nil, input, output)
 }
 
-// CheckHTTPResponseStatusCode compares http response header StatusCode against expected
-// statuses. Primary function is to ensure StatusCode is in the 20x (return nil).
-// Ok: 200. Created: 201. Accepted: 202. No Content: 204. Partial Content: 206.
-// Otherwise return error message.
-func checkHTTPResponseStatusCode(resp *http.Response) error {
-	switch resp.StatusCode {
-	case 200, 201, 202, 204, 206:
-		return nil
-	case 400:
-		return errors.New("Error: response == 400 bad request")
-	case 401:
-		return errors.New("Error: response == 401 unauthorised")
-	case 403:
-		return errors.New("Error: response == 403 forbidden")
-	case 404:
-		return errors.New("Error: response == 404 not found")
-	case 405:
-		return errors.New("Error: response == 405 method not allowed")
-	case 409:
-		return errors.New("Error: response == 409 conflict")
-	case 413:
-		return errors.New("Error: response == 413 over limit")
-	case 415:
-		return errors.New("Error: response == 415 bad media type")
-	case 422:
-		return errors.New("Error: response == 422 unprocessable")
-	case 429:
-		return errors.New("Error: response == 429 too many request")
-	case 500:
-		return errors.New("Error: response == 500 instance fault / server err")
-	case 501:
-		return errors.New("Error: response == 501 not implemented")
-	case 503:
-		return errors.New("Error: response == 503 service unavailable")
+func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
+	k := &KeystoneReciver{auth: auth}
+	k.GetToken()
+	return k
+}
+
+type KeystoneReciver struct {
+	auth *KeystoneAuthOptions
+}
+
+func (k *KeystoneReciver) GetToken() error {
+	opts := gophercloud.AuthOptions{
+		IdentityEndpoint: k.auth.IdentityEndpoint,
+		Username:         k.auth.Username,
+		UserID:           k.auth.UserID,
+		Password:         k.auth.Password,
+		DomainID:         k.auth.DomainID,
+		DomainName:       k.auth.DomainName,
+		TenantID:         k.auth.TenantID,
+		TenantName:       k.auth.TenantName,
+		AllowReauth:      k.auth.AllowReauth,
 	}
-	return errors.New("Error: unexpected response status code")
+
+	provider, err := openstack.AuthenticatedClient(opts)
+	if err != nil {
+		log.Printf("When get auth client:", err)
+		return err
+	}
+
+	// Only support keystone v3
+	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
+	if err != nil {
+		log.Printf("When get identity session:", err)
+		return err
+	}
+	r := tokens.Create(identity, &opts)
+	token, err := r.ExtractToken()
+	if err != nil {
+		log.Printf("When get extract token session:", err)
+		return err
+	}
+	project, err := r.ExtractProject()
+	if err != nil {
+		log.Printf("When get extract project session:", err)
+		return err
+	}
+	k.auth.TenantID = project.ID
+	k.auth.TokenID = token.ID
+	return nil
+}
+
+func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
+	desc := fmt.Sprintf("%s %s", method, url)
+	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
+		if retryIdx > 0 {
+			err, ok := lastErr.(*HttpError)
+			if ok && err.Code == http.StatusUnauthorized {
+				k.GetToken()
+			} else {
+				return lastErr
+			}
+		}
+
+		headers := HeaderOption{}
+		headers[constants.AuthTokenHeader] = k.auth.TokenID
+		return request(url, method, headers, body, output)
+	})
 }

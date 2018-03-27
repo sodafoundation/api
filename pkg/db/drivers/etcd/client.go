@@ -58,7 +58,7 @@ type clientInterface interface {
 // Init
 func Init(edps []string) *client {
 	var cliv3 *clientv3.Client
-	err := utils.Retry(retryNum, "Get etcd client", func() error {
+	err := utils.Retry(retryNum, "Get etcd client", false, func(retryIdx int, lastErr error) error {
 		var err error
 		cliv3, err = clientv3.New(clientv3.Config{
 			Endpoints:   edps,
@@ -84,7 +84,7 @@ func (c *client) Create(req *Request) *Response {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	err := utils.Retry(retryNum, "Etcd put", func() error {
+	err := utils.Retry(retryNum, "Etcd put", false, func(retryIdx int, lastErr error) error {
 		_, err := c.cli.Put(ctx, req.Url, req.Content)
 		return err
 	})

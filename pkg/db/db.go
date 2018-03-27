@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"strings"
 
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
@@ -54,75 +55,81 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
-	CreateDock(dck *model.DockSpec) (*model.DockSpec, error)
+	CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error)
 
-	GetDock(dckID string) (*model.DockSpec, error)
+	GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error)
 
-	ListDocks() ([]*model.DockSpec, error)
+	ListDocks(ctx *c.Context) ([]*model.DockSpec, error)
 
-	UpdateDock(dckID, name, desp string) (*model.DockSpec, error)
+        ListDocksWithFilter(ctx *c.Context,m map[string][]string) ([]*model.DockSpec, error)
+	UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error)
 
-	DeleteDock(dckID string) error
+	DeleteDock(ctx *c.Context, dckID string) error
 
-	GetDockByPoolId(poolId string) (*model.DockSpec, error)
+	GetDockByPoolId(ctx *c.Context, poolId string) (*model.DockSpec, error)
 
-	CreatePool(pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error)
+	CreatePool(ctx *c.Context, pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error)
 
-	GetPool(polID string) (*model.StoragePoolSpec, error)
+	GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, error)
 
-	ListPools() ([]*model.StoragePoolSpec, error)
+	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
-	UpdatePool(polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
+ListPoolsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.StoragePoolSpec, error)
+	UpdatePool(ctx *c.Context, polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
-	DeletePool(polID string) error
+	DeletePool(ctx *c.Context, polID string) error
 
-	CreateProfile(prf *model.ProfileSpec) (*model.ProfileSpec, error)
+	CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.ProfileSpec, error)
 
-	GetProfile(prfID string) (*model.ProfileSpec, error)
+	GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, error)
 
-	GetDefaultProfile() (*model.ProfileSpec, error)
+	GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error)
 
-	ListProfiles() ([]*model.ProfileSpec, error)
+	ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 
-	UpdateProfile(prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
+ListProfilesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.ProfileSpec, error)
+	UpdateProfile(ctx *c.Context, prfID string, input *model.ProfileSpec) (*model.ProfileSpec, error)
 
-	DeleteProfile(prfID string) error
+	DeleteProfile(ctx *c.Context, prfID string) error
 
-	AddExtraProperty(prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error)
+	AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error)
 
-	ListExtraProperties(prfID string) (*model.ExtraSpec, error)
+	ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error)
 
-	RemoveExtraProperty(prfID, extraKey string) error
+	RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) error
 
-	CreateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
+	CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
-	GetVolume(volID string) (*model.VolumeSpec, error)
+	GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error)
 
-	ListVolumes() ([]*model.VolumeSpec, error)
+	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 
-	UpdateVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
+ListVolumesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSpec, error)
+	UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
-	DeleteVolume(volID string) error
+	DeleteVolume(ctx *c.Context, volID string) error
 
-	ExtendVolume(vol *model.VolumeSpec) (*model.VolumeSpec, error)
+	ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
-	CreateVolumeAttachment(attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
+	CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
-	GetVolumeAttachment(attachmentId string) (*model.VolumeAttachmentSpec, error)
+	GetVolumeAttachment(ctx *c.Context, attachmentId string) (*model.VolumeAttachmentSpec, error)
 
-	ListVolumeAttachments(volumeId string) ([]*model.VolumeAttachmentSpec, error)
+	ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error)
 
-	UpdateVolumeAttachment(attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
+ListVolumeAttachmentsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeAttachmentSpec, error)
+	UpdateVolumeAttachment(ctx *c.Context, attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error)
 
-	DeleteVolumeAttachment(attachmentId string) error
+	DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error
 
-	CreateVolumeSnapshot(vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
+	CreateVolumeSnapshot(ctx *c.Context, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
-	GetVolumeSnapshot(snapshotID string) (*model.VolumeSnapshotSpec, error)
+	GetVolumeSnapshot(ctx *c.Context, snapshotID string) (*model.VolumeSnapshotSpec, error)
 
-	ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error)
+	ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpec, error)
 
-	UpdateVolumeSnapshot(snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
+ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSnapshotSpec, error)
+	UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
-	DeleteVolumeSnapshot(snapshotID string) error
+	DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error
 }

@@ -65,7 +65,6 @@ func NewFakeDockReceiver() c.Receiver {
 type fakeDockReceiver struct{}
 
 func (*fakeDockReceiver) Recv(
-	f c.ReqFunc,
 	string,
 	method string,
 	in interface{},
@@ -100,7 +99,6 @@ func NewFakePoolReceiver() c.Receiver {
 type fakePoolReceiver struct{}
 
 func (*fakePoolReceiver) Recv(
-	f c.ReqFunc,
 	string,
 	method string,
 	in interface{},
@@ -135,7 +133,6 @@ func NewFakeProfileReceiver() c.Receiver {
 type fakeProfileReceiver struct{}
 
 func (*fakeProfileReceiver) Recv(
-	f c.ReqFunc,
 	string,
 	method string,
 	in interface{},
@@ -195,7 +192,6 @@ func NewFakeVolumeReceiver() c.Receiver {
 type fakeVolumeReceiver struct{}
 
 func (*fakeVolumeReceiver) Recv(
-	f c.ReqFunc,
 	string,
 	method string,
 	in interface{},
@@ -275,7 +271,6 @@ func NewFakeVersionReceiver() c.Receiver {
 type fakeVersionReceiver struct{}
 
 func (*fakeVersionReceiver) Recv(
-	f c.ReqFunc,
 	string,
 	method string,
 	in interface{},

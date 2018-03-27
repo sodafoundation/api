@@ -15,7 +15,8 @@
 package utils
 
 import (
-	"fmt"
+	"encoding/json"
+	"errors"
 	"os"
 	"reflect"
 
@@ -72,15 +73,93 @@ func PathExists(path string) (bool, error) {
 	return false, err
 }
 
-func Retry(retryNum int, desc string, fn func() error) error {
+func Retry(retryNum int, desc string, silent bool, fn func(retryIdx int, lastErr error) error) error {
+	var err error
 	for i := 0; i < retryNum; i++ {
-		if err := fn(); err != nil {
-			log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
+		if err = fn(i, err); err != nil {
+			if !silent {
+				log.Errorf("%s:%s, retry %d time(s)", desc, err, i+1)
+			}
 		} else {
 			return nil
 		}
 	}
-	err := fmt.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
-	log.Error(err)
+	if !silent {
+		log.Errorf("%s retry exceed the max retry times(%d).", desc, retryNum)
+	}
 	return err
+}
+
+// StructToMap ...
+func StructToMap(structObj interface{}) (map[string]interface{}, error) {
+	jsonStr, err := json.Marshal(structObj)
+	if nil != err {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(jsonStr, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// Epsilon ...
+const Epsilon float64 = 0.00000001
+
+// IsFloatEqual ...
+func IsFloatEqual(a, b float64) bool {
+	if (a-b) < Epsilon && (b-a) < Epsilon {
+		return true
+	}
+
+	return false
+}
+
+// IsEqual ...
+func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) {
+	switch value.(type) {
+	case bool:
+		v, ok1 := value.(bool)
+		r, ok2 := reqValue.(bool)
+
+		if ok1 && ok2 {
+			if v == r {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be bool")
+	case float64:
+		v, ok1 := value.(float64)
+		r, ok2 := reqValue.(float64)
+
+		if ok1 && ok2 {
+			if IsFloatEqual(v, r) {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be float64")
+	case string:
+		v, ok1 := value.(string)
+		r, ok2 := reqValue.(string)
+		if ok1 && ok2 {
+			if v == r {
+				return true, nil
+			}
+
+			return false, nil
+		}
+
+		return false, errors.New("the type of " + key + " must be string")
+	default:
+		return false, errors.New("the type of " + key + " must be bool or float64 or string")
+	}
 }

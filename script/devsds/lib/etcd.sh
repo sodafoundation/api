@@ -35,8 +35,7 @@ osds::etcd::start() {
     # Start etcd
     mkdir -p $ETCD_DIR
     nohup etcd --advertise-client-urls http://${ETCD_HOST}:${ETCD_PORT} --listen-client-urls http://${ETCD_HOST}:${ETCD_PORT}\
-    -advertise-client-urls http://${ETCD_HOST}:${ETCD_PEER_PORT} -listen-peer-urls http://${ETCD_HOST}:${ETCD_PEER_PORT}\
-    --data-dir ${ETCD_DATADIR} --debug 2> "${ETCD_LOGFILE}" >/dev/null &
+    --listen-peer-urls http://${ETCD_HOST}:${ETCD_PEER_PORT} --data-dir ${ETCD_DATADIR} --debug 2> "${ETCD_LOGFILE}" >/dev/null &
     echo $! > $ETCD_DIR/etcd.pid
 
     osds::echo_summary "Waiting for etcd to come up."

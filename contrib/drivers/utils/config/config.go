@@ -22,11 +22,16 @@ import (
 )
 
 type PoolProperties struct {
-	DiskType string `yaml:"diskType,omitempty"`
-	AZ       string `yaml:"AZ,omitempty"`
-	Thin     bool   `yaml:"thin,omitempty"`
-	Compress bool   `yaml:"compress,omitempty"`
-	Dedupe   bool   `yaml:"dedupe,omitempty"`
+	DiskType        string `yaml:"diskType,omitempty"`
+	AZ              string `yaml:"AZ,omitempty"`
+	AccessProtocol  string `yaml:"accessProtocol,omitempty"`
+	ThinProvisioned bool   `yaml:"thinProvisioned,omitempty"`
+	Compressed      bool   `yaml:"compressed,omitempty"`
+	// Besides those basic pool properties above, vendors can configure some
+	// advanced features (IOPS, throughout, latency, etc) themselves, all these
+	// properties can be exposed to controller scheduler and filtered by
+	// selector in a extensible way.
+	Advanced map[string]interface{} `yaml:"advanced,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
@@ -40,4 +45,25 @@ func Parse(conf interface{}, p string) (interface{}, error) {
 		return nil, err
 	}
 	return conf, nil
+}
+
+func BuildDefaultPoolParam(proper PoolProperties) map[string]interface{} {
+	param := make(map[string]interface{})
+	if proper.DiskType != "" {
+		param["diskType"] = proper.DiskType
+	}
+	if proper.AccessProtocol != "" {
+		param["accessProtocol"] = proper.AccessProtocol
+	}
+	if proper.ThinProvisioned {
+		param["thinProvisioned"] = proper.ThinProvisioned
+	}
+	if proper.Compressed {
+		param["compressed"] = proper.Compressed
+	}
+	if len(proper.Advanced) != 0 {
+		param["advanced"] = proper.Advanced
+	}
+
+	return param
 }
