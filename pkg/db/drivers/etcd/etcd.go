@@ -648,7 +648,7 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 	if prf.CreatedAt == "" {
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
+	prf.TenantId = ctx.TenantId
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err
@@ -927,6 +927,7 @@ func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.CreatedAt == "" {
 		vol.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
+	vol.TenantId = ctx.TenantId
 	volBody, err := json.Marshal(vol)
 	if err != nil {
 		return nil, err
@@ -1155,7 +1156,14 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		Url:        urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, vol.Id),
 		NewContent: string(body),
 	}
-
+	if IsAdminContext(ctx) {
+		vol, err := c.GetVolume(ctx, vol.Id)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, vol.TenantId, vol.Id)
+	}
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume in db:", dbRes.Error)
@@ -1168,6 +1176,14 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 func (c *Client) DeleteVolume(ctx *c.Context, volID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, volID),
+	}
+	if IsAdminContext(ctx) {
+		vol, err := c.GetVolume(ctx, volID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, vol.TenantId, volID)
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -1218,6 +1234,7 @@ func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.Volume
 	if attachment.CreatedAt == "" {
 		attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
+	attachment.TenantId = ctx.TenantId
 
 	atcBody, err := json.Marshal(attachment)
 	if err != nil {
@@ -1241,7 +1258,7 @@ func (c *Client) GetVolumeAttachment(ctx *c.Context, attachmentId string) (*mode
 	if !IsAdminContext(ctx) || err == nil {
 		return attach, err
 	}
-	attachs, err := c.ListVolumeAttachments(ctx, attachmentId)
+	attachs, err := c.ListVolumeAttachments(ctx, "")
 	if err != nil {
 		return nil, err
 	}
@@ -1458,6 +1475,16 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		Url:        urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
 		NewContent: string(atcBody),
 	}
+
+	if IsAdminContext(ctx) {
+		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		dbReq.Url = urls.GenerateAttachmentURL(urls.Etcd, attach.TenantId, attachmentId)
+	}
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume attachment in db:", dbRes.Error)
@@ -1470,6 +1497,14 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 func (c *Client) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error {
 	dbReq := &Request{
 		Url: urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
+	}
+	if IsAdminContext(ctx) {
+		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		dbReq.Url = urls.GenerateAttachmentURL(urls.Etcd, attach.TenantId, attachmentId)
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
@@ -1488,6 +1523,7 @@ func (c *Client) CreateVolumeSnapshot(ctx *c.Context, snp *model.VolumeSnapshotS
 	if snp.CreatedAt == "" {
 		snp.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
+	snp.TenantId = ctx.TenantId
 	snpBody, err := json.Marshal(snp)
 	if err != nil {
 		return nil, err
@@ -1704,6 +1740,15 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 		NewContent: string(atcBody),
 	}
 
+	if IsAdminContext(ctx) {
+		snap, err := c.GetVolumeSnapshot(ctx, snpID)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		dbReq.Url = urls.GenerateSnapshotURL(urls.Etcd, snap.TenantId, snpID)
+	}
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume snapshot in db:", dbRes.Error)
@@ -1716,6 +1761,14 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
+	}
+	if IsAdminContext(ctx) {
+		snap, err := c.GetVolumeSnapshot(ctx, snpID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		dbReq.Url = urls.GenerateSnapshotURL(urls.Etcd, snap.TenantId, snpID)
 	}
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
