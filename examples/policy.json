@@ -31,5 +31,14 @@
   "dock:list": "rule:admin_api",
   "dock:get": "rule:admin_api",
   "pool:list": "rule:admin_api",
-  "pool:get": "rule:admin_api"
+  "pool:get": "rule:admin_api",
+  "replication:create": "rule:admin_or_owner",
+  "replication:list": "rule:admin_or_owner",
+  "replication:list_detail": "rule:admin_or_owner",
+  "replication:get": "rule:admin_or_owner",
+  "replication:update": "rule:admin_or_owner",
+  "replication:delete": "rule:admin_or_owner",
+  "replication:action:enable": "rule:admin_or_owner",
+  "replication:action:disable": "rule:admin_or_owner",
+  "replication:action:failover": "rule:admin_or_owner"
 }

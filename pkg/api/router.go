@@ -82,6 +82,12 @@ func Run(host string) {
 				// Creates, shows, lists, unpdates and deletes snapshot.
 				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
 				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
+
+				// Creates, shows, lists, unpdates and deletes replication.
+				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplication"),
+				beego.NSRouter("/replications/detail", NewReplicationPortal(), "get:ListReplicationDetail"),
+				beego.NSRouter("/replications/:replicationId", NewReplicationPortal(), "get:GetReplication;put:UpdateReplication;delete:DeleteReplication"),
+				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
 			),
 			// Extend Volume
 			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),

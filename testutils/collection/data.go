@@ -231,6 +231,13 @@ var (
 			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d9",
 		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+			},
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d0",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d1",
+		},
 	}
 )
 

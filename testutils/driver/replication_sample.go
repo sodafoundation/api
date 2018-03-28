@@ -32,12 +32,28 @@ import (
 type ReplicationDriver struct{}
 
 // Setup
-func (*ReplicationDriver) Setup() error { return nil }
+func (r *ReplicationDriver) Setup() error { return nil }
 
 // Unset
-func (*ReplicationDriver) Unset() error { return nil }
+func (r *ReplicationDriver) Unset() error { return nil }
 
 // CreateReplication
-func (*ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
+func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	return &SampleReplications[0], nil
+}
+
+func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	return nil
 }

@@ -37,6 +37,10 @@ type ReplicationDriver interface {
 	Unset() error
 
 	CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error)
+	DeleteReplication(opt *pb.DeleteReplicationOpts) error
+	EnableReplication(opt *pb.EnableReplicationOpts) error
+	DisableReplication(opt *pb.DisableReplicationOpts) error
+	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 }
 
 // Init

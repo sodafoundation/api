@@ -49,6 +49,15 @@ type Controller interface {
 	DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
 	CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error)
+
+	DeleteReplication(opt *pb.DeleteReplicationOpts) error
+
+	EnableReplication(opt *pb.EnableReplicationOpts) error
+
+	DisableReplication(opt *pb.DisableReplicationOpts) error
+
+	FailoverReplication(opt *pb.FailoverReplicationOpts) error
+
 	SetDock(dockInfo *model.DockSpec)
 }
 
@@ -267,4 +276,84 @@ func (c *controller) CreateReplication(opt *pb.CreateReplicationOpts) (*model.Re
 	}
 
 	return snp, nil
+}
+
+func (c *controller) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.DeleteReplication(context.Background(), opt)
+	if err != nil {
+		log.Error("Delete replication failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
+
+func (c *controller) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.EnableReplication(context.Background(), opt)
+	if err != nil {
+		log.Error("Enable replication failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
+
+func (c *controller) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.DisableReplication(context.Background(), opt)
+	if err != nil {
+		log.Error("Disable replication failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
+
+func (c *controller) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.FailoverReplication(context.Background(), opt)
+	if err != nil {
+		log.Error("Failover replication failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
 }

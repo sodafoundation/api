@@ -92,7 +92,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Store the volume data into database.
-	result, err := db.C.CreateVolume(c.NewContextFormJson(opt.GetContext()), vol)
+	result, err := db.C.CreateVolume(c.NewContextFromJson(opt.GetContext()), vol)
 	if err != nil {
 		log.Error("When create volume in db module:", err)
 		return nil, err
@@ -117,7 +117,7 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		return err
 	}
 
-	if err = db.C.DeleteVolume(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
+	if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume in db:", err)
 		return err
 	}
@@ -142,7 +142,7 @@ func (d *DockHub) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, err
 
 	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(c.NewContextFormJson(opt.GetContext()), vol)
+	result, err := db.C.ExtendVolume(c.NewContextFromJson(opt.GetContext()), vol)
 	if err != nil {
 		log.Error("When extend volume in db module:", err)
 		return nil, err
@@ -180,7 +180,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 		Metadata:       opt.GetMetadata(),
 	}
 
-	result, err := db.C.CreateVolumeAttachment(c.NewContextFormJson(opt.GetContext()), atc)
+	result, err := db.C.CreateVolumeAttachment(c.NewContextFromJson(opt.GetContext()), atc)
 	if err != nil {
 		log.Error("Error occurred in dock module when create volume attachment in db:", err)
 		return nil, err
@@ -203,7 +203,7 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 		return err
 	}
 
-	if err := db.C.DeleteVolumeAttachment(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
+	if err := db.C.DeleteVolumeAttachment(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
 		return err
 	}
@@ -226,7 +226,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 		return nil, err
 	}
 
-	result, err := db.C.CreateVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), snp)
+	result, err := db.C.CreateVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), snp)
 	if err != nil {
 		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
 		return nil, err
@@ -251,7 +251,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		return err
 	}
 
-	if err = db.C.DeleteVolumeSnapshot(c.NewContextFormJson(opt.GetContext()), opt.GetId()); err != nil {
+	if err = db.C.DeleteVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
 		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
 		return err
 	}
@@ -265,15 +265,100 @@ func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.Repli
 	driver := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
-	log.Info("Calling volume driver to terminate volume connection...")
+	log.Info("Calling replication driver to create replication...")
 
 	//Call function of StorageDrivers configured by storage drivers.
 	replica, err := driver.CreateReplication(opt)
 	if err != nil {
-		log.Error("Call driver to terminate volume connection failed:", err)
+		log.Error("Call driver to create replication failed:", err)
 		return nil, err
 	}
 
-	// TODO:  storage replication in db.
-	return replica, nil
+	replica.PoolId = opt.GetPoolId()
+	replica.ProfileId = opt.GetProfileId()
+	replica.Name = opt.GetName()
+	result, err := db.C.CreateReplication(c.NewContextFromJson(opt.GetContext()), replica)
+	if err != nil {
+		log.Error("Error occurred in dock module when create replication in db:", err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (d *DockHub) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to delete replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.DeleteReplication(opt); err != nil {
+		log.Error("When calling replication driver to delete replication:", err)
+		return err
+	}
+
+	if err = db.C.DeleteReplication(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
+		log.Error("Error occurred in dock module when delete replication in db:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (d *DockHub) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to enable replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.EnableReplication(opt); err != nil {
+		log.Error("When calling replication driver to enable replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
+}
+
+func (d *DockHub) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to disable replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.DisableReplication(opt); err != nil {
+		log.Error("When calling replication driver to disable replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
+}
+
+func (d *DockHub) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to failover replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.FailoverReplication(opt); err != nil {
+		log.Error("When calling replication driver to failover replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
 }
