@@ -84,10 +84,7 @@ func (this *VolumePortal) CreateVolume() {
 	go controller.Brain.CreateVolume(c.GetContext(this.Ctx), result, pool, profile, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	return
@@ -240,10 +237,7 @@ func (this *VolumePortal) ExtendVolume() {
 	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), id, extendRequestBody.Extend.NewSize, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	// Marshal the result.
@@ -296,10 +290,7 @@ func (this *VolumePortal) DeleteVolume() {
 
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	this.Ctx.Output.SetStatus(StatusAccepted)
@@ -345,10 +336,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	go controller.Brain.CreateVolumeAttachment(c.GetContext(this.Ctx), result, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	// Marshal the result.
@@ -498,10 +486,7 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume attachment failed: %v", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	// NOTE:It will not wait for the real volume attachment deletion to complete
@@ -549,10 +534,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	go controller.Brain.CreateVolumeSnapshot(c.GetContext(this.Ctx), &snapshot, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	// Marshal the result.
@@ -713,10 +695,7 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	go controller.Brain.DeleteVolumeSnapshot(c.GetContext(this.Ctx), snapshot, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 		log.Error(reason)
-		return
 	}
 
 	this.Ctx.Output.SetStatus(StatusAccepted)

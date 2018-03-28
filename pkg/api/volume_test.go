@@ -706,8 +706,8 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	controller.Brain = controller.NewController()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
 	}
 
 	jsonStr = []byte(`{"extend":{"newSize": 92}}`)
