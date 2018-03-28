@@ -287,12 +287,10 @@ func (this *VolumePortal) DeleteVolume() {
 	// and database or update volume status to "errorDeleting" if deletion from driver faild.
 	var errchan = make(chan error, 1)
 	go controller.Brain.DeleteVolume(c.GetContext(this.Ctx), volume, errchan)
-
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
 		log.Error(reason)
 	}
-
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }
