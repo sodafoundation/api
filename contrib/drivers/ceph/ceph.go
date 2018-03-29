@@ -296,11 +296,17 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	poolName, ok := opt.GetMetadata()["poolName"]
+	if !ok {
+		err := errors.New("Failed to find poolName in volume metadata!")
+		log.Error(err)
+		return nil, err
+	}
 	return &model.ConnectionInfo{
 		DriverVolumeType: "rbd",
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
-			"name":         "rbd/" + opensdsPrefix + opt.GetVolumeId(),
+			"name":         poolName + "/" + opensdsPrefix + opt.GetVolumeId(),
 			"cluster_name": "ceph",
 			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    opt.GetVolumeId(),
