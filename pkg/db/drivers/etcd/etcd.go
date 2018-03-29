@@ -988,7 +988,7 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 		Url: urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId),
 	}
 
-	// list all volumes not just belong specified project.
+	// Admin user should get all volumes including the volumes whose tenant is not admin.
 	if IsAdminContext(ctx) {
 		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, "")
 	}
@@ -1152,18 +1152,21 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		return nil, err
 	}
 
-	dbReq := &Request{
-		Url:        urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, vol.Id),
-		NewContent: string(body),
-	}
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		vol, err := c.GetVolume(ctx, vol.Id)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, vol.TenantId, vol.Id)
+		tenantId = vol.TenantId
 	}
+	dbReq := &Request{
+		Url:        urls.GenerateVolumeURL(urls.Etcd, tenantId, vol.Id),
+		NewContent: string(body),
+	}
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume in db:", dbRes.Error)
@@ -1174,17 +1177,20 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // DeleteVolume
 func (c *Client) DeleteVolume(ctx *c.Context, volID string) error {
-	dbReq := &Request{
-		Url: urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, volID),
-	}
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		vol, err := c.GetVolume(ctx, volID)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, vol.TenantId, volID)
+		tenantId = vol.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateVolumeURL(urls.Etcd, tenantId, volID),
+	}
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume in db:", dbRes.Error)
@@ -1471,18 +1477,19 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		return nil, err
 	}
 
-	dbReq := &Request{
-		Url:        urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
-		NewContent: string(atcBody),
-	}
-
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-		dbReq.Url = urls.GenerateAttachmentURL(urls.Etcd, attach.TenantId, attachmentId)
+		tenantId = attach.TenantId
+	}
+	dbReq := &Request{
+		Url:        urls.GenerateAttachmentURL(urls.Etcd, tenantId, attachmentId),
+		NewContent: string(atcBody),
 	}
 
 	dbRes := c.Update(dbReq)
@@ -1495,17 +1502,21 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 
 // DeleteVolumeAttachment
 func (c *Client) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error {
-	dbReq := &Request{
-		Url: urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
-	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		dbReq.Url = urls.GenerateAttachmentURL(urls.Etcd, attach.TenantId, attachmentId)
+		tenantId = attach.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateAttachmentURL(urls.Etcd, tenantId, attachmentId),
+	}
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume attachment in db:", dbRes.Error)
@@ -1735,18 +1746,20 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 		return nil, err
 	}
 
-	dbReq := &Request{
-		Url:        urls.GenerateSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
-		NewContent: string(atcBody),
-	}
-
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		snap, err := c.GetVolumeSnapshot(ctx, snpID)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-		dbReq.Url = urls.GenerateSnapshotURL(urls.Etcd, snap.TenantId, snpID)
+		tenantId = snap.TenantId
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateSnapshotURL(urls.Etcd, tenantId, snpID),
+		NewContent: string(atcBody),
 	}
 
 	dbRes := c.Update(dbReq)
@@ -1759,17 +1772,21 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 
 // DeleteVolumeSnapshot
 func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
-	dbReq := &Request{
-		Url: urls.GenerateSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
-	}
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
 	if IsAdminContext(ctx) {
 		snap, err := c.GetVolumeSnapshot(ctx, snpID)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		dbReq.Url = urls.GenerateSnapshotURL(urls.Etcd, snap.TenantId, snpID)
+		tenantId = snap.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateSnapshotURL(urls.Etcd, tenantId, snpID),
+	}
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume snapshot in db:", dbRes.Error)
