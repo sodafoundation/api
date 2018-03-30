@@ -1,12 +1,16 @@
 configFile: /etc/ceph/ceph.conf
 pool:
-  "rbd":
-    diskType: SSD
-    AZ: ceph
-    accessProtocol: rbd	
-    thinProvisioned: true
-    compressed: true
-    advanced:
-      recoveryTimeObjective: 0
-      maxIOPS: 1000
-      deduped: false
+  rbd:
+    storageType: block
+    availabilityZone: default
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: rbd
+        maxIOPS: 8000000
+        maxBWS: 700
+      advanced:
+        diskType: SSD
+        latency: 3ms

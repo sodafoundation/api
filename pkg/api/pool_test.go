@@ -47,12 +47,18 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     6999,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Extras: model.ExtraSpec{
-			"key1": "val1",
-			"key2": "val2",
-			"key3": map[string]string{
-				"subKey1": "subVal1",
-				"subKey2": "subVal2",
+		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				ProvisioningPolicy: "Thin",
+				IsSpaceEfficient:   true,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "rbd",
+				MaxIOPS:        1000,
+			},
+			Advanced: map[string]interface{}{
+				"diskType":   "SSD",
+				"throughput": float64(1000),
 			},
 		},
 	}
@@ -91,11 +97,17 @@ func TestListPools(t *testing.T) {
 			"freeCapacity": 6999,
 			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
 			"extras": {
-				"key1": "val1",
-				"key2": "val2",
-				"key3": {
-					"subKey1": "subVal1",
-					"subKey2": "subVal2"
+				"dataStorage": {
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true
+				},
+				"ioConnectivity": {
+					"accessProtocol": "rbd",
+					"maxIOPS":        1000
+				},
+				"advanced": {
+					"diskType":   "SSD",
+					"throughput": 1000
 				}
 			}	
 		}		
@@ -160,11 +172,17 @@ func TestGetPool(t *testing.T) {
 			"freeCapacity": 6999,
 			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
 			"extras": {
-				"key1": "val1",
-				"key2": "val2",
-				"key3": {
-					"subKey1": "subVal1",
-					"subKey2": "subVal2"
+				"dataStorage": {
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true
+				},
+				"ioConnectivity": {
+					"accessProtocol": "rbd",
+					"maxIOPS":        1000
+				},
+				"advanced": {
+					"diskType":   "SSD",
+					"throughput": 1000
 				}
 			}	
 		}`
