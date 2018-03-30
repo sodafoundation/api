@@ -20,6 +20,7 @@ import (
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 type AuthBase interface {
@@ -31,8 +32,11 @@ type NoAuth struct {
 
 func (auth *NoAuth) Filter(httpCtx *context.Context) {
 	ctx := c.GetContext(httpCtx)
-	ctx.IsAdmin = true
 	ctx.TenantId = httpCtx.Input.Param(":tenantId")
+	// In noauth case, only the default id is treated as admin role.
+	if ctx.TenantId == constants.DefaultTenantId {
+		ctx.IsAdmin = true
+	}
 	httpCtx.Input.SetData("context", ctx)
 }
 

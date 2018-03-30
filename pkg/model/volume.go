@@ -189,4 +189,5 @@ const (
 	VOLUMEATM_CREATING        = "creating"
 	VOLUMEATM_AVAILABLE       = "available"
 	VOLUMEATM_ERROR_DELETING  = "errorDeleting"
+	VOLUMEATM_ERROR           = "error"
 )

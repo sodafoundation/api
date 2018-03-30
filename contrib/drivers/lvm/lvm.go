@@ -68,7 +68,7 @@ func (*Driver) Unset() error { return nil }
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var polName = opt.GetPoolName()
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var name = volumePrefix + id
 
 	if _, err := d.handler("lvcreate", []string{
@@ -229,7 +229,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var snapName = snapshotPrefix + id
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {

@@ -76,8 +76,6 @@ func (c *controller) ExecuteAsyncPolicy(req interface{}, in string, errChan chan
 		return
 	}
 
-	defer close(errChan)
-
 	if err = executor.ExecuteAsynchronizedWorkflow(awf); err != nil {
 		errChan <- err
 		return
