@@ -82,7 +82,7 @@ var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionI
 func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	attachment := &model.VolumeAttachmentSpec{}
-	if err := json.Unmarshal([]byte(args[0]), &attachment); err != nil {
+	if err := json.Unmarshal([]byte(args[0]), attachment); err != nil {
 		Errorln(err)
 		cmd.Usage()
 		os.Exit(1)
