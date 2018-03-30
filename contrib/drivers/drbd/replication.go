@@ -1,4 +1,3 @@
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -30,4 +29,20 @@ func (r *ReplicationDriver) Unset() error { return nil }
 // CreateReplication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	return nil, nil
+}
+
+func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	return nil
+}
+
+func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	return nil
 }

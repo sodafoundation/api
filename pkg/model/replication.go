@@ -47,25 +47,27 @@ type ReplicationSpec struct {
 
 	// NOTE: Need to figure out how to represent the relationship
 	// when there are more than 2 sites. May need to use array.
-	AvailabilityZone               string            `json:"availabilityZone,omitempty"`
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
 	// region
-	Region                         string            `json:"region,omitempty"`
+	Region string `json:"region,omitempty"`
 	// group id
-	GroupId                        string            `json:"groupId,omitempty"`
+	GroupId string `json:"groupId,omitempty"`
 	// primary replication driver data
-	PrimaryReplicationDriverData   map[string]string `json:"primaryReplicationDriverData,omitempty"`
+	PrimaryReplicationDriverData map[string]string `json:"primaryReplicationDriverData,omitempty"`
 	// secondary replication driver data
 	SecondaryReplicationDriverData map[string]string `json:"secondaryReplicationDriverData,omitempty"`
 	// replication status
-	ReplicationStatus              string            `json:"replicationStatus,omitempty"`
+	ReplicationStatus string `json:"replicationStatus,omitempty"`
 	// supports "async" or "sync" now
 	ReplicationModel string `json:"replicationModel,omitempty"`
 	// 0 means sync replication.
-	ReplicationPeriod    int    `json:"replicationPeriod,omitempty"`
+	ReplicationPeriod int `json:"replicationPeriod,omitempty"`
 	// replication period
-	ReplicationBandwidth int    `json:"replicationBandwidth,omitempty"`
+	ReplicationBandwidth int `json:"replicationBandwidth,omitempty"`
 	// profile id
-	ProfileId            string `json:"profileId,omitempty"`
+	ProfileId string `json:"profileId,omitempty"`
+	// pool id
+	PoolId string `json:"poolId,omitempty"`
 }
 
 type FailoverReplicationSpec struct {

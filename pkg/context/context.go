@@ -38,10 +38,9 @@ func NewInternalTenantContext(tenantId, userId string) *Context {
 	}
 }
 
-func NewContextFormJson(s string) *Context {
+func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
-	glog.Errorf(s)
 	if err != nil {
 		glog.Errorf("Unmarshal json to context failed, reason:%v", err)
 	}

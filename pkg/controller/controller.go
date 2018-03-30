@@ -340,3 +340,175 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		},
 	)
 }
+
+func (c *Controller) CreateReplication(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+
+	var profile *model.ProfileSpec
+	var err error
+
+	if in.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		profile, err = db.C.GetDefaultProfile(ctx)
+	} else {
+		profile, err = db.C.GetProfile(ctx, in.ProfileId)
+	}
+	if err != nil {
+		log.Error("Get profile failed: ", err)
+		return nil, err
+	}
+
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+
+	var filterRequest map[string]interface{}
+	if profile.Extras != nil {
+		filterRequest = profile.Extras
+	} else {
+		filterRequest = make(map[string]interface{})
+	}
+
+	// TODO: how to choose the docker
+	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
+	if err != nil {
+		log.Error("When search supported pool resource:", err)
+		return nil, err
+	}
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return nil, err
+	}
+	log.Warning("pool info", polInfo)
+	c.volumeController.SetDock(dockInfo)
+	opt := &pb.CreateReplicationOpts{
+		Id:                             in.Id,
+		Name:                           in.Name,
+		Description:                    in.Description,
+		PrimaryVolumeId:                in.PrimaryVolumeId,
+		SecondaryVolumeId:              in.SecondaryVolumeId,
+		PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
+		SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
+		PoolId:     polInfo.Id,
+		PoolName:   polInfo.Name,
+		ProfileId:  profile.Id,
+		DockId:     dockInfo.Id,
+		DriverName: dockInfo.DriverName,
+		Context:    ctx.ToJson(),
+	}
+	result, err := c.volumeController.CreateReplication(opt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(profile)
+	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
+	c.policyController.SetDock(dockInfo)
+
+	var errChan = make(chan error, 1)
+	volBody, _ := json.Marshal(result)
+	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChan)
+
+	return result, nil
+}
+
+func (c *Controller) DeleteReplication(ctx *c.Context, in *model.ReplicationSpec) error {
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return err
+	}
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.DeleteReplication(
+		&pb.DeleteReplicationOpts{
+			Id:                             in.Id,
+			Name:                           in.Name,
+			Description:                    in.Description,
+			PrimaryVolumeId:                in.PrimaryVolumeId,
+			SecondaryVolumeId:              in.SecondaryVolumeId,
+			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
+			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
+		},
+	)
+}
+
+func (c *Controller) EnableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
+	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return err
+	}
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.EnableReplication(
+		&pb.EnableReplicationOpts{
+			Id:                             in.Id,
+			Name:                           in.Name,
+			Description:                    in.Description,
+			PrimaryVolumeId:                in.PrimaryVolumeId,
+			SecondaryVolumeId:              in.SecondaryVolumeId,
+			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
+			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
+		},
+	)
+}
+
+func (c *Controller) DisableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
+	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return err
+	}
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.DisableReplication(
+		&pb.DisableReplicationOpts{
+			Id:                             in.Id,
+			Name:                           in.Name,
+			Description:                    in.Description,
+			PrimaryVolumeId:                in.PrimaryVolumeId,
+			SecondaryVolumeId:              in.SecondaryVolumeId,
+			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
+			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
+			DockId:     dockInfo.Id,
+			DriverName: dockInfo.DriverName,
+			Context:    ctx.ToJson(),
+		},
+	)
+}
+
+func (c *Controller) FailoverReplication(ctx *c.Context, replication *model.ReplicationSpec, failover *model.FailoverReplicationSpec) error {
+	dockInfo, err := db.C.GetDockByPoolId(ctx, replication.PoolId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return err
+	}
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.FailoverReplication(
+		&pb.FailoverReplicationOpts{
+			Id:                             replication.Id,
+			Name:                           replication.Name,
+			Description:                    replication.Description,
+			PrimaryVolumeId:                replication.PrimaryVolumeId,
+			SecondaryVolumeId:              replication.SecondaryVolumeId,
+			PrimaryReplicationDriverData:   replication.PrimaryReplicationDriverData,
+			SecondaryReplicationDriverData: replication.SecondaryReplicationDriverData,
+			DockId:              dockInfo.Id,
+			DriverName:          dockInfo.DriverName,
+			Context:             ctx.ToJson(),
+			AllowAttachedVolume: failover.Failover.AllowAttachedVolume,
+			SecondaryBackendId:  failover.Failover.SecondaryBackendId,
+		},
+	)
+}
