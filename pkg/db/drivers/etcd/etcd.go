@@ -1479,17 +1479,12 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	}
 
 	// If an admin want to access other tenant's resource just fake other's tenantId.
-	tenantId := ctx.TenantId
-	if IsAdminContext(ctx) {
-		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-		tenantId = attach.TenantId
+	if !IsAdminContext(ctx) && ctx.TenantId != attachment.TenantId {
+		return nil, fmt.Errorf("opertaion is not permitted")
 	}
+
 	dbReq := &Request{
-		Url:        urls.GenerateAttachmentURL(urls.Etcd, tenantId, attachmentId),
+		Url:        urls.GenerateAttachmentURL(urls.Etcd, attachment.TenantId, attachmentId),
 		NewContent: string(atcBody),
 	}
 

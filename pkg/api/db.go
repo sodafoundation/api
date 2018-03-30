@@ -116,21 +116,6 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 	if len(in.ConnectionData) == 0 {
 		in.ConnectionData = map[string]interface{}{"attachment": "attachment"}
 	}
-	if in.Platform == "" {
-		in.Platform = ""
-	}
-	if in.OsType == "" {
-		in.OsType = ""
-	}
-	if in.Ip == "" {
-		in.Ip = ""
-	}
-	if in.Host == "" {
-		in.Host = ""
-	}
-	if in.Initiator == "" {
-		in.Initiator = ""
-	}
 
 	var atc = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
