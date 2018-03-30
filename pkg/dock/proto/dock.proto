@@ -104,6 +104,10 @@ message CreateVolumeOpts {
     string driverName = 12;
     // The Context
     string context = 13;
+    // The replication driver data
+    map<string, string> replicationDriverData = 14;
+    // The uuid of replication
+    string replicationId = 15;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties
@@ -247,6 +251,10 @@ message HostInfo {
     string initiator = 5;
 }
 
+message VolumeData {
+    map<string, string> data = 1;
+}
+
 // CreateReplicationOpts is a structure which indicates all required properties
 // for creating a replication.
 // NOTE: Need to figure out how to handle more than 2 sites.
@@ -279,6 +287,12 @@ message CreateReplicationOpts {
     string driverName = 14;
     // The Context
     string context = 15;
+    // Whether is primary replication
+    bool  isPrimary = 16;
+    // The replication metadata
+    map<string, string> metadata = 17;
+    // The volume data list
+    repeated  VolumeData volumeDataList = 18;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties

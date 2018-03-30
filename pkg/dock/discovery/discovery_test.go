@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"testing"
 
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	. "github.com/opensds/opensds/testutils/collection"
@@ -99,9 +100,9 @@ func TestStore(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateDock", dd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", dd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", dd.pols[1]).Return(nil, nil)
+	mockClient.On("CreateDock", c.NewAdminContext(), dd.dcks[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), dd.pols[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), dd.pols[1]).Return(nil, nil)
 	dd.c = mockClient
 
 	if err := dd.Store(); err != nil {

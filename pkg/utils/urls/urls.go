@@ -53,7 +53,7 @@ func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
 }
 
 func GenerateReplicationURL(urlType int, tenantId string, in ...string) string {
-	return generateURL("block/replication", urlType, tenantId, in...)
+	return generateURL("block/replications", urlType, tenantId, in...)
 }
 
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {

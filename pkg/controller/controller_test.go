@@ -78,13 +78,30 @@ func (fvc *fakeVolumeController) CreateReplication(opts *pb.CreateReplicationOpt
 	return &SampleReplications[0], nil
 }
 
+func (fvc *fakeVolumeController) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	return nil
+}
+
+func (fvc *fakeVolumeController) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	return nil
+
+}
+
+func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	return nil
+}
+
+func (fvc *fakeVolumeController) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	return nil
+}
+
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeSpec{
@@ -114,8 +131,8 @@ func TestCreateVolume(t *testing.T) {
 
 func TestDeleteVolume(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeSpec{
@@ -141,10 +158,10 @@ func TestDeleteVolume(t *testing.T) {
 
 func TestExtendVolume(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
-	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeSpec{
@@ -175,8 +192,8 @@ func TestExtendVolume(t *testing.T) {
 
 func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 	var req = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
@@ -199,8 +216,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 func TestDeleteVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeAttachmentSpec{
@@ -222,8 +239,8 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 
 func TestCreateVolumeSnapshot(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeSnapshotSpec{
@@ -249,8 +266,8 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("GetDockByPoolId", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	db.C = mockClient
 
 	var req = &model.VolumeSnapshotSpec{
@@ -264,6 +281,140 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 	}
 
 	result := c.DeleteVolumeSnapshot(context.NewAdminContext(), req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestCreateReplication(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var req = &model.ReplicationSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+		Name:              "sample-replication-01",
+		Description:       "This is a sample replication for testing",
+		PoolId:            "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
+
+	var c = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			err: nil,
+		},
+		volumeController: NewFakeVolumeController(),
+	}
+	var expected = &SampleReplications[0]
+
+	result, err := c.CreateReplication(context.NewAdminContext(), req)
+	if err != nil {
+		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
+	}
+}
+
+func TestDeleteReplication(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var req = &model.ReplicationSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+	var c = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	result := c.DeleteReplication(context.NewAdminContext(), req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestEnableReplication(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var req = &model.ReplicationSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+	var c = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	result := c.EnableReplication(context.NewAdminContext(), req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestDisableReplication(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var req = &model.ReplicationSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+	var c = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	result := c.DisableReplication(context.NewAdminContext(), req)
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestFailoverReplication(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
+	db.C = mockClient
+
+	var vol = &model.ReplicationSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+
+	var failover = &model.FailoverReplicationSpec{Failover: struct {
+		AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
+		SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
+	}{AllowAttachedVolume: true, SecondaryBackendId: "084bf71e-a102-11e7-88a8-e31fe6d52249"}}
+	var c = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	result := c.FailoverReplication(context.NewAdminContext(), vol, failover)
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}

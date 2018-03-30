@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"testing"
 
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
@@ -26,7 +27,7 @@ import (
 
 func TestSelectSupportedPool(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListPools").Return(fakePools, nil)
+	mockClient.On("ListPools", c.NewAdminContext()).Return(fakePools, nil)
 	db.C = mockClient
 
 	testCases := []struct {

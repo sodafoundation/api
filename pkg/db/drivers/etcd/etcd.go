@@ -1751,6 +1751,23 @@ func (c *Client) CreateReplication(ctx *c.Context, r *model.ReplicationSpec) (*m
 }
 
 func (c *Client) GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	replication, err := c.getReplication(ctx, replicationId)
+	if !IsAdminContext(ctx) || err == nil {
+		return replication, err
+	}
+	replications, err := c.ListReplication(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range replications {
+		if r.Id == replicationId {
+			return r, nil
+		}
+	}
+	return nil, fmt.Errorf("specified replication(%s) can't find", replicationId)
+}
+
+func (c *Client) getReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
 	req := &Request{
 		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, replicationId),
 	}
@@ -1771,6 +1788,9 @@ func (c *Client) GetReplication(ctx *c.Context, replicationId string) (*model.Re
 func (c *Client) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error) {
 	req := &Request{
 		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId),
+	}
+	if IsAdminContext(ctx) {
+		req.Url = urls.GenerateReplicationURL(urls.Etcd, "")
 	}
 	resp := c.List(req)
 	if resp.Status != "Success" {
@@ -1900,13 +1920,20 @@ func (c *Client) ListReplicationWithFilter(ctx *c.Context, m map[string][]string
 		sortKeys = append(sortKeys, k)
 	}
 	p := c.ParameterFilter(m, len(rlist), sortKeys)
-
 	return c.SortReplications(rlist, p)[p.beginIdx:p.endIdx], nil
 }
 
 func (c *Client) DeleteReplication(ctx *c.Context, replicationId string) error {
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		r, err := c.GetReplication(ctx, replicationId)
+		if err != nil {
+			return err
+		}
+		tenantId = r.TenantId
+	}
 	req := &Request{
-		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, replicationId),
+		Url: urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
 	}
 	reps := c.Delete(req)
 	if reps.Status != "Success" {
@@ -1937,9 +1964,12 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 	if err != nil {
 		return nil, err
 	}
-
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		tenantId = r.TenantId
+	}
 	req := &Request{
-		Url:        urls.GenerateProfileURL(urls.Etcd, ctx.TenantId, replicationId),
+		Url:        urls.GenerateProfileURL(urls.Etcd, tenantId, replicationId),
 		NewContent: string(b),
 	}
 	resp := c.Update(req)

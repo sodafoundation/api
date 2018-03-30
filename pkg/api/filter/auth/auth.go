@@ -30,6 +30,7 @@ type NoAuth struct {
 }
 
 func (auth *NoAuth) Filter(httpCtx *context.Context) {
+	panic("")
 	ctx := c.GetContext(httpCtx)
 	ctx.IsAdmin = true
 	ctx.TenantId = httpCtx.Input.Param(":tenantId")
