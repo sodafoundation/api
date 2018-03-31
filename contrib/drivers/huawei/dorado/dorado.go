@@ -316,8 +316,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             p.Name,
 			TotalCapacity:    d.sector2Gb(p.UserTotalCapacity),
 			FreeCapacity:     d.sector2Gb(p.UserFreeCapacity),
-			Extras:           BuildDefaultPoolParam(c.Pool[p.Name]),
-			AvailabilityZone: c.Pool[p.Name].AZ,
+			StorageType:      c.Pool[p.Name].StorageType,
+			Extras:           c.Pool[p.Name].Extras,
+			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ

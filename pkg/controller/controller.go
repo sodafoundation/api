@@ -109,9 +109,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
 		//Change the status of the volume to error when the creation faild
-		in.Status = model.VOLUME_ERROR
-		if _, errUpdate := db.C.UpdateVolume(ctx, in); errUpdate != nil {
-			log.Error("When update volume in db:", errUpdate.Error())
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUME_ERROR); errUpdate != nil {
 			errchanVolume <- errUpdate
 			return
 		}
@@ -123,14 +121,11 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.
-	result.Status = model.VOLUME_AVAILABLE
-
-	result, err = db.C.UpdateVolume(ctx, result)
-	if err != nil {
-		log.Error("When update volume in db:", err)
+	if err = c.UpdateStatus(ctx, result, model.VOLUME_AVAILABLE); err != nil {
 		errchanVolume <- err
 		return
 	}
+
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(profile)
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
@@ -189,9 +184,7 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 
 	err = c.volumeController.DeleteVolume(opt)
 	if err != nil {
-		in.Status = model.VOLUEM_ERROR_DELETING
-		if _, errUpdate := db.C.UpdateVolume(ctx, in); errUpdate != nil {
-			log.Error("When update volume in db:", errUpdate.Error())
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUEM_ERROR_DELETING); errUpdate != nil {
 			errchanvol <- errUpdate
 			return
 		}
@@ -271,10 +264,8 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 
 	result, err := c.volumeController.ExtendVolume(opt)
 	if err != nil {
-		volume.Status = model.VOLUME_ERROR
 		volume.Size = volumeSize
-		if _, errUpdate := db.C.UpdateVolume(ctx, volume); errUpdate != nil {
-			log.Error("When update volume in db:", errUpdate.Error())
+		if errUpdate := c.UpdateStatus(ctx, volume, model.VOLUME_ERROR); errUpdate != nil {
 			errchanVolume <- errUpdate
 			return
 		}
@@ -282,14 +273,11 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 		return
 	}
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
-	// Update the volume data in database.
-	result.Status = model.VOLUME_AVAILABLE
-	_, err = db.C.UpdateVolume(ctx, result)
-	if err != nil {
-		log.Error("When update volume in db:", err)
-		errchanVolume <- err
-		return
 
+	// Update the volume data in database.
+	if errUpdate := c.UpdateStatus(ctx, result, model.VOLUME_AVAILABLE); errUpdate != nil {
+		errchanVolume <- errUpdate
+		return
 	}
 
 	volBody, _ := json.Marshal(result)
@@ -337,23 +325,17 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 	}
 	result, err := c.volumeController.CreateVolumeAttachment(atm)
 	if err != nil {
-		in.Status = model.VOLUMEATM_ERROR
-		if _, errUpdate := db.C.UpdateVolumeAttachment(ctx, in.Id, in); errUpdate != nil {
-			log.Error("Error occurred in dock module when update volume attachment in db:", errUpdate.Error())
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMEATM_ERROR); errUpdate != nil {
 			errchanVolAtm <- errUpdate
 			return
 		}
 		errchanVolAtm <- err
 		return
 	}
-	result.Status = model.VOLUMEATM_AVAILABLE
-	_, err = db.C.UpdateVolumeAttachment(ctx, result.Id, result)
-	if err != nil {
-		log.Error("Error occurred in dock module when update volume attachment in db:", err)
+	if err = c.UpdateStatus(ctx, result, model.VOLUMEATM_AVAILABLE); err != nil {
 		errchanVolAtm <- err
 		return
 	}
-
 	errchanVolAtm <- nil
 }
 
@@ -395,9 +377,7 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 	)
 
 	if err != nil {
-		in.Status = model.VOLUMEATM_ERROR_DELETING
-		if _, errUpdate := db.C.UpdateVolumeAttachment(ctx, in.Id, in); errUpdate != nil {
-			log.Error("Error occurred in dock module when update volume attachment in db:", errUpdate)
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMEATM_ERROR_DELETING); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
@@ -443,23 +423,17 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		},
 	)
 	if err != nil {
-		in.Status = model.VOLUMESNAP_ERROR
-		if _, errUpdate := db.C.UpdateVolumeSnapshot(ctx, in.Id, in); errUpdate != nil {
-			log.Error("When update volume snapshot in db:", errUpdate)
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMESNAP_ERROR); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
 		errchan <- err
 		return
 	}
-	snp.Status = model.VOLUMESNAP_AVAILABLE
-	_, err = db.C.UpdateVolumeSnapshot(ctx, snp.Id, snp)
-	if err != nil {
-		log.Error("When update volume snapshot in db:", err)
-		errchan <- err
+	if errUpdate := c.UpdateStatus(ctx, snp, model.VOLUMESNAP_AVAILABLE); errUpdate != nil {
+		errchan <- errUpdate
 		return
 	}
-
 	errchan <- nil
 }
 
@@ -489,12 +463,11 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		},
 	)
 	if err != nil {
-		in.Status = model.VOLUMESNAP_ERROR_DELETING
-		if _, errUpdate := db.C.UpdateVolumeSnapshot(ctx, in.Id, in); errUpdate != nil {
-			log.Error("Error occurs when deleting volume snapshot from driver:", errUpdate.Error())
+		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMESNAP_ERROR_DELETING); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
+		log.Error("Error occurred in dock module when delete volume snapshot in driver:", err)
 		errchan <- err
 		return
 	}
@@ -503,6 +476,35 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		errchan <- err
 		return
 	}
-
 	errchan <- nil
+}
+
+func (c *Controller) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
+	switch in.(type) {
+
+	case *model.VolumeSnapshotSpec:
+		snap := in.(*model.VolumeSnapshotSpec)
+		snap.Status = status
+		if _, errUpdate := db.C.UpdateVolumeSnapshot(ctx, snap.Id, snap); errUpdate != nil {
+			log.Error("Error occurs when update volume snapshot status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.VolumeAttachmentSpec:
+		attm := in.(*model.VolumeAttachmentSpec)
+		attm.Status = status
+		if _, errUpdate := db.C.UpdateVolumeAttachment(ctx, attm.Id, attm); errUpdate != nil {
+			log.Error("Error occurred in dock module when update volume attachment status in db:", errUpdate)
+			return errUpdate
+		}
+
+	case *model.VolumeSpec:
+		volume := in.(*model.VolumeSpec)
+		volume.Status = status
+		if _, errUpdate := db.C.UpdateVolume(ctx, volume); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
+	}
+	return nil
 }

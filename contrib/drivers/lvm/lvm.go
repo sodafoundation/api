@@ -375,8 +375,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
 			FreeCapacity:     vg.FreeCapacity,
-			Extras:           BuildDefaultPoolParam(d.conf.Pool[vg.Name]),
-			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
+			StorageType:      d.conf.Pool[vg.Name].StorageType,
+			Extras:           d.conf.Pool[vg.Name].Extras,
+			AvailabilityZone: d.conf.Pool[vg.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = "default"

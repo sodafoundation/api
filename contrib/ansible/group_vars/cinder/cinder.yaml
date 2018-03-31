@@ -24,8 +24,16 @@ authOptions:
   tenantName: "myproject"
 pool:
   "cinder-lvm@lvm#lvm":
-    AZ: nova
-    thin: true
-    accessProtocol: iscsi
-    thinProvisioned: true
-    compressed: true
+    storageType: block
+    availabilityZone: nova
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 3ms

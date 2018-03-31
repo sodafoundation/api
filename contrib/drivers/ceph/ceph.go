@@ -538,17 +538,16 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 	return poolDetail, nil
 }
 
-func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
-	param := BuildDefaultPoolParam(proper)
-
-	param["redundancyType"] = line[poolType]
-	if param["redundancyType"] == "replicated" {
-		param["replicateSize"] = line[poolTypeSize]
+func (d *Driver) buildPoolExtras(line []string, extras model.StoragePoolExtraSpec) model.StoragePoolExtraSpec {
+	extras.Advanced["redundancyType"] = line[poolType]
+	if extras.Advanced["redundancyType"] == "replicated" {
+		extras.Advanced["replicateSize"] = line[poolTypeSize]
 	} else {
-		param["erasureSize"] = line[poolTypeSize]
+		extras.Advanced["erasureSize"] = line[poolTypeSize]
 	}
-	param["crushRuleset"] = line[poolCrushRuleset]
-	return &param
+	extras.Advanced["crushRuleset"] = line[poolCrushRuleset]
+
+	return extras
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
@@ -575,7 +574,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := c.Pool[name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(pa[name], c.Pool[name])
+
+		extras := d.buildPoolExtras(pa[name], c.Pool[name].Extras)
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
@@ -588,8 +588,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity:    totalCap * maxAvailCap / availCap,
 			FreeCapacity:     maxAvailCap,
-			Extras:           *param,
-			AvailabilityZone: c.Pool[name].AZ,
+			StorageType:      c.Pool[name].StorageType,
+			Extras:           extras,
+			AvailabilityZone: c.Pool[name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ
