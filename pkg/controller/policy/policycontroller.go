@@ -73,12 +73,12 @@ func (c *controller) ExecuteAsyncPolicy(req interface{}, in string, errChan chan
 	awf, err := executor.RegisterAsynchronizedWorkflow(req, c.Tag.asyncTag, c.DockInfo, in)
 	if err != nil {
 		errChan <- err
+		return
 	}
-
-	defer close(errChan)
 
 	if err = executor.ExecuteAsynchronizedWorkflow(awf); err != nil {
 		errChan <- err
+		return
 	}
 	errChan <- nil
 }

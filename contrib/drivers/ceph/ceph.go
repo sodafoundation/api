@@ -103,6 +103,7 @@ func (d *Driver) initConn() error {
 		log.Error("New connect failed:", err)
 		return err
 	}
+
 	if err = conn.ReadConfigFile(d.conf.ConfigFile); err != nil {
 		log.Error("Read config file failed:", err)
 		return err
@@ -136,7 +137,7 @@ func (d *Driver) destroy() {
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	size := opt.GetSize()
-	id := uuid.NewV4().String()
+	id := opt.GetId()
 	name := opensdsPrefix + id
 	if err := d.init(opt.GetPoolName()); err != nil {
 		log.Error("Connect ceph failed.")
@@ -340,7 +341,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		log.Error("When open image:", err)
 		return nil, err
 	}
-	id := uuid.NewV4().String()
+	id := opt.GetId()
 	name := opensdsPrefix + id
 	if _, err = img.CreateSnapshot(name); err != nil {
 		log.Error("When create snapshot:", err)
@@ -364,6 +365,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 			"poolName": poolName,
 		},
 	}, nil
+
 }
 
 func (d *Driver) visitSnapshot(snapID string, fn func(imgName string, img *rbd.Image, snap *rbd.SnapInfo) error) error {
