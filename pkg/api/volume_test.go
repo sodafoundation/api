@@ -679,20 +679,6 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 }
 
 func TestExtendVolumeWithBadRequest(t *testing.T) {
-	var extendVolume = model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: 123},
-	}
-
-	extendVolumeByte, err := json.Marshal(extendVolume)
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-
-	extendVolumeStr := string(extendVolumeByte)
-	if extendVolumeStr != "{\"extend\":{\"newSize\":123}}" {
-		t.Errorf("Expected {\"extend\":{\"newSize\":123}}, actual %v", extendVolumeStr)
-	}
-
 	var jsonStr = []byte(`{"extend":{"newSize": 0}}`)
 	r, _ := http.NewRequest("POST",
 		"/v1beta/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/action", bytes.NewBuffer(jsonStr))
@@ -705,14 +691,23 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
 
+	volume := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    "available",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+	}
+
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("ExtendVolume", volume).Return(volume, nil)
+	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("GetPool", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
+
 	db.C = mockClient
 	controller.Brain = controller.NewController()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
 	}
 
 	jsonStr = []byte(`{"extend":{"newSize": 92}}`)
@@ -722,7 +717,9 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/JSON")
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
 
-	mockClient.On("GetPool", "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SamplePools[0], nil)
+	mockClient.On("ExtendVolume", volume).Return(volume, nil)
+	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("GetPool", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
 
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

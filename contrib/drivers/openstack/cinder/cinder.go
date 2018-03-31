@@ -174,7 +174,7 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: vol.ID,
+			Id: req.GetId(),
 		},
 		Name:             vol.Name,
 		Description:      vol.Description,
