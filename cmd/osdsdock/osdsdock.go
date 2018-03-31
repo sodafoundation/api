@@ -22,7 +22,7 @@ package main
 import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
-	dockServer "github.com/opensds/opensds/pkg/dock/server"
+	"github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -54,8 +54,10 @@ func main() {
 		panic(err)
 	}
 
-	// Construct dock module grpc server struct and do some initialization.
-	ds := dockServer.NewDockServer(CONF.OsdsDock.ApiEndpoint)
-	// Start the listen mechanism of dock module.
-	dockServer.ListenAndServe(ds)
+	// Construct dock module grpc server struct and start the listen mechanism
+	// of dock module.
+	ds := server.NewDockServer(CONF.OsdsDock.ApiEndpoint)
+	if err := ds.Run(); err != nil {
+		panic(err)
+	}
 }
