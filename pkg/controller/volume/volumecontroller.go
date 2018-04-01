@@ -148,7 +148,7 @@ func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*mode
 
 	response, err := c.Client.CreateAttachment(context.Background(), opt)
 	if err != nil {
-		log.Error("Create volume failed in volume controller:", err)
+		log.Error("Create volume attachment failed in volume controller:", err)
 		return nil, err
 	}
 	defer c.Client.Close()
