@@ -101,7 +101,6 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		ProfileId:        profile.Id,
 		PoolId:           polInfo.Id,
 		PoolName:         polInfo.Name,
-		DockId:           dockInfo.Id,
 		DriverName:       dockInfo.DriverName,
 		Context:          ctx.ToJson(),
 	}
@@ -167,7 +166,6 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 	opt := &pb.DeleteVolumeOpts{
 		Id:         in.Id,
 		Metadata:   in.Metadata,
-		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
@@ -257,7 +255,6 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 		Id:         volume.Id,
 		Size:       volume.Size,
 		Metadata:   volume.Metadata,
-		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
@@ -319,7 +316,6 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 			Initiator: in.Initiator,
 		},
 		Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
@@ -370,7 +366,6 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 				Initiator: in.Initiator,
 			},
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
 			Context:    ctx.ToJson(),
 		},
@@ -417,7 +412,6 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 			VolumeId:    in.VolumeId,
 			Size:        vol.Size,
 			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:      dockInfo.Id,
 			DriverName:  dockInfo.DriverName,
 			Context:     ctx.ToJson(),
 		},
@@ -457,7 +451,6 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 			Id:         in.Id,
 			VolumeId:   in.VolumeId,
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
 			Context:    ctx.ToJson(),
 		},
