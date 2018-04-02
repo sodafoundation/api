@@ -63,6 +63,17 @@ pool:
   $DEFAULT_VOLUME_GROUP_NAME:
     diskType: NL-SAS
     AZ: default
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 5ms
 OPENSDS_LVM_CONFIG_DOC
 
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_LVM_GLOBAL_CONFIG_DOC
