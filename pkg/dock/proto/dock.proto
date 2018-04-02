@@ -35,7 +35,7 @@ syntax = "proto3";
 package proto;
 
 
-service Dock {
+service ProvisionDock {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
     
@@ -216,6 +216,40 @@ message HostInfo {
     string ip = 4;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
     string initiator = 5;
+}
+
+service AttachDock {
+    // Attach a volume
+    rpc AttachVolume (AttachVolumeOpts) returns (GenericResponse){}
+    
+    // Detach a volume
+    rpc DetachVolume (DetachVolumeOpts) returns (GenericResponse){}
+}
+
+// AttachVolumeOpts is a structure which indicates all required
+// properties for attaching a volume.
+message AttachVolumeOpts {
+	// The access protocol for attaching a volume.
+    string accessProtocol = 1;
+	// The connectionData for attaching a volume.
+	string connectionData = 2;
+    // The metadata for attaching a volume, optional.
+    map<string, string> metadata = 3;
+    // The Context
+    string context = 4;
+}
+
+// DetachVolumeOpts is a structure which indicates all required
+// properties for detaching a volume.
+message DetachVolumeOpts {
+	// The access protocol for detaching a volume.
+    string accessProtocol = 1;
+	// The connectionData for detaching a volume.
+	string connectionData = 2;
+    // The metadata for detaching a volume, optional.
+    map<string, string> metadata = 3;
+    // The Context
+    string context = 4;
 }
 
 // Generic response, it return:
