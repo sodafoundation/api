@@ -21,7 +21,11 @@ storage plugins.
 package dock
 
 import (
+	"encoding/json"
+	"fmt"
+
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -208,4 +212,34 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		return err
 	}
 	return nil
+}
+
+// AttachVolume
+func (d *DockHub) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
+	var connData = make(map[string]interface{})
+	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
+		return "", fmt.Errorf("Error occurred in dock module when unmarshalling conncection data!")
+	}
+
+	con := connector.NewConnector(opt.GetAccessProtocol())
+	if con == nil {
+		return "", fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+	}
+
+	return con.Attach(connData)
+}
+
+// DetachVolume
+func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
+	var connData = make(map[string]interface{})
+	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
+		return fmt.Errorf("Error occurred in dock module when unmarshalling conncection data!")
+	}
+
+	con := connector.NewConnector(opt.GetAccessProtocol())
+	if con == nil {
+		return fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+	}
+
+	return con.Detach(connData)
 }
