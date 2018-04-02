@@ -539,6 +539,7 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 }
 
 func (d *Driver) buildPoolExtras(line []string, extras model.StoragePoolExtraSpec) model.StoragePoolExtraSpec {
+	extras.Advanced = make(map[string]interface{})
 	extras.Advanced["redundancyType"] = line[poolType]
 	if extras.Advanced["redundancyType"] == "replicated" {
 		extras.Advanced["replicateSize"] = line[poolTypeSize]
