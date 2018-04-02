@@ -218,7 +218,7 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 func (d *DockHub) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
-		return "", fmt.Errorf("Error occurred in dock module when unmarshalling conncection data!")
+		return "", fmt.Errorf("Error occurred in dock module when unmarshalling connection data!")
 	}
 
 	con := connector.NewConnector(opt.GetAccessProtocol())
@@ -233,7 +233,7 @@ func (d *DockHub) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
 func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
-		return fmt.Errorf("Error occurred in dock module when unmarshalling conncection data!")
+		return fmt.Errorf("Error occurred in dock module when unmarshalling connection data!")
 	}
 
 	con := connector.NewConnector(opt.GetAccessProtocol())
