@@ -49,8 +49,7 @@ func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
 }
 
-func AuthorizeProjectContext(ctx *c.Context) bool {
-	tenantId := strings.Split(ctx.Uri, "/")[1]
+func AuthorizeProjectContext(ctx *c.Context, tenantId string) bool {
 	return ctx.TenantId == tenantId
 }
 
@@ -1162,17 +1161,12 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	}
 
 	// If an admin want to access other tenant's resource just fake other's tenantId.
-	tenantId := ctx.TenantId
-	if IsAdminContext(ctx) {
-		vol, err := c.GetVolume(ctx, vol.Id)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-		tenantId = vol.TenantId
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
 	}
+
 	dbReq := &Request{
-		Url:        urls.GenerateVolumeURL(urls.Etcd, tenantId, vol.Id),
+		Url:        urls.GenerateVolumeURL(urls.Etcd, result.TenantId, vol.Id),
 		NewContent: string(body),
 	}
 
@@ -1242,11 +1236,12 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	attachment.TenantId = ctx.TenantId
+
 	atcBody, err := json.Marshal(attachment)
 	if err != nil {
 		return nil, err
 	}
-
 	dbReq := &Request{
 		Url:     urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachment.Id),
 		Content: string(atcBody),
@@ -1479,12 +1474,12 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	}
 
 	// If an admin want to access other tenant's resource just fake other's tenantId.
-	if !IsAdminContext(ctx) && ctx.TenantId != attachment.TenantId {
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
 		return nil, fmt.Errorf("opertaion is not permitted")
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateAttachmentURL(urls.Etcd, attachment.TenantId, attachmentId),
+		Url:        urls.GenerateAttachmentURL(urls.Etcd, result.TenantId, attachmentId),
 		NewContent: string(atcBody),
 	}
 
@@ -1746,18 +1741,12 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 	}
 
 	// If an admin want to access other tenant's resource just fake other's tenantId.
-	tenantId := ctx.TenantId
-	if IsAdminContext(ctx) {
-		snap, err := c.GetVolumeSnapshot(ctx, snpID)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-		tenantId = snap.TenantId
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateSnapshotURL(urls.Etcd, tenantId, snpID),
+		Url:        urls.GenerateSnapshotURL(urls.Etcd, result.TenantId, snpID),
 		NewContent: string(atcBody),
 	}
 
@@ -1784,7 +1773,6 @@ func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateSnapshotURL(urls.Etcd, tenantId, snpID),
 	}
-	// If an admin want to access other tenant's resource just fake other's tenantId.
 
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
