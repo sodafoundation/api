@@ -132,6 +132,17 @@ func TestThinFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
 			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         1000,
+				},
+				DataProtection: model.DataProtectionLos{},
 				Advanced: model.ExtraSpec{
 					"thin": true,
 				},
@@ -165,6 +176,17 @@ func TestThinFilter(t *testing.T) {
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
 					Extras: model.StoragePoolExtraSpec{
+						DataStorage: model.DataStorageLoS{
+							RecoveryTimeObjective: 1,
+							ProvisioningPolicy:    "Thin",
+							IsSpaceEfficient:      true,
+						},
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "rbd",
+							MaxIOPS:        1,
+							MaxBWS:         1000,
+						},
+						DataProtection: model.DataProtectionLos{},
 						Advanced: model.ExtraSpec{
 							"thin": true,
 						},
@@ -210,6 +232,17 @@ func TestDedupeFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
 			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         1000,
+				},
+				DataProtection: model.DataProtectionLos{},
 				Advanced: model.ExtraSpec{
 					"dedupe": true,
 				},
@@ -217,6 +250,17 @@ func TestDedupeFilter(t *testing.T) {
 		},
 		&model.StoragePoolSpec{
 			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         100,
+				},
+				DataProtection: model.DataProtectionLos{},
 				Advanced: model.ExtraSpec{
 					"dedupe": true,
 				},
@@ -224,6 +268,17 @@ func TestDedupeFilter(t *testing.T) {
 		},
 		&model.StoragePoolSpec{
 			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         10,
+				},
+				DataProtection: model.DataProtectionLos{},
 				Advanced: model.ExtraSpec{
 					"dedupe": false,
 				},
@@ -243,6 +298,17 @@ func TestDedupeFilter(t *testing.T) {
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
 					Extras: model.StoragePoolExtraSpec{
+						DataStorage: model.DataStorageLoS{
+							RecoveryTimeObjective: 1,
+							ProvisioningPolicy:    "Thin",
+							IsSpaceEfficient:      true,
+						},
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "rbd",
+							MaxIOPS:        1,
+							MaxBWS:         1000,
+						},
+						DataProtection: model.DataProtectionLos{},
 						Advanced: model.ExtraSpec{
 							"dedupe": true,
 						},
@@ -250,6 +316,17 @@ func TestDedupeFilter(t *testing.T) {
 				},
 				&model.StoragePoolSpec{
 					Extras: model.StoragePoolExtraSpec{
+						DataStorage: model.DataStorageLoS{
+							RecoveryTimeObjective: 1,
+							ProvisioningPolicy:    "Thin",
+							IsSpaceEfficient:      true,
+						},
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "rbd",
+							MaxIOPS:        1,
+							MaxBWS:         100,
+						},
+						DataProtection: model.DataProtectionLos{},
 						Advanced: model.ExtraSpec{
 							"dedupe": true,
 						},
@@ -265,6 +342,17 @@ func TestDedupeFilter(t *testing.T) {
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
 					Extras: model.StoragePoolExtraSpec{
+						DataStorage: model.DataStorageLoS{
+							RecoveryTimeObjective: 1,
+							ProvisioningPolicy:    "Thin",
+							IsSpaceEfficient:      true,
+						},
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "rbd",
+							MaxIOPS:        1,
+							MaxBWS:         10,
+						},
+						DataProtection: model.DataProtectionLos{},
 						Advanced: model.ExtraSpec{
 							"dedupe": false,
 						},
@@ -434,6 +522,17 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
 		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				RecoveryTimeObjective: 3,
+				ProvisioningPolicy:    "Thin",
+				IsSpaceEfficient:      true,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "rbd",
+				MaxIOPS:        1,
+				MaxBWS:         1000,
+			},
+			DataProtection: model.DataProtectionLos{},
 			Advanced: model.ExtraSpec{
 				"thin":     true,
 				"dedupe":   true,
@@ -472,5 +571,123 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 	value1, ok := result["extras.advanced.mapA.key1"].(string)
 	if (!ok) || ("value1" != value1) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, "value1", ok, value1)
+	}
+
+	RecoveryTimeObjective, ok := result["extras.dataStorage.recoveryTimeObjective"].(float64)
+	if (!ok) || (!utils.IsFloatEqual(RecoveryTimeObjective, float64(Pool.Extras.DataStorage.RecoveryTimeObjective))) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.Extras.DataStorage.RecoveryTimeObjective), ok, RecoveryTimeObjective)
+	}
+
+	ProvisioningPolicy, ok := result["extras.dataStorage.provisioningPolicy"].(string)
+	if (!ok) || (Pool.Extras.DataStorage.ProvisioningPolicy != ProvisioningPolicy) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.ProvisioningPolicy, ok, ProvisioningPolicy)
+	}
+
+	IsSpaceEfficient, ok := result["extras.dataStorage.isSpaceEfficient"].(bool)
+	if (!ok) || (Pool.Extras.DataStorage.IsSpaceEfficient != IsSpaceEfficient) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.IsSpaceEfficient, ok, IsSpaceEfficient)
+	}
+}
+
+func TestIoConnectivityFilter(t *testing.T) {
+	fakePools := []*model.StoragePoolSpec{
+		&model.StoragePoolSpec{
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         1000,
+				},
+				DataProtection: model.DataProtectionLos{},
+				Advanced: model.ExtraSpec{
+					"thin": true,
+				},
+			},
+		},
+		&model.StoragePoolSpec{
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin": true,
+				},
+			},
+		},
+		&model.StoragePoolSpec{
+			Extras: model.StoragePoolExtraSpec{
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "erbd",
+					MaxIOPS:        1,
+					MaxBWS:         99,
+				},
+				Advanced: model.ExtraSpec{
+					"thin": false,
+				},
+			},
+		},
+	}
+	testCases := []struct {
+		request  map[string]interface{}
+		pools    []*model.StoragePoolSpec
+		expected []*model.StoragePoolSpec
+	}{
+		{
+			request: map[string]interface{}{
+				"extras.ioConnectivity.maxBWS": 1000.0,
+			},
+			pools: fakePools,
+			expected: []*model.StoragePoolSpec{
+				&model.StoragePoolSpec{
+					Extras: model.StoragePoolExtraSpec{
+						DataStorage: model.DataStorageLoS{
+							RecoveryTimeObjective: 1,
+							ProvisioningPolicy:    "Thin",
+							IsSpaceEfficient:      true,
+						},
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "rbd",
+							MaxIOPS:        1,
+							MaxBWS:         1000,
+						},
+						DataProtection: model.DataProtectionLos{},
+						Advanced: model.ExtraSpec{
+							"thin": true,
+						},
+					},
+				},
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"extras.ioConnectivity.accessProtocol": "erbd",
+			},
+			pools: fakePools,
+			expected: []*model.StoragePoolSpec{
+				&model.StoragePoolSpec{
+					Extras: model.StoragePoolExtraSpec{
+						IOConnectivity: model.IOConnectivityLoS{
+							AccessProtocol: "erbd",
+							MaxIOPS:        1,
+							MaxBWS:         99,
+						},
+						Advanced: model.ExtraSpec{
+							"thin": false,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
 	}
 }

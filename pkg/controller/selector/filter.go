@@ -59,7 +59,8 @@ func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, 
 
 	result := make(map[string]interface{})
 
-	for {
+	// There is no infinite loop here, so set the maximum number of loops to 10.
+	for i := 0; i < 10; i++ {
 		simpleMap, unSimpleMap := simplifyPoolCapabilityMap(temMap)
 
 		if 0 != len(result) {
@@ -76,6 +77,8 @@ func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, 
 
 		temMap = unSimpleMap
 	}
+
+	return result, nil
 }
 
 // IsAvailablePool ...
