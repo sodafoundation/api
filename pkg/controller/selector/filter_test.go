@@ -131,18 +131,24 @@ func TestAZFilter(t *testing.T) {
 func TestThinFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"thin": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"thin": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"thin": false,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin": false,
+				},
 			},
 		},
 	}
@@ -153,31 +159,37 @@ func TestThinFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"extras.thin": true,
+				"extras.advanced.thin": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"thin": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"thin": true,
+						},
 					},
 				},
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"thin": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"thin": true,
+						},
 					},
 				},
 			},
 		},
 		{
 			request: map[string]interface{}{
-				"extras.thin": false,
+				"extras.advanced.thin": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"thin": false,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"thin": false,
+						},
 					},
 				},
 			},
@@ -197,18 +209,24 @@ func TestThinFilter(t *testing.T) {
 func TestDedupeFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"dedupe": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"dedupe": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"dedupe": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"dedupe": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"dedupe": false,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"dedupe": false,
+				},
 			},
 		},
 	}
@@ -219,31 +237,37 @@ func TestDedupeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"extras.dedupe": true,
+				"extras.advanced.dedupe": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"dedupe": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"dedupe": true,
+						},
 					},
 				},
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"dedupe": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"dedupe": true,
+						},
 					},
 				},
 			},
 		},
 		{
 			request: map[string]interface{}{
-				"extras.dedupe": false,
+				"extras.advanced.dedupe": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"dedupe": false,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"dedupe": false,
+						},
 					},
 				},
 			},
@@ -263,18 +287,24 @@ func TestDedupeFilter(t *testing.T) {
 func TestCompressFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"compress": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"compress": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"compress": true,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"compress": true,
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"compress": false,
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"compress": false,
+				},
 			},
 		},
 	}
@@ -285,31 +315,37 @@ func TestCompressFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"extras.compress": true,
+				"extras.advanced.compress": true,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"compress": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"compress": true,
+						},
 					},
 				},
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"compress": true,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"compress": true,
+						},
 					},
 				},
 			},
 		},
 		{
 			request: map[string]interface{}{
-				"extras.compress": false,
+				"extras.advanced.compress": false,
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"compress": false,
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"compress": false,
+						},
 					},
 				},
 			},
@@ -329,18 +365,24 @@ func TestCompressFilter(t *testing.T) {
 func TestDiskTypeFilter(t *testing.T) {
 	fakePools := []*model.StoragePoolSpec{
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"diskType": "SSD",
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"diskType": "SAS",
+				},
 			},
 		},
 		&model.StoragePoolSpec{
-			Extras: model.ExtraSpec{
-				"diskType": "SATA",
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"diskType": "SATA",
+				},
 			},
 		},
 	}
@@ -351,20 +393,22 @@ func TestDiskTypeFilter(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"extras.diskType": "SSD",
+				"extras.advanced.diskType": "SSD",
 			},
 			pools: fakePools,
 			expected: []*model.StoragePoolSpec{
 				&model.StoragePoolSpec{
-					Extras: model.ExtraSpec{
-						"diskType": "SSD",
+					Extras: model.StoragePoolExtraSpec{
+						Advanced: model.ExtraSpec{
+							"diskType": "SSD",
+						},
 					},
 				},
 			},
 		},
 		{
 			request: map[string]interface{}{
-				"extras.diskType": "NVMe SSD",
+				"extras.advanced.diskType": "NVMe SSD",
 			},
 			pools:    fakePools,
 			expected: nil,
@@ -389,11 +433,13 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 		},
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   true,
-			"compress": true,
-			"diskType": "SSD",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SSD",
+			},
 		},
 	}
 
@@ -401,7 +447,7 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 	mapA = make(map[string]interface{})
 	mapA["key1"] = "value1"
 	mapA["key2"] = "value2"
-	Pool.Extras["mapA"] = mapA
+	Pool.Extras.Advanced["mapA"] = mapA
 
 	result, err := GetPoolCapabilityMap(&Pool)
 	if nil != err {
@@ -418,12 +464,12 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.FreeCapacity), ok, FreeCapacity)
 	}
 
-	thin, ok := result["extras.thin"].(bool)
-	if (!ok) || (Pool.Extras["thin"] != thin) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras["thin"], ok, thin)
+	thin, ok := result["extras.advanced.thin"].(bool)
+	if (!ok) || (Pool.Extras.Advanced["thin"] != thin) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.Advanced["thin"], ok, thin)
 	}
 
-	value1, ok := result["extras.mapA.key1"].(string)
+	value1, ok := result["extras.advanced.mapA.key1"].(string)
 	if (!ok) || ("value1" != value1) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, "value1", ok, value1)
 	}

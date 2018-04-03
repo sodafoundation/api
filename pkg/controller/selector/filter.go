@@ -57,20 +57,23 @@ func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, 
 		return nil, err
 	}
 
-	lastSimpleMap := make(map[string]interface{})
+	result := make(map[string]interface{})
 
 	for {
 		simpleMap, unSimpleMap := simplifyPoolCapabilityMap(temMap)
 
-		if 0 == len(unSimpleMap) {
-			for key, value := range lastSimpleMap {
-				simpleMap[key] = value
+		if 0 != len(result) {
+			for key, value := range simpleMap {
+				result[key] = value
 			}
-
-			return simpleMap, nil
+		} else {
+			result = simpleMap
 		}
 
-		lastSimpleMap = simpleMap
+		if 0 == len(unSimpleMap) {
+			return result, nil
+		}
+
 		temMap = unSimpleMap
 	}
 }
