@@ -35,17 +35,17 @@ func TestSelectSupportedPool(t *testing.T) {
 	}{
 		{
 			request: map[string]interface{}{
-				"freeCapacity":     ">= 5001",
-				"availabilityZone": "az1",
-				"extras.thin":      true,
+				"freeCapacity":         ">= 5001",
+				"availabilityZone":     "az1",
+				"extras.advanced.thin": true,
 			},
 			expected: fakePools[1],
 		},
 		{
 			request: map[string]interface{}{
-				"freeCapacity":     ">= 400",
-				"availabilityZone": "s== default",
-				"extras.diskType":  "s== SSD",
+				"freeCapacity":             ">= 400",
+				"availabilityZone":         "s== default",
+				"extras.advanced.diskType": "s== SSD",
 			},
 			expected: nil,
 		},
@@ -74,11 +74,13 @@ var (
 			TotalCapacity:    99999,
 			FreeCapacity:     5000,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-			Extras: model.ExtraSpec{
-				"thin":     true,
-				"dedupe":   false,
-				"compress": false,
-				"diskType": "SSD",
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin":     true,
+					"dedupe":   false,
+					"compress": false,
+					"diskType": "SSD",
+				},
 			},
 		},
 		{
@@ -93,11 +95,13 @@ var (
 			TotalCapacity:    99999,
 			FreeCapacity:     6999,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-			Extras: model.ExtraSpec{
-				"thin":     true,
-				"dedupe":   true,
-				"compress": true,
-				"diskType": "SATA",
+			Extras: model.StoragePoolExtraSpec{
+				Advanced: model.ExtraSpec{
+					"thin":     true,
+					"dedupe":   true,
+					"compress": true,
+					"diskType": "SATA",
+				},
 			},
 		},
 	}
@@ -111,11 +115,13 @@ var (
 		},
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   true,
-			"compress": true,
-			"diskType": "SSD",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SSD",
+			},
 		},
 	}
 	PoolB = model.StoragePoolSpec{
@@ -125,11 +131,13 @@ var (
 		},
 		FreeCapacity:     int64(60),
 		AvailabilityZone: "az2",
-		Extras: model.ExtraSpec{
-			"thin":     false,
-			"dedupe":   false,
-			"compress": false,
-			"diskType": "SATA",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     false,
+				"dedupe":   false,
+				"compress": false,
+				"diskType": "SATA",
+			},
 		},
 	}
 	PoolC = model.StoragePoolSpec{
@@ -139,18 +147,20 @@ var (
 		},
 		FreeCapacity:     int64(70),
 		AvailabilityZone: "az3",
-		Extras: model.ExtraSpec{
-			"thin":     true,
-			"dedupe":   false,
-			"compress": true,
-			"diskType": "SSD",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   false,
+				"compress": true,
+				"diskType": "SSD",
+			},
 		},
 	}
 )
 
 func TestSelectSupportedPools_00(t *testing.T) {
 	request := make(map[string]interface{})
-	request["extras.thin"] = true
+	request["extras.advanced.thin"] = true
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -167,7 +177,7 @@ func TestSelectSupportedPools_00(t *testing.T) {
 		t.Errorf("Expected %v, get %v", PoolA, supportedPools[0])
 	}
 
-	delete(request, "extras.thin")
+	delete(request, "extras.advanced.thin")
 	request["freeCapacity"] = float64(70)
 	supportedPools, err = SelectSupportedPools(3, request, pools)
 	if nil != err {
@@ -181,7 +191,7 @@ func TestSelectSupportedPools_00(t *testing.T) {
 
 func TestSelectSupportedPools_01(t *testing.T) {
 	request := make(map[string]interface{})
-	request["extras.thin"] = 1
+	request["extras.advanced.thin"] = 1
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -190,7 +200,7 @@ func TestSelectSupportedPools_01(t *testing.T) {
 	}
 
 	supportedPools, err := SelectSupportedPools(3, request, pools)
-	ExpectedErr := "the type of extras.thin must be bool"
+	ExpectedErr := "the type of extras.advanced.thin must be bool"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -201,11 +211,11 @@ func TestSelectSupportedPools_01(t *testing.T) {
 	}
 
 	fmt.Println(err.Error())
-	delete(request, "extras.thin")
+	delete(request, "extras.advanced.thin")
 	delete(request, "availabilityZone")
 	request["freeCapacity"] = float64(80)
 	supportedPools, err = SelectSupportedPools(3, request, pools)
-	ExpectedErr = "No available pool to meet user's requirement"
+	ExpectedErr = "no available pool to meet user's requirement"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -219,7 +229,7 @@ func TestSelectSupportedPools_01(t *testing.T) {
 func TestSelectSupportedPools_03(t *testing.T) {
 	request := make(map[string]interface{})
 	// bool:1、0、t、f、T、F、true、false、True、False、TRUE、FALSE
-	request["extras.thin"] = "1"
+	request["extras.advanced.thin"] = "1"
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -236,7 +246,7 @@ func TestSelectSupportedPools_03(t *testing.T) {
 		t.Errorf("Expected %v, get %v", PoolA, supportedPools[0])
 	}
 
-	delete(request, "extras.thin")
+	delete(request, "extras.advanced.thin")
 	request["freeCapacity"] = "70"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
 	if nil != err {
@@ -248,7 +258,7 @@ func TestSelectSupportedPools_03(t *testing.T) {
 	}
 
 	delete(request, "freeCapacity")
-	request["extras.diskType"] = "SATA"
+	request["extras.advanced.diskType"] = "SATA"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
 	if nil != err {
 		t.Errorf(err.Error())
@@ -261,7 +271,7 @@ func TestSelectSupportedPools_03(t *testing.T) {
 
 func TestSelectSupportedPools_04(t *testing.T) {
 	request := make(map[string]interface{})
-	request["extras.thin"] = "2"
+	request["extras.advanced.thin"] = "2"
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -270,7 +280,7 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	supportedPools, err := SelectSupportedPools(3, request, pools)
-	ExpectedErr := "capability is: extras.thin, 2 is not bool"
+	ExpectedErr := "capability is: extras.advanced.thin, 2 is not bool"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -281,11 +291,11 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	fmt.Println(err.Error())
-	delete(request, "extras.thin")
+	delete(request, "extras.advanced.thin")
 	delete(request, "availabilityZone")
 	request["freeCapacity"] = "80"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
-	ExpectedErr = "No available pool to meet user's requirement"
+	ExpectedErr = "no available pool to meet user's requirement"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -296,9 +306,9 @@ func TestSelectSupportedPools_04(t *testing.T) {
 	}
 
 	delete(request, "freeCapacity")
-	request["extras.diskType"] = "SSD1"
+	request["extras.advanced.diskType"] = "SSD1"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
-	ExpectedErr = "No available pool to meet user's requirement"
+	ExpectedErr = "no available pool to meet user's requirement"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -587,7 +597,7 @@ func TestSelectSupportedPools_10(t *testing.T) {
 
 func TestSelectSupportedPools_11(t *testing.T) {
 	request := make(map[string]interface{})
-	request["extras.dedupe"] = "<is>"
+	request["extras.advanced.dedupe"] = "<is>"
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -596,7 +606,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 	}
 
 	supportedPools, err := SelectSupportedPools(3, request, pools)
-	ExpectedErr := "the format of extras.dedupe: <is> is incorrect"
+	ExpectedErr := "the format of extras.advanced.dedupe: <is> is incorrect"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -606,9 +616,9 @@ func TestSelectSupportedPools_11(t *testing.T) {
 		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
-	request["extras.dedupe"] = "<is> 2"
+	request["extras.advanced.dedupe"] = "<is> 2"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
-	ExpectedErr = "capability is: extras.dedupe, 2 is not bool"
+	ExpectedErr = "capability is: extras.advanced.dedupe, 2 is not bool"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -618,7 +628,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 		t.Errorf("Expected %v, get %v", nil, supportedPools[0])
 	}
 
-	delete(request, "extras.dedupe")
+	delete(request, "extras.advanced.dedupe")
 	request["freeCapacity"] = "<is> 1"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
 	ExpectedErr = "the value of freeCapacity is not bool"
@@ -635,7 +645,7 @@ func TestSelectSupportedPools_11(t *testing.T) {
 func TestSelectSupportedPools_12(t *testing.T) {
 	request := make(map[string]interface{})
 
-	request["extras.dedupe"] = "<is> t"
+	request["extras.advanced.dedupe"] = "<is> t"
 
 	pools := []*model.StoragePoolSpec{
 		&PoolA,
@@ -652,7 +662,7 @@ func TestSelectSupportedPools_12(t *testing.T) {
 		t.Errorf("Expected %v, get %v", PoolA, supportedPools[0])
 	}
 
-	request["extras.dedupe"] = "<is> f"
+	request["extras.advanced.dedupe"] = "<is> f"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
 	if nil != err {
 		t.Errorf(err.Error())
@@ -685,9 +695,9 @@ func TestSelectSupportedPools_13(t *testing.T) {
 	}
 
 	delete(request, "availabilityZone")
-	request["extras.dedupe"] = "s== az"
+	request["extras.advanced.dedupe"] = "s== az"
 	supportedPools, err = SelectSupportedPools(3, request, pools)
-	ExpectedErr = "extras.dedupeis not a string"
+	ExpectedErr = "extras.advanced.dedupeis not a string"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)
@@ -781,7 +791,7 @@ func TestSelectSupportedPools_15(t *testing.T) {
 	}
 
 	supportedPools, err := SelectSupportedPools(3, request, pools)
-	ExpectedErr := "No available pool to meet user's requirement"
+	ExpectedErr := "no available pool to meet user's requirement"
 
 	if ExpectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", ExpectedErr, err)

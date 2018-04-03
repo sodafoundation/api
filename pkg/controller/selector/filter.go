@@ -57,20 +57,23 @@ func GetPoolCapabilityMap(pool *model.StoragePoolSpec) (map[string]interface{}, 
 		return nil, err
 	}
 
-	lastSimpleMap := make(map[string]interface{})
+	result := make(map[string]interface{})
 
 	for {
 		simpleMap, unSimpleMap := simplifyPoolCapabilityMap(temMap)
 
-		if 0 == len(unSimpleMap) {
-			for key, value := range lastSimpleMap {
-				simpleMap[key] = value
+		if 0 != len(result) {
+			for key, value := range simpleMap {
+				result[key] = value
 			}
-
-			return simpleMap, nil
+		} else {
+			result = simpleMap
 		}
 
-		lastSimpleMap = simpleMap
+		if 0 == len(unSimpleMap) {
+			return result, nil
+		}
+
 		temMap = unSimpleMap
 	}
 }
@@ -81,20 +84,18 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 	if nil != err {
 		return false, err
 	}
-
 	for key, reqValue := range filterReq {
 		poolValue, ok := poolMap[key]
 		if !ok {
 			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)
 			return false, nil
 		}
-
 		ismatch, err := match(key, poolValue, reqValue)
 		if nil != err {
 			return false, err
 		}
 
-		if false == ismatch {
+		if !ismatch {
 			return false, nil
 		}
 	}

@@ -68,7 +68,8 @@ func (ds *dockServer) Run() error {
 	// New Grpc Server
 	s := grpc.NewServer()
 	// Register dock service.
-	pb.RegisterDockServer(s, ds)
+	pb.RegisterProvisionDockServer(s, ds)
+	pb.RegisterAttachDockServer(s, ds)
 
 	// Listen the dock server port.
 	lis, err := net.Listen("tcp", ds.Port)
@@ -197,6 +198,41 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 
 	if err := dock.Brain.DeleteSnapshot(opt); err != nil {
 		log.Error("Error occurred in dock module when delete snapshot:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult("")
+	return &res, nil
+}
+
+// AttachVolume implements pb.DockServer.AttachVolume
+func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive attach volume request, vr =", opt)
+
+	atc, err := dock.Brain.AttachVolume(opt)
+	if err != nil {
+		log.Error("Error occurred in dock module when attach volume:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult(atc)
+	return &res, nil
+}
+
+// DetachVolume implements pb.DockServer.DetachVolume
+func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive detach volume request, vr =", opt)
+
+	if err := dock.Brain.DetachVolume(opt); err != nil {
+		log.Error("Error occurred in dock module when detach volume:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
