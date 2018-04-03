@@ -23,6 +23,8 @@
   "volume:get_attachment": "rule:admin_or_owner",
   "volume:update_attachment": "rule:admin_or_owner",
   "volume:delete_attachment": "rule:admin_or_owner",
+  "volume:attach_volume": "rule:admin_or_owner",
+  "volume:detach_volume": "rule:admin_or_owner",
   "snapshot:create": "rule:admin_or_owner",
   "snapshot:list": "rule:admin_or_owner",
   "snapshot:get": "rule:admin_or_owner",
