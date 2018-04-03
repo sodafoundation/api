@@ -110,6 +110,26 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 	}, nil
 }
 
+// Attach a volume
+func (fc *fakeClient) AttachVolume(ctx context.Context, in *pb.AttachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: "",
+			},
+		},
+	}, nil
+}
+
+// Detach a volume
+func (fc *fakeClient) DetachVolume(ctx context.Context, in *pb.DetachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 func NewFakeController() Controller {
 	return &controller{
 		Client:   NewFakeClient(),

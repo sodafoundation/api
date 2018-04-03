@@ -35,7 +35,7 @@ syntax = "proto3";
 package proto;
 
 
-service Dock {
+service ProvisionDock {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
     
@@ -83,12 +83,10 @@ message CreateVolumeOpts {
     string poolName = 9;    
     // The metadata of the volume, optional.
     map<string, string> metadata = 10;
-    // The dock infomation on which the request will be executed
-    string dockId = 11;
     // The storage driver type.
-    string driverName = 12;
+    string driverName = 11;
     // The Context
-    string context = 13;
+    string context = 12;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties
@@ -98,12 +96,10 @@ message DeleteVolumeOpts {
     string id = 1;
     // The metadata of the volume, optional.
     map<string, string> metadata = 2;
-    // The dock infomation on which the request will be executed.
-    string dockId = 3;
     // The storage driver type.
-    string driverName = 4;
+    string driverName = 3;
     // The Context
-    string context = 5;
+    string context = 4;
 }
 
 // ExtendVolumeOpts is a structure which indicates all required properties
@@ -129,12 +125,10 @@ message ExtendVolumeOpts {
     string poolName = 9;    
     // The metadata of the volume, optional.
     map<string, string> metadata = 10;
-    // The dock infomation on which the request will be executed
-    string dockId = 11;
     // The storage driver type.
-    string driverName = 12;
+    string driverName = 11;
     // The Context
-    string context = 13;
+    string context = 12;
 }
 
 // CreateVolumeSnapshotOpts is a structure which indicates all required
@@ -152,12 +146,10 @@ message CreateVolumeSnapshotOpts {
     string volumeId = 5;
     // The metadata of the volume snapshot, optional.
     map<string, string> metadata = 6;
-    // The dock infomation on which the request will be executed
-    string dockId = 7;
     // The storage driver type.
-    string driverName = 8;
+    string driverName = 7;
     // The Context
-    string context = 9;
+    string context = 8;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
@@ -169,12 +161,10 @@ message DeleteVolumeSnapshotOpts {
     string volumeId = 2;
     // The metadata of the volume snapshot, optional.
     map<string, string> metadata = 3;
-    // The dock infomation on which the request will be executed
-    string dockId = 4;
     // The storage driver type.
-    string driverName = 5;
+    string driverName = 4;
     // The Context
-    string context = 6;
+    string context = 5;
 }
 
 // CreateAttachmentOpts is a structure which indicates all required
@@ -192,12 +182,10 @@ message CreateAttachmentOpts {
     HostInfo hostInfo = 5;
     // The metadata of the volume attachment, optional.
     map<string, string> metadata = 6;
-    // The dock infomation on which the request will be executed
-    string dockId = 7;
     // The storage driver type.
-    string driverName = 8;
+    string driverName = 7;
     // The Context
-    string context = 9;
+    string context = 8;
 }
 
 // DeleteAttachmentOpts is a structure which indicates all required
@@ -211,12 +199,10 @@ message DeleteAttachmentOpts {
     HostInfo hostInfo = 3;
     // The metadata of the volume attachment, optional.
     map<string, string> metadata = 4;
-    // The dock infomation on which the request will be executed
-    string dockId = 5;
     // The storage driver type.
-    string driverName = 6;
+    string driverName = 5;
     // The Context
-    string context = 7;
+    string context = 6;
 }
 
 message HostInfo {
@@ -230,6 +216,40 @@ message HostInfo {
     string ip = 4;
     // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
     string initiator = 5;
+}
+
+service AttachDock {
+    // Attach a volume
+    rpc AttachVolume (AttachVolumeOpts) returns (GenericResponse){}
+    
+    // Detach a volume
+    rpc DetachVolume (DetachVolumeOpts) returns (GenericResponse){}
+}
+
+// AttachVolumeOpts is a structure which indicates all required
+// properties for attaching a volume.
+message AttachVolumeOpts {
+	// The access protocol for attaching a volume.
+    string accessProtocol = 1;
+	// The connectionData for attaching a volume.
+	string connectionData = 2;
+    // The metadata for attaching a volume, optional.
+    map<string, string> metadata = 3;
+    // The Context
+    string context = 4;
+}
+
+// DetachVolumeOpts is a structure which indicates all required
+// properties for detaching a volume.
+message DetachVolumeOpts {
+	// The access protocol for detaching a volume.
+    string accessProtocol = 1;
+	// The connectionData for detaching a volume.
+	string connectionData = 2;
+    // The metadata for detaching a volume, optional.
+    map<string, string> metadata = 3;
+    // The Context
+    string context = 4;
 }
 
 // Generic response, it return:
