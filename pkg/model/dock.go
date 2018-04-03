@@ -43,6 +43,10 @@ type DockSpec struct {
 	// Endpoint represents the dock server's access address.
 	Endpoint string `json:"endpoint,omitempty"`
 
+	// NodeId represents the identification of the host, it can be considered
+	// as instance id or hostname.
+	NodeId string `json:"nodeId,omitempty"`
+
 	// DriverName represents the dock provider.
 	// Currently One of: "cinder", "ceph", "lvm", "default".
 	DriverName string `json:"driverName,omitempty"`

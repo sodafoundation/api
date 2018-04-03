@@ -78,6 +78,9 @@ func Run(host string) {
 				beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
 				beego.NSRouter("/attachments/:attachmentId", &VolumeAttachmentPortal{}, "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
 
+				// Attaches and detaches volume.
+				beego.NSRouter("/attachments/:attachmentId/action", &VolumeAttachmentPortal{}, "post:AttachVolume;delete:DetachVolume"),
+
 				// Snapshot is a point-in-time copy of the data that a volume contains.
 				// Creates, shows, lists, unpdates and deletes snapshot.
 				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),

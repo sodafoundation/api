@@ -117,9 +117,9 @@ type ConnectionInfo struct {
 	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty"`
 }
 
-func (con *ConnectionInfo) EncodeConnectionData() []byte {
+func (con *ConnectionInfo) EncodeConnectionData() string {
 	conBody, _ := json.Marshal(&con.ConnectionData)
-	return conBody
+	return string(conBody)
 }
 
 // VolumeSnapshotSpec is a description of volume snapshot resource.

@@ -48,6 +48,10 @@ type Controller interface {
 
 	DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
+	AttachVolume(opt *pb.AttachVolumeOpts) (string, error)
+
+	DetachVolume(opt *pb.DetachVolumeOpts) error
+
 	SetDock(dockInfo *model.DockSpec)
 }
 
@@ -225,6 +229,48 @@ func (c *controller) DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) erro
 	response, err := c.Client.DeleteVolumeSnapshot(context.Background(), opt)
 	if err != nil {
 		log.Error("Delete volume snapshot failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
+
+func (c *controller) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return "", err
+	}
+
+	response, err := c.Client.AttachVolume(context.Background(), opt)
+	if err != nil {
+		log.Error("Attach volume failed in volume controller:", err)
+		return "", err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return "",
+			fmt.Errorf("Failed to attach volume in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	return response.GetResult().GetMessage(), nil
+}
+
+func (c *controller) DetachVolume(opt *pb.DetachVolumeOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.DetachVolume(context.Background(), opt)
+	if err != nil {
+		log.Error("Detach volume failed in volume controller:", err)
 		return err
 	}
 	defer c.Client.Close()

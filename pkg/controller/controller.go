@@ -472,6 +472,42 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 	errchan <- nil
 }
 
+func (c *Controller) AttachVolume(ctx *c.Context, in *model.VolumeAttachmentSpec) (string, error) {
+	nodeId := in.Host
+	dockInfo, err := searchDockByNodeId(ctx, nodeId)
+	if err != nil {
+		return "", err
+	}
+
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.AttachVolume(
+		&pb.AttachVolumeOpts{
+			AccessProtocol: in.DriverVolumeType,
+			ConnectionData: in.EncodeConnectionData(),
+			Context:        ctx.ToJson(),
+		},
+	)
+}
+
+func (c *Controller) DetachVolume(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
+	nodeId := in.Host
+	dockInfo, err := searchDockByNodeId(ctx, nodeId)
+	if err != nil {
+		return err
+	}
+
+	c.volumeController.SetDock(dockInfo)
+
+	return c.volumeController.DetachVolume(
+		&pb.DetachVolumeOpts{
+			AccessProtocol: in.DriverVolumeType,
+			ConnectionData: in.EncodeConnectionData(),
+			Context:        ctx.ToJson(),
+		},
+	)
+}
+
 func (c *Controller) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
 	switch in.(type) {
 
@@ -500,4 +536,18 @@ func (c *Controller) UpdateStatus(ctx *c.Context, in interface{}, status string)
 		}
 	}
 	return nil
+}
+
+func searchDockByNodeId(ctx *c.Context, nodeId string) (*model.DockSpec, error) {
+	dcks, err := db.C.ListDocks(ctx)
+	if err != nil {
+		log.Error("When list dock resource:", err)
+		return nil, err
+	}
+	for _, dck := range dcks {
+		if nodeId == dck.NodeId {
+			return dck, nil
+		}
+	}
+	return nil, fmt.Errorf("Failed to search supported dock resource with node id (%s)!", nodeId)
 }

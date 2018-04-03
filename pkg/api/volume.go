@@ -496,6 +496,64 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	return
 }
 
+func (this *VolumeAttachmentPortal) AttachVolume() {
+	if !policy.Authorize(this.Ctx, "volume:attach_volume") {
+		return
+	}
+	var attachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&attachment); err != nil {
+		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	result, err := controller.Brain.AttachVolume(c.GetContext(this.Ctx), &attachment)
+	if err != nil {
+		reason := fmt.Sprintf("Attach volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.Body([]byte(result))
+	return
+}
+
+func (this *VolumeAttachmentPortal) DetachVolume() {
+	if !policy.Authorize(this.Ctx, "volume:detach_volume") {
+		return
+	}
+	var attachment = model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&attachment); err != nil {
+		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	if err := controller.Brain.DetachVolume(c.GetContext(this.Ctx), &attachment); err != nil {
+		reason := fmt.Sprintf("Detach volume failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusAccepted)
+	return
+}
+
 type VolumeSnapshotPortal struct {
 	BasePortal
 }

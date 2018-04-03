@@ -72,6 +72,7 @@ func (dd *DockDiscoverer) Init() error {
 			Description: b.Description,
 			DriverName:  b.DriverName,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
+			NodeId:      host,
 		}
 		dd.dcks = append(dd.dcks, dck)
 	}
