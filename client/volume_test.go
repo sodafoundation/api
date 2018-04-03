@@ -410,7 +410,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		Name:        "sample-snapshot-01",
 		Description: "This is the first sample snapshot for testing",
 		Size:        int64(1),
-		Status:      "created",
+		Status:      "available",
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 
@@ -437,7 +437,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		Name:        "sample-snapshot-01",
 		Description: "This is the first sample snapshot for testing",
 		Size:        int64(1),
-		Status:      "created",
+		Status:      "available",
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 
@@ -462,7 +462,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 			Name:        "sample-snapshot-01",
 			Description: "This is the first sample snapshot for testing",
 			Size:        int64(1),
-			Status:      "created",
+			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
 		{
@@ -472,7 +472,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 			Name:        "sample-snapshot-02",
 			Description: "This is the second sample snapshot for testing",
 			Size:        int64(1),
-			Status:      "created",
+			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
 	}
@@ -520,7 +520,7 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		Name:        "sample-snapshot-01",
 		Description: "This is the first sample snapshot for testing",
 		Size:        1,
-		Status:      "created",
+		Status:      "available",
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 

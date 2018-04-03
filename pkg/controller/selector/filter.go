@@ -81,20 +81,18 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 	if nil != err {
 		return false, err
 	}
-
 	for key, reqValue := range filterReq {
 		poolValue, ok := poolMap[key]
 		if !ok {
 			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)
 			return false, nil
 		}
-
 		ismatch, err := match(key, poolValue, reqValue)
 		if nil != err {
 			return false, err
 		}
 
-		if false == ismatch {
+		if !ismatch {
 			return false, nil
 		}
 	}
