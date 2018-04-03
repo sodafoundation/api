@@ -205,12 +205,13 @@ func (fc *FakeDbClient) RemoveExtraProperty(ctx *c.Context, prfID, extraKey stri
 
 // CreateVolume
 func (fc *FakeDbClient) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	return &SampleVolumes[0], nil
+	return vol, nil
 }
 
 // GetVolume
 func (fc *FakeDbClient) GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
-	return &SampleVolumes[0], nil
+	vol := SampleVolumes[0]
+	return &vol, nil
 }
 
 // ListVolumes
@@ -244,12 +245,13 @@ func (fc *FakeDbClient) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*mo
 
 // CreateVolumeAttachment
 func (fc *FakeDbClient) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	return &SampleAttachments[0], nil
+	return attachment, nil
 }
 
 // GetVolumeAttachment
 func (fc *FakeDbClient) GetVolumeAttachment(ctx *c.Context, attachmentId string) (*model.VolumeAttachmentSpec, error) {
-	return &SampleAttachments[0], nil
+	attach := SampleAttachments[0]
+	return &attach, nil
 }
 
 // ListVolumeAttachments
@@ -278,12 +280,13 @@ func (fc *FakeDbClient) DeleteVolumeAttachment(ctx *c.Context, attachmentId stri
 
 // CreateVolumeSnapshot
 func (fc *FakeDbClient) CreateVolumeSnapshot(ctx *c.Context, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	return &SampleSnapshots[0], nil
+	return vs, nil
 }
 
 // GetVolumeSnapshot
 func (fc *FakeDbClient) GetVolumeSnapshot(ctx *c.Context, snapshotID string) (*model.VolumeSnapshotSpec, error) {
-	return &SampleSnapshots[0], nil
+	snap := SampleSnapshots[0]
+	return &snap, nil
 }
 
 // ListVolumeSnapshots
