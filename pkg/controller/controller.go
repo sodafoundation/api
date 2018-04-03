@@ -256,9 +256,9 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	c.volumeController.SetDock(dockInfo)
 
 	opt := &pb.ExtendVolumeOpts{
-		Id:         volume.Id,
-		Size:       volume.Size,
-		Metadata:   volume.Metadata,
+		Id:         vol.Id,
+		Size:       vol.Size,
+		Metadata:   vol.Metadata,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
