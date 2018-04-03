@@ -75,6 +75,17 @@ var (
 			FreeCapacity:     5000,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
 			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        1,
+					MaxBWS:         10,
+				},
+				DataProtection: model.DataProtectionLos{},
 				Advanced: model.ExtraSpec{
 					"thin":     true,
 					"dedupe":   false,
