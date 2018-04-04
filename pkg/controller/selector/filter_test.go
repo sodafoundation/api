@@ -26,51 +26,58 @@ import (
 
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
-func TestGetPoolCapabilityMap(t *testing.T) {
-	Pool := model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
-			CreatedAt: "2017-10-24T15:04:05",
-		},
-		FreeCapacity:     int64(50),
-		AvailabilityZone: "az1",
-		Extras: model.StoragePoolExtraSpec{
-			DataStorage: model.DataStorageLoS{
-				RecoveryTimeObjective: 3,
-				ProvisioningPolicy:    "Thin",
-				IsSpaceEfficient:      true,
-			},
-			IOConnectivity: model.IOConnectivityLoS{
-				AccessProtocol: "rbd",
-				MaxIOPS:        1,
-				MaxBWS:         1000,
-			},
-			DataProtection: model.DataProtectionLos{},
-			Advanced: model.ExtraSpec{
-				"thin":     true,
-				"dedupe":   true,
-				"compress": true,
-				"diskType": "SSD",
-			},
-		},
+type FilterCaseSpec struct {
+	request  map[string]interface{}
+	expected []*model.StoragePoolSpec
+}
+
+var (
+	FakePools = []*model.StoragePoolSpec{
+		&SamplePools[0],
+		&SamplePools[1],
+	}
+)
+
+func TestSimplifyPoolCapabilityMap(t *testing.T) {
+	input := make(map[string]interface{})
+	input["name"] = "sample-pool-02"
+	input["extras.advanced"] = map[string]interface{}{
+		"diskType": "SAS",
+	}
+	simpleMap, unSimpleMap := simplifyPoolCapabilityMap(input)
+
+	if 2 != len(simpleMap) {
+		t.Errorf("Expected %v, get %v", 2, len(simpleMap))
 	}
 
-	var mapA map[string]interface{}
-	mapA = make(map[string]interface{})
-	mapA["key1"] = "value1"
-	mapA["key2"] = "value2"
-	Pool.Extras.Advanced["mapA"] = mapA
+	if 0 != len(unSimpleMap) {
+		t.Errorf("Expected %v, get %v", 0, len(simpleMap))
+	}
 
+	name, ok := simpleMap["name"].(string)
+	if (!ok) || (input["name"] != name) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, input["name"], ok, name)
+	}
+
+	diskType, ok := simpleMap["extras.advanced.diskType"].(string)
+	if (!ok) || ("SAS" != diskType) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, "SAS", ok, diskType)
+	}
+}
+
+func TestGetPoolCapabilityMap(t *testing.T) {
+	Pool := SamplePools[0]
 	result, err := GetPoolCapabilityMap(&Pool)
 	if nil != err {
-		t.Errorf("Expected %v, get %v", nil, result)
+		t.Errorf("Expected %v, get %v", nil, err)
 	}
 
-	CreatedAt, ok := result["createdAt"].(string)
-	if (!ok) || (Pool.CreatedAt != CreatedAt) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.CreatedAt, ok, CreatedAt)
+	id, ok := result["id"].(string)
+	if (!ok) || (Pool.Id != id) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Id, ok, id)
 	}
 
 	FreeCapacity, ok := result["freeCapacity"].(float64)
@@ -78,82 +85,211 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.FreeCapacity), ok, FreeCapacity)
 	}
 
-	thin, ok := result["extras.advanced.thin"].(bool)
-	if (!ok) || (Pool.Extras.Advanced["thin"] != thin) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.Advanced["thin"], ok, thin)
-	}
-
-	value1, ok := result["extras.advanced.mapA.key1"].(string)
-	if (!ok) || ("value1" != value1) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, "value1", ok, value1)
-	}
-
-	RecoveryTimeObjective, ok := result["extras.dataStorage.recoveryTimeObjective"].(float64)
-	if (!ok) || (!utils.IsFloatEqual(RecoveryTimeObjective, float64(Pool.Extras.DataStorage.RecoveryTimeObjective))) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.Extras.DataStorage.RecoveryTimeObjective), ok, RecoveryTimeObjective)
-	}
-
-	ProvisioningPolicy, ok := result["extras.dataStorage.provisioningPolicy"].(string)
-	if (!ok) || (Pool.Extras.DataStorage.ProvisioningPolicy != ProvisioningPolicy) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.ProvisioningPolicy, ok, ProvisioningPolicy)
-	}
-
 	IsSpaceEfficient, ok := result["extras.dataStorage.isSpaceEfficient"].(bool)
 	if (!ok) || (Pool.Extras.DataStorage.IsSpaceEfficient != IsSpaceEfficient) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.IsSpaceEfficient, ok, IsSpaceEfficient)
 	}
+
+	latency, ok := result["extras.advanced.latency"].(string)
+	if (!ok) || (Pool.Extras.Advanced["latency"] != latency) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.Advanced["latency"], ok, latency)
+	}
 }
 
-var (
-	FakePools = []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{},
-		&model.StoragePoolSpec{},
-		&model.StoragePoolSpec{},
+func TestIsAvailablePool(t *testing.T) {
+	filterReq := make(map[string]interface{})
+	filterReq["totalCapacity"] = "<= 100"
+	isAvailable, err := IsAvailablePool(filterReq, &SamplePools[0])
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
 	}
 
-	TestCases = []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
+	if true != isAvailable {
+		t.Errorf("Expected %v, get %v", true, isAvailable)
+	}
+
+	filterReq["totalCapacity"] = "!= 200"
+	isAvailable, err = IsAvailablePool(filterReq, &SamplePools[1])
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != isAvailable {
+		t.Errorf("Expected %v, get %v", false, isAvailable)
+	}
+
+}
+
+func TestMatch(t *testing.T) {
+
+	isMatch, err := match("availabilityZone", "default", "<in> defau")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != isMatch {
+		t.Errorf("Expected %v, get %v", true, isMatch)
+	}
+
+	isMatch, err = match("availabilityZone", "default", "<in> defau1")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != isMatch {
+		t.Errorf("Expected %v, get %v", false, isMatch)
+	}
+}
+
+func TestInOperator(t *testing.T) {
+
+	result, err := InOperator("availabilityZone", "fau", "default")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = InOperator("availabilityZone", "default1", "default")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+		t.Errorf("Expected %v, get %v", false, result)
+	}
+}
+
+func TestCompareOperator(t *testing.T) {
+
+	result, err := CompareOperator("s<", "dockId", "123", "122")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = CompareOperator("s<", "dockId", "123", "124")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+		t.Errorf("Expected %v, get %v", false, result)
+	}
+}
+
+func TestStringCompare(t *testing.T) {
+
+	result, err := StringCompare("s<", "dockId", "123", "122")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+		t.Errorf("Expected %v, get %v", false, result)
+	}
+
+	result, err = StringCompare("s<", "dockId", "123", "124")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+}
+
+func TestParseBoolAndCompare(t *testing.T) {
+
+	result, err := ParseBoolAndCompare("isSpaceEfficient", true, "T")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = ParseBoolAndCompare("isSpaceEfficient", true, "0")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+		t.Errorf("Expected %v, get %v", false, result)
+	}
+}
+
+func TestParseFloat64AndCompare(t *testing.T) {
+
+	result, err := ParseFloat64AndCompare("==", "freeCapacity", 60.0, "60")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = ParseFloat64AndCompare("!=", "freeCapacity", 61.0, "60")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+}
+
+func TestOrOperator(t *testing.T) {
+	words := []string{"<or>", "10", "<or>", "20"}
+	result, err := OrOperator("freeCapacity", words, 20.0)
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = OrOperator("freeCapacity", words, 30.0)
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+		t.Errorf("Expected %v, get %v", false, result)
+	}
+}
+
+func TestIdFilter(t *testing.T) {
+	testCases := []FilterCaseSpec{
 		{
-			pools: FakePools,
+			request: map[string]interface{}{
+				"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+			},
 		},
 		{
-			pools: FakePools,
+			request: map[string]interface{}{
+				"id": "s== a594b8ac-a103-11e7-985f-d723bcf01b5f",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[1],
+			},
 		},
 	}
-)
 
-func TestCreatedAtFilter(t *testing.T) {
-	FakePools[0].BaseModel = &model.BaseModel{
-		CreatedAt: "2017-10-24T15:04:05",
-	}
-	FakePools[1].BaseModel = &model.BaseModel{
-		CreatedAt: "2017-10-24T15:04:06",
-	}
-	FakePools[2].BaseModel = &model.BaseModel{
-		CreatedAt: "2017-10-24T15:04:07",
-	}
-
-	TestCases[0].request = map[string]interface{}{
-		"createdAt": "s== 2017-10-24T15:04:05",
-	}
-	TestCases[0].expected = []*model.StoragePoolSpec{
-		FakePools[0],
-	}
-
-	TestCases[1].request = map[string]interface{}{
-		"createdAt": "s>= 2017-10-24T15:04:06",
-	}
-	TestCases[1].expected = []*model.StoragePoolSpec{
-		FakePools[1],
-		FakePools[2],
-	}
-
-	for _, testCase := range TestCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
 
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
@@ -162,26 +298,28 @@ func TestCreatedAtFilter(t *testing.T) {
 }
 
 func TestFreeCapacityFilter(t *testing.T) {
-	FakePools[0].FreeCapacity = 100
-	FakePools[1].FreeCapacity = 50
-	FakePools[2].FreeCapacity = 66
-
-	TestCases[0].request = map[string]interface{}{
-		"freeCapacity": ">= 66",
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"freeCapacity": ">= 170",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[1],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"freeCapacity": "== 90",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+			},
+		},
 	}
-	TestCases[0].expected = []*model.StoragePoolSpec{
-		FakePools[0],
-		FakePools[2],
-	}
 
-	TestCases[1].request = map[string]interface{}{
-		"freeCapacity": "> 100",
-	}
-	TestCases[1].expected = nil
-
-	for _, testCase := range TestCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
 
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
@@ -189,36 +327,28 @@ func TestFreeCapacityFilter(t *testing.T) {
 	}
 }
 
-func TestAccessProtocolFilter(t *testing.T) {
-	FakePools[0].Extras.IOConnectivity = model.IOConnectivityLoS{
-		AccessProtocol: "dbr",
-	}
-	FakePools[1].Extras.IOConnectivity = model.IOConnectivityLoS{
-		AccessProtocol: "rbd",
-	}
-	FakePools[2].Extras.IOConnectivity = model.IOConnectivityLoS{
-		AccessProtocol: "brd",
-	}
-
-	TestCases[0].request = map[string]interface{}{
-		"extras.ioConnectivity.accessProtocol": "rbd",
-	}
-	TestCases[0].expected = []*model.StoragePoolSpec{
-		FakePools[1],
-	}
-
-	TestCases[1].request = map[string]interface{}{
-		"extras.ioConnectivity.accessProtocol": "s!= rbd",
+func TestIsSpaceEfficientFilter(t *testing.T) {
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"extras.dataStorage.isSpaceEfficient": "<is> true",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+				&SamplePools[1],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"extras.dataStorage.isSpaceEfficient": "<is> false",
+			},
+			expected: nil,
+		},
 	}
 
-	TestCases[1].expected = []*model.StoragePoolSpec{
-		FakePools[0],
-		FakePools[2],
-	}
-
-	for _, testCase := range TestCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
 
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
@@ -227,34 +357,28 @@ func TestAccessProtocolFilter(t *testing.T) {
 }
 
 func TestAdvancedFilter(t *testing.T) {
-	FakePools[0].Extras.Advanced = model.ExtraSpec{
-		"compress": true,
-	}
-	FakePools[1].Extras.Advanced = model.ExtraSpec{
-		"compress": true,
-	}
-	FakePools[2].Extras.Advanced = model.ExtraSpec{
-		"compress": false,
-	}
-
-	TestCases[0].request = map[string]interface{}{
-		"extras.advanced.compress": true,
-	}
-	TestCases[0].expected = []*model.StoragePoolSpec{
-		FakePools[0],
-		FakePools[1],
-	}
-
-	TestCases[1].request = map[string]interface{}{
-		"extras.advanced.compress": false,
-	}
-	TestCases[1].expected = []*model.StoragePoolSpec{
-		FakePools[2],
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"extras.advanced.diskType": "SAS",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[1],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"extras.advanced.diskType": "s>= SSD",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+			},
+		},
 	}
 
-	for _, testCase := range TestCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
 
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
