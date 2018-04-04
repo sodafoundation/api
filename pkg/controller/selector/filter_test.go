@@ -28,491 +28,6 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 )
 
-func TestCapacityFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			FreeCapacity: int64(100),
-		},
-		&model.StoragePoolSpec{
-			FreeCapacity: int64(50),
-		},
-		&model.StoragePoolSpec{
-			FreeCapacity: int64(66),
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"freeCapacity": ">= 66",
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					FreeCapacity: int64(100),
-				},
-				&model.StoragePoolSpec{
-					FreeCapacity: int64(66),
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"freeCapacity": ">= 101",
-			},
-			pools:    fakePools,
-			expected: nil,
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
-func TestAZFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			AvailabilityZone: "az1",
-		},
-		&model.StoragePoolSpec{
-			AvailabilityZone: "az2",
-		},
-		&model.StoragePoolSpec{
-			AvailabilityZone: "az1",
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"availabilityZone": "az1",
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					AvailabilityZone: "az1",
-				},
-				&model.StoragePoolSpec{
-					AvailabilityZone: "az1",
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"availabilityZone": "az3",
-			},
-			pools:    fakePools,
-			expected: nil,
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
-func TestThinFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					RecoveryTimeObjective: 1,
-					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         1000,
-				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"thin": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"thin": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"thin": false,
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"extras.advanced.thin": true,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						DataStorage: model.DataStorageLoS{
-							RecoveryTimeObjective: 1,
-							ProvisioningPolicy:    "Thin",
-							IsSpaceEfficient:      true,
-						},
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "rbd",
-							MaxIOPS:        1,
-							MaxBWS:         1000,
-						},
-						DataProtection: model.DataProtectionLos{},
-						Advanced: model.ExtraSpec{
-							"thin": true,
-						},
-					},
-				},
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"thin": true,
-						},
-					},
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"extras.advanced.thin": false,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"thin": false,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
-func TestDedupeFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					RecoveryTimeObjective: 1,
-					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         1000,
-				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"dedupe": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					RecoveryTimeObjective: 1,
-					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         100,
-				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"dedupe": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					RecoveryTimeObjective: 1,
-					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         10,
-				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"dedupe": false,
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"extras.advanced.dedupe": true,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						DataStorage: model.DataStorageLoS{
-							RecoveryTimeObjective: 1,
-							ProvisioningPolicy:    "Thin",
-							IsSpaceEfficient:      true,
-						},
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "rbd",
-							MaxIOPS:        1,
-							MaxBWS:         1000,
-						},
-						DataProtection: model.DataProtectionLos{},
-						Advanced: model.ExtraSpec{
-							"dedupe": true,
-						},
-					},
-				},
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						DataStorage: model.DataStorageLoS{
-							RecoveryTimeObjective: 1,
-							ProvisioningPolicy:    "Thin",
-							IsSpaceEfficient:      true,
-						},
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "rbd",
-							MaxIOPS:        1,
-							MaxBWS:         100,
-						},
-						DataProtection: model.DataProtectionLos{},
-						Advanced: model.ExtraSpec{
-							"dedupe": true,
-						},
-					},
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"extras.advanced.dedupe": false,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						DataStorage: model.DataStorageLoS{
-							RecoveryTimeObjective: 1,
-							ProvisioningPolicy:    "Thin",
-							IsSpaceEfficient:      true,
-						},
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "rbd",
-							MaxIOPS:        1,
-							MaxBWS:         10,
-						},
-						DataProtection: model.DataProtectionLos{},
-						Advanced: model.ExtraSpec{
-							"dedupe": false,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
-func TestCompressFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"compress": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"compress": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"compress": false,
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"extras.advanced.compress": true,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"compress": true,
-						},
-					},
-				},
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"compress": true,
-						},
-					},
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"extras.advanced.compress": false,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"compress": false,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
-func TestDiskTypeFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"diskType": "SSD",
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"diskType": "SAS",
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"diskType": "SATA",
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		request  map[string]interface{}
-		pools    []*model.StoragePoolSpec
-		expected []*model.StoragePoolSpec
-	}{
-		{
-			request: map[string]interface{}{
-				"extras.advanced.diskType": "SSD",
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						Advanced: model.ExtraSpec{
-							"diskType": "SSD",
-						},
-					},
-				},
-			},
-		},
-		{
-			request: map[string]interface{}{
-				"extras.advanced.diskType": "NVMe SSD",
-			},
-			pools:    fakePools,
-			expected: nil,
-		},
-	}
-
-	for _, testCase := range testCases {
-		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
-			testCase.pools)
-
-		if !reflect.DeepEqual(result, testCase.expected) {
-			t.Errorf("Expected %v, get %v", testCase.expected, result)
-		}
-	}
-}
-
 func TestGetPoolCapabilityMap(t *testing.T) {
 	Pool := model.StoragePoolSpec{
 		BaseModel: &model.BaseModel{
@@ -589,100 +104,155 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 	}
 }
 
-func TestIoConnectivityFilter(t *testing.T) {
-	fakePools := []*model.StoragePoolSpec{
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				DataStorage: model.DataStorageLoS{
-					RecoveryTimeObjective: 1,
-					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
-				},
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         1000,
-				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"thin": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"thin": true,
-				},
-			},
-		},
-		&model.StoragePoolSpec{
-			Extras: model.StoragePoolExtraSpec{
-				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "erbd",
-					MaxIOPS:        1,
-					MaxBWS:         99,
-				},
-				Advanced: model.ExtraSpec{
-					"thin": false,
-				},
-			},
-		},
+var (
+	FakePools = []*model.StoragePoolSpec{
+		&model.StoragePoolSpec{},
+		&model.StoragePoolSpec{},
+		&model.StoragePoolSpec{},
 	}
-	testCases := []struct {
+
+	TestCases = []struct {
 		request  map[string]interface{}
 		pools    []*model.StoragePoolSpec
 		expected []*model.StoragePoolSpec
 	}{
 		{
-			request: map[string]interface{}{
-				"extras.ioConnectivity.maxBWS": 1000.0,
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						DataStorage: model.DataStorageLoS{
-							RecoveryTimeObjective: 1,
-							ProvisioningPolicy:    "Thin",
-							IsSpaceEfficient:      true,
-						},
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "rbd",
-							MaxIOPS:        1,
-							MaxBWS:         1000,
-						},
-						DataProtection: model.DataProtectionLos{},
-						Advanced: model.ExtraSpec{
-							"thin": true,
-						},
-					},
-				},
-			},
+			pools: FakePools,
 		},
 		{
-			request: map[string]interface{}{
-				"extras.ioConnectivity.accessProtocol": "erbd",
-			},
-			pools: fakePools,
-			expected: []*model.StoragePoolSpec{
-				&model.StoragePoolSpec{
-					Extras: model.StoragePoolExtraSpec{
-						IOConnectivity: model.IOConnectivityLoS{
-							AccessProtocol: "erbd",
-							MaxIOPS:        1,
-							MaxBWS:         99,
-						},
-						Advanced: model.ExtraSpec{
-							"thin": false,
-						},
-					},
-				},
-			},
+			pools: FakePools,
 		},
 	}
+)
 
-	for _, testCase := range testCases {
+func TestCreatedAtFilter(t *testing.T) {
+	FakePools[0].BaseModel = &model.BaseModel{
+		CreatedAt: "2017-10-24T15:04:05",
+	}
+	FakePools[1].BaseModel = &model.BaseModel{
+		CreatedAt: "2017-10-24T15:04:06",
+	}
+	FakePools[2].BaseModel = &model.BaseModel{
+		CreatedAt: "2017-10-24T15:04:07",
+	}
+
+	TestCases[0].request = map[string]interface{}{
+		"createdAt": "s== 2017-10-24T15:04:05",
+	}
+	TestCases[0].expected = []*model.StoragePoolSpec{
+		FakePools[0],
+	}
+
+	TestCases[1].request = map[string]interface{}{
+		"createdAt": "s>= 2017-10-24T15:04:06",
+	}
+	TestCases[1].expected = []*model.StoragePoolSpec{
+		FakePools[1],
+		FakePools[2],
+	}
+
+	for _, testCase := range TestCases {
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
+	}
+}
+
+func TestFreeCapacityFilter(t *testing.T) {
+	FakePools[0].FreeCapacity = 100
+	FakePools[1].FreeCapacity = 50
+	FakePools[2].FreeCapacity = 66
+
+	TestCases[0].request = map[string]interface{}{
+		"freeCapacity": ">= 66",
+	}
+	TestCases[0].expected = []*model.StoragePoolSpec{
+		FakePools[0],
+		FakePools[2],
+	}
+
+	TestCases[1].request = map[string]interface{}{
+		"freeCapacity": "> 100",
+	}
+	TestCases[1].expected = nil
+
+	for _, testCase := range TestCases {
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
+	}
+}
+
+func TestAccessProtocolFilter(t *testing.T) {
+	FakePools[0].Extras.IOConnectivity = model.IOConnectivityLoS{
+		AccessProtocol: "dbr",
+	}
+	FakePools[1].Extras.IOConnectivity = model.IOConnectivityLoS{
+		AccessProtocol: "rbd",
+	}
+	FakePools[2].Extras.IOConnectivity = model.IOConnectivityLoS{
+		AccessProtocol: "brd",
+	}
+
+	TestCases[0].request = map[string]interface{}{
+		"extras.ioConnectivity.accessProtocol": "rbd",
+	}
+	TestCases[0].expected = []*model.StoragePoolSpec{
+		FakePools[1],
+	}
+
+	TestCases[1].request = map[string]interface{}{
+		"extras.ioConnectivity.accessProtocol": "s!= rbd",
+	}
+
+	TestCases[1].expected = []*model.StoragePoolSpec{
+		FakePools[0],
+		FakePools[2],
+	}
+
+	for _, testCase := range TestCases {
+		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
+			testCase.pools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
+	}
+}
+
+func TestAdvancedFilter(t *testing.T) {
+	FakePools[0].Extras.Advanced = model.ExtraSpec{
+		"compress": true,
+	}
+	FakePools[1].Extras.Advanced = model.ExtraSpec{
+		"compress": true,
+	}
+	FakePools[2].Extras.Advanced = model.ExtraSpec{
+		"compress": false,
+	}
+
+	TestCases[0].request = map[string]interface{}{
+		"extras.advanced.compress": true,
+	}
+	TestCases[0].expected = []*model.StoragePoolSpec{
+		FakePools[0],
+		FakePools[1],
+	}
+
+	TestCases[1].request = map[string]interface{}{
+		"extras.advanced.compress": false,
+	}
+	TestCases[1].expected = []*model.StoragePoolSpec{
+		FakePools[2],
+	}
+
+	for _, testCase := range TestCases {
 		result, _ := SelectSupportedPools(len(testCase.pools), testCase.request,
 			testCase.pools)
 
