@@ -84,6 +84,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	filterRequest["availabilityZone"] = in.AvailabilityZone
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
+	if err != nil {
+		errchanVolume <- err
+		return
+	}
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
@@ -101,7 +105,6 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		ProfileId:        profile.Id,
 		PoolId:           polInfo.Id,
 		PoolName:         polInfo.Name,
-		DockId:           dockInfo.Id,
 		DriverName:       dockInfo.DriverName,
 		Context:          ctx.ToJson(),
 	}
@@ -167,7 +170,6 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 	opt := &pb.DeleteVolumeOpts{
 		Id:         in.Id,
 		Metadata:   in.Metadata,
-		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
@@ -201,38 +203,38 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 
 // ExtendVolume ...
 func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, errchanVolume chan error) {
-	volume, err := db.C.GetVolume(ctx, volID)
-	var volumeSize = volume.Size
+	vol, err := db.C.GetVolume(ctx, volID)
+	var volumeSize = vol.Size
 	if err != nil {
 		log.Error("Get volume failed in extend volume method: ", err.Error())
 		errchanVolume <- err
 		return
 	}
 
-	if newSize > volume.Size {
-		pool, err := db.C.GetPool(ctx, volume.PoolId)
+	if newSize > vol.Size {
+		pool, err := db.C.GetPool(ctx, vol.PoolId)
 		if nil != err {
 			log.Error("Get pool failed in extend volume method: ", err.Error())
 			errchanVolume <- err
 			return
 		}
 
-		if pool.FreeCapacity >= (newSize - volume.Size) {
-			volume.Size = newSize
+		if pool.FreeCapacity >= (newSize - vol.Size) {
+			vol.Size = newSize
 		} else {
 			reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
-				pool.FreeCapacity, newSize, volume.Size)
+				pool.FreeCapacity, newSize, vol.Size)
 			errchanVolume <- errors.New(reason)
 			return
 		}
 	} else {
-		reason := fmt.Sprintf("new size(%d) <= old size(%d)", newSize, volume.Size)
+		reason := fmt.Sprintf("new size(%d) <= old size(%d)", newSize, vol.Size)
 		errchanVolume <- errors.New(reason)
 		log.Error(reason)
 		return
 	}
 
-	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
 	if err != nil {
 		log.Error("when search profile in db:", err)
 		errchanVolume <- err
@@ -243,7 +245,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(EXTEND_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, volume.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err.Error())
 		errchanVolume <- err
@@ -254,18 +256,17 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	c.volumeController.SetDock(dockInfo)
 
 	opt := &pb.ExtendVolumeOpts{
-		Id:         volume.Id,
-		Size:       volume.Size,
-		Metadata:   volume.Metadata,
-		DockId:     dockInfo.Id,
+		Id:         vol.Id,
+		Size:       vol.Size,
+		Metadata:   vol.Metadata,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
 
 	result, err := c.volumeController.ExtendVolume(opt)
 	if err != nil {
-		volume.Size = volumeSize
-		if errUpdate := c.UpdateStatus(ctx, volume, model.VOLUME_ERROR); errUpdate != nil {
+		vol.Size = volumeSize
+		if errUpdate := c.UpdateStatus(ctx, vol, model.VOLUME_ERROR); errUpdate != nil {
 			errchanVolume <- errUpdate
 			return
 		}
@@ -319,7 +320,6 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 			Initiator: in.Initiator,
 		},
 		Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		DockId:     dockInfo.Id,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
 	}
@@ -370,7 +370,6 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 				Initiator: in.Initiator,
 			},
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
 			Context:    ctx.ToJson(),
 		},
@@ -417,7 +416,6 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 			VolumeId:    in.VolumeId,
 			Size:        vol.Size,
 			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:      dockInfo.Id,
 			DriverName:  dockInfo.DriverName,
 			Context:     ctx.ToJson(),
 		},
@@ -457,7 +455,6 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 			Id:         in.Id,
 			VolumeId:   in.VolumeId,
 			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DockId:     dockInfo.Id,
 			DriverName: dockInfo.DriverName,
 			Context:    ctx.ToJson(),
 		},
@@ -499,9 +496,9 @@ func (c *Controller) UpdateStatus(ctx *c.Context, in interface{}, status string)
 		}
 
 	case *model.VolumeSpec:
-		volume := in.(*model.VolumeSpec)
-		volume.Status = status
-		if _, errUpdate := db.C.UpdateVolume(ctx, volume); errUpdate != nil {
+		vol := in.(*model.VolumeSpec)
+		vol.Status = status
+		if _, errUpdate := db.C.UpdateVolume(ctx, vol); errUpdate != nil {
 			log.Error("When update volume status in db:", errUpdate.Error())
 			return errUpdate
 		}
