@@ -1,0 +1,26 @@
+<div class="table-detail-con" *ngIf="!isDetailFinished"><div>Loading...</div></div>
+<div class="table-detail-con" *ngIf="isDetailFinished">
+
+    <h3>Resource Usage</h3>
+    <ul>
+        <li>Storage Capacity:<span>20.5 GB</span></li>
+        <li>Volumes:<span>215</span></li>
+        <li>Volume Snapshots<span>110</span></li>
+    </ul>
+
+    <h3>User Management</h3>
+    <div class="table-toolbar">
+        <div class="left"><button pButton type="button" label="Add User"></button></div>
+    </div>
+
+    <p-dataTable [value]="users" [rows]="5" [paginator]="true" [pageLinks]="3">
+        <p-column field="username" header="Username"></p-column>
+        <p-column field="status" header="Status"></p-column>
+        <p-column field="role" header="Role"></p-column>
+        <p-column header="Operation" [style]="{'width': '20%'}">
+            <ng-template pTemplate="body">
+                <a href="#">Remove</a>
+            </ng-template>
+        </p-column>
+    </p-dataTable>
+</div>

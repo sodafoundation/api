@@ -1,0 +1,37 @@
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { HttpModule } from "@angular/http";
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { SharedModule } from './shared/shared.module';
+// import { AppService } from './app.service';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+
+// import { MsgBoxService } from './shared/api';
+import { MessagesModule } from './components/messages/messages';
+// import { NoAccessModule } from '';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    CommonModule,
+    AppRoutingModule,
+    MessagesModule,
+    HttpModule,
+    BrowserAnimationsModule,
+    // NoAccessModule,
+    // HeaderModule,
+    SharedModule.forRoot()
+  ],
+  providers: [
+    // AppService,
+      { provide: LocationStrategy, useClass: HashLocationStrategy }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

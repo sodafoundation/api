@@ -1,0 +1,39 @@
+.ui-dropmenu {
+    position: relative;
+    display: inline-block;
+    zoom: 1;
+}
+
+.ui-dropmenu > .ui-widget.ui-button {
+    vertical-align: top;
+    background: none;
+    border: none;
+    color: map-get($color-primary, 'normal');
+    &:hover {
+        background: none;
+        border: none;
+        color: map-get($color-primary, 'hover');
+    }
+    &:active {
+        background: none;
+        border: none;
+        color: map-get($color-primary, 'active');
+    }
+    &:disabled{
+        background: none;
+        border: none;
+        color: $color-disabled;
+    }
+}
+
+.ui-dropmenu.ui-state-disabled button {
+    cursor: default;
+}
+
+.ui-fluid .ui-dropmenu {
+    width: 100%;
+}
+
+.ui-fluid .ui-dropmenu .ui-button {
+    width: 100%;
+}

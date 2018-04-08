@@ -1,0 +1,33 @@
+<div class="layout-wrapper">
+    <div id="layout-topbar">
+        <a href="#" class="logo" [routerLink]="['/']"></a>
+
+        <ul class="topbar-menu">
+            <li>
+                <a href="#" [routerLink]="['/home']">Home</a>
+            </li>
+            <li>
+                <a href="#" [routerLink]="['/service']">Service</a>
+            </li>
+            <li>
+                <a href="#" [routerLink]="['/profile']">Profile</a>
+            </li>
+            <li>
+                <a href="#" [routerLink]="['/resource']">Resource</a>
+            </li>
+            <li>
+                <a href="#" [routerLink]="['/identity']">Identity</a>
+            </li>
+        </ul>
+    </div>
+
+    <div id="layout-content">
+        <div class="content-work">
+            <router-outlet></router-outlet>
+        </div>
+
+        <div id="layout-footer">
+            <span class="footer-text">OpenSDS, Copyright &copy; 2018</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="content-header">
+    <p>A tenant is used to group and manage resources and users.</p>
+</div>
+<p-tabView styleClass="ui-tabview-large">
+    <p-tabPanel header="Tenant">
+        <div class="table-toolbar">
+            <div class="left"><button pButton type="button" label="Create" (click)="showCreateTenant()" class="ui-button-secondary ui-button-large"></button><button pButton type="button" label="Delete"></button></div>
+            <div class="right">
+                <div class="ui-inputgroup">
+                    <input type="text" pInputText placeholder="search">
+                    <button pButton type="button" icon="fa-check" ></button>
+                </div>
+                <button class="" pButton type="button" icon="fa-check"></button>
+            </div>
+        </div>
+        <tenant-list #tenantList></tenant-list>
+    </p-tabPanel>
+    <p-tabPanel header="User">
+        <div class="table-toolbar">
+            <div class="left"><button pButton type="button" label="Create" class="ui-button-secondary"></button><button pButton type="button" label="Delete"></button></div>
+            <div class="right">
+                <div class="ui-inputgroup">
+                    <input type="text" pInputText placeholder="search">
+                    <button pButton type="button" icon="fa-check" ></button>
+                </div>
+                <button class="" pButton type="button" icon="fa-check"></button>
+            </div>
+        </div>
+        <user-list #userList></user-list>
+    </p-tabPanel>
+</p-tabView>
+
+<p-dialog header="Create Tenant" [(visible)]="createTenantDisplay" [width]="600" modal="modal">
+    <div>这里添加内容</div>
+    <p-footer ngStyle="border:none;">
+        <button type="button" pButton (click)="createTenantDisplay=false" label="OK"></button>
+        <button type="button" pButton (click)="createTenantDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+    
+    
