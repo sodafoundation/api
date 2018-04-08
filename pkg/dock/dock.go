@@ -30,6 +30,9 @@ import (
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+
+	_ "github.com/opensds/opensds/contrib/connector/iscsi"
+	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
 
 // Brain is a global variable that controls the dock module.
