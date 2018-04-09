@@ -20,30 +20,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-)
-
-const (
-	ThickLuntype      = 0
-	ThinLuntype       = 1
-	MaxNameLength     = 31
-	MaxVolDescription = 170
-	PortNumPerContr   = 2
-	PwdExpired        = 3
-	PwdReset          = 4
-)
-const (
-	ErrorConnectToServer      = -403
-	ErrorUnauthorizedToServer = -401
-)
-
-const (
-	MappingViewPrefix = "OpenSDS_MappingView_"
-	LunGroupPrefix    = "OpenSDS_LunGroup_"
-	HostGroupPrefix   = "OpenSDS_HostGroup_"
 )
 
 type ArrayInnerError struct {
@@ -75,12 +56,13 @@ type DoradoClient struct {
 	insecure   bool
 }
 
-func NewClient(user, passwd string, endpoints []string, insecure bool) (*DoradoClient, error) {
+func NewClient(opt *AuthOptions) (*DoradoClient, error) {
+	endpoints := strings.Split(opt.Endpoints, ",")
 	c := &DoradoClient{
-		user:      user,
-		passwd:    passwd,
+		user:      opt.Username,
+		passwd:    opt.Password,
 		endpoints: endpoints,
-		insecure:  insecure,
+		insecure:  opt.Insecure,
 	}
 	err := c.login()
 	return c, err
@@ -243,6 +225,19 @@ func (c *DoradoClient) ExtendVolume(capacity int64, id string) error {
 	return err
 }
 
+func (c *DoradoClient) CheckLunExist(id, wwn string) bool {
+	lun := &LunResp{}
+	err := c.request("GET", "/lun/"+id, nil, lun)
+	if err != nil {
+		return false
+	}
+	if wwn != "" && lun.Data.Wwn != wwn {
+		log.Infof("LUN Id %s with WWN %s does not on the array.", id, wwn)
+		return false
+	}
+	return true
+}
+
 func (c *DoradoClient) CreateSnapshot(volId, name, desc string) (*Snapshot, error) {
 	data := map[string]interface{}{
 		"PARENTTYPE":  11,
@@ -269,6 +264,25 @@ func (c *DoradoClient) ListStoragePools() ([]StoragePool, error) {
 	pools := &StoragePoolsResp{}
 	err := c.request("GET", "/storagepool?range=[0-100]", nil, pools)
 	return pools.Data, err
+}
+
+func (c *DoradoClient) ListAllStoragePools() ([]StoragePool, error) {
+	pools := &StoragePoolsResp{}
+	err := c.request("GET", "/storagepool", nil, pools)
+	return pools.Data, err
+}
+
+func (c *DoradoClient) GetPoolIdByName(poolName string) (string, error) {
+	pools, err := c.ListAllStoragePools()
+	if err != nil {
+		return "", err
+	}
+	for _, p := range pools {
+		if p.Name == poolName {
+			return p.Id, nil
+		}
+	}
+	return "", fmt.Errorf("not found specified pool '%s'", poolName)
 }
 
 func (c *DoradoClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
@@ -944,4 +958,86 @@ func (c *DoradoClient) DeleteHost(id string) error {
 
 func (c *DoradoClient) DeleteMappingView(id string) error {
 	return c.request("DELETE", "/mappingview/"+id, nil, nil)
+}
+
+func (c *DoradoClient) GetArrayInfo() (*System, error) {
+	sys := &SystemResp{}
+	err := c.request("GET", "/system/", nil, sys)
+	if err != nil {
+		log.Error("Get system info failed,", err)
+		return nil, err
+	}
+	return &sys.Data, nil
+}
+
+func (c *DoradoClient) ListRemoteDevices() (*[]RemoteDevice, error) {
+	dev := &RemoteDevicesResp{}
+	err := c.request("GET", "/remote_device/", nil, dev)
+	if err != nil {
+		return nil, err
+		log.Error("List remote devices failed,", err)
+	}
+	return &dev.Data, nil
+}
+
+func (c *DoradoClient) CreatePair(params map[string]interface{}) (*ReplicationPair, error) {
+	pair := &ReplicationPairResp{}
+	err := c.request("POST", "/REPLICATIONPAIR", params, pair)
+	return &pair.Data, err
+}
+
+func (c *DoradoClient) GetPair(id string) (*ReplicationPair, error) {
+	pair := &ReplicationPairResp{}
+	err := c.request("GET", "/REPLICATIONPAIR/"+id, nil, pair)
+	if err != nil {
+		log.Errorf("Get pair failed, %v", err)
+		return nil, err
+	}
+	return &pair.Data, err
+}
+
+func (c *DoradoClient) SwitchPair(id string) error {
+	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	err := c.request("PUT", "/REPLICATIONPAIR/switch", nil, data)
+	if err != nil {
+		log.Errorf("Switch pair failed, %v", err)
+	}
+	return err
+}
+
+func (c *DoradoClient) SplitPair(id string) error {
+	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	err := c.request("PUT", "/REPLICATIONPAIR/split", nil, data)
+	if err != nil {
+		log.Errorf("Split pair failed, %v", err)
+	}
+	return err
+}
+
+func (c *DoradoClient) SyncPair(id string) error {
+	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	err := c.request("PUT", "/REPLICATIONPAIR/sync", nil, data)
+	if err != nil {
+		log.Errorf("Sync pair failed, %v", err)
+	}
+	return err
+}
+
+func (c *DoradoClient) SetPairSecondAccess(id string, access string) error {
+	data := map[string]interface{}{"ID": id, "SECRESACCESS": access}
+	err := c.request("PUT", "/REPLICATIONPAIR/"+id, nil, data)
+	if err != nil {
+		log.Errorf("Set pair secondary access failed, %v", err)
+	}
+	return err
+}
+
+func (c *DoradoClient) DeletePair(id string) error {
+	return c.request("DELETE", "/REPLICATIONPAIR/"+id, nil, nil)
+}
+
+func (c *DoradoClient) CheckPairExist(id string) bool {
+	resp := &SimpleResp{}
+	err := c.request("GET", "/REPLICATIONPAIR/"+id, nil, resp)
+	return err == nil
 }

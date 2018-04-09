@@ -327,6 +327,8 @@ message DeleteReplicationOpts {
     string driverName = 14;
     // The Context
     string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
 }
 
 
@@ -360,6 +362,8 @@ message EnableReplicationOpts {
     string driverName = 14;
     // The Context
     string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -392,6 +396,8 @@ message DisableReplicationOpts {
     string driverName = 14;
     // The Context
     string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -428,6 +434,8 @@ message FailoverReplicationOpts {
     bool allowAttachedVolume = 16;
     // The secondary backend id.
     string secondaryBackendId = 17;
+    // The replication metadata
+    map<string, string> metadata = 18;
 }
 
 // Generic response, it return:

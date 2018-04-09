@@ -30,21 +30,7 @@ import (
 const (
 	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
 	defaultAZ       = "default"
-	UnitGi          = 1024 * 1024 * 1024
 )
-
-type AuthOptions struct {
-	Username  string `yaml:"username,omitempty"`
-	Password  string `yaml:"password,omitempty"`
-	Endpoints string `yaml:"endpoints,omitempty"`
-	Insecure  bool   `yaml:"insecure,omitempty"`
-}
-
-type DoradoConfig struct {
-	AuthOptions `yaml:"authOptions"`
-	Pool        map[string]PoolProperties `yaml:"pool,flow"`
-	TargetIp    string                    `yaml:"targetIp,omitempty"`
-}
 
 type Driver struct {
 	conf   *DoradoConfig
@@ -64,7 +50,7 @@ func (d *Driver) gb2Sector(gb int64) int64 {
 	return gb * UnitGi / 512
 }
 
-func (d *Driver) Setup() error {
+func (d *Driver) Setup() (err error) {
 	// Read huawei dorado config file
 	conf := &DoradoConfig{}
 	d.conf = conf
@@ -74,9 +60,7 @@ func (d *Driver) Setup() error {
 		path = defaultConfPath
 	}
 	Parse(conf, path)
-	dp := strings.Split(conf.Endpoints, ",")
-	client, err := NewClient(conf.Username, conf.Password, dp, conf.Insecure)
-	d.client = client
+	d.client, err = NewClient(&d.conf.AuthOptions)
 	if err != nil {
 		log.Errorf("Get new client failed, %v", err)
 		return err

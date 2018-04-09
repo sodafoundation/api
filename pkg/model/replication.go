@@ -68,6 +68,8 @@ type ReplicationSpec struct {
 	ProfileId string `json:"profileId,omitempty"`
 	// pool id
 	PoolId string `json:"poolId,omitempty"`
+	// metadata
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 type FailoverReplicationSpec struct {
