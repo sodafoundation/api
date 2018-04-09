@@ -1,12 +1,12 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { I18NService } from '../../../app/shared/api';
-import { AppService } from '../../../app/app.service';
+import { I18NService } from 'app/shared/api';
+import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate} from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
 @Component({
-    templateUrl: './resource.html',
+    templateUrl: './block.html',
     styleUrls: [],
     animations: [
         trigger('overlayState', [
@@ -34,7 +34,7 @@ import { I18nPluralPipe } from '@angular/common';
         ])
     ]
 })
-export class ResourceComponent implements OnInit{
+export class BlockComponent implements OnInit{
 
     constructor(
         // private I18N: I18NService,
@@ -46,4 +46,3 @@ export class ResourceComponent implements OnInit{
     }
     
 }
-

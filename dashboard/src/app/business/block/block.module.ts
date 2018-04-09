@@ -1,22 +1,26 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { ResourceComponent } from './resource.component';
+import { BlockComponent } from './block.component';
 import { RouterModule } from '@angular/router';
 import { TabViewModule, ButtonModule } from '../../components/common/api';
+import { VolumeListModule } from './volumeList.module';
+import { VolumeGroupModule } from './volumeGroup.module';
 
 let routers = [{
   path: '',
-  component: ResourceComponent
+  component: BlockComponent
 }]
 
 @NgModule({
   declarations: [
-    ResourceComponent
+    BlockComponent
   ],
   imports: [
     RouterModule.forChild(routers),
+    VolumeListModule,
+    VolumeGroupModule,
     TabViewModule,
     ButtonModule
   ],
   providers: []
 })
-export class ResourceModule { }
+export class BlockModule { }
