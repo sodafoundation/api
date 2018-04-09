@@ -27,13 +27,13 @@ import (
 )
 
 const (
-	ThickLuntype      = 0
-	ThinLuntype       = 1
-	MaxNameLength     = 31
-	MaxVolDescription = 170
-	PortNumPerContr   = 2
-	PwdExpired        = 3
-	PwdReset          = 4
+	ThickLuntype         = 0
+	ThinLuntype          = 1
+	MaxNameLength        = 31
+	MaxDescriptionLength = 255
+	PortNumPerContr      = 2
+	PwdExpired           = 3
+	PwdReset             = 4
 )
 const (
 	ErrorConnectToServer      = -403
@@ -204,10 +204,10 @@ func (c *DoradoClient) logout() error {
 	return c.request("DELETE", "/sessions", nil, nil)
 }
 
-func (c *DoradoClient) CreateVolume(name string, sectors int64, desc string) (*Lun, error) {
+func (c *DoradoClient) CreateVolume(name string, size int64, desc string) (*Lun, error) {
 	data := map[string]interface{}{
 		"NAME":        name,
-		"CAPACITY":    sectors,
+		"CAPACITY":    Gb2Sector(size),
 		"DESCRIPTION": desc,
 		"ALLOCTYPE":   1,
 		"PARENTID":    "0",
@@ -227,15 +227,24 @@ func (c *DoradoClient) GetVolume(id string) (*Lun, error) {
 	return &lun.Data, err
 }
 
+func (c *DoradoClient) GetVolumeByName(name string) (*Lun, error) {
+	lun := &LunResp{}
+	err := c.request("GET", "/lun?filter=NAME::"+name, nil, lun)
+	if err != nil {
+		return nil, err
+	}
+	return &lun.Data, err
+}
+
 func (c *DoradoClient) DeleteVolume(id string) error {
 	err := c.request("DELETE", "/lun/"+id, nil, nil)
 	return err
 }
 
 // ExtendVolume ...
-func (c *DoradoClient) ExtendVolume(capacity int64, id string) error {
+func (c *DoradoClient) ExtendVolume(size int64, id string) error {
 	data := map[string]interface{}{
-		"CAPACITY": capacity,
+		"CAPACITY": Gb2Sector(size),
 		"ID":       id,
 	}
 
@@ -243,10 +252,10 @@ func (c *DoradoClient) ExtendVolume(capacity int64, id string) error {
 	return err
 }
 
-func (c *DoradoClient) CreateSnapshot(volId, name, desc string) (*Snapshot, error) {
+func (c *DoradoClient) CreateSnapshot(lunId, name, desc string) (*Snapshot, error) {
 	data := map[string]interface{}{
 		"PARENTTYPE":  11,
-		"PARENTID":    volId,
+		"PARENTID":    lunId,
 		"NAME":        name,
 		"DESCRIPTION": desc,
 	}
@@ -261,6 +270,12 @@ func (c *DoradoClient) GetSnapshot(id string) (*Snapshot, error) {
 	return &snap.Data, err
 }
 
+func (c *DoradoClient) GetSnapshotByName(name string) (*Snapshot, error) {
+	snap := &SnapshotResp{}
+	err := c.request("GET", "/snapshot?filter=NAME::"+name, nil, snap)
+	return &snap.Data, err
+}
+
 func (c *DoradoClient) DeleteSnapshot(id string) error {
 	return c.request("DELETE", "/snapshot/"+id, nil, nil)
 }
@@ -272,19 +287,21 @@ func (c *DoradoClient) ListStoragePools() ([]StoragePool, error) {
 }
 
 func (c *DoradoClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
+	hostName := EncodeHostName(hostInfo.Host)
+
 	hostId, _ := c.GetHostIdByName(hostInfo.Host)
 	if hostId != "" {
 		return hostId, nil
 	}
 
 	reqBody := map[string]interface{}{
-		"NAME":            hostInfo.Host,
+		"NAME":            hostName,
 		"OPERATIONSYSTEM": 0, /*linux*/
 		"IP":              hostInfo.Ip,
 	}
 	hostResp := &HostResp{}
 	if err := c.request("POST", "/host", reqBody, hostResp); err != nil {
-		log.Errorf("Create host failed, host name: %s, error: %v", hostInfo.Host, err)
+		log.Errorf("Create host failed, host name: %s, error: %v", hostName, err)
 		return "", err
 	}
 
@@ -299,6 +316,7 @@ func (c *DoradoClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
 }
 
 func (c *DoradoClient) GetHostIdByName(hostName string) (string, error) {
+	hostName = EncodeHostName(hostName)
 	hostsResp := &HostsResp{}
 
 	if err := c.request("GET", "/host?filter=NAME::"+hostName, nil, hostsResp); err != nil {

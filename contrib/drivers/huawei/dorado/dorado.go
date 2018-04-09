@@ -17,7 +17,6 @@ package dorado
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	log "github.com/golang/glog"
@@ -30,7 +29,11 @@ import (
 const (
 	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
 	defaultAZ       = "default"
-	UnitGi          = 1024 * 1024 * 1024
+)
+
+const (
+	KLunId  = "huaweiLunId"
+	KSnapId = "huaweiSnapId"
 )
 
 type AuthOptions struct {
@@ -49,19 +52,6 @@ type DoradoConfig struct {
 type Driver struct {
 	conf   *DoradoConfig
 	client *DoradoClient
-}
-
-func (d *Driver) sector2Gb(sec string) int64 {
-	capa, err := strconv.ParseInt(sec, 10, 64)
-	if err != nil {
-		log.Error("Convert capacity from string to number failed, error:", err)
-		return 0
-	}
-	return capa * 512 / UnitGi
-}
-
-func (d *Driver) gb2Sector(gb int64) int64 {
-	return gb * UnitGi / 512
 }
 
 func (d *Driver) Setup() error {
@@ -90,9 +80,9 @@ func (d *Driver) Unset() error {
 }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	//Convert the storage unit Giga to sector
-
-	lun, err := d.client.CreateVolume(opt.GetName(), d.gb2Sector(opt.GetSize()), opt.GetDescription())
+	name := EncodeName(opt.GetId())
+	desc := TruncateDescription(opt.GetDescription())
+	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err
@@ -102,15 +92,19 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
-		Name:             lun.Name,
-		Size:             d.sector2Gb(lun.Capacity),
-		Description:      lun.Description,
-		AvailabilityZone: "dorado",
+		Name:             opt.GetName(),
+		Size:             Sector2Gb(lun.Capacity),
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+		Metadata: map[string]string{
+			KLunId: lun.Id,
+		},
 	}, nil
 }
 
 func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
-	lun, err := d.client.GetVolume(volID)
+	name := EncodeName(volID)
+	lun, err := d.client.GetVolumeByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -119,17 +113,18 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 		BaseModel: &model.BaseModel{
 			Id: lun.Id,
 		},
-		Name:             lun.Name,
-		Size:             d.sector2Gb(lun.Capacity),
+		Size:             Sector2Gb(lun.Capacity),
 		Description:      lun.Description,
-		AvailabilityZone: "dorado",
+		AvailabilityZone: lun.ParentName,
 	}, nil
 }
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
-	err := d.client.DeleteVolume(opt.Id)
+	lunId := opt.GetMetadata()[KLunId]
+	err := d.client.DeleteVolume(lunId)
 	if err != nil {
 		log.Errorf("Delete volume failed, volume id =%s , Error:%s", opt.GetId(), err)
+		return err
 	}
 	log.Info("Remove volume success, volume id =", opt.GetId())
 	return nil
@@ -137,8 +132,8 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
 // ExtendVolume ...
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	//Convert the storage unit Giga to sector
-	err := d.client.ExtendVolume(d.gb2Sector(opt.GetSize()), opt.GetId())
+	lunId := opt.GetMetadata()[KLunId]
+	err := d.client.ExtendVolume(opt.GetSize(), lunId)
 	if err != nil {
 		log.Error("Extend Volume Failed:", err)
 		return nil, err
@@ -177,6 +172,7 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 
+	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
 	// Create host if not exist.
 	hostId, err := d.client.AddHostWithCheck(hostInfo)
@@ -199,9 +195,9 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}
 
 	// Mapping lungroup and hostgroup to view.
-	if err = d.client.DoMapping(opt.GetVolumeId(), hostGrpId, hostId); err != nil {
+	if err = d.client.DoMapping(lunId, hostGrpId, hostId); err != nil {
 		log.Errorf("Do mapping failed, lun id=%s, hostGrpId=%s, hostId=%s, error: %v",
-			opt.GetVolumeId(), hostGrpId, hostId, err)
+			lunId, hostGrpId, hostId, err)
 		return nil, err
 	}
 
@@ -210,7 +206,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		log.Error("Get the target info failed,", err)
 		return nil, err
 	}
-	tgtLun, err := d.client.GetHostLunId(hostId, opt.GetVolumeId())
+	tgtLun, err := d.client.GetHostLunId(hostId, lunId)
 	if err != nil {
 		log.Error("Get the get host lun id failed,", err)
 		return nil, err
@@ -229,7 +225,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	lunId := opt.GetVolumeId()
+	lunId := opt.GetMetadata()[KLunId]
 	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
 	if err != nil {
 		return err
@@ -256,23 +252,30 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
-	snap, err := d.client.CreateSnapshot(opt.GetVolumeId(), opt.GetName(), opt.GetDescription())
+	lunId := opt.GetMetadata()[KLunId]
+	name := EncodeName(opt.GetId())
+	desc := TruncateDescription(opt.GetDescription())
+	snap, err := d.client.CreateSnapshot(lunId, name, desc)
 	if err != nil {
 		return nil, err
 	}
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
-			Id: snap.Id,
+			Id: opt.GetId(),
 		},
-		Name:        snap.Name,
-		Description: snap.Description,
-		VolumeId:    snap.ParentId,
+		Name:        opt.GetName(),
+		Description: opt.GetDescription(),
+		VolumeId:    opt.GetVolumeId(),
 		Size:        0,
+		Metadata: map[string]string{
+			KSnapId: snap.Id,
+		},
 	}, nil
 }
 
 func (d *Driver) PullSnapshot(id string) (*model.VolumeSnapshotSpec, error) {
-	snap, err := d.client.GetSnapshot(id)
+	name := EncodeName(id)
+	snap, err := d.client.GetSnapshotByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +291,8 @@ func (d *Driver) PullSnapshot(id string) (*model.VolumeSnapshotSpec, error) {
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	err := d.client.DeleteSnapshot(opt.GetId())
+	id := opt.GetMetadata()[KSnapId]
+	err := d.client.DeleteSnapshot(id)
 	if err != nil {
 		log.Errorf("Delete volume snapshot failed, volume snapshot id = %s , error: %v", opt.GetId(), err)
 		return err
@@ -314,8 +318,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 				Id: p.Id,
 			},
 			Name:             p.Name,
-			TotalCapacity:    d.sector2Gb(p.UserTotalCapacity),
-			FreeCapacity:     d.sector2Gb(p.UserFreeCapacity),
+			TotalCapacity:    Sector2Gb(p.UserTotalCapacity),
+			FreeCapacity:     Sector2Gb(p.UserFreeCapacity),
 			StorageType:      c.Pool[p.Name].StorageType,
 			Extras:           c.Pool[p.Name].Extras,
 			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
