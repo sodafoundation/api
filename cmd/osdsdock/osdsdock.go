@@ -20,6 +20,8 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
+	"fmt"
+
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	"github.com/opensds/opensds/pkg/dock/server"
@@ -34,7 +36,7 @@ func init() {
 	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	// flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
 	daemon.SetDaemonFlag(&CONF.OsdsDock.Daemon, def.OsdsDock.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
@@ -50,8 +52,19 @@ func main() {
 
 	// Automatically discover dock and pool resources from backends.
 	dock.Brain = dock.NewDockHub()
-	if err := dock.Brain.TriggerDiscovery(); err != nil {
-		panic(err)
+	switch CONF.OsdsDock.DockType {
+	case "provisioner":
+		if err := dock.Brain.TriggerDiscovery(); err != nil {
+			panic(err)
+		}
+		break
+	case "attacher":
+		if err := dock.Brain.RegisterDock(); err != nil {
+			panic(err)
+		}
+		break
+	default:
+		panic(fmt.Errorf("Dock type (%s) is not supportes!", CONF.OsdsDock.DockType))
 	}
 
 	// Construct dock module grpc server struct and start the listen mechanism

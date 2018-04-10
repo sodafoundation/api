@@ -77,7 +77,12 @@ func (d *DockHub) TriggerDiscovery() error {
 		}
 	}(ctx)
 
-	return nil
+	return err
+}
+
+// RegisterDock
+func (d *DockHub) RegisterDock() error {
+	return discovery.RegisterAttachDock()
 }
 
 // CreateVolume

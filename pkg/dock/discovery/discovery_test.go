@@ -45,7 +45,9 @@ func init() {
 }
 
 func NewFakeDiscoverer() *DockDiscoverer {
-	return &DockDiscoverer{}
+	return &DockDiscoverer{
+		DockRegister: &DockRegister{},
+	}
 }
 
 func TestInit(t *testing.T) {
@@ -60,6 +62,7 @@ func TestInit(t *testing.T) {
 	}
 	for i := range dd.dcks {
 		dd.dcks[i].Id = ""
+		dd.dcks[i].NodeId = ""
 		expected[i].Id = ""
 	}
 	if !reflect.DeepEqual(dd.dcks, expected) {

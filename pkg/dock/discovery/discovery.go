@@ -36,16 +36,16 @@ import (
 // NewDiscoverer method creates a new DockDiscoverer and return its pointer.
 func NewDiscoverer() *DockDiscoverer {
 	return &DockDiscoverer{
-		c: db.C,
+		DockRegister: NewDockRegister(),
 	}
 }
 
 // DockDiscoverer is a struct for exposing some operations of service discovery.
 type DockDiscoverer struct {
+	*DockRegister
+
 	dcks []*model.DockSpec
 	pols []*model.StoragePoolSpec
-
-	c db.Client
 }
 
 // Init
@@ -111,21 +111,17 @@ func (dd *DockDiscoverer) Discover() error {
 // Store
 func (dd *DockDiscoverer) Store() error {
 	var err error
-	ctx := c.NewAdminContext()
+
 	// Store dock resources in database.
 	for _, dck := range dd.dcks {
-		// Call db module to create dock resource.
-		if _, err = dd.c.CreateDock(ctx, dck); err != nil {
-			log.Errorf("When create dock %s in db: %v\n", dck.Name, err)
+		if err = dd.Register(dck); err != nil {
 			return err
 		}
 	}
 
 	// Store pool resources in database.
 	for _, pol := range dd.pols {
-		// Call db module to create pool resource.
-		if _, err = dd.c.CreatePool(ctx, pol); err != nil {
-			log.Errorf("When create pool %s in db: %v\n", pol.Name, err)
+		if err = dd.Register(pol); err != nil {
 			return err
 		}
 	}
@@ -156,4 +152,83 @@ func DiscoveryAndReport(dd *DockDiscoverer, ctx *Context) {
 
 		time.Sleep(60 * time.Second)
 	}
+}
+
+func NewDockRegister() *DockRegister {
+	return &DockRegister{c: db.C}
+}
+
+type DockRegister struct {
+	c db.Client
+}
+
+func (dr *DockRegister) Register(in interface{}) error {
+	ctx := c.NewAdminContext()
+
+	switch in.(type) {
+	case *model.DockSpec:
+		dck := in.(*model.DockSpec)
+		// Call db module to create dock resource.
+		if _, err := dr.c.CreateDock(ctx, dck); err != nil {
+			log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
+			return err
+		}
+		break
+	case *model.StoragePoolSpec:
+		pol := in.(*model.StoragePoolSpec)
+		// Call db module to create pool resource.
+		if _, err := dr.c.CreatePool(ctx, pol); err != nil {
+			log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
+			return err
+		}
+		break
+	default:
+		return fmt.Errorf("Resource type is not supported!")
+	}
+
+	return nil
+}
+
+func (dr *DockRegister) Unregister(in interface{}) error {
+	ctx := c.NewAdminContext()
+
+	switch in.(type) {
+	case *model.DockSpec:
+		dck := in.(*model.DockSpec)
+		// Call db module to delete dock resource.
+		if err := dr.c.DeleteDock(ctx, dck.Id); err != nil {
+			log.Errorf("When delete dock %s in db: %v\n", dck.Id, err)
+			return err
+		}
+		break
+	case *model.StoragePoolSpec:
+		pol := in.(*model.StoragePoolSpec)
+		// Call db module to delete pool resource.
+		if err := dr.c.DeletePool(ctx, pol.Id); err != nil {
+			log.Errorf("When delete pool %s in db: %v\n", pol.Id, err)
+			return err
+		}
+		break
+	default:
+		return fmt.Errorf("Resource type is not supported!")
+	}
+
+	return nil
+}
+
+func RegisterAttachDock() error {
+	host, err := os.Hostname()
+	if err != nil {
+		log.Error("When get os hostname:", err)
+		return err
+	}
+	dck := &model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+CONF.OsdsDock.ApiEndpoint).String(),
+		},
+		Endpoint: CONF.OsdsDock.ApiEndpoint,
+		NodeId:   host,
+	}
+
+	return NewDockRegister().Register(dck)
 }
