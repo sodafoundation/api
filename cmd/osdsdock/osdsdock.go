@@ -64,7 +64,7 @@ func main() {
 		}
 		break
 	default:
-		panic(fmt.Errorf("Dock type (%s) is not supportes!", CONF.OsdsDock.DockType))
+		panic(fmt.Errorf("Dock type (%s) is not supported!", CONF.OsdsDock.DockType))
 	}
 
 	// Construct dock module grpc server struct and start the listen mechanism
