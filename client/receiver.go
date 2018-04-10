@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -140,26 +139,22 @@ func (k *KeystoneReciver) GetToken() error {
 
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		log.Printf("When get auth client:", err)
-		return err
+		return fmt.Errorf("When get auth client: %v", err)
 	}
 
 	// Only support keystone v3
 	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		log.Printf("When get identity session:", err)
-		return err
+		return fmt.Errorf("When get identity session: %v", err)
 	}
 	r := tokens.Create(identity, &opts)
 	token, err := r.ExtractToken()
 	if err != nil {
-		log.Printf("When get extract token session:", err)
-		return err
+		return fmt.Errorf("When get extract token session: %v", err)
 	}
 	project, err := r.ExtractProject()
 	if err != nil {
-		log.Printf("When get extract project session:", err)
-		return err
+		return fmt.Errorf("When get extract project session: %v", err)
 	}
 	k.auth.TenantID = project.ID
 	k.auth.TokenID = token.ID

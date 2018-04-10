@@ -27,6 +27,7 @@ type OsdsLet struct {
 
 type OsdsDock struct {
 	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
+	DockType        string   `conf:"dock_type,provisioner"`
 	EnabledBackends []string `conf:"enabled_backends,lvm"`
 	Daemon          bool     `conf:"daemon,false"`
 	Backends
