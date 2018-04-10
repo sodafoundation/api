@@ -43,16 +43,16 @@ var Brain *DockHub
 type DockHub struct {
 	// Discoverer represents the mechanism of DockHub discovering the storage
 	// capabilities from different backends.
-	Discoverer *discovery.DockDiscoverer
+	Discoverer discovery.DockDiscoverer
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
 }
 
 // NewDockHub method creates a new DockHub and returns its pointer.
-func NewDockHub() *DockHub {
+func NewDockHub(dockType string) *DockHub {
 	return &DockHub{
-		Discoverer: discovery.NewDiscoverer(),
+		Discoverer: discovery.NewDockDiscoverer(dockType),
 	}
 }
 
@@ -78,11 +78,6 @@ func (d *DockHub) TriggerDiscovery() error {
 	}(ctx)
 
 	return err
-}
-
-// RegisterDock
-func (d *DockHub) RegisterDock() error {
-	return discovery.RegisterAttachDock()
 }
 
 // CreateVolume

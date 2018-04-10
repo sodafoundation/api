@@ -20,8 +20,6 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"fmt"
-
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	"github.com/opensds/opensds/pkg/dock/server"
@@ -51,20 +49,9 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	dock.Brain = dock.NewDockHub()
-	switch CONF.OsdsDock.DockType {
-	case "provisioner":
-		if err := dock.Brain.TriggerDiscovery(); err != nil {
-			panic(err)
-		}
-		break
-	case "attacher":
-		if err := dock.Brain.RegisterDock(); err != nil {
-			panic(err)
-		}
-		break
-	default:
-		panic(fmt.Errorf("Dock type (%s) is not supported!", CONF.OsdsDock.DockType))
+	dock.Brain = dock.NewDockHub(CONF.OsdsDock.DockType)
+	if err := dock.Brain.TriggerDiscovery(); err != nil {
+		panic(err)
 	}
 
 	// Construct dock module grpc server struct and start the listen mechanism

@@ -33,23 +33,64 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-// NewDiscoverer method creates a new DockDiscoverer and return its pointer.
-func NewDiscoverer() *DockDiscoverer {
-	return &DockDiscoverer{
-		DockRegister: NewDockRegister(),
+type Context struct {
+	StopChan chan bool
+	ErrChan  chan error
+	MetaChan chan string
+}
+
+func DiscoveryAndReport(dd DockDiscoverer, ctx *Context) {
+	for {
+		select {
+		case <-ctx.StopChan:
+			return
+		default:
+			if err := dd.Discover(); err != nil {
+				ctx.ErrChan <- err
+			}
+
+			if err := dd.Report(); err != nil {
+				ctx.ErrChan <- err
+			}
+		}
+
+		time.Sleep(60 * time.Second)
 	}
 }
 
-// DockDiscoverer is a struct for exposing some operations of service discovery.
-type DockDiscoverer struct {
+type DockDiscoverer interface {
+	Init() error
+
+	Discover() error
+
+	Report() error
+}
+
+// NewDockDiscoverer method creates a new DockDiscoverer.
+func NewDockDiscoverer(dockType string) DockDiscoverer {
+	switch dockType {
+	case "provisioner":
+		return &provisionDockDiscoverer{
+			DockRegister: NewDockRegister(),
+		}
+	case "attacher":
+		return &attachDockDiscoverer{
+			DockRegister: NewDockRegister(),
+		}
+	}
+	return nil
+}
+
+// provisionDockDiscoverer is a struct for exposing some operations of provision
+// dock service discovery.
+type provisionDockDiscoverer struct {
 	*DockRegister
 
 	dcks []*model.DockSpec
 	pols []*model.StoragePoolSpec
 }
 
-// Init
-func (dd *DockDiscoverer) Init() error {
+func (pdd *provisionDockDiscoverer) Init() error {
 	// Load resource from specified file
 	bm := GetBackendsMap()
 	host, err := os.Hostname()
@@ -73,18 +114,17 @@ func (dd *DockDiscoverer) Init() error {
 			DriverName:  b.DriverName,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
 		}
-		dd.dcks = append(dd.dcks, dck)
+		pdd.dcks = append(pdd.dcks, dck)
 	}
 
 	return nil
 }
 
-// Discover
-func (dd *DockDiscoverer) Discover() error {
+func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info
-	dd.pols = dd.pols[:0]
+	pdd.pols = pdd.pols[:0]
 
-	for _, dck := range dd.dcks {
+	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
 		pols, err := drivers.Init(dck.DriverName).ListPools()
 		if err != nil {
@@ -100,58 +140,66 @@ func (dd *DockDiscoverer) Discover() error {
 			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 			pol.DockId = dck.Id
 		}
-		dd.pols = append(dd.pols, pols...)
+		pdd.pols = append(pdd.pols, pols...)
 	}
-	if len(dd.pols) == 0 {
+	if len(pdd.pols) == 0 {
 		return fmt.Errorf("There is no pool can be found.")
 	}
+
 	return nil
 }
 
-// Store
-func (dd *DockDiscoverer) Store() error {
+func (pdd *provisionDockDiscoverer) Report() error {
 	var err error
 
 	// Store dock resources in database.
-	for _, dck := range dd.dcks {
-		if err = dd.Register(dck); err != nil {
-			return err
+	for _, dck := range pdd.dcks {
+		if err = pdd.Register(dck); err != nil {
+			break
 		}
 	}
 
 	// Store pool resources in database.
-	for _, pol := range dd.pols {
-		if err = dd.Register(pol); err != nil {
-			return err
+	for _, pol := range pdd.pols {
+		if err != nil {
+			break
 		}
+		err = pdd.Register(pol)
 	}
 
 	return err
 }
 
-type Context struct {
-	StopChan chan bool
-	ErrChan  chan error
-	MetaChan chan string
+// attachDockDiscoverer is a struct for exposing some operations of attach
+// dock service discovery.
+type attachDockDiscoverer struct {
+	*DockRegister
+
+	dck *model.DockSpec
 }
 
-func DiscoveryAndReport(dd *DockDiscoverer, ctx *Context) {
-	for {
-		select {
-		case <-ctx.StopChan:
-			return
-		default:
-			if err := dd.Discover(); err != nil {
-				ctx.ErrChan <- err
-			}
+func (add *attachDockDiscoverer) Init() error { return nil }
 
-			if err := dd.Store(); err != nil {
-				ctx.ErrChan <- err
-			}
-		}
-
-		time.Sleep(60 * time.Second)
+func (add *attachDockDiscoverer) Discover() error {
+	host, err := os.Hostname()
+	if err != nil {
+		log.Error("When get os hostname:", err)
+		return err
 	}
+
+	add.dck = &model.DockSpec{
+		BaseModel: &model.BaseModel{
+			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+CONF.OsdsDock.ApiEndpoint).String(),
+		},
+		Endpoint: CONF.OsdsDock.ApiEndpoint,
+		NodeId:   host,
+	}
+
+	return nil
+}
+
+func (add *attachDockDiscoverer) Report() error {
+	return add.Register(add.dck)
 }
 
 func NewDockRegister() *DockRegister {
@@ -214,21 +262,4 @@ func (dr *DockRegister) Unregister(in interface{}) error {
 	}
 
 	return nil
-}
-
-func RegisterAttachDock() error {
-	host, err := os.Hostname()
-	if err != nil {
-		log.Error("When get os hostname:", err)
-		return err
-	}
-	dck := &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+CONF.OsdsDock.ApiEndpoint).String(),
-		},
-		Endpoint: CONF.OsdsDock.ApiEndpoint,
-		NodeId:   host,
-	}
-
-	return NewDockRegister().Register(dck)
 }
