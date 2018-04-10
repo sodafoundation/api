@@ -17,6 +17,7 @@ export { I18N } from './I18N';
 
 export { FormModule } from '../form/form';
 export { InputTextModule } from '../inputtext/inputtext';
+export { InputTextareaModule } from '../inputtextarea/inputtextarea';
 export { CheckboxModule } from '../checkbox/checkbox';
 export { ButtonModule } from '../button/button';
 export { TabViewModule } from '../tabview/tabview';
@@ -24,3 +25,5 @@ export { DataTableModule } from '../datatable/datatable';
 export { SplitButtonModule } from '../splitbutton/splitbutton';
 export { DropMenuModule } from '../dropmenu/dropmenu';
 export { DialogModule } from '../dialog/dialog';
+export { DropdownModule } from '../dropdown/dropdown';
+export { PasswordModule } from '../password/password';

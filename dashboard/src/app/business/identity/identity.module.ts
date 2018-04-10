@@ -1,7 +1,7 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { IdentityComponent } from './identity.component';
 import { RouterModule } from '@angular/router';
-import { TabViewModule, ButtonModule, DialogModule} from '../../components/common/api';
+import { TabViewModule } from '../../components/common/api';
 import { TenantListModule } from './tenantList.module';
 import { UserListModule } from './userList.module';
 
@@ -18,9 +18,7 @@ let routers = [{
     RouterModule.forChild(routers),
     TenantListModule,
     UserListModule,
-    TabViewModule,
-    ButtonModule,
-    DialogModule
+    TabViewModule
   ],
   providers: []
 })

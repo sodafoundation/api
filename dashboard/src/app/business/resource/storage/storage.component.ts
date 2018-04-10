@@ -1,15 +1,14 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { I18NService } from 'app/shared/api';
-import { AppService } from 'app/app.service';
+import { I18NService } from './../../../../app/shared/api';
+import { AppService } from './../../../../app/app.service';
 import { trigger, state, style, transition, animate} from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
 @Component({
-    templateUrl: './identity.html',
-    styleUrls: [
-        
-    ],
+    selector: 'storage-table',
+    templateUrl: './storage.html',
+    styleUrls: [],
     animations: [
         trigger('overlayState', [
             state('hidden', style({
@@ -36,13 +35,46 @@ import { I18nPluralPipe } from '@angular/common';
         ])
     ]
 })
-export class IdentityComponent implements OnInit{
+export class StorageComponent implements OnInit{
+
+    storages = [];
+
     constructor(
         // private I18N: I18NService,
         // private router: Router
     ){}
     
     ngOnInit() {
-      
+        this.storages = [
+            { 
+                "name": "OceanStor_V3_100",
+                "ip": "1.1.1.1",
+                "status": "Enabled",
+                "vender": "Huawei",
+                "model": "OceanStor V3",
+                "region": "Primary Region",
+                "zone":"AZ_cd"
+            },
+            { 
+                "name": "OceanStor_V3_100",
+                "ip": "1.1.1.1",
+                "status": "Enabled",
+                "vender": "Huawei",
+                "model": "OceanStor V3",
+                "region": "Primary Region",
+                "zone":"AZ_cd"
+            },
+            { 
+                "name": "OceanStor_V3_100",
+                "ip": "1.1.1.1",
+                "status": "Enabled",
+                "vender": "Huawei",
+                "model": "OceanStor V3",
+                "region": "Primary Region",
+                "zone":"AZ_cd"
+            }
+        ];
     }
+    
 }
+
