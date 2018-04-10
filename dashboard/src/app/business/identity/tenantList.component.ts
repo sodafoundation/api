@@ -8,12 +8,15 @@ import { MenuItem } from '../../components/common/api';
 @Component({
     selector: 'tenant-list',
     templateUrl: 'tenantList.html',
+    styleUrls: [
+        'dialogcss.css'
+    ],
     animations: []
 })
 export class TenantListComponent implements OnInit {
     tenants = [];
     isDetailFinished = false;
-
+    createTenantDisplay = false;
     constructor(
         // private I18N: I18NService,
         // private router: Router
@@ -25,11 +28,20 @@ export class TenantListComponent implements OnInit {
             { "name": "tenant_B", "description": "--", }
         ];
     }
+ 
+    showCreateTenant() {
+        this.createTenantDisplay = true;
+    }
 
     onRowExpand(evt){
         this.isDetailFinished = false;
         console.log(evt.data.name);
         
+    }
+
+    label:object = {
+        userNameLabel:'Name:',
+        descriptionLabel:'Description:',
     }
 
 }

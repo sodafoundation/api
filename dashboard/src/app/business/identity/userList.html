@@ -1,3 +1,17 @@
+<div class="table-toolbar">
+    <div class="left">
+        <button pButton type="button" label="Create" (click)="showCreateUser()" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Delete"></button>
+    </div>
+    <div class="right">
+        <div class="ui-inputgroup">
+            <input type="text" pInputText placeholder="search">
+            <button pButton type="button" icon="fa-check"></button>
+        </div>
+        <button class="" pButton type="button" icon="fa-check"></button>
+    </div>
+</div>
+
 <p-dataTable [value]="users" selectionMode="multiple" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
     <p-column field="username" header="Username"></p-column>
@@ -13,3 +27,68 @@
         </ng-template>
     </p-column>
 </p-dataTable>
+
+<p-dialog header="Create User" [(visible)]="createUserDisplay" [width]="500" modal="modal">
+    <div class="ui-inputgroup">
+        <span class="ui-g-4 ui-md-4">{{label.userNameLabel}}</span>
+        <input type="text" pInputText placeholder="Username">
+    </div>
+    <div class="ui-inputgroup margin-top-1em">
+        <span class="ui-g-4 ui-md-4">{{label.passwordLabel}}</span>
+        <input type="text" pPassword>
+    </div>
+    <div class="ui-inputgroup margin-top-1em">
+        <span class="ui-g-4 ui-md-4">{{label.confirmPasswordLabel}}</span>
+        <input type="text" pPassword>
+    </div>
+    <div class="ui-inputgroup margin-top-1em">
+        <span class="ui-g-4 ui-md-4">{{label.roleLabel}}</span>
+        <input type="text" pInputText placeholder="Username">
+        <!-- <p-dropdown [options]="roles"></p-dropdown> -->
+    </div>
+    <div class="ui-inputgroup margin-top-1em">
+        <span class="ui-g-4 ui-md-4">{{label.tenantLabel}}</span>
+        <input type="text" pInputText placeholder="Username">
+        <!-- <p-dropdown [options]="roles"></p-dropdown> -->
+    </div>
+    <!-- <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="formGroup" [errorMessage]="errorMessage"> -->
+    <!-- <form-item label="ssss" [required]="true">
+        <input type="text" pInputText formcontrolName="xxx">
+    </form-item>
+    <form-item label="ssss" [required]="true">
+        <div class="ui-inputgroup">
+            <span class="ui-g-4 ui-md-4">{{label.userNameLabel}}</span>
+            <input type="text" pInputText placeholder="Username">
+        </div>
+    </form-item>
+    <form-item label="ssss" [required]="true">
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.passwordLabel}}</span>
+            <input type="text" pInputText placeholder="Password">
+        </div>
+    </form-item>
+    <form-item label="ssss" [required]="true">
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.confirmPasswordLabel}}</span>
+            <input type="text" pInputText placeholder="Username">
+        </div>
+    </form-item>
+    <form-item label="ssss" [required]="true">
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.roleLabel}}</span>
+            <p-dropdown [options]="roles"></p-dropdown>
+        </div>
+    </form-item>
+    <form-item label="ssss" [required]="true">
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.tenantLabel}}</span>
+            <input type="text" pInputText placeholder="Username">
+            <p-dropdown [options]="cities1" [(ngModel)]="selectedCity1"></p-dropdown>
+        </div>
+    </form-item>
+    </form> -->
+    <p-footer ngStyle="border:none;">
+        <button type="button" pButton (click)="createUserDisplay=false" label="OK"></button>
+        <button type="button" pButton (click)="createUserDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>

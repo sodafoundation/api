@@ -1,15 +1,14 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { I18NService } from 'app/shared/api';
-import { AppService } from 'app/app.service';
+import { I18NService } from './../../../../app/shared/api';
+import { AppService } from './../../../../app/app.service';
 import { trigger, state, style, transition, animate} from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
 @Component({
-    templateUrl: './identity.html',
-    styleUrls: [
-        
-    ],
+    selector: 'region-table',
+    templateUrl: './region.html',
+    styleUrls: [],
     animations: [
         trigger('overlayState', [
             state('hidden', style({
@@ -36,13 +35,24 @@ import { I18nPluralPipe } from '@angular/common';
         ])
     ]
 })
-export class IdentityComponent implements OnInit{
+export class RegionComponent implements OnInit{
+    regions = [];
+
     constructor(
         // private I18N: I18NService,
         // private router: Router
     ){}
     
     ngOnInit() {
-      
+        this.regions = [
+            { "name": "Region_Beijing", "role": "Primary Region", },
+            { "name": "Region_Chengdu", "role": "Secondary Region", }
+        ];
     }
+
+    rowSelect(rowdata){
+        console.log(rowdata);
+    }
+    
 }
+

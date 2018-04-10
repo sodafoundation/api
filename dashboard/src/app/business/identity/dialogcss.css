@@ -1,0 +1,19 @@
+.margin-top-1em {
+    margin-top: 1em;
+}
+
+.ui-inputgroup .ui-inputtext:not(:first-child) {
+    border-left: 1px solid #cfd7db;
+}
+
+.padding-litte {
+    padding: 0.5em
+}
+
+.ui-inputgroup .ui-inputtext:enabled:hover {
+    border-color: #98a5bc;
+}
+
+.ui-dialog .ui-dialog-content {
+    overflow: visible !important;
+}

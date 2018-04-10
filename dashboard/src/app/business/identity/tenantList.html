@@ -1,6 +1,16 @@
-<p-dataTable [value]="tenants" selectionMode="multiple" [showHeaderCheckbox]="true" expandableRows="true" rowExpandMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]" 
-(onRowExpand)="onRowExpand($event)">
-    <p-column expander="true" styleClass="col-icon" [style]="{'width': '60px'}"></p-column>    
+<div class="table-toolbar">
+    <div class="left"><button pButton type="button" label="Create" (click)="showCreateTenant()" class="ui-button-secondary ui-button-large"></button><button pButton type="button" label="Delete"></button></div>
+    <div class="right">
+        <div class="ui-inputgroup">
+            <input type="text" pInputText placeholder="search">
+            <button pButton type="button" icon="fa-check"></button>
+        </div>
+        <button class="" pButton type="button" icon="fa-check"></button>
+    </div>
+</div>
+
+<p-dataTable [value]="tenants" selectionMode="multiple" [showHeaderCheckbox]="true" expandableRows="true" rowExpandMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]" (onRowExpand)="onRowExpand($event)">
+    <p-column expander="true" styleClass="col-icon" [style]="{'width': '60px'}"></p-column>
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
     <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
     <p-column field="description" header="Description"></p-column>
@@ -14,4 +24,18 @@
         <tenant-detail [isDetailFinished]="isDetailFinished"></tenant-detail>
     </ng-template>
 </p-dataTable>
-    
+
+<p-dialog header="Create Tenant" [(visible)]="createTenantDisplay" [width]="600" modal="modal">
+    <div class="ui-inputgroup">
+        <span class="ui-g-4 ui-md-3">{{label.userNameLabel}}</span>
+        <input type="text" pInputText placeholder="Username">
+    </div>
+    <div class="ui-inputgroup margin-top-1em">
+        <span class="ui-g-4 ui-md-3">{{label.descriptionLabel}}</span>
+        <textarea class="padding-litte" placeholder="Description" [rows]="5" [cols]="30" pInputTextarea autoResize="autoResize"></textarea>
+    </div>
+    <p-footer>
+        <button type="button" pButton (click)="createTenantDisplay=false" label="OK"></button>
+        <button type="button" pButton (click)="createTenantDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
