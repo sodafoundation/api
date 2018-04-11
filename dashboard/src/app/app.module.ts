@@ -6,6 +6,7 @@ import { HttpModule } from "@angular/http";
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
+import { DropMenuModule } from './components/common/api';
 // import { AppService } from './app.service';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
@@ -26,7 +27,8 @@ import { MessagesModule } from './components/messages/messages';
     BrowserAnimationsModule,
     // NoAccessModule,
     // HeaderModule,
-    SharedModule.forRoot()
+    SharedModule.forRoot(),
+    DropMenuModule
   ],
   providers: [
     // AppService,

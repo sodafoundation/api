@@ -11,23 +11,25 @@
     float: left; 
     top: 0.01rem;
     position: relative; 
-    margin-right: 0.10rem;  
+    margin-right: 0.30rem;  
     padding: 0; 
     white-space: nowrap; 
 }
 
 .ui-tabview .ui-tabview-nav li a { 
     float: left; 
-    padding: 0 0.2rem; 
+    padding: 0 0.05rem; 
     font-size: 0.16rem;
-    line-height: 0.35rem;
+    line-height: 0.20rem;
+    height: 0.32rem;
     text-decoration: none; 
 }
 
 .ui-tabview.ui-tabview-large .ui-tabview-nav li a {
-    padding: 0 0.20rem; 
+    padding: 0 0.05rem; 
     font-size: 0.20rem;
-    line-height: 0.40rem;
+    line-height: 0.24rem;
+    height: 0.40rem;
 }
 
 .ui-tabview .ui-tabview-nav li.ui-tabview-selected a, 
@@ -43,7 +45,7 @@
 
 .ui-tabview .ui-tabview-panel { 
     border-width: 0; 
-    padding: 0.2rem 0; 
+    padding: 0.3rem 0; 
     background: none; 
 }
 

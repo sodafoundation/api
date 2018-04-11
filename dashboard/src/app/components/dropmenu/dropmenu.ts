@@ -11,7 +11,7 @@ import {RouterModule} from '@angular/router';
     selector: 'p-dropmenu',
     template: `
         <div #container [ngClass]="{'ui-dropmenu ui-buttonset ui-widget':true,'ui-state-disabled':disabled}" [ngStyle]="style" [class]="styleClass">
-            <button type="button" [label]="label" pButton icon="fa-caret-down" iconPos="right" (click)="onDropdownButtonClick($event)" [disabled]="disabled"></button>
+            <button type="button" [label]="label" pButton [icon]="icon" iconPos="right" (click)="onDropdownButtonClick($event)" [disabled]="disabled"></button>
             <div #overlay [ngClass]="'ui-menu ui-menu-dynamic ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-shadow'" [style.display]="menuVisible ? 'block' : 'none'"
                     [ngStyle]="menuStyle" [class]="menuStyleClass" [@overlayState]="menuVisible ? 'visible' : 'hidden'">
                 <ul class="ui-menu-list ui-helper-reset">
@@ -51,7 +51,7 @@ export class SplitButton implements AfterViewInit,AfterViewChecked,OnDestroy {
 
     @Input() model: MenuItem[];
 
-    @Input() icon: string;
+    @Input() icon: string = 'fa-caret-down';
 
     @Input() iconPos: string = 'left';
         

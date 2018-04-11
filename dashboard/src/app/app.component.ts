@@ -3,6 +3,7 @@ import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, 
 import { I18NService } from 'app/shared/api';
 // import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
+import { MenuItem } from './components/common/api';
 
 @Component({
     selector: 'app-root',
@@ -12,10 +13,40 @@ import { I18nPluralPipe } from '@angular/common';
 export class AppComponent implements OnInit{
     chromeBrowser: boolean = false;
     linkUrl = "";
+    dropMenuItems: MenuItem[];
+    menuItems = [
+        {
+            "title": "Home",
+            "description": "Update 5 minutes ago",
+            "routerLink": "/home"
+        },
+        {
+            "title": "Block Service",
+            "description": "23 volumes",
+            "routerLink": "/block"
+        },
+        {
+            "title": "profile",
+            "description": "7 profiles have been created",
+            "routerLink": "/profile"
+        },
+        {
+            "title": "Resource",
+            "description": "5 storages, 2 availability zone",
+            "routerLink": "/resource"
+        },
+        {
+            "title": "Identity",
+            "description": "Managing tenants and users",
+            "routerLink": "/identity"
+        }
+    ];
+    activeItem: any;
 
     private msgs: any = [{ severity: 'warn', summary: 'Warn Message', detail: 'There are unsaved changes'}];
 
     constructor(
+        private el: ElementRef
         // private I18N: I18NService,
         // private viewContainerRef: ViewContainerRef,
         // private appService: AppService,
@@ -23,9 +54,28 @@ export class AppComponent implements OnInit{
     ){}
     
     ngOnInit() {
-      
+        this.activeItem = this.menuItems[0];
+
+        this.dropMenuItems = [
+            { 
+                label: "Switch Tenant", 
+                items:[
+                    {
+                        label: "TenantA", command:()=>{}
+                    },
+                    {
+                        label: "TenantB", command:()=>{}
+                    }
+                ]
+            },
+            { label: "Logout", command:()=>{} }
+        ];
     }
     
+    menuItemClick(event, item) {
+        this.activeItem = item;
+    }
+
     supportCurrentBrowser(){
         let ie,
             firefox,

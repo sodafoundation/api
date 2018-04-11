@@ -5,6 +5,9 @@
 }
 
 .ui-dropmenu > .ui-widget.ui-button {
+    padding-right: 0.20rem;
+    padding-left: 0; 
+    width: auto;
     vertical-align: top;
     background: none;
     border: none;
@@ -13,6 +16,7 @@
         background: none;
         border: none;
         color: map-get($color-primary, 'hover');
+        box-shadow: none;
     }
     &:active {
         background: none;
@@ -23,6 +27,12 @@
         background: none;
         border: none;
         color: $color-disabled;
+    }
+    & > .ui-button-icon-right{
+        right: 0;
+    }
+    &.ui-button-icon-only{
+        padding-right: 0;
     }
 }
 

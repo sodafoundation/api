@@ -1,8 +1,7 @@
-$color-primary: (normal: #3284d6, hover: #4596e8, active: #1f5fac);
-$color-secondary: #666;
+$color-primary: (normal: #438bd3, hover: #4596e8, active: #1f5fac);
 $color-disabled: #c9d1d8;
 $color-text: (primary: #657D95, secondary: #8893a6, tertary: #b9c3c8, auxiliary: #c9d1d8 );
-$color-title: (primary: #333333, secondary: #657D95);
+$color-title: (primary: #2e3039, secondary: #657D95);
 
 $color-splitline: #ecf0f2;
 $color-panelbg: #f3f6f7;
@@ -131,15 +130,15 @@ h1,h2,h3,h4,h5{
     font-weight: 500;
 }
 
-h1{ font-size: 0.20rem; }
+h1{ font-size: 0.24rem; line-height: 0.28rem;}
 
-h2{ font-size: 0.18rem; }
+h2{ font-size: 0.20rem; line-height: 0.24rem;}
 
-h3{ font-size: 0.16rem; }
+h3{ font-size: 0.18rem; line-height: 0.24rem;}
 
-h4{ font-size: 0.14rem; }
+h4{ font-size: 0.16rem; line-height: 0.22rem;}
 
-h5{ font-size: 0.12rem; }
+h5{ font-size: 0.14rem; line-height: 0.22rem;}
 
 ol,ul,li{
     list-style: none;
@@ -197,7 +196,7 @@ a{
 
 p{
     line-height: 1.5;
-    color: $color-secondary;
+    color: map-get($color-text, primary);
     word-wrap: normal;
     word-break: break-word;
 }
@@ -257,7 +256,7 @@ p{
                background: none;
                border:none;
                a {
-                    color: map-get($color-title, primary);
+                    color: map-get($color-title, secondary);
                }
             }
                         
@@ -265,7 +264,7 @@ p{
             &:not(.ui-state-active):not(.ui-state-disabled):hover {
                 background: none;
                 a {
-                    color: map-get($color-primary, normal);
+                    color: map-get($color-title, primary);
                 }
             }
 

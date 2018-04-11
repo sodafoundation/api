@@ -1,36 +1,30 @@
 <div class="layout-wrapper">
     <div id="layout-topbar">
-        <a href="#" class="logo" [routerLink]="['/']"></a>
-
+        <div class="user-info">
+            <div>
+                <h1>admin</h1>
+                <p-dropmenu icon="fa-ellipsis-v" [model]="dropMenuItems"></p-dropmenu>
+            </div>
+            <p><span><i class="fa fa-map-marker"></i>Region-Beijing</span><span><i class="fa fa-users"></i>Tenant-A</span></p>
+        </div>
+        
         <ul class="topbar-menu">
-            <li>
-                <a href="#" [routerLink]="['/home']">Home</a>
-            </li>
-            <li>
-                <a href="#" [routerLink]="['/block']">Block Service</a>
-            </li>
-            <li>
-                <a href="#" [routerLink]="['/service']">Service</a>
-            </li>
-            <li>
-                <a href="#" [routerLink]="['/profile']">Profile</a>
-            </li>
-            <li>
-                <a href="#" [routerLink]="['/resource']">Resource</a>
-            </li>
-            <li>
-                <a href="#" [routerLink]="['/identity']">Identity</a>
+            <li *ngFor="let menuItem of menuItems">
+                <a href="#" [routerLink]="menuItem.routerLink" [ngClass]="{'active-item':menuItem==activeItem}" (click)="menuItemClick($event, menuItem)">
+                    <h1>{{menuItem.title}}</h1>
+                    <p>{{menuItem.description}}</p>
+                </a>
             </li>
         </ul>
+
+        <div class="logo">
+            <a href="#" [routerLink]="['/']"></a>
+        </div>
     </div>
 
     <div id="layout-content">
         <div class="content-work">
             <router-outlet></router-outlet>
-        </div>
-
-        <div id="layout-footer">
-            <span class="footer-text">OpenSDS, Copyright &copy; 2018</span>
         </div>
     </div>
 </div>
