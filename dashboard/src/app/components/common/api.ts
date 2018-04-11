@@ -27,3 +27,7 @@ export { DropMenuModule } from '../dropmenu/dropmenu';
 export { DialogModule } from '../dialog/dialog';
 export { DropdownModule } from '../dropdown/dropdown';
 export { PasswordModule } from '../password/password';
+export { CardModule } from '../card/card';
+export { ChartModule } from '../chart/chart';
+export { BreadcrumbModule } from '../breadcrumb/breadcrumb';
+export { TableModule } from '../table/table';

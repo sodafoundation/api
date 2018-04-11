@@ -7,7 +7,9 @@ import { I18nPluralPipe } from '@angular/common';
 
 @Component({
     templateUrl: './profile.component.html',
-    styleUrls: [],
+    styleUrls: [
+        './profile.component.css'
+    ],
     animations: [
         trigger('overlayState', [
             state('hidden', style({
@@ -35,14 +37,52 @@ import { I18nPluralPipe } from '@angular/common';
     ]
 })
 export class ProfileComponent implements OnInit{
-
+    profiles = [];
     constructor(
         // private I18N: I18NService,
         // private router: Router
     ){}
-    
+    showCard = true;
     ngOnInit() {
-      
+        this.profiles = [
+            {
+              "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c1",
+              "name": "Gold",
+              "protocol": "FC",
+              "type": "Thin",
+              "policys": [
+                  "Qos",
+                  "Snapshot",
+                  "Replication"
+              ],
+              "description": "provide gold storage service",
+              "extras": {
+                "key1": "value1",
+                "key2": {
+                  "subKey1": "subValue1",
+                  "subKey2": "subValue2"
+                },
+                "key3": "value3"
+              }     
+            },
+            {
+              "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c2",
+              "name": "Silver",
+              "protocol": "iSCSI",
+              "type": "Thick",
+              "policys": [
+                "Qos",
+                "Snapshot"
+            ],
+              "description": "provide silver storage service",
+              "extras": {
+                "key1": "value1",
+                "key2": "value2"
+              }
+            }
+          ];
     }
-    
+    onDeleteProfile = function(){
+        alert(1);
+    }
 }
