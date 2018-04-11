@@ -1,0 +1,23 @@
+<div>
+    <div class="ui-g-12 ui-md-6">
+        <div>
+            <span>name</span>:
+            <span>{{data.name}}</span>
+        </div>
+        <div>
+            <span>protocol</span>:
+            <span>{{data.protocol}}</span>
+        </div>
+        <div>
+            <span>type</span>:
+            <span>{{data.type}}</span>
+        </div>
+        <div>
+            <span class="policy-bar" *ngFor="let policy of data.policys">{{policy}}</span>
+        </div>
+    </div>
+    <div class="ui-g-12 ui-md-6">
+        <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-helper-clearfix"></div>
+</div>

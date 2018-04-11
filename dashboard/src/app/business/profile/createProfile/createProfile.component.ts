@@ -46,5 +46,9 @@ export class CreateProfileComponent implements OnInit{
     ngOnInit() {
       
     }
+
+    createProfile(){
+        alert(1);
+    }
     
 }

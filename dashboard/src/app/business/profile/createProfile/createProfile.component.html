@@ -12,6 +12,6 @@
     </form> -->
 </div>
 <div class="form-btn">
-    <button pButton type="button" label="OK"></button>
-    <button pButton type="button" label="Cancel"></button>
+    <button pButton type="button" label="OK" (click)="createProfile()"></button>
+    <button pButton type="button" label="Cancel" [routerLink]="['/profile']"></button>
 </div>

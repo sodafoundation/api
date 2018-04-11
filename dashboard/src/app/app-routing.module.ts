@@ -8,6 +8,7 @@ const routes: Routes = [
     {path: 'block', loadChildren: './business/block/block.module#BlockModule'},
     {path: 'profile', loadChildren: './business/profile/profile.module#ProfileModule'},
     {path: 'createProfile', loadChildren: './business/profile/createProfile/createProfile.module#CreateProfileModule'},
+    {path: 'modifyProfile', loadChildren: './business/profile/modifyProfile/modifyProfile.module#ModifyProfileModule'},
     {path: 'resource', loadChildren: './business/resource/resource.module#ResourceModule'},
     {path: 'identity', loadChildren: './business/identity/identity.module#IdentityModule'}
 ];

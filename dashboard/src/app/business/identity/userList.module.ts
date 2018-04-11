@@ -1,6 +1,9 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { UserListComponent } from './userList.component';
 import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, InputTextModule, InputTextareaModule, DropdownModule, PasswordModule } from '../../components/common/api';
+
+
 
 @NgModule({
   declarations: [UserListComponent],
@@ -12,7 +15,8 @@ import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, InputTextM
     InputTextModule,
     InputTextareaModule,  
     DropdownModule,
-    PasswordModule
+    PasswordModule,
+    FormsModule    
   ],
   exports: [UserListComponent],
   providers: []

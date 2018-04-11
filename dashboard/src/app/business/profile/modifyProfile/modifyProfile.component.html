@@ -1,0 +1,65 @@
+<p-breadcrumb [model]="items"></p-breadcrumb>
+<div>
+    <div class="ui-g-12 ui-md-8">
+        <div>
+            <span class="ui-g-12 ui-md-3">name:</span>
+            <span class="ui-g-12 ui-md-9">{{data.name}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">protocol:</span>
+            <span class="ui-g-12 ui-md-9">{{data.protocol}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">type:</span>
+            <span class="ui-g-12 ui-md-9">{{data.type}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">policy:</span>
+            <div class="ui-g-12 ui-md-9">
+                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            </div>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">policy:</span>
+            <div class="ui-g-12 ui-md-9">
+                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            </div>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">policy:</span>
+            <div class="ui-g-12 ui-md-9">
+                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            </div>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-3">policy:</span>
+            <div class="ui-g-12 ui-md-9">
+                <p-table [value]="pools">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th *ngFor="let col of cols">
+                                {{col.header}}
+                            </th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-pool>
+                        <tr>
+                            <td *ngFor="let col of cols">
+                                {{pool[col.field]}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-g-12 ui-md-4">
+        <p-chart [options]="option" [responsive]="false" [width]="300" [height]="300" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-helper-clearfix"></div>
+    <div>
+        <button pButton type="button" label="Modify" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Back" [routerLink]="['/profile']" class="ui-button-secondary"></button>
+    </div>
+</div>

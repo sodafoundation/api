@@ -1,9 +1,11 @@
-import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
+import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, ViewChildren } from '@angular/core';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem } from '../../components/common/api';
+
+import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
     selector: 'user-list',
@@ -20,14 +22,6 @@ export class UserListComponent implements OnInit {
         // private I18N: I18NService,
         // private router: Router
     ) { }
-
-    ngOnInit() {
-        this.users = [
-            { "username": "admin", "status": "Enabled", "tenant": "tenant_A, tenant_B", "role": "System Administrator", "userid":"uu220816001" },
-            { "username": "cloud_admin", "status": "Enabled", "tenant": "tenant_B", "role": "Storage Administrator", "userid":"uu220816002" },
-            { "username": "jack", "status": "Enabled", "tenant": "tenant_A", "role": "Tenant User", "userid":"uu220816003" }
-        ];
-    }
     
     showCreateUser(): void{
         this.createUserDisplay = true;
@@ -35,7 +29,7 @@ export class UserListComponent implements OnInit {
     
 
     roles = [
-        {label:'Select City', value:null},
+        {label:'Select User', value:null},
         {label:'New York', value:{id:1, name: 'New York', code: 'NY'}},
         {label:'Rome', value:{id:2, name: 'Rome', code: 'RM'}},
         {label:'London', value:{id:3, name: 'London', code: 'LDN'}},
@@ -49,6 +43,22 @@ export class UserListComponent implements OnInit {
         confirmPasswordLabel:'Confirm Password:',
         roleLabel:'Role:',
         tenantLabel:'Tenant:'
+    }
+    tenants = [
+        {label:'Select Tenant', value:null},
+        {label:'Tenant1', value:1},
+        {label:'Tenant2', value:2}
+    ]
+
+    errorMessage = {};
+
+
+    ngOnInit() {
+        this.users = [
+            { "username": "admin", "status": "Enabled", "tenant": "tenant_A, tenant_B", "role": "System Administrator", "userid":"uu220816001" },
+            { "username": "cloud_admin", "status": "Enabled", "tenant": "tenant_B", "role": "Storage Administrator", "userid":"uu220816002" },
+            { "username": "jack", "status": "Enabled", "tenant": "tenant_A", "role": "Tenant User", "userid":"uu220816003" }
+        ];
     }
 
 }

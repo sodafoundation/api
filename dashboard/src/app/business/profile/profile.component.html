@@ -4,3 +4,11 @@
 <div>
     <p-button label="Create" [routerLink]="['/createProfile']"></p-button>
 </div>
+
+<div class="ui-g-12 ui-md-6" style="position: relative;" *ngFor="let profile of profiles">
+    <p-button style="position:absolute;right: -6px; top: -6px;" (click)="onDeleteProfile()" styleClass="ui-button-info" icon="fa fa-fw fa-close">
+    </p-button>
+    <p-card [routerLink]="['/modifyProfile']">
+        <profile-card [data]="profile"></profile-card>
+    </p-card>
+</div>
