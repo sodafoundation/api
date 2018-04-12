@@ -8,7 +8,7 @@ $color-panelbg: #f3f6f7;
 $widget-border: (normal: #cfd7db, hover: #98a5bc, focus: #98a5bc, active: #98a5bc);
 $widget-bg: (normal: #fdfdfd, hover: #ffffff, focus: #ffffff, active: #f1f1f1);
 
-$border-radius: (small, 2px), (medium, 10px), (large, 20px);
+$border-radius: (small, 3px), (medium, 10px), (large, 20px);
 @each $type, $size in $border-radius{
     $radius-pos:    (tl,   $size 0 0 0 ),
                     (tr,    0 $size 0 0 ),

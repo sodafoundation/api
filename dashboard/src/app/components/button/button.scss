@@ -6,11 +6,12 @@
     margin-right: .1rem; 
     text-decoration: none !important; 
     cursor: pointer; 
-    text-align: center; 
+    text-align: center;
+    min-width: 1.00rem; 
     zoom: 1; 
     overflow: visible; /* the overflow property removes extra width in IE */
     &:enabled:hover{
-        box-shadow: 0px 2px 8px #eee;
+        box-shadow: 0px 4px 8px #e3e3e3;
         border-color: map-get($widget-border, normal);
     }
     &.ui-button-icon-only { 
@@ -30,6 +31,10 @@
             line-height: 0.38rem;
         }
     }
+}
+
+.ui-button-icon-only{
+    min-width: 0;
 }
 
 p-button {
@@ -148,7 +153,7 @@ button.ui-button::-moz-focus-inner {
     background-color: map-get($color-primary, hover);
     border-color: map-get($color-primary, hover);
     color: #fff;
-    box-shadow: 0px 2px 8px #a7c9eb;
+    box-shadow: 0px 4px 8px #a7c9eb;
 }
 
 .ui-button.ui-button-secondary:enabled:active,

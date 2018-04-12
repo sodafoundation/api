@@ -1,16 +1,27 @@
 .ui-dialog {
     position: fixed;
     padding: 0;
+    background: #f3f6f7;
+    border: none;
+    box-shadow: 0px 5px 20px 0px rgba(0, 0, 0, 0.3);
+    @extend .ui-corner-all-small;
 }
-.ui-dialog .ui-dialog-titlebar {
-	padding: .5em .75em;
+
+.ui-dialog.ui-widget .ui-dialog-titlebar{
+    padding: .3rem .3rem .2rem;
     position: relative;
     border: 0;
-}
-.ui-dialog .ui-dialog-content {
+    background: none;
+    @extend .ui-corner-top-small;
+    .ui-dialog-title{
+        font-size: .24rem;
+    }
+} 
+
+.ui-dialog.ui-widget .ui-dialog-content {
     position: relative;
     border: 0;
-    padding: .5em .75em;
+    padding: .1rem .3rem .3rem;
     background: none;
     overflow: auto;
     zoom: 1;
@@ -38,18 +49,32 @@
 }
 .ui-dialog .ui-dialog-titlebar-close {
     float: right;
-    padding: .125em;
+    width: .24rem;
+    height: .24rem;
+    padding: .03rem .01rem 0.05rem;
+    margin: -.12rem -.12rem 0 0;
+    background: map-get($map: $color-primary, $key: normal);
     cursor: pointer;
-    border: 1px solid transparent;
+    @extend .ui-corner-all-large;
+    &:hover{
+        background: map-get($map: $color-primary, $key: hover);
+        box-shadow: 0px 4px 8px #e3e3e3;
+    }
 }
 .ui-dialog .ui-dialog-titlebar-close span {
     display: block;
     margin: 0;
+    color: #fff;
+    width: .22rem;
+    font-size: .14rem;
+    line-height: .16rem;
 }
 
 .ui-dialog-footer {
-    padding: 1em;
-    text-align: right;
+    padding: .18rem 0 .20rem 0;
+    text-align: center;
+    background: #e6edef;
+    @extend .ui-corner-bottom-small;
 }
 .ui-dialog .ui-dialog-footer {
     border: none;
