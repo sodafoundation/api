@@ -65,8 +65,8 @@ type VolumeSpec struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty"`
 
-        // The uuid of the replication which the volume belongs to.
-        ReplicationId string `json:"replicationId,omitempty"`
+	// The uuid of the replication which the volume belongs to.
+	ReplicationId string `json:"replicationId,omitempty"`
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.

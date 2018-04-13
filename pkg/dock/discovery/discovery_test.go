@@ -103,17 +103,10 @@ func TestReport(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.MockClient)
-<<<<<<< HEAD
-	mockClient.On("CreateDock", c.NewAdminContext(), dd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", c.NewAdminContext(), dd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", c.NewAdminContext(), dd.pols[1]).Return(nil, nil)
-	dd.c = mockClient
-=======
-	mockClient.On("CreateDock", fdd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", fdd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", fdd.pols[1]).Return(nil, nil)
+	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)
 	fdd.c = mockClient
->>>>>>> development
 
 	if err := fdd.Report(); err != nil {
 		t.Errorf("Failed to store docks and pools into database: %v\n", err)

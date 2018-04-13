@@ -779,9 +779,9 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	r.Header.Set("Content-Type", "application/JSON")
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
 
-	mockClient.On("ExtendVolume", volume).Return(volume, nil)
-	mockClient.On("GetVolume", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
-	mockClient.On("GetPool", "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
+	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
 
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

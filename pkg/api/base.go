@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	//	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 )
 

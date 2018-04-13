@@ -107,13 +107,13 @@ func TestCreateVolume(t *testing.T) {
 	}
 	var vol = &SampleVolumes[0]
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetDock", "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
-	mockClient.On("GetDefaultProfile").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetProfile", "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("UpdateVolume", vol.Id, vol).Return(req, nil)
+	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(req, nil)
 	db.C = mockClient
 
-	var c = &Controller{
+	var ctrl = &Controller{
 		selector: &fakeSelector{
 			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
 			err: nil,
@@ -122,7 +122,7 @@ func TestCreateVolume(t *testing.T) {
 	}
 
 	var errchan = make(chan error, 1)
-	c.CreateVolume(context.NewAdminContext(), req, errchan)
+	ctrl.CreateVolume(context.NewAdminContext(), req, errchan)
 	if err := <-errchan; err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
@@ -175,7 +175,7 @@ func TestExtendVolume(t *testing.T) {
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", context.NewAdminContext(), vol.ProfileId).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), vol2.Id, vol2).Return(vol, nil)
+	mockClient.On("UpdateVolume", context.NewAdminContext(), vol2).Return(vol, nil)
 	db.C = mockClient
 
 	var c = &Controller{

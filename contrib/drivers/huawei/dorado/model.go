@@ -315,7 +315,7 @@ type ReplicationPair struct {
 
 type ReplicationPairResp struct {
 	Data  ReplicationPair `json:"data"`
-	Error Error             `json:"error"`
+	Error Error           `json:"error"`
 }
 
 type SimpleStruct struct {

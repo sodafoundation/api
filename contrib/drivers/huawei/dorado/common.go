@@ -3,14 +3,13 @@ package dorado
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	log "github.com/golang/glog"
-	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-
 )
 
 type AuthOptions struct {
@@ -73,13 +72,13 @@ func Gb2Sector(gb int64) int64 {
 	return gb * UnitGi / 512
 }
 
-func WaitForCondition(f func() (bool, error), interval , timeout time.Duration) error {
+func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
 	endAt := time.Now().Add(timeout)
 	time.Sleep(time.Duration(interval))
-	for{
+	for {
 		startTime := time.Now()
-		ok, err:=f()
-		if err != nil{
+		ok, err := f()
+		if err != nil {
 			return err
 		}
 		if ok {
@@ -88,8 +87,8 @@ func WaitForCondition(f func() (bool, error), interval , timeout time.Duration) 
 		if time.Now().After(endAt) {
 			break
 		}
-		elapsed  :=time.Now().Sub(startTime)
-		time.Sleep(interval-elapsed)
+		elapsed := time.Now().Sub(startTime)
+		time.Sleep(interval - elapsed)
 	}
 	return fmt.Errorf("wait for condition timeout")
 }

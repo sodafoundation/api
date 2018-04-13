@@ -69,8 +69,8 @@ const (
 )
 
 const (
-	DefaultReplicaWaitInterval = 1*time.Second
-	DefaultReplicaWaitTimeout  = 20*time.Second
+	DefaultReplicaWaitInterval = 1 * time.Second
+	DefaultReplicaWaitTimeout  = 20 * time.Second
 
 	ReplicaSyncModel  = "1"
 	ReplicaAsyncModel = "2"

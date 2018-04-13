@@ -15,6 +15,7 @@
 package dorado
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -95,40 +96,47 @@ func TestTruncateDescription(t *testing.T) {
 
 func TestWaitForCondition(t *testing.T) {
 	var count = 0
-	err := WaitForCondition(func() bool {
-		count ++
-		time.Sleep(2*time.Microsecond)
+	err := WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(2 * time.Microsecond)
 		if count >= 5 {
-			return true
+			return true, nil
 		}
-		return false
-	}, 1*time.Microsecond,100*time.Second)
+		return false, nil
+	}, 1*time.Microsecond, 100*time.Second)
 	if err != nil {
 		t.Errorf("Test WaitForCondition failed, %v", err)
 	}
 
 	count = 0
-	err = WaitForCondition(func() bool {
-		count ++
-		time.Sleep(1*time.Millisecond)
+	err = WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(1 * time.Millisecond)
 		if count >= 5 {
-			return true
+			return true, nil
 		}
-		return false
-	}, 4*time.Millisecond,100*time.Millisecond)
+		return false, nil
+	}, 4*time.Millisecond, 100*time.Millisecond)
 	if err != nil {
 		t.Errorf("Test WaitForCondition failed, %v", err)
 	}
 
+	err = WaitForCondition(func() (bool, error) {
+		return true, fmt.Errorf("test error....")
+	}, 4*time.Millisecond, 100*time.Millisecond)
+	if err == nil {
+		t.Errorf("Test WaitForCondition failed, %v", err)
+	}
+
 	count = 0
-	err = WaitForCondition(func() bool {
-		count ++
-		time.Sleep(2*time.Millisecond)
+	err = WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(2 * time.Millisecond)
 		if count >= 5 {
-			return true
+			return true, nil
 		}
-		return false
-	}, 2*time.Millisecond,5*time.Millisecond)
+		return false, nil
+	}, 2*time.Millisecond, 5*time.Millisecond)
 	if err == nil {
 		t.Errorf("Test WaitForCondition failed, %v", err)
 	}
