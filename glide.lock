@@ -1,5 +1,5 @@
-hash: b3c4035bb92bcf7f61eebf111dafb29acec4a65b7d4da2be367d40355f9bab26
-updated: 2018-03-14T12:42:49.031276378Z
+hash: d97931e137fb73e846b68a7f7a2c9c27beb02ef6ade996fabcce8cbf6d0e640f
+updated: 2018-04-01T15:18:36.923665676Z
 imports:
 - name: github.com/astaxie/beego
   version: bf5c5626ab429e66d88602e1ab1ab5fbf4629a01
@@ -19,7 +19,7 @@ imports:
   - rados
   - rbd
 - name: github.com/coreos/etcd
-  version: c9d46ab3799b7f2174268e75f72d01e6d6aac953
+  version: e348b1aedd9167360c466ae98f7343d3e22281f8
   subpackages:
   - auth/authpb
   - clientv3
@@ -65,6 +65,8 @@ imports:
   - pagination
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/mitchellh/mapstructure
+  version: a4e142e9c047c904fa2f1e144d9a84e6133024bc
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:

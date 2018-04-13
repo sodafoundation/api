@@ -72,10 +72,10 @@ func (*fakeClientCaller) List(req *Request) *Response {
 	var resp []string
 
 	if strings.Contains(req.Url, "docks") {
-		resp = StringSliceDocksWithFilter
+		resp = StringSliceDocks
 	}
 	if strings.Contains(req.Url, "pools") {
-		resp = StringSlicePoolsWithFilter
+		resp = StringSlicePools
 	}
 	if strings.Contains(req.Url, "profiles") {
 		resp = StringSliceProfiles
@@ -246,8 +246,8 @@ func TestListDocks(t *testing.T) {
 		"limit":      []string{"732"},
 		"sortDir":    []string{"desc"},
 		"sortKey":    []string{"id"},
-		"Name":       []string{"sample1"},
-		"DriverName": []string{"docktest"},
+		"Name":       []string{"sample"},
+		"DriverName": []string{"sample"},
 	}
 
 	dcks, err := fc.ListDocksWithFilter(c.NewAdminContext(), m)
@@ -256,9 +256,7 @@ func TestListDocks(t *testing.T) {
 	}
 
 	var expected []*model.DockSpec
-	for i := range SampleDocksWithFilter {
-		expected = append(expected, &SampleDocksWithFilter[i])
-	}
+	expected = append(expected, &SampleDocks[0])
 	if !reflect.DeepEqual(dcks, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, dcks)
 	}
@@ -278,9 +276,7 @@ func TestListPools(t *testing.T) {
 	}
 
 	var expected []*model.StoragePoolSpec
-	for i := range SamplePoolsWithFilter {
-		expected = append(expected, &SamplePoolsWithFilter[i])
-	}
+	expected = append(expected, &SamplePools[0])
 	if !reflect.DeepEqual(pols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, pols)
 	}

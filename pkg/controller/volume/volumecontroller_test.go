@@ -110,17 +110,27 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 	}, nil
 }
 
+<<<<<<< HEAD
 // Create a volume attachment
 func (fc *fakeClient) CreateReplication(ctx context.Context, in *pb.CreateReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{
 			Result: &pb.GenericResponse_Result{
 				Message: ByteReplication,
+=======
+// Attach a volume
+func (fc *fakeClient) AttachVolume(ctx context.Context, in *pb.AttachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: "",
+>>>>>>> development
 			},
 		},
 	}, nil
 }
 
+<<<<<<< HEAD
 // Delete a replication
 func (fc *fakeClient) DeleteReplication(ctx context.Context, in *pb.DeleteReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
@@ -150,6 +160,10 @@ func (fc *fakeClient) DisableReplication(ctx context.Context, in *pb.DisableRepl
 
 // Failover a replication
 func (fc *fakeClient) FailoverReplication(ctx context.Context, in *pb.FailoverReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+=======
+// Detach a volume
+func (fc *fakeClient) DetachVolume(ctx context.Context, in *pb.DetachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+>>>>>>> development
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{
 			Result: &pb.GenericResponse_Result{},
