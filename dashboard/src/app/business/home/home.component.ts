@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
+import { Http } from '@angular/http';
 
 @Component({
     templateUrl: './home.component.html',
@@ -7,6 +8,7 @@ import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, 
 export class HomeComponent implements OnInit{
 
     constructor(
+        private http: Http
         // private I18N: I18NService,
         // private router: Router
     ){}
@@ -19,31 +21,9 @@ export class HomeComponent implements OnInit{
       
     }
     
-    // arraySort(array){
-    //     for(let i = 1; i<array.length; i++){
-    //         for(let j = i-1; j>=0; j--){
-    //             if(array[j+1] < array[j]){
-    //                 let tempArr = [array[j+1], array[j]];
-    //                 array.splice(j, 2, tempArr[0],tempArr[1]);
-    //             }else{
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     console.log(array);
-    //     return array;
-    // }
-
-    // arraySortUpdate(array){
-    //     for(let i = 1; i<array.length; i++){
-    //         var temmArr = array[i];
-    //         var j;
-    //         for(j=i; j>0 && temmArr < array[j-1]; j--){
-    //             array[j] = array[j-1];
-    //         }
-    //         array[j] = temmArr;
-    //     }
-    //     console.log(array);
-    //     return array;
-    // }
+    showData() {
+        this.http.get("/v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/profiles").subscribe((res)=>{
+            console.log(res.json().data);
+        });
+    }
 }
