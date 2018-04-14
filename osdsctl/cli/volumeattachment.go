@@ -87,7 +87,6 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(1)
 	}
-
 	resp, err := client.CreateVolumeAttachment(attachment)
 	PrintResponse(resp)
 	if err != nil {

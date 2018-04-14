@@ -21,13 +21,18 @@ storage plugins.
 package dock
 
 import (
+	"encoding/json"
+	"fmt"
+
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+
+	_ "github.com/opensds/opensds/contrib/connector/iscsi"
+	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
 
 // Brain is a global variable that controls the dock module.
@@ -38,16 +43,16 @@ var Brain *DockHub
 type DockHub struct {
 	// Discoverer represents the mechanism of DockHub discovering the storage
 	// capabilities from different backends.
-	Discoverer *discovery.DockDiscoverer
+	Discoverer discovery.DockDiscoverer
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
 }
 
 // NewDockHub method creates a new DockHub and returns its pointer.
-func NewDockHub() *DockHub {
+func NewDockHub(dockType string) *DockHub {
 	return &DockHub{
-		Discoverer: discovery.NewDiscoverer(),
+		Discoverer: discovery.NewDockDiscoverer(dockType),
 	}
 }
 
@@ -72,7 +77,7 @@ func (d *DockHub) TriggerDiscovery() error {
 		}
 	}(ctx)
 
-	return nil
+	return err
 }
 
 // CreateVolume
@@ -89,16 +94,7 @@ func (d *DockHub) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, err
 		log.Error("When calling volume driver to create volume:", err)
 		return nil, err
 	}
-	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
-
-	// Store the volume data into database.
-	result, err := db.C.CreateVolume(c.NewContextFromJson(opt.GetContext()), vol)
-	if err != nil {
-		log.Error("When create volume in db module:", err)
-		return nil, err
-	}
-
-	return result, nil
+	return vol, nil
 }
 
 // DeleteVolume
@@ -116,12 +112,6 @@ func (d *DockHub) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		log.Error("When calling volume driver to delete volume:", err)
 		return err
 	}
-
-	if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
-		log.Error("Error occurred in dock module when delete volume in db:", err)
-		return err
-	}
-
 	return nil
 }
 
@@ -139,16 +129,7 @@ func (d *DockHub) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, err
 		log.Error("When calling volume driver to extend volume:", err)
 		return nil, err
 	}
-
-	vol.PoolId, vol.ProfileId = opt.GetPoolId(), opt.GetProfileId()
-	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(c.NewContextFromJson(opt.GetContext()), vol)
-	if err != nil {
-		log.Error("When extend volume in db module:", err)
-		return nil, err
-	}
-
-	return result, nil
+	return vol, nil
 }
 
 // CreateVolumeAttachment
@@ -167,8 +148,10 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 	}
 
 	var atc = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{},
-		VolumeId:  opt.GetVolumeId(),
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		VolumeId: opt.GetVolumeId(),
 		HostInfo: model.HostInfo{
 			Platform:  opt.HostInfo.GetPlatform(),
 			OsType:    opt.HostInfo.GetOsType(),
@@ -180,13 +163,7 @@ func (d *DockHub) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.V
 		Metadata:       opt.GetMetadata(),
 	}
 
-	result, err := db.C.CreateVolumeAttachment(c.NewContextFromJson(opt.GetContext()), atc)
-	if err != nil {
-		log.Error("Error occurred in dock module when create volume attachment in db:", err)
-		return nil, err
-	}
-
-	return result, nil
+	return atc, nil
 }
 
 // DeleteVolumeAttachment
@@ -202,12 +179,6 @@ func (d *DockHub) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
 		log.Error("Call driver to terminate volume connection failed:", err)
 		return err
 	}
-
-	if err := db.C.DeleteVolumeAttachment(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
-		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
-		return err
-	}
-
 	return nil
 }
 
@@ -225,14 +196,7 @@ func (d *DockHub) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volum
 		log.Error("Call driver to create volume snashot failed:", err)
 		return nil, err
 	}
-
-	result, err := db.C.CreateVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), snp)
-	if err != nil {
-		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
-		return nil, err
-	}
-
-	return result, nil
+	return snp, nil
 }
 
 // DeleteSnapshot
@@ -250,13 +214,37 @@ func (d *DockHub) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		log.Error("When calling volume driver to delete volume:", err)
 		return err
 	}
+	return nil
+}
 
-	if err = db.C.DeleteVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
-		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
-		return err
+// AttachVolume
+func (d *DockHub) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
+	var connData = make(map[string]interface{})
+	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
+		return "", fmt.Errorf("Error occurred in dock module when unmarshalling connection data!")
 	}
 
-	return nil
+	con := connector.NewConnector(opt.GetAccessProtocol())
+	if con == nil {
+		return "", fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+	}
+
+	return con.Attach(connData)
+}
+
+// DetachVolume
+func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
+	var connData = make(map[string]interface{})
+	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
+		return fmt.Errorf("Error occurred in dock module when unmarshalling connection data!")
+	}
+
+	con := connector.NewConnector(opt.GetAccessProtocol())
+	if con == nil {
+		return fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+	}
+
+	return con.Detach(connData)
 }
 
 // DeleteVolumeAttachment
@@ -277,13 +265,13 @@ func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.Repli
 	replica.PoolId = opt.GetPoolId()
 	replica.ProfileId = opt.GetProfileId()
 	replica.Name = opt.GetName()
-	result, err := db.C.CreateReplication(c.NewContextFromJson(opt.GetContext()), replica)
-	if err != nil {
-		log.Error("Error occurred in dock module when create replication in db:", err)
-		return nil, err
-	}
+	//result, err := db.C.CreateReplication(c.NewContextFromJson(opt.GetContext()), replica)
+	//if err != nil {
+	//	log.Error("Error occurred in dock module when create replication in db:", err)
+	//	return nil, err
+	//}
 
-	return result, nil
+	return replica, nil
 }
 
 func (d *DockHub) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
@@ -301,10 +289,10 @@ func (d *DockHub) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 		return err
 	}
 
-	if err = db.C.DeleteReplication(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
-		log.Error("Error occurred in dock module when delete replication in db:", err)
-		return err
-	}
+	//if err = db.C.DeleteReplication(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
+	//	log.Error("Error occurred in dock module when delete replication in db:", err)
+	//	return err
+	//}
 
 	return nil
 }

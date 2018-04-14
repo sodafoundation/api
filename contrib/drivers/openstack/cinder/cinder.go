@@ -174,7 +174,7 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: vol.ID,
+			Id: req.GetId(),
 		},
 		Name:             vol.Name,
 		Description:      vol.Description,
@@ -377,8 +377,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             page.Name,
 			TotalCapacity:    int64(page.Capabilities.TotalCapacityGB),
 			FreeCapacity:     int64(page.Capabilities.FreeCapacityGB),
-			AvailabilityZone: d.conf.Pool[page.Name].AZ,
-			Extras:           BuildDefaultPoolParam(d.conf.Pool[page.Name]),
+			StorageType:      d.conf.Pool[page.Name].StorageType,
+			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
+			Extras:           d.conf.Pool[page.Name].Extras,
 		}
 		pols = append(pols, pol)
 	}

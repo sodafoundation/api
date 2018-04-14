@@ -1,9 +1,9 @@
 kind: Deployment
 apiVersion: extensions/v1beta1
 metadata:
-  name: {{ template "fullname" . }}-osdslet
+  name: {{ template "fullname" . }}-opensds
   labels:
-    app: {{ template "fullname" . }}-osdslet
+    app: {{ template "fullname" . }}-opensds
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -11,75 +11,46 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}-osdslet
+      app: {{ template "fullname" . }}-opensds
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}-osdslet
+        app: {{ template "fullname" . }}-opensds
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
       containers:
-      - name: osdslet
-        image: {{ .Values.image.osdslet }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        resources:
-          requests:
-            cpu: 100m
-            memory: 20Mi
-          limits:
-            cpu: 100m
-            memory: 30Mi
-        ports:
-        - containerPort: 50040
-        volumeMounts:
-        - mountPath: /etc/opensds
-          name: config-dir
+        - name: osdsdb
+          image: {{ .Values.image.osdsdb }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          volumeMounts:
+            - name: etcd-cert-dir
+              mountPath: /etc/ssl/certs
+        - name: osdslet
+          image: {{ .Values.image.osdslet }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          volumeMounts:
+            - name: opensds-conf-dir
+              mountPath: /etc/opensds
+        - name: osdsdock
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          image: {{ .Values.image.osdsdock }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          volumeMounts:
+            - name: opensds-conf-dir
+              mountPath: /etc/opensds
+              mountPropagation: "Bidirectional"
       volumes:
-      - name: config-dir
-        hostPath:
-          path: /etc/opensds
-------
-kind: Deployment
-apiVersion: extensions/v1beta1
-metadata:
-  name: {{ template "fullname" . }}-osdsdock
-  labels:
-    app: {{ template "fullname" . }}-osdsdock
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      app: {{ template "fullname" . }}-osdsdock
-  template:
-    metadata:
-      labels:
-        app: {{ template "fullname" . }}-osdsdock
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        release: "{{ .Release.Name }}"
-        heritage: "{{ .Release.Service }}"
-    spec:
-      containers:
-      - name: osdsdock
-        image: {{ .Values.image.osdsdock }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        resources:
-          requests:
-            cpu: 100m
-            memory: 20Mi
-          limits:
-            cpu: 100m
-            memory: 30Mi
-        ports:
-        - containerPort: 50050
-        volumeMounts:
-        - mountPath: /etc/opensds
-          name: config-dir
-      volumes:
-      - name: config-dir
-        hostPath:
-          path: /etc/opensds
+        - name: etcd-cert-dir
+          hostPath:
+            path: /usr/share/ca-certificates/
+            type: Directory
+        - name: opensds-conf-dir
+          hostPath:
+            path: /etc/opensds
+            type: Directory

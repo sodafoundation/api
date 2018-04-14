@@ -45,36 +45,47 @@ import (
 	"fmt"
 	"net"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/dock"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
-
-	log "github.com/golang/glog"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-// dockServer is used to implement opensds.DockServer.
+// dockServer is used to implement pb.DockServer
 type dockServer struct {
-	Server *grpc.Server
-	Port   string
+	Port string
 }
 
-// NewDockServer returns an dockServer instance.
-func NewDockServer(port string) pb.DockServer {
-	// Construct dock server.
-	gs := grpc.NewServer()
-	ds := &dockServer{
-		Server: gs,
-		Port:   port,
+// NewDockServer returns a dockServer instance.
+func NewDockServer(port string) *dockServer {
+	return &dockServer{
+		Port: port,
+	}
+}
+
+func (ds *dockServer) Run() error {
+	// New Grpc Server
+	s := grpc.NewServer()
+	// Register dock service.
+	pb.RegisterProvisionDockServer(s, ds)
+	pb.RegisterAttachDockServer(s, ds)
+
+	// Listen the dock server port.
+	lis, err := net.Listen("tcp", ds.Port)
+	if err != nil {
+		log.Fatalf("failed to listen: %+v", err)
+		return err
 	}
 
-	// Register dock server.
-	pb.RegisterDockServer(gs, ds)
+	log.Info("Dock server initialized! Start listening on port:", lis.Addr())
 
-	return ds
+	// Start dock server watching loop.
+	defer s.Stop()
+	return s.Serve(lis)
 }
 
-// CreateVolume implements opensds.DockServer
+// CreateVolume implements pb.DockServer.CreateVolume
 func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -92,7 +103,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 	return &res, nil
 }
 
-// DeleteVolume implements opensds.DockServer
+// DeleteVolume implements pb.DockServer.DeleteVolume
 func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -109,7 +120,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 	return &res, nil
 }
 
-// ExtendVolume implements opensds.DockServer
+// ExtendVolume implements pb.DockServer.ExtendVolume
 func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -127,7 +138,7 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 	return &res, nil
 }
 
-// CreateAttachment implements opensds.DockServer
+// CreateAttachment implements pb.DockServer.CreateAttachment
 func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -145,7 +156,7 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 	return &res, nil
 }
 
-// DeleteAttachment implements opensds.DockServer
+// DeleteAttachment implements pb.DockServer.DeleteAttachment
 func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -162,7 +173,7 @@ func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttach
 	return &res, nil
 }
 
-// CreateVolumeSnapshot implements opensds.DockServer
+// CreateVolumeSnapshot implements pb.DockServer.CreateVolumeSnapshot
 func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVolumeSnapshotOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -179,7 +190,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 	return &res, nil
 }
 
-// DeleteVolumeSnapshot implements opensds.DockServer
+// DeleteVolumeSnapshot implements pb.DockServer.DeleteVolumeSnapshot
 func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 
@@ -187,6 +198,41 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 
 	if err := dock.Brain.DeleteSnapshot(opt); err != nil {
 		log.Error("Error occurred in dock module when delete snapshot:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult("")
+	return &res, nil
+}
+
+// AttachVolume implements pb.DockServer.AttachVolume
+func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive attach volume request, vr =", opt)
+
+	atc, err := dock.Brain.AttachVolume(opt)
+	if err != nil {
+		log.Error("Error occurred in dock module when attach volume:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult(atc)
+	return &res, nil
+}
+
+// DetachVolume implements pb.DockServer.DetachVolume
+func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive detach volume request, vr =", opt)
+
+	if err := dock.Brain.DetachVolume(opt); err != nil {
+		log.Error("Error occurred in dock module when detach volume:", err)
 
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
@@ -275,31 +321,6 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 
 	res.Reply = GenericResponseResult("")
 	return &res, nil
-}
-
-func ListenAndServe(srv pb.DockServer) {
-	// Find whether the type of input is supported.
-	switch srv.(type) {
-	case *dockServer:
-		ds := srv.(*dockServer)
-
-		// Listen the dock server port.
-		lis, err := net.Listen("tcp", ds.Port)
-		if err != nil {
-			log.Fatalf("failed to listen: %+v", err)
-			return
-		}
-
-		log.Info("Dock server initialized! Start listening on port:", ds.Port)
-
-		// Start dock server watching loop.
-		ds.Server.Serve(lis)
-
-		defer ds.Server.Stop()
-	default:
-		log.Fatalln("Don't support this type!")
-		return
-	}
 }
 
 func GenericResponseResult(message interface{}) *pb.GenericResponse_Result_ {

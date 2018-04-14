@@ -25,18 +25,34 @@ import (
 	"github.com/opensds/opensds/pkg/utils/config"
 )
 
+var fp = map[string]PoolProperties{
+	"vg001": {
+		StorageType:      "block",
+		AvailabilityZone: "default",
+		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				ProvisioningPolicy: "Thin",
+				IsSpaceEfficient:   false,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "iscsi",
+				MaxIOPS:        7000000,
+				MaxBWS:         600,
+			},
+			Advanced: map[string]interface{}{
+				"diskType": "SSD",
+				"latency":  "5ms",
+			},
+		},
+	},
+}
+
 func TestSetup(t *testing.T) {
 	var d = &Driver{}
 	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/lvm.yaml"
 	var expectedDriver = &Driver{
 		conf: &LVMConfig{
-			Pool: map[string]PoolProperties{
-				"vg001": {
-					DiskType:       "SSD",
-					AZ:             "default",
-					AccessProtocol: "iscsi",
-				},
-			},
+			Pool:      fp,
 			TgtBindIp: "192.168.56.105",
 		},
 		handler: execCmd,
@@ -56,13 +72,7 @@ func TestSetup(t *testing.T) {
 
 var fd = &Driver{
 	conf: &LVMConfig{
-		Pool: map[string]PoolProperties{
-			"vg001": {
-				DiskType:       "SSD",
-				AZ:             "default",
-				AccessProtocol: "iscsi",
-			},
-		},
+		Pool: fp,
 	},
 	handler: fakeHandler,
 }
@@ -225,15 +235,27 @@ func TestDeleteSnapshot(t *testing.T) {
 func TestListPools(t *testing.T) {
 	var expected = []*model.StoragePoolSpec{
 		{
-			BaseModel:     &model.BaseModel{},
-			Name:          "vg001",
-			TotalCapacity: int64(18),
-			FreeCapacity:  int64(18),
-			Extras: model.ExtraSpec{
-				"diskType":       "SSD",
-				"accessProtocol": "iscsi",
-			},
+			BaseModel:        &model.BaseModel{},
+			Name:             "vg001",
+			TotalCapacity:    int64(18),
+			FreeCapacity:     int64(18),
 			AvailabilityZone: "default",
+			StorageType:      "block",
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   false,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "iscsi",
+					MaxIOPS:        7000000,
+					MaxBWS:         600,
+				},
+				Advanced: map[string]interface{}{
+					"diskType": "SSD",
+					"latency":  "5ms",
+				},
+			},
 		},
 	}
 	pols, err := fd.ListPools()

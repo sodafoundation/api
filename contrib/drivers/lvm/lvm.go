@@ -68,7 +68,7 @@ func (*Driver) Unset() error { return nil }
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var polName = opt.GetPoolName()
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var name = volumePrefix + id
 
 	if _, err := d.handler("lvcreate", []string{
@@ -101,7 +101,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: id,
+			Id: opt.GetId(),
 		},
 		Name:        opt.GetName(),
 		Size:        opt.GetSize(),
@@ -229,7 +229,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var snapName = snapshotPrefix + id
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
@@ -375,8 +375,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
 			FreeCapacity:     vg.FreeCapacity,
-			Extras:           BuildDefaultPoolParam(d.conf.Pool[vg.Name]),
-			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
+			StorageType:      d.conf.Pool[vg.Name].StorageType,
+			Extras:           d.conf.Pool[vg.Name].Extras,
+			AvailabilityZone: d.conf.Pool[vg.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = "default"

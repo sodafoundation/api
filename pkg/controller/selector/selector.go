@@ -55,7 +55,7 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 		return nil, err
 	}
 
-	// Now, we just return the firt supported pool which will be improved in
+	// Now, we just return the first supported pool which will be improved in
 	// the future.
 	return supportedPools[0], nil
 
@@ -84,5 +84,5 @@ func SelectSupportedPools(maxNum int, filterReq map[string]interface{}, pools []
 		return supportedPools, nil
 	}
 
-	return nil, errors.New("No available pool to meet user's requirement")
+	return nil, errors.New("no available pool to meet user's requirement")
 }

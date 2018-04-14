@@ -1,37 +1,16 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-osdslet
+  name: {{ template "fullname" . }}-opensds
   labels:
-    app: {{ template "fullname" . }}-osdslet
+    app: {{ template "fullname" . }}-opensds
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  type: {{ .Values.osdslet.service.type }}
   selector:
-    app: {{ template "fullname" . }}-osdslet
+    app: {{ template "fullname" . }}-opensds
   ports:
-  - name: osdslet-server
-    protocol: TCP
+  - protocol: TCP
     port: 50040
     targetPort: 50040
-------
-kind: Service
-apiVersion: v1
-metadata:
-  name: {{ template "fullname" . }}-osdsdock
-  labels:
-    app: {{ template "fullname" . }}-osdsdock
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  type: {{ .Values.osdsdock.service.type }}
-  selector:
-    app: {{ template "fullname" . }}-osdsdock
-  ports:
-  - name: osdsdock-server
-    protocol: TCP
-    port: 50050
-    targetPort: 50050

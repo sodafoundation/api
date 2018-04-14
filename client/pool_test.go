@@ -73,8 +73,19 @@ func TestGetPool(t *testing.T) {
 		TotalCapacity: int64(100),
 		FreeCapacity:  int64(90),
 		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		Extras: model.ExtraSpec{
-			"diskType": "SSD",
+		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				ProvisioningPolicy: "Thin",
+				IsSpaceEfficient:   true,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "rbd",
+				MaxIOPS:        1000,
+			},
+			Advanced: map[string]interface{}{
+				"diskType":   "SSD",
+				"throughput": float64(1000),
+			},
 		},
 	}
 
@@ -101,8 +112,20 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(100),
 			FreeCapacity:  int64(90),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SSD",
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        8000000,
+					MaxBWS:         700,
+				},
+				Advanced: map[string]interface{}{
+					"diskType": "SSD",
+					"latency":  "3ms",
+				},
 			},
 		},
 		{
@@ -114,8 +137,20 @@ func TestListPools(t *testing.T) {
 			TotalCapacity: int64(200),
 			FreeCapacity:  int64(170),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			Extras: model.ExtraSpec{
-				"diskType": "SAS",
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        3000000,
+					MaxBWS:         350,
+				},
+				Advanced: map[string]interface{}{
+					"diskType": "SAS",
+					"latency":  "500ms",
+				},
 			},
 		},
 	}

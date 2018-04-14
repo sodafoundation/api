@@ -23,6 +23,7 @@ package drivers
 
 import (
 	"github.com/opensds/opensds/contrib/drivers/drbd"
+	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
@@ -50,6 +51,9 @@ func InitReplicationDriver(resourceType string) ReplicationDriver {
 	case "drbd":
 		d = &drbd.ReplicationDriver{}
 		break
+	case "huawei_dorado":
+		d = &dorado.ReplicationDriver{}
+		break
 	default:
 		d = &replication_sample.ReplicationDriver{}
 		break
@@ -64,6 +68,8 @@ func CleanReplicationDriver(d ReplicationDriver) ReplicationDriver {
 	switch d.(type) {
 	case *drbd.ReplicationDriver:
 		break
+	case *dorado.ReplicationDriver:
+		d = &dorado.ReplicationDriver{}
 	default:
 		break
 	}
