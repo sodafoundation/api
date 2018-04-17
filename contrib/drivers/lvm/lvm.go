@@ -140,7 +140,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		return err
 	}
 	if _, err := d.handler("lvremove", []string{
-		"-f", lvPath,
+		lvPath,
 	}); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
