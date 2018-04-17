@@ -13,7 +13,7 @@ import { ButtonModule } from './../../../components/common/api';
     selector: 'profile-card',
     templateUrl: './profile-card.component.html',
     styleUrls: [
-        "./profile-card.css"
+        "./profile-card.scss"
     ],
     animations: [
         trigger('overlayState', [
@@ -58,7 +58,7 @@ export class ProfileCardComponent implements OnInit {
                     data: [(1000-300), 300],//未使用容量放前面
                     backgroundColor: [
                         "rgba(224, 224, 224, 1)",
-                        "#FF6384"
+                        "#438bd3"
                     ]
                     // hoverBackgroundColor: [
                     //     "#FF6384",

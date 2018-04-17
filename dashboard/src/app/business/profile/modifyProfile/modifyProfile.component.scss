@@ -1,0 +1,34 @@
+@import "./../scss-variable";
+// custom
+// style="padding: 0.16rem;color:rgb(104, 114, 132);"
+// style="padding: 1em 0.08rem;color: #333333;"
+.custom-breadcrumb {
+    padding: 0.16rem;
+}
+
+.custom-breadcrumb a {
+    color: map-get($color-text, custom) !important;
+}
+
+.custom-breadcrumb .font-color-class {
+    color: #438bd3 !important;
+}
+
+.proflie-name {
+    padding: 1em 0.08rem;
+    color: #333333;
+}
+
+.modify-profile-item {
+    margin-top: 0.5em;
+}
+
+.footer-button-class {
+    margin-top: 2em;
+}
+
+.storage-count-capacity {
+    font-size: 2em;
+    color: #438bd3 !important;
+    padding-right: 0.5em;
+}

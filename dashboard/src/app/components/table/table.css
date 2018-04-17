@@ -8,25 +8,27 @@
     table-layout: fixed;
 }
 
-.ui-table .ui-table-thead > tr > th,
-.ui-table .ui-table-tbody > tr > td,
-.ui-table .ui-table-tfoot > tr > td {
+.ui-table .ui-table-thead>tr>th,
+.ui-table .ui-table-tbody>tr>td,
+.ui-table .ui-table-tfoot>tr>td {
     padding: .25em .5em;
 }
- 
+
 .ui-table .ui-sortable-column {
     cursor: pointer;
 }
 
-.ui-table-auto-layout > .ui-table-wrapper {
+.ui-table-auto-layout>.ui-table-wrapper {
     overflow-x: auto;
 }
 
-.ui-table-auto-layout > .ui-table-wrapper > table {
+.ui-table-auto-layout>.ui-table-wrapper>table {
     table-layout: auto;
 }
 
+
 /* Sections */
+
 .ui-table-caption,
 .ui-table-summary {
     padding: .25em .5em;
@@ -42,7 +44,9 @@
     border-top: 0 none;
 }
 
+
 /* Paginator */
+
 .ui-table .ui-paginator-top {
     border-bottom: 0 none;
 }
@@ -51,7 +55,9 @@
     border-top: 0 none;
 }
 
+
 /* Scrollable */
+
 .ui-table-scrollable-header,
 .ui-table-scrollable-footer {
     overflow: hidden;
@@ -63,20 +69,22 @@
     position: relative;
 }
 
-.ui-table-scrollable-body > table > .ui-table-tbody > tr:first-child > td {
+.ui-table-scrollable-body>table>.ui-table-tbody>tr:first-child>td {
     border-top: 0 none;
-} 
+}
 
 .ui-table-virtual-table {
     position: absolute;
 }
 
+
 /* Frozen Columns */
+
 .ui-table-frozen-view .ui-table-scrollable-body {
     overflow: hidden;
 }
 
-.ui-table-frozen-view > .ui-table-scrollable-body > table > .ui-table-tbody > tr > td:last-child {
+.ui-table-frozen-view>.ui-table-scrollable-body>table>.ui-table-tbody>tr>td:last-child {
     border-right: 0 none;
 }
 
@@ -85,14 +93,16 @@
     top: 0px;
 }
 
+
 /* Resizable */
-.ui-table-resizable > .ui-table-wrapper {
+
+.ui-table-resizable>.ui-table-wrapper {
     overflow-x: auto;
 }
 
-.ui-table-resizable .ui-table-thead > tr > th,
-.ui-table-resizable .ui-table-tfoot > tr > td,
-.ui-table-resizable .ui-table-data > tr > td {
+.ui-table-resizable .ui-table-thead>tr>th,
+.ui-table-resizable .ui-table-tfoot>tr>td,
+.ui-table-resizable .ui-table-data>tr>td {
     overflow: hidden;
 }
 
@@ -114,7 +124,7 @@
     width: .5em;
     height: 100%;
     padding: 0px;
-    cursor:col-resize;
+    cursor: col-resize;
     border: 1px solid transparent;
 }
 
@@ -125,46 +135,50 @@
     display: none;
 }
 
+
 /* Edit */
-.ui-table .ui-table-tbody > tr > td.ui-editing-cell {
+
+.ui-table .ui-table-tbody>tr>td.ui-editing-cell {
     padding: 0;
 }
 
-.ui-table .ui-table-tbody > tr > td.ui-editing-cell p-celleditor >  * {
+.ui-table .ui-table-tbody>tr>td.ui-editing-cell p-celleditor>* {
     width: 100%;
 }
 
+
 /* Reorder */
+
 .ui-table-reorder-indicator-up,
 .ui-table-reorder-indicator-down {
     position: absolute;
     display: none;
 }
 
+
 /* Responsive */
-.ui-table-responsive .ui-table-tbody > tr > td .ui-column-title {
+
+.ui-table-responsive .ui-table-tbody>tr>td .ui-column-title {
     display: none;
 }
 
 @media screen and (max-width: 40em) {
-    .ui-table-responsive .ui-table-thead > tr > th,
-    .ui-table-responsive .ui-table-tfoot > tr > td {
+    .ui-table-responsive .ui-table-thead>tr>th,
+    .ui-table-responsive .ui-table-tfoot>tr>td {
         display: none !important;
     }
-
-    .ui-table-responsive .ui-table-tbody > tr > td {
+    .ui-table-responsive .ui-table-tbody>tr>td {
         text-align: left;
         display: block;
         border: 0 none;
         width: 100% !important;
-		-webkit-box-sizing: border-box;
-		-moz-box-sizing: border-box;
-		box-sizing: border-box;
-		float: left;
-		clear: left;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        float: left;
+        clear: left;
     }
-
-    .ui-table-responsive .ui-table-tbody > tr > td .ui-column-title {
+    .ui-table-responsive .ui-table-tbody>tr>td .ui-column-title {
         padding: .4em;
         min-width: 30%;
         display: inline-block;
@@ -173,7 +187,9 @@
     }
 }
 
+
 /* Loader */
+
 .ui-table-loading {
     position: absolute;
     width: 100%;
@@ -191,3 +207,18 @@
     margin-top: -1em;
     margin-left: -1em;
 }
+
+
+/* 自定义table modifyProfile start */
+
+.custom-table-class tr td,
+.custom-table-class th {
+    color: #657D95 !important;
+    font-weight: normal;
+    text-align: left;
+    line-height: 2em;
+    border: none !important;
+}
+
+
+/* 自定义table modifyProfile end */

@@ -1,22 +1,28 @@
 <div>
     <div class="ui-g-12 ui-md-6">
-        <div>
-            <span>name</span>:
-            <span>{{data.name}}</span>
+        <div class="font-primary">
+            <h2>{{data.name}}</h2>
         </div>
-        <div>
-            <span>protocol</span>:
+        <div class="padding-class">
+            <span class="label-class">Access Protocol:</span>
             <span>{{data.protocol}}</span>
         </div>
-        <div>
-            <span>type</span>:
+        <div class="padding-class">
+            <span class="label-class">Provisioning Type:</span>
             <span>{{data.type}}</span>
         </div>
-        <div>
-            <span class="policy-bar" *ngFor="let policy of data.policys">{{policy}}</span>
+
+        <div class="padding-class">
+            <!-- <p-overlayPanel #op>
+                Content
+            </p-overlayPanel> -->
+            <div (hover)="op.toggle($event)" class="fa fa-check icon-color-class" *ngFor="let policy of data.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
+                <span class="font-color-class">{{policy}}</span>
+            </div>
         </div>
     </div>
     <div class="ui-g-12 ui-md-6">
+        <!-- <div>{{policy}}</div> -->
         <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
     </div>
     <div class="ui-helper-clearfix"></div>

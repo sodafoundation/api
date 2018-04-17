@@ -4,8 +4,9 @@ import { ProfileComponent } from './profile.component';
 import { RouterModule } from '@angular/router';
 
 import { ProfileCardComponent } from './profileCard/profile-card.component';
-import { ButtonModule,CardModule,ChartModule } from '../../components/common/api';
-
+import { ButtonModule,CardModule,ChartModule,MessageModule,OverlayPanelModule,DialogModule } from '../../components/common/api';
+import { ProfileService } from './profile.service';
+import { HttpService } from '../../shared/api';
 let routers = [{
   path: '',
   component: ProfileComponent
@@ -21,8 +22,14 @@ let routers = [{
     ButtonModule,
     CommonModule,
     CardModule,
-    ChartModule
+    ChartModule,
+    MessageModule,
+    OverlayPanelModule,
+    DialogModule
   ],
-  providers: []
+  providers: [
+    HttpService,
+    ProfileService
+  ]
 })
 export class ProfileModule { }

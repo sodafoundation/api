@@ -5,10 +5,12 @@ import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate} from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
+import { ProfileService } from './profile.service'
+
 @Component({
     templateUrl: './profile.component.html',
     styleUrls: [
-        './profile.component.css'
+        './profile.component.scss'
     ],
     animations: [
         trigger('overlayState', [
@@ -37,16 +39,21 @@ import { I18nPluralPipe } from '@angular/common';
     ]
 })
 export class ProfileComponent implements OnInit{
-    profiles = [];
+    profileId;
+    profiles;
+    showWarningDialog = false;
     constructor(
         // private I18N: I18NService,
         // private router: Router
+        private ProfileService: ProfileService
     ){}
     showCard = true;
     ngOnInit() {
+        // this.getProfiles();
+
         this.profiles = [
             {
-              "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c1",
+              "id": "bbb",
               "name": "Gold",
               "protocol": "FC",
               "type": "Thin",
@@ -66,7 +73,7 @@ export class ProfileComponent implements OnInit{
               }     
             },
             {
-              "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c2",
+              "id": "aaa",
               "name": "Silver",
               "protocol": "iSCSI",
               "type": "Thick",
@@ -82,7 +89,22 @@ export class ProfileComponent implements OnInit{
             }
           ];
     }
-    onDeleteProfile = function(){
-        alert(1);
+
+    getProfiles(){
+        this.ProfileService.getProfiles().subscribe((res) => {
+            // return res.json();
+            this.profiles = res.json();
+        })
+    }
+
+    showWarningDialogFun(id){
+        this.profileId = id;
+        this.showWarningDialog = true;
+    }
+    deleteProfile(id){
+        this.ProfileService.deleteProfile(id).subscribe((res) => {
+            // this.profiles = res.json();
+            this.getProfiles();
+        });
     }
 }
