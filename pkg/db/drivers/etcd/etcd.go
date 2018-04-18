@@ -1152,7 +1152,9 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.Status != "" {
 		result.Status = vol.Status
 	}
-
+	if vol.ReplicationDriverData != nil {
+		result.ReplicationDriverData = vol.ReplicationDriverData
+	}
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -1788,6 +1790,7 @@ func (c *Client) CreateReplication(ctx *c.Context, r *model.ReplicationSpec) (*m
 		r.Id = uuid.NewV4().String()
 	}
 
+	r.TenantId = ctx.TenantId
 	r.CreatedAt = time.Now().Format(constants.TimeFormat)
 	rBody, err := json.Marshal(r)
 	if err != nil {
@@ -2014,6 +2017,18 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 	if input.Description != "" {
 		r.Description = input.Description
 	}
+	if input.Status != "" {
+		r.Status = input.Status
+	}
+	if input.PrimaryReplicationDriverData != nil {
+		r.PrimaryReplicationDriverData = input.PrimaryReplicationDriverData
+	}
+	if input.SecondaryReplicationDriverData != nil {
+		r.SecondaryReplicationDriverData = input.SecondaryReplicationDriverData
+	}
+	if input.Metadata != nil {
+		r.Metadata = input.Metadata
+	}
 
 	r.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -2026,7 +2041,7 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 		tenantId = r.TenantId
 	}
 	req := &Request{
-		Url:        urls.GenerateProfileURL(urls.Etcd, tenantId, replicationId),
+		Url:        urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
 		NewContent: string(b),
 	}
 	resp := c.Update(req)

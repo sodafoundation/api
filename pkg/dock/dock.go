@@ -250,7 +250,10 @@ func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
 // DeleteVolumeAttachment
 func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	//Get the storage drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return nil, err
+	}
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Calling replication driver to create replication...")
@@ -278,7 +281,10 @@ func (d *DockHub) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Calling replication driver to delete replication ...")
@@ -301,7 +307,10 @@ func (d *DockHub) EnableReplication(opt *pb.EnableReplicationOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Calling replication driver to enable replication ...")
@@ -319,7 +328,10 @@ func (d *DockHub) DisableReplication(opt *pb.DisableReplicationOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Calling replication driver to disable replication ...")
@@ -337,7 +349,10 @@ func (d *DockHub) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
 	var err error
 
 	//Get the storage drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Calling replication driver to failover replication ...")

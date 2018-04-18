@@ -18,6 +18,24 @@ This module implements the common data structure.
 
 package model
 
+import "github.com/opensds/opensds/pkg/dock/proto"
+
+//volume status
+const (
+	ReplicationDeleted       = "deleted"
+	ReplicationCreating      = "creating"
+	ReplicationDeleting      = "enabling"
+	ReplicationEnabling      = "enabling"
+	ReplicationDisabling     = "disabling"
+	ReplicationFailovering   = "failovering"
+	ReplicationAvailable     = "available"
+	ReplicationError         = "error"
+	ReplicationErrorDeleting = "error_deleting"
+	ReplicationErrorEnabled  = "error_enabled"
+	ReplicationErrorDisabled = "error_disabled"
+	ReplicationErrorFailover = "error_failover"
+)
+
 // ReplicationSpec represents a replication relationship between the volumes
 // on the primary and secondary sites.
 type ReplicationSpec struct {
@@ -70,6 +88,8 @@ type ReplicationSpec struct {
 	PoolId string `json:"poolId,omitempty"`
 	// metadata
 	Metadata map[string]string `json:"metadata,omitempty"`
+	// volume data list
+	VolumeDataList []*proto.VolumeData `json:"volumeDataList,omitempty"`
 }
 
 type FailoverReplicationSpec struct {

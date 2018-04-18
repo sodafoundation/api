@@ -53,7 +53,7 @@ var volumeAttachmentListCommand = &cobra.Command{
 }
 
 var volumeAttachmentDeleteCommand = &cobra.Command{
-	Use:   "delete <volume id> <attachment id>",
+	Use:   "delete <attachment id>",
 	Short: "delete a volume attachment of specified volume in the cluster",
 	Run:   volumeAttachmentDeleteAction,
 }
@@ -121,15 +121,13 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeAttachmentDeleteAction(cmd *cobra.Command, args []string) {
-	ArgsNumCheck(cmd, args, 2)
-	attachment := &model.VolumeAttachmentSpec{
-		VolumeId: args[0],
-	}
-	err := client.DeleteVolumeAttachment(args[1], attachment)
+	ArgsNumCheck(cmd, args, 1)
+	attachment := &model.VolumeAttachmentSpec{}
+	err := client.DeleteVolumeAttachment(args[0], attachment)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete attachment(%s) success.\n", args[1])
+	fmt.Printf("Delete attachment(%s) success.\n", args[0])
 }
 
 func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {

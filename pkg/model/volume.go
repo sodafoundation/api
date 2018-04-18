@@ -67,6 +67,9 @@ type VolumeSpec struct {
 
 	// The uuid of the replication which the volume belongs to.
 	ReplicationId string `json:"replicationId,omitempty"`
+
+	// The uuid of the replication which the volume belongs to.
+	ReplicationDriverData map[string]string `json:"replicationDriverData,omitempty"`
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.
@@ -172,25 +175,25 @@ type ExtendVolumeSpec struct {
 
 //volume status
 const (
-	VOLUME_CREATING           = "creating"
-	VOLUME_AVAILABLE          = "available"
-	VOLUME_RESERVED           = "reserved"
-	VOLUME_ATTACHING          = "attaching"
-	VOLUME_DETACHING          = "detaching"
-	VOLUME_IN_USE             = "inUse"
-	VOLUME_DELETING           = "deleting"
-	VOLUME_ERROR              = "error"
-	VOLUEM_ERROR_DELETING     = "errorDeleting"
-	VOLUME_ERROR_EXTENDING    = "errorExtending"
-	VOLUME_EXTENDING          = "extending"
-	VOLUMESNAP_CREATING       = "creating"
-	VOLUMESNAP_AVAILABLE      = "available"
-	VOLUMESNAP_DELETING       = "deleting"
-	VOLUMESNAP_ERROR          = "error"
-	VOLUMESNAP_ERROR_DELETING = "errorDeleting"
-	VOLUMESNAP_DELETED        = "deleted"
-	VOLUMEATM_CREATING        = "creating"
-	VOLUMEATM_AVAILABLE       = "available"
-	VOLUMEATM_ERROR_DELETING  = "errorDeleting"
-	VOLUMEATM_ERROR           = "error"
+	VolumeCreating            = "creating"
+	VolumeAvailable           = "available"
+	VolumeReserved            = "reserved"
+	VolumeAttaching           = "attaching"
+	VolumeDetaching           = "detaching"
+	VolumeInUse               = "inUse"
+	VolumeDeleting            = "deleting"
+	VolumeError               = "error"
+	VolumeErrorDeleting       = "errorDeleting"
+	VolumeErrorExtending      = "errorExtending"
+	VolumeExtending           = "extending"
+	VolumeSnapCreating        = "creating"
+	VolumeSnapAvailable       = "available"
+	VolumeSnapDeleting        = "deleting"
+	VolumeSnapError           = "error"
+	VolumeSnapErrorDeleting   = "errorDeleting"
+	VolumeSnapDeleted         = "deleted"
+	VolumeAttachCreating      = "creating"
+	VolumeAttachAvailable     = "available"
+	VolumeAttachErrorDeleting = "errorDeleting"
+	VolumeAttachError         = "error"
 )

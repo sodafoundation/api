@@ -74,6 +74,7 @@ var (
 			Description: "sample backend service",
 			Endpoint:    "localhost:50050",
 			DriverName:  "sample",
+			Type:        model.DockTypeProvioner,
 		},
 	}
 
@@ -509,7 +510,8 @@ var (
 			"name":        "sample",
 			"description": "sample backend service",
 			"endpoint":    "localhost:50050",
-			"driverName":  "sample"
+			"driverName":  "sample",
+			"type":        "provisioner"
 		}`,
 	}
 

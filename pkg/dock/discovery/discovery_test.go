@@ -64,6 +64,7 @@ func TestInit(t *testing.T) {
 	for i := range fdd.dcks {
 		fdd.dcks[i].Id = ""
 		fdd.dcks[i].NodeId = ""
+		fdd.dcks[i].Metadata = nil
 		expected[i].Id = ""
 	}
 	if !reflect.DeepEqual(fdd.dcks, expected) {
