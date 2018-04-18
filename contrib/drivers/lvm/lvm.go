@@ -32,14 +32,17 @@ import (
 )
 
 const (
-	defaultConfPath = "/etc/opensds/driver/lvm.yaml"
-	volumePrefix    = "volume-"
-	snapshotPrefix  = "_snapshot-"
+	defaultTgtConfDir = "/etc/tgt/conf.d"
+	defaultTgtBindIp  = "127.0.0.1"
+	defaultConfPath   = "/etc/opensds/driver/lvm.yaml"
+	volumePrefix      = "volume-"
+	snapshotPrefix    = "_snapshot-"
 )
 
 type LVMConfig struct {
-	TgtBindIp string                    `yaml:"tgtBindIp"`
-	Pool      map[string]PoolProperties `yaml:"pool,flow"`
+	TgtBindIp  string                    `yaml:"tgtBindIp"`
+	TgtConfDir string                    `yaml:"tgtConfDir"`
+	Pool       map[string]PoolProperties `yaml:"pool,flow"`
 }
 
 type Driver struct {
@@ -50,7 +53,7 @@ type Driver struct {
 
 func (d *Driver) Setup() error {
 	// Read lvm config file
-	d.conf = &LVMConfig{TgtBindIp: "127.0.0.1"}
+	d.conf = &LVMConfig{TgtBindIp: defaultTgtBindIp, TgtConfDir: defaultTgtConfDir}
 	p := config.CONF.OsdsDock.Backends.LVM.ConfigPath
 	if "" == p {
 		p = defaultConfPath
@@ -184,7 +187,6 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
 		initiator = "ALL"
 	}
-	// TODO	Add lvm path in Metadata field.
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
 		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
@@ -192,8 +194,8 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		return nil, err
 	}
 
-	t := targets.NewTarget(d.conf.TgtBindIp)
-	expt, err := t.CreateExport(lvPath, initiator)
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, initiator)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err
@@ -206,24 +208,11 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	var initiator string
-	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
-		initiator = "ALL"
-	}
-	// TODO	Add lvm path in Metadata field.
-	lvPath, ok := opt.GetMetadata()["lvPath"]
-	if !ok {
-		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
-		log.Error(err)
-		return err
-	}
-
-	t := targets.NewTarget(d.conf.TgtBindIp)
-	if err := t.RemoveExport(lvPath, initiator); err != nil {
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return err
 	}
-
 	return nil
 }
 
