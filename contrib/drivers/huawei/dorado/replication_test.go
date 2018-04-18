@@ -15,14 +15,8 @@
 package dorado
 
 import (
-	"fmt"
-	"github.com/opensds/opensds/pkg/utils/config"
 	"testing"
 )
 
 func TestLoadConf(t *testing.T) {
-	r := ReplicationDriver{}
-	config.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/dorado.yaml"
-	r.Setup()
-	fmt.Println(r.conf)
 }

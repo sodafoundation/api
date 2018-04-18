@@ -26,6 +26,7 @@ import (
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
+	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -46,15 +47,18 @@ const (
 var Brain *Controller
 
 func NewController() *Controller {
+	volCtrl := volume.NewController()
 	return &Controller{
 		selector:         selector.NewSelector(),
-		volumeController: volume.NewController(),
+		volumeController: volCtrl,
+		drController:     dr.NewController(volCtrl),
 	}
 }
 
 type Controller struct {
 	selector         selector.Selector
 	volumeController volume.Controller
+	drController     dr.Controller
 	policyController policy.Controller
 }
 
@@ -112,7 +116,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
 		//Change the status of the volume to error when the creation faild
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUME_ERROR); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
 			errchanVolume <- errUpdate
 			return
 		}
@@ -124,7 +128,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.
-	if err = c.UpdateStatus(ctx, result, model.VOLUME_AVAILABLE); err != nil {
+	if err = c.UpdateStatus(ctx, result, model.VolumeAvailable); err != nil {
 		errchanVolume <- err
 		return
 	}
@@ -186,7 +190,7 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 
 	err = c.volumeController.DeleteVolume(opt)
 	if err != nil {
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUEM_ERROR_DELETING); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
 			errchanvol <- errUpdate
 			return
 		}
@@ -266,7 +270,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	result, err := c.volumeController.ExtendVolume(opt)
 	if err != nil {
 		vol.Size = volumeSize
-		if errUpdate := c.UpdateStatus(ctx, vol, model.VOLUME_ERROR); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, vol, model.VolumeError); errUpdate != nil {
 			errchanVolume <- errUpdate
 			return
 		}
@@ -276,7 +280,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.
-	if errUpdate := c.UpdateStatus(ctx, result, model.VOLUME_AVAILABLE); errUpdate != nil {
+	if errUpdate := c.UpdateStatus(ctx, result, model.VolumeAvailable); errUpdate != nil {
 		errchanVolume <- errUpdate
 		return
 	}
@@ -325,14 +329,14 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 	}
 	result, err := c.volumeController.CreateVolumeAttachment(atm)
 	if err != nil {
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMEATM_ERROR); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeAttachError); errUpdate != nil {
 			errchanVolAtm <- errUpdate
 			return
 		}
 		errchanVolAtm <- err
 		return
 	}
-	if err = c.UpdateStatus(ctx, result, model.VOLUMEATM_AVAILABLE); err != nil {
+	if err = c.UpdateStatus(ctx, result, model.VolumeAttachAvailable); err != nil {
 		errchanVolAtm <- err
 		return
 	}
@@ -376,7 +380,7 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 	)
 
 	if err != nil {
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMEATM_ERROR_DELETING); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeAttachErrorDeleting); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
@@ -421,14 +425,14 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		},
 	)
 	if err != nil {
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMESNAP_ERROR); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeSnapError); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
 		errchan <- err
 		return
 	}
-	if errUpdate := c.UpdateStatus(ctx, snp, model.VOLUMESNAP_AVAILABLE); errUpdate != nil {
+	if errUpdate := c.UpdateStatus(ctx, snp, model.VolumeSnapAvailable); errUpdate != nil {
 		errchan <- errUpdate
 		return
 	}
@@ -460,7 +464,7 @@ func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 		},
 	)
 	if err != nil {
-		if errUpdate := c.UpdateStatus(ctx, in, model.VOLUMESNAP_ERROR_DELETING); errUpdate != nil {
+		if errUpdate := c.UpdateStatus(ctx, in, model.VolumeSnapErrorDeleting); errUpdate != nil {
 			errchan <- errUpdate
 			return
 		}
@@ -502,178 +506,116 @@ func (c *Controller) UpdateStatus(ctx *c.Context, in interface{}, status string)
 			log.Error("When update volume status in db:", errUpdate.Error())
 			return errUpdate
 		}
+	case *model.ReplicationSpec:
+		replica := in.(*model.ReplicationSpec)
+		replica.Status = status
+		if _, errUpdate := db.C.UpdateReplication(ctx, replica.Id, replica); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
 	}
 	return nil
 }
 
 func (c *Controller) CreateReplication(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	// TODO: Get profile and do some policy action.
 
-	var profile *model.ProfileSpec
-	var err error
-
-	if in.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		profile, err = db.C.GetDefaultProfile(ctx)
-	} else {
-		profile, err = db.C.GetProfile(ctx, in.ProfileId)
-	}
+	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		log.Error("Get profile failed: ", err)
 		return nil, err
 	}
-
-	if in.AvailabilityZone == "" {
-		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
-		in.AvailabilityZone = "default"
-	}
-
-	var filterRequest map[string]interface{}
-	if profile.Extras != nil {
-		filterRequest = profile.Extras
-	} else {
-		filterRequest = make(map[string]interface{})
-	}
-
-	// TODO: how to choose the docker
-	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
-	if err != nil {
-		log.Error("When search supported pool resource:", err)
-		return nil, err
-	}
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		return nil, err
-	}
-	log.Warning("pool info", polInfo)
-	c.volumeController.SetDock(dockInfo)
-	opt := &pb.CreateReplicationOpts{
-		Id:                             in.Id,
-		Name:                           in.Name,
-		Description:                    in.Description,
-		PrimaryVolumeId:                in.PrimaryVolumeId,
-		SecondaryVolumeId:              in.SecondaryVolumeId,
-		PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
-		SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
-		PoolId:     polInfo.Id,
-		PoolName:   polInfo.Name,
-		ProfileId:  profile.Id,
-		DockId:     dockInfo.Id,
-		DriverName: dockInfo.DriverName,
-		Context:    ctx.ToJson(),
-	}
-	result, err := c.volumeController.CreateReplication(opt)
+	// TODO: If user does not provide the secondary volume. Do the following steps:
+	// 1. Get profile from db.
+	// 2. Use selector to choose backend.
+	// 3. Create volume.
+	// TODO: The secondary volume may be across region.
+	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
 	if err != nil {
 		return nil, err
 	}
 
-	// Select the storage tag according to the lifecycle flag.
-	c.policyController = policy.NewController(profile)
-	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
-	c.policyController.SetDock(dockInfo)
-
-	var errChan = make(chan error, 1)
-	volBody, _ := json.Marshal(result)
-	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChan)
-
-	return result, nil
+	result, err := c.drController.CreateReplication(ctx, in, pvol, svol)
+	result.Status = model.ReplicationAvailable
+	if err != nil {
+		result.Status = model.ReplicationError
+	}
+	// update status ,driver data, metadata
+	db.C.UpdateReplication(ctx, result.Id, result)
+	return nil, err
 }
 
 func (c *Controller) DeleteReplication(ctx *c.Context, in *model.ReplicationSpec) error {
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err)
 		return err
 	}
-	c.volumeController.SetDock(dockInfo)
+	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	if err != nil {
+		return err
+	}
 
-	return c.volumeController.DeleteReplication(
-		&pb.DeleteReplicationOpts{
-			Id:                             in.Id,
-			Name:                           in.Name,
-			Description:                    in.Description,
-			PrimaryVolumeId:                in.PrimaryVolumeId,
-			SecondaryVolumeId:              in.SecondaryVolumeId,
-			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
-			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
-			DockId:     dockInfo.Id,
-			DriverName: dockInfo.DriverName,
-			Context:    ctx.ToJson(),
-		},
-	)
+	err = c.drController.DeleteReplication(ctx, in, pvol, svol)
+	if err != nil {
+		c.UpdateStatus(ctx, in, model.ReplicationErrorDeleting)
+	} else {
+		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
+	}
+	return err
 }
 
 func (c *Controller) EnableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err)
 		return err
 	}
-	c.volumeController.SetDock(dockInfo)
+	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	if err != nil {
+		return err
+	}
 
-	return c.volumeController.EnableReplication(
-		&pb.EnableReplicationOpts{
-			Id:                             in.Id,
-			Name:                           in.Name,
-			Description:                    in.Description,
-			PrimaryVolumeId:                in.PrimaryVolumeId,
-			SecondaryVolumeId:              in.SecondaryVolumeId,
-			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
-			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
-			DockId:     dockInfo.Id,
-			DriverName: dockInfo.DriverName,
-			Context:    ctx.ToJson(),
-		},
-	)
+	err = c.drController.EnableReplication(ctx, in, pvol, svol)
+	if err != nil {
+		c.UpdateStatus(ctx, in, model.ReplicationErrorEnabled)
+	} else {
+		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
+	}
+	return err
 }
 
 func (c *Controller) DisableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err)
 		return err
 	}
-	c.volumeController.SetDock(dockInfo)
+	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	if err != nil {
+		return err
+	}
 
-	return c.volumeController.DisableReplication(
-		&pb.DisableReplicationOpts{
-			Id:                             in.Id,
-			Name:                           in.Name,
-			Description:                    in.Description,
-			PrimaryVolumeId:                in.PrimaryVolumeId,
-			SecondaryVolumeId:              in.SecondaryVolumeId,
-			PrimaryReplicationDriverData:   in.PrimaryReplicationDriverData,
-			SecondaryReplicationDriverData: in.SecondaryReplicationDriverData,
-			DockId:     dockInfo.Id,
-			DriverName: dockInfo.DriverName,
-			Context:    ctx.ToJson(),
-		},
-	)
+	err = c.drController.DisableReplication(ctx, in, pvol, svol)
+	if err != nil {
+		c.UpdateStatus(ctx, in, model.ReplicationErrorDisabled)
+	} else {
+		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
+	}
+	return err
 }
 
 func (c *Controller) FailoverReplication(ctx *c.Context, replication *model.ReplicationSpec, failover *model.FailoverReplicationSpec) error {
-	dockInfo, err := db.C.GetDockByPoolId(ctx, replication.PoolId)
+	pvol, err := db.C.GetVolume(ctx, replication.PrimaryVolumeId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err)
 		return err
 	}
-	c.volumeController.SetDock(dockInfo)
-
-	return c.volumeController.FailoverReplication(
-		&pb.FailoverReplicationOpts{
-			Id:                             replication.Id,
-			Name:                           replication.Name,
-			Description:                    replication.Description,
-			PrimaryVolumeId:                replication.PrimaryVolumeId,
-			SecondaryVolumeId:              replication.SecondaryVolumeId,
-			PrimaryReplicationDriverData:   replication.PrimaryReplicationDriverData,
-			SecondaryReplicationDriverData: replication.SecondaryReplicationDriverData,
-			DockId:              dockInfo.Id,
-			DriverName:          dockInfo.DriverName,
-			Context:             ctx.ToJson(),
-			AllowAttachedVolume: failover.Failover.AllowAttachedVolume,
-			SecondaryBackendId:  failover.Failover.SecondaryBackendId,
-		},
-	)
+	svol, err := db.C.GetVolume(ctx, replication.SecondaryVolumeId)
+	if err != nil {
+		return err
+	}
+	err = c.drController.FailoverReplication(ctx, replication, pvol, svol)
+	if err != nil {
+		c.UpdateStatus(ctx, replication, model.ReplicationErrorFailover)
+	} else {
+		c.UpdateStatus(ctx, replication, model.ReplicationAvailable)
+	}
+	return err
 }

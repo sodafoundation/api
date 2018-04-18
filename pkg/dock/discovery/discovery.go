@@ -22,15 +22,18 @@ package discovery
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/contrib/drivers"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"strings"
 )
 
 type Context struct {
@@ -69,11 +72,11 @@ type DockDiscoverer interface {
 // NewDockDiscoverer method creates a new DockDiscoverer.
 func NewDockDiscoverer(dockType string) DockDiscoverer {
 	switch dockType {
-	case "provisioner":
+	case model.DockTypeProvioner:
 		return &provisionDockDiscoverer{
 			DockRegister: NewDockRegister(),
 		}
-	case "attacher":
+	case model.DockTypeAttacher:
 		return &attachDockDiscoverer{
 			DockRegister: NewDockRegister(),
 		}
@@ -113,6 +116,9 @@ func (pdd *provisionDockDiscoverer) Init() error {
 			Description: b.Description,
 			DriverName:  b.DriverName,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
+			NodeId:      host,
+			Type:        model.DockTypeProvioner,
+			Metadata:    map[string]string{"HostReplicationDriver": CONF.OsdsDock.HostBasedReplicationDriver},
 		}
 		pdd.dcks = append(pdd.dcks, dck)
 	}
@@ -136,9 +142,16 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			log.Warningf("The pool of dock %s is empty!\n", dck.Id)
 		}
 
+		replicationDriverName := dck.Metadata["HostReplicationDriver"]
+		replicationType := model.ReplicationTypeHost
+		if drivers.ReplicationProbe(dck.DriverName) {
+			replicationType = model.ReplicationTypeArray
+		}
 		for _, pol := range pols {
 			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 			pol.DockId = dck.Id
+			pol.ReplicationType = replicationType
+			pol.ReplicationDriverName = replicationDriverName
 		}
 		pdd.pols = append(pdd.pols, pols...)
 	}
@@ -187,14 +200,37 @@ func (add *attachDockDiscoverer) Discover() error {
 		return err
 	}
 
+	iqns, err := iscsi.GetInitiator()
+	if err != nil {
+		log.Error("get initiator failed", err)
+		return err
+	}
+	var localIqn string
+	if len(iqns) > 0 {
+		localIqn = iqns[0]
+	}
+
+	bindIp := CONF.BindIp
+	if bindIp == "" {
+		bindIp = iscsi.GetHostIp()
+	}
+
+	segments := strings.Split(CONF.OsdsDock.ApiEndpoint, ":")
+	endpointIp := segments[len(segments)-2]
 	add.dck = &model.DockSpec{
 		BaseModel: &model.BaseModel{
-			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+CONF.OsdsDock.ApiEndpoint).String(),
+			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+endpointIp).String(),
 		},
 		Endpoint: CONF.OsdsDock.ApiEndpoint,
 		NodeId:   host,
+		Type:     model.DockTypeAttacher,
+		Metadata: map[string]string{
+			"Platform":  runtime.GOARCH,
+			"OsType":    runtime.GOOS,
+			"Ip":        bindIp,
+			"Initiator": localIqn,
+		},
 	}
-
 	return nil
 }
 

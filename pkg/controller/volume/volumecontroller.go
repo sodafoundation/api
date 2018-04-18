@@ -58,6 +58,10 @@ type Controller interface {
 
 	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 
+	AttachVolume(opt *pb.AttachVolumeOpts) (string, error)
+
+	DetachVolume(opt *pb.DetachVolumeOpts) error
+
 	SetDock(dockInfo *model.DockSpec)
 }
 
@@ -246,10 +250,6 @@ func (c *controller) DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) erro
 	return nil
 }
 
-func (c *controller) SetDock(dockInfo *model.DockSpec) {
-	c.DockInfo = dockInfo
-}
-
 func (c *controller) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("When connecting dock client:", err)
@@ -356,4 +356,51 @@ func (c *controller) FailoverReplication(opt *pb.FailoverReplicationOpts) error 
 	}
 
 	return nil
+}
+
+func (c *controller) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
+	fmt.Println(c.Client)
+	fmt.Println(c.DockInfo)
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return "", err
+	}
+
+	response, err := c.Client.AttachVolume(context.Background(), opt)
+	if err != nil {
+		log.Error("Attach volume failed in volume controller:", err)
+		return "", err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return "",
+			fmt.Errorf("Failed to attach volume in volume controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	return response.GetResult().GetMessage(), nil
+}
+
+func (c *controller) DetachVolume(opt *pb.DetachVolumeOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("When connecting dock client:", err)
+		return err
+	}
+	response, err := c.Client.DetachVolume(context.Background(), opt)
+	if err != nil {
+		log.Error("Detach volume failed in volume controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
+
+func (c *controller) SetDock(dockInfo *model.DockSpec) {
+	c.DockInfo = dockInfo
 }

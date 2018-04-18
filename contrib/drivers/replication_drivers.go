@@ -22,10 +22,13 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
+	"reflect"
+
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/config"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
 )
 
@@ -44,8 +47,23 @@ type ReplicationDriver interface {
 	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 }
 
+func ReplicationProbe(resourceType string) bool {
+	v := reflect.ValueOf(config.CONF.Backends)
+	t := reflect.TypeOf(config.CONF.Backends)
+	for i := 0; i < t.NumField(); i++ {
+		field := v.Field(i)
+		tag := t.Field(i).Tag.Get("conf")
+		if resourceType == tag && field.Interface().(config.BackendProperties).SupportReplication {
+			// Probe whether the replication function is ok.
+			_, err := InitReplicationDriver(resourceType)
+			return err == nil
+		}
+	}
+	return false
+}
+
 // Init
-func InitReplicationDriver(resourceType string) ReplicationDriver {
+func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 	var d ReplicationDriver
 	switch resourceType {
 	case "drbd":
@@ -58,8 +76,8 @@ func InitReplicationDriver(resourceType string) ReplicationDriver {
 		d = &replication_sample.ReplicationDriver{}
 		break
 	}
-	d.Setup()
-	return d
+	err := d.Setup()
+	return d, err
 }
 
 // Clean

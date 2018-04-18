@@ -20,6 +20,7 @@ import (
 
 	"github.com/astaxie/beego/context"
 	//log "github.com/golang/glog"
+	"fmt"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
@@ -45,12 +46,12 @@ func (this *ReplicationPortal) CreateReplication() {
 		return
 	}
 
-	var replication = model.ReplicationSpec{
+	var replication = &model.ReplicationSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
 	// Unmarshal the request body
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&replication); err != nil {
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(replication); err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
@@ -71,8 +72,15 @@ func (this *ReplicationPortal) CreateReplication() {
 		return
 	}
 
+	replication.Status = model.ReplicationCreating
+	replication, err = db.C.CreateReplication(ctx, replication)
+	if err != nil {
+		model.HttpError(this.Ctx, http.StatusInternalServerError,
+			"create replication in db failed")
+		return
+	}
 	// Call global controller variable to handle create replication request.
-	result, err := controller.Brain.CreateReplication(c.GetContext(this.Ctx), &replication)
+	result, err := controller.Brain.CreateReplication(ctx, replication)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"create replication failed: %s", err.Error())
@@ -208,7 +216,7 @@ func (this *ReplicationPortal) UpdateReplication() {
 		}
 		// TODO:compared with the original profile_id to get the differences
 	}
-
+	fmt.Println("status --> ", r.Status)
 	result, err := db.C.UpdateReplication(c.GetContext(this.Ctx), id, &r)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
@@ -241,6 +249,10 @@ func (this *ReplicationPortal) DeleteReplication() {
 		return
 	}
 
+	if err := DeleteReplicationDBEntry(c.GetContext(this.Ctx), r); err != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
+		return
+	}
 	// Call global controller variable to handle delete replication request.
 	err = controller.Brain.DeleteReplication(c.GetContext(this.Ctx), r)
 	if err != nil {
@@ -266,6 +278,10 @@ func (this *ReplicationPortal) EnableReplication(ctx *context.Context) {
 		return
 	}
 
+	if err := EnableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
 	// Call global controller variable to handle delete replication request.
 	err = controller.Brain.EnableReplication(c.GetContext(ctx), r)
 	if err != nil {
@@ -290,6 +306,10 @@ func (this *ReplicationPortal) DisableReplication(ctx *context.Context) {
 		return
 	}
 
+	if err := DisableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
 	// Call global controller variable to handle delete r request.
 	err = controller.Brain.DisableReplication(c.GetContext(ctx), r)
 	if err != nil {
@@ -319,6 +339,11 @@ func (this *ReplicationPortal) FailoverReplication(ctx *context.Context) {
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
+		return
+	}
+
+	if err := FailoverReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
