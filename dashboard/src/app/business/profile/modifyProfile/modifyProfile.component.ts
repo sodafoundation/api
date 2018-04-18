@@ -73,6 +73,8 @@ export class modifyProfileComponent implements OnInit {
                 }]
         };
         this.option = {
+            cutoutPercentage: 80,
+            // rotation: (-0.2 * Math.PI),
             title: {
                 display: false,
                 text: 'My Title',
@@ -80,7 +82,9 @@ export class modifyProfileComponent implements OnInit {
             },
             legend: {
                 display: true,
-                width: '5px',
+                labels:{
+                    boxWidth:12
+                },
                 position: 'bottom',
                 fontSize: 12
             }
@@ -170,15 +174,19 @@ export class modifyProfileComponent implements OnInit {
                 }
               }
           ]
-          this.totalFreeCapacity = this.getTotalFreeCapacity(this.pools);
+          this.totalFreeCapacity = this.getSumCapacity(this.pools,'free');
     }
 
-    getTotalFreeCapacity(pools){
-        let totalFreeCapacity:number = 0;
+    getSumCapacity(pools,FreeOrTotal){
+        let SumCapacity:number = 0;
         let arrLength = pools.length;
         for(let i=0;i<arrLength;i++){
-            totalFreeCapacity += pools[i].freeCapacity;
+            if(FreeOrTotal==='free'){
+                SumCapacity += pools[i].freeCapacity;
+            }else{
+                SumCapacity += pools[i].totalCapacity;
+            }
         }
-        return totalFreeCapacity;
+        return SumCapacity;
     }
 }

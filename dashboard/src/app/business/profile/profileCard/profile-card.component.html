@@ -13,16 +13,16 @@
         </div>
 
         <div class="padding-class">
-            <!-- <p-overlayPanel #op>
+            <div #op *ngIf="">
                 Content
-            </p-overlayPanel> -->
-            <div (hover)="op.toggle($event)" class="fa fa-check icon-color-class" *ngFor="let policy of data.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
+            </div>
+            <div (hover)="showPanel=true" class="fa fa-check icon-color-class" *ngFor="let policy of data.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
                 <span class="font-color-class">{{policy}}</span>
             </div>
         </div>
     </div>
     <div class="ui-g-12 ui-md-6">
-        <!-- <div>{{policy}}</div> -->
+        <div>{{policy}}</div>
         <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
     </div>
     <div class="ui-helper-clearfix"></div>
