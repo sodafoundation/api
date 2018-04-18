@@ -255,7 +255,7 @@ func (t *tgtTarget) isBindInitiatorName(tid, initiator string) bool {
 
 func (t *tgtTarget) BindInitiatorName(tid, initiator string) error {
 	if t.isBindInitiatorName(tid, initiator) {
-		log.Infof("Specified initiator %s has already been binded to target %d", initiator, tid)
+		log.Infof("Specified initiator %s has already been bound to target %d", initiator, tid)
 		return nil
 	}
 	var cmd = []string{

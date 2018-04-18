@@ -201,7 +201,7 @@ func Connect(portal string, targetiqn string, targetlun string) (string, error) 
 func sessionExists(portal string, tgtIqn string) bool {
 	info, err := exec.Command("iscsiadm", "-m", "session", "-s").CombinedOutput()
 	if err != nil {
-		log.Println("Warnning: get session failed,", string(info))
+		log.Println("Warning: get session failed,", string(info))
 		return false
 	}
 	portal = strings.Replace(portal, ":", ",", -1)

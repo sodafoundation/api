@@ -59,13 +59,13 @@ func (d *DrController) LoadOperator(replicationType string) {
 func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpec, primaryVol,
 	secondaryVol *VolumeSpec) (*ReplicationSpec, error) {
 	if primaryVol.Size != secondaryVol.Size {
-		return nil, fmt.Errorf("secondary volume size(%d) is not the same with the primary size(%d)",
+		return nil, fmt.Errorf("secondary volume size(%d) is not the same as the primary size(%d)",
 			secondaryVol.Size, primaryVol.Size)
 	}
 	pPool, _ := db.C.GetPool(ctx, primaryVol.PoolId)
 	sPool, _ := db.C.GetPool(ctx, secondaryVol.PoolId)
 	if pPool.ReplicationType != sPool.ReplicationType {
-		return nil, fmt.Errorf("secondary replication type is not the same with the primary")
+		return nil, fmt.Errorf("secondary replication type is not the same as the primary")
 	}
 
 	d.LoadOperator(pPool.ReplicationType)
@@ -98,11 +98,6 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 		db.C.UpdateVolume(ctx, secondaryVol)
 	}
 
-	//replica.Status = ReplicationAvailable
-	//result, err := db.C.UpdateReplication(ctx, replica.Id, replica)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return replica, nil
 }
 

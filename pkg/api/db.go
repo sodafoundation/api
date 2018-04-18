@@ -216,10 +216,10 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 
 func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting,
-		model.ReplicationEnabling, model.ReplicationDisabling, model.ReplicationFailovering}
+		model.ReplicationEnabling, model.ReplicationDisabling, model.ReplicationFailingOver}
 
 	if utils.Contained(in.Status, invalidStatus) {
-		errMsg := fmt.Sprintf("can delete the replication in %s", in.Status)
+		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -234,7 +234,7 @@ func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 
 func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	if in.Status != model.ReplicationAvailable {
-		errMsg := "Only the replication with the status available can be enbaled"
+		errMsg := "Only the replication with the status available can be enabled"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -249,7 +249,7 @@ func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 
 func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	if in.Status != model.ReplicationAvailable {
-		errMsg := "Only the replication with the status available can be enbaled"
+		errMsg := "Only the replication with the status available can be disabled"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -264,12 +264,12 @@ func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error 
 
 func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	if in.Status != model.ReplicationAvailable {
-		errMsg := "Only the replication with the status available can be enbaled"
+		errMsg := "Only the replication with the status available can be failover"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
 
-	in.Status = model.ReplicationFailovering
+	in.Status = model.ReplicationFailingOver
 	_, err := db.C.UpdateReplication(ctx, in.Id, in)
 	if err != nil {
 		return err
