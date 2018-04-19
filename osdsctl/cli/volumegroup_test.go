@@ -52,7 +52,6 @@ func TestVolumeGroupAction(t *testing.T) {
 
 func TestVolumeGroupCreateAction(t *testing.T) {
 	var args []string
-	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	volumeGroupCreateAction(volumeGroupCreateCommand, args)
 }
 
