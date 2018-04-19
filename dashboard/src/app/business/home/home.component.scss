@@ -1,3 +1,4 @@
+@import "./../scss-variable";
 .img-item-div-height {
     height: 300px;
     margin: 2em;
@@ -15,4 +16,22 @@
 
 .user-img-item-margin {
     margin-top: 3em;
+}
+
+.header-h2-title-font {
+    font-size: 2em;
+    padding: 0.5em 0.25em;
+}
+
+.home-font-color-class {
+    color: map-get($color-title, primary);
+}
+
+.header-p-text {
+    padding: 0 0.5em;
+    // color: map-get($color-title, secondary);
+}
+
+.capacity-secondary {
+    margin: 1em 0;
 }

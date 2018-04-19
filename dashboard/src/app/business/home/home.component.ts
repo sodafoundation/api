@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        let arr = [3, 10, 11, 17, 21, 23, 4];
+        let arr = [13, 10, 11, 17, 21, 23, 4];
         // let arr = [1,4,3,2];
         // this.arraySortUpdate(arr);
         this.items = [

@@ -1,8 +1,8 @@
-<div>
+<div class="home-font-color-class">
     <div>
         <header>
-            <h2>Overview</h2>
-            <p>Updated 5 minutes ago</p>
+            <h2 class="header-h2-title-font">Overview</h2>
+            <p class="header-p-text">Updated 5 minutes ago</p>
         </header>
         <div class="ui-inputgroup">
             <div class="ui-g-12 ui-md-4">
@@ -58,20 +58,20 @@
     </div>
     <hr>
     <div>
-        <header>Capacity</header>
-        <div class="ui-inputgroup">
-            <div class="ui-g-12 ui-md-4">
-                <p>Block Storage Capacity</p>
-                <p>Updated 5 minutes ago</p>
-                <div>
-                    <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
-                </div>
+        <h2 class="header-h2-title-font">Capacity</h2>
+        <div class="ui-inputgroup"></div>
+        <div class="ui-g-12 ui-md-4">
+            <div class="capacity-secondary">Block Storage Capacity</div>
+            <p class="capacity-secondary">Updated 5 minutes ago</p>
+            <div>
+                <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
             </div>
-            <div class="ui-g-12 ui-md-4">
-                <p>Top 5 Allocated Capacity by Block Profile</p>
-                <p>Updated 5 minutes ago</p>
-                <p-chart [options]="option" type="bar" [data]="chartDatas"></p-chart>
-            </div>
-
         </div>
+        <div class="ui-g-12 ui-md-4">
+            <div class="capacity-secondary">Top 5 Allocated Capacity by Block Profile</div>
+            <p class="capacity-secondary">Updated 5 minutes ago</p>
+            <p-chart [options]="option" type="bar" [data]="chartDatas"></p-chart>
+        </div>
+
     </div>
+</div>

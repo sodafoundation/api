@@ -1,4 +1,4 @@
-@import "./../scss-variable";
+@import "./../../scss-variable";
 // custom
 // style="padding: 0.16rem;color:rgb(104, 114, 132);"
 // style="padding: 1em 0.08rem;color: #333333;"
@@ -7,7 +7,7 @@
 }
 
 .custom-breadcrumb a {
-    color: map-get($color-text, custom) !important;
+    color: map-get($color-text, primary) !important;
 }
 
 .custom-breadcrumb .font-color-class {

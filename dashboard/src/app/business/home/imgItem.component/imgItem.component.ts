@@ -4,11 +4,13 @@ import { Http } from '@angular/http';
 @Component({
     selector: 'img-item',
     templateUrl: './imgItem.component.html',
-    styleUrls: []
+    styleUrls: [
+        './imgItem.component.scss'
+    ]
 })
 export class ImgItemComponent implements OnInit{
-    countNum:number = 0;
-    label:string = '';
+    // countNum:number = 0;
+    // label:string = '';
     @Input() item;
 
     
@@ -17,7 +19,5 @@ export class ImgItemComponent implements OnInit{
     ){}
     
     ngOnInit() {
-        this.countNum = this.item.countNum;
-        this.label = this.item.label;
     }
 }
