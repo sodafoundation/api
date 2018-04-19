@@ -1,7 +1,9 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { HomeComponent } from './home.component';
+import { ImgItemComponent } from './imgItem.component/imgItem.component';
+
 import { RouterModule } from '@angular/router';
-import { ButtonModule } from '../../components/common/api';
+import { ButtonModule, ChartModule } from '../../components/common/api';
 
 let routers = [{
   path: '',
@@ -10,9 +12,13 @@ let routers = [{
 
 @NgModule({
   declarations: [
-    HomeComponent
+    HomeComponent,
+    ImgItemComponent,
   ],
-  imports: [ RouterModule.forChild(routers), ButtonModule],
+  imports: [
+    RouterModule.forChild(routers), ButtonModule,
+    ChartModule
+  ],
   providers: []
 })
 export class HomeModule { }

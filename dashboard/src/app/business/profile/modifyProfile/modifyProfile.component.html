@@ -1,40 +1,52 @@
-<p-breadcrumb [model]="items"></p-breadcrumb>
+<div class="custom-breadcrumb">
+    <span *ngFor="let item of items; index as i">
+        <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
+        <span *ngIf="(i+1) !== items.length">></span>
+    </span>
+</div>
 <div>
-    <div class="ui-g-12 ui-md-8">
+    <div class="ui-g-12 ui-md-6">
         <div>
-            <span class="ui-g-12 ui-md-3">name:</span>
-            <span class="ui-g-12 ui-md-9">{{data.name}}</span>
+            <h2 class="proflie-name">{{data.name}}</h2>
         </div>
         <div>
-            <span class="ui-g-12 ui-md-3">protocol:</span>
-            <span class="ui-g-12 ui-md-9">{{data.protocol}}</span>
+            <span class="ui-g-12 ui-md-4">Access Protocol:</span>
+            <span class="ui-g-12 ui-md-8">{{data.protocol}}</span>
         </div>
         <div>
-            <span class="ui-g-12 ui-md-3">type:</span>
-            <span class="ui-g-12 ui-md-9">{{data.type}}</span>
+            <span class="ui-g-12 ui-md-4">Provisioning Type:</span>
+            <span class="ui-g-12 ui-md-8">{{data.type}}</span>
         </div>
         <div>
-            <span class="ui-g-12 ui-md-3">policy:</span>
-            <div class="ui-g-12 ui-md-9">
-                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            <span class="ui-g-12 ui-md-4">QoS Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
         <div>
-            <span class="ui-g-12 ui-md-3">policy:</span>
-            <div class="ui-g-12 ui-md-9">
-                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            <span class="ui-g-12 ui-md-4">Replication Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
         <div>
-            <span class="ui-g-12 ui-md-3">policy:</span>
-            <div class="ui-g-12 ui-md-9">
-                <div *ngFor="let policy of data.policys">{{policy}}</div>
+            <span class="ui-g-12 ui-md-4">Snapshot Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
-        <div>
-            <span class="ui-g-12 ui-md-3">policy:</span>
-            <div class="ui-g-12 ui-md-9">
-                <p-table [value]="pools">
+    </div>
+    <div class="ui-g-12 ui-md-6">
+        <p-chart [options]="option" [responsive]="false" [width]="300" [height]="400" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-g-12 ui-md-12">
+        <span class="ui-g-12 ui-md-2">Storage Pools:</span>
+        <div class="ui-g-12 ui-md-8">
+            <div>
+                <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools,<span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
+            </div>
+            <div class="footer-button-class">
+                <p-table [value]="pools" styleClass="custom-table-class">
                     <ng-template pTemplate="header">
                         <tr>
                             <th *ngFor="let col of cols">
@@ -54,12 +66,9 @@
         </div>
     </div>
 
-    <div class="ui-g-12 ui-md-4">
-        <p-chart [options]="option" [responsive]="false" [width]="300" [height]="300" type="doughnut" [data]="chartDatas"></p-chart>
-    </div>
     <div class="ui-helper-clearfix"></div>
-    <div>
+    <div class="footer-button-class">
         <button pButton type="button" label="Modify" class="ui-button-secondary"></button>
-        <button pButton type="button" label="Back" [routerLink]="['/profile']" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Back" [routerLink]="['/profile']"></button>
     </div>
 </div>

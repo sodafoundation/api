@@ -13,7 +13,7 @@ import { ButtonModule } from './../../../components/common/api';
     selector: 'profile-card',
     templateUrl: './profile-card.component.html',
     styleUrls: [
-        "./profile-card.css"
+        "./profile-card.scss"
     ],
     animations: [
         trigger('overlayState', [
@@ -52,13 +52,13 @@ export class ProfileCardComponent implements OnInit {
     option = {};
     ngOnInit() {
         this.chartDatas = {
-            labels: ['A', 'B'],
+            labels: ['Unused Capacity', 'Used Capacity'],
             datasets: [
                 {
-                    data: [(1000-300), 300],//未使用容量放前面
+                    data: [(1000 - 300), 300],//已使用300，总容量1000
                     backgroundColor: [
-                        "rgba(224, 224, 224, 1)",
-                        "#FF6384"
+                        "rgba(224, 224, 224, .5)",
+                        "#438bd3"
                     ]
                     // hoverBackgroundColor: [
                     //     "#FF6384",
@@ -68,13 +68,19 @@ export class ProfileCardComponent implements OnInit {
                 }]
         };
         this.option = {
+            cutoutPercentage: 80,
+            // rotation: (0.5 * Math.PI),
+            // circumference: (Math.PI),
             title: {
                 display: false,
                 text: 'My Title',
                 fontSize: 12
             },
             legend: {
-                display: true,
+                labels: {
+                    boxWidth: 12
+                },
+                display: false,
                 width: '5px',
                 position: 'right',
                 fontSize: 12
