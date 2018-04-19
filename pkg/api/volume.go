@@ -105,7 +105,8 @@ func (this *VolumePortal) ListVolumes() {
 		return
 	}
 
-	result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), m)
+	//result, err := db.C.ListVolumesWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListVolumeWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -369,7 +370,7 @@ func (this *VolumeAttachmentPortal) ListVolumeAttachments() {
 		return
 	}
 
-	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListVolumeAttachmentsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -565,7 +566,7 @@ func (this *VolumeSnapshotPortal) ListVolumeSnapshots() {
 		return
 	}
 
-	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListVolumeSnapshotsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

@@ -51,13 +51,7 @@ func TestListDocks(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.MockClient)
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
-	}
-	mockClient.On("ListDocksWithFilter", m).Return(fakeDocks, nil)
+	mockClient.On("ListDocks").Return(fakeDocks, nil)
 
 	db.C = mockClient
 
@@ -98,13 +92,7 @@ func TestListDocks(t *testing.T) {
 func TestListDocksWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
-	}
-	mockClient.On("ListDocksWithFilter", m).Return(nil, errors.New("db error"))
+	mockClient.On("ListDocks").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)

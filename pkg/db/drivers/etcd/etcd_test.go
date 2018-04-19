@@ -219,16 +219,8 @@ func TestGetVolumeSnapshot(t *testing.T) {
 }
 
 func TestListDocks(t *testing.T) {
-	m := map[string][]string{
-		"offset":     []string{"2"},
-		"limit":      []string{"732"},
-		"sortDir":    []string{"desc"},
-		"sortKey":    []string{"id"},
-		"Name":       []string{"sample"},
-		"DriverName": []string{"sample"},
-	}
 
-	dcks, err := fc.ListDocksWithFilter(c.NewAdminContext(), m)
+	dcks, err := fc.ListDocks(c.NewAdminContext())
 	if err != nil {
 		t.Error("List docks failed:", err)
 	}
@@ -241,14 +233,7 @@ func TestListDocks(t *testing.T) {
 }
 
 func TestListPools(t *testing.T) {
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"-5"},
-		"sortDir": []string{"desc"},
-		"sortKey": []string{"DockId"},
-		"Name":    []string{"sample-pool-01"},
-	}
-	pols, err := fc.ListPoolsWithFilter(c.NewAdminContext(), m)
+	pols, err := fc.ListPools(c.NewAdminContext())
 	if err != nil {
 		t.Error("List pools failed:", err)
 	}
@@ -261,13 +246,8 @@ func TestListPools(t *testing.T) {
 }
 
 func TestListProfiles(t *testing.T) {
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"2"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"Id"},
-	}
-	prfs, err := fc.ListProfilesWithFilter(c.NewAdminContext(), m)
+
+	prfs, err := fc.ListProfiles(c.NewAdminContext())
 	if err != nil {
 		t.Error("List profiles failed:", err)
 	}
@@ -282,13 +262,8 @@ func TestListProfiles(t *testing.T) {
 }
 
 func TestListVolumes(t *testing.T) {
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
-	}
-	vols, err := fc.ListVolumesWithFilter(c.NewAdminContext(), m)
+
+	vols, err := fc.ListVolumes(c.NewAdminContext())
 	if err != nil {
 		t.Error("List volumes failed:", err)
 	}
@@ -334,14 +309,8 @@ func TestUpdateVolume(t *testing.T) {
 }
 
 func TestListVolumeAttachments(t *testing.T) {
-	m := map[string][]string{
-		"VolumeId": []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
-		"offset":   []string{"0"},
-		"limit":    []string{"1"},
-		"sortDir":  []string{"asc"},
-		"sortKey":  []string{"name"},
-	}
-	atcs, err := fc.ListVolumeAttachmentsWithFilter(c.NewAdminContext(), m)
+
+	atcs, err := fc.ListVolumeAttachments(c.NewAdminContext(), SampleVolumes[0].Id)
 	if err != nil {
 		t.Error("List volume attachments failed:", err)
 	}
@@ -418,13 +387,8 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 }
 
 func TestListVolumeSnapshots(t *testing.T) {
-	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"2"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
-	}
-	snps, err := fc.ListVolumeSnapshotsWithFilter(c.NewAdminContext(), m)
+
+	snps, err := fc.ListVolumeSnapshots(c.NewAdminContext())
 	if err != nil {
 		t.Error("List volume snapshots failed:", err)
 	}

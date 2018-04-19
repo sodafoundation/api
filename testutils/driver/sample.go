@@ -101,3 +101,15 @@ func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 	return pols, nil
 }
+
+func (*Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, group *model.VolumeGroupSpec) (*model.VolumeGroupSpec, int, error) {
+	return nil, model.ErrorNotImplemented, nil
+}
+
+func (*Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, group *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, int, error) {
+	return nil, nil, nil, model.ErrorNotImplemented, nil
+}
+
+func (*Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, group *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, int, error) {
+	return nil, nil, model.ErrorNotImplemented, nil
+}

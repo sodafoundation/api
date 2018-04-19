@@ -49,7 +49,7 @@ func (this *DockPortal) ListDocks() {
 		log.Error(reason)
 		return
 	}
-	result, err := db.C.ListDocksWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListDocksWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List docks failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

@@ -57,6 +57,12 @@ type VolumeDriver interface {
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
+	CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, group *model.VolumeGroupSpec) (*model.VolumeGroupSpec, int, error)
+
+	UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, group *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, int, error)
+
+	DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, group *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, int, error)
+
 	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
