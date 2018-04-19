@@ -31,7 +31,7 @@ const (
 )
 
 type ISCSITarget interface {
-	CreateISCSITarget(volId, tgtIqn, path, initiator string, chapAuth []string) error
+	CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error
 	GetISCSITarget(iqn string) int
 	RemoveISCSITarget(volId, iqn string) error
 	GetLun(path string) int
@@ -81,7 +81,7 @@ func (t *tgtTarget) getTgtConfPath(volId string) string {
 	return t.TgtConfDir + "/" + opensdsPrefix + volId + ".conf"
 }
 
-func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, initiator string, chapAuth []string) error {
+func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
 
 	if exist, _ := utils.PathExists(t.TgtConfDir); !exist {
 		os.MkdirAll(t.TgtConfDir, 0755)
@@ -102,10 +102,9 @@ func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, initiator string, cha
 	write-cache %s
 </target>
 `
-	var initiatorAddr string
+	var initiatorAddr = "initiator-address" + hostIp
 	var initiatorName string
 	if initiator != "ALL" {
-		initiatorAddr = "initiator-address ALL"
 		initiatorName = "initiator-name " + initiator
 	}
 
@@ -175,7 +174,7 @@ func (t *tgtTarget) RemoveISCSITarget(volId, iqn string) error {
 
 func (*tgtTarget) execCmd(name string, cmd ...string) (string, error) {
 	ret, err := exec.Command(name, cmd...).Output()
-	log.V(8).Infoln("Command: ", "tgtadm ", strings.Join(cmd, " "))
+	log.V(8).Infoln("Command:", cmd, strings.Join(cmd, " "))
 	log.V(8).Infof("result:%s", string(ret))
 	if err != nil {
 		log.V(8).Info("error info:", err)

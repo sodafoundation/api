@@ -183,10 +183,16 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	var initiator string
-	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
+	initiator := opt.HostInfo.GetInitiator()
+	if initiator == "" {
 		initiator = "ALL"
 	}
+
+	hostIP := opt.HostInfo.GetIp()
+	if hostIP == "" {
+		initiator = "ALL"
+	}
+
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
 		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
@@ -195,7 +201,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}
 
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
-	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, initiator)
+	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err

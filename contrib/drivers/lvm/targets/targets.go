@@ -21,7 +21,7 @@ const (
 // Target is an interface for exposing some operations of different targets,
 // currently support iscsiTarget.
 type Target interface {
-	CreateExport(volId, path, initiator string) (map[string]interface{}, error)
+	CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error)
 
 	RemoveExport(volId string) error
 }
@@ -37,9 +37,9 @@ type iscsiTarget struct {
 	ISCSITarget
 }
 
-func (t *iscsiTarget) CreateExport(volId, path, initiator string) (map[string]interface{}, error) {
+func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error) {
 	tgtIqn := iscsiTgtPrefix + volId
-	if err := t.CreateISCSITarget(volId, tgtIqn, path, initiator, []string{}); err != nil {
+	if err := t.CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator, []string{}); err != nil {
 		return nil, err
 	}
 	lunId := t.GetLun(path)
