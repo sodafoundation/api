@@ -31,4 +31,5 @@ export { CardModule } from '../card/card';
 export { ChartModule } from '../chart/chart';
 export { BreadcrumbModule } from '../breadcrumb/breadcrumb';
 export { TableModule } from '../table/table';
-export { SelectButtonModule } from '../selectbutton/selectbutton';
+export { MessageModule } from '../message/message';
+export { OverlayPanelModule } from '../overlaypanel/overlaypanel';

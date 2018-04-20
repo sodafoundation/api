@@ -7,7 +7,9 @@ import { I18nPluralPipe } from '@angular/common';
 
 @Component({
     templateUrl: './modifyProfile.component.html',
-    styleUrls: [],
+    styleUrls: [
+        "./modifyProfile.component.scss"
+    ],
     animations: [
         trigger('overlayState', [
             state('hidden', style({
@@ -37,6 +39,7 @@ import { I18nPluralPipe } from '@angular/common';
 export class modifyProfileComponent implements OnInit {
     items;
     chartDatas;
+    totalFreeCapacity;
     option;
     data;
     cars;
@@ -48,20 +51,19 @@ export class modifyProfileComponent implements OnInit {
         // private I18N: I18NService,
         // private router: Router
     ) { }
-
     ngOnInit() {
         this.items = [
-            { label: 'Profile', url: '#/profile' },
-            { label: 'Profile detail' }
+            { label: 'Profile', url: '/profile' },
+            { label: 'Profile detail', url: '/modifyProfile' }
         ];
         this.chartDatas = {
-            labels: ['b', 'a'],
+            labels: ['Total Capacity', 'Used Capacity'],
             datasets: [
                 {
                     data: [(1000 - 300), 300],//未使用容量放前面
                     backgroundColor: [
                         "rgba(224, 224, 224, 1)",
-                        "#FF6384"
+                        "#438bd3"
                     ]
                     // hoverBackgroundColor: [
                     //     "#FF6384",
@@ -71,6 +73,8 @@ export class modifyProfileComponent implements OnInit {
                 }]
         };
         this.option = {
+            cutoutPercentage: 80,
+            // rotation: (-0.2 * Math.PI),
             title: {
                 display: false,
                 text: 'My Title',
@@ -78,8 +82,10 @@ export class modifyProfileComponent implements OnInit {
             },
             legend: {
                 display: true,
-                width: '5px',
-                position: 'right',
+                labels:{
+                    boxWidth:12
+                },
+                position: 'bottom',
                 fontSize: 12
             }
         };
@@ -123,7 +129,7 @@ export class modifyProfileComponent implements OnInit {
               "status": "string",
               "availabilityZone": "string",
               "totalCapacity": 0,
-              "freeCapacity": 0,
+              "freeCapacity": 1,
               "dockId": "string",
               "extras": {
                 "additionalProp1": {},
@@ -141,7 +147,7 @@ export class modifyProfileComponent implements OnInit {
                 "status": "string",
                 "availabilityZone": "string",
                 "totalCapacity": 0,
-                "freeCapacity": 0,
+                "freeCapacity": 8,
                 "dockId": "string",
                 "extras": {
                   "additionalProp1": {},
@@ -159,7 +165,7 @@ export class modifyProfileComponent implements OnInit {
                 "status": "string",
                 "availabilityZone": "string",
                 "totalCapacity": 0,
-                "freeCapacity": 0,
+                "freeCapacity": 10,
                 "dockId": "string",
                 "extras": {
                   "additionalProp1": {},
@@ -168,5 +174,19 @@ export class modifyProfileComponent implements OnInit {
                 }
               }
           ]
+          this.totalFreeCapacity = this.getSumCapacity(this.pools,'free');
+    }
+
+    getSumCapacity(pools,FreeOrTotal){
+        let SumCapacity:number = 0;
+        let arrLength = pools.length;
+        for(let i=0;i<arrLength;i++){
+            if(FreeOrTotal==='free'){
+                SumCapacity += pools[i].freeCapacity;
+            }else{
+                SumCapacity += pools[i].totalCapacity;
+            }
+        }
+        return SumCapacity;
     }
 }
