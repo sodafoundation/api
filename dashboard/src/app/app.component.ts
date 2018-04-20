@@ -26,7 +26,12 @@ export class AppComponent implements OnInit{
             "routerLink": "/block"
         },
         {
-            "title": "profile",
+            "title": "Multi-Cloud Service",
+            "description": "5 replications, 1 migrations",
+            "routerLink": "/cloud"
+        },
+        {
+            "title": "Profile",
             "description": "7 profiles have been created",
             "routerLink": "/profile"
         },
