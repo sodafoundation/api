@@ -25,7 +25,7 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
 )
 
 func init() {

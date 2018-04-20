@@ -26,8 +26,8 @@ import (
 	log "github.com/golang/glog"
 	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/policy"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 
 	"github.com/opensds/opensds/pkg/model"
 )

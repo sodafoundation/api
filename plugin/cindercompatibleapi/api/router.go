@@ -32,7 +32,7 @@ import (
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 )
 
 const (

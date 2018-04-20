@@ -25,7 +25,7 @@ import (
 	"os"
 
 	"github.com/opensds/opensds/pkg/utils/logs"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/api"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/api"
 )
 
 func main() {

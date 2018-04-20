@@ -20,7 +20,7 @@ package converter
 
 import (
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
+	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
 )
 
 // *******************show*******************
