@@ -27,7 +27,7 @@ import (
 	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
 )
 
@@ -155,7 +155,7 @@ func (portal *AttachmentPortal) CreateAttachment() {
 	if !policy.Authorize(portal.Ctx, "attachment:create") {
 		return
 	}
-	var cinderReq = CinderModel.CreateAttachmentReqSpec{}
+	var cinderReq = cindermodel.CreateAttachmentReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create attachment, parse request body failed: %s", err.Error())
@@ -198,7 +198,7 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 	}
 
 	id := portal.Ctx.Input.Param(":attachmentId")
-	var cinderReq = CinderModel.UpdateAttachmentReqSpec{}
+	var cinderReq = cindermodel.UpdateAttachmentReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update an attachment, parse request body failed: %s", err.Error())

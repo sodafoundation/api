@@ -25,7 +25,7 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 func init() {
@@ -52,7 +52,7 @@ func TestGetType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ShowTypeRespSpec
+	var output cindermodel.ShowTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -64,7 +64,7 @@ func TestGetType(t *testing.T) {
     	}
 	}`
 
-	var expected CinderModel.ShowTypeRespSpec
+	var expected cindermodel.ShowTypeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 	expected.VolumeType.IsPublic = true
 
@@ -85,7 +85,7 @@ func TestGetDefaultType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ShowTypeRespSpec
+	var output cindermodel.ShowTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	if w.Code != 200 {
@@ -103,7 +103,7 @@ func TestListType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ListTypeRespSpec
+	var output cindermodel.ListTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -137,7 +137,7 @@ func TestListType(t *testing.T) {
 		]
 		}`
 
-	var expected CinderModel.ListTypeRespSpec
+	var expected cindermodel.ListTypeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -164,10 +164,10 @@ func TestCreateType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.CreateTypeRespSpec
+	var output cindermodel.CreateTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.CreateTypeRespSpec
+	var expected cindermodel.CreateTypeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != 200 {
@@ -209,10 +209,10 @@ func TestUpdateType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.UpdateTypeRespSpec
+	var output cindermodel.UpdateTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.UpdateTypeRespSpec
+	var expected cindermodel.UpdateTypeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 	expected.VolumeType.IsPublic = true
 
@@ -246,10 +246,10 @@ func TestAddExtraProperty(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ExtraSpec
+	var output cindermodel.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.ExtraSpec
+	var expected cindermodel.ExtraSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != 200 {
@@ -266,10 +266,10 @@ func TestListExtraProperties(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ExtraSpec
+	var output cindermodel.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.ExtraSpec
+	var expected cindermodel.ExtraSpec
 	expectedStr := `{
 		"extra_specs":{
 			"dataStorage": {
@@ -299,10 +299,10 @@ func TestShowExtraPropertie(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ExtraSpec
+	var output cindermodel.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.ExtraSpec
+	var expected cindermodel.ExtraSpec
 	expectedStr := `{
 		"dataStorage": {
 					"provisioningPolicy": "Thin",
@@ -325,7 +325,7 @@ func TestShowExtraPropertieWithBadRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ExtraSpec
+	var output cindermodel.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	if w.Code != 200 {
@@ -350,7 +350,7 @@ func TestUpdateExtraPropertie(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ExtraSpec
+	var output cindermodel.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedStr := `{
@@ -360,7 +360,7 @@ func TestUpdateExtraPropertie(t *testing.T) {
 				}
 	}`
 
-	var expected CinderModel.ExtraSpec
+	var expected cindermodel.ExtraSpec
 	json.Unmarshal([]byte(expectedStr), &expected)
 
 	if w.Code != 200 {

@@ -22,13 +22,13 @@ import (
 	"errors"
 
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 // *******************Create*******************
 
 // CreateSnapshotReq ...
-func CreateSnapshotReq(cinderReq *CinderModel.CreateSnapshotReqSpec) (*model.VolumeSnapshotSpec, error) {
+func CreateSnapshotReq(cinderReq *cindermodel.CreateSnapshotReqSpec) (*model.VolumeSnapshotSpec, error) {
 	req := model.VolumeSnapshotSpec{}
 	req.VolumeId = cinderReq.Snapshot.VolumeID
 	req.Name = cinderReq.Snapshot.Name
@@ -46,8 +46,8 @@ func CreateSnapshotReq(cinderReq *CinderModel.CreateSnapshotReqSpec) (*model.Vol
 }
 
 // CreateSnapshotResp ...
-func CreateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.CreateSnapshotRespSpec {
-	resp := CinderModel.CreateSnapshotRespSpec{}
+func CreateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *cindermodel.CreateSnapshotRespSpec {
+	resp := cindermodel.CreateSnapshotRespSpec{}
 	resp.Snapshot.Status = snapshot.Status
 	resp.Snapshot.Description = snapshot.Description
 	resp.Snapshot.CreatedAt = snapshot.BaseModel.CreatedAt
@@ -65,7 +65,7 @@ func CreateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.CreateS
 // *******************Update*******************
 
 // UpdateSnapshotReq ...
-func UpdateSnapshotReq(cinderSnapshot *CinderModel.UpdateSnapshotReqSpec) *model.VolumeSnapshotSpec {
+func UpdateSnapshotReq(cinderSnapshot *cindermodel.UpdateSnapshotReqSpec) *model.VolumeSnapshotSpec {
 	req := model.VolumeSnapshotSpec{}
 	req.Name = cinderSnapshot.Snapshot.Name
 	req.Description = cinderSnapshot.Snapshot.Description
@@ -74,8 +74,8 @@ func UpdateSnapshotReq(cinderSnapshot *CinderModel.UpdateSnapshotReqSpec) *model
 }
 
 // UpdateSnapshotResp ...
-func UpdateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.UpdateSnapshotRespSpec {
-	resp := CinderModel.UpdateSnapshotRespSpec{}
+func UpdateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *cindermodel.UpdateSnapshotRespSpec {
+	resp := cindermodel.UpdateSnapshotRespSpec{}
 	resp.Snapshot.Status = snapshot.Status
 	resp.Snapshot.Description = snapshot.Description
 	resp.Snapshot.CreatedAt = snapshot.BaseModel.CreatedAt
@@ -91,8 +91,8 @@ func UpdateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.UpdateS
 // *******************Show details*******************
 
 // ShowSnapshotDetailsResp ...
-func ShowSnapshotDetailsResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.ShowSnapshotDetailsRespSpec {
-	resp := CinderModel.ShowSnapshotDetailsRespSpec{}
+func ShowSnapshotDetailsResp(snapshot *model.VolumeSnapshotSpec) *cindermodel.ShowSnapshotDetailsRespSpec {
+	resp := cindermodel.ShowSnapshotDetailsRespSpec{}
 	resp.Snapshot.Status = snapshot.Status
 	resp.Snapshot.Description = snapshot.Description
 	resp.Snapshot.CreatedAt = snapshot.BaseModel.CreatedAt
@@ -108,12 +108,12 @@ func ShowSnapshotDetailsResp(snapshot *model.VolumeSnapshotSpec) *CinderModel.Sh
 // *******************List*******************
 
 // ListSnapshotResp ...
-func ListSnapshotResp(snapshots []*model.VolumeSnapshotSpec) *CinderModel.ListSnapshotRespSpec {
-	var resp CinderModel.ListSnapshotRespSpec
-	var cinderSnapshot CinderModel.ListSnapshotResp
+func ListSnapshotResp(snapshots []*model.VolumeSnapshotSpec) *cindermodel.ListSnapshotRespSpec {
+	var resp cindermodel.ListSnapshotRespSpec
+	var cinderSnapshot cindermodel.ListSnapshotResp
 
 	if 0 == len(snapshots) {
-		resp.Snapshots = make([]CinderModel.ListSnapshotResp, 0, 0)
+		resp.Snapshots = make([]cindermodel.ListSnapshotResp, 0, 0)
 	} else {
 		for _, snapshot := range snapshots {
 			cinderSnapshot.Status = snapshot.Status
@@ -134,12 +134,12 @@ func ListSnapshotResp(snapshots []*model.VolumeSnapshotSpec) *CinderModel.ListSn
 }
 
 // ListSnapshotDetailResp ...
-func ListSnapshotDetailResp(snapshots []*model.VolumeSnapshotSpec) *CinderModel.ListSnapshotDetailRespSpec {
-	var resp CinderModel.ListSnapshotDetailRespSpec
-	var cinderSnapshot CinderModel.ListSnapshotDetailResp
+func ListSnapshotDetailResp(snapshots []*model.VolumeSnapshotSpec) *cindermodel.ListSnapshotDetailRespSpec {
+	var resp cindermodel.ListSnapshotDetailRespSpec
+	var cinderSnapshot cindermodel.ListSnapshotDetailResp
 
 	if 0 == len(snapshots) {
-		resp.Snapshots = make([]CinderModel.ListSnapshotDetailResp, 0, 0)
+		resp.Snapshots = make([]cindermodel.ListSnapshotDetailResp, 0, 0)
 	} else {
 		for _, snapshot := range snapshots {
 			cinderSnapshot.Status = snapshot.Status

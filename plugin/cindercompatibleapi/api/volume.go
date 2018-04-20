@@ -26,7 +26,7 @@ import (
 	log "github.com/golang/glog"
 	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/policy"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -72,7 +72,7 @@ func (portal *VolumePortal) CreateVolume() {
 	if !policy.Authorize(portal.Ctx, "volume:create") {
 		return
 	}
-	var cinderReq = CinderModel.CreateVolumeReqSpec{}
+	var cinderReq = cindermodel.CreateVolumeReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a volume, parse request body failed: %s", err.Error())
@@ -184,7 +184,7 @@ func (portal *VolumePortal) UpdateVolume() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeId")
-	var cinderReq = CinderModel.UpdateVolumeReqSpec{}
+	var cinderReq = cindermodel.UpdateVolumeReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update a volume, parse request body failed: %s", err.Error())

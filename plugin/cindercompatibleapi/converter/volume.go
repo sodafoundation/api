@@ -22,7 +22,7 @@ import (
 	"errors"
 
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 var (
@@ -35,16 +35,16 @@ var (
 // *******************List Detail*******************
 
 // ListVolumeDetailResp ...
-func ListVolumeDetailResp(volumes []*model.VolumeSpec) *CinderModel.ListVolumeDetailRespSpec {
-	var resp CinderModel.ListVolumeDetailRespSpec
-	var volumeForList CinderModel.VolumeForListDetailResp
+func ListVolumeDetailResp(volumes []*model.VolumeSpec) *cindermodel.ListVolumeDetailRespSpec {
+	var resp cindermodel.ListVolumeDetailRespSpec
+	var volumeForList cindermodel.VolumeForListDetailResp
 
 	if 0 == len(volumes) {
-		resp.Volumes = make([]CinderModel.VolumeForListDetailResp, 0, 0)
+		resp.Volumes = make([]cindermodel.VolumeForListDetailResp, 0, 0)
 	} else {
 		for _, volume := range volumes {
 
-			volumeForList.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+			volumeForList.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 			volumeForList.AvailabilityZone = volume.AvailabilityZone
 			volumeForList.UpdatedAt = volume.BaseModel.UpdatedAt
 			volumeForList.ID = volume.BaseModel.Id
@@ -67,7 +67,7 @@ func ListVolumeDetailResp(volumes []*model.VolumeSpec) *CinderModel.ListVolumeDe
 // *******************Create*******************
 
 // CreateVolumeReq ...
-func CreateVolumeReq(cinderReq *CinderModel.CreateVolumeReqSpec) (*model.VolumeSpec, error) {
+func CreateVolumeReq(cinderReq *cindermodel.CreateVolumeReqSpec) (*model.VolumeSpec, error) {
 	volume := model.VolumeSpec{}
 	volume.BaseModel = &model.BaseModel{}
 	volume.Name = cinderReq.Volume.Name
@@ -88,10 +88,10 @@ func CreateVolumeReq(cinderReq *CinderModel.CreateVolumeReqSpec) (*model.VolumeS
 }
 
 // CreateVolumeResp ...
-func CreateVolumeResp(volume *model.VolumeSpec) *CinderModel.CreateVolumeRespSpec {
-	resp := CinderModel.CreateVolumeRespSpec{}
+func CreateVolumeResp(volume *model.VolumeSpec) *cindermodel.CreateVolumeRespSpec {
+	resp := cindermodel.CreateVolumeRespSpec{}
 
-	resp.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	resp.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	resp.Volume.AvailabilityZone = volume.AvailabilityZone
 	resp.Volume.UpdatedAt = volume.BaseModel.UpdatedAt
 	resp.Volume.ID = volume.BaseModel.Id
@@ -109,12 +109,12 @@ func CreateVolumeResp(volume *model.VolumeSpec) *CinderModel.CreateVolumeRespSpe
 // *******************List*******************
 
 // ListVolumeResp ...
-func ListVolumeResp(volumes []*model.VolumeSpec) *CinderModel.ListVolumeRespSpec {
-	var resp CinderModel.ListVolumeRespSpec
-	var volumeForList CinderModel.VolumeForListResp
+func ListVolumeResp(volumes []*model.VolumeSpec) *cindermodel.ListVolumeRespSpec {
+	var resp cindermodel.ListVolumeRespSpec
+	var volumeForList cindermodel.VolumeForListResp
 
 	if 0 == len(volumes) {
-		resp.Volumes = make([]CinderModel.VolumeForListResp, 0, 0)
+		resp.Volumes = make([]cindermodel.VolumeForListResp, 0, 0)
 	} else {
 		for _, volume := range volumes {
 			volumeForList.ID = volume.Id
@@ -130,10 +130,10 @@ func ListVolumeResp(volumes []*model.VolumeSpec) *CinderModel.ListVolumeRespSpec
 // *******************Show*******************
 
 // ShowVolumeResp ...
-func ShowVolumeResp(volume *model.VolumeSpec) *CinderModel.ShowVolumeRespSpec {
-	resp := CinderModel.ShowVolumeRespSpec{}
+func ShowVolumeResp(volume *model.VolumeSpec) *cindermodel.ShowVolumeRespSpec {
+	resp := cindermodel.ShowVolumeRespSpec{}
 
-	resp.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	resp.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	resp.Volume.AvailabilityZone = volume.AvailabilityZone
 	resp.Volume.UpdatedAt = volume.BaseModel.UpdatedAt
 	resp.Volume.ID = volume.BaseModel.Id
@@ -152,7 +152,7 @@ func ShowVolumeResp(volume *model.VolumeSpec) *CinderModel.ShowVolumeRespSpec {
 // *******************Update*******************
 
 // UpdateVolumeReq ...
-func UpdateVolumeReq(cinderReq *CinderModel.UpdateVolumeReqSpec) (*model.VolumeSpec, error) {
+func UpdateVolumeReq(cinderReq *cindermodel.UpdateVolumeReqSpec) (*model.VolumeSpec, error) {
 	volume := model.VolumeSpec{}
 	volume.BaseModel = &model.BaseModel{}
 	volume.Description = cinderReq.Volume.Description
@@ -167,9 +167,9 @@ func UpdateVolumeReq(cinderReq *CinderModel.UpdateVolumeReqSpec) (*model.VolumeS
 }
 
 // UpdateVolumeResp ...
-func UpdateVolumeResp(volume *model.VolumeSpec) *CinderModel.UpdateVolumeRespSpec {
-	resp := CinderModel.UpdateVolumeRespSpec{}
-	resp.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+func UpdateVolumeResp(volume *model.VolumeSpec) *cindermodel.UpdateVolumeRespSpec {
+	resp := cindermodel.UpdateVolumeRespSpec{}
+	resp.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	resp.Volume.AvailabilityZone = volume.AvailabilityZone
 	resp.Volume.UpdatedAt = volume.BaseModel.UpdatedAt
 	resp.Volume.ID = volume.BaseModel.Id

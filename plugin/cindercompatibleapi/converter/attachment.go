@@ -20,14 +20,14 @@ package converter
 
 import (
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 // *******************show*******************
 
 // ShowAttachmentResp ...
-func ShowAttachmentResp(attachment *model.VolumeAttachmentSpec) *CinderModel.ShowAttachmentRespSpec {
-	resp := CinderModel.ShowAttachmentRespSpec{}
+func ShowAttachmentResp(attachment *model.VolumeAttachmentSpec) *cindermodel.ShowAttachmentRespSpec {
+	resp := cindermodel.ShowAttachmentRespSpec{}
 	resp.VolumeAttachment.Status = attachment.Status
 	resp.VolumeAttachment.ConnectionInfo.DriverVolumeType = attachment.ConnectionInfo.DriverVolumeType
 	resp.VolumeAttachment.ConnectionInfo.ConnectionData = attachment.ConnectionInfo.ConnectionData
@@ -42,13 +42,13 @@ func ShowAttachmentResp(attachment *model.VolumeAttachmentSpec) *CinderModel.Sho
 // *******************List Detail*******************
 
 // ListAttachmentDetailResp ...
-func ListAttachmentDetailResp(attachments []*model.VolumeAttachmentSpec) *CinderModel.ListAttachmentDetailRespSpec {
-	var resp CinderModel.ListAttachmentDetailRespSpec
-	attachmentOfListDetail := CinderModel.AttachmentOfListDetailResp{}
+func ListAttachmentDetailResp(attachments []*model.VolumeAttachmentSpec) *cindermodel.ListAttachmentDetailRespSpec {
+	var resp cindermodel.ListAttachmentDetailRespSpec
+	attachmentOfListDetail := cindermodel.AttachmentOfListDetailResp{}
 
 	if 0 == len(attachments) {
 		// Even if the number is 0, it must return {"attachments":[]}
-		resp.Attachments = make([]CinderModel.AttachmentOfListDetailResp, 0, 0)
+		resp.Attachments = make([]cindermodel.AttachmentOfListDetailResp, 0, 0)
 	} else {
 		for _, attachment := range attachments {
 			attachmentOfListDetail.Status = attachment.Status
@@ -69,13 +69,13 @@ func ListAttachmentDetailResp(attachments []*model.VolumeAttachmentSpec) *Cinder
 // *******************List*******************
 
 // ListAttachmentResp ...
-func ListAttachmentResp(attachments []*model.VolumeAttachmentSpec) *CinderModel.ListAttachmentRespSpec {
-	var resp CinderModel.ListAttachmentRespSpec
-	var attachmentOfList CinderModel.AttachmentOfListResp
+func ListAttachmentResp(attachments []*model.VolumeAttachmentSpec) *cindermodel.ListAttachmentRespSpec {
+	var resp cindermodel.ListAttachmentRespSpec
+	var attachmentOfList cindermodel.AttachmentOfListResp
 
 	if 0 == len(attachments) {
 		// Even if the number is 0, it must return {"attachments":[]}
-		resp.Attachments = make([]CinderModel.AttachmentOfListResp, 0, 0)
+		resp.Attachments = make([]cindermodel.AttachmentOfListResp, 0, 0)
 	} else {
 		for _, attachment := range attachments {
 			attachmentOfList.Status = attachment.Status
@@ -93,7 +93,7 @@ func ListAttachmentResp(attachments []*model.VolumeAttachmentSpec) *CinderModel.
 // *******************Create*******************
 
 // CreateAttachmentReq ...
-func CreateAttachmentReq(cinderReq *CinderModel.CreateAttachmentReqSpec) *model.VolumeAttachmentSpec {
+func CreateAttachmentReq(cinderReq *cindermodel.CreateAttachmentReqSpec) *model.VolumeAttachmentSpec {
 	attachment := model.VolumeAttachmentSpec{}
 	attachment.Metadata = make(map[string]string)
 	attachment.Metadata["instance_uuid"] = cinderReq.Attachment.InstanceUuID
@@ -109,8 +109,8 @@ func CreateAttachmentReq(cinderReq *CinderModel.CreateAttachmentReqSpec) *model.
 }
 
 // CreateAttachmentResp ...
-func CreateAttachmentResp(attachment *model.VolumeAttachmentSpec) *CinderModel.CreateAttachmentRespSpec {
-	resp := CinderModel.CreateAttachmentRespSpec{}
+func CreateAttachmentResp(attachment *model.VolumeAttachmentSpec) *cindermodel.CreateAttachmentRespSpec {
+	resp := cindermodel.CreateAttachmentRespSpec{}
 	resp.Attachment.Status = attachment.Status
 	resp.Attachment.ConnectionInfo.DriverVolumeType = attachment.ConnectionInfo.DriverVolumeType
 	resp.Attachment.ConnectionInfo.ConnectionData = attachment.ConnectionInfo.ConnectionData
@@ -125,7 +125,7 @@ func CreateAttachmentResp(attachment *model.VolumeAttachmentSpec) *CinderModel.C
 // *******************Update*******************
 
 // UpdateAttachmentReq ...
-func UpdateAttachmentReq(cinderReq *CinderModel.UpdateAttachmentReqSpec) *model.VolumeAttachmentSpec {
+func UpdateAttachmentReq(cinderReq *cindermodel.UpdateAttachmentReqSpec) *model.VolumeAttachmentSpec {
 	attachment := model.VolumeAttachmentSpec{}
 	attachment.HostInfo.Initiator = cinderReq.Attachment.Connector.Initiator
 	attachment.HostInfo.Ip = cinderReq.Attachment.Connector.IP
@@ -138,8 +138,8 @@ func UpdateAttachmentReq(cinderReq *CinderModel.UpdateAttachmentReqSpec) *model.
 }
 
 // UpdateAttachmentResp ...
-func UpdateAttachmentResp(attachment *model.VolumeAttachmentSpec) *CinderModel.UpdateAttachmentRespSpec {
-	resp := CinderModel.UpdateAttachmentRespSpec{}
+func UpdateAttachmentResp(attachment *model.VolumeAttachmentSpec) *cindermodel.UpdateAttachmentRespSpec {
+	resp := cindermodel.UpdateAttachmentRespSpec{}
 	resp.Attachment.Status = attachment.Status
 	resp.Attachment.ConnectionInfo.DriverVolumeType = attachment.ConnectionInfo.DriverVolumeType
 	resp.Attachment.ConnectionInfo.ConnectionData = attachment.ConnectionInfo.ConnectionData

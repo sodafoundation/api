@@ -17,7 +17,7 @@ This module implements the common data structure.
 
 */
 
-package CinderModel
+package cindermodel
 
 // *******************show*******************
 

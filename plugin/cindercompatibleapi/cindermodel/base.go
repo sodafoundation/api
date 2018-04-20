@@ -17,7 +17,7 @@ This module implements the common data structure.
 
 */
 
-package CinderModel
+package cindermodel
 
 // ExtraSpec ...
 type ExtraSpec map[string]interface{}

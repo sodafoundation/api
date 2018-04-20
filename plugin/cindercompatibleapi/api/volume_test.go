@@ -24,7 +24,7 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 func init() {
@@ -48,7 +48,7 @@ func TestGetVolume(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ShowVolumeRespSpec
+	var output cindermodel.ShowVolumeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -61,14 +61,14 @@ func TestGetVolume(t *testing.T) {
 		}
 	}`
 
-	var expected CinderModel.ShowVolumeRespSpec
+	var expected cindermodel.ShowVolumeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
 		t.Errorf("Expected 200, actual %v", w.Code)
 	}
 
-	expected.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	expected.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	expected.Volume.Status = "available"
 
 	if !reflect.DeepEqual(expected, output) {
@@ -82,7 +82,7 @@ func TestListVolume(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ListVolumeRespSpec
+	var output cindermodel.ListVolumeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{"volumes":
@@ -94,7 +94,7 @@ func TestListVolume(t *testing.T) {
 		]
 	}`
 
-	var expected CinderModel.ListVolumeRespSpec
+	var expected cindermodel.ListVolumeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -112,7 +112,7 @@ func TestListVolumeDetail(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ListVolumeDetailRespSpec
+	var output cindermodel.ListVolumeDetailRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{"volumes":
@@ -126,14 +126,14 @@ func TestListVolumeDetail(t *testing.T) {
 			]
 	}`
 
-	var expected CinderModel.ListVolumeDetailRespSpec
+	var expected cindermodel.ListVolumeDetailRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
 		t.Errorf("Expected 200, actual %v", w.Code)
 	}
 
-	expected.Volumes[0].Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	expected.Volumes[0].Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
 	}
@@ -154,17 +154,17 @@ func TestCreateVolume(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.CreateVolumeRespSpec
+	var output cindermodel.CreateVolumeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.CreateVolumeRespSpec
+	var expected cindermodel.CreateVolumeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != StatusAccepted {
 		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
 	}
 
-	expected.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	expected.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	expected.Volume.Status = "available"
 	expected.Volume.ID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected.Volume.Metadata = make(map[string]string)
@@ -200,17 +200,17 @@ func TestUpdateVolume(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.UpdateVolumeRespSpec
+	var output cindermodel.UpdateVolumeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.UpdateVolumeRespSpec
+	var expected cindermodel.UpdateVolumeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != 200 {
 		t.Errorf("Expected 200, actual %v", w.Code)
 	}
 
-	expected.Volume.Attachments = make([]CinderModel.AttachmentOfVolumeResp, 0, 0)
+	expected.Volume.Attachments = make([]cindermodel.AttachmentOfVolumeResp, 0, 0)
 	expected.Volume.Status = "available"
 	expected.Volume.ID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected.Volume.Size = 1

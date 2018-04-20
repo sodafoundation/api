@@ -27,7 +27,7 @@ import (
 	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
 )
 
@@ -72,7 +72,7 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 		return
 	}
 
-	var cinderReq = CinderModel.CreateSnapshotReqSpec{}
+	var cinderReq = cindermodel.CreateSnapshotReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a snapshot, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -183,7 +183,7 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 	}
 
 	id := portal.Ctx.Input.Param(":snapshotId")
-	var cinderUpdateReq = CinderModel.UpdateSnapshotReqSpec{}
+	var cinderUpdateReq = cindermodel.UpdateSnapshotReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderUpdateReq); err != nil {
 		reason := fmt.Sprintf("Update a snapshot, parse request body failed: %s", err.Error())

@@ -24,7 +24,7 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 func init() {
@@ -49,7 +49,7 @@ func TestGetAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ShowAttachmentRespSpec
+	var output cindermodel.ShowAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{"attachment":{
@@ -67,7 +67,7 @@ func TestGetAttachment(t *testing.T) {
 			}
 	}`
 
-	var expected CinderModel.ShowAttachmentRespSpec
+	var expected cindermodel.ShowAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -85,7 +85,7 @@ func TestListAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ListAttachmentRespSpec
+	var output cindermodel.ListAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -96,7 +96,7 @@ func TestListAttachment(t *testing.T) {
 			}]
 		}`
 
-	var expected CinderModel.ListAttachmentRespSpec
+	var expected cindermodel.ListAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -114,7 +114,7 @@ func TestListAttachmentDetails(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ListAttachmentDetailRespSpec
+	var output cindermodel.ListAttachmentDetailRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -132,7 +132,7 @@ func TestListAttachmentDetails(t *testing.T) {
 			}]
 		}`
 
-	var expected CinderModel.ListAttachmentDetailRespSpec
+	var expected cindermodel.ListAttachmentDetailRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -158,7 +158,7 @@ func TestCreateAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.CreateAttachmentRespSpec
+	var output cindermodel.CreateAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{"attachment":{
@@ -176,7 +176,7 @@ func TestCreateAttachment(t *testing.T) {
 			}
 	}`
 
-	var expected CinderModel.CreateAttachmentRespSpec
+	var expected cindermodel.CreateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -214,7 +214,7 @@ func TestUpdateAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.UpdateAttachmentRespSpec
+	var output cindermodel.UpdateAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{"attachment":{
@@ -232,7 +232,7 @@ func TestUpdateAttachment(t *testing.T) {
 			}
 	}`
 
-	var expected CinderModel.UpdateAttachmentRespSpec
+	var expected cindermodel.UpdateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {

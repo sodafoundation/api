@@ -28,7 +28,7 @@ import (
 	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/converter"
 )
 
@@ -47,7 +47,7 @@ func (portal *TypePortal) UpdateType() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	var cinderReq = CinderModel.UpdateTypeReqSpec{}
+	var cinderReq = cindermodel.UpdateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update a volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -96,7 +96,7 @@ func (portal *TypePortal) AddExtraProperty() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	var cinderReq = CinderModel.AddExtraReqSpec{}
+	var cinderReq = cindermodel.AddExtraReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create or update extra specs for volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -205,7 +205,7 @@ func (portal *TypePortal) UpdateExtraProperty() {
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
-	var cinderReq = CinderModel.UpdateExtraReqSpec{}
+	var cinderReq = cindermodel.UpdateExtraReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update extra specification for volume type, parse request body failed: %s", err.Error())
@@ -395,7 +395,7 @@ func (portal *TypePortal) CreateType() {
 		return
 	}
 
-	var cinderReq = CinderModel.CreateTypeReqSpec{}
+	var cinderReq = cindermodel.CreateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)

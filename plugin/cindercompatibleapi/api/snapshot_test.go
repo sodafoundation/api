@@ -24,7 +24,7 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/CinderModel"
+	"github.com/opensds/opensds/plugin/CinderCompatibleAPI/cindermodel"
 )
 
 func init() {
@@ -58,10 +58,10 @@ func TestCreateSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.CreateSnapshotRespSpec
+	var output cindermodel.CreateSnapshotRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.CreateSnapshotRespSpec
+	var expected cindermodel.CreateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != StatusAccepted {
@@ -83,7 +83,7 @@ func TestGetSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.ShowSnapshotDetailsResp
+	var output cindermodel.ShowSnapshotDetailsResp
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON := `{
@@ -95,7 +95,7 @@ func TestGetSnapshot(t *testing.T) {
 		}
 	}`
 
-	var expected CinderModel.ShowSnapshotDetailsResp
+	var expected cindermodel.ShowSnapshotDetailsResp
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -113,7 +113,7 @@ func TestListSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output []CinderModel.ListSnapshotRespSpec
+	var output []cindermodel.ListSnapshotRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON :=
@@ -132,7 +132,7 @@ func TestListSnapshot(t *testing.T) {
 		}
 		]}`
 
-	var expected []CinderModel.ListSnapshotRespSpec
+	var expected []cindermodel.ListSnapshotRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -150,7 +150,7 @@ func TestListSnapshotDetail(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output []CinderModel.ListSnapshotDetailRespSpec
+	var output []cindermodel.ListSnapshotDetailRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJSON :=
@@ -169,7 +169,7 @@ func TestListSnapshotDetail(t *testing.T) {
 		}
 		]}`
 
-	var expected []CinderModel.ListSnapshotDetailRespSpec
+	var expected []cindermodel.ListSnapshotDetailRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -206,10 +206,10 @@ func TestUpdateSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output CinderModel.UpdateSnapshotRespSpec
+	var output cindermodel.UpdateSnapshotRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected CinderModel.UpdateSnapshotRespSpec
+	var expected cindermodel.UpdateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != StatusOK {
