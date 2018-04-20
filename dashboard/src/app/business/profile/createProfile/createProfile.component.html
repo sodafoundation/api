@@ -4,14 +4,87 @@
 </div>
 <div class="form-con">
     <h3>Form 标题</h3>
-    <input type="text" pInputText formcontrolName="xxx">
-    <!-- <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="formGroup" [errorMessage]="errorMessage">
-        <form-item label="ssss" [required]="true">
-            <input type="text" pInputText formcontrolName="xxx">
-        </form-item>
-    </form> -->
+    <div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.name}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <input type="text" pInputText placeholder="Name" [(ngModel)]="param.name">
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.protocol}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <p-dropdown [style]="{'min-width':150}" [options]="protocolOptions" [(ngModel)]="param.extras.protocol"></p-dropdown>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.type}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <p-radioButton label="Auto" name="typeRadioGroup" value="Auto" [(ngModel)]="param.storageType"></p-radioButton>
+                <p-radioButton label="Thin" name="typeRadioGroup" value="Thin" [(ngModel)]="param.storageType"></p-radioButton>
+                <p-radioButton label="Thick" name="typeRadioGroup" value="Thick" [(ngModel)]="param.storageType"></p-radioButton>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.qosPolicy}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <p-checkbox (onChange)="showDetails('qos')" name="policyCheckbox" value="qosPolicy" label="Enable" [(ngModel)]="param.extras.policy"></p-checkbox>
+                <div *ngIf="qosIsChecked">helloffffffffffffffffffffffffffffffffffffff</div>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.replicationPolicy}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <p-checkbox (onChange)="showDetails('replication')" name="policyCheckbox" value="replicationPolicy" label="Enable" [(ngModel)]="param.extras.policy"></p-checkbox>
+                <div *ngIf="replicationIsChecked">helloffffffffffffffffffffffffffffffffffffff</div>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.snapshotPolicy}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <p-checkbox (onChange)="showDetails('snapshot')" name="policyCheckbox" value="snapshotPolicy" label="Enable" [(ngModel)]="param.extras.policy"></p-checkbox>
+                <div *ngIf="snapshotIsChecked">helloffffffffffffffffffffffffffffffffffffff</div>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.customization}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <a class="create-profile-img" (click)="showCustomization=!showCustomization">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                    <span>Add</span>
+                </a>
+            </div>
+        </div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-6 ui-md-2">{{label.storagePool}}</span>
+            <div class="ui-g-6 ui-md-10">
+                <a class="create-profile-img" (click)="showStoragePool=!showStoragePool">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2861.png">
+                    <span>Matching</span>
+                </a>
+                <div *ngIf="showStoragePool">hello world</div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="form-btn">
     <button pButton type="button" label="OK" (click)="createProfile()"></button>
     <button pButton type="button" label="Cancel" [routerLink]="['/profile']"></button>
 </div>
+
+<p-dialog header="Create User" [(visible)]="showCustomization" [width]="500" modal="modal">
+    <div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-4 ui-md-4">{{label.key}}</span>
+            <input type="text" pInputText placeholder="Username">
+        </div>
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.value}}</span>
+            <input type="password" pPassword placeholder="Password">
+        </div>
+    </div>
+    <p-footer>
+        <p-button label="OK" styleClass="ui-button-secondary" (click)="showCustomization=false"></p-button>
+        <p-button label="Cancel" (click)="showCustomization=false"></p-button>
+    </p-footer>
+</p-dialog>
