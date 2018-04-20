@@ -27,6 +27,29 @@
     height:100%;
 }
 
+/* login */
+.layout-wrapper .login-bg{
+    height: 100%;
+    background: #242e43;
+}
+
+.layout-wrapper .login-form{
+    position: absolute;
+    left: calc(50% - 1.2rem);
+    top: 30%;
+    width: 2.4rem;
+}
+
+.login-form .form-list p{
+    padding-bottom: .2rem;
+}
+
+.layout-wrapper .login-form .ui-button{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* menu */
 #layout-topbar {
     background-color: #242e43;
     background-image: url('./assets/business/images/menu-bg.png');

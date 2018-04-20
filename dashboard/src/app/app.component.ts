@@ -1,9 +1,11 @@
 // import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
+import { Http } from '@angular/http';
+import { Router } from '@angular/router';
 import { I18NService } from 'app/shared/api';
 // import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
-import { MenuItem } from './components/common/api';
+import { MenuItem, SelectItem } from './components/common/api';
 
 @Component({
     selector: 'app-root',
@@ -12,8 +14,21 @@ import { MenuItem } from './components/common/api';
 })
 export class AppComponent implements OnInit{
     chromeBrowser: boolean = false;
+
+    isLogin: boolean;
+
     linkUrl = "";
+
+    userRoles: SelectItem[];
+
+    currentRole: string = "admin";
+
+    username: string;
+
+    password: string;
+
     dropMenuItems: MenuItem[];
+
     menuItems = [
         {
             "title": "Home",
@@ -41,12 +56,15 @@ export class AppComponent implements OnInit{
             "routerLink": "/identity"
         }
     ];
+
     activeItem: any;
 
     private msgs: any = [{ severity: 'warn', summary: 'Warn Message', detail: 'There are unsaved changes'}];
 
     constructor(
-        private el: ElementRef
+        private el: ElementRef,
+        private http: Http,
+        private router: Router
         // private I18N: I18NService,
         // private viewContainerRef: ViewContainerRef,
         // private appService: AppService,
@@ -54,7 +72,18 @@ export class AppComponent implements OnInit{
     ){}
     
     ngOnInit() {
-        this.activeItem = this.menuItems[0];
+        if( localStorage['x-subject-token'] != '' ){
+            this.isLogin = true;
+            this.router.navigateByUrl("home");
+            this.activeItem = this.menuItems[0];
+        }else{
+            this.isLogin = false;
+        }
+
+        this.userRoles = [
+            { label: "Administrator", value: "admin" },
+            { label: "Tenant", value: "tenant" }
+        ]
 
         this.dropMenuItems = [
             { 
@@ -68,10 +97,68 @@ export class AppComponent implements OnInit{
                     }
                 ]
             },
-            { label: "Logout", command:()=>{} }
+            { label: "Logout", command:()=>
+                {
+                    this.logout();
+                }
+            }
         ];
     }
     
+    login() {
+        let request: any = { auth: {} };
+        request.auth = {
+            "identity": {
+                "methods": [
+                    "password"
+                ],
+                "password":{
+                    "user": {
+                        "name": this.username,
+                        "domain": {
+                            "name": "Default"
+                        },
+                        "password": this.password
+                    }
+                }
+            }
+        }
+
+        this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            let g_token_id = res.headers.get('x-subject-token'); 
+            // console.log( g_token_id);
+            let req: any = { auth: {} };
+            req.auth = {
+                "identity": {
+                    "methods": [
+                        "token"
+                    ],
+                    "token": {
+                        "id": g_token_id
+                    }
+                }
+            }
+
+            this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
+                console.log(r.headers.get('x-subject-token') );
+                localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
+                if( localStorage['x-subject-token'] != '' ){
+                    this.isLogin = true;
+                    this.router.navigateByUrl("home");
+                    this.activeItem = this.menuItems[0];
+                }
+            })
+
+        });
+    }
+
+    logout() {
+        localStorage['x-subject-token'] = "";
+        this.isLogin = false;
+        this.password = "";
+        console.log("xxx",localStorage['x-subject-token'])
+    }
+
     menuItemClick(event, item) {
         this.activeItem = item;
     }

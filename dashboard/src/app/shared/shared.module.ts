@@ -12,6 +12,10 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions, inject
     options.headers.set('expires', '0');
     options.headers.set('Pragma', 'no-cache');
     
+    if( localStorage['x-subject-token'] ){
+        options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
+    }
+
     return new HttpService(backend, options, injector);
 }
 

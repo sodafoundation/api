@@ -176,6 +176,19 @@
     }
 }
 
+.ui-inputsearch {
+    display: flex;
+    .ui-inputtext{
+        padding-left: .15rem; 
+        padding-right: .4rem;
+        @extend .ui-corner-all-large;
+    }
+    .ui-button {
+        margin-left: -.35rem;
+    }
+}
+
+
 .ui-float-label input.ng-dirty.ng-invalid ~ label {
     color: $stateErrorTextColor;
 }

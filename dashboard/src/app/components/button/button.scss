@@ -23,6 +23,10 @@
             border: none;
             background: none;
             box-shadow: none;
+            color: map-get($map: $color-primary, $key: hover);
+        }
+        &:active{
+            color: map-get($map: $color-primary, $key: active);
         }
     } 
     &.ui-button-large{
@@ -138,7 +142,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 /* Severity Buttons */
-/* primary */
+/* secondary */
 .ui-button.ui-button-secondary.ui-state-default,
 .ui-splitbutton.ui-button-secondary .ui-button.ui-state-default {
     background-color: map-get($color-primary, normal);

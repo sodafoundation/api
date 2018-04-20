@@ -6,7 +6,7 @@ import { HttpModule } from "@angular/http";
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
-import { DropMenuModule } from './components/common/api';
+import { DropMenuModule, SelectButtonModule, ButtonModule, InputTextModule } from './components/common/api';
 // import { AppService } from './app.service';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
@@ -28,7 +28,10 @@ import { MessagesModule } from './components/messages/messages';
     // NoAccessModule,
     // HeaderModule,
     SharedModule.forRoot(),
-    DropMenuModule
+    DropMenuModule,
+    SelectButtonModule,
+    ButtonModule,
+    InputTextModule
   ],
   providers: [
     // AppService,
