@@ -52,8 +52,9 @@ func TestSetup(t *testing.T) {
 	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/lvm.yaml"
 	var expectedDriver = &Driver{
 		conf: &LVMConfig{
-			Pool:      fp,
-			TgtBindIp: "192.168.56.105",
+			Pool:       fp,
+			TgtBindIp:  "192.168.56.105",
+			TgtConfDir: "/etc/tgt/conf.d",
 		},
 		handler: execCmd,
 	}
