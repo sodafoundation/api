@@ -40,11 +40,11 @@ export class AppComponent implements OnInit{
             "description": "23 volumes",
             "routerLink": "/block"
         },
-        {
-            "title": "Multi-Cloud Service",
-            "description": "5 replications, 1 migrations",
-            "routerLink": "/cloud"
-        },
+        // {
+        //     "title": "Multi-Cloud Service",
+        //     "description": "5 replications, 1 migrations",
+        //     "routerLink": "/cloud"
+        // },
         {
             "title": "Profile",
             "description": "7 profiles have been created",
