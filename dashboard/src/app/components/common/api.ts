@@ -33,3 +33,4 @@ export { BreadcrumbModule } from '../breadcrumb/breadcrumb';
 export { TableModule } from '../table/table';
 export { MessageModule } from '../message/message';
 export { OverlayPanelModule } from '../overlaypanel/overlaypanel';
+export { SelectButtonModule } from '../selectbutton/selectbutton';

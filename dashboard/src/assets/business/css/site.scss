@@ -149,6 +149,7 @@
     margin: 0.1rem 0 0;
     padding: 0 0.3rem 0 0.4rem;
     height: 100%;
+    overflow: scroll;
 }
 
 .topbar-menu > li:first-of-type {
@@ -231,7 +232,7 @@
     display: -webkit-flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.1rem;
+    padding-bottom: 0.15rem;
 }
 .table-toolbar > div{
     display: flex;

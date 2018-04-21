@@ -131,7 +131,7 @@ export class AppComponent implements OnInit{
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
             let g_token_id = res.headers.get('x-subject-token'); 
-            // console.log( g_token_id);
+            console.log("获取基本token", g_token_id);
             let req: any = { auth: {} };
             req.auth = {
                 "identity": {
@@ -141,12 +141,24 @@ export class AppComponent implements OnInit{
                     "token": {
                         "id": g_token_id
                     }
+                },
+                "scope": {
+                  "project": {
+                    "name": "demo",
+                    "domain": { "id": "default" }
+                  }
                 }
             }
 
+
+
+            console.log("存储的token",  localStorage['x-subject-token']);
+
             this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
-                console.log(r.headers.get('x-subject-token') );
+                console.log("正式token", r.headers.get('x-subject-token') );
                 localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
+
+                console.log("存储gengxin的token",  localStorage['x-subject-token']);
                 if( localStorage['x-subject-token'] != '' ){
                     this.isLogin = true;
                     this.router.navigateByUrl("home");

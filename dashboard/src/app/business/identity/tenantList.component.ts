@@ -18,6 +18,9 @@ export class TenantListComponent implements OnInit {
     tenants = [];
     isDetailFinished = false;
     createTenantDisplay = false;
+    
+    sortField: string;
+
     constructor(
         private http: Http,
         // private I18N: I18NService,
@@ -27,22 +30,10 @@ export class TenantListComponent implements OnInit {
     ngOnInit() {
         this.listTenants();
 
-        this.tenants = [
-            { "name": "tenant_A", "description": "--", },
-            { "name": "tenant_B", "description": "--", }
-        ];
     }
 
     listTenants() {
-        // let request: any = { auth:{}};
-        // request.auth = {
-        //     "identity": {
-        //         "methods": [ "list_projects" ],
-        //         "list_projects":{
-        //             "domain_id": "default"
-        //         }
-        //     }
-        // }
+        this.sortField = "name";
 
         let request: any = { params:{} };
         request.params = {
@@ -50,7 +41,7 @@ export class TenantListComponent implements OnInit {
         }
 
         this.http.get("/v3/projects", request).subscribe((res) => {
-            console.log(res.json)
+            this.tenants = res.json().projects;
         });
     }
 
@@ -60,7 +51,16 @@ export class TenantListComponent implements OnInit {
 
     onRowExpand(evt) {
         this.isDetailFinished = false;
-        console.log(evt.data.name);
+        console.log(evt.data);
+
+        let request: any = { params:{} };
+        request.params = {
+            "domain_id": "default"
+        }
+
+        // this.http.get("/v2.0/tenants/"+ evt.data.id +"/users").subscribe((res) => {
+        //     // this.tenants = res.json().projects;
+        // });
 
     }
 
