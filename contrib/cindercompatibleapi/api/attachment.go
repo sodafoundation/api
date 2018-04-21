@@ -23,17 +23,16 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 )
 
 // AttachmentPortal ...
 type AttachmentPortal struct {
-	OpenSDSAPI.BasePortal
+	beego.Controller
 }
 
 // DeleteAttachment ...
@@ -90,9 +89,9 @@ func (portal *AttachmentPortal) GetAttachment() {
 	return
 }
 
-// ListAttachmentsDetail ...
-func (portal *AttachmentPortal) ListAttachmentsDetail() {
-	if !policy.Authorize(portal.Ctx, "attachment:list_detail") {
+// ListAttachmentsDetails ...
+func (portal *AttachmentPortal) ListAttachmentsDetails() {
+	if !policy.Authorize(portal.Ctx, "attachment:list_details") {
 		return
 	}
 
@@ -105,7 +104,7 @@ func (portal *AttachmentPortal) ListAttachmentsDetail() {
 		return
 	}
 
-	result := converter.ListAttachmentDetailResp(attachments)
+	result := converter.ListAttachmentsDetailsResp(attachments)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details, marshal result failed: %v", err)
@@ -120,8 +119,8 @@ func (portal *AttachmentPortal) ListAttachmentsDetail() {
 	return
 }
 
-// ListAttachment ...
-func (portal *AttachmentPortal) ListAttachment() {
+// ListAttachments ...
+func (portal *AttachmentPortal) ListAttachments() {
 	if !policy.Authorize(portal.Ctx, "attachment:list") {
 		return
 	}
@@ -135,7 +134,7 @@ func (portal *AttachmentPortal) ListAttachment() {
 		return
 	}
 
-	result := converter.ListAttachmentResp(attachments)
+	result := converter.ListAttachmentsResp(attachments)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List attachments, marshal result failed: %v", err)
@@ -155,7 +154,7 @@ func (portal *AttachmentPortal) CreateAttachment() {
 	if !policy.Authorize(portal.Ctx, "attachment:create") {
 		return
 	}
-	var cinderReq = cindermodel.CreateAttachmentReqSpec{}
+	var cinderReq = converter.CreateAttachmentReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create attachment, parse request body failed: %s", err.Error())
@@ -198,7 +197,7 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 	}
 
 	id := portal.Ctx.Input.Param(":attachmentId")
-	var cinderReq = cindermodel.UpdateAttachmentReqSpec{}
+	var cinderReq = converter.UpdateAttachmentReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update an attachment, parse request body failed: %s", err.Error())

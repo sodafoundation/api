@@ -25,12 +25,12 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
 func init() {
 	beego.Router("/v3/types", &TypePortal{},
-		"post:CreateType;get:ListType")
+		"post:CreateType;get:ListTypes")
 	beego.Router("/v3/types/:volumeTypeId", &TypePortal{},
 		"get:GetType;delete:DeleteType;put:UpdateType")
 	beego.Router("/v3/types/:volumeTypeId/extra_specs", &TypePortal{},
@@ -52,19 +52,20 @@ func TestGetType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ShowTypeRespSpec
+	var output converter.ShowTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{
-    	"volume_type": {
-		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-        "name": "default",
-        "description": "default policy",
-		"extra_specs": []
-    	}
-	}`
+	expectedJSON := `
+    {
+        "volume_type": {
+            "id": "1106b972-66ef-11e7-b172-db03f3689c9c",
+            "name": "default",
+            "description": "default policy",
+            "extra_specs": []
+        }
+    }`
 
-	var expected cindermodel.ShowTypeRespSpec
+	var expected converter.ShowTypeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 	expected.VolumeType.IsPublic = true
 
@@ -85,7 +86,7 @@ func TestGetDefaultType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ShowTypeRespSpec
+	var output converter.ShowTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	if w.Code != 200 {
@@ -97,47 +98,45 @@ func TestGetDefaultType(t *testing.T) {
 	}
 }
 
-func TestListType(t *testing.T) {
+func TestListTypes(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/v3/types", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ListTypeRespSpec
+	var output converter.ListTypesRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{
-	"volume_types":	
-	[{
-		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
-        "name": "default",
-        "description": "default policy",
-		"os-volume-type-access:is_public": true,
-		"is_public": true
-    	}
-		,
-		{
-		"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
-        "name": "silver",
-        "description": "silver policy",
-		"os-volume-type-access:is_public": true,
-		"is_public": true,
-		"extra_specs": {
-            "dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        5000000,
-					"maxBWS":         500
-				}
-        }
-    	}
-		]
-		}`
+	expectedJSON := `
+    {
+        "volume_types": [{
+            "id": "1106b972-66ef-11e7-b172-db03f3689c9c",
+            "name": "default",
+            "description": "default policy",
+            "os-volume-type-access:is_public": true,
+            "is_public": true
+        },
+        {
+            "id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
+            "name": "silver",
+            "description": "silver policy",
+            "os-volume-type-access:is_public": true,
+            "is_public": true,
+            "extra_specs": {
+                "dataStorage": {
+                    "provisioningPolicy": "Thin",
+                    "isSpaceEfficient": true
+                },
+                "ioConnectivity": {
+                    "accessProtocol": "rbd",
+                    "maxIOPS": 5000000,
+                    "maxBWS": 500
+                }
+            }
+        }]
+    }`
 
-	var expected cindermodel.ListTypeRespSpec
+	var expected converter.ListTypesRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -150,13 +149,14 @@ func TestListType(t *testing.T) {
 }
 
 func TestCreateType(t *testing.T) {
-	RequestBodyStr := `{
-    	"volume_type": {
-        "name": "default",
-		"os-volume-type-access:is_public": true,
-        "description": "default policy"
-    	}
-	}`
+	RequestBodyStr := `
+    {
+        "volume_type": {
+            "name": "default",
+            "os-volume-type-access:is_public": true,
+            "description": "default policy"
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("POST", "/v3/types", bytes.NewBuffer(jsonStr))
@@ -164,10 +164,10 @@ func TestCreateType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.CreateTypeRespSpec
+	var output converter.CreateTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.CreateTypeRespSpec
+	var expected converter.CreateTypeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != 200 {
@@ -195,13 +195,14 @@ func TestDeleteType(t *testing.T) {
 }
 
 func TestUpdateType(t *testing.T) {
-	RequestBodyStr := `{
-    	"volume_type": {
-        "name": "default",
-        "description": "default policy",
-		"is_public": true
-    	}
-	}`
+	RequestBodyStr := `
+    {
+        "volume_type": {
+            "name": "default",
+            "description": "default policy",
+            "is_public": true
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("PUT", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
@@ -209,10 +210,10 @@ func TestUpdateType(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.UpdateTypeRespSpec
+	var output converter.UpdateTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.UpdateTypeRespSpec
+	var expected converter.UpdateTypeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 	expected.VolumeType.IsPublic = true
 
@@ -226,19 +227,20 @@ func TestUpdateType(t *testing.T) {
 }
 
 func TestAddExtraProperty(t *testing.T) {
-	RequestBodyStr := `{
-		"extra_specs":{
-			"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        5000000,
-					"maxBWS":         500
-				}
-		}
-	}`
+	RequestBodyStr := `
+    {
+        "extra_specs": {
+            "dataStorage": {
+                "provisioningPolicy": "Thin",
+                "isSpaceEfficient": true
+            },
+            "ioConnectivity": {
+                "accessProtocol": "rbd",
+                "maxIOPS": 5000000,
+                "maxBWS": 500
+            }
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("POST", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs", bytes.NewBuffer(jsonStr))
@@ -246,10 +248,10 @@ func TestAddExtraProperty(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ExtraSpec
+	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.ExtraSpec
+	var expected converter.ExtraSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != 200 {
@@ -266,23 +268,24 @@ func TestListExtraProperties(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ExtraSpec
+	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.ExtraSpec
-	expectedStr := `{
-		"extra_specs":{
-			"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        5000000,
-					"maxBWS":         500
-				}
-		}
-	}`
+	var expected converter.ExtraSpec
+	expectedStr := `
+    {
+        "extra_specs": {
+            "dataStorage": {
+                "provisioningPolicy": "Thin",
+                "isSpaceEfficient": true
+            },
+            "ioConnectivity": {
+                "accessProtocol": "rbd",
+                "maxIOPS": 5000000,
+                "maxBWS": 500
+            }
+        }
+    }`
 	json.Unmarshal([]byte(expectedStr), &expected)
 
 	if w.Code != 200 {
@@ -299,16 +302,17 @@ func TestShowExtraPropertie(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ExtraSpec
+	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.ExtraSpec
-	expectedStr := `{
-		"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				}
-	}`
+	var expected converter.ExtraSpec
+	expectedStr := `
+    {
+        "dataStorage": {
+            "provisioningPolicy": "Thin",
+            "isSpaceEfficient": true
+        }
+    }`
 	json.Unmarshal([]byte(expectedStr), &expected)
 
 	if w.Code != 200 {
@@ -325,7 +329,7 @@ func TestShowExtraPropertieWithBadRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ExtraSpec
+	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	if w.Code != 200 {
@@ -338,29 +342,31 @@ func TestShowExtraPropertieWithBadRequest(t *testing.T) {
 }
 
 func TestUpdateExtraPropertie(t *testing.T) {
-	RequestBodyStr := `{
-		"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				}
-	}`
+	RequestBodyStr := `
+    {
+        "dataStorage": {
+            "provisioningPolicy": "Thin",
+            "isSpaceEfficient": true
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("PUT", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs/dataStorage", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ExtraSpec
+	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedStr := `{
-		"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				}
-	}`
+	expectedStr := `
+    {
+        "dataStorage": {
+            "provisioningPolicy": "Thin",
+            "isSpaceEfficient": true
+        }
+    }`
 
-	var expected cindermodel.ExtraSpec
+	var expected converter.ExtraSpec
 	json.Unmarshal([]byte(expectedStr), &expected)
 
 	if w.Code != 200 {

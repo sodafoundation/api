@@ -24,17 +24,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 )
 
 // TypePortal ...
 type TypePortal struct {
-	OpenSDSAPI.BasePortal
+	beego.Controller
 }
 
 // DefaultTypeName ...
@@ -47,7 +46,7 @@ func (portal *TypePortal) UpdateType() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	var cinderReq = cindermodel.UpdateTypeReqSpec{}
+	var cinderReq = converter.UpdateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update a volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -96,7 +95,7 @@ func (portal *TypePortal) AddExtraProperty() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	var cinderReq = cindermodel.AddExtraReqSpec{}
+	var cinderReq = converter.AddExtraReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create or update extra specs for volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -205,7 +204,7 @@ func (portal *TypePortal) UpdateExtraProperty() {
 
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
-	var cinderReq = cindermodel.UpdateExtraReqSpec{}
+	var cinderReq = converter.UpdateExtraReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update extra specification for volume type, parse request body failed: %s", err.Error())
@@ -359,8 +358,8 @@ func (portal *TypePortal) DeleteType() {
 	return
 }
 
-// ListType ...
-func (portal *TypePortal) ListType() {
+// ListTypes ...
+func (portal *TypePortal) ListTypes() {
 	if !policy.Authorize(portal.Ctx, "type:list") {
 		return
 	}
@@ -374,7 +373,7 @@ func (portal *TypePortal) ListType() {
 		return
 	}
 
-	result := converter.ListTypeResp(profiles)
+	result := converter.ListTypesResp(profiles)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List all volume types, marshal result failed: %v", err)
@@ -395,7 +394,7 @@ func (portal *TypePortal) CreateType() {
 		return
 	}
 
-	var cinderReq = cindermodel.CreateTypeReqSpec{}
+	var cinderReq = converter.CreateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a volume type, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)

@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/api"
 	"github.com/opensds/opensds/pkg/utils/logs"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/api"
 )
 
 func main() {
@@ -33,8 +33,12 @@ func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	cinderEndPoint := os.Getenv("CINDER_ENDPOINT")
-	fmt.Println("CINDER_ENDPOINT=" + cinderEndPoint)
+	cinderEndPoint, ok := os.LookupEnv("CINDER_ENDPOINT")
+	if !ok {
+		fmt.Println("ERROR: You must provide the cinder endpoint by setting " +
+			"the environment variable CINDER_ENDPOINT")
+		return
+	}
 
 	api.Run(cinderEndPoint)
 }

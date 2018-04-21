@@ -23,23 +23,22 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 	"github.com/opensds/opensds/pkg/api/policy"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 
 	"github.com/opensds/opensds/pkg/model"
 )
 
 // VolumePortal ...
 type VolumePortal struct {
-	OpenSDSAPI.BasePortal
+	beego.Controller
 }
 
-// ListVolumeDetail ...
-func (portal *VolumePortal) ListVolumeDetail() {
-	if !policy.Authorize(portal.Ctx, "volume:list_detail") {
+// ListVolumesDetails ...
+func (portal *VolumePortal) ListVolumesDetails() {
+	if !policy.Authorize(portal.Ctx, "volume:list_details") {
 		return
 	}
 
@@ -52,7 +51,7 @@ func (portal *VolumePortal) ListVolumeDetail() {
 		return
 	}
 
-	result := converter.ListVolumeDetailResp(volumes)
+	result := converter.ListVolumesDetailsResp(volumes)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details, marshal result failed: %v", err)
@@ -72,7 +71,7 @@ func (portal *VolumePortal) CreateVolume() {
 	if !policy.Authorize(portal.Ctx, "volume:create") {
 		return
 	}
-	var cinderReq = cindermodel.CreateVolumeReqSpec{}
+	var cinderReq = converter.CreateVolumeReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a volume, parse request body failed: %s", err.Error())
@@ -115,8 +114,8 @@ func (portal *VolumePortal) CreateVolume() {
 	return
 }
 
-// ListVolume ...
-func (portal *VolumePortal) ListVolume() {
+// ListVolumes ...
+func (portal *VolumePortal) ListVolumes() {
 	if !policy.Authorize(portal.Ctx, "volume:list") {
 		return
 	}
@@ -130,7 +129,7 @@ func (portal *VolumePortal) ListVolume() {
 		return
 	}
 
-	result := converter.ListVolumeResp(volumes)
+	result := converter.ListVolumesResp(volumes)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes, marshal result failed: %v", err)
@@ -184,7 +183,7 @@ func (portal *VolumePortal) UpdateVolume() {
 	}
 
 	id := portal.Ctx.Input.Param(":volumeId")
-	var cinderReq = cindermodel.UpdateVolumeReqSpec{}
+	var cinderReq = converter.UpdateVolumeReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Update a volume, parse request body failed: %s", err.Error())

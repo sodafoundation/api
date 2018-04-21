@@ -24,17 +24,17 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
 func init() {
 	beego.Router("/V3/attachments/:attachmentId", &AttachmentPortal{},
 		"get:GetAttachment;delete:DeleteAttachment;put:UpdateAttachment")
 	beego.Router("/V3/attachments/detail", &AttachmentPortal{},
-		"get:ListAttachmentsDetail")
+		"get:ListAttachmentsDetails")
 
 	beego.Router("/V3/attachments", &AttachmentPortal{},
-		"post:CreateAttachment;get:ListAttachment")
+		"post:CreateAttachment;get:ListAttachments")
 	if false == IsFakeClient {
 		client = NewFakeClient(&c.Config{Endpoint: TestEp})
 	}
@@ -49,25 +49,28 @@ func TestGetAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ShowAttachmentRespSpec
+	var output converter.ShowAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{"attachment":{
-		"id":"f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		"volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",		
-		"status":"available",
-		"connection_info":{
-			"driver_volume_type":"iscsi",
-			"data":{"discard":false,
-				"targetDiscovered":true,
-				"targetIqn":"iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal":"127.0.0.0.1:3260"
-			}
-			}
-			}
-	}`
+	expectedJSON := `
+	{
+        "attachment": {
+            "id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "status": "available",
+            "connection_info": {
+                "driver_volume_type": "iscsi",
+                "data": {
+                    "discard": false,
+                    "targetDiscovered": true,
+                    "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+                    "targetPortal": "127.0.0.0.1:3260"
+                }
+            }
+        }
+    }`
 
-	var expected cindermodel.ShowAttachmentRespSpec
+	var expected converter.ShowAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -79,24 +82,25 @@ func TestGetAttachment(t *testing.T) {
 	}
 }
 
-func TestListAttachment(t *testing.T) {
+func TestListAttachments(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/V3/attachments", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ListAttachmentRespSpec
+	var output converter.ListAttachmentsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{
-		"attachments":[{
-			"id":"f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"status":"available"			
-			}]
-		}`
+	expectedJSON := `
+	{
+        "attachments": [{
+            "id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "status": "available"
+        }]
+    }`
 
-	var expected cindermodel.ListAttachmentRespSpec
+	var expected converter.ListAttachmentsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -108,31 +112,34 @@ func TestListAttachment(t *testing.T) {
 	}
 }
 
-func TestListAttachmentDetails(t *testing.T) {
+func TestListAttachmentsDetails(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/V3/attachments/detail", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ListAttachmentDetailRespSpec
+	var output converter.ListAttachmentsDetailsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{
-		"attachments":[{
-			"id":"f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"status":"available",
-			"connection_info":{
-			"driver_volume_type":"iscsi",
-			"data":{"discard":false,
-				"targetDiscovered":true,
-				"targetIqn":"iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal":"127.0.0.0.1:3260"
-			}}			
-			}]
-		}`
+	expectedJSON := `
+	{
+        "attachments": [{
+            "id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "status": "available",
+            "connection_info": {
+                "driver_volume_type": "iscsi",
+                "data": {
+                    "discard": false,
+                    "targetDiscovered": true,
+                    "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+                    "targetPortal": "127.0.0.0.1:3260"
+                }
+            }
+        }]
+    }`
 
-	var expected cindermodel.ListAttachmentDetailRespSpec
+	var expected converter.ListAttachmentsDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -145,12 +152,13 @@ func TestListAttachmentDetails(t *testing.T) {
 }
 
 func TestCreateAttachment(t *testing.T) {
-	RequestBodyStr := `{
-    	"attachment": {
-		"id": "",
-        "volume_uuid": "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		}
-		}`
+	RequestBodyStr := `
+	{
+        "attachment": {
+            "id": "",
+            "volume_uuid": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("POST", "/V3/attachments", bytes.NewBuffer(jsonStr))
@@ -158,25 +166,28 @@ func TestCreateAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.CreateAttachmentRespSpec
+	var output converter.CreateAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{"attachment":{
-		"id":"f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		"volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",		
-		"status":"available",
-		"connection_info":{
-			"driver_volume_type":"iscsi",
-			"data":{"discard":false,
-				"targetDiscovered":true,
-				"targetIqn":"iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal":"127.0.0.0.1:3260"
-			}
-			}
-			}
-	}`
+	expectedJSON := `
+	{
+        "attachment": {
+            "id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "status": "available",
+            "connection_info": {
+                "driver_volume_type": "iscsi",
+                "data": {
+                    "discard": false,
+                    "targetDiscovered": true,
+                    "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+                    "targetPortal": "127.0.0.0.1:3260"
+                }
+            }
+        }
+    }`
 
-	var expected cindermodel.CreateAttachmentRespSpec
+	var expected converter.CreateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {
@@ -202,11 +213,14 @@ func TestDeleteAttachment(t *testing.T) {
 }
 
 func TestUpdateAttachment(t *testing.T) {
-	RequestBodyStr := `{
-    	"attachment": {
-		"connector":{"ip": "127.0.0.0.1"}
-		}
-		}`
+	RequestBodyStr := `
+    {
+        "attachment": {
+            "connector": {
+                "ip": "127.0.0.0.1"
+            }
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("PUT", "/V3/attachments/f2dda3d2-bf79-11e7-8665-f750b088f63e", bytes.NewBuffer(jsonStr))
@@ -214,25 +228,28 @@ func TestUpdateAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.UpdateAttachmentRespSpec
+	var output converter.UpdateAttachmentRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{"attachment":{
-		"id":"f2dda3d2-bf79-11e7-8665-f750b088f63e",
-		"volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",		
-		"status":"available",
-		"connection_info":{
-			"driver_volume_type":"iscsi",
-			"data":{"discard":false,
-				"targetDiscovered":true,
-				"targetIqn":"iqn.2017-10.io.opensds:volume:00000001",
-				"targetPortal":"127.0.0.0.1:3260"
-			}
-			}
-			}
-	}`
+	expectedJSON := `
+	{
+        "attachment": {
+            "id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "status": "available",
+            "connection_info": {
+                "driver_volume_type": "iscsi",
+                "data": {
+                    "discard": false,
+                    "targetDiscovered": true,
+                    "targetIqn": "iqn.2017-10.io.opensds:volume:00000001",
+                    "targetPortal": "127.0.0.0.1:3260"
+                }
+            }
+        }
+    }`
 
-	var expected cindermodel.UpdateAttachmentRespSpec
+	var expected converter.UpdateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != 200 {

@@ -28,11 +28,10 @@ import (
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/osdsctl/cli"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 )
 
 const (
@@ -40,6 +39,26 @@ const (
 	StatusOK = http.StatusOK
 	// StatusAccepted ...
 	StatusAccepted = http.StatusAccepted
+
+	// OpensdsEndpoint ...
+	OpensdsEndpoint = "OPENSDS_ENDPOINT"
+	// OpensdsAuthStrategy ...
+	OpensdsAuthStrategy = "OPENSDS_AUTH_STRATEGY"
+	// OpensdsTenantID ...
+	OpensdsTenantID = "OPENSDS_TENANT_ID"
+
+	// OsAuthURL ...
+	OsAuthURL = "OS_AUTH_URL"
+	// OsUsername ...
+	OsUsername = "OS_USERNAME"
+	// OsPassword ...
+	OsPassword = "OS_PASSWORD"
+	// OsTenantName ...
+	OsTenantName = "OS_TENANT_NAME"
+	// OsProjectName ...
+	OsProjectName = "OS_PROJECT_NAME"
+	// OsUserDomainID ...
+	OsUserDomainID = "OS_USER_DOMAIN_ID"
 )
 
 var (
@@ -48,25 +67,25 @@ var (
 
 // Run ...
 func Run(CinderEndPoint string) {
-	ep, ok := os.LookupEnv(cli.OpensdsEndpoint)
+	ep, ok := os.LookupEnv(OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
-			"the environment variable OPENSDS_ENDPOINT")
+			"the environment variable " + OpensdsEndpoint)
 		return
 	}
 	cfg := &c.Config{Endpoint: ep}
 
-	authStrategy, ok := os.LookupEnv(cli.OpensdsAuthStrategy)
+	authStrategy, ok := os.LookupEnv(OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
-		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
+		fmt.Println("WARNING: Not found Env " + OpensdsAuthStrategy + ", use default(noauth)")
 	}
 
 	switch authStrategy {
 	case c.Keystone:
-		cfg.AuthOptions = cli.LoadKeystoneAuthOptionsFromEnv()
+		cfg.AuthOptions = LoadKeystoneAuthOptionsFromEnv()
 	case c.Noauth:
-		cfg.AuthOptions = cli.LoadNoAuthOptionsFromEnv()
+		cfg.AuthOptions = LoadNoAuthOptionsFromEnv()
 	default:
 		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
 	}
@@ -87,21 +106,21 @@ func Run(CinderEndPoint string) {
 				return true
 			}),
 			beego.NSNamespace("/:projectId",
-				beego.NSRouter("/types", &TypePortal{}, "post:CreateType;get:ListType"),
+				beego.NSRouter("/types", &TypePortal{}, "post:CreateType;get:ListTypes"),
 				beego.NSRouter("/types/:volumeTypeId", &TypePortal{}, "get:GetType;put:UpdateType;delete:DeleteType"),
 				beego.NSRouter("/types/:volumeTypeId/extra_specs", &TypePortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
 				beego.NSRouter("/types/:volumeTypeId/extra_specs/:key", &TypePortal{}, "get:ShowExtraProperty;put:UpdateExtraProperty;delete:DeleteExtraProperty"),
 
-				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolume"),
-				beego.NSRouter("/volumes/detail", &VolumePortal{}, "get:ListVolumeDetail"),
+				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
+				beego.NSRouter("/volumes/detail", &VolumePortal{}, "get:ListVolumesDetails"),
 				beego.NSRouter("/volumes/:volumeId", &VolumePortal{}, "get:GetVolume;delete:DeleteVolume;put:UpdateVolume"),
 
-				beego.NSRouter("/attachments", &AttachmentPortal{}, "post:CreateAttachment;get:ListAttachment"),
-				beego.NSRouter("/attachments/detail", &AttachmentPortal{}, "get:ListAttachmentsDetail"),
+				beego.NSRouter("/attachments", &AttachmentPortal{}, "post:CreateAttachment;get:ListAttachments"),
+				beego.NSRouter("/attachments/detail", &AttachmentPortal{}, "get:ListAttachmentsDetails"),
 				beego.NSRouter("/attachments/:attachmentId", &AttachmentPortal{}, "get:GetAttachment;delete:DeleteAttachment;put:UpdateAttachment"),
 
-				beego.NSRouter("/snapshots", &SnapshotPortal{}, "post:CreateSnapshot;get:ListSnapshot"),
-				beego.NSRouter("/snapshots/detail", &SnapshotPortal{}, "get:ListSnapshotDetail"),
+				beego.NSRouter("/snapshots", &SnapshotPortal{}, "post:CreateSnapshot;get:ListSnapshots"),
+				beego.NSRouter("/snapshots/detail", &SnapshotPortal{}, "get:ListSnapshotsDetails"),
 				beego.NSRouter("/snapshots/:snapshotId", &SnapshotPortal{}, "get:GetSnapshot;delete:DeleteSnapshot;put:UpdateSnapshot"),
 			),
 		)
@@ -112,4 +131,28 @@ func Run(CinderEndPoint string) {
 
 	// start service
 	beego.Run(words[2])
+}
+
+// LoadKeystoneAuthOptionsFromEnv ...
+func LoadKeystoneAuthOptionsFromEnv() *c.KeystoneAuthOptions {
+	opt := c.NewKeystoneAuthOptions()
+	opt.IdentityEndpoint = os.Getenv(OsAuthURL)
+	opt.Username = os.Getenv(OsUsername)
+	opt.Password = os.Getenv(OsPassword)
+	opt.TenantName = os.Getenv(OsTenantName)
+	projectName := os.Getenv(OsProjectName)
+	opt.DomainID = os.Getenv(OsUserDomainID)
+	if opt.TenantName == "" {
+		opt.TenantName = projectName
+	}
+	return opt
+}
+
+// LoadNoAuthOptionsFromEnv ...
+func LoadNoAuthOptionsFromEnv() *c.NoAuthOptions {
+	tenantID, ok := os.LookupEnv(OpensdsTenantID)
+	if !ok {
+		return c.NewNoauthOptions(constants.DefaultTenantId)
+	}
+	return c.NewNoauthOptions(tenantID)
 }

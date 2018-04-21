@@ -24,16 +24,16 @@ import (
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
 func init() {
 	beego.Router("/V3/snapshots/:snapshotId", &SnapshotPortal{},
 		"get:GetSnapshot;delete:DeleteSnapshot;put:UpdateSnapshot")
 	beego.Router("/V3/snapshots", &SnapshotPortal{},
-		"post:CreateSnapshot;get:ListSnapshot")
+		"post:CreateSnapshot;get:ListSnapshots")
 	beego.Router("/V3/snapshots/detail", &SnapshotPortal{},
-		"get:ListSnapshotDetail")
+		"get:ListSnapshotsDetails")
 	if false == IsFakeClient {
 		client = NewFakeClient(&c.Config{Endpoint: TestEp})
 	}
@@ -43,14 +43,15 @@ func init() {
 //                            Tests for Snapshot                              //
 ////////////////////////////////////////////////////////////////////////////////
 func TestCreateSnapshot(t *testing.T) {
-	RequestBodyStr := `{
-    	"snapshot": {
-        "name": "sample-snapshot-01",
-		"description": "This is the first sample snapshot for testing",
-		"volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"metadata": null
-		}
-	}`
+	RequestBodyStr := `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "metadata": null
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("POST", "/V3/snapshots", bytes.NewBuffer(jsonStr))
@@ -58,10 +59,10 @@ func TestCreateSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.CreateSnapshotRespSpec
+	var output converter.CreateSnapshotRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.CreateSnapshotRespSpec
+	var expected converter.CreateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != StatusAccepted {
@@ -83,19 +84,22 @@ func TestGetSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.ShowSnapshotDetailsResp
+	var output converter.ShowSnapshotDetailsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON := `{
-    	"snapshot": {
-		"id": "3769855c-a102-11e7-b772-17b880d2f537",
-        "name": "sample-snapshot-01",
-		"description": "This is the first sample snapshot for testing",
-		"volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8"
-		}
-	}`
+	expectedJSON := `
+    {
+        "snapshot": {
+            "status": "available",
+			"size": 1,
+            "id": "3769855c-a102-11e7-b772-17b880d2f537",
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+        }
+    }`
 
-	var expected cindermodel.ShowSnapshotDetailsResp
+	var expected converter.ShowSnapshotDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -107,32 +111,36 @@ func TestGetSnapshot(t *testing.T) {
 	}
 }
 
-func TestListSnapshot(t *testing.T) {
+func TestListSnapshots(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/V3/snapshots", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output []cindermodel.ListSnapshotRespSpec
+	var output []converter.ListSnapshotsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON :=
-		`{"snapshots":[
-		{"status":"created",
-		 "description":"This is the first sample snapshot for testing",
-		 "name":"sample-snapshot-01",
-		 "volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-		 "id":"3769855c-a102-11e7-b772-17b880d2f537",
-		 "size":1},
-		{"status":"created",
-		 "description":"This is the second sample snapshot for testing",
-		 "name":"sample-snapshot-02",
-		 "volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-		 "id":"3bfaf2cc-a102-11e7-8ecb-63aea739d755","size":1
-		}
-		]}`
+	expectedJSON := `
+    {
+        "snapshots": [{
+            "status": "created",
+            "description": "This is the first sample snapshot for testing",
+            "name": "sample-snapshot-01",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "id": "3769855c-a102-11e7-b772-17b880d2f537",
+            "size": 1
+        },
+        {
+            "status": "created",
+            "description": "This is the second sample snapshot for testing",
+            "name": "sample-snapshot-02",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+            "size": 1
+        }]
+    }`
 
-	var expected []cindermodel.ListSnapshotRespSpec
+	var expected []converter.ListSnapshotsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -144,32 +152,36 @@ func TestListSnapshot(t *testing.T) {
 	}
 }
 
-func TestListSnapshotDetail(t *testing.T) {
+func TestListSnapshotsDetails(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/V3/snapshots/detail", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output []cindermodel.ListSnapshotDetailRespSpec
+	var output []converter.ListSnapshotsDetailsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	expectedJSON :=
-		`{"snapshots":[
-		{"status":"created",
-		 "description":"This is the first sample snapshot for testing",
-		 "name":"sample-snapshot-01",
-		 "volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-		 "id":"3769855c-a102-11e7-b772-17b880d2f537",
-		 "size":1},
-		{"status":"created",
-		 "description":"This is the second sample snapshot for testing",
-		 "name":"sample-snapshot-02",
-		 "volume_id":"bd5b12a8-a101-11e7-941e-d77981b584d8",
-		 "id":"3bfaf2cc-a102-11e7-8ecb-63aea739d755","size":1
-		}
-		]}`
+	expectedJSON := `
+    {
+        "snapshots": [{
+            "status": "created",
+            "description": "This is the first sample snapshot for testing",
+            "name": "sample-snapshot-01",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "id": "3769855c-a102-11e7-b772-17b880d2f537",
+            "size": 1
+        },
+        {
+            "status": "created",
+            "description": "This is the second sample snapshot for testing",
+            "name": "sample-snapshot-02",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+            "size": 1
+        }]
+    }`
 
-	var expected []cindermodel.ListSnapshotDetailRespSpec
+	var expected []converter.ListSnapshotsDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != StatusOK {
@@ -193,12 +205,13 @@ func TestDeleteSnapshot(t *testing.T) {
 }
 
 func TestUpdateSnapshot(t *testing.T) {
-	RequestBodyStr := `{
-    	"snapshot": {
-        "name": "sample-snapshot-01",
-		"description": "This is the first sample snapshot for testing"
-		}
-	}`
+	RequestBodyStr := `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing"
+        }
+    }`
 
 	var jsonStr = []byte(RequestBodyStr)
 	r, _ := http.NewRequest("PUT", "/V3/snapshots/3769855c-a102-11e7-b772-17b880d2f537", bytes.NewBuffer(jsonStr))
@@ -206,10 +219,10 @@ func TestUpdateSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output cindermodel.UpdateSnapshotRespSpec
+	var output converter.UpdateSnapshotRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	var expected cindermodel.UpdateSnapshotRespSpec
+	var expected converter.UpdateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
 	if w.Code != StatusOK {

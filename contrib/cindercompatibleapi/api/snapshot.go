@@ -23,21 +23,20 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	OpenSDSAPI "github.com/opensds/opensds/pkg/api"
+	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/cindermodel"
-	"github.com/opensds/opensds/plugin/cindercompatibleapi/converter"
 )
 
 // SnapshotPortal ...
 type SnapshotPortal struct {
-	OpenSDSAPI.BasePortal
+	beego.Controller
 }
 
-// ListSnapshotDetail ...
-func (portal *SnapshotPortal) ListSnapshotDetail() {
+// ListSnapshotsDetails ...
+func (portal *SnapshotPortal) ListSnapshotsDetails() {
 	if !policy.Authorize(portal.Ctx, "snapshot:list") {
 		return
 	}
@@ -51,7 +50,7 @@ func (portal *SnapshotPortal) ListSnapshotDetail() {
 		return
 	}
 
-	result := converter.ListSnapshotDetailResp(snapshots)
+	result := converter.ListSnapshotsDetailsResp(snapshots)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List snapshots and details, marshal result failed: %v", err)
@@ -72,7 +71,7 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 		return
 	}
 
-	var cinderReq = cindermodel.CreateSnapshotReqSpec{}
+	var cinderReq = converter.CreateSnapshotReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a snapshot, parse request body failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -114,8 +113,8 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 	return
 }
 
-// ListSnapshot ...
-func (portal *SnapshotPortal) ListSnapshot() {
+// ListSnapshots ...
+func (portal *SnapshotPortal) ListSnapshots() {
 	if !policy.Authorize(portal.Ctx, "snapshot:list") {
 		return
 	}
@@ -129,7 +128,7 @@ func (portal *SnapshotPortal) ListSnapshot() {
 		return
 	}
 
-	result := converter.ListSnapshotResp(snapshots)
+	result := converter.ListSnapshotsResp(snapshots)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible snapshots, marshal result failed: %v", err)
@@ -183,7 +182,7 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 	}
 
 	id := portal.Ctx.Input.Param(":snapshotId")
-	var cinderUpdateReq = cindermodel.UpdateSnapshotReqSpec{}
+	var cinderUpdateReq = converter.UpdateSnapshotReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderUpdateReq); err != nil {
 		reason := fmt.Sprintf("Update a snapshot, parse request body failed: %s", err.Error())
