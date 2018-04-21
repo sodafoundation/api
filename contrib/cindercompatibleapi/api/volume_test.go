@@ -169,8 +169,8 @@ func TestCreateVolume(t *testing.T) {
 	var expected converter.CreateVolumeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != StatusAccepted {
-		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 
 	expected.Volume.Attachments = make([]converter.RespAttachment, 0, 0)

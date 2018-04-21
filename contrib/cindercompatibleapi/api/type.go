@@ -22,6 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/astaxie/beego"
@@ -67,8 +68,8 @@ func (portal *TypePortal) UpdateType() {
 	profile, err = client.UpdateProfile(id, profile)
 	if err != nil {
 		reason := fmt.Sprintf("Update a volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -83,7 +84,7 @@ func (portal *TypePortal) UpdateType() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -108,8 +109,8 @@ func (portal *TypePortal) AddExtraProperty() {
 	profileExtra, err := client.AddExtraProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Create or update extra specs for volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -125,7 +126,7 @@ func (portal *TypePortal) AddExtraProperty() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -141,8 +142,8 @@ func (portal *TypePortal) ListExtraProperties() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Show all extra specifications for volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -157,7 +158,7 @@ func (portal *TypePortal) ListExtraProperties() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -173,8 +174,8 @@ func (portal *TypePortal) ShowExtraProperty() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Show extra specification for volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -191,7 +192,7 @@ func (portal *TypePortal) ShowExtraProperty() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -226,8 +227,8 @@ func (portal *TypePortal) UpdateExtraProperty() {
 	profileExtra, err = client.AddExtraProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Update extra specification for volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -242,7 +243,7 @@ func (portal *TypePortal) UpdateExtraProperty() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 
@@ -260,13 +261,13 @@ func (portal *TypePortal) DeleteExtraProperty() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete extra specification for volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	return
 }
 
@@ -290,8 +291,8 @@ func (portal *TypePortal) GetType() {
 
 		if err != nil {
 			reason := fmt.Sprintf("Get profile failed: %v", err)
-			portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-			portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+			portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+			portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 			log.Error(reason)
 			return
 		}
@@ -301,8 +302,8 @@ func (portal *TypePortal) GetType() {
 		profiles, err := client.ListProfiles()
 		if err != nil {
 			reason := fmt.Sprintf("List profiles failed: %v", err)
-			portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-			portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+			portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+			portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 			log.Error(reason)
 			return
 		}
@@ -332,7 +333,7 @@ func (portal *TypePortal) GetType() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -348,13 +349,13 @@ func (portal *TypePortal) DeleteType() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a volume type failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	return
 }
 
@@ -367,8 +368,8 @@ func (portal *TypePortal) ListTypes() {
 	profiles, err := client.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List all volume types failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -383,7 +384,7 @@ func (portal *TypePortal) ListTypes() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -415,8 +416,8 @@ func (portal *TypePortal) CreateType() {
 	profile, err = client.CreateProfile(profile)
 	if err != nil {
 		reason := fmt.Sprintf("Create a volume type failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -431,7 +432,7 @@ func (portal *TypePortal) CreateType() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }

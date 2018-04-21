@@ -383,7 +383,7 @@ func TestDeleteExtraPropertie(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != StatusAccepted {
-		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 }

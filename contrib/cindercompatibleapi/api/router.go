@@ -21,7 +21,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
@@ -35,11 +34,6 @@ import (
 )
 
 const (
-	// StatusOK ...
-	StatusOK = http.StatusOK
-	// StatusAccepted ...
-	StatusAccepted = http.StatusAccepted
-
 	// OpensdsEndpoint ...
 	OpensdsEndpoint = "OPENSDS_ENDPOINT"
 	// OpensdsAuthStrategy ...

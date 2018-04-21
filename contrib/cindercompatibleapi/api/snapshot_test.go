@@ -65,8 +65,8 @@ func TestCreateSnapshot(t *testing.T) {
 	var expected converter.CreateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != StatusAccepted {
-		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 
 	expected.Snapshot.ID = "3769855c-a102-11e7-b772-17b880d2f537"
@@ -102,8 +102,8 @@ func TestGetSnapshot(t *testing.T) {
 	var expected converter.ShowSnapshotDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -143,8 +143,8 @@ func TestListSnapshots(t *testing.T) {
 	var expected []converter.ListSnapshotsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -184,8 +184,8 @@ func TestListSnapshotsDetails(t *testing.T) {
 	var expected []converter.ListSnapshotsDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -199,8 +199,8 @@ func TestDeleteSnapshot(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != StatusAccepted {
-		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 }
 
@@ -225,8 +225,8 @@ func TestUpdateSnapshot(t *testing.T) {
 	var expected converter.UpdateSnapshotRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Snapshot.ID = "3769855c-a102-11e7-b772-17b880d2f537"

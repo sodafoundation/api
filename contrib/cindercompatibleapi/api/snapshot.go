@@ -22,6 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
@@ -44,8 +45,8 @@ func (portal *SnapshotPortal) ListSnapshotsDetails() {
 	snapshots, err := client.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List snapshots and details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -60,7 +61,7 @@ func (portal *SnapshotPortal) ListSnapshotsDetails() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -92,8 +93,8 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 	snapshot, err = client.CreateVolumeSnapshot(snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create a snapshot failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -108,7 +109,7 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -122,8 +123,8 @@ func (portal *SnapshotPortal) ListSnapshots() {
 	snapshots, err := client.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible snapshots failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -138,7 +139,7 @@ func (portal *SnapshotPortal) ListSnapshots() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -154,8 +155,8 @@ func (portal *SnapshotPortal) GetSnapshot() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Show a snapshot’s details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -170,7 +171,7 @@ func (portal *SnapshotPortal) GetSnapshot() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -197,8 +198,8 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Update a snapshot failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -213,7 +214,7 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -229,12 +230,12 @@ func (portal *SnapshotPortal) DeleteSnapshot() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a snapshot failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	return
 }

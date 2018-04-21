@@ -22,6 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
@@ -47,13 +48,13 @@ func (portal *AttachmentPortal) DeleteAttachment() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete attachment failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	return
 }
 
@@ -68,8 +69,8 @@ func (portal *AttachmentPortal) GetAttachment() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Show attachment details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -84,7 +85,7 @@ func (portal *AttachmentPortal) GetAttachment() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -98,8 +99,8 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 	attachments, err := client.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -114,7 +115,7 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -128,8 +129,8 @@ func (portal *AttachmentPortal) ListAttachments() {
 	attachments, err := client.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -144,7 +145,7 @@ func (portal *AttachmentPortal) ListAttachments() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -169,8 +170,8 @@ func (portal *AttachmentPortal) CreateAttachment() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Create attachment failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -185,7 +186,7 @@ func (portal *AttachmentPortal) CreateAttachment() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -212,8 +213,8 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Update an attachment failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -228,7 +229,7 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }

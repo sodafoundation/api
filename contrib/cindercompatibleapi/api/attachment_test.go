@@ -207,8 +207,8 @@ func TestDeleteAttachment(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 }
 

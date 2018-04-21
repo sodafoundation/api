@@ -22,6 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
@@ -45,8 +46,8 @@ func (portal *VolumePortal) ListVolumesDetails() {
 	volumes, err := client.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -61,7 +62,7 @@ func (portal *VolumePortal) ListVolumesDetails() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -93,8 +94,8 @@ func (portal *VolumePortal) CreateVolume() {
 	volume, err = client.CreateVolume(volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create a volume failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -109,7 +110,7 @@ func (portal *VolumePortal) CreateVolume() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -123,8 +124,8 @@ func (portal *VolumePortal) ListVolumes() {
 	volumes, err := client.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -139,7 +140,7 @@ func (portal *VolumePortal) ListVolumes() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -155,8 +156,8 @@ func (portal *VolumePortal) GetVolume() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Show a volume’s details failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -171,7 +172,7 @@ func (portal *VolumePortal) GetVolume() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -206,8 +207,8 @@ func (portal *VolumePortal) UpdateVolume() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Update a volume failed: %s", err.Error())
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
@@ -222,7 +223,7 @@ func (portal *VolumePortal) UpdateVolume() {
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusOK)
+	portal.Ctx.Output.SetStatus(http.StatusOK)
 	portal.Ctx.Output.Body(body)
 	return
 }
@@ -240,12 +241,12 @@ func (portal *VolumePortal) DeleteVolume() {
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a volume failed: %v", err)
-		portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
 		return
 	}
 
-	portal.Ctx.Output.SetStatus(StatusAccepted)
+	portal.Ctx.Output.SetStatus(http.StatusAccepted)
 	return
 }
