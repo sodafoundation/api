@@ -19,7 +19,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -160,7 +159,6 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete volume(%s) success.\n", args[0])
 }
 
 func volumeUpdateAction(cmd *cobra.Command, args []string) {
