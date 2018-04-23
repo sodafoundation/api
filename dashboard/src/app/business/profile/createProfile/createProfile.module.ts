@@ -1,9 +1,11 @@
 import { Component, NgModule, APP_INITIALIZER } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CreateProfileComponent } from './createProfile.component';
 import { RouterModule } from '@angular/router';
-import { InputTextModule, CheckboxModule, FormModule, ButtonModule, DropdownModule, RadioButtonModule, DialogModule } from '../../../components/common/api';
+import { InputTextModule, CheckboxModule, FormModule, ButtonModule, DropdownModule, RadioButtonModule, DialogModule, Message, GrowlModule } from '../../../components/common/api';
+import { HttpService } from './../../../shared/api';
+import { ProfileService } from './../profile.service';
 
 let routers = [{
   path: '',
@@ -16,6 +18,7 @@ let routers = [{
   ],
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     FormsModule,  
     RouterModule.forChild(routers),
     InputTextModule,
@@ -23,8 +26,12 @@ let routers = [{
     ButtonModule,
     DropdownModule,
     RadioButtonModule,
-    DialogModule
+    DialogModule,
+    GrowlModule
   ],
-  providers: []
+  providers: [
+    HttpService,
+    ProfileService
+  ]
 })
 export class CreateProfileModule { }

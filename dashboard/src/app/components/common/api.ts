@@ -35,3 +35,5 @@ export { MessageModule } from '../message/message';
 export { OverlayPanelModule } from '../overlaypanel/overlaypanel';
 export { RadioButtonModule } from '../radiobutton/radiobutton';
 export { SelectButtonModule } from '../selectbutton/selectbutton';
+export { GrowlModule } from '../growl/growl';
+export { PanelModule } from '../panel/panel';

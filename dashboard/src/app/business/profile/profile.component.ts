@@ -49,7 +49,7 @@ export class ProfileComponent implements OnInit {
     ) { }
     showCard = true;
     ngOnInit() {
-        // this.getProfiles();
+        this.getProfiles();
 
         this.profiles = [
             {
@@ -105,6 +105,7 @@ export class ProfileComponent implements OnInit {
         this.ProfileService.deleteProfile(id).subscribe((res) => {
             // this.profiles = res.json();
             this.getProfiles();
+            this.showWarningDialog = false;
         });
     }
 }

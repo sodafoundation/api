@@ -44,6 +44,7 @@ import { ButtonModule } from './../../../components/common/api';
 export class ProfileCardComponent implements OnInit {
 
     @Input() data;
+    
     chartDatas: any;
     constructor(
         // private I18N: I18NService,
