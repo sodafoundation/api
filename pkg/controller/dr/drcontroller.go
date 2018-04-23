@@ -59,26 +59,28 @@ func (d *DrController) LoadOperator(replicationType string) {
 func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpec, primaryVol,
 	secondaryVol *VolumeSpec) (*ReplicationSpec, error) {
 	if primaryVol.Size != secondaryVol.Size {
-		return nil, fmt.Errorf("secondary volume size(%d) is not the same as the primary size(%d)",
+		return replica, fmt.Errorf("secondary volume size(%d) is not the same as the primary size(%d)",
 			secondaryVol.Size, primaryVol.Size)
 	}
 	pPool, _ := db.C.GetPool(ctx, primaryVol.PoolId)
 	sPool, _ := db.C.GetPool(ctx, secondaryVol.PoolId)
 	if pPool.ReplicationType != sPool.ReplicationType {
-		return nil, fmt.Errorf("secondary replication type is not the same as the primary")
+		return replica, fmt.Errorf("secondary replication type is not the same as the primary")
 	}
 
+	replica.PrimaryReplicationDriverData = utils.MergeStringMaps(replica.PrimaryReplicationDriverData, primaryVol.Metadata)
+	replica.SecondaryReplicationDriverData = utils.MergeStringMaps(replica.SecondaryReplicationDriverData, secondaryVol.Metadata)
 	d.LoadOperator(pPool.ReplicationType)
 	pResult, err := d.primaryOp.Create(ctx, replica, primaryVol)
 	if err != nil {
 		log.Errorf("Create primary replication failed, %s", err)
-		return nil, err
+		return replica, err
 	}
 
 	sResult, err := d.secondaryOp.Create(ctx, replica, secondaryVol)
 	if err != nil {
 		log.Errorf("Create secondary replication failed, %s", err)
-		return nil, err
+		return replica, err
 	}
 
 	replica.PrimaryReplicationDriverData = utils.MergeStringMaps(replica.PrimaryReplicationDriverData, pResult.PrimaryReplicationDriverData)
@@ -231,6 +233,7 @@ func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol
 		return nil, err
 	}
 
+	a.volumeController.SetDock(provisionerDock)
 	opt := &pb.CreateReplicationOpts{
 		Id:                             vol.Id,
 		Name:                           vol.Name,
@@ -239,6 +242,7 @@ func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
 		SecondaryReplicationDriverData: replica.SecondaryReplicationDriverData,
+		ReplicationMode:                replica.ReplicationModel,
 		PoolName:                       pool.Name,
 		DockId:                         provisionerDock.Id,
 		DriverName:                     provisionerDock.DriverName,
@@ -264,6 +268,7 @@ func (a *ArrayPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol
 		return err
 	}
 
+	a.volumeController.SetDock(provisionerDock)
 	opt := &pb.DeleteReplicationOpts{
 		Id:                             vol.Id,
 		Name:                           vol.Name,
@@ -462,10 +467,10 @@ func (h *HostPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol 
 
 	replica.VolumeDataList = volumeDataList
 	if h.isPrimary {
-		replica.PrimaryReplicationDriverData = utils.MergeStringMaps(replica.PrimaryReplicationDriverData, data, vol.Metadata)
+		replica.PrimaryReplicationDriverData = utils.MergeStringMaps(replica.PrimaryReplicationDriverData, data)
 	} else {
 		// TODO: create replication pair in remote device.
-		replica.SecondaryReplicationDriverData = utils.MergeStringMaps(replica.SecondaryReplicationDriverData, data, vol.Metadata)
+		replica.SecondaryReplicationDriverData = utils.MergeStringMaps(replica.SecondaryReplicationDriverData, data)
 	}
 
 	opt := &pb.CreateReplicationOpts{
@@ -476,6 +481,7 @@ func (h *HostPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol 
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
 		SecondaryReplicationDriverData: replica.SecondaryReplicationDriverData,
+		ReplicationMode:                replica.ReplicationModel,
 		PoolName:                       pool.Name,
 		DockId:                         provisionerDock.Id,
 		DriverName:                     pool.ReplicationDriverName,

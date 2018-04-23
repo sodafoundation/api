@@ -31,7 +31,7 @@ type OsdsDock struct {
 	EnabledBackends            []string `conf:"enabled_backends,lvm"`
 	Daemon                     bool     `conf:"daemon,false"`
 	BindIp                     string   `conf:"bind_ip"` // Just used for attacher dock
-	HostBasedReplicationDriver string   `conf:"host_based_replication_driver,drdb"`
+	HostBasedReplicationDriver string   `conf:"host_based_replication_driver,drbd"`
 	Backends
 }
 

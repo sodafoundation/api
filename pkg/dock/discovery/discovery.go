@@ -146,6 +146,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		replicationType := model.ReplicationTypeHost
 		if drivers.ReplicationProbe(dck.DriverName) {
 			replicationType = model.ReplicationTypeArray
+			replicationDriverName = dck.DriverName
 		}
 		for _, pol := range pols {
 			log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)

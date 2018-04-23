@@ -16,22 +16,16 @@ package dorado
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"strconv"
-	"strings"
-	"time"
-)
-
-const (
-	KPrimaryLunId    = "huaweiPrimaryLunId"    // local lun id
-	KSecondaryLunId  = "huaweiSecondaryLunId"  // remote lun id
-	KPairId          = "huaweiReplicaPairId"   // replication pair
-	KSecondaryLunWwn = "huaweiSecondaryLunWwn" // replication pair
 )
 
 // ReplicationDriver
@@ -63,12 +57,14 @@ func (r *ReplicationDriver) Unset() error { return nil }
 
 // CreateReplication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
-	pLunId := opt.Metadata[KPrimaryLunId]
-	pLun, err := r.mgr.localClient.GetVolume(pLunId)
-	if err != nil {
-		return nil, err
+	log.Info("dorado replication start ...")
+	pLunId := opt.PrimaryReplicationDriverData[KLunId]
+	sLunId := opt.SecondaryReplicationDriverData[KLunId]
+	replicationModel := ReplicaAsyncModel
+	if opt.ReplicationMode == model.ReplicationModelSync {
+		replicationModel = ReplicaSyncModel
 	}
-	resp, err := r.mgr.CreateReplication(pLun, ReplicaSyncModel)
+	resp, err := r.mgr.CreateReplication(pLunId, sLunId, replicationModel)
 	if err != nil {
 		return nil, err
 	}
@@ -77,19 +73,19 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
-		Metadata:         resp,
-		ReplicationModel: "SYNC",
+		Metadata: resp,
 	}, nil
 }
 
 func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 	pairId, ok := opt.GetMetadata()[KPairId]
+	sLunId := opt.SecondaryReplicationDriverData[KLunId]
 	if !ok {
 		msg := fmt.Sprintf("Can find pair id in metadata")
 		log.Errorf(msg)
 		return fmt.Errorf(msg)
 	}
-	return r.mgr.DeletePair(pairId)
+	return r.mgr.DeleteReplication(pairId, sLunId)
 }
 
 func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) error {
@@ -268,7 +264,7 @@ func (r *ReplicaPairMgr) DeleteRemoteLun(id string) error {
 }
 
 func (r *ReplicaPairMgr) DeletePair(id string) error {
-	if r.localClient.CheckPairExist(id) {
+	if !r.localClient.CheckPairExist(id) {
 		return nil
 	}
 	if err := r.localDriver.Split(id); err != nil {
@@ -281,47 +277,68 @@ func (r *ReplicaPairMgr) DeletePair(id string) error {
 	return nil
 }
 
-func (r *ReplicaPairMgr) CreateReplication(localLun *Lun, replicationModel string) (map[string]string, error) {
+func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationModel string) (map[string]string, error) {
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
-	err := r.WaitVolumeOnline(r.localClient, localLun, interval, timeout)
-	if err != nil {
-		return nil, err
-	}
-	rmtLun, err := r.CreateRemoteLun(localLun)
+	var respMap = make(map[string]string)
+
+	localLun, err := r.localClient.GetVolume(pLunId)
 	if err != nil {
 		return nil, err
 	}
 
+	err = r.WaitVolumeOnline(r.localClient, localLun, interval, timeout)
+	if err != nil {
+		return nil, err
+	}
+	var rmtLunId = sLunId
+	if sLunId == "" {
+		rmtLun, err := r.CreateRemoteLun(localLun)
+		if err != nil {
+			return nil, err
+		}
+		rmtLunId = rmtLun.Id
+		respMap[KSecondaryLunId] = rmtLunId
+	}
+
+	var cleanlun = false
+	defer func() {
+		if cleanlun && sLunId == "" {
+			r.DeleteRemoteLun(rmtLunId)
+		}
+	}()
+
 	rmtDevId, rmtDevName := r.GetRemoteDevInfo()
+	log.Errorf("rmtDevId:%s, rmtDevName:%s", rmtDevId, rmtDevName)
 	if rmtDevId == "" || rmtDevName == "" {
-		r.DeleteRemoteLun(rmtLun.Id)
+		cleanlun = true
 		return nil, fmt.Errorf("get remote deivce info failed")
 	}
 
-	pair, err := r.localOp.Create(localLun.Id, rmtLun.Id, rmtDevId, rmtDevName, replicationModel, ReplicaSpeed, ReplicaPeriod)
+	pair, err := r.localOp.Create(localLun.Id, rmtLunId, rmtDevId, rmtDevName, replicationModel, ReplicaSpeed, ReplicaPeriod)
 	if err != nil {
-		r.DeleteRemoteLun(rmtLun.Id)
+		cleanlun = true
 		return nil, err
 	}
-
+	log.Error("start sync ....", pair)
 	if err := r.localDriver.Sync(pair.Id, replicationModel == ReplicaSyncModel); err != nil {
 		r.DeletePair(pair.Id)
-		r.DeleteRemoteLun(rmtLun.Id)
+		cleanlun = true
 		return nil, err
 	}
-
-	return map[string]string{
-		KPairId:          pair.Id,
-		KSecondaryLunId:  rmtLun.Id,
-		KSecondaryLunWwn: rmtLun.Wwn,
-	}, nil
-
+	respMap[KPairId] = pair.Id
+	return respMap, nil
 }
 
-func (r *ReplicaPairMgr) DeleteReplication(pairId, rmtLunId string) {
-	r.DeletePair(pairId)
-	r.DeleteRemoteLun(rmtLunId)
+func (r *ReplicaPairMgr) DeleteReplication(pairId, rmtLunId string) error {
+	if err := r.DeletePair(pairId); err != nil {
+		log.Error("Delete pair failed,", err)
+		return err
+	}
+	if rmtLunId != "" {
+		return r.DeleteRemoteLun(rmtLunId)
+	}
+	return nil
 }
 
 // Failover volumes back to primary backend.
@@ -395,7 +412,9 @@ func (r *ReplicaCommonDriver) Sync(replicaId string, waitComplete bool) error {
 	if replicaPair.ReplicationModel == ReplicaSyncModel && r.op.isRunningStatus(expectStatus, replicaPair) {
 		return nil
 	}
-	r.op.Sync(replicaId)
+	if err := r.op.Sync(replicaId); err != nil {
+		return err
+	}
 	r.WaitExpectState(replicaId, expectStatus, []string{})
 	if waitComplete {
 		r.WaitReplicaReady(replicaId)
@@ -584,7 +603,7 @@ func (p *PairOperation) Create(localLunId, rmtLunId, rmtDevId, rmtDevName,
 		"REMOTERESID":      rmtLunId,
 		"REPLICATIONMODEL": replicationModel,
 		// recovery policy. 1: auto, 2: manual
-		"RECOVERYPOLICY": '1',
+		"RECOVERYPOLICY": "1",
 		"SPEED":          speed,
 	}
 
@@ -593,10 +612,10 @@ func (p *PairOperation) Create(localLunId, rmtLunId, rmtDevId, rmtDevName,
 		// 1, manual
 		// 2, timed wait when synchronization begins
 		// 3, timed wait when synchronization ends
-		params["SYNCHRONIZETYPE"] = 2
+		params["SYNCHRONIZETYPE"] = "2"
 		params["TIMINGVAL"] = period
 	}
-
+	log.Error(params)
 	pair, err := p.client.CreatePair(params)
 	if err != nil {
 		log.Errorf("Create pair failed,%v", err)

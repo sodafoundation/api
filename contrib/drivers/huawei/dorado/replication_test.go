@@ -20,3 +20,21 @@ import (
 
 func TestLoadConf(t *testing.T) {
 }
+
+func TestCreateReplication(t *testing.T) {
+}
+
+func TestEnableReplication(t *testing.T) {
+}
+
+func TestDisableReplication(t *testing.T) {
+
+}
+
+func TestFailoverReplication(t *testing.T) {
+
+}
+
+func TestDeleteReplication(t *testing.T) {
+
+}

@@ -115,6 +115,8 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 		b, _, err = c.doRequest(method, c.urlPrefix+url, in)
 		if err == nil {
 			break
+		} else {
+			log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		}
 		if inErr, ok := err.(*ArrayInnerError); ok {
 			errCode := inErr.Err.Code
@@ -988,7 +990,7 @@ func (c *DoradoClient) GetArrayInfo() (*System, error) {
 
 func (c *DoradoClient) ListRemoteDevices() (*[]RemoteDevice, error) {
 	dev := &RemoteDevicesResp{}
-	err := c.request("GET", "/remote_device/", nil, dev)
+	err := c.request("GET", "/remote_device", nil, dev)
 	if err != nil {
 		return nil, err
 		log.Error("List remote devices failed,", err)
@@ -1014,7 +1016,7 @@ func (c *DoradoClient) GetPair(id string) (*ReplicationPair, error) {
 
 func (c *DoradoClient) SwitchPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": "263"}
-	err := c.request("PUT", "/REPLICATIONPAIR/switch", nil, data)
+	err := c.request("PUT", "/REPLICATIONPAIR/switch", data, nil)
 	if err != nil {
 		log.Errorf("Switch pair failed, %v", err)
 	}
@@ -1023,7 +1025,7 @@ func (c *DoradoClient) SwitchPair(id string) error {
 
 func (c *DoradoClient) SplitPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": "263"}
-	err := c.request("PUT", "/REPLICATIONPAIR/split", nil, data)
+	err := c.request("PUT", "/REPLICATIONPAIR/split", data, nil)
 	if err != nil {
 		log.Errorf("Split pair failed, %v", err)
 	}
@@ -1032,7 +1034,7 @@ func (c *DoradoClient) SplitPair(id string) error {
 
 func (c *DoradoClient) SyncPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": "263"}
-	err := c.request("PUT", "/REPLICATIONPAIR/sync", nil, data)
+	err := c.request("PUT", "/REPLICATIONPAIR/sync", data, nil)
 	if err != nil {
 		log.Errorf("Sync pair failed, %v", err)
 	}
@@ -1041,7 +1043,7 @@ func (c *DoradoClient) SyncPair(id string) error {
 
 func (c *DoradoClient) SetPairSecondAccess(id string, access string) error {
 	data := map[string]interface{}{"ID": id, "SECRESACCESS": access}
-	err := c.request("PUT", "/REPLICATIONPAIR/"+id, nil, data)
+	err := c.request("PUT", "/REPLICATIONPAIR/"+id, data, nil)
 	if err != nil {
 		log.Errorf("Set pair secondary access failed, %v", err)
 	}

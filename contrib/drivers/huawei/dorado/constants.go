@@ -16,6 +16,22 @@ package dorado
 import "time"
 
 const (
+	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
+	defaultAZ       = "default"
+)
+
+const (
+	KLunId  = "huaweiLunId"
+	KSnapId = "huaweiSnapId"
+)
+
+const (
+	KPairId          = "huaweiReplicaPairId"   // replication pair
+	KSecondaryLunId  = "huaweiSecondaryLunId"  // secondary lun id
+	KSecondaryLunWwn = "huaweiSecondaryLunWwn" // secondary lun wwn
+)
+
+const (
 	StatusHealth       = "1"
 	StatusActive       = "43"
 	StatusRunning      = "10"

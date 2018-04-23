@@ -279,6 +279,8 @@ message CreateReplicationOpts {
     map<string, string> metadata = 17;
     // The volume data list
     repeated  VolumeData volumeDataList = 18;
+    //the replication mode sync/async
+    string replicationMode = 19;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
