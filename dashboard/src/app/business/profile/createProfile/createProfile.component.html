@@ -155,7 +155,27 @@
             <div class="ui-grid-col-2">
             </div>
             <div class="ui-grid-col-10">
-                <div>helloffffffffffffffffffffffffffffffffffffff</div>
+                <div class="footer-button-class">
+                    <div>
+                        <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools,<span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
+                    </div>
+                    <p-table [value]="pools" styleClass="custom-table-class">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th *ngFor="let col of cols">
+                                    {{col.header}}
+                                </th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-pool>
+                            <tr>
+                                <td *ngFor="let col of cols">
+                                    {{pool[col.field]}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
             </div>
         </div>
     </div>
