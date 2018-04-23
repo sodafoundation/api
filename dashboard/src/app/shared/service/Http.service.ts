@@ -21,46 +21,27 @@ export class HttpService extends Http {
     }
 
     get(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        this.setToken(options);
         return this.intercept(super.get(url, options), options);
     }
 
     post(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-        // this.setToken(options);
-        if( localStorage['x-subject-token'] ){
-            !options && (options = {})
-            !options.headers && (options['headers'] = new Headers());
-            options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
-        }
         return this.intercept(super.post(url, body, options), options);
     }
 
     delete(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        this.setToken(options);
         return this.intercept(super.delete(url, options), options);
     }
 
     patch(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-        this.setToken(options);
         return this.intercept(super.patch(url, options), options);
     }
 
     head(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        this.setToken(options);
         return this.intercept(super.head(url, options), options);
     }
 
     options(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        this.setToken(options);
         return this.intercept(super.options(url, options), options);
-    }
-
-    setToken(options){
-        if( localStorage['x-subject-token'] ){
-            !options && (options = {})
-            !options.headers && (options['headers'] = new Headers());
-            options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
-        }
     }
 
     intercept(observable: Observable<Response>, options = <BaseRequestOptionsArgs>{}): Observable<Response> {
@@ -69,8 +50,6 @@ export class HttpService extends Http {
         if(options.mask != false) {
             Mask.show();
         }
-
-        
 
         return observable.timeout(options.timeout || this.TIMEOUT).do((res: Response) => {
             //success

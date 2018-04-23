@@ -10,7 +10,7 @@
         <p-button (click)="showWarningDialogFun(profile.id)" styleClass="close-class" icon="fa fa-fw fa-close">
         </p-button>
     </div>
-    <p-card [routerLink]="['/modifyProfile']" styleClass="new-card-class ui-card-shadow">
+    <p-card [routerLink]="['/modifyProfile/' + profile.id]" styleClass="new-card-class ui-card-shadow">
         <profile-card [data]="profile"></profile-card>
     </p-card>
 </div>
@@ -20,7 +20,7 @@
         确定要删除{{profileId}}？
     </div>
     <p-footer>
-        <button type="button" pButton (click)="deleteProfile(profile.id)" label="OK"></button>
+        <button type="button" pButton (click)="deleteProfile(profileId)" label="OK"></button>
         <button type="button" pButton (click)="showWarningDialog=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>

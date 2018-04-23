@@ -5,18 +5,18 @@
         </div>
         <div class="padding-class">
             <span class="label-class">Access Protocol:</span>
-            <span>{{data.protocol}}</span>
+            <span>{{data.extras.protocol}}</span>
         </div>
         <div class="padding-class">
             <span class="label-class">Provisioning Type:</span>
-            <span>{{data.type}}</span>
+            <span>{{data.storageType}}</span>
         </div>
 
-        <div class="padding-class">
+        <div class="padding-class" *ngIf="data.extras">
             <div #op *ngIf="">
                 Content
             </div>
-            <div (hover)="showPanel=true" class="fa fa-check icon-color-class" *ngFor="let policy of data.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
+            <div (hover)="showPanel=true" class="fa fa-check icon-color-class" *ngFor="let policy of data.extras.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
                 <span class="font-color-class">{{policy}}</span>
             </div>
         </div>

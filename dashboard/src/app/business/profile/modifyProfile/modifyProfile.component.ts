@@ -1,4 +1,4 @@
-import { Router } from '@angular/router';
+import { Router,ActivatedRoute} from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
@@ -47,11 +47,17 @@ export class modifyProfileComponent implements OnInit {
     formGroup;
     errorMessage;
     pools;
+    profile;
     constructor(
         // private I18N: I18NService,
         // private router: Router
+        private ActivatedRoute: ActivatedRoute
     ) { }
     ngOnInit() {
+
+        this.ActivatedRoute.params.subscribe((params) => console.log(params));
+        // this.profile = params.username
+        console.log
         this.items = [
             { label: 'Profile', url: '/profile' },
             { label: 'Profile detail', url: '/modifyProfile' }

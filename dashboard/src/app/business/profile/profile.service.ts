@@ -8,7 +8,7 @@ export class ProfileService {
     constructor(private http: HttpService) { }
     //创建profile
     createProfile(param) {
-        this.http.post(this.url, param);
+        return this.http.post(this.url, param);
     }
 
     //删除profile
