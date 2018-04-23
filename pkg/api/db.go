@@ -200,8 +200,10 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
-	if in.Status != model.VOLUME_AVAILABLE {
-		errMsg := "Only the volume with the status available can be deleted"
+	invalidStatus := []string{model.VOLUME_AVAILABLE, model.VOLUME_ERROR,
+		model.VOLUEM_ERROR_DELETING, model.VOLUME_ERROR_EXTENDING}
+	if !utils.Contained(in.Status, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
