@@ -2029,6 +2029,9 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 	if input.Metadata != nil {
 		r.Metadata = input.Metadata
 	}
+	if input.ReplicationStatus != "" {
+		r.ReplicationStatus = input.ReplicationStatus
+	}
 
 	r.UpdatedAt = time.Now().Format(constants.TimeFormat)
 

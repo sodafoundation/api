@@ -22,18 +22,26 @@ import "github.com/opensds/opensds/pkg/dock/proto"
 
 //volume status
 const (
-	ReplicationDeleted       = "deleted"
-	ReplicationCreating      = "creating"
-	ReplicationDeleting      = "deleting"
-	ReplicationEnabling      = "enabling"
-	ReplicationDisabling     = "disabling"
-	ReplicationFailingOver   = "failingover"
-	ReplicationAvailable     = "available"
-	ReplicationError         = "error"
-	ReplicationErrorDeleting = "error_deleting"
-	ReplicationErrorEnabled  = "error_enabling"
-	ReplicationErrorDisabled = "error_disabling"
-	ReplicationErrorFailover = "error_failover"
+	ReplicationDeleted        = "deleted"
+	ReplicationCreating       = "creating"
+	ReplicationDeleting       = "deleting"
+	ReplicationEnabling       = "enabling"
+	ReplicationDisabling      = "disabling"
+	ReplicationFailingOver    = "failingover"
+	ReplicationAvailable      = "available"
+	ReplicationError          = "error"
+	ReplicationErrorDeleting  = "error_deleting"
+	ReplicationErrorEnabling  = "error_enabling"
+	ReplicationErrorDisabling = "error_disabling"
+	ReplicationErrorFailover  = "error_failover"
+	ReplicationEnabled        = "enabled"
+	ReplicationDisabled       = "disabled"
+	ReplicationFailover       = "failover"
+)
+
+const (
+	ReplicationModelSync  = "sync"
+	ReplicationModelAsync = "async"
 )
 
 // ReplicationSpec represents a replication relationship between the volumes
@@ -92,9 +100,11 @@ type ReplicationSpec struct {
 	VolumeDataList []*proto.VolumeData `json:"volumeDataList,omitempty"`
 }
 
+type Failover struct {
+	AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
+	SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
+}
+
 type FailoverReplicationSpec struct {
-	Failover struct {
-		AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
-		SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
-	} `json:"failoverReplication"`
+	Failover `json:"failoverReplication"`
 }

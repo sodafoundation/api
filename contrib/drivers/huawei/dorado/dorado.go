@@ -24,16 +24,8 @@ import (
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
-)
-
-const (
-	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
-	defaultAZ       = "default"
-)
-
-const (
-	KLunId  = "huaweiLunId"
-	KSnapId = "huaweiSnapId"
+	"github.com/satori/go.uuid"
+	"os"
 )
 
 type Driver struct {
@@ -297,10 +289,11 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := c.Pool[p.Name]; !ok {
 			continue
 		}
-
+		host, _ := os.Hostname()
+		name := fmt.Sprintf("%s:%s:%s", host, d.conf.Endpoints, p.Id)
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: p.Id,
+				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
 			Name:             p.Name,
 			TotalCapacity:    Sector2Gb(p.UserTotalCapacity),

@@ -38,8 +38,10 @@ type ReplicationPortal struct {
 	BasePortal
 }
 
-var whiteListSimple = []string{"Id", "Name"}
-var whiteList = []string{"Id", "Name", "Description", "Status", "TenantId", "PrimaryVolumeId", "SecondaryVolumeId"}
+var whiteListSimple = []string{"Id", "Name", "Status"}
+var whiteList = []string{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "Status",
+	"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
+	"ReplicationStatus", "ReplicationModel", "ReplicationPeriod", "ProfileId"}
 
 func (this *ReplicationPortal) CreateReplication() {
 	if !policy.Authorize(this.Ctx, "replication:create") {

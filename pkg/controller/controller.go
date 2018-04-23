@@ -536,12 +536,15 @@ func (c *Controller) CreateReplication(ctx *c.Context, in *model.ReplicationSpec
 
 	result, err := c.drController.CreateReplication(ctx, in, pvol, svol)
 	result.Status = model.ReplicationAvailable
+	result.ReplicationStatus = model.ReplicationEnabled
 	if err != nil {
 		result.Status = model.ReplicationError
+		result.ReplicationStatus = "--"
 	}
+
 	// update status ,driver data, metadata
 	db.C.UpdateReplication(ctx, result.Id, result)
-	return nil, err
+	return result, err
 }
 
 func (c *Controller) DeleteReplication(ctx *c.Context, in *model.ReplicationSpec) error {
@@ -558,8 +561,6 @@ func (c *Controller) DeleteReplication(ctx *c.Context, in *model.ReplicationSpec
 	err = c.drController.DeleteReplication(ctx, in, pvol, svol)
 	if err != nil {
 		c.UpdateStatus(ctx, in, model.ReplicationErrorDeleting)
-	} else {
-		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
 	}
 	return err
 }
@@ -576,9 +577,14 @@ func (c *Controller) EnableReplication(ctx *c.Context, in *model.ReplicationSpec
 
 	err = c.drController.EnableReplication(ctx, in, pvol, svol)
 	if err != nil {
-		c.UpdateStatus(ctx, in, model.ReplicationErrorEnabled)
+		in.Status = model.ReplicationErrorEnabling
+		in.ReplicationStatus = "--"
 	} else {
-		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
+		in.Status = model.ReplicationAvailable
+		in.ReplicationStatus = model.ReplicationDisabled
+	}
+	if _, err := db.C.UpdateReplication(ctx, in.Id, in); err != nil {
+		log.Error("update replication in db error, ", err)
 	}
 	return err
 }
@@ -595,10 +601,16 @@ func (c *Controller) DisableReplication(ctx *c.Context, in *model.ReplicationSpe
 
 	err = c.drController.DisableReplication(ctx, in, pvol, svol)
 	if err != nil {
-		c.UpdateStatus(ctx, in, model.ReplicationErrorDisabled)
+		in.Status = model.ReplicationErrorDisabling
+		in.ReplicationStatus = "--"
 	} else {
-		c.UpdateStatus(ctx, in, model.ReplicationAvailable)
+		in.Status = model.ReplicationAvailable
+		in.ReplicationStatus = model.ReplicationDisabled
 	}
+	if _, err := db.C.UpdateReplication(ctx, in.Id, in); err != nil {
+		log.Error("update replication in db error, ", err)
+	}
+
 	return err
 }
 
@@ -613,9 +625,14 @@ func (c *Controller) FailoverReplication(ctx *c.Context, replication *model.Repl
 	}
 	err = c.drController.FailoverReplication(ctx, replication, pvol, svol)
 	if err != nil {
-		c.UpdateStatus(ctx, replication, model.ReplicationErrorFailover)
+		replication.Status = model.ReplicationErrorDisabling
+		replication.ReplicationStatus = "--"
 	} else {
-		c.UpdateStatus(ctx, replication, model.ReplicationAvailable)
+		replication.Status = model.ReplicationAvailable
+		replication.ReplicationStatus = model.ReplicationFailover
+	}
+	if _, err := db.C.UpdateReplication(ctx, replication.Id, replication); err != nil {
+		log.Error("update replication in db error, ", err)
 	}
 	return err
 }

@@ -32,6 +32,7 @@ type Client struct {
 	*PoolMgr
 	*VolumeMgr
 	*VersionMgr
+	*ReplicationMgr
 
 	cfg *Config
 }
@@ -101,12 +102,13 @@ func NewClient(c *Config) *Client {
 
 	t := c.AuthOptions.GetTenantId()
 	return &Client{
-		cfg:        c,
-		ProfileMgr: NewProfileMgr(r, c.Endpoint, t),
-		DockMgr:    NewDockMgr(r, c.Endpoint, t),
-		PoolMgr:    NewPoolMgr(r, c.Endpoint, t),
-		VolumeMgr:  NewVolumeMgr(r, c.Endpoint, t),
-		VersionMgr: NewVersionMgr(r, c.Endpoint, t),
+		cfg:            c,
+		ProfileMgr:     NewProfileMgr(r, c.Endpoint, t),
+		DockMgr:        NewDockMgr(r, c.Endpoint, t),
+		PoolMgr:        NewPoolMgr(r, c.Endpoint, t),
+		VolumeMgr:      NewVolumeMgr(r, c.Endpoint, t),
+		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
+		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
 	}
 }
 
