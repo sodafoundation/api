@@ -35,5 +35,3 @@ export { MessageModule } from '../message/message';
 export { OverlayPanelModule } from '../overlaypanel/overlaypanel';
 export { RadioButtonModule } from '../radiobutton/radiobutton';
 export { SelectButtonModule } from '../selectbutton/selectbutton';
-export { SelectButtonModule } from '../selectbutton/selectbutton';
-
