@@ -182,6 +182,14 @@ func (portal *TypePortal) ShowExtraProperty() {
 
 	key := portal.Ctx.Input.Param(":key")
 	result := converter.ShowExtraResp(key, profileExtra)
+	if nil == (*result) {
+		reason := "The key name of the extra spec for the volume type can not be found"
+		portal.Ctx.Output.SetStatus(http.StatusNotFound)
+		portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
 	body, err := json.Marshal(result)
 
 	if err != nil {
@@ -316,7 +324,7 @@ func (portal *TypePortal) GetType() {
 
 		if nil == profile {
 			reason := "Default volume type can not be found"
-			portal.Ctx.Output.SetStatus(model.ErrorBadRequest)
+			portal.Ctx.Output.SetStatus(http.StatusNotFound)
 			portal.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 			log.Error(reason)
 			return

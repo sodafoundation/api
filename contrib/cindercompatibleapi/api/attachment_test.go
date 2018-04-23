@@ -73,8 +73,8 @@ func TestGetAttachment(t *testing.T) {
 	var expected converter.ShowAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -103,8 +103,8 @@ func TestListAttachments(t *testing.T) {
 	var expected converter.ListAttachmentsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -142,8 +142,8 @@ func TestListAttachmentsDetails(t *testing.T) {
 	var expected converter.ListAttachmentsDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -190,8 +190,8 @@ func TestCreateAttachment(t *testing.T) {
 	var expected converter.CreateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Attachment.ID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
@@ -252,8 +252,8 @@ func TestUpdateAttachment(t *testing.T) {
 	var expected converter.UpdateAttachmentRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Attachment.ID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"

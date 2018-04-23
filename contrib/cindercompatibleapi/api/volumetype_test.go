@@ -17,7 +17,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -47,7 +46,7 @@ func init() {
 //                            Tests for volume types                               //
 ////////////////////////////////////////////////////////////////////////////////
 func TestGetType(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
@@ -69,8 +68,8 @@ func TestGetType(t *testing.T) {
 	json.Unmarshal([]byte(expectedJSON), &expected)
 	expected.VolumeType.IsPublic = true
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -89,8 +88,8 @@ func TestGetDefaultType(t *testing.T) {
 	var output converter.ShowTypeRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if DefaultTypeName != output.VolumeType.Name {
@@ -139,8 +138,8 @@ func TestListTypes(t *testing.T) {
 	var expected converter.ListTypesRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -170,11 +169,10 @@ func TestCreateType(t *testing.T) {
 	var expected converter.CreateTypeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
-	fmt.Println(expected)
-	fmt.Println(output)
+
 	expected.VolumeType.ID = "1106b972-66ef-11e7-b172-db03f3689c9c"
 	expected.VolumeType.IsPublic = true
 
@@ -184,13 +182,13 @@ func TestCreateType(t *testing.T) {
 }
 
 func TestDeleteType(t *testing.T) {
-	r, _ := http.NewRequest("DELETE", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("DELETE", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 202 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 }
 
@@ -205,7 +203,7 @@ func TestUpdateType(t *testing.T) {
     }`
 
 	var jsonStr = []byte(RequestBodyStr)
-	r, _ := http.NewRequest("PUT", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+	r, _ := http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", bytes.NewBuffer(jsonStr))
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
@@ -217,9 +215,10 @@ func TestUpdateType(t *testing.T) {
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 	expected.VolumeType.IsPublic = true
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
+
 	expected.VolumeType.ID = "1106b972-66ef-11e7-b172-db03f3689c9c"
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
@@ -243,7 +242,7 @@ func TestAddExtraProperty(t *testing.T) {
     }`
 
 	var jsonStr = []byte(RequestBodyStr)
-	r, _ := http.NewRequest("POST", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs", bytes.NewBuffer(jsonStr))
+	r, _ := http.NewRequest("POST", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs", bytes.NewBuffer(jsonStr))
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
@@ -254,8 +253,8 @@ func TestAddExtraProperty(t *testing.T) {
 	var expected converter.ExtraSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -264,7 +263,7 @@ func TestAddExtraProperty(t *testing.T) {
 }
 
 func TestListExtraProperties(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs", nil)
+	r, _ := http.NewRequest("GET", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -288,8 +287,8 @@ func TestListExtraProperties(t *testing.T) {
     }`
 	json.Unmarshal([]byte(expectedStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -298,7 +297,7 @@ func TestListExtraProperties(t *testing.T) {
 }
 
 func TestShowExtraPropertie(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs/dataStorage", nil)
+	r, _ := http.NewRequest("GET", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/dataStorage", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -315,8 +314,8 @@ func TestShowExtraPropertie(t *testing.T) {
     }`
 	json.Unmarshal([]byte(expectedStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -325,15 +324,15 @@ func TestShowExtraPropertie(t *testing.T) {
 }
 
 func TestShowExtraPropertieWithBadRequest(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs/disk", nil)
+	r, _ := http.NewRequest("GET", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/disk", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output converter.ExtraSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusNotFound {
+		t.Errorf("Expected %v, actual %v", http.StatusNotFound, w.Code)
 	}
 
 	if nil != output["disk"] {
@@ -351,7 +350,7 @@ func TestUpdateExtraPropertie(t *testing.T) {
     }`
 
 	var jsonStr = []byte(RequestBodyStr)
-	r, _ := http.NewRequest("PUT", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs/dataStorage", bytes.NewBuffer(jsonStr))
+	r, _ := http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/dataStorage", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -369,8 +368,8 @@ func TestUpdateExtraPropertie(t *testing.T) {
 	var expected converter.ExtraSpec
 	json.Unmarshal([]byte(expectedStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -379,7 +378,7 @@ func TestUpdateExtraPropertie(t *testing.T) {
 }
 
 func TestDeleteExtraPropertie(t *testing.T) {
-	r, _ := http.NewRequest("DELETE", "/v3/types/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extra_specs/diskType", nil)
+	r, _ := http.NewRequest("DELETE", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/diskType", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

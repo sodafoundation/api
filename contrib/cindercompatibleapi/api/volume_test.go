@@ -67,8 +67,8 @@ func TestGetVolume(t *testing.T) {
 	var expected converter.ShowVolumeRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Volume.Attachments = make([]converter.RespAttachment, 0, 0)
@@ -102,8 +102,8 @@ func TestListVolumes(t *testing.T) {
 	var expected converter.ListVolumesRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	if !reflect.DeepEqual(expected, output) {
@@ -137,8 +137,8 @@ func TestListVolumesDetails(t *testing.T) {
 	var expected converter.ListVolumesDetailsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Volumes[0].Attachments = make([]converter.RespAttachment, 0, 0)
@@ -189,8 +189,8 @@ func TestDeleteVolume(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 202 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
 	}
 }
 
@@ -216,8 +216,8 @@ func TestUpdateVolume(t *testing.T) {
 	var expected converter.UpdateVolumeRespSpec
 	json.Unmarshal([]byte(RequestBodyStr), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %v, actual %v", http.StatusOK, w.Code)
 	}
 
 	expected.Volume.Attachments = make([]converter.RespAttachment, 0, 0)
