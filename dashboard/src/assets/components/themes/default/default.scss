@@ -184,15 +184,20 @@ textarea{
 }
 
 a{
-    color: $stateDefaultTextColor;
+    color: map-get($color-primary, normal);
     text-decoration: none;
     &:hover,&:active{
-        color: $stateHoverTextColor;
+        color: map-get($color-primary, active);
     }
     &:disabled{
         color: $color-disabled;
     }
 }
+
+.ui-widget-content a{
+    color: map-get($color-primary, normal);
+}
+
 
 p{
     line-height: 1.5;

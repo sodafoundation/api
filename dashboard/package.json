@@ -65,6 +65,6 @@
     "zone.js": "^0.8.14"
   },
   "dependencies": {
-    "underscore": "^1.8.3"
+    "underscore": "^1.9.0"
   }
 }

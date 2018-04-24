@@ -22,7 +22,7 @@
             <p><span><i class="fa fa-map-marker"></i>Region-Beijing</span><span><i class="fa fa-users"></i>Tenant-A</span></p>
         </div>
         
-        <ul class="topbar-menu" style="overflow:scroll">
+        <ul class="topbar-menu">
             <li *ngFor="let menuItem of menuItems">
                 <a href="#" [routerLink]="menuItem.routerLink" [ngClass]="{'active-item':menuItem==activeItem}" (click)="menuItemClick($event, menuItem)">
                     <h1>{{menuItem.title}}</h1>

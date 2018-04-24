@@ -4,9 +4,11 @@ import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { MenuItem } from '../../components/common/api';
+import { MenuItem, ConfirmationService } from '../../components/common/api';
 
 import { FormGroup, FormControl } from '@angular/forms';
+
+let _ = require("underscore");
 
 @Component({
     selector: 'user-list',
@@ -14,6 +16,7 @@ import { FormGroup, FormControl } from '@angular/forms';
     styleUrls: [
         'dialogcss.css'
     ],
+    providers: [ConfirmationService],
     animations: []
 })
 export class UserListComponent implements OnInit {
@@ -21,17 +24,24 @@ export class UserListComponent implements OnInit {
     tenantLists = [];
     createUserDisplay = false;
     isUserDetailFinished = false;
+    isEditUser = false;
+
+    selectedUsers = [];
+
     selectedTenant: string;
     username: string;
-    description: string = "Description";
-    password: string;
+    description: string;
+    newPassword: string;
+    passwordConfirm: string;
     userRole: string;
 
     detailUserInfo: string;
+    popTitle: String;
 
     sortField: string;
     constructor(
         private http: Http,
+        private confirmationService: ConfirmationService
         // private I18N: I18NService,
         // private router: Router
     ) { }
@@ -40,6 +50,7 @@ export class UserListComponent implements OnInit {
     label:object = {
         userNameLabel:'Username:',
         passwordLabel:'Password:',
+        descriptionLabel:'Description',
         confirmPasswordLabel:'Confirm Password:',
         roleLabel:'Role:',
         tenantLabel:'Tenant:'
@@ -47,10 +58,30 @@ export class UserListComponent implements OnInit {
 
     errorMessage = {};
     
-    showCreateUser(): void{
-        this.createUserDisplay = true;
-        this.getTenants();
-        this.getRoles();
+    showUserForm(user?): void{
+        if(user){
+            this.isEditUser = true;
+            this.popTitle = "Modify";
+
+            this.username = user.username;
+            this.newPassword = "";
+            this.passwordConfirm = "";
+            this.description = user.description;
+            this.selectedTenant = user.defaultTenant;
+
+        }else{
+            this.isEditUser = false;
+            this.popTitle = "Create";
+
+            this.username = "";
+            this.newPassword = "";
+            this.passwordConfirm = "";
+            this.description = "";
+
+            this.createUserDisplay = true;
+            this.getTenants();
+            this.getRoles();
+        }
     }
 
     createUser(){
@@ -60,17 +91,27 @@ export class UserListComponent implements OnInit {
             "domain_id": "default",
             "name": this.username,
             "description": this.description,
-            "password": this.password
+            "password": this.newPassword
         }
         
         this.http.post("/v3/users", request).subscribe((res) => {
             let userInfo = res.json().user;
-            let request: any = { params:{} };
+            let request: any = {};
             this.http.put("/v3/projects/"+ userInfo.default_project_id +"/users/"+ userInfo.id +"/roles/"+ this.userRole, request).subscribe((r) => {
                 this.createUserDisplay = false;
-                this.tenantUsers = [];
                 this.listUsers();
             })
+        });
+    }
+
+    updateUser(userid){
+
+        let request: any = { user:{} };
+        request.user = {
+            "enabled": status
+        }
+        this.http.patch("/v3/users/"+ userid, request).subscribe((res) => {
+            this.listUsers();
         });
     }
     
@@ -85,6 +126,8 @@ export class UserListComponent implements OnInit {
         });
     }
     getTenants(){
+        this.tenantLists = [];
+
         let request: any = { params:{} };
         request.params = {
             "domain_id": "default"
@@ -108,6 +151,8 @@ export class UserListComponent implements OnInit {
     }
 
     listUsers(){
+        this.tenantUsers = [];
+
         this.sortField = "username";
 
         let request: any = { params:{} };
@@ -117,15 +162,66 @@ export class UserListComponent implements OnInit {
         this.http.get("/v3/users", request).subscribe((res) => {
             res.json().users.map((item, index) => {
                 let user = {};
-                user["status"] = (item.enabled == true) ? "Enabled" : "Disabled";
+                user["enabled"] = item.enabled;
                 user["username"] = item.name;
                 user["userid"] = item.id;
                 user["defaultTenant"] = item.default_project_id;
                 user["description"] = item.description;
                 this.tenantUsers.push(user);
             });
-            console.log(this.tenantUsers);
         });
+    }
+
+    userStatus(userid, isEnabled){
+        let msg = isEnabled == true ? "Are you sure you want to disable this user?" : "Are you sure you want to enable this user?";
+        let status = isEnabled ? false : true;
+
+        this.confirmationService.confirm({
+            message: msg,
+            header: "Confirm",
+            icon: "fa fa-question-circle",
+            accept: ()=>{
+                let request: any = { user:{} };
+                request.user = {
+                    "enabled": status
+                }
+                this.http.patch("/v3/users/"+ userid, request).subscribe((res) => {
+                    this.listUsers();
+                });
+                
+            },
+            reject:()=>{}
+        })
+    }
+
+    deleteUsers(users){
+        let arr=[];
+        if(_.isArray(users)){
+            users.forEach((item,index)=> {
+                arr.push(item.userid);
+            })
+        }else{
+            arr.push(users);
+        }
+
+        this.confirmationService.confirm({
+            message: "Are you sure you want to delete users?",
+            header: "Confirm",
+            icon: "fa fa-question-circle",
+            accept: ()=>{
+                arr.forEach((item,index)=> {
+                    let request: any = {};
+                    this.http.delete("/v3/users/"+ item, request).subscribe((res) => {
+                        if(index == arr.length-1){
+                            this.listUsers();
+                        }
+                    });
+                })
+                
+            },
+            reject:()=>{}
+        })
+
     }
 
     onRowExpand(evt) {

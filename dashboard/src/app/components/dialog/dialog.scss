@@ -88,16 +88,16 @@
 
 /* ConfirmDialog */
 .ui-confirmdialog {
-    width: 30em;
+    width: 5.00rem;
 }
 
 .ui-confirmdialog.ui-dialog .ui-dialog-content {
-    padding: 1em 2em;
 }
 .ui-confirmdialog .ui-dialog-content .fa {
-    font-size: 1.5em;
+    font-size: .48rem;
     vertical-align: middle;
-    margin-right: .5em;
+    margin-right: .2rem;
+    color: #438bd3;
 }
 .ui-confirmdialog .ui-dialog-content .ui-confirmdialog-message {
     vertical-align: middle;

@@ -54,13 +54,13 @@ export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
     
     @Input() message: string;
     
-    @Input() acceptIcon: string = 'fa-check';
+    @Input() acceptIcon: string;
     
     @Input() acceptLabel: string = 'Yes';
     
     @Input() acceptVisible: boolean = true;
 
-    @Input() rejectIcon: string = 'fa-close';
+    @Input() rejectIcon: string;
     
     @Input() rejectLabel: string = 'No';
     
