@@ -56,23 +56,19 @@
             </div>
         </div>
 
-        <div class="ui-grid-row volume-content-padding">
-            <div class="ui-grid-col-2">
-                <a class="create-profile-img" (click)="addVolumeItem()">
-                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
-                    <span>Add Volumes</span>
-                </a>
-            </div>
+        <div class="volume-content-padding">
+            <a class="create-profile-img" (click)="addVolumeItem()">
+                <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                <span>Add Volumes</span>
+            </a>
         </div>
 
-        <div class="ui-grid-row volume-content-padding">
-            <div class="ui-grid-col-2">
-                <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" name="replicationCheckbox" value="value" label="Configuration replication now"></p-checkbox>
-            </div>
+        <div class="volume-content-padding">
+            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" name="replicationCheckbox" value="value" label="Configuration replication now"></p-checkbox>
         </div>
 
-        <div *ngIf="showReplicationConf">
-            留给replication component
+        <div class="volume-content-padding" *ngIf="showReplicationConf">
+            <app-replication-group></app-replication-group>
         </div>
 
         <!-- <div class="ui-grid-row profile-form-padding">

@@ -7,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ReplicationGroupComponent implements OnInit {
 
+  value:boolean;
+
   constructor() { }
 
   ngOnInit() {
