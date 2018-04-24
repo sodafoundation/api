@@ -7,6 +7,7 @@ import { ProfileCardComponent } from './profileCard/profile-card.component';
 import { ButtonModule,CardModule,ChartModule,MessageModule,OverlayPanelModule,DialogModule } from '../../components/common/api';
 import { ProfileService } from './profile.service';
 import { HttpService } from '../../shared/api';
+import { StoragePoolsTableComponent } from './storage-pools-table/storage-pools-table.component';
 let routers = [{
   path: '',
   component: ProfileComponent
@@ -18,7 +19,8 @@ let routers = [{
 @NgModule({
   declarations: [
     ProfileComponent,
-    ProfileCardComponent
+    ProfileCardComponent,
+    StoragePoolsTableComponent
   ],
   imports: [
     RouterModule.forChild(routers),

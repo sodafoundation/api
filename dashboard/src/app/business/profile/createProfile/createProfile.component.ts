@@ -90,6 +90,8 @@ export class CreateProfileComponent implements OnInit {
     //用户自定义项，用于
     customizationItems = [];
 
+    pools;
+    cols = [];
 
     constructor(
         // private I18N: I18NService,
@@ -120,6 +122,71 @@ export class CreateProfileComponent implements OnInit {
             'storageType': new FormControl('', Validators.required),
             'policys': new FormControl('')
         });
+
+        this.cols = [
+            { field: 'name', header: 'Name' },
+            { field: 'freeCapacity', header: 'FreeCapacity' },
+            { field: 'totalCapacity', header: 'TotalCapacity' },
+            { field: 'dockId', header: 'Disk' },
+            { field: 'storageType', header: 'StorageType' }
+        ];
+
+        this.pools =[
+            {
+              "id": "string",
+              "createdAt": "2018-04-11T08:11:27.335Z",
+              "updatedAt": "2018-04-11T08:11:27.335Z",
+              "name": "string1",
+              "storageType": "string",
+              "description": "string",
+              "status": "string",
+              "availabilityZone": "string",
+              "totalCapacity": 0,
+              "freeCapacity": 1,
+              "dockId": "string",
+              "extras": {
+                "additionalProp1": {},
+                "additionalProp2": {},
+                "additionalProp3": {}
+              }
+            },
+            {
+                "id": "string",
+                "createdAt": "2018-04-11T08:11:27.335Z",
+                "updatedAt": "2018-04-11T08:11:27.335Z",
+                "name": "string2",
+                "storageType": "string",
+                "description": "string",
+                "status": "string",
+                "availabilityZone": "string",
+                "totalCapacity": 0,
+                "freeCapacity": 8,
+                "dockId": "string",
+                "extras": {
+                  "additionalProp1": {},
+                  "additionalProp2": {},
+                  "additionalProp3": {}
+                }
+              },
+              {
+                "id": "string",
+                "createdAt": "2018-04-11T08:11:27.335Z",
+                "updatedAt": "2018-04-11T08:11:27.335Z",
+                "name": "string3",
+                "storageType": "string",
+                "description": "string",
+                "status": "string",
+                "availabilityZone": "string",
+                "totalCapacity": 0,
+                "freeCapacity": 10,
+                "dockId": "string",
+                "extras": {
+                  "additionalProp1": {},
+                  "additionalProp2": {},
+                  "additionalProp3": {}
+                }
+              }
+          ]
     }
 
     onSubmit(value) {
