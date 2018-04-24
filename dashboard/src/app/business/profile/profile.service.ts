@@ -25,9 +25,7 @@ export class ProfileService {
     //查询profiles
     getProfileById(id) {
         let getUrl = this.url + '/' + id
-        this.http.get(getUrl).subscribe((res) => {
-            console.log(res.json().data);
-        });
+        return this.http.get(getUrl);
     }
 
     //修改profile

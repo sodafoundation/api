@@ -4,35 +4,35 @@
         <span *ngIf="(i+1) !== items.length">></span>
     </span>
 </div>
-<div>
+<div *ngIf='data'>
     <div class="ui-g-12 ui-md-6">
         <div>
             <h2 class="proflie-name">{{data.name}}</h2>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">Access Protocol:</span>
-            <span class="ui-g-12 ui-md-8">{{data.protocol}}</span>
+            <span class="ui-g-12 ui-md-8">{{data.extras.protocol}}</span>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">Provisioning Type:</span>
-            <span class="ui-g-12 ui-md-8">{{data.type}}</span>
+            <span class="ui-g-12 ui-md-8">{{data.storageType}}</span>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">QoS Policy:</span>
             <div class="ui-g-12 ui-md-8">
-                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">Replication Policy:</span>
             <div class="ui-g-12 ui-md-8">
-                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">Snapshot Policy:</span>
             <div class="ui-g-12 ui-md-8">
-                <div *ngFor="let policy of data.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>
     </div>

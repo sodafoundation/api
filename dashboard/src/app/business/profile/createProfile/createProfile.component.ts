@@ -211,7 +211,7 @@ export class CreateProfileComponent implements OnInit {
             // return res.json();
             // this.profiles = res.json();
             this.router.navigate(['/profile']);
-        })
+        });
     }
 
     getI18n() {

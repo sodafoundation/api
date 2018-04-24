@@ -4,11 +4,14 @@
 <p-tabView>
     <p-tabPanel header="Volume">
         <div class="table-toolbar">
-            <div class="left"><button pButton type="button" label="Create"></button><button pButton type="button" label="Delete"></button></div>
+            <div class="left">
+                <button pButton type="button" label="Create" [routerLink]="['/createVolume']"></button>
+                <button pButton type="button" label="Delete"></button>
+            </div>
             <div class="right">
                 <div class="ui-inputgroup">
                     <input type="text" pInputText placeholder="search">
-                    <button pButton type="button" icon="fa-check" ></button>
+                    <button pButton type="button" icon="fa-check"></button>
                 </div>
                 <button class="" pButton type="button" icon="fa-check"></button>
             </div>
@@ -21,7 +24,7 @@
             <div class="right">
                 <div class="ui-inputgroup">
                     <input type="text" pInputText placeholder="search">
-                    <button pButton type="button" icon="fa-check" ></button>
+                    <button pButton type="button" icon="fa-check"></button>
                 </div>
                 <button class="" pButton type="button" icon="fa-check"></button>
             </div>
@@ -29,4 +32,3 @@
         <volume-group-list #volumeGroupList></volume-group-list>
     </p-tabPanel>
 </p-tabView>
-

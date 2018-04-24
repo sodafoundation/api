@@ -5,6 +5,8 @@ import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
+import { ProfileService } from './../profile.service';
+
 @Component({
     templateUrl: './modifyProfile.component.html',
     styleUrls: [
@@ -47,17 +49,22 @@ export class modifyProfileComponent implements OnInit {
     formGroup;
     errorMessage;
     pools;
-    profile;
+    // profileId;
     constructor(
         // private I18N: I18NService,
         // private router: Router
-        private ActivatedRoute: ActivatedRoute
+        private ActivatedRoute: ActivatedRoute,
+        private ProfileService: ProfileService
     ) { }
     ngOnInit() {
+        let profileId;
+        this.ActivatedRoute.params.subscribe((params) => profileId = params.profileId);
 
-        this.ActivatedRoute.params.subscribe((params) => console.log(params));
-        // this.profile = params.username
-        console.log
+        this.ProfileService.getProfileById(profileId).subscribe((res) => {
+            // return res.json();
+            // this.profiles = res.json();
+            this.data = res.json();
+        });
         this.items = [
             { label: 'Profile', url: '/profile' },
             { label: 'Profile detail', url: '/modifyProfile' }
@@ -95,26 +102,26 @@ export class modifyProfileComponent implements OnInit {
                 fontSize: 12
             }
         };
-        this.data = {
-            "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c1",
-            "name": "Gold",
-            "protocol": "FC",
-            "type": "Thin",
-            "policys": [
-                "Qos",
-                "Snapshot",
-                "Replication"
-            ],
-            "description": "provide gold storage service",
-            "extras": {
-                "key1": "value1",
-                "key2": {
-                    "subKey1": "subValue1",
-                    "subKey2": "subValue2"
-                },
-                "key3": "value3"
-            }
-        };
+        // this.data = {
+        //     "id": "5d8c3732-a248-50ed-bebc-539a6ffd25c1",
+        //     "name": "Gold",
+        //     "protocol": "FC",
+        //     "type": "Thin",
+        //     "policys": [
+        //         "Qos",
+        //         "Snapshot",
+        //         "Replication"
+        //     ],
+        //     "description": "provide gold storage service",
+        //     "extras": {
+        //         "key1": "value1",
+        //         "key2": {
+        //             "subKey1": "subValue1",
+        //             "subKey2": "subValue2"
+        //         },
+        //         "key3": "value3"
+        //     }
+        // };
 
         this.cols = [
             { field: 'name', header: 'Name' },

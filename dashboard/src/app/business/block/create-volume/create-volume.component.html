@@ -1,0 +1,149 @@
+<div class="content-header">
+    <h2>Create Volume</h2>
+    <p>Apply for block storage resources.</p>
+</div>
+
+<form [formGroup]="volumeform" (ngSubmit)="onSubmit(volumeform.value)">
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+                {{label.zone}}
+            </div>
+            <div class="ui-grid-col-2">
+                <p-dropdown [options]="availabilityZones" formControlName="zone"></p-dropdown>
+            </div>
+            <div class="ui-grid-col-2">
+                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['zone'].valid&&volumeform.controls['zone'].dirty">
+                    <i class="fa fa-close"></i> Zone is required
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-grid-row volume-item-padding">
+            <div class="ui-grid-col-2">
+                {{label.name}}
+            </div>
+            <div class="ui-grid-col-2">
+                {{label.profile}}
+            </div>
+            <div class="ui-grid-col-2">
+                {{label.capacity}}
+            </div>
+            <div class="ui-grid-col-1">
+                {{label.quantity}}
+            </div>
+        </div>
+
+        <div class="ui-grid-row volume-item-padding" *ngFor="let volumeItem of volumeItems;index as i">
+            <div class="ui-grid-col-2">
+                <input pInputText type="text" placeholder="Name" formControlName="name" />
+                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['name'].valid&&volumeform.controls['name'].dirty">
+                    <i class="fa fa-close"></i> Name is required
+                </div>
+            </div>
+            <div class="ui-grid-col-2">
+                <p-dropdown [options]="availabilityZones" formControlName="zone"></p-dropdown>
+            </div>
+            <div class="ui-grid-col-2" style="display: flex;">
+                <p-spinner formControlName="capacity" [min]="1" aria-placeholder="1"></p-spinner>
+                <p-dropdown [options]="capacityUnit"></p-dropdown>
+            </div>
+            <div class="ui-grid-col-1">
+                <p-spinner formControlName="quantity" [min]="1" aria-placeholder="1"></p-spinner>
+            </div>
+            <div class="ui-grid-col-1" *ngIf="i !== 0" (click)="deleteVolumeItem(i)">
+                <img style="vertical-align:middle;" src="assets/business/images/profile/u1065.png">
+            </div>
+        </div>
+
+        <div class="ui-grid-row volume-content-padding">
+            <div class="ui-grid-col-2">
+                <a class="create-profile-img" (click)="addVolumeItem()">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                    <span>Add Volumes</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="ui-grid-row volume-content-padding">
+            <div class="ui-grid-col-2">
+                <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" name="replicationCheckbox" value="value" label="Configuration replication now"></p-checkbox>
+            </div>
+        </div>
+
+        <div *ngIf="showReplicationConf">
+            留给replication component
+        </div>
+
+        <!-- <div class="ui-grid-row profile-form-padding">
+            <div class="ui-grid-col-2">
+                {{label.customization}}
+            </div>
+            <div class="ui-grid-col-2">
+                <a class="create-profile-img" (click)="showCustomization=!showCustomization">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                    <span>Add</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="ui-grid-row profile-form-padding" *ngFor="let customizationItem of customizationItems;index as i">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="customization-container">
+                <div class="customization-item">
+                    {{customizationItem.key}}:
+                </div>
+                <div class="customization-item">
+                    {{customizationItem.value}}
+                </div>
+                <div class="create-profile-img " (click)="deleteCustomization(i)">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u1065.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-grid-row profile-form-padding">
+            <div class="ui-grid-col-2">
+                {{label.qosPolicy}}
+            </div>
+            <div class="ui-grid-col-2">
+                <p-checkbox (onChange)="showDetails('qos')" name="policyCheckbox" value="Qos" label="Enable" [formControl]="profileform.controls['policys']"></p-checkbox>
+            </div>
+        </div> -->
+        <!-- <div class="ui-grid-row" *ngIf="qosIsChecked"> qos 策略的详情
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="ui-grid-col-10">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-1">
+                            {{label.maxIOPS}}
+                        </div>
+                        <div class="ui-grid-col-2">
+                            <div style="display: flex;align-items: center;">
+                                <input pInputText type="text" placeholder="MaxIOPS" />
+                                <span style="padding: 0 0.5em;">IOPS/TB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui-grid-row">
+                        <div class="ui-grid-col-1">
+                            {{label.MBPS}}
+                        </div>
+                        <div class="ui-grid-col-2">
+                            <div style="display: flex;align-items: center;">
+                                <input pInputText type="text" placeholder="MBPS" />
+                                <span style="padding: 0 0.5em;">MBPS/TB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+    <div class="volume-content-padding">
+        <button pButton type="submit" class="ui-button-secondary" label="OK" [disabled]="!volumeform.valid"></button>
+        <button pButton type="button" label="Cancel" [routerLink]="['/profile']"></button>
+    </div>
+</form>

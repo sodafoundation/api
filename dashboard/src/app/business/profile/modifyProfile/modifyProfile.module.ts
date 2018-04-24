@@ -4,6 +4,9 @@ import { modifyProfileComponent } from './modifyProfile.component';
 import { RouterModule } from '@angular/router';
 import { BreadcrumbModule,ChartModule,TableModule,ButtonModule } from './../../../components/common/api';
 
+import { HttpService } from './../../../shared/api';
+import { ProfileService } from './../profile.service';
+
 let routers = [{
   path: '',
   component: modifyProfileComponent
@@ -22,6 +25,9 @@ let routers = [{
     ButtonModule
     // FormModule
   ],
-  providers: []
+  providers: [
+    HttpService,
+    ProfileService
+  ]
 })
 export class ModifyProfileModule { }

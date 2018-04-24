@@ -11,9 +11,9 @@ import { StoragePoolsTableComponent } from './storage-pools-table/storage-pools-
 let routers = [{
   path: '',
   component: ProfileComponent
-},{
-  path: '/:profileId',
-  component: ProfileComponent
+// },{
+//   path: '/:profileId',
+//   component: ProfileComponent
 }]
 
 @NgModule({
