@@ -39,6 +39,12 @@ const (
 	snapshotPrefix    = "_snapshot-"
 )
 
+type LvInfo struct {
+	Name string
+	Vg   string
+	Size int64
+}
+
 type LVMConfig struct {
 	TgtBindIp  string                    `yaml:"tgtBindIp"`
 	TgtConfDir string                    `yaml:"tgtConfDir"`
@@ -135,16 +141,74 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	}, nil
 }
 
+func (d *Driver) geLvInfos() ([]*LvInfo, error) {
+	var lvList []*LvInfo
+	args := []string{"--noheadings", "--unit=g", "-o", "vg_name,name,size", "--nosuffix"}
+	info, err := d.handler("lvs", args)
+	if err != nil {
+		log.Error("Get volume failed", err)
+		return lvList, err
+	}
+	for _, line := range strings.Split(info, "\n") {
+		if len(line) == 0 {
+			continue
+		}
+		words := strings.Fields(line)
+		size, _ := strconv.ParseInt(words[2], 10, 64)
+		lv := &LvInfo{
+			Name: words[0],
+			Vg:   words[1],
+			Size: size,
+		}
+		lvList = append(lvList, lv)
+	}
+	return lvList, nil
+}
+
+func (d *Driver) volumeExists(id string) bool {
+	lvList, _ := d.geLvInfos()
+	name := volumePrefix + id
+	for _, lv := range lvList {
+		if lv.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *Driver) lvHasSnapshot(lvPath string) bool {
+	args := []string{"--noheading", "-C", "-o", "Attr", lvPath}
+	info, err := d.handler("lvdisplay", args)
+	if err != nil {
+		log.Error("Failed to remove logic volume:", err)
+		return false
+	}
+	info = strings.Trim(info, " ")
+	return info[0] == 'o' || info[0] == 'O'
+}
+
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+
+	id := opt.GetId()
+	if !d.volumeExists(id) {
+		log.Warningf("Volume(%s) does not exist, nothing to remove", id)
+		return nil
+	}
+
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
-		err := errors.New("Failed to find logic volume path in volume metadata!")
+		err := errors.New("failed to find logic volume path in volume metadata")
 		log.Error(err)
 		return err
 	}
-	if _, err := d.handler("lvremove", []string{
-		lvPath,
-	}); err != nil {
+
+	if d.lvHasSnapshot(lvPath) {
+		err := fmt.Errorf("unable to delete due to existing snapshot for volume: %s", id)
+		log.Error(err)
+		return err
+	}
+
+	if _, err := d.handler("lvremove", []string{"-f", lvPath}); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -384,11 +448,11 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 func execCmd(script string, cmd []string) (string, error) {
 	log.Infof("Command: %s %s", script, strings.Join(cmd, " "))
-	ret, err := exec.Command(script, cmd...).Output()
+	info, err := exec.Command(script, cmd...).Output()
 	if err != nil {
-		log.Error(err.Error())
+		log.Error(info, err.Error())
 		return "", err
 	}
-	log.Infof("Command Result:\n%s", string(ret))
-	return string(ret), nil
+	log.V(8).Infof("Command Result:\n%s", string(info))
+	return string(info), nil
 }

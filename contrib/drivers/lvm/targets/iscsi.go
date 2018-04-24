@@ -102,7 +102,7 @@ func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator str
 	write-cache %s
 </target>
 `
-	var initiatorAddr = "initiator-address" + hostIp
+	var initiatorAddr = "initiator-address " + hostIp
 	var initiatorName string
 	if initiator != "ALL" {
 		initiatorName = "initiator-name " + initiator
@@ -174,10 +174,10 @@ func (t *tgtTarget) RemoveISCSITarget(volId, iqn string) error {
 
 func (*tgtTarget) execCmd(name string, cmd ...string) (string, error) {
 	ret, err := exec.Command(name, cmd...).Output()
-	log.V(8).Infoln("Command:", cmd, strings.Join(cmd, " "))
+	log.Infoln("Command:", cmd, strings.Join(cmd, " "))
 	log.V(8).Infof("result:%s", string(ret))
 	if err != nil {
-		log.V(8).Info("error info:", err)
+		log.Error("error info:", err)
 	}
 	return string(ret), err
 }
