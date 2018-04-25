@@ -215,8 +215,8 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 }
 
 func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
-	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting,
-		model.ReplicationEnabling, model.ReplicationDisabling, model.ReplicationFailingOver}
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
 
 	if utils.Contained(in.Status, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.Status)
@@ -262,14 +262,17 @@ func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error 
 	return nil
 }
 
-func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secondaryBackendId string) error {
 	if in.Status != model.ReplicationAvailable {
 		errMsg := "Only the replication with the status available can be failover"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
-
-	in.Status = model.ReplicationFailingOver
+	if secondaryBackendId == model.ReplicationBackendIdDefault {
+		in.Status = model.ReplicationFailingOver
+	} else {
+		in.Status = model.ReplicationFailingBack
+	}
 	_, err := db.C.UpdateReplication(ctx, in.Id, in)
 	if err != nil {
 		return err

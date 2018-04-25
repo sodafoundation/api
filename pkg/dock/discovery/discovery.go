@@ -228,7 +228,7 @@ func (add *attachDockDiscoverer) Discover() error {
 		Metadata: map[string]string{
 			"Platform":  runtime.GOARCH,
 			"OsType":    runtime.GOOS,
-			"Ip":        bindIp,
+			"HostIp":    bindIp,
 			"Initiator": localIqn,
 		},
 	}

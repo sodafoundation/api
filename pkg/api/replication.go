@@ -344,7 +344,7 @@ func (this *ReplicationPortal) FailoverReplication(ctx *context.Context) {
 		return
 	}
 
-	if err := FailoverReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+	if err := FailoverReplicationDBEntry(c.GetContext(ctx), r, failover.SecondaryBackendId); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}

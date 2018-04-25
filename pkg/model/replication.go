@@ -27,21 +27,24 @@ const (
 	ReplicationDeleting       = "deleting"
 	ReplicationEnabling       = "enabling"
 	ReplicationDisabling      = "disabling"
-	ReplicationFailingOver    = "failingover"
+	ReplicationFailingOver    = "failing_over"
+	ReplicationFailingBack    = "failing_back"
 	ReplicationAvailable      = "available"
 	ReplicationError          = "error"
 	ReplicationErrorDeleting  = "error_deleting"
 	ReplicationErrorEnabling  = "error_enabling"
 	ReplicationErrorDisabling = "error_disabling"
 	ReplicationErrorFailover  = "error_failover"
+	ReplicationErrorFailback  = "error_failback"
 	ReplicationEnabled        = "enabled"
 	ReplicationDisabled       = "disabled"
-	ReplicationFailover       = "failover"
+	ReplicationFailover       = "failed_over"
 )
 
 const (
-	ReplicationModelSync  = "sync"
-	ReplicationModelAsync = "async"
+	ReplicationModelSync        = "sync"
+	ReplicationModelAsync       = "async"
+	ReplicationBackendIdDefault = "default"
 )
 
 // ReplicationSpec represents a replication relationship between the volumes

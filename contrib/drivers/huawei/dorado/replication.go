@@ -79,7 +79,10 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 
 func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 	pairId, ok := opt.GetMetadata()[KPairId]
-	sLunId := opt.SecondaryReplicationDriverData[KLunId]
+	var sLunId string
+	if opt.SecondaryVolumeId == "" {
+		sLunId = opt.SecondaryReplicationDriverData[KLunId]
+	}
 	if !ok {
 		msg := fmt.Sprintf("Can find pair id in metadata")
 		log.Errorf(msg)
@@ -115,7 +118,11 @@ func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts)
 		log.Errorf(msg)
 		return fmt.Errorf(msg)
 	}
-	return r.mgr.Failover(pairId)
+	if opt.SecondaryBackendId == model.ReplicationBackendIdDefault {
+		return r.mgr.Failover(pairId)
+	} else {
+		return r.mgr.Failback(pairId)
+	}
 }
 
 func NewReplicaPairMgr(conf *DoradoConfig) (r *ReplicaPairMgr, err error) {
@@ -349,9 +356,7 @@ func (r *ReplicaPairMgr) DeleteReplication(pairId, rmtLunId string) error {
 // 4. Switch the role of replication pairs.
 // 5. Enable replications.
 
-func (r *ReplicaPairMgr) Failback(metaData, primaryDriverData, secondaryDriverData map[string]string) error {
-	pairId := metaData[KPairId]
-	//rmtLunId := secondaryDriverData[KLunId]
+func (r *ReplicaPairMgr) Failback(pairId string) error {
 	r.localDriver.Enable(pairId, false)
 	r.localDriver.WaitReplicaReady(pairId)
 	r.remoteDriver.Failover(pairId)
