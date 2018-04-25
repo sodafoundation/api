@@ -1,3 +1,7 @@
+<div class="content-header">
+    <p>A tenant is used to group and manage resources and users.</p>
+</div>
+
 <div class="table-toolbar">
     <div class="left"><button pButton type="button" label="Create" (click)="showCreateTenant()" class="ui-button-secondary"></button><button pButton type="button" label="Delete"></button></div>
     <div class="right">
@@ -15,27 +19,30 @@
     <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
     <p-column field="description" header="Description"></p-column>
     <p-column header="Operation" [style]="{'width': '30%'}">
-        <ng-template pTemplate="body">
-            <a href="#">Modify</a>
+        <ng-template pTemplate="body" let-tenant="rowData">
+            <a (click)="showCreateTenant(tenant)">Modify</a>
             <a href="#">Delete</a>
         </ng-template>
     </p-column>
     <ng-template pTemplate="rowexpansion">
-        <tenant-detail [isDetailFinished]="isDetailFinished"></tenant-detail>
+        <tenant-detail [projectID]="projectID" [isDetailFinished]="isDetailFinished"></tenant-detail>
     </ng-template>
 </p-dataTable>
 
-<p-dialog header="Create Tenant" [(visible)]="createTenantDisplay" [width]="600" modal="modal">
-    <div class="ui-inputgroup">
-        <span class="ui-g-4 ui-md-3">{{label.userNameLabel}}</span>
-        <input type="text" pInputText placeholder="Username">
-    </div>
-    <div class="ui-inputgroup margin-top-1em">
-        <span class="ui-g-4 ui-md-3">{{label.descriptionLabel}}</span>
-        <textarea class="padding-litte" placeholder="Description" [rows]="5" [cols]="30" pInputTextarea autoResize="autoResize"></textarea>
-    </div>
+<p-dialog *ngIf="createTenantDisplay" [header]="popTitle" [(visible)]="createTenantDisplay" [width]="600" modal="modal">
+    <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="tenantFormGroup" [errorMessage]="errorMessage">
+        <form-item label="{{label.tenantNameLabel}}" [required]="true">
+            <input type="text" pInputText formControlName="form_name" />
+        </form-item>
+
+        <form-item label="{{label.descriptionLabel}}" [required]="false">
+            <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="form_description"></textarea>
+        </form-item>
+    </form>
+
     <p-footer>
-        <button type="button" pButton (click)="createTenantDisplay=false" label="OK"></button>
+        <button *ngIf="isEditTenant" type="button" pButton (click)="updateTenant()" label="OK"></button>
+        <button *ngIf="!isEditTenant" type="button" pButton (click)="createTenant()" label="OK"></button>
         <button type="button" pButton (click)="createTenantDisplay=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>

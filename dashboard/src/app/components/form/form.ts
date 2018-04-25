@@ -1,7 +1,7 @@
 import { NgModule, Component, Directive, Input, Output, ElementRef, Injector, OnInit, AfterViewInit, AfterContentChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, AbstractControl } from '@angular/forms';
-import { SharedModule } from '../../shared/shared.module';
+import { Keys } from '../common/keys.pipe';
 
 @Directive({
     selector: 'form'
@@ -28,13 +28,13 @@ export class Form{
         </div>
         <div [ngClass]='{"form-content": true}' [class]='contentStyleClass'>
             <ng-content></ng-content>
-            <div class="ui-message ui-message-error ui-corner-all">
-                <svg class="ui-message-error-icon icon">
-                    <use xlink:href="#icon-status-failed"></use>
-                </svg>
-                <span class="ui-message-error-text" *ngFor="let errKey of [(formCtrl.errors | Keys)[0]]">
-                    {{ (errorMessage && errorMessage[errKey]) || formCtrl.errors[errKey] }}
-                </span>
+            <div class="ui-message-container" *ngIf="formCtrl">
+                <div class="ui-message ui-message-error ui-corner-all">
+                    <i class="fa fa-exclamation-circle" ></i>
+                    <span class="ui-message-error-text" *ngFor="let errKey of [(formCtrl.errors | Keys)[0]]">
+                        {{ (errorMessage && errorMessage[errKey]) || formCtrl.errors[errKey] }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -81,7 +81,7 @@ export class FormItem implements OnInit, AfterViewInit, AfterContentChecked {
         let ctrlElems =this.el.nativeElement.querySelectorAll(".form-content [formControlName]");
         if( this.formInstance.formGroup && ctrlElems.length > 0){
             ctrlElems.forEach(elem => {
-                let name = elem.getattribute("formControlName");
+                let name = elem.getAttribute("formControlName");
                 let formCtrl = this.formInstance.formGroup.get(name);
 
                 if( formCtrl ){
@@ -119,9 +119,9 @@ export class FormItem implements OnInit, AfterViewInit, AfterContentChecked {
 }
 
 @NgModule({
-    imports: [CommonModule, FormsModule, SharedModule],
-    exports: [Form, FormItem],
-    declarations: [Form, FormItem]
+    imports: [CommonModule, FormsModule ],
+    exports: [Form, FormItem, Keys ],
+    declarations: [Form, FormItem, Keys ]
 })
 export class FormModule{}
 

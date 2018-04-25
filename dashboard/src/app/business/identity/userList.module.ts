@@ -1,8 +1,9 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { UserListComponent } from './userList.component';
-import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, InputTextModule, InputTextareaModule, DropdownModule, PasswordModule, ConfirmDialogModule } from '../../components/common/api';
+import { FormModule, ButtonModule, CheckboxModule, DataTableModule, DropMenuModule, DialogModule, InputTextModule, InputTextareaModule, DropdownModule, PasswordModule, ConfirmDialogModule } from '../../components/common/api';
+
 import { UserDetailModule } from './userDetail/userDetail.module';
 
 @NgModule({
@@ -17,8 +18,11 @@ import { UserDetailModule } from './userDetail/userDetail.module';
     InputTextModule,
     InputTextareaModule,  
     DropdownModule,
+    CheckboxModule,
     PasswordModule,
     FormsModule,
+    ReactiveFormsModule,
+    FormModule,
     UserDetailModule
   ],
   exports: [UserListComponent],

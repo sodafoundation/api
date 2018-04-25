@@ -19,8 +19,6 @@ export class userDetailComponent implements OnInit {
 
     userID: string;
 
-    userRole: string;
-
     defaultTenant: string;
 
     constructor(
@@ -30,8 +28,7 @@ export class userDetailComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.userID = this.detailUserInfo.split("|")[0];
-        this.userRole = this.detailUserInfo.split("|")[1] == "admin" ? "System Administrator" : "Tenant User";
+        this.userID = this.detailUserInfo;
 
         let request: any = { params: {} };
         this.http.get("/v3/users/" + this.userID, request).subscribe((res) => {

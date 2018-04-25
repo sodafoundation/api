@@ -21,19 +21,22 @@ export class HttpService extends Http {
     }
 
     get(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-<<<<<<< HEAD
         // this.setToken(options);
         if( localStorage['x-subject-token'] ){
             !options && (options = {})
             !options.headers && (options['headers'] = new Headers());
             options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
         }
-=======
->>>>>>> 18c7b0a657a7581518be7dffbf2b8082e14e23e5
         return this.intercept(super.get(url, options), options);
     }
 
     post(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
+        // this.setToken(options);
+        if( localStorage['x-subject-token'] ){
+            !options && (options = {})
+            !options.headers && (options['headers'] = new Headers());
+            options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
+        }
         return this.intercept(super.post(url, body, options), options);
     }
 
@@ -48,20 +51,16 @@ export class HttpService extends Http {
     }
 
     delete(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-<<<<<<< HEAD
         // this.setToken(options);
         if( localStorage['x-subject-token'] ){
             !options && (options = {})
             !options.headers && (options['headers'] = new Headers());
             options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
         }
-=======
->>>>>>> 18c7b0a657a7581518be7dffbf2b8082e14e23e5
         return this.intercept(super.delete(url, options), options);
     }
 
     patch(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-<<<<<<< HEAD
         // this.setToken(options);
         if( localStorage['x-subject-token'] ){
             !options && (options = {})
@@ -69,12 +68,14 @@ export class HttpService extends Http {
             options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
         }
         return this.intercept(super.patch(url, body, options), options);
-=======
-        return this.intercept(super.patch(url, options), options);
->>>>>>> 18c7b0a657a7581518be7dffbf2b8082e14e23e5
     }
 
     head(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
+        if( localStorage['x-subject-token'] ){
+            !options && (options = {})
+            !options.headers && (options['headers'] = new Headers());
+            options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
+        }
         return this.intercept(super.head(url, options), options);
     }
 
