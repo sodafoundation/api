@@ -21,7 +21,6 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -121,15 +120,12 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 }
 
 func volumeAttachmentDeleteAction(cmd *cobra.Command, args []string) {
-	ArgsNumCheck(cmd, args, 2)
-	attachment := &model.VolumeAttachmentSpec{
-		VolumeId: args[0],
-	}
-	err := client.DeleteVolumeAttachment(args[1], attachment)
+	ArgsNumCheck(cmd, args, 1)
+	attachment := &model.VolumeAttachmentSpec{}
+	err := client.DeleteVolumeAttachment(args[0], attachment)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete attachment(%s) success.\n", args[1])
 }
 
 func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {

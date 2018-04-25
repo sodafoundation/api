@@ -223,7 +223,6 @@ func sliceconv(slice interface{}) []interface{} {
 	if v.Kind() != reflect.Slice {
 		panic("sliceconv: param \"slice\" should be on slice value")
 	}
-
 	l := v.Len()
 	r := make([]interface{}, l)
 	for i := 0; i < l; i++ {
@@ -257,6 +256,9 @@ func parseList(slice interface{}, keys KeyList, fmts FormatterList) (
 			rows = appendRow(rows, row)
 		}
 	}
+	if len(coln) == 0 {
+		coln = keys
+	}
 	colw = getColw(coln, rows)
 	return coln, colw, rows
 }
@@ -270,9 +272,6 @@ func repeat(time int, char rune) string {
 }
 
 func table(coln []string, colw []int, rows [][]string, b bd) (table string) {
-	if len(rows) == 0 {
-		return "Nothing"
-	}
 	head := [][]rune{[]rune{b.DR}, []rune{b.V}, []rune{b.VR}}
 	bttm := []rune{b.UR}
 	for i, v := range colw {
