@@ -38,7 +38,7 @@ func (s *fakeSelector) SelectSupportedPool(tags map[string]interface{}) (*model.
 	return s.res, nil
 }
 
-func (s *fakeSelector) SelectSupportedPoolForVG(group *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
+func (s *fakeSelector) SelectSupportedPoolForVG(vg *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
 	if s.err != nil {
 		return nil, s.err
 	}

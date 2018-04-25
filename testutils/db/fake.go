@@ -334,7 +334,7 @@ func (fc *FakeDbClient) ListVolumesByIds(ctx *c.Context, ids []string) ([]*model
 	return nil, nil
 }
 
-func (fc *FakeDbClient) ListVolumesByGroupId(ctx *c.Context, groupId string) ([]*model.VolumeSpec, error) {
+func (fc *FakeDbClient) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
 	return nil, nil
 }
 

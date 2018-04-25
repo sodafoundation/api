@@ -286,11 +286,11 @@ func (v *VolumeMgr) CreateVolumeGroup(body VolumeGroupBuilder) (*model.VolumeGro
 }
 
 // GetVolumeGroup
-func (v *VolumeMgr) GetVolumeGroup(groupId string) (*model.VolumeGroupSpec, error) {
+func (v *VolumeMgr) GetVolumeGroup(vgId string) (*model.VolumeGroupSpec, error) {
 	var res model.VolumeGroupSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, groupId)}, "/")
+		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -314,20 +314,20 @@ func (v *VolumeMgr) ListVolumeGroups() ([]*model.VolumeGroupSpec, error) {
 }
 
 // DeleteVolumeGroup
-func (v *VolumeMgr) DeleteVolumeGroup(groupId string, body VolumeGroupBuilder) error {
+func (v *VolumeMgr) DeleteVolumeGroup(vgId string, body VolumeGroupBuilder) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, groupId)}, "/")
+		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
 
 	return v.Recv(url, "DELETE", body, nil)
 }
 
 // UpdateVolumeSnapshot
-func (v *VolumeMgr) UpdateVolumeGroup(groupId string, body VolumeGroupBuilder) (*model.VolumeGroupSpec, error) {
+func (v *VolumeMgr) UpdateVolumeGroup(vgId string, body VolumeGroupBuilder) (*model.VolumeGroupSpec, error) {
 	var res model.VolumeGroupSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, groupId)}, "/")
+		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err

@@ -84,7 +84,7 @@ type StoragePoolExtraSpec struct {
 	Advanced map[string]interface{} `json:"advanced,omitempty" yaml:"advanced,omitempty"`
 }
 
-var pool_sortKey string
+var poolSortKey string
 
 type StoragePoolSlice []*StoragePoolSpec
 
@@ -93,7 +93,7 @@ func (pool StoragePoolSlice) Len() int { return len(pool) }
 func (pool StoragePoolSlice) Swap(i, j int) { pool[i], pool[j] = pool[j], pool[i] }
 
 func (pool StoragePoolSlice) Less(i, j int) bool {
-	switch pool_sortKey {
+	switch poolSortKey {
 
 	case "ID":
 		return pool[i].Id < pool[j].Id
@@ -141,7 +141,7 @@ func (c *StoragePoolSpec) FindValue(k string, p *StoragePoolSpec) string {
 
 func (c *StoragePoolSpec) SortList(pools []*StoragePoolSpec, sortKey, sortDir string) []*StoragePoolSpec {
 
-	pool_sortKey = sortKey
+	poolSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(StoragePoolSlice(pools))

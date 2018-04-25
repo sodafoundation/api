@@ -253,10 +253,10 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
 
-	var group = model.VolumeGroupSpec{
+	var vg = model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
-	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&group)
+	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&vg)
 
 	mockClient := new(dbtest.MockClient)
 
@@ -264,13 +264,13 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	mockClient.On("ListVolumesByGroupId", fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
 	mockClient.On("GetVolume", fakeGroupVolumeTest.Id).Return(fakeGroupVolumeTest, nil)
 	mockClient.On("GetDockByPoolId", fakeVolumeGroup.PoolId).Return(nil, errors.New("db error"))
-	var groupUpdate = &model.VolumeGroupSpec{
+	var vgUpdate = &model.VolumeGroupSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "fakeGroupUpdate",
 		Status:      "updating",
 		Description: "fakeGroupUpdate",
 	}
-	mockClient.On("UpdateVolumeGroup", groupUpdate).Return(nil, errors.New("db error"))
+	mockClient.On("UpdateVolumeGroup", vgUpdate).Return(nil, errors.New("db error"))
 	db.C = mockClient
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

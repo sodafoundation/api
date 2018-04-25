@@ -248,7 +248,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 
 	log.Info("Dock server receive create volume group request, vr =", opt)
 
-	group, err := dock.Brain.CreateVolumeGroup(opt)
+	vg, err := dock.Brain.CreateVolumeGroup(opt)
 	if err != nil {
 		log.Error("Error occurred in dock module when create volume group:", err)
 
@@ -256,7 +256,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 		return &res, err
 	}
 
-	res.Reply = GenericResponseResult(group)
+	res.Reply = GenericResponseResult(vg)
 	return &res, nil
 }
 

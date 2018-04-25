@@ -57,7 +57,7 @@ type DockSpec struct {
 	DriverName string `json:"driverName,omitempty"`
 }
 
-var dock_sortKey string
+var dockSortKey string
 
 type DockSlice []*DockSpec
 
@@ -66,7 +66,7 @@ func (dock DockSlice) Len() int { return len(dock) }
 func (dock DockSlice) Swap(i, j int) { dock[i], dock[j] = dock[j], dock[i] }
 
 func (dock DockSlice) Less(i, j int) bool {
-	switch dock_sortKey {
+	switch dockSortKey {
 
 	case "ID":
 		return dock[i].Id < dock[j].Id
@@ -109,7 +109,7 @@ func (c *DockSpec) FindValue(k string, d *DockSpec) string {
 }
 
 func (c *DockSpec) SortList(dcks []*DockSpec, sortKey, sortDir string) []*DockSpec {
-	dock_sortKey = sortKey
+	dockSortKey = sortKey
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(DockSlice(dcks))
 	} else {

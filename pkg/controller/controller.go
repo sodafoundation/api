@@ -70,6 +70,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VOLUME_ERROR); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -85,6 +89,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
 	if err != nil {
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VOLUME_ERROR); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -92,6 +100,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err.Error())
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VOLUME_ERROR); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -536,8 +548,8 @@ func (c *Controller) CreateVolumeGroup(ctx *c.Context, in *model.VolumeGroupSpec
 	return nil
 }
 
-func (c *Controller) UpdateVolumeGroup(ctx *c.Context, group *model.VolumeGroupSpec, addVolumes []string, removeVolumes []string) error {
-	dock, err := db.C.GetDockByPoolId(ctx, group.PoolId)
+func (c *Controller) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec, addVolumes []string, removeVolumes []string) error {
+	dock, err := db.C.GetDockByPoolId(ctx, vg.PoolId)
 	if err != nil {
 		return err
 	}
@@ -545,7 +557,7 @@ func (c *Controller) UpdateVolumeGroup(ctx *c.Context, group *model.VolumeGroupS
 	c.volumeController.SetDock(dock)
 
 	opt := &pb.UpdateVolumeGroupOpts{
-		Id:            group.Id,
+		Id:            vg.Id,
 		DriverName:    dock.DriverName,
 		AddVolumes:    addVolumes,
 		RemoveVolumes: removeVolumes,
@@ -576,8 +588,8 @@ func (c *Controller) UpdateVolumeGroup(ctx *c.Context, group *model.VolumeGroupS
 	return nil
 }
 
-func (c *Controller) DeleteVolumeGroup(ctx *c.Context, group *model.VolumeGroupSpec) error {
-	dock, err := db.C.GetDockByPoolId(ctx, group.PoolId)
+func (c *Controller) DeleteVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) error {
+	dock, err := db.C.GetDockByPoolId(ctx, vg.PoolId)
 	if err != nil {
 		return err
 	}
@@ -585,7 +597,7 @@ func (c *Controller) DeleteVolumeGroup(ctx *c.Context, group *model.VolumeGroupS
 	c.volumeController.SetDock(dock)
 
 	opt := &pb.DeleteVolumeGroupOpts{
-		Id:         group.Id,
+		Id:         vg.Id,
 		DriverName: dock.DriverName,
 		Context:    ctx.ToJson(),
 	}

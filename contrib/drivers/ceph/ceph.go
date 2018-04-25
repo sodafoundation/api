@@ -601,14 +601,15 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, group *model.VolumeGroupSpec) (*model.VolumeGroupSpec, int, error) {
-	return nil, model.ErrorNotImplemented, nil
+// Bool return parameter imply that the method is implemented or not(true or false).
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, bool, error) {
+	return nil, false, nil
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, group *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, int, error) {
-	return nil, nil, nil, model.ErrorNotImplemented, nil
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, bool, error) {
+	return nil, nil, nil, false, nil
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, group *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, int, error) {
-	return nil, nil, model.ErrorNotImplemented, nil
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, bool, error) {
+	return nil, nil, false, nil
 }

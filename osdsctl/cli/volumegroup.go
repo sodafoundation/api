@@ -63,24 +63,24 @@ var volumeGroupUpdateCommand = &cobra.Command{
 }
 
 var (
-	volGroupName  string
-	volGroupDesp  string
-	volGroupAZ    string
+	vgName        string
+	vgDesp        string
+	vgAZ          string
 	addVolumes    *[]string
 	removeVolumes *[]string
 )
 
 func init() {
 	volumeGroupCommand.AddCommand(volumeGroupCreateCommand)
-	volumeGroupCreateCommand.Flags().StringVarP(&volGroupName, "name", "n", "", "the name of created volume group")
-	volumeGroupCreateCommand.Flags().StringVarP(&volGroupDesp, "description", "d", "", "the description of created volume group")
-	volumeGroupCreateCommand.Flags().StringVarP(&volGroupAZ, "availabilityZone", "a", "", "the availabilityZone of created volume group")
+	volumeGroupCreateCommand.Flags().StringVarP(&vgName, "name", "n", "", "the name of created volume group")
+	volumeGroupCreateCommand.Flags().StringVarP(&vgDesp, "description", "d", "", "the description of created volume group")
+	volumeGroupCreateCommand.Flags().StringVarP(&vgAZ, "availabilityZone", "a", "", "the availabilityZone of created volume group")
 	volumeGroupCommand.AddCommand(volumeGroupShowCommand)
 	volumeGroupCommand.AddCommand(volumeGroupListCommand)
 	volumeGroupCommand.AddCommand(volumeGroupDeleteCommand)
 	volumeGroupCommand.AddCommand(volumeGroupUpdateCommand)
-	volumeGroupUpdateCommand.Flags().StringVarP(&volGroupName, "name", "n", "", "the name of updated volume group")
-	volumeGroupUpdateCommand.Flags().StringVarP(&volGroupDesp, "description", "d", "", "the description of updated volume group")
+	volumeGroupUpdateCommand.Flags().StringVarP(&vgName, "name", "n", "", "the name of updated volume group")
+	volumeGroupUpdateCommand.Flags().StringVarP(&vgDesp, "description", "d", "", "the description of updated volume group")
 	addVolumes = volumeGroupUpdateCommand.Flags().StringSliceP("addVolumes", "a", nil, "the addVolumes of updated volume group")
 	removeVolumes = volumeGroupUpdateCommand.Flags().StringSliceP("removeVolumes", "r", nil, "the removeVolumes of updated volume group")
 }
@@ -92,13 +92,13 @@ func volumeGroupAction(cmd *cobra.Command, args []string) {
 
 func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	group := &model.VolumeGroupSpec{
-		Name:             volGroupName,
-		Description:      volGroupDesp,
-		AvailabilityZone: volGroupAZ,
+	vg := &model.VolumeGroupSpec{
+		Name:             vgName,
+		Description:      vgDesp,
+		AvailabilityZone: vgAZ,
 	}
 
-	resp, err := client.CreateVolumeGroup(group)
+	resp, err := client.CreateVolumeGroup(vg)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
@@ -135,14 +135,14 @@ func volumeGroupDeleteAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete snapshot(%s) success.\n", args[0])
+	fmt.Printf("Delete group(%s) success.\n", args[0])
 }
 
 func volumeGroupUpdateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	snp := &model.VolumeGroupSpec{
-		Name:          volGroupName,
-		Description:   volGroupDesp,
+		Name:          vgName,
+		Description:   vgDesp,
 		AddVolumes:    *addVolumes,
 		RemoveVolumes: *removeVolumes,
 	}

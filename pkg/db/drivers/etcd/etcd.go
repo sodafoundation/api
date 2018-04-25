@@ -1057,6 +1057,7 @@ func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
 }
 
 func (c *Client) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg.TenantId = ctx.TenantId
 	vgBody, err := json.Marshal(vg)
 	if err != nil {
 		return nil, err
@@ -1093,43 +1094,43 @@ func (c *Client) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroup
 	return vg, nil
 }
 
-func (c *Client) UpdateVolumeGroup(ctx *c.Context, volumeGroup *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	group, err := c.GetVolumeGroup(ctx, volumeGroup.Id)
+func (c *Client) UpdateVolumeGroup(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg, err := c.GetVolumeGroup(ctx, vgUpdate.Id)
 	if err != nil {
 		return nil, err
 	}
-	if volumeGroup.Name != "" && volumeGroup.Name != group.Name {
-		group.Name = volumeGroup.Name
+	if vgUpdate.Name != "" && vgUpdate.Name != vg.Name {
+		vg.Name = vgUpdate.Name
 	}
-	if volumeGroup.AvailabilityZone != "" && volumeGroup.AvailabilityZone != group.AvailabilityZone {
-		group.AvailabilityZone = volumeGroup.AvailabilityZone
+	if vgUpdate.AvailabilityZone != "" && vgUpdate.AvailabilityZone != vg.AvailabilityZone {
+		vg.AvailabilityZone = vgUpdate.AvailabilityZone
 	}
-	if volumeGroup.Description != "" && volumeGroup.Description != group.Description {
-		group.Description = volumeGroup.Description
+	if vgUpdate.Description != "" && vgUpdate.Description != vg.Description {
+		vg.Description = vgUpdate.Description
 	}
-	if volumeGroup.PoolId != "" && volumeGroup.PoolId != group.PoolId {
-		group.PoolId = volumeGroup.PoolId
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
 	}
-	if volumeGroup.Status != "" && volumeGroup.Status != group.Status {
-		group.Status = volumeGroup.Status
+	if vg.Status != "" && vgUpdate.Status != vg.Status {
+		vg.Status = vgUpdate.Status
 	}
-	if volumeGroup.PoolId != "" && volumeGroup.PoolId != group.PoolId {
-		group.PoolId = volumeGroup.PoolId
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
 	}
-	if volumeGroup.CreatedAt != "" && volumeGroup.CreatedAt != group.CreatedAt {
-		group.CreatedAt = volumeGroup.CreatedAt
+	if vgUpdate.CreatedAt != "" && vgUpdate.CreatedAt != vg.CreatedAt {
+		vg.CreatedAt = vgUpdate.CreatedAt
 	}
-	if volumeGroup.UpdatedAt != "" && volumeGroup.UpdatedAt != group.UpdatedAt {
-		group.UpdatedAt = volumeGroup.UpdatedAt
+	if vgUpdate.UpdatedAt != "" && vgUpdate.UpdatedAt != vg.UpdatedAt {
+		vg.UpdatedAt = vgUpdate.UpdatedAt
 	}
 
-	vgBody, err := json.Marshal(group)
+	vgBody, err := json.Marshal(vg)
 	if err != nil {
 		return nil, err
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, volumeGroup.Id),
+		Url:        urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vgUpdate.Id),
 		NewContent: string(vgBody),
 	}
 	dbRes := c.Update(dbReq)
@@ -1137,7 +1138,7 @@ func (c *Client) UpdateVolumeGroup(ctx *c.Context, volumeGroup *model.VolumeGrou
 		log.Error("When update volume group in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
-	return group, nil
+	return vg, nil
 }
 
 func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
@@ -1184,7 +1185,7 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 	return nil
 }
 
-func (c *Client) ListVolumesByGroupId(ctx *c.Context, groupId string) ([]*model.VolumeSpec, error) {
+func (c *Client) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
 	volumes, err := c.ListVolumes(ctx)
 
 	if err != nil {
@@ -1193,7 +1194,7 @@ func (c *Client) ListVolumesByGroupId(ctx *c.Context, groupId string) ([]*model.
 
 	var volumesInSameGroup []*model.VolumeSpec
 	for _, v := range volumes {
-		if v.GroupId == groupId {
+		if v.GroupId == vgId {
 			volumesInSameGroup = append(volumesInSameGroup, v)
 		}
 	}

@@ -214,7 +214,7 @@ type VolumeGroupSpec struct {
 	GroupSnapshots []string `json:"groupSnapshots,omitempty"`
 }
 
-var volume_sortKey string
+var volumeSortKey string
 
 type VolumeSlice []*VolumeSpec
 
@@ -223,7 +223,7 @@ func (volume VolumeSlice) Len() int { return len(volume) }
 func (volume VolumeSlice) Swap(i, j int) { volume[i], volume[j] = volume[j], volume[i] }
 
 func (volume VolumeSlice) Less(i, j int) bool {
-	switch volume_sortKey {
+	switch volumeSortKey {
 
 	case "ID":
 		return volume[i].Id < volume[j].Id
@@ -281,7 +281,7 @@ func (c *VolumeSpec) FindValue(k string, p *VolumeSpec) string {
 
 func (c *VolumeSpec) SortList(volumes []*VolumeSpec, sortKey, sortDir string) []*VolumeSpec {
 
-	volume_sortKey = sortKey
+	volumeSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(VolumeSlice(volumes))
@@ -292,7 +292,7 @@ func (c *VolumeSpec) SortList(volumes []*VolumeSpec, sortKey, sortDir string) []
 	return volumes
 }
 
-var volumeAttachment_sortKey string
+var volumeAttachmentSortKey string
 
 type VolumeAttachmentSlice []*VolumeAttachmentSpec
 
@@ -304,7 +304,7 @@ func (volumeAttachment VolumeAttachmentSlice) Swap(i, j int) {
 }
 
 func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
-	switch volumeAttachment_sortKey {
+	switch volumeAttachmentSortKey {
 
 	case "ID":
 		return volumeAttachment[i].Id < volumeAttachment[j].Id
@@ -344,7 +344,7 @@ func (c *VolumeAttachmentSpec) FindValue(k string, p *VolumeAttachmentSpec) stri
 
 func (c *VolumeAttachmentSpec) SortList(attachments []*VolumeAttachmentSpec, sortKey, sortDir string) []*VolumeAttachmentSpec {
 
-	volumeAttachment_sortKey = sortKey
+	volumeAttachmentSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(VolumeAttachmentSlice(attachments))
@@ -354,7 +354,7 @@ func (c *VolumeAttachmentSpec) SortList(attachments []*VolumeAttachmentSpec, sor
 	return attachments
 }
 
-var volumeSnapshot_sortKey string
+var volumeSnapshotSortKey string
 
 type VolumeSnapshotSlice []*VolumeSnapshotSpec
 
@@ -366,7 +366,7 @@ func (volumeSnapshot VolumeSnapshotSlice) Swap(i, j int) {
 }
 
 func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
-	switch volumeSnapshot_sortKey {
+	switch volumeSnapshotSortKey {
 
 	case "ID":
 		return volumeSnapshot[i].Id < volumeSnapshot[j].Id
@@ -413,7 +413,7 @@ func (c *VolumeSnapshotSpec) FindValue(k string, p *VolumeSnapshotSpec) string {
 
 func (c *VolumeSnapshotSpec) SortList(snapshots []*VolumeSnapshotSpec, sortKey, sortDir string) []*VolumeSnapshotSpec {
 
-	volumeSnapshot_sortKey = sortKey
+	volumeSnapshotSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(VolumeSnapshotSlice(snapshots))
@@ -423,7 +423,7 @@ func (c *VolumeSnapshotSpec) SortList(snapshots []*VolumeSnapshotSpec, sortKey, 
 	return snapshots
 }
 
-var volumeGroup_sortKey string
+var volumeGroupSortKey string
 
 type VolumeGroupSlice []*VolumeGroupSpec
 
@@ -435,7 +435,7 @@ func (volumeGroup VolumeGroupSlice) Swap(i, j int) {
 }
 
 func (volumeGroup VolumeGroupSlice) Less(i, j int) bool {
-	switch volumeGroup_sortKey {
+	switch volumeGroupSortKey {
 
 	case "ID":
 		return volumeGroup[i].Id < volumeGroup[j].Id
@@ -483,15 +483,15 @@ func (c *VolumeGroupSpec) FindValue(k string, p *VolumeGroupSpec) string {
 	return ""
 }
 
-func (c *VolumeGroupSpec) SortList(groups []*VolumeGroupSpec, sortKey, sortDir string) []*VolumeGroupSpec {
+func (c *VolumeGroupSpec) SortList(vgs []*VolumeGroupSpec, sortKey, sortDir string) []*VolumeGroupSpec {
 
-	volumeGroup_sortKey = sortKey
+	volumeGroupSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
-		sort.Sort(VolumeGroupSlice(groups))
+		sort.Sort(VolumeGroupSlice(vgs))
 	} else {
-		sort.Sort(sort.Reverse(VolumeGroupSlice(groups)))
+		sort.Sort(sort.Reverse(VolumeGroupSlice(vgs)))
 	}
-	return groups
+	return vgs
 
 }

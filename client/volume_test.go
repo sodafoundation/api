@@ -556,20 +556,20 @@ func TestCreateVolumeGroup(t *testing.T) {
 		Status:      "creating",
 	}
 
-	group, err := fv.CreateVolumeGroup(&model.VolumeGroupSpec{})
+	vg, err := fv.CreateVolumeGroup(&model.VolumeGroupSpec{})
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(group, expected) {
-		t.Errorf("Expected %v, got %v", expected, group)
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
 		return
 	}
 }
 
 func TestGetVolumeGroup(t *testing.T) {
-	var groupId = "3769855c-a102-11e7-b772-17b880d2f555"
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
 	expected := &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{
 			Id: "3769855c-a102-11e7-b772-17b880d2f555",
@@ -578,14 +578,14 @@ func TestGetVolumeGroup(t *testing.T) {
 		Description: "This is the first sample group for testing",
 		Status:      "creating",
 	}
-	group, err := fv.GetVolumeGroup(groupId)
+	vg, err := fv.GetVolumeGroup(vgId)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(group, expected) {
-		t.Errorf("Expected %v, got %v", expected, group)
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
 		return
 	}
 }
@@ -601,30 +601,30 @@ func TestListVolumeGroups(t *testing.T) {
 		},
 	}
 
-	group, err := fv.ListVolumeGroups()
+	vg, err := fv.ListVolumeGroups()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(group, expected) {
-		t.Errorf("Expected %v, got %v", expected, group)
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
 		return
 	}
 }
 
 func TestDeleteVolumeGroup(t *testing.T) {
-	var groupId = "3769855c-a102-11e7-b772-17b880d2f555"
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
 
-	if err := fv.DeleteVolumeGroup(groupId, &model.VolumeGroupSpec{}); err != nil {
+	if err := fv.DeleteVolumeGroup(vgId, &model.VolumeGroupSpec{}); err != nil {
 		t.Error(err)
 		return
 	}
 }
 
 func TestUpdateVolumeGroup(t *testing.T) {
-	var groupId = "3769855c-a102-11e7-b772-17b880d2f555"
-	group := model.VolumeGroupSpec{
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
+	vg := model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{
 			Id: "3769855c-a102-11e7-b772-17b880d2f555",
 		},
@@ -632,7 +632,7 @@ func TestUpdateVolumeGroup(t *testing.T) {
 		Description: "This is the first sample group for testing",
 	}
 
-	result, err := fv.UpdateVolumeGroup(groupId, &group)
+	result, err := fv.UpdateVolumeGroup(vgId, &vg)
 	if err != nil {
 		t.Error(err)
 		return

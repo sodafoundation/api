@@ -164,12 +164,12 @@ func (_m *MockClient) CreateVolumeAttachment(ctx *c.Context, attachment *model.V
 }
 
 // CreateVolumeGroup provides a mock function with given fields: ctx, group
-func (_m *MockClient) CreateVolumeGroup(ctx *c.Context, group *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	ret := _m.Called(group)
+func (_m *MockClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vg)
 
 	var r0 *model.VolumeGroupSpec
 	if rf, ok := ret.Get(0).(func(*model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
-		r0 = rf(group)
+		r0 = rf(vg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeGroupSpec)
@@ -178,7 +178,7 @@ func (_m *MockClient) CreateVolumeGroup(ctx *c.Context, group *model.VolumeGroup
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*model.VolumeGroupSpec) error); ok {
-		r1 = rf(group)
+		r1 = rf(vg)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -280,12 +280,12 @@ func (_m *MockClient) DeleteVolumeAttachment(ctx *c.Context, attachmentId string
 }
 
 // DeleteVolumeGroup provides a mock function with given fields: ctx, groupId
-func (_m *MockClient) DeleteVolumeGroup(ctx *c.Context, groupId string) error {
-	ret := _m.Called(groupId)
+func (_m *MockClient) DeleteVolumeGroup(ctx *c.Context, vgId string) error {
+	ret := _m.Called(vgId)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(groupId)
+		r0 = rf(vgId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -492,12 +492,12 @@ func (_m *MockClient) GetVolumeAttachment(ctx *c.Context, attachmentId string) (
 }
 
 // GetVolumeGroup provides a mock function with given fields: ctx, groupId
-func (_m *MockClient) GetVolumeGroup(ctx *c.Context, groupId string) (*model.VolumeGroupSpec, error) {
-	ret := _m.Called(groupId)
+func (_m *MockClient) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vgId)
 
 	var r0 *model.VolumeGroupSpec
 	if rf, ok := ret.Get(0).(func(string) *model.VolumeGroupSpec); ok {
-		r0 = rf(groupId)
+		r0 = rf(vgId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeGroupSpec)
@@ -506,7 +506,7 @@ func (_m *MockClient) GetVolumeGroup(ctx *c.Context, groupId string) (*model.Vol
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(groupId)
+		r1 = rf(vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -745,12 +745,12 @@ func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 }
 
 // ListVolumesByGroupId provides a mock function with given fields: ctx, groupId
-func (_m *MockClient) ListVolumesByGroupId(ctx *c.Context, groupId string) ([]*model.VolumeSpec, error) {
-	ret := _m.Called(groupId)
+func (_m *MockClient) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(vgId)
 
 	var r0 []*model.VolumeSpec
 	if rf, ok := ret.Get(0).(func(string) []*model.VolumeSpec); ok {
-		r0 = rf(groupId)
+		r0 = rf(vgId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.VolumeSpec)
@@ -759,7 +759,7 @@ func (_m *MockClient) ListVolumesByGroupId(ctx *c.Context, groupId string) ([]*m
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(groupId)
+		r1 = rf(vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -911,12 +911,12 @@ func (_m *MockClient) UpdateVolumeAttachment(ctx *c.Context, attachmentId string
 }
 
 // UpdateVolumeGroup provides a mock function with given fields: ctx, group
-func (_m *MockClient) UpdateVolumeGroup(ctx *c.Context, group *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	ret := _m.Called(group)
+func (_m *MockClient) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vg)
 
 	var r0 *model.VolumeGroupSpec
 	if rf, ok := ret.Get(0).(func(*model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
-		r0 = rf(group)
+		r0 = rf(vg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeGroupSpec)
@@ -925,7 +925,7 @@ func (_m *MockClient) UpdateVolumeGroup(ctx *c.Context, group *model.VolumeGroup
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*model.VolumeGroupSpec) error); ok {
-		r1 = rf(group)
+		r1 = rf(vg)
 	} else {
 		r1 = ret.Error(1)
 	}

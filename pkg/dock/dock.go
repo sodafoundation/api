@@ -260,20 +260,20 @@ func (d *DockHub) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Volum
 	log.Info("Creating group...", opt.GetId())
 
 	// NOTE Opt parameter requires complete volumegroup information, because driver may use it.
-	group, err := db.C.GetVolumeGroup(c.NewContextFormJson(opt.GetContext()), opt.GetId())
+	vg, err := db.C.GetVolumeGroup(c.NewContextFormJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	groupUpdate, notImplementErr, err := d.Driver.CreateVolumeGroup(opt, group)
+	vgUpdate, methodImplementFlag, err := d.Driver.CreateVolumeGroup(opt, vg)
 	if err != nil {
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
+		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, model.VOLUMEGROUP_ERROR)
 		log.Error("When calling volume driver to create volume group:", err)
 		return nil, err
 	}
 
-	if notImplementErr == model.ErrorNotImplemented {
-		groupUpdate = &model.VolumeGroupSpec{
+	if !methodImplementFlag {
+		vgUpdate = &model.VolumeGroupSpec{
 			BaseModel: &model.BaseModel{
 				Id: opt.GetId(),
 			},
@@ -281,20 +281,20 @@ func (d *DockHub) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Volum
 		}
 	}
 
-	if groupUpdate != nil && groupUpdate.Status == model.VOLUMEGROUP_ERROR {
-		msg := "Error occurred when creating volume group" + opt.GetId()
+	if vgUpdate != nil && vgUpdate.Status == model.VOLUMEGROUP_ERROR {
+		msg := fmt.Sprintf("Error occurred when creating volume group %s", opt.GetId())
 		log.Error(msg)
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
+		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, model.VOLUMEGROUP_ERROR)
 		return nil, errors.New(msg)
 	}
 
-	group.Status = model.VOLUMEGROUP_AVAILABLE
-	group.CreatedAt = time.Now().Format(constants.TimeFormat)
-	group.PoolId = opt.GetPoolId()
-	db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, group.Status)
+	vg.Status = model.VOLUMEGROUP_AVAILABLE
+	vg.CreatedAt = time.Now().Format(constants.TimeFormat)
+	vg.PoolId = opt.GetPoolId()
+	db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, vg.Status)
 	log.Info("Create group successfully.")
 
-	return group, nil
+	return vg, nil
 }
 
 func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
@@ -320,7 +320,7 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 		return err
 	}
 
-	groupUpdate, addVolumesUpdate, removeVolumesUpdate, notImplementErr, err := d.Driver.UpdateVolumeGroup(opt, group, addVolumesRef, removeVolumesRef)
+	groupUpdate, addVolumesUpdate, removeVolumesUpdate, methodImplementFlag, err := d.Driver.UpdateVolumeGroup(opt, group, addVolumesRef, removeVolumesRef)
 	// Group update faild...
 	if err != nil {
 		err = db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
@@ -341,7 +341,7 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 		return errors.New("Error occured when updating group" + opt.GetId() + "," + err.Error())
 	}
 
-	if notImplementErr == model.ErrorNotImplemented {
+	if !methodImplementFlag {
 		groupUpdate, addVolumesUpdate, removeVolumesUpdate = nil, nil, nil
 	}
 
@@ -364,7 +364,7 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 
 	if groupUpdate != nil {
 		if groupUpdate.Status == model.VOLUMEGROUP_ERROR {
-			msg := "Error occurred when updating volume group " + opt.GetId()
+			msg := fmt.Sprintf("Error occurred when updating volume group %s", opt.GetId())
 			log.Error(msg)
 			return errors.New(msg)
 		}
@@ -399,12 +399,12 @@ func (d *DockHub) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes []st
 			return nil, err
 		}
 		if add == true && vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE {
-			msg := "Update group failed, wrong status for volume " + vol.Id + vol.Status
+			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
 		}
 		if add == false && vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE && vol.Status != model.VOLUME_ERROR && vol.Status != model.VOLUEM_ERROR_DELETING {
-			msg := "Update group failed, wrong status for volume " + vol.Id + vol.Status
+			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
 		}
@@ -421,8 +421,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 
 	for _, vol := range volumes {
 		if vol.AttachStatus == model.VOLUME_ATTACHED {
-			msg := "Volume " + vol.Id + " is still attached, need to detach first."
-			return errors.New(msg)
+			return fmt.Errorf("Volume %s is still attached, need to detach first.", vol.Id)
 		}
 	}
 
@@ -436,7 +435,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	defer drivers.Clean(d.Driver)
 	log.Info("Calling volume driver to delete volume group...")
 
-	groupUpdate, volumesUpdate, notImplementErr, err := d.Driver.DeleteVolumeGroup(opt, group, volumes)
+	groupUpdate, volumesUpdate, methodImplementFlag, err := d.Driver.DeleteVolumeGroup(opt, group, volumes)
 	if err != nil {
 		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
 		// If driver returns none for volumesUpdate, set volume status to error.
@@ -449,7 +448,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 		return err
 	}
 
-	if notImplementErr == model.ErrorNotImplemented {
+	if !methodImplementFlag {
 		groupUpdate, volumesUpdate = d.deleteGroupGeneric(d.Driver, group, volumes)
 	}
 
@@ -467,7 +466,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 
 	if groupUpdate != nil {
 		if groupUpdate.Status == model.VOLUMEGROUP_ERROR || groupUpdate.Status == model.VOLUMEGROUP_ERROR_DELETING {
-			msg := "Delete group failed"
+			msg := fmt.Sprintf("Delete group failed")
 			log.Error(msg)
 			return errors.New(msg)
 		}
@@ -475,7 +474,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	}
 
 	if err = db.C.DeleteVolumeGroup(c.NewContextFormJson(opt.GetContext()), group.Id); err != nil {
-		msg := "Delete volume group failed" + err.Error()
+		msg := fmt.Sprintf("Delete volume group failed: %s", err.Error())
 		log.Error(msg)
 		return errors.New(msg)
 	}
@@ -484,14 +483,14 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	return nil
 }
 
-func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, group *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
+func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
 	//Delete a group and volumes in the group
 	var volumesUpdate []*model.VolumeSpec
-	groupUpdate := &model.VolumeGroupSpec{
+	vgUpdate := &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{
-			Id: group.Id,
+			Id: vg.Id,
 		},
-		Status: group.Status,
+		Status: vg.Status,
 	}
 
 	for _, volumeRef := range volumes {
@@ -502,7 +501,7 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, group *model.V
 		}
 		if err := driver.DeleteVolume(&pb.DeleteVolumeOpts{Metadata: volumeRef.Metadata}); err != nil {
 			v.Status = model.VOLUME_ERROR
-			groupUpdate.Status = model.VOLUMEGROUP_ERROR
+			vgUpdate.Status = model.VOLUMEGROUP_ERROR
 			log.Error("Error occurred when delete volume " + volumeRef.Id + " from group.")
 		} else {
 			v.Status = model.VOLUME_DELETED
@@ -510,5 +509,5 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, group *model.V
 		volumesUpdate = append(volumesUpdate, v)
 	}
 
-	return groupUpdate, volumesUpdate
+	return vgUpdate, volumesUpdate
 }

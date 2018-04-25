@@ -66,19 +66,19 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	if !policy.Authorize(this.Ctx, "volumeGroup:update") {
 		return
 	}
-	var group = &model.VolumeGroupSpec{
+	var vg = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
 	id := this.Ctx.Input.Param(":groupId")
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&group); err != nil {
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&vg); err != nil {
 		this.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
 		return
 	}
 
-	group.Id = id
+	vg.Id = id
 
-	result, err := UpdateVolumeGroupDBEntry(c.GetContext(this.Ctx), group)
+	result, err := UpdateVolumeGroupDBEntry(c.GetContext(this.Ctx), vg)
 	if err != nil {
 		this.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
 		return

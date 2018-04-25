@@ -60,7 +60,7 @@ func (ext ExtraSpec) Encode() []byte {
 	return parmBody
 }
 
-var profile_sortKey string
+var profileSortKey string
 
 type ProfileSlice []*ProfileSpec
 
@@ -69,7 +69,7 @@ func (profile ProfileSlice) Len() int { return len(profile) }
 func (profile ProfileSlice) Swap(i, j int) { profile[i], profile[j] = profile[j], profile[i] }
 
 func (profile ProfileSlice) Less(i, j int) bool {
-	switch profile_sortKey {
+	switch profileSortKey {
 
 	case "ID":
 		return profile[i].Id < profile[j].Id
@@ -101,7 +101,7 @@ func (c *ProfileSpec) FindValue(k string, p *ProfileSpec) string {
 
 func (c *ProfileSpec) SortList(profiles []*ProfileSpec, sortKey, sortDir string) []*ProfileSpec {
 
-	profile_sortKey = sortKey
+	profileSortKey = sortKey
 
 	if strings.EqualFold(sortDir, "asc") {
 		sort.Sort(ProfileSlice(profiles))
