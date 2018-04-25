@@ -14,32 +14,22 @@
 
 package targets
 
-import (
-	"errors"
-)
-
 const (
-	globalTid = 1
-	globalIQN = "iqn.2017-10.io.opensds:volume:00000001"
-	baseNum   = 100
-)
-
-var (
-	globalLun = 1
+	iscsiTgtPrefix = "iqn.2017-10.io.opensds:"
 )
 
 // Target is an interface for exposing some operations of different targets,
 // currently support iscsiTarget.
 type Target interface {
-	CreateExport(path, initiator string) (map[string]interface{}, error)
+	CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error)
 
-	RemoveExport(path, initiator string) error
+	RemoveExport(volId string) error
 }
 
 // NewTarget method creates a new iscsi target.
-func NewTarget(bip string) Target {
+func NewTarget(bip string, tgtConfDir string) Target {
 	return &iscsiTarget{
-		ISCSITarget: NewISCSITarget(globalTid, globalIQN, bip),
+		ISCSITarget: NewISCSITarget(bip, tgtConfDir),
 	}
 }
 
@@ -47,44 +37,22 @@ type iscsiTarget struct {
 	ISCSITarget
 }
 
-func (t *iscsiTarget) CreateExport(path, initiator string) (map[string]interface{}, error) {
-	globalLun = (globalLun + 1) % baseNum
-
-	if t.GetISCSITarget() != globalTid {
-		if err := t.CreateISCSITarget(); err != nil {
-			return nil, err
-		}
-		if err := t.BindInitiatorAddress("ALL"); err != nil {
-			return nil, err
-		}
-	}
-	if err := t.AddLun(globalLun, path); err != nil {
+func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error) {
+	tgtIqn := iscsiTgtPrefix + volId
+	if err := t.CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator, []string{}); err != nil {
 		return nil, err
 	}
-	if err := t.BindInitiatorName(initiator); err != nil {
-		return nil, err
-	}
-
+	lunId := t.GetLun(path)
 	return map[string]interface{}{
 		"targetDiscovered": true,
-		"targetIQN":        globalIQN,
+		"targetIQN":        tgtIqn,
 		"targetPortal":     t.ISCSITarget.(*tgtTarget).BindIp + ":3260",
 		"discard":          false,
-		"targetLun":        globalLun,
+		"targetLun":        lunId,
 	}, nil
 }
 
-func (t *iscsiTarget) RemoveExport(path, initiator string) error {
-	if err := t.UnbindInitiatorName(initiator); err != nil {
-		return err
-	}
-	lun := t.GetLun(path)
-	if lun == -1 {
-		return errors.New("Can't find lun with path " + path)
-	}
-	if err := t.RemoveLun(lun); err != nil {
-		return err
-	}
-
-	return t.RemoveISCSITarget()
+func (t *iscsiTarget) RemoveExport(volId string) error {
+	tgtIqn := iscsiTgtPrefix + volId
+	return t.RemoveISCSITarget(volId, tgtIqn)
 }
