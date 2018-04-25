@@ -470,6 +470,7 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	db.C.UpdateStatus(ctx, vg, model.VOLUMEGROUP_DELETING)
 	//TODO Rpc call to delete group.
 	controller.Brain.DeleteVolumeGroup(ctx, vg)
+
 	return nil
 }
 
