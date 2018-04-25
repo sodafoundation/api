@@ -36,3 +36,12 @@ export class ProfileService {
         });
     }
 }
+
+export class PoolService{
+    url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/pools';
+    constructor(private http: HttpService) { }
+    //查询profiles
+    getPools(): Observable<any> {
+        return this.http.get(this.url);
+    }
+}

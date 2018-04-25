@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 
 import { Message, SelectItem } from './../../../components/common/api';
+
+import { VolumeService } from './../volume.service';
+import { ProfileService } from './../../profile/profile.service';
 
 @Component({
   selector: 'app-create-volume',
@@ -36,16 +40,27 @@ import { Message, SelectItem } from './../../../components/common/api';
 })
 export class CreateVolumeComponent implements OnInit {
 
+  bbbbb = 'name';
   label = {};
   availabilityZones = [];
   volumeform;
-  volumeItems = [{}];
+  volumeItems = [0];
   capacityUnit = [];
+  profileOptions = [
+    {
+      label: 'Select Profile',
+      value: null
+    }
+  ];
+  capacity = 'GB';
 
   value: boolean;
 
   constructor(
-    private fb: FormBuilder
+    private router: Router,
+    private fb: FormBuilder,
+    private ProfileService: ProfileService,
+    private VolumeService: VolumeService
   ) { }
 
   ngOnInit() {
@@ -69,6 +84,8 @@ export class CreateVolumeComponent implements OnInit {
       }
     ];
 
+    this.getProfiles();
+
     this.capacityUnit = [
       {
         label: 'GB', value: 'GB'
@@ -80,18 +97,75 @@ export class CreateVolumeComponent implements OnInit {
 
     this.volumeform = this.fb.group({
       'zone': new FormControl('', Validators.required),
-      'name': new FormControl('', Validators.required),
-      'capacity': new FormControl('', Validators.required),
-      'quantity': new FormControl('')
+      'name0': new FormControl('', Validators.required),
+      'profileId0': new FormControl('', Validators.required),
+      'size0': new FormControl('', Validators.required),
+      'capacity0': new FormControl(''),
+      'quantity0': new FormControl('')
+    });
+
+  }
+
+  addVolumeItem() {
+    this.volumeItems.push(
+      this.volumeItems[this.volumeItems.length-1] + 1
+    );
+    this.volumeItems.forEach(index => {
+      if(index !== 0){
+        this.volumeform.addControl('name'+index, this.fb.control('', Validators.required));
+        this.volumeform.addControl('profileId'+index, this.fb.control('', Validators.required));
+        this.volumeform.addControl('size'+index, this.fb.control('', Validators.required));
+        this.volumeform.addControl('capacity'+index, this.fb.control('', Validators.required));
+        this.volumeform.addControl('quantity'+index, this.fb.control(''));
+      }
     });
   }
 
-  addVolumeItem(){
-    this.volumeItems.push({});
+  getProfiles() {
+    this.ProfileService.getProfiles().subscribe((res) => {
+      let profiles = res.json();
+      profiles.forEach(profile => {
+        this.profileOptions.push({
+          label: profile.name,
+          value: profile.id
+        });
+      });
+    });
   }
 
-  deleteVolumeItem(index){
-    this.volumeItems.splice(index,1);
+  deleteVolumeItem(index) {
+    this.volumeItems.splice(index, 1);
+  }
+
+  createVolume(param){
+    this.VolumeService.createVolume(param).subscribe((res) => {
+      this.router.navigate(['/volume']);
+  });
+  }
+
+  onSubmit(value) {
+
+    
+    let dataArr = [];
+    this.volumeItems.forEach(index => {
+      if(!value['capacity'+index]){
+        value['capacity'+index]='GB';
+      }
+      let unit = value['capacity'+index]==='GB' ? 1024 : 1024*1024;
+      dataArr.push({
+        name: value['name'+index],
+        size: value['size'+index]*unit,
+        availabilityZone: value.zone,
+        profileId: value['profileId'+index],
+        // metadata: {
+        //   quantity: value['quantity'+index]
+        // }
+      });
+    });
+
+    dataArr.forEach(data=>{
+      this.createVolume(data);
+    });
   }
 
 }

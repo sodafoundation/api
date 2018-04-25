@@ -7,7 +7,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { I18nPluralPipe } from '@angular/common';
 
 import { Message,SelectItem } from './../../../components/common/api';
-import { ProfileService } from './../profile.service';
+import { ProfileService,PoolService } from './../profile.service';
 
 @Component({
     templateUrl: './createProfile.component.html',
@@ -97,6 +97,7 @@ export class CreateProfileComponent implements OnInit {
         // private I18N: I18NService,
         private router: Router,
         private ProfileService: ProfileService,
+        private PoolService: PoolService,
         private fb: FormBuilder
     ) { }
 
@@ -211,6 +212,13 @@ export class CreateProfileComponent implements OnInit {
             // return res.json();
             // this.profiles = res.json();
             this.router.navigate(['/profile']);
+        });
+    }
+
+    getPools(){
+        this.PoolService.getPools().subscribe((res) => {
+            // this.pools = res.json();
+            console.log(res.json());
         });
     }
 

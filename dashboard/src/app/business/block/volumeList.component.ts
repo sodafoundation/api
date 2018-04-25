@@ -24,10 +24,10 @@ export class VolumeListComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.volumes = [
-            { "name": "vol-01", "status": "Available", "capacity": "200.000 GB", "profile": "PF_block_01", "az":"az_01" },
-            { "name": "vol-02", "status": "Error", "capacity": "200.000 GB", "profile": "PF_block_02", "az":"az_02" }
-        ];
+        // this.volumes = [
+        //     { "name": "vol-01", "status": "Available", "capacity": "200.000 GB", "profile": "PF_block_01", "az":"az_01" },
+        //     { "name": "vol-02", "status": "Error", "capacity": "200.000 GB", "profile": "PF_block_02", "az":"az_02" }
+        // ];
         this.menuItems = [
             { "label": "Modify", command:()=>{} },
             { "label": "Expand", command:()=>{} },
@@ -35,7 +35,7 @@ export class VolumeListComponent implements OnInit {
         ];
 
         this.VolumeService.getVolumes().subscribe((res) => {
-            console.log(res.json());
+            this.volumes = res.json();
         });;
     }
 
