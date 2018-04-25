@@ -623,14 +623,26 @@ func (c *Controller) FailoverReplication(ctx *c.Context, replication *model.Repl
 	if err != nil {
 		return err
 	}
-	err = c.drController.FailoverReplication(ctx, replication, pvol, svol)
-	if err != nil {
-		replication.Status = model.ReplicationErrorDisabling
-		replication.ReplicationStatus = "--"
+
+	err = c.drController.FailoverReplication(ctx, replication, failover, pvol, svol)
+	if failover.SecondaryBackendId == model.ReplicationBackendIdDefault {
+		if err != nil {
+			replication.Status = model.ReplicationErrorFailover
+			replication.ReplicationStatus = "--"
+		} else {
+			replication.Status = model.ReplicationAvailable
+			replication.ReplicationStatus = model.ReplicationFailover
+		}
 	} else {
-		replication.Status = model.ReplicationAvailable
-		replication.ReplicationStatus = model.ReplicationFailover
+		if err != nil {
+			replication.Status = model.ReplicationErrorFailback
+			replication.ReplicationStatus = "--"
+		} else {
+			replication.Status = model.ReplicationAvailable
+			replication.ReplicationStatus = model.ReplicationEnabled
+		}
 	}
+
 	if _, err := db.C.UpdateReplication(ctx, replication.Id, replication); err != nil {
 		log.Error("update replication in db error, ", err)
 	}

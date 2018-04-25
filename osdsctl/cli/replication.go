@@ -105,7 +105,7 @@ func init() {
 	replicationUpdateCommand.Flags().StringVarP(&replicationName, "name", "n", "", "the name of updated replication")
 	replicationUpdateCommand.Flags().StringVarP(&replicationDesp, "description", "d", "", "the description of updated replication")
 	replicationFailoverCommand.Flags().BoolVarP(&allowAttachedVolume, "allow_attached_volume", "a", false, "whether allow attached volume when failing over replication")
-	replicationFailoverCommand.Flags().StringVarP(&secondaryBackendId, "secondary_backend_id", "s", "", "the secondary backend id of failoverr replication")
+	replicationFailoverCommand.Flags().StringVarP(&secondaryBackendId, "secondary_backend_id", "s", model.ReplicationBackendIdDefault, "the secondary backend id of failoverr replication(default:default)")
 	replicationCommand.AddCommand(replicationShowCommand)
 	replicationCommand.AddCommand(replicationListCommand)
 	replicationCommand.AddCommand(replicationDeleteCommand)
