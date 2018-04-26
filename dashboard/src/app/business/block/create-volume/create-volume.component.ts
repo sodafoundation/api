@@ -77,10 +77,7 @@ export class CreateVolumeComponent implements OnInit {
         label: 'Select Zone', value: null
       },
       {
-        label: 'DataCenter_UnitA', value: '1'
-      },
-      {
-        label: 'DataCenter_UnitB', value: '2'
+        label: 'Default', value: 'default'
       }
     ];
 
@@ -139,27 +136,22 @@ export class CreateVolumeComponent implements OnInit {
 
   createVolume(param){
     this.VolumeService.createVolume(param).subscribe((res) => {
-      this.router.navigate(['/volume']);
+      this.router.navigate(['/block']);
   });
   }
 
-  onSubmit(value) {
-
-    
+  onSubmit(value) {    
     let dataArr = [];
     this.volumeItems.forEach(index => {
       if(!value['capacity'+index]){
         value['capacity'+index]='GB';
       }
-      let unit = value['capacity'+index]==='GB' ? 1024 : 1024*1024;
+      let unit = value['capacity'+index]==='GB' ? 1 : 1024;
       dataArr.push({
         name: value['name'+index],
         size: value['size'+index]*unit,
         availabilityZone: value.zone,
-        profileId: value['profileId'+index],
-        // metadata: {
-        //   quantity: value['quantity'+index]
-        // }
+        profileId: value['profileId'+index]
       });
     });
 

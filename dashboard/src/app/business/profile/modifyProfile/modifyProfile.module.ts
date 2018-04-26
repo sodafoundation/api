@@ -2,10 +2,11 @@ import { Component, NgModule, APP_INITIALIZER } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { modifyProfileComponent } from './modifyProfile.component';
 import { RouterModule } from '@angular/router';
-import { BreadcrumbModule,ChartModule,TableModule,ButtonModule } from './../../../components/common/api';
+import { BreadcrumbModule,ChartModule,ButtonModule } from './../../../components/common/api';
 
 import { HttpService } from './../../../shared/api';
-import { ProfileService } from './../profile.service';
+import { ProfileService,PoolService } from './../profile.service';
+import { PoolModule } from './../storage-pools-table/storage-pools-table.module';
 
 let routers = [{
   path: '',
@@ -21,13 +22,14 @@ let routers = [{
     RouterModule.forChild(routers),
     BreadcrumbModule,
     ChartModule,
-    TableModule,
-    ButtonModule
+    ButtonModule,
+    PoolModule
     // FormModule
   ],
   providers: [
     HttpService,
-    ProfileService
+    ProfileService,
+    PoolService
   ]
 })
 export class ModifyProfileModule { }

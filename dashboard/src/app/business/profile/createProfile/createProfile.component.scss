@@ -28,3 +28,17 @@
 .ui-inputgroup .ui-inputtext:enabled:hover {
     border-color: #98a5bc;
 }
+
+.input-text-vertical-align {
+    display: flex;
+    align-items: center;
+}
+
+.input-text-vertical-align span,
+.execution-time-add {
+    padding: 0 0.5em;
+}
+
+.execution-time-add {
+    cursor: pointer;
+}

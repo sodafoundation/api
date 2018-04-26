@@ -1,13 +1,13 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { Validators,FormControl,FormGroup,FormBuilder } from '@angular/forms';
+import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
-import { Message,SelectItem } from './../../../components/common/api';
-import { ProfileService,PoolService } from './../profile.service';
+import { Message, SelectItem } from './../../../components/common/api';
+import { ProfileService } from './../profile.service';
 
 @Component({
     templateUrl: './createProfile.component.html',
@@ -43,7 +43,7 @@ import { ProfileService,PoolService } from './../profile.service';
 export class CreateProfileComponent implements OnInit {
     errorMessage;
     showCustomization = false;
-    msgs:Message[] = [];
+    msgs: Message[] = [];
     userform: FormGroup;
     submitted: boolean;
     genders: SelectItem[];
@@ -66,20 +66,16 @@ export class CreateProfileComponent implements OnInit {
     snapshotIsChecked = false;
     protocolOptions = [
         {
-            label:'Please Select Protocol',
-            value:''
+            label: 'iSCSI',
+            value: 'iSCSI'
         },
         {
-            label:'iSCSI',
-            value:'iSCSI'
+            label: 'FC',
+            value: 'FC'
         },
         {
-            label:'FC',
-            value:'FC'
-        },
-        {
-            label:'RBD',
-            value:'RBD'
+            label: 'RBD',
+            value: 'RBD'
         }
     ];
 
@@ -90,16 +86,161 @@ export class CreateProfileComponent implements OnInit {
     //用户自定义项，用于
     customizationItems = [];
 
-    pools;
-    cols = [];
+    replicationTypeOptions = [
+        {
+            label: 'Continuous',
+            value: 'continuous'
+        },
+        {
+            label: 'Full',
+            value: 'full'
+        },
+        {
+            label: 'Delta',
+            value: 'delta'
+        }
+    ];
+
+    replicationRGOOptions = [
+        {
+            label: 'Rack',
+            value: 'rack'
+        },
+        {
+            label: 'Row',
+            value: 'row'
+        },
+        {
+            label: 'Server',
+            value: 'server'
+        },
+        {
+            label: 'Facility',
+            value: 'facility'
+        },
+        {
+            label: 'Availability Zone',
+            value: 'availabilityZone'
+        },
+        {
+            label: 'Region',
+            value: 'region'
+        }
+    ];
+
+    replicationModeOptions = [
+        {
+            label: 'Synchronous',
+            value: 'Synchronous'
+        },
+        {
+            label: 'Asynchronous',
+            value: 'Asynchronous'
+        },
+        {
+            label: 'Active',
+            value: 'Active'
+        },
+        {
+            label: 'Adaptive',
+            value: 'Adaptive'
+        }
+    ];
+
+    replicationRTOOptions = [
+        {
+            label: 'Immediate',
+            value: 'Immediate'
+        },
+        {
+            label: 'Online',
+            value: 'Online'
+        },
+        {
+            label: 'Nearline',
+            value: 'Nearline'
+        },
+        {
+            label: 'Offline',
+            value: 'Offline'
+        }
+    ];
+
+    replicationRPOOptions = [
+        {
+            label: '0',
+            value: 0
+        },
+        {
+            label: '4',
+            value: 4
+        },
+        {
+            label: '60',
+            value: 60
+        },
+        {
+            label: '3600',
+            value: 3600
+        }
+    ];
+
+    snapshotRetentionOptions = [
+        {
+            label: 'Time',
+            value: 'Time'
+        },
+        {
+            label: 'Quantity',
+            value: 'Quantity'
+        }
+    ];
+
+    weekDays;
 
     constructor(
         // private I18N: I18NService,
         private router: Router,
         private ProfileService: ProfileService,
-        private PoolService: PoolService,
         private fb: FormBuilder
-    ) { }
+    ) {
+        this.weekDays = [
+            {
+                label: 'Sun',
+                value: 0,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Mon',
+                value: 1,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Tue',
+                value: 2,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Wed',
+                value: 3,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Thu',
+                value: 4,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Fri', value: 5,
+                styleClass: 'week-select-list'
+            },
+            {
+                label: 'Sat',
+                value: 6,
+                styleClass: 'week-select-list'
+            }
+        ];
+    }
 
     ngOnInit() {
         this.label = {
@@ -114,97 +255,55 @@ export class CreateProfileComponent implements OnInit {
             key: 'Key',
             value: 'Value',
             maxIOPS: 'MaxIOPS',
-            MBPS: 'MBPS'
+            MBPS: 'MBPS',
+            replicationLabel: {
+                type: 'Type',
+                RGO: 'RGO',
+                Mode: 'Mode',
+                RTO: 'RTO',
+                Period: 'Period',
+                RPO: 'RPO',
+                Bandwidth: 'Bandwidth',
+                Consistency: 'Consistency'
+            },
+            snapshotLabel: {
+                Schedule: 'Schedule',
+                executionTime: 'Execution Time',
+                Retention: 'Retention'
+            }
         };
 
         this.profileform = this.fb.group({
             'name': new FormControl('', Validators.required),
-            'protocol': new FormControl('', Validators.required),
+            'protocol': new FormControl('iSCSI'),
             'storageType': new FormControl('', Validators.required),
-            'policys': new FormControl('')
+            'policys': new FormControl(''),
+            'snapshotRetention': new FormControl('Time')
         });
 
-        this.cols = [
-            { field: 'name', header: 'Name' },
-            { field: 'freeCapacity', header: 'FreeCapacity' },
-            { field: 'totalCapacity', header: 'TotalCapacity' },
-            { field: 'dockId', header: 'Disk' },
-            { field: 'storageType', header: 'StorageType' }
-        ];
 
-        this.pools =[
-            {
-              "id": "string",
-              "createdAt": "2018-04-11T08:11:27.335Z",
-              "updatedAt": "2018-04-11T08:11:27.335Z",
-              "name": "string1",
-              "storageType": "string",
-              "description": "string",
-              "status": "string",
-              "availabilityZone": "string",
-              "totalCapacity": 0,
-              "freeCapacity": 1,
-              "dockId": "string",
-              "extras": {
-                "additionalProp1": {},
-                "additionalProp2": {},
-                "additionalProp3": {}
-              }
-            },
-            {
-                "id": "string",
-                "createdAt": "2018-04-11T08:11:27.335Z",
-                "updatedAt": "2018-04-11T08:11:27.335Z",
-                "name": "string2",
-                "storageType": "string",
-                "description": "string",
-                "status": "string",
-                "availabilityZone": "string",
-                "totalCapacity": 0,
-                "freeCapacity": 8,
-                "dockId": "string",
-                "extras": {
-                  "additionalProp1": {},
-                  "additionalProp2": {},
-                  "additionalProp3": {}
-                }
-              },
-              {
-                "id": "string",
-                "createdAt": "2018-04-11T08:11:27.335Z",
-                "updatedAt": "2018-04-11T08:11:27.335Z",
-                "name": "string3",
-                "storageType": "string",
-                "description": "string",
-                "status": "string",
-                "availabilityZone": "string",
-                "totalCapacity": 0,
-                "freeCapacity": 10,
-                "dockId": "string",
-                "extras": {
-                  "additionalProp1": {},
-                  "additionalProp2": {},
-                  "additionalProp3": {}
-                }
-              }
-          ]
+
     }
 
     onSubmit(value) {
         this.submitted = true;
         this.msgs = [];
-        this.msgs.push({severity:'info', summary:'Success', detail:'Form Submitted'});
+        this.msgs.push({ severity: 'info', summary: 'Success', detail: 'Form Submitted' });
         this.param.name = value.name;
         this.param.storageType = value.storageType;
         this.param.extras.protocol = value.protocol;
         this.param.extras.policys = value.policys;
-        if(this.customizationItems.length > 0){
+        if (this.customizationItems.length > 0) {
             let arrLength = this.customizationItems.length;
-            for(let i=0;i<arrLength;i++){
+            for (let i = 0; i < arrLength; i++) {
                 this.param.extras[this.customizationItems[i].key] = this.customizationItems[i].value;
             }
         }
         this.createProfile(this.param);
+    }
+
+    retentionChange(){
+        console.log(this.profileform.controls['snapshotRetention'].value);
     }
 
     createProfile(param) {
@@ -215,38 +314,28 @@ export class CreateProfileComponent implements OnInit {
         });
     }
 
-    getPools(){
-        this.PoolService.getPools().subscribe((res) => {
-            // this.pools = res.json();
-            console.log(res.json());
-        });
-    }
+
 
     getI18n() {
-
         // return {};
     }
 
-    showDetails(policyType){
-        // alert(policyType);
-        this[policyType+'IsChecked'] = !this[policyType+'IsChecked'];
+    showDetails(policyType) {
+        this[policyType + 'IsChecked'] = !this[policyType + 'IsChecked'];
     }
 
-    addCustomization(){
+    addCustomization() {
         this.customizationItems.push({
-            key:this.customizationKey,
-            value:this.customizationValue
+            key: this.customizationKey,
+            value: this.customizationValue
         });
-        // this.param.extras[this.customizationKey] = this.customizationValue;
         this.showCustomization = false
         this.customizationKey = '';
         this.customizationValue = '';
-        console.log(this.customizationItems);
     }
 
-    deleteCustomization(index){
+    deleteCustomization(index) {
         this.customizationItems.splice(index, 1);
-        console.log(this.customizationItems);
     }
 
 }
