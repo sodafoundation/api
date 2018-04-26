@@ -78,6 +78,90 @@ func TestCreateSnapshot(t *testing.T) {
 	}
 }
 
+func TestCreateSnapshotWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "metadata": null,
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/V3/snapshots", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Create a snapshot, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "force": true
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("POST", "/V3/snapshots", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Create a snapshot failed: OpenSDS does not support the parameter: force"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+            "volume_id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+            "metadata": {
+                "key1": "value1"
+            }
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("POST", "/V3/snapshots", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Create a snapshot failed: OpenSDS does not support the parameter: metadata"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+}
+
 func TestGetSnapshot(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/V3/snapshots/f2dda3d2-bf79-11e7-8665-f750b088f63e", nil)
 
@@ -236,5 +320,33 @@ func TestUpdateSnapshot(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestUpdateSnapshotWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "snapshot": {
+            "name": "sample-snapshot-01",
+            "description": "This is the first sample snapshot for testing",
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("PUT", "/V3/snapshots/3769855c-a102-11e7-b772-17b880d2f537", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Update a snapshot, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
 	}
 }

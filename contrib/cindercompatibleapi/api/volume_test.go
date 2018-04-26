@@ -180,6 +180,61 @@ func TestCreateVolume(t *testing.T) {
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
 	}
+}
+
+func TestCreateVolumeWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "volume": {
+            "name": "sample-volume",
+            "description": "This is a sample volume for testing",
+            "size": 1,
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/v3/volumes", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Create a volume, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "volume": {
+            "name": "sample-volume",
+            "description": "This is a sample volume for testing",
+            "size": 1,
+			"multiattach": true
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("POST", "/v3/volumes", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Create a volume failed: OpenSDS does not support the parameter: id/source_volid/multiattach/snapshot_id/backup_id/imageRef/volume_type/metadata/consistencygroup_id"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
 
 }
 
@@ -227,5 +282,63 @@ func TestUpdateVolume(t *testing.T) {
 	expected.Volume.Metadata = make(map[string]string)
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestUpdateVolumeWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "volume": {
+            "name": "sample-volume",
+            "multiattach": false,
+            "description": "This is a sample volume for testing",
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("PUT", "/v3/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Update a volume, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "volume": {
+            "name": "sample-volume",
+            "multiattach": false,
+            "description": "This is a sample volume for testing",
+            "metadata": {
+                "key1": "value1"
+            }
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("PUT", "/v3/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", bytes.NewBuffer(jsonStr))
+
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Update a volume failed: OpenSDS does not support the parameter: metadata"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
 	}
 }

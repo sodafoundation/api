@@ -60,7 +60,7 @@ func CreateTypeReq(cinderReq *CreateTypeReqSpec) (*model.ProfileSpec, error) {
 
 	profile.Name = cinderReq.VolumeType.Name
 	if false == cinderReq.VolumeType.AccessIsPublic {
-		return nil, errors.New("When creating a volume type, opensds does not support os-volume-type-access:is_public = false")
+		return nil, errors.New("OpenSDS does not support os-volume-type-access:is_public = false")
 	}
 	profile.Description = cinderReq.VolumeType.Description
 	profile.Extras = *(CinderExtraToOpenSDSExtra(&(cinderReq.VolumeType.Extras)))
@@ -129,7 +129,7 @@ func UpdateTypeReq(cinderReq *UpdateTypeReqSpec) (*model.ProfileSpec, error) {
 	profile.Name = cinderReq.VolumeType.Name
 	profile.Description = cinderReq.VolumeType.Description
 	if false == cinderReq.VolumeType.IsPublic {
-		return nil, errors.New("When updating a volume type, opensds does not support is_public = false")
+		return nil, errors.New("OpenSDS does not support is_public = false")
 	}
 
 	return &profile, nil
@@ -241,7 +241,7 @@ func UpdateExtraReq(reqkey string, cinderReq *UpdateExtraReqSpec) (*model.ExtraS
 		profileExtras = make(map[string]interface{})
 		profileExtras[reqkey] = (*cinderReq)[reqkey]
 	} else {
-		return nil, errors.New("The bady of the request is wrong")
+		return nil, errors.New("The body of the request is wrong")
 	}
 
 	return &profileExtras, nil

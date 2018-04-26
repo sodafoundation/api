@@ -201,6 +201,34 @@ func TestCreateAttachment(t *testing.T) {
 
 }
 
+func TestCreateAttachmentWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+	{
+        "attachment": {
+            "id": "",
+            "volume_uuid": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/V3/attachments", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Create attachment, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+}
+
 func TestDeleteAttachment(t *testing.T) {
 	r, _ := http.NewRequest("DELETE", "/V3/attachments/f2dda3d2-bf79-11e7-8665-f750b088f63e", nil)
 
@@ -259,5 +287,34 @@ func TestUpdateAttachment(t *testing.T) {
 	expected.Attachment.ID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestUpdateAttachmentWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "attachment": {
+            "connector": {
+                "ip": "127.0.0.0.1",
+            }
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("PUT", "/V3/attachments/f2dda3d2-bf79-11e7-8665-f750b088f63e", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Update an attachment, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
 	}
 }

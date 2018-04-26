@@ -67,11 +67,11 @@ func CreateSnapshotReq(cinderReq *CreateSnapshotReqSpec) (*model.VolumeSnapshotS
 	req.Description = cinderReq.Snapshot.Description
 
 	if false != cinderReq.Snapshot.Force {
-		return nil, errors.New("Opensds does not support the parameter: force")
+		return nil, errors.New("OpenSDS does not support the parameter: force")
 	}
 
 	if 0 != len(cinderReq.Snapshot.Metadata) {
-		return nil, errors.New("Opensds does not support the parameter: metadata")
+		return nil, errors.New("OpenSDS does not support the parameter: metadata")
 	}
 
 	return &req, nil
@@ -148,7 +148,7 @@ func UpdateSnapshotResp(snapshot *model.VolumeSnapshotSpec) *UpdateSnapshotRespS
 	return &resp
 }
 
-// *******************Show a snapshot’s details*******************
+// *******************Show a snapshot's details*******************
 
 // ShowSnapshotDetailsRespSpec ...
 type ShowSnapshotDetailsRespSpec struct {

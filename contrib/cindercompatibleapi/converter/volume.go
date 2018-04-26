@@ -178,8 +178,8 @@ func CreateVolumeReq(cinderReq *CreateVolumeReqSpec) (*model.VolumeSpec, error) 
 		("" != cinderReq.Volume.ImageRef) || ("" != cinderReq.Volume.VolumeType) ||
 		(0 != len(cinderReq.Volume.Metadata)) || ("" != cinderReq.Volume.ConsistencygroupID) {
 
-		return nil, errors.New("When creating a volume, opensds does not support " +
-			"id/source_volid/multiattach/snapshot_id/backup_id/imageRef/volume_type/metadata/consistencygroup_id in body")
+		return nil, errors.New("OpenSDS does not support the parameter: " +
+			"id/source_volid/multiattach/snapshot_id/backup_id/imageRef/volume_type/metadata/consistencygroup_id")
 	}
 
 	return &volume, nil
@@ -238,7 +238,7 @@ func ListVolumesResp(volumes []*model.VolumeSpec) *ListVolumesRespSpec {
 	return &resp
 }
 
-// *******************Show a volume’s details*******************
+// *******************Show a volume's details*******************
 
 // ShowVolumeRespSpec ...
 type ShowVolumeRespSpec struct {
@@ -355,7 +355,7 @@ func UpdateVolumeReq(cinderReq *UpdateVolumeReqSpec) (*model.VolumeSpec, error) 
 
 	if 0 != len(cinderReq.Volume.Metadata) {
 
-		return nil, errors.New("When updating a volume, opensds does not support metadata")
+		return nil, errors.New("OpenSDS does not support the parameter: metadata")
 	}
 
 	return &volume, nil

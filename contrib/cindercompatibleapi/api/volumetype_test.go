@@ -181,6 +181,61 @@ func TestCreateType(t *testing.T) {
 	}
 }
 
+func TestCreateTypeWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "volume_type": {
+            "name": "default",
+            "os-volume-type-access:is_public": true,
+            "description": "default policy",
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/v3/types", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Create a volume type, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "volume_type": {
+            "name": "default",
+            "os-volume-type-access:is_public": false,
+            "description": "default policy"
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("POST", "/v3/types", bytes.NewBuffer(jsonStr))
+
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Create a volume type failed: OpenSDS does not support os-volume-type-access:is_public = false"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+}
+
 func TestDeleteType(t *testing.T) {
 	r, _ := http.NewRequest("DELETE", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", nil)
 
@@ -225,6 +280,60 @@ func TestUpdateType(t *testing.T) {
 	}
 }
 
+func TestUpdateTypeWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "volume_type": {
+            "name": "default",
+            "description": "default policy",
+            "is_public": true,
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Update a volume type, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "volume_type": {
+            "name": "default",
+            "description": "default policy",
+            "is_public": false
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Update a volume type failed: OpenSDS does not support is_public = false"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+}
+
 func TestAddExtraProperty(t *testing.T) {
 	RequestBodyStr := `
     {
@@ -259,6 +368,41 @@ func TestAddExtraProperty(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestAddExtraPropertyWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "extra_specs": {
+            "dataStorage": {
+                "provisioningPolicy": "Thin",
+                "isSpaceEfficient": true
+            },
+            "ioConnectivity": {
+                "accessProtocol": "rbd",
+                "maxIOPS": 5000000,
+                "maxBWS": 500,
+            }
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Create or update extra specs for volume type, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
 	}
 }
 
@@ -340,7 +484,7 @@ func TestShowExtraPropertieWithBadRequest(t *testing.T) {
 	}
 }
 
-func TestUpdateExtraPropertie(t *testing.T) {
+func TestUpdateExtraPropertiy(t *testing.T) {
 	RequestBodyStr := `
     {
         "dataStorage": {
@@ -374,6 +518,57 @@ func TestUpdateExtraPropertie(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
+
+func TestUpdateExtraPropertiyWithBadRequest(t *testing.T) {
+	RequestBodyStr := `
+    {
+        "dataStorage": {
+            "provisioningPolicy": "Thin",
+            "isSpaceEfficient": true,
+        }
+    }`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/dataStorage", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Update extra specification for volume type, parse request body failed: invalid character '}' looking for beginning of object key string"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+
+	RequestBodyStr = `
+    {
+        "Storage": {
+            "provisioningPolicy": "Thin",
+            "isSpaceEfficient": true
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("PUT", "/v3/types/1106b972-66ef-11e7-b172-db03f3689c9c/extra_specs/dataStorage", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %v, actual %v", http.StatusBadRequest, w.Code)
+	}
+
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected = "Update extra specification for volume type failed: The body of the request is wrong"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
 	}
 }
 

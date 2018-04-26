@@ -154,7 +154,7 @@ func (portal *SnapshotPortal) GetSnapshot() {
 	snapshot, err := client.GetVolumeSnapshot(id)
 
 	if err != nil {
-		reason := fmt.Sprintf("Show a snapshot’s details failed: %v", err)
+		reason := fmt.Sprintf("Show a snapshot's details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
 		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
@@ -164,7 +164,7 @@ func (portal *SnapshotPortal) GetSnapshot() {
 	result := converter.ShowSnapshotDetailsResp(snapshot)
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Show a snapshot’s details, marshal result failed: %v", err)
+		reason := fmt.Sprintf("Show a snapshot's details, marshal result failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
 		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)
