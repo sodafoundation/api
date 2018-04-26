@@ -1,0 +1,81 @@
+<div class="content-header">
+    <p>A tenant is used to group and manage resources and users.</p>
+</div>
+
+<div class="table-toolbar">
+    <div class="left">
+        <button pButton type="button" label="Create" (click)="showUserForm()" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Delete" [disabled]="selectedUsers.length==0?'disabled':''" (click)="deleteUsers(selectedUsers)"></button>
+    </div>
+    <div class="right">
+        <div class="ui-inputsearch">
+            <input type="text" [(ngModel)]="userfilter" pInputText placeholder="search" />
+            <button pButton type="button" icon="fa-search" (click)="listUsers()"></button>
+        </div>
+        <button pButton type="button" icon="fa-refresh" (click)="listUsers()"></button>
+    </div>
+</div>
+
+<p-dataTable [immutable]="false" [(selection)]="selectedUsers" [sortField]="sortField" [value]="tenantUsers" selectionMode="multiple" [showHeaderCheckbox]="true" expandableRows="true" rowExpandMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]" (onRowExpand)="onRowExpand($event)">
+    <p-column expander="true" styleClass="col-icon" [style]="{'width': '60px'}"></p-column>
+    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
+    <p-column field="username" header="Username"></p-column>
+    <p-column header="Status">
+        <ng-template let-user="rowData" pTemplate="body">
+            <span>{{(user.enabled == true) ? "Enabled" : "Disabled"}}</span>
+        </ng-template>
+    </p-column>
+    <p-column field="description" header="Description"></p-column>
+    <p-column header="Operation" [style]="{'width': '20%'}">
+        <ng-template let-user="rowData" pTemplate="body">
+            <a (click)="showUserForm(user)">Modify</a>
+            <a (click)="userStatus(user.userid, user.enabled)">{{ (user.enabled == true) ? "Disable" : "Enable" }}</a>
+            <a (click)="deleteUsers(user.userid)">Delete</a>
+        </ng-template>
+    </p-column>
+
+    <ng-template pTemplate="rowexpansion">
+        <user-detail [isUserDetailFinished]="isUserDetailFinished" [detailUserInfo]="detailUserInfo"></user-detail>
+    </ng-template>
+</p-dataTable>
+
+<p-dialog *ngIf="createUserDisplay" [contentStyle]="{'overflow':'visible'}" [header]="popTitle" [(visible)]="createUserDisplay" [width]="600" modal="modal">
+
+    <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="myFormGroup" [errorMessage]="errorMessage">
+        <form-item label="{{label.userNameLabel}}" [required]="true">
+            <input *ngIf="!isEditUser" type="text" pInputText formControlName="form_username" />
+            <span *ngIf="isEditUser">{{ username }}</span>
+        </form-item>
+
+        <form-item label="{{label.descriptionLabel}}" [required]="false">
+            <textarea [rows]="3" [cols]="30" pInputTextarea formControlName="form_description" ></textarea>
+        </form-item>
+
+        <form-item label="{{label.tenantLabel}}" [required]="true">
+            <p-dropdown [options]="tenantLists" formControlName="form_tenant"></p-dropdown>
+        </form-item>
+
+        <form-item *ngIf="isEditUser" class="hide" [required]="false">
+            <p-checkbox binary="true" label="Change password" formControlName="form_isModifyPsw" ></p-checkbox>
+        </form-item>
+
+        <form-item *ngIf="myFormGroup.value.form_isModifyPsw" label="{{label.passwordLabel}}" [required]="true">
+            <input type="password" pPassword formControlName="form_psw" />
+        </form-item>
+
+        <form-item *ngIf="myFormGroup.value.form_isModifyPsw" label="{{label.confirmPasswordLabel}}" [required]="true">
+            <input type="password" [feedback]="false" pPassword formControlName="form_pswConfirm" />
+        </form-item>
+
+    </form>
+
+    <p-footer *ngIf="!isEditUser">
+        <button type="button" pButton (click)="createUser()" label="OK"></button>
+        <button type="button" pButton (click)="createUserDisplay=false" label="Cancel"></button>
+    </p-footer>
+    <p-footer *ngIf="isEditUser">
+        <button type="button" pButton (click)="updateUser()" label="OK"></button>
+        <button type="button" pButton (click)="createUserDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+<p-confirmDialog></p-confirmDialog>

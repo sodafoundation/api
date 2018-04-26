@@ -1,0 +1,74 @@
+<div class="custom-breadcrumb">
+    <span *ngFor="let item of items; index as i">
+        <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
+        <span *ngIf="(i+1) !== items.length">></span>
+    </span>
+</div>
+<div *ngIf='data'>
+    <div class="ui-g-12 ui-md-6">
+        <div>
+            <h2 class="proflie-name">{{data.name}}</h2>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Access Protocol:</span>
+            <span class="ui-g-12 ui-md-8">{{data.extras.protocol}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Provisioning Type:</span>
+            <span class="ui-g-12 ui-md-8">{{data.storageType}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">QoS Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Replication Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Snapshot Policy:</span>
+            <div class="ui-g-12 ui-md-8">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g-12 ui-md-6">
+        <p-chart [options]="option" [responsive]="false" [width]="300" [height]="400" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-g-12 ui-md-12">
+        <span class="ui-g-12 ui-md-2">Storage Pools:</span>
+        <div class="ui-g-12 ui-md-8">
+            <div>
+                <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools,<span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
+            </div>
+            <div class="footer-button-class">
+                <p-table [value]="pools" styleClass="custom-table-class">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th *ngFor="let col of cols">
+                                {{col.header}}
+                            </th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-pool>
+                        <tr>
+                            <td *ngFor="let col of cols">
+                                {{pool[col.field]}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-helper-clearfix"></div>
+    <div class="footer-button-class">
+        <button pButton type="button" label="Modify" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Back" [routerLink]="['/profile']"></button>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+.create-profile-img {
+    cursor: pointer;
+}
+
+.profile-form-padding {
+    padding: 1em 0;
+}
+
+.customization-item {
+    min-width: 46%;
+    margin: 0 0.5em;
+    overflow: hidden;
+}
+
+.customization-container {
+    min-width: 30%;
+    max-width: 100%;
+    padding: 1em 2em !important;
+    background-color: rgba(243, 246, 247, 1);
+    border-radius: 10px;
+    display: flex;
+}
+
+.ui-inputgroup .ui-inputtext:not(:first-child) {
+    border-left: 1px solid #cfd7db;
+}
+
+.ui-inputgroup .ui-inputtext:enabled:hover {
+    border-color: #98a5bc;
+}

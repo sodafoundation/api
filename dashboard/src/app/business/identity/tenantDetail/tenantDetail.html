@@ -1,0 +1,51 @@
+<div class="table-detail-con" *ngIf="!isDetailFinished"><div>Loading...</div></div>
+<div class="table-detail-con" *ngIf="isDetailFinished">
+
+    <h3>Resource Usage</h3>
+    <ul>
+        <li>Storage Capacity:<span>20.5 GB</span></li>
+        <li>Volumes:<span>215</span></li>
+        <li>Volume Snapshots<span>110</span></li>
+    </ul>
+
+    <h3>User Management</h3>
+    <div class="table-toolbar">
+        <div class="left"><button pButton type="button" label="Add User" (click)="showAddUsers()"></button></div>
+    </div>
+
+    <p-dataTable [value]="users" [rows]="5" [paginator]="true" [pageLinks]="3">
+        <p-column field="name" header="Username"></p-column>
+        <p-column header="Status">
+                <ng-template let-user="rowData" pTemplate="body">
+                        <span>{{(user.enabled == true) ? "Enabled" : "Disabled"}}</span>
+                    </ng-template>
+        </p-column>
+        <p-column field="role" header="Role"></p-column>
+        <p-column field="description" header="Description"></p-column>
+        <p-column header="Operation" [style]="{'width': '20%'}">
+            <ng-template let-user="rowData" pTemplate="body">
+                <a (click)="removeUser(user)">Remove</a>
+            </ng-template>
+        </p-column>
+    </p-dataTable>
+</div>
+
+<p-dialog *ngIf="addUserDisplay" [contentStyle]="{'overflow':'visible'}" header="Add User" [(visible)]="addUserDisplay" [width]="600" modal="modal">
+    <p-dataTable [immutable]="false" [(selection)]="popSelectedUsers" sortField="username" [value]="allUsers" scrollable="true" scrollHeight="300px" selectionMode="multiple" [showHeaderCheckbox]="true"  >
+        <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
+        <p-column field="username" header="Username"></p-column>
+        <p-column header="Status">
+            <ng-template let-user="rowData" pTemplate="body">
+                <span>{{(user.enabled == true) ? "Enabled" : "Disabled"}}</span>
+            </ng-template>
+        </p-column>
+        <p-column field="description" header="Description"></p-column>
+    </p-dataTable>
+
+    <p-footer>
+        <button type="button" pButton (click)="addUsers()" label="OK"></button>
+        <button type="button" pButton (click)="addUserDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

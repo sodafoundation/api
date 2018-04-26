@@ -1,0 +1,41 @@
+<div>
+    <div>
+        <p-button label="Registry" styleClass="ui-button-secondary" (click)="showRegistryService()"></p-button>
+    </div>
+    <div class="ui-inputgroup">
+        <div class="ui-g-6 ui-md-3" *ngFor="let cloudService of cloudServices">
+            <app-cloud-service-item [cloudService]="cloudService"></app-cloud-service-item>
+        </div>
+    </div>
+    <div class="ui-helper-clearfix"></div>
+</div>
+
+
+<p-dialog [contentStyle]="{'overflow':'visible'}" header="Registry Service" [(visible)]="registryServiceDisplay" [width]="500" modal="modal">
+    <div>
+        <div class="ui-inputgroup">
+            <span class="ui-g-4 ui-md-4">{{label.name}}</span>
+            <input type="text" pInputText placeholder="Username">
+        </div>
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.type}}</span>
+            <p-dropdown [style]="{'min-width':150}" [options]="serviceTypeOptions" [(ngModel)]="selectedType" placeholder="Service Type"></p-dropdown>
+        </div>
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.region}}</span>
+            <p-dropdown [style]="{'min-width':150}" [options]="regionOptions" [(ngModel)]="selectedRegion" placeholder="Select Region"></p-dropdown>
+        </div>
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.accessKey}}</span>
+            <input type="text" pInputText placeholder="Access Key">
+        </div>
+        <div class="ui-inputgroup margin-top-1em">
+            <span class="ui-g-4 ui-md-4">{{label.secretKey}}</span>
+            <input type="text" pInputText placeholder="Secret Key">
+        </div>
+    </div>
+    <p-footer>
+        <p-button label="OK" styleClass="ui-button-secondary" (click)="registryCloud()"></p-button>
+        <p-button label="Cancel" (click)="registryServiceDisplay=false"></p-button>
+    </p-footer>
+</p-dialog>

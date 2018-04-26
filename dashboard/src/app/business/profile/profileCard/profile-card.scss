@@ -1,0 +1,29 @@
+@import "./../../scss-variable";
+.margin-left-class {
+    margin-left: 0.5em;
+}
+
+.padding-class {
+    min-width: 300px;
+    padding: 10px 0 0;
+}
+
+.icon-color-class {
+    font-size: $fontSize;
+    color: map-get($color-primary, normal);
+    background: rgba(101, 125, 149, 0.149019607843137);
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.font-color-class {
+    color: map-get($color-text, primary);
+}
+
+.font-primary {
+    color: #434B52; //map-get($color-text, primary);
+}
+
+.label-class {
+    color: #B9C3C8;
+}

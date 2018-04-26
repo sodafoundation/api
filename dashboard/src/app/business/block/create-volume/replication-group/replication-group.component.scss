@@ -1,0 +1,9 @@
+@import "./../../../scss-variable";
+.text-align-center {
+    text-align: center;
+}
+
+.replication-pair-volume-item {
+    border-top: 1px dotted map-get($widget-border, hover);
+    padding: 1em 0;
+}
