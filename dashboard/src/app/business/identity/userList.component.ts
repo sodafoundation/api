@@ -1,12 +1,11 @@
-import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, ViewChildren } from '@angular/core';
+import { Component, OnInit, AfterContentChecked, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, ViewChildren } from '@angular/core';
 import { Http } from '@angular/http';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem, ConfirmationService } from '../../components/common/api';
-
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
 
 let _ = require("underscore");
 
@@ -19,44 +18,59 @@ let _ = require("underscore");
     providers: [ConfirmationService],
     animations: []
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, AfterContentChecked{
     tenantUsers = [];
     tenantLists = [];
     createUserDisplay = false;
     isUserDetailFinished = false;
     isEditUser = false;
+    userfilter = "";
+    myFormGroup;
 
     selectedUsers = [];
 
-    selectedTenant: string;
     username: string;
-    description: string;
-    newPassword: string;
-    passwordConfirm: string;
     userRole: string;
+    currentUser;
 
     detailUserInfo: string;
     popTitle: String;
 
     sortField: string;
+
     constructor(
         private http: Http,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
         // private I18N: I18NService,
-        // private router: Router
-    ) { }
-
-    
-    label:object = {
-        userNameLabel:'Username:',
-        passwordLabel:'Password:',
-        descriptionLabel:'Description',
-        confirmPasswordLabel:'Confirm Password:',
-        roleLabel:'Role:',
-        tenantLabel:'Tenant:'
+        // private router: Router,
+        private fb: FormBuilder
+    ) { 
+        this.myFormGroup = this.fb.group({
+            "form_username": ["", Validators.required ],
+            "form_description":["", Validators.maxLength(200) ],
+            "form_tenant": [""],
+            "form_isModifyPsw": [""],
+            "form_psw": ["", Validators.required ],
+            "form_pswConfirm": ["", Validators.required ]
+        })
     }
 
-    errorMessage = {};
+    errorMessage = {
+        "form_username": { required: "Username is required."},
+        "form_description": { maxlength: "Max. length is 200."},
+        "form_tenant": { required: "Tenant is required."},
+        "form_psw": { required: "Password is required." },
+        "form_pswConfirm": { required: "Password is required." }
+    };
+    
+    label:object = {
+        userNameLabel:'Username',
+        passwordLabel:'Password',
+        descriptionLabel:'Description',
+        confirmPasswordLabel:'Confirm Password',
+        roleLabel:'Role',
+        tenantLabel:'Tenant'
+    }
     
     showUserForm(user?): void{
         if(user){
@@ -64,55 +78,79 @@ export class UserListComponent implements OnInit {
             this.popTitle = "Modify";
 
             this.username = user.username;
-            this.newPassword = "";
-            this.passwordConfirm = "";
-            this.description = user.description;
-            this.selectedTenant = user.defaultTenant;
+            this.currentUser = user;
+
+            this.createUserDisplay = true;
+            this.getTenants();
+            console.log(user)
+            this.myFormGroup = this.fb.group({
+                "form_username": [user.username, Validators.required ],
+                "form_description":[user.description, Validators.maxLength(200) ],
+                "form_tenant": [user.defaultTenant, Validators.required],
+                "form_isModifyPsw": [false]
+            })
+            
 
         }else{
             this.isEditUser = false;
             this.popTitle = "Create";
 
-            this.username = "";
-            this.newPassword = "";
-            this.passwordConfirm = "";
-            this.description = "";
-
             this.createUserDisplay = true;
             this.getTenants();
             this.getRoles();
+
+            this.myFormGroup = this.fb.group({
+                "form_username": ["", Validators.required ],
+                "form_description":["", Validators.maxLength(200) ],
+                "form_tenant": ["",Validators.required],
+                "form_isModifyPsw": [true],
+                "form_psw": ["", Validators.required ],
+                "form_pswConfirm": ["", Validators.required ]
+            })
         }
     }
 
     createUser(){
         let request: any = { user:{} };
         request.user = {
-            "default_project_id": this.selectedTenant,
+            "default_project_id": this.myFormGroup.value.form_tenant,
             "domain_id": "default",
-            "name": this.username,
-            "description": this.description,
-            "password": this.newPassword
+            "name": this.myFormGroup.value.form_username,
+            "description": this.myFormGroup.value.form_description,
+            "password": this.myFormGroup.value.form_psw
         }
         
-        this.http.post("/v3/users", request).subscribe((res) => {
-            let userInfo = res.json().user;
-            let request: any = {};
-            this.http.put("/v3/projects/"+ userInfo.default_project_id +"/users/"+ userInfo.id +"/roles/"+ this.userRole, request).subscribe((r) => {
-                this.createUserDisplay = false;
-                this.listUsers();
-            })
-        });
+        if(this.myFormGroup.status == "VALID"){
+            this.http.post("/v3/users", request).subscribe((res) => {
+                let userInfo = res.json().user;
+                let request: any = {};
+                this.http.put("/v3/projects/"+ userInfo.default_project_id +"/users/"+ userInfo.id +"/roles/"+ this.userRole, request).subscribe((r) => {
+                    this.createUserDisplay = false;
+                    this.listUsers();
+                })
+            });
+        }else{
+
+        }
     }
 
-    updateUser(userid){
-
+    updateUser(){
         let request: any = { user:{} };
         request.user = {
-            "enabled": status
+            "description": this.myFormGroup.value.form_description,
+            "default_project_id": this.myFormGroup.value.form_tenant
         }
-        this.http.patch("/v3/users/"+ userid, request).subscribe((res) => {
-            this.listUsers();
-        });
+        if(this.myFormGroup.value.form_isModifyPsw==true){
+            request.user["password"] = this.myFormGroup.value.form_psw;
+        }
+        
+        console.log(request);
+        if(this.myFormGroup.status == "VALID"){
+            this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
+                this.createUserDisplay = false;
+                this.listUsers();
+            });
+        }
     }
     
     getRoles(){
@@ -139,7 +177,6 @@ export class UserListComponent implements OnInit {
                 tenant["label"] = item.name;
                 tenant["value"] = item.id;
                 this.tenantLists.push(tenant);
-                this.selectedTenant =  this.tenantLists[0].value;
             });
         });
     }
@@ -148,6 +185,19 @@ export class UserListComponent implements OnInit {
     ngOnInit() {
         this.listUsers();
         
+    }
+
+    ngAfterContentChecked(){
+    //     if(this.isEditUser == true && this.myFormGroup.value.form_isModifyPsw == true){
+    //         this.myFormGroup = this.fb.group({
+    //             "form_username": [this.currentUser.username, Validators.required ],
+    //             "form_description":[this.currentUser.description, Validators.maxLength(200) ],
+    //             "form_tenant": [this.currentUser.defaultTenant, Validators.required],
+    //             "form_isModifyPsw": [true],
+    //             "form_psw": ["", Validators.required ],
+    //             "form_pswConfirm": ["", Validators.required ]
+    //         })
+    //     }
     }
 
     listUsers(){
@@ -159,6 +209,11 @@ export class UserListComponent implements OnInit {
         request.params = {
             "domain_id": "default"
         }
+
+        if(this.userfilter != ""){
+            request.params["name"] = this.userfilter;
+        }
+
         this.http.get("/v3/users", request).subscribe((res) => {
             res.json().users.map((item, index) => {
                 let user = {};
@@ -226,6 +281,6 @@ export class UserListComponent implements OnInit {
 
     onRowExpand(evt) {
         this.isUserDetailFinished = false;
-        this.detailUserInfo = evt.data.userid+ "|"+ evt.data.username;
+        this.detailUserInfo = evt.data.userid;
     }
 }
