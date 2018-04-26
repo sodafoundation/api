@@ -254,7 +254,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 
 	hostIP := opt.HostInfo.GetIp()
 	if hostIP == "" {
-		initiator = "ALL"
+		hostIP = "ALL"
 	}
 
 	lvPath, ok := opt.GetMetadata()["lvPath"]
