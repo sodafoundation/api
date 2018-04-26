@@ -63,7 +63,6 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VOLUME_CREATING,
-		ProfileId:        in.ProfileId,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
