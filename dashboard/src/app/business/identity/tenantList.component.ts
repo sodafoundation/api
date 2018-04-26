@@ -103,32 +103,31 @@ export class TenantListComponent implements OnInit {
             this.http.post("/v3/projects", request).subscribe((res) => {
                 let tenantid = res.json().project.id;
                 
-                // create group
-                let request: any = { group:{} };
-                request.group = {
-                    "domain_id": "default",
-                    "name": "group_"+ tenantid
-                }
-                this.http.post("/v3/groups/", request).subscribe((groupRES) => {
-                    let groupid = groupRES.json().group.id;
 
-                    // get roles
-                    let request: any = { params:{} };
-                    this.http.get("/v3/roles", request).subscribe((roleRES) => {
-                        let roleid;
-                        roleRES.json().roles.forEach((item, index) => {
-                            if(item.name == "Member"){
-                                roleid = item.id;
+                // get roles
+                let request: any = { params:{} };
+                this.http.get("/v3/roles", request).subscribe((roleRES) => {
+                    roleRES.json().roles.forEach((item, index) => {
+                        if(item.name == "Member"){
+                            // create group for role named [Member]
+                            let request: any = { group:{} };
+                            request.group = {
+                                "domain_id": "default",
+                                "name": "group_"+ tenantid + "_Member"
                             }
-                        })
+                            this.http.post("/v3/groups/", request).subscribe((groupRES) => {
+                                let groupid = groupRES.json().group.id;
 
-                        // Assign role to group on project
-                        let reqRole: any = { };
-                        this.http.put("/v3/projects/"+ tenantid +"/groups/"+ groupid +"/roles/"+ roleid, reqRole).subscribe(() => {
-                            this.createTenantDisplay = false;
-                            this.listTenants();
-                        })
-                    });
+                                // Assign role to group on project
+                                let reqRole: any = { };
+                                this.http.put("/v3/projects/"+ tenantid +"/groups/"+ groupid +"/roles/"+  item.id, reqRole).subscribe(() => {
+                                    this.createTenantDisplay = false;
+                                    this.listTenants();
+                                })
+                            });
+                        }
+                    })
+
                 })
 
                 
@@ -154,49 +153,35 @@ export class TenantListComponent implements OnInit {
         }
     }
 
+    deleteTenant(tenant){
+        console.log("aaa")
+        this.confirmationService.confirm({
+            message: "Are you sure you want to delete this tenant?",
+            header: "Confirm",
+            icon: "fa fa-question-circle",
+            accept: ()=>{
+                this.http.get("/v3/role_assignments?scope.project.id="+ tenant.id).subscribe((res)=>{
+                    res.json().role_assignments.forEach((item, index) => {
+                        if(item.group){
+                            let request: any = {};
+                            this.http.delete("/v3/groups/"+ item.group.id, request).subscribe();
+                        }
+                    });
+
+                    let request: any = {};
+                    this.http.delete("/v3/projects/"+ tenant.id, request).subscribe((r) => {
+                        this.listTenants();
+                    })
+                })
+            },
+            reject:()=>{}
+        })
+
+    }
+
     onRowExpand(evt) {
         this.isDetailFinished = false;
-
         this.projectID = evt.data.id;
-        // this.http.get("/v3/role_assignments?scope.project.id="+ evt.data.id).subscribe((res)=>{
-        //     let arr = res.json().role_assignments;
-        //     let newarr = [];
-        //     let roles=[];
-        //     let groups=[];
-
-        //     // get roles
-        //     let reqRole: any = { params:{} };
-        //     this.http.get("/v3/roles", reqRole).subscribe((roleRES) => {
-        //         roleRES.json().roles.forEach((item, index) => {
-        //             if(item.name == "Member"){ // more role can be expand
-        //                 let roleJson = {};
-        //                 roleJson["id"] = item.id;
-        //                 roleJson["name"] = item.name;
-        //                 roles.push(roleJson);
-        //             }
-        //         })
-
-        //         roles.forEach((item, index)=>{
-        //             arr.forEach(ele => {
-        //                 if(ele.role.id == item.id){
-        //                     ele.role["name"] = item.name;
-        //                     newarr.push(ele);
-        //                 }
-        //             });
-        //         })
-
-        //         newarr.forEach((item, index) => {
-        //             if(item.group){
-        //                 let groupJson = {};
-        //                 groupJson["groupid"] = item.group.id;
-        //                 groupJson["grouprole"] = item.role
-        //                 groups.push(groupJson);
-        //             }
-        //         });
-
-        //         this.userGroups = groups;
-        //     })
-        // })
     }
 
     label: object = {

@@ -51,19 +51,15 @@
             <textarea [rows]="3" [cols]="30" pInputTextarea formControlName="form_description" ></textarea>
         </form-item>
 
-        <form-item label="{{label.tenantLabel}}" [required]="true">
-            <p-dropdown [options]="tenantLists" formControlName="form_tenant"></p-dropdown>
-        </form-item>
-
         <form-item *ngIf="isEditUser" class="hide" [required]="false">
             <p-checkbox binary="true" label="Change password" formControlName="form_isModifyPsw" ></p-checkbox>
         </form-item>
 
-        <form-item *ngIf="myFormGroup.value.form_isModifyPsw" label="{{label.passwordLabel}}" [required]="true">
+        <form-item [style.display]="myFormGroup.value.form_isModifyPsw ? 'block' : 'none'" label="{{label.passwordLabel}}" [required]="myFormGroup.value.form_isModifyPsw">
             <input type="password" pPassword formControlName="form_psw" />
         </form-item>
 
-        <form-item *ngIf="myFormGroup.value.form_isModifyPsw" label="{{label.confirmPasswordLabel}}" [required]="true">
+        <form-item [style.display]="myFormGroup.value.form_isModifyPsw ? 'block' : 'none'" label="{{label.confirmPasswordLabel}}" [required]="myFormGroup.value.form_isModifyPsw">
             <input type="password" [feedback]="false" pPassword formControlName="form_pswConfirm" />
         </form-item>
 

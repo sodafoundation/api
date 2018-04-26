@@ -130,8 +130,16 @@ export class AppComponent implements OnInit{
         }
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            let req1: any = { params:{} };
+            let userid = res.json().token.user.id;
+            console.log(userid);
+            this.http.get("/v3/users/"+ userid +"/projects", req1).subscribe((roleRES) => {
+                
+            })
+
+
+
             let g_token_id = res.headers.get('x-subject-token'); 
-            console.log("获取基本token", g_token_id);
             let req: any = { auth: {} };
             req.auth = {
                 "identity": {
@@ -149,10 +157,6 @@ export class AppComponent implements OnInit{
                   }
                 }
             }
-
-
-
-            console.log("存储的token",  localStorage['x-subject-token']);
 
             this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
                 console.log("正式token", r.headers.get('x-subject-token') );

@@ -335,8 +335,7 @@
     tbody.ui-datatable-hoverable-rows {
         > tr.ui-widget-content:not(.ui-state-highlight):hover {
             cursor: pointer;
-            background: $stateHoverBgColor;
-            color: $stateHoverTextColor;
+            background: #ebf0f2;
         }
     }
 }

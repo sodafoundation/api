@@ -26,11 +26,17 @@
 }
 
 .ui-datatable thead th, .ui-datatable tfoot td {
-    text-align: center;
+    text-align: left;
 }
 
 .ui-datatable thead tr {
     border-width: 0;
+}
+
+.ui-datatable thead th:not(:first-of-type) span.ui-column-title{
+    border-left:1px solid #b4c3c9;
+    margin-left: -0.1rem;
+    padding-left: 0.1rem;
 }
 
 .ui-datatable .ui-datatable-thead > tr > th,
@@ -38,9 +44,12 @@
 .ui-datatable .ui-datatable-data > tr > td {
     border-color: inherit;
     box-sizing: border-box;
-    padding: .25em .5em;
-    border-width: 1px;
-    border-style: solid;
+    padding: .09rem .1rem;
+    border: none;
+}
+.ui-datatable .ui-datatable-thead > tr > th,
+.ui-datatable .ui-datatable-tfoot > tr > td{
+    padding: .1rem .1rem;
 }
 
 
@@ -57,6 +66,26 @@
 
 .ui-datatable tbody {
     outline: 0;
+}
+
+.ui-datatable tbody.ui-widget-content,
+.ui-datatable tbody tr.ui-widget-content{
+    border: 0;
+}
+
+.ui-datatable tbody .ui-cell-data {
+    height: .32rem;
+    line-height: .32rem;
+}
+
+.ui-datatable tbody .ui-cell-data > a{
+    margin-right: .2rem;
+}
+
+.ui-datatable tbody tr.ui-expanded-row-content {
+    background: #fbfdff;
+    border-bottom: 1px solid #ebf0f2;
+    border-top: 1px solid #ebf0f2;
 }
 
 .ui-datatable .ui-sortable-column {

@@ -452,13 +452,11 @@ p-togglebutton.ng-dirty.ng-invalid .ui-button {
 .ui-datatable {
     th {
         &.ui-state-default {
-            background: #ebedf0;
-            border-color: #d9d9d9;
+            background: #dfe6e9;
         }
         
         &.ui-sortable-column:not(.ui-state-active):hover {
-            background: #d3d5d8;
-            border-color: #d9d9d9;
+            background: #dfe6e9;
         }
                 
         &.ui-state-active {
@@ -469,15 +467,18 @@ p-togglebutton.ng-dirty.ng-invalid .ui-button {
     
     tbody {
         > tr.ui-widget-content {
-            border-color: #d9d9d9;
             
             &.ui-datatable-odd {
-                background-color: #fafafb;
+                background-color: #f5f8f9;
+            }
+
+            &.ui-datatable-even {
+                background-color: #ffffff;
             }
             
             &.ui-state-highlight {
-                background-color: $stateHighlightBgColor;
-                color: $stateHighlightTextColor;
+                background-color: #ebf0f2;
+                color: #657D95;
             }
         }        
     }
@@ -490,6 +491,26 @@ p-togglebutton.ng-dirty.ng-invalid .ui-button {
             }
         }
     }
+
+    .ui-datatable-scrollable-header{
+        background: #dfe6e9;
+    }
+
+    .ui-datatable-tablewrapper, .ui-datatable-scrollable-body{
+        border-bottom:1px solid #dfe6e9;
+    }
+
+    .ui-paginator-bottom{
+        border: none;
+        background: none;
+        text-align: left;
+
+        &.ui-paginator{
+            padding: .15rem 0;
+        }
+    }
+
+    
 }
 
 /* TurboTable */

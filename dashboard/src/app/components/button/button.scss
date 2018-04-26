@@ -193,7 +193,7 @@ button.ui-button::-moz-focus-inner {
     background-color: map-get($color-primary, hover);
     border-color: map-get($color-primary, hover);
     color: #fff;
-    box-shadow: 0px 4px 8px #a7c9eb;
+    box-shadow: 0px 4px 8px rgba(0, 101, 203, 0.4);
 }
 
 .ui-button.ui-button-secondary:enabled:active,

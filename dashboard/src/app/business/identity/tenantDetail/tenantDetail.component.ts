@@ -133,9 +133,9 @@ export class TenantDetailComponent implements OnInit {
                 userRES.json().users.forEach((ele) => {
                     ele["role"] = item.grouprole.name;
                     this.users.push(ele);
-                    this.isDetailFinished = true;
+                    
                 });
-
+                this.isDetailFinished = true;
             })
         })
 

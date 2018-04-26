@@ -18,9 +18,8 @@ let _ = require("underscore");
     providers: [ConfirmationService],
     animations: []
 })
-export class UserListComponent implements OnInit, AfterContentChecked{
+export class UserListComponent implements OnInit {
     tenantUsers = [];
-    tenantLists = [];
     createUserDisplay = false;
     isUserDetailFinished = false;
     isEditUser = false;
@@ -30,7 +29,6 @@ export class UserListComponent implements OnInit, AfterContentChecked{
     selectedUsers = [];
 
     username: string;
-    userRole: string;
     currentUser;
 
     detailUserInfo: string;
@@ -81,13 +79,12 @@ export class UserListComponent implements OnInit, AfterContentChecked{
             this.currentUser = user;
 
             this.createUserDisplay = true;
-            this.getTenants();
-            console.log(user)
+            
             this.myFormGroup = this.fb.group({
-                "form_username": [user.username, Validators.required ],
                 "form_description":[user.description, Validators.maxLength(200) ],
-                "form_tenant": [user.defaultTenant, Validators.required],
-                "form_isModifyPsw": [false]
+                "form_isModifyPsw": [false],
+                "form_psw": ["",  Validators.required ],
+                "form_pswConfirm": ["",  Validators.required ]
             })
             
 
@@ -96,13 +93,10 @@ export class UserListComponent implements OnInit, AfterContentChecked{
             this.popTitle = "Create";
 
             this.createUserDisplay = true;
-            this.getTenants();
-            this.getRoles();
 
             this.myFormGroup = this.fb.group({
                 "form_username": ["", Validators.required ],
                 "form_description":["", Validators.maxLength(200) ],
-                "form_tenant": ["",Validators.required],
                 "form_isModifyPsw": [true],
                 "form_psw": ["", Validators.required ],
                 "form_pswConfirm": ["", Validators.required ]
@@ -113,7 +107,6 @@ export class UserListComponent implements OnInit, AfterContentChecked{
     createUser(){
         let request: any = { user:{} };
         request.user = {
-            "default_project_id": this.myFormGroup.value.form_tenant,
             "domain_id": "default",
             "name": this.myFormGroup.value.form_username,
             "description": this.myFormGroup.value.form_description,
@@ -122,12 +115,8 @@ export class UserListComponent implements OnInit, AfterContentChecked{
         
         if(this.myFormGroup.status == "VALID"){
             this.http.post("/v3/users", request).subscribe((res) => {
-                let userInfo = res.json().user;
-                let request: any = {};
-                this.http.put("/v3/projects/"+ userInfo.default_project_id +"/users/"+ userInfo.id +"/roles/"+ this.userRole, request).subscribe((r) => {
-                    this.createUserDisplay = false;
-                    this.listUsers();
-                })
+                this.createUserDisplay = false;
+                this.listUsers();
             });
         }else{
 
@@ -137,67 +126,62 @@ export class UserListComponent implements OnInit, AfterContentChecked{
     updateUser(){
         let request: any = { user:{} };
         request.user = {
-            "description": this.myFormGroup.value.form_description,
-            "default_project_id": this.myFormGroup.value.form_tenant
+            "description": this.myFormGroup.value.form_description
         }
         if(this.myFormGroup.value.form_isModifyPsw==true){
             request.user["password"] = this.myFormGroup.value.form_psw;
+
+            if(this.myFormGroup.status == "VALID"){
+                this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
+                    this.createUserDisplay = false;
+                    this.listUsers();
+                });
+            }
+        }else{
+            if(this.myFormGroup.controls['form_description'].valid == true){
+                this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
+                    this.createUserDisplay = false;
+                    this.listUsers();
+                });
+            }
         }
         
-        console.log(request);
-        if(this.myFormGroup.status == "VALID"){
-            this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
-                this.createUserDisplay = false;
-                this.listUsers();
-            });
-        }
+        
     }
     
-    getRoles(){
-        let request: any = { params:{} };
-        this.http.get("/v3/roles", request).subscribe((res) => {
-            res.json().roles.forEach((item, index) => {
-                if(item.name == "Member"){
-                    this.userRole = item.id;
-                }
-            })
-        });
-    }
-    getTenants(){
-        this.tenantLists = [];
+    // getRoles(){
+    //     let request: any = { params:{} };
+    //     this.http.get("/v3/roles", request).subscribe((res) => {
+    //         res.json().roles.forEach((item, index) => {
+    //             if(item.name == "Member"){
+    //                 this.userRole = item.id;
+    //             }
+    //         })
+    //     });
+    // }
 
-        let request: any = { params:{} };
-        request.params = {
-            "domain_id": "default"
-        }
+    // getTenants(){
+    //     this.tenantLists = [];
 
-        this.http.get("/v3/projects", request).subscribe((res) => {
-            res.json().projects.map((item, index) => {
-                let tenant = {};
-                tenant["label"] = item.name;
-                tenant["value"] = item.id;
-                this.tenantLists.push(tenant);
-            });
-        });
-    }
+    //     let request: any = { params:{} };
+    //     request.params = {
+    //         "domain_id": "default"
+    //     }
+
+    //     this.http.get("/v3/projects", request).subscribe((res) => {
+    //         res.json().projects.map((item, index) => {
+    //             let tenant = {};
+    //             tenant["label"] = item.name;
+    //             tenant["value"] = item.id;
+    //             this.tenantLists.push(tenant);
+    //         });
+    //     });
+    // }
 
 
     ngOnInit() {
         this.listUsers();
         
-    }
-
-    ngAfterContentChecked(){
-    //     if(this.isEditUser == true && this.myFormGroup.value.form_isModifyPsw == true){
-    //         this.myFormGroup = this.fb.group({
-    //             "form_username": [this.currentUser.username, Validators.required ],
-    //             "form_description":[this.currentUser.description, Validators.maxLength(200) ],
-    //             "form_tenant": [this.currentUser.defaultTenant, Validators.required],
-    //             "form_isModifyPsw": [true],
-    //             "form_psw": ["", Validators.required ],
-    //             "form_pswConfirm": ["", Validators.required ]
-    //         })
-    //     }
     }
 
     listUsers(){

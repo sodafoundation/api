@@ -19,7 +19,9 @@ export class userDetailComponent implements OnInit {
 
     userID: string;
 
-    defaultTenant: string;
+    unspecified: boolean = false;
+
+    ownedTenant: string = "";
 
     constructor(
         private http: Http,
@@ -31,15 +33,20 @@ export class userDetailComponent implements OnInit {
         this.userID = this.detailUserInfo;
 
         let request: any = { params: {} };
-        this.http.get("/v3/users/" + this.userID, request).subscribe((res) => {
-            let project_id = res.json().user.default_project_id;
-            let req: any = { params: {} };
-            this.http.get("/v3/projects/" + project_id, req).subscribe((res) => {
-                this.defaultTenant = res.json().project.name;
+        this.http.get("/v3/users/" + this.userID + "/projects", request).subscribe((res) => {
+            if(res.json().projects.length == 0){
+                this.ownedTenant = "Unspecified";
+                this.unspecified = true;
+            }
+            res.json().projects.forEach((ele, i) => {
+                if(i==0){
+                    this.ownedTenant = ele.name;
+                }else{
+                    this.ownedTenant += ", "+ ele.name;
+                }
+            });
 
-                this.isUserDetailFinished = true;
-            })
-
+            this.isUserDetailFinished = true;
         });
 
     }

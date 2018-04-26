@@ -21,7 +21,7 @@
     <p-column header="Operation" [style]="{'width': '30%'}">
         <ng-template pTemplate="body" let-tenant="rowData">
             <a (click)="showCreateTenant(tenant)">Modify</a>
-            <a href="#">Delete</a>
+            <a (click)="deleteTenant(tenant)">Delete</a>
         </ng-template>
     </p-column>
     <ng-template pTemplate="rowexpansion">
@@ -46,3 +46,5 @@
         <button type="button" pButton (click)="createTenantDisplay=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>
+
+<p-confirmDialog></p-confirmDialog>
