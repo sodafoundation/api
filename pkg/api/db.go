@@ -58,6 +58,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		TenantId:         in.TenantId,
 		Name:             in.Name,
 		Description:      in.Description,
+		ProfileId:        in.ProfileId,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VOLUME_CREATING,
