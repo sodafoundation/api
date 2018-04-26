@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
@@ -74,7 +75,7 @@ func TestListPools(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListPoolsWithFilter", m).Return(fakePools, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(fakePools, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -134,7 +135,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListPoolsWithFilter", m).Return(nil, errors.New("db error"))
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -149,7 +150,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 func TestGetPool(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetPool", "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
@@ -202,7 +203,7 @@ func TestGetPool(t *testing.T) {
 func TestGetPoolWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetPool", "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
+	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
 
