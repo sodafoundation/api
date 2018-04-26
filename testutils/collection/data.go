@@ -519,30 +519,6 @@ var (
 				}
 			}
 		}`,
-		//		`{
-		//			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-		//			"name":             "sample-pool-02",
-		//			"description":      "This is the second sample storage pool for testing",
-		//			"totalCapacity":    200,
-		//			"freeCapacity":     170,
-		//			"availabilityZone": "default",
-		//			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		//			"extras": {
-		//				"dataStorage": {
-		//					"provisioningPolicy": "Thin",
-		//					"isSpaceEfficient":   true
-		//				},
-		//				"ioConnectivity": {
-		//					"accessProtocol": "rbd",
-		//					"maxIOPS":        3000000,
-		//					"maxBWS": 	      350
-		//				},
-		//				"advanced": {
-		//					"diskType": "SAS",
-		//					"latency":  "500ms"
-		//				}
-		//			}
-		//		}`,
 	}
 
 	StringSliceVolumes = []string{

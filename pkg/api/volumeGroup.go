@@ -119,14 +119,14 @@ func (this *VolumeGroupPortal) GetVolumeGroup() {
 	// Call db api module to handle get volume request.
 	result, err := db.C.GetVolumeGroup(c.GetContext(this.Ctx), this.Ctx.Input.Param(":groupId"))
 	if err != nil {
-		this.ErrorHandle("Get volume failed", model.ErrorBadRequest, err)
+		this.ErrorHandle("Get volume group failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume showed result failed", model.ErrorInternalServer, err)
+		this.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
