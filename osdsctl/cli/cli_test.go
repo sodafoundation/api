@@ -215,6 +215,11 @@ func (*fakeVolumeReceiver) Recv(
 				return err
 			}
 			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
+				return err
+			}
+			break
 		default:
 			return errors.New("output format not supported")
 		}
@@ -248,6 +253,16 @@ func (*fakeVolumeReceiver) Recv(
 			break
 		case *[]*model.VolumeSnapshotSpec:
 			if err := json.Unmarshal([]byte(ByteSnapshots), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroups), out); err != nil {
 				return err
 			}
 			break

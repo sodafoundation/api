@@ -48,7 +48,7 @@ func (this *PoolPortal) ListPools() {
 		return
 	}
 
-	result, err := db.C.ListPoolsWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListPoolsWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List pools failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

@@ -91,7 +91,7 @@ func (this *ProfilePortal) ListProfiles() {
 		return
 	}
 
-	result, err := db.C.ListProfilesWithFilter(c.GetContext(this.Ctx), m)
+	result, err := ListProfilesWithFilter(c.GetContext(this.Ctx), m)
 	if err != nil {
 		reason := fmt.Sprintf("List profiles failed: %v", err)
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)

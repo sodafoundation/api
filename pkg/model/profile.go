@@ -21,6 +21,8 @@ package model
 
 import (
 	"encoding/json"
+	"sort"
+	"strings"
 )
 
 // An OpenSDS profile is identified by a unique name and ID. With adding
@@ -56,4 +58,55 @@ type ExtraSpec map[string]interface{}
 func (ext ExtraSpec) Encode() []byte {
 	parmBody, _ := json.Marshal(&ext)
 	return parmBody
+}
+
+var profileSortKey string
+
+type ProfileSlice []*ProfileSpec
+
+func (profile ProfileSlice) Len() int { return len(profile) }
+
+func (profile ProfileSlice) Swap(i, j int) { profile[i], profile[j] = profile[j], profile[i] }
+
+func (profile ProfileSlice) Less(i, j int) bool {
+	switch profileSortKey {
+
+	case "ID":
+		return profile[i].Id < profile[j].Id
+	case "NAME":
+		return profile[i].Name < profile[j].Name
+	case "DESCRIPTION":
+		return profile[i].Description < profile[j].Description
+	}
+	return false
+}
+
+func (c *ProfileSpec) FindValue(k string, p *ProfileSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "StorageType":
+		return p.StorageType
+	}
+	return ""
+}
+
+func (c *ProfileSpec) SortList(profiles []*ProfileSpec, sortKey, sortDir string) []*ProfileSpec {
+
+	profileSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(ProfileSlice(profiles))
+	} else {
+		sort.Sort(sort.Reverse(ProfileSlice(profiles)))
+	}
+	return profiles
 }

@@ -21,6 +21,9 @@ package model
 
 import (
 	"encoding/json"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 // VolumeSpec is an block device created by storage service, it can be attached
@@ -41,6 +44,9 @@ type VolumeSpec struct {
 	// The description of the volume.
 	// +optional
 	Description string `json:"description,omitempty"`
+
+	// The group id of the volume.
+	GroupId string `json:"groupId,omitempty"`
 
 	// The size of the volume requested by the user.
 	// Default unit of volume Size is GB.
@@ -64,6 +70,9 @@ type VolumeSpec struct {
 	// and backend storage resouce description are clear.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty"`
+
+	// Attach status of the volume.
+	AttachStatus string
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.
@@ -167,27 +176,322 @@ type ExtendVolumeSpec struct {
 	Extend ExtendSpec `json:"extend,omitempty"`
 }
 
-//volume status
-const (
-	VOLUME_CREATING           = "creating"
-	VOLUME_AVAILABLE          = "available"
-	VOLUME_RESERVED           = "reserved"
-	VOLUME_ATTACHING          = "attaching"
-	VOLUME_DETACHING          = "detaching"
-	VOLUME_IN_USE             = "inUse"
-	VOLUME_DELETING           = "deleting"
-	VOLUME_ERROR              = "error"
-	VOLUEM_ERROR_DELETING     = "errorDeleting"
-	VOLUME_ERROR_EXTENDING    = "errorExtending"
-	VOLUME_EXTENDING          = "extending"
-	VOLUMESNAP_CREATING       = "creating"
-	VOLUMESNAP_AVAILABLE      = "available"
-	VOLUMESNAP_DELETING       = "deleting"
-	VOLUMESNAP_ERROR          = "error"
-	VOLUMESNAP_ERROR_DELETING = "errorDeleting"
-	VOLUMESNAP_DELETED        = "deleted"
-	VOLUMEATM_CREATING        = "creating"
-	VOLUMEATM_AVAILABLE       = "available"
-	VOLUMEATM_ERROR_DELETING  = "errorDeleting"
-	VOLUMEATM_ERROR           = "error"
-)
+type VolumeGroupSpec struct {
+	*BaseModel
+	// The name of the volume group.
+	Name string `json:"name,omitempty"`
+
+	Status string `json:"status,omitempty"`
+
+	// The uuid of the project that the volume snapshot belongs to.
+	TenantId string `json:"tenantId,omitempty"`
+
+	// The uuid of the user that the volume snapshot belongs to.
+	// +optional
+	UserId string `json:"userId,omitempty"`
+
+	// The description of the volume group.
+	// +optional
+	Description string `json:"description,omitempty"`
+
+	// The uuid of the profile which the volume group belongs to.
+	Profiles []string `json:"profileId,omitempty"`
+
+	// The locality that volume group belongs to.
+	// +optional
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
+
+	// The addVolumes contain UUIDs of volumes to be added to the group.
+	AddVolumes []string `json:"addVolumes,omitempty"`
+
+	// The removeVolumes contains the volumes to be removed from the group.
+	RemoveVolumes []string `json:"removeVolumes,omitempty"`
+
+	// The uuid of the pool which the volume belongs to.
+	// +readOnly
+	PoolId string `json:"poolId,omitempty"`
+
+	GroupSnapshots []string `json:"groupSnapshots,omitempty"`
+}
+
+var volumeSortKey string
+
+type VolumeSlice []*VolumeSpec
+
+func (volume VolumeSlice) Len() int { return len(volume) }
+
+func (volume VolumeSlice) Swap(i, j int) { volume[i], volume[j] = volume[j], volume[i] }
+
+func (volume VolumeSlice) Less(i, j int) bool {
+	switch volumeSortKey {
+
+	case "ID":
+		return volume[i].Id < volume[j].Id
+	case "NAME":
+		return volume[i].Name < volume[j].Name
+	case "STATUS":
+		return volume[i].Status < volume[j].Status
+	case "AVAILABILITYZONE":
+		return volume[i].AvailabilityZone < volume[j].AvailabilityZone
+	case "PROFILEID":
+		return volume[i].ProfileId < volume[j].ProfileId
+	case "TENANTID":
+		return volume[i].TenantId < volume[j].TenantId
+	case "SIZE":
+		return volume[i].Size < volume[j].Size
+	case "POOLID":
+		return volume[i].PoolId < volume[j].PoolId
+	case "DESCRIPTION":
+		return volume[i].Description < volume[j].Description
+		// TODO:case "lun_id" (admin_only)
+		// TODO:case "GroupId"
+	}
+	return false
+}
+
+func (c *VolumeSpec) FindValue(k string, p *VolumeSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "AvailabilityZone":
+		return p.AvailabilityZone
+	case "Size":
+		return strconv.FormatInt(p.Size, 10)
+	case "Status":
+		return p.Status
+	case "PoolId":
+		return p.PoolId
+	case "ProfileId":
+		return p.ProfileId
+	}
+	return ""
+}
+
+func (c *VolumeSpec) SortList(volumes []*VolumeSpec, sortKey, sortDir string) []*VolumeSpec {
+
+	volumeSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(VolumeSlice(volumes))
+
+	} else {
+		sort.Sort(sort.Reverse(VolumeSlice(volumes)))
+	}
+	return volumes
+}
+
+var volumeAttachmentSortKey string
+
+type VolumeAttachmentSlice []*VolumeAttachmentSpec
+
+func (volumeAttachment VolumeAttachmentSlice) Len() int { return len(volumeAttachment) }
+
+func (volumeAttachment VolumeAttachmentSlice) Swap(i, j int) {
+
+	volumeAttachment[i], volumeAttachment[j] = volumeAttachment[j], volumeAttachment[i]
+}
+
+func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
+	switch volumeAttachmentSortKey {
+
+	case "ID":
+		return volumeAttachment[i].Id < volumeAttachment[j].Id
+	case "VOLUMEID":
+		return volumeAttachment[i].VolumeId < volumeAttachment[j].VolumeId
+	case "STATUS":
+		return volumeAttachment[i].Status < volumeAttachment[j].Status
+	case "USERID":
+		return volumeAttachment[i].UserId < volumeAttachment[j].UserId
+	case "TENANTID":
+		return volumeAttachment[i].TenantId < volumeAttachment[j].TenantId
+	}
+	return false
+}
+
+func (c *VolumeAttachmentSpec) FindValue(k string, p *VolumeAttachmentSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAte":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "VolumeId":
+		return p.VolumeId
+	case "Mountpoint":
+		return p.Mountpoint
+	case "Status":
+		return p.Status
+	}
+	return ""
+}
+
+func (c *VolumeAttachmentSpec) SortList(attachments []*VolumeAttachmentSpec, sortKey, sortDir string) []*VolumeAttachmentSpec {
+
+	volumeAttachmentSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(VolumeAttachmentSlice(attachments))
+	} else {
+		sort.Sort(sort.Reverse(VolumeAttachmentSlice(attachments)))
+	}
+	return attachments
+}
+
+var volumeSnapshotSortKey string
+
+type VolumeSnapshotSlice []*VolumeSnapshotSpec
+
+func (volumeSnapshot VolumeSnapshotSlice) Len() int { return len(volumeSnapshot) }
+
+func (volumeSnapshot VolumeSnapshotSlice) Swap(i, j int) {
+
+	volumeSnapshot[i], volumeSnapshot[j] = volumeSnapshot[j], volumeSnapshot[i]
+}
+
+func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
+	switch volumeSnapshotSortKey {
+
+	case "ID":
+		return volumeSnapshot[i].Id < volumeSnapshot[j].Id
+	case "VOLUMEID":
+		return volumeSnapshot[i].VolumeId < volumeSnapshot[j].VolumeId
+	case "STATUS":
+		return volumeSnapshot[i].Status < volumeSnapshot[j].Status
+	case "USERID":
+		return volumeSnapshot[i].UserId < volumeSnapshot[j].UserId
+	case "TENANTID":
+		return volumeSnapshot[i].TenantId < volumeSnapshot[j].TenantId
+	case "SIZE":
+		return volumeSnapshot[i].Size < volumeSnapshot[j].Size
+		//TODO:case "GroupSnapshotId"
+	}
+	return false
+}
+
+func (c *VolumeSnapshotSpec) FindValue(k string, p *VolumeSnapshotSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAte":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "Status":
+		return p.Status
+	case "Size":
+		return strconv.FormatInt(p.Size, 10)
+	case "VolumeId":
+		return p.VolumeId
+	}
+	return ""
+}
+
+func (c *VolumeSnapshotSpec) SortList(snapshots []*VolumeSnapshotSpec, sortKey, sortDir string) []*VolumeSnapshotSpec {
+
+	volumeSnapshotSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(VolumeSnapshotSlice(snapshots))
+	} else {
+		sort.Sort(sort.Reverse(VolumeSnapshotSlice(snapshots)))
+	}
+	return snapshots
+}
+
+var volumeGroupSortKey string
+
+type VolumeGroupSlice []*VolumeGroupSpec
+
+func (volumeGroup VolumeGroupSlice) Len() int { return len(volumeGroup) }
+
+func (volumeGroup VolumeGroupSlice) Swap(i, j int) {
+
+	volumeGroup[i], volumeGroup[j] = volumeGroup[j], volumeGroup[i]
+}
+
+func (volumeGroup VolumeGroupSlice) Less(i, j int) bool {
+	switch volumeGroupSortKey {
+
+	case "ID":
+		return volumeGroup[i].Id < volumeGroup[j].Id
+	case "CREATEDAT":
+		return volumeGroup[i].CreatedAt < volumeGroup[j].CreatedAt
+	case "NAME":
+		return volumeGroup[i].Name < volumeGroup[j].Name
+	case "USERID":
+		return volumeGroup[i].UserId < volumeGroup[j].UserId
+	case "TENANTID":
+		return volumeGroup[i].TenantId < volumeGroup[j].TenantId
+	case "STATUS":
+		return volumeGroup[i].Status < volumeGroup[j].Status
+	case "POOLID":
+		return volumeGroup[i].PoolId < volumeGroup[j].PoolId
+	case "AVAILABILITYZONE":
+		return volumeGroup[i].AvailabilityZone < volumeGroup[i].AvailabilityZone
+	}
+	return false
+}
+
+func (c *VolumeGroupSpec) FindValue(k string, p *VolumeGroupSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAte":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "Status":
+		return p.Status
+	case "AvailabilityZone":
+		return p.AvailabilityZone
+	case "PoolId":
+		return p.PoolId
+	}
+	return ""
+}
+
+func (c *VolumeGroupSpec) SortList(vgs []*VolumeGroupSpec, sortKey, sortDir string) []*VolumeGroupSpec {
+
+	volumeGroupSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(VolumeGroupSlice(vgs))
+	} else {
+		sort.Sort(sort.Reverse(VolumeGroupSlice(vgs)))
+	}
+	return vgs
+
+}

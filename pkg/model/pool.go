@@ -19,6 +19,12 @@ This module implements the common data structure.
 
 package model
 
+import (
+	"sort"
+	"strconv"
+	"strings"
+)
+
 // A pool is discoveried and updated by a dock service. Each pool can be regarded
 // as a physical storage pool or a virtual storage pool. It's a logical and
 // atomic pool and can be abstracted from any storage platform.
@@ -76,4 +82,71 @@ type StoragePoolExtraSpec struct {
 	// themselves, all these properties can be exposed to controller scheduler
 	// and filtered by selector in a extensible way.
 	Advanced map[string]interface{} `json:"advanced,omitempty" yaml:"advanced,omitempty"`
+}
+
+var poolSortKey string
+
+type StoragePoolSlice []*StoragePoolSpec
+
+func (pool StoragePoolSlice) Len() int { return len(pool) }
+
+func (pool StoragePoolSlice) Swap(i, j int) { pool[i], pool[j] = pool[j], pool[i] }
+
+func (pool StoragePoolSlice) Less(i, j int) bool {
+	switch poolSortKey {
+
+	case "ID":
+		return pool[i].Id < pool[j].Id
+	case "NAME":
+		return pool[i].Name < pool[j].Name
+	case "STATUS":
+		return pool[i].Status < pool[j].Status
+	case "AVAILABILITYZONE":
+		return pool[i].AvailabilityZone < pool[j].AvailabilityZone
+	case "DOCKID":
+		return pool[i].DockId < pool[j].DockId
+	case "DESCRIPTION":
+		return pool[i].Description < pool[j].Description
+	}
+	return false
+}
+
+func (c *StoragePoolSpec) FindValue(k string, p *StoragePoolSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "Status":
+		return p.Status
+	case "DockId":
+		return p.DockId
+	case "AvailabilityZone":
+		return p.AvailabilityZone
+	case "TotalCapacity":
+		return strconv.FormatInt(p.TotalCapacity, 10)
+	case "FreeCapacity":
+		return strconv.FormatInt(p.FreeCapacity, 10)
+	case "StorageType":
+		return p.StorageType
+	}
+	return ""
+}
+
+func (c *StoragePoolSpec) SortList(pools []*StoragePoolSpec, sortKey, sortDir string) []*StoragePoolSpec {
+
+	poolSortKey = sortKey
+
+	if strings.EqualFold(sortDir, "asc") {
+		sort.Sort(StoragePoolSlice(pools))
+	} else {
+		sort.Sort(sort.Reverse(StoragePoolSlice(pools)))
+	}
+	return pools
 }
