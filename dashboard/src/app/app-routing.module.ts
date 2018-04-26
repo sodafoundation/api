@@ -7,6 +7,7 @@ const routes: Routes = [
     {path: 'service', loadChildren: './business/service/service.module#ServiceModule'},
     {path: 'block', loadChildren: './business/block/block.module#BlockModule'},
     {path: 'createVolume', loadChildren: './business/block/create-volume/create-volume.module#CreateVolumeModule'},
+    {path: 'volumeDetails/:volumeId', loadChildren: './business/block/volume-detail/volume-detail.module#VolumeDetailModule'},
     {path: 'cloud', loadChildren: './business/cloud/cloud.module#CloudModule'},
     {path: 'profile', loadChildren: './business/profile/profile.module#ProfileModule'},
     {path: 'createProfile', loadChildren: './business/profile/createProfile/createProfile.module#CreateProfileModule'},

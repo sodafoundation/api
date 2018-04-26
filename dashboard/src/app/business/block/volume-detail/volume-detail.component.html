@@ -1,0 +1,63 @@
+<div>
+  <div class="custom-breadcrumb">
+      <span *ngFor="let item of items; index as i">
+          <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
+          <span *ngIf="(i+1) !== items.length">></span>
+      </span>
+  </div>
+  <div>
+    <div>Basic Information</div>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+              {{label.Name}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.name}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{label.Profile}}  
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.name}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{label.Status}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.status}}
+            </div>
+        </div>
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+              {{label.VolumeID}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.id}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{label.Capacity}}  
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.size}} 
+            </div>
+            <div class="ui-grid-col-2">
+              {{label.CreatedAt}}
+            </div>
+            <div class="ui-grid-col-2">
+              {{volume.createdAt}}
+            </div>
+        </div>
+      </div>
+  </div>
+  <div>
+      <p-tabView>
+        <p-tabPanel header="Snapshort">
+            <!-- <volume-list #volumeList></volume-list> -->
+        </p-tabPanel>
+        <p-tabPanel header="Replication">
+            <!-- <volume-list #volumeList></volume-list> -->
+        </p-tabPanel>
+      </p-tabView>
+  </div>
+</div>

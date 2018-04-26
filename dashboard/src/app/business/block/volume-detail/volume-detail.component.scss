@@ -1,0 +1,12 @@
+@import "./../../scss-variable";
+.custom-breadcrumb {
+    padding: 0.16rem;
+}
+
+.custom-breadcrumb a {
+    color: map-get($color-text, primary) !important;
+}
+
+.custom-breadcrumb .font-color-class {
+    color: #438bd3 !important;
+}

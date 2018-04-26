@@ -22,6 +22,12 @@ export class VolumeService {
     return this.http.get(this.url);
   }
 
+  //查询指定Id volume
+  getVolumeById(id): Observable<any> {
+    let url = this.url + '/' + id;
+    return this.http.get(url);
+  }
+
   //创建 volumesGroup
   createVolumesGroup(param) {
     return this.http.post(this.url, param);
@@ -36,5 +42,11 @@ export class VolumeService {
   //查询 volumesGroups
   getVolumesGroups(): Observable<any> {
     return this.http.get(this.url);
+  }
+
+  //创建 volume
+  createSnapshot(param) {
+    let url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/block/snapshots'
+    return this.http.post(url, param);
   }
 }
