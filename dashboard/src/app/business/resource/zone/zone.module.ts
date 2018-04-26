@@ -1,6 +1,6 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { ZoneComponent } from './zone.component';
-import { ButtonModule,DataTableModule } from './../../../components/common/api';
+import { ButtonModule, DataTableModule, InputTextModule } from './../../../components/common/api';
 
 @NgModule({
   declarations: [
@@ -8,7 +8,8 @@ import { ButtonModule,DataTableModule } from './../../../components/common/api';
   ],
   imports: [
     ButtonModule,
-    DataTableModule
+    DataTableModule,
+    InputTextModule
   ],
   exports: [
     ZoneComponent

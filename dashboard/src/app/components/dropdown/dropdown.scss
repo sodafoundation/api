@@ -3,6 +3,7 @@
     position: relative;
     cursor: pointer;
     vertical-align: middle;
+    @extend .ui-corner-all-small;
 }
 
 .ui-dropdown .ui-dropdown-clear-icon {
@@ -20,17 +21,18 @@
     border-top: none;
     border-bottom: none;
     cursor: pointer;
-    width: 1.5em;
+    width: .25rem;
     height: 100%;
     position: absolute;
     right: 0;
     top: 0;
-    padding: 0 .25em;
+    padding: 0;
+    @extend .ui-corner-right-small;
 }
 
 .ui-dropdown .ui-dropdown-trigger .fa {
-    margin-top: .3em;
-    margin-left: -.125em;
+    margin-top: .07rem;
+    margin-left: .03rem;
 }
 
 .ui-dropdown .ui-dropdown-label  {
@@ -41,6 +43,11 @@
     font-weight: normal;
     width: 100%;
     padding-right: 2.5em;
+}
+.ui-dropdown .ui-inputtext{
+    min-height: .30rem;
+    min-width: .80rem;
+    line-height: .20rem;
 }
 
 .ui-dropdown-item-empty,

@@ -1,8 +1,11 @@
 .ui-inputtext {
     margin: 0;
     outline: medium none;
-    padding: .25em;
     font-weight: normal;
+    padding: .05rem;
+    min-height: 32px;
+    min-width: 220px;
+    @extend .ui-corner-all-small;
 }
 
 .ui-widget-header .ui-inputtext,

@@ -12,9 +12,7 @@ let _ = require("underscore");
 @Component({
     selector: 'user-list',
     templateUrl: 'userList.html',
-    styleUrls: [
-        'dialogcss.css'
-    ],
+    styleUrls: [],
     providers: [ConfirmationService],
     animations: []
 })

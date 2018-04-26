@@ -1,6 +1,6 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { RegionComponent } from './region.component';
-import { ButtonModule,DataTableModule } from './../../../components/common/api';
+import { ButtonModule, DataTableModule, InputTextModule } from './../../../components/common/api';
 
 
 @NgModule({
@@ -9,7 +9,8 @@ import { ButtonModule,DataTableModule } from './../../../components/common/api';
   ],
   imports: [
     ButtonModule,
-    DataTableModule
+    DataTableModule,
+    InputTextModule
   ],
   exports: [ RegionComponent ],
   providers: []

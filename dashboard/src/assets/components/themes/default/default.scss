@@ -8,7 +8,7 @@ $color-panelbg: #f3f6f7;
 $widget-border: (normal: #cfd7db, hover: #98a5bc, focus: #98a5bc, active: #98a5bc);
 $widget-bg: (normal: #fdfdfd, hover: #ffffff, focus: #ffffff, active: #f1f1f1);
 
-$border-radius: (small, 3px), (medium, 10px), (large, 20px); //@Extend .ui-corner-bl-small;
+$border-radius: (small, 3px), (medium, 10px), (large, 20px); //@extend .ui-corner-bl-small;
 @each $type, $size in $border-radius{
     $radius-pos:    (tl,   $size 0 0 0 ),
                     (tr,    0 $size 0 0 ),
@@ -442,10 +442,10 @@ p-togglebutton.ng-dirty.ng-invalid .ui-button {
 	color: #ffffff !important;
 }
 
-.ui-paginator .ui-paginator-page.ui-state-active {
-	background: #186ba0;
+.ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
+	background: #1f5fac;
 	color: #ffffff;
-	border-color: #156090;
+	border-color: #1f5fac;
 }
 
 /* DataTable  */

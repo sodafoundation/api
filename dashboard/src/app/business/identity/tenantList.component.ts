@@ -7,13 +7,12 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { MenuItem, ConfirmationService } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
 
+let _ = require("underscore");
 
 @Component({
     selector: 'tenant-list',
     templateUrl: 'tenantList.html',
-    styleUrls: [
-        'dialogcss.css'
-    ],
+    styleUrls: [],
     providers: [ConfirmationService],
     animations: []
 })
@@ -22,6 +21,8 @@ export class TenantListComponent implements OnInit {
     isDetailFinished = false;
     createTenantDisplay = false;
     isEditTenant = false;
+
+    selectedTenants = [];
 
     sortField: string;
     currentTenant: string;
@@ -153,24 +154,34 @@ export class TenantListComponent implements OnInit {
         }
     }
 
-    deleteTenant(tenant){
-        console.log("aaa")
+    deleteTenant(tenants){
+        let arr=[];
+        if(_.isArray(tenants)){
+            tenants.forEach((item,index)=> {
+                arr.push(item.id);
+            })
+        }else{
+            arr.push(tenants.id);
+        }
+        
         this.confirmationService.confirm({
-            message: "Are you sure you want to delete this tenant?",
+            message: "Are you sure you want to delete this tenants?",
             header: "Confirm",
             icon: "fa fa-question-circle",
             accept: ()=>{
-                this.http.get("/v3/role_assignments?scope.project.id="+ tenant.id).subscribe((res)=>{
-                    res.json().role_assignments.forEach((item, index) => {
-                        if(item.group){
-                            let request: any = {};
-                            this.http.delete("/v3/groups/"+ item.group.id, request).subscribe();
-                        }
-                    });
+                arr.forEach((ele)=> {
+                    this.http.get("/v3/role_assignments?scope.project.id="+ ele).subscribe((res)=>{
+                        res.json().role_assignments.forEach((item, index) => {
+                            if(item.group){
+                                let request: any = {};
+                                this.http.delete("/v3/groups/"+ item.group.id, request).subscribe();
+                            }
+                        });
 
-                    let request: any = {};
-                    this.http.delete("/v3/projects/"+ tenant.id, request).subscribe((r) => {
-                        this.listTenants();
+                        let request: any = {};
+                        this.http.delete("/v3/projects/"+ ele, request).subscribe((r) => {
+                            this.listTenants();
+                        })
                     })
                 })
             },
