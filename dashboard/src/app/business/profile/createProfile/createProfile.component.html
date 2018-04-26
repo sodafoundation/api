@@ -129,14 +129,16 @@
         <div class="ui-grid-row profile-form-padding" *ngFor="let customizationItem of customizationItems;index as i">
             <div class="ui-grid-col-2">
             </div>
-            <div class="ui-grid-col-2">
-                {{customizationItem.key}}
-            </div>
-            <div class="ui-grid-col-2">
-                {{customizationItem.value}}
-            </div>
-            <div class="ui-grid-col-2" style="width:10px;height:10px;border:1px solid red;" (click)="deleteCustomization(i)">
-
+            <div class="customization-container">
+                <div class="customization-item">
+                    {{customizationItem.key}}:
+                </div>
+                <div class="customization-item">
+                    {{customizationItem.value}}
+                </div>
+                <div class="create-profile-img " (click)="deleteCustomization(i)">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u1065.png">
+                </div>
             </div>
         </div>
 
@@ -155,7 +157,27 @@
             <div class="ui-grid-col-2">
             </div>
             <div class="ui-grid-col-10">
-                <div>helloffffffffffffffffffffffffffffffffffffff</div>
+                <div class="footer-button-class">
+                    <div>
+                        <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools,<span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
+                    </div>
+                    <p-table [value]="pools" styleClass="custom-table-class">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th *ngFor="let col of cols">
+                                    {{col.header}}
+                                </th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-pool>
+                            <tr>
+                                <td *ngFor="let col of cols">
+                                    {{pool[col.field]}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
             </div>
         </div>
     </div>

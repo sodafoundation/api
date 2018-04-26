@@ -25,9 +25,7 @@ export class ProfileService {
     //查询profiles
     getProfileById(id) {
         let getUrl = this.url + '/' + id
-        this.http.get(getUrl).subscribe((res) => {
-            console.log(res.json().data);
-        });
+        return this.http.get(getUrl);
     }
 
     //修改profile
@@ -36,5 +34,14 @@ export class ProfileService {
         this.http.put(modifyUrl, param).subscribe((res) => {
             console.log(res.json().data);
         });
+    }
+}
+
+export class PoolService{
+    url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/pools';
+    constructor(private http: HttpService) { }
+    //查询profiles
+    getPools(): Observable<any> {
+        return this.http.get(this.url);
     }
 }

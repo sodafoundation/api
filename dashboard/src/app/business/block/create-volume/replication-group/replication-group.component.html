@@ -1,0 +1,73 @@
+<div class="content-header">
+    <h2>
+        Replication Group
+    </h2>
+    <div style="padding:1em 0;">
+        <p-checkbox [(ngModel)]="replicationEnable" binary="true" label="Enable"></p-checkbox>
+    </div>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" *ngIf="replicationEnable">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+                <p-dropdown (onChange)="getReplicationGroup()" [options]="groupOptions" [(ngModel)]="createOrExist"></p-dropdown>
+            </div>
+            <div class="ui-grid-col-2" *ngIf="createOrExist==='createGroup'">
+                <input pInputText type="text" placeholder="Enter a group name" />
+            </div>
+            <div class="ui-grid-col-2" *ngIf="createOrExist==='existingGroup'">
+                <p-dropdown [options]="existingGroupLists"></p-dropdown>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content-header">
+    <h2>
+        Replication Pair
+    </h2>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-3">
+                <div>
+                    <div class="text-align-center" style="height:100px;">
+                        <img style="vertical-align:middle;" src="assets/business/images/volume/u583.png">
+                        <input pInputText type="text" disabled="true" [(ngModel)]="volumes[0].availabilityZone" />
+                    </div>
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-pair-volume-item" *ngFor="let volume of volumes">
+                            <div class="ui-grid-col-4 text-align-center">
+                                <input pInputText type="text" [(ngModel)]="volume.name" disabled="true" />
+                            </div>
+                            <div class="ui-grid-col-4 text-align-center">
+                                <input pInputText type="text" [(ngModel)]="volume.size" disabled="true" />
+                            </div>
+                            <div class="ui-grid-col-4 text-align-center">
+                                <input pInputText type="text" [(ngModel)]="volume.profileId" disabled="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-3"></div>
+            <div class="ui-grid-col-3">
+                <div>
+                    <div class="text-align-center">
+                        <img style="vertical-align:middle;" src="assets/business/images/volume/u585.png">
+                        <input pInputText type="text" placeholder="Name" disabled="true" />
+                    </div>
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-pair-volume-item" *ngFor="let volume of volumes">
+                            <div class="ui-grid-col-6 text-align-center">
+                                <input pInputText type="text" placeholder="Name" />
+                            </div>
+                            <div class="ui-grid-col-6 text-align-center">
+                                <input pInputText type="text" placeholder="Name" />
+                            </div>
+                            <!-- <div class="ui-grid-col-4 text-align-center">
+                                <input pInputText type="text" placeholder="Name" />
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

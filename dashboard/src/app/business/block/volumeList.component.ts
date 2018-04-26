@@ -5,6 +5,8 @@ import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem } from '../../components/common/api';
 
+import { VolumeService } from './volume.service';
+
 @Component({
     selector: 'volume-list',
     templateUrl: 'volumeList.html',
@@ -18,18 +20,23 @@ export class VolumeListComponent implements OnInit {
     constructor(
         // private I18N: I18NService,
         // private router: Router
+        private VolumeService: VolumeService
     ) { }
 
     ngOnInit() {
-        this.volumes = [
-            { "name": "vol-01", "status": "Available", "capacity": "200.000 GB", "profile": "PF_block_01", "az":"az_01" },
-            { "name": "vol-02", "status": "Error", "capacity": "200.000 GB", "profile": "PF_block_02", "az":"az_02" }
-        ];
+        // this.volumes = [
+        //     { "name": "vol-01", "status": "Available", "capacity": "200.000 GB", "profile": "PF_block_01", "az":"az_01" },
+        //     { "name": "vol-02", "status": "Error", "capacity": "200.000 GB", "profile": "PF_block_02", "az":"az_02" }
+        // ];
         this.menuItems = [
             { "label": "Modify", command:()=>{} },
             { "label": "Expand", command:()=>{} },
             { "label": "Delete", command:()=>{} }
         ];
+
+        this.VolumeService.getVolumes().subscribe((res) => {
+            this.volumes = res.json();
+        });;
     }
 
 }

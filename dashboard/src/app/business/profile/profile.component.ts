@@ -94,7 +94,7 @@ export class ProfileComponent implements OnInit {
         this.ProfileService.getProfiles().subscribe((res) => {
             // return res.json();
             this.profiles = res.json();
-        })
+        });
     }
 
     showWarningDialogFun(id) {

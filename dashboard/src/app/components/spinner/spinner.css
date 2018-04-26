@@ -15,14 +15,22 @@
     cursor: default;
     display: block;
     height: 50%;
-    margin: 0;
+    margin: 0 !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
     overflow: hidden;
-    padding: 0;
-    position: absolute;
+    padding: 0 !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
+    position: absolute !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
     right: 0;
-    text-align: center;
+    text-align: center !important;
+    /* 覆盖掉.ui-button 给的样式*/
     vertical-align: middle;
     width: 1.5em;
+    min-width: 2em !important;
+    /* 覆盖掉.ui-button 给的样式*/
+    border-radius: 0 !important;
+    /* 覆盖掉.ui-button 给的样式*/
 }
 
 .ui-spinner .fa {
@@ -42,7 +50,9 @@
     bottom: 0;
 }
 
+
 /* Fluid */
+
 .ui-fluid .ui-spinner {
     width: 100%;
 }
@@ -57,5 +67,6 @@
 }
 
 .ui-fluid .ui-spinner .ui-spinner-button .fa {
-    left: .7em;
+    left: 50%;
+    /* 避免上下箭头没有居中 */
 }

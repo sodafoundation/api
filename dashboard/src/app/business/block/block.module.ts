@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TabViewModule, ButtonModule } from '../../components/common/api';
 import { VolumeListModule } from './volumeList.module';
 import { VolumeGroupModule } from './volumeGroup.module';
+import { CreateVolumeGroupComponent } from './create-volume-group/create-volume-group.component';
 
 let routers = [{
   path: '',
@@ -12,7 +13,8 @@ let routers = [{
 
 @NgModule({
   declarations: [
-    BlockComponent
+    BlockComponent,
+    CreateVolumeGroupComponent
   ],
   imports: [
     RouterModule.forChild(routers),
