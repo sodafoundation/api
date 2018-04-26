@@ -2,7 +2,7 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Http } from '@angular/http';
 import { Router } from '@angular/router';
-import { I18NService } from 'app/shared/api';
+import { I18NService, Consts } from 'app/shared/api';
 // import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { MenuItem, SelectItem } from './components/common/api';
@@ -28,6 +28,8 @@ export class AppComponent implements OnInit{
     password: string;
 
     dropMenuItems: MenuItem[];
+
+    currentTenant: string="";
 
     menuItems = [
         {
@@ -130,46 +132,45 @@ export class AppComponent implements OnInit{
         }
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
-            let req1: any = { params:{} };
+            localStorage['x-subject-token'] =  res.headers.get('x-subject-token');
             let userid = res.json().token.user.id;
-            console.log(userid);
-            this.http.get("/v3/users/"+ userid +"/projects", req1).subscribe((roleRES) => {
-                
-            })
 
+            // Get user owned tenants
+            let reqUser: any = { params:{} };
+            this.http.get("/v3/users/"+ userid +"/projects", reqUser).subscribe((objRES) => {
+                if(this.username != "admin"){
+                    this.currentTenant = objRES.json().projects[0].name;
+                }
 
-
-            let g_token_id = res.headers.get('x-subject-token'); 
-            let req: any = { auth: {} };
-            req.auth = {
-                "identity": {
-                    "methods": [
-                        "token"
-                    ],
-                    "token": {
-                        "id": g_token_id
+                // Get token authentication with scoped
+                let g_token_id = res.headers.get('x-subject-token'); 
+                let req: any = { auth: {} };
+                req.auth = {
+                    "identity": {
+                        "methods": [
+                            "token"
+                        ],
+                        "token": {
+                            "id": g_token_id
+                        }
+                    },
+                    "scope": {
+                    "project": {
+                        "name": objRES.json().projects[0].name,
+                        "domain": { "id": "default" }
                     }
-                },
-                "scope": {
-                  "project": {
-                    "name": "demo",
-                    "domain": { "id": "default" }
-                  }
+                    }
                 }
-            }
 
-            this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
-                console.log("正式token", r.headers.get('x-subject-token') );
-                localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
-
-                console.log("存储gengxin的token",  localStorage['x-subject-token']);
-                if( localStorage['x-subject-token'] != '' ){
-                    this.isLogin = true;
-                    this.router.navigateByUrl("home");
-                    this.activeItem = this.menuItems[0];
-                }
+                this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
+                    localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
+                    if( localStorage['x-subject-token'] != '' ){
+                        this.isLogin = true;
+                        this.router.navigateByUrl("home");
+                        this.activeItem = this.menuItems[0];
+                    }
+                })
             })
-
         });
     }
 
@@ -177,7 +178,6 @@ export class AppComponent implements OnInit{
         localStorage['x-subject-token'] = "";
         this.isLogin = false;
         this.password = "";
-        console.log("xxx",localStorage['x-subject-token'])
     }
 
     menuItemClick(event, item) {

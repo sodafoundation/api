@@ -16,10 +16,10 @@
     <div id="layout-topbar">
         <div class="user-info">
             <div>
-                <h1>admin</h1>
+                <h1>{{ username }}</h1>
                 <p-dropmenu icon="fa-ellipsis-v" [model]="dropMenuItems" styleClass="ui-dropmenu-large"></p-dropmenu>
             </div>
-            <p><span><i class="fa fa-map-marker"></i>Region-Beijing</span><span><i class="fa fa-users"></i>Tenant-A</span></p>
+            <p><span><i class="fa fa-map-marker"></i>Region-Beijing</span><span *ngIf=" currentTenant!='' "><i class="fa fa-users"></i>{{ currentTenant }}</span></p>
         </div>
         
         <ul class="topbar-menu">

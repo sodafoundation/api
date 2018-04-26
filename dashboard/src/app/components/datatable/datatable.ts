@@ -622,9 +622,9 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
     
     @Input() public expandedRowsGroups: any[];
     
-    @Input() expandedIcon: string = 'fa-angle-up';
+    @Input() expandedIcon: string = 'fa-angle-down';
 
-    @Input() collapsedIcon: string = 'fa-angle-down';
+    @Input() collapsedIcon: string = 'fa-angle-right';
     
     @Input() tabindex: number = 1;
     

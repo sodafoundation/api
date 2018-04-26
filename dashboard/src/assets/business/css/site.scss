@@ -44,9 +44,49 @@
     padding-bottom: .2rem;
 }
 
-.layout-wrapper .login-form .ui-button{
-    padding-left: 0;
-    padding-right: 0;
+.layout-wrapper .login-form {
+    .logo{
+        height: .75rem;
+        padding-bottom: .80rem;
+        background-image: url('./assets/business/images/logo.png');
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .ui-button{
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .ui-inputtext{
+        background: #303e58;
+        border: 1px solid #687284;
+        padding: .1rem .2rem;
+        color: #e8efff;
+
+        @extend .ui-corner-all-large;
+    }
+
+    ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+        color: #6a7ca0;
+    }
+    :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+       color: #6a7ca0;
+       opacity:  1;
+    }
+    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+       color: #6a7ca0;
+       opacity:  1;
+    }
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+       color: #6a7ca0;
+    }
+    ::-ms-input-placeholder { /* Microsoft Edge */
+       color: #6a7ca0;
+    }
+    .ui-placeholder {
+       color: #6a7ca0;
+    }
 }
 
 /* menu */
