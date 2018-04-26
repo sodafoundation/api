@@ -1,17 +1,3 @@
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 swagger: '2.0'
 info:
   version: "v1beta"
@@ -708,7 +694,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-   '/v1beta/{projectId}/block/groups':
+  '/v1beta/{projectId}/block/groups':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -721,7 +707,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Group'
+              $ref: '#/definitions/VolumeGroup'
         '401':
           description: Unauthorized
         '403':
@@ -736,22 +722,22 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/VolumeGroup'
       responses:
         '202':
           description: OK
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/VolumeGroup'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/groups/{groupId}'
+  '/v1beta/{projectId}/block/groups/{volumeGroupId}':
     parameters:
       - $ref: '#/parameters/projectId'
-      - $ref: '#/parameters/groupId'
+      - $ref: '#/parameters/volumeGroupId'
     get:
       tags:
         - Block volume group
@@ -760,7 +746,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/VolumeGroup'
         '401':
           description: Unauthorized
         '403':
@@ -789,7 +775,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/VolumeGroup'
         '401':
           description: Unauthorized
         '403':
@@ -1037,7 +1023,7 @@ definitions:
       - type: object
         required:
           - name
-          - availabilityZone
+          - description
         properties:
           projectId:
             type: string
@@ -1051,21 +1037,28 @@ definitions:
             type: string
           availabilityZone:
             type: string
+            readOnly: true
           status:
             type: string
             readOnly: true
           poolId:
             type: string
             readOnly: true
-		  AddVolumes:
-		    type: []string
-			readOnly: true
-		  RemoveVolumes:
-		    type: []string
-			readOnly: true
-		  GroupSnapshots:
-		    type: []string
-			readOnly: true					
+          AddVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          RemoveVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          GroupSnapshots:
+            type: array
+            items: 
+              type: string
+            readOnly: true          
   Error:
     description: >-
       Detailed HTTP error response, which consists of a HTTP status code, and a
@@ -1155,10 +1148,10 @@ parameters:
     required: true
     description: The UUID of the volume snapshot.
     type: string
-  vgId:
+  volumeGroupId:
     name: volumeGroupId
-	in: path
-	required: true
+    in: path
+    required: true
     description: The UUID of the volume group.
     type: string
 responses:
