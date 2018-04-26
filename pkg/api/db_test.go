@@ -70,7 +70,7 @@ func TestDeleteVolumeDBEntry(t *testing.T) {
 		Status:    "available"}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("UpdateVolume", "", vol).Return(nil, nil)
+	mockClient.On("UpdateVolume", vol).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)

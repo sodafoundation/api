@@ -138,4 +138,22 @@ type Client interface {
 	UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error
+
+	CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
+
+	GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error)
+
+	UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
+
+	UpdateStatus(ctx *c.Context, object interface{}, status string) error
+
+	ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error)
+
+	ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error)
+
+	DeleteVolumeGroup(ctx *c.Context, vgId string) error
+
+	ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error)
+
+	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 }

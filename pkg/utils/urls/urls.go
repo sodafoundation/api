@@ -52,6 +52,10 @@ func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("block/snapshots", urlType, tenantId, in...)
 }
 
+func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/groups", urlType, tenantId, in...)
+}
+
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {
 	// If project id is not specified, ignore it.
 	if tenantId == "" {
@@ -60,7 +64,7 @@ func generateURL(resource string, urlType int, tenantId string, in ...string) st
 		return strings.Join(value, "/")
 	}
 
-	// Set project id after resource uri just for etcd query performance.
+	// Set project id after resource url just for etcd query performance.
 	var value []string
 	if urlType == Etcd {
 		value = []string{CurrentVersion(), resource, tenantId}

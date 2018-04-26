@@ -15,9 +15,12 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/astaxie/beego"
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type BasePortal struct {
@@ -35,4 +38,18 @@ func (this *BasePortal) GetParameters() (map[string][]string, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (this *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
+	reason := fmt.Sprintf(errMsg+": %s", err.Error())
+	this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+	this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+	log.Error(reason)
+}
+
+func (this *BasePortal) SuccessHandle(status int, body []byte) {
+	this.Ctx.Output.SetStatus(status)
+	if body != nil {
+		this.Ctx.Output.Body(body)
+	}
 }

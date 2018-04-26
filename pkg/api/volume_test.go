@@ -202,7 +202,7 @@ func TestUpdateVolume(t *testing.T) {
 	volume.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("UpdateVolume", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", &volume).Return(fakeVolume, nil)
+	mockClient.On("UpdateVolume", &volume).Return(fakeVolume, nil)
 	db.C = mockClient
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -258,8 +258,7 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 	volume.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("UpdateVolume", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-		&volume).Return(nil, errors.New("db error"))
+	mockClient.On("UpdateVolume", &volume).Return(nil, errors.New("db error"))
 	db.C = mockClient
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

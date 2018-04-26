@@ -82,6 +82,10 @@ func Run(host string) {
 				// Creates, shows, lists, unpdates and deletes snapshot.
 				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
 				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
+
+				// Volume group contains a list of volumes that are used in the same application.
+				beego.NSRouter("/groups", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
+				beego.NSRouter("/groups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 			// Extend Volume
 			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),

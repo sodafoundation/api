@@ -93,6 +93,7 @@ func init() {
 
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 	volumeCommand.AddCommand(volumeAttachmentCommand)
+	volumeCommand.AddCommand(volumeGroupCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -122,7 +123,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -134,7 +135,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -146,7 +147,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -174,7 +175,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -195,6 +196,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }

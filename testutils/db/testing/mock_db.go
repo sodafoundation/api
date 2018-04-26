@@ -163,6 +163,29 @@ func (_m *MockClient) CreateVolumeAttachment(ctx *c.Context, attachment *model.V
 	return r0, r1
 }
 
+// CreateVolumeGroup
+func (_m *MockClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vg)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
+		r0 = rf(vg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeGroupSpec) error); ok {
+		r1 = rf(vg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateVolumeSnapshot
 func (_m *MockClient) CreateVolumeSnapshot(ctx *c.Context, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(vs)
@@ -256,6 +279,20 @@ func (_m *MockClient) DeleteVolumeAttachment(ctx *c.Context, attachmentId string
 	return r0
 }
 
+// DeleteVolumeGroup
+func (_m *MockClient) DeleteVolumeGroup(ctx *c.Context, vgId string) error {
+	ret := _m.Called(vgId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(vgId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteVolumeSnapshot
 func (_m *MockClient) DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error {
 	ret := _m.Called(snapshotID)
@@ -268,6 +305,52 @@ func (_m *MockClient) DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) er
 	}
 
 	return r0
+}
+
+// ExtendVolume
+func (_m *MockClient) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	ret := _m.Called(vol)
+
+	var r0 *model.VolumeSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeSpec) *model.VolumeSpec); ok {
+		r0 = rf(vol)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeSpec) error); ok {
+		r1 = rf(vol)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDefaultProfile
+func (_m *MockClient) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *model.ProfileSpec
+	if rf, ok := ret.Get(0).(func(*c.Context) *model.ProfileSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*c.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetDock
@@ -362,29 +445,6 @@ func (_m *MockClient) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSp
 	return r0, r1
 }
 
-// GetDefaultProfile
-func (_m *MockClient) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
-	ret := _m.Called()
-
-	var r0 *model.ProfileSpec
-	if rf, ok := ret.Get(0).(func() *model.ProfileSpec); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ProfileSpec)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetVolume
 func (_m *MockClient) GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
 	ret := _m.Called(volID)
@@ -424,6 +484,29 @@ func (_m *MockClient) GetVolumeAttachment(ctx *c.Context, attachmentId string) (
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(attachmentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetVolumeGroup
+func (_m *MockClient) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vgId)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(string) *model.VolumeGroupSpec); ok {
+		r0 = rf(vgId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -477,8 +560,8 @@ func (_m *MockClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return r0, r1
 }
 
-// ListDocks
-func (_m *MockClient) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*model.DockSpec, error) {
+// ListDocksWithFilter
+func (_m *MockClient) ListDocksWithFilter(ctx *c.Context,m map[string][]string) ([]*model.DockSpec, error) {
 	ret := _m.Called(m)
 	var r0 []*model.DockSpec
 	if rf, ok := ret.Get(0).(func() []*model.DockSpec); ok {
@@ -546,7 +629,7 @@ func (_m *MockClient) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error
 }
 
 // ListPools
-func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error) {
+func (_m *MockClient) ListPoolsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.StoragePoolSpec
@@ -591,7 +674,8 @@ func (_m *MockClient) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 	return r0, r1
 }
 
-func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
+// ListProfilesWithFilter
+func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.ProfileSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.ProfileSpec
@@ -606,6 +690,29 @@ func (_m *MockClient) ListProfilesWithFilter(ctx *c.Context, m map[string][]stri
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListSnapshotsByVolumeId
+func (_m *MockClient) ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error) {
+	ret := _m.Called(volId)
+
+	var r0 []*model.VolumeSnapshotSpec
+	if rf, ok := ret.Get(0).(func(string) []*model.VolumeSnapshotSpec); ok {
+		r0 = rf(volId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSnapshotSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(volId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -636,6 +743,7 @@ func (_m *MockClient) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]
 	return r0, r1
 }
 
+// ListVolumeAttachmentsWithFilter 
 func (_m *MockClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(m)
 
@@ -651,6 +759,29 @@ func (_m *MockClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[stri
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(m["volumeId"][0])
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumeGroups
+func (_m *MockClient) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
+	ret := _m.Called()
+
+	var r0 []*model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func() []*model.VolumeGroupSpec); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -681,7 +812,7 @@ func (_m *MockClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapsh
 	return r0, r1
 }
 
-func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
+func (_m *MockClient) ListVolumeSnapshotsWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.VolumeSnapshotSpec
@@ -726,7 +857,7 @@ func (_m *MockClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	return r0, r1
 }
 
-func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error) {
+func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context,m map[string][]string) ([]*model.VolumeSpec, error) {
 	ret := _m.Called(m)
 
 	var r0 []*model.VolumeSpec
@@ -741,6 +872,29 @@ func (_m *MockClient) ListVolumesWithFilter(ctx *c.Context, m map[string][]strin
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumesByGroupId
+func (_m *MockClient) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(vgId)
+
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func(string) []*model.VolumeSpec); ok {
+		r0 = rf(vgId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -831,13 +985,27 @@ func (_m *MockClient) UpdateProfile(ctx *c.Context, prfID string, input *model.P
 	return r0, r1
 }
 
-// UpdateVolume ...
+// UpdateStatus provides a mock function with given fields: ctx, object, status
+func (_m *MockClient) UpdateStatus(ctx *c.Context, object interface{}, status string) error {
+	ret := _m.Called(object, status)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(interface{}, string) error); ok {
+		r0 = rf(object, status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateVolume
 func (_m *MockClient) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	ret := _m.Called(vol.Id, vol)
+	ret := _m.Called(vol)
 
 	var r0 *model.VolumeSpec
-	if rf, ok := ret.Get(0).(func(string, *model.VolumeSpec) *model.VolumeSpec); ok {
-		r0 = rf(vol.Id, vol)
+	if rf, ok := ret.Get(0).(func(*model.VolumeSpec) *model.VolumeSpec); ok {
+		r0 = rf(vol)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeSpec)
@@ -845,8 +1013,8 @@ func (_m *MockClient) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*mode
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, *model.VolumeSpec) error); ok {
-		r1 = rf(vol.Id, vol)
+	if rf, ok := ret.Get(1).(func(*model.VolumeSpec) error); ok {
+		r1 = rf(vol)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -854,13 +1022,13 @@ func (_m *MockClient) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*mode
 	return r0, r1
 }
 
-// UpdateVolumeAttachment ...
-func (_m *MockClient) UpdateVolumeAttachment(ctx *c.Context, attachmentID string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	ret := _m.Called(attachmentID, attachment)
+// UpdateVolumeAttachment
+func (_m *MockClient) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	ret := _m.Called(attachmentId, attachment)
 
 	var r0 *model.VolumeAttachmentSpec
 	if rf, ok := ret.Get(0).(func(string, *model.VolumeAttachmentSpec) *model.VolumeAttachmentSpec); ok {
-		r0 = rf(attachmentID, attachment)
+		r0 = rf(attachmentId, attachment)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.VolumeAttachmentSpec)
@@ -869,7 +1037,7 @@ func (_m *MockClient) UpdateVolumeAttachment(ctx *c.Context, attachmentID string
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, *model.VolumeAttachmentSpec) error); ok {
-		r1 = rf(attachmentID, attachment)
+		r1 = rf(attachmentId, attachment)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -877,7 +1045,30 @@ func (_m *MockClient) UpdateVolumeAttachment(ctx *c.Context, attachmentID string
 	return r0, r1
 }
 
-// UpdateVolumeSnapshot ...
+// UpdateVolumeGroup
+func (_m *MockClient) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(vg)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
+		r0 = rf(vg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.VolumeGroupSpec) error); ok {
+		r1 = rf(vg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateVolumeSnapshot
 func (_m *MockClient) UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(snapshotID, vs)
 
@@ -900,22 +1091,22 @@ func (_m *MockClient) UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs
 	return r0, r1
 }
 
-// ExtendVolume ...
-func (_m *MockClient) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	ret := _m.Called(vol)
+// VolumesToUpdate
+func (_m *MockClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(volumeList)
 
-	var r0 *model.VolumeSpec
-	if rf, ok := ret.Get(0).(func(string, *model.VolumeSpec) *model.VolumeSpec); ok {
-		r0 = rf(vol.Id, vol)
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func([]*model.VolumeSpec) []*model.VolumeSpec); ok {
+		r0 = rf(volumeList)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.VolumeSpec)
+			r0 = ret.Get(0).([]*model.VolumeSpec)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, *model.VolumeSpec) error); ok {
-		r1 = rf(vol.Id, vol)
+	if rf, ok := ret.Get(1).(func([]*model.VolumeSpec) error); ok {
+		r1 = rf(volumeList)
 	} else {
 		r1 = ret.Error(1)
 	}

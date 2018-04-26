@@ -21,11 +21,13 @@ package api
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"time"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
+	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
@@ -54,13 +56,13 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 			Id:        in.Id,
 			CreatedAt: in.CreatedAt,
 		},
-		UserId:           in.UserId,
-		TenantId:         in.TenantId,
+		UserId:           ctx.UserId,
 		Name:             in.Name,
 		Description:      in.Description,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VOLUME_CREATING,
+		ProfileId:        in.ProfileId,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
@@ -213,5 +215,260 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+
+	vg := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: in.Id,
+		},
+		UserId:           ctx.UserId,
+		Name:             in.Name,
+		Description:      in.Description,
+		AvailabilityZone: in.AvailabilityZone,
+		Status:           model.VOLUMEGROUP_CREATING,
+	}
+	result, err := db.C.CreateVolumeGroup(ctx, vg)
+	if err != nil {
+		log.Error("When add volume to db:", err)
+		return nil, err
+	}
+	// TODO:Rpc call to create group.
+	// Create volume group request is sent to the Dock. Dock will update volume status to "available"
+	// after volume group creation is completed.
+	controller.Brain.CreateVolumeGroup(ctx, vg)
+	return result, nil
+}
+
+func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg, err := db.C.GetVolumeGroup(ctx, vgUpdate.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	var name string
+	if vg.Name == vgUpdate.Name {
+		name = ""
+	} else {
+		name = vgUpdate.Name
+	}
+	var description string
+	if vg.Description == vgUpdate.Description {
+		description = ""
+	} else {
+		description = vgUpdate.Description
+	}
+
+	var invalid_uuids []string
+	for _, uuidAdd := range vgUpdate.AddVolumes {
+		for _, uuidRemove := range vgUpdate.RemoveVolumes {
+			if uuidAdd == uuidRemove {
+				invalid_uuids = append(invalid_uuids, uuidAdd)
+			}
+		}
+	}
+	if len(invalid_uuids) > 0 {
+		msg := fmt.Sprintf("UUID %s is in both add and remove volume list", strings.Join(invalid_uuids, ","))
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	volumes, err := db.C.ListVolumesByGroupId(ctx, vgUpdate.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	var addVolumesNew, removeVolumeNew []string
+	// Validate volumes in AddVolumes and RemoveVolumes.
+	if len(vgUpdate.AddVolumes) > 0 {
+		if addVolumesNew, err = ValidateAddVolumes(ctx, volumes, vgUpdate.AddVolumes, vgUpdate); err != nil {
+			return nil, err
+		}
+	}
+	if len(vgUpdate.RemoveVolumes) > 0 {
+		if removeVolumeNew, err = ValidateRemoveVolumes(ctx, volumes, vgUpdate.RemoveVolumes, vgUpdate); err != nil {
+			return nil, err
+		}
+	}
+
+	if name == "" && description == "" && len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+		msg := fmt.Sprintf("Update group %s faild, because no valid name, description, addvolumes or removevolumes were provided", vgUpdate.Id)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	vgNew := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: vg.Id,
+		},
+	}
+
+	vgNew.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	// Only update name or description. No need to send them over through an RPC call and set status to available.
+	if name != "" {
+		vgNew.Name = name
+	}
+	if description != "" {
+		vgNew.Description = description
+	}
+	if len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+		vgNew.Status = model.VOLUMEGROUP_AVAILABLE
+	} else {
+		vgNew.Status = model.VOLUMEGROUP_UPDATING
+	}
+
+	result, err := db.C.UpdateVolumeGroup(ctx, vgNew)
+	if err != nil {
+		log.Error("When update volume group in db:", err.Error())
+		return nil, err
+	}
+
+	//TODO: Do an RPC call only if addVolumesNew or removeVolumeNew is not nil.
+	if len(addVolumesNew) > 0 || len(removeVolumeNew) > 0 {
+		controller.Brain.UpdateVolumeGroup(ctx, vg, addVolumesNew, removeVolumeNew)
+	}
+
+	return result, nil
+}
+
+func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes []string, vg *model.VolumeGroupSpec) ([]string, error) {
+	var addVolumeRef []string
+	var flag bool
+	for _, volumeId := range addVolumes {
+		flag = true
+		for _, volume := range volumes {
+			if volumeId == volume.Id {
+				// Volume already in group. Remove it from addVolumes.
+				flag = false
+				break
+			}
+		}
+		if flag {
+			addVolumeRef = append(addVolumeRef, volumeId)
+		}
+	}
+
+	var addVolumesNew []string
+	for _, addVol := range addVolumeRef {
+		addVolRef, err := db.C.GetVolume(ctx, addVol)
+		if err != nil {
+			log.Error(fmt.Sprintf("Cannot add volume %s to group %s, volume cannot be found.", addVol, vg.Id))
+			return nil, err
+		}
+		if addVolRef.GroupId != "" {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse it is already in group %s", addVolRef.Id, vg.Id, addVolRef.GroupId)
+		}
+		if addVolRef.Status != model.VOLUME_AVAILABLE && addVolRef.Status != model.VOLUME_IN_USE {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse volume is in invalid status %s", addVolRef.Id, vg.Id, addVolRef.Status)
+		}
+
+		addVolumesNew = append(addVolumesNew, addVolRef.Id)
+	}
+
+	return addVolumesNew, nil
+}
+
+func ValidateRemoveVolumes(ctx *c.Context, volumes []*model.VolumeSpec, removeVolumes []string, vg *model.VolumeGroupSpec) ([]string, error) {
+
+	for _, v := range removeVolumes {
+		for _, volume := range volumes {
+			if v == volume.Id {
+				if volume.Status != model.VOLUME_AVAILABLE && volume.Status != model.VOLUME_IN_USE && volume.Status != model.VOLUME_ERROR && volume.Status != model.VOLUEM_ERROR_DELETING {
+					return nil, fmt.Errorf("Cannot remove volume %s from group %s, volume is in invalid status %s", volume.Id, vg.Id, volume.Status)
+				}
+				break
+			}
+
+		}
+	}
+	for _, v := range removeVolumes {
+		var available = false
+		for _, volume := range volumes {
+			if v == volume.Id {
+				available = true
+				break
+			}
+		}
+		if available == false {
+			return nil, fmt.Errorf("Cannot remove volume %s from group %s, volume is not in group ", v, vg.Id)
+		}
+	}
+
+	return removeVolumes, nil
+}
+
+func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
+	vg, err := db.C.GetVolumeGroup(ctx, volumeGroupId)
+	if err != nil {
+		return err
+	}
+	//TODO DeleteVolumes tag is set by policy.
+	deleteVolumes := true
+
+	if deleteVolumes == false && vg.Status != model.VOLUMEGROUP_AVAILABLE && vg.Status != model.VOLUMEGROUP_ERROR {
+		msg := fmt.Sprintf("The status of the Group must be available or error , group can be deleted. But current status is %s", vg.Status)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	if vg.GroupSnapshots != nil {
+		msg := fmt.Sprintf("Group can not be deleted, because group has existing snapshots")
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	volumes, err := db.C.ListVolumesByGroupId(ctx, vg.Id)
+	if err != nil {
+		return err
+	}
+
+	if len(volumes) > 0 && deleteVolumes == false {
+		msg := fmt.Sprintf("Group %s still contains volumes. The deleteVolumes flag is required to delete it.", vg.Id)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	var volumesUpdate []*model.VolumeSpec
+	for _, value := range volumes {
+		if value.AttachStatus == model.VOLUME_ATTACHED {
+			msg := fmt.Sprintf("Volume %s in group %s is attached. Need to deach first.", value.Id, vg.Id)
+			log.Error(msg)
+			return errors.New(msg)
+		}
+
+		snapshots, err := db.C.ListSnapshotsByVolumeId(ctx, value.Id)
+		if err != nil {
+			return err
+		}
+		if len(snapshots) > 0 {
+			msg := fmt.Sprintf("Volume %s in group still has snapshots", value.Id)
+			log.Error(msg)
+			return errors.New(msg)
+		}
+
+		volumesUpdate = append(volumesUpdate, &model.VolumeSpec{
+			BaseModel: &model.BaseModel{
+				Id: value.Id,
+			},
+			Status:  model.VOLUME_DELETING,
+			GroupId: volumeGroupId,
+		})
+	}
+
+	db.C.UpdateStatus(ctx, volumesUpdate, "")
+
+	db.C.UpdateStatus(ctx, vg, model.VOLUMEGROUP_DELETING)
+	//TODO Rpc call to delete group.
+	controller.Brain.DeleteVolumeGroup(ctx, vg)
+
 	return nil
 }
