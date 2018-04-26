@@ -6,7 +6,7 @@
         <div class="table-toolbar">
             <div class="left">
                 <button class="ui-button-secondary" pButton type="button" label="Create" [routerLink]="['/createVolume']"></button>
-                <button pButton type="button" label="Delete"></button>
+                <button pButton type="button" label="Delete" (click)="deleteVolume()"></button>
             </div>
             <div class="right">
                 <div class="ui-inputgroup">

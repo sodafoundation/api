@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CreateProfileComponent } from './createProfile.component';
 import { RouterModule } from '@angular/router';
-import { InputTextModule, CheckboxModule, FormModule, ButtonModule, DropdownModule, RadioButtonModule, DialogModule, Message, GrowlModule, TableModule } from '../../../components/common/api';
+import { InputTextModule, CheckboxModule, FormModule, ButtonModule, DropdownModule, RadioButtonModule, DialogModule, Message, GrowlModule, SelectButtonModule } from '../../../components/common/api';
 import { HttpService } from './../../../shared/api';
-import { ProfileService } from './../profile.service';
+import { ProfileService,PoolService } from './../profile.service';
+import { PoolModule } from './../storage-pools-table/storage-pools-table.module';
 
 let routers = [{
   path: '',
@@ -28,11 +29,13 @@ let routers = [{
     RadioButtonModule,
     DialogModule,
     GrowlModule,
-    TableModule
-  ],
+    PoolModule,
+    SelectButtonModule
+  ],  
   providers: [
     HttpService,
-    ProfileService
+    ProfileService,
+    PoolService
   ]
 })
 export class CreateProfileModule { }

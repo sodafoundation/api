@@ -42,27 +42,7 @@
     <div class="ui-g-12 ui-md-12">
         <span class="ui-g-12 ui-md-2">Storage Pools:</span>
         <div class="ui-g-12 ui-md-8">
-            <div>
-                <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools,<span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
-            </div>
-            <div class="footer-button-class">
-                <p-table [value]="pools" styleClass="custom-table-class">
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th *ngFor="let col of cols">
-                                {{col.header}}
-                            </th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-pool>
-                        <tr>
-                            <td *ngFor="let col of cols">
-                                {{pool[col.field]}}
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </div>
+            <app-storage-pools-table></app-storage-pools-table>
         </div>
     </div>
 
