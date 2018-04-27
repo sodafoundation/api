@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { SnapshotService } from './../../volume.service';
+import { VolumeService,SnapshotService } from './../../volume.service';
 
 @Component({
   selector: 'app-snapshot-list',
@@ -10,18 +10,31 @@ import { SnapshotService } from './../../volume.service';
 export class SnapshotListComponent implements OnInit {
 
   @Input() volumeId;
+  volume;
   label;
-  selectedSnapshot;
+  selectedSnapshotId;
   selectedSnapshots = [];
   snapshortfilter;
   snapshots;
   snapshotfilter;
-  modifyDialogDisplay = false;
-  createSnapshotDisplay = false;
+  snapshotPropertyDisplay = false;
   snapshotFormGroup;
-  modifyFormGroup;
+
+  isCreate = false;
+  isModify = false;
+  snapshotProperty = {
+    name: '',
+    description: ''
+  }
+  okBtnDisabled = true;
+
+  errorMessage = {
+      "name": { required: "Name is required." },
+      "description": { maxlength: "Max. length is 200." }
+  };
 
   constructor(
+    private VolumeService: VolumeService,
     private SnapshotService: SnapshotService,
     private fb: FormBuilder
   ) {
@@ -29,12 +42,10 @@ export class SnapshotListComponent implements OnInit {
       "name": ["", Validators.required],
       "description": ["", Validators.maxLength(200)]
     });
-    this.modifyFormGroup = this.fb.group({
-      "name": ['', Validators.required]
-    });
   }
 
   ngOnInit() {
+    this.getVolumeById(this.volumeId);
     this.label = {
       name: 'name',
       volume: 'Volume',
@@ -48,8 +59,10 @@ export class SnapshotListComponent implements OnInit {
     );
   }
 
-  showCreateSnapshot() {
-    this.createSnapshotDisplay = true;
+  getVolumeById(volumeId){
+    this.VolumeService.getVolumeById(volumeId).subscribe((res) => {
+      this.volume = res.json();
+    });
   }
 
   createSnapshot() {
@@ -65,35 +78,75 @@ export class SnapshotListComponent implements OnInit {
           value: this.volumeId
         }
       );
-      this.createSnapshotDisplay = false;
     });
   }
 
   batchDeleteSnapshort() {
     if (this.selectedSnapshots) {
       this.selectedSnapshots.forEach(snapshot => {
-        // this.deleteSnapshot(snapshot.id);
-        console.log(this.selectedSnapshots);
+        this.deleteSnapshot(snapshot.id);
       });
     }
+  }
+
+  deleteSnapshot(id) {
+    this.SnapshotService.deleteSnapshot(id).subscribe((res) => {
+      this.getSnapshots(
+        {
+          key: 'volumeId',
+          value: this.volumeId
+        }
+      );
+    });
   }
 
   getSnapshots(filter?) {
     this.SnapshotService.getSnapshots(filter).subscribe((res) => {
       this.snapshots = res.json();
+      this.snapshotPropertyDisplay = false;
     });
   }
 
-  deleteSnapshot(id) {
-    this.SnapshotService.deleteSnapshot(id).subscribe((res) => {
-      // this.snapshots = res.json();
-      console.log('delete success');
+  modifySnapshot(){
+    let param = {
+      name: this.snapshotFormGroup.value.name,
+      description: this.snapshotFormGroup.value.description
+    }
+    this.SnapshotService.modifySnapshot(this.selectedSnapshotId,param).subscribe((res) => {
+      this.getSnapshots(
+        {
+          key: 'volumeId',
+          value: this.volumeId
+        }
+      );
     });
   }
 
+  showSnapshotPropertyDialog(method,selectedSnapshot?){
+    this.snapshotPropertyDisplay = true;
+    if(method === 'create'){
+      this.isCreate = true;
+      this.isModify = false;
+      this.snapshotProperty.name = '';
+      this.snapshotProperty.description = '';
+    }else if(method === 'modify'){
+      this.isCreate = false;
+      this.isModify = true;
+      this.snapshotProperty.name = selectedSnapshot.name;
+      this.snapshotProperty.description = selectedSnapshot.description;
+    }
+    if(selectedSnapshot && selectedSnapshot.id){
+      this.selectedSnapshotId = selectedSnapshot.id;
+    }
+  }
 
-  showModifyDialog(id) {
-    this.modifyDialogDisplay = true;
+  snapshotModifyOrCreate(){
+    if(this.isModify){
+      this.modifySnapshot();
+    }else{
+      this.createSnapshot();
+    }
+    
   }
 
 }

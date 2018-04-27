@@ -70,7 +70,7 @@ export class SnapshotService {
   getSnapshots(filter?){
     let url = this.url;
     if(filter){
-      this.url += "?" + filter.key + "=" + filter.value;
+      url = this.url + "?" + filter.key + "=" + filter.value;
     }
     console.log(url);
     return this.http.get(url);

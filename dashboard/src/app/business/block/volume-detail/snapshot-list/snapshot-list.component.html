@@ -1,7 +1,7 @@
 <div>
     <div class="table-toolbar">
         <div class="left">
-            <button pButton type="button" label="Create" (click)="showCreateSnapshot()" class="ui-button-secondary"></button>
+            <button pButton type="button" label="Create" (click)="showSnapshotPropertyDialog('create')" class="ui-button-secondary"></button>
             <button pButton type="button" label="Delete" [disabled]="selectedSnapshots.length == 0" (click)="batchDeleteSnapshot()"></button>
         </div>
         <div class="right">
@@ -29,48 +29,31 @@
         <p-column header="Operation" [style]="{'width': '25%'}">
             <ng-template let-snapshot="rowData" pTemplate="body">
                 <a [routerLink]="['/createVolume']">Create Volume</a>
-                <a (click)="showModifyDialog(snapshot.id)">Modify</a>
+                <a (click)="showSnapshotPropertyDialog('modify',snapshot)">Modify</a>
                 <a (click)="deleteSnapshot(snapshot.id)">Delete</a>
             </ng-template>
         </p-column>
-        <!-- 
-        <ng-template pTemplate="rowexpansion">
-            <user-detail [isUserDetailFinished]="isUserDetailFinished" [detailUserInfo]="detailUserInfo"></user-detail>
-        </ng-template> -->
     </p-dataTable>
 
 
-    <p-dialog *ngIf="createSnapshotDisplay" header="Create Snapshot" [(visible)]="createSnapshotDisplay" [width]="600" modal="modal">
+    <p-dialog *ngIf="snapshotPropertyDisplay" header="Create Snapshot" [(visible)]="snapshotPropertyDisplay" [width]="600" modal="modal">
         <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="snapshotFormGroup" [errorMessage]="errorMessage">
             <form-item label="{{label.volume}}" [required]="false">
-                <span>{{volumeId}}</span>
+                <span>{{volume.name}}</span>
             </form-item>
 
             <form-item label="{{label.name}}" [required]="true">
-                <input type="text" pInputText formControlName="name" />
+                <input type="text" pInputText formControlName="name" value="{{snapshotProperty.name}}"/>
             </form-item>
 
             <form-item label="{{label.description}}" [required]="false">
-                <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description"></textarea>
+                <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description" value="{{snapshotProperty.description}}"></textarea>
             </form-item>
         </form>
 
         <p-footer>
-            <button type="button" pButton (click)="createSnapshot()" label="OK"></button>
-            <button type="button" pButton (click)="createSnapshotDisplay=false" label="Cancel"></button>
-        </p-footer>
-    </p-dialog>
-
-
-    <p-dialog *ngIf="modifyDialogDisplay" header="Modify" [(visible)]="modifyDialogDisplay" [width]="600" modal="modal">
-        <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="modifyFormGroup" [errorMessage]="errorMessage">
-            <form-item label="{{label.name}}" [required]="true">
-                <input type="text" pInputText formControlName="name" value="{{selectedVolume.name}}" />
-            </form-item>
-        </form>
-        <p-footer>
-            <button type="button" pButton (click)="modifyVolume()" label="OK" [disabled]="!modifyFormGroup.valid || modifyFormGroup.value.name === selectedVolume.name"></button>
-            <button type="button" pButton (click)="modifyDisplay=false" label="Cancel"></button>
+            <button type="button" pButton (click)="snapshotModifyOrCreate()" label="OK" [disabled]="okBtnDisabled"></button>
+            <button type="button" pButton (click)="snapshotPropertyDisplay=false" label="Cancel"></button>
         </p-footer>
     </p-dialog>
 </div>
