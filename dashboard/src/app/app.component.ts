@@ -1,5 +1,5 @@
 // import { Router } from '@angular/router';
-import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
+import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
 import { Router } from '@angular/router';
 import { I18NService, Consts } from 'app/shared/api';
@@ -12,16 +12,14 @@ import { MenuItem, SelectItem } from './components/common/api';
     templateUrl: './app.component.html',
     styleUrls: []
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit, AfterViewInit{
     chromeBrowser: boolean = false;
 
     isLogin: boolean;
 
+    hideLoginForm: boolean = false;
+
     linkUrl = "";
-
-    userRoles: SelectItem[];
-
-    currentRole: string = "admin";
 
     username: string;
 
@@ -31,14 +29,33 @@ export class AppComponent implements OnInit{
 
     currentTenant: string="";
 
-    menuItems = [
+    showLoginAnimation: boolean=false;
+
+    showLogoutAnimation: boolean=false;
+
+    menuItems = [];
+
+    menuItems_tenant = [
         {
             "title": "Home",
             "description": "Update 5 minutes ago",
             "routerLink": "/home"
         },
         {
-            "title": "Block Service",
+            "title": "Volume",
+            "description": "23 volumes",
+            "routerLink": "/block"
+        }
+    ]
+
+    menuItems_admin = [
+        {
+            "title": "Home",
+            "description": "Update 5 minutes ago",
+            "routerLink": "/home"
+        },
+        {
+            "title": "Volume",
             "description": "23 volumes",
             "routerLink": "/block"
         },
@@ -79,18 +96,25 @@ export class AppComponent implements OnInit{
     ){}
     
     ngOnInit() {
-        if( localStorage['x-subject-token'] != '' ){
+        let currentUserInfo = localStorage['opensds-current-user'];
+        if(currentUserInfo != ""){
+            this.username = currentUserInfo.split("|")[0];
+            this.currentTenant = currentUserInfo.split("|")[1];
+
+            if(this.username=="admin"){
+                this.menuItems = this.menuItems_admin;
+            }else{
+                this.menuItems = this.menuItems_tenant;
+            }
+
             this.isLogin = true;
+            this.hideLoginForm = true;
             this.router.navigateByUrl("home");
             this.activeItem = this.menuItems[0];
         }else{
             this.isLogin = false;
+            this.hideLoginForm = false;
         }
-
-        this.userRoles = [
-            { label: "Administrator", value: "admin" },
-            { label: "Tenant", value: "tenant" }
-        ]
 
         this.dropMenuItems = [
             { 
@@ -110,6 +134,29 @@ export class AppComponent implements OnInit{
                 }
             }
         ];
+
+        
+    }
+
+    ngAfterViewInit(){
+        this.loginBgAnimation();
+    }
+
+    loginBgAnimation(){
+        let obj =this.el.nativeElement.querySelector(".login-bg");
+        if(obj){
+            let obj_w = obj.clientWidth;
+            let obj_h = obj.clientHeight;
+            let dis = 50;
+            obj.addEventListener("mousemove", (e)=>{
+                let MX = e.clientX;
+                let MY = e.clientY;
+                let offsetX = (obj_w - 2258)*0.5 + (obj_w-MX)*dis / obj_w;
+                let offsetY = (obj_h - 1363)*0.5 + (obj_h-MY)*dis / obj_h;
+                obj.style.backgroundPositionX = offsetX +"px";
+                obj.style.backgroundPositionY = offsetY +"px";
+            })
+        }
     }
     
     login() {
@@ -140,6 +187,8 @@ export class AppComponent implements OnInit{
             this.http.get("/v3/users/"+ userid +"/projects", reqUser).subscribe((objRES) => {
                 if(this.username != "admin"){
                     this.currentTenant = objRES.json().projects[0].name;
+                }else{
+                    this.currentTenant = "";
                 }
 
                 // Get token authentication with scoped
@@ -165,9 +214,24 @@ export class AppComponent implements OnInit{
                 this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
                     localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
                     if( localStorage['x-subject-token'] != '' ){
+                        localStorage['opensds-current-user'] = this.username+ "|"+ this.currentTenant;
+
+                        if(this.username == "admin"){
+                            this.menuItems = this.menuItems_admin;
+                        }else{
+                            this.menuItems = this.menuItems_tenant;
+                        }
+
                         this.isLogin = true;
                         this.router.navigateByUrl("home");
                         this.activeItem = this.menuItems[0];
+
+                        // annimation for after login
+                        this.showLoginAnimation = true;
+                        setTimeout(() => {
+                            this.showLoginAnimation = false;
+                            this.hideLoginForm = true;
+                        }, 500);
                     }
                 })
             })
@@ -176,8 +240,17 @@ export class AppComponent implements OnInit{
 
     logout() {
         localStorage['x-subject-token'] = "";
-        this.isLogin = false;
-        this.password = "";
+        localStorage['opensds-current-user'] = "";
+        
+        // annimation for after login
+        this.hideLoginForm = false;
+        this.showLogoutAnimation = true;
+        setTimeout(() => {
+            this.showLogoutAnimation = false;
+            this.password = "";
+            this.isLogin = false;
+        }, 500);
+
     }
 
     menuItemClick(event, item) {

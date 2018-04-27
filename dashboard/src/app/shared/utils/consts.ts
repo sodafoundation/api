@@ -26,4 +26,7 @@ export const Consts = {
     /** 百分比显示小数位数 **/
 
     /** 百分比显示小数位数 **/
+
+    CURRENT_USERNAME: "",
+    CURRENT_ROLE: "",
 }

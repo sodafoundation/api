@@ -24,20 +24,65 @@
 /*  ----------------------------------------------------------------------------------------------------- */
 
 .layout-wrapper{
+    width: 100%;
     height:100%;
+}
+
+/* animation login */
+@keyframes loginHide
+{
+    0% {width:2000px; }
+    80% {width:320px; opacity: 1; }
+    100% {width:320px; opacity: 0; }
+}
+
+@-webkit-keyframes loginHide /*Safari and Chrome*/
+{
+    0% {width:2000px; }
+    80% {width:320px; opacity: 1; }
+    100% {width:320px; opacity: 0; }
+}
+
+.login-animation{
+    animation: loginHide 500ms ease;
+    -webkit-animation: loginHide 500ms ease; /* Safari 和 Chrome */
+}
+
+/* animation logout */
+@keyframes loginShow
+{
+    0% {width:320px; opacity: 0; }
+    20% {width:320px; opacity: 1; }
+    100% {width:2000px; opacity: 1;}
+}
+
+@-webkit-keyframes loginShow /*Safari and Chrome*/
+{
+    0% {width:320px; opacity: 0; }
+    20% {width:320px; opacity: 1; }
+    100% {width:2000px; opacity: 1;}
+}
+
+.logout-animation{
+    animation: loginShow 500ms ease;
+    -webkit-animation: loginShow 500ms ease; /* Safari 和 Chrome */
 }
 
 /* login */
 .layout-wrapper .login-bg{
+    width: 100%;
     height: 100%;
-    background: #242e43;
+    background: url('./assets/business/images/login-bg.png') #242e43 no-repeat center center;
+    position: absolute;
+    z-index: 1001;
 }
 
 .layout-wrapper .login-form{
     position: absolute;
     left: calc(50% - 1.2rem);
-    top: 30%;
+    top: 20%;
     width: 2.4rem;
+    z-index: 1002;
 }
 
 .login-form .form-list p{
@@ -47,9 +92,9 @@
 .layout-wrapper .login-form {
     .logo{
         height: .75rem;
-        padding-bottom: .80rem;
+        padding-bottom: .60rem;
         background-image: url('./assets/business/images/logo.png');
-        background-position: center;
+        background-position: center top;
         background-repeat: no-repeat;
     }
 
@@ -104,10 +149,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    // z-index: 9997;
-    // -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.3);
-    // -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.3);
-	// box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.3);
+    z-index: 1000;
 }
 
 #layout-topbar .logo{
@@ -189,7 +231,7 @@
     margin: 0.1rem 0 0;
     padding: 0 0.3rem 0 0.4rem;
     height: 100%;
-    overflow: scroll;
+    // overflow: scroll;
 }
 
 .topbar-menu > li:first-of-type {
