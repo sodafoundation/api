@@ -20,8 +20,7 @@ export class VolumeDetailComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    let volumeId;
-    this.ActivatedRoute.params.subscribe((params) => volumeId = params.volumeId);
+    this.ActivatedRoute.params.subscribe((params) => this.volumeId = params.volumeId);
 
     this.items = [
       { label: 'Volume', url: '/block' },
@@ -37,13 +36,12 @@ export class VolumeDetailComponent implements OnInit {
       CreatedAt: 'Created At'
     };
 
-    this.getVolume(volumeId);
+    this.getVolume(this.volumeId);
   }
 
   getVolume(id){
     this.VolumeService.getVolumeById(id).subscribe((res) => {
       this.volume = res.json();
-      console.log(this.volume);
     });
   }
 

@@ -11,9 +11,6 @@ import { HttpService } from '../../shared/api';
 let routers = [{
   path: '',
   component: ProfileComponent
-// },{
-//   path: '/:profileId',
-//   component: ProfileComponent
 }]
 
 @NgModule({

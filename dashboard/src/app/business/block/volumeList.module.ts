@@ -5,7 +5,7 @@ import { VolumeListComponent } from './volumeList.component';
 import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule } from '../../components/common/api';
 
 import { HttpService } from './../../shared/service/Http.service';
-import { VolumeService } from './volume.service';
+import { VolumeService,SnapshotService } from './volume.service';
 
 @NgModule({
   declarations: [ VolumeListComponent ],
@@ -22,7 +22,8 @@ import { VolumeService } from './volume.service';
   exports: [ VolumeListComponent ],
   providers: [
     HttpService,
-    VolumeService
+    VolumeService,
+    SnapshotService
   ]
 })
 export class VolumeListModule { }
