@@ -1,10 +1,9 @@
 <div class="content-header">
-    <h2>Create Profile</h2>
+    <h1>Create Profile</h1>
     <p>Create profile to suit your specific use requirements.</p>
 </div>
 
-<!-- <p-growl [value]="msgs" sticky="sticky"></p-growl> 成功提示，我们直接跳转到profiles页面，不需要 -->
-
+<div class="create-profile-form">
 <form [formGroup]="profileform" (ngSubmit)="onSubmit(profileform.value)">
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <div class="ui-grid-row profile-form-padding">
@@ -239,6 +238,7 @@
         <button pButton type="button" label="Cancel" [routerLink]="['/profile']"></button>
     </div>
 </form>
+</div>
 
 <p-dialog header="Create Customization" [(visible)]="showCustomization" [width]="500" modal="modal">
     <div>
