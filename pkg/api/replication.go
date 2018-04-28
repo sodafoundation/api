@@ -19,8 +19,7 @@ import (
 	"net/http"
 
 	"github.com/astaxie/beego/context"
-	//log "github.com/golang/glog"
-	"fmt"
+
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
@@ -38,10 +37,10 @@ type ReplicationPortal struct {
 	BasePortal
 }
 
-var whiteListSimple = []string{"Id", "Name", "Status"}
-var whiteList = []string{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "Status",
+var whiteListSimple = []string{"Id", "Name", "ReplicationStatus"}
+var whiteList = []string{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "ReplicationStatus",
 	"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
-	"ReplicationStatus", "ReplicationModel", "ReplicationPeriod", "ProfileId"}
+	"ReplicationMode", "ReplicationPeriod", "ProfileId"}
 
 func (this *ReplicationPortal) CreateReplication() {
 	if !policy.Authorize(this.Ctx, "replication:create") {
@@ -74,7 +73,7 @@ func (this *ReplicationPortal) CreateReplication() {
 		return
 	}
 
-	replication.Status = model.ReplicationCreating
+	replication.ReplicationStatus = model.ReplicationCreating
 	replication, err = db.C.CreateReplication(ctx, replication)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusInternalServerError,
@@ -218,7 +217,7 @@ func (this *ReplicationPortal) UpdateReplication() {
 		}
 		// TODO:compared with the original profile_id to get the differences
 	}
-	fmt.Println("status --> ", r.Status)
+
 	result, err := db.C.UpdateReplication(c.GetContext(this.Ctx), id, &r)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,

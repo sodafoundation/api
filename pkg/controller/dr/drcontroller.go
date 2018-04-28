@@ -70,6 +70,8 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 
 	replica.PrimaryReplicationDriverData = utils.MergeStringMaps(replica.PrimaryReplicationDriverData, primaryVol.Metadata)
 	replica.SecondaryReplicationDriverData = utils.MergeStringMaps(replica.SecondaryReplicationDriverData, secondaryVol.Metadata)
+
+	// Load replication operator by replication type.
 	d.LoadOperator(pPool.ReplicationType)
 	pResult, err := d.primaryOp.Create(ctx, replica, primaryVol)
 	if err != nil {
@@ -402,7 +404,9 @@ func (h *HostPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol 
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
 		SecondaryReplicationDriverData: replica.SecondaryReplicationDriverData,
-		ReplicationMode:                replica.ReplicationModel,
+		ReplicationMode:                replica.ReplicationMode,
+		ReplicationPeriod:              replica.ReplicationPeriod,
+		ReplicationBandwidth:           replica.ReplicationBandwidth,
 		PoolName:                       pool.Name,
 		DockId:                         provisionerDock.Id,
 		DriverName:                     pool.ReplicationDriverName,
@@ -495,7 +499,9 @@ func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
 		SecondaryReplicationDriverData: replica.SecondaryReplicationDriverData,
-		ReplicationMode:                replica.ReplicationModel,
+		ReplicationMode:                replica.ReplicationMode,
+		ReplicationPeriod:              replica.ReplicationPeriod,
+		ReplicationBandwidth:           replica.ReplicationBandwidth,
 		PoolName:                       pool.Name,
 		DockId:                         provisionerDock.Id,
 		DriverName:                     provisionerDock.DriverName,

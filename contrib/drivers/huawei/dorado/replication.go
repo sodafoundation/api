@@ -60,11 +60,14 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 	log.Info("dorado replication start ...")
 	pLunId := opt.PrimaryReplicationDriverData[KLunId]
 	sLunId := opt.SecondaryReplicationDriverData[KLunId]
-	replicationModel := ReplicaAsyncModel
-	if opt.ReplicationMode == model.ReplicationModelSync {
-		replicationModel = ReplicaSyncModel
+	replicationPeriod := strconv.FormatInt(opt.ReplicationPeriod, 10)
+
+	replicationMode := ReplicaAsyncMode
+	if opt.ReplicationMode == model.ReplicationModeSync {
+		replicationMode = ReplicaSyncMode
+		replicationPeriod = "0"
 	}
-	resp, err := r.mgr.CreateReplication(pLunId, sLunId, replicationModel)
+	resp, err := r.mgr.CreateReplication(pLunId, sLunId, replicationMode, replicationPeriod)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +121,7 @@ func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts)
 		log.Errorf(msg)
 		return fmt.Errorf(msg)
 	}
-	if opt.SecondaryBackendId == model.ReplicationBackendIdDefault {
+	if opt.SecondaryBackendId == model.ReplicationDefaultBackendId {
 		return r.mgr.Failover(pairId)
 	} else {
 		return r.mgr.Failback(pairId)
@@ -284,7 +287,7 @@ func (r *ReplicaPairMgr) DeletePair(id string) error {
 	return nil
 }
 
-func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationModel string) (map[string]string, error) {
+func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationMode string, replicaPeriod string) (map[string]string, error) {
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
 	var respMap = make(map[string]string)
@@ -322,13 +325,13 @@ func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationModel stri
 		return nil, fmt.Errorf("get remote deivce info failed")
 	}
 
-	pair, err := r.localOp.Create(localLun.Id, rmtLunId, rmtDevId, rmtDevName, replicationModel, ReplicaSpeed, ReplicaPeriod)
+	pair, err := r.localOp.Create(localLun.Id, rmtLunId, rmtDevId, rmtDevName, replicationMode, ReplicaSpeed, replicaPeriod)
 	if err != nil {
 		cleanlun = true
 		return nil, err
 	}
 	log.Error("start sync ....", pair)
-	if err := r.localDriver.Sync(pair.Id, replicationModel == ReplicaSyncModel); err != nil {
+	if err := r.localDriver.Sync(pair.Id, replicationMode == ReplicaSyncMode); err != nil {
 		r.DeletePair(pair.Id)
 		cleanlun = true
 		return nil, err
@@ -414,7 +417,7 @@ func (r *ReplicaCommonDriver) Sync(replicaId string, waitComplete bool) error {
 		ReplicaRunningStatusSync,
 		ReplicaRunningStatusInitialSync,
 	}
-	if replicaPair.ReplicationModel == ReplicaSyncModel && r.op.isRunningStatus(expectStatus, replicaPair) {
+	if replicaPair.replicationMode == ReplicaSyncMode && r.op.isRunningStatus(expectStatus, replicaPair) {
 		return nil
 	}
 	if err := r.op.Sync(replicaId); err != nil {
@@ -599,20 +602,20 @@ func (p *PairOperation) isHealthStatus(status []string, replicaPair *Replication
 }
 
 func (p *PairOperation) Create(localLunId, rmtLunId, rmtDevId, rmtDevName,
-	replicationModel, speed, period string) (*ReplicationPair, error) {
+	replicationMode, speed, period string) (*ReplicationPair, error) {
 	params := map[string]interface{}{
 		"LOCALRESID":       localLunId,
 		"LOCALRESTYPE":     "11",
 		"REMOTEDEVICEID":   rmtDevId,
 		"REMOTEDEVICENAME": rmtDevName,
 		"REMOTERESID":      rmtLunId,
-		"REPLICATIONMODEL": replicationModel,
+		"REPLICATIONMODEL": replicationMode,
 		// recovery policy. 1: auto, 2: manual
 		"RECOVERYPOLICY": "1",
 		"SPEED":          speed,
 	}
 
-	if replicationModel == ReplicaAsyncModel {
+	if replicationMode == ReplicaAsyncMode {
 		// Synchronize type values:
 		// 1, manual
 		// 2, timed wait when synchronization begins

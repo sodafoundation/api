@@ -87,8 +87,8 @@ var (
 	replicationDesp                string
 	primaryReplicationDriverData   string
 	secondaryReplicationDriverData string
-	replicationModel               string
-	replicationPeriod              int
+	replicationMode                string
+	replicationPeriod              int64
 	allowAttachedVolume            bool
 	secondaryBackendId             string
 )
@@ -100,12 +100,13 @@ func init() {
 	flags.StringVarP(&replicationDesp, "description", "d", "", "the description of created replication")
 	flags.StringVarP(&primaryReplicationDriverData, "primary_driver_data", "p", "", "the primary replication driver data of created replication")
 	flags.StringVarP(&secondaryReplicationDriverData, "secondary_driver_data", "s", "", "the secondary replication driver data of created replication")
-	flags.StringVarP(&replicationModel, "replication_model", "m", "", "the replication mode of created replication, value can be sync/async")
-	flags.IntVarP(&replicationPeriod, "replication_period", "t", 120, "the replication period of created replication, the value must greater than 0")
+	flags.StringVarP(&replicationMode, "replication_mode", "m", model.ReplicationModeSync, "the replication mode of created replication, value can be sync/async")
+	flags.Int64VarP(&replicationPeriod, "replication_period", "t", 0, "the replication period(minute) of created replication, the value must greater than 0, only in sync replication mode should set this value (default 60)")
 	replicationUpdateCommand.Flags().StringVarP(&replicationName, "name", "n", "", "the name of updated replication")
 	replicationUpdateCommand.Flags().StringVarP(&replicationDesp, "description", "d", "", "the description of updated replication")
+	// TODO: Add some other update items, such as status, replicatoin_period ... etc.
 	replicationFailoverCommand.Flags().BoolVarP(&allowAttachedVolume, "allow_attached_volume", "a", false, "whether allow attached volume when failing over replication")
-	replicationFailoverCommand.Flags().StringVarP(&secondaryBackendId, "secondary_backend_id", "s", model.ReplicationBackendIdDefault, "the secondary backend id of failoverr replication(default:default)")
+	replicationFailoverCommand.Flags().StringVarP(&secondaryBackendId, "secondary_backend_id", "s", model.ReplicationDefaultBackendId, "the secondary backend id of failoverr replication")
 	replicationCommand.AddCommand(replicationShowCommand)
 	replicationCommand.AddCommand(replicationListCommand)
 	replicationCommand.AddCommand(replicationDeleteCommand)
@@ -125,12 +126,10 @@ var replicationFormatters = FormatterList{"PrimaryReplicationDriverData": JsonFo
 
 func replicationCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 2)
-	validMode := []string{model.ReplicationModelSync, model.ReplicationModelAsync}
-	var mode = strings.ToLower(replicationModel)
-	if len(replicationModel) == 0 {
-		mode = model.ReplicationModelAsync
-	} else if !utils.Contained(mode, validMode) {
-		Fatalf("invalid replication mode '%s'\n", replicationModel)
+	validMode := []string{model.ReplicationModeSync, model.ReplicationModeAsync}
+	var mode = strings.ToLower(replicationMode)
+	if !utils.Contained(mode, validMode) {
+		Fatalf("invalid replication mode '%s'\n", replicationMode)
 	}
 
 	prdd := map[string]string{}
@@ -149,8 +148,15 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if replicationPeriod < 0 {
+	switch {
+	case replicationPeriod < 0:
 		Fatalf("invalid replication period '%d'\n", replicationPeriod)
+	case replicationPeriod != 0 && replicationMode == model.ReplicationModeSync:
+		Fatalf("no need to set replication_period when the replication mode is 'sync'\n")
+	case replicationPeriod != 0:
+		break
+	case replicationPeriod == 0 && replicationMode == model.ReplicationModeAsync:
+		replicationPeriod = model.ReplicationDefaultPeriod
 	}
 
 	replica := &model.ReplicationSpec{
@@ -160,7 +166,7 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 		SecondaryVolumeId:              args[1],
 		PrimaryReplicationDriverData:   prdd,
 		SecondaryReplicationDriverData: srdd,
-		ReplicationModel:               mode,
+		ReplicationMode:                mode,
 		ReplicationPeriod:              replicationPeriod,
 	}
 
@@ -169,9 +175,9 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "Status",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone",
 		"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
-		"ReplicationStatus", "ReplicationModel", "ReplicationPeriod", "ProfileId"}
+		"ReplicationStatus", "ReplicationMode", "ReplicationPeriod", "ProfileId"}
 	PrintDict(resp, keys, replicationFormatters)
 }
 
@@ -182,9 +188,9 @@ func replicationShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "Status",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone",
 		"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
-		"ReplicationStatus", "ReplicationModel", "ReplicationPeriod", "ProfileId"}
+		"ReplicationStatus", "ReplicationMode", "ReplicationPeriod", "ProfileId"}
 	PrintDict(resp, keys, replicationFormatters)
 }
 
@@ -195,8 +201,8 @@ func replicationListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "AvailabilityZone", "Status",
-		"PrimaryVolumeId", "SecondaryVolumeId", "ReplicationStatus", "ReplicationModel"}
+	keys := KeyList{"Id", "Name", "Description", "AvailabilityZone",
+		"PrimaryVolumeId", "SecondaryVolumeId", "ReplicationStatus", "ReplicationMode"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -212,9 +218,9 @@ func replicationUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "Status",
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone",
 		"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
-		"ReplicationStatus", "ReplicationModel", "ReplicationPeriod", "ProfileId"}
+		"ReplicationStatus", "ReplicationMode", "ReplicationPeriod", "ProfileId"}
 	PrintDict(resp, keys, replicationFormatters)
 }
 

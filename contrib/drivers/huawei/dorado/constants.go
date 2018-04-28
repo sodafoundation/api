@@ -88,12 +88,12 @@ const (
 	DefaultReplicaWaitInterval = 1 * time.Second
 	DefaultReplicaWaitTimeout  = 20 * time.Second
 
-	ReplicaSyncModel  = "1"
-	ReplicaAsyncModel = "2"
-	ReplicaSpeed      = "2"
-	ReplicaPeriod     = "3600"
-	ReplicaSecondRo   = "2"
-	ReplicaSecondRw   = "3"
+	ReplicaSyncMode  = "1"
+	ReplicaAsyncMode = "2"
+	ReplicaSpeed     = "2"
+	ReplicaPeriod    = "3600"
+	ReplicaSecondRo  = "2"
+	ReplicaSecondRw  = "3"
 
 	ReplicaRunningStatusKey         = "RUNNINGSTATUS"
 	ReplicaRunningStatusInitialSync = "21"

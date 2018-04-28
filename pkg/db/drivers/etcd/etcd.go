@@ -1942,9 +1942,11 @@ func (r ReplicationSlice) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
 func (r ReplicationSlice) Less(i, j int) bool { return replicationsCompareFunc(r[i], r[j]) }
 
 var replicationSortKey2Func = map[string]ReplicationsCompareFunc{
-	"ID":     func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Id > b.Id },
-	"NAME":   func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Name > b.Name },
-	"STATUS": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Status > b.Status },
+	"ID":   func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Id > b.Id },
+	"NAME": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Name > b.Name },
+	"REPLICATIONSTATUS": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
+		return a.ReplicationStatus > b.ReplicationStatus
+	},
 	"AVAILABILITYZONE": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
 		return a.AvailabilityZone > b.AvailabilityZone
 	},
@@ -2016,9 +2018,6 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 	}
 	if input.Description != "" {
 		r.Description = input.Description
-	}
-	if input.Status != "" {
-		r.Status = input.Status
 	}
 	if input.PrimaryReplicationDriverData != nil {
 		r.PrimaryReplicationDriverData = input.PrimaryReplicationDriverData

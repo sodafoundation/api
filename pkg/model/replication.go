@@ -42,9 +42,10 @@ const (
 )
 
 const (
-	ReplicationModelSync        = "sync"
-	ReplicationModelAsync       = "async"
-	ReplicationBackendIdDefault = "default"
+	ReplicationModeSync         = "sync"
+	ReplicationModeAsync        = "async"
+	ReplicationDefaultBackendId = "default"
+	ReplicationDefaultPeriod    = 60
 )
 
 // ReplicationSpec represents a replication relationship between the volumes
@@ -66,7 +67,7 @@ type ReplicationSpec struct {
 	Description string `json:"description,omitempty"`
 
 	// The status of the replication.
-	Status string `json:"status,omitempty"`
+	//ReplicationStatus string `json:"status,omitempty"`
 
 	// The uuid of the volume on the primary site.
 	PrimaryVolumeId string `json:"primaryVolumeId,omitempty"`
@@ -88,11 +89,11 @@ type ReplicationSpec struct {
 	// replication status
 	ReplicationStatus string `json:"replicationStatus,omitempty"`
 	// supports "async" or "sync" now
-	ReplicationModel string `json:"replicationModel,omitempty"`
+	ReplicationMode string `json:"replicationMode,omitempty"`
 	// 0 means sync replication.
-	ReplicationPeriod int `json:"replicationPeriod,omitempty"`
+	ReplicationPeriod int64 `json:"replicationPeriod,omitempty"`
 	// replication period
-	ReplicationBandwidth int `json:"replicationBandwidth,omitempty"`
+	ReplicationBandwidth int64 `json:"replicationBandwidth,omitempty"`
 	// profile id
 	ProfileId string `json:"profileId,omitempty"`
 	// pool id

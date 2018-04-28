@@ -45,6 +45,29 @@ func (this *BasePortal) GetParameters() (map[string][]string, error) {
 
 type ActionSpec map[string]interface{}
 
+// This is an action router, some resource model need to extras action, this handler maybe useful.
+// Developer can use it by three steps:
+// 1. Config action in  router.go
+// 		beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
+//
+// 2. Initialize 'Self' variable
+//		func NewReplicationPortal() *ReplicationPortal {
+//			r := &ReplicationPortal{}
+//			r.Self = r
+//			return r
+//		}
+//
+// 3. Implement real action handler. The handler name must be same with the json keyword.
+//		JSON:
+//		{
+//		"enableReplication": {}
+//		}
+//
+//		Action handler:
+//		func (this *ReplicationPortal) EnableReplication(ctx *context.Context) {
+//			return
+//		}
+//  Note: If you want to use http ctx in action handler please use 'ctx' which is function parameter instead of 'this.Ctx'
 func (this *BasePortal) Action() {
 	action := ActionSpec{}
 	// IO reader only can be used once, but in action situation request body will read twice

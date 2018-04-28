@@ -281,6 +281,10 @@ message CreateReplicationOpts {
     repeated  VolumeData volumeDataList = 18;
     //the replication mode sync/async
     string replicationMode = 19;
+    // 0 means sync replication.
+    int64 ReplicationPeriod = 20;
+    // replication bandwidth
+    int64 ReplicationBandwidth = 21;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties

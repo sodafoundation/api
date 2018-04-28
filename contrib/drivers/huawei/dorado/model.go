@@ -300,7 +300,7 @@ type ReplicationPair struct {
 	RemoteDeviceSn      string `json:"REMOTEDEVICESN"`
 	RemoteResId         string `json:"REMOTERESID"`
 	RemoteResName       string `json:"REMOTERESNAME"`
-	ReplicationModel    string `json:"REPLICATIONMODEL"`
+	replicationMode    string `json:"REPLICATIONMODEL"`
 	ReplicationProgress string `json:"REPLICATIONPROGRESS"`
 	RunningStatus       string `json:"RUNNINGSTATUS"`
 	SecResAccess        string `json:"SECRESACCESS"`
