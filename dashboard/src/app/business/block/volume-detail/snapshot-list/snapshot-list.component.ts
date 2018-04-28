@@ -81,7 +81,7 @@ export class SnapshotListComponent implements OnInit {
     });
   }
 
-  batchDeleteSnapshort() {
+  batchDeleteSnapshot() {
     if (this.selectedSnapshots) {
       this.selectedSnapshots.forEach(snapshot => {
         this.deleteSnapshot(snapshot.id);
