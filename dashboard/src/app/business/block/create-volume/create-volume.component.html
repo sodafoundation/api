@@ -1,9 +1,9 @@
-<div class="content-header">
+<div class="create-volume-content-header">
     <h2>Create Volume</h2>
     <p>Apply for block storage resources.</p>
 </div>
 
-<form [formGroup]="volumeform" (ngSubmit)="onSubmit(volumeform.value)">
+<form [formGroup]="volumeform" (ngSubmit)="onSubmit(volumeform.value)" class="form-margin">
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <div class="ui-grid-row">
             <div class="ui-grid-col-2">
@@ -11,61 +11,80 @@
             </div>
             <div class="ui-grid-col-2">
                 <p-dropdown [options]="availabilityZones" formControlName="zone"></p-dropdown>
-            </div>
-            <div class="ui-grid-col-2">
-                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['zone'].valid&&volumeform.controls['zone'].dirty">
-                    <i class="fa fa-close"></i> Zone is required
+                <div class="ui-message-container" *ngIf="!volumeform.controls['zone'].valid&&volumeform.controls['zone'].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            Zone is required
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="ui-grid-row volume-item-padding">
             <div class="ui-grid-col-2">
-                {{label.name}}
+                {{label.name}}:
             </div>
             <div class="ui-grid-col-2">
-                {{label.profile}}
+                {{label.profile}}:
             </div>
             <div class="ui-grid-col-2">
-                {{label.capacity}}
+                {{label.capacity}}:
             </div>
             <div class="ui-grid-col-1">
-                {{label.quantity}}
+                {{label.quantity}}:
             </div>
         </div>
 
         <div class="ui-grid-row volume-item-padding" *ngFor="let volumeItem of volumeItems;index as i">
             <div class="ui-grid-col-2">
                 <input pInputText type="text" placeholder="Name" formControlName="{{'name'+i}}" />
-                <!-- <div>{{volumeform.controls['name'+i]}}++{{'name'+i}}</div> -->
-                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
-                    <i class="fa fa-close"></i> Name is required
+                <div class="ui-message-container" *ngIf="!volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            Name is required
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="ui-grid-col-2">
                 <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}"></p-dropdown>
-                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].dirty">
-                    <i class="fa fa-close"></i> profileId is required
+                <div class="ui-message-container" *ngIf="!volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            ProfileId is required
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="ui-grid-col-2" style="display: flex;">
-                <p-spinner formControlName="{{'size'+i}}" [min]="1" aria-placeholder="1"></p-spinner>
-                <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
-                <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
-                    <i class="fa fa-close"></i> capacity is required
+            <div class="ui-grid-col-2">
+                <div style="display: flex;">
+                    <p-spinner formControlName="{{'size'+i}}" [min]="1" aria-placeholder="1"></p-spinner>
+                    <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
+                </div>
+                <div class="ui-message-container" *ngIf="!volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            Capacity is required
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="ui-grid-col-1">
                 <p-spinner formControlName="{{'quantity'+i}}" [min]="1" aria-placeholder="1"></p-spinner>
             </div>
-            <div class="ui-grid-col-1" *ngIf="i !== 0" (click)="deleteVolumeItem(i)">
-                <img style="vertical-align:middle;" src="assets/business/images/profile/u1065.png">
+            <div class="ui-grid-col-1 delete-img-class" *ngIf="i !== 0" (click)="deleteVolumeItem(i)">
+                <img src="assets/business/images/profile/u1065.png">
             </div>
         </div>
 
         <div class="volume-content-padding">
             <a class="create-profile-img" (click)="addVolumeItem()">
-                <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                <img style="vertical-align:middle;" width="24" height="24" src="assets/business/images/volume/u937.png">
                 <span>Add Volumes</span>
             </a>
         </div>
@@ -78,7 +97,7 @@
             <app-replication-group></app-replication-group>
         </div>
     </div>
-    <div class="volume-content-padding">
+    <div class="volume-footer-btn-padding">
         <!--  [disabled]="!volumeform.valid" -->
         <button pButton type="submit" class="ui-button-secondary" label="OK"></button>
         <button pButton type="button" label="Cancel" [routerLink]="['/block']"></button>

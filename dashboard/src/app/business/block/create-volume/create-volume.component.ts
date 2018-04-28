@@ -74,9 +74,6 @@ export class CreateVolumeComponent implements OnInit {
 
     this.availabilityZones = [
       {
-        label: 'Select Zone', value: null
-      },
-      {
         label: 'Default', value: 'default'
       }
     ];
@@ -93,7 +90,7 @@ export class CreateVolumeComponent implements OnInit {
     ];
 
     this.volumeform = this.fb.group({
-      'zone': new FormControl('', Validators.required),
+      'zone': new FormControl('default', Validators.required),
       'name0': new FormControl('', Validators.required),
       'profileId0': new FormControl('', Validators.required),
       'size0': new FormControl('', Validators.required),

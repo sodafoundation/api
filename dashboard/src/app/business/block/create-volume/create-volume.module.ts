@@ -9,7 +9,7 @@ import { ReplicationGroupComponent } from './replication-group/replication-group
 import { HttpService } from './../../../shared/api';
 import { VolumeService } from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
-import { InputTextModule, CheckboxModule, ButtonModule, DropdownModule, DialogModule, Message, GrowlModule, SpinnerModule } from './../../../components/common/api';
+import { InputTextModule, CheckboxModule, ButtonModule, DropdownModule, DialogModule, Message, GrowlModule, SpinnerModule, FormModule } from './../../../components/common/api';
 
 let routers = [{
   path: '',
@@ -28,7 +28,8 @@ let routers = [{
     DropdownModule,
     DialogModule,
     GrowlModule,
-    SpinnerModule
+    SpinnerModule,
+    FormModule
   ],
   declarations: [
     CreateVolumeComponent,

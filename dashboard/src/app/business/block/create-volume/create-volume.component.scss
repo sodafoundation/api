@@ -15,3 +15,35 @@
 .volume-content-padding {
     padding: 1em 0.5em !important;
 }
+
+.volume-footer-btn-padding {
+    padding: 3em 0.5em !important;
+}
+
+.create-volume-content-header {
+    padding: 0.5em;
+}
+
+.create-volume-content-header h2 {
+    font-family: 'AvenirNext-Regular', 'Avenir Next';
+    font-weight: 400;
+    font-style: normal;
+    font-size: 22px;
+    color: #2E3039;
+    padding: 0.5em 0;
+}
+
+.create-volume-content-header p {
+    padding: 0.5em 0;
+}
+
+.form-margin {
+    margin-top: 2em;
+}
+
+.delete-img-class {
+    margin-left: 2em !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}

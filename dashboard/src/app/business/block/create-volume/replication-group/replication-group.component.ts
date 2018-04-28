@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ProfileService } from './../../../profile/profile.service';
 
 @Component({
   selector: 'app-replication-group',
@@ -11,8 +12,18 @@ export class ReplicationGroupComponent implements OnInit {
   existingGroupLists = [];
   replicationEnable:boolean;
   volumes = [];
+  period = 60;
+  selectedProfile;
+  profileOptions = [
+    {
+      label: 'Select Profile',
+      value: null
+    }
+  ];
 
-  constructor() { }
+  constructor(
+    private ProfileService: ProfileService
+  ) { }
 
   ngOnInit() {
     this.groupOptions = [
@@ -39,6 +50,7 @@ export class ReplicationGroupComponent implements OnInit {
         profileId: 'PF_block_02'
       }
     ];
+    this.getProfiles();
   }
 
   getReplicationGroup(){
@@ -54,6 +66,18 @@ export class ReplicationGroupComponent implements OnInit {
         }
       ]
     }
+  }
+
+  getProfiles() {
+    this.ProfileService.getProfiles().subscribe((res) => {
+      let profiles = res.json();
+      profiles.forEach(profile => {
+        this.profileOptions.push({
+          label: profile.name,
+          value: profile.id
+        });
+      });
+    });
   }
 
 }
