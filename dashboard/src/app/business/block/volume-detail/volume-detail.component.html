@@ -1,4 +1,4 @@
-<div style="width: 80%">
+<div>
     <div class="custom-breadcrumb">
         <span *ngFor="let item of items; index as i">
           <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
