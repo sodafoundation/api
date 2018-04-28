@@ -60,9 +60,11 @@
                     </div>
                 </div>
             </div>
-            <div class="ui-grid-col-2" style="display: flex;">
-                <p-spinner formControlName="{{'size'+i}}" [min]="1" aria-placeholder="1"></p-spinner>
-                <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
+            <div class="ui-grid-col-2">
+                <div style="display: flex;">
+                    <p-spinner formControlName="{{'size'+i}}" [min]="1" aria-placeholder="1"></p-spinner>
+                    <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
+                </div>
                 <div class="ui-message-container" *ngIf="!volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
