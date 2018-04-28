@@ -6,6 +6,7 @@ import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule
 
 import { HttpService } from './../../shared/service/Http.service';
 import { VolumeService,SnapshotService } from './volume.service';
+import { ProfileService } from './../profile/profile.service';
 
 @NgModule({
   declarations: [ VolumeListComponent ],
@@ -23,7 +24,8 @@ import { VolumeService,SnapshotService } from './volume.service';
   providers: [
     HttpService,
     VolumeService,
-    SnapshotService
+    SnapshotService,
+    ProfileService
   ]
 })
 export class VolumeListModule { }

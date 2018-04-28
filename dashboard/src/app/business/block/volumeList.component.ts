@@ -7,7 +7,8 @@ import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem } from '../../components/common/api';
 
-import { VolumeService,SnapshotService } from './volume.service';
+import { VolumeService, SnapshotService } from './volume.service';
+import { ProfileService } from './../profile/profile.service';
 import { identifierModuleUrl } from '@angular/compiler';
 
 @Component({
@@ -30,13 +31,15 @@ export class VolumeListComponent implements OnInit {
         "name": { required: "Name is required." },
         "description": { maxlength: "Max. length is 200." }
     };
-    selectedVolume
+    profiles;
+    selectedVolume;
 
     constructor(
         // private I18N: I18NService,
         private router: Router,
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,
+        private ProfileService: ProfileService,
         private fb: FormBuilder
     ) {
         this.snapshotFormGroup = this.fb.group({
@@ -76,11 +79,18 @@ export class VolumeListComponent implements OnInit {
             name: 'Name',
             description: 'Description'
         }
+        this.getProfiles()
     }
 
     getVolumes() {
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
+        });
+    }
+
+    getProfiles() {
+        this.ProfileService.getProfiles().subscribe((res) => {
+            this.profiles = res.json();
         });
     }
 
@@ -120,16 +130,13 @@ export class VolumeListComponent implements OnInit {
         this.selectedVolume = selectedVoluem;
     }
 
-    modifyVolume(){
+    modifyVolume() {
         let param = {
             name: this.modifyFormGroup.value.name
         };
-        this.VolumeService.modifyVolume(this.selectedVolume.id,param).subscribe((res) => {
+        this.VolumeService.modifyVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
             this.modifyDisplay = false;
         });
     }
-
-
-
 }
