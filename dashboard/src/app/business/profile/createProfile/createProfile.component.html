@@ -7,11 +7,11 @@
 <form [formGroup]="profileform" (ngSubmit)="onSubmit(profileform.value)">
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <div class="ui-grid-row profile-form-padding">
-            <div class="ui-grid-col-2">
-                {{label.name}}*
+            <div class="ui-grid-col-2 required">
+                {{label.name}}
             </div>
             <div class="ui-grid-col-2">
-                <input pInputText type="text" size="80" formControlName="name" placeholder="Name Required" />
+                <input pInputText type="text" size="80" formControlName="name" />
             </div>
             <div class="ui-grid-col-2">
                 <div class="ui-message ui-messages-error ui-corner-all" *ngIf="!profileform.controls['name'].valid&&profileform.controls['name'].dirty">
@@ -20,21 +20,21 @@
             </div>
         </div>
         <div class="ui-grid-row profile-form-padding">
-            <div class="ui-grid-col-2">
-                {{label.protocol}}*
+            <div class="ui-grid-col-2 required">
+                {{label.protocol}}
             </div>
             <div class="ui-grid-col-2">
                 <p-dropdown [style]="{'min-width':150}" formControlName="protocol" [options]="protocolOptions"></p-dropdown>
             </div>
         </div>
         <div class="ui-grid-row profile-form-padding">
-            <div class="ui-grid-col-2">
-                {{label.type}}*
+            <div class="ui-grid-col-2 required">
+                {{label.type}}
             </div>
-            <div class="ui-grid-col-3">
-                <p-radioButton label="Auto" formControlName="storageType" name="typeRadioGroup" value="Auto"></p-radioButton>
-                <p-radioButton label="Thin" formControlName="storageType" name="typeRadioGroup" value="Thin"></p-radioButton>
-                <p-radioButton label="Thick" formControlName="storageType" name="typeRadioGroup" value="Thick"></p-radioButton>
+            <div class="ui-grid-col-3 radio-groups">
+                <span><p-radioButton label="Auto" formControlName="storageType" name="typeRadioGroup" value="Auto"></p-radioButton></span>
+                <span><p-radioButton label="Thin" formControlName="storageType" name="typeRadioGroup" value="Thin"></p-radioButton></span>
+                <span><p-radioButton label="Thick" formControlName="storageType" name="typeRadioGroup" value="Thick"></p-radioButton></span>
             </div>
         </div>
         <div class="ui-grid-row profile-form-padding">
@@ -49,23 +49,23 @@
             <div class="ui-grid-col-2">
             </div>
             <div class="ui-grid-col-10">
-                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
-                    <div class="ui-grid-row">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
+                    <div class="ui-grid-row profile-form-padding">
                         <div class="ui-grid-col-1">
                             {{label.maxIOPS}}
                         </div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-3">
                             <div class="input-text-vertical-align">
                                 <input pInputText type="text" placeholder="MaxIOPS" />
                                 <span>IOPS/TB</span>
                             </div>
                         </div>
                     </div>
-                    <div class="ui-grid-row">
+                    <div class="ui-grid-row profile-form-padding">
                         <div class="ui-grid-col-1">
                             {{label.MBPS}}
                         </div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-3">
                             <div class="input-text-vertical-align">
                                 <input pInputText type="text" placeholder="MBPS" />
                                 <span>MBPS/TB</span>
@@ -88,48 +88,48 @@
             <div class="ui-grid-col-2">
             </div>
             <div class="ui-grid-col-10">
-                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
                     <div class="ui-grid-row profile-form-padding">
-                        <div class="ui-grid-col-2">{{label.replicationLabel.type}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.type}}</div>
+                        <div class="ui-grid-col-3">
                             <p-dropdown [style]="{'min-width':150}" [options]="replicationTypeOptions"></p-dropdown>
                         </div>
                         <div class="ui-grid-col-1"></div>
-                        <div class="ui-grid-col-2">{{label.replicationLabel.RGO}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.RGO}}</div>
+                        <div class="ui-grid-col-3">
                             <p-dropdown [style]="{'min-width':150}" [options]="replicationRGOOptions"></p-dropdown>
                         </div>
                     </div>
                     <div class="ui-grid-row profile-form-padding">
-                        <div class="ui-grid-col-2">{{label.replicationLabel.Mode}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.Mode}}</div>
+                        <div class="ui-grid-col-3">
                             <p-dropdown [style]="{'min-width':150}" [options]="replicationModeOptions"></p-dropdown>
                         </div>
                         <div class="ui-grid-col-1"></div>
-                        <div class="ui-grid-col-2">{{label.replicationLabel.RTO}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.RTO}}</div>
+                        <div class="ui-grid-col-3">
                             <p-dropdown [style]="{'min-width':150}" [options]="replicationRTOOptions"></p-dropdown>
                         </div>
                     </div>
                     <div class="ui-grid-row profile-form-padding">
-                        <div class="ui-grid-col-2">{{label.replicationLabel.Period}}</div>
-                        <div class="ui-grid-col-2 input-text-vertical-align">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.Period}}</div>
+                        <div class="ui-grid-col-3 input-text-vertical-align">
                             <input pInputText type="text" placeholder="Period" /><span>Minutes</span>
                         </div>
                         <div class="ui-grid-col-1"></div>
-                        <div class="ui-grid-col-2">{{label.replicationLabel.RPO}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.RPO}}</div>
+                        <div class="ui-grid-col-3">
                             <p-dropdown [style]="{'min-width':150}" [options]="replicationRPOOptions"></p-dropdown>
                         </div>
                     </div>
                     <div class="ui-grid-row profile-form-padding">
-                        <div class="ui-grid-col-2">{{label.replicationLabel.Bandwidth}}</div>
-                        <div class="ui-grid-col-2 input-text-vertical-align">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.Bandwidth}}</div>
+                        <div class="ui-grid-col-3 input-text-vertical-align">
                             <input pInputText type="text" placeholder="Bandwidth" /><span>MBPS/TB</span>
                         </div>
                         <div class="ui-grid-col-1"></div>
-                        <div class="ui-grid-col-2">{{label.replicationLabel.Consistency}}</div>
-                        <div class="ui-grid-col-2">
+                        <div class="ui-grid-col-1">{{label.replicationLabel.Consistency}}</div>
+                        <div class="ui-grid-col-3">
                             <p-checkbox value="consistency" label="Enable"></p-checkbox>
                         </div>
                     </div>
@@ -149,7 +149,7 @@
             <div class="ui-grid-col-2">
             </div>
             <div class="ui-grid-col-10">
-                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
                     <div class="ui-grid-row profile-form-padding">
                         <div class="ui-grid-col-2">
                             {{label.snapshotLabel.Schedule}}
@@ -164,7 +164,7 @@
                         </div>
                         <div class="ui-grid-col-10 input-text-vertical-align">
                             <div>
-                                <input pInputText type="time" />
+                                <input pInputText type="time" value="23:00" />
                                 <!-- <img style="position: absolute; top: 0.25em; right: 0.5em" src="assets/business/images/profile/u1065.png"> -->
                             </div>
                             <a class="input-text-vertical-align execution-time-add">
@@ -177,8 +177,8 @@
                             {{label.snapshotLabel.Retention}}
                         </div>
                         <div class="ui-grid-col-3 input-text-vertical-align">
-                            <p-dropdown [style]="{'min-width':150}" [options]="snapshotRetentionOptions" formControlName="snapshotRetention"></p-dropdown>
-                            <input pInputText type="number" />
+                            <p-dropdown [style]="{'min-width':200}" [options]="snapshotRetentionOptions" formControlName="snapshotRetention"></p-dropdown>
+                            <span><input pInputText type="number" [value]="profileform.controls['snapshotRetention'].value === 'Time' ? '30' : '100' " /></span>
                             <span *ngIf="profileform.controls['snapshotRetention'].value === 'Time'">Days</span>
                         </div>
                     </div>
@@ -228,21 +228,21 @@
         <div class="ui-grid-row profile-form-padding" *ngIf="showStoragePool">
             <div class="ui-grid-col-2">
             </div>
-            <div class="ui-grid-col-10">
+            <div class="ui-grid-col-10 secondary-form">
                 <app-storage-pools-table></app-storage-pools-table>
             </div>
         </div>
     </div>
-    <div class="profile-form-padding">
-        <button pButton type="submit" class="ui-button-secondary" label="OK" [disabled]="!profileform.valid"></button>
-        <button pButton type="button" label="Cancel" [routerLink]="['/profile']"></button>
+    <div class="form-submit-button">
+        <button pButton type="submit" class="ui-button-secondary ui-button-large" label="OK" [disabled]="!profileform.valid"></button>
+        <button pButton type="button" class="ui-button-large" label="Cancel" [routerLink]="['/profile']"></button>
     </div>
 </form>
 </div>
 
 <p-dialog header="Create Customization" [(visible)]="showCustomization" [width]="500" modal="modal">
     <div>
-        <div class="ui-inputgroup">
+        <div class="ui-inputgroup profile-form-padding">
             <span class="ui-g-4 ui-md-4">{{label.key}}</span>
             <input type="text" pInputText placeholder="Key" [(ngModel)]="customizationKey">
         </div>

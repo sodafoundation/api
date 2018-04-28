@@ -299,14 +299,14 @@ button.ui-button::-moz-focus-inner {
     border-color: #d9534f;
 }
 
-//自定义部分
-.close-class {
+// custom button style
+.ui-button.ui-button-icon-only.close-class {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: .35rem;
+    right: .25rem;
     background-color: #fff;
     border: 1px solid #B9C3C8 !important;
-    color: #B9C3C8;
+
 }
 
 .cloud-servie-delete-button-radius {

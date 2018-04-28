@@ -109,7 +109,7 @@ export class AppComponent implements OnInit, AfterViewInit{
 
             this.isLogin = true;
             this.hideLoginForm = true;
-            this.router.navigateByUrl("home");
+            // this.router.navigateByUrl("home");
             this.activeItem = this.menuItems[0];
         }else{
             this.isLogin = false;

@@ -1,5 +1,5 @@
 <div>
-    <div class="ui-g-12 ui-md-6">
+    <div class="ui-g-12 ui-md-7">
         <div class="font-primary">
             <h2>{{data.name}}</h2>
         </div>
@@ -13,17 +13,12 @@
         </div>
 
         <div class="padding-class" *ngIf="data.extras && data.extras.policys">
-            <!-- <div (mouseover)="op2.show($event)" (mouseout)="op2.hide($event)" class="fa fa-check icon-color-class" *ngFor="let policy of data.extras.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}"> -->
-            <div (mouseover)="showDiv = true" (mouseout)="showDiv = false" class="fa fa-check icon-color-class" *ngFor="let policy of data.extras.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
+            <div class="fa fa-check icon-color-class" *ngFor="let policy of data.extras.policys; index as i" [ngClass]="{'margin-left-class':i !== 0}">
                 <span class="font-color-class">{{policy}}</span>
-                <!-- <p-overlayPanel #op2 styleClass="aaa">
-                    <div style="width:100px;height:100px; border: 1px solid red;"></div>
-                </p-overlayPanel> -->
             </div>
-            <div *ngIf="showDiv" style="width:100px;height:100px; border: 1px solid red;"></div>
         </div>
     </div>
-    <div class="ui-g-12 ui-md-6">
+    <div class="ui-g-12 ui-md-5">
         <div>{{policy}}</div>
         <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
     </div>

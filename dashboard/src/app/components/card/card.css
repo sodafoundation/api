@@ -43,4 +43,8 @@
 .new-card-class {
     border: none !important;
     border-radius: 12px;
+    
+}
+.ui-card-body{
+    padding: .15rem .2rem;
 }

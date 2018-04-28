@@ -3,9 +3,20 @@
     margin-left: 0.5em;
 }
 
+
+    
+.font-primary{
+    color: #434B52; 
+    h2{
+        padding-bottom: .10rem;
+    }
+}
+
 .padding-class {
     min-width: 300px;
-    padding: 10px 0 0;
+    &:last-of-type{
+        padding-top: .10rem;
+    }
 }
 
 .icon-color-class {
@@ -18,10 +29,6 @@
 
 .font-color-class {
     color: map-get($color-text, primary);
-}
-
-.font-primary {
-    color: #434B52; //map-get($color-text, primary);
 }
 
 .label-class {
