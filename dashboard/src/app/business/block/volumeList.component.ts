@@ -1,11 +1,14 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import { I18NService } from 'app/shared/api';
+import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem } from '../../components/common/api';
 
-import { VolumeService } from './volume.service';
+import { VolumeService,SnapshotService } from './volume.service';
+import { identifierModuleUrl } from '@angular/compiler';
 
 @Component({
     selector: 'volume-list',
@@ -14,29 +17,119 @@ import { VolumeService } from './volume.service';
     animations: []
 })
 export class VolumeListComponent implements OnInit {
+    createSnapshotDisplay = false;
+    createReplicationDisplay = false;
+    modifyDisplay = false;
+    selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
+    label = {};
+    snapshotFormGroup;
+    modifyFormGroup;
+    errorMessage = {
+        "name": { required: "Name is required." },
+        "description": { maxlength: "Max. length is 200." }
+    };
+    selectedVolume
 
     constructor(
         // private I18N: I18NService,
-        // private router: Router
-        private VolumeService: VolumeService
-    ) { }
+        private router: Router,
+        private VolumeService: VolumeService,
+        private SnapshotService: SnapshotService,
+        private fb: FormBuilder
+    ) {
+        this.snapshotFormGroup = this.fb.group({
+            "name": ["", Validators.required],
+            "description": ["", Validators.maxLength(200)]
+        });
+        this.modifyFormGroup = this.fb.group({
+            "name": ['', Validators.required]
+        });
+    }
 
     ngOnInit() {
-        // this.volumes = [
-        //     { "name": "vol-01", "status": "Available", "capacity": "200.000 GB", "profile": "PF_block_01", "az":"az_01" },
-        //     { "name": "vol-02", "status": "Error", "capacity": "200.000 GB", "profile": "PF_block_02", "az":"az_02" }
-        // ];
         this.menuItems = [
-            { "label": "Modify", command:()=>{} },
-            { "label": "Expand", command:()=>{} },
-            { "label": "Delete", command:()=>{} }
+            {
+                "label": "Modify",
+                command: () => {
+                    this.modifyDisplay = true;
+                }
+            },
+            {
+                "label": "Expand",
+                command: () => { }
+            },
+            {
+                "label": "Delete", command: () => {
+                    if (this.selectedVolume && this.selectedVolume.id) {
+                        this.deleteVolumeById(this.selectedVolume.id);
+                    }
+                }
+            }
         ];
 
+        this.getVolumes();
+
+        this.label = {
+            volume: 'Volume',
+            name: 'Name',
+            description: 'Description'
+        }
+    }
+
+    getVolumes() {
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
-        });;
+        });
     }
+
+    batchDeleteVolume() {
+        this.selectedVolumes.forEach(volume => {
+            this.deleteVolume(volume.id);
+        });
+    }
+
+    deleteVolumeById(id) {
+        this.deleteVolume(id);
+    }
+
+    deleteVolume(id) {
+        this.VolumeService.deleteVolume(id).subscribe((res) => {
+            this.getVolumes();
+        });
+    }
+
+    createSnapshot() {
+        let param = {
+            name: this.snapshotFormGroup.value.name,
+            volumeId: this.selectedVolume.id,
+            description: this.snapshotFormGroup.value.description
+        }
+        this.SnapshotService.createSnapshot(param).subscribe((res) => {
+            this.createSnapshotDisplay = false;
+        });
+    }
+
+    returnSelectedVolume(selectedVoluem, dialog) {
+        if (dialog === 'snapshot') {
+            this.createSnapshotDisplay = true;
+        } else if (dialog === 'replication') {
+            this.createReplicationDisplay = true;
+        }
+        this.selectedVolume = selectedVoluem;
+    }
+
+    modifyVolume(){
+        let param = {
+            name: this.modifyFormGroup.value.name
+        };
+        this.VolumeService.modifyVolume(this.selectedVolume.id,param).subscribe((res) => {
+            this.getVolumes();
+            this.modifyDisplay = false;
+        });
+    }
+
+
 
 }

@@ -1,0 +1,35 @@
+@import "./../../scss-variable";
+.custom-breadcrumb {
+    padding: 0.16rem 0;
+}
+
+.custom-breadcrumb a {
+    color: map-get($color-text, primary) !important;
+}
+
+.custom-breadcrumb .font-color-class {
+    color: #438bd3 !important;
+}
+
+.volume-basic-info {
+    padding: 2em;
+    border-radius: 30px;
+    // border: 1px solid red;
+    // background-color: blue;
+}
+
+.volume-basic-info h3 {
+    padding: 1em 0.08rem;
+}
+
+.margin-left-5percentage {
+    margin-left: 5%;
+}
+
+.volume-basic-item-class {
+    padding: 0.5em 0 !important;
+}
+
+.volume-basic-item-value-color {
+    color: #2E3039 !important;
+}
