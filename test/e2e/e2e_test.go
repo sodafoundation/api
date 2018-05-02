@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	_ "reflect"
 	"runtime"
 	"testing"
 

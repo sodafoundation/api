@@ -11,33 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package api
 
-package iscsi
-
-import (
-	"strconv"
-
-	"github.com/opensds/opensds/contrib/connector"
-)
-
-var (
-	ISCSI_DRIVER = "iscsi"
-)
-
-type Iscsi struct{}
-
-func init() {
-	connector.RegisterConnector(ISCSI_DRIVER, &Iscsi{})
-}
-
-func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Connect(iscsiCon.TgtPortal, iscsiCon.TgtIQN, strconv.Itoa(iscsiCon.TgtLun))
-}
-
-func (isc *Iscsi) Detach(conn map[string]interface{}) error {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Disconnect(iscsiCon.TgtPortal, iscsiCon.TgtIQN)
-}
+// TODO add unit test

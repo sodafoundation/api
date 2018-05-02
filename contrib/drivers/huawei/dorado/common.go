@@ -3,12 +3,32 @@ package dorado
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"regexp"
 	"strconv"
 	"strings"
-
-	log "github.com/golang/glog"
+	"time"
 )
+
+type AuthOptions struct {
+	Username  string `yaml:"username,omitempty"`
+	Password  string `yaml:"password,omitempty"`
+	Endpoints string `yaml:"endpoints,omitempty"`
+	Insecure  bool   `yaml:"insecure,omitempty"`
+}
+
+type Replication struct {
+	RemoteAuthOpt AuthOptions `yaml:"remoteAuthOptions"`
+}
+
+type DoradoConfig struct {
+	AuthOptions `yaml:"authOptions"`
+	Replication `yaml:"replication"`
+	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+	TargetIp    string                    `yaml:"targetIp,omitempty"`
+}
 
 const UnitGi = 1024 * 1024 * 1024
 
@@ -50,4 +70,25 @@ func Sector2Gb(sec string) int64 {
 
 func Gb2Sector(gb int64) int64 {
 	return gb * UnitGi / 512
+}
+
+func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
+	endAt := time.Now().Add(timeout)
+	time.Sleep(time.Duration(interval))
+	for {
+		startTime := time.Now()
+		ok, err := f()
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
+		if time.Now().After(endAt) {
+			break
+		}
+		elapsed := time.Now().Sub(startTime)
+		time.Sleep(interval - elapsed)
+	}
+	return fmt.Errorf("wait for condition timeout")
 }

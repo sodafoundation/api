@@ -36,6 +36,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
 	"github.com/satori/go.uuid"
+	"reflect"
 )
 
 const (
@@ -1151,7 +1152,9 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.Status != "" {
 		result.Status = vol.Status
 	}
-
+	if vol.ReplicationDriverData != nil {
+		result.ReplicationDriverData = vol.ReplicationDriverData
+	}
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -1780,4 +1783,273 @@ func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
 		return errors.New(dbRes.Error)
 	}
 	return nil
+}
+
+func (c *Client) CreateReplication(ctx *c.Context, r *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	if r.Id == "" {
+		r.Id = uuid.NewV4().String()
+	}
+
+	r.TenantId = ctx.TenantId
+	r.CreatedAt = time.Now().Format(constants.TimeFormat)
+	rBody, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &Request{
+		Url:     urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, r.Id),
+		Content: string(rBody),
+	}
+	resp := c.Create(req)
+	if resp.Status != "Success" {
+		log.Error("When create replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	return r, nil
+}
+
+func (c *Client) GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	replication, err := c.getReplication(ctx, replicationId)
+	if !IsAdminContext(ctx) || err == nil {
+		return replication, err
+	}
+	replications, err := c.ListReplication(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range replications {
+		if r.Id == replicationId {
+			return r, nil
+		}
+	}
+	return nil, fmt.Errorf("specified replication(%s) can't find", replicationId)
+}
+
+func (c *Client) getReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, replicationId),
+	}
+	resp := c.Get(req)
+	if resp.Status != "Success" {
+		log.Error("When get pool in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	var r = &model.ReplicationSpec{}
+	if err := json.Unmarshal([]byte(resp.Message[0]), r); err != nil {
+		log.Error("When parsing replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+	return r, nil
+}
+
+func (c *Client) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error) {
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId),
+	}
+	if IsAdminContext(ctx) {
+		req.Url = urls.GenerateReplicationURL(urls.Etcd, "")
+	}
+	resp := c.List(req)
+	if resp.Status != "Success" {
+		log.Error("When list replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	var replicas = []*model.ReplicationSpec{}
+	if len(resp.Message) == 0 {
+		return replicas, nil
+	}
+	for _, msg := range resp.Message {
+		var r = &model.ReplicationSpec{}
+		if err := json.Unmarshal([]byte(msg), r); err != nil {
+			log.Error("When parsing replication in db:", resp.Error)
+			return nil, errors.New(resp.Error)
+		}
+		replicas = append(replicas, r)
+	}
+	return replicas, nil
+
+}
+
+func (c *Client) filterByName(param map[string][]string, spec interface{}, filterList map[string]interface{}) bool {
+	v := reflect.ValueOf(spec)
+	for key := range param {
+		_, ok := filterList[key]
+		if !ok {
+			continue
+		}
+		filed := v.FieldByName(key)
+		if !filed.IsValid() {
+			continue
+		}
+		paramVal := param[key][0]
+		var val string
+		switch filed.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			val = strconv.FormatInt(filed.Int(), 10)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			val = strconv.FormatUint(filed.Uint(), 10)
+		case reflect.String:
+			val = filed.String()
+		default:
+			return false
+		}
+		if val != "" && !strings.EqualFold(paramVal, val) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (c *Client) SelectReplication(param map[string][]string, replications []*model.ReplicationSpec) []*model.ReplicationSpec {
+
+	if !c.SelectOrNot(param) {
+		return replications
+	}
+
+	filterList := map[string]interface{}{
+		"Id":                nil,
+		"CreatedAt":         nil,
+		"UpdatedAt":         nil,
+		"Name":              nil,
+		"Description":       nil,
+		"PrimaryVolumeId":   nil,
+		"SecondaryVolumeId": nil,
+	}
+
+	var rlist = []*model.ReplicationSpec{}
+	for _, r := range replications {
+		if c.filterByName(param, r, filterList) {
+			rlist = append(rlist, r)
+		}
+	}
+	return rlist
+
+}
+
+type ReplicationsCompareFunc func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool
+
+var replicationsCompareFunc ReplicationsCompareFunc
+
+type ReplicationSlice []*model.ReplicationSpec
+
+func (r ReplicationSlice) Len() int           { return len(r) }
+func (r ReplicationSlice) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+func (r ReplicationSlice) Less(i, j int) bool { return replicationsCompareFunc(r[i], r[j]) }
+
+var replicationSortKey2Func = map[string]ReplicationsCompareFunc{
+	"ID":   func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Id > b.Id },
+	"NAME": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Name > b.Name },
+	"REPLICATIONSTATUS": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
+		return a.ReplicationStatus > b.ReplicationStatus
+	},
+	"AVAILABILITYZONE": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
+		return a.AvailabilityZone > b.AvailabilityZone
+	},
+	"PROFILEID": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.ProfileId > b.ProfileId },
+	"TENANTID":  func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.TenantId > b.TenantId },
+	"POOLID":    func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.PoolId > b.PoolId },
+}
+
+func (c *Client) SortReplications(replications []*model.ReplicationSpec, p *Parameter) []*model.ReplicationSpec {
+
+	replicationsCompareFunc = replicationSortKey2Func[p.sortKey]
+
+	if strings.EqualFold(p.sortDir, "asc") {
+		sort.Sort(ReplicationSlice(replications))
+
+	} else {
+		sort.Sort(sort.Reverse(ReplicationSlice(replications)))
+	}
+	return replications
+}
+
+func (c *Client) ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error) {
+	replicas, err := c.ListReplication(ctx)
+	if err != nil {
+		log.Error("List replications failed: ", err)
+		return nil, err
+	}
+
+	rlist := c.SelectReplication(m, replicas)
+
+	var sortKeys []string
+	for k := range replicationSortKey2Func {
+		sortKeys = append(sortKeys, k)
+	}
+	p := c.ParameterFilter(m, len(rlist), sortKeys)
+	return c.SortReplications(rlist, p)[p.beginIdx:p.endIdx], nil
+}
+
+func (c *Client) DeleteReplication(ctx *c.Context, replicationId string) error {
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		r, err := c.GetReplication(ctx, replicationId)
+		if err != nil {
+			return err
+		}
+		tenantId = r.TenantId
+	}
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
+	}
+	reps := c.Delete(req)
+	if reps.Status != "Success" {
+		log.Error("When delete replication in db:", reps.Error)
+		return errors.New(reps.Error)
+	}
+	return nil
+}
+
+func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	r, err := c.GetReplication(ctx, replicationId)
+	if err != nil {
+		return nil, err
+	}
+	if input.ProfileId != "" {
+		r.ProfileId = input.ProfileId
+	}
+	if input.Name != "" {
+		r.Name = input.Name
+	}
+	if input.Description != "" {
+		r.Description = input.Description
+	}
+	if input.PrimaryReplicationDriverData != nil {
+		r.PrimaryReplicationDriverData = input.PrimaryReplicationDriverData
+	}
+	if input.SecondaryReplicationDriverData != nil {
+		r.SecondaryReplicationDriverData = input.SecondaryReplicationDriverData
+	}
+	if input.Metadata != nil {
+		r.Metadata = input.Metadata
+	}
+	if input.ReplicationStatus != "" {
+		r.ReplicationStatus = input.ReplicationStatus
+	}
+
+	r.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	b, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		tenantId = r.TenantId
+	}
+	req := &Request{
+		Url:        urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
+		NewContent: string(b),
+	}
+	resp := c.Update(req)
+	if resp.Status != "Success" {
+		log.Error("When update replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+	return r, nil
 }

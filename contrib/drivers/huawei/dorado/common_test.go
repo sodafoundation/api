@@ -1,8 +1,24 @@
+// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//         http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+
 package dorado
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestEncodeName(t *testing.T) {
@@ -75,5 +91,53 @@ func TestTruncateDescription(t *testing.T) {
 	result = TruncateDescription(longDescription)
 	if len(result) > MaxDescriptionLength {
 		t.Error("TruncateDescription exceed the max name length")
+	}
+}
+
+func TestWaitForCondition(t *testing.T) {
+	var count = 0
+	err := WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(2 * time.Microsecond)
+		if count >= 5 {
+			return true, nil
+		}
+		return false, nil
+	}, 1*time.Microsecond, 100*time.Second)
+	if err != nil {
+		t.Errorf("Test WaitForCondition failed, %v", err)
+	}
+
+	count = 0
+	err = WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(1 * time.Millisecond)
+		if count >= 5 {
+			return true, nil
+		}
+		return false, nil
+	}, 4*time.Millisecond, 100*time.Millisecond)
+	if err != nil {
+		t.Errorf("Test WaitForCondition failed, %v", err)
+	}
+
+	err = WaitForCondition(func() (bool, error) {
+		return true, fmt.Errorf("test error....")
+	}, 4*time.Millisecond, 100*time.Millisecond)
+	if err == nil {
+		t.Errorf("Test WaitForCondition failed, %v", err)
+	}
+
+	count = 0
+	err = WaitForCondition(func() (bool, error) {
+		count++
+		time.Sleep(2 * time.Millisecond)
+		if count >= 5 {
+			return true, nil
+		}
+		return false, nil
+	}, 2*time.Millisecond, 5*time.Millisecond)
+	if err == nil {
+		t.Errorf("Test WaitForCondition failed, %v", err)
 	}
 }
