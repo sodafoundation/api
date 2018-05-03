@@ -46,8 +46,8 @@ export class ZoneComponent implements OnInit {
 
     ngOnInit() {
         this.zones = [
-            { "name": "DataCenter_UnitA", "region": "Primary Region", "description":"--"},
-            { "name": "DataCenter_UnitB", "region": "Secondary Region", "description":"--"}
+            { "name": "default", "region": "Region_Chengdu", "description":"Chengdu Pixian data center"},
+            { "name": "remote", "region": "Region_Chengdu", "description":"Chengdu Pixian data center"}
         ];
     }
 

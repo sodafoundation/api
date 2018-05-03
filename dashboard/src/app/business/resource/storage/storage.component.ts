@@ -47,31 +47,22 @@ export class StorageComponent implements OnInit{
     ngOnInit() {
         this.storages = [
             { 
-                "name": "OceanStor_V3_100",
-                "ip": "1.1.1.1",
+                "name": "Dorado6000V3.SiteA.78",
+                "ip": "8.46.191.46",
                 "status": "Enabled",
                 "vender": "Huawei",
-                "model": "OceanStor V3",
-                "region": "Primary Region",
-                "zone":"AZ_cd"
+                "model": "Dorado6000 V3",
+                "region": "Region_Chengdu",
+                "zone":"default"
             },
             { 
-                "name": "OceanStor_V3_100",
-                "ip": "1.1.1.1",
+                "name": "Dorado6000V3.SiteB.115",
+                "ip": "8.46.185.114",
                 "status": "Enabled",
                 "vender": "Huawei",
-                "model": "OceanStor V3",
-                "region": "Primary Region",
-                "zone":"AZ_cd"
-            },
-            { 
-                "name": "OceanStor_V3_100",
-                "ip": "1.1.1.1",
-                "status": "Enabled",
-                "vender": "Huawei",
-                "model": "OceanStor V3",
-                "region": "Primary Region",
-                "zone":"AZ_cd"
+                "model": "Dorado6000 V3",
+                "region": "Region_Chengdu",
+                "zone":"remote"
             }
         ];
     }

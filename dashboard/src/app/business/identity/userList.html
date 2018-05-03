@@ -44,7 +44,7 @@
     <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="myFormGroup" [errorMessage]="errorMessage">
         <form-item label="{{label.userNameLabel}}" [required]="true">
             <input *ngIf="!isEditUser" type="text" pInputText formControlName="form_username" />
-            <span *ngIf="isEditUser">{{ username }}</span>
+            <span *ngIf="isEditUser" class="text-only">{{ username }}</span>
         </form-item>
 
         <form-item label="{{label.descriptionLabel}}" [required]="false">

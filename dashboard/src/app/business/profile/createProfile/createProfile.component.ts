@@ -88,20 +88,28 @@ export class CreateProfileComponent implements OnInit {
 
     replicationTypeOptions = [
         {
-            label: 'Continuous',
-            value: 'continuous'
+            label: 'Mirror',
+            value: 'mirror'
         },
         {
-            label: 'Full',
-            value: 'full'
+            label: 'Snapshot',
+            value: 'snapshot'
         },
         {
-            label: 'Delta',
-            value: 'delta'
+            label: 'Clone',
+            value: 'clone'
+        },
+        {
+            label: 'Tokenized Clone',
+            value: 'tokenized'
         }
     ];
 
     replicationRGOOptions = [
+        {
+            label: 'Availability Zone',
+            value: 'availabilityZone'
+        },
         {
             label: 'Rack',
             value: 'rack'
@@ -117,10 +125,6 @@ export class CreateProfileComponent implements OnInit {
         {
             label: 'Facility',
             value: 'facility'
-        },
-        {
-            label: 'Availability Zone',
-            value: 'availabilityZone'
         },
         {
             label: 'Region',
@@ -255,7 +259,7 @@ export class CreateProfileComponent implements OnInit {
             key: 'Key',
             value: 'Value',
             maxIOPS: 'MaxIOPS',
-            MBPS: 'MBPS',
+            MBPS: 'MBWS',
             replicationLabel: {
                 type: 'Type',
                 RGO: 'RGO',

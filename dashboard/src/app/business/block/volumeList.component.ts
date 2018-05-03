@@ -20,13 +20,28 @@ import { identifierModuleUrl } from '@angular/compiler';
 export class VolumeListComponent implements OnInit {
     createSnapshotDisplay = false;
     createReplicationDisplay = false;
+    expandDisplay = false;
     modifyDisplay = false;
+
+
+    capacityOptions = [
+        {
+            label: 'GB',
+            value: 'tb'
+        },
+        {
+            label: 'TB',
+            value: 'tb'
+        }
+
+    ];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
     label = {};
     snapshotFormGroup;
     modifyFormGroup;
+    expandFormGroup;
     errorMessage = {
         "name": { required: "Name is required." },
         "description": { maxlength: "Max. length is 200." }
@@ -61,7 +76,9 @@ export class VolumeListComponent implements OnInit {
             },
             {
                 "label": "Expand",
-                command: () => { }
+                command: () => { 
+                    this.expandDisplay = true;
+                }
             },
             {
                 "label": "Delete", command: () => {

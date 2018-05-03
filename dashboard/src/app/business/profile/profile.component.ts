@@ -52,41 +52,26 @@ export class ProfileComponent implements OnInit {
         this.getProfiles();
 
         this.profiles = [
-            {
-                "id": "bbb",
-                "name": "Gold",
-                "protocol": "FC",
-                "type": "Thin",
-                "policys": [
-                    "Qos",
-                    "Snapshot",
-                    "Replication"
-                ],
-                "description": "provide gold storage service",
-                "extras": {
-                    "key1": "value1",
-                    "key2": {
-                        "subKey1": "subValue1",
-                        "subKey2": "subValue2"
-                    },
-                    "key3": "value3"
-                }
-            },
-            {
-                "id": "aaa",
-                "name": "Silver",
-                "protocol": "iSCSI",
-                "type": "Thick",
-                "policys": [
-                    "Qos",
-                    "Snapshot"
-                ],
-                "description": "provide silver storage service",
-                "extras": {
-                    "key1": "value1",
-                    "key2": "value2"
-                }
-            }
+            // {
+            //     "id": "bbb",
+            //     "name": "Gold",
+            //     "protocol": "FC",
+            //     "type": "Thin",
+            //     "policys": [
+            //         "Qos",
+            //         "Snapshot",
+            //         "Replication"
+            //     ],
+            //     "description": "provide gold storage service",
+            //     "extras": {
+            //         "key1": "value1",
+            //         "key2": {
+            //             "subKey1": "subValue1",
+            //             "subKey2": "subValue2"
+            //         },
+            //         "key3": "value3"
+            //     }
+            // }
         ];
     }
 

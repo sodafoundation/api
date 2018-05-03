@@ -56,7 +56,7 @@
                         </div>
                         <div class="ui-grid-col-3">
                             <div class="input-text-vertical-align">
-                                <input pInputText type="text" placeholder="MaxIOPS" />
+                                <input pInputText type="text" value="8000" />
                                 <span>IOPS/TB</span>
                             </div>
                         </div>
@@ -67,8 +67,8 @@
                         </div>
                         <div class="ui-grid-col-3">
                             <div class="input-text-vertical-align">
-                                <input pInputText type="text" placeholder="MBPS" />
-                                <span>MBPS/TB</span>
+                                <input pInputText type="text" value="100" />
+                                <span>MBWS/TB</span>
                             </div>
                         </div>
                     </div>
@@ -114,18 +114,18 @@
                     <div class="ui-grid-row profile-form-padding">
                         <div class="ui-grid-col-1">{{label.replicationLabel.Period}}</div>
                         <div class="ui-grid-col-3 input-text-vertical-align">
-                            <input pInputText type="text" placeholder="Period" /><span>Minutes</span>
+                            <input pInputText type="text" placeholder="Period" value="0" /><span>Minutes</span>
                         </div>
                         <div class="ui-grid-col-1"></div>
                         <div class="ui-grid-col-1">{{label.replicationLabel.RPO}}</div>
                         <div class="ui-grid-col-3">
-                            <p-dropdown [style]="{'min-width':150}" [options]="replicationRPOOptions"></p-dropdown>
+                            <p-dropdown [style]="{'min-width':150}" [options]="replicationRPOOptions" value="0"></p-dropdown>
                         </div>
                     </div>
                     <div class="ui-grid-row profile-form-padding">
                         <div class="ui-grid-col-1">{{label.replicationLabel.Bandwidth}}</div>
                         <div class="ui-grid-col-3 input-text-vertical-align">
-                            <input pInputText type="text" placeholder="Bandwidth" /><span>MBPS/TB</span>
+                            <input pInputText type="text" placeholder="Bandwidth" value="10" /><span>MBWS/TB</span>
                         </div>
                         <div class="ui-grid-col-1"></div>
                         <div class="ui-grid-col-1">{{label.replicationLabel.Consistency}}</div>

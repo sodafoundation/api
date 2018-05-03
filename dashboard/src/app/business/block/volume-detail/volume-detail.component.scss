@@ -1,6 +1,6 @@
 @import "./../../scss-variable";
 .custom-breadcrumb {
-    padding: 0.16rem 0;
+    padding: 0 0 0.30rem;
 }
 
 .custom-breadcrumb a {
@@ -12,14 +12,14 @@
 }
 
 .volume-basic-info {
-    padding: 2em;
-    border-radius: 30px;
-    // border: 1px solid red;
-    // background-color: blue;
+    background: #f3f6f7;
+    margin-bottom: .3rem;
+    padding: .2rem;
+    border-radius: 12px;
 }
 
 .volume-basic-info h3 {
-    padding: 1em 0.08rem;
+    padding: 0 .08rem .20rem;
 }
 
 .margin-left-5percentage {

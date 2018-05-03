@@ -1,7 +1,12 @@
 @import "./../scss-variable";
 .img-item-div-height {
-    height: 300px;
+    height: 258px;
     margin: 2em;
+}
+
+.statisBg{
+    background: #f3f6f7;
+    border-radius: 12px;
 }
 
 .img-item-div {
@@ -25,6 +30,7 @@
 
 .home-font-color-class {
     color: map-get($color-title, primary);
+    padding-bottom: .30rem;
 }
 
 .header-p-text {

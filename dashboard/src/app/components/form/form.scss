@@ -23,6 +23,11 @@
                 }
             }
         }
+        .form-content{
+            .text-only{
+                line-height: .32rem;
+            }
+        }
     }
     .hide .form-item .form-label{
         display: none;

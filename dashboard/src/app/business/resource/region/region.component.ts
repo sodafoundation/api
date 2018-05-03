@@ -45,8 +45,7 @@ export class RegionComponent implements OnInit{
     
     ngOnInit() {
         this.regions = [
-            { "name": "Region_Beijing", "role": "Primary Region", },
-            { "name": "Region_Chengdu", "role": "Secondary Region", }
+            { "name": "Region_Chengdu", "role": "Primary Region", }
         ];
     }
 

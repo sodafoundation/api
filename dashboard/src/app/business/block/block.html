@@ -1,20 +1,13 @@
-<div class="content-header">
-    <p>View and manage resources that have been manually created or applied for through service templates.</p>
-</div>
-<p-tabView>
+<p-tabView styleClass="ui-tabview-large">
     <p-tabPanel header="Volume">
+        <div class="content-header">
+            <p>View and manage resources that have been manually created or applied for through service templates.</p>
+        </div>
         <volume-list #volumeList></volume-list>
     </p-tabPanel>
     <p-tabPanel header="Volume Group">
-        <div class="table-toolbar">
-            <div class="left"><button pButton type="button" label="Create"></button><button pButton type="button" label="Delete"></button></div>
-            <div class="right">
-                <div class="ui-inputgroup">
-                    <input type="text" pInputText placeholder="search">
-                    <button pButton type="button" icon="fa-check"></button>
-                </div>
-                <button class="" pButton type="button" icon="fa-check"></button>
-            </div>
+        <div class="content-header">
+            <p>View and manage resources that have been manually created or applied for through service templates.</p>
         </div>
         <volume-group-list #volumeGroupList></volume-group-list>
     </p-tabPanel>

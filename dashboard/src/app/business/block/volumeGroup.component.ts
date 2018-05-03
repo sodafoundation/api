@@ -12,6 +12,7 @@ import { trigger, state, style, transition, animate} from '@angular/animations';
 })
 export class VolumeGroupComponent implements OnInit{
     volumeGroups=[];
+    selectedVolumeGroups=[];
 
     constructor(
         // private I18N: I18NService,

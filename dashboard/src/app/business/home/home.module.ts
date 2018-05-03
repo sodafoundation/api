@@ -1,4 +1,5 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HomeComponent } from './home.component';
 import { ImgItemComponent } from './imgItem.component/imgItem.component';
 
@@ -17,6 +18,7 @@ let routers = [{
   ],
   imports: [
     RouterModule.forChild(routers), ButtonModule,
+    CommonModule,
     ChartModule
   ],
   providers: []
