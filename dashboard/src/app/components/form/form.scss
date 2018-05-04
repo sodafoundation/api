@@ -1,9 +1,11 @@
 .form{
     .form-item{
         margin-bottom: 0.1rem;
+        flex-wrap: nowrap;
         .form-label{
             padding:0;
             line-height: 0.32rem;
+            flex-shrink: 0;
             &::before{
                 content: "*";
                 display:  inline;

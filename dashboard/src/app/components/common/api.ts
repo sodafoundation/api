@@ -21,6 +21,7 @@ export { InputTextareaModule } from '../inputtextarea/inputtextarea';
 export { CheckboxModule } from '../checkbox/checkbox';
 export { ConfirmDialogModule } from '../confirmDialog/confirmDialog';
 export { ButtonModule } from '../button/button';
+export { BadgeModule } from '../badge/badge';
 export { TabViewModule } from '../tabview/tabview';
 export { DataTableModule } from '../datatable/datatable';
 export { SplitButtonModule } from '../splitbutton/splitbutton';

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentChecked, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, ViewChildren } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, AfterContentChecked, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, ViewChildren } from '@angular/core';
 import { Http } from '@angular/http';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
@@ -6,6 +6,7 @@ import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem, ConfirmationService } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
+import { retry } from 'rxjs/operators';
 
 let _ = require("underscore");
 
@@ -16,12 +17,11 @@ let _ = require("underscore");
     providers: [ConfirmationService],
     animations: []
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, AfterViewChecked {
     tenantUsers = [];
     createUserDisplay = false;
     isUserDetailFinished = false;
     isEditUser = false;
-    userfilter = "";
     myFormGroup;
 
     selectedUsers = [];
@@ -34,6 +34,12 @@ export class UserListComponent implements OnInit {
 
     sortField: string;
 
+    validRule= {
+        'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){2,127}$'
+    };
+
+    newPassword = "";
+
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
@@ -41,22 +47,24 @@ export class UserListComponent implements OnInit {
         // private router: Router,
         private fb: FormBuilder
     ) { 
+        
+
         this.myFormGroup = this.fb.group({
-            "form_username": ["", Validators.required ],
+            "form_username": ["", [Validators.required, Validators.pattern(this.validRule.name)] ],
             "form_description":["", Validators.maxLength(200) ],
             "form_tenant": [""],
             "form_isModifyPsw": [""],
-            "form_psw": ["", Validators.required ],
-            "form_pswConfirm": ["", Validators.required ]
+            "form_psw": ["", [Validators.required, Validators.minLength(8), this.regPassword]],
+            "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword) ] ]
         })
     }
 
     errorMessage = {
-        "form_username": { required: "Username is required."},
+        "form_username": { required: "Username is required.", pattern:"Beginning with a letter with a length of 3-20, it can contain letters / numbers / underlines."},
         "form_description": { maxlength: "Max. length is 200."},
         "form_tenant": { required: "Tenant is required."},
-        "form_psw": { required: "Password is required." },
-        "form_pswConfirm": { required: "Password is required." }
+        "form_psw": { required: "Password is required.", minlength: "At least two kinds of letters / numbers / special characters, min. length is 8.", regPassword:"At least two kinds of letters / numbers / special characters, min. length is 8." },
+        "form_pswConfirm": { required: "Password is required.", regConfirmPassword: "Two inputted password inconsistencies." }
     };
     
     label:object = {
@@ -68,6 +76,31 @@ export class UserListComponent implements OnInit {
         tenantLabel:'Tenant'
     }
     
+    regPassword(c:AbstractControl):{[key:string]:boolean} | null {
+        let reg1 = /.*[a-zA-Z]+.*/;
+        let reg2 = /.*[0-9]+.*/;
+        let reg3 = /.*[\ \`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\\\|\[\{\}\]\;\:\'\"\,\<\.\>\/\?]+.*/;
+        if( !reg1.test(c.value) && !reg2.test(c.value) ){
+            return {'regPassword': true};
+        }
+        if( !reg1.test(c.value) && !reg3.test(c.value) ){
+            return {'regPassword': true};
+        }
+        if( !reg2.test(c.value) && !reg3.test(c.value) ){
+            return {'regPassword': true};
+        }
+        return null;
+    }
+
+    regConfirmPassword (param: any): ValidatorFn{
+        return (c: AbstractControl): {[key:string]: boolean} | null => {
+            if(c.value != this.newPassword){
+                return {'regConfirmPassword': true};
+            }
+            return null;
+        }
+    }
+
     showUserForm(user?): void{
         if(user){
             this.isEditUser = true;
@@ -81,8 +114,8 @@ export class UserListComponent implements OnInit {
             this.myFormGroup = this.fb.group({
                 "form_description":[user.description, Validators.maxLength(200) ],
                 "form_isModifyPsw": [false],
-                "form_psw": ["",  Validators.required ],
-                "form_pswConfirm": ["",  Validators.required ]
+                "form_psw": ["",  [Validators.required, Validators.minLength(8), this.regPassword] ],
+                "form_pswConfirm": ["",  [Validators.required, this.regConfirmPassword(this.newPassword) ]]
             })
             
 
@@ -93,11 +126,11 @@ export class UserListComponent implements OnInit {
             this.createUserDisplay = true;
 
             this.myFormGroup = this.fb.group({
-                "form_username": ["", Validators.required ],
+                "form_username": ["",  [Validators.required, Validators.pattern(this.validRule.name)] ],
                 "form_description":["", Validators.maxLength(200) ],
                 "form_isModifyPsw": [true],
-                "form_psw": ["", Validators.required ],
-                "form_pswConfirm": ["", Validators.required ]
+                "form_psw": ["", [Validators.required, Validators.minLength(8), this.regPassword] ],
+                "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword) ] ]
             })
         }
     }
@@ -181,6 +214,10 @@ export class UserListComponent implements OnInit {
         this.listUsers();
         
     }
+    
+    ngAfterViewChecked(){
+        this.newPassword = this.myFormGroup.value.form_psw;
+    }
 
     listUsers(){
         this.tenantUsers = [];
@@ -192,10 +229,6 @@ export class UserListComponent implements OnInit {
             "domain_id": "default"
         }
 
-        if(this.userfilter != ""){
-            request.params["name"] = this.userfilter;
-        }
-
         this.http.get("/v3/users", request).subscribe((res) => {
             res.json().users.map((item, index) => {
                 let user = {};
@@ -203,7 +236,7 @@ export class UserListComponent implements OnInit {
                 user["username"] = item.name;
                 user["userid"] = item.id;
                 user["defaultTenant"] = item.default_project_id;
-                user["description"] = item.description;
+                user["description"] = !item.description ? '--' : item.description=='' ? '--' : item.description;
                 this.tenantUsers.push(user);
             });
         });

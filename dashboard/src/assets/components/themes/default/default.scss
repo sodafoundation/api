@@ -8,6 +8,13 @@ $color-panelbg: #f3f6f7;
 $widget-border: (normal: #cfd7db, hover: #98a5bc, focus: #98a5bc, active: #98a5bc);
 $widget-bg: (normal: #fdfdfd, hover: #ffffff, focus: #ffffff, active: #f1f1f1);
 
+//Alert Colors [type, border, backgroud, text]
+$color-alert:   (success,   #3DCCA6,   #F0FBF8,    #3DCCA6 ),
+                (error,     #FF4C4C,   #FFF1F1,    #FF4C4C ),
+                (info,      #499DF2,   #F1F7FE,    #499DF2 ),
+                (warn,      #FF8833,   #FFF6EF,    #FF8833 ),
+                (describe,  #CACACA,   #FFFFFF,    #657D95);
+
 $border-radius: (small, 3px), (medium, 10px), (large, 20px); //@extend .ui-corner-bl-small;
 @each $type, $size in $border-radius{
     $radius-pos:    (tl,   $size 0 0 0 ),
@@ -186,11 +193,14 @@ textarea{
 a{
     color: map-get($color-primary, normal);
     text-decoration: none;
+    cursor: pointer;
+
     &:hover,&:active{
         color: map-get($color-primary, active);
     }
     &:disabled{
         color: $color-disabled;
+        cursor: default;
     }
 }
 
