@@ -517,13 +517,13 @@ func TestUpdateReplication(t *testing.T) {
 		ProfileId:   "3769855c-a102-11e7-b772-17b880d2f123",
 	}
 
-	result, err := fc.UpdateReplication(c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", &replication)
+	result, err := fc.UpdateReplication(c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", &replication)
 	if err != nil {
 		t.Error("Update replication failed:", err)
 	}
 
-	if result.Id != "bd5b12a8-a101-11e7-941e-d77981b584d8" {
-		t.Errorf("Expected %+v, got %+v\n", "3769855c-a102-11e7-b772-17b880d2f537", result.Id)
+	if result.Id != "c299a978-4f3e-11e8-8a5c-977218a83359" {
+		t.Errorf("Expected %+v, got %+v\n", "c299a978-4f3e-11e8-8a5c-977218a83359", result.Id)
 	}
 
 	if result.Name != "Test Name" {

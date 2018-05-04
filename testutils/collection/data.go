@@ -203,10 +203,10 @@ var (
 	SampleReplications = []model.ReplicationSpec{
 		{
 			BaseModel: &model.BaseModel{
-				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+				Id: "c299a978-4f3e-11e8-8a5c-977218a83359",
 			},
-			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d9",
-			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d0",
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			Name:              "sample-replication-01",
 			Description:       "This is a sample replication for testing",
 			PoolId:            "084bf71e-a102-11e7-88a8-e31fe6d52248",
@@ -214,10 +214,10 @@ var (
 		},
 		{
 			BaseModel: &model.BaseModel{
-				Id: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+				Id: "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
 			},
-			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d0",
-			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d1",
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			Name:              "sample-replication-02",
 			Description:       "This is a sample replication for testing",
 			PoolId:            "084bf71e-a102-11e7-88a8-e31fe6d52248",
@@ -431,16 +431,6 @@ var (
 		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	}`
 
-	ByteReplication = `{
-			"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d9",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d0",
-			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
-		}`
-
 	ByteSnapshots = `[
 		{
 			"id": "3769855c-a102-11e7-b772-17b880d2f537",
@@ -457,6 +447,37 @@ var (
 			"size": 1,
 			"status": "available",
 			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+		}
+	]`
+
+	ByteReplication = `{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-01",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`
+
+	ByteReplications = `[
+		{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-01",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+		},
+		{
+			"id": "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-02",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
 
@@ -614,20 +635,21 @@ var (
 			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
 		}`,
 	}
+
 	StringSliceReplications = []string{
 		`{
-			"id":                "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d9",
-			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d0",
+			"id":                "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name":              "sample-replication-01",
 			"description":       "This is a sample replication for testing",
 			"poolId":            "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"profileId":         "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 		`{
-			"id":                "bd5b12a8-a101-11e7-941e-d77981b584d9",
-			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d0",
-			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d1",
+			"id":                "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
+			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name":              "sample-replication-02",
 			"description":       "This is a sample replication for testing",
 			"poolId":            "084bf71e-a102-11e7-88a8-e31fe6d52248",
