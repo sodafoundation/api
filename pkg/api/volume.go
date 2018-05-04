@@ -241,7 +241,7 @@ func (this *VolumePortal) ExtendVolume() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
+	this.Ctx.Output.SetStatus(StatusAccepted)
 	this.Ctx.Output.Body(body)
 
 	// NOTE:The real volume extension process.
