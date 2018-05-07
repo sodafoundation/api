@@ -230,7 +230,7 @@ func TestCreateVolumeWithBadRequest(t *testing.T) {
 	}
 
 	json.Unmarshal(w.Body.Bytes(), &output)
-	expected = "Create a volume failed: OpenSDS does not support the parameter: id/source_volid/multiattach/snapshot_id/backup_id/imageRef/volume_type/metadata/consistencygroup_id"
+	expected = "Create a volume failed: OpenSDS does not support the parameter: id/source_volid/multiattach/snapshot_id/backup_id/imageRef/metadata/consistencygroup_id"
 
 	if expected != output.Message {
 		t.Errorf("Expected %v, actual %v", expected, output.Message)

@@ -172,14 +172,15 @@ func CreateVolumeReq(cinderReq *CreateVolumeReqSpec) (*model.VolumeSpec, error) 
 	volume.Description = cinderReq.Volume.Description
 	volume.Size = cinderReq.Volume.Size
 	volume.AvailabilityZone = cinderReq.Volume.AvailabilityZone
+	volume.ProfileId = cinderReq.Volume.VolumeType
 
 	if ("" != cinderReq.Volume.SourceVolID) || (false != cinderReq.Volume.Multiattach) ||
 		("" != cinderReq.Volume.SnapshotID) || ("" != cinderReq.Volume.BackupID) ||
-		("" != cinderReq.Volume.ImageRef) || ("" != cinderReq.Volume.VolumeType) ||
-		(0 != len(cinderReq.Volume.Metadata)) || ("" != cinderReq.Volume.ConsistencygroupID) {
+		("" != cinderReq.Volume.ImageRef) || (0 != len(cinderReq.Volume.Metadata)) ||
+		("" != cinderReq.Volume.ConsistencygroupID) {
 
 		return nil, errors.New("OpenSDS does not support the parameter: " +
-			"id/source_volid/multiattach/snapshot_id/backup_id/imageRef/volume_type/metadata/consistencygroup_id")
+			"id/source_volid/multiattach/snapshot_id/backup_id/imageRef/metadata/consistencygroup_id")
 	}
 
 	return &volume, nil
