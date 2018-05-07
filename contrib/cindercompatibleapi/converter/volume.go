@@ -201,6 +201,7 @@ func CreateVolumeResp(volume *model.VolumeSpec) *CreateVolumeRespSpec {
 	resp.Volume.Description = volume.Description
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
+	resp.Volume.VolumeType = volume.ProfileId
 
 	return &resp
 }
