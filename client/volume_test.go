@@ -592,9 +592,10 @@ func TestGetVolumeGroup(t *testing.T) {
 
 func TestListVolumeGroups(t *testing.T) {
 	expected := []*model.VolumeGroupSpec{
-		{BaseModel: &model.BaseModel{
-			Id: "3769855c-a102-11e7-b772-17b880d2f555",
-		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f555",
+			},
 			Name:        "sample-group-01",
 			Description: "This is the first sample group for testing",
 			Status:      "creating",
