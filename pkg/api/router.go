@@ -84,8 +84,8 @@ func Run(host string) {
 				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
 
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/groups", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
-				beego.NSRouter("/groups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
+				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
+				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 			// Extend Volume
 			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),

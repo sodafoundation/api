@@ -53,7 +53,7 @@ func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
 }
 
 func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
-	return generateURL("block/groups", urlType, tenantId, in...)
+	return generateURL("block/volumeGroup", urlType, tenantId, in...)
 }
 
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {
