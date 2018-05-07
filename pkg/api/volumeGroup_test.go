@@ -28,6 +28,7 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	//. "github.com/opensds/opensds/testutils/collection"
+	c "github.com/opensds/opensds/pkg/context"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
@@ -104,7 +105,7 @@ var (
 func TestGetVolumeGroup(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolumeGroup", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroup, nil)
+	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroup, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
@@ -139,7 +140,7 @@ func TestGetVolumeGroup(t *testing.T) {
 func TestGetVolumeGroupWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolumeGroup", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
+	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
@@ -260,10 +261,10 @@ func TestUpdateVolumeGroup(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 
-	mockClient.On("GetVolumeGroup", fakeVolumeGroup.Id).Return(fakeVolumeGroup, nil)
-	mockClient.On("ListVolumesByGroupId", fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
-	mockClient.On("GetVolume", fakeGroupVolumeTest.Id).Return(fakeGroupVolumeTest, nil)
-	mockClient.On("GetDockByPoolId", fakeVolumeGroup.PoolId).Return(nil, errors.New("db error"))
+	mockClient.On("GetVolumeGroup", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeVolumeGroup, nil)
+	mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), fakeGroupVolumeTest.Id).Return(fakeGroupVolumeTest, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fakeVolumeGroup.PoolId).Return(nil, errors.New("db error"))
 	var vgUpdate = &model.VolumeGroupSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "fakeGroupUpdate",
@@ -305,9 +306,9 @@ func TestDeleteVolumeGroup(t *testing.T) {
 		},
 	}
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetVolumeGroup", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroupDelete, nil)
-	mockClient.On("ListVolumesByGroupId", fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
-	mockClient.On("ListSnapshotsByVolumeId", fakeGroupVolumes[0].Id).Return(Snapshots, nil)
+	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroupDelete, nil)
+	mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
+	mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), fakeGroupVolumes[0].Id).Return(Snapshots, nil)
 
 	db.C = mockClient
 

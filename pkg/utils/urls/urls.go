@@ -52,10 +52,13 @@ func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("block/snapshots", urlType, tenantId, in...)
 }
 
+func GenerateReplicationURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/replications", urlType, tenantId, in...)
+}
+
 func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("block/volumeGroup", urlType, tenantId, in...)
 }
-
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {
 	// If project id is not specified, ignore it.
 	if tenantId == "" {

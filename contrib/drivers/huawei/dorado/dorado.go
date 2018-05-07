@@ -24,37 +24,16 @@ import (
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/satori/go.uuid"
+	"os"
 )
-
-const (
-	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
-	defaultAZ       = "default"
-)
-
-const (
-	KLunId  = "huaweiLunId"
-	KSnapId = "huaweiSnapId"
-)
-
-type AuthOptions struct {
-	Username  string `yaml:"username,omitempty"`
-	Password  string `yaml:"password,omitempty"`
-	Endpoints string `yaml:"endpoints,omitempty"`
-	Insecure  bool   `yaml:"insecure,omitempty"`
-}
-
-type DoradoConfig struct {
-	AuthOptions `yaml:"authOptions"`
-	Pool        map[string]PoolProperties `yaml:"pool,flow"`
-	TargetIp    string                    `yaml:"targetIp,omitempty"`
-}
 
 type Driver struct {
 	conf   *DoradoConfig
 	client *DoradoClient
 }
 
-func (d *Driver) Setup() error {
+func (d *Driver) Setup() (err error) {
 	// Read huawei dorado config file
 	conf := &DoradoConfig{}
 	d.conf = conf
@@ -64,9 +43,7 @@ func (d *Driver) Setup() error {
 		path = defaultConfPath
 	}
 	Parse(conf, path)
-	dp := strings.Split(conf.Endpoints, ",")
-	client, err := NewClient(conf.Username, conf.Password, dp, conf.Insecure)
-	d.client = client
+	d.client, err = NewClient(&d.conf.AuthOptions)
 	if err != nil {
 		log.Errorf("Get new client failed, %v", err)
 		return err
@@ -111,7 +88,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: lun.Id,
+			Id: volID,
 		},
 		Size:             Sector2Gb(lun.Capacity),
 		Description:      lun.Description,
@@ -312,10 +289,11 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := c.Pool[p.Name]; !ok {
 			continue
 		}
-
+		host, _ := os.Hostname()
+		name := fmt.Sprintf("%s:%s:%s", host, d.conf.Endpoints, p.Id)
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: p.Id,
+				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
 			Name:             p.Name,
 			TotalCapacity:    Sector2Gb(p.UserTotalCapacity),

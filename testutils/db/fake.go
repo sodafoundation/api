@@ -313,6 +313,36 @@ func (fc *FakeDbClient) DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) 
 	return nil
 }
 
+func (fc *FakeDbClient) CreateReplication(ctx *c.Context, replication *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
+func (fc *FakeDbClient) GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
+func (fc *FakeDbClient) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error) {
+	var replications = []*model.ReplicationSpec{
+		&SampleReplications[0], &SampleReplications[1],
+	}
+	return replications, nil
+}
+
+func (fc *FakeDbClient) ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error) {
+	var replications = []*model.ReplicationSpec{
+		&SampleReplications[0], &SampleReplications[1],
+	}
+	return replications, nil
+}
+
+func (fc *FakeDbClient) DeleteReplication(ctx *c.Context, replicationId string) error {
+	return nil
+}
+
+func (fc *FakeDbClient) UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	return nil, nil
+}
+
 // CreateVolumeGroup
 func (fc *FakeDbClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	return nil, nil

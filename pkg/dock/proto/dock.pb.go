@@ -16,6 +16,12 @@ It has these top-level messages:
 	CreateAttachmentOpts
 	DeleteAttachmentOpts
 	HostInfo
+	VolumeData
+	CreateReplicationOpts
+	DeleteReplicationOpts
+	EnableReplicationOpts
+	DisableReplicationOpts
+	FailoverReplicationOpts
 	CreateVolumeGroupOpts
 	UpdateVolumeGroupOpts
 	DeleteVolumeGroupOpts
@@ -72,6 +78,10 @@ type CreateVolumeOpts struct {
 	DriverName string `protobuf:"bytes,11,opt,name=driverName" json:"driverName,omitempty"`
 	// The Context
 	Context string `protobuf:"bytes,12,opt,name=context" json:"context,omitempty"`
+	// The replication driver data
+	ReplicationDriverData map[string]string `protobuf:"bytes,13,rep,name=replicationDriverData" json:"replicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The uuid of replication
+	ReplicationId string `protobuf:"bytes,14,opt,name=replicationId" json:"replicationId,omitempty"`
 }
 
 func (m *CreateVolumeOpts) Reset()                    { *m = CreateVolumeOpts{} }
@@ -159,6 +169,20 @@ func (m *CreateVolumeOpts) GetDriverName() string {
 func (m *CreateVolumeOpts) GetContext() string {
 	if m != nil {
 		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateVolumeOpts) GetReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.ReplicationDriverData
+	}
+	return nil
+}
+
+func (m *CreateVolumeOpts) GetReplicationId() string {
+	if m != nil {
+		return m.ReplicationId
 	}
 	return ""
 }
@@ -663,6 +687,809 @@ func (m *HostInfo) GetInitiator() string {
 	return ""
 }
 
+type VolumeData struct {
+	Data map[string]string `protobuf:"bytes,1,rep,name=data" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *VolumeData) Reset()                    { *m = VolumeData{} }
+func (m *VolumeData) String() string            { return proto1.CompactTextString(m) }
+func (*VolumeData) ProtoMessage()               {}
+func (*VolumeData) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *VolumeData) GetData() map[string]string {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+// CreateReplicationOpts is a structure which indicates all required properties
+// for creating a replication.
+// NOTE: Need to figure out how to handle more than 2 sites.
+type CreateReplicationOpts struct {
+	// The uuid of the replication, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the replication, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of the replication, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The uuid of the primary volume. This field is required.
+	PrimaryVolumeId string `protobuf:"bytes,4,opt,name=primaryVolumeId" json:"primaryVolumeId,omitempty"`
+	// The uuid of the secondary volume. This field is required.
+	SecondaryVolumeId string `protobuf:"bytes,5,opt,name=secondaryVolumeId" json:"secondaryVolumeId,omitempty"`
+	// The dock infomation on which the request will be executed
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the primary replication, optional.
+	PrimaryReplicationDriverData map[string]string `protobuf:"bytes,11,rep,name=primaryReplicationDriverData" json:"primaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The metadata of the seondary replication, optional.
+	SecondaryReplicationDriverData map[string]string `protobuf:"bytes,12,rep,name=secondaryReplicationDriverData" json:"secondaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The dock id.
+	DockId string `protobuf:"bytes,13,opt,name=dockId" json:"dockId,omitempty"`
+	// The replication driver type.
+	DriverName string `protobuf:"bytes,14,opt,name=driverName" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,15,opt,name=context" json:"context,omitempty"`
+	// Whether is primary replication
+	IsPrimary bool `protobuf:"varint,16,opt,name=isPrimary" json:"isPrimary,omitempty"`
+	// The replication metadata
+	Metadata map[string]string `protobuf:"bytes,17,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The volume data list
+	VolumeDataList []*VolumeData `protobuf:"bytes,18,rep,name=volumeDataList" json:"volumeDataList,omitempty"`
+	// the replication mode sync/async
+	ReplicationMode string `protobuf:"bytes,19,opt,name=replicationMode" json:"replicationMode,omitempty"`
+	// 0 means sync replication.
+	ReplicationPeriod int64 `protobuf:"varint,20,opt,name=ReplicationPeriod" json:"ReplicationPeriod,omitempty"`
+	// replication bandwidth
+	ReplicationBandwidth int64 `protobuf:"varint,21,opt,name=ReplicationBandwidth" json:"ReplicationBandwidth,omitempty"`
+}
+
+func (m *CreateReplicationOpts) Reset()                    { *m = CreateReplicationOpts{} }
+func (m *CreateReplicationOpts) String() string            { return proto1.CompactTextString(m) }
+func (*CreateReplicationOpts) ProtoMessage()               {}
+func (*CreateReplicationOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+
+func (m *CreateReplicationOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetPrimaryVolumeId() string {
+	if m != nil {
+		return m.PrimaryVolumeId
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetSecondaryVolumeId() string {
+	if m != nil {
+		return m.SecondaryVolumeId
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetPrimaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.PrimaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *CreateReplicationOpts) GetSecondaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.SecondaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *CreateReplicationOpts) GetDockId() string {
+	if m != nil {
+		return m.DockId
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetIsPrimary() bool {
+	if m != nil {
+		return m.IsPrimary
+	}
+	return false
+}
+
+func (m *CreateReplicationOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *CreateReplicationOpts) GetVolumeDataList() []*VolumeData {
+	if m != nil {
+		return m.VolumeDataList
+	}
+	return nil
+}
+
+func (m *CreateReplicationOpts) GetReplicationMode() string {
+	if m != nil {
+		return m.ReplicationMode
+	}
+	return ""
+}
+
+func (m *CreateReplicationOpts) GetReplicationPeriod() int64 {
+	if m != nil {
+		return m.ReplicationPeriod
+	}
+	return 0
+}
+
+func (m *CreateReplicationOpts) GetReplicationBandwidth() int64 {
+	if m != nil {
+		return m.ReplicationBandwidth
+	}
+	return 0
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+// for deleting a replication.
+// NOTE: Need to figure out how to handle more than 2 sites.
+type DeleteReplicationOpts struct {
+	// The uuid of the replication, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the replication, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of the replication, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The uuid of the primary volume. This field is required.
+	PrimaryVolumeId string `protobuf:"bytes,4,opt,name=primaryVolumeId" json:"primaryVolumeId,omitempty"`
+	// The uuid of the secondary volume. This field is required.
+	SecondaryVolumeId string `protobuf:"bytes,5,opt,name=secondaryVolumeId" json:"secondaryVolumeId,omitempty"`
+	// The dock infomation on which the request will be executed
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the primary replication, optional.
+	PrimaryReplicationDriverData map[string]string `protobuf:"bytes,11,rep,name=primaryReplicationDriverData" json:"primaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The metadata of the seondary replication, optional.
+	SecondaryReplicationDriverData map[string]string `protobuf:"bytes,12,rep,name=secondaryReplicationDriverData" json:"secondaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The dock id.
+	DockId string `protobuf:"bytes,13,opt,name=dockId" json:"dockId,omitempty"`
+	// The replication driver type.
+	DriverName string `protobuf:"bytes,14,opt,name=driverName" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,15,opt,name=context" json:"context,omitempty"`
+	// The replication metadata
+	Metadata map[string]string `protobuf:"bytes,16,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *DeleteReplicationOpts) Reset()                    { *m = DeleteReplicationOpts{} }
+func (m *DeleteReplicationOpts) String() string            { return proto1.CompactTextString(m) }
+func (*DeleteReplicationOpts) ProtoMessage()               {}
+func (*DeleteReplicationOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+
+func (m *DeleteReplicationOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetPrimaryVolumeId() string {
+	if m != nil {
+		return m.PrimaryVolumeId
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetSecondaryVolumeId() string {
+	if m != nil {
+		return m.SecondaryVolumeId
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetPrimaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.PrimaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *DeleteReplicationOpts) GetSecondaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.SecondaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *DeleteReplicationOpts) GetDockId() string {
+	if m != nil {
+		return m.DockId
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DeleteReplicationOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+type EnableReplicationOpts struct {
+	// The uuid of the replication, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the replication, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of the replication, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The uuid of the primary volume. This field is required.
+	PrimaryVolumeId string `protobuf:"bytes,4,opt,name=primaryVolumeId" json:"primaryVolumeId,omitempty"`
+	// The uuid of the secondary volume. This field is required.
+	SecondaryVolumeId string `protobuf:"bytes,5,opt,name=secondaryVolumeId" json:"secondaryVolumeId,omitempty"`
+	// The dock infomation on which the request will be executed
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the primary replication, optional.
+	PrimaryReplicationDriverData map[string]string `protobuf:"bytes,11,rep,name=primaryReplicationDriverData" json:"primaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The metadata of the seondary replication, optional.
+	SecondaryReplicationDriverData map[string]string `protobuf:"bytes,12,rep,name=secondaryReplicationDriverData" json:"secondaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The dock id.
+	DockId string `protobuf:"bytes,13,opt,name=dockId" json:"dockId,omitempty"`
+	// The replication driver type.
+	DriverName string `protobuf:"bytes,14,opt,name=driverName" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,15,opt,name=context" json:"context,omitempty"`
+	// The replication metadata
+	Metadata map[string]string `protobuf:"bytes,16,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *EnableReplicationOpts) Reset()                    { *m = EnableReplicationOpts{} }
+func (m *EnableReplicationOpts) String() string            { return proto1.CompactTextString(m) }
+func (*EnableReplicationOpts) ProtoMessage()               {}
+func (*EnableReplicationOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+
+func (m *EnableReplicationOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetPrimaryVolumeId() string {
+	if m != nil {
+		return m.PrimaryVolumeId
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetSecondaryVolumeId() string {
+	if m != nil {
+		return m.SecondaryVolumeId
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetPrimaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.PrimaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *EnableReplicationOpts) GetSecondaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.SecondaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *EnableReplicationOpts) GetDockId() string {
+	if m != nil {
+		return m.DockId
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *EnableReplicationOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+type DisableReplicationOpts struct {
+	// The uuid of the replication, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the replication, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of the replication, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The uuid of the primary volume. This field is required.
+	PrimaryVolumeId string `protobuf:"bytes,4,opt,name=primaryVolumeId" json:"primaryVolumeId,omitempty"`
+	// The uuid of the secondary volume. This field is required.
+	SecondaryVolumeId string `protobuf:"bytes,5,opt,name=secondaryVolumeId" json:"secondaryVolumeId,omitempty"`
+	// The dock infomation on which the request will be executed
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the primary replication, optional.
+	PrimaryReplicationDriverData map[string]string `protobuf:"bytes,11,rep,name=primaryReplicationDriverData" json:"primaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The metadata of the seondary replication, optional.
+	SecondaryReplicationDriverData map[string]string `protobuf:"bytes,12,rep,name=secondaryReplicationDriverData" json:"secondaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The dock id.
+	DockId string `protobuf:"bytes,13,opt,name=dockId" json:"dockId,omitempty"`
+	// The replication driver type.
+	DriverName string `protobuf:"bytes,14,opt,name=driverName" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,15,opt,name=context" json:"context,omitempty"`
+	// The replication metadata
+	Metadata map[string]string `protobuf:"bytes,16,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *DisableReplicationOpts) Reset()                    { *m = DisableReplicationOpts{} }
+func (m *DisableReplicationOpts) String() string            { return proto1.CompactTextString(m) }
+func (*DisableReplicationOpts) ProtoMessage()               {}
+func (*DisableReplicationOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+
+func (m *DisableReplicationOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetPrimaryVolumeId() string {
+	if m != nil {
+		return m.PrimaryVolumeId
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetSecondaryVolumeId() string {
+	if m != nil {
+		return m.SecondaryVolumeId
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetPrimaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.PrimaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *DisableReplicationOpts) GetSecondaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.SecondaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *DisableReplicationOpts) GetDockId() string {
+	if m != nil {
+		return m.DockId
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DisableReplicationOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+type FailoverReplicationOpts struct {
+	// The uuid of the replication, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	// The name of the replication, optional.
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// The description of the replication, optional.
+	Description string `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
+	// The uuid of the primary volume. This field is required.
+	PrimaryVolumeId string `protobuf:"bytes,4,opt,name=primaryVolumeId" json:"primaryVolumeId,omitempty"`
+	// The uuid of the secondary volume. This field is required.
+	SecondaryVolumeId string `protobuf:"bytes,5,opt,name=secondaryVolumeId" json:"secondaryVolumeId,omitempty"`
+	// The dock infomation on which the request will be executed
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone" json:"availabilityZone,omitempty"`
+	// The service level that volume belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId" json:"profileId,omitempty"`
+	// The uuid of the pool on which volume will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId" json:"poolId,omitempty"`
+	// The name of the pool on which volume will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName" json:"poolName,omitempty"`
+	// The metadata of the primary replication, optional.
+	PrimaryReplicationDriverData map[string]string `protobuf:"bytes,11,rep,name=primaryReplicationDriverData" json:"primaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The metadata of the seondary replication, optional.
+	SecondaryReplicationDriverData map[string]string `protobuf:"bytes,12,rep,name=secondaryReplicationDriverData" json:"secondaryReplicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// The dock id.
+	DockId string `protobuf:"bytes,13,opt,name=dockId" json:"dockId,omitempty"`
+	// The replication driver type.
+	DriverName string `protobuf:"bytes,14,opt,name=driverName" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,15,opt,name=context" json:"context,omitempty"`
+	// Allow attached volume
+	AllowAttachedVolume bool `protobuf:"varint,16,opt,name=allowAttachedVolume" json:"allowAttachedVolume,omitempty"`
+	// The secondary backend id.
+	SecondaryBackendId string `protobuf:"bytes,17,opt,name=secondaryBackendId" json:"secondaryBackendId,omitempty"`
+	// The replication metadata
+	Metadata map[string]string `protobuf:"bytes,18,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+}
+
+func (m *FailoverReplicationOpts) Reset()                    { *m = FailoverReplicationOpts{} }
+func (m *FailoverReplicationOpts) String() string            { return proto1.CompactTextString(m) }
+func (*FailoverReplicationOpts) ProtoMessage()               {}
+func (*FailoverReplicationOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+
+func (m *FailoverReplicationOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetPrimaryVolumeId() string {
+	if m != nil {
+		return m.PrimaryVolumeId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetSecondaryVolumeId() string {
+	if m != nil {
+		return m.SecondaryVolumeId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetPrimaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.PrimaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *FailoverReplicationOpts) GetSecondaryReplicationDriverData() map[string]string {
+	if m != nil {
+		return m.SecondaryReplicationDriverData
+	}
+	return nil
+}
+
+func (m *FailoverReplicationOpts) GetDockId() string {
+	if m != nil {
+		return m.DockId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetAllowAttachedVolume() bool {
+	if m != nil {
+		return m.AllowAttachedVolume
+	}
+	return false
+}
+
+func (m *FailoverReplicationOpts) GetSecondaryBackendId() string {
+	if m != nil {
+		return m.SecondaryBackendId
+	}
+	return ""
+}
+
+func (m *FailoverReplicationOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
 // CreateVolumeGroupOpts is a structure which indicates all required
 // properties for creating a volume group.
 type CreateVolumeGroupOpts struct {
@@ -689,7 +1516,7 @@ type CreateVolumeGroupOpts struct {
 func (m *CreateVolumeGroupOpts) Reset()                    { *m = CreateVolumeGroupOpts{} }
 func (m *CreateVolumeGroupOpts) String() string            { return proto1.CompactTextString(m) }
 func (*CreateVolumeGroupOpts) ProtoMessage()               {}
-func (*CreateVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*CreateVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *CreateVolumeGroupOpts) GetId() string {
 	if m != nil {
@@ -770,7 +1597,7 @@ type UpdateVolumeGroupOpts struct {
 func (m *UpdateVolumeGroupOpts) Reset()                    { *m = UpdateVolumeGroupOpts{} }
 func (m *UpdateVolumeGroupOpts) String() string            { return proto1.CompactTextString(m) }
 func (*UpdateVolumeGroupOpts) ProtoMessage()               {}
-func (*UpdateVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
+func (*UpdateVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *UpdateVolumeGroupOpts) GetId() string {
 	if m != nil {
@@ -819,7 +1646,7 @@ type DeleteVolumeGroupOpts struct {
 func (m *DeleteVolumeGroupOpts) Reset()                    { *m = DeleteVolumeGroupOpts{} }
 func (m *DeleteVolumeGroupOpts) String() string            { return proto1.CompactTextString(m) }
 func (*DeleteVolumeGroupOpts) ProtoMessage()               {}
-func (*DeleteVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
+func (*DeleteVolumeGroupOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
 func (m *DeleteVolumeGroupOpts) GetId() string {
 	if m != nil {
@@ -858,7 +1685,7 @@ type AttachVolumeOpts struct {
 func (m *AttachVolumeOpts) Reset()                    { *m = AttachVolumeOpts{} }
 func (m *AttachVolumeOpts) String() string            { return proto1.CompactTextString(m) }
 func (*AttachVolumeOpts) ProtoMessage()               {}
-func (*AttachVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*AttachVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
 func (m *AttachVolumeOpts) GetAccessProtocol() string {
 	if m != nil {
@@ -904,7 +1731,7 @@ type DetachVolumeOpts struct {
 func (m *DetachVolumeOpts) Reset()                    { *m = DetachVolumeOpts{} }
 func (m *DetachVolumeOpts) String() string            { return proto1.CompactTextString(m) }
 func (*DetachVolumeOpts) ProtoMessage()               {}
-func (*DetachVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*DetachVolumeOpts) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *DetachVolumeOpts) GetAccessProtocol() string {
 	if m != nil {
@@ -948,7 +1775,7 @@ type GenericResponse struct {
 func (m *GenericResponse) Reset()                    { *m = GenericResponse{} }
 func (m *GenericResponse) String() string            { return proto1.CompactTextString(m) }
 func (*GenericResponse) ProtoMessage()               {}
-func (*GenericResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*GenericResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
 type isGenericResponse_Reply interface {
 	isGenericResponse_Reply()
@@ -1066,7 +1893,7 @@ type GenericResponse_Result struct {
 func (m *GenericResponse_Result) Reset()                    { *m = GenericResponse_Result{} }
 func (m *GenericResponse_Result) String() string            { return proto1.CompactTextString(m) }
 func (*GenericResponse_Result) ProtoMessage()               {}
-func (*GenericResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13, 0} }
+func (*GenericResponse_Result) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19, 0} }
 
 func (m *GenericResponse_Result) GetMessage() string {
 	if m != nil {
@@ -1083,7 +1910,7 @@ type GenericResponse_Error struct {
 func (m *GenericResponse_Error) Reset()                    { *m = GenericResponse_Error{} }
 func (m *GenericResponse_Error) String() string            { return proto1.CompactTextString(m) }
 func (*GenericResponse_Error) ProtoMessage()               {}
-func (*GenericResponse_Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13, 1} }
+func (*GenericResponse_Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19, 1} }
 
 func (m *GenericResponse_Error) GetCode() string {
 	if m != nil {
@@ -1108,6 +1935,12 @@ func init() {
 	proto1.RegisterType((*CreateAttachmentOpts)(nil), "proto.CreateAttachmentOpts")
 	proto1.RegisterType((*DeleteAttachmentOpts)(nil), "proto.DeleteAttachmentOpts")
 	proto1.RegisterType((*HostInfo)(nil), "proto.HostInfo")
+	proto1.RegisterType((*VolumeData)(nil), "proto.VolumeData")
+	proto1.RegisterType((*CreateReplicationOpts)(nil), "proto.CreateReplicationOpts")
+	proto1.RegisterType((*DeleteReplicationOpts)(nil), "proto.DeleteReplicationOpts")
+	proto1.RegisterType((*EnableReplicationOpts)(nil), "proto.EnableReplicationOpts")
+	proto1.RegisterType((*DisableReplicationOpts)(nil), "proto.DisableReplicationOpts")
+	proto1.RegisterType((*FailoverReplicationOpts)(nil), "proto.FailoverReplicationOpts")
 	proto1.RegisterType((*CreateVolumeGroupOpts)(nil), "proto.CreateVolumeGroupOpts")
 	proto1.RegisterType((*UpdateVolumeGroupOpts)(nil), "proto.UpdateVolumeGroupOpts")
 	proto1.RegisterType((*DeleteVolumeGroupOpts)(nil), "proto.DeleteVolumeGroupOpts")
@@ -1143,6 +1976,16 @@ type ProvisionDockClient interface {
 	CreateAttachment(ctx context.Context, in *CreateAttachmentOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete a volume attachment
 	DeleteAttachment(ctx context.Context, in *DeleteAttachmentOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a replication
+	CreateReplication(ctx context.Context, in *CreateReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a replication
+	DeleteReplication(ctx context.Context, in *DeleteReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Enable a replication
+	EnableReplication(ctx context.Context, in *EnableReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Disable a replication
+	DisableReplication(ctx context.Context, in *DisableReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Failover a replication
+	FailoverReplication(ctx context.Context, in *FailoverReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Create a volume group
 	CreateVolumeGroup(ctx context.Context, in *CreateVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Update volume group
@@ -1222,6 +2065,51 @@ func (c *provisionDockClient) DeleteAttachment(ctx context.Context, in *DeleteAt
 	return out, nil
 }
 
+func (c *provisionDockClient) CreateReplication(ctx context.Context, in *CreateReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.ProvisionDock/CreateReplication", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *provisionDockClient) DeleteReplication(ctx context.Context, in *DeleteReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.ProvisionDock/DeleteReplication", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *provisionDockClient) EnableReplication(ctx context.Context, in *EnableReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.ProvisionDock/EnableReplication", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *provisionDockClient) DisableReplication(ctx context.Context, in *DisableReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.ProvisionDock/DisableReplication", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *provisionDockClient) FailoverReplication(ctx context.Context, in *FailoverReplicationOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := grpc.Invoke(ctx, "/proto.ProvisionDock/FailoverReplication", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *provisionDockClient) CreateVolumeGroup(ctx context.Context, in *CreateVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
 	err := grpc.Invoke(ctx, "/proto.ProvisionDock/CreateVolumeGroup", in, out, c.cc, opts...)
@@ -1266,6 +2154,16 @@ type ProvisionDockServer interface {
 	CreateAttachment(context.Context, *CreateAttachmentOpts) (*GenericResponse, error)
 	// Delete a volume attachment
 	DeleteAttachment(context.Context, *DeleteAttachmentOpts) (*GenericResponse, error)
+	// Create a replication
+	CreateReplication(context.Context, *CreateReplicationOpts) (*GenericResponse, error)
+	// Delete a replication
+	DeleteReplication(context.Context, *DeleteReplicationOpts) (*GenericResponse, error)
+	// Enable a replication
+	EnableReplication(context.Context, *EnableReplicationOpts) (*GenericResponse, error)
+	// Disable a replication
+	DisableReplication(context.Context, *DisableReplicationOpts) (*GenericResponse, error)
+	// Failover a replication
+	FailoverReplication(context.Context, *FailoverReplicationOpts) (*GenericResponse, error)
 	// Create a volume group
 	CreateVolumeGroup(context.Context, *CreateVolumeGroupOpts) (*GenericResponse, error)
 	// Update volume group
@@ -1404,6 +2302,96 @@ func _ProvisionDock_DeleteAttachment_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProvisionDock_CreateReplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateReplicationOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).CreateReplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/CreateReplication",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).CreateReplication(ctx, req.(*CreateReplicationOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProvisionDock_DeleteReplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteReplicationOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).DeleteReplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/DeleteReplication",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).DeleteReplication(ctx, req.(*DeleteReplicationOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProvisionDock_EnableReplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnableReplicationOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).EnableReplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/EnableReplication",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).EnableReplication(ctx, req.(*EnableReplicationOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProvisionDock_DisableReplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableReplicationOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).DisableReplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/DisableReplication",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).DisableReplication(ctx, req.(*DisableReplicationOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProvisionDock_FailoverReplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FailoverReplicationOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).FailoverReplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/FailoverReplication",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).FailoverReplication(ctx, req.(*FailoverReplicationOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProvisionDock_CreateVolumeGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateVolumeGroupOpts)
 	if err := dec(in); err != nil {
@@ -1489,6 +2477,26 @@ var _ProvisionDock_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAttachment",
 			Handler:    _ProvisionDock_DeleteAttachment_Handler,
+		},
+		{
+			MethodName: "CreateReplication",
+			Handler:    _ProvisionDock_CreateReplication_Handler,
+		},
+		{
+			MethodName: "DeleteReplication",
+			Handler:    _ProvisionDock_DeleteReplication_Handler,
+		},
+		{
+			MethodName: "EnableReplication",
+			Handler:    _ProvisionDock_EnableReplication_Handler,
+		},
+		{
+			MethodName: "DisableReplication",
+			Handler:    _ProvisionDock_DisableReplication_Handler,
+		},
+		{
+			MethodName: "FailoverReplication",
+			Handler:    _ProvisionDock_FailoverReplication_Handler,
 		},
 		{
 			MethodName: "CreateVolumeGroup",
@@ -1611,70 +2619,107 @@ var _AttachDock_serviceDesc = grpc.ServiceDesc{
 func init() { proto1.RegisterFile("dock.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 1039 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x58, 0x4d, 0x6f, 0xe3, 0x44,
-	0x18, 0xae, 0xed, 0x38, 0x71, 0xde, 0x6c, 0x77, 0xc3, 0xa8, 0x5d, 0xac, 0x50, 0x96, 0x2a, 0x02,
-	0x54, 0x40, 0xf4, 0x10, 0x90, 0x40, 0x20, 0x0e, 0x85, 0xad, 0xb6, 0x11, 0x5f, 0xc5, 0x7c, 0x1c,
-	0xb8, 0xcd, 0xda, 0x53, 0x6a, 0xd5, 0xf1, 0x58, 0xe3, 0x49, 0xb4, 0xe1, 0xc4, 0x91, 0x33, 0xff,
-	0x80, 0x13, 0x27, 0xfe, 0x05, 0xbf, 0x80, 0x33, 0x3f, 0x81, 0x0b, 0x67, 0xf6, 0x80, 0x66, 0xfc,
-	0x91, 0xb1, 0x63, 0x4f, 0xb2, 0xd0, 0x85, 0x1e, 0x38, 0x75, 0xe6, 0xf5, 0xeb, 0x67, 0xfc, 0x3c,
-	0xf3, 0x7e, 0xa5, 0x00, 0x01, 0xf5, 0xaf, 0x8e, 0x13, 0x46, 0x39, 0x45, 0xb6, 0xfc, 0x33, 0xfe,
-	0xc5, 0x82, 0xe1, 0x07, 0x8c, 0x60, 0x4e, 0xbe, 0xa2, 0xd1, 0x7c, 0x46, 0x3e, 0x4d, 0x78, 0x8a,
-	0x6e, 0x83, 0x19, 0x06, 0xae, 0x71, 0x68, 0x1c, 0xf5, 0x3d, 0x33, 0x0c, 0x10, 0x82, 0x4e, 0x8c,
-	0x67, 0xc4, 0x35, 0xa5, 0x45, 0xae, 0x85, 0x2d, 0x0d, 0xbf, 0x25, 0xae, 0x75, 0x68, 0x1c, 0x59,
-	0x9e, 0x5c, 0xa3, 0x43, 0x18, 0x04, 0x24, 0xf5, 0x59, 0x98, 0xf0, 0x90, 0xc6, 0x6e, 0x47, 0xba,
-	0xab, 0x26, 0x74, 0x0f, 0x20, 0x8d, 0x71, 0x92, 0x5e, 0x52, 0x3e, 0x0d, 0x5c, 0x5b, 0x3a, 0x28,
-	0x16, 0xf4, 0x2a, 0x0c, 0xf1, 0x02, 0x87, 0x11, 0x7e, 0x18, 0x46, 0x21, 0x5f, 0x7e, 0x4d, 0x63,
-	0xe2, 0x76, 0xa5, 0xd7, 0x9a, 0x1d, 0x1d, 0x40, 0x3f, 0x61, 0xf4, 0x22, 0x8c, 0xc8, 0x34, 0x70,
-	0x7b, 0xd2, 0x69, 0x65, 0x40, 0x77, 0xa1, 0x9b, 0x50, 0x1a, 0x4d, 0x03, 0xd7, 0x91, 0x8f, 0xf2,
-	0x1d, 0x1a, 0x81, 0x23, 0x56, 0x9f, 0x08, 0x3e, 0x7d, 0xf9, 0xa4, 0xdc, 0xa3, 0x13, 0x70, 0x66,
-	0x84, 0xe3, 0x00, 0x73, 0xec, 0xc2, 0xa1, 0x75, 0x34, 0x98, 0xbc, 0x94, 0xa9, 0x75, 0x5c, 0x97,
-	0xe8, 0xf8, 0xe3, 0xdc, 0xef, 0x34, 0xe6, 0x6c, 0xe9, 0x95, 0xaf, 0x09, 0x82, 0x01, 0x0b, 0x17,
-	0x84, 0xc9, 0x03, 0x06, 0x19, 0xc1, 0x95, 0x05, 0xb9, 0xd0, 0xf3, 0x69, 0xcc, 0xc9, 0x23, 0xee,
-	0xde, 0x92, 0x0f, 0x8b, 0xed, 0xe8, 0x5d, 0xd8, 0xad, 0x80, 0xa2, 0x21, 0x58, 0x57, 0x64, 0x99,
-	0x5f, 0x83, 0x58, 0xa2, 0x3d, 0xb0, 0x17, 0x38, 0x9a, 0x17, 0x17, 0x91, 0x6d, 0xde, 0x31, 0xdf,
-	0x36, 0xc6, 0xbf, 0x19, 0x30, 0xbc, 0x4f, 0x22, 0xa2, 0xbd, 0x46, 0x95, 0x9e, 0x59, 0xa1, 0x57,
-	0x7f, 0x75, 0x4b, 0x7a, 0x96, 0x8e, 0x5e, 0xe7, 0x1a, 0xe9, 0x89, 0x28, 0x3d, 0x7d, 0xc4, 0x49,
-	0x1c, 0xfc, 0x1f, 0xa5, 0x9a, 0x28, 0xad, 0x4b, 0x74, 0xd3, 0xa2, 0xf4, 0x57, 0x13, 0x5c, 0x35,
-	0x93, 0x3e, 0xcf, 0x25, 0x7d, 0xca, 0xd7, 0x39, 0x02, 0x67, 0x21, 0xcf, 0x2b, 0x2f, 0xb3, 0xdc,
-	0xa3, 0xa9, 0x22, 0x66, 0x57, 0x8a, 0xf9, 0x7a, 0x43, 0xca, 0xab, 0x1f, 0xba, 0xa5, 0xa8, 0x3d,
-	0x9d, 0xa8, 0xce, 0x35, 0x8a, 0xfa, 0xbd, 0x09, 0xae, 0x9a, 0xbf, 0x5a, 0x51, 0x55, 0x29, 0x4c,
-	0x8d, 0x14, 0x56, 0x45, 0x8a, 0x36, 0xf8, 0x2d, 0xa5, 0xe8, 0xe8, 0xa4, 0xb0, 0xaf, 0x51, 0x8a,
-	0x3f, 0x4c, 0xd8, 0xcb, 0xae, 0xed, 0x84, 0x73, 0xec, 0x5f, 0xce, 0x48, 0xfc, 0xe4, 0x32, 0xbc,
-	0x08, 0xbb, 0x01, 0xfd, 0x88, 0xfa, 0x38, 0xca, 0x40, 0x64, 0xb0, 0x39, 0x5e, 0xd5, 0x28, 0xd2,
-	0x7a, 0x36, 0x8f, 0x78, 0x78, 0x8e, 0xf9, 0xa5, 0x24, 0xe8, 0x78, 0x2b, 0x03, 0x7a, 0x0d, 0x9c,
-	0x4b, 0x9a, 0xf2, 0x69, 0x7c, 0x41, 0x25, 0xc1, 0xc1, 0xe4, 0x4e, 0x2e, 0xe5, 0x59, 0x6e, 0xf6,
-	0x4a, 0x07, 0x74, 0xba, 0x16, 0x82, 0xaf, 0x54, 0x42, 0xb0, 0xca, 0xe5, 0xa6, 0x85, 0xdf, 0xcf,
-	0x26, 0xec, 0x65, 0xf1, 0xf1, 0x0f, 0x34, 0x57, 0xf5, 0xb2, 0x9e, 0x44, 0xaf, 0x4e, 0x45, 0xaf,
-	0xa6, 0xef, 0xd8, 0x52, 0x2f, 0x5b, 0xa7, 0x57, 0xf7, 0x1a, 0xf5, 0xfa, 0xce, 0x00, 0xa7, 0x20,
-	0x25, 0xcb, 0x7c, 0x84, 0xf9, 0x05, 0x65, 0xb3, 0xfc, 0xed, 0x72, 0x2f, 0x5a, 0x03, 0x4d, 0xbf,
-	0x58, 0x26, 0x05, 0x46, 0xbe, 0x13, 0x35, 0x50, 0x48, 0x91, 0x37, 0x5f, 0xb9, 0x96, 0x5a, 0x27,
-	0x79, 0x9e, 0x99, 0x61, 0x22, 0xa2, 0x33, 0x8c, 0x43, 0x1e, 0x62, 0x4e, 0x59, 0x4e, 0x6d, 0x65,
-	0x18, 0xff, 0x68, 0xc2, 0xbe, 0x5a, 0xdd, 0x1e, 0x30, 0x3a, 0x4f, 0xb6, 0xae, 0xc1, 0x9b, 0x46,
-	0x80, 0xcd, 0xf5, 0xb8, 0xa9, 0x7d, 0xda, 0x2d, 0xed, 0xf3, 0x1e, 0x00, 0x0e, 0xf2, 0x96, 0x96,
-	0xca, 0xf4, 0xe8, 0x7b, 0x8a, 0x45, 0x64, 0x2b, 0x23, 0x33, 0xba, 0x20, 0x85, 0x4b, 0x4f, 0xba,
-	0x54, 0x8d, 0xad, 0x6d, 0x56, 0xb9, 0xe3, 0x7e, 0xe5, 0x8e, 0xc7, 0x3f, 0x19, 0xb0, 0xff, 0x65,
-	0x12, 0x6c, 0xa1, 0x51, 0x55, 0x0f, 0x73, 0x4d, 0x8f, 0x2a, 0x03, 0x6b, 0x33, 0x83, 0x4e, 0x13,
-	0x83, 0xd6, 0x8a, 0x39, 0xc6, 0xb0, 0xaf, 0xd6, 0xe7, 0xbf, 0xff, 0xa1, 0xca, 0x11, 0x56, 0xf5,
-	0x88, 0xc7, 0x06, 0x0c, 0xb3, 0xac, 0x52, 0xc6, 0xaf, 0x97, 0xe1, 0x36, 0xf6, 0x7d, 0x92, 0xa6,
-	0xe7, 0x22, 0xf7, 0x7c, 0x1a, 0xe5, 0x47, 0xd5, 0xac, 0xc2, 0xcf, 0xa7, 0x71, 0x4c, 0x7c, 0x71,
-	0xf7, 0xf7, 0xb3, 0xd9, 0x53, 0xfa, 0x55, 0xad, 0x95, 0xb1, 0xc6, 0xaa, 0x8c, 0x35, 0xf5, 0xa3,
-	0x5b, 0x53, 0xfa, 0x29, 0x4d, 0x9f, 0x8f, 0xe5, 0x70, 0xfd, 0x9f, 0xd1, 0xaf, 0x1f, 0xfd, 0x6f,
-	0xd3, 0xff, 0xdd, 0x80, 0x3b, 0x0f, 0x48, 0x4c, 0x58, 0xe8, 0x7b, 0x24, 0x4d, 0x68, 0x9c, 0x12,
-	0xf4, 0x16, 0x74, 0x19, 0x49, 0xe7, 0x11, 0x97, 0x10, 0x83, 0xc9, 0xf3, 0xf9, 0xb7, 0xd6, 0xfc,
-	0x8e, 0x3d, 0xe9, 0x74, 0xb6, 0xe3, 0xe5, 0xee, 0xe8, 0x4d, 0xb0, 0x09, 0x63, 0x94, 0xc9, 0x63,
-	0x06, 0x93, 0x83, 0x96, 0xf7, 0x4e, 0x85, 0xcf, 0xd9, 0x8e, 0x97, 0x39, 0x8f, 0xc6, 0xd0, 0xcd,
-	0x90, 0x04, 0xc7, 0x19, 0x49, 0x53, 0xfc, 0x0d, 0xc9, 0x3f, 0xbe, 0xd8, 0x8e, 0xde, 0x03, 0x5b,
-	0xbe, 0x25, 0x8a, 0x96, 0x4f, 0x83, 0xe2, 0xb9, 0x5c, 0xd7, 0x8b, 0x92, 0xb9, 0x56, 0x94, 0xde,
-	0xef, 0x81, 0xcd, 0x48, 0x12, 0x2d, 0x27, 0x7f, 0xda, 0xb0, 0x7b, 0xce, 0xe8, 0x22, 0x4c, 0xc5,
-	0xd5, 0x50, 0xff, 0x0a, 0x9d, 0xc0, 0x2d, 0xb5, 0x5c, 0xa2, 0x67, 0x5b, 0x7e, 0x14, 0x8e, 0xee,
-	0x36, 0xb3, 0x19, 0xef, 0x08, 0x08, 0x35, 0x49, 0x4b, 0x88, 0xfa, 0x0f, 0x2f, 0x3d, 0x84, 0x3a,
-	0xdf, 0x97, 0x10, 0xf5, 0xa1, 0x5f, 0x03, 0xf1, 0x59, 0x31, 0x1e, 0x55, 0x47, 0x39, 0xf4, 0xc2,
-	0x86, 0x91, 0x57, 0x0f, 0xd9, 0x34, 0x1d, 0x96, 0x90, 0x6d, 0xa3, 0xa3, 0x06, 0x72, 0x5a, 0xfc,
-	0x47, 0x62, 0xd5, 0xc8, 0xd1, 0x73, 0x9a, 0x89, 0x48, 0x0f, 0x55, 0x9f, 0x09, 0x4a, 0xa8, 0xa6,
-	0x61, 0x41, 0x03, 0xf5, 0x21, 0x3c, 0xb3, 0xd6, 0x33, 0xd1, 0x41, 0x83, 0x70, 0x65, 0x01, 0xd6,
-	0x83, 0xad, 0x35, 0x97, 0x12, 0xac, 0xb1, 0xed, 0xe8, 0xc1, 0xd6, 0x1a, 0x40, 0x09, 0xd6, 0xd8,
-	0x1a, 0xda, 0xc1, 0x26, 0x3f, 0x18, 0x00, 0x99, 0x26, 0x45, 0xe8, 0xab, 0xd5, 0xb7, 0x0c, 0xba,
-	0x7a, 0x49, 0xde, 0x14, 0xfa, 0x0d, 0x10, 0xf5, 0xb2, 0xd6, 0x0e, 0xf1, 0xb0, 0x2b, 0x1f, 0xbc,
-	0xf1, 0x57, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc2, 0x4e, 0x51, 0xc9, 0xc0, 0x12, 0x00, 0x00,
+	// 1624 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5a, 0x4f, 0x73, 0xdc, 0xc4,
+	0x12, 0xcf, 0x6a, 0xbd, 0xde, 0xdd, 0xde, 0xd8, 0x5e, 0x4f, 0xec, 0x44, 0xb5, 0x71, 0xfc, 0xfc,
+	0xf6, 0xe5, 0xbd, 0xf2, 0x4b, 0xc2, 0x42, 0x2d, 0x54, 0x85, 0x3f, 0xc5, 0x1f, 0x1b, 0x3b, 0xf1,
+	0x16, 0x09, 0x71, 0x36, 0x90, 0x03, 0x37, 0x45, 0x9a, 0x60, 0x95, 0xb5, 0x1a, 0x95, 0x24, 0x6f,
+	0x62, 0x4e, 0x54, 0xe0, 0x10, 0x38, 0xf2, 0x01, 0xa8, 0xa2, 0x38, 0xc0, 0x85, 0xaf, 0xc0, 0x81,
+	0xe2, 0x13, 0x70, 0xe6, 0x23, 0x70, 0xe1, 0x9e, 0x03, 0xa5, 0x19, 0x49, 0x3b, 0x92, 0x46, 0xb3,
+	0x32, 0x6b, 0x27, 0xa6, 0xec, 0xd3, 0x4a, 0x3d, 0xad, 0x9e, 0xee, 0xdf, 0xf4, 0xaf, 0x47, 0x9a,
+	0x5e, 0x00, 0x83, 0xe8, 0xbb, 0x1d, 0xc7, 0x25, 0x3e, 0x41, 0x15, 0xfa, 0xd3, 0xfe, 0xb6, 0x02,
+	0xcd, 0xf7, 0x5d, 0xac, 0xf9, 0xf8, 0x3e, 0xb1, 0xf6, 0x06, 0xf8, 0x8e, 0xe3, 0x7b, 0x68, 0x16,
+	0x14, 0xd3, 0x50, 0x4b, 0x2b, 0xa5, 0xd5, 0x7a, 0x5f, 0x31, 0x0d, 0x84, 0x60, 0xca, 0xd6, 0x06,
+	0x58, 0x55, 0xa8, 0x84, 0x5e, 0x07, 0x32, 0xcf, 0xfc, 0x0c, 0xab, 0xe5, 0x95, 0xd2, 0x6a, 0xb9,
+	0x4f, 0xaf, 0xd1, 0x0a, 0x34, 0x0c, 0xec, 0xe9, 0xae, 0xe9, 0xf8, 0x26, 0xb1, 0xd5, 0x29, 0xaa,
+	0xce, 0x8b, 0xd0, 0x32, 0x80, 0x67, 0x6b, 0x8e, 0xb7, 0x43, 0xfc, 0x9e, 0xa1, 0x56, 0xa8, 0x02,
+	0x27, 0x41, 0x57, 0xa0, 0xa9, 0x0d, 0x35, 0xd3, 0xd2, 0x1e, 0x98, 0x96, 0xe9, 0xef, 0x7f, 0x42,
+	0x6c, 0xac, 0x4e, 0x53, 0xad, 0x8c, 0x1c, 0x2d, 0x41, 0xdd, 0x71, 0xc9, 0x43, 0xd3, 0xc2, 0x3d,
+	0x43, 0xad, 0x52, 0xa5, 0x91, 0x00, 0x9d, 0x87, 0x69, 0x87, 0x10, 0xab, 0x67, 0xa8, 0x35, 0x3a,
+	0x14, 0xde, 0xa1, 0x16, 0xd4, 0x82, 0xab, 0x0f, 0x83, 0x78, 0xea, 0x74, 0x24, 0xbe, 0x47, 0x6b,
+	0x50, 0x1b, 0x60, 0x5f, 0x33, 0x34, 0x5f, 0x53, 0x61, 0xa5, 0xbc, 0xda, 0xe8, 0xfe, 0x97, 0xa1,
+	0xd5, 0x49, 0x43, 0xd4, 0xb9, 0x1d, 0xea, 0x6d, 0xda, 0xbe, 0xbb, 0xdf, 0x8f, 0x1f, 0x0b, 0x02,
+	0x34, 0x5c, 0x73, 0x88, 0x5d, 0x3a, 0x41, 0x83, 0x05, 0x38, 0x92, 0x20, 0x15, 0xaa, 0x3a, 0xb1,
+	0x7d, 0xfc, 0xd8, 0x57, 0xcf, 0xd2, 0xc1, 0xe8, 0x16, 0xed, 0xc0, 0xa2, 0x8b, 0x1d, 0xcb, 0xd4,
+	0xb5, 0x00, 0xa9, 0x0d, 0xfa, 0xc8, 0x46, 0xe0, 0xc9, 0x0c, 0xf5, 0xa4, 0x9b, 0xe7, 0x49, 0x5f,
+	0xf4, 0x10, 0x73, 0x4b, 0x6c, 0x10, 0x5d, 0x86, 0x19, 0x6e, 0xa0, 0x67, 0xa8, 0xb3, 0xd4, 0x93,
+	0xa4, 0xb0, 0xf5, 0x16, 0xcc, 0x24, 0x82, 0x44, 0x4d, 0x28, 0xef, 0xe2, 0xfd, 0x30, 0x2d, 0x82,
+	0x4b, 0xb4, 0x00, 0x95, 0xa1, 0x66, 0xed, 0x45, 0x89, 0xc1, 0x6e, 0xde, 0x54, 0x5e, 0x2f, 0xb5,
+	0xb6, 0xa0, 0x95, 0xef, 0xd7, 0x41, 0x2c, 0xb5, 0x7f, 0x2f, 0x41, 0x73, 0x03, 0x5b, 0x58, 0x9a,
+	0xa0, 0xfc, 0xc2, 0x29, 0x89, 0x85, 0x4b, 0x3f, 0x5a, 0x70, 0xe1, 0xca, 0xb2, 0x85, 0x9b, 0x4a,
+	0x2c, 0xdc, 0x44, 0x40, 0xb5, 0x7f, 0x2d, 0x43, 0x73, 0xf3, 0xb1, 0x8f, 0x6d, 0xe3, 0x94, 0x7f,
+	0x12, 0xfe, 0xa5, 0x21, 0x3a, 0x7c, 0xfe, 0x4d, 0xb6, 0x8c, 0xbf, 0x29, 0xa0, 0xf2, 0xcc, 0xbc,
+	0x17, 0x42, 0x7a, 0xc4, 0xcb, 0xd9, 0x82, 0xda, 0x90, 0xce, 0x17, 0x2f, 0x66, 0x7c, 0x8f, 0x7a,
+	0x1c, 0x98, 0xd3, 0x14, 0xcc, 0x97, 0x04, 0x25, 0x84, 0x77, 0xb4, 0x20, 0xa8, 0x55, 0x19, 0xa8,
+	0xb5, 0x43, 0x04, 0xf5, 0xa9, 0x02, 0x2a, 0xcf, 0x5f, 0x29, 0xa8, 0x3c, 0x14, 0x8a, 0x04, 0x8a,
+	0x72, 0x02, 0x8a, 0x3c, 0xf3, 0x05, 0xa1, 0x98, 0x92, 0x41, 0x51, 0x39, 0x44, 0x28, 0xfe, 0x54,
+	0x60, 0x81, 0x2d, 0xdb, 0x9a, 0xef, 0x6b, 0xfa, 0xce, 0x00, 0xdb, 0x07, 0x87, 0xe1, 0x32, 0xcc,
+	0x18, 0xe4, 0x16, 0xd1, 0x35, 0x8b, 0x19, 0xa1, 0xc9, 0x56, 0xeb, 0x27, 0x85, 0x01, 0xad, 0x07,
+	0x7b, 0x96, 0x6f, 0x6e, 0x6b, 0xfe, 0x0e, 0x0d, 0xb0, 0xd6, 0x1f, 0x09, 0xd0, 0x55, 0xa8, 0xed,
+	0x10, 0xcf, 0xef, 0xd9, 0x0f, 0x09, 0x0d, 0xb0, 0xd1, 0x9d, 0x0b, 0xa1, 0xdc, 0x0a, 0xc5, 0xfd,
+	0x58, 0x01, 0x6d, 0x66, 0x52, 0xf0, 0xff, 0x89, 0x14, 0x4c, 0xc6, 0x72, 0xdc, 0xd2, 0xef, 0x27,
+	0x05, 0x16, 0x58, 0x7e, 0x4c, 0x80, 0x39, 0x8f, 0x57, 0xf9, 0x20, 0x78, 0x4d, 0x25, 0xf0, 0x12,
+	0xf9, 0x51, 0x10, 0xaf, 0x8a, 0x0c, 0xaf, 0xe9, 0x43, 0xc4, 0xeb, 0xf3, 0x12, 0xd4, 0xa2, 0xa0,
+	0x68, 0x99, 0xb7, 0x34, 0xff, 0x21, 0x71, 0x07, 0xe1, 0xd3, 0xf1, 0x7d, 0xb0, 0x35, 0x10, 0xef,
+	0xa3, 0x7d, 0x27, 0xb2, 0x11, 0xde, 0x05, 0x35, 0x30, 0x80, 0x22, 0xdc, 0x7c, 0xe9, 0x35, 0xc5,
+	0xda, 0x09, 0x79, 0xa6, 0x98, 0x4e, 0x90, 0x9d, 0xa6, 0x6d, 0xfa, 0xa6, 0xe6, 0x13, 0x37, 0x0c,
+	0x6d, 0x24, 0x68, 0x0f, 0x01, 0x18, 0x97, 0xe9, 0x7b, 0xce, 0xcb, 0x30, 0x45, 0xa1, 0x2c, 0x51,
+	0x28, 0x2f, 0x86, 0x50, 0x8e, 0x14, 0x3a, 0xa3, 0x37, 0x25, 0xaa, 0xd8, 0xba, 0x0e, 0xf5, 0xbf,
+	0xf7, 0x92, 0xf2, 0x7d, 0x1d, 0x16, 0x59, 0x4a, 0x73, 0x6f, 0x3d, 0x85, 0x6b, 0x7f, 0xaa, 0xce,
+	0x97, 0xb3, 0x75, 0x7e, 0x15, 0xe6, 0x1c, 0xd7, 0x1c, 0x68, 0xee, 0xfe, 0xfd, 0x28, 0xd1, 0x18,
+	0x24, 0x69, 0x31, 0xba, 0x06, 0xf3, 0x1e, 0xd6, 0x89, 0x6d, 0xf0, 0xba, 0x0c, 0xa7, 0xec, 0xc0,
+	0x0b, 0xde, 0xee, 0x9f, 0x94, 0x60, 0x29, 0xf4, 0x5f, 0xf8, 0xb2, 0xa8, 0x36, 0xe8, 0xc2, 0xbd,
+	0x93, 0xa8, 0x19, 0x29, 0x80, 0x3b, 0xdb, 0x12, 0x03, 0x6c, 0x6d, 0xa5, 0x73, 0xa0, 0xa7, 0x25,
+	0x58, 0x8e, 0x81, 0x11, 0xbb, 0x71, 0x96, 0xba, 0xf1, 0x9e, 0xd4, 0x8d, 0x7b, 0x52, 0x13, 0xcc,
+	0x91, 0x31, 0xf3, 0x04, 0x18, 0x06, 0x1f, 0x68, 0x3d, 0x43, 0x9d, 0x61, 0x18, 0xb2, 0xbb, 0x14,
+	0x9f, 0x67, 0x65, 0x7c, 0x9e, 0x4b, 0x7e, 0x53, 0x04, 0x6c, 0xf1, 0x42, 0x84, 0xd4, 0x26, 0xab,
+	0xe5, 0xb1, 0x00, 0xdd, 0xe0, 0xca, 0xcd, 0x3c, 0x8d, 0xf1, 0x8a, 0x34, 0xc6, 0xbc, 0x7a, 0xf3,
+	0x06, 0xcc, 0x0e, 0x63, 0x52, 0xdd, 0x32, 0x3d, 0x5f, 0x45, 0xd4, 0xda, 0x7c, 0x86, 0x71, 0xfd,
+	0x94, 0x62, 0x90, 0xd8, 0xdc, 0x57, 0xc7, 0x6d, 0x62, 0x60, 0xf5, 0x1c, 0x4b, 0xec, 0x94, 0x38,
+	0x48, 0x6c, 0xce, 0x9f, 0x6d, 0xec, 0x9a, 0xc4, 0x50, 0x17, 0xe8, 0xdb, 0x52, 0x76, 0x00, 0x75,
+	0x61, 0x81, 0x13, 0xae, 0x6b, 0xb6, 0xf1, 0xc8, 0x34, 0xfc, 0x1d, 0x75, 0x91, 0x3e, 0x20, 0x1c,
+	0x6b, 0xdd, 0x81, 0x7f, 0x8f, 0x4d, 0xa6, 0x03, 0x7d, 0x04, 0xdd, 0x85, 0xff, 0x14, 0x48, 0x8b,
+	0x03, 0x99, 0x9c, 0xa8, 0x40, 0xff, 0x5c, 0x85, 0x45, 0xb6, 0x91, 0x9c, 0x56, 0xa9, 0x23, 0xab,
+	0x52, 0x42, 0x80, 0x9f, 0x7f, 0x95, 0x12, 0xbb, 0x71, 0x3c, 0xab, 0x14, 0x5f, 0x87, 0x9a, 0x89,
+	0x3a, 0x24, 0x8e, 0x22, 0xa7, 0x0e, 0x9d, 0x0c, 0x02, 0x6f, 0xda, 0xda, 0x03, 0xeb, 0x94, 0xc0,
+	0x47, 0x47, 0x60, 0x21, 0xc0, 0xcf, 0x9f, 0xc0, 0x62, 0x37, 0xfe, 0x69, 0x04, 0x16, 0x47, 0x71,
+	0x62, 0x09, 0xfc, 0x4b, 0x15, 0xce, 0x6f, 0x98, 0xde, 0x29, 0x83, 0x0f, 0xc6, 0xe0, 0x2f, 0x8a,
+	0x31, 0xf8, 0xdd, 0x68, 0xd7, 0x10, 0x22, 0x3c, 0x31, 0x85, 0xbf, 0x2a, 0x4a, 0xe1, 0x35, 0xb9,
+	0x1f, 0xc7, 0x93, 0xc3, 0x37, 0x33, 0x1c, 0xbe, 0x2a, 0x0f, 0xe3, 0xc4, 0x92, 0xf8, 0xc7, 0x1a,
+	0x5c, 0xb8, 0xa1, 0x99, 0x16, 0x19, 0x62, 0xf7, 0x94, 0xc5, 0xc5, 0x59, 0xfc, 0x65, 0x31, 0x16,
+	0x47, 0x1b, 0x60, 0x0e, 0xc4, 0x13, 0xd3, 0xf8, 0xeb, 0xa2, 0x34, 0x5e, 0x1f, 0xe3, 0xc8, 0xf1,
+	0xe4, 0xf1, 0x2b, 0x70, 0x4e, 0xb3, 0x2c, 0xf2, 0x88, 0x9d, 0x15, 0xe2, 0xb0, 0x67, 0x12, 0x7e,
+	0xfc, 0x8b, 0x86, 0x50, 0x07, 0x50, 0xec, 0xe5, 0xba, 0xa6, 0xef, 0x62, 0xdb, 0xe8, 0x19, 0xea,
+	0x3c, 0x35, 0x2b, 0x18, 0x41, 0x5b, 0x5c, 0xa5, 0x60, 0x1f, 0xfa, 0xd7, 0xc6, 0x20, 0x75, 0x62,
+	0x4b, 0xc5, 0x77, 0x4a, 0x74, 0x2e, 0xc8, 0xb0, 0xbe, 0xe9, 0x92, 0x3d, 0xa7, 0x70, 0xa1, 0x18,
+	0xd7, 0x92, 0x1c, 0xdf, 0x1f, 0x12, 0x11, 0xbe, 0x92, 0x43, 0xf8, 0x65, 0x00, 0xcd, 0x08, 0x73,
+	0xc2, 0xa3, 0xc7, 0xf5, 0xf5, 0x3e, 0x27, 0x61, 0x5d, 0xe3, 0x01, 0x19, 0xe2, 0x48, 0xa5, 0x4a,
+	0x55, 0x92, 0xc2, 0xdc, 0xc2, 0xc0, 0x25, 0x6c, 0x3d, 0x91, 0xb0, 0xed, 0x1f, 0x4a, 0xb0, 0xf8,
+	0xb1, 0x63, 0x14, 0xc0, 0x28, 0x89, 0x87, 0x92, 0xc1, 0x23, 0x19, 0x41, 0x79, 0x7c, 0x04, 0x53,
+	0xa2, 0x08, 0x72, 0x3b, 0x38, 0x6d, 0x2d, 0x3a, 0x3e, 0x99, 0xd4, 0x51, 0x6e, 0x8a, 0x72, 0x72,
+	0x8a, 0x67, 0x25, 0x68, 0x32, 0x7a, 0x72, 0xed, 0xe0, 0xff, 0xc1, 0xac, 0xa6, 0xeb, 0xd8, 0xf3,
+	0xb6, 0x03, 0x96, 0xe9, 0xc4, 0x0a, 0xa7, 0x4a, 0x49, 0x03, 0x3d, 0x9d, 0xd8, 0x36, 0xd6, 0x69,
+	0xce, 0xb3, 0x5e, 0x38, 0xd5, 0x4b, 0x4a, 0x13, 0x6d, 0xd6, 0x72, 0xa2, 0xcd, 0x9a, 0x9e, 0x3a,
+	0xf7, 0xc8, 0xef, 0x88, 0xba, 0xe1, 0xcf, 0x68, 0xb3, 0xff, 0x85, 0x85, 0x9f, 0x9e, 0xfa, 0x79,
+	0x87, 0xff, 0x47, 0x09, 0xe6, 0x6e, 0x62, 0x1b, 0xbb, 0xa6, 0xde, 0xc7, 0x9e, 0x43, 0x6c, 0x0f,
+	0xa3, 0xeb, 0x30, 0xed, 0x62, 0x6f, 0xcf, 0xf2, 0xa9, 0x89, 0x46, 0xf7, 0x52, 0xe8, 0x6b, 0x4a,
+	0xaf, 0xd3, 0xa7, 0x4a, 0x5b, 0x67, 0xfa, 0xa1, 0x3a, 0x7a, 0x0d, 0x2a, 0xd8, 0x75, 0x89, 0x4b,
+	0xa7, 0x69, 0x74, 0x97, 0x72, 0x9e, 0xdb, 0x0c, 0x74, 0xb6, 0xce, 0xf4, 0x99, 0x72, 0xab, 0x0d,
+	0xd3, 0xcc, 0x52, 0x10, 0xe3, 0x00, 0x7b, 0x9e, 0xf6, 0x29, 0x0e, 0x9d, 0x8f, 0x6e, 0x5b, 0x6f,
+	0x43, 0x85, 0x3e, 0x15, 0x14, 0x2d, 0x9d, 0x18, 0xd1, 0x38, 0xbd, 0x4e, 0x17, 0x25, 0x25, 0x53,
+	0x94, 0xd6, 0xab, 0x50, 0x71, 0xb1, 0x63, 0xed, 0x77, 0x9f, 0xd4, 0x61, 0x66, 0xdb, 0x25, 0x43,
+	0xd3, 0x0b, 0x96, 0x86, 0xe8, 0xbb, 0x68, 0x0d, 0xce, 0xf2, 0xe5, 0x12, 0x5d, 0xc8, 0xf9, 0xd3,
+	0x4b, 0xeb, 0xbc, 0x38, 0x9a, 0xf6, 0x99, 0xc0, 0x04, 0x4f, 0xd2, 0xd8, 0x44, 0xfa, 0x8f, 0x20,
+	0x72, 0x13, 0xfc, 0xff, 0x0d, 0x62, 0x13, 0xe9, 0x3f, 0x21, 0x48, 0x4c, 0xdc, 0x8d, 0xda, 0xb5,
+	0xc9, 0xd6, 0x32, 0xfa, 0xd7, 0x98, 0x16, 0xbc, 0xdc, 0xa4, 0xa8, 0x5b, 0x1d, 0x9b, 0xcc, 0x6b,
+	0x65, 0x4b, 0x4c, 0xf6, 0xa2, 0xff, 0x7e, 0x8d, 0x1a, 0x8b, 0xe8, 0xa2, 0xa4, 0x43, 0x2b, 0x37,
+	0x95, 0xee, 0x51, 0xc6, 0xa6, 0x44, 0xcd, 0x4b, 0x89, 0xa9, 0x0f, 0x60, 0x3e, 0xd3, 0x7f, 0x40,
+	0x4b, 0xb2, 0xce, 0x84, 0xdc, 0x58, 0xe6, 0x10, 0x31, 0x36, 0x26, 0x3c, 0x5e, 0x94, 0x1b, 0xcb,
+	0x1c, 0x68, 0xc4, 0xc6, 0x84, 0x47, 0x1d, 0x12, 0x63, 0xb7, 0x01, 0x65, 0xbf, 0xac, 0xd0, 0x25,
+	0xe9, 0x47, 0x97, 0xc4, 0xdc, 0x1d, 0x38, 0x27, 0x78, 0xfd, 0x42, 0xcb, 0xf2, 0x57, 0xb3, 0x22,
+	0xcb, 0xc0, 0xed, 0x76, 0xa9, 0x65, 0x48, 0xed, 0x83, 0x72, 0x63, 0x99, 0x3d, 0x3e, 0x36, 0x26,
+	0xdc, 0xfd, 0x8b, 0xac, 0xa9, 0xc8, 0x98, 0x70, 0x87, 0xce, 0x37, 0xd6, 0xfd, 0xa6, 0x04, 0xc0,
+	0x52, 0x33, 0xaa, 0x40, 0xfc, 0x26, 0x18, 0x73, 0x3f, 0xbd, 0x33, 0x8e, 0xab, 0x40, 0x02, 0x13,
+	0xe9, 0xdd, 0x25, 0xdf, 0xc4, 0x83, 0x69, 0x3a, 0xf0, 0xea, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff,
+	0x3c, 0x50, 0x50, 0x61, 0xb1, 0x29, 0x00, 0x00,
 }

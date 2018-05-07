@@ -139,6 +139,18 @@ type Client interface {
 
 	DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error
 
+	CreateReplication(ctx *c.Context, replication *model.ReplicationSpec) (*model.ReplicationSpec, error)
+
+	GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error)
+
+	ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error)
+
+	ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error)
+
+	DeleteReplication(ctx *c.Context, replicationId string) error
+
+	UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error)
+
 	CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
 
 	GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error)

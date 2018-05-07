@@ -16,53 +16,53 @@ package model
 
 // volume status
 const (
-	VOLUME_CREATING        = "creating"
-	VOLUME_AVAILABLE       = "available"
-	VOLUME_IN_USE          = "inUse"
-	VOLUME_DELETING        = "deleting"
-	VOLUME_ERROR           = "error"
-	VOLUEM_ERROR_DELETING  = "errorDeleting"
-	VOLUME_ERROR_EXTENDING = "errorExtending"
-	VOLUME_EXTENDING       = "extending"
+	VolumeCreating       = "creating"
+	VolumeAvailable      = "available"
+	VolumeInUse          = "inUse"
+	VolumeDeleting       = "deleting"
+	VolumeError          = "error"
+	VolumeErrorDeleting  = "errorDeleting"
+	VolumeErrorExtending = "errorExtending"
+	VolumeExtending      = "extending"
 )
 
 // volume attach status
 const (
-	VOLUME_ATTACHING       = "attaching"
-	VOLUME_ATTACHED        = "attached"
-	VOLUME_DETACHED        = "detached"
-	VOLUME_RESERVED        = "reserved"
-	VOLUME_ERROR_ATTACHING = "errorAttaching"
-	VOLUME_ERROR_DETACHING = "errorDetaching"
-	VOLUME_DELETED         = "deleted"
+	VolumeAttacing       = "attaching"
+	VolumeAttached       = "attached"
+	VolumeDetached       = "detached"
+	VolumeReserved       = "reserved"
+	VolumeErrorAttaching = "errorAttaching"
+	VolumeErrorDetaching = "errorDetaching"
+	VolumeDeleted        = "deleted"
 )
 
 // volume snapshot status
 const (
-	VOLUMESNAP_CREATING       = "creating"
-	VOLUMESNAP_AVAILABLE      = "available"
-	VOLUMESNAP_DELETING       = "deleting"
-	VOLUMESNAP_ERROR          = "error"
-	VOLUMESNAP_ERROR_DELETING = "errorDeleting"
-	VOLUMESNAP_DELETED        = "deleted"
+	VolumeSnapCreating      = "creating"
+	VolumeSnapAvailable     = "available"
+	VolumeSnapDeleting      = "deleting"
+	VolumeSnapError         = "error"
+	VolumeSnapErrorDeleting = "errorDeleting"
+	VolumeSnapDeleted       = "deleted"
 )
 
 // volume attachment status
 const (
-	VOLUMEATM_CREATING       = "creating"
-	VOLUMEATM_AVAILABLE      = "available"
-	VOLUMEATM_ERROR_DELETING = "errorDeleting"
-	VOLUMEATM_ERROR          = "error"
+	VolumeAttachCreating      = "creating"
+	VolumeAttachAvailable     = "available"
+	VolumeAttachErrorDeleting = "errorDeleting"
+	VolumeAttachError         = "error"
 )
 
 // volume group status
 const (
-	VOLUMEGROUP_CREATING       = "creating"
-	VOLUMEGROUP_AVAILABLE      = "available"
-	VOLUMEGROUP_ERROR_DELETING = "errorDeleting"
-	VOLUMEGROUP_ERROR          = "error"
-	VOLUMEGROUP_DELETING       = "deleting"
-	VOLUMEGROUP_DELETED        = "deleted"
-	VOLUMEGROUP_UPDATING       = "updating"
-	VOLUMEGROUP_IN_USE         = "inUse"
+	VolumeGroupCreating      = "creating"
+	VolumeGroupAvailable     = "available"
+	VolumeGroupErrorDeleting = "errorDeleting"
+	VolumeGroupError         = "error"
+	VolumeGroupDeleting      = "deleting"
+	VolumeGroupDeleted       = "deleted"
+	VolumeGroupUpdating      = "updating"
+	VolumeGroupInUse         = "inUse"
 )

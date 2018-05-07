@@ -62,7 +62,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		ProfileId:        in.ProfileId,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
-		Status:           model.VOLUME_CREATING,
+		Status:           model.VolumeCreating,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
@@ -80,12 +80,12 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string) (*model.VolumeSpec, error
 		return nil, err
 	}
 
-	if volume.Status != model.VOLUME_AVAILABLE {
+	if volume.Status != model.VolumeAvailable {
 		errMsg := "The status of the volume to be extended must be available"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	volume.Status = model.VOLUME_EXTENDING
+	volume.Status = model.VolumeExtending
 	// Store the volume data into database.
 	result, err := db.C.ExtendVolume(ctx, volume)
 	if err != nil {
@@ -101,7 +101,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 		log.Error("Get volume failed in create volume attachment method: ", err)
 		return nil, err
 	}
-	if vol.Status != model.VOLUME_AVAILABLE {
+	if vol.Status != model.VolumeAvailable {
 		errMsg := "Only the status of volume is available, attachment can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
@@ -132,7 +132,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 			Host:      in.Host,
 			Initiator: in.Initiator,
 		},
-		Status:         model.VOLUMEATM_CREATING,
+		Status:         model.VolumeAttachCreating,
 		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
 		ConnectionInfo: in.ConnectionInfo,
 	}
@@ -151,7 +151,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 		log.Error("Get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
-	if vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE {
+	if vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
 		var errMsg = "Only the status of volume is available or in-use, the snapshot can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
@@ -175,7 +175,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 		VolumeId:    in.VolumeId,
 		Size:        vol.Size,
 		Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		Status:      model.VOLUMESNAP_CREATING,
+		Status:      model.VolumeSnapCreating,
 	}
 
 	result, err := db.C.CreateVolumeSnapshot(ctx, snap)
@@ -187,12 +187,12 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
-	if in.Status != model.VOLUMESNAP_AVAILABLE {
+	if in.Status != model.VolumeSnapAvailable {
 		errMsg := "Only the volume snapshot with the status available can be deleted"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
-	in.Status = model.VOLUMESNAP_DELETING
+	in.Status = model.VolumeSnapDeleting
 	_, err := db.C.UpdateVolumeSnapshot(ctx, in.Id, in)
 	if err != nil {
 		return err
@@ -202,15 +202,15 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
-	invalidStatus := []string{model.VOLUME_AVAILABLE, model.VOLUME_ERROR,
-		model.VOLUEM_ERROR_DELETING, model.VOLUME_ERROR_EXTENDING}
+	invalidStatus := []string{model.VolumeAvailable, model.VolumeError,
+		model.VolumeErrorDeleting, model.VolumeErrorExtending}
 	if !utils.Contained(in.Status, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
 
-	in.Status = model.VOLUME_DELETING
+	in.Status = model.VolumeDeleting
 	_, err := db.C.UpdateVolume(ctx, in)
 	if err != nil {
 		return err
@@ -218,6 +218,78 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	return nil
 }
 
+func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationDeleting
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't enable the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationEnabling
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't disable the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationDisabling
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secondaryBackendId string) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't fail over/back the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	if secondaryBackendId == model.ReplicationDefaultBackendId {
+		in.ReplicationStatus = model.ReplicationFailingOver
+	} else {
+		in.ReplicationStatus = model.ReplicationFailingBack
+	}
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
@@ -235,7 +307,7 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 		Name:             in.Name,
 		Description:      in.Description,
 		AvailabilityZone: in.AvailabilityZone,
-		Status:           model.VOLUMEGROUP_CREATING,
+		Status:           model.VolumeGroupCreating,
 	}
 	result, err := db.C.CreateVolumeGroup(ctx, vg)
 	if err != nil {
@@ -321,9 +393,9 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 		vgNew.Description = description
 	}
 	if len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
-		vgNew.Status = model.VOLUMEGROUP_AVAILABLE
+		vgNew.Status = model.VolumeGroupAvailable
 	} else {
-		vgNew.Status = model.VOLUMEGROUP_UPDATING
+		vgNew.Status = model.VolumeGroupUpdating
 	}
 
 	result, err := db.C.UpdateVolumeGroup(ctx, vgNew)
@@ -367,7 +439,7 @@ func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes 
 		if addVolRef.GroupId != "" {
 			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse it is already in group %s", addVolRef.Id, vg.Id, addVolRef.GroupId)
 		}
-		if addVolRef.Status != model.VOLUME_AVAILABLE && addVolRef.Status != model.VOLUME_IN_USE {
+		if addVolRef.Status != model.VolumeAvailable && addVolRef.Status != model.VolumeInUse {
 			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse volume is in invalid status %s", addVolRef.Id, vg.Id, addVolRef.Status)
 		}
 
@@ -382,7 +454,7 @@ func ValidateRemoveVolumes(ctx *c.Context, volumes []*model.VolumeSpec, removeVo
 	for _, v := range removeVolumes {
 		for _, volume := range volumes {
 			if v == volume.Id {
-				if volume.Status != model.VOLUME_AVAILABLE && volume.Status != model.VOLUME_IN_USE && volume.Status != model.VOLUME_ERROR && volume.Status != model.VOLUEM_ERROR_DELETING {
+				if volume.Status != model.VolumeAvailable && volume.Status != model.VolumeInUse && volume.Status != model.VolumeError && volume.Status != model.VolumeErrorDeleting {
 					return nil, fmt.Errorf("Cannot remove volume %s from group %s, volume is in invalid status %s", volume.Id, vg.Id, volume.Status)
 				}
 				break
@@ -414,7 +486,7 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	//TODO DeleteVolumes tag is set by policy.
 	deleteVolumes := true
 
-	if deleteVolumes == false && vg.Status != model.VOLUMEGROUP_AVAILABLE && vg.Status != model.VOLUMEGROUP_ERROR {
+	if deleteVolumes == false && vg.Status != model.VolumeGroupAvailable && vg.Status != model.VolumeGroupError {
 		msg := fmt.Sprintf("The status of the Group must be available or error , group can be deleted. But current status is %s", vg.Status)
 		log.Error(msg)
 		return errors.New(msg)
@@ -439,7 +511,7 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 
 	var volumesUpdate []*model.VolumeSpec
 	for _, value := range volumes {
-		if value.AttachStatus == model.VOLUME_ATTACHED {
+		if value.AttachStatus == model.VolumeAttached {
 			msg := fmt.Sprintf("Volume %s in group %s is attached. Need to deach first.", value.Id, vg.Id)
 			log.Error(msg)
 			return errors.New(msg)
@@ -459,14 +531,14 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 			BaseModel: &model.BaseModel{
 				Id: value.Id,
 			},
-			Status:  model.VOLUME_DELETING,
+			Status:  model.VolumeDeleting,
 			GroupId: volumeGroupId,
 		})
 	}
 
 	db.C.UpdateStatus(ctx, volumesUpdate, "")
 
-	db.C.UpdateStatus(ctx, vg, model.VOLUMEGROUP_DELETING)
+	db.C.UpdateStatus(ctx, vg, model.VolumeGroupDeleting)
 	//TODO Rpc call to delete group.
 	controller.Brain.DeleteVolumeGroup(ctx, vg)
 

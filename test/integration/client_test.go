@@ -22,9 +22,12 @@ import (
 
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var c = client.NewClient(&client.Config{"http://localhost:50040", nil})
+var c = client.NewClient(&client.Config{
+	Endpoint:    "http://localhost:50040",
+	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{
@@ -304,12 +307,8 @@ func TestClientListVolumeAttachments(t *testing.T) {
 
 func TestClientDeleteVolumeAttachment(t *testing.T) {
 	var atcID = "f2dda3d2-bf79-11e7-8665-f750b088f63e"
-	body := &model.VolumeAttachmentSpec{
-		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
-	}
 
-	if err := c.DeleteVolumeAttachment(atcID, body); err != nil {
+	if err := c.DeleteVolumeAttachment(atcID, nil); err != nil {
 		t.Error("delete volume attachment in client failed:", err)
 		return
 	}
@@ -360,11 +359,8 @@ func TestClientListVolumeSnapshots(t *testing.T) {
 
 func TestClientDeleteVolumeSnapshot(t *testing.T) {
 	var snpID = "3769855c-a102-11e7-b772-17b880d2f537"
-	body := &model.VolumeSnapshotSpec{
-		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-	}
 
-	if err := c.DeleteVolumeSnapshot(snpID, body); err != nil {
+	if err := c.DeleteVolumeSnapshot(snpID, nil); err != nil {
 		t.Error("delete volume snapshot in client failed:", err)
 		return
 	}
@@ -388,3 +384,106 @@ func TestClientUpdateVolumeSnapshot(t *testing.T) {
 	snpBody, _ := json.MarshalIndent(snp, "", "	")
 	t.Log(string(snpBody))
 }
+
+// There are some deployment issues when testing Replicaiton operation,
+// so these test cases would be hidden until we fix the bug.
+/*
+func TestClientCreateReplication(t *testing.T) {
+	var body = &model.ReplicationSpec{
+		Name:              "sample-replication-01",
+		Description:       "This is a sample replication for testing",
+		PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ReplicationMode:   model.ReplicationModeSync,
+	}
+
+	replica, err := c.CreateReplication(body)
+	if err != nil {
+		t.Error("create volume replication in client failed:", err)
+		return
+	}
+
+	replicaBody, _ := json.MarshalIndent(replica, "", "	")
+	t.Log(string(replicaBody))
+}
+
+func TestClientGetReplication(t *testing.T) {
+	var replicaID = "c299a978-4f3e-11e8-8a5c-977218a83359"
+
+	replica, err := c.GetReplication(replicaID)
+	if err != nil {
+		t.Error("get volume replication in client failed:", err)
+		return
+	}
+
+	replicaBody, _ := json.MarshalIndent(replica, "", "	")
+	t.Log(string(replicaBody))
+}
+
+func TestClientListReplications(t *testing.T) {
+	replicas, err := c.ListReplications()
+	if err != nil {
+		t.Error("list volume replications in client failed:", err)
+		return
+	}
+
+	replicasBody, _ := json.MarshalIndent(replicas, "", "	")
+	t.Log(string(replicasBody))
+}
+
+func TestClientUpdateReplication(t *testing.T) {
+	var replicaID = "c299a978-4f3e-11e8-8a5c-977218a83359"
+	body := &model.ReplicationSpec{
+		Name:        "sample-replication-02",
+		Description: "This is a super-cool replication for testing",
+	}
+
+	replica, err := c.UpdateReplication(replicaID, body)
+	if err != nil {
+		t.Error("update volume replication in client failed:", err)
+		return
+	}
+
+	replicaBody, _ := json.MarshalIndent(replica, "", "	")
+	t.Log(string(replicaBody))
+}
+
+func TestClientDeleteReplication(t *testing.T) {
+	var replicaID = "c299a978-4f3e-11e8-8a5c-977218a83359"
+
+	if err := c.DeleteReplication(replicaID, nil); err != nil {
+		t.Error("delete volume replicaiton in client failed:", err)
+		return
+	}
+
+	t.Log("Delete volume replication success!")
+}
+
+func TestClientEnableReplication(t *testing.T) {
+	var replicaID = "c299a978-4f3e-11e8-8a5c-977218a83359"
+
+	if err := c.EnableReplication(replicaID); err != nil {
+		t.Error("enable volume replication in client failed:", err)
+		return
+	}
+
+	t.Log("Enable volume replication success!")
+}
+
+func TestClientDisableReplication(t *testing.T) {
+	var replicaID = "c299a978-4f3e-11e8-8a5c-977218a83359"
+
+	if err := c.DisableReplication(replicaID); err != nil {
+		t.Error("disable volume replicaiton in client failed:", err)
+		return
+	}
+
+	t.Log("Disable volume replication success!")
+}
+
+func TestClientFailoverReplication(t *testing.T) {
+	// TODO Add TestClientFailoverRelication method.
+
+	t.Log("Disable volume replication not ready!")
+}
+*/

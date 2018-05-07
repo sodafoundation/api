@@ -251,6 +251,123 @@ func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
 
 	return con.Detach(connData)
 }
+func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
+	//Get the storage drivers and do some initializations.
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return nil, err
+	}
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to create replication...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	replica, err := driver.CreateReplication(opt)
+	if err != nil {
+		log.Error("Call driver to create replication failed:", err)
+		return nil, err
+	}
+
+	replica.PoolId = opt.GetPoolId()
+	replica.ProfileId = opt.GetProfileId()
+	replica.Name = opt.GetName()
+	//result, err := db.C.CreateReplication(c.NewContextFromJson(opt.GetContext()), replica)
+	//if err != nil {
+	//	log.Error("Error occurred in dock module when create replication in db:", err)
+	//	return nil, err
+	//}
+
+	return replica, nil
+}
+
+func (d *DockHub) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to delete replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.DeleteReplication(opt); err != nil {
+		log.Error("When calling replication driver to delete replication:", err)
+		return err
+	}
+
+	//if err = db.C.DeleteReplication(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
+	//	log.Error("Error occurred in dock module when delete replication in db:", err)
+	//	return err
+	//}
+
+	return nil
+}
+
+func (d *DockHub) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to enable replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.EnableReplication(opt); err != nil {
+		log.Error("When calling replication driver to enable replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
+}
+
+func (d *DockHub) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to disable replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.DisableReplication(opt); err != nil {
+		log.Error("When calling replication driver to disable replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
+}
+
+func (d *DockHub) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	var err error
+
+	//Get the storage drivers and do some initializations.
+	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())
+	if err != nil {
+		return err
+	}
+	defer drivers.CleanReplicationDriver(driver)
+
+	log.Info("Calling replication driver to failover replication ...")
+
+	//Call function of StorageDrivers configured by storage drivers.
+	if err = driver.FailoverReplication(opt); err != nil {
+		log.Error("When calling replication driver to failover replication:", err)
+		return err
+	}
+	// TODO: maybe need to update status in DB.
+	return nil
+}
 
 func (d *DockHub) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	// Get the storage drivers and do some initializations.
@@ -260,7 +377,7 @@ func (d *DockHub) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Volum
 	log.Info("Creating group...", opt.GetId())
 
 	// NOTE Opt parameter requires complete volumegroup information, because driver may use it.
-	vg, err := db.C.GetVolumeGroup(c.NewContextFormJson(opt.GetContext()), opt.GetId())
+	vg, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -272,25 +389,25 @@ func (d *DockHub) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Volum
 			BaseModel: &model.BaseModel{
 				Id: opt.GetId(),
 			},
-			Status: model.VOLUMEGROUP_AVAILABLE,
+			Status: model.VolumeGroupAvailable,
 		}
 	} else {
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, model.VOLUMEGROUP_ERROR)
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, model.VolumeGroupError)
 		log.Error("When calling volume driver to create volume group:", err)
 		return nil, err
 	}
 
-	if vgUpdate != nil && vgUpdate.Status == model.VOLUMEGROUP_ERROR {
+	if vgUpdate != nil && vgUpdate.Status == model.VolumeGroupError {
 		msg := fmt.Sprintf("Error occurred when creating volume group %s", opt.GetId())
 		log.Error(msg)
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, model.VOLUMEGROUP_ERROR)
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, model.VolumeGroupError)
 		return nil, errors.New(msg)
 	}
 
-	vg.Status = model.VOLUMEGROUP_AVAILABLE
+	vg.Status = model.VolumeGroupAvailable
 	vg.CreatedAt = time.Now().Format(constants.TimeFormat)
 	vg.PoolId = opt.GetPoolId()
-	db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), vg, vg.Status)
+	db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, vg.Status)
 	log.Info("Create group successfully.")
 
 	return vg, nil
@@ -314,7 +431,7 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 
 	log.Info("Calling volume driver to update volume group...")
 
-	group, err := db.C.GetVolumeGroup(c.NewContextFormJson(opt.GetContext()), opt.GetId())
+	group, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return err
 	}
@@ -325,18 +442,18 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 	if _, ok := err.(*model.NotImplementError); ok {
 		groupUpdate, addVolumesUpdate, removeVolumesUpdate = nil, nil, nil
 	} else {
-		err = db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
+		err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupError)
 		if err != nil {
 			return err
 		}
 
 		for _, addVol := range addVolumesRef {
-			if err = db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), addVol, model.VOLUME_ERROR); err != nil {
+			if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), addVol, model.VolumeError); err != nil {
 				return err
 			}
 		}
 		for _, remVol := range removeVolumesRef {
-			if err = db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), remVol, model.VOLUME_ERROR); err != nil {
+			if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), remVol, model.VolumeError); err != nil {
 				return err
 			}
 		}
@@ -357,11 +474,11 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 		}
 	}
 	if len(volumesToUpdate) > 0 {
-		db.C.VolumesToUpdate(c.NewContextFormJson(opt.GetContext()), volumesToUpdate)
+		db.C.VolumesToUpdate(c.NewContextFromJson(opt.GetContext()), volumesToUpdate)
 	}
 
 	if groupUpdate != nil {
-		if groupUpdate.Status == model.VOLUMEGROUP_ERROR {
+		if groupUpdate.Status == model.VolumeGroupError {
 			msg := fmt.Sprintf("Error occurred when updating volume group %s", opt.GetId())
 			log.Error(msg)
 			return errors.New(msg)
@@ -370,38 +487,38 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 
 	for _, addVol := range addVolumesRef {
 		addVol.GroupId = opt.GetId()
-		if _, err = db.C.UpdateVolume(c.NewContextFormJson(opt.GetContext()), addVol); err != nil {
+		if _, err = db.C.UpdateVolume(c.NewContextFromJson(opt.GetContext()), addVol); err != nil {
 			return err
 		}
 	}
 	for _, remVol := range removeVolumesRef {
 		remVol.GroupId = ""
-		if _, err = db.C.UpdateVolume(c.NewContextFormJson(opt.GetContext()), remVol); err != nil {
+		if _, err = db.C.UpdateVolume(c.NewContextFromJson(opt.GetContext()), remVol); err != nil {
 			return err
 		}
 	}
-	if err = db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_AVAILABLE); err != nil {
+	if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupAvailable); err != nil {
 		return err
 	}
 
-	log.Info("Update group " + opt.GetId() + "successfully.")
+	log.Info("Update group successfully.")
 	return nil
 }
 
 func (d *DockHub) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes []string, add bool) ([]*model.VolumeSpec, error) {
 	var volumesRef []*model.VolumeSpec
 	for _, v := range volumes {
-		vol, err := db.C.GetVolume(c.NewContextFormJson(opt.GetContext()), v)
+		vol, err := db.C.GetVolume(c.NewContextFromJson(opt.GetContext()), v)
 		if err != nil {
 			log.Error("Update group failed", err)
 			return nil, err
 		}
-		if add == true && vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE {
+		if add == true && vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
 			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
 		}
-		if add == false && vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE && vol.Status != model.VOLUME_ERROR && vol.Status != model.VOLUEM_ERROR_DELETING {
+		if add == false && vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse && vol.Status != model.VolumeError && vol.Status != model.VolumeErrorDeleting {
 			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
@@ -412,18 +529,18 @@ func (d *DockHub) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes []st
 }
 
 func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
-	volumes, err := db.C.ListVolumesByGroupId(c.NewContextFormJson(opt.GetContext()), opt.GetId())
+	volumes, err := db.C.ListVolumesByGroupId(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return err
 	}
 
 	for _, vol := range volumes {
-		if vol.AttachStatus == model.VOLUME_ATTACHED {
+		if vol.AttachStatus == model.VolumeAttached {
 			return fmt.Errorf("Volume %s is still attached, need to detach first.", vol.Id)
 		}
 	}
 
-	group, err := db.C.GetVolumeGroup(c.NewContextFormJson(opt.GetContext()), opt.GetId())
+	group, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return err
 	}
@@ -438,39 +555,39 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	if _, ok := err.(*model.NotImplementError); ok {
 		groupUpdate, volumesUpdate = d.deleteGroupGeneric(d.Driver, group, volumes)
 	} else {
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), group, model.VOLUMEGROUP_ERROR)
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupError)
 		// If driver returns none for volumesUpdate, set volume status to error.
 		if volumesUpdate == nil {
 			for _, v := range volumes {
-				v.Status = model.VOLUME_ERROR
+				v.Status = model.VolumeError
 			}
-			db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), volumes, "")
+			db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), volumes, "")
 		}
 		return err
 	}
 
 	if volumesUpdate != nil {
 		for _, v := range volumesUpdate {
-			if (v.Status == model.VOLUME_ERROR || v.Status == model.VOLUEM_ERROR_DELETING) && (groupUpdate.Status != model.VOLUMEGROUP_ERROR_DELETING || groupUpdate.Status != model.VOLUMEGROUP_ERROR) {
+			if (v.Status == model.VolumeError || v.Status == model.VolumeErrorDeleting) && (groupUpdate.Status != model.VolumeGroupErrorDeleting || groupUpdate.Status != model.VolumeGroupError) {
 				groupUpdate.Status = v.Status
 				break
 			}
 		}
 
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), volumesUpdate, "")
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), volumesUpdate, "")
 
 	}
 
 	if groupUpdate != nil {
-		if groupUpdate.Status == model.VOLUMEGROUP_ERROR || groupUpdate.Status == model.VOLUMEGROUP_ERROR_DELETING {
+		if groupUpdate.Status == model.VolumeGroupError || groupUpdate.Status == model.VolumeGroupErrorDeleting {
 			msg := fmt.Sprintf("Delete group failed")
 			log.Error(msg)
 			return errors.New(msg)
 		}
-		db.C.UpdateStatus(c.NewContextFormJson(opt.GetContext()), groupUpdate, groupUpdate.Status)
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), groupUpdate, groupUpdate.Status)
 	}
 
-	if err = db.C.DeleteVolumeGroup(c.NewContextFormJson(opt.GetContext()), group.Id); err != nil {
+	if err = db.C.DeleteVolumeGroup(c.NewContextFromJson(opt.GetContext()), group.Id); err != nil {
 		msg := fmt.Sprintf("Delete volume group failed: %s", err.Error())
 		log.Error(msg)
 		return errors.New(msg)
@@ -497,11 +614,11 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.Volu
 			},
 		}
 		if err := driver.DeleteVolume(&pb.DeleteVolumeOpts{Metadata: volumeRef.Metadata}); err != nil {
-			v.Status = model.VOLUME_ERROR
-			vgUpdate.Status = model.VOLUMEGROUP_ERROR
+			v.Status = model.VolumeError
+			vgUpdate.Status = model.VolumeGroupError
 			log.Error("Error occurred when delete volume " + volumeRef.Id + " from group.")
 		} else {
-			v.Status = model.VOLUME_DELETED
+			v.Status = model.VolumeDeleted
 		}
 		volumesUpdate = append(volumesUpdate, v)
 	}
