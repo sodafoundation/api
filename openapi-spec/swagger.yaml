@@ -408,7 +408,7 @@ paths:
     post:
       tags:
         - Block volumes
-      description: Create a volume.
+      description: Creates a volume.
       parameters:
         - name: body
           in: body
@@ -626,7 +626,7 @@ paths:
     post:
       tags:
         - Block volume snapshots
-      description: Create a volume snapshot.
+      description: Creates a volume snapshot.
       parameters:
         - name: body
           in: body
@@ -708,7 +708,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/groups':
+  '/v1beta/{projectId}/block/volumeGroup':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -731,7 +731,7 @@ paths:
     post:
       tags:
         - Block volume group
-      description: Create a volume group.
+      description: Creates a volume group.
       parameters:
         - name: body
           in: body
@@ -748,14 +748,14 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/groups/{volumeGroupId}':
+  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeGroupId'
     get:
       tags:
         - Block volume group
-      description: Get volume group detail by volume group id.
+      description: Gets volume group detail by volume group id.
       responses:
         '200':
           description: OK
