@@ -33,6 +33,8 @@ socket_order = inc
 [osdsdock]
 api_endpoint = localhost:50050
 log_file = /var/log/opensds/osdsdock.log
+# Choose the type of dock resource, only support 'provisioner' and 'attacher'.
+dock_type = provisioner
 # Enabled backend types, such as sample, ceph, cinder, etc.
 enabled_backends = sample
 

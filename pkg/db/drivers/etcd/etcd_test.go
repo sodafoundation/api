@@ -59,7 +59,9 @@ func (*fakeClientCaller) Get(req *Request) *Response {
 	if strings.Contains(req.Url, "snapshots") {
 		resp = append(resp, StringSliceSnapshots[0])
 	}
-
+	if strings.Contains(req.Url, "replications") {
+		resp = append(resp, StringSliceReplications[0])
+	}
 	return &Response{
 		Status:  "Success",
 		Message: resp,
@@ -87,7 +89,9 @@ func (*fakeClientCaller) List(req *Request) *Response {
 	if strings.Contains(req.Url, "snapshots") {
 		resp = StringSliceSnapshots
 	}
-
+	if strings.Contains(req.Url, "replications") {
+		resp = StringSliceReplications
+	}
 	return &Response{
 		Status:  "Success",
 		Message: resp,
@@ -146,6 +150,12 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	}
 }
 
+func TestCreateReplication(t *testing.T) {
+	if _, err := fc.CreateReplication(c.NewAdminContext(), &model.ReplicationSpec{BaseModel: &model.BaseModel{}}); err != nil {
+		t.Error("Create replication failed:", err)
+	}
+}
+
 func TestGetDock(t *testing.T) {
 	dck, err := fc.GetDock(c.NewAdminContext(), "")
 	if err != nil {
@@ -182,7 +192,7 @@ func TestGetProfile(t *testing.T) {
 	}
 }
 
-func TesGetVolume(t *testing.T) {
+func TestGetVolume(t *testing.T) {
 	vol, err := fc.GetVolume(c.NewAdminContext(), "")
 	if err != nil {
 		t.Error("Get volume failed:", err)
@@ -213,6 +223,18 @@ func TestGetVolumeSnapshot(t *testing.T) {
 	}
 
 	var expected = &SampleSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, snp)
+	}
+}
+
+func TestGetReplication(t *testing.T) {
+	snp, err := fc.GetReplication(c.NewAdminContext(), "")
+	if err != nil {
+		t.Error("Get replication failed:", err)
+	}
+
+	var expected = &SampleReplications[0]
 	if !reflect.DeepEqual(snp, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, snp)
 	}
@@ -466,6 +488,57 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 	}
 }
 
+func TestListReplications(t *testing.T) {
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"2"},
+		"sortDir": []string{"desc"},
+		"sortKey": []string{"name"},
+	}
+	replication, err := fc.ListReplicationWithFilter(c.NewAdminContext(), m)
+	if err != nil {
+		t.Error("List replication failed:", err)
+	}
+
+	var expected []*model.ReplicationSpec
+	for i := range SampleSnapshots {
+		expected = append(expected, &SampleReplications[i])
+	}
+	if !reflect.DeepEqual(replication, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected[0], replication[0])
+		t.Errorf("Expected %+v, got %+v\n", expected[1], replication[1])
+	}
+}
+
+func TestUpdateReplication(t *testing.T) {
+	var replication = model.ReplicationSpec{
+		Name:        "Test Name",
+		Description: "Test Description",
+		ProfileId:   "3769855c-a102-11e7-b772-17b880d2f123",
+	}
+
+	result, err := fc.UpdateReplication(c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", &replication)
+	if err != nil {
+		t.Error("Update replication failed:", err)
+	}
+
+	if result.Id != "c299a978-4f3e-11e8-8a5c-977218a83359" {
+		t.Errorf("Expected %+v, got %+v\n", "c299a978-4f3e-11e8-8a5c-977218a83359", result.Id)
+	}
+
+	if result.Name != "Test Name" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Name", result.Name)
+	}
+
+	if result.Description != "Test Description" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Description", result.Description)
+	}
+
+	if result.ProfileId != "3769855c-a102-11e7-b772-17b880d2f123" {
+		t.Errorf("Expected %+v, got %+v\n", "Test Description", result.Description)
+	}
+}
+
 func TestDeleteDock(t *testing.T) {
 	if err := fc.DeleteDock(c.NewAdminContext(), ""); err != nil {
 		t.Error("Delete dock failed:", err)
@@ -499,6 +572,12 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	if err := fc.DeleteVolumeSnapshot(c.NewAdminContext(), ""); err != nil {
 		t.Error("Delete volume snapshot failed:", err)
+	}
+}
+
+func TestDeleteReplication(t *testing.T) {
+	if err := fc.DeleteReplication(c.NewAdminContext(), ""); err != nil {
+		t.Error("Delete replication failed:", err)
 	}
 }
 

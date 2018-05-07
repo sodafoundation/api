@@ -52,7 +52,7 @@ var volumeAttachmentListCommand = &cobra.Command{
 }
 
 var volumeAttachmentDeleteCommand = &cobra.Command{
-	Use:   "delete <volume id> <attachment id>",
+	Use:   "delete <attachment id>",
 	Short: "delete a volume attachment of specified volume in the cluster",
 	Run:   volumeAttachmentDeleteAction,
 }

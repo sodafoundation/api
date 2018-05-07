@@ -21,15 +21,19 @@ import (
 	"fmt"
 	"net"
 	"os"
+	_ "reflect"
 	"runtime"
 	"testing"
 
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 var (
-	c = client.NewClient(&client.Config{"http://localhost:50040", nil})
+	c = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 	localIqn = "iqn.2017-10.io.opensds:volume:00000001"
 )

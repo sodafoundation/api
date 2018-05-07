@@ -19,11 +19,19 @@ This module implements the common data structure.
 
 package model
 
+const (
+	DockTypeProvioner = "provisioner"
+	DockTypeAttacher  = "attacher"
+)
+
 // DockSpec is initialized by specific driver configuration. Each backend
 // can be regarded as a docking service between SDS controller and storage
 // service.
 type DockSpec struct {
 	*BaseModel
+
+	// The type of the dock(provisioner/attacher)
+	Type string `json:"type,omitempty"`
 
 	// The name of the dock.
 	Name string `json:"name,omitempty"`
@@ -50,4 +58,9 @@ type DockSpec struct {
 	// DriverName represents the dock provider.
 	// Currently One of: "cinder", "ceph", "lvm", "default".
 	DriverName string `json:"driverName,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds volume
+	// attachment and backend attached storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
