@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"testing"
 
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	. "github.com/opensds/opensds/testutils/collection"
@@ -63,6 +64,7 @@ func TestInit(t *testing.T) {
 	for i := range fdd.dcks {
 		fdd.dcks[i].Id = ""
 		fdd.dcks[i].NodeId = ""
+		fdd.dcks[i].Metadata = nil
 		expected[i].Id = ""
 	}
 	if !reflect.DeepEqual(fdd.dcks, expected) {
@@ -102,9 +104,9 @@ func TestReport(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateDock", fdd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", fdd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", fdd.pols[1]).Return(nil, nil)
+	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)
 	fdd.c = mockClient
 
 	if err := fdd.Report(); err != nil {

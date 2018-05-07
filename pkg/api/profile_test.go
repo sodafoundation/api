@@ -25,6 +25,8 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
@@ -70,7 +72,7 @@ func TestCreateProfile(t *testing.T) {
 		}`
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateProfile", &model.ProfileSpec{
+	mockClient.On("CreateProfile", c.NewAdminContext(), &model.ProfileSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "Gold",
 		Description: "Gold service"}).Return(&model.ProfileSpec{
@@ -84,6 +86,9 @@ func TestCreateProfile(t *testing.T) {
 
 	r, _ := http.NewRequest("POST", "/v1beta/profiles", strings.NewReader(fakeBody))
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output model.ProfileSpec
@@ -113,7 +118,7 @@ func TestCreateProfile(t *testing.T) {
 func TestUpdateProfile(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("UpdateProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeProfile).Return(fakeProfile, nil)
+	mockClient.On("UpdateProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeProfile).Return(fakeProfile, nil)
 	db.C = mockClient
 
 	var fakeBody = `
@@ -134,6 +139,9 @@ func TestUpdateProfile(t *testing.T) {
 		}`
 	r, _ := http.NewRequest("PUT", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", strings.NewReader(fakeBody))
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output model.ProfileSpec
@@ -177,11 +185,14 @@ func TestListProfiles(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListProfilesWithFilter", m).Return(fakeProfiles, nil)
+	mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(fakeProfiles, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output []model.ProfileSpec
@@ -226,11 +237,14 @@ func TestListProfilesWithBadRequest(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListProfilesWithFilter", m).Return(nil, errors.New("db error"))
+	mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 400 {
@@ -241,11 +255,14 @@ func TestListProfilesWithBadRequest(t *testing.T) {
 func TestGetProfile(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeProfile, nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeProfile, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output model.ProfileSpec
@@ -283,13 +300,16 @@ func TestGetProfile(t *testing.T) {
 func TestGetProfileWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
+	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET",
 		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 400 {
@@ -300,14 +320,17 @@ func TestGetProfileWithBadRequest(t *testing.T) {
 func TestDeleteProfile(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
+	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		fakeProfile, nil)
-	mockClient.On("DeleteProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil)
+	mockClient.On("DeleteProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("DELETE",
 		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 200 {
@@ -318,13 +341,16 @@ func TestDeleteProfile(t *testing.T) {
 func TestDeleteProfileWithBadrequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetProfile", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
+	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("Invalid resource uuid"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("DELETE",
 		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 400 {
@@ -339,11 +365,14 @@ func TestDeleteProfileWithBadrequest(t *testing.T) {
 func TestListExtraProperties(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListExtraProperties", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(&fakeExtras, nil)
+	mockClient.On("ListExtraProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(&fakeExtras, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output model.ExtraSpec
@@ -373,11 +402,14 @@ func TestListExtraProperties(t *testing.T) {
 func TestListExtraPropertiesWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("ListExtraProperties", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
+	mockClient.On("ListExtraProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 400 {
@@ -388,7 +420,7 @@ func TestListExtraPropertiesWithBadRequest(t *testing.T) {
 func TestAddExtraProperty(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("AddExtraProperty", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeExtras).Return(&fakeExtras, nil)
+	mockClient.On("AddExtraProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeExtras).Return(&fakeExtras, nil)
 	db.C = mockClient
 
 	var fakeBody = `
@@ -402,6 +434,9 @@ func TestAddExtraProperty(t *testing.T) {
 		}`
 	r, _ := http.NewRequest("POST", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras", strings.NewReader(fakeBody))
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output model.ExtraSpec
@@ -432,12 +467,15 @@ func TestAddExtraProperty(t *testing.T) {
 func TestRemoveExtraProperty(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("RemoveExtraProperty", "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", "key1").Return(nil)
+	mockClient.On("RemoveExtraProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", "key1").Return(nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("DELETE",
 		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras/key1", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 200 {

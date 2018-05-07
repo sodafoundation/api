@@ -61,7 +61,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		ProfileId:        in.ProfileId,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
-		Status:           model.VOLUME_CREATING,
+		Status:           model.VolumeCreating,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
@@ -79,12 +79,12 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string) (*model.VolumeSpec, error
 		return nil, err
 	}
 
-	if volume.Status != model.VOLUME_AVAILABLE {
+	if volume.Status != model.VolumeAvailable {
 		errMsg := "The status of the volume to be extended must be available"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	volume.Status = model.VOLUME_EXTENDING
+	volume.Status = model.VolumeExtending
 	// Store the volume data into database.
 	result, err := db.C.ExtendVolume(ctx, volume)
 	if err != nil {
@@ -100,7 +100,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 		log.Error("Get volume failed in create volume attachment method: ", err)
 		return nil, err
 	}
-	if vol.Status != model.VOLUME_AVAILABLE {
+	if vol.Status != model.VolumeAvailable {
 		errMsg := "Only the status of volume is available, attachment can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
@@ -131,7 +131,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 			Host:      in.Host,
 			Initiator: in.Initiator,
 		},
-		Status:         model.VOLUMEATM_CREATING,
+		Status:         model.VolumeAttachCreating,
 		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
 		ConnectionInfo: in.ConnectionInfo,
 	}
@@ -150,7 +150,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 		log.Error("Get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
-	if vol.Status != model.VOLUME_AVAILABLE && vol.Status != model.VOLUME_IN_USE {
+	if vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
 		var errMsg = "Only the status of volume is available or in-use, the snapshot can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
@@ -174,7 +174,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 		VolumeId:    in.VolumeId,
 		Size:        vol.Size,
 		Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		Status:      model.VOLUMESNAP_CREATING,
+		Status:      model.VolumeSnapCreating,
 	}
 
 	result, err := db.C.CreateVolumeSnapshot(ctx, snap)
@@ -186,12 +186,12 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
-	if in.Status != model.VOLUMESNAP_AVAILABLE {
+	if in.Status != model.VolumeSnapAvailable {
 		errMsg := "Only the volume snapshot with the status available can be deleted"
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
-	in.Status = model.VOLUMESNAP_DELETING
+	in.Status = model.VolumeSnapDeleting
 	_, err := db.C.UpdateVolumeSnapshot(ctx, in.Id, in)
 	if err != nil {
 		return err
@@ -201,16 +201,89 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
-	invalidStatus := []string{model.VOLUME_AVAILABLE, model.VOLUME_ERROR,
-		model.VOLUEM_ERROR_DELETING, model.VOLUME_ERROR_EXTENDING}
+	invalidStatus := []string{model.VolumeAvailable, model.VolumeError,
+		model.VolumeErrorDeleting, model.VolumeErrorExtending}
 	if !utils.Contained(in.Status, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
 
-	in.Status = model.VOLUME_DELETING
+	in.Status = model.VolumeDeleting
 	_, err := db.C.UpdateVolume(ctx, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationDeleting
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't enable the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationEnabling
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't disable the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.ReplicationStatus = model.ReplicationDisabling
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secondaryBackendId string) error {
+	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+		errMsg := fmt.Sprintf("Can't fail over/back the replication in %s", in.ReplicationStatus)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	if secondaryBackendId == model.ReplicationDefaultBackendId {
+		in.ReplicationStatus = model.ReplicationFailingOver
+	} else {
+		in.ReplicationStatus = model.ReplicationFailingBack
+	}
+	_, err := db.C.UpdateReplication(ctx, in.Id, in)
 	if err != nil {
 		return err
 	}
