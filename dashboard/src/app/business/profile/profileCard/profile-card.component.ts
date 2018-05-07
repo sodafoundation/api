@@ -13,7 +13,7 @@ import { ButtonModule } from './../../../components/common/api';
     selector: 'profile-card',
     templateUrl: './profile-card.component.html',
     styleUrls: [
-        "./profile-card.scss"
+        
     ],
     animations: [
         trigger('overlayState', [

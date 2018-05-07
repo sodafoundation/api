@@ -6,8 +6,8 @@
 </div>
 <div *ngIf='data'>
     <div class="ui-g-12 ui-md-6">
-        <div>
-            <h2 class="proflie-name">{{data.name}}</h2>
+        <div class="content-header">
+            <h1>{{data.name}}</h1>
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">Access Protocol:</span>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="ui-helper-clearfix"></div>
-    <div class="footer-button-class">
+    <div class="bottom-button-margin">
         <button pButton type="button" label="Modify" class="ui-button-secondary"></button>
         <button pButton type="button" label="Back" [routerLink]="['/profile']"></button>
     </div>

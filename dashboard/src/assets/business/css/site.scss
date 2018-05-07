@@ -1056,6 +1056,137 @@ a {
 /* block: volume css end */
 
 
+/* profile css start */
+
+.relative-class {
+    padding-right: 0.40rem;
+    position: relative;
+}
+
+.create-profile-form {
+    line-height: .32rem;
+    .profile-form-padding {
+        padding: .05rem 0;
+        &>div:first-of-type {
+            &::before {
+                content: "*";
+                display: inline;
+                color: transparent;
+                padding-right: 0;
+                margin-left: -0.09rem;
+            }
+            &.required::before {
+                color: #cd0a0a;
+            }
+        }
+        .radio-groups span {
+            padding-right: .30rem;
+        }
+    }
+    .form-submit-button {
+        padding: .30rem 0 .10rem;
+    }
+    .secondary-form {
+        padding: 15px 30px;
+        background: #f3f6f7;
+        border-radius: 12px;
+    }
+}
+
+.profile-form-padding {
+    padding: .05rem 0;
+}
+
+.create-profile-img {
+    cursor: pointer;
+}
+
+.customization-item {
+    min-width: 46%;
+    margin: 0 0.5em;
+    overflow: hidden;
+}
+
+.customization-container {
+    min-width: 30%;
+    max-width: 100%;
+    padding: 1em 2em !important;
+    background-color: rgba(243, 246, 247, 1);
+    border-radius: 10px;
+    display: flex;
+}
+
+.ui-inputgroup .ui-inputtext:not(:first-child) {
+    border-left: 1px solid #cfd7db;
+}
+
+.ui-inputgroup .ui-inputtext:enabled:hover {
+    border-color: #98a5bc;
+}
+
+.input-text-vertical-align {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.input-text-vertical-align span,
+.execution-time-add {
+    padding: 0 0.5em;
+}
+
+.execution-time-add {
+    cursor: pointer;
+}
+
+.modify-profile-item {
+    margin-top: 0.5em;
+}
+
+.margin-left-class {
+    margin-left: 0.5em;
+}
+
+.font-primary {
+    color: #434B52;
+    h2 {
+        padding-bottom: .10rem;
+    }
+}
+
+.padding-class {
+    min-width: 300px;
+    &:last-of-type {
+        padding-top: .10rem;
+    }
+}
+
+.icon-color-class {
+    font-size: $fontSize;
+    color: map-get($color-primary, normal);
+    background: rgba(101, 125, 149, 0.149019607843137);
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.font-color-class {
+    color: map-get($color-text, primary);
+}
+
+.label-class {
+    color: #B9C3C8;
+}
+
+.storage-count-capacity {
+    font-size: .2rem;
+    color: #438bd3 !important;
+    padding-right: 0.05rem;
+}
+
+
+/* profile css end */
+
+
 /* Who Uses */
 
 .home .whouses {

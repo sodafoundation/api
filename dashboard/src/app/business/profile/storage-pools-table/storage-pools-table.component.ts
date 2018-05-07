@@ -4,7 +4,9 @@ import { PoolService } from './../profile.service';
 @Component({
   selector: 'app-storage-pools-table',
   templateUrl: './storage-pools-table.component.html',
-  styleUrls: ['./storage-pools-table.component.css']
+  styleUrls: [
+    
+  ]
 })
 export class StoragePoolsTableComponent implements OnInit {
   cols;
