@@ -87,7 +87,7 @@ func Run(host string) {
 				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplication"),
 				beego.NSRouter("/replications/detail", NewReplicationPortal(), "get:ListReplicationDetail"),
 				beego.NSRouter("/replications/:replicationId", NewReplicationPortal(), "get:GetReplication;put:UpdateReplication;delete:DeleteReplication"),
-				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
+				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "post:Action"),
 			),
 			// Extend Volume
 			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
