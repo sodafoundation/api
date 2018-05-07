@@ -6,7 +6,9 @@ import { VolumeService } from './../volume.service';
 @Component({
   selector: 'app-volume-detail',
   templateUrl: './volume-detail.component.html',
-  styleUrls: ['./volume-detail.component.scss']
+  styleUrls: [
+    
+  ]
 })
 export class VolumeDetailComponent implements OnInit {
   items;

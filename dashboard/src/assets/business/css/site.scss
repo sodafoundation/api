@@ -1033,6 +1033,25 @@ a {
     background-color: rgba(243, 246, 247, 1);
 }
 
+.volume-basic-info {
+    background: #f3f6f7;
+    margin-bottom: .3rem;
+    padding: .2rem;
+    border-radius: 12px;
+}
+
+.volume-basic-info h3 {
+    padding: 0 .08rem .2rem;
+}
+
+.volume-basic-item-class {
+    padding: 0.5em 0;
+}
+
+.volume-basic-item-value-color {
+    color: #2E3039 !important;
+}
+
 
 /* block: volume css end */
 
@@ -1316,3 +1335,21 @@ a {
         display: block;
     }
 }
+
+
+/* custom breadcrumb start */
+
+.custom-breadcrumb {
+    padding: 0 0 0.3rem;
+}
+
+.custom-breadcrumb a {
+    color: map-get($color-text, primary) !important;
+}
+
+.custom-breadcrumb .font-color-class {
+    color: #478CD0 !important;
+}
+
+
+/* custom breadcrumb end */
