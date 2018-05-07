@@ -91,6 +91,7 @@ func ListVolumesDetailsResp(volumes []*model.VolumeSpec) *ListVolumesDetailsResp
 			cinderVolume.Description = volume.Description
 			cinderVolume.Name = volume.Name
 			cinderVolume.CreatedAt = volume.BaseModel.CreatedAt
+			cinderVolume.VolumeType = volume.ProfileId
 
 			resp.Volumes = append(resp.Volumes, cinderVolume)
 		}
@@ -294,6 +295,7 @@ func ShowVolumeResp(volume *model.VolumeSpec) *ShowVolumeRespSpec {
 	resp.Volume.Description = volume.Description
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
+	resp.Volume.VolumeType = volume.ProfileId
 	//resp.Volume.TenantID = volume.TenantId
 
 	return &resp
@@ -377,6 +379,7 @@ func UpdateVolumeResp(volume *model.VolumeSpec) *UpdateVolumeRespSpec {
 	resp.Volume.Description = volume.Description
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
+	resp.Volume.VolumeType = volume.BaseModel.CreatedAt
 
 	return &resp
 }

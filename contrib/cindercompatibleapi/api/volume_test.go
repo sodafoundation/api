@@ -73,6 +73,7 @@ func TestGetVolume(t *testing.T) {
 
 	expected.Volume.Attachments = make([]converter.RespAttachment, 0, 0)
 	expected.Volume.Status = "available"
+	expected.Volume.VolumeType = "1106b972-66ef-11e7-b172-db03f3689c9c"
 
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
@@ -130,6 +131,7 @@ func TestListVolumesDetails(t *testing.T) {
             "metadata": {
                 
             },
+			"volume_type": "1106b972-66ef-11e7-b172-db03f3689c9c",
             "name": "sample-volume"
         }]
     }`
