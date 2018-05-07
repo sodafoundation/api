@@ -156,8 +156,8 @@ func (d *Driver) geLvInfos() ([]*LvInfo, error) {
 		words := strings.Fields(line)
 		size, _ := strconv.ParseInt(words[2], 10, 64)
 		lv := &LvInfo{
-			Name: words[0],
-			Vg:   words[1],
+			Vg:   words[0],
+			Name: words[1],
 			Size: size,
 		}
 		lvList = append(lvList, lv)
