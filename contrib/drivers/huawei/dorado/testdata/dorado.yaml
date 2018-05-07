@@ -3,6 +3,14 @@ authOptions:
   username: "opensds"
   password: "Opensds@123"
   insecure: true
+
+replication:
+  remoteAuthOptions:
+    endpoints: "https://8.46.185.104:8088/deviceManager/rest"
+    username: "opensds"
+    password: "Opensds@123"
+    insecure: true
+
 pool:
   StoragePool001:
     storageType: block

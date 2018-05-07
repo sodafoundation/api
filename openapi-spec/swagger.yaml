@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -408,7 +408,7 @@ paths:
     post:
       tags:
         - Block volumes
-      description: Create a volume.
+      description: Creates a volume.
       parameters:
         - name: body
           in: body
@@ -626,7 +626,7 @@ paths:
     post:
       tags:
         - Block volume snapshots
-      description: Create a volume snapshot.
+      description: Creates a volume snapshot.
       parameters:
         - name: body
           in: body
@@ -697,6 +697,111 @@ paths:
       tags:
         - Block volume snapshots
       description: Deletes a volume snapshot.
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/volumeGroup':
+    parameters:
+      - $ref: '#/parameters/projectId'
+    get:
+      tags:
+        - Block volume group
+      description: Lists information for all volume groups.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - Block volume group
+      description: Creates a volume group.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+      responses:
+        '202':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
+    parameters:
+      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/volumeGroupId'
+    get:
+      tags:
+        - Block volume group
+      description: Gets volume group detail by volume group id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    put:
+      tags:
+        - Block volume group
+      description: Updates a volume group.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+            required:
+              - name
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - Block volume group
+      description: Deletes a volume group.
       responses:
         '200':
           description: OK
@@ -924,6 +1029,50 @@ definitions:
             readOnly: true
           volumeId:
             type: string
+  VolumeGroup:
+    description: >-
+      Volume group contains a list of volumes that are used in the same application.
+    allOf:
+      - $ref: '#/definitions/BaseModel'
+      - type: object
+        required:
+          - name
+          - description
+        properties:
+          projectId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+          description:
+            type: string
+          availabilityZone:
+            type: string
+            readOnly: true
+          status:
+            type: string
+            readOnly: true
+          poolId:
+            type: string
+            readOnly: true
+          AddVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          RemoveVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          GroupSnapshots:
+            type: array
+            items: 
+              type: string
+            readOnly: true          
   Error:
     description: >-
       Detailed HTTP error response, which consists of a HTTP status code, and a
@@ -1012,6 +1161,12 @@ parameters:
     in: path
     required: true
     description: The UUID of the volume snapshot.
+    type: string
+  volumeGroupId:
+    name: volumeGroupId
+    in: path
+    required: true
+    description: The UUID of the volume group.
     type: string
 responses:
   HTTPStatus500:

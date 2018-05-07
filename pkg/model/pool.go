@@ -19,6 +19,11 @@ This module implements the common data structure.
 
 package model
 
+const (
+	ReplicationTypeHost  = "HostBased"
+	ReplicationTypeArray = "ArrayBased"
+)
+
 // A pool is discoveried and updated by a dock service. Each pool can be regarded
 // as a physical storage pool or a virtual storage pool. It's a logical and
 // atomic pool and can be abstracted from any storage platform.
@@ -61,6 +66,11 @@ type StoragePoolSpec struct {
 	// of the pool, such as supported capabilities.
 	// +optional
 	Extras StoragePoolExtraSpec `json:"extras,omitempty"`
+
+	//Replication type host based or array based
+	ReplicationType string `json:"replicationType,omitempty"`
+	//Replication driver name
+	ReplicationDriverName string `json:"replicationDriverName,omitempty"`
 }
 
 type StoragePoolExtraSpec struct {

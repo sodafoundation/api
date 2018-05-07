@@ -22,6 +22,8 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
+	c "github.com/opensds/opensds/pkg/context"
 )
 
 func init() {
@@ -33,6 +35,9 @@ func init() {
 func TestListVersions(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output []map[string]string
@@ -46,6 +51,9 @@ func TestListVersions(t *testing.T) {
 func TestGetVersion(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/v1beta", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	var output map[string]string
@@ -66,6 +74,9 @@ func TestGetVersion(t *testing.T) {
 func TestGetVersionWithInvalidAPIVersion(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/InvalidAPIVersion", nil)
 	w := httptest.NewRecorder()
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 404 {
