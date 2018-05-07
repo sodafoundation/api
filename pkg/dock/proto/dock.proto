@@ -58,7 +58,6 @@ service ProvisionDock {
     
     // Delete a volume attachment
     rpc DeleteAttachment (DeleteAttachmentOpts) returns (GenericResponse){}
-
     // Create a replication
     rpc CreateReplication (CreateReplicationOpts) returns (GenericResponse){}
 
@@ -73,7 +72,14 @@ service ProvisionDock {
 
     // Failover a replication
     rpc FailoverReplication (FailoverReplicationOpts) returns (GenericResponse){}
-}
+    // Create a volume group
+    rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Update volume group
+    rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Delete volume group
+    rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}}
 
 // CreateVolumeOpts is a structure which indicates all required properties
 // for creating a volume.
@@ -428,6 +434,51 @@ message FailoverReplicationOpts {
     string secondaryBackendId = 17;
     // The replication metadata
     map<string, string> metadata = 18;
+}
+
+// CreateVolumeGroupOpts is a structure which indicates all required
+// properties for creating a volume group.
+message CreateVolumeGroupOpts {
+    // The uuid of the volume group, optional when creating.
+    string id = 1;
+    // The name of the volume, required.
+    string name = 2;
+    // The driver of the volume group.
+    string driverName = 3;
+    // The description of the volume, optional.
+    string description = 4;
+    // When create volume from snapshot, this field is required.
+    string availabilityZone = 5;
+    // The addVolumes contain UUIDs of volumes to be added to the group.
+    repeated string addVolumes = 6;
+    // The removeVolumes contains the volumes to be removed from the group.
+    repeated string removeVolumes = 7;
+    // The pool belongs to the group.
+    string poolId =8;
+    // The Context
+    string context = 9;
+}
+
+message UpdateVolumeGroupOpts{
+    // The uuid of the volume group, optional when updating.
+    string id = 1;
+    // The driver of the volume group.
+    string driverName = 2;
+    // The addVolumes contain UUIDs of volumes to be added to the group.
+    repeated string addVolumes = 3;
+    // The removeVolumes contains the volumes to be removed from the group.
+    repeated string removeVolumes = 4;
+    // The Context
+    string context = 5;
+}
+
+message DeleteVolumeGroupOpts{
+    // The uuid of the volume group, optional when deleting.
+    string id = 1;
+    // The driver of the volume group.
+    string driverName = 2;
+    // The Context
+    string context = 3;
 }
 service AttachDock {
     // Attach a volume

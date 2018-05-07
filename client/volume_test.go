@@ -59,6 +59,11 @@ func (*fakeVolumeReceiver) Recv(
 				return err
 			}
 			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
+				return err
+			}
+			break
 		default:
 			return errors.New("output format not supported!")
 		}
@@ -95,6 +100,17 @@ func (*fakeVolumeReceiver) Recv(
 				return err
 			}
 			break
+		case *[]*model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroups), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
+				return err
+			}
+			break
+
 		default:
 			return errors.New("output format not supported!")
 		}
@@ -522,6 +538,114 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		Size:        1,
 		Status:      "available",
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v", expected, result)
+		return
+	}
+}
+
+func TestCreateVolumeGroup(t *testing.T) {
+	expected := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f555",
+		},
+		Name:        "sample-group-01",
+		Description: "This is the first sample group for testing",
+		Status:      "creating",
+	}
+
+	vg, err := fv.CreateVolumeGroup(&model.VolumeGroupSpec{})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
+		return
+	}
+}
+
+func TestGetVolumeGroup(t *testing.T) {
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
+	expected := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f555",
+		},
+		Name:        "sample-group-01",
+		Description: "This is the first sample group for testing",
+		Status:      "creating",
+	}
+	vg, err := fv.GetVolumeGroup(vgId)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
+		return
+	}
+}
+
+func TestListVolumeGroups(t *testing.T) {
+	expected := []*model.VolumeGroupSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f555",
+			},
+			Name:        "sample-group-01",
+			Description: "This is the first sample group for testing",
+			Status:      "creating",
+		},
+	}
+
+	vg, err := fv.ListVolumeGroups()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("Expected %v, got %v", expected, vg)
+		return
+	}
+}
+
+func TestDeleteVolumeGroup(t *testing.T) {
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
+
+	if err := fv.DeleteVolumeGroup(vgId, &model.VolumeGroupSpec{}); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestUpdateVolumeGroup(t *testing.T) {
+	var vgId = "3769855c-a102-11e7-b772-17b880d2f555"
+	vg := model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f555",
+		},
+		Name:        "sample-group-02",
+		Description: "This is the first sample group for testing",
+	}
+
+	result, err := fv.UpdateVolumeGroup(vgId, &vg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f555",
+		},
+		Name:        "sample-group-01",
+		Description: "This is the first sample group for testing",
+		Status:      "creating",
 	}
 
 	if !reflect.DeepEqual(result, expected) {

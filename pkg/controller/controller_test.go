@@ -38,6 +38,13 @@ func (s *fakeSelector) SelectSupportedPool(tags map[string]interface{}) (*model.
 	return s.res, nil
 }
 
+func (s *fakeSelector) SelectSupportedPoolForVG(vg *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
+	return s.res, nil
+}
+
 func NewFakeVolumeController() volume.Controller {
 	return &fakeVolumeController{}
 }
@@ -101,7 +108,17 @@ func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOp
 func (fvc *fakeVolumeController) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
 	return nil
 }
+func (fvc *fakeVolumeController) CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
 
+func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) error {
+	return nil
+}
+
+func (fvc *fakeVolumeController) DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error {
+	return nil
+}
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 func TestCreateVolume(t *testing.T) {
@@ -117,7 +134,7 @@ func TestCreateVolume(t *testing.T) {
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(req, nil)
+	mockClient.On("UpdateStatus",context.NewAdminContext(), vol, vol.Status).Return(nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{
@@ -182,7 +199,7 @@ func TestExtendVolume(t *testing.T) {
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", context.NewAdminContext(), vol.ProfileId).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), vol2).Return(vol, nil)
+        mockClient.On("UpdateStatus", context.NewAdminContext(), vol2, vol2.Status).Return(nil)
 	db.C = mockClient
 
 	var c = &Controller{
@@ -241,7 +258,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolumeAttachment", context.NewAdminContext(), volattm.Id, volattm).Return(volattm, nil)
+mockClient.On("UpdateStatus", context.NewAdminContext(),volattm, volattm.Status).Return(nil)
 
 	db.C = mockClient
 
@@ -299,7 +316,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), snp.Id, snp).Return(snp, nil)
+mockClient.On("UpdateStatus", context.NewAdminContext(),snp, "available").Return(nil)
 
 	db.C = mockClient
 
