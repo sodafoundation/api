@@ -110,6 +110,37 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 	}, nil
 }
 
+// Create a volume snapshot
+func (fc *fakeClient) CreateVolumeGroup(ctx context.Context, in *pb.CreateVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteVolumeGroup,
+			},
+		},
+	}, nil
+}
+
+// Create a volume snapshot
+func (fc *fakeClient) UpdateVolumeGroup(ctx context.Context, in *pb.UpdateVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteVolumeGroup,
+			},
+		},
+	}, nil
+}
+
+// Delete a volume snapshot
+func (fc *fakeClient) DeleteVolumeGroup(ctx context.Context, in *pb.DeleteVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 // Attach a volume
 func (fc *fakeClient) AttachVolume(ctx context.Context, in *pb.AttachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{

@@ -431,6 +431,22 @@ var (
 		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	}`
 
+	ByteVolumeGroup = `{
+		"id": "3769855c-a102-11e7-b772-17b880d2f555",
+		"name": "sample-group-01",
+		"description": "This is the first sample group for testing",
+		"status": "creating"
+	}`
+
+	ByteVolumeGroups = `[
+	{
+		"id": "3769855c-a102-11e7-b772-17b880d2f555",
+		"name": "sample-group-01",
+		"description": "This is the first sample group for testing",
+		"status": "creating"
+	}
+	]`
+
 	ByteSnapshots = `[
 		{
 			"id": "3769855c-a102-11e7-b772-17b880d2f537",
@@ -558,30 +574,6 @@ var (
 				"advanced": {
 					"diskType": "SSD",
 					"latency":  "3ms"
-				}
-			}
-		}`,
-		`{
-			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			"name":             "sample-pool-02",
-			"description":      "This is the second sample storage pool for testing",
-			"totalCapacity":    200,
-			"freeCapacity":     170,
-			"availabilityZone": "default",
-			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        3000000,
-					"maxBWS": 	      350
-				},
-				"advanced": {
-					"diskType": "SAS",
-					"latency":  "500ms"
 				}
 			}
 		}`,
