@@ -21,7 +21,6 @@ export class StoragePoolsTableComponent implements OnInit {
     this.PoolService.getPools().subscribe((res) => {
       this.pools = res.json();
       this.totalFreeCapacity = this.getSumCapacity(this.pools, 'free');
-      console.log(res.json());
     });
   }
 

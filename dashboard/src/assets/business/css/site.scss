@@ -1143,8 +1143,12 @@ a {
     margin-top: 0.5em;
 }
 
-.margin-left-class {
-    margin-left: 0.5em;
+.margin-right-class {
+    margin-right: 0.5em;
+}
+
+.suspension-frame-content h3 {
+    color: #fff;
 }
 
 .font-primary {
@@ -1181,6 +1185,42 @@ a {
     font-size: .2rem;
     color: #438bd3 !important;
     padding-right: 0.05rem;
+}
+
+.suspension-frame-container {
+    position: absolute;
+    width: 200%;
+    top: -0.1rem;
+    left: -5px;
+    margin-left: 50%;
+    transform: translate(-50%, -100%);
+}
+
+.suspension-frame-content {
+    position: relative;
+    background-color: #242e43;
+    border-radius: 4px;
+}
+
+.suspension-frame-content>div {
+    padding: 1em;
+}
+
+.suspension-frame-content::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 6px solid #242e43;
+    border-left: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid transparent;
+    position: absolute;
+    left: 50%;
+    margin-left: -6px;
+}
+
+.mouse-cursor {
+    cursor: pointer;
 }
 
 

@@ -89,4 +89,20 @@ export class ProfileCardComponent implements OnInit {
         };
     }
 
+    index;
+    isHover;
+
+    showSuspensionFrame(event){
+        if(event.type === 'mouseenter'){
+            this.isHover = true;
+        }else if(event.type === 'mouseleave'){
+            this.isHover = false;
+        }
+        let arrLength = event.target.parentNode.children.length;
+        for(let i=0; i<arrLength; i++) {
+            if(event.target.parentNode.children[i] === event.target){
+                this.index = i;
+            }
+        }
+    }
 }
