@@ -86,7 +86,7 @@ func Run(host string) {
 				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplication"),
 				beego.NSRouter("/replications/detail", NewReplicationPortal(), "get:ListReplicationDetail"),
 				beego.NSRouter("/replications/:replicationId", NewReplicationPortal(), "get:GetReplication;put:UpdateReplication;delete:DeleteReplication"),
-				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
+				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "post:Action"),
 				// Volume group contains a list of volumes that are used in the same application.
 				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
 				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
