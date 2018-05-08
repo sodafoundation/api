@@ -19,13 +19,14 @@ import (
 	"fmt"
 	"strings"
 
+	"os"
+
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"os"
 )
 
 type Driver struct {
@@ -148,6 +149,16 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	if opt.Protocol == "fc" {
+		return d.InitializeConnectionIscsi(opt)
+	}
+	if opt.Protocol == "iscsi" {
+		return d.InitializeConnectionFC(opt)
+	}
+	return nil, errors.New("No supported protocol for dorado driver.")
+}
+
+func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
@@ -308,6 +319,140 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
+}
+
+func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	lunId := opt.GetMetadata()[KLunId]
+	hostInfo := opt.GetHostInfo()
+	// Create host if not exist.
+	hostId, err := d.client.AddHostWithCheck(hostInfo)
+	if err != nil {
+		log.Errorf("Add host failed, host name =%s, error: %v", hostInfo.Host, err)
+		return nil, err
+	}
+
+	// Add host to hostgroup.
+	hostGrpId, err := d.client.AddHostToHostGroup(hostId)
+	if err != nil {
+		log.Errorf("Add host to group failed, host id=%s, error: %v", hostId, err)
+		return nil, err
+	}
+
+	// Not use FC switch
+	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, hostId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mapping lungroup and hostgroup to view.
+	if err = d.client.DoMapping(lunId, hostGrpId, hostId); err != nil {
+		log.Errorf("Do mapping failed, lun id=%s, hostGrpId=%s, hostId=%s, error: %v",
+			lunId, hostGrpId, hostId, err)
+		return nil, err
+	}
+
+	tgtLun, err := d.client.GetHostLunId(hostId, lunId)
+	if err != nil {
+		log.Error("Get the get host lun id failed,", err)
+		return nil, err
+	}
+
+	fcInfo := &model.ConnectionInfo{
+		DriverVolumeType: "fibre_channel",
+		ConnectionData: map[string]interface{}{
+			"targetDiscovered":     true,
+			"target_wwn":           tgtPortWWNs,
+			"volume_id":            opt.GetVolumeId(),
+			"initiator_target_map": initTargMap,
+			"description":          "huawei",
+			"host_name":            opt.GetHostInfo().Host,
+			"targetLun":            tgtLun,
+		},
+	}
+	return fcInfo, nil
+}
+
+func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateAttachmentOpts, hostId string) ([]string, map[string][]string, error) {
+	wwns, err := d.client.GetWWNs()
+	if err != nil {
+		return nil, nil, err
+	}
+	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
+	if err != nil {
+		return nil, nil, err
+	}
+	onlineFreeWWNs, err := d.client.GetOnlineFreeWWNs()
+	if err != nil {
+		return nil, nil, err
+	}
+	onlineFCInitiators, err := d.client.GetOnlineFCInitiatorOnArray()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var wwnsNew []string
+	for _, w := range wwns {
+		if d.isInStringArray(w, onlineFCInitiators) {
+			wwnsNew = append(wwnsNew, w)
+		}
+	}
+	log.Info(fmt.Sprintf("initialize connection, online initiators on the array:%s"), wwnsNew)
+
+	if wwnsNew == nil {
+		return nil, nil, errors.New("no available host initiator")
+	}
+
+	for _, wwn := range wwnsNew {
+		if !d.isInStringArray(wwn, onlineWWNsInHost) && !d.isInStringArray(wwn, onlineFreeWWNs) {
+			wwnsInHost, err := d.client.GetHostFCInitiators(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+			iqnsInHost, err := d.client.GetHostIscsiInitiators(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+			flag, err := d.client.IsHostAssociatedToHostgroup(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			if wwnsInHost == nil && iqnsInHost == nil && flag == false {
+				if err = d.client.RemoveHost(hostId); err != nil {
+					return nil, nil, err
+				}
+			}
+
+			msg := fmt.Sprintf("host initiator occupied: Can not add FC initiator %s to host %s, please check if this initiator has been added to other host.", wwn, hostId)
+			log.Errorf(msg)
+			return nil, nil, errors.New(msg)
+		}
+	}
+
+	for _, wwn := range wwnsNew {
+		if d.isInStringArray(wwn, onlineFreeWWNs) {
+			if err = d.client.AddFCPortTohost(hostId, wwn); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
+
+	tgtPortWWNs, initTargMap, err := d.client.GetIniTargMap(wwnsNew)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return tgtPortWWNs, initTargMap, nil
+
+}
+
+func (d *Driver) isInStringArray(s string, source []string) bool {
+	for _, i := range source {
+		if s == i {
+			return true
+		}
+	}
+	return false
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {

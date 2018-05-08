@@ -165,10 +165,11 @@ type InitiatorsResp struct {
 }
 
 type Host struct {
-	Id     string `json:"ID"`
-	Name   string `json:"NAME"`
-	OsType string `json:"OPERATIONSYSTEM"`
-	Ip     string `json:"IP"`
+	Id               string `json:"ID"`
+	Name             string `json:"NAME"`
+	OsType           string `json:"OPERATIONSYSTEM"`
+	Ip               string `json:"IP"`
+	IsAddToHostGroup bool   `json:"ISADD2HOSTGROUP"`
 }
 
 type HostResp struct {
@@ -326,4 +327,28 @@ type SimpleStruct struct {
 type SimpleResp struct {
 	Data  []SimpleStruct `json:"data"`
 	Error Error          `json:"error"`
+}
+
+type FCInitiatorsResp struct {
+	Data  []FCInitiator `json:"data"`
+	Error Error         `json:"error"`
+}
+
+type FCInitiator struct {
+	Isfree        bool   `json:"ISFREE"`
+	Id            string `json:"ID"`
+	Type          string `json:"TYPE"`
+	Runningstatus string `json:"RUNNINGSTATUS"`
+	ParentId      string `json:"PARENTID"`
+	ParentType    string `json:"PARENTTYPE"`
+}
+
+type FCTargWWPNResp struct {
+	Data  []FCTargWWPN `json:"data"`
+	Error Error        `json:"error"`
+}
+
+type FCTargWWPN struct {
+	IniPortWWN  string `json:"INITIATOR_PORT_WWN"`
+	TargPortWWN string `json:"TARGET_PORT_WWN"`
 }

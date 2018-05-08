@@ -133,6 +133,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 			Initiator: in.Initiator,
 		},
 		Status:         model.VolumeAttachCreating,
+		Protocol:       in.Protocol,
 		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
 		ConnectionInfo: in.ConnectionInfo,
 	}

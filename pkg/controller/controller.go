@@ -335,6 +335,7 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 			Host:      in.Host,
 			Initiator: in.Initiator,
 		},
+		Protocol:   in.Protocol,
 		Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
