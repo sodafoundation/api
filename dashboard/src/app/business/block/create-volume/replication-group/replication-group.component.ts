@@ -1,10 +1,39 @@
 import { Component, OnInit } from '@angular/core';
+import { trigger, state, style, transition, animate } from '@angular/animations';
+
 import { ProfileService } from './../../../profile/profile.service';
 
 @Component({
   selector: 'app-replication-group',
   templateUrl: './replication-group.component.html',
-  styleUrls: ['./replication-group.component.scss']
+  styleUrls: [
+    
+  ],
+  animations: [
+    trigger('overlayState', [
+      state('hidden', style({
+        opacity: 0
+      })),
+      state('visible', style({
+        opacity: 1
+      })),
+      transition('visible => hidden', animate('400ms ease-in')),
+      transition('hidden => visible', animate('400ms ease-out'))
+    ]),
+
+    trigger('notificationTopbar', [
+      state('hidden', style({
+        height: '0',
+        opacity: 0
+      })),
+      state('visible', style({
+        height: '*',
+        opacity: 1
+      })),
+      transition('visible => hidden', animate('400ms ease-in')),
+      transition('hidden => visible', animate('400ms ease-out'))
+    ])
+  ]
 })
 export class ReplicationGroupComponent implements OnInit {
   groupOptions = [];

@@ -11,7 +11,9 @@ import { ProfileService } from './../../profile/profile.service';
 @Component({
   selector: 'app-create-volume',
   templateUrl: './create-volume.component.html',
-  styleUrls: ['./create-volume.component.scss'],
+  styleUrls: [
+    
+  ],
   animations: [
     trigger('overlayState', [
       state('hidden', style({
@@ -55,6 +57,10 @@ export class CreateVolumeComponent implements OnInit {
   capacity = 'GB';
 
   value: boolean;
+
+  errorMessage = {
+    "zone": { required: "Zone is required."},//已经默认了一个选项，不会出现这个错误
+  };
 
   constructor(
     private router: Router,
@@ -144,12 +150,24 @@ export class CreateVolumeComponent implements OnInit {
         value['capacity'+index]='GB';
       }
       let unit = value['capacity'+index]==='GB' ? 1 : 1024;
-      dataArr.push({
-        name: value['name'+index],
-        size: value['size'+index]*unit,
-        availabilityZone: value.zone,
-        profileId: value['profileId'+index]
-      });
+      let qunantity = value['quantity'+index];
+      if(qunantity && qunantity !== 1){
+        for(let i=0;i<qunantity;i++){
+          dataArr.push({
+            name: value['name'+index]+i,
+            size: value['size'+index]*unit,
+            availabilityZone: value.zone,
+            profileId: value['profileId'+index]
+          });
+        }
+      }else{
+        dataArr.push({
+          name: value['name'+index],
+          size: value['size'+index]*unit,
+          availabilityZone: value.zone,
+          profileId: value['profileId'+index]
+        });
+      }
     });
 
     dataArr.forEach(data=>{

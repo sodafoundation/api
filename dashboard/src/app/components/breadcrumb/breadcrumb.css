@@ -19,19 +19,3 @@
 .ui-breadcrumb ul li .ui-menuitem-link {
     text-decoration: none;
 }
-
-
-/* 自定义面包屑 start */
-
-.custom-breadcrumb {
-    border: none !important;
-    background: none !important;
-}
-
-.custom-breadcrumb a:nth-child(1) {
-    font-style: normal !important;
-    color: #478CD0 !important;
-}
-
-
-/* 自定义面包屑 end */
