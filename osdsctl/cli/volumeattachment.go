@@ -92,7 +92,7 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
+		"Mountpoint", "Status", "VolumeId", "Protocol"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
