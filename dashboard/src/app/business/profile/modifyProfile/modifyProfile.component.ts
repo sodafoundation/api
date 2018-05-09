@@ -10,7 +10,7 @@ import { ProfileService } from './../profile.service';
 @Component({
     templateUrl: './modifyProfile.component.html',
     styleUrls: [
-        "./modifyProfile.component.scss"
+        
     ],
     animations: [
         trigger('overlayState', [

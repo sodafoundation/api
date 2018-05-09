@@ -28,12 +28,12 @@
             box-shadow: none;
             color: map-get($map: $color-primary, $key: hover);
         }
-        &:active{
+        &:active {
             color: map-get($map: $color-primary, $key: active);
         }
-    } 
-    &.ui-button-large{
-        padding: 0 0.40rem; 
+    }
+    &.ui-button-large {
+        padding: 0 0.40rem;
         .ui-button-text {
             line-height: 0.38rem;
         }
@@ -177,6 +177,8 @@ button.ui-button::-moz-focus-inner {
 
 
 /* Severity Buttons */
+
+
 /* secondary */
 
 .ui-button.ui-button-secondary.ui-state-default,
@@ -306,11 +308,10 @@ button.ui-button::-moz-focus-inner {
 // custom button style
 .ui-button.ui-button-icon-only.close-class {
     position: absolute;
-    top: .35rem;
+    top: 0;
     right: .25rem;
     background-color: #fff;
     border: 1px solid #B9C3C8 !important;
-
 }
 
 .cloud-servie-delete-button-radius {

@@ -4,7 +4,9 @@ import { PoolService } from './../profile.service';
 @Component({
   selector: 'app-storage-pools-table',
   templateUrl: './storage-pools-table.component.html',
-  styleUrls: ['./storage-pools-table.component.css']
+  styleUrls: [
+    
+  ]
 })
 export class StoragePoolsTableComponent implements OnInit {
   cols;
@@ -19,7 +21,6 @@ export class StoragePoolsTableComponent implements OnInit {
     this.PoolService.getPools().subscribe((res) => {
       this.pools = res.json();
       this.totalFreeCapacity = this.getSumCapacity(this.pools, 'free');
-      console.log(res.json());
     });
   }
 

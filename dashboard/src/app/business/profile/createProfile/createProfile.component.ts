@@ -12,7 +12,7 @@ import { ProfileService } from './../profile.service';
 @Component({
     templateUrl: './createProfile.component.html',
     styleUrls: [
-        './createProfile.component.scss'
+        
     ],
     animations: [
         trigger('overlayState', [
