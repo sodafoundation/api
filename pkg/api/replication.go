@@ -100,7 +100,7 @@ func (this *ReplicationPortal) CreateReplication() {
 	this.Ctx.Output.Body(body)
 }
 
-func (this *ReplicationPortal) ListReplication() {
+func (this *ReplicationPortal) ListReplications() {
 	if !policy.Authorize(this.Ctx, "replication:list") {
 		return
 	}
@@ -134,7 +134,7 @@ func (this *ReplicationPortal) ListReplication() {
 
 }
 
-func (this *ReplicationPortal) ListReplicationDetail() {
+func (this *ReplicationPortal) ListReplicationsDetail() {
 	if !policy.Authorize(this.Ctx, "replication:list_detail") {
 		return
 	}
@@ -215,7 +215,7 @@ func (this *ReplicationPortal) UpdateReplication() {
 				"get profile failed: %s", err.Error())
 			return
 		}
-		// TODO:compared with the original profile_id to get the differences
+		// TODO:compare with the original profile_id to get the differences
 	}
 
 	result, err := db.C.UpdateReplication(c.GetContext(this.Ctx), id, &r)
