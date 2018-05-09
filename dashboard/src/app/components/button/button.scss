@@ -256,8 +256,8 @@ button.ui-button::-moz-focus-inner {
 
 .ui-button.ui-button-warning.ui-state-default,
 .ui-splitbutton.ui-button-warning .ui-button.ui-state-default {
-    background-color: #f0ad4e;
-    border-color: #f0ad4e;
+    background-color: #FF8833;
+    border-color: #FF8833;
     color: #ffffff;
 }
 
@@ -265,14 +265,18 @@ button.ui-button::-moz-focus-inner {
 .ui-button.ui-button-warning:focus,
 .ui-splitbutton.ui-button-warning .ui-button:enabled:hover,
 .ui-splitbutton.ui-button-warning .ui-button:focus {
-    background-color: #eea236;
-    border-color: #f0ad4e;
+    background-color: #FF8833;
+    border-color: #FF8833;
+}
+.ui-button.ui-button-warning:enabled:hover,
+.ui-splitbutton.ui-button-warning .ui-button:enabled:hover{
+    box-shadow: 0px 4px 8px rgba(243, 163, 15, 0.4);
 }
 
 .ui-button.ui-button-warning:enabled:active,
 .ui-splitbutton.ui-button-warning .ui-button:enabled:active {
-    background-color: #ec971f;
-    border-color: #f0ad4e;
+    background-color: #FF8833;
+    border-color: #FF8833;
 }
 
 

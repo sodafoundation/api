@@ -574,6 +574,12 @@ p-togglebutton.ng-dirty.ng-invalid .ui-button {
             background: #186ba0;
             color: #ffffff;
         }
+        &.table-col-expander{
+            width: .40rem;
+        }
+        &.table-col-selection{
+            width: .40rem;
+        }
     }
     
     tbody {

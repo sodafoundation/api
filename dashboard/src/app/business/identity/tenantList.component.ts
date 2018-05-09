@@ -55,6 +55,9 @@ export class TenantListComponent implements OnInit {
     }
 
     listTenants() {
+        this.tenants=[];
+        this.selectedTenants = [];
+
         this.sortField = "name";
 
         let request: any = { params:{} };
@@ -64,6 +67,9 @@ export class TenantListComponent implements OnInit {
 
         this.http.get("/v3/projects", request).subscribe((res) => {
             this.tenants = res.json().projects;
+            this.tenants.forEach((item)=>{
+                item["description"] = item.description == '' ? '--' : item.description;
+            })
         });
     }
 
@@ -134,7 +140,10 @@ export class TenantListComponent implements OnInit {
                 
             });
         }else{
-
+            // validate
+            for(let i in this.tenantFormGroup.controls){
+                this.tenantFormGroup.controls[i].markAsTouched();
+            }
         }
     }
 
@@ -155,19 +164,22 @@ export class TenantListComponent implements OnInit {
     }
 
     deleteTenant(tenants){
-        let arr=[];
+        let arr=[],msg;
         if(_.isArray(tenants)){
             tenants.forEach((item,index)=> {
                 arr.push(item.id);
             })
+            msg = "<div>Are you sure you want to delete the selected tenants?</div><h3>[ "+ tenants.length +" Tenants ]</h3>";
         }else{
             arr.push(tenants.id);
+            msg = "<div>Are you sure you want to delete the tenant?</div><h3>[ "+ tenants.name +" ]</h3>"
         }
         
         this.confirmationService.confirm({
-            message: "Are you sure you want to delete this tenants?",
-            header: "Confirm",
-            icon: "fa fa-question-circle",
+            message: msg,
+            header: "Delete Tenant",
+            acceptLabel: "Delete",
+            isWarning: true,
             accept: ()=>{
                 arr.forEach((ele)=> {
                     this.http.get("/v3/role_assignments?scope.project.id="+ ele).subscribe((res)=>{
@@ -193,6 +205,10 @@ export class TenantListComponent implements OnInit {
     onRowExpand(evt) {
         this.isDetailFinished = false;
         this.projectID = evt.data.id;
+    }
+
+    tablePaginate() {
+        this.selectedTenants = [];
     }
 
     label: object = {

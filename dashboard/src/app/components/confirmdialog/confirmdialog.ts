@@ -11,7 +11,7 @@ import {Subscription}   from 'rxjs/Subscription';
 @Component({
     selector: 'p-confirmDialog',
     template: `
-        <div [ngClass]="{'ui-dialog ui-confirmdialog ui-widget ui-widget-content ui-corner-all ui-shadow':true,'ui-dialog-rtl':rtl}" 
+        <div [ngClass]="{'ui-dialog ui-confirmdialog ui-widget ui-widget-content ui-corner-all ui-shadow':true,'ui-dialog-rtl':rtl, 'ui-confirmdialog-warning': isWarning}" 
             [style.display]="visible ? 'block' : 'none'" [style.width.px]="width" [style.height.px]="height" (mousedown)="moveOnTop()" [@dialogState]="visible ? 'visible' : 'hidden'">
             <div class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top">
                 <span class="ui-dialog-title" *ngIf="header">{{header}}</span>
@@ -20,14 +20,14 @@ import {Subscription}   from 'rxjs/Subscription';
                 </a>
             </div>
             <div class="ui-dialog-content ui-widget-content">
-                <i [ngClass]="'fa'" [class]="icon" *ngIf="icon"></i>
-                <span class="ui-confirmdialog-message" [innerHTML]="message"></span>
+                <i [ngClass]="{'fa-warning': isWarning, 'fa-question-circle': !isWarning}" [class]="icon" *ngIf="icon"></i>
+                <div class="ui-confirmdialog-message" [innerHTML]="message"></div>
             </div>
             <div class="ui-dialog-footer ui-widget-content" *ngIf="footer">
                 <ng-content select="p-footer"></ng-content>
             </div>
             <div class="ui-dialog-footer ui-widget-content" *ngIf="!footer">
-                <button type="button" pButton [icon]="acceptIcon" [label]="acceptLabel" (click)="accept()" [class]="acceptButtonStyleClass" *ngIf="acceptVisible"></button>
+                <button type="button" pButton [icon]="acceptIcon" [label]="acceptLabel" (click)="accept()" [class]="acceptButtonStyleClass" [ngClass]="{'ui-button-secondary':!isWarning, 'ui-button-warning':isWarning}" *ngIf="acceptVisible"></button>
                 <button type="button" pButton [icon]="rejectIcon" [label]="rejectLabel" (click)="reject()" [class]="rejectButtonStyleClass" *ngIf="rejectVisible"></button>
             </div>
         </div>
@@ -49,20 +49,22 @@ import {Subscription}   from 'rxjs/Subscription';
 export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
     
     @Input() header: string;
+
+    @Input() isWarning: boolean = false;
     
-    @Input() icon: string;
+    @Input() icon: string = 'fa';
     
     @Input() message: string;
     
     @Input() acceptIcon: string;
     
-    @Input() acceptLabel: string = 'Yes';
+    @Input() acceptLabel: string = 'Confirm';
     
     @Input() acceptVisible: boolean = true;
 
     @Input() rejectIcon: string;
     
-    @Input() rejectLabel: string = 'No';
+    @Input() rejectLabel: string = 'Cancel';
     
     @Input() rejectVisible: boolean = true;
     
@@ -113,6 +115,9 @@ export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
                 this.confirmation = confirmation;
                 this.message = this.confirmation.message||this.message;
                 this.icon = this.confirmation.icon||this.icon;
+                this.isWarning = this.confirmation.isWarning||this.isWarning;
+                this.acceptLabel = this.confirmation.acceptLabel||this.acceptLabel;
+                this.rejectLabel = this.confirmation.rejectLabel||this.rejectLabel;
                 this.header = this.confirmation.header||this.header;
                 this.rejectVisible = this.confirmation.rejectVisible == null ? this.rejectVisible : this.confirmation.rejectVisible;
                 this.acceptVisible = this.confirmation.acceptVisible == null ? this.acceptVisible : this.confirmation.acceptVisible;
@@ -218,6 +223,7 @@ export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
         }
         
         this.hide();
+        this.isWarning = false;
         event.preventDefault();
     }
     
@@ -285,6 +291,7 @@ export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
         }
         
         this.hide();
+        this.isWarning = false;
         this.confirmation = null;
     }
     
@@ -294,6 +301,7 @@ export class ConfirmDialog implements AfterViewInit,AfterViewChecked,OnDestroy {
         }
         
         this.hide();
+        this.isWarning = false;
         this.confirmation = null;
     }
 }

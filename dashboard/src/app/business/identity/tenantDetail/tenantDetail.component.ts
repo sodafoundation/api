@@ -89,15 +89,16 @@ export class TenantDetailComponent implements OnInit {
             }
         })
 
-        this.popSelectedUsers.forEach((element, i) => {
+        this.popSelectedUsers.forEach((user, i) => {
             let request: any = {};
-            this.http.put("/v3/groups/"+ group_id +"/users/"+ element.userid, request).subscribe((r) => {
-
+            this.http.put("/v3/groups/"+ group_id +"/users/"+ user.id, request).subscribe((r) => {
+                if(i == (this.popSelectedUsers.length-1)){
+                    this.listUsers();
+                    this.addUserDisplay = false;
+                }
             })
         });
 
-        this.listUsers();
-        this.addUserDisplay = false;
     }
 
     listAllUsers(){
@@ -114,13 +115,21 @@ export class TenantDetailComponent implements OnInit {
 
         this.http.get("/v3/users", request).subscribe((res) => {
             res.json().users.map((item, index) => {
-                let user = {};
-                user["enabled"] = item.enabled;
-                user["username"] = item.name;
-                user["userid"] = item.id;
-                user["description"] = item.description;
-                this.allUsers.push(user);
+                item["description"] = item.description == '' ? '--' : item.description;
+                this.allUsers.push(item);
             });
+
+            //Filter added users
+            this.users.forEach((addedUser) => {
+                this.allUsers.forEach((user, i) => {
+                    if(user.id == addedUser.id){
+                        this.allUsers.splice(i,1);
+                    }
+                });
+            });
+
+            console.log(this.allUsers);
+
         });
     }
 
@@ -132,9 +141,10 @@ export class TenantDetailComponent implements OnInit {
             this.http.get("/v3/groups/"+ item.groupid +"/users", request).subscribe((userRES)=>{
                 userRES.json().users.forEach((ele) => {
                     ele["role"] = item.grouprole.name;
+                    ele["description"] = ele.description == '' ? '--' : ele.description;
                     this.users.push(ele);
-                    
                 });
+
                 this.isDetailFinished = true;
             })
         })
@@ -149,10 +159,11 @@ export class TenantDetailComponent implements OnInit {
             }
         })
 
+        let msg = "<div>Are you sure you want to remove the user?</div><h3>[ "+ user.name +" ]</h3>"
         this.confirmationService.confirm({
-            message: "Are you sure you want to remove this user?",
-            header: "Confirm",
-            icon: "fa fa-question-circle",
+            message: msg,
+            header: "Remove user",
+            acceptLabel: "Remove",
             accept: ()=>{
                 let request: any = {};
                 this.http.delete("/v3/groups/"+ group_id +"/users/"+ user.id, request).subscribe((r) => {

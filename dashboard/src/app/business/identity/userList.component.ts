@@ -3,10 +3,11 @@ import { Http } from '@angular/http';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, state, style, transition, animate, group } from '@angular/animations';
 import { MenuItem, ConfirmationService } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
 import { retry } from 'rxjs/operators';
+import { forEach } from '@angular/router/src/utils/collection';
 
 let _ = require("underscore");
 
@@ -25,6 +26,9 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     myFormGroup;
 
     selectedUsers = [];
+
+    userRole: string;
+    tenantLists = [];
 
     username: string;
     currentUser;
@@ -47,20 +51,19 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         // private router: Router,
         private fb: FormBuilder
     ) { 
-        
-
+    
         this.myFormGroup = this.fb.group({
-            "form_username": ["", [Validators.required, Validators.pattern(this.validRule.name)] ],
+            "form_username": ["", {validators:[Validators.required, Validators.pattern(this.validRule.name), this.ifUserExisting(this.tenantUsers)], updateOn:'blur'}  ],
             "form_description":["", Validators.maxLength(200) ],
             "form_tenant": [""],
             "form_isModifyPsw": [""],
-            "form_psw": ["", [Validators.required, Validators.minLength(8), this.regPassword]],
-            "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword) ] ]
+            "form_psw": ["", {validators: [Validators.required, Validators.minLength(8), this.regPassword], updateOn:'blur'} ],
+            "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword)] ]
         })
     }
 
     errorMessage = {
-        "form_username": { required: "Username is required.", pattern:"Beginning with a letter with a length of 3-20, it can contain letters / numbers / underlines."},
+        "form_username": { required: "Username is required.", pattern:"Beginning with a letter with a length of 3-20, it can contain letters / numbers / underlines.", ifUserExisting:"Username is existing."},
         "form_description": { maxlength: "Max. length is 200."},
         "form_tenant": { required: "Tenant is required."},
         "form_psw": { required: "Password is required.", minlength: "At least two kinds of letters / numbers / special characters, min. length is 8.", regPassword:"At least two kinds of letters / numbers / special characters, min. length is 8." },
@@ -76,6 +79,22 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         tenantLabel:'Tenant'
     }
     
+    ifUserExisting (param: any): ValidatorFn{
+        return (c: AbstractControl): {[key:string]: boolean} | null => {
+            let isExisting= false;
+            this.tenantUsers.forEach(element => {
+                if(element.username == c.value){
+                    isExisting = true;
+                }
+            })
+            if(isExisting){
+                return {'ifUserExisting': true};
+            }else{
+                return null;
+            }
+        }
+    }
+
     regPassword(c:AbstractControl):{[key:string]:boolean} | null {
         let reg1 = /.*[a-zA-Z]+.*/;
         let reg2 = /.*[0-9]+.*/;
@@ -102,36 +121,39 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     }
 
     showUserForm(user?): void{
+        this.getRoles();
+        this.getTenants();
+        this.createUserDisplay = true;
+
+        //Reset form
+        this.myFormGroup.reset();
+
         if(user){
             this.isEditUser = true;
             this.popTitle = "Modify";
 
             this.username = user.username;
             this.currentUser = user;
-
-            this.createUserDisplay = true;
             
-            this.myFormGroup = this.fb.group({
-                "form_description":[user.description, Validators.maxLength(200) ],
-                "form_isModifyPsw": [false],
-                "form_psw": ["",  [Validators.required, Validators.minLength(8), this.regPassword] ],
-                "form_pswConfirm": ["",  [Validators.required, this.regConfirmPassword(this.newPassword) ]]
-            })
+            this.myFormGroup.controls['form_description'].value = user.description;
+            this.myFormGroup.controls['form_isModifyPsw'].value = false;
+            this.myFormGroup.controls['form_psw'].value = "";
+            this.myFormGroup.controls['form_pswConfirm'].value = "";
+
+            this.myFormGroup.controls['form_username'].clearValidators();
+            this.myFormGroup.controls['form_psw'].clearValidators();
+            this.myFormGroup.controls['form_pswConfirm'].clearValidators();
             
 
         }else{
             this.isEditUser = false;
             this.popTitle = "Create";
 
-            this.createUserDisplay = true;
-
-            this.myFormGroup = this.fb.group({
-                "form_username": ["",  [Validators.required, Validators.pattern(this.validRule.name)] ],
-                "form_description":["", Validators.maxLength(200) ],
-                "form_isModifyPsw": [true],
-                "form_psw": ["", [Validators.required, Validators.minLength(8), this.regPassword] ],
-                "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword) ] ]
-            })
+            this.myFormGroup.controls['form_username'].value = "";
+            this.myFormGroup.controls['form_description'].value = "";
+            this.myFormGroup.controls['form_isModifyPsw'].value = true;
+            this.myFormGroup.controls['form_psw'].value = "";
+            this.myFormGroup.controls['form_pswConfirm'].value = "";
         }
     }
 
@@ -143,14 +165,40 @@ export class UserListComponent implements OnInit, AfterViewChecked {
             "description": this.myFormGroup.value.form_description,
             "password": this.myFormGroup.value.form_psw
         }
-        
+        console.log(this.myFormGroup.status)
         if(this.myFormGroup.status == "VALID"){
-            this.http.post("/v3/users", request).subscribe((res) => {
-                this.createUserDisplay = false;
-                this.listUsers();
+            this.http.post("/v3/users", request).subscribe( (res) => {
+                let tenants = this.myFormGroup.value.form_tenant;
+                if(tenants.length==0){
+                    this.createUserDisplay = false;
+                    this.listUsers();
+                    return;
+                }
+
+                tenants.forEach( (element, i) => {
+                    this.http.get("/v3/role_assignments?scope.project.id="+ element).subscribe((ass_res)=>{
+                        let groupid;
+
+                        ass_res.json().role_assignments.map((element)=>{
+                            if(element.group){
+                                return groupid = element.group.id;
+                            }
+                        })
+
+                        let request: any = {};
+                        this.http.put("/v3/groups/"+ groupid + "/users/"+ res.json().user.id, request).subscribe();
+                    })
+                    if(i == (tenants.length-1)){
+                        this.createUserDisplay = false;
+                        this.listUsers();
+                    }
+                })
             });
         }else{
-
+            // validate
+            for(let i in this.myFormGroup.controls){
+                this.myFormGroup.controls[i].markAsTouched();
+            }
         }
     }
 
@@ -161,53 +209,74 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         }
         if(this.myFormGroup.value.form_isModifyPsw==true){
             request.user["password"] = this.myFormGroup.value.form_psw;
+            
+            this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
+            this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
+            this.myFormGroup.controls['form_psw'].updateValueAndValidity();
+            this.myFormGroup.controls['form_pswConfirm'].updateValueAndValidity();
 
             if(this.myFormGroup.status == "VALID"){
                 this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
                     this.createUserDisplay = false;
                     this.listUsers();
                 });
+            }else{
+                // validate
+                for(let i in this.myFormGroup.controls){
+                    this.myFormGroup.controls[i].markAsTouched();
+                }
             }
         }else{
-            if(this.myFormGroup.controls['form_description'].valid == true){
+            this.myFormGroup.controls['form_psw'].clearValidators();
+            this.myFormGroup.controls['form_pswConfirm'].clearValidators();
+            this.myFormGroup.controls['form_psw'].updateValueAndValidity();
+            this.myFormGroup.controls['form_pswConfirm'].updateValueAndValidity();
+
+
+            if(this.myFormGroup.status == "VALID"){
                 this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
                     this.createUserDisplay = false;
                     this.listUsers();
                 });
+            }else{
+                // validate
+                for(let i in this.myFormGroup.controls){
+                    this.myFormGroup.controls[i].markAsTouched();
+                }
             }
         }
         
         
     }
     
-    // getRoles(){
-    //     let request: any = { params:{} };
-    //     this.http.get("/v3/roles", request).subscribe((res) => {
-    //         res.json().roles.forEach((item, index) => {
-    //             if(item.name == "Member"){
-    //                 this.userRole = item.id;
-    //             }
-    //         })
-    //     });
-    // }
+    getRoles(){
+        let request: any = { params:{} };
+        this.http.get("/v3/roles", request).subscribe((res) => {
+            res.json().roles.forEach((item, index) => {
+                if(item.name == "Member"){
+                    this.userRole = item.id;
+                }
+            })
+        });
+    }
 
-    // getTenants(){
-    //     this.tenantLists = [];
+    getTenants(){
+        this.tenantLists = [];
 
-    //     let request: any = { params:{} };
-    //     request.params = {
-    //         "domain_id": "default"
-    //     }
+        let request: any = { params:{} };
+        request.params = {
+            "domain_id": "default"
+        }
 
-    //     this.http.get("/v3/projects", request).subscribe((res) => {
-    //         res.json().projects.map((item, index) => {
-    //             let tenant = {};
-    //             tenant["label"] = item.name;
-    //             tenant["value"] = item.id;
-    //             this.tenantLists.push(tenant);
-    //         });
-    //     });
-    // }
+        this.http.get("/v3/projects", request).subscribe((res) => {
+            res.json().projects.map((item, index) => {
+                let tenant = {};
+                tenant["label"] = item.name;
+                tenant["value"] = item.id;
+                this.tenantLists.push(tenant);
+            });
+        });
+    }
 
 
     ngOnInit() {
@@ -217,10 +286,12 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     
     ngAfterViewChecked(){
         this.newPassword = this.myFormGroup.value.form_psw;
+
     }
 
     listUsers(){
         this.tenantUsers = [];
+        this.selectedUsers = [];
 
         this.sortField = "username";
 
@@ -242,20 +313,20 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         });
     }
 
-    userStatus(userid, isEnabled){
-        let msg = isEnabled == true ? "Are you sure you want to disable this user?" : "Are you sure you want to enable this user?";
-        let status = isEnabled ? false : true;
+    userStatus(user){
+        let msg = user.enabled == true ? "<div>Are you sure you want to disable the user?</div><h3>[ "+ user.username +" ]</h3>" : "<div>Are you sure you want to enable the user?</div><h3>[ "+ user.username +" ]</h3>";
+        let status = user.enabled ? false : true;
 
         this.confirmationService.confirm({
             message: msg,
-            header: "Confirm",
-            icon: "fa fa-question-circle",
+            header: user.enabled ? 'Disable User' : 'Enable User',
+            acceptLabel: user.enabled ? 'Disable' : 'Enable',
             accept: ()=>{
                 let request: any = { user:{} };
                 request.user = {
                     "enabled": status
                 }
-                this.http.patch("/v3/users/"+ userid, request).subscribe((res) => {
+                this.http.patch("/v3/users/"+ user.userid, request).subscribe((res) => {
                     this.listUsers();
                 });
                 
@@ -265,19 +336,22 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     }
 
     deleteUsers(users){
-        let arr=[];
+        let arr=[], msg;
         if(_.isArray(users)){
             users.forEach((item,index)=> {
                 arr.push(item.userid);
             })
+            msg = "<div>Are you sure you want to delete the selected users?</div><h3>[ "+ users.length +" Users ]</h3>";
         }else{
-            arr.push(users);
+            arr.push(users.userid);
+            msg = "<div>Are you sure you want to delete the user?</div><h3>[ "+ users.username +" ]</h3>";
         }
 
         this.confirmationService.confirm({
-            message: "Are you sure you want to delete users?",
-            header: "Confirm",
-            icon: "fa fa-question-circle",
+            message: msg,
+            header: "Delete User",
+            acceptLabel: "Delete",
+            isWarning: true,
             accept: ()=>{
                 arr.forEach((item,index)=> {
                     let request: any = {};
@@ -297,5 +371,9 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     onRowExpand(evt) {
         this.isUserDetailFinished = false;
         this.detailUserInfo = evt.data.userid;
+    }
+
+    tablePaginate() {
+        this.selectedUsers = [];
     }
 }
