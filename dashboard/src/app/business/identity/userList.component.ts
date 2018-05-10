@@ -39,7 +39,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     sortField: string;
 
     validRule= {
-        'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){2,127}$'
+        'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
     };
 
     newPassword = "";
@@ -53,17 +53,17 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     ) { 
     
         this.myFormGroup = this.fb.group({
-            "form_username": ["", {validators:[Validators.required, Validators.pattern(this.validRule.name), this.ifUserExisting(this.tenantUsers)], updateOn:'blur'}  ],
+            "form_username": ["", {validators:[Validators.required, Validators.pattern(this.validRule.name), this.ifUserExisting(this.tenantUsers)], updateOn:'change'}  ],
             "form_description":["", Validators.maxLength(200) ],
             "form_tenant": [""],
-            "form_isModifyPsw": [""],
+            "form_isModifyPsw": [true],
             "form_psw": ["", {validators: [Validators.required, Validators.minLength(8), this.regPassword], updateOn:'blur'} ],
             "form_pswConfirm": ["", [Validators.required, this.regConfirmPassword(this.newPassword)] ]
         })
     }
 
     errorMessage = {
-        "form_username": { required: "Username is required.", pattern:"Beginning with a letter with a length of 3-20, it can contain letters / numbers / underlines.", ifUserExisting:"Username is existing."},
+        "form_username": { required: "Username is required.", pattern:"Beginning with a letter with a length of 1-128, it can contain letters / numbers / underlines.", ifUserExisting:"User is existing."},
         "form_description": { maxlength: "Max. length is 200."},
         "form_tenant": { required: "Tenant is required."},
         "form_psw": { required: "Password is required.", minlength: "At least two kinds of letters / numbers / special characters, min. length is 8.", regPassword:"At least two kinds of letters / numbers / special characters, min. length is 8." },
@@ -137,8 +137,6 @@ export class UserListComponent implements OnInit, AfterViewChecked {
             
             this.myFormGroup.controls['form_description'].value = user.description;
             this.myFormGroup.controls['form_isModifyPsw'].value = false;
-            this.myFormGroup.controls['form_psw'].value = "";
-            this.myFormGroup.controls['form_pswConfirm'].value = "";
 
             this.myFormGroup.controls['form_username'].clearValidators();
             this.myFormGroup.controls['form_psw'].clearValidators();
@@ -149,11 +147,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
             this.isEditUser = false;
             this.popTitle = "Create";
 
-            this.myFormGroup.controls['form_username'].value = "";
-            this.myFormGroup.controls['form_description'].value = "";
             this.myFormGroup.controls['form_isModifyPsw'].value = true;
-            this.myFormGroup.controls['form_psw'].value = "";
-            this.myFormGroup.controls['form_pswConfirm'].value = "";
         }
     }
 

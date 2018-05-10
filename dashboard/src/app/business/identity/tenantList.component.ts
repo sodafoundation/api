@@ -31,6 +31,10 @@ export class TenantListComponent implements OnInit {
     tenantFormGroup;
     projectID: string;
 
+    validRule= {
+        'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
+    };
+
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
@@ -39,19 +43,35 @@ export class TenantListComponent implements OnInit {
         private fb: FormBuilder
     ) {
         this.tenantFormGroup = this.fb.group({
-            "form_name": ["", Validators.required ],
+            "form_name": ["", [Validators.required, Validators.pattern(this.validRule.name), this.ifTenantExisting(this.tenants)] ],
             "form_description":["", Validators.maxLength(200) ],
         })
     }
 
     errorMessage = {
-        "form_name": { required: "Username is required."},
+        "form_name": { required: "Username is required.", pattern:"Beginning with a letter with a length of 1-128, it can contain letters / numbers / underlines.", ifTenantExisting:"Tenant is existing."},
         "form_description": { maxlength: "Max. length is 200."}
     };
 
     ngOnInit() {
         this.listTenants();
 
+    }
+
+    ifTenantExisting (param: any): ValidatorFn{
+        return (c: AbstractControl): {[key:string]: boolean} | null => {
+            let isExisting= false;
+            this.tenants.forEach(element => {
+                if(element.name == c.value){
+                    isExisting = true;
+                }
+            })
+            if(isExisting){
+                return {'ifTenantExisting': true};
+            }else{
+                return null;
+            }
+        }
     }
 
     listTenants() {
@@ -75,25 +95,23 @@ export class TenantListComponent implements OnInit {
 
     showCreateTenant(tenant?) {
         this.createTenantDisplay = true;
+
+        //Reset form
+        this.tenantFormGroup.reset();
+
         if(tenant){
             this.isEditTenant = true;
             this.popTitle = "Modify";
 
             this.currentTenant = tenant.id;
 
-            this.tenantFormGroup = this.fb.group({
-                "form_name": [tenant.name, Validators.required ],
-                "form_description":[tenant.description, Validators.maxLength(200) ],
-            })
+            this.tenantFormGroup.controls['form_name'].value = tenant.name;
+            this.tenantFormGroup.controls['form_description'].value = tenant.description;
 
         }else{
             this.isEditTenant = false;
             this.popTitle = "Create";
 
-            this.tenantFormGroup = this.fb.group({
-                "form_name": ["", Validators.required ],
-                "form_description":["", Validators.maxLength(200) ],
-            })
         }
     }
 
