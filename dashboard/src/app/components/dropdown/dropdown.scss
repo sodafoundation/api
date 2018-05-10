@@ -32,10 +32,10 @@
 
 .ui-dropdown .ui-dropdown-trigger .fa {
     margin-top: .07rem;
-    margin-left: .03rem;
+    margin-left: .02rem; //原为.03rem,改为.02rem更居中
 }
 
-.ui-dropdown .ui-dropdown-label  {
+.ui-dropdown .ui-dropdown-label {
     display: block;
     border: none;
     white-space: nowrap;
@@ -44,7 +44,8 @@
     width: 100%;
     padding-right: 2.5em;
 }
-.ui-dropdown .ui-inputtext{
+
+.ui-dropdown .ui-inputtext {
     min-height: .30rem;
     min-width: .80rem;
     line-height: .20rem;
@@ -52,7 +53,7 @@
 
 .ui-dropdown-item-empty,
 .ui-dropdown-label-empty {
-    text-indent: -9999px;   
+    text-indent: -9999px;
     overflow: hidden;
 }
 
@@ -61,11 +62,11 @@
     cursor: default;
 }
 
-.ui-dropdown label.ui-dropdown-label  {
+.ui-dropdown label.ui-dropdown-label {
     cursor: pointer;
 }
 
-.ui-dropdown input.ui-dropdown-label  {
+.ui-dropdown input.ui-dropdown-label {
     cursor: default;
 }
 
@@ -122,7 +123,9 @@
     right: 1em;
 }
 
+
 /** Dropdown **/
+
 .ui-fluid .ui-dropdown {
     width: 100%;
 }

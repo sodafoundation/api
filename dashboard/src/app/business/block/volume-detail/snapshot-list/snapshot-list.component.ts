@@ -5,7 +5,9 @@ import { VolumeService,SnapshotService } from './../../volume.service';
 @Component({
   selector: 'app-snapshot-list',
   templateUrl: './snapshot-list.component.html',
-  styleUrls: ['./snapshot-list.component.scss']
+  styleUrls: [
+    
+  ]
 })
 export class SnapshotListComponent implements OnInit {
 

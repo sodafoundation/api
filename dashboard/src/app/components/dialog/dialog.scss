@@ -53,7 +53,7 @@
     height: .24rem;
     padding: .03rem .01rem 0.05rem;
     margin: -.12rem -.22rem 0 0;
-    background: map-get($map: $color-primary, $key: normal);
+    background: #9ba9b7;
     cursor: pointer;
     @extend .ui-corner-all-large;
     &:hover{
@@ -92,6 +92,13 @@
 }
 
 .ui-confirmdialog.ui-dialog .ui-dialog-content {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.ui-confirmdialog.ui-dialog .ui-dialog-content h3{
+    margin-top: .10rem;
 }
 .ui-confirmdialog .ui-dialog-content .fa {
     font-size: .48rem;
@@ -99,8 +106,8 @@
     margin-right: .2rem;
     color: #438bd3;
 }
-.ui-confirmdialog .ui-dialog-content .ui-confirmdialog-message {
-    vertical-align: middle;
+.ui-confirmdialog.ui-confirmdialog-warning .ui-dialog-content .fa {
+    color:#FF8833;
 }
 
 /* Fluid */

@@ -4,6 +4,9 @@ export interface Confirmation {
     message: string;
     key?: string;
     icon?: string;
+    acceptLabel?: string;
+    rejectLabel?: string;
+    isWarning?: boolean;
     header?: string;
     accept?: Function;
     reject?: Function;
