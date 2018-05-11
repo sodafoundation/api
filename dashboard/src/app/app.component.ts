@@ -2,7 +2,7 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
 import { Router } from '@angular/router';
-import { I18NService, Consts } from 'app/shared/api';
+import { I18NService, Consts, ParamStorService } from 'app/shared/api';
 // import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { MenuItem, SelectItem } from './components/common/api';
@@ -88,7 +88,8 @@ export class AppComponent implements OnInit, AfterViewInit{
     constructor(
         private el: ElementRef,
         private http: Http,
-        private router: Router
+        private router: Router,
+        private paramStor: ParamStorService
         // private I18N: I18NService,
         // private viewContainerRef: ViewContainerRef,
         // private appService: AppService,
@@ -96,10 +97,10 @@ export class AppComponent implements OnInit, AfterViewInit{
     ){}
     
     ngOnInit() {
-        let currentUserInfo = localStorage['opensds-current-user'];
+        let currentUserInfo = this.paramStor.CURRENT_USER();
         if(currentUserInfo != ""){
-            this.username = currentUserInfo.split("|")[0];
-            this.currentTenant = currentUserInfo.split("|")[1];
+            this.username = this.paramStor.CURRENT_USER().split("|")[0];
+            this.currentTenant = this.paramStor.CURRENT_TENANT().split("|")[0];
 
             if(this.username=="admin"){
                 this.menuItems = this.menuItems_admin;
@@ -179,18 +180,12 @@ export class AppComponent implements OnInit, AfterViewInit{
         }
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
-            localStorage['x-subject-token'] =  res.headers.get('x-subject-token');
+            this.paramStor.AUTH_TOKEN(res.headers.get('x-subject-token'));
             let userid = res.json().token.user.id;
 
             // Get user owned tenants
             let reqUser: any = { params:{} };
             this.http.get("/v3/users/"+ userid +"/projects", reqUser).subscribe((objRES) => {
-                if(this.username != "admin"){
-                    this.currentTenant = objRES.json().projects[0].name;
-                }else{
-                    this.currentTenant = "";
-                }
-
                 // Get token authentication with scoped
                 let g_token_id = res.headers.get('x-subject-token'); 
                 let req: any = { auth: {} };
@@ -212,9 +207,10 @@ export class AppComponent implements OnInit, AfterViewInit{
                 }
 
                 this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
-                    localStorage['x-subject-token'] =  r.headers.get('x-subject-token');
-                    if( localStorage['x-subject-token'] != '' ){
-                        localStorage['opensds-current-user'] = this.username+ "|"+ this.currentTenant;
+                    this.paramStor.AUTH_TOKEN( r.headers.get('x-subject-token') );
+                    if( this.paramStor.AUTH_TOKEN() != '' ){
+                        this.paramStor.CURRENT_TENANT(objRES.json().projects[0].name + "|" +objRES.json().projects[0].id);
+                        this.paramStor.CURRENT_USER(this.username + "|"+ userid);
 
                         if(this.username == "admin"){
                             this.menuItems = this.menuItems_admin;
@@ -223,6 +219,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                         }
 
                         this.isLogin = true;
+                        this.currentTenant = objRES.json().projects[0].name;
                         this.router.navigateByUrl("home");
                         this.activeItem = this.menuItems[0];
 
@@ -239,8 +236,9 @@ export class AppComponent implements OnInit, AfterViewInit{
     }
 
     logout() {
-        localStorage['x-subject-token'] = "";
-        localStorage['opensds-current-user'] = "";
+        this.paramStor.AUTH_TOKEN("");
+        this.paramStor.CURRENT_USER("");
+        this.paramStor.CURRENT_TENANT("");
         
         // annimation for after login
         this.hideLoginForm = false;

@@ -56,7 +56,7 @@
         </form-item>
 
         <form-item *ngIf="isEditUser" class="hide" [required]="false">
-            <p-checkbox binary="true" label="Change password" formControlName="form_isModifyPsw" ></p-checkbox>
+            <p-checkbox binary="true" label="Change password" formControlName="form_isModifyPsw" (click)="ModifyPswChecked(myFormGroup.value.form_isModifyPsw)" ></p-checkbox>
         </form-item>
 
         <form-item [style.display]="myFormGroup.value.form_isModifyPsw ? 'block' : 'none'" label="{{label.passwordLabel}}" [required]="myFormGroup.value.form_isModifyPsw">

@@ -32,6 +32,13 @@ export class TenantDetailComponent implements OnInit {
 
     ngOnInit() {
         this.listProjectGroup();
+        // this.projectResources();
+    }
+
+    projectResources(){
+        this.http.get("/v1beta/"+ this.projectID +"/block/volumes").subscribe((res)=>{
+            //let arr = res.json().role_assignments;
+        })
     }
 
     listProjectGroup(){
