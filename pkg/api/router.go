@@ -20,9 +20,9 @@ This module implements a entry into the OpenSDS northbound REST service.
 package api
 
 import (
+	"fmt"
 	"net/http"
 
-	"fmt"
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
