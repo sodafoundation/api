@@ -51,14 +51,35 @@ service ProvisionDock {
     
     // Delete a volume snapshot
     rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts) 
-      returns (GenericResponse){}    
+      returns (GenericResponse){}
     
     // Create a volume attachment
     rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
     
     // Delete a volume attachment
     rpc DeleteAttachment (DeleteAttachmentOpts) returns (GenericResponse){}
-}
+    // Create a replication
+    rpc CreateReplication (CreateReplicationOpts) returns (GenericResponse){}
+
+    // Delete a replication
+    rpc DeleteReplication (DeleteReplicationOpts) returns (GenericResponse){}
+
+    // Enable a replication
+    rpc EnableReplication (EnableReplicationOpts) returns (GenericResponse){}
+
+    // Disable a replication
+    rpc DisableReplication (DisableReplicationOpts) returns (GenericResponse){}
+
+    // Failover a replication
+    rpc FailoverReplication (FailoverReplicationOpts) returns (GenericResponse){}
+    // Create a volume group
+    rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Update volume group
+    rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Delete volume group
+    rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}}
 
 // CreateVolumeOpts is a structure which indicates all required properties
 // for creating a volume.
@@ -87,6 +108,10 @@ message CreateVolumeOpts {
     string driverName = 11;
     // The Context
     string context = 12;
+    // The replication driver data
+    map<string, string> replicationDriverData = 13;
+    // The uuid of replication
+    string replicationId = 14;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties
@@ -218,6 +243,243 @@ message HostInfo {
     string initiator = 5;
 }
 
+message VolumeData {
+    map<string, string> data = 1;
+}
+
+// CreateReplicationOpts is a structure which indicates all required properties
+// for creating a replication.
+// NOTE: Need to figure out how to handle more than 2 sites.
+message CreateReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;
+    // The metadata of the primary replication, optional.
+    map<string, string> primaryReplicationDriverData = 11;
+    // The metadata of the seondary replication, optional.
+    map<string, string> secondaryReplicationDriverData = 12;
+    // The dock id.
+    string dockId = 13;
+    // The replication driver type.
+    string driverName = 14;
+    // The Context
+    string context = 15;
+    // Whether is primary replication
+    bool  isPrimary = 16;
+    // The replication metadata
+    map<string, string> metadata = 17;
+    // The volume data list
+    repeated  VolumeData volumeDataList = 18;
+    //the replication mode sync/async
+    string replicationMode = 19;
+    // 0 means sync replication.
+    int64 ReplicationPeriod = 20;
+    // replication bandwidth
+    int64 ReplicationBandwidth = 21;
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+// for deleting a replication.
+// NOTE: Need to figure out how to handle more than 2 sites.
+message DeleteReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;
+    // The metadata of the primary replication, optional.
+    map<string, string> primaryReplicationDriverData = 11;
+    // The metadata of the seondary replication, optional.
+    map<string, string> secondaryReplicationDriverData = 12;
+    // The dock id.
+    string dockId = 13;
+    // The replication driver type.
+    string driverName = 14;
+    // The Context
+    string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
+}
+
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+message EnableReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;
+    // The metadata of the primary replication, optional.
+    map<string, string> primaryReplicationDriverData = 11;
+    // The metadata of the seondary replication, optional.
+    map<string, string> secondaryReplicationDriverData = 12;
+    // The dock id.
+    string dockId = 13;
+    // The replication driver type.
+    string driverName = 14;
+    // The Context
+    string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+message DisableReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;
+    // The metadata of the primary replication, optional.
+    map<string, string> primaryReplicationDriverData = 11;
+    // The metadata of the seondary replication, optional.
+    map<string, string> secondaryReplicationDriverData = 12;
+    // The dock id.
+    string dockId = 13;
+    // The replication driver type.
+    string driverName = 14;
+    // The Context
+    string context = 15;
+    // The replication metadata
+    map<string, string> metadata = 16;
+}
+
+// Delete ReplicationOpts is a structure which indicates all required properties
+message FailoverReplicationOpts {
+    // The uuid of the replication, optional when creating.
+    string id = 1;
+    // The name of the replication, optional.
+    string name = 2;
+    // The description of the replication, optional.
+    string description = 3;
+    // The uuid of the primary volume. This field is required.
+    string primaryVolumeId = 4;
+    // The uuid of the secondary volume. This field is required.
+    string secondaryVolumeId = 5;
+    // The dock infomation on which the request will be executed
+    string availabilityZone = 6;
+    // The service level that volume belongs to, required.
+    string profileId = 7;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 8;
+    // The name of the pool on which volume will be created, required.
+    string poolName = 9;
+    // The metadata of the primary replication, optional.
+    map<string, string> primaryReplicationDriverData = 11;
+    // The metadata of the seondary replication, optional.
+    map<string, string> secondaryReplicationDriverData = 12;
+    // The dock id.
+    string dockId = 13;
+    // The replication driver type.
+    string driverName = 14;
+    // The Context
+    string context = 15;
+    // Allow attached volume
+    bool allowAttachedVolume = 16;
+    // The secondary backend id.
+    string secondaryBackendId = 17;
+    // The replication metadata
+    map<string, string> metadata = 18;
+}
+
+// CreateVolumeGroupOpts is a structure which indicates all required
+// properties for creating a volume group.
+message CreateVolumeGroupOpts {
+    // The uuid of the volume group, optional when creating.
+    string id = 1;
+    // The name of the volume, required.
+    string name = 2;
+    // The driver of the volume group.
+    string driverName = 3;
+    // The description of the volume, optional.
+    string description = 4;
+    // When create volume from snapshot, this field is required.
+    string availabilityZone = 5;
+    // The addVolumes contain UUIDs of volumes to be added to the group.
+    repeated string addVolumes = 6;
+    // The removeVolumes contains the volumes to be removed from the group.
+    repeated string removeVolumes = 7;
+    // The pool belongs to the group.
+    string poolId =8;
+    // The Context
+    string context = 9;
+}
+
+message UpdateVolumeGroupOpts{
+    // The uuid of the volume group, optional when updating.
+    string id = 1;
+    // The driver of the volume group.
+    string driverName = 2;
+    // The addVolumes contain UUIDs of volumes to be added to the group.
+    repeated string addVolumes = 3;
+    // The removeVolumes contains the volumes to be removed from the group.
+    repeated string removeVolumes = 4;
+    // The Context
+    string context = 5;
+}
+
+message DeleteVolumeGroupOpts{
+    // The uuid of the volume group, optional when deleting.
+    string id = 1;
+    // The driver of the volume group.
+    string driverName = 2;
+    // The Context
+    string context = 3;
+}
 service AttachDock {
     // Attach a volume
     rpc AttachVolume (AttachVolumeOpts) returns (GenericResponse){}

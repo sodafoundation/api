@@ -8,6 +8,8 @@ services:
     - /etc/opensds:/etc/opensds
     depends_on:
     - osdsdb
+    restart: on-failure
+    command: /bin/bash -c '/usr/bin/osdslet -logtostderr'
   osdsdock:
     image: 'opensdsio/opensds-dock:latest'
     tty: true
@@ -16,8 +18,14 @@ services:
     volumes:
     - /etc/opensds:/etc/opensds
     - /etc/ceph:/etc/ceph
+    - /dev/:/dev/
+    - /run/:/run/:shared
+    - /etc/localtime:/etc/localtime:ro
+    - /lib/modules:/lib/modules:ro
     depends_on:
     - osdsdb
+    restart: on-failure
+    command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsdock -logtostderr'
   osdsdb:
     image: 'quay.io/coreos/etcd:latest'
     tty: true

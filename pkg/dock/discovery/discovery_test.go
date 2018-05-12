@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"testing"
 
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	. "github.com/opensds/opensds/testutils/collection"
@@ -44,67 +45,71 @@ func init() {
 	}
 }
 
-func NewFakeDiscoverer() *DockDiscoverer {
-	return &DockDiscoverer{}
+func NewFakeDockDiscoverer() *provisionDockDiscoverer {
+	return &provisionDockDiscoverer{
+		DockRegister: &DockRegister{},
+	}
 }
 
 func TestInit(t *testing.T) {
-	var dd = NewFakeDiscoverer()
+	var fdd = NewFakeDockDiscoverer()
 	var expected []*model.DockSpec
 
 	for i := range SampleDocks {
 		expected = append(expected, &SampleDocks[i])
 	}
-	if err := dd.Init(); err != nil {
+	if err := fdd.Init(); err != nil {
 		t.Errorf("Failed to init discoverer struct: %v\n", err)
 	}
-	for i := range dd.dcks {
-		dd.dcks[i].Id = ""
+	for i := range fdd.dcks {
+		fdd.dcks[i].Id = ""
+		fdd.dcks[i].NodeId = ""
+		fdd.dcks[i].Metadata = nil
 		expected[i].Id = ""
 	}
-	if !reflect.DeepEqual(dd.dcks, expected) {
-		t.Errorf("Expected %+v, got %+v\n", expected, dd.dcks)
+	if !reflect.DeepEqual(fdd.dcks, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, fdd.dcks)
 	}
 }
 
 func TestDiscover(t *testing.T) {
-	var dd = NewFakeDiscoverer()
+	var fdd = NewFakeDockDiscoverer()
 	var expected []*model.StoragePoolSpec
 
 	for i := range SampleDocks {
-		dd.dcks = append(dd.dcks, &SampleDocks[i])
+		fdd.dcks = append(fdd.dcks, &SampleDocks[i])
 	}
 	for i := range SamplePools {
 		expected = append(expected, &SamplePools[i])
 	}
-	if err := dd.Discover(); err != nil {
+	if err := fdd.Discover(); err != nil {
 		t.Errorf("Failed to discoverer pools: %v\n", err)
 	}
-	for _, pol := range dd.pols {
+	for _, pol := range fdd.pols {
 		pol.Id = ""
 	}
-	if !reflect.DeepEqual(dd.pols, expected) {
-		t.Errorf("Expected %+v, got %+v\n", expected, dd.pols)
+	if !reflect.DeepEqual(fdd.pols, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, fdd.pols)
 	}
 }
 
-func TestStore(t *testing.T) {
-	var dd = NewFakeDiscoverer()
+func TestReport(t *testing.T) {
+	var fdd = NewFakeDockDiscoverer()
 
 	for i := range SampleDocks {
-		dd.dcks = append(dd.dcks, &SampleDocks[i])
+		fdd.dcks = append(fdd.dcks, &SampleDocks[i])
 	}
 	for i := range SamplePools {
-		dd.pols = append(dd.pols, &SamplePools[i])
+		fdd.pols = append(fdd.pols, &SamplePools[i])
 	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateDock", dd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", dd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", dd.pols[1]).Return(nil, nil)
-	dd.c = mockClient
+	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
+	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)
+	fdd.c = mockClient
 
-	if err := dd.Store(); err != nil {
+	if err := fdd.Report(); err != nil {
 		t.Errorf("Failed to store docks and pools into database: %v\n", err)
 	}
 }

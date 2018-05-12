@@ -74,6 +74,7 @@ var (
 			Description: "sample backend service",
 			Endpoint:    "localhost:50050",
 			DriverName:  "sample",
+			Type:        model.DockTypeProvioner,
 		},
 	}
 
@@ -196,6 +197,31 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+	}
+
+	SampleReplications = []model.ReplicationSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "c299a978-4f3e-11e8-8a5c-977218a83359",
+			},
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			Name:              "sample-replication-01",
+			Description:       "This is a sample replication for testing",
+			PoolId:            "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
+			},
+			PrimaryVolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			SecondaryVolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			Name:              "sample-replication-02",
+			Description:       "This is a sample replication for testing",
+			PoolId:            "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
 )
@@ -402,8 +428,24 @@ var (
 		"description": "This is the first sample snapshot for testing",
 		"size": 1,
 		"status": "available",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"		
+		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	}`
+
+	ByteVolumeGroup = `{
+		"id": "3769855c-a102-11e7-b772-17b880d2f555",
+		"name": "sample-group-01",
+		"description": "This is the first sample group for testing",
+		"status": "creating"
+	}`
+
+	ByteVolumeGroups = `[
+	{
+		"id": "3769855c-a102-11e7-b772-17b880d2f555",
+		"name": "sample-group-01",
+		"description": "This is the first sample group for testing",
+		"status": "creating"
+	}
+	]`
 
 	ByteSnapshots = `[
 		{
@@ -412,7 +454,7 @@ var (
 			"description": "This is the first sample snapshot for testing",
 			"size": 1,
 			"status": "available",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
+			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
 		},
 		{
 			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
@@ -420,7 +462,38 @@ var (
 			"description": "This is the second sample snapshot for testing",
 			"size": 1,
 			"status": "available",
-			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"	
+			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+		}
+	]`
+
+	ByteReplication = `{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-01",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`
+
+	ByteReplications = `[
+		{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-01",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+		},
+		{
+			"id": "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
+			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-02",
+			"Description": "This is a sample replication for testing",
+			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
 
@@ -474,7 +547,8 @@ var (
 			"name":        "sample",
 			"description": "sample backend service",
 			"endpoint":    "localhost:50050",
-			"driverName":  "sample"
+			"driverName":  "sample",
+			"type":        "provisioner"
 		}`,
 	}
 
@@ -500,30 +574,6 @@ var (
 				"advanced": {
 					"diskType": "SSD",
 					"latency":  "3ms"
-				}
-			}
-		}`,
-		`{
-			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			"name":             "sample-pool-02",
-			"description":      "This is the second sample storage pool for testing",
-			"totalCapacity":    200,
-			"freeCapacity":     170,
-			"availabilityZone": "default",
-			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"extras": {
-				"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        3000000,
-					"maxBWS": 	      350
-				},
-				"advanced": {
-					"diskType": "SAS",
-					"latency":  "500ms"
 				}
 			}
 		}`,
@@ -575,6 +625,27 @@ var (
 			"size":        1,
 			"status":      "available",
 			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
+		}`,
+	}
+
+	StringSliceReplications = []string{
+		`{
+			"id":                "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name":              "sample-replication-01",
+			"description":       "This is a sample replication for testing",
+			"poolId":            "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId":         "1106b972-66ef-11e7-b172-db03f3689c9c"
+		}`,
+		`{
+			"id":                "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
+			"primaryVolumeId":   "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name":              "sample-replication-02",
+			"description":       "This is a sample replication for testing",
+			"poolId":            "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId":         "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 	}
 )

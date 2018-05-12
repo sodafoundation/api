@@ -20,12 +20,14 @@ This module implements a entry into the OpenSDS northbound REST service.
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 const (
@@ -37,7 +39,7 @@ func Run(host string) {
 
 	// add router for v1beta api
 	ns :=
-		beego.NewNamespace("/v1beta",
+		beego.NewNamespace("/"+constants.ApiVersion,
 			beego.NSCond(func(ctx *bctx.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -82,14 +84,23 @@ func Run(host string) {
 				// Creates, shows, lists, unpdates and deletes snapshot.
 				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
 				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
+
+				// Creates, shows, lists, unpdates and deletes replication.
+				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplications"),
+				beego.NSRouter("/replications/detail", NewReplicationPortal(), "get:ListReplicationsDetail"),
+				beego.NSRouter("/replications/:replicationId", NewReplicationPortal(), "get:GetReplication;put:UpdateReplication;delete:DeleteReplication"),
+				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
+				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "post:Action"),
+				// Volume group contains a list of volumes that are used in the same application.
+				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
+				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 			// Extend Volume
 			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
 		)
-	beego.InsertFilter("*", beego.BeforeExec, context.Factory())
-	beego.InsertFilter("*", beego.BeforeExec, auth.Factory())
-	//ns.Filter("before", context.Factory())
-	//ns.Filter("before", auth.Factory())
+	pattern := fmt.Sprintf("/%s/*", constants.ApiVersion)
+	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
+	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)
 
 	// add router for api version

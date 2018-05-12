@@ -16,14 +16,24 @@
 
 osds:usage()
 {
-    echo "Usage: $(basename $0) [--help|--purge]"
+    echo "Usage: $(basename $0) [--help|--cleanup|--purge]"
+cat  << OSDS_HELP_UNINSTALL_INFO_DOC
+Usage:
+    $(basename $0) [-h|--help]
+    $(basename $0) [-c|--cleanup]
+    $(basename $0) [-p|--purge]
+Flags:
+    -h, --help     Print this information.
+    -c, --cleanup  Stop service and clean up some application data.
+    -p, --purge    Remove package, config file, log file.
+OSDS_HELP_UNINSTALL_INFO_DOC
 }
 
 # Parse parameter first
 case "$# $*" in
-    "0 "|"1 --purge")
+    "0 "|"1 --purge"|"1 -p"|"1 --cleanup"|"1 -c")
     ;;
-    "1 --help")
+    "1 -h"|"1 --help")
     osds:usage
     exit 0
     ;;
@@ -42,54 +52,36 @@ OPT_DIR=/opt/opensds
 OPT_BIN=$OPT_DIR/bin
 
 source $TOP_DIR/lib/util.sh
-source $TOP_DIR/lib/etcd.sh
-source $TOP_DIR/lib/lvm.sh
-source $TOP_DIR/lib/ceph.sh
+source $TOP_DIR/sdsrc
 
-osds::stop()
-{
-    OSDSLET_PID=$(pgrep osdslet)
-    OSDSDOCK_PID=$(pgrep osdsdock)
-    if [ ! -z "$OSDSLET_PID" ]; then
-        kill $OSDSLET_PID
-    fi
-    if [ ! -z "$OSDSDOCK_PID" ]; then
-        kill $OSDSDOCK_PID
-    fi
+osds::cleanup() {
+    osds::util::serice_operation cleanup
 }
 
-osds::lvm_enabled(){
-    cat $OPT_DIR/backend.list | grep lvm
-    return $?
-}
-
-osds::ceph_enabled(){
-    cat $OPT_DIR/backend.list | grep ceph
-    return $?
-}
-
-osds::cleanup(){
-    osds::etcd::cleanup
-    osds::lvm_enabled && osds::lvm::cleanup
-    osds::ceph_enabled && osds::ceph::cleanup
-    osds::stop
-}
-
-osds::purge_cleanup(){
+osds::uninstall(){
     osds::cleanup
-    osds::lvm::pkg_uninstall
+    osds::util::serice_operation uninstall
+}
+
+osds::uninstall_purge(){
+    osds::uninstall
+    osds::util::serice_operation uninstall_purge
+
     rm /opt/opensds -rf
     rm /etc/opensds -rf
     rm /var/log/opensds -rf
-    rm /etc/bash_completion.d/osdsctl.bash_completion
+    rm /etc/bash_completion.d/osdsctl.bash_completion -rf
 }
 
 case "$# $*" in
-    "0 ")
+    "1 -c"|"1 --cleanup")
     osds::cleanup
     ;;
-    "1 --purge")
-    osds::purge_cleanup
+    "0 ")
+    osds::uninstall
+    ;;
+    "1 -p"|"1 --purge")
+    osds::uninstall_purge
     ;;
      *)
     osds:usage
