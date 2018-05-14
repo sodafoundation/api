@@ -212,10 +212,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         }
         if(this.myFormGroup.value.form_isModifyPsw==true){
             request.user["password"] = this.myFormGroup.value.form_psw;
-            this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
-            this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
-            this.myFormGroup.controls['form_psw'].updateValueAndValidity();
-            this.myFormGroup.controls['form_pswConfirm'].updateValueAndValidity();
+         
             if(this.myFormGroup.status == "VALID"){
                 this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
                     this.createUserDisplay = false;
