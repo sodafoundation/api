@@ -16,12 +16,14 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 
 	"github.com/astaxie/beego"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -68,6 +70,7 @@ type ActionSpec map[string]interface{}
 //			return
 //		}
 //  Note: If you want to use http ctx in action handler please use 'ctx' which is function parameter instead of 'this.Ctx'
+
 func (this *BasePortal) Action() {
 	action := ActionSpec{}
 	// IO reader only can be used once, but in action situation request body will read twice
@@ -121,4 +124,18 @@ func (this *BasePortal) doFilter(resp interface{}, whiteList []string) map[strin
 		}
 	}
 	return m
+}
+
+func (this *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
+	reason := fmt.Sprintf(errMsg+": %s", err.Error())
+	this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+	this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+	log.Error(reason)
+}
+
+func (this *BasePortal) SuccessHandle(status int, body []byte) {
+	this.Ctx.Output.SetStatus(status)
+	if body != nil {
+		this.Ctx.Output.Body(body)
+	}
 }

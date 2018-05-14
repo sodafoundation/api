@@ -1155,6 +1155,8 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.ReplicationDriverData != nil {
 		result.ReplicationDriverData = vol.ReplicationDriverData
 	}
+	result.GroupId = vol.GroupId
+
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -2052,4 +2054,226 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 		return nil, errors.New(resp.Error)
 	}
 	return r, nil
+}
+func (c *Client) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg.TenantId = ctx.TenantId
+	vgBody, err := json.Marshal(vg)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vg.Id),
+		Content: string(vgBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When create volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return vg, nil
+}
+
+func (c *Client) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vgId),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var vg = &model.VolumeGroupSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), vg); err != nil {
+		log.Error("When parsing volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return vg, nil
+}
+
+func (c *Client) UpdateVolumeGroup(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg, err := c.GetVolumeGroup(ctx, vgUpdate.Id)
+	if err != nil {
+		return nil, err
+	}
+	if vgUpdate.Name != "" && vgUpdate.Name != vg.Name {
+		vg.Name = vgUpdate.Name
+	}
+	if vgUpdate.AvailabilityZone != "" && vgUpdate.AvailabilityZone != vg.AvailabilityZone {
+		vg.AvailabilityZone = vgUpdate.AvailabilityZone
+	}
+	if vgUpdate.Description != "" && vgUpdate.Description != vg.Description {
+		vg.Description = vgUpdate.Description
+	}
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
+	}
+	if vg.Status != "" && vgUpdate.Status != vg.Status {
+		vg.Status = vgUpdate.Status
+	}
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
+	}
+	if vgUpdate.CreatedAt != "" && vgUpdate.CreatedAt != vg.CreatedAt {
+		vg.CreatedAt = vgUpdate.CreatedAt
+	}
+	if vgUpdate.UpdatedAt != "" && vgUpdate.UpdatedAt != vg.UpdatedAt {
+		vg.UpdatedAt = vgUpdate.UpdatedAt
+	}
+
+	vgBody, err := json.Marshal(vg)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vgUpdate.Id),
+		NewContent: string(vgBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return vg, nil
+}
+
+func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
+	switch in.(type) {
+
+	case *model.VolumeSnapshotSpec:
+		snap := in.(*model.VolumeSnapshotSpec)
+		snap.Status = status
+		if _, errUpdate := c.UpdateVolumeSnapshot(ctx, snap.Id, snap); errUpdate != nil {
+			log.Error("Error occurs when update volume snapshot status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.VolumeAttachmentSpec:
+		attm := in.(*model.VolumeAttachmentSpec)
+		attm.Status = status
+		if _, errUpdate := c.UpdateVolumeAttachment(ctx, attm.Id, attm); errUpdate != nil {
+			log.Error("Error occurred in dock module when update volume attachment status in db:", errUpdate)
+			return errUpdate
+		}
+
+	case *model.VolumeSpec:
+		volume := in.(*model.VolumeSpec)
+		volume.Status = status
+		if _, errUpdate := c.UpdateVolume(ctx, volume); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.VolumeGroupSpec:
+		vg := in.(*model.VolumeGroupSpec)
+		vg.Status = status
+		if _, errUpdate := c.UpdateVolumeGroup(ctx, vg); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case []*model.VolumeSpec:
+		vols := in.([]*model.VolumeSpec)
+		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
+			return errUpdate
+		}
+	}
+	return nil
+}
+
+func (c *Client) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
+	volumes, err := c.ListVolumes(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var volumesInSameGroup []*model.VolumeSpec
+	for _, v := range volumes {
+		if v.GroupId == vgId {
+			volumesInSameGroup = append(volumesInSameGroup, v)
+		}
+	}
+
+	return volumesInSameGroup, nil
+}
+
+func (c *Client) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
+	var volumeRefs []*model.VolumeSpec
+	for _, values := range volumeList {
+		v, err := c.UpdateVolume(ctx, values)
+		if err != nil {
+			return nil, err
+		}
+		volumeRefs = append(volumeRefs, v)
+	}
+	return volumeRefs, nil
+}
+
+// ListVolumes
+func (c *Client) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId),
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When list volume groups in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var groups []*model.VolumeGroupSpec
+	if len(dbRes.Message) == 0 {
+		return groups, nil
+	}
+	for _, msg := range dbRes.Message {
+		var group = &model.VolumeGroupSpec{}
+		if err := json.Unmarshal([]byte(msg), group); err != nil {
+			log.Error("When parsing volume group in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		groups = append(groups, group)
+	}
+	return groups, nil
+}
+
+func (c *Client) DeleteVolumeGroup(ctx *c.Context, volumeGroupId string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		group, err := c.GetVolumeGroup(ctx, volumeGroupId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = group.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, tenantId, volumeGroupId),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When delete volume group in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+func (c *Client) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeSnapshotSpec, error) {
+	snaps, err := c.ListVolumeSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.VolumeSnapshotSpec
+	for _, snap := range snaps {
+		if snap.VolumeId == volumeId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
 }

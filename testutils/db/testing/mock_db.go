@@ -172,6 +172,29 @@ func (_m *MockClient) CreateVolumeAttachment(ctx *context.Context, attachment *m
 	return r0, r1
 }
 
+// CreateVolumeGroup provides a mock function with given fields: ctx, vg
+func (_m *MockClient) CreateVolumeGroup(ctx *context.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx, vg)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
+		r0 = rf(ctx, vg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.VolumeGroupSpec) error); ok {
+		r1 = rf(ctx, vg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateVolumeSnapshot provides a mock function with given fields: ctx, vs
 func (_m *MockClient) CreateVolumeSnapshot(ctx *context.Context, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(ctx, vs)
@@ -272,6 +295,20 @@ func (_m *MockClient) DeleteVolumeAttachment(ctx *context.Context, attachmentId 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
 		r0 = rf(ctx, attachmentId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteVolumeGroup provides a mock function with given fields: ctx, vgId
+func (_m *MockClient) DeleteVolumeGroup(ctx *context.Context, vgId string) error {
+	ret := _m.Called(ctx, vgId)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
+		r0 = rf(ctx, vgId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -493,6 +530,29 @@ func (_m *MockClient) GetVolumeAttachment(ctx *context.Context, attachmentId str
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
 		r1 = rf(ctx, attachmentId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetVolumeGroup provides a mock function with given fields: ctx, vgId
+func (_m *MockClient) GetVolumeGroup(ctx *context.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx, vgId)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.VolumeGroupSpec); ok {
+		r0 = rf(ctx, vgId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -730,6 +790,29 @@ func (_m *MockClient) ListReplicationWithFilter(ctx *context.Context, m map[stri
 	return r0, r1
 }
 
+// ListSnapshotsByVolumeId provides a mock function with given fields: ctx, volId
+func (_m *MockClient) ListSnapshotsByVolumeId(ctx *context.Context, volId string) ([]*model.VolumeSnapshotSpec, error) {
+	ret := _m.Called(ctx, volId)
+
+	var r0 []*model.VolumeSnapshotSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []*model.VolumeSnapshotSpec); ok {
+		r0 = rf(ctx, volId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSnapshotSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, volId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumeAttachments provides a mock function with given fields: ctx, volumeId
 func (_m *MockClient) ListVolumeAttachments(ctx *context.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(ctx, volumeId)
@@ -769,6 +852,29 @@ func (_m *MockClient) ListVolumeAttachmentsWithFilter(ctx *context.Context, m ma
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
 		r1 = rf(ctx, m)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumeGroups provides a mock function with given fields: ctx
+func (_m *MockClient) ListVolumeGroups(ctx *context.Context) ([]*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []*model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.VolumeGroupSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -838,6 +944,29 @@ func (_m *MockClient) ListVolumes(ctx *context.Context) ([]*model.VolumeSpec, er
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
 		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumesByGroupId provides a mock function with given fields: ctx, vgId
+func (_m *MockClient) ListVolumesByGroupId(ctx *context.Context, vgId string) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(ctx, vgId)
+
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []*model.VolumeSpec); ok {
+		r0 = rf(ctx, vgId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, vgId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -974,6 +1103,20 @@ func (_m *MockClient) UpdateReplication(ctx *context.Context, replicationId stri
 	return r0, r1
 }
 
+// UpdateStatus provides a mock function with given fields: ctx, object, status
+func (_m *MockClient) UpdateStatus(ctx *context.Context, object interface{}, status string) error {
+	ret := _m.Called(ctx, object, status)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*context.Context, interface{}, string) error); ok {
+		r0 = rf(ctx, object, status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateVolume provides a mock function with given fields: ctx, vol
 func (_m *MockClient) UpdateVolume(ctx *context.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
 	ret := _m.Called(ctx, vol)
@@ -1020,6 +1163,29 @@ func (_m *MockClient) UpdateVolumeAttachment(ctx *context.Context, attachmentId 
 	return r0, r1
 }
 
+// UpdateVolumeGroup provides a mock function with given fields: ctx, vg
+func (_m *MockClient) UpdateVolumeGroup(ctx *context.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx, vg)
+
+	var r0 *model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.VolumeGroupSpec) *model.VolumeGroupSpec); ok {
+		r0 = rf(ctx, vg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.VolumeGroupSpec) error); ok {
+		r1 = rf(ctx, vg)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateVolumeSnapshot provides a mock function with given fields: ctx, snapshotID, vs
 func (_m *MockClient) UpdateVolumeSnapshot(ctx *context.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(ctx, snapshotID, vs)
@@ -1036,6 +1202,29 @@ func (_m *MockClient) UpdateVolumeSnapshot(ctx *context.Context, snapshotID stri
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, string, *model.VolumeSnapshotSpec) error); ok {
 		r1 = rf(ctx, snapshotID, vs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VolumesToUpdate provides a mock function with given fields: ctx, volumeList
+func (_m *MockClient) VolumesToUpdate(ctx *context.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
+	ret := _m.Called(ctx, volumeList)
+
+	var r0 []*model.VolumeSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, []*model.VolumeSpec) []*model.VolumeSpec); ok {
+		r0 = rf(ctx, volumeList)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, []*model.VolumeSpec) error); ok {
+		r1 = rf(ctx, volumeList)
 	} else {
 		r1 = ret.Error(1)
 	}

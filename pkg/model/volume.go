@@ -42,6 +42,9 @@ type VolumeSpec struct {
 	// +optional
 	Description string `json:"description,omitempty"`
 
+	// The group id of the volume.
+	GroupId string `json:"groupId,omitempty"`
+
 	// The size of the volume requested by the user.
 	// Default unit of volume Size is GB.
 	Size int64 `json:"size,omitempty"`
@@ -70,7 +73,8 @@ type VolumeSpec struct {
 
 	// The uuid of the replication which the volume belongs to.
 	ReplicationDriverData map[string]string `json:"replicationDriverData,omitempty"`
-}
+	// Attach status of the volume.
+	AttachStatus string}
 
 // VolumeAttachmentSpec is a description of volume attached resource.
 type VolumeAttachmentSpec struct {
@@ -173,27 +177,40 @@ type ExtendVolumeSpec struct {
 	Extend ExtendSpec `json:"extend,omitempty"`
 }
 
-//volume status
-const (
-	VolumeCreating            = "creating"
-	VolumeAvailable           = "available"
-	VolumeReserved            = "reserved"
-	VolumeAttaching           = "attaching"
-	VolumeDetaching           = "detaching"
-	VolumeInUse               = "inUse"
-	VolumeDeleting            = "deleting"
-	VolumeError               = "error"
-	VolumeErrorDeleting       = "errorDeleting"
-	VolumeErrorExtending      = "errorExtending"
-	VolumeExtending           = "extending"
-	VolumeSnapCreating        = "creating"
-	VolumeSnapAvailable       = "available"
-	VolumeSnapDeleting        = "deleting"
-	VolumeSnapError           = "error"
-	VolumeSnapErrorDeleting   = "errorDeleting"
-	VolumeSnapDeleted         = "deleted"
-	VolumeAttachCreating      = "creating"
-	VolumeAttachAvailable     = "available"
-	VolumeAttachErrorDeleting = "errorDeleting"
-	VolumeAttachError         = "error"
-)
+type VolumeGroupSpec struct {
+	*BaseModel
+	// The name of the volume group.
+	Name string `json:"name,omitempty"`
+
+	Status string `json:"status,omitempty"`
+
+	// The uuid of the project that the volume snapshot belongs to.
+	TenantId string `json:"tenantId,omitempty"`
+
+	// The uuid of the user that the volume snapshot belongs to.
+	// +optional
+	UserId string `json:"userId,omitempty"`
+
+	// The description of the volume group.
+	// +optional
+	Description string `json:"description,omitempty"`
+
+	// The uuid of the profile which the volume group belongs to.
+	Profiles []string `json:"profileId,omitempty"`
+
+	// The locality that volume group belongs to.
+	// +optional
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
+
+	// The addVolumes contain UUIDs of volumes to be added to the group.
+	AddVolumes []string `json:"addVolumes,omitempty"`
+
+	// The removeVolumes contains the volumes to be removed from the group.
+	RemoveVolumes []string `json:"removeVolumes,omitempty"`
+
+	// The uuid of the pool which the volume belongs to.
+	// +readOnly
+	PoolId string `json:"poolId,omitempty"`
+
+	GroupSnapshots []string `json:"groupSnapshots,omitempty"`
+}

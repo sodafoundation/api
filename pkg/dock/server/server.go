@@ -323,6 +323,56 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 	return &res, nil
 }
 
+// DetachVolume implements pb.DockServer.CreateVolumeGroup
+func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive create volume group request, vr =", opt)
+
+	vg, err := dock.Brain.CreateVolumeGroup(opt)
+	if err != nil {
+		log.Error("Error occurred in dock module when create volume group:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult(vg)
+	return &res, nil
+}
+
+func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive update volume group request, vr =", opt)
+
+	if err := dock.Brain.UpdateVolumeGroup(opt); err != nil {
+		log.Error("Error occurred in dock module when update volume group:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult("")
+	return &res, nil
+}
+
+func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var res pb.GenericResponse
+
+	log.Info("Dock server receive delete volume group request, vr =", opt)
+
+	if err := dock.Brain.DeleteVolumeGroup(opt); err != nil {
+		log.Error("Error occurred in dock module when delete volume group:", err)
+
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
+	}
+
+	res.Reply = GenericResponseResult("")
+	return &res, nil
+}
+
 func GenericResponseResult(message interface{}) *pb.GenericResponse_Result_ {
 	var msg string
 	switch message.(type) {

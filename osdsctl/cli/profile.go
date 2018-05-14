@@ -14,7 +14,6 @@
 
 /*
 This module implements a entry into the OpenSDS service.
-
 */
 
 package cli
