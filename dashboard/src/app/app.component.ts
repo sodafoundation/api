@@ -155,6 +155,9 @@ export class AppComponent implements OnInit, AfterViewInit{
             this.paramStor.AUTH_TOKEN(res.headers.get('x-subject-token'));
             let user = res.json().token.user;
             this.AuthWithTokenScoped(user);
+        },
+        error=>{
+            console.log("Username or password incorrect.")
         });
     }
 
@@ -246,6 +249,9 @@ export class AppComponent implements OnInit, AfterViewInit{
                 }, 500);
 
             })
+        },
+        error => {
+            this.logout();
         })
     }
 

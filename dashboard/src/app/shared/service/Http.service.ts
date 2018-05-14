@@ -21,44 +21,37 @@ export class HttpService extends Http {
     }
 
     get(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.get(url, options), options);
     }
 
     post(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.post(url, body, options), options);
     }
 
     put(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.put(url, body, options), options);
     }
 
     delete(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.delete(url, options), options);
     }
 
     patch(url: string, body: any, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.patch(url, body, options), options);
     }
 
     head(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.head(url, options), options);
     }
 
     options(url: string, options?: BaseRequestOptionsArgs): Observable<Response>{
-        url = this.presetURL(url, options).url;
-        options = this.presetURL(url, options).options;
+        [url, options]= this.presetURL(url, options);
         return this.intercept(super.options(url, options), options);
     }
 
@@ -78,14 +71,7 @@ export class HttpService extends Http {
             
         }
 
-        let re = {
-            url: '', 
-            options: {}
-        };
-        re.options = options;
-        re.url = url;
-
-        return re;
+        return [url, options];
     }
 
     intercept(observable: Observable<Response>, options = <BaseRequestOptionsArgs>{}): Observable<Response> {
