@@ -75,16 +75,16 @@
             </form-item>
             <form-item label="Expand Capacity By" >
                 <div style="display: inline-flex;" class="ui-fluid">
-                        <input *ngIf="!isEditUser" type="text" pInputText value="0" style="width: 150px; margin-right: 10px;" />
-                        <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions"></p-dropdown>
+                        <input *ngIf="!isEditUser" type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
+                        <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
                 </div>
             </form-item>
             <form-item label="Total Capacity After Expansion" >
-                    <span class="text-only">{{selectedVolume.size}}</span>
+                    <span class="text-only">{{selectVolumeSize}}</span>
             </form-item>
         </form>
         <p-footer>
-            <button type="button" pButton (click)="expandDisplay=false" label="OK" ></button>
+            <button type="button" pButton (click)="expandVolume()" label="OK" ></button>
             <button type="button" pButton (click)="expandDisplay=false" label="Cancel"></button>
         </p-footer>
     </p-dialog>

@@ -34,7 +34,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
     currentUser;
 
     detailUserInfo: string;
-    popTitle: String;
+    popTitle: string;
 
     sortField: string;
 
@@ -50,8 +50,8 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         // private I18N: I18NService,
         // private router: Router,
         private fb: FormBuilder
-    ) { 
-    
+    ) {
+
         this.myFormGroup = this.fb.group({
             "form_username": ["", {validators:[Validators.required, Validators.pattern(this.validRule.name), this.ifUserExisting(this.tenantUsers)], updateOn:'change'}  ],
             "form_description":["", Validators.maxLength(200) ],
@@ -69,7 +69,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         "form_psw": { required: "Password is required.", minlength: "At least two kinds of letters / numbers / special characters, min. length is 8.", regPassword:"At least two kinds of letters / numbers / special characters, min. length is 8." },
         "form_pswConfirm": { required: "Password is required.", regConfirmPassword: "Two inputted password inconsistencies." }
     };
-    
+
     label:object = {
         userNameLabel:'Username',
         passwordLabel:'Password',
@@ -78,7 +78,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         roleLabel:'Role',
         tenantLabel:'Tenant'
     }
-    
+
     ifUserExisting (param: any): ValidatorFn{
         return (c: AbstractControl): {[key:string]: boolean} | null => {
             let isExisting= false;
@@ -134,14 +134,14 @@ export class UserListComponent implements OnInit, AfterViewChecked {
 
             this.username = user.username;
             this.currentUser = user;
-            
+
             this.myFormGroup.controls['form_description'].value = user.description;
             this.myFormGroup.controls['form_isModifyPsw'].value = false;
 
             this.myFormGroup.controls['form_username'].clearValidators();
             this.myFormGroup.controls['form_psw'].clearValidators();
             this.myFormGroup.controls['form_pswConfirm'].clearValidators();
-            
+
 
         }else{
             this.isEditUser = false;
@@ -203,7 +203,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         }
         if(this.myFormGroup.value.form_isModifyPsw==true){
             request.user["password"] = this.myFormGroup.value.form_psw;
-            
+
             this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
             this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
             this.myFormGroup.controls['form_psw'].updateValueAndValidity();
@@ -239,10 +239,10 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                 }
             }
         }
-        
-        
+
+
     }
-    
+
     getRoles(){
         let request: any = { params:{} };
         this.http.get("/v3/roles", request).subscribe((res) => {
@@ -275,9 +275,9 @@ export class UserListComponent implements OnInit, AfterViewChecked {
 
     ngOnInit() {
         this.listUsers();
-        
+
     }
-    
+
     ngAfterViewChecked(){
         this.newPassword = this.myFormGroup.value.form_psw;
 
@@ -323,7 +323,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                 this.http.patch("/v3/users/"+ user.userid, request).subscribe((res) => {
                     this.listUsers();
                 });
-                
+
             },
             reject:()=>{}
         })
@@ -355,7 +355,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                         }
                     });
                 })
-                
+
             },
             reject:()=>{}
         })
