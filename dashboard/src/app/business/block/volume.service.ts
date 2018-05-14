@@ -55,6 +55,10 @@ export class VolumeService {
   getVolumesGroups(): Observable<any> {
     return this.http.get(this.url);
   }
+  expandVolume(id,param):Observable<any> {
+      let expandVolumeUrl = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/volumes' + '/' + id + "/action"
+      return this.http.post(expandVolumeUrl,param);
+  }
 }
 
 @Injectable()

@@ -22,12 +22,12 @@ export class VolumeListComponent implements OnInit {
     createReplicationDisplay = false;
     expandDisplay = false;
     modifyDisplay = false;
-
-
+    selectVolumeSize :number;
+    unit:number = 1;
     capacityOptions = [
         {
             label: 'GB',
-            value: 'tb'
+            value: 'gb'
         },
         {
             label: 'TB',
@@ -64,6 +64,21 @@ export class VolumeListComponent implements OnInit {
         this.modifyFormGroup = this.fb.group({
             "name": ['', Validators.required]
         });
+        this.expandFormGroup = this.fb.group({
+            "expandSize":[1,{validators:[Validators.required], updateOn:'change'} ],
+            "capacityOption":[this.capacityOptions[0],{validators:[Validators.required], updateOn:'change'} ]
+        });
+        this.expandFormGroup.get("expandSize").valueChanges.subscribe(
+            (value:string)=>{
+                this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(value)*this.unit;
+            }
+        );
+        this.expandFormGroup.get("capacityOption").valueChanges.subscribe(
+            (value:string)=>{
+                this.unit =(value === "tb" ? 1024: 1);
+                this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize)*this.unit;
+            }
+        )
     }
 
     ngOnInit() {
@@ -76,8 +91,12 @@ export class VolumeListComponent implements OnInit {
             },
             {
                 "label": "Expand",
-                command: () => { 
+                command: () => {
                     this.expandDisplay = true;
+                    this.expandFormGroup.reset();
+                    this.selectVolumeSize = parseInt(this.selectedVolume.size);
+                    this.expandFormGroup.controls["expandSize"].setValue(1);
+                    this.unit = 1;
                 }
             },
             {
@@ -88,7 +107,6 @@ export class VolumeListComponent implements OnInit {
                 }
             }
         ];
-
         this.getVolumes();
 
         this.label = {
@@ -145,6 +163,7 @@ export class VolumeListComponent implements OnInit {
             this.createReplicationDisplay = true;
         }
         this.selectedVolume = selectedVoluem;
+        this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize);
     }
 
     modifyVolume() {
@@ -154,6 +173,17 @@ export class VolumeListComponent implements OnInit {
         this.VolumeService.modifyVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
             this.modifyDisplay = false;
+        });
+    }
+    expandVolume(){
+        let param = {
+            "extend": {
+                "newSize": this.selectVolumeSize
+            }
+        }
+        this.VolumeService.expandVolume(this.selectedVolume.id, param).subscribe((res) => {
+            this.getVolumes();
+            this.expandDisplay = false;
         });
     }
 }
