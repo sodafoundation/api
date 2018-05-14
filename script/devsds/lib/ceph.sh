@@ -18,14 +18,20 @@
 _XTRACE_CEPH=$(set +o | grep xtrace)
 set +o xtrace
 
-osds::ceph::init(){
-    #TODO
-    echo dummy init
+osds::ceph::install(){
+     : # TODO
 }
 
-osds::ceph::cleanup(){
-    #TODO
-    echo dummy cleanup
+osds::ceph::cleanup() {
+     : # TODO
+}
+
+osds::ceph::uninstall(){
+     : # TODO
+}
+
+osds::ceph::uninstall_purge(){
+     : # TODO
 }
 
 # Restore xtrace

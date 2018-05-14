@@ -59,6 +59,8 @@ osds::lvm::create_volume_group(){
 
 osds::lvm::set_configuration(){
 cat > $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
+tgtBindIp: $HOST_IP
+tgtConfDir: /etc/tgt/conf.d
 pool:
   $DEFAULT_VOLUME_GROUP_NAME:
     diskType: NL-SAS
@@ -82,23 +84,8 @@ name = lvm
 description = LVM Test
 driver_name = lvm
 config_path = /etc/opensds/driver/lvm.yaml
+
 OPENSDS_LVM_GLOBAL_CONFIG_DOC
-}
-
-osds::lvm::init() {
-    local vg=$DEFAULT_VOLUME_GROUP_NAME
-    local size=$VOLUME_BACKING_FILE_SIZE
-
-    # Install lvm relative packages.
-    osds::lvm::pkg_install
-    osds::lvm::create_volume_group $vg $size
-
-    # Remove iscsi targets
-    sudo tgtadm --op show --mode target | awk '/Target/ {print $3}' | sudo xargs -r -n1 tgt-admin --delete
-    # Remove volumes that already exist.
-    osds::lvm::remove_volumes $vg
-    osds::lvm::set_configuration
-    osds::lvm::set_lvm_filter
 }
 
 osds::lvm::remove_volumes() {
@@ -139,10 +126,6 @@ osds::lvm::clean_volume_group() {
     fi
 }
 
-osds::lvm::cleanup(){
-    osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
-    osds::lvm::clean_lvm_filter
-}
 
 # osds::lvm::clean_lvm_filter() Remove the filter rule set in set_lvm_filter()
 
@@ -173,6 +156,36 @@ osds::lvm::set_lvm_filter() {
     osds::lvm::clean_lvm_filter
     sudo sed -i "/# global_filter = \[.*\]/a\    $global_filter$filter_string" /etc/lvm/lvm.conf
     osds::echo_summary "set lvm.conf device global_filter to: $filter_string"
+}
+
+
+osds::lvm::install() {
+    local vg=$DEFAULT_VOLUME_GROUP_NAME
+    local size=$VOLUME_BACKING_FILE_SIZE
+
+    # Install lvm relative packages.
+    osds::lvm::pkg_install
+    osds::lvm::create_volume_group $vg $size
+
+    # Remove iscsi targets
+    sudo tgtadm --op show --mode target | awk '/Target/ {print $3}' | sudo xargs -r -n1 tgt-admin --delete
+    # Remove volumes that already exist.
+    osds::lvm::remove_volumes $vg
+    osds::lvm::set_configuration
+    osds::lvm::set_lvm_filter
+}
+
+osds::lvm::cleanup(){
+    osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
+    osds::lvm::clean_lvm_filter
+}
+
+osds::lvm::uninstall(){
+    : # do nothing
+}
+
+osds::lvm::uninstall_purge(){
+    echo osds::lvm::pkg_uninstall
 }
 
 # Restore xtrace

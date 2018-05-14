@@ -52,10 +52,8 @@ func (c *client) Connect(edp string) error {
 		return err
 	}
 	// Create dock client via the connection.
-	pdc := pb.NewProvisionDockClient(conn)
-	adc := pb.NewAttachDockClient(conn)
-
-	c.ProvisionDockClient, c.AttachDockClient = pdc, adc
+	c.ProvisionDockClient = pb.NewProvisionDockClient(conn)
+	c.AttachDockClient = pb.NewAttachDockClient(conn)
 	c.ClientConn = conn
 
 	return nil

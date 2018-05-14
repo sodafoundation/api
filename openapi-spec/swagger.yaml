@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -408,7 +408,7 @@ paths:
     post:
       tags:
         - Block volumes
-      description: Create a volume.
+      description: Creates a volume.
       parameters:
         - name: body
           in: body
@@ -482,6 +482,32 @@ paths:
       responses:
         '202':
           description: Accepted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/volumes/{volumeId}/action':
+    parameters:
+      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/volumeId'
+    post:
+      tags:
+        - Block volumes
+      description: Extends a volume.
+      parameters:
+        - name: ExtendVolumeRequest
+          in: body
+          schema:
+            $ref: '#/definitions/ExtendVolumeRequest'
+      responses:
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/Volume'
         '401':
           description: Unauthorized
         '403':
@@ -626,7 +652,7 @@ paths:
     post:
       tags:
         - Block volume snapshots
-      description: Create a volume snapshot.
+      description: Creates a volume snapshot.
       parameters:
         - name: body
           in: body
@@ -700,6 +726,450 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/volumeGroup':
+    parameters:
+      - $ref: '#/parameters/projectId'
+    get:
+      tags:
+        - Block volume group
+      description: Lists information for all volume groups.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - Block volume group
+      description: Creates a volume group.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+      responses:
+        '202':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
+    parameters:
+      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/volumeGroupId'
+    get:
+      tags:
+        - Block volume group
+      description: Gets volume group detail by volume group id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    put:
+      tags:
+        - Block volume group
+      description: Updates a volume group.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+            required:
+              - name
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/VolumeGroup'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - Block volume group
+      description: Deletes a volume group.
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications':
+    parameters:
+      - $ref: '#/parameters/projectId'
+    get:
+      tags:
+        - Block Replications
+      description: Lists information for all replications.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Replication'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - Block Replications
+      description: Create a replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+             $ref: '#/definitions/ReplicationDetail'
+      responses:
+        '202':
+          description: OK
+          schema:
+            $ref: '#/definitions/ReplicationDetail'
+          examples:
+            application/json:
+              id: e416db95-b6f4-4669-a075-5a873d050a93
+              createdAt: "2018-05-07T07:02:35.389Z"
+              updatedAt:
+              name: replication-demo
+              description: volume replication demo
+              availabilityZone: default
+              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+              primaryReplicationDriverData:
+                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+              secondaryReplicationDriverData:
+                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+              ReplicationStatus: enabled
+              replicationMode: sync
+              replicationPeriod: 0
+              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications/{replicationId}':
+    parameters:
+      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/replicationId'
+    get:
+      tags:
+        - Block Replications
+      description: Gets replication detail by replication id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ReplicationDetail'
+          examples:
+            application/json:
+              id: e416db95-b6f4-4669-a075-5a873d050a93
+              createdAt: "2018-05-07T07:02:35.389Z"
+              updatedAt:
+              name: replication-demo
+              description: volume replication demo
+              availabilityZone: default
+              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+              primaryReplicationDriverData:
+                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+              secondaryReplicationDriverData:
+                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+              ReplicationStatus: enabled
+              replicationMode: sync
+              replicationPeriod: 0
+              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    put:
+      tags:
+        - Block Replications
+      description: Updates a replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+            required:
+              - name
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ReplicationDetail'
+          examples:
+            application/json:
+              id: e416db95-b6f4-4669-a075-5a873d050a93
+              createdAt: "2018-05-07T07:02:35.389Z"
+              updatedAt:
+              name: replication-demo
+              description: volume replication demo
+              availabilityZone: default
+              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+              primaryReplicationDriverData:
+                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+              secondaryReplicationDriverData:
+                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                HostIp: 192.168.56.100
+                HostName: opensds-master
+                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+              ReplicationStatus: enabled
+              replicationMode: sync
+              replicationPeriod: 0
+              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - Block Replications
+      description: Deletes a replication.
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications/detail':
+    parameters:
+      - $ref: '#/parameters/projectId'
+    get:
+      tags:
+        - Block Replications
+      description: Lists detail information for all replications.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReplicationDetail'
+          examples:
+            application/json:
+              - id: e416db95-b6f4-4669-a075-5a873d050a93
+                createdAt: "2018-05-07T07:02:35.389Z"
+                updatedAt:
+                name: replication-demo
+                description: volume replication demo
+                availabilityZone: default
+                primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+                secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+                primaryReplicationDriverData:
+                  AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                  HostIp: 192.168.56.100
+                  HostName: opensds-master
+                  Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                  lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+                secondaryReplicationDriverData:
+                  AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                  HostIp: 192.168.56.100
+                  HostName: opensds-master
+                  Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                  lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+                ReplicationStatus: enabled
+                replicationMode: sync
+                replicationPeriod: 0
+                profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications/{replicationId}/action4enable':
+    parameters:
+    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/replicationId'
+    post:
+      tags:
+        - Block Replications
+      description: Enable Replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              enableReplication:
+                type: object
+            required:
+              - enableReplication
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications/{replicationId}/action4disable':
+    parameters:
+    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/replicationId'
+    post:
+      tags:
+        - Block Replications
+      description: Disable Replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              disableReplication:
+                type: object
+            required:
+              - disableReplication
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The resource does not exist.
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/block/replications/{replicationId}/action4failover':
+    parameters:
+    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/replicationId'
+    post:
+      tags:
+        - Block Replications
+      description: Failover Replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              failoverReplication:
+                type: object
+                properties:
+                  allowAttachedVolume:
+                    type: boolean
+                  secondaryBackendId:
+                    type: string
+            required:
+              - failoverReplication
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad Request
         '401':
           description: Unauthorized
         '403':
@@ -830,6 +1300,7 @@ definitions:
             type: string
           size:
             type: integer
+            example: 2
           availabilityZone:
             type: string
           status:
@@ -924,6 +1395,137 @@ definitions:
             readOnly: true
           volumeId:
             type: string
+  VolumeGroup:
+    description: >-
+      Volume group contains a list of volumes that are used in the same application.
+    allOf:
+      - $ref: '#/definitions/BaseModel'
+      - type: object
+        required:
+          - name
+          - description
+        properties:
+          projectId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+          description:
+            type: string
+          availabilityZone:
+            type: string
+            readOnly: true
+          status:
+            type: string
+            readOnly: true
+          poolId:
+            type: string
+            readOnly: true
+          AddVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          RemoveVolumes:
+            type: array
+            items: 
+              type: string
+            readOnly: true
+          GroupSnapshots:
+            type: array
+            items: 
+              type: string
+            readOnly: true          
+  Replication:
+    description: '""'
+    allOf:
+      - $ref: '#/definitions/BaseModel'
+      - type: object
+        required:
+          - name
+          - id
+        properties:
+          name:
+            type: string
+          id:
+            type: string
+  ReplicationDetail:
+    description: '""'
+    allOf:
+      - $ref: '#/definitions/BaseModel'
+      - type: object
+        required:
+          - name
+          - primaryVolumeId
+          - scondaryVolumeId
+          - availabilityZone
+          - replicationPeriod
+          - replicationMode
+          - profileId
+        properties:
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+            example: replication-demo
+          description:
+            type: string
+            example: This is replication demo api specs
+          availabilityZone:
+            type: string
+            example: default
+          replicationStatus:
+            type: string
+            enum:
+              - available
+              - creating
+              - deleting
+              - enabling
+              - disabling
+              - failing_over
+              - failing_back
+              - error
+              - error_deleting
+              - error_enabling
+              - error_disabling
+              - error_failover
+              - error_failback
+              - enabled
+              - disabled
+              - failed_over
+            readOnly: true
+          primaryVolumeId:
+            type: string
+            example: 655ec3e2-5840-4138-b5bd-bce930d2acda
+          secondaryVolumeId:
+            type: string
+            example: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+          primaryReplicationDriverData:
+            type: object
+            additionalProperties:
+              type: string
+          secondaryReplicationDriverData:
+            type: object
+            additionalProperties:
+              type: string
+          replicationMode:
+            type: string
+            enum:
+              - sync
+              - async
+          replicationPeriod:
+            type: integer
+            minimum: 0
+          profileId:
+            type: string
+            example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
   Error:
     description: >-
       Detailed HTTP error response, which consists of a HTTP status code, and a
@@ -957,6 +1559,20 @@ definitions:
         type: string
         format: date-time
         example: '2017-04-10T14:36:58.014Z'
+  ExtendVolumeRequest:
+    description: >-
+      Extends the size of a volume to a requested size, in gibibytes (GiB).
+    type: object
+    properties:
+      extend:
+        type: object
+        required:
+          - newSize
+        properties:
+          newSize:
+            type: integer
+            example: 2
+
 parameters:
   apiVersion:
     name: apiVersion
@@ -1012,6 +1628,18 @@ parameters:
     in: path
     required: true
     description: The UUID of the volume snapshot.
+    type: string
+  volumeGroupId:
+    name: volumeGroupId
+    in: path
+    required: true
+    description: The UUID of the volume group.
+    type: string
+  replicationId:
+    name: replicationId
+    in: path
+    required: true
+    description: The UUID of the relication.
     type: string
 responses:
   HTTPStatus500:

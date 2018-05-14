@@ -15,18 +15,36 @@
 # limitations under the License.
 
 # default backend list
-BACKEND_LIST=${BACKEND_LIST:-lvm}
+OPENSDS_BACKEND_LIST=${OPENSDS_BACKEND_LIST:-lvm}
 
 osds::usage(){
     cat  << OSDS_HELP_INFO_DOC
 Usage:
-  $(basename $0) [-h|--help]
-  $(basename $0) [-b|--backends xxx]
+    $(basename $0) [-h|--help]
 Flags:
-  -h, --help     Print this information.
-  -b, --backends Specify backend list,separated by a comma (default: "lvm").
+    -h, --help     Print this information.
+To self-define install configuration, you can edit local.conf, here is config item blow:
+    OPENSDS_AUTH_STRATEGY: Authentication strategy, value can be keystone, noauth.
+    OPENSDS_BACKEND_LIST: Storage backend list, separated by a comma, support lvm right now.
+    HOST_IP: It is used to service ip binding, including osdslet, osdsdock, etcd, keystone etc.
 OSDS_HELP_INFO_DOC
 }
+
+# Parse parameter first
+case "$# $1" in
+    "0 ")
+    echo "Starting install..."
+    ;;
+    "1 -h"|"2 --help")
+    osds::usage
+    exit 0
+    ;;
+     *)
+    osds::usage
+    exit 1
+    ;;
+esac
+
 
 osds::backendlist_check(){
     local backendlist=$1
@@ -42,25 +60,6 @@ osds::backendlist_check(){
     done
 }
 
-# Parse parameter first
-case "$# $1" in
-    "0 ")
-    echo "Not specified the backend, using default(lvm)"
-    ;;
-    "2 -b"|"2 --backends")
-    BACKEND_LIST=$2
-    osds::backendlist_check $BACKEND_LIST
-    ;;
-    "1 -h"|"2 --help")
-    osds::usage
-    exit 0
-    ;;
-     *)
-    osds::usage
-    exit 1
-    ;;
-esac
-
 # Print the commands being run so that we can see the command that triggers
 # an error.  It is also useful for following along as the install occurs.
 set -o xtrace
@@ -70,7 +69,6 @@ set -o errexit
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 # OpenSDS source code root directory
 OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
-
 # OpenSDS configuration directory
 OPENSDS_CONFIG_DIR=${OPENSDS_CONFIG_DIR:-/etc/opensds}
 OPENSDS_DRIVER_CONFIG_DIR=${OPENSDS_CONFIG_DIR}/driver
@@ -82,9 +80,6 @@ OPT_DIR=/opt/opensds
 OPT_BIN=$OPT_DIR/bin
 mkdir -p $OPT_BIN
 export PATH=$OPT_BIN:$PATH
-
-# Store backend list.
-echo -n  $BACKEND_LIST > $OPT_DIR/backend.list
 
 # Echo text to the log file, summary log file and stdout
 # osds::echo_summary "something to say"
@@ -128,76 +123,36 @@ ln -sf $LOGFILE $LOGFILE_DIR/$LOGFILE_NAME
 ln -sf $SUMFILE $LOGFILE_DIR/$LOGFILE_NAME.summary
 
 source $TOP_DIR/lib/util.sh
-source $TOP_DIR/lib/etcd.sh
-osds::etcd::start
+source $TOP_DIR/sdsrc
 
-# Set global configuration.
-cat > $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
-[osdslet]
-api_endpoint = 0.0.0.0:50040
-graceful = True
-log_file = /var/log/opensds/osdslet.log
-socket_order = inc
+osds::backendlist_check $OPENSDS_BACKEND_LIST
 
-[osdsdock]
-api_endpoint = localhost:50050
-log_file = /var/log/opensds/osdsdock.log
-# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
-enabled_backends = $BACKEND_LIST
+# clean up opensds.conf
+:> $OPENSDS_CONFIG_DIR/opensds.conf
 
-[database]
-endpoint = localhost:$ETCD_PORT,localhost:$ETCD_PEER_PORT
-driver = etcd
-OPENSDS_GLOBAL_CONFIG_DOC
-
-for backend in $(echo $BACKEND_LIST | tr "," " "); do
-    case $backend in
-        "lvm")
-        source $TOP_DIR/lib/lvm.sh
-        osds::lvm::init
-        ;;
-        "ceph")
-        source $TOP_DIR/lib/ceph.sh
-        osds::ceph::init
-        ;;
-    esac
-done
-
-
-# Run osdsdock and osdslet daemon in background.
-(
-cd ${OPENSDS_DIR}
-sudo build/out/bin/osdslet --daemon --alsologtostderr
-sudo build/out/bin/osdsdock --daemon --alsologtostderr
-
-osds::echo_summary "Waiting for osdslet to come up."
-osds::util::wait_for_url localhost:50040 "osdslet" 0.25 80
-
-export OPENSDS_ENDPOINT=http://localhost:50040
-build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
-# Copy bash completion script to system.
-cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/
-
-if [ $? == 0 ]; then
-osds::echo_summary devsds installed successfully !!
-fi
-)
+# Install service which is enabled.
+osds::util::serice_operation install
 
 set +o xtrace
 exec 1>&3
 # Force all output to stdout and logs now
 exec 1> >( tee -a "${LOGFILE}" ) 2>&1
 
-echo -e "\n\n\n"
-echo "Execute command blow to set up ENV OPENSDS_ENDPOINT:"
-echo ""
+echo -e "\n"
+echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
+echo "------------------------------------------------------------------"
+echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"
 echo "export OPENSDS_ENDPOINT=http://localhost:50040"
-echo ""
+if osds::util::is_service_enabled keystone; then
+    echo "source $DEV_STACK_DIR/openrc"
+fi
+echo "------------------------------------------------------------------"
 echo "Enjoy it !!"
+echo
 
 # Restore/close logging file descriptors
 exec 1>&3
 exec 2>&3
 exec 3>&-
 exec 6>&-
-echo ""
+echo

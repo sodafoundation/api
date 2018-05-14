@@ -101,3 +101,12 @@ func HttpError(ctx *context.Context, code int, format string, a ...interface{}) 
 	log.Error(errInfo)
 	return fmt.Errorf(errInfo)
 }
+
+// Volume group error
+type NotImplementError struct {
+	S string
+}
+
+func (e *NotImplementError) Error() string {
+	return e.S
+}

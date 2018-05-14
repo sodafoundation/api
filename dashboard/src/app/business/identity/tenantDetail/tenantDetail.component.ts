@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Http } from '@angular/http';
-import { I18NService } from 'app/shared/api';
+import { I18NService, Utils } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -23,6 +23,10 @@ export class TenantDetailComponent implements OnInit {
     popSelectedUsers;
     allUsers;
 
+    statistics_volumeSnapshots: string;
+    statistics_volumes: string;
+    statistics_capacity: string;
+
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
@@ -32,12 +36,21 @@ export class TenantDetailComponent implements OnInit {
 
     ngOnInit() {
         this.listProjectGroup();
-        // this.projectResources();
+        this.projectResources();
     }
 
     projectResources(){
         this.http.get("/v1beta/"+ this.projectID +"/block/volumes").subscribe((res)=>{
-            //let arr = res.json().role_assignments;
+            let originCapacity = 0;
+            res.json().map(ele => {
+                originCapacity += ele.size;
+            })
+            this.statistics_volumes = res.json().length;
+            this.statistics_capacity = Utils.getDisplayCapacity(originCapacity*1024*1024*1024, 3, "GB");
+        })
+
+        this.http.get("/v1beta/"+ this.projectID +"/block/snapshots").subscribe((res)=>{
+            this.statistics_volumeSnapshots = res.json().length;
         })
     }
 

@@ -138,4 +138,34 @@ type Client interface {
 	UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, vs *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error
+
+	CreateReplication(ctx *c.Context, replication *model.ReplicationSpec) (*model.ReplicationSpec, error)
+
+	GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error)
+
+	ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error)
+
+	ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error)
+
+	DeleteReplication(ctx *c.Context, replicationId string) error
+
+	UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error)
+
+	CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
+
+	GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error)
+
+	UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
+
+	UpdateStatus(ctx *c.Context, object interface{}, status string) error
+
+	ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error)
+
+	ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error)
+
+	DeleteVolumeGroup(ctx *c.Context, vgId string) error
+
+	ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error)
+
+	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 }
