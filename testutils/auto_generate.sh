@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 go get -v github.com/vektra/mockery/.../
 
 # Auto-generate some fake objects in db module for mocking work.
-mockery -name Client -dir ../pkg/db -output ./db/mocks -case underscore
+mockery -name Client -dir ../pkg/db -output ./db/testing -case underscore
 # Auto-generate some fake objects in dock module for mocking work.
-mockery -name Client -dir ../pkg/dock/client -output ./dock/mocks -case underscore
+mockery -name Client -dir ../pkg/dock/client -output ./dock/testing -case underscore
 # Auto-generate some fake objects in driver module for mocking work.
-mockery -name VolumeDriver -dir ../contrib/drivers -output ./driver/mocks -case underscore
-mockery -name ReplicationDriver -dir ../contrib/drivers -output ./driver/mocks -case underscore
+mockery -name VolumeDriver -dir ../contrib/drivers -output ./driver/testing -case underscore
+mockery -name ReplicationDriver -dir ../contrib/drivers -output ./driver/testing -case underscore
