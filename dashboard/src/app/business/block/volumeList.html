@@ -89,7 +89,7 @@
         </p-footer>
     </p-dialog>
 <!--Create Replication-->
-<p-dialog  header="Create Replication" [(visible)]="createReplicationDisplay" [width]="750" modal="modal">
+<p-dialog  header="Create Replication" [(visible)]="createReplicationDisplay" [height]="500"  [width]="750" modal="modal">
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <div class="ui-grid-row">
             <div class="ui-grid-col-4 item-content-backgroud">
@@ -97,8 +97,10 @@
                     <div class="ui-grid-row replication-img-item-height">
                         <div class="ui-grid-col-6 text-align-center">
                             <img src="assets/business/images/volume/u583.png">
-                            <span>{{selectedVolume && selectedVolume.name}}</span>
-                            <div class="item-flex">
+                            <div style="padding-top: 76px" class="item-flex">
+                                <span class="margin-between-img-text">{{selectedVolume && selectedVolume.name}}</span>
+                            </div>
+                            <div style="padding-top: 30px" class="item-flex">
                                 <span><img src="assets/business/images/volume/u436.png"></span>
                                 <span class="margin-between-img-text">region_beijing</span>
                             </div>
@@ -106,36 +108,48 @@
                     </div>
                 </div>
             </div>
-            <div class="ui-grid-col-4">
-                <div class="replication-img-item-padding position-relative">
-                    <div class="replication-img-item-height">
-                        <div class="item-flex item-flex-justify" >
-                            <span>Period</span>
-                            <span class="margin-between-img-text">=</span>
-                            <input class="margin-between-img-text" pInputText style="width:30px;" type="text" [(ngModel)]="repPeriod" />
-                            <span class="margin-between-img-text">Minutes</span>
-                        </div>
-                        <img src="assets/business/images/volume/u760p000.png">
-                    </div>
-                </div>
-            </div>
-            <div class="ui-grid-col-4 item-content-backgroud" >
-                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
-                    <div class="ui-grid-row replication-img-item-height">
-                        <div class="ui-grid-col-6"></div>
-                        <div class="ui-grid-col-6 text-align-center">
-                            <img src="assets/business/images/volume/u585.png" height="61px">
+            <div class="ui-grid-col-8">
+                <div class="ui-grid-col-6">
+                    <div class="replication-img-item-padding position-relative">
+                        <div class="replication-img-item-height">
+                            <div class="item-flex item-flex-justify" >
+                                <span>Period</span>
+                                <span class="margin-between-img-text">=</span>
+                                <input class="margin-between-img-text" pInputText style="width:30px;" type="text" [(ngModel)]="repPeriod" />
+                                <span class="margin-between-img-text">Minutes</span>
+                            </div>
+                            <img src="assets/business/images/volume/u760p000.png">
                         </div>
                     </div>
                 </div>
+                <div class="ui-grid-col-6 item-content-backgroud" >
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-img-item-height">
+                            <div class="ui-grid-col-6"></div>
+                            <div class="ui-grid-col-6 text-align-center">
+                                <img src="assets/business/images/volume/u585.png" height="61px">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
-                    <form [grid]="{label: 'ui-g-9', content:'ui-g-11'}" [formGroup]="expandFormGroup" >
+                    <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" >
                         <form-item label="Secondary Name" >
-                            <input type="text" pInputText formControlName="expandSize" [style]="{'min-width':'100px'}"/>
+                            <input type="text" pInputText formControlName="repName" [style]="{'min-width':'100px'}"/>
                         </form-item>
                         <form-item label="Target Region" >
                             <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'100px'}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" formControlName="capacityOption"></p-dropdown>
+                            </div>
+                        </form-item>
+                        <form-item label="Target Availability Zone" >
+                            <div style="display: inline-flex;" class="ui-fluid">
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" formControlName="capacityOption"></p-dropdown>
+                            </div>
+                        </form-item>
+                        <form-item label="Secondary Profile" >
+                            <div style="display: inline-flex;" class="ui-fluid">
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="profileOptions" formControlName="capacityOption"></p-dropdown>
                             </div>
                         </form-item>
                     </form>

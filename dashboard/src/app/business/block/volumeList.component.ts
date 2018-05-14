@@ -36,6 +36,12 @@ export class VolumeListComponent implements OnInit {
         }
 
     ];
+    profileOptions = [
+        {
+            label: 'Select Profile',
+            value: null
+        }
+    ];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
@@ -43,6 +49,7 @@ export class VolumeListComponent implements OnInit {
     snapshotFormGroup;
     modifyFormGroup;
     expandFormGroup;
+    replicationGroup;
     errorMessage = {
         "name": { required: "Name is required." },
         "description": { maxlength: "Max. length is 200." }
@@ -80,6 +87,10 @@ export class VolumeListComponent implements OnInit {
                 this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize)*this.unit;
             }
         )
+        this.replicationGroup = this.fb.group({
+            "repName": ['', Validators.required]
+        });
+
     }
 
     ngOnInit() {
@@ -127,6 +138,12 @@ export class VolumeListComponent implements OnInit {
     getProfiles() {
         this.ProfileService.getProfiles().subscribe((res) => {
             this.profiles = res.json();
+            this.profiles.forEach(profile => {
+                this.profileOptions.push({
+                    label: profile.name,
+                    value: profile.id
+                });
+            });
         });
     }
 
@@ -164,6 +181,7 @@ export class VolumeListComponent implements OnInit {
             this.createReplicationDisplay = true;
         }
         this.selectedVolume = selectedVoluem;
+        this.replicationGroup.controls["repName"].setValue(this.selectedVolume.name+"-replication");
         this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize);
     }
 
