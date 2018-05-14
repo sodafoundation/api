@@ -24,6 +24,7 @@ export class VolumeListComponent implements OnInit {
     modifyDisplay = false;
     selectVolumeSize :number;
     unit:number = 1;
+    repPeriod : number=60;
     capacityOptions = [
         {
             label: 'GB',
