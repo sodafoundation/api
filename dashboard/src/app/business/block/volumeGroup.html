@@ -1,6 +1,6 @@
 <div class="table-toolbar">
     <div class="left">
-        <button class="ui-button-secondary" pButton type="button" label="Create"></button>
+        <button class="ui-button-secondary" pButton type="button" label="Create" (click)="createVolumeGroup()"></button>
         <button pButton type="button" label="Delete" [disabled]="selectedVolumeGroups.length == 0"></button></div>
     <div class="right">
         <div class="ui-inputsearch">
@@ -12,7 +12,7 @@
 </div>
 
 <p-dataTable [value]="volumeGroups" [selectionMode]="multiple" [(selection)]="selectedVolumeGroups" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
-    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>    
+    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
     <p-column field="name" header="Name"></p-column>
     <p-column field="status" header="Status"></p-column>
     <p-column field="profile" header="Profile"></p-column>
@@ -23,4 +23,18 @@
         </ng-template>
     </p-column>
 </p-dataTable>
-    
+<!--create volumes group-->
+<p-dialog header="Create Volume Group" [(visible)]="showVolumeGroupDialog" [modal]="true" [responsive]="true" [width]="800">
+    <form [grid]="{label: 'ui-g-2', content:'ui-g-10'}" [formGroup]="volumeGroupForm" [errorMessage]="errorMessage">
+        <form-item label="{{label.group_name_lable}}" [required]="true">
+            <input type="text" pInputText formControlName="group_name" />
+        </form-item>
+        <form-item label="{{label.profile_label}}" >
+            <p-dropdown [options]="volemeOptions" formControlName="profile" [style]="{'width':'150px'}" placeholder="Please choose"></p-dropdown>
+        </form-item>
+    </form>
+    <p-footer>
+        <button type="button" pButton (click)="submit(volumeGroupForm.value)"  label="OK"></button>
+        <button type="button" pButton (click)="showVolumeGroupDialog=false"  label="Cancel"></button>
+    </p-footer>
+</p-dialog>
