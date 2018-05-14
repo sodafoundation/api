@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Http } from '@angular/http';
+import { ParamStorService } from 'app/shared/api';
 
 @Component({
     templateUrl: './home.component.html',
@@ -12,19 +13,18 @@ export class HomeComponent implements OnInit {
     chartDatas;
     chartDatasbar;
     option;
-    role;
     lineData_nums;
     lineData_capacity;
     showAdminStatis = true;
     constructor(
-        private http: Http
+        private http: Http,
+        private paramStor: ParamStorService
         // private I18N: I18NService,
         // private router: Router
     ) { }
 
     ngOnInit() {
-        this.role = localStorage['opensds-current-user'].split("|")[0];
-        if(this.role == "admin"){
+        if(this.paramStor.CURRENT_USER().split("|")[0] == "admin"){
             this.showAdminStatis = true;
         }else{
             this.showAdminStatis = false;

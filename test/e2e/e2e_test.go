@@ -27,10 +27,13 @@ import (
 
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 var (
-	c = client.NewClient(&client.Config{"http://localhost:50040", nil})
+	c = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 	localIqn = "iqn.2017-10.io.opensds:volume:00000001"
 )
@@ -105,11 +108,11 @@ func TestGetVolume(t *testing.T) {
 		t.Error("Check volume failed:", err)
 		return
 	}
-	// TODO Test the return value.
-	// if !reflect.DeepEqual(vol, result) {
-	// 		t.Errorf("Expected %+v, got %+v", vol, result)
-	// 		return
-	// }
+	// Test the status of created volume.
+	if result.Status != "available" {
+		t.Error("The status of volume is not available!")
+		return
+	}
 
 	volBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume success, got:", string(volBody))
@@ -335,12 +338,11 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		t.Error("Check volume snapshot failed:", err)
 		return
 	}
-	// TODO Test the return value.
-	//
-	//	if !reflect.DeepEqual(snp, result) {
-	//		t.Errorf("Expected %+v, got %+v", snp, result)
-	//		return
-	//	}
+	// Test the status of created volume snapshot.
+	if result.Status != "available" {
+		t.Error("The status of volume snapshot is not available!")
+		return
+	}
 
 	snpBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume snapshot success, got:", string(snpBody))

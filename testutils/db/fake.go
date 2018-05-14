@@ -312,3 +312,78 @@ func (fc *FakeDbClient) UpdateVolumeSnapshot(ctx *c.Context, snapshotID string, 
 func (fc *FakeDbClient) DeleteVolumeSnapshot(ctx *c.Context, snapshotID string) error {
 	return nil
 }
+
+func (fc *FakeDbClient) CreateReplication(ctx *c.Context, replication *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
+func (fc *FakeDbClient) GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
+func (fc *FakeDbClient) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error) {
+	var replications = []*model.ReplicationSpec{
+		&SampleReplications[0], &SampleReplications[1],
+	}
+	return replications, nil
+}
+
+func (fc *FakeDbClient) ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error) {
+	var replications = []*model.ReplicationSpec{
+		&SampleReplications[0], &SampleReplications[1],
+	}
+	return replications, nil
+}
+
+func (fc *FakeDbClient) DeleteReplication(ctx *c.Context, replicationId string) error {
+	return nil
+}
+
+func (fc *FakeDbClient) UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	return nil, nil
+}
+
+// CreateVolumeGroup
+func (fc *FakeDbClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
+	return nil
+}
+
+func (fc *FakeDbClient) ListVolumesByIds(ctx *c.Context, ids []string) ([]*model.VolumeSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeSnapshotSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) DeleteVolumeGroup(ctx *c.Context, volumeId string) error {
+	return nil
+}
+
+func (fc *FakeDbClient) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
+	return nil, nil
+}

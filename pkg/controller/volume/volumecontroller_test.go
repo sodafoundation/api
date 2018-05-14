@@ -110,6 +110,37 @@ func (fc *fakeClient) DeleteVolumeSnapshot(ctx context.Context, in *pb.DeleteVol
 	}, nil
 }
 
+// Create a volume snapshot
+func (fc *fakeClient) CreateVolumeGroup(ctx context.Context, in *pb.CreateVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteVolumeGroup,
+			},
+		},
+	}, nil
+}
+
+// Create a volume snapshot
+func (fc *fakeClient) UpdateVolumeGroup(ctx context.Context, in *pb.UpdateVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteVolumeGroup,
+			},
+		},
+	}, nil
+}
+
+// Delete a volume snapshot
+func (fc *fakeClient) DeleteVolumeGroup(ctx context.Context, in *pb.DeleteVolumeGroupOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 // Attach a volume
 func (fc *fakeClient) AttachVolume(ctx context.Context, in *pb.AttachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
@@ -123,6 +154,53 @@ func (fc *fakeClient) AttachVolume(ctx context.Context, in *pb.AttachVolumeOpts,
 
 // Detach a volume
 func (fc *fakeClient) DetachVolume(ctx context.Context, in *pb.DetachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
+// Create a volume attachment
+func (fc *fakeClient) CreateReplication(ctx context.Context, in *pb.CreateReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteReplication,
+			},
+		},
+	}, nil
+}
+
+// Delete a replication
+func (fc *fakeClient) DeleteReplication(ctx context.Context, in *pb.DeleteReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
+// Enable a replication
+func (fc *fakeClient) EnableReplication(ctx context.Context, in *pb.EnableReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
+// Disable a replication
+func (fc *fakeClient) DisableReplication(ctx context.Context, in *pb.DisableReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
+// Failover a replication
+func (fc *fakeClient) FailoverReplication(ctx context.Context, in *pb.FailoverReplicationOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{
 			Result: &pb.GenericResponse_Result{},
@@ -215,6 +293,47 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 	fc := NewFakeController()
 
 	result := fc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestCreateReplication(t *testing.T) {
+	fc := NewFakeController()
+	var expected = &SampleReplications[0]
+
+	result, err := fc.CreateReplication(&pb.CreateReplicationOpts{})
+	if err != nil {
+		t.Errorf("Failed to create replication, err is %v\n", err)
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
+	}
+}
+
+func TestDeleteReplication(t *testing.T) {
+	fc := NewFakeController()
+
+	result := fc.DeleteReplication(&pb.DeleteReplicationOpts{})
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestEnableReplication(t *testing.T) {
+	fc := NewFakeController()
+
+	result := fc.EnableReplication(&pb.EnableReplicationOpts{})
+	if result != nil {
+		t.Errorf("Expected %v, got %v\n", nil, result)
+	}
+}
+
+func TestDisableReplication(t *testing.T) {
+	fc := NewFakeController()
+
+	result := fc.DisableReplication(&pb.DisableReplicationOpts{})
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}

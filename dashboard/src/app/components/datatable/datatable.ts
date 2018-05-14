@@ -175,7 +175,7 @@ export class ColumnFooters {
                             <span class="ui-row-toggler fa fa-fw ui-clickable" [ngClass]="dt.isRowExpanded(rowData) ? dt.expandedIcon : dt.collapsedIcon"></span>
                         </a>
                         <p-dtRadioButton *ngIf="col.selectionMode=='single'" (onClick)="dt.selectRowWithRadio($event, rowData)" [checked]="dt.isSelected(rowData)"></p-dtRadioButton>
-                        <p-dtCheckbox *ngIf="col.selectionMode=='multiple'" (onChange)="dt.toggleRowWithCheckbox($event,rowData)" [checked]="dt.isSelected(rowData)"></p-dtCheckbox>
+                        <p-dtCheckbox *ngIf="col.selectionMode=='multiple'" [disabled]="rowData.disabled" (onChange)="dt.toggleRowWithCheckbox($event,rowData)" [checked]="dt.isSelected(rowData)"></p-dtCheckbox>
                     </td>
                 </ng-template>
             </tr>
@@ -1500,7 +1500,10 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
                                 this.selectionKeys = {};
                             }
 
-                            this._selection = [...this.selection,rowData];
+                            if(!rowData.disabled){
+                                this._selection = [...this.selection,rowData];
+                            }
+                            
                             this.selectionChange.emit(this.selection);
                             if(dataKeyValue) {
                                 this.selectionKeys[dataKeyValue] = 1;
@@ -1596,7 +1599,10 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
             }
         }
         else {
-            this._selection = [...this.selection,rowData];
+            if(!rowData.disabled){
+                this._selection = [...this.selection,rowData];
+            }
+            
             this.selectionChange.emit(this.selection);
             this.onRowSelect.emit({originalEvent: event, data: rowData, type: 'checkbox'});
             if(dataKeyValue) {
@@ -1609,11 +1615,15 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
     }
     
     toggleRowsWithCheckbox(event) {
-        if(event.checked)
+        if(event.checked){
             this.selection = this.headerCheckboxToggleAllPages ? this.value.slice() : this.dataToRender.slice();
-        else
+            this.selection.forEach((ele, i)=>{
+                if(ele.disabled)
+                    this.selection.splice(i, 1);
+            })
+        }else{
             this.selection = [];
-            
+        } 
         this.selectionChange.emit(this.selection);
         
         this.onHeaderCheckboxToggle.emit({originalEvent: event, checked: event.checked});
@@ -1698,9 +1708,15 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
         }
         else {
             let val = true;
-            if(this.dataToRender && this.selection && (this.dataToRender.length <= this.selection.length)) {
+            let num = 0;
+            this.dataToRender && this.dataToRender.map(ele=>{
+                if(ele.disabled)
+                    num++;
+            })
+
+            if(this.dataToRender && this.selection && (this.dataToRender.length <= (this.selection.length + num))) {
                 for(let data of this.dataToRender) {
-                    if(!this.isSelected(data)) {
+                    if(!this.isSelected(data) && !data.disabled) {
                         val = false;
                         break;
                     }

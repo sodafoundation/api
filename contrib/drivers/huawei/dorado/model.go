@@ -253,6 +253,71 @@ type HostAssociateLunsResp struct {
 	Error Error              `json:"error"`
 }
 
+type System struct {
+	Id          string `json:"ID"`
+	Name        string `json:"NAME"`
+	Location    string `json:"LOCATION"`
+	ProductMode string `json:"PRODUCTMODE"`
+	Wwn         string `json:"wwn"`
+}
+
+type SystemResp struct {
+	Data  System `json:"data"`
+	Error Error  `json:"error"`
+}
+
+type RemoteDevice struct {
+	Id            string `json:"ID"`
+	Name          string `json:"NAME"`
+	ArrayType     string `json:"ARRAYTYPE"`
+	HealthStatus  string `json:"HEALTHSTATUS"`
+	RunningStatus string `json:"RUNNINGSTATUS"`
+	Wwn           string `json:"WWN"`
+}
+
+type RemoteDevicesResp struct {
+	Data  []RemoteDevice `json:"data"`
+	Error Error          `json:"error"`
+}
+
+type ReplicationPair struct {
+	Capacity            string `json:"CAPACITY"`
+	CompressValid       string `json:"COMPRESSVALID"`
+	EnableCompress      string `json:"ENABLECOMPRESS"`
+	HealthStatus        string `json:"HEALTHSTATUS"`
+	Id                  string `json:"ID"`
+	IsDataSync          string `json:"ISDATASYNC"`
+	IsInCg              string `json:"ISINCG"`
+	IsPrimary           string `json:"ISPRIMARY"`
+	IsRollback          string `json:"ISROLLBACK"`
+	LocalResId          string `json:"LOCALRESID"`
+	LocalResName        string `json:"LOCALRESNAME"`
+	LocalResType        string `json:"LOCALRESTYPE"`
+	PriResDataStatus    string `json:"PRIRESDATASTATUS"`
+	RecoveryPolicy      string `json:"RECOVERYPOLICY"`
+	RemoteDeviceId      string `json:"REMOTEDEVICEID"`
+	RemoteDeviceName    string `json:"REMOTEDEVICENAME"`
+	RemoteDeviceSn      string `json:"REMOTEDEVICESN"`
+	RemoteResId         string `json:"REMOTERESID"`
+	RemoteResName       string `json:"REMOTERESNAME"`
+	replicationMode    string `json:"REPLICATIONMODEL"`
+	ReplicationProgress string `json:"REPLICATIONPROGRESS"`
+	RunningStatus       string `json:"RUNNINGSTATUS"`
+	SecResAccess        string `json:"SECRESACCESS"`
+	SecResDataStatus    string `json:"SECRESDATASTATUS"`
+	Speed               string `json:"SPEED"`
+	SynchronizeType     string `json:"SYNCHRONIZETYPE"`
+	SyncLeftTime        string `json:"SYNCLEFTTIME"`
+	TimeDifference      string `json:"TIMEDIFFERENCE"`
+	RemTimeoutPeriod    string `json:"REMTIMEOUTPERIOD"`
+	Type                string `json:"TYPE"`
+}
+
+type ReplicationPairResp struct {
+	Data  ReplicationPair `json:"data"`
+	Error Error           `json:"error"`
+}
+
 type SimpleStruct struct {
 	Id   string `json:"ID"`
 	Name string `json:"NAME"`

@@ -24,15 +24,13 @@ import (
 )
 
 func init() {
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+	client = NewFakeClient(&c.Config{Endpoint: TestEp})
 }
 
 func TestProfileAction(t *testing.T) {
-	beBrasher := os.Getenv("BE_CRASHER")
+	beCrasher := os.Getenv("BE_CRASHER")
 
-	if beBrasher == "1" {
+	if beCrasher == "1" {
 		var args []string
 		profileAction(profileCommand, args)
 

@@ -87,3 +87,86 @@ osds::util::download_file() {
   return 1
 }
 
+# Prints line number and "message" in warning format
+# warn $LINENO "message"
+osds::util::warn() {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local msg="[WARNING] ${BASH_SOURCE[2]}:$1 $2"
+    echo $msg
+    $xtrace
+    return $exitcode
+}
+
+# Prints line number and "message" in error format
+# err $LINENO "message"
+osds::util::err() {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local msg="[ERROR] ${BASH_SOURCE[2]}:$1 $2"
+    echo $msg 1>&2;
+    $xtrace
+    return $exitcode
+}
+
+# Prints line number and "message" then exits
+# die $LINENO "message"
+osds::util::die() {
+    local exitcode=$?
+    set +o xtrace
+    local line=$1; shift
+    if [ $exitcode == 0 ]; then
+        exitcode=1
+    fi
+    osds::util::err $line "$*"
+    # Give buffers a second to flush
+    sleep 1
+    exit $exitcode
+}
+
+osds::util::get_default_host_ip() {
+    local host_ip=$1
+    local af=$2
+    # Search for an IP unless an explicit is set by ``HOST_IP`` environment variable
+    if [ -z "$host_ip" ]; then
+        host_ip=""
+        # Find the interface used for the default route
+        host_ip_iface=${host_ip_iface:-$(ip -f $af route | awk '/default/ {print $5}' | head -1)}
+        local host_ips
+        host_ips=$(LC_ALL=C ip -f $af addr show ${host_ip_iface} | sed /temporary/d |awk /$af'/ {split($2,parts,"/");  print parts[1]}')
+        local ip
+        for ip in $host_ips; do
+            host_ip=$ip
+            break;
+        done
+    fi
+    echo $host_ip
+}
+
+osds::util::is_service_enabled() {
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local enabled=1
+    local services=$@
+    local service
+    for service in ${services}; do
+        [[ ,${OPENSDS_ENABLED_SERVICES}, =~ ,${service}, ]] && enabled=0
+    done
+    $xtrace
+    return $enabled
+}
+
+osds::util::serice_operation() {
+    local action=$1
+    for service in $(echo $SUPPORT_SERVICES|tr ',' ' '); do
+            if osds::util::is_service_enabled $service; then
+                source $TOP_DIR/lib/$service.sh
+                osds::$service::$action
+            fi
+    done
+}

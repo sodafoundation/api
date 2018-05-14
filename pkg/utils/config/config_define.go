@@ -26,9 +26,12 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint     string   `conf:"api_endpoint,localhost:50050"`
-	EnabledBackends []string `conf:"enabled_backends,lvm"`
-	Daemon          bool     `conf:"daemon,false"`
+	ApiEndpoint                string   `conf:"api_endpoint,localhost:50050"`
+	DockType                   string   `conf:"dock_type,provisioner"`
+	EnabledBackends            []string `conf:"enabled_backends,lvm"`
+	Daemon                     bool     `conf:"daemon,false"`
+	BindIp                     string   `conf:"bind_ip"` // Just used for attacher dock
+	HostBasedReplicationDriver string   `conf:"host_based_replication_driver,drbd"`
 	Backends
 }
 
@@ -39,10 +42,11 @@ type Database struct {
 }
 
 type BackendProperties struct {
-	Name        string `conf:"name"`
-	Description string `conf:"description"`
-	DriverName  string `conf:"driver_name"`
-	ConfigPath  string `conf:"config_path"`
+	Name               string `conf:"name"`
+	Description        string `conf:"description"`
+	DriverName         string `conf:"driver_name"`
+	ConfigPath         string `conf:"config_path"`
+	SupportReplication bool   `conf:"support_replication,false"`
 }
 
 type Backends struct {

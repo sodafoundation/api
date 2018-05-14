@@ -24,15 +24,13 @@ import (
 )
 
 func init() {
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+	client = NewFakeClient(&c.Config{Endpoint: TestEp})
 }
 
 func TestVolumeAttachmentAction(t *testing.T) {
-	beBrasher := os.Getenv("BE_CRASHER")
+	beCrasher := os.Getenv("BE_CRASHER")
 
-	if beBrasher == "1" {
+	if beCrasher == "1" {
 		var args []string
 		volumeAttachmentAction(volumeAttachmentCommand, args)
 
@@ -70,7 +68,6 @@ func TestVolumeAttachmentListAction(t *testing.T) {
 
 func TestVolumeAttachmentDeleteAction(t *testing.T) {
 	var args []string
-	args = append(args, "bd5b12a8-a101-11e7-941e-d77981b584d8")
 	args = append(args, "f2dda3d2-bf79-11e7-8665-f750b088f63e")
 	volumeAttachmentDeleteAction(volumeAttachmentDeleteCommand, args)
 }

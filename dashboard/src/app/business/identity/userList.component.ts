@@ -148,6 +148,14 @@ export class UserListComponent implements OnInit, AfterViewChecked {
             this.popTitle = "Create";
 
             this.myFormGroup.controls['form_isModifyPsw'].value = true;
+            this.myFormGroup.controls['form_username'].setValidators({validators:[Validators.required, Validators.pattern(this.validRule.name), this.ifUserExisting(this.tenantUsers)], updateOn:'change'});
+            this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
+            this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
+        }
+
+        // Update form validate status
+        for(let i in this.myFormGroup.controls){
+            this.myFormGroup.controls[i].updateValueAndValidity();
         }
     }
 
@@ -159,11 +167,12 @@ export class UserListComponent implements OnInit, AfterViewChecked {
             "description": this.myFormGroup.value.form_description,
             "password": this.myFormGroup.value.form_psw
         }
-        console.log(this.myFormGroup.status)
+        
         if(this.myFormGroup.status == "VALID"){
             this.http.post("/v3/users", request).subscribe( (res) => {
                 let tenants = this.myFormGroup.value.form_tenant;
-                if(tenants.length==0){
+                
+                if(!tenants){
                     this.createUserDisplay = false;
                     this.listUsers();
                     return;
@@ -203,12 +212,10 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         }
         if(this.myFormGroup.value.form_isModifyPsw==true){
             request.user["password"] = this.myFormGroup.value.form_psw;
-
             this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
             this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
             this.myFormGroup.controls['form_psw'].updateValueAndValidity();
             this.myFormGroup.controls['form_pswConfirm'].updateValueAndValidity();
-
             if(this.myFormGroup.status == "VALID"){
                 this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
                     this.createUserDisplay = false;
@@ -221,11 +228,6 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                 }
             }
         }else{
-            this.myFormGroup.controls['form_psw'].clearValidators();
-            this.myFormGroup.controls['form_pswConfirm'].clearValidators();
-            this.myFormGroup.controls['form_psw'].updateValueAndValidity();
-            this.myFormGroup.controls['form_pswConfirm'].updateValueAndValidity();
-
 
             if(this.myFormGroup.status == "VALID"){
                 this.http.patch("/v3/users/"+ this.currentUser.userid, request).subscribe((res) => {
@@ -283,6 +285,23 @@ export class UserListComponent implements OnInit, AfterViewChecked {
 
     }
 
+    ModifyPswChecked(checked){
+        if(checked){
+            this.myFormGroup.controls['form_psw'].setValidators([Validators.required, Validators.minLength(8), this.regPassword]);
+            this.myFormGroup.controls['form_pswConfirm'].setValidators([Validators.required, this.regConfirmPassword(this.newPassword)] );
+
+        }else{
+            this.myFormGroup.controls['form_psw'].clearValidators();
+            this.myFormGroup.controls['form_pswConfirm'].clearValidators();
+
+        }
+
+        // Update form validate status
+        for(let i in this.myFormGroup.controls){
+            this.myFormGroup.controls[i].updateValueAndValidity();
+        }
+    }
+
     listUsers(){
         this.tenantUsers = [];
         this.selectedUsers = [];
@@ -302,6 +321,10 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                 user["userid"] = item.id;
                 user["defaultTenant"] = item.default_project_id;
                 user["description"] = !item.description ? '--' : item.description=='' ? '--' : item.description;
+
+                if(item.name == "admin"){
+                    user["disabled"] = true;
+                }
                 this.tenantUsers.push(user);
             });
         });

@@ -34,7 +34,7 @@ func init() {
 	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	// flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
 	daemon.SetDaemonFlag(&CONF.OsdsDock.Daemon, def.OsdsDock.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
@@ -49,7 +49,7 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	dock.Brain = dock.NewDockHub()
+	dock.Brain = dock.NewDockHub(CONF.OsdsDock.DockType)
 	if err := dock.Brain.TriggerDiscovery(); err != nil {
 		panic(err)
 	}

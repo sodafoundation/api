@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpService } from './../../shared/service/Http.service';
+import { I18NService, HttpService, ParamStorService } from '../../shared/api';
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class VolumeService {
-  url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/block/volumes'
-  constructor(private http: HttpService) { }
+  constructor(
+    private http: HttpService,
+    private paramStor: ParamStorService
+  ) { }
+
+  project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
+  url = 'v1beta/'+ this.project_id +'/block/volumes';
+
   //创建 volume
   createVolume(param) {
     return this.http.post(this.url, param);
@@ -57,8 +63,14 @@ export class VolumeService {
 
 @Injectable()
 export class SnapshotService {
-  url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/block/snapshots'
-  constructor(private http: HttpService) { }
+  constructor(
+    private http: HttpService,
+    private paramStor: ParamStorService
+  ) { }
+
+  project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
+  url = 'v1beta/'+ this.project_id +'/block/snapshots';
+
   //创建 snapshot
   createSnapshot(param) {
     return this.http.post(this.url, param);

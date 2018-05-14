@@ -14,14 +14,12 @@
 
 /*
 This module implements a entry into the OpenSDS service.
-
 */
 
 package cli
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -118,5 +116,4 @@ func profileDeleteAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete profile(%s) success.\n", args[0])
 }

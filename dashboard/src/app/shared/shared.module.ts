@@ -1,6 +1,6 @@
 import { NgModule, ModuleWithProviders, APP_INITIALIZER, Injector } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ExceptionService, MsgBoxService, I18NService, HttpService } from './api';
+import { ExceptionService, MsgBoxService, I18NService, HttpService, ParamStorService } from './api';
 import { SharedConfig } from './shared.config';
 import { I18N } from '../components/common/api';
 import { XHRBackend, RequestOptions, Http } from '@angular/http';
@@ -11,10 +11,6 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions, inject
     options.headers.set('cache-control', 'no-store');
     options.headers.set('expires', '0');
     options.headers.set('Pragma', 'no-cache');
-    
-    if( localStorage['x-subject-token'] ){
-        options.headers.set('X-Auth-Token', localStorage['x-subject-token']);
-    }
 
     return new HttpService(backend, options, injector);
 }
@@ -30,6 +26,7 @@ export class SharedModule {
             providers: [
                 MsgBoxService,
                 I18NService,
+                ParamStorService,
                 ExceptionService,
                 {
                     provide: Http,
