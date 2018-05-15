@@ -1201,12 +1201,13 @@ func (c *DoradoClient) RemoveHost(hostId string) error {
 
 func (c *DoradoClient) AddFCPortTohost(hostId string, wwn string) error {
 	url := fmt.Sprintf("/fc_initiator/%s", wwn)
-	data := &FCInitiator{
-		Type:       "223",
-		Id:         wwn,
-		ParentId:   hostId,
-		ParentType: "21",
+	data := map[string]interface{}{
+		"TYPE":       "223",
+		"ID":         wwn,
+		"PARENTTYPE": "21",
+		"PARENTID":   hostId,
 	}
+
 	if err := c.request("PUT", url, data, nil); err != nil {
 		log.Errorf("Add fc port to host failed.")
 		return err
@@ -1216,7 +1217,7 @@ func (c *DoradoClient) AddFCPortTohost(hostId string, wwn string) error {
 }
 
 func (c *DoradoClient) GetIniTargMap(wwns []string) ([]string, map[string][]string, error) {
-	var initTargMap map[string][]string
+	initTargMap := make(map[string][]string)
 	var tgtPortWWNs []string
 	for _, wwn := range wwns {
 		tgtwwpns, err := c.getFCTargetWWPNs(wwn)
@@ -1229,7 +1230,7 @@ func (c *DoradoClient) GetIniTargMap(wwns []string) ([]string, map[string][]stri
 
 		initTargMap[wwn] = tgtwwpns
 		for _, tgtwwpn := range tgtwwpns {
-			if c.isInStringArray(tgtwwpn, tgtPortWWNs) {
+			if !c.isInStringArray(tgtwwpn, tgtPortWWNs) {
 				tgtPortWWNs = append(tgtPortWWNs, tgtwwpn)
 			}
 		}
