@@ -112,3 +112,22 @@ export class ReplicationService {
         return this.http.post(url,param);
     }
 }
+@Injectable()
+export class VolumeGroupService {
+    constructor(
+        private http: HttpService,
+        private paramStor: ParamStorService
+    ) { }
+
+    project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
+    volumeGroupUrl = 'v1beta/'+ this.project_id +'/block/volumeGroup';
+    //create volume group
+    createVolumeGroup(param){
+        let url = this.volumeGroupUrl;
+        return this.http.post(url,param);
+    }
+    //查询 volumes
+    getVolumeGroups(): Observable<any> {
+        return this.http.get(this.volumeGroupUrl);
+    }
+}

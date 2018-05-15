@@ -5,6 +5,7 @@ import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate} from '@angular/animations';
 import { DialogModule } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
+import { VolumeService ,VolumeGroupService} from './volume.service';
 
 @Component({
     selector: 'volume-group-list',
@@ -25,6 +26,7 @@ export class VolumeGroupComponent implements OnInit{
     constructor(
         // private I18N: I18NService,
         // private router: Router
+        private volumeGroupService : VolumeGroupService,
         private fb : FormBuilder
     ){
         this.volumeGroupForm = this.fb.group({
@@ -45,6 +47,7 @@ export class VolumeGroupComponent implements OnInit{
           {"name": "group_for_REP", "status": "Available", "profile": "PF_block_01", "volumes": "2"},
           {"name": "group_app01", "status": "Error", "profile": "PF_block_02", "volumes": "5"}
       ];
+      this.getVolumeGroups();
       this.volemeOptions = [
           {label: "group_for_REP",value:1},
           {label: "group_app01",value:2}
@@ -61,8 +64,21 @@ export class VolumeGroupComponent implements OnInit{
                 this.volumeGroupForm.controls[i].markAsTouched();
             }
             return;
-        }
+        }/*else{
+            let param = {
+
+            }
+            this.volumeGroupService.createVolumeGroup(param).subscribe((res) => {
+                this.getVolumeGroups();
+            });
+        }*/
         this.showVolumeGroupDialog = false;
+    }
+    getVolumeGroups(){
+        this.volumeGroupService.getVolumeGroups().subscribe((res) => {
+            console.log(res);
+            this.volumeGroups = res.json();
+        });
     }
 
 }
