@@ -4,7 +4,7 @@
         <div class="logo"></div>
         <div class="form-list">
             <p><input id="username" placeholder="Username" type="text" pInputText [(ngModel)]="username" /></p>
-            <p><input id="password" placeholder="Password" type="Password" pInputText [(ngModel)]="password" /></p>
+            <p><input id="password" placeholder="Password" type="Password" pInputText [(ngModel)]="password" (keydown)="onKeyDown($event)" /></p>
             <p><button pButton type="button" label="Login" (click)="login()" class="ui-button-secondary ui-button-large"></button></p>
         </div>
     </div>
