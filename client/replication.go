@@ -107,8 +107,8 @@ func (v *ReplicationMgr) UpdateReplication(replicaId string, body ReplicationBui
 func (v *ReplicationMgr) EnableReplication(replicaId string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "action")}, "/")
-	body := map[string]interface{}{"enableReplication": map[string]interface{}{}}
+		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "enable")}, "/")
+	body := map[string]interface{}{}
 	return v.Recv(url, "POST", body, nil)
 }
 
@@ -116,8 +116,8 @@ func (v *ReplicationMgr) EnableReplication(replicaId string) error {
 func (v *ReplicationMgr) DisableReplication(replicaId string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "action")}, "/")
-	body := map[string]interface{}{"disableReplication": map[string]interface{}{}}
+		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "disable")}, "/")
+	body := map[string]interface{}{}
 	return v.Recv(url, "POST", body, nil)
 }
 
@@ -125,6 +125,6 @@ func (v *ReplicationMgr) DisableReplication(replicaId string) error {
 func (v *ReplicationMgr) FailoverReplication(replicaId string, body FailoverReplicationBuilder) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "action")}, "/")
+		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "failover")}, "/")
 	return v.Recv(url, "POST", body, nil)
 }

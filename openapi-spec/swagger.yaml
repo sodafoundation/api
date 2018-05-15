@@ -853,6 +853,11 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Replication'
+          examples:
+            application/json:
+              - id: e416db95-b6f4-4669-a075-5a873d050a93
+                name: replication-demo
+                ReplicationStatus: enabled
         '400':
           description: Bad Request
         '401':
@@ -869,12 +874,12 @@ paths:
         - name: body
           in: body
           schema:
-             $ref: '#/definitions/ReplicationDetail'
+             $ref: '#/definitions/Replication'
       responses:
         '202':
           description: OK
           schema:
-            $ref: '#/definitions/ReplicationDetail'
+            $ref: '#/definitions/Replication'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -921,7 +926,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/ReplicationDetail'
+            $ref: '#/definitions/Replication'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -978,7 +983,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/ReplicationDetail'
+            $ref: '#/definitions/Replication'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -1045,7 +1050,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ReplicationDetail'
+              $ref: '#/definitions/Replication'
           examples:
             application/json:
               - id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -1080,7 +1085,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/action4enable':
+  '/v1beta/{projectId}/block/replications/{replicationId}/enable':
     parameters:
     - $ref: '#/parameters/projectId'
     - $ref: '#/parameters/replicationId'
@@ -1093,11 +1098,6 @@ paths:
           in: body
           schema:
             type: object
-            properties:
-              enableReplication:
-                type: object
-            required:
-              - enableReplication
       responses:
         '202':
           description: Accepted
@@ -1111,7 +1111,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/action4disable':
+  '/v1beta/{projectId}/block/replications/{replicationId}/disable':
     parameters:
     - $ref: '#/parameters/projectId'
     - $ref: '#/parameters/replicationId'
@@ -1124,11 +1124,6 @@ paths:
           in: body
           schema:
             type: object
-            properties:
-              disableReplication:
-                type: object
-            required:
-              - disableReplication
       responses:
         '202':
           description: Accepted
@@ -1142,7 +1137,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/action4failover':
+  '/v1beta/{projectId}/block/replications/{replicationId}/failover':
     parameters:
     - $ref: '#/parameters/projectId'
     - $ref: '#/parameters/replicationId'
@@ -1156,15 +1151,10 @@ paths:
           schema:
             type: object
             properties:
-              failoverReplication:
-                type: object
-                properties:
-                  allowAttachedVolume:
-                    type: boolean
-                  secondaryBackendId:
-                    type: string
-            required:
-              - failoverReplication
+              allowAttachedVolume:
+                type: boolean
+              secondaryBackendId:
+                type: string
       responses:
         '202':
           description: Accepted
@@ -1438,21 +1428,8 @@ definitions:
             type: array
             items: 
               type: string
-            readOnly: true          
+            readOnly: true
   Replication:
-    description: '""'
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - name
-          - id
-        properties:
-          name:
-            type: string
-          id:
-            type: string
-  ReplicationDetail:
     description: '""'
     allOf:
       - $ref: '#/definitions/BaseModel'

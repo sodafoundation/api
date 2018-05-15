@@ -300,10 +300,10 @@ func (*fakeReplicationReceiver) Recv(
 ) error {
 	switch strings.ToUpper(method) {
 	case "POST":
-		if strings.HasSuffix(url, "action") {
-			return nil
-		} else {
+		if out != nil {
 			return json.Unmarshal([]byte(ByteReplication), out)
+		} else {
+			return nil
 		}
 	case "PUT":
 		return json.Unmarshal([]byte(ByteReplication), out)
