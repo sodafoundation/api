@@ -1,7 +1,7 @@
 <div class="table-toolbar">
     <div class="left">
         <button class="ui-button-secondary" pButton type="button" label="Create" [routerLink]="['/createVolume']"></button>
-        <button pButton type="button" label="Delete" (click)="batchDeleteVolume()" [disabled]="selectedVolumes.length == 0"></button>
+        <button pButton type="button" label="Delete" (click)="deleteVolumes(selectedVolumes)" [disabled]="selectedVolumes.length == 0"></button>
     </div>
     <div class="right">
         <div class="ui-inputsearch">
@@ -162,3 +162,4 @@
         <button type="button" pButton (click)="createReplicationDisplay=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>
+<p-confirmDialog></p-confirmDialog>

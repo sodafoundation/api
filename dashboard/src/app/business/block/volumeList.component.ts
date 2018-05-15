@@ -5,12 +5,13 @@ import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractC
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { MenuItem } from '../../components/common/api';
+import { MenuItem ,ConfirmationService} from '../../components/common/api';
 
 import { VolumeService, SnapshotService,ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 import { identifierModuleUrl } from '@angular/compiler';
 
+let _ = require("underscore");
 @Component({
     selector: 'volume-list',
     templateUrl: 'volumeList.html',
@@ -67,6 +68,7 @@ export class VolumeListComponent implements OnInit {
         private SnapshotService: SnapshotService,
         private ProfileService: ProfileService,
         private ReplicationService: ReplicationService,
+        private confirmationService: ConfirmationService,
         private fb: FormBuilder
     ) {
         this.snapshotFormGroup = this.fb.group({
@@ -120,7 +122,7 @@ export class VolumeListComponent implements OnInit {
             {
                 "label": "Delete", command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
-                        this.deleteVolumeById(this.selectedVolume.id);
+                        this.deleteVolumes(this.selectedVolume);
                     }
                 }
             }
@@ -241,5 +243,32 @@ export class VolumeListComponent implements OnInit {
                 this.createReplicationDisplay = false;
             });
         });
+    }
+    deleteVolumes(volumes){
+        let arr=[], msg;
+        if(_.isArray(volumes)){
+            volumes.forEach((item,index)=> {
+                arr.push(item.id);
+            })
+            msg = "<div>Are you sure you want to delete the selected volumes?</div><h3>[ "+ volumes.length +" Volumes ]</h3>";
+        }else{
+            arr.push(volumes.id);
+            msg = "<div>Are you sure you want to delete the volume?</div><h3>[ "+ volumes.name +" ]</h3>";
+        }
+
+        this.confirmationService.confirm({
+            message: msg,
+            header: "Delete Volume",
+            acceptLabel: "Delete",
+            isWarning: true,
+            accept: ()=>{
+                arr.forEach((item,index)=> {
+                    this.deleteVolume(item)
+                })
+
+            },
+            reject:()=>{}
+        })
+
     }
 }
