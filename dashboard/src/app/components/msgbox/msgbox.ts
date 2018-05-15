@@ -14,8 +14,7 @@ export class Safe{
 
 @Component({
     template:`
-    <p-dialog [header]="config.header" [isMsgBox]="true" [(visible)]="config.visible" [width]="config.width" [height]="config.height" [cancelBtnVisible]="config.cancelBtnVisible" (onOk)="config.ok()" (onCancel)="config.cancel()"
-    [okBtnDisabled]="config.okBtnDisabled" [closeBtnDisabled]="config.closeBtnDisabled" [cancelBtnDisabled]="config.cancelBtnDisabled" [btnFocus]="config.btnFocus" [showCloseBtn]="config.showCloseBtn">
+    <p-dialog [header]="config.header" [isMsgBox]="true" [(visible)]="config.visible" [width]="config.width" [height]="config.height" (onOk)="config.ok()">
         <div class="msgbox">
             <div>
                 <svg class="icon icon-size-48" [ngSwitch]="config.type">

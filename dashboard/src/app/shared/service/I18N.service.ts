@@ -19,7 +19,7 @@ export class I18NService {
         return str;
     }
 
-    //从Cookie中获取本地语言，默认中文(zh: 中文 en: 英文)
+    //zh: Chinese en: English
     getCookieLanguage() {
         this.urlLanguage();
         let cookieStr = document.cookie.split("; ");

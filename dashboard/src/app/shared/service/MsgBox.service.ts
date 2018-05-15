@@ -1,5 +1,5 @@
 import { Injectable, Injector, ApplicationRef, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
-import { MsgBox } from '../../components/MsgBox/MsgBox';
+import { MsgBox } from '../../components/msgbox/msgbox';
 import { I18NService } from './I18N.service';
 
 @Injectable()
@@ -7,9 +7,6 @@ export class MsgBoxService {
     private defaultConfig = {
         header: this.I18N.get("tip"),
         visible: true,
-        concelBtnVisible: false,
-        closeBtnDisabled: false,
-        okBtnDisabled: false,
         width: 418,
         height: "auto"
     }
@@ -29,20 +26,14 @@ export class MsgBoxService {
             return;
         }
 
-        let ViewContainerRef = this.applicationRef.components[0].instance.ViewContainerRef;
+        let viewContainerRef = this.applicationRef.components[0].instance.viewContainerRef;
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(MsgBox);
-        ViewContainerRef.clear();
-        let componentRef = ViewContainerRef.createComponent(componentFactory);
+        viewContainerRef.clear();
+        let componentRef = viewContainerRef.createComponent(componentFactory);
 
         if( !config.ok ){
             config.ok = () => config.visible = false;
         }
-
-        if( !config.cancel ){
-            config.cancel = () => config.visible = false;
-        }
-
-        config.close = () => config.visible = false;
 
         (<MsgBox>componentRef.instance).config = config;
 
@@ -60,7 +51,6 @@ export class MsgBoxService {
             type: "info",
             content: "",
             header: this.I18N.get("tip"),
-            btnFocus: "okBtn"
         }
 
         return this.open(Object.assign({}, this.defaultConfig, _config, config));
@@ -94,46 +84,10 @@ export class MsgBoxService {
             type: "error",
             title: this.I18N.get("fail"),
             content: "",
-            header: this.I18N.get("tip"),
-            btnFocus: "none"
+            header: this.I18N.get("tip")
         }
 
         return this.open(Object.assign({}, this.defaultConfig, _config, config));
     }
 
-    confirm(config = {}){
-        if( typeof config == "string"){
-            config = {
-                content: config
-            }
-        }
-
-        let _config = {
-            type: "confirm",
-            title: this.I18N.get("confirm"),
-            content: "",
-            cancelBtnVisible: true,
-            btnFocus: "none"
-        }
-
-        return this.open(Object.assign({}, this.defaultConfig, _config, config));
-    }
-
-    warn(config = {}){
-        if( typeof config == "string"){
-            config = {
-                content: config
-            }
-        }
-
-        let _config = {
-            type: "warn",
-            title: this.I18N.get("warn"),
-            content: "",
-            cancelBtnVisible: true,
-            btnFocus: "none"
-        }
-
-        return this.open(Object.assign({}, this.defaultConfig, _config, config));
-    }
 }

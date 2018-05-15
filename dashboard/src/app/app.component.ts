@@ -88,6 +88,7 @@ export class AppComponent implements OnInit, AfterViewInit{
 
     constructor(
         private el: ElementRef,
+        private viewContainerRef: ViewContainerRef,
         private http: Http,
         private router: Router,
         private paramStor: ParamStorService

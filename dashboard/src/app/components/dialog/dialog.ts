@@ -4,13 +4,14 @@ import {trigger,state,style,transition,animate} from '@angular/animations';
 import {CommonModule} from '@angular/common';
 import {DomHandler} from '../dom/domhandler';
 import {Header,Footer,SharedModule} from '../common/shared';
+import {ButtonModule } from '../button/button';
 
 let idx: number = 0;
 
 @Component({
     selector: 'p-dialog',
     template: `
-        <div #container [ngClass]="{'ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow':true, 'ui-dialog-rtl':rtl,'ui-dialog-draggable':draggable}" [style.display]="visible ? 'block' : 'none'"
+        <div #container [ngClass]="{'M-dialog':!isMsgBox, 'M-msgBox':isMsgBox ,'ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow':true, 'ui-dialog-rtl':rtl,'ui-dialog-draggable':draggable}" [style.display]="visible ? 'block' : 'none'"
             [ngStyle]="style" [class]="styleClass" [style.width.px]="width" [style.height.px]="height" [style.minWidth.px]="minWidth" (mousedown)="moveOnTop()" [@dialogState]="visible ? 'visible' : 'hidden'"
             role="dialog" [attr.aria-labelledby]="id + '-label'">
             <div #titlebar class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top"
@@ -28,6 +29,9 @@ let idx: number = 0;
             </div>
             <div class="ui-dialog-footer ui-widget-content" *ngIf="footerFacet && footerFacet.first">
                 <ng-content select="p-footer"></ng-content>
+            </div>
+            <div class="ui-dialog-footer ui-widget-content" *ngIf="isMsgBox">
+                <button type="button" pButton *ngIf="showCloseBtn" (click)="ok($event)"  [label]="closeBtnLabel" class="ui-btn-ms closeBtn"></button>
             </div>
             <div *ngIf="resizable" class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"
                 (mousedown)="initResize($event)"></div>
@@ -80,6 +84,8 @@ export class Dialog implements AfterViewInit,AfterViewChecked,OnDestroy {
     @Input() closable: boolean = true;
 
     @Input() responsive: boolean = true;
+
+    @Input() isMsgBox: boolean = false;
     
     @Input() appendTo: any;
     
@@ -88,6 +94,10 @@ export class Dialog implements AfterViewInit,AfterViewChecked,OnDestroy {
     @Input() styleClass: string;
     
     @Input() showHeader: boolean = true;
+
+    @Input() showCloseBtn: boolean = true;
+
+    @Input() closeBtnLabel: string = "Close";
     
     @Input() breakpoint: number = 640;
     
@@ -118,6 +128,8 @@ export class Dialog implements AfterViewInit,AfterViewChecked,OnDestroy {
     @Output() onHide: EventEmitter<any> = new EventEmitter();
 
     @Output() visibleChange:EventEmitter<any> = new EventEmitter();
+
+    @Output() onOk: EventEmitter<any> = new EventEmitter();
     
     _visible: boolean;
     
@@ -426,6 +438,10 @@ export class Dialog implements AfterViewInit,AfterViewChecked,OnDestroy {
         }
     }
     
+    ok(evt) {
+        this.onOk.emit(evt);
+    }
+
     onResizeEnd(event: MouseEvent) {
         if(this.resizing) {
             this.resizing = false;
@@ -570,7 +586,7 @@ export class Dialog implements AfterViewInit,AfterViewChecked,OnDestroy {
 }
 
 @NgModule({
-    imports: [CommonModule],
+    imports: [CommonModule, ButtonModule],
     exports: [Dialog,SharedModule],
     declarations: [Dialog]
 })

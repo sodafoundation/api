@@ -10,9 +10,7 @@ import { DropMenuModule, SelectButtonModule, ButtonModule, InputTextModule } fro
 // import { AppService } from './app.service';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
-// import { MsgBoxService } from './shared/api';
 import { MessagesModule } from './components/messages/messages';
-// import { NoAccessModule } from '';
 
 @NgModule({
   declarations: [
@@ -25,8 +23,6 @@ import { MessagesModule } from './components/messages/messages';
     MessagesModule,
     HttpModule,
     BrowserAnimationsModule,
-    // NoAccessModule,
-    // HeaderModule,
     SharedModule.forRoot(),
     DropMenuModule,
     SelectButtonModule,
