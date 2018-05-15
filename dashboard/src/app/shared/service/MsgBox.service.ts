@@ -65,9 +65,8 @@ export class MsgBoxService {
 
         let _config = {
             type: "success",
-            title: this.I18N.get("success"),
             content: "",
-            header: this.I18N.get("tip")
+            header: this.I18N.get("success")
         }
 
         return this.open(Object.assign({}, this.defaultConfig, _config, config));
@@ -82,9 +81,8 @@ export class MsgBoxService {
 
         let _config = {
             type: "error",
-            title: this.I18N.get("fail"),
             content: "",
-            header: this.I18N.get("tip")
+            header: this.I18N.get("error")
         }
 
         return this.open(Object.assign({}, this.defaultConfig, _config, config));

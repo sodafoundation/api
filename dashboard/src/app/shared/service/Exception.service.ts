@@ -43,6 +43,6 @@ export class ExceptionService {
         if(data && data.code) {
             code = data.code;
         }
-        this.msgBox.error(this.I18N.get(code) + "test");
+        this.msgBox.error(this.I18N.get(code) + "");
     }
 }

@@ -31,11 +31,11 @@ export class I18NService {
             }
         }
 
-        let language = window.navigator.language ? window.navigator.language.split("-")[0] : "zh";
+        let language = window.navigator.language ? window.navigator.language.split("-")[0] : "en";
         if(language == "zh" || language == "en"){
             return language;
         } else{
-            return "zh";
+            return "en";
         }
     }
 

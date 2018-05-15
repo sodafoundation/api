@@ -14,16 +14,10 @@ export class Safe{
 
 @Component({
     template:`
-    <p-dialog [header]="config.header" [isMsgBox]="true" [(visible)]="config.visible" [width]="config.width" [height]="config.height" (onOk)="config.ok()">
+    <p-dialog [header]="config.header" [isMsgBox]="true" [modal]="true" [(visible)]="config.visible" [width]="config.width" [height]="config.height" (onOk)="config.ok()">
         <div class="msgbox">
             <div>
-                <svg class="icon icon-size-48" [ngSwitch]="config.type">
-                    <use xlink:href="#icon-popup-success-48" *ngSwitchCase="'success'"></use>
-                    <use xlink:href="#icon-popup-error-48" *ngSwitchCase="'error'"></use>
-                    <use xlink:href="#icon-popup-info-48" *ngSwitchCase="'info'"></use>
-                    <use xlink:href="#icon-popup-question-48" *ngSwitchCase="'confirm'"></use>
-                    <use xlink:href="#icon-popup-warning-48" *ngSwitchCase="'warn'"></use>
-                </svg>
+                <i [ngClass]="{'fa ':true, 'fa-info-circle': config.type=='info', 'error fa-times-circle': config.type=='error', 'success fa-info-circle': config.type=='success'}" [class]="config.icon" ></i>
             </div>
             <div>
                 <h3 *ngIf="config.type=='success' || config.type=='error'" [ngClass]="config.type + '-title'">{{config.title}}</h3>
