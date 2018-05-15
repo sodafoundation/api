@@ -56,8 +56,6 @@ export class VolumeGroupComponent implements OnInit{
         this.showVolumeGroupDialog = true;
     }
     submit(group){
-        console.log(group);
-        console.log(this.volumeGroupForm.status);
         if(!this.volumeGroupForm.valid){
             for(let i in this.volumeGroupForm.controls){
                 this.volumeGroupForm.controls[i].markAsTouched();

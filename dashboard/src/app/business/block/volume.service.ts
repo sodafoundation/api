@@ -8,7 +8,7 @@ export class VolumeService {
     private http: HttpService,
     private paramStor: ParamStorService
   ) { }
-
+  
   url = 'v1beta/{project_id}/block/volumes';
 
   //创建 volume
@@ -95,4 +95,19 @@ export class SnapshotService {
     let url = this.url + "/" + id;
     return this.http.put(url,param);
   }
+}
+@Injectable()
+export class ReplicationService {
+    constructor(
+        private http: HttpService,
+        private paramStor: ParamStorService
+    ) { }
+
+    project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
+    replicationUrl = 'v1beta/'+ this.project_id +'/block/replications';
+    //create replication
+    createReplication(param){
+        let url = this.replicationUrl;
+        return this.http.post(url,param);
+    }
 }

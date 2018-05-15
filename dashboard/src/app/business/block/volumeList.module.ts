@@ -2,15 +2,15 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { VolumeListComponent } from './volumeList.component';
-import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule, InputTextModule, InputTextareaModule, DropdownModule } from '../../components/common/api';
+import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule, InputTextModule, InputTextareaModule, DropdownModule ,ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 
 import { HttpService } from './../../shared/service/Http.service';
-import { VolumeService,SnapshotService } from './volume.service';
+import {VolumeService, SnapshotService, ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 
 @NgModule({
   declarations: [ VolumeListComponent ],
-  imports: [ 
+  imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -21,14 +21,17 @@ import { ProfileService } from './../profile/profile.service';
     DropdownModule,
     DropMenuModule,
     DialogModule,
-    FormModule
+    FormModule,
+    ConfirmDialogModule
   ],
   exports: [ VolumeListComponent ],
   providers: [
     HttpService,
     VolumeService,
     SnapshotService,
-    ProfileService
+    ProfileService,
+    ReplicationService,
+    ConfirmationService
   ]
 })
 export class VolumeListModule { }

@@ -5,12 +5,13 @@ import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractC
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { MenuItem } from '../../components/common/api';
+import { MenuItem ,ConfirmationService} from '../../components/common/api';
 
-import { VolumeService, SnapshotService } from './volume.service';
+import { VolumeService, SnapshotService,ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 import { identifierModuleUrl } from '@angular/compiler';
 
+let _ = require("underscore");
 @Component({
     selector: 'volume-list',
     templateUrl: 'volumeList.html',
@@ -24,6 +25,7 @@ export class VolumeListComponent implements OnInit {
     modifyDisplay = false;
     selectVolumeSize :number;
     unit:number = 1;
+    repPeriod : number=60;
     capacityOptions = [
         {
             label: 'GB',
@@ -35,6 +37,13 @@ export class VolumeListComponent implements OnInit {
         }
 
     ];
+    profileOptions = [
+        {
+            label: 'Select Profile',
+            value: null
+        }
+    ];
+    azOption=[{label:"default",value:"default"}];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
@@ -42,9 +51,12 @@ export class VolumeListComponent implements OnInit {
     snapshotFormGroup;
     modifyFormGroup;
     expandFormGroup;
+    replicationGroup;
     errorMessage = {
         "name": { required: "Name is required." },
-        "description": { maxlength: "Max. length is 200." }
+        "description": { maxlength: "Max. length is 200." },
+        "repName":{ required: "Name is required." },
+        "profileOption":{ required: "Name is required." },
     };
     profiles;
     selectedVolume;
@@ -55,6 +67,8 @@ export class VolumeListComponent implements OnInit {
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,
         private ProfileService: ProfileService,
+        private ReplicationService: ReplicationService,
+        private confirmationService: ConfirmationService,
         private fb: FormBuilder
     ) {
         this.snapshotFormGroup = this.fb.group({
@@ -79,6 +93,12 @@ export class VolumeListComponent implements OnInit {
                 this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize)*this.unit;
             }
         )
+        this.replicationGroup = this.fb.group({
+            "repName": ['',{validators:[Validators.required], updateOn:'change'}],
+            "az": [this.azOption[0]],
+            "profileOption":['',{validators:[Validators.required], updateOn:'change'}]
+        });
+
     }
 
     ngOnInit() {
@@ -102,7 +122,7 @@ export class VolumeListComponent implements OnInit {
             {
                 "label": "Delete", command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
-                        this.deleteVolumeById(this.selectedVolume.id);
+                        this.deleteVolumes(this.selectedVolume);
                     }
                 }
             }
@@ -126,6 +146,12 @@ export class VolumeListComponent implements OnInit {
     getProfiles() {
         this.ProfileService.getProfiles().subscribe((res) => {
             this.profiles = res.json();
+            this.profiles.forEach(profile => {
+                this.profileOptions.push({
+                    label: profile.name,
+                    value: profile.id
+                });
+            });
         });
     }
 
@@ -163,6 +189,9 @@ export class VolumeListComponent implements OnInit {
             this.createReplicationDisplay = true;
         }
         this.selectedVolume = selectedVoluem;
+        this.replicationGroup.reset();
+        this.replicationGroup.controls["repName"].setValue(this.selectedVolume.name+"-replication");
+        this.replicationGroup.controls["az"].setValue(this.azOption[0]);
         this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize);
     }
 
@@ -185,5 +214,61 @@ export class VolumeListComponent implements OnInit {
             this.getVolumes();
             this.expandDisplay = false;
         });
+    }
+    createReplication(){
+        if(!this.replicationGroup.valid){
+            for(let i in this.replicationGroup.controls){
+                this.replicationGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
+        let param = {
+            "name":this.replicationGroup.value.repName ,
+            "size": this.selectedVolume.size,
+            "availabilityZone": this.replicationGroup.value.az.value,
+            "profileId": this.replicationGroup.value.profileOption,
+        }
+        this.VolumeService.createVolume(param).subscribe((res) => {
+            let param = {
+                "name":this.replicationGroup.value.repName ,
+                "primaryVolumeId": this.selectedVolume.id,
+                "availabilityZone": this.replicationGroup.value.az.value,
+                "profileId": this.replicationGroup.value.profileOption,
+                "replicationMode":"async",
+                "replicationPeriod":this.repPeriod,
+                "secondaryVolumeId":res.json().id
+            }
+            this.ReplicationService.createReplication(param).subscribe((res) => {
+                this.getVolumes();
+                this.createReplicationDisplay = false;
+            });
+        });
+    }
+    deleteVolumes(volumes){
+        let arr=[], msg;
+        if(_.isArray(volumes)){
+            volumes.forEach((item,index)=> {
+                arr.push(item.id);
+            })
+            msg = "<div>Are you sure you want to delete the selected volumes?</div><h3>[ "+ volumes.length +" Volumes ]</h3>";
+        }else{
+            arr.push(volumes.id);
+            msg = "<div>Are you sure you want to delete the volume?</div><h3>[ "+ volumes.name +" ]</h3>";
+        }
+
+        this.confirmationService.confirm({
+            message: msg,
+            header: "Delete Volume",
+            acceptLabel: "Delete",
+            isWarning: true,
+            accept: ()=>{
+                arr.forEach((item,index)=> {
+                    this.deleteVolume(item)
+                })
+
+            },
+            reject:()=>{}
+        })
+
     }
 }
