@@ -26,4 +26,6 @@ const (
 	// Token parameter name
 	AuthTokenHeader    = "X-Auth-Token"
 	SubjectTokenHeader = "X-Subject-Token"
+
+	ApiVersion = "v1beta"
 )
