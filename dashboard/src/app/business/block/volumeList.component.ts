@@ -7,7 +7,7 @@ import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem } from '../../components/common/api';
 
-import { VolumeService, SnapshotService } from './volume.service';
+import { VolumeService, SnapshotService,ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 import { identifierModuleUrl } from '@angular/compiler';
 
@@ -42,6 +42,7 @@ export class VolumeListComponent implements OnInit {
             value: null
         }
     ];
+    azOption=[{label:"default",value:"default"}];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
@@ -52,7 +53,9 @@ export class VolumeListComponent implements OnInit {
     replicationGroup;
     errorMessage = {
         "name": { required: "Name is required." },
-        "description": { maxlength: "Max. length is 200." }
+        "description": { maxlength: "Max. length is 200." },
+        "repName":{ required: "Name is required." },
+        "profileOption":{ required: "Name is required." },
     };
     profiles;
     selectedVolume;
@@ -63,6 +66,7 @@ export class VolumeListComponent implements OnInit {
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,
         private ProfileService: ProfileService,
+        private ReplicationService: ReplicationService,
         private fb: FormBuilder
     ) {
         this.snapshotFormGroup = this.fb.group({
@@ -88,7 +92,9 @@ export class VolumeListComponent implements OnInit {
             }
         )
         this.replicationGroup = this.fb.group({
-            "repName": ['', Validators.required]
+            "repName": ['',{validators:[Validators.required], updateOn:'change'}],
+            "az": [this.azOption[0]],
+            "profileOption":['',{validators:[Validators.required], updateOn:'change'}]
         });
 
     }
@@ -181,7 +187,9 @@ export class VolumeListComponent implements OnInit {
             this.createReplicationDisplay = true;
         }
         this.selectedVolume = selectedVoluem;
+        this.replicationGroup.reset();
         this.replicationGroup.controls["repName"].setValue(this.selectedVolume.name+"-replication");
+        this.replicationGroup.controls["az"].setValue(this.azOption[0]);
         this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize);
     }
 
@@ -203,6 +211,35 @@ export class VolumeListComponent implements OnInit {
         this.VolumeService.expandVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
             this.expandDisplay = false;
+        });
+    }
+    createReplication(){
+        if(!this.replicationGroup.valid){
+            for(let i in this.replicationGroup.controls){
+                this.replicationGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
+        let param = {
+            "name":this.replicationGroup.value.repName ,
+            "size": this.selectedVolume.size,
+            "availabilityZone": this.replicationGroup.value.az.value,
+            "profileId": this.replicationGroup.value.profileOption,
+        }
+        this.VolumeService.createVolume(param).subscribe((res) => {
+            let param = {
+                "name":this.replicationGroup.value.repName ,
+                "primaryVolumeId": this.selectedVolume.id,
+                "availabilityZone": this.replicationGroup.value.az.value,
+                "profileId": this.replicationGroup.value.profileOption,
+                "replicationMode":"async",
+                "replicationPeriod":this.repPeriod,
+                "secondaryVolumeId":res.json().id
+            }
+            this.ReplicationService.createReplication(param).subscribe((res) => {
+                this.getVolumes();
+                this.createReplicationDisplay = false;
+            });
         });
     }
 }

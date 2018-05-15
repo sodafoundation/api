@@ -133,23 +133,23 @@
                     </div>
                 </div>
                 <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
-                    <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" >
-                        <form-item label="Secondary Name" >
+                    <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" [errorMessage]="errorMessage" >
+                        <form-item label="Secondary Name" [required]="true">
                             <input type="text" pInputText formControlName="repName" [style]="{'min-width':'100px'}"/>
                         </form-item>
                         <form-item label="Target Region" >
                             <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" formControlName="capacityOption"></p-dropdown>
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" ></p-dropdown>
                             </div>
                         </form-item>
-                        <form-item label="Target Availability Zone" >
+                        <form-item label="Target Availability Zone" [required]="true" >
                             <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" formControlName="capacityOption"></p-dropdown>
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="azOption" formControlName="az"></p-dropdown>
                             </div>
                         </form-item>
-                        <form-item label="Secondary Profile" >
+                        <form-item label="Secondary Profile" [required]="true">
                             <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'136px'}" [options]="profileOptions" formControlName="capacityOption"></p-dropdown>
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="profileOptions" formControlName="profileOption"></p-dropdown>
                             </div>
                         </form-item>
                     </form>
@@ -158,7 +158,7 @@
         </div>
     </div>
     <p-footer>
-        <button type="button" pButton (click)="createReplicationDisplay=false" label="OK" ></button>
+        <button type="button" pButton (click)="createReplication()" label="OK" ></button>
         <button type="button" pButton (click)="createReplicationDisplay=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>

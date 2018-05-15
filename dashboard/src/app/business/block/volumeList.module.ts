@@ -5,12 +5,12 @@ import { VolumeListComponent } from './volumeList.component';
 import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule, InputTextModule, InputTextareaModule, DropdownModule } from '../../components/common/api';
 
 import { HttpService } from './../../shared/service/Http.service';
-import { VolumeService,SnapshotService } from './volume.service';
+import {VolumeService, SnapshotService, ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 
 @NgModule({
   declarations: [ VolumeListComponent ],
-  imports: [ 
+  imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -28,7 +28,8 @@ import { ProfileService } from './../profile/profile.service';
     HttpService,
     VolumeService,
     SnapshotService,
-    ProfileService
+    ProfileService,
+    ReplicationService
   ]
 })
 export class VolumeListModule { }
