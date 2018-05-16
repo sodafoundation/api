@@ -1093,11 +1093,6 @@ paths:
       tags:
         - Block Replications
       description: Enable Replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
       responses:
         '202':
           description: Accepted
@@ -1119,11 +1114,6 @@ paths:
       tags:
         - Block Replications
       description: Disable Replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
       responses:
         '202':
           description: Accepted

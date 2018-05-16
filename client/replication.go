@@ -108,8 +108,7 @@ func (v *ReplicationMgr) EnableReplication(replicaId string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "enable")}, "/")
-	body := map[string]interface{}{}
-	return v.Recv(url, "POST", body, nil)
+	return v.Recv(url, "POST", nil, nil)
 }
 
 // EnableReplication
@@ -117,8 +116,7 @@ func (v *ReplicationMgr) DisableReplication(replicaId string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "disable")}, "/")
-	body := map[string]interface{}{}
-	return v.Recv(url, "POST", body, nil)
+	return v.Recv(url, "POST", nil, nil)
 }
 
 // EnableReplication
