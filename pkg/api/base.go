@@ -15,12 +15,9 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
@@ -29,7 +26,6 @@ import (
 
 type BasePortal struct {
 	beego.Controller
-	Self interface{}
 }
 
 func (this *BasePortal) GetParameters() (map[string][]string, error) {
@@ -43,60 +39,6 @@ func (this *BasePortal) GetParameters() (map[string][]string, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-type ActionSpec map[string]interface{}
-
-// This is an action router, some resource model need to extras action, this handler maybe useful.
-// Developer can use it by three steps:
-// 1. Config action in  router.go
-// 		beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
-//
-// 2. Initialize 'Self' variable
-//		func NewReplicationPortal() *ReplicationPortal {
-//			r := &ReplicationPortal{}
-//			r.Self = r
-//			return r
-//		}
-//
-// 3. Implement real action handler. The handler name must be same with the json keyword.
-//		JSON:
-//		{
-//		"enableReplication": {}
-//		}
-//
-//		Action handler:
-//		func (this *ReplicationPortal) EnableReplication(ctx *context.Context) {
-//			return
-//		}
-//  Note: If you want to use http ctx in action handler please use 'ctx' which is function parameter instead of 'this.Ctx'
-
-func (this *BasePortal) Action() {
-	action := ActionSpec{}
-	// IO reader only can be used once, but in action situation request body will read twice
-	// one for parent action , and the other for child action which is the real action.
-	this.Ctx.Input.CopyBody(beego.BConfig.MaxMemory)
-
-	// Unmarshal the request body
-	if err := json.Unmarshal(this.Ctx.Input.RequestBody, &action); err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest, "decode request body failed, %v", err)
-		return
-	}
-
-	v := reflect.ValueOf(this.Self)
-	for m, _ := range action {
-		m = strings.Title(m) // convert the first letter to upper
-		if val := v.MethodByName(m); val.IsValid() {
-			val.Call([]reflect.Value{reflect.ValueOf(this.Ctx)})
-			if !this.Ctx.Output.IsSuccessful() {
-				return
-			}
-		} else {
-			model.HttpError(this.Ctx, http.StatusNotFound,
-				"specified action(%s) does not find in controller", m)
-			return
-		}
-	}
 }
 
 // Filter some items in spec that no need to transfer to users.
