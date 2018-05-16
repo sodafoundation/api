@@ -187,7 +187,7 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 	}
 
 	body := &model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: int64(newSize)},
+		NewSize: int64(newSize),
 	}
 
 	resp, err := client.ExtendVolume(args[0], body)

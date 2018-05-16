@@ -97,7 +97,7 @@ func Run(host string) {
 				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 			// Extend Volume
-			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
+			beego.NSRouter("/:tenantId/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.ApiVersion)
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
