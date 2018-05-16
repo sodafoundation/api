@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,Input,Output,EventEmitter} from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 import { ProfileService } from './../../../profile/profile.service';
+import {FormBuilder, FormControl, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-replication-group',
   templateUrl: './replication-group.component.html',
   styleUrls: [
-    
+
   ],
   animations: [
     trigger('overlayState', [
@@ -40,7 +41,8 @@ export class ReplicationGroupComponent implements OnInit {
   createOrExist = 'createGroup';
   existingGroupLists = [];
   replicationEnable:boolean;
-  volumes = [];
+  @Input() volumes:any;
+  @Output() checkParam = new EventEmitter();
   period = 60;
   selectedProfile;
   profileOptions = [
@@ -51,7 +53,8 @@ export class ReplicationGroupComponent implements OnInit {
   ];
 
   constructor(
-    private ProfileService: ProfileService
+    private ProfileService: ProfileService,
+    private fb: FormBuilder
   ) { }
 
   ngOnInit() {
@@ -63,20 +66,6 @@ export class ReplicationGroupComponent implements OnInit {
       {
         label: 'Add to Existing Group',
         value: 'existingGroup'
-      }
-    ];
-    this.volumes = [
-      {
-        availabilityZone: 'Region-Beijing',
-        name: 'vol_01',
-        size: 1,
-        profileId: 'PF_block_01'
-      },
-      {
-        availabilityZone: 'Region-Beijing',
-        name: 'vol_02',
-        size: 1,
-        profileId: 'PF_block_02'
       }
     ];
     this.getProfiles();
@@ -108,5 +97,7 @@ export class ReplicationGroupComponent implements OnInit {
       });
     });
   }
-
+    checkParamSubmit(){
+      this.checkParam.emit(false);
+    }
 }
