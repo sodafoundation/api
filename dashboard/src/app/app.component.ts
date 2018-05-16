@@ -1,4 +1,3 @@
-// import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
 import { Router } from '@angular/router';
@@ -32,6 +31,8 @@ export class AppComponent implements OnInit, AfterViewInit{
     showLoginAnimation: boolean=false;
 
     showLogoutAnimation: boolean=false;
+
+    tenantItems = [];
 
     menuItems = [];
 
@@ -90,53 +91,24 @@ export class AppComponent implements OnInit, AfterViewInit{
         private http: Http,
         private router: Router,
         private paramStor: ParamStorService
-        // private I18N: I18NService,
-        // private viewContainerRef: ViewContainerRef,
-        // private appService: AppService,
-        // private router: Router
+        // private I18N: I18NService
     ){}
     
     ngOnInit() {
         let currentUserInfo = this.paramStor.CURRENT_USER();
         if(currentUserInfo != ""){
-            this.username = this.paramStor.CURRENT_USER().split("|")[0];
-            this.currentTenant = this.paramStor.CURRENT_TENANT().split("|")[0];
-
-            if(this.username=="admin"){
-                this.menuItems = this.menuItems_admin;
-            }else{
-                this.menuItems = this.menuItems_tenant;
-            }
-
-            this.isLogin = true;
             this.hideLoginForm = true;
-            // this.router.navigateByUrl("home");
-            this.activeItem = this.menuItems[0];
+
+            let [username, userid, tenantname, tenantid] = [
+                    this.paramStor.CURRENT_USER().split("|")[0],
+                    this.paramStor.CURRENT_USER().split("|")[1],
+                    this.paramStor.CURRENT_TENANT().split("|")[0],
+                    this.paramStor.CURRENT_TENANT().split("|")[1] ];
+            this.AuthWithTokenScoped({'name': username, 'id': userid});
         }else{
             this.isLogin = false;
             this.hideLoginForm = false;
         }
-
-        this.dropMenuItems = [
-            { 
-                label: "Switch Tenant", 
-                items:[
-                    {
-                        label: "TenantA", command:()=>{}
-                    },
-                    {
-                        label: "TenantB", command:()=>{}
-                    }
-                ]
-            },
-            { label: "Logout", command:()=>
-                {
-                    this.logout();
-                }
-            }
-        ];
-
-        
     }
 
     ngAfterViewInit(){
@@ -181,74 +153,131 @@ export class AppComponent implements OnInit, AfterViewInit{
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
             this.paramStor.AUTH_TOKEN(res.headers.get('x-subject-token'));
-            let userid = res.json().token.user.id;
+            let user = res.json().token.user;
+            this.AuthWithTokenScoped(user);
+        },
+        error=>{
+            console.log("Username or password incorrect.")
+        });
+    }
 
-            // Get user owned tenants
-            let reqUser: any = { params:{} };
-            this.http.get("/v3/users/"+ userid +"/projects", reqUser).subscribe((objRES) => {
-                // Get token authentication with scoped
-                let g_token_id = res.headers.get('x-subject-token'); 
-                let req: any = { auth: {} };
-                req.auth = {
-                    "identity": {
-                        "methods": [
-                            "token"
-                        ],
-                        "token": {
-                            "id": g_token_id
+    AuthWithTokenScoped(user, tenant?){
+        // Get user owned tenants
+        let reqUser: any = { params:{} };
+        this.http.get("/v3/users/"+ user.id +"/projects", reqUser).subscribe((objRES) => {
+            let project = tenant===undefined ? objRES.json().projects[0] : tenant;
+
+            this.tenantItems = [];
+            objRES.json().projects.map(item => {
+                let tenantItemObj = {};
+                tenantItemObj["label"] = item.name;
+                tenantItemObj["command"] = ()=>{
+                    let username =  this.paramStor.CURRENT_USER().split("|")[0];
+                    let userid =  this.paramStor.CURRENT_USER().split("|")[1];
+                    this.AuthWithTokenScoped({'name': username, 'id': userid}, item);
+                };
+                this.tenantItems.push(tenantItemObj);
+            })
+ 
+            // Get token authentication with scoped
+            let token_id = this.paramStor.AUTH_TOKEN(); 
+            let req: any = { auth: {} };
+            req.auth = {
+                "identity": {
+                    "methods": [
+                        "token"
+                    ],
+                    "token": {
+                        "id": token_id
+                    }
+                },
+                "scope": {
+                "project": {
+                    "name": project.name,
+                    "domain": { "id": "default" }
+                }
+                }
+            }
+
+            this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
+                this.paramStor.AUTH_TOKEN( r.headers.get('x-subject-token') );
+                this.paramStor.CURRENT_TENANT(project.name + "|" + project.id);
+                this.paramStor.CURRENT_USER(user.name + "|"+ user.id);
+
+                this.username = this.paramStor.CURRENT_USER().split("|")[0];
+                this.currentTenant = this.paramStor.CURRENT_TENANT().split("|")[0];
+
+                if(this.username == "admin"){
+                    this.menuItems = this.menuItems_admin;
+                    this.dropMenuItems = [
+                        { 
+                            label: "Switch Region", 
+                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                        },
+                        { 
+                            label: "Logout", 
+                            command:()=>{ this.logout() }
                         }
-                    },
-                    "scope": {
-                    "project": {
-                        "name": objRES.json().projects[0].name,
-                        "domain": { "id": "default" }
-                    }
-                    }
+                    ];
+                }else{
+                    this.menuItems = this.menuItems_tenant;
+                    this.dropMenuItems = [
+                        { 
+                            label: "Switch Region", 
+                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                        },
+                        { 
+                            label: "Switch Tenant", 
+                            items: this.tenantItems
+                        },
+                        { 
+                            label: "Logout", 
+                            command:()=>{ this.logout() }
+                        }
+                    ];
                 }
 
-                this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
-                    this.paramStor.AUTH_TOKEN( r.headers.get('x-subject-token') );
-                    if( this.paramStor.AUTH_TOKEN() != '' ){
-                        this.paramStor.CURRENT_TENANT(objRES.json().projects[0].name + "|" +objRES.json().projects[0].id);
-                        this.paramStor.CURRENT_USER(this.username + "|"+ userid);
+                this.isLogin = true;
+                this.router.navigateByUrl("home");
+                this.activeItem = this.menuItems[0];
 
-                        if(this.username == "admin"){
-                            this.menuItems = this.menuItems_admin;
-                        }else{
-                            this.menuItems = this.menuItems_tenant;
-                        }
+                // annimation for after login
+                this.showLoginAnimation = true;
+                setTimeout(() => {
+                    this.showLoginAnimation = false;
+                    this.hideLoginForm = true;
+                }, 500);
 
-                        this.isLogin = true;
-                        this.currentTenant = objRES.json().projects[0].name;
-                        this.router.navigateByUrl("home");
-                        this.activeItem = this.menuItems[0];
-
-                        // annimation for after login
-                        this.showLoginAnimation = true;
-                        setTimeout(() => {
-                            this.showLoginAnimation = false;
-                            this.hideLoginForm = true;
-                        }, 500);
-                    }
-                })
             })
-        });
+        },
+        error => {
+            this.logout();
+        })
     }
 
     logout() {
         this.paramStor.AUTH_TOKEN("");
         this.paramStor.CURRENT_USER("");
         this.paramStor.CURRENT_TENANT("");
-        
-        // annimation for after login
+
+
+        // annimation for after logout
         this.hideLoginForm = false;
         this.showLogoutAnimation = true;
         setTimeout(() => {
             this.showLogoutAnimation = false;
+            this.username = "";
             this.password = "";
             this.isLogin = false;
         }, 500);
 
+    }
+
+    onKeyDown(e) {
+        let keycode = window.event ? e.keyCode : e.which;
+        if(keycode == 13){
+            this.login();
+        }
     }
 
     menuItemClick(event, item) {

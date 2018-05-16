@@ -8,9 +8,9 @@ export class VolumeService {
     private http: HttpService,
     private paramStor: ParamStorService
   ) { }
+  
+  url = 'v1beta/{project_id}/block/volumes';
 
-  project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
-  url = 'v1beta/'+ this.project_id +'/block/volumes';
   //创建 volume
   createVolume(param) {
     return this.http.post(this.url, param);
@@ -67,8 +67,7 @@ export class SnapshotService {
     private paramStor: ParamStorService
   ) { }
 
-  project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
-  url = 'v1beta/'+ this.project_id +'/block/snapshots';
+  url = 'v1beta/{project_id}/block/snapshots';
 
   //创建 snapshot
   createSnapshot(param) {

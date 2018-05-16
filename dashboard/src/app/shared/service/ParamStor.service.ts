@@ -14,28 +14,28 @@ export class ParamStorService {
 
     // Current login user
     CURRENT_USER(param?){
-        if(param){
-            this.setParam('current-user', param);
-        } else {
+        if(param === undefined){
             return this.getParam('current-user');
+        } else {
+            this.setParam('current-user', param);
         }
     }
 
     // User auth token
     AUTH_TOKEN(param?){
-        if(param){
-            this.setParam('auth-token', param);
-        } else {
+        if(param === undefined){
             return this.getParam('auth-token');
+        } else {
+            this.setParam('auth-token', param);
         }
     }
 
     // Current login user
     CURRENT_TENANT(param?){
-        if(param){
-            this.setParam('current-tenant', param);
-        } else {
+        if(param === undefined){
             return this.getParam('current-tenant');
+        } else {
+            this.setParam('current-tenant', param);
         }
     }
 
