@@ -2,7 +2,7 @@ import { NgModule, ModuleWithProviders, APP_INITIALIZER, Injector } from '@angul
 import { FormsModule } from '@angular/forms';
 import { ExceptionService, MsgBoxService, I18NService, HttpService, ParamStorService } from './api';
 import { SharedConfig } from './shared.config';
-import { I18N } from '../components/common/api';
+import { I18N, MsgBoxModule } from '../components/common/api';
 import { XHRBackend, RequestOptions, Http } from '@angular/http';
 
 export function httpFactory(backend: XHRBackend, options: RequestOptions, injector: Injector){
@@ -16,7 +16,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions, inject
 }
 
 @NgModule({
-    exports:[FormsModule]
+    imports:[MsgBoxModule],
+    exports:[FormsModule, MsgBoxModule]
 })
 
 export class SharedModule {
