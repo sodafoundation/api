@@ -9,19 +9,20 @@ export class ExceptionService {
 
     //异常判断
     isException(res){
-        let isRest = res.url.indexOf('v1') || res.url.indexOf('v3');
-        if (isRest > 0){
-            if(res.text() === "sessionout"){
-                return true;
-            }
-            let data = res.json();
-            if(data && data.code != 0) {
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
+        return false;
+        // let isRest = res.url.indexOf('v1') || res.url.indexOf('v3');
+        // if (isRest > 0){
+        //     if(res.text() === "sessionout"){
+        //         return true;
+        //     }
+        //     let data = res.json();
+        //     if(data && data.code != 0) {
+        //         return true;
+        //     }
+        //     else{
+        //         return false;
+        //     }
+        // }
     }
 
     doException(res){
