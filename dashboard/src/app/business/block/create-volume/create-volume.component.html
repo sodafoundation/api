@@ -11,13 +11,13 @@
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid volume-item">
         <div class="ui-grid-row">
             <div class="ui-grid-col-2">
-                {{label.name}}:
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.name}}:
             </div>
             <div class="ui-grid-col-2">
-                {{label.profile}}:
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.profile}}:
             </div>
             <div class="ui-grid-col-2">
-                {{label.capacity}}:
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.capacity}}:
             </div>
             <div class="ui-grid-col-1">
                 {{label.quantity}}:
@@ -27,7 +27,7 @@
         <div class="ui-grid-row volume-item" *ngFor="let volumeItem of volumeItems;index as i">
             <div class="ui-grid-col-2">
                 <input pInputText type="text" placeholder="Name" formControlName="{{'name'+i}}" />
-                <div class="ui-message-container" *ngIf="!volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
+                <div class="ui-message-container" *ngIf="volumeform.controls['name'+i] && !volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
@@ -37,8 +37,8 @@
                 </div>
             </div>
             <div class="ui-grid-col-2">
-                <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}"></p-dropdown>
-                <div class="ui-message-container" *ngIf="!volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].dirty">
+                <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}" placeholder="Select Profile"></p-dropdown>
+                <div class="ui-message-container" *ngIf="volumeform.controls['profileId'+i] && !volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].touched">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
@@ -49,10 +49,10 @@
             </div>
             <div class="ui-grid-col-2">
                 <div class="item-flex">
-                    <p-spinner formControlName="{{'size'+i}}" [min]="1" placeholder="1"></p-spinner>
+                    <p-spinner formControlName="{{'size'+i}}" [min]="1"></p-spinner>
                     <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
                 </div>
-                <div class="ui-message-container" *ngIf="!volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
+                <div class="ui-message-container" *ngIf="volumeform.controls['size'+i] && !volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
@@ -62,16 +62,16 @@
                 </div>
             </div>
             <div class="ui-grid-col-1">
-                <p-spinner formControlName="{{'quantity'+i}}" [min]="1" placeholder="1" value=100></p-spinner>
+                <p-spinner formControlName="{{'quantity'+i}}" [min]="1" value=100></p-spinner>
             </div>
-            <div class="ui-grid-col-1 item-flex" *ngIf="i !== 0" (click)="deleteVolumeItem(i)">
-                <img src="assets/business/images/profile/u1065.png">
+            <div class="ui-grid-col-1 item-flex" *ngIf="i !== 0">
+                <img src="assets/business/images/profile/u1065.png" (click)="deleteVolumeItem(i)">
             </div>
         </div>
 
         <div class="volume-item">
-            <a (click)="addVolumeItem()" class="item-flex">
-                <img width="24" height="24" src="assets/business/images/volume/u937.png">
+            <a class="item-flex">
+                <img width="24" height="24" src="assets/business/images/volume/u937.png" (click)="addVolumeItem()">
                 <span class="margin-between-img-text">Add Volumes</span>
             </a>
         </div>
@@ -81,7 +81,7 @@
         </div>
 
         <div *ngIf="showReplicationConf">
-            <app-replication-group></app-replication-group>
+            <app-replication-group [volumes]="createVolumes" (checkParam) = "checkRep($event)"></app-replication-group>
         </div>
     </div>
     <div class="bottom-button-margin">

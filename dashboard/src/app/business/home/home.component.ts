@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Http } from '@angular/http';
 import { ParamStorService } from 'app/shared/api';
+import {Observable} from "rxjs/Rx";
 
 @Component({
     templateUrl: './home.component.html',
@@ -35,12 +36,12 @@ export class HomeComponent implements OnInit {
         // this.arraySortUpdate(arr);
         this.items = [
             {
-                countNum: arr[0] || 　0,
+                countNum: 0,
                 // imgName: "u288.png",
                 label: "Tenants"
             },
             {
-                countNum: arr[1] || 　0,
+                countNum:0,
                 // imgName: "u288.png",
                 label: "Users"
             },
@@ -80,7 +81,7 @@ export class HomeComponent implements OnInit {
                 label: "Cross-Region Migrations"
             }
         ];
-
+        this.getCountData();
 
         this.chartDatas = {
             labels: ['Unused Capacity', 'Used Capacity'],
@@ -161,8 +162,31 @@ export class HomeComponent implements OnInit {
     }
 
     showData() {
-        this.http.get("/v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/profiles").subscribe((res) => {
+        this.http.get("/v1beta/{project_id}/profiles").subscribe((res) => {
             console.log(res.json().data);
         });
+    }
+    listTenants() {
+        let request: any = { params:{} };
+        request.params = {
+            "domain_id": "default"
+        }
+
+        this.http.get("/v3/projects", request).subscribe((res) => {
+            this.items[0].countNum = res.json().projects.length;
+        });
+    }
+    listUsers(){
+        let request: any = { params:{} };
+        request.params = {
+            "domain_id": "default"
+        }
+        this.http.get("/v3/users", request).subscribe((res) => {
+            this.items[1].countNum = res.json().users.length;
+        });
+    }
+    getCountData(){
+        this.listTenants();
+        this.listUsers();
     }
 }
