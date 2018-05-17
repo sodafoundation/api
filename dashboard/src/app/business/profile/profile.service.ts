@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class ProfileService {
-    url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/profiles'
+    url = 'v1beta/{project_id}/profiles'
     constructor(private http: HttpService) { }
     //创建profile
     createProfile(param) {
@@ -39,7 +39,7 @@ export class ProfileService {
 
 @Injectable()
 export class PoolService{
-    url = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/pools';
+    url = 'v1beta/{project_id}/pools';
     constructor(private http: HttpService) { }
     //查询profiles
     getPools(): Observable<any> {

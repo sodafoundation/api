@@ -8,7 +8,7 @@ export class VolumeService {
     private http: HttpService,
     private paramStor: ParamStorService
   ) { }
-  
+
   url = 'v1beta/{project_id}/block/volumes';
 
   //创建 volume
@@ -55,7 +55,7 @@ export class VolumeService {
     return this.http.get(this.url);
   }
   expandVolume(id,param):Observable<any> {
-      let expandVolumeUrl = 'v1beta/ef305038-cd12-4f3b-90bd-0612f83e14ee/volumes' + '/' + id + "/action"
+      let expandVolumeUrl = 'v1beta/{project_id}/volumes' + '/' + id + "/action"
       return this.http.post(expandVolumeUrl,param);
   }
 }
