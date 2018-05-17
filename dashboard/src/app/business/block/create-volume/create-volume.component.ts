@@ -5,7 +5,7 @@ import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms'
 
 import { Message, SelectItem } from './../../../components/common/api';
 
-import { VolumeService } from './../volume.service';
+import { VolumeService ,ReplicationService} from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
 
 @Component({
@@ -57,12 +57,16 @@ export class CreateVolumeComponent implements OnInit {
   errorMessage = {
     "zone": { required: "Zone is required."}
   };
-
+    defaultProfile = {
+        label: null,
+        value: {id:null,profileName:null}
+    };
   constructor(
     private router: Router,
     private fb: FormBuilder,
     private ProfileService: ProfileService,
-    private VolumeService: VolumeService
+    private VolumeService: VolumeService,
+    private replicationService:ReplicationService
   ) {}
 
   ngOnInit() {
@@ -90,11 +94,10 @@ export class CreateVolumeComponent implements OnInit {
         label: 'TB', value: 'TB'
       }
     ];
-
     this.volumeform = this.fb.group({
       'zone': new FormControl('default', Validators.required),
       'name0': new FormControl('', Validators.required),
-      'profileId0': new FormControl('', Validators.required),
+      'profileId0': new FormControl(this.defaultProfile, Validators.required),
       'size0': new FormControl(1, Validators.required),
       'capacity0': new FormControl(''),
       'quantity0': new FormControl(1)
@@ -116,7 +119,7 @@ export class CreateVolumeComponent implements OnInit {
     this.volumeItems.forEach(index => {
       if(index !== 0){
         this.volumeform.addControl('name'+index, this.fb.control('', Validators.required));
-        this.volumeform.addControl('profileId'+index, this.fb.control('',Validators.required));
+        this.volumeform.addControl('profileId'+index, this.fb.control(this.defaultProfile,Validators.required));
         this.volumeform.addControl('size'+index, this.fb.control(1, Validators.required));
         this.volumeform.addControl('capacity'+index, this.fb.control('GB', Validators.required));
         this.volumeform.addControl('quantity'+index, this.fb.control(1));
@@ -150,7 +153,23 @@ export class CreateVolumeComponent implements OnInit {
       this.router.navigate(['/block']);
     });
   }
-
+  createVolumeAndReplication(volParam,repParam){
+    this.VolumeService.createVolume(volParam).subscribe((res2) => {
+        this.VolumeService.createVolume(repParam).subscribe((res) => {
+            let param = {
+                "name":res.json().name ,
+                "primaryVolumeId": res2.json().id,
+                "availabilityZone": res.json().availabilityZone,
+                "profileId": res.json().profileId,
+                "replicationMode":"async",
+                "replicationPeriod":this.createVolumes["formGroup"].value.period,
+                "secondaryVolumeId":res.json().id
+            }
+            this.replicationService.createReplication(param).subscribe((res) => {});
+            this.router.navigate(['/block']);
+        });
+    });
+  }
   onSubmit(value) {
       if(!this.volumeform.valid){
           for(let i in this.volumeform.controls){
@@ -174,14 +193,20 @@ export class CreateVolumeComponent implements OnInit {
               profileId: item.profile.id
           });
       });
-      volumeData.forEach(data=>{
+      for(let i in volumeData){
           if(this.showReplicationConf){
-              //wating create replication interface
-              this.createVolume(data);
+              let repVolume = {
+                  name:null,
+                  profileId:null
+              };
+              Object.assign(repVolume,volumeData[i]);
+              repVolume.name = this.createVolumes["formGroup"].value["name"+i];
+              repVolume.profileId = this.createVolumes["formGroup"].value["profileId"+i];
+              this.createVolumeAndReplication(volumeData[i],repVolume);
           }else{
-              this.createVolume(data);
+              this.createVolume(volumeData[i]);
           }
-      });
+      }
   }
   getVolumesDataArray(value){
       let dataArr = [];
