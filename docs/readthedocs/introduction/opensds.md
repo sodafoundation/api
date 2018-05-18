@@ -24,13 +24,9 @@ you should consider joining the [OpenSDS Project](https://opensds.io/).
 If you are a developer want to be part of the code development that is happening
 now, please refer to the Contributing sections below.
 
-## Collaborative Testing
-
-* [CNCF Cluster](https://github.com/cncf/cluster/issues/30)
-
 ## Contact
 
-* Mailing list: [opensds-dev](https://groups.google.com/forum/?hl=en#!forum/opensds-dev)
+* Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
 * slack: #[opensds](https://opensds.slack.com)
 * Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
 
@@ -38,4 +34,4 @@ now, please refer to the Contributing sections below.
 
 ### OpenAPI
 
-* [OpenAPI](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)
+* [Zealand](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)

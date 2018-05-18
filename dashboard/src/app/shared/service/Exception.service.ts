@@ -26,24 +26,24 @@ export class ExceptionService {
     }
 
     doException(res){
-        if(res.text() === "sessionout" ) {
-            let url = window.location.href;
-            let isresource = url.indexOf('siteDistribution');
-            if(isresource > 0 ){
-                parent.postMessage({reload: "reload" }, '*');
-            }
-            else{
-                window.location.reload();
-            }
-            return;
-        }
+        // if(res.text() === "sessionout" ) {
+        //     let url = window.location.href;
+        //     let isresource = url.indexOf('siteDistribution');
+        //     if(isresource > 0 ){
+        //         parent.postMessage({reload: "reload" }, '*');
+        //     }
+        //     else{
+        //         window.location.reload();
+        //     }
+        //     return;
+        // }
 
-        let data = res.json();
-        let code = data.code;
+        // let data = res.json();
+        // let code = data.code;
 
-        if(data && data.code) {
-            code = data.code;
-        }
-        this.msgBox.error(this.I18N.get(code) + "");
+        // if(data && data.code) {
+        //     code = data.code;
+        // }
+        // this.msgBox.error(this.I18N.get(code) + "");
     }
 }

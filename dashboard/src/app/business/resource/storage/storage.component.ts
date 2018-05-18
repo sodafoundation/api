@@ -1,9 +1,8 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { I18NService } from './../../../../app/shared/api';
-import { AppService } from './../../../../app/app.service';
+import { I18NService, ParamStorService} from 'app/shared/api';
+import { Http } from '@angular/http';
 import { trigger, state, style, transition, animate} from '@angular/animations';
-import { I18nPluralPipe } from '@angular/common';
 
 @Component({
     selector: 'storage-table',
@@ -41,30 +40,38 @@ export class StorageComponent implements OnInit{
 
     constructor(
         // private I18N: I18NService,
-        // private router: Router
+        private http: Http,
+        private paramStor: ParamStorService
     ){}
     
     ngOnInit() {
-        this.storages = [
-            { 
-                "name": "Dorado6000V3.SiteA.78",
-                "ip": "8.46.191.46",
-                "status": "Enabled",
-                "vender": "Huawei",
-                "model": "Dorado6000 V3",
-                "region": "Region_Chengdu",
-                "zone":"default"
-            },
-            { 
-                "name": "Dorado6000V3.SiteB.115",
-                "ip": "8.46.185.114",
-                "status": "Enabled",
-                "vender": "Huawei",
-                "model": "Dorado6000 V3",
-                "region": "Region_Chengdu",
-                "zone":"remote"
-            }
-        ];
+        this.storages = [];
+
+        this.listStorage();
+    }
+
+    listStorage(){
+        this.storages = [];
+        let reqUser: any = { params:{} };
+        let user_id = this.paramStor.CURRENT_USER().split("|")[1];
+        this.http.get("/v3/users/"+ user_id +"/projects", reqUser).subscribe((objRES) => {
+            let project_id;
+            objRES.json().projects.forEach(element => {
+                if(element.name == "admin"){
+                    project_id = element.id;
+                }
+            })
+
+            let reqDock: any = { params:{} };
+            this.http.get("/v1beta/"+ project_id +"/docks", reqDock).subscribe((dockRES) => {
+                dockRES.json().forEach(ele => {
+                        let [name,ip,status,description,region,az] = [ele.name, ele.endpoint.split(":")[0], "Enabled", ele.description, "Region_Chengdu", "default"];
+                        this.storages.push({name,ip,status,description,region,az});
+                })
+                console.log(this.storages);
+            })
+
+        })
     }
     
 }

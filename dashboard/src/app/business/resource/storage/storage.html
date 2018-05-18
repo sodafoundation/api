@@ -1,8 +1,3 @@
-
-<div class="content-header">
-    <p>Managing current region storage devices.</p>
-</div>
-
 <div class="table-toolbar">
     <div class="left"></div>
     <div class="right">
@@ -14,12 +9,11 @@
     </div>
 </div>
 
-<p-dataTable [globalFilter]="searchByName" [value]="storages" selectionMode="single" rowExpandMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+<p-dataTable [immutable]="false" [globalFilter]="searchByName" [value]="storages" selectionMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
     <p-column field="ip" header="IP Address"></p-column>
     <p-column field="status" header="Status"></p-column>
-    <p-column field="vender" header="Vender"></p-column>
-    <p-column field="model" header="Model"></p-column>
+    <p-column field="description" header="Description"></p-column>
     <p-column field="region" header="Region"></p-column>
-    <p-column field="zone" header="Availability Zone"></p-column>
+    <p-column field="az" header="Availability Zone"></p-column>
 </p-dataTable>

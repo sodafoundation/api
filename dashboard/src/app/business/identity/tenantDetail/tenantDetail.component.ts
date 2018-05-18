@@ -134,21 +134,32 @@ export class TenantDetailComponent implements OnInit {
         }
 
         this.http.get("/v3/users", request).subscribe((res) => {
+            let newarr = [];
             res.json().users.map((item, index) => {
                 item["description"] = item.description == '' ? '--' : item.description;
-                this.allUsers.push(item);
+                newarr.push(item);
             });
 
             //Filter added users
-            this.users.forEach((addedUser) => {
-                this.allUsers.forEach((user, i) => {
-                    if(user.id == addedUser.id){
-                        this.allUsers.splice(i,1);
+            newarr.forEach((user, i) => {
+                if(this.users.length > 0){
+                    let added = false;
+                    this.users.forEach((addedUser) => {
+                        if(user.id == addedUser.id ){
+                            added = true;
+                        }
+                    });
+                    if('admin' != user.name && !added){
+                        this.allUsers.push(user);
                     }
-                });
+                }else{
+                    if('admin' == user.name){
+                        newarr.splice(i, 1);
+                        this.allUsers = newarr;
+                    }
+                }
+                
             });
-
-            console.log(this.allUsers);
 
         });
     }

@@ -1,9 +1,8 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
-import { I18NService } from './../../../../app/shared/api';
-import { AppService } from './../../../../app/app.service';
+import { I18NService, ParamStorService} from 'app/shared/api';
+import { Http } from '@angular/http';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { I18nPluralPipe } from '@angular/common';
 
 @Component({
     selector: 'zone-table',
@@ -41,15 +40,42 @@ export class ZoneComponent implements OnInit {
 
     constructor(
         // private I18N: I18NService,
-        // private router: Router
+        private http: Http,
+        private paramStor: ParamStorService
     ) { }
 
     ngOnInit() {
-        this.zones = [
-            { "name": "default", "region": "Region_Chengdu", "description":"Chengdu Pixian data center"},
-            { "name": "remote", "region": "Region_Chengdu", "description":"Chengdu Pixian data center"}
-        ];
+
+        this.listAZ();
     }
 
+    listAZ(){
+        this.zones = [];
+        let reqUser: any = { params:{} };
+        let user_id = this.paramStor.CURRENT_USER().split("|")[1];
+        this.http.get("/v3/users/"+ user_id +"/projects", reqUser).subscribe((objRES) => {
+            let project_id;
+            objRES.json().projects.forEach(element => {
+                if(element.name == "admin"){
+                    project_id = element.id;
+                }
+            })
+
+            let reqPool: any = { params:{} };
+            this.http.get("/v1beta/"+ project_id +"/pools", reqPool).subscribe((poolRES) => {
+                let AZs=[];
+                poolRES.json().forEach(ele => {
+                    if(!AZs.includes(ele.availabilityZone)){
+                        AZs.push(ele.availabilityZone);
+
+                        let [name,region,description] = [ele.availabilityZone, "Region_Chengdu", "--"];
+                        this.zones.push({name,region,description});
+                    }
+                })
+                console.log(this.zones);
+            })
+
+        })
+    }
 }
 
