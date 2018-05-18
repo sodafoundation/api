@@ -2,7 +2,7 @@
     <div class="table-toolbar">
         <div class="left">
             <button pButton type="button" label="Create" (click)="showSnapshotPropertyDialog('create')" class="ui-button-secondary"></button>
-            <button pButton type="button" label="Delete" [disabled]="selectedSnapshots.length == 0" (click)="batchDeleteSnapshot()"></button>
+            <button pButton type="button" label="Delete" [disabled]="selectedSnapshots.length == 0" (click)="batchDeleteSnapshot(selectedSnapshots)"></button>
         </div>
         <div class="right">
             <div class="ui-inputsearch">
@@ -30,7 +30,7 @@
             <ng-template let-snapshot="rowData" pTemplate="body">
                 <a [routerLink]="['/createVolume']">Create Volume</a>
                 <a (click)="showSnapshotPropertyDialog('modify',snapshot)">Modify</a>
-                <a (click)="deleteSnapshot(snapshot.id)">Delete</a>
+                <a (click)="batchDeleteSnapshot([snapshot])">Delete</a>
             </ng-template>
         </p-column>
     </p-dataTable>
@@ -57,3 +57,4 @@
         </p-footer>
     </p-dialog>
 </div>
+<p-confirmDialog></p-confirmDialog>

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { VolumeService,SnapshotService } from './../../volume.service';
+import { ConfirmationService,ConfirmDialogModule} from '../../../../components/common/api';
 
 @Component({
   selector: 'app-snapshot-list',
@@ -38,7 +39,8 @@ export class SnapshotListComponent implements OnInit {
   constructor(
     private VolumeService: VolumeService,
     private SnapshotService: SnapshotService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private confirmationService:ConfirmationService
   ) {
     this.snapshotFormGroup = this.fb.group({
       "name": ["", Validators.required],
@@ -83,11 +85,29 @@ export class SnapshotListComponent implements OnInit {
     });
   }
 
-  batchDeleteSnapshot() {
-    if (this.selectedSnapshots) {
-      this.selectedSnapshots.forEach(snapshot => {
-        this.deleteSnapshot(snapshot.id);
-      });
+  batchDeleteSnapshot(param) {
+    if (param) {
+        let  msg;
+        if(param.length>1){
+
+            msg = "<div>Are you sure you want to delete the selected Snapshots?</div><h3>[ "+ param.length +" Snapshots ]</h3>";
+        }else{
+            msg = "<div>Are you sure you want to delete the Snapshot?</div><h3>[ "+ param[0].name +" ]</h3>";
+        }
+
+        this.confirmationService.confirm({
+            message: msg,
+            header: "Delete Snapshots",
+            acceptLabel: "Delete",
+            isWarning: true,
+            accept: ()=>{
+                param.forEach(snapshot => {
+                    this.deleteSnapshot(snapshot.id);
+                });
+
+            },
+            reject:()=>{}
+        })
     }
   }
 
