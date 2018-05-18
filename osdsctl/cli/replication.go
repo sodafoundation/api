@@ -255,10 +255,8 @@ func replicationFailoverAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	replicaId := args[0]
 	failoverReplication := &model.FailoverReplicationSpec{
-		Failover: model.Failover{
-			AllowAttachedVolume: allowAttachedVolume,
-			SecondaryBackendId:  secondaryBackendId,
-		},
+		AllowAttachedVolume: allowAttachedVolume,
+		SecondaryBackendId:  secondaryBackendId,
 	}
 	err := client.FailoverReplication(replicaId, failoverReplication)
 	if err != nil {
