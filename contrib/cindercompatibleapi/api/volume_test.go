@@ -17,6 +17,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -28,6 +29,8 @@ import (
 )
 
 func init() {
+	beego.Router("/v3/volumes/:volumeId/action", &VolumePortal{},
+		"post:VolumeAction")
 	beego.Router("/v3/volumes/:volumeId", &VolumePortal{},
 		"get:GetVolume;delete:DeleteVolume;put:UpdateVolume")
 	beego.Router("/v3/volumes/detail", &VolumePortal{},
@@ -340,6 +343,73 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 
 	json.Unmarshal(w.Body.Bytes(), &output)
 	expected = "Update a volume failed: OpenSDS does not support the parameter: metadata"
+
+	if expected != output.Message {
+		t.Errorf("Expected %v, actual %v", expected, output.Message)
+	}
+}
+
+func TestVolumeAction(t *testing.T) {
+	RequestBodyStr := `{"os-reserve": null}`
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/v3/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/action", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected %v, actual %v", http.StatusAccepted, w.Code)
+	}
+
+	RequestBodyStr = `
+    {
+        "os-extend": {
+            "new_size": 3
+        }
+    }`
+
+	jsonStr = []byte(RequestBodyStr)
+	r, _ = http.NewRequest("POST", "/v3/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/action", bytes.NewBuffer(jsonStr))
+	w = httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("Expected %v, actual %v", http.StatusNotFound, w.Code)
+	}
+}
+
+func TestVolumeActionInitializeConnectionWithError(t *testing.T) {
+	Req := converter.InitializeConnectionReqSpec{}
+
+	Req.InitializeConnection.Connector.Platform = "x86_64"
+	Req.InitializeConnection.Connector.Host = "ubuntu"
+	Req.InitializeConnection.Connector.DoLocalAttach = false
+	Req.InitializeConnection.Connector.IP = "10.10.3.173"
+	Req.InitializeConnection.Connector.OsType = "linux2"
+	Req.InitializeConnection.Connector.Multipath = false
+	Req.InitializeConnection.Connector.Initiator = "iqn.1993-08.org.debian:01:6acaf7eab14"
+	body, _ := json.Marshal(Req)
+
+	RequestBodyStr := string(body)
+	fmt.Println("397")
+	fmt.Println(string(body))
+	fmt.Println("399")
+	fmt.Println(RequestBodyStr)
+
+	var jsonStr = []byte(RequestBodyStr)
+	r, _ := http.NewRequest("POST", "/v3/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/action", bytes.NewBuffer(jsonStr))
+
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("Expected %v, actual %v", http.StatusInternalServerError, w.Code)
+	}
+
+	var output ErrorSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
+	expected := "Initialize connection, attachment is not available or connectionInfo is incorrect"
 
 	if expected != output.Message {
 		t.Errorf("Expected %v, actual %v", expected, output.Message)

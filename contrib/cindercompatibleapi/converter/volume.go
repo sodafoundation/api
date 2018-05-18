@@ -46,7 +46,7 @@ type ListRespVolumeDetails struct {
 	Links               []Link            `json:"links,omitempty"`
 	AvailabilityZone    string            `json:"availability_zone,omitempty"`
 	Host                string            `json:"os-vol-host-attr:host,omitempty"`
-	Encrypted           bool              `json:"encrypted ,omitempty"`
+	Encrypted           bool              `json:"encrypted,omitempty"`
 	UpdatedAt           string            `json:"updated_at"`
 	ReplicationStatus   string            `json:"replication_status,omitempty"`
 	SnapshotID          string            `json:"snapshot_id,omitempty"`
@@ -57,7 +57,7 @@ type ListRespVolumeDetails struct {
 	Migstat             string            `json:"os-vol-mig-status-attr:migstat,omitempty"`
 	Metadata            map[string]string `json:"metadata"`
 	Status              string            `json:"status"`
-	VolumeImageMetadata map[string]string `json:"volume_image_metadata ,omitempty"`
+	VolumeImageMetadata map[string]string `json:"volume_image_metadata,omitempty"`
 	Description         string            `json:"description"`
 	Multiattach         bool              `json:"multiattach,omitempty"`
 	SourceVolID         string            `json:"source_volid,omitempty"`
@@ -140,7 +140,7 @@ type CreateRespVolume struct {
 	Attachments        []RespAttachment  `json:"attachments"`
 	Links              []Link            `json:"links,omitempty"`
 	AvailabilityZone   string            `json:"availability_zone,omitempty"`
-	Encrypted          bool              `json:"encrypted ,omitempty"`
+	Encrypted          bool              `json:"encrypted,omitempty"`
 	UpdatedAt          string            `json:"updated_at,omitempty"`
 	ReplicationStatus  string            `json:"replication_status,omitempty"`
 	SnapshotID         string            `json:"snapshot_id,omitempty"`
@@ -255,10 +255,10 @@ type ShowRespVolume struct {
 	Links               []Link            `json:"links,omitempty"`
 	AvailabilityZone    string            `json:"availability_zone,omitempty"`
 	Host                string            `json:"os-vol-host-attr:host,omitempty"`
-	Encrypted           bool              `json:"encrypted ,omitempty"`
+	Encrypted           bool              `json:"encrypted,omitempty"`
 	UpdatedAt           string            `json:"updated_at"`
 	ReplicationStatus   string            `json:"replication_status,omitempty"`
-	SnapshotID          string            `json:"snapshot_id,omitempty"`
+	SnapshotID          string            `json:"snapshot_id"`
 	ID                  string            `json:"id"`
 	Size                int64             `json:"size"`
 	UserID              string            `json:"user_id"`
@@ -266,14 +266,14 @@ type ShowRespVolume struct {
 	Migstat             string            `json:"os-vol-mig-status-attr:migstat,omitempty"`
 	Metadata            map[string]string `json:"metadata"`
 	Status              string            `json:"status"`
-	VolumeImageMetadata map[string]string `json:"volume_image_metadata,omitempty"`
+	VolumeImageMetadata map[string]string `json:"volume_image_metadata"`
 	Description         string            `json:"description"`
 	Multiattach         bool              `json:"multiattach,omitempty"`
 	SourceVolID         string            `json:"source_volid,omitempty"`
 	ConsistencygroupID  string            `json:"consistencygroup_id,omitempty"`
 	NameID              string            `json:"os-vol-mig-status-attr:name_id,omitempty"`
 	Name                string            `json:"name"`
-	Bootable            bool              `json:"bootable,omitempty"`
+	Bootable            bool              `json:"bootable"`
 	CreatedAt           string            `json:"created_at"`
 	VolumeType          string            `json:"volume_type,omitempty"`
 	ServiceUuID         string            `json:"service_uuid,omitempty"`
@@ -326,7 +326,7 @@ type UpdateRespVolume struct {
 	Attachments        []RespAttachment  `json:"attachments"`
 	Links              []Link            `json:"links,omitempty"`
 	AvailabilityZone   string            `json:"availability_zone,omitempty"`
-	Encrypted          bool              `json:"encrypted ,omitempty"`
+	Encrypted          bool              `json:"encrypted,omitempty"`
 	UpdatedAt          string            `json:"updated_at"`
 	ReplicationStatus  string            `json:"replication_status,omitempty"`
 	SnapshotID         string            `json:"snapshot_id,omitempty"`
@@ -380,6 +380,77 @@ func UpdateVolumeResp(volume *model.VolumeSpec) *UpdateVolumeRespSpec {
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
 	resp.Volume.VolumeType = volume.BaseModel.CreatedAt
+
+	return &resp
+}
+
+// *******************Volume actions*******************
+
+// InitializeConnectionReqSpec ...
+type InitializeConnectionReqSpec struct {
+	InitializeConnection InitializeConnection `json:"os-initialize_connection"`
+}
+
+// InitializeConnection ...
+type InitializeConnection struct {
+	Connector InitializeConnector `json:"connector"`
+}
+
+// InitializeConnector ...
+type InitializeConnector struct {
+	Platform      string `json:"platform"`
+	Host          string `json:"host"`
+	DoLocalAttach bool   `json:"do_local_attach"`
+	IP            string `json:"ip"`
+	OsType        string `json:"os_type"`
+	Multipath     bool   `json:"multipath"`
+	Initiator     string `json:"initiator"`
+}
+
+// InitializeConnectionRespSpec ...
+type InitializeConnectionRespSpec struct {
+	ConnectionInfo InitializeConnectionInfo `json:"connection_info"`
+}
+
+// InitializeConnectionInfo ...
+type InitializeConnectionInfo struct {
+	DriverVolumeType string                 `json:"driver_volume_type"`
+	Data             map[string]interface{} `json:"data"`
+}
+
+// InitializeConnectionReq ...
+func InitializeConnectionReq(initializeConnectionReq *InitializeConnectionReqSpec, volumeID string) *model.VolumeAttachmentSpec {
+	attachment := model.VolumeAttachmentSpec{}
+	attachment.Metadata = make(map[string]string)
+	//attachment.Metadata["instance_uuid"] = cinderReq.Attachment.InstanceUuID
+	attachment.HostInfo.Initiator = initializeConnectionReq.InitializeConnection.Connector.Initiator
+	attachment.HostInfo.Ip = initializeConnectionReq.InitializeConnection.Connector.IP
+	attachment.HostInfo.Platform = initializeConnectionReq.InitializeConnection.Connector.Platform
+	attachment.HostInfo.Host = initializeConnectionReq.InitializeConnection.Connector.Host
+	attachment.HostInfo.OsType = initializeConnectionReq.InitializeConnection.Connector.OsType
+	//attachment.Mountpoint = cinderReq.Attachment.Connector.Mountpoint
+	attachment.VolumeId = volumeID
+
+	return &attachment
+}
+
+// InitializeConnectionResp ...
+func InitializeConnectionResp(attachment *model.VolumeAttachmentSpec) *InitializeConnectionRespSpec {
+	resp := InitializeConnectionRespSpec{}
+	resp.ConnectionInfo.DriverVolumeType = attachment.ConnectionInfo.DriverVolumeType
+	resp.ConnectionInfo.Data = make(map[string]interface{})
+
+	resp.ConnectionInfo.Data["auth_password"] = attachment.ConnectionInfo.ConnectionData["authPassword"]
+	resp.ConnectionInfo.Data["target_discovered"] = attachment.ConnectionInfo.ConnectionData["targetDiscovered"]
+	resp.ConnectionInfo.Data["encrypted"] = attachment.ConnectionInfo.ConnectionData["encrypted"]
+	//resp.ConnectionInfo.Data["qos_specs"]
+	resp.ConnectionInfo.Data["target_iqn"] = attachment.ConnectionInfo.ConnectionData["targetIQN"]
+	resp.ConnectionInfo.Data["target_portal"] = attachment.ConnectionInfo.ConnectionData["targetPortal"]
+	resp.ConnectionInfo.Data["volume_id"] = attachment.ConnectionInfo.ConnectionData["volumeId"]
+	resp.ConnectionInfo.Data["target_lun"] = attachment.ConnectionInfo.ConnectionData["targetLun"]
+	resp.ConnectionInfo.Data["access_mode"] = attachment.ConnectionInfo.ConnectionData["accessMode"]
+	resp.ConnectionInfo.Data["auth_username"] = attachment.ConnectionInfo.ConnectionData["authUserName"]
+	resp.ConnectionInfo.Data["auth_method"] = attachment.ConnectionInfo.ConnectionData["authMethod"]
 
 	return &resp
 }

@@ -85,13 +85,36 @@ func Run(CinderEndPoint string) {
 	}
 
 	client = c.NewClient(cfg)
-	// CinderEndPoint: http://127.0.0.1:8777/v3
+	// CinderEndPoint: http://127.0.0.1:8777/v3 http://10.10.3.173/volume/v3
 	words := strings.Split(CinderEndPoint, "/")
-	converter.EndPoint = CinderEndPoint
-	converter.APIVersion = words[3]
+	versionPosition := 3
+	isHaveV3 := false
+
+	for i := 0; i < len(words); i++ {
+		if words[i] == converter.APIVersion {
+			versionPosition = i
+			isHaveV3 = true
+		}
+	}
+
+	fmt.Println(versionPosition)
+	if (versionPosition < 3) || (false == isHaveV3) {
+		fmt.Println("The environment variable CINDER_ENDPOINT is set incorrectly")
+		return
+	}
+
+	prefix := ""
+	for j := 3; j <= versionPosition; j++ {
+		prefix = prefix + words[j]
+		if j != versionPosition {
+			prefix = prefix + "/"
+		}
+	}
+
+	fmt.Println(prefix)
 
 	ns :=
-		beego.NewNamespace(words[3],
+		beego.NewNamespace(prefix,
 			beego.NSCond(func(ctx *bctx.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -108,6 +131,7 @@ func Run(CinderEndPoint string) {
 				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
 				beego.NSRouter("/volumes/detail", &VolumePortal{}, "get:ListVolumesDetails"),
 				beego.NSRouter("/volumes/:volumeId", &VolumePortal{}, "get:GetVolume;delete:DeleteVolume;put:UpdateVolume"),
+				beego.NSRouter("/volumes/:volumeId/action", &VolumePortal{}, "post:VolumeAction"),
 
 				beego.NSRouter("/attachments", &AttachmentPortal{}, "post:CreateAttachment;get:ListAttachments"),
 				beego.NSRouter("/attachments/detail", &AttachmentPortal{}, "get:ListAttachmentsDetails"),
@@ -122,6 +146,8 @@ func Run(CinderEndPoint string) {
 	beego.InsertFilter("*", beego.BeforeExec, context.Factory())
 	beego.InsertFilter("*", beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)
+
+	beego.Router("/", &APIVersionPortal{}, "get:ListAllApiVersions")
 
 	// start service
 	beego.Run(words[2])
