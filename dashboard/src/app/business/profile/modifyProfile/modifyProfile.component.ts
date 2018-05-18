@@ -5,12 +5,12 @@ import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
-import { ProfileService } from './../profile.service';
+import { ProfileService, PoolService} from './../profile.service';
 
 @Component({
     templateUrl: './modifyProfile.component.html',
     styleUrls: [
-        
+
     ],
     animations: [
         trigger('overlayState', [
@@ -41,7 +41,7 @@ import { ProfileService } from './../profile.service';
 export class modifyProfileComponent implements OnInit {
     items;
     chartDatas;
-    totalFreeCapacity;
+    totalFreeCapacity = 0;
     option;
     data;
     cars;
@@ -49,12 +49,14 @@ export class modifyProfileComponent implements OnInit {
     formGroup;
     errorMessage;
     pools;
+    totalCapacity = 0;
     // profileId;
     constructor(
         // private I18N: I18NService,
         // private router: Router
         private ActivatedRoute: ActivatedRoute,
-        private ProfileService: ProfileService
+        private ProfileService: ProfileService,
+        private poolService:PoolService
     ) { }
     ngOnInit() {
         let profileId;
@@ -64,27 +66,12 @@ export class modifyProfileComponent implements OnInit {
             // return res.json();
             // this.profiles = res.json();
             this.data = res.json();
+            this.getPools();
         });
         this.items = [
             { label: 'Profile', url: '/profile' },
             { label: 'Profile detail', url: '/modifyProfile' }
         ];
-        this.chartDatas = {
-            labels: ['Total Capacity', 'Used Capacity'],
-            datasets: [
-                {
-                    data: [(1000 - 300), 300],//未使用容量放前面
-                    backgroundColor: [
-                        "rgba(224, 224, 224, 1)",
-                        "#438bd3"
-                    ]
-                    // hoverBackgroundColor: [
-                    //     "#FF6384",
-                    //     "#36A2EB",
-                    //     "#FFCE56"
-                    // ]
-                }]
-        };
         this.option = {
             cutoutPercentage: 80,
             // rotation: (-0.2 * Math.PI),
@@ -122,6 +109,44 @@ export class modifyProfileComponent implements OnInit {
         //         "key3": "value3"
         //     }
         // };
-          
+
+    }
+    getPools() {
+        this.poolService.getPools().subscribe((res) => {
+            this.pools = res.json();
+            this.totalFreeCapacity = this.getSumCapacity(this.pools, 'free');
+            this.totalCapacity = this.getSumCapacity(this.pools, 'total');
+            this.chartDatas = {
+                labels: ['Total Capacity', 'Used Capacity'],
+                datasets: [
+                    {
+                        data: [this.totalCapacity, this.totalCapacity-this.totalFreeCapacity],
+                        backgroundColor: [
+                            "rgba(224, 224, 224, 1)",
+                            "#438bd3"
+                        ]
+                        // hoverBackgroundColor: [
+                        //     "#FF6384",
+                        //     "#36A2EB",
+                        //     "#FFCE56"
+                        // ]
+                    }]
+            };
+        });
+    }
+
+    getSumCapacity(pools, FreeOrTotal) {
+        let SumCapacity: number = 0;
+        let arrLength = pools.length;
+        for (let i = 0; i < arrLength; i++) {
+            if(this.data.extras.protocol.toLowerCase() == pools[i].extras.ioConnectivity.accessProtocol &&  this.data.storageType == pools[i].extras.dataStorage.provisioningPolicy){
+                if (FreeOrTotal === 'free') {
+                    SumCapacity += pools[i].freeCapacity;
+                } else {
+                    SumCapacity += pools[i].totalCapacity;
+                }
+            }
+        }
+        return SumCapacity;
     }
 }

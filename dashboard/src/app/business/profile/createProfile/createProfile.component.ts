@@ -12,7 +12,7 @@ import { ProfileService } from './../profile.service';
 @Component({
     templateUrl: './createProfile.component.html',
     styleUrls: [
-        
+
     ],
     animations: [
         trigger('overlayState', [
@@ -50,7 +50,10 @@ export class CreateProfileComponent implements OnInit {
     description: string;
 
     profileform: FormGroup;
-
+    paramData= {
+        extras:{protocol:""},
+        storageType:""
+    };
     label = {};
     param = {
         name: '',
@@ -284,6 +287,22 @@ export class CreateProfileComponent implements OnInit {
             'policys': new FormControl(''),
             'snapshotRetention': new FormControl('Time')
         });
+        this.profileform.get("protocol").valueChanges.subscribe(
+            (value:string)=>{
+                this.paramData = {
+                    extras:{protocol:value},
+                    storageType:this.profileform.value.storageType
+                }
+            }
+        );
+        this.profileform.get("storageType").valueChanges.subscribe(
+            (value:string)=>{
+                this.paramData = {
+                    extras:{protocol:this.profileform.value.protocol},
+                    storageType:value
+                }
+            }
+        );
 
 
 
