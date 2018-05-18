@@ -490,7 +490,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/volumes/{volumeId}/action':
+  '/v1beta/{projectId}/volumes/{volumeId}/resize':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeId'
@@ -1530,15 +1530,12 @@ definitions:
     description: >-
       Extends the size of a volume to a requested size, in gibibytes (GiB).
     type: object
-    properties:
-      extend:
-        type: object
-        required:
+    required:
           - newSize
-        properties:
-          newSize:
-            type: integer
-            example: 2
+    properties:
+      newSize:
+        type: integer
+        example: 2
 
 parameters:
   apiVersion:
