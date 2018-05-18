@@ -6,7 +6,7 @@ import { VolumeService,SnapshotService } from './../../volume.service';
   selector: 'app-snapshot-list',
   templateUrl: './snapshot-list.component.html',
   styleUrls: [
-    
+
   ]
 })
 export class SnapshotListComponent implements OnInit {
@@ -28,7 +28,7 @@ export class SnapshotListComponent implements OnInit {
     name: '',
     description: ''
   }
-  okBtnDisabled = true;
+  okBtnDisabled = false;
 
   errorMessage = {
       "name": { required: "Name is required." },
@@ -148,7 +148,7 @@ export class SnapshotListComponent implements OnInit {
     }else{
       this.createSnapshot();
     }
-    
+
   }
 
 }

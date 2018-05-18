@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit {
     lineData_nums;
     lineData_capacity;
     showAdminStatis = true;
+    tenants =[];
     constructor(
         private http: Http,
         private paramStor: ParamStorService
@@ -51,17 +52,17 @@ export class HomeComponent implements OnInit {
                 label: "Block Storages"
             },
             {
-                countNum: arr[3] || 　0,
+                countNum: 0,
                 // imgName: "u288.png",
                 label: "Storage Pools"
             },
             {
-                countNum: arr[4] || 　0,
+                countNum: 0,
                 // imgName: "u288.png",
                 label: "Volumes"
             },
             {
-                countNum: arr[5] || 　0,
+                countNum: 0,
                 // imgName: "u288.png",
                 label: "Volume Snapshots"
             },
@@ -173,7 +174,14 @@ export class HomeComponent implements OnInit {
         }
 
         this.http.get("/v3/projects", request).subscribe((res) => {
+
             this.items[0].countNum = res.json().projects.length;
+            this.tenants = res.json().projects;
+            this.tenants.forEach((item)=>{
+                this.getAllvolumes(item.id);
+                this.getAllSnapshots(item.id);
+                this.getAllpools(item.id);
+            });
         });
     }
     listUsers(){
@@ -183,6 +191,24 @@ export class HomeComponent implements OnInit {
         }
         this.http.get("/v3/users", request).subscribe((res) => {
             this.items[1].countNum = res.json().users.length;
+        });
+    }
+    getAllvolumes(projectId){
+        let url = 'v1beta/'+projectId+'/block/volumes';
+        this.http.get(url).subscribe((res)=>{
+            this.items[4].countNum = this.items[4].countNum + res.json().length;
+        });
+    }
+    getAllSnapshots(projectId){
+        let url = 'v1beta/'+projectId+'/block/snapshots';
+        this.http.get(url).subscribe((res)=>{
+            this.items[5].countNum = this.items[5].countNum + res.json().length;
+        });
+    }
+    getAllpools(projectId){
+        let url = 'v1beta/'+projectId+'/pools';
+        this.http.get(url).subscribe((res)=>{
+            this.items[3].countNum = this.items[3].countNum + res.json().length;
         });
     }
     getCountData(){

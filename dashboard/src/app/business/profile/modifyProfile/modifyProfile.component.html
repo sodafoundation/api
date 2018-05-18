@@ -19,19 +19,15 @@
         </div>
         <div>
             <span class="ui-g-12 ui-md-4">QoS Policy:</span>
-            <div class="ui-g-12 ui-md-8">
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
                 <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
-        </div>
-        <div>
             <span class="ui-g-12 ui-md-4">Replication Policy:</span>
-            <div class="ui-g-12 ui-md-8">
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
                 <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
-        </div>
-        <div>
             <span class="ui-g-12 ui-md-4">Snapshot Policy:</span>
-            <div class="ui-g-12 ui-md-8">
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
                 <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
             </div>
         </div>

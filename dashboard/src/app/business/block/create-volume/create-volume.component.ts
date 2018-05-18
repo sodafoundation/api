@@ -97,7 +97,7 @@ export class CreateVolumeComponent implements OnInit {
     this.volumeform = this.fb.group({
       'zone': new FormControl('default', Validators.required),
       'name0': new FormControl('', Validators.required),
-      'profileId0': new FormControl(this.defaultProfile, Validators.required),
+      'profileId0': new FormControl(this.defaultProfile, {validators:[Validators.required,this.checkProfile]}),
       'size0': new FormControl(1, Validators.required),
       'capacity0': new FormControl(''),
       'quantity0': new FormControl(1)
@@ -248,6 +248,11 @@ export class CreateVolumeComponent implements OnInit {
             param["profileId"+i] = new FormControl('', Validators.required);
         }
         this.createVolumes["formGroup"] = this.fb.group(param);
+    }
+    checkProfile(control:FormControl):{[s:string]:boolean}{
+      if(control.value.id == null){
+          return {invalid:true}
+      }
     }
 
 }
