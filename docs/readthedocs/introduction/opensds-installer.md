@@ -23,4 +23,4 @@ charts folder for installing and configuring OpenSDS cluster through helm tool.
 
 * Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
 * slack: #[opensds](https://opensds.slack.com)
-* Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
+* Ideas/Bugs: [issues](https://github.com/opensds/opensds-installer/issues)
