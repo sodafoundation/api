@@ -9,6 +9,7 @@ import { HttpService } from './../../../shared/service/Http.service';
 import { VolumeService,SnapshotService } from './../volume.service';
 import { SnapshotListComponent } from './snapshot-list/snapshot-list.component';
 import { ReplicationListComponent } from './replication-list/replication-list.component';
+import { ProfileService } from './../../profile/profile.service';
 
 let routers = [{
   path: '',
@@ -38,7 +39,8 @@ let routers = [{
     HttpService,
     VolumeService,
     SnapshotService,
-    ConfirmationService
+    ConfirmationService,
+    ProfileService
   ]
 })
 export class VolumeDetailModule { }

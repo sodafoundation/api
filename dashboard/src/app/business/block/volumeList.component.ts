@@ -140,6 +140,13 @@ export class VolumeListComponent implements OnInit {
     getVolumes() {
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
+            this.volumes.forEach((item)=>
+                {
+                    this.ProfileService.getProfileById(item.profileId).subscribe((res)=>{
+                        item.profileName = res.json().name;
+                    })
+                }
+            )
         });
     }
 
