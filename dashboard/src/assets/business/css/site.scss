@@ -1062,7 +1062,7 @@ a {
     line-height: .32rem;
     .profile-form-padding {
         padding: .05rem 0;
-        &>div:first-of-type {
+        & > div:first-of-type {
             &::before {
                 content: "*";
                 display: inline;
@@ -1074,7 +1074,7 @@ a {
                 color: #cd0a0a;
             }
         }
-        .radio-groups span {
+        .radio-groups > span {
             padding-right: .30rem;
         }
     }

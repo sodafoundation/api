@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Http } from '@angular/http';
 import { ParamStorService } from 'app/shared/api';
+import { ProfileService } from 'app/business/profile/profile.service';
 import {Observable} from "rxjs/Rx";
 
 @Component({
@@ -14,13 +15,16 @@ export class HomeComponent implements OnInit {
     chartDatas;
     chartDatasbar;
     option;
+    chartBarOpion;
+    profileOptions = [];
     lineData_nums;
     lineData_capacity;
     showAdminStatis = true;
     tenants =[];
     constructor(
         private http: Http,
-        private paramStor: ParamStorService
+        private paramStor: ParamStorService,
+        private profileService: ProfileService
         // private I18N: I18NService,
         // private router: Router
     ) { }
@@ -28,95 +32,69 @@ export class HomeComponent implements OnInit {
     ngOnInit() {
         if(this.paramStor.CURRENT_USER().split("|")[0] == "admin"){
             this.showAdminStatis = true;
+            this.getCountData();
         }else{
             this.showAdminStatis = false;
+            this.getTenantCountData();
         }
 
-        let arr = [4, 2, 2, 10, 3, 0, 4];
-        // let arr = [1,4,3,2];
-        // this.arraySortUpdate(arr);
         this.items = [
             {
                 countNum: 0,
-                // imgName: "u288.png",
                 label: "Tenants"
             },
             {
                 countNum:0,
-                // imgName: "u288.png",
                 label: "Users"
             },
             {
-                countNum: arr[2] || 　0,
-                // imgName: "u288.png",
+                countNum: 0,
                 label: "Block Storages"
             },
             {
                 countNum: 0,
-                // imgName: "u288.png",
                 label: "Storage Pools"
             },
             {
                 countNum: 0,
-                // imgName: "u288.png",
                 label: "Volumes"
             },
             {
                 countNum: 0,
-                // imgName: "u288.png",
                 label: "Volume Snapshots"
             },
             {
-                countNum: arr[6] || 　0,
-                // imgName: "u288.png",
+                countNum: 0,
                 label: "Volume Replications"
             },
             {
-                countNum: arr[0] || 　0,
-                // imgName: "u288.png",
+                countNum: 0,
                 label: "Cross-Region Replications"
             },
             {
-                countNum: arr[0] || 　0,
-                // imgName: "u288.png",
+                countNum: 0,
                 label: "Cross-Region Migrations"
             }
-        ];
-        this.getCountData();
+        ];        
 
-        this.chartDatas = {
-            labels: ['Unused Capacity', 'Used Capacity'],
-            datasets: [
-                {
-                    label: 'high_capacity',
-                    data: [(1000 - 300), 300],//已使用300，总容量1000
-                    backgroundColor: [
-                        "rgba(224, 224, 224, .5)",
-                        "#438bd3"
-                    ]
-                    // hoverBackgroundColor: [
-                    //     "#FF6384",
-                    //     "#36A2EB",
-                    //     "#FFCE56"
-                    // ]
-                }]
-        };
-        this.chartDatasbar = {
-            labels: ['high_capacity'],
-            datasets: [
-                {
-                    label: 'Total Capacity',
-                    backgroundColor: '#42A5F5',
-                    borderColor: '#1E88E5',
-                    data: [65]
-                },
-                {
-                    label: 'Free Capacity',
-                    backgroundColor: '#9CCC65',
-                    borderColor: '#7CB342',
-                    data: [28]
-                }]
-        };
+        // this.chartDatasbar = { 
+        //     datasets: [
+        //         {
+        //             label: 'Total Capacity',
+        //             backgroundColor: '#438bd3',
+        //             data: [65]
+        //         },
+        //         {
+        //             label: 'Free Capacity',
+        //             backgroundColor: '#438bd3',
+        //             data: [28]
+        //         },
+        //         {
+        //             label: 'Free Capacity',
+        //             backgroundColor: '#438bd3',
+        //             data: [18]
+        //         }]
+        // };
         this.option = {
             cutoutPercentage: 80,
             // rotation: (0.5 * Math.PI),
@@ -135,6 +113,18 @@ export class HomeComponent implements OnInit {
                 fontSize: 12
             }
         };
+        this.chartBarOpion= {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            }
+        }
 
         this.lineData_capacity = {
             labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -162,11 +152,19 @@ export class HomeComponent implements OnInit {
 
     }
 
-    showData() {
-        this.http.get("/v1beta/{project_id}/profiles").subscribe((res) => {
-            console.log(res.json().data);
+    getProfiles() {
+        this.profileService.getProfiles().subscribe((res) => {
+            let profiles = res.json();
+            profiles.forEach(profile => {
+                this.profileOptions.push({
+                    name: profile.name,
+                    id: profile.id,
+                    capacity: 0
+                })
+            });
         });
     }
+
     listTenants() {
         let request: any = { params:{} };
         request.params = {
@@ -177,11 +175,16 @@ export class HomeComponent implements OnInit {
 
             this.items[0].countNum = res.json().projects.length;
             this.tenants = res.json().projects;
-            this.tenants.forEach((item)=>{
-                this.getAllvolumes(item.id);
+            this.tenants.forEach((item, i)=>{
+                this.getAllvolumes(item.id, i);
                 this.getAllSnapshots(item.id);
-                this.getAllpools(item.id);
+                if(item.name == "admin"){
+                    this.getAllPools(item.id);
+                    this.getAllDocks(item.id);
+                }
             });
+
+
         });
     }
     listUsers(){
@@ -193,10 +196,38 @@ export class HomeComponent implements OnInit {
             this.items[1].countNum = res.json().users.length;
         });
     }
-    getAllvolumes(projectId){
+    getAllvolumes(projectId, index?){
         let url = 'v1beta/'+projectId+'/block/volumes';
         this.http.get(url).subscribe((res)=>{
             this.items[4].countNum = this.items[4].countNum + res.json().length;
+
+            if(this.showAdminStatis){
+                res.json().forEach(volume => {
+                    this.profileOptions.forEach(profile => {
+                        if(volume.profileId == profile.id){
+                            profile.capacity = profile.capacity + volume.size;
+                        }
+                    });
+                });
+
+                if(index == (this.tenants.length-1)){
+                    let [chartData, chartLabel] = [[],[]];
+                    this.profileOptions.forEach(ele=>{
+                        chartData.push(ele.capacity);
+                        chartLabel.push(ele.name);
+                    });
+                    
+                    this.chartDatasbar = { 
+                        labels: chartLabel,
+                        datasets: [{
+                            label:"Used Capacity",
+                            backgroundColor: '#42A5F5',
+                            // backgroundColor: pattern.draw('circle', '#36a2eb'),
+                            data: chartData
+                        }]
+                    }
+                }
+            }
         });
     }
     getAllSnapshots(projectId){
@@ -205,14 +236,51 @@ export class HomeComponent implements OnInit {
             this.items[5].countNum = this.items[5].countNum + res.json().length;
         });
     }
-    getAllpools(projectId){
+    getAllPools(projectId){
         let url = 'v1beta/'+projectId+'/pools';
         this.http.get(url).subscribe((res)=>{
             this.items[3].countNum = this.items[3].countNum + res.json().length;
+
+            let [storCapacityTotal, storCapacityFree]=[0,0];
+            res.json().forEach(element => {
+                storCapacityTotal = storCapacityTotal + element.totalCapacity;
+                storCapacityFree = storCapacityFree + element.freeCapacity;
+            });
+            
+            this.chartDatas = { 
+                labels: ['Used Capacity', 'Free Capacity'],
+                datasets: [
+                    {
+                        label: 'high_capacity',
+                        data: [(storCapacityTotal-storCapacityFree), storCapacityFree],
+                        backgroundColor: [
+                            "#438bd3",
+                            "rgba(224, 224, 224, .5)"                            
+                        ]
+                        // hoverBackgroundColor: [
+                        //     "#FF6384",
+                        //     "#36A2EB",
+                        //     "#FFCE56"
+                        // ]
+                    }]
+            };
+        });
+    }
+    getAllDocks(projectId){
+        let url = 'v1beta/'+projectId+'/docks';
+        this.http.get(url).subscribe((res)=>{
+            this.items[2].countNum = this.items[2].countNum + res.json().length;
         });
     }
     getCountData(){
+        this.getProfiles();
         this.listTenants();
         this.listUsers();
+    }
+
+    getTenantCountData(){
+        let tenantId = this.paramStor.CURRENT_TENANT().split("|")[1];
+        this.getAllvolumes(tenantId);
+        this.getAllSnapshots(tenantId);
     }
 }
