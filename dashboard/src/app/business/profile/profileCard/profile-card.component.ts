@@ -4,6 +4,7 @@ import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
+import { HttpService } from './../../../shared/api';
 
 import { ButtonModule } from './../../../components/common/api';
 
@@ -13,7 +14,7 @@ import { ButtonModule } from './../../../components/common/api';
     selector: 'profile-card',
     templateUrl: './profile-card.component.html',
     styleUrls: [
-        
+
     ],
     animations: [
         trigger('overlayState', [
@@ -44,30 +45,19 @@ import { ButtonModule } from './../../../components/common/api';
 export class ProfileCardComponent implements OnInit {
 
     @Input() data;
-    
+
     chartDatas: any;
     constructor(
         // private I18N: I18NService,
         // private router: Router
+        private http: HttpService
     ) { }
     option = {};
+    pools = [];
+    totalFreeCapacity = 0;
+    totalCapacity = 0;
     ngOnInit() {
-        this.chartDatas = {
-            labels: ['Unused Capacity', 'Used Capacity'],
-            datasets: [
-                {
-                    data: [(1000 - 300), 300],//已使用300，总容量1000
-                    backgroundColor: [
-                        "rgba(224, 224, 224, .5)",
-                        "#438bd3"
-                    ]
-                    // hoverBackgroundColor: [
-                    //     "#FF6384",
-                    //     "#36A2EB",
-                    //     "#FFCE56"
-                    // ]
-                }]
-        };
+        this.getPools();
         this.option = {
             cutoutPercentage: 80,
             // rotation: (0.5 * Math.PI),
@@ -104,5 +94,44 @@ export class ProfileCardComponent implements OnInit {
                 this.index = i;
             }
         }
+    }
+    getPools() {
+        let url = 'v1beta/{project_id}/pools';
+        this.http.get(url).subscribe((res) => {
+            this.pools = res.json();
+            this.totalFreeCapacity = this.getSumCapacity(this.pools, 'free');
+            this.totalCapacity = this.getSumCapacity(this.pools, 'total');
+            this.chartDatas = {
+                labels: ['Unused Capacity', 'Used Capacity'],
+                datasets: [
+                    {
+                        data: [this.totalFreeCapacity,this.totalCapacity-this.totalFreeCapacity],
+                        backgroundColor: [
+                            "rgba(224, 224, 224, .5)",
+                            "#438bd3"
+                        ]
+                        // hoverBackgroundColor: [
+                        //     "#FF6384",
+                        //     "#36A2EB",
+                        //     "#FFCE56"
+                        // ]
+                    }]
+            };
+        });
+    }
+
+    getSumCapacity(pools, FreeOrTotal) {
+        let SumCapacity: number = 0;
+        let arrLength = pools.length;
+        for (let i = 0; i < arrLength; i++) {
+            if(this.data.extras.protocol.toLowerCase() == pools[i].extras.ioConnectivity.accessProtocol &&  this.data.storageType == pools[i].extras.dataStorage.provisioningPolicy){
+                if (FreeOrTotal === 'free') {
+                    SumCapacity += pools[i].freeCapacity;
+                } else {
+                    SumCapacity += pools[i].totalCapacity;
+                }
+            }
+        }
+        return SumCapacity;
     }
 }

@@ -38,13 +38,13 @@
     <div class="ui-g-12 ui-md-12">
         <span class="ui-g-12 ui-md-2">Storage Pools:</span>
         <div class="ui-g-12 ui-md-8">
-            <app-storage-pools-table></app-storage-pools-table>
+            <app-storage-pools-table [selectProfile]="data"></app-storage-pools-table>
         </div>
     </div>
 
     <div class="ui-helper-clearfix"></div>
     <div class="bottom-button-margin">
-        <button pButton type="button" label="Modify" class="ui-button-secondary"></button>
-        <button pButton type="button" label="Back" [routerLink]="['/profile']"></button>
+        <button pButton type="button" *ngIf="false" label="Modify" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Back" class="ui-button-secondary" [routerLink]="['/profile']"></button>
     </div>
 </div>
