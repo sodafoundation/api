@@ -499,7 +499,7 @@ paths:
         - Block volumes
       description: Extends a volume.
       parameters:
-        - name: ExtendVolumeRequest
+        - name: body
           in: body
           schema:
             $ref: '#/definitions/ExtendVolumeRequest'
