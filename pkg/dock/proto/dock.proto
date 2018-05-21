@@ -230,8 +230,8 @@ message DeleteAttachmentOpts {
     string driverName = 5;
     // The Context
     string context = 6;
-	// The protocol
-	string protocol = 7;
+    // The protocol
+    string protocol = 7;
 }
 
 message HostInfo {

@@ -109,8 +109,8 @@ type VolumeAttachmentSpec struct {
 	// See details in `ConnectionInfo`
 	ConnectionInfo `json:"connectionInfo,omitempty"`
 
-	// The protocl
-	Protocol string `json:"protocol,omitempty"`
+    // The protocl
+    Protocol string `json:"protocol,omitempty"`
 }
 
 // HostInfo is a structure for all properties of host when create a volume
