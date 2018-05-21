@@ -325,6 +325,20 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 		return
 	}
 	c.volumeController.SetDock(dockInfo)
+
+	pol, err := db.C.GetPool(ctx, vol.PoolId)
+	if err != nil {
+		log.Error("Get pool failed in create volume attachment method: ", err)
+		errchanVolAtm <- err
+		return
+	}
+
+	var protocol = pol.Extras.IOConnectivity.AccessProtocol
+	if protocol == "" {
+		// Default protocol is iscsi
+		protocol = "iscsi"
+	}
+
 	var atm = &pb.CreateAttachmentOpts{
 		Id:       in.Id,
 		VolumeId: in.VolumeId,
@@ -335,9 +349,10 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 			Host:      in.Host,
 			Initiator: in.Initiator,
 		},
-		Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		DriverName: dockInfo.DriverName,
-		Context:    ctx.ToJson(),
+		AccessProtocol: protocol,
+		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
+		DriverName:     dockInfo.DriverName,
+		Context:        ctx.ToJson(),
 	}
 	result, err := c.volumeController.CreateVolumeAttachment(atm)
 	if err != nil {
@@ -385,9 +400,10 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 				Host:      in.Host,
 				Initiator: in.Initiator,
 			},
-			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DriverName: dockInfo.DriverName,
-			Context:    ctx.ToJson(),
+			AccessProtocol: in.AccessProtocol,
+			Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
+			DriverName:     dockInfo.DriverName,
+			Context:        ctx.ToJson(),
 		},
 	)
 
