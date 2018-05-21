@@ -24,13 +24,13 @@ import (
 
 // *******************List All Api Versions*******************
 
-// ListAllApiVersionsRespSpec ...
-type ListAllApiVersionsRespSpec struct {
-	Versions []ListAllApiVersions `json:"versions"`
+// ListAllAPIVersionsRespSpec ...
+type ListAllAPIVersionsRespSpec struct {
+	Versions []ListAllAPIVersions `json:"versions"`
 }
 
-// ListAllApiVersions ...
-type ListAllApiVersions struct {
+// ListAllAPIVersions ...
+type ListAllAPIVersions struct {
 	Status     string            `json:"status"`
 	Updated    string            `json:"updated"`
 	Links      []VersionLink     `json:"links"`
@@ -47,13 +47,13 @@ type VersionLink struct {
 	Rel  string `json:"rel"`
 }
 
-// ListAllApiVersionsResp ...
-func ListAllApiVersionsResp(versions []*model.VersionSpec) *ListAllApiVersionsRespSpec {
-	var resp ListAllApiVersionsRespSpec
-	var cinderVersion ListAllApiVersions
+// ListAllAPIVersionsResp ...
+func ListAllAPIVersionsResp(versions []*model.VersionSpec) *ListAllAPIVersionsRespSpec {
+	var resp ListAllAPIVersionsRespSpec
+	var cinderVersion ListAllAPIVersions
 
 	if 0 == len(versions) {
-		resp.Versions = make([]ListAllApiVersions, 0, 0)
+		resp.Versions = make([]ListAllAPIVersions, 0, 0)
 	} else {
 		for _, version := range versions {
 
