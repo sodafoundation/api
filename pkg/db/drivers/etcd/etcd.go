@@ -889,7 +889,7 @@ func (c *Client) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraS
 
 	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return nil, err
 	}
 	return &prf.Extras, nil
@@ -912,7 +912,7 @@ func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) err
 	}
 
 	delete(prf.Extras, extraKey)
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return err
 	}
 	return nil
