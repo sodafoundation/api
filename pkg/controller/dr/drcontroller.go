@@ -397,9 +397,9 @@ func (h *HostPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol 
 	}
 
 	opt := &pb.CreateReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -415,6 +415,7 @@ func (h *HostPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol 
 		VolumeDataList:                 volumeDataList,
 		Metadata:                       replica.Metadata,
 	}
+	h.volumeController.SetDock(provisionerDock)
 	return h.volumeController.CreateReplication(opt)
 }
 
@@ -432,9 +433,9 @@ func (h *HostPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol 
 	}
 
 	opt := &pb.DeleteReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -455,8 +456,8 @@ func (h *HostPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol 
 		attachmentId = replica.PrimaryReplicationDriverData["AttachmentId"]
 	} else {
 		attachmentId = replica.SecondaryReplicationDriverData["AttachmentId"]
-
 	}
+
 	return h.detach(ctx, attachmentId, vol, provisionerDock)
 }
 
@@ -492,9 +493,9 @@ func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol
 
 	a.volumeController.SetDock(provisionerDock)
 	opt := &pb.CreateReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -529,9 +530,9 @@ func (a *ArrayPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol
 
 	a.volumeController.SetDock(provisionerDock)
 	opt := &pb.DeleteReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -567,9 +568,9 @@ func (h *BaseOperator) Enable(ctx *c.Context, replica *ReplicationSpec, vol *Vol
 	}
 
 	opt := &pb.EnableReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -601,9 +602,9 @@ func (h *BaseOperator) Disable(ctx *c.Context, replica *ReplicationSpec, vol *Vo
 	}
 
 	opt := &pb.DisableReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,
@@ -635,9 +636,9 @@ func (h *BaseOperator) Failover(ctx *c.Context, replica *ReplicationSpec, failov
 	}
 
 	opt := &pb.FailoverReplicationOpts{
-		Id:                             vol.Id,
-		Name:                           vol.Name,
-		Description:                    vol.Description,
+		Id:                             replica.Id,
+		Name:                           replica.Name,
+		Description:                    replica.Description,
 		PrimaryVolumeId:                replica.PrimaryVolumeId,
 		SecondaryVolumeId:              replica.SecondaryVolumeId,
 		PrimaryReplicationDriverData:   replica.PrimaryReplicationDriverData,

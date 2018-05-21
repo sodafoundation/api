@@ -245,7 +245,7 @@ func TestUpdateVolume(t *testing.T) {
 func TestExtendVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	body := model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: 1},
+		NewSize: 1,
 	}
 
 	result, err := fv.ExtendVolume(volID, &body)
