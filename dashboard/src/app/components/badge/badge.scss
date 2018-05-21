@@ -1,0 +1,117 @@
+@keyframes statusProcessing {
+	0% {
+		-webkit-transform: scale(.8);
+		transform: scale(.8);
+		opacity: .5
+	}
+	to {
+		-webkit-transform: scale(2.4);
+		transform: scale(2.4);
+		opacity: 0
+	}
+}
+
+.ui-badge{
+	display: inline-block;
+    height: .2rem;
+	width:auto;
+    min-width: .2rem;
+    position: absolute;
+    top: -.1rem;
+	right: 0rem;
+	overflow: hidden;
+    border-radius: .1rem;
+    background: nth(nth($color-alert,2),2);
+    color: white;
+    line-height: .2rem;
+    text-align: center;
+    padding: 0 .06rem;
+    font-size: .12rem;
+    white-space: nowrap;
+	transform: translateX(50%);
+    transform-origin: center center;
+	transition:width ease-in .3s;
+	z-index:9;
+	user-select: none;
+	&.ui-badge-dot{
+		width: .1rem;
+		min-width: .1rem;
+		height:.1rem;
+		padding: 0;
+		top: -.05rem;
+		&.ui-badge-status-content{
+			background-color: transparent;
+			transform: none;
+			top: 0;
+			overflow: visible;
+			font-size: 0;
+			line-height: .2rem;
+			height: .2rem;
+			width: auto;
+			position: relative;
+			.ui-badge-status{
+				position:relative;
+				display: inline-block;
+				width:.1rem;
+				height:.1rem;
+				border-radius: .05rem;
+				vertical-align: middle;
+				&.ui-badge-status-success{
+					background-color: nth(nth($color-alert,1),2);
+				}
+				&.ui-badge-status-processing{
+					background-color: nth(nth($color-alert,3),2);
+					&::after{
+						position: absolute;
+						top: -.01rem;
+						left: -.01rem;
+						width: 100%;
+						height: 100%;
+						border-radius: 50%;
+						border: 1px solid nth(nth($color-alert,3),2);
+						content: "";
+						animation: statusProcessing 1.2s infinite ease-in-out;
+					}
+				}
+				&.ui-badge-status-default{
+					background-color: nth(nth($color-alert,5),2);
+				}
+				&.ui-badge-status-warning{
+					background-color: nth(nth($color-alert,4),2);
+				}
+				&.ui-badge-status-error{
+					background-color: nth(nth($color-alert,2),2);
+				}
+			}
+			.ui-badge-status-text{
+				font-size:.14rem;
+				color: map-get($color-text, primary);
+				padding-left: .08rem;
+				vertical-align: middle;
+			}
+		}
+	}
+	&.ui-badge-hide{
+		display: none;
+	}
+	.ui-badge-counts{
+		width: 100%;
+		height: 100%;
+		position: relative;
+		overflow: hidden;
+		display: block;
+		font-size:0; 
+		.ui-badge-counts-item{
+			display: inline-block;
+			transition: transform ease-in-out .3s;
+			p{	
+				width: 100%;
+				padding: 0;
+				margin:0;
+				line-height: .2rem;
+				font-size: .12rem;
+				color:inherit;
+			}
+		}
+	}
+}
