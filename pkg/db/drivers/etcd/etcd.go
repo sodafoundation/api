@@ -35,6 +35,7 @@ import (
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
 	"github.com/satori/go.uuid"
@@ -46,6 +47,8 @@ const (
 	defaultSortDir = "desc"
 	defaultSortKey = "ID"
 )
+
+var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
 
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
@@ -85,7 +88,7 @@ func (c *Client) IsInArray(e string, s []string) bool {
 
 func (c *Client) SelectOrNot(m map[string][]string) bool {
 	for key := range m {
-		if key != "limit" && key != "offset" && key != "sortDir" && key != "sortKey" {
+		if !utils.Contained(key, validKey) {
 			return true
 		}
 	}
@@ -342,8 +345,11 @@ func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*
 	for _, dock := range docks {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindDockValue(key, dock)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -514,8 +520,11 @@ func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSp
 	for _, pool := range pools {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindPoolValue(key, pool)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -797,8 +806,11 @@ func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.Profile
 	for _, profile := range profiles {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindProfileValue(key, profile)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1095,8 +1107,11 @@ func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpe
 	for _, vol := range volumes {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindVolumeValue(key, vol)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1406,8 +1421,11 @@ func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*m
 	for _, attachment := range attachments {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindAttachmentValue(key, attachment)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1702,8 +1720,11 @@ func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.Volum
 	for _, snapshot := range snapshots {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindSnapshotsValue(key, snapshot)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1935,7 +1956,7 @@ func (c *Client) filterByName(param map[string][]string, spec interface{}, filte
 		default:
 			return false
 		}
-		if val != "" && !strings.EqualFold(paramVal, val) {
+		if !strings.EqualFold(paramVal, val) {
 			return false
 		}
 	}
