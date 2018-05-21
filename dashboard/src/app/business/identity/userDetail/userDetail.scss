@@ -1,0 +1,18 @@
+.table-detail-con > ul{
+    padding: 0;
+}
+.table-detail-con > ul li{
+    display: flex;
+    display: -webkit-flex;
+    justify-content: flex-start;
+    line-height: .28rem;
+}
+.table-detail-con > ul li label{
+    display: inline-block;
+    width: 135px;
+    color: #8893a6;
+}
+.table-detail-con > ul li span{
+    padding-left: 0.1rem;
+    color: #657D95;
+}

@@ -1,0 +1,19 @@
+.ui-selectbutton {
+    display: inline-block;
+}
+
+.ui-selectbutton.ui-state-error {
+    padding: 0;
+}
+
+.ui-selectbutton .ui-button.ui-state-focus {
+    outline: none;
+}
+
+
+/* 自定义部分 */
+
+.week-select-list {
+    width: 70px !important;
+    margin-right: 0.5em !important;
+}

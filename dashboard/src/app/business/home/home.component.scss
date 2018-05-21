@@ -1,0 +1,43 @@
+@import "./../scss-variable";
+.img-item-div-height {
+    height: 258px;
+    margin: 2em;
+}
+
+.statisBg{
+    background: #f3f6f7;
+    border-radius: 12px;
+}
+
+.img-item-div {
+    padding: 2em;
+    border-radius: 10px;
+    // background-color: rgb(208, 232, 240);
+}
+
+.home-img-item-margin {
+    margin: 2em 0;
+}
+
+.user-img-item-margin {
+    margin-top: 3em;
+}
+
+.header-h2-title-font {
+    font-size: 2em;
+    padding: 0.5em 0.25em;
+}
+
+.home-font-color-class {
+    color: map-get($color-title, primary);
+    padding-bottom: .30rem;
+}
+
+.header-p-text {
+    padding: 0 0.5em;
+    // color: map-get($color-title, secondary);
+}
+
+.capacity-secondary {
+    margin: 1em 0;
+}
