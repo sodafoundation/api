@@ -1,0 +1,165 @@
+.ui-dialog {
+    position: fixed;
+    padding: 0;
+    background: #f3f6f7;
+    border: none;
+    box-shadow: 0px 5px 20px 0px rgba(0, 0, 0, 0.3);
+    @extend .ui-corner-all-small;
+}
+
+.ui-dialog.ui-widget .ui-dialog-titlebar{
+    padding: .3rem .4rem .2rem;
+    position: relative;
+    border: 0;
+    background: none;
+    @extend .ui-corner-top-small;
+    .ui-dialog-title{
+        font-size: .24rem;
+    }
+} 
+
+.ui-dialog.ui-widget .ui-dialog-content {
+    position: relative;
+    border: 0;
+    padding: .1rem .4rem .3rem;
+    background: none;
+    overflow: auto;
+    zoom: 1;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+    float: right;
+}
+
+.ui-dialog .ui-dialog-buttonpane button {
+    margin: .5em .4em .5em 0;
+    cursor: pointer;
+    float: right;
+}
+.ui-dialog .ui-resizable-se {
+    width: 14px;
+    height: 14px;
+    right: 3px;
+    bottom: 3px;
+}
+.ui-draggable .ui-dialog-titlebar {
+    cursor: move;
+}
+.ui-dialog .ui-dialog-titlebar-icon {
+    text-decoration: none
+}
+.ui-dialog .ui-dialog-titlebar-close {
+    float: right;
+    width: .24rem;
+    height: .24rem;
+    padding: .03rem .01rem 0.05rem;
+    margin: -.12rem -.22rem 0 0;
+    background: #9ba9b7;
+    cursor: pointer;
+    @extend .ui-corner-all-large;
+    &:hover{
+        background: map-get($map: $color-primary, $key: hover);
+        box-shadow: 0px 4px 8px #e3e3e3;
+    }
+}
+.ui-dialog .ui-dialog-titlebar-close span {
+    display: block;
+    margin: 0;
+    color: #fff;
+    width: .22rem;
+    font-size: .14rem;
+    line-height: .16rem;
+}
+
+.ui-dialog-footer {
+    padding: .18rem 0 .20rem 0;
+    text-align: center;
+    background: #e6edef;
+    @extend .ui-corner-bottom-small;
+}
+.ui-dialog .ui-dialog-footer {
+    border: none;
+}
+
+.ui-dialog-mask {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* ConfirmDialog */
+.ui-confirmdialog {
+    width: 5.00rem;
+}
+
+.ui-confirmdialog.ui-dialog .ui-dialog-content {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.ui-confirmdialog.ui-dialog .ui-dialog-content h3{
+    margin-top: .10rem;
+}
+.ui-confirmdialog .ui-dialog-content .fa {
+    font-size: .48rem;
+    vertical-align: middle;
+    margin-right: .2rem;
+    color: #438bd3;
+}
+.ui-confirmdialog.ui-confirmdialog-warning .ui-dialog-content .fa {
+    color:#FF8833;
+}
+
+/* Fluid */
+.ui-fluid .ui-dialog-footer .ui-button {
+    width: auto;
+}
+
+/* RTL */
+.ui-rtl .ui-dialog .ui-dialog-titlebar-close  {
+    float: left;
+}
+
+.ui-rtl .ui-dialog .ui-dialog-buttonpane button {
+    text-align: right;
+}
+
+@media screen and (max-width: 40em) {
+    .ui-confirmdialog {
+        width: 90%;
+    }
+}
+
+
+
+/*增加msgBox样式*/
+.ui-dialog .ui-dialog-content .msgbox >div{
+    display: table-cell;
+}
+.ui-dialog .ui-dialog-content .msgbox div:first-child{
+    vertical-align: top;
+}
+.ui-dialog .ui-dialog-content .msgbox div:last-child{
+    vertical-align: middle;
+    padding-left: 20px;
+}
+.ui-dialog .ui-dialog-content .msgbox .fa {
+    font-size: .48rem;
+    color: #438bd3;
+    &.error{
+        color: #FF8833;
+    }
+    &.success{
+        color: #3DCCA6;
+    }
+}
+.ui-dialog .ui-dialog-content .msgbox h3{
+    margin-bottom: 5px;
+}
+.ui-dialog .ui-dialog-content .msgbox .success-title{
+    color: #3DCCA6;
+}
+.ui-dialog .ui-dialog-content .msgbox .error-title{
+    color: #FF8833;
+}
+
