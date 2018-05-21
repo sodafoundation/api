@@ -89,14 +89,15 @@ func Run(host string) {
 				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplications"),
 				beego.NSRouter("/replications/detail", NewReplicationPortal(), "get:ListReplicationsDetail"),
 				beego.NSRouter("/replications/:replicationId", NewReplicationPortal(), "get:GetReplication;put:UpdateReplication;delete:DeleteReplication"),
-				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "put:Action"),
-				beego.NSRouter("/replications/:replicationId/action", NewReplicationPortal(), "post:Action"),
+				beego.NSRouter("/replications/:replicationId/enable", NewReplicationPortal(), "post:EnableReplication"),
+				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
+				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
 				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
 				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 			// Extend Volume
-			beego.NSRouter("/:tenantId/volumes/:volumeId/action", &VolumePortal{}, "post:ExtendVolume"),
+			beego.NSRouter("/:tenantId/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.ApiVersion)
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
