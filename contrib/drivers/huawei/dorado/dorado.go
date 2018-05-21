@@ -149,10 +149,10 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	if opt.Protocol == "iscsi" {
+	if opt.GetAccessProtocol() == "iscsi" {
 		return d.InitializeConnectionIscsi(opt)
 	}
-	if opt.Protocol == "fc" {
+	if opt.GetAccessProtocol() == "fc" {
 		return d.InitializeConnectionFC(opt)
 	}
 	return nil, errors.New("No supported protocol for dorado driver.")
@@ -213,10 +213,10 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	if opt.GetProtocol() == "iscsi" {
+	if opt.GetAccessProtocol() == "iscsi" {
 		return d.TerminateConnectionIscsi(opt)
 	}
-	if opt.GetProtocol() == "fc" {
+	if opt.GetAccessProtocol() == "fc" {
 		return d.TerminateConnectionFC(opt)
 	}
 	return nil

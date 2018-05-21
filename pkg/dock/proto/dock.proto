@@ -212,7 +212,7 @@ message CreateAttachmentOpts {
     // The Context
     string context = 8;
     // The protocol
-    string protocol = 9;
+    string AccessProtocol = 9;
 }
 
 // DeleteAttachmentOpts is a structure which indicates all required
@@ -231,7 +231,7 @@ message DeleteAttachmentOpts {
     // The Context
     string context = 6;
     // The protocol
-    string protocol = 7;
+    string AccessProtocol = 7;
 }
 
 message HostInfo {
