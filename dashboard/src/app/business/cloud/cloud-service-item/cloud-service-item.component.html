@@ -1,0 +1,13 @@
+<div>
+    <div class="img-div">
+        <img class="img-center" src="../../../../assets/business/images/cloud_service/{{cloudService.type}}.png">
+    </div>
+    <h2>{{cloudService.name}}</h2>
+    <div style="padding: 0.5em;">
+        <div>region:{{cloudService.region}}</div>
+        <div>type:{{cloudService.type}}</div>
+        <div>
+            <p-button styleClass="cloud-servie-delete-button-radius" label="Delete" (click)="deleteCloud(cloudService.name)"></p-button>
+        </div>
+    </div>
+</div>

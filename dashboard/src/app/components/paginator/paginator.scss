@@ -1,0 +1,114 @@
+.ui-paginator {
+    margin: 0;
+    text-align: center;
+    padding: .125em;
+}
+
+.ui-paginator .ui-paginator-top {
+    border-bottom: 0 none;
+}
+
+.ui-paginator .ui-paginator-bottom {
+    border-top:0 none;
+}
+
+.ui-paginator .ui-paginator-left-content {
+    float: left;    
+}
+
+.ui-paginator .ui-paginator-right-content {
+    float: right;    
+}
+
+.ui-paginator .ui-paginator-pages,
+.ui-paginator .ui-paginator-page,
+.ui-paginator .ui-paginator-next,
+.ui-paginator .ui-paginator-last,
+.ui-paginator .ui-paginator-first,
+.ui-paginator .ui-paginator-prev,
+.ui-paginator .ui-paginator-current {
+    width: .26rem;
+    height: .26rem;
+    border: none;
+	display: inline-block;
+	padding: .04rem;
+	zoom: 1;
+	text-decoration: none;
+    vertical-align: middle;
+}
+
+.ui-paginator .ui-paginator-pages{
+    width: auto;
+    padding: 0 0.04rem;
+    text-align: center;
+    .ui-paginator-page{
+        margin: 0 .03rem;
+        border: 1px solid #ddd;
+        @extend .ui-corner-all-small;
+    }
+}
+
+.ui-paginator .fa{
+    display: inline-block;
+    width: .18rem;
+    height: .18rem;
+}
+
+.ui-paginator .ui-paginator-next,
+.ui-paginator .ui-paginator-prev{
+    padding: 0;
+    .fa{
+        width: .26rem;
+        height: .26rem; 
+        font-size: .26rem;
+        text-align: center;
+    }
+}
+
+.ui-paginator .ui-paginator-last,
+.ui-paginator .ui-paginator-first{
+    padding: .05rem;
+    .fa{
+        width: .18rem;
+        height: .18rem; 
+        font-size: .18rem;
+        text-align: center;
+    }
+}
+
+.ui-paginator .ui-paginator-page,
+.ui-paginator .ui-paginator-next,
+.ui-paginator .ui-paginator-last,
+.ui-paginator .ui-paginator-first,
+.ui-paginator .ui-paginator-prev{
+    cursor: pointer;
+}
+
+.ui-paginator .ui-paginator-current,
+.ui-paginator .ui-paginator-rpp-options {
+	margin-left: 1em;
+	margin-right: 1em;
+    background-image: none;
+}
+
+.ui-paginator .ui-paginator-jtp-select option,
+.ui-paginator .ui-paginator-rpp-options option {
+    background-image: none;
+    border: 0 none;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.ui-paginator a.ui-state-disabled {
+    outline: 0 none;
+}
+
+.ui-paginator .ui-dropdown {
+    min-width: 4em;
+    margin-left: .375em;
+}
+
+.ui-fluid .ui-paginator .ui-dropdown {
+    width: auto;
+}
