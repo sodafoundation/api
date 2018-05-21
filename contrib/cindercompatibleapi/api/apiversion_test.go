@@ -27,8 +27,8 @@ import (
 )
 
 func init() {
-	beego.Router("/", &APIVersionPortal{},
-		"get:ListAllApiVersions")
+	beego.Router("/", &VersionPortal{},
+		"get:ListAllAPIVersions")
 
 	if false == IsFakeClient {
 		client = NewFakeClient(&c.Config{Endpoint: TestEp})
@@ -38,13 +38,13 @@ func init() {
 ////////////////////////////////////////////////////////////////////////////////
 //                            Tests for Version                              //
 ////////////////////////////////////////////////////////////////////////////////
-func TestListAllApiVersions(t *testing.T) {
+func TestListAllAPIVersions(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output converter.ListAllApiVersionsRespSpec
+	var output converter.ListAllAPIVersionsRespSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 	//fmt.Println(string(w.Body.Bytes()))
 	expectedJSON := `
@@ -57,7 +57,7 @@ func TestListAllApiVersions(t *testing.T) {
 		}]
 	}`
 
-	var expected converter.ListAllApiVersionsRespSpec
+	var expected converter.ListAllAPIVersionsRespSpec
 	json.Unmarshal([]byte(expectedJSON), &expected)
 
 	if w.Code != http.StatusMultipleChoices {

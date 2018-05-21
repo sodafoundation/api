@@ -28,7 +28,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -42,10 +41,6 @@ var DefaultTypeName = "default"
 
 // UpdateType ...
 func (portal *TypePortal) UpdateType() {
-	if !policy.Authorize(portal.Ctx, "type:update") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	var cinderReq = converter.UpdateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
@@ -91,10 +86,6 @@ func (portal *TypePortal) UpdateType() {
 
 // AddExtraProperty ...
 func (portal *TypePortal) AddExtraProperty() {
-	if !policy.Authorize(portal.Ctx, "type:add_extra_property") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	var cinderReq = converter.AddExtraReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
@@ -133,10 +124,6 @@ func (portal *TypePortal) AddExtraProperty() {
 
 // ListExtraProperties ...
 func (portal *TypePortal) ListExtraProperties() {
-	if !policy.Authorize(portal.Ctx, "type:list_extra_properties") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	profileExtra, err := client.ListExtraProperties(id)
 
@@ -165,10 +152,6 @@ func (portal *TypePortal) ListExtraProperties() {
 
 // ShowExtraProperty ...
 func (portal *TypePortal) ShowExtraProperty() {
-	if !policy.Authorize(portal.Ctx, "type:show_extra_property") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	profileExtra, err := client.ListExtraProperties(id)
 
@@ -207,10 +190,6 @@ func (portal *TypePortal) ShowExtraProperty() {
 
 // UpdateExtraProperty ...
 func (portal *TypePortal) UpdateExtraProperty() {
-	if !policy.Authorize(portal.Ctx, "type:update_extra_property") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
 	var cinderReq = converter.UpdateExtraReqSpec{}
@@ -259,10 +238,6 @@ func (portal *TypePortal) UpdateExtraProperty() {
 
 // DeleteExtraProperty ...
 func (portal *TypePortal) DeleteExtraProperty() {
-	if !policy.Authorize(portal.Ctx, "type:delete_extra_property") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
 	err := client.RemoveExtraProperty(id, key)
@@ -281,10 +256,6 @@ func (portal *TypePortal) DeleteExtraProperty() {
 
 // GetType ...
 func (portal *TypePortal) GetType() {
-	if !policy.Authorize(portal.Ctx, "Type:get") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	DefaultName := os.Getenv("DEFAULT_VOLUME_TYPE_NAME")
 	if ("" != DefaultName) && (DefaultTypeName != DefaultName) {
@@ -348,10 +319,6 @@ func (portal *TypePortal) GetType() {
 
 // DeleteType ...
 func (portal *TypePortal) DeleteType() {
-	if !policy.Authorize(portal.Ctx, "type:delete") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	err := client.DeleteProfile(id)
 
@@ -369,10 +336,6 @@ func (portal *TypePortal) DeleteType() {
 
 // ListTypes ...
 func (portal *TypePortal) ListTypes() {
-	if !policy.Authorize(portal.Ctx, "type:list") {
-		return
-	}
-
 	profiles, err := client.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List all volume types failed: %v", err)
@@ -399,10 +362,6 @@ func (portal *TypePortal) ListTypes() {
 
 // CreateType ...
 func (portal *TypePortal) CreateType() {
-	if !policy.Authorize(portal.Ctx, "type:create") {
-		return
-	}
-
 	var cinderReq = converter.CreateTypeReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a volume type, parse request body failed: %s", err.Error())

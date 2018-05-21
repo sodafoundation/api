@@ -147,7 +147,7 @@ func Run(CinderEndPoint string) {
 	beego.InsertFilter("*", beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)
 
-	beego.Router("/", &APIVersionPortal{}, "get:ListAllApiVersions")
+	beego.Router("/", &VersionPortal{}, "get:ListAllAPIVersions")
 
 	// start service
 	beego.Run(words[2])

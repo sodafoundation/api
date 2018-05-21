@@ -27,7 +27,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -38,10 +37,6 @@ type AttachmentPortal struct {
 
 // DeleteAttachment ...
 func (portal *AttachmentPortal) DeleteAttachment() {
-	if !policy.Authorize(portal.Ctx, "attachment:delete") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":attachmentId")
 	attachment := model.VolumeAttachmentSpec{}
 	err := client.DeleteVolumeAttachment(id, &attachment)
@@ -60,10 +55,6 @@ func (portal *AttachmentPortal) DeleteAttachment() {
 
 // GetAttachment ...
 func (portal *AttachmentPortal) GetAttachment() {
-	if !policy.Authorize(portal.Ctx, "attachment:get") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":attachmentId")
 	attachment, err := client.GetVolumeAttachment(id)
 
@@ -92,10 +83,6 @@ func (portal *AttachmentPortal) GetAttachment() {
 
 // ListAttachmentsDetails ...
 func (portal *AttachmentPortal) ListAttachmentsDetails() {
-	if !policy.Authorize(portal.Ctx, "attachment:list_details") {
-		return
-	}
-
 	attachments, err := client.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details failed: %v", err)
@@ -122,10 +109,6 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 
 // ListAttachments ...
 func (portal *AttachmentPortal) ListAttachments() {
-	if !policy.Authorize(portal.Ctx, "attachment:list") {
-		return
-	}
-
 	attachments, err := client.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments failed: %v", err)
@@ -152,9 +135,6 @@ func (portal *AttachmentPortal) ListAttachments() {
 
 // CreateAttachment ...
 func (portal *AttachmentPortal) CreateAttachment() {
-	if !policy.Authorize(portal.Ctx, "attachment:create") {
-		return
-	}
 	var cinderReq = converter.CreateAttachmentReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
@@ -193,10 +173,6 @@ func (portal *AttachmentPortal) CreateAttachment() {
 
 // UpdateAttachment ...
 func (portal *AttachmentPortal) UpdateAttachment() {
-	if !policy.Authorize(portal.Ctx, "attachment:update") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":attachmentId")
 	var cinderReq = converter.UpdateAttachmentReqSpec{}
 

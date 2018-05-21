@@ -30,7 +30,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/policy"
 
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -42,10 +41,6 @@ type VolumePortal struct {
 
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
-	if !policy.Authorize(portal.Ctx, "volume:list_details") {
-		return
-	}
-
 	volumes, err := client.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details failed: %v", err)
@@ -72,9 +67,6 @@ func (portal *VolumePortal) ListVolumesDetails() {
 
 // CreateVolume ...
 func (portal *VolumePortal) CreateVolume() {
-	if !policy.Authorize(portal.Ctx, "volume:create") {
-		return
-	}
 	var cinderReq = converter.CreateVolumeReqSpec{}
 
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
@@ -120,10 +112,6 @@ func (portal *VolumePortal) CreateVolume() {
 
 // ListVolumes ...
 func (portal *VolumePortal) ListVolumes() {
-	if !policy.Authorize(portal.Ctx, "volume:list") {
-		return
-	}
-
 	volumes, err := client.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes failed: %v", err)
@@ -150,10 +138,6 @@ func (portal *VolumePortal) ListVolumes() {
 
 // GetVolume ...
 func (portal *VolumePortal) GetVolume() {
-	if !policy.Authorize(portal.Ctx, "volume:get") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeId")
 	volume, err := client.GetVolume(id)
 
@@ -182,10 +166,6 @@ func (portal *VolumePortal) GetVolume() {
 
 // UpdateVolume ...
 func (portal *VolumePortal) UpdateVolume() {
-	if !policy.Authorize(portal.Ctx, "volume:update") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeId")
 	var cinderReq = converter.UpdateVolumeReqSpec{}
 
@@ -233,10 +213,6 @@ func (portal *VolumePortal) UpdateVolume() {
 
 // DeleteVolume ...
 func (portal *VolumePortal) DeleteVolume() {
-	if !policy.Authorize(portal.Ctx, "volume:delete") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeId")
 	volume := model.VolumeSpec{}
 
@@ -256,10 +232,6 @@ func (portal *VolumePortal) DeleteVolume() {
 
 // VolumeAction ...
 func (portal *VolumePortal) VolumeAction() {
-	if !policy.Authorize(portal.Ctx, "volume:action") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":volumeId")
 	byts, err := ioutil.ReadAll(portal.Ctx.Request.Body)
 	if err != nil {
@@ -374,7 +346,12 @@ func (portal *VolumePortal) VolumeAction() {
 		return
 	}
 
-	reason := fmt.Sprintf("Volume actions failed: request body is incorrect")
+	if strings.HasPrefix(rawBodyText, `{"os-begin_detaching":`) {
+		portal.Ctx.Output.SetStatus(http.StatusAccepted)
+		return
+	}
+
+	reason := fmt.Sprintf("Volume actions failed: the body of the request is wrong or not currently supported")
 	log.Error("Volume actions failed: " + rawBodyText + " is incorrect")
 	portal.Ctx.Output.SetStatus(http.StatusNotFound)
 	portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))

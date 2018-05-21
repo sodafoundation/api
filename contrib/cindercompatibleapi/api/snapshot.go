@@ -27,7 +27,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -38,10 +37,6 @@ type SnapshotPortal struct {
 
 // ListSnapshotsDetails ...
 func (portal *SnapshotPortal) ListSnapshotsDetails() {
-	if !policy.Authorize(portal.Ctx, "snapshot:list") {
-		return
-	}
-
 	snapshots, err := client.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List snapshots and details failed: %v", err)
@@ -68,10 +63,6 @@ func (portal *SnapshotPortal) ListSnapshotsDetails() {
 
 // CreateSnapshot ...
 func (portal *SnapshotPortal) CreateSnapshot() {
-	if !policy.Authorize(portal.Ctx, "snapshot:create") {
-		return
-	}
-
 	var cinderReq = converter.CreateSnapshotReqSpec{}
 	if err := json.NewDecoder(portal.Ctx.Request.Body).Decode(&cinderReq); err != nil {
 		reason := fmt.Sprintf("Create a snapshot, parse request body failed: %s", err.Error())
@@ -116,10 +107,6 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 
 // ListSnapshots ...
 func (portal *SnapshotPortal) ListSnapshots() {
-	if !policy.Authorize(portal.Ctx, "snapshot:list") {
-		return
-	}
-
 	snapshots, err := client.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible snapshots failed: %v", err)
@@ -146,10 +133,6 @@ func (portal *SnapshotPortal) ListSnapshots() {
 
 // GetSnapshot ...
 func (portal *SnapshotPortal) GetSnapshot() {
-	if !policy.Authorize(portal.Ctx, "snapshot:get") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":snapshotId")
 	snapshot, err := client.GetVolumeSnapshot(id)
 
@@ -178,10 +161,6 @@ func (portal *SnapshotPortal) GetSnapshot() {
 
 // UpdateSnapshot ...
 func (portal *SnapshotPortal) UpdateSnapshot() {
-	if !policy.Authorize(portal.Ctx, "snapshot:update") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":snapshotId")
 	var cinderUpdateReq = converter.UpdateSnapshotReqSpec{}
 
@@ -221,10 +200,6 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 
 // DeleteSnapshot ...
 func (portal *SnapshotPortal) DeleteSnapshot() {
-	if !policy.Authorize(portal.Ctx, "snapshot:delete") {
-		return
-	}
-
 	id := portal.Ctx.Input.Param(":snapshotId")
 	err := client.DeleteVolumeSnapshot(id, nil)
 

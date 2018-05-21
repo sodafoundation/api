@@ -27,22 +27,17 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/policy"
 
 	"github.com/opensds/opensds/pkg/model"
 )
 
-// APIVersionPortal ...
-type APIVersionPortal struct {
+// VersionPortal ...
+type VersionPortal struct {
 	beego.Controller
 }
 
-// ListAllApiVersions ...
-func (portal *APIVersionPortal) ListAllApiVersions() {
-	if !policy.Authorize(portal.Ctx, "apiversion:list_all_version") {
-		return
-	}
-
+// ListAllAPIVersions ...
+func (portal *VersionPortal) ListAllAPIVersions() {
 	volumes, err := client.ListVersions()
 	if err != nil {
 		reason := fmt.Sprintf("List All Api Versions failed: %v", err)
@@ -52,7 +47,7 @@ func (portal *APIVersionPortal) ListAllApiVersions() {
 		return
 	}
 
-	result := converter.ListAllApiVersionsResp(volumes)
+	result := converter.ListAllAPIVersionsResp(volumes)
 	body, err := json.Marshal(result)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details, marshal result failed: %v", err)
