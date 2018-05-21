@@ -97,7 +97,7 @@ export class AppComponent implements OnInit, AfterViewInit{
     
     ngOnInit() {
         let currentUserInfo = this.paramStor.CURRENT_USER();
-        if(currentUserInfo != ""){
+        if(currentUserInfo != undefined && currentUserInfo != ""){
             this.hideLoginForm = true;
 
             let [username, userid, tenantname, tenantid] = [
