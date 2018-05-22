@@ -8,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 export class RegistryComponent implements OnInit {
 
   registryServiceDisplay = false;
-  label = {};
+  label;
   cloudServices = [];
   serviceTypeOptions = [];
   regionOptions = [];

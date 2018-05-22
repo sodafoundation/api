@@ -43,6 +43,7 @@ import { ProfileService } from './../profile.service';
 export class CreateProfileComponent implements OnInit {
     errorMessage;
     showCustomization = false;
+    showStoragePool = false;
     msgs: Message[] = [];
     userform: FormGroup;
     submitted: boolean;
@@ -54,7 +55,7 @@ export class CreateProfileComponent implements OnInit {
         extras:{protocol:""},
         storageType:""
     };
-    label = {};
+    label;
     param = {
         name: '',
         storageType: '',
