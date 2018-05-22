@@ -47,7 +47,11 @@ export class VolumeListComponent implements OnInit {
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
-    label = {};
+    label = {
+        volume: 'Volume',
+        name: 'Name',
+        description: 'Description'
+    };
     snapshotFormGroup;
     modifyFormGroup;
     expandFormGroup;
@@ -129,11 +133,6 @@ export class VolumeListComponent implements OnInit {
         ];
         this.getVolumes();
 
-        this.label = {
-            volume: 'Volume',
-            name: 'Name',
-            description: 'Description'
-        }
         this.getProfiles()
     }
 

@@ -43,7 +43,13 @@ import { ProfileService } from './../../profile/profile.service';
 export class CreateVolumeComponent implements OnInit {
 
   bbbbb = 'name';
-  label = {};
+  label = {
+    zone: 'Availability Zone',
+    name: 'Name',
+    profile: 'Profile',
+    capacity: 'Capacity',
+    quantity: 'Quantity'
+  };
   availabilityZones = [];
   volumeform;
   volumeItems = [0];
@@ -70,13 +76,6 @@ export class CreateVolumeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.label = {
-      zone: 'Availability Zone',
-      name: 'Name',
-      profile: 'Profile',
-      capacity: 'Capacity',
-      quantity: 'Quantity'
-    }
 
     this.availabilityZones = [
       {
