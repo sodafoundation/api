@@ -293,6 +293,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("GetPool", context.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("UpdateStatus", context.NewAdminContext(), volattm, volattm.Status).Return(nil)
 
 	db.C = mockClient

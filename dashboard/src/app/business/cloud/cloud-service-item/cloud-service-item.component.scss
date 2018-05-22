@@ -1,0 +1,15 @@
+.img-div {
+    width: 217px;
+    height: 153px;
+    position: relative;
+    background-image: url(../../../../assets/business/images/cloud_service/u2309.png);
+    text-align: center;
+}
+
+.img-center {
+    height: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+}
