@@ -38,10 +38,12 @@ export class VolumeGroupComponent implements OnInit{
         "group_name": { required: "group name is required.", pattern:"Beginning with a letter with a length of 1-128, it can contain letters / numbers / underlines."},
         "profile": { required: "profile is required."}
     };
-    label:object = {
+    
+    label = {
         group_name_lable:'Group Name',
         profile_label:'Profile'
     }
+
     ngOnInit() {
       this.volumeGroups = [
           {"name": "group_for_REP", "status": "Available", "profile": "PF_block_01", "volumes": "2"},
