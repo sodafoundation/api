@@ -57,7 +57,7 @@ export class SnapshotListComponent implements OnInit {
     }
     this.getSnapshots(
       {
-        key: 'volumeId',
+        key: 'VolumeId',
         value: this.volumeId
       }
     );
@@ -78,7 +78,7 @@ export class SnapshotListComponent implements OnInit {
     this.SnapshotService.createSnapshot(param).subscribe((res) => {
       this.getSnapshots(
         {
-          key: 'volumeId',
+          key: 'VolumeId',
           value: this.volumeId
         }
       );
@@ -115,7 +115,7 @@ export class SnapshotListComponent implements OnInit {
     this.SnapshotService.deleteSnapshot(id).subscribe((res) => {
       this.getSnapshots(
         {
-          key: 'volumeId',
+          key: 'VolumeId',
           value: this.volumeId
         }
       );
@@ -137,7 +137,7 @@ export class SnapshotListComponent implements OnInit {
     this.SnapshotService.modifySnapshot(this.selectedSnapshotId,param).subscribe((res) => {
       this.getSnapshots(
         {
-          key: 'volumeId',
+          key: 'VolumeId',
           value: this.volumeId
         }
       );
