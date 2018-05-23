@@ -31,7 +31,7 @@
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            Name is required
+                            {{getErrorMessage(volumeform.controls['name'+i],"name")}}
                         </span>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            ProfileId is required
+                           {{getErrorMessage(volumeform.controls['profileId'+i],"profile")}}
                         </span>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            Capacity is required
+                            {{getErrorMessage(volumeform.controls['size'+i],"Capacity")}}
                         </span>
                     </div>
                 </div>

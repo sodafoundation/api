@@ -7,6 +7,7 @@ import { Message, SelectItem } from './../../../components/common/api';
 
 import { VolumeService ,ReplicationService} from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
+import { I18NService,Utils } from 'app/shared/api';
 
 @Component({
   selector: 'app-create-volume',
@@ -59,10 +60,12 @@ export class CreateVolumeComponent implements OnInit {
   createVolumes = [];
   value: boolean;
   showReplicationConf = false;
-
   errorMessage = {
     "zone": { required: "Zone is required."}
   };
+    validRule= {
+        'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
+    };
     defaultProfile = {
         label: null,
         value: {id:null,profileName:null}
@@ -72,11 +75,11 @@ export class CreateVolumeComponent implements OnInit {
     private fb: FormBuilder,
     private ProfileService: ProfileService,
     private VolumeService: VolumeService,
-    private replicationService:ReplicationService
+    private replicationService:ReplicationService,
+    private i18n:I18NService
   ) {}
 
   ngOnInit() {
-
     this.availabilityZones = [
       {
         label: 'Default', value: 'default'
@@ -95,7 +98,7 @@ export class CreateVolumeComponent implements OnInit {
     ];
     this.volumeform = this.fb.group({
       'zone': new FormControl('default', Validators.required),
-      'name0': new FormControl('', Validators.required),
+      'name0': new FormControl('', {validators:[Validators.required,Validators.pattern(this.validRule.name)]}),
       'profileId0': new FormControl(this.defaultProfile, {validators:[Validators.required,this.checkProfile]}),
       'size0': new FormControl(1, Validators.required),
       'capacity0': new FormControl(''),
@@ -250,8 +253,12 @@ export class CreateVolumeComponent implements OnInit {
     }
     checkProfile(control:FormControl):{[s:string]:boolean}{
       if(control.value.id == null){
-          return {invalid:true}
+          return {profileNull:true}
       }
     }
-
+    getErrorMessage(control,extraParam){
+        let page = "";
+        let key = Utils.getErrorKey(control,page);
+        return extraParam ? this.i18n.keyID[key].replace("{0}",extraParam):this.i18n.keyID[key];
+    }
 }

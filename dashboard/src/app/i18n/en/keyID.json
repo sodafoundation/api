@@ -1,3 +1,5 @@
 {
-    
+    "sds_required":"{0} is required.",
+    "sds_pattern":"Beginning with a letter with a length of 1-128, it can contain letters / numbers / underlines.",
+    "sds_profileNull":"profile is required"
 }
