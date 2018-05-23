@@ -24,8 +24,6 @@
         </p-column>
         <p-column field="size" header="Capacity"></p-column>
         <p-column field="createdAt" header="Created At"></p-column>
-        <p-column *ngIf="availabilityZone" field="availabilityZone" header="Availability Zone">
-        </p-column>
         <p-column header="Operation" [style]="{'width': '25%'}">
             <ng-template let-snapshot="rowData" pTemplate="body">
                 <a [routerLink]="['/createVolume']">Create Volume</a>
