@@ -30,13 +30,15 @@ import (
 	"strconv"
 	"strings"
 
+	"reflect"
+
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
 	"github.com/satori/go.uuid"
-	"reflect"
 )
 
 const (
@@ -45,6 +47,8 @@ const (
 	defaultSortDir = "desc"
 	defaultSortKey = "ID"
 )
+
+var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
 
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
@@ -84,7 +88,7 @@ func (c *Client) IsInArray(e string, s []string) bool {
 
 func (c *Client) SelectOrNot(m map[string][]string) bool {
 	for key := range m {
-		if key != "limit" && key != "offset" && key != "sortDir" && key != "sortKey" {
+		if !utils.Contained(key, validKey) {
 			return true
 		}
 	}
@@ -341,8 +345,11 @@ func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*
 	for _, dock := range docks {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindDockValue(key, dock)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -370,6 +377,7 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List docks failed: ", err.Error())
 		return nil, err
 	}
+
 	dcks := c.SelectDocks(m, docks)
 
 	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
@@ -512,8 +520,11 @@ func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSp
 	for _, pool := range pools {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindPoolValue(key, pool)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -543,10 +554,15 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List pools failed: ", err.Error())
 		return nil, err
 	}
-	pols := c.SelectPools(m, pools)
+	var pol []*model.StoragePoolSpec
+	for _, v := range pools {
+		if v.TenantId == ctx.TenantId {
+			pol = append(pol, v)
+		}
+	}
+	pols := c.SelectPools(m, pol)
 	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
 	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
-
 }
 
 // GetPool
@@ -790,8 +806,11 @@ func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.Profile
 	for _, profile := range profiles {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindProfileValue(key, profile)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -810,7 +829,13 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		log.Error("List profiles failed: ", err)
 		return nil, err
 	}
-	prfs := c.SelectProfiles(m, profiles)
+	var prof []*model.ProfileSpec
+	for _, v := range profiles {
+		if v.TenantId == ctx.TenantId {
+			prof = append(prof, v)
+		}
+	}
+	prfs := c.SelectProfiles(m, prof)
 
 	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
 
@@ -1082,8 +1107,11 @@ func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpe
 	for _, vol := range volumes {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindVolumeValue(key, vol)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1115,7 +1143,14 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
-	vols := c.SelectVolumes(m, volumes)
+
+	var vol []*model.VolumeSpec
+	for _, v := range volumes {
+		if v.TenantId == ctx.TenantId {
+			vol = append(vol, v)
+		}
+	}
+	vols := c.SelectVolumes(m, vol)
 
 	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION"})
 
@@ -1386,8 +1421,11 @@ func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*m
 	for _, attachment := range attachments {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindAttachmentValue(key, attachment)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1423,7 +1461,15 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
-	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
+
+	var volacts []*model.VolumeAttachmentSpec
+	for _, v := range volumeAttachments {
+		if v.TenantId == ctx.TenantId {
+			volacts = append(volacts, v)
+		}
+	}
+
+	atcs := c.SelectVolumeAttachments(m, volacts)
 	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortVolumeAttachments(atcs, p)[p.beginIdx:p.endIdx], nil
@@ -1674,8 +1720,11 @@ func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.Volum
 	for _, snapshot := range snapshots {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindSnapshotsValue(key, snapshot)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1707,7 +1756,15 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		log.Error("List volumeSnapshots failed: ", err)
 		return nil, err
 	}
-	snps := c.SelectSnapshots(m, volumeSnapshots)
+
+	var volsnap []*model.VolumeSnapshotSpec
+	for _, v := range volumeSnapshots {
+		if v.TenantId == ctx.TenantId {
+			volsnap = append(volsnap, v)
+		}
+	}
+
+	snps := c.SelectSnapshots(m, volsnap)
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
@@ -1899,7 +1956,7 @@ func (c *Client) filterByName(param map[string][]string, spec interface{}, filte
 		default:
 			return false
 		}
-		if val != "" && !strings.EqualFold(paramVal, val) {
+		if !strings.EqualFold(paramVal, val) {
 			return false
 		}
 	}
@@ -1977,7 +2034,14 @@ func (c *Client) ListReplicationWithFilter(ctx *c.Context, m map[string][]string
 		return nil, err
 	}
 
-	rlist := c.SelectReplication(m, replicas)
+	var rep []*model.ReplicationSpec
+	for _, v := range replicas {
+		if v.TenantId == ctx.TenantId {
+			rep = append(rep, v)
+		}
+	}
+
+	rlist := c.SelectReplication(m, rep)
 
 	var sortKeys []string
 	for k := range replicationSortKey2Func {
