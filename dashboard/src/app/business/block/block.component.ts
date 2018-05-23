@@ -19,7 +19,7 @@ import { I18nPluralPipe } from '@angular/common';
             transition('visible => hidden', animate('400ms ease-in')),
             transition('hidden => visible', animate('400ms ease-out'))
         ]),
-    
+
         trigger('notificationTopbar', [
             state('hidden', style({
             height: '0',
@@ -37,12 +37,12 @@ import { I18nPluralPipe } from '@angular/common';
 export class BlockComponent implements OnInit{
 
     constructor(
-        // private I18N: I18NService,
+         private I18N: I18NService,
         // private router: Router
     ){}
-    
+
     ngOnInit() {
-      
+
     }
-    
+
 }
