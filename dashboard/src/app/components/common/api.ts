@@ -19,7 +19,7 @@ export { FormModule } from '../form/form';
 export { InputTextModule } from '../inputtext/inputtext';
 export { InputTextareaModule } from '../inputtextarea/inputtextarea';
 export { CheckboxModule } from '../checkbox/checkbox';
-export { ConfirmDialogModule } from '../confirmDialog/confirmDialog';
+export { ConfirmDialogModule } from '../confirmdialog/confirmdialog';
 export { ButtonModule } from '../button/button';
 export { BadgeModule } from '../badge/badge';
 export { TabViewModule } from '../tabview/tabview';
