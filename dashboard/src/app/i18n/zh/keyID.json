@@ -3,5 +3,19 @@
     "sds_pattern":"Beginning with a letter with a length of 1-128, it can contain letters / numbers / underlines.",
     "sds_profileNull":"profile is required",
     "sds_block_volumes_descrip":"View and manage resources that have been manually created or applied for through service templates.",
-    "sds_block_volumesGroup_descrip":"View and manage resources that have been manually created or applied for through service templates."
+    "sds_block_volumesGroup_descrip":"View and manage resources that have been manually created or applied for through service templates.",
+    "sds_home_tenants":"Tenants",
+    "sds_home_users":"Users",
+    "sds_home_volumes":"Volumes",
+    "sds_home_snapshots":"Volume Snapshots",
+    "sds_home_replications":"Volume Replications",
+    "sds_home_pools":"Storage Pools",
+    "sds_home_storages":"Block Storages",
+    "sds_home_overvew":"Overview",
+    "sds_home_update":"Updated 5 minutes ago",
+    "sds_home_capacity":"Capacity",
+    "sds_home_block_capacity":"Block Storage Capacity",
+    "sds_home_top5":"Top 5 Allocated Capacity by Block Profile",
+    "sds_home_used_capacity":"Used Capacity",
+    "sds_home_free_capacity":"Free Capacity"
 }
