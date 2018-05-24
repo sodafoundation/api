@@ -90,6 +90,8 @@ func fakeHandler(script string, cmd []string) (string, error) {
 		return "", nil
 	case "vgdisplay":
 		return string(sampleVG), nil
+	case "vgs":
+		return string(sampleVGS), nil
 	default:
 		break
 	}
@@ -356,4 +358,8 @@ var (
 		- currently set to     256
 		Block device           253:3
 	`
+	sampleVGS = `
+  vg001      18.62  18.62
+  ubuntu-vg  127.52  0.03
+`
 )
