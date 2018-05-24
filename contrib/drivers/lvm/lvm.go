@@ -381,35 +381,29 @@ type VolumeGroup struct {
 }
 
 func (d *Driver) getVGList() (*[]VolumeGroup, error) {
-	const vgInfoLineCount = 10
-	info, err := d.handler("vgdisplay", []string{})
+	info, err := d.handler("vgs", []string{
+		"--noheadings", "--nosuffix",
+		"--unit=g",
+		"-o", "name,size,free",
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	lines := strings.Split(info, "\n")
-	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
-
-	var vgIdx = -1
+	var vgs []VolumeGroup
 	for _, line := range lines {
-		if strings.Contains(line, "--- Volume group ---") {
-			vgIdx++
+		val := strings.Fields(line)
+		if len(val) != 3 {
 			continue
 		}
-		if strings.Contains(line, "VG Name") {
-			slice := strings.Fields(line)
-			vgs[vgIdx].Name = slice[2]
-		}
-		if strings.Contains(line, "VG Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[2], 64)
-			vgs[vgIdx].TotalCapacity = int64(capa)
-		}
-		if strings.Contains(line, "Free  PE / Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[len(slice)-2], 64)
-			vgs[vgIdx].FreeCapacity = int64(capa)
-		}
+		vg := VolumeGroup{}
+		vg.Name = val[0]
+		capa, _ := strconv.ParseFloat(val[1], 64)
+		vg.TotalCapacity = int64(capa)
+		capa, _ = strconv.ParseFloat(val[2], 64)
+		vg.FreeCapacity = int64(capa)
+		vgs = append(vgs, vg)
 	}
 	return &vgs, nil
 }
