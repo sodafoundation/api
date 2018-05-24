@@ -378,13 +378,14 @@ type VolumeGroup struct {
 	Name          string
 	TotalCapacity int64
 	FreeCapacity  int64
+	UUID          string
 }
 
 func (d *Driver) getVGList() (*[]VolumeGroup, error) {
 	info, err := d.handler("vgs", []string{
 		"--noheadings", "--nosuffix",
 		"--unit=g",
-		"-o", "name,size,free",
+		"-o", "name,size,free,uuid",
 	})
 	if err != nil {
 		return nil, err
@@ -394,15 +395,21 @@ func (d *Driver) getVGList() (*[]VolumeGroup, error) {
 	var vgs []VolumeGroup
 	for _, line := range lines {
 		val := strings.Fields(line)
-		if len(val) != 3 {
+		if len(val) != 4 {
 			continue
 		}
-		vg := VolumeGroup{}
-		vg.Name = val[0]
+
 		capa, _ := strconv.ParseFloat(val[1], 64)
-		vg.TotalCapacity = int64(capa)
+		total := int64(capa)
 		capa, _ = strconv.ParseFloat(val[2], 64)
-		vg.FreeCapacity = int64(capa)
+		free := int64(capa)
+
+		vg := VolumeGroup{
+			Name:          val[0],
+			TotalCapacity: total,
+			FreeCapacity:  free,
+			UUID:          val[3],
+		}
 		vgs = append(vgs, vg)
 	}
 	return &vgs, nil
@@ -423,7 +430,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, vg.Name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, vg.UUID).String(),
 			},
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
