@@ -41,6 +41,8 @@ import (
 
 const (
 	defaultConfPath = "/etc/opensds/driver/cinder.yaml"
+	KCinderVolumeId = "cinderVolumeId"
+	KCinderSnapId   = "cinderSnapId"
 )
 
 var conf = CinderConfig{}
@@ -132,10 +134,9 @@ func (d *Driver) Unset() error { return nil }
 func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	//Configure create request body.
 	opts := &volumesv2.CreateOpts{
-		Name:             req.GetName(),
-		Description:      req.GetDescription(),
-		Size:             int(req.GetSize()),
-		AvailabilityZone: req.GetAvailabilityZone(),
+		Name:        req.GetName(),
+		Description: req.GetDescription(),
+		Size:        int(req.GetSize()),
 	}
 
 	vol, err := volumesv2.Create(d.blockStoragev2, opts).Extract()
@@ -179,8 +180,9 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Name:             vol.Name,
 		Description:      vol.Description,
 		Size:             int64(vol.Size),
-		AvailabilityZone: vol.AvailabilityZone,
+		AvailabilityZone: req.GetAvailabilityZone(),
 		Status:           vol.Status,
+		Metadata:         map[string]string{KCinderVolumeId: vol.ID},
 	}, nil
 }
 
@@ -194,19 +196,19 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: vol.ID,
+			Id: volID,
 		},
-		Name:             vol.Name,
-		Description:      vol.Description,
-		Size:             int64(vol.Size),
-		AvailabilityZone: vol.AvailabilityZone,
-		Status:           vol.Status,
+		Name:        vol.Name,
+		Description: vol.Description,
+		Size:        int64(vol.Size),
+		Status:      vol.Status,
 	}, nil
 }
 
 // DeleteVolume
-func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
-	if err := volumesv2.Delete(d.blockStoragev2, opt.GetId()).ExtractErr(); err != nil {
+func (d *Driver) DeleteVolume(req *pb.DeleteVolumeOpts) error {
+	cinderVolId := req.Metadata[KCinderVolumeId]
+	if err := volumesv2.Delete(d.blockStoragev2, cinderVolId).ExtractErr(); err != nil {
 		log.Error("Cannot delete volume:", err)
 		return err
 	}
@@ -220,8 +222,8 @@ func (d *Driver) ExtendVolume(req *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	opts := &volumeactions.ExtendSizeOpts{
 		NewSize: int(req.GetSize()),
 	}
-
-	err := volumeactions.ExtendSize(d.blockStoragev2, req.GetId(), opts).ExtractErr()
+	cinderVolId := req.Metadata[KCinderVolumeId]
+	err := volumeactions.ExtendSize(d.blockStoragev2, cinderVolId, opts).ExtractErr()
 	if err != nil {
 		log.Error("Cannot extend volume:", err)
 		return nil, err
@@ -249,25 +251,52 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 		Multipath: &req.MultiPath,
 	}
 
-	conn, err := volumeactions.InitializeConnection(d.blockStoragev2, req.GetVolumeId(), opts).Extract()
+	cinderVolId := req.Metadata[KCinderVolumeId]
+	conn, err := volumeactions.InitializeConnection(d.blockStoragev2, cinderVolId, opts).Extract()
 	if err != nil {
 		log.Error("Cannot initialize volume connection:", err)
 		return nil, err
 	}
 
+	data := conn["data"].(map[string]interface{})
+	connData := map[string]interface{}{
+		"accessMode":       data["access_mode"],
+		"targetDiscovered": data["target_discovered"],
+		"targetIQN":        data["target_iqn"],
+		"targetPortal":     data["target_portal"],
+		"discard":          false,
+		"targetLun":        data["target_lun"],
+	}
+	// If auth is enabled, add auth info.
+	if authMethod, ok := data["auth_method"]; ok {
+		connData["authMethod"] = authMethod
+		connData["authPassword"] = data["auth_password"]
+		connData["authUsername"] = data["auth_username"]
+	}
 	return &model.ConnectionInfo{
 		DriverVolumeType: "iscsi",
-		ConnectionData:   conn,
+		ConnectionData:   connData,
 	}, nil
 }
 
 // TerminateConnection
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+func (d *Driver) TerminateConnection(req *pb.DeleteAttachmentOpts) error {
+	opts := volumeactions.TerminateConnectionOpts{
+		IP:        req.HostInfo.GetIp(),
+		Host:      req.HostInfo.GetHost(),
+		Initiator: req.HostInfo.GetInitiator(),
+		Platform:  req.HostInfo.GetPlatform(),
+		OSType:    req.HostInfo.GetOsType(),
+	}
+	cinderVolId := req.Metadata[KCinderVolumeId]
+	return volumeactions.TerminateConnection(d.blockStoragev2, cinderVolId, opts).ExtractErr()
+}
 
 // CreateSnapshot
 func (d *Driver) CreateSnapshot(req *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
+	cinderVolId := req.Metadata[KCinderVolumeId]
 	opts := &snapshotsv2.CreateOpts{
-		VolumeID:    req.GetVolumeId(),
+		VolumeID:    cinderVolId,
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
 	}
@@ -308,13 +337,14 @@ func (d *Driver) CreateSnapshot(req *pb.CreateVolumeSnapshotOpts) (*model.Volume
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
-			Id: snp.ID,
+			Id: req.GetId(),
 		},
 		Name:        snp.Name,
 		Description: snp.Description,
 		Size:        int64(snp.Size),
 		Status:      snp.Status,
 		VolumeId:    req.GetVolumeId(),
+		Metadata:    map[string]string{KCinderSnapId: snp.ID},
 	}, nil
 }
 
@@ -328,23 +358,22 @@ func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) 
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
-			Id: snp.ID,
+			Id: snapID,
 		},
 		Name:        snp.Name,
 		Description: snp.Description,
 		Size:        int64(snp.Size),
 		Status:      snp.Status,
-		VolumeId:    snp.VolumeID,
 	}, nil
 }
 
 // DeleteSnapshot
 func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
-	if err := snapshotsv2.Delete(d.blockStoragev2, req.GetId()).ExtractErr(); err != nil {
+	cinderSnapId := req.Metadata[KCinderSnapId]
+	if err := snapshotsv2.Delete(d.blockStoragev2, cinderSnapId).ExtractErr(); err != nil {
 		log.Error("Cannot delete snapshot:", err)
 		return err
 	}
-
 	return nil
 }
 
@@ -386,14 +415,14 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+func (d *Driver) CreateVolumeGroup(req *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
+func (d *Driver) UpdateVolumeGroup(req *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
 	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
+func (d *Driver) DeleteVolumeGroup(req *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
 	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
 }
