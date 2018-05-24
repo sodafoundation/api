@@ -14,6 +14,8 @@ export class Form{
 
     @Input() formGroup: FormGroup;
 
+    @Input() columns: any;
+
     constructor(el: ElementRef) {
         el.nativeElement.classList.add('form');
     }
@@ -22,7 +24,7 @@ export class Form{
 @Component({
     selector: 'form-item',
     template: `
-    <div class='form-item ui-g' *ngIf="!hide">
+    <div [ngClass]='{"form-item ui-g": true}' [class]='itemStyleClass' *ngIf="!hide">
         <div [ngClass]='{"required": required, "form-label": true}' [class]='labelStyleClass'>
             <label>{{label}}</label>
         </div>
@@ -51,6 +53,8 @@ export class FormItem implements OnInit, AfterViewInit, AfterContentChecked {
 
     errorMessage: {[Key:string]:{[key:string]:any}};
 
+    itemStyleClass: string;
+
     labelStyleClass: string;
 
     contentStyleClass: string;
@@ -74,6 +78,11 @@ export class FormItem implements OnInit, AfterViewInit, AfterContentChecked {
         if( this.formInstance.grid ){
             this.labelStyleClass = this.formInstance.grid.label;
             this.contentStyleClass = this.formInstance.grid.content;
+        }
+
+        if( this.formInstance.columns ){
+            let className = "ui-g-" + 12 / this.formInstance.columns;
+            this.itemStyleClass = className;
         }
     }
 
