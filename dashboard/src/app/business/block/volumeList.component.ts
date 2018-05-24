@@ -61,6 +61,7 @@ export class VolumeListComponent implements OnInit {
         "description": { maxlength: "Max. length is 200." },
         "repName":{ required: "Name is required." },
         "profileOption":{ required: "Name is required." },
+        "expandSize":{required: "Expand Capacity is required."}
     };
     profiles;
     selectedVolume;
@@ -84,7 +85,7 @@ export class VolumeListComponent implements OnInit {
         });
         this.expandFormGroup = this.fb.group({
             "expandSize":[1,{validators:[Validators.required], updateOn:'change'} ],
-            "capacityOption":[this.capacityOptions[0],{validators:[Validators.required], updateOn:'change'} ]
+            "capacityOption":[this.capacityOptions[0] ]
         });
         this.expandFormGroup.get("expandSize").valueChanges.subscribe(
             (value:string)=>{
@@ -178,6 +179,12 @@ export class VolumeListComponent implements OnInit {
     }
 
     createSnapshot() {
+        if(!this.snapshotFormGroup.valid){
+            for(let i in this.snapshotFormGroup.controls){
+                this.snapshotFormGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
         let param = {
             name: this.snapshotFormGroup.value.name,
             volumeId: this.selectedVolume.id,
@@ -211,6 +218,12 @@ export class VolumeListComponent implements OnInit {
         });
     }
     expandVolume(){
+        if(!this.expandFormGroup.valid){
+            for(let i in this.expandFormGroup.controls){
+                this.expandFormGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
         let param = {
             "extend": {
                 "newSize": this.selectVolumeSize

@@ -66,7 +66,7 @@
 </p-dialog>
 
 <p-dialog *ngIf="expandDisplay" header="Expand" [(visible)]="expandDisplay" [width]="650" modal="modal">
-        <form [grid]="{label: 'ui-g-5', content:'ui-g-20'}" [formGroup]="expandFormGroup" >
+        <form [grid]="{label: 'ui-g-5', content:'ui-g-20'}" [formGroup]="expandFormGroup" [errorMessage]="errorMessage">
             <form-item label="Volume" >
                 <span class="text-only">{{selectedVolume.name}}</span>
             </form-item>
