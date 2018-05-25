@@ -32,5 +32,11 @@
     "sds_block_volume_expand":"Expand",
     "sds_block_volume_delete":"Delete",
     "sds_block_volume_create":"Create",
-    "sds_block_volume_search":"search"
+    "sds_block_volume_search":"search",
+    "sds_block_volume_createVol":"Create Volume",
+    "sds_block_volume_createVol_desc":"Apply for block storage resources.",
+    "sds_block_volume_quantity":"Quantity",
+    "sds_block_volume_addvolu":"Add Volumes",
+    "sds_block_volume_selectpro":"Select Profile",
+    "sds_block_volume_conf_rep":"Configuration replication now"
 }

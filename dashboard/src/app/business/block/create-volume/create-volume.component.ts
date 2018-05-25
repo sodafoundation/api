@@ -45,11 +45,11 @@ export class CreateVolumeComponent implements OnInit {
 
   bbbbb = 'name';
   label = {
-    zone: 'Availability Zone',
-    name: 'Name',
-    profile: 'Profile',
-    capacity: 'Capacity',
-    quantity: 'Quantity'
+    zone: this.i18n.keyID["sds_block_volume_az"],
+    name: this.i18n.keyID["sds_block_volume_name"],
+    profile: this.i18n.keyID["sds_block_volume_profile"],
+    capacity: this.i18n.keyID["sds_home_capacity"],
+    quantity: this.i18n.keyID["sds_block_volume_quantity"]
   };
   availabilityZones = [];
   volumeform;
