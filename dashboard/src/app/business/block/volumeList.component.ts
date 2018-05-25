@@ -48,9 +48,9 @@ export class VolumeListComponent implements OnInit {
     volumes = [];
     menuItems: MenuItem[];
     label = {
-        volume: 'Volume',
-        name: 'Name',
-        description: 'Description'
+        name: this.I18N.keyID['sds_block_volume_name'],
+        volume:  this.I18N.keyID['sds_block_volume_title'],
+        description:  this.I18N.keyID['sds_block_volume_descri']
     };
     snapshotFormGroup;
     modifyFormGroup;
@@ -61,12 +61,13 @@ export class VolumeListComponent implements OnInit {
         "description": { maxlength: "Max. length is 200." },
         "repName":{ required: "Name is required." },
         "profileOption":{ required: "Name is required." },
+        "expandSize":{required: "Expand Capacity is required."}
     };
     profiles;
     selectedVolume;
 
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         private router: Router,
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,
@@ -84,7 +85,7 @@ export class VolumeListComponent implements OnInit {
         });
         this.expandFormGroup = this.fb.group({
             "expandSize":[1,{validators:[Validators.required], updateOn:'change'} ],
-            "capacityOption":[this.capacityOptions[0],{validators:[Validators.required], updateOn:'change'} ]
+            "capacityOption":[this.capacityOptions[0] ]
         });
         this.expandFormGroup.get("expandSize").valueChanges.subscribe(
             (value:string)=>{
@@ -108,13 +109,13 @@ export class VolumeListComponent implements OnInit {
     ngOnInit() {
         this.menuItems = [
             {
-                "label": "Modify",
+                "label": this.I18N.keyID['sds_block_volume_modify'],
                 command: () => {
                     this.modifyDisplay = true;
                 }
             },
             {
-                "label": "Expand",
+                "label": this.I18N.keyID['sds_block_volume_expand'],
                 command: () => {
                     this.expandDisplay = true;
                     this.expandFormGroup.reset();
@@ -124,7 +125,7 @@ export class VolumeListComponent implements OnInit {
                 }
             },
             {
-                "label": "Delete", command: () => {
+                "label": this.I18N.keyID['sds_block_volume_delete'], command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
                         this.deleteVolumes(this.selectedVolume);
                     }
@@ -178,6 +179,12 @@ export class VolumeListComponent implements OnInit {
     }
 
     createSnapshot() {
+        if(!this.snapshotFormGroup.valid){
+            for(let i in this.snapshotFormGroup.controls){
+                this.snapshotFormGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
         let param = {
             name: this.snapshotFormGroup.value.name,
             volumeId: this.selectedVolume.id,
@@ -211,6 +218,12 @@ export class VolumeListComponent implements OnInit {
         });
     }
     expandVolume(){
+        if(!this.expandFormGroup.valid){
+            for(let i in this.expandFormGroup.controls){
+                this.expandFormGroup.controls[i].markAsTouched();
+            }
+            return;
+        }
         let param = {
             "extend": {
                 "newSize": this.selectVolumeSize
@@ -264,8 +277,8 @@ export class VolumeListComponent implements OnInit {
 
         this.confirmationService.confirm({
             message: msg,
-            header: "Delete Volume",
-            acceptLabel: "Delete",
+            header: this.I18N.keyID['sds_block_volume_deleVolu'],
+            acceptLabel: this.I18N.keyID['sds_block_volume_delete'],
             isWarning: true,
             accept: ()=>{
                 arr.forEach((item,index)=> {

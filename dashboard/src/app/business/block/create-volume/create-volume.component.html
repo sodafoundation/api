@@ -1,6 +1,6 @@
 <div class="content-header">
-    <h1>Create Volume</h1>
-    <p>Apply for block storage resources.</p>
+    <h1>{{i18n.keyID['sds_block_volume_createVol']}}</h1>
+    <p>{{i18n.keyID['sds_block_volume_createVol_desc']}}</p>
 </div>
 
 <form [formGroup]="volumeform" [grid]="{label: 'ui-g-2', content:'ui-g-20'}" (ngSubmit)="onSubmit(volumeform.value)" [errorMessage]="errorMessage">
@@ -26,23 +26,23 @@
 
         <div class="ui-grid-row volume-item" *ngFor="let volumeItem of volumeItems;index as i">
             <div class="ui-grid-col-2">
-                <input pInputText type="text" placeholder="Name" formControlName="{{'name'+i}}" />
+                <input pInputText type="text" placeholder="{{i18n.keyID['sds_block_volume_name']}}" formControlName="{{'name'+i}}" />
                 <div class="ui-message-container" *ngIf="volumeform.controls['name'+i] && !volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            Name is required
+                            {{getErrorMessage(volumeform.controls['name'+i],"name")}}
                         </span>
                     </div>
                 </div>
             </div>
             <div class="ui-grid-col-2">
-                <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}" placeholder="Select Profile"></p-dropdown>
+                <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}" placeholder="{{i18n.keyID['sds_block_volume_selectpro']}}"></p-dropdown>
                 <div class="ui-message-container" *ngIf="volumeform.controls['profileId'+i] && !volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].touched">
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            ProfileId is required
+                           {{getErrorMessage(volumeform.controls['profileId'+i],"profile")}}
                         </span>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="ui-message ui-message-error ui-corner-all">
                         <i class="fa fa-exclamation-circle"></i>
                         <span class="ui-message-error-text">
-                            Capacity is required
+                            {{getErrorMessage(volumeform.controls['size'+i],"Capacity")}}
                         </span>
                     </div>
                 </div>
@@ -72,12 +72,12 @@
         <div class="volume-item">
             <a class="item-flex">
                 <img width="24" height="24" src="assets/business/images/volume/u937.png" (click)="addVolumeItem()">
-                <span class="margin-between-img-text">Add Volumes</span>
+                <span class="margin-between-img-text">{{i18n.keyID["sds_block_volume_addvolu"]}}</span>
             </a>
         </div>
 
         <div class="volume-item">
-            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" [disabled]="true" name="replicationCheckbox" value="value" label="Configuration replication now"></p-checkbox>
+            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" [disabled]="true" name="replicationCheckbox" value="value" label="{{i18n.keyID['sds_block_volume_conf_rep']}}"></p-checkbox>
         </div>
 
         <div *ngIf="showReplicationConf">
@@ -86,7 +86,7 @@
     </div>
     <div class="bottom-button-margin">
         <!--  [disabled]="!volumeform.valid" -->
-        <button pButton type="submit" class="ui-button-secondary" label="OK"></button>
-        <button pButton type="button" label="Cancel" [routerLink]="['/block']"></button>
+        <button pButton type="submit" class="ui-button-secondary" label="{{i18n.keyID['ok']}}"></button>
+        <button pButton type="button" label="{{i18n.keyID['cancel']}}" [routerLink]="['/block']"></button>
     </div>
 </form>

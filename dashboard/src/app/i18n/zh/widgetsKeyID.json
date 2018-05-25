@@ -1,7 +1,7 @@
 {
-    "ok":       "确定",
+    "ok":       "OK",
     "close":    "关闭",
-    "cancel":   "取消",
+    "cancel":   "Cancel",
     "confirm":  "确认",
     "warn": "警告",
     "tip":  "提示",
