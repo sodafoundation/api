@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import { ParamStorService } from 'app/shared/api';
 import { ProfileService } from 'app/business/profile/profile.service';
 import {Observable} from "rxjs/Rx";
+import { I18NService } from 'app/shared/api';
 
 @Component({
     templateUrl: './home.component.html',
@@ -24,8 +25,8 @@ export class HomeComponent implements OnInit {
     constructor(
         private http: Http,
         private paramStor: ParamStorService,
-        private profileService: ProfileService
-        // private I18N: I18NService,
+        private profileService: ProfileService,
+        private I18N: I18NService,
         // private router: Router
     ) { }
 
@@ -41,31 +42,31 @@ export class HomeComponent implements OnInit {
         this.items = [
             {
                 countNum: 0,
-                label: "Tenants"
+                label: this.I18N.keyID["sds_home_tenants"]
             },
             {
                 countNum:0,
-                label: "Users"
+                label: this.I18N.keyID["sds_home_users"]
             },
             {
                 countNum: 0,
-                label: "Block Storages"
+                label: this.I18N.keyID["sds_home_storages"]
             },
             {
                 countNum: 0,
-                label: "Storage Pools"
+                label: this.I18N.keyID["sds_home_pools"]
             },
             {
                 countNum: 0,
-                label: "Volumes"
+                label: this.I18N.keyID["sds_home_volumes"]
             },
             {
                 countNum: 0,
-                label: "Volume Snapshots"
+                label:this.I18N.keyID["sds_home_snapshots"]
             },
             {
                 countNum: 0,
-                label: "Volume Replications"
+                label: this.I18N.keyID["sds_home_replications"]
             },
             {
                 countNum: 0,
@@ -75,9 +76,9 @@ export class HomeComponent implements OnInit {
                 countNum: 0,
                 label: "Cross-Region Migrations"
             }
-        ];        
+        ];
 
-        // this.chartDatasbar = { 
+        // this.chartDatasbar = {
         //     datasets: [
         //         {
         //             label: 'Total Capacity',
@@ -216,8 +217,8 @@ export class HomeComponent implements OnInit {
                         chartData.push(ele.capacity);
                         chartLabel.push(ele.name);
                     });
-                    
-                    this.chartDatasbar = { 
+
+                    this.chartDatasbar = {
                         labels: chartLabel,
                         datasets: [{
                             label:"Used Capacity",
@@ -246,16 +247,16 @@ export class HomeComponent implements OnInit {
                 storCapacityTotal = storCapacityTotal + element.totalCapacity;
                 storCapacityFree = storCapacityFree + element.freeCapacity;
             });
-            
-            this.chartDatas = { 
-                labels: ['Used Capacity', 'Free Capacity'],
+
+            this.chartDatas = {
+                labels: [this.I18N.keyID["sds_home_used_capacity"],this.I18N.keyID["sds_home_free_capacity"]],
                 datasets: [
                     {
                         label: 'high_capacity',
                         data: [(storCapacityTotal-storCapacityFree), storCapacityFree],
                         backgroundColor: [
                             "#438bd3",
-                            "rgba(224, 224, 224, .5)"                            
+                            "rgba(224, 224, 224, .5)"
                         ]
                         // hoverBackgroundColor: [
                         //     "#FF6384",

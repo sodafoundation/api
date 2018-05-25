@@ -1,8 +1,8 @@
 <div class="home-font-color-class" *ngIf="showAdminStatis">
     <div>
         <header>
-            <h2 class="header-h2-title-font">Overview</h2>
-            <p class="header-p-text">Updated 5 minutes ago</p>
+            <h2 class="header-h2-title-font">{{I18N.keyID["sds_home_overvew"]}}</h2>
+            <p class="header-p-text">{{I18N.keyID["sds_home_update"]}}</p>
         </header>
         <div class="ui-inputgroup">
             <div class="ui-g-12 ui-md-5">
@@ -58,19 +58,19 @@
     </div>
     <hr>
     <div>
-        <h2 class="header-h2-title-font">Capacity</h2>
+        <h2 class="header-h2-title-font">{{I18N.keyID["Capacity"]}}</h2>
         <div class="ui-inputgroup"></div>
         <div class="ui-g-12 ui-md-4">
-            <div class="capacity-secondary">Block Storage Capacity</div>
-            <p class="capacity-secondary">Updated 5 minutes ago</p>
+            <div class="capacity-secondary">{{I18N.keyID["sds_home_block_capacity"]}}</div>
+            <p class="capacity-secondary">{{I18N.keyID["sds_home_update"]}}</p>
             <div>
                 <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
             </div>
         </div>
         <div class="ui-g-12 ui-md-2"></div>
         <div class="ui-g-12 ui-md-4">
-            <div class="capacity-secondary">Top 5 Allocated Capacity by Block Profile</div>
-            <p class="capacity-secondary">Updated 5 minutes ago</p>
+            <div class="capacity-secondary">{{I18N.keyID["sds_home_top5"]}}</div>
+            <p class="capacity-secondary">{{I18N.keyID["sds_home_update"]}}</p>
             <p-chart [options]="chartBarOpion" type="bar" [data]="chartDatasbar"></p-chart>
         </div>
         <div class="ui-helper-clearfix"></div>
@@ -84,8 +84,8 @@
                 <p class="header-p-text">Updated 5 minutes ago</p>
             </header>
             <div class="ui-inputgroup">
-                
-    
+
+
                 <div class="ui-g-12 ui-md-12">
                     <div class="img-item-div-height img-item-div statisBg" style="height: 100px; margin-left: 0; margin-right: 0;">
                         <div class="ui-g-12 ui-md-4">
@@ -99,7 +99,7 @@
                         </div>
                     </div>
                 </div>
-    
+
         </div>
         <hr>
         <div>

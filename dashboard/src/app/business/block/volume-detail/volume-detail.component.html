@@ -52,10 +52,10 @@
     </div>
     <div>
         <p-tabView>
-            <p-tabPanel header="Snapshort">
+            <p-tabPanel header="{{i18n.keyID['sds_block_volume_snapshort']}}">
                 <app-snapshot-list [volumeId]="volumeId"></app-snapshot-list>
             </p-tabPanel>
-            <p-tabPanel header="Replication">
+            <p-tabPanel header="{{i18n.keyID['sds_block_volume_replication']}}">
                 <app-replication-list></app-replication-list>
             </p-tabPanel>
         </p-tabView>
