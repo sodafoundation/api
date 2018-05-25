@@ -17,7 +17,25 @@
     "sds_home_block_capacity":"Block Storage Capacity",
     "sds_home_top5":"Top 5 Allocated Capacity by Block Profile",
     "sds_home_used_capacity":"Used Capacity",
-    "sds_home_free_capacity":"Free Capacity"
+    "sds_home_free_capacity":"Free Capacity",
+    "sds_block_volume_name":"Name",
+    "sds_block_volume_status":"Status",
+    "sds_block_volume_profile":"Profile",
+    "sds_block_volume_az":"Availability Zone",
+    "sds_block_volume_operation":"Operation",
+    "sds_block_volume_title":"Volume",
+    "sds_block_volume_grouptitle":"Volume Group",
+    "sds_block_volume_createsna":"Create Snapshot",
+    "sds_block_volume_createrep":"Create Replication",
+    "sds_block_volume_more":"More",
+    "sds_block_volume_modify":"Modify",
+    "sds_block_volume_expand":"Expand",
+    "sds_block_volume_delete":"Delete",
+    "sds_block_volume_create":"Create",
+    "sds_block_volume_search":"search"
+
+
+
 
 
 }

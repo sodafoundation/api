@@ -67,7 +67,7 @@ export class VolumeListComponent implements OnInit {
     selectedVolume;
 
     constructor(
-        // private I18N: I18NService,
+        private I18N: I18NService,
         private router: Router,
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,
@@ -109,13 +109,13 @@ export class VolumeListComponent implements OnInit {
     ngOnInit() {
         this.menuItems = [
             {
-                "label": "Modify",
+                "label": this.I18N.keyID['sds_block_volume_modify'],
                 command: () => {
                     this.modifyDisplay = true;
                 }
             },
             {
-                "label": "Expand",
+                "label": this.I18N.keyID['sds_block_volume_expand'],
                 command: () => {
                     this.expandDisplay = true;
                     this.expandFormGroup.reset();
@@ -125,7 +125,7 @@ export class VolumeListComponent implements OnInit {
                 }
             },
             {
-                "label": "Delete", command: () => {
+                "label": this.I18N.keyID['sds_block_volume_delete'], command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
                         this.deleteVolumes(this.selectedVolume);
                     }
