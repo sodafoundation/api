@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { VolumeService,SnapshotService } from './../../volume.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../../../components/common/api';
+import { I18NService } from 'app/shared/api';
 
 @Component({
   selector: 'app-snapshot-list',
@@ -40,7 +41,8 @@ export class SnapshotListComponent implements OnInit {
     private VolumeService: VolumeService,
     private SnapshotService: SnapshotService,
     private fb: FormBuilder,
-    private confirmationService:ConfirmationService
+    private confirmationService:ConfirmationService,
+    private I18N:I18NService
   ) {
     this.snapshotFormGroup = this.fb.group({
       "name": ["", Validators.required],
@@ -51,9 +53,9 @@ export class SnapshotListComponent implements OnInit {
   ngOnInit() {
     this.getVolumeById(this.volumeId);
     this.label = {
-      name: 'name',
-      volume: 'Volume',
-      description: 'Description'
+      name: this.I18N.keyID['sds_block_volume_name'],
+      volume:  this.I18N.keyID['sds_block_volume_title'],
+      description:  this.I18N.keyID['sds_block_volume_descri']
     }
     this.getSnapshots(
       {
@@ -97,8 +99,8 @@ export class SnapshotListComponent implements OnInit {
 
         this.confirmationService.confirm({
             message: msg,
-            header: "Delete Snapshots",
-            acceptLabel: "Delete",
+            header: this.I18N.keyID['sds_block_volume_del_sna'],
+            acceptLabel: this.I18N.keyID['sds_block_volume_delete'],
             isWarning: true,
             accept: ()=>{
                 param.forEach(snapshot => {

@@ -3,6 +3,7 @@ import { Router,ActivatedRoute} from '@angular/router';
 
 import { VolumeService } from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
+import { I18NService } from 'app/shared/api';
 
 @Component({
   selector: 'app-volume-detail',
@@ -20,24 +21,25 @@ export class VolumeDetailComponent implements OnInit {
   constructor(
     private VolumeService: VolumeService,
     private ActivatedRoute: ActivatedRoute,
-    private ProfileService: ProfileService
+    private ProfileService: ProfileService,
+    private i18n:I18NService
   ) { }
 
   ngOnInit() {
     this.ActivatedRoute.params.subscribe((params) => this.volumeId = params.volumeId);
 
     this.items = [
-      { label: 'Volume', url: '/block' },
-      { label: 'Volume detail', url: '/volumeDetail' }
+      { label: this.i18n.keyID["sds_block_volume_title"], url: '/block' },
+      { label: this.i18n.keyID["sds_block_volume_detail"], url: '/volumeDetail' }
     ];
 
     this.label = {
-      Name: 'Name',
-      Profile: 'Profile',
-      Status: 'Status',
-      VolumeID: 'Volume ID',
-      Capacity: 'Capacity',
-      CreatedAt: 'Created At'
+      Name: this.i18n.keyID["sds_block_volume_name"],
+      Profile: this.i18n.keyID["sds_block_volume_profile"],
+      Status: this.i18n.keyID["sds_block_volume_status"],
+      VolumeID: this.i18n.keyID["sds_block_volume_id"],
+      Capacity: this.i18n.keyID["sds_home_capacity"],
+      CreatedAt: this.i18n.keyID["sds_block_volume_createat"]
     };
 
     this.getVolume(this.volumeId);
