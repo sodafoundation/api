@@ -378,38 +378,39 @@ type VolumeGroup struct {
 	Name          string
 	TotalCapacity int64
 	FreeCapacity  int64
+	UUID          string
 }
 
 func (d *Driver) getVGList() (*[]VolumeGroup, error) {
-	const vgInfoLineCount = 10
-	info, err := d.handler("vgdisplay", []string{})
+	info, err := d.handler("vgs", []string{
+		"--noheadings", "--nosuffix",
+		"--unit=g",
+		"-o", "name,size,free,uuid",
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	lines := strings.Split(info, "\n")
-	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
-
-	var vgIdx = -1
+	var vgs []VolumeGroup
 	for _, line := range lines {
-		if strings.Contains(line, "--- Volume group ---") {
-			vgIdx++
+		val := strings.Fields(line)
+		if len(val) != 4 {
 			continue
 		}
-		if strings.Contains(line, "VG Name") {
-			slice := strings.Fields(line)
-			vgs[vgIdx].Name = slice[2]
+
+		capa, _ := strconv.ParseFloat(val[1], 64)
+		total := int64(capa)
+		capa, _ = strconv.ParseFloat(val[2], 64)
+		free := int64(capa)
+
+		vg := VolumeGroup{
+			Name:          val[0],
+			TotalCapacity: total,
+			FreeCapacity:  free,
+			UUID:          val[3],
 		}
-		if strings.Contains(line, "VG Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[2], 64)
-			vgs[vgIdx].TotalCapacity = int64(capa)
-		}
-		if strings.Contains(line, "Free  PE / Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[len(slice)-2], 64)
-			vgs[vgIdx].FreeCapacity = int64(capa)
-		}
+		vgs = append(vgs, vg)
 	}
 	return &vgs, nil
 }
@@ -429,7 +430,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, vg.Name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, vg.UUID).String(),
 			},
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
