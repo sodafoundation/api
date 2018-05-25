@@ -10,7 +10,7 @@ export class Utils {
         BYTE: "BYTE",
         BIT: "BIT"
     }
-    
+
     /**
      * Formatting data, preserving three decimal (interception)
      * ex. 123456.78901 -> 123,456.789
@@ -90,6 +90,19 @@ export class Utils {
 
         ret = this.numberFormat(ret, decimals);
         return ret == 0 ? ret + " " + minUnit : ret + " " + unit;
+    }
+
+    /**
+     * Help get validation information.
+     * @param control form information
+     * @param page extra validation information param
+     * @returns {string}
+     */
+    static getErrorKey(control,page){
+        if(control.errors){
+            let key = Object.keys(control.errors)[0];
+            return page ? "sds_"+ page +key:"sds_"+key;
+        }
     }
 
 }
