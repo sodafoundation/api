@@ -76,7 +76,7 @@ export class CreateVolumeComponent implements OnInit {
     private ProfileService: ProfileService,
     private VolumeService: VolumeService,
     private replicationService:ReplicationService,
-    private i18n:I18NService
+    public i18n:I18NService
   ) {}
 
   ngOnInit() {

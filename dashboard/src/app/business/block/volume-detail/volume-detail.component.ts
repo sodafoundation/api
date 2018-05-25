@@ -22,7 +22,7 @@ export class VolumeDetailComponent implements OnInit {
     private VolumeService: VolumeService,
     private ActivatedRoute: ActivatedRoute,
     private ProfileService: ProfileService,
-    private i18n:I18NService
+    public i18n:I18NService
   ) { }
 
   ngOnInit() {

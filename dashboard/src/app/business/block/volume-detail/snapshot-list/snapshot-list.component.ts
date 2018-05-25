@@ -42,7 +42,7 @@ export class SnapshotListComponent implements OnInit {
     private SnapshotService: SnapshotService,
     private fb: FormBuilder,
     private confirmationService:ConfirmationService,
-    private I18N:I18NService
+    public I18N:I18NService
   ) {
     this.snapshotFormGroup = this.fb.group({
       "name": ["", Validators.required],

@@ -67,7 +67,7 @@ export class VolumeListComponent implements OnInit {
     selectedVolume;
 
     constructor(
-        private I18N: I18NService,
+        public I18N: I18NService,
         private router: Router,
         private VolumeService: VolumeService,
         private SnapshotService: SnapshotService,

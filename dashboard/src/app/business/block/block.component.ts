@@ -37,7 +37,7 @@ import { I18nPluralPipe } from '@angular/common';
 export class BlockComponent implements OnInit{
 
     constructor(
-         private I18N: I18NService,
+         public I18N: I18NService,
         // private router: Router
     ){}
 
