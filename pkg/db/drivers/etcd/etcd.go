@@ -554,13 +554,8 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List pools failed: ", err.Error())
 		return nil, err
 	}
-	var pol []*model.StoragePoolSpec
-	for _, v := range pools {
-		if v.TenantId == ctx.TenantId {
-			pol = append(pol, v)
-		}
-	}
-	pols := c.SelectPools(m, pol)
+
+	pols := c.SelectPools(m, pools)
 	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
 	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
 }
@@ -829,13 +824,8 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		log.Error("List profiles failed: ", err)
 		return nil, err
 	}
-	var prof []*model.ProfileSpec
-	for _, v := range profiles {
-		if v.TenantId == ctx.TenantId {
-			prof = append(prof, v)
-		}
-	}
-	prfs := c.SelectProfiles(m, prof)
+
+	prfs := c.SelectProfiles(m, profiles)
 
 	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
 
@@ -1144,13 +1134,7 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		return nil, err
 	}
 
-	var vol []*model.VolumeSpec
-	for _, v := range volumes {
-		if v.TenantId == ctx.TenantId {
-			vol = append(vol, v)
-		}
-	}
-	vols := c.SelectVolumes(m, vol)
+	vols := c.SelectVolumes(m, volumes)
 
 	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION"})
 
@@ -1462,14 +1446,7 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		return nil, err
 	}
 
-	var volacts []*model.VolumeAttachmentSpec
-	for _, v := range volumeAttachments {
-		if v.TenantId == ctx.TenantId {
-			volacts = append(volacts, v)
-		}
-	}
-
-	atcs := c.SelectVolumeAttachments(m, volacts)
+	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
 	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortVolumeAttachments(atcs, p)[p.beginIdx:p.endIdx], nil
@@ -1757,14 +1734,7 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		return nil, err
 	}
 
-	var volsnap []*model.VolumeSnapshotSpec
-	for _, v := range volumeSnapshots {
-		if v.TenantId == ctx.TenantId {
-			volsnap = append(volsnap, v)
-		}
-	}
-
-	snps := c.SelectSnapshots(m, volsnap)
+	snps := c.SelectSnapshots(m, volumeSnapshots)
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
@@ -2034,14 +2004,7 @@ func (c *Client) ListReplicationWithFilter(ctx *c.Context, m map[string][]string
 		return nil, err
 	}
 
-	var rep []*model.ReplicationSpec
-	for _, v := range replicas {
-		if v.TenantId == ctx.TenantId {
-			rep = append(rep, v)
-		}
-	}
-
-	rlist := c.SelectReplication(m, rep)
+	rlist := c.SelectReplication(m, replicas)
 
 	var sortKeys []string
 	for k := range replicationSortKey2Func {
