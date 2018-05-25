@@ -32,7 +32,7 @@
     </p-column>
 </p-dataTable>
 
-<p-dialog *ngIf="createSnapshotDisplay" header="Create Snapshot" [(visible)]="createSnapshotDisplay" [width]="600" modal="modal">
+<p-dialog *ngIf="createSnapshotDisplay" header="{{I18N.keyID['sds_block_volume_createsna']}}" [(visible)]="createSnapshotDisplay" [width]="600" modal="modal">
     <form [grid]="{label: 'ui-g-3', content:'ui-g-20'}" [formGroup]="snapshotFormGroup" [errorMessage]="errorMessage">
         <form-item label="{{label.volume}}" [required]="false">
             <span class="text-only">{{selectedVolume.name}}</span>
@@ -48,44 +48,44 @@
     </form>
 
     <p-footer>
-        <button type="button" pButton (click)="createSnapshot()" label="OK"></button>
-        <button type="button" pButton (click)="createSnapshotDisplay=false" label="Cancel"></button>
+        <button type="button" pButton (click)="createSnapshot()" label="{{I18N.keyID['ok']}}"></button>
+        <button type="button" pButton (click)="createSnapshotDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
     </p-footer>
 </p-dialog>
 
-<p-dialog *ngIf="modifyDisplay" header="Modify" [(visible)]="modifyDisplay" [width]="450" modal="modal">
+<p-dialog *ngIf="modifyDisplay" header="{{I18N.keyID['sds_block_volume_modify']}}" [(visible)]="modifyDisplay" [width]="450" modal="modal">
     <form [grid]="{label: 'ui-g-2', content:'ui-g-20'}" [formGroup]="modifyFormGroup" [errorMessage]="errorMessage">
         <form-item label="{{label.name}}" [required]="true">
             <input type="text" pInputText formControlName="name" value="{{selectedVolume.name}}" />
         </form-item>
     </form>
     <p-footer>
-        <button type="button" pButton (click)="modifyVolume()" label="OK" [disabled]="!modifyFormGroup.valid || modifyFormGroup.value.name === selectedVolume.name"></button>
-        <button type="button" pButton (click)="modifyDisplay=false" label="Cancel"></button>
+        <button type="button" pButton (click)="modifyVolume()" label="{{I18N.keyID['ok']}}" [disabled]="!modifyFormGroup.valid || modifyFormGroup.value.name === selectedVolume.name"></button>
+        <button type="button" pButton (click)="modifyDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
     </p-footer>
 </p-dialog>
 
-<p-dialog *ngIf="expandDisplay" header="Expand" [(visible)]="expandDisplay" [width]="650" modal="modal">
+<p-dialog *ngIf="expandDisplay" header="{{I18N.keyID['sds_block_volume_modify']}}" [(visible)]="expandDisplay" [width]="650" modal="modal">
         <form [grid]="{label: 'ui-g-5', content:'ui-g-20'}" [formGroup]="expandFormGroup" [errorMessage]="errorMessage">
-            <form-item label="Volume" >
+            <form-item label="{{I18N.keyID['sds_block_volume_title']}}Volume" >
                 <span class="text-only">{{selectedVolume.name}}</span>
             </form-item>
-            <form-item label="Current Capacity">
+            <form-item label="{{I18N.keyID['sds_block_volume_curr_capa']}}">
                 <span class="text-only">{{selectedVolume.size}}</span>
             </form-item>
-            <form-item label="Expand Capacity By" >
+            <form-item label="{{I18N.keyID['sds_block_volume_expandby']}}" >
                 <div style="display: inline-flex;" class="ui-fluid">
                         <input *ngIf="!isEditUser" type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
                         <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
                 </div>
             </form-item>
-            <form-item label="Total Capacity After Expansion" >
+            <form-item label="{{I18N.keyID['sds_block_volume_totalcapa']}}" >
                     <span class="text-only">{{selectVolumeSize}}</span>
             </form-item>
         </form>
         <p-footer>
-            <button type="button" pButton (click)="expandVolume()" label="OK" ></button>
-            <button type="button" pButton (click)="expandDisplay=false" label="Cancel"></button>
+            <button type="button" pButton (click)="expandVolume()" label="{{I18N.keyID['ok']}}" ></button>
+            <button type="button" pButton (click)="expandDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
         </p-footer>
     </p-dialog>
 <!--Create Replication-->

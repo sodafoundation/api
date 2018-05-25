@@ -48,9 +48,9 @@ export class VolumeListComponent implements OnInit {
     volumes = [];
     menuItems: MenuItem[];
     label = {
-        volume: 'Volume',
-        name: 'Name',
-        description: 'Description'
+        name: this.I18N.keyID['sds_block_volume_name'],
+        volume:  this.I18N.keyID['sds_block_volume_title'],
+        description:  this.I18N.keyID['sds_block_volume_descri']
     };
     snapshotFormGroup;
     modifyFormGroup;
@@ -277,8 +277,8 @@ export class VolumeListComponent implements OnInit {
 
         this.confirmationService.confirm({
             message: msg,
-            header: "Delete Volume",
-            acceptLabel: "Delete",
+            header: this.I18N.keyID['sds_block_volume_deleVolu'],
+            acceptLabel: this.I18N.keyID['sds_block_volume_delete'],
             isWarning: true,
             accept: ()=>{
                 arr.forEach((item,index)=> {

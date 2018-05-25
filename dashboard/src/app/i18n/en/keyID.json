@@ -45,8 +45,11 @@
     "sds_block_volume_snapshort":"Snapshort",
     "sds_block_volume_replication":"Replication",
     "sds_block_volume_descri":"Description",
-    "sds_block_volume_del_sna":"Delete Snapshots"
-
+    "sds_block_volume_del_sna":"Delete Snapshots",
+    "sds_block_volume_curr_capa":"Current Capacity",
+    "sds_block_volume_expandby":"Expand Capacity By",
+    "sds_block_volume_totalcapa":"Total Capacity After Expansion",
+    "sds_block_volume_deleVolu":"Delete Volume"
 
 
 }
