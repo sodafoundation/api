@@ -118,6 +118,17 @@ func TestIsAvailablePool(t *testing.T) {
 		t.Errorf("Expected %v, get %v", false, isAvailable)
 	}
 
+	delete(filterReq, "totalCapacity")
+	filterReq[":totalCapacity"] = "!= 200"
+	isAvailable, err = IsAvailablePool(filterReq, &SamplePools[1])
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != isAvailable {
+		t.Errorf("Expected %v, get %v", false, isAvailable)
+	}
+
 }
 
 func TestMatch(t *testing.T) {
