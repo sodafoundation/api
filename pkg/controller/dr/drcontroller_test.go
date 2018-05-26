@@ -411,10 +411,8 @@ func TestFailoverReplication(t *testing.T) {
 		ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	f := &model.FailoverReplicationSpec{
-		Failover: model.Failover{
-			AllowAttachedVolume: true,
-			SecondaryBackendId:  model.ReplicationDefaultBackendId,
-		},
+		AllowAttachedVolume: true,
+		SecondaryBackendId:  model.ReplicationDefaultBackendId,
 	}
 	c := NewController(NewFakeVolumeController())
 	err := c.FailoverReplication(context.NewAdminContext(), r, f, &volumes[0], &volumes[1])

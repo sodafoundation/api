@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# 'stack' user is just for install keystone through devstack
 
 _XTRACE_KEYSTONE=$(set +o | grep xtrace)
 set +o xtrace
 
+# 'stack' user is just for install keystone through devstack
 osds::keystone::create_user(){
     if id ${STACK_USER_NAME} &> /dev/null; then
         return
@@ -110,7 +110,7 @@ osds::keystone::install(){
     osds::keystone::download_code
     osds::keystone::opensds_conf
 
-    # If keystone is on there no need continue next steps.
+    # If keystone is ready to start, there is no need continue next step.
     if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
         return
     fi

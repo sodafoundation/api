@@ -1,0 +1,50 @@
+<div class="custom-breadcrumb">
+    <span *ngFor="let item of items; index as i">
+        <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
+        <span *ngIf="(i+1) !== items.length">></span>
+    </span>
+</div>
+<div *ngIf='data'>
+    <div class="ui-g-12 ui-md-6">
+        <div class="content-header">
+            <h1>{{data.name}}</h1>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Access Protocol:</span>
+            <span class="ui-g-12 ui-md-8">{{data.extras.protocol}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">Provisioning Type:</span>
+            <span class="ui-g-12 ui-md-8">{{data.storageType}}</span>
+        </div>
+        <div>
+            <span class="ui-g-12 ui-md-4">QoS Policy:</span>
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+            <span class="ui-g-12 ui-md-4">Replication Policy:</span>
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+            <span class="ui-g-12 ui-md-4">Snapshot Policy:</span>
+            <div class="ui-g-12 ui-md-8" style="min-height:30px">
+                <div *ngFor="let policy of data.extras.policys;index as i" [ngClass]="{'modify-profile-item':i !== 0}">{{policy}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g-12 ui-md-6">
+        <p-chart [options]="option" [responsive]="false" [width]="300" [height]="400" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-g-12 ui-md-12">
+        <span class="ui-g-12 ui-md-2">Storage Pools:</span>
+        <div class="ui-g-12 ui-md-8">
+            <app-storage-pools-table [selectProfile]="data"></app-storage-pools-table>
+        </div>
+    </div>
+
+    <div class="ui-helper-clearfix"></div>
+    <div class="bottom-button-margin">
+        <button pButton type="button" *ngIf="false" label="Modify" class="ui-button-secondary"></button>
+        <button pButton type="button" label="Back" class="ui-button-secondary" [routerLink]="['/profile']"></button>
+    </div>
+</div>

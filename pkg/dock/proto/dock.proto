@@ -211,6 +211,8 @@ message CreateAttachmentOpts {
     string driverName = 7;
     // The Context
     string context = 8;
+    // The protocol
+    string AccessProtocol = 9;
 }
 
 // DeleteAttachmentOpts is a structure which indicates all required
@@ -228,6 +230,8 @@ message DeleteAttachmentOpts {
     string driverName = 5;
     // The Context
     string context = 6;
+    // The protocol
+    string AccessProtocol = 7;
 }
 
 message HostInfo {
