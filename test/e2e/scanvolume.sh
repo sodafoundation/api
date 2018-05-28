@@ -99,7 +99,7 @@ fdisk -l|grep Disk >$DISKLOG
 #   else
 #     echo "volume attachment fail!"
 #fi
-#grep "Disk /dev/sd" $DISKLOG |grep "2 GiB">$DISKRSLOG
+echo `grep "Disk /dev/sd" $DISKLOG |grep "2 GiB"`
 
 #login out from the target 
 iscsiadm -m node –T $target -p $ip -u

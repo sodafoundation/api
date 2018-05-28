@@ -32,7 +32,6 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var DISKLOG = "disk.log"
 var VOLNAME = "flowvolume"
 var VOLDESC = "description"
 var UPDATENAME = "Update Name"
@@ -135,13 +134,14 @@ func GetVolSnapInfo() []string {
 }
 
 //check Attachemnt By scan volume
-func ScanVolume() {
+func ScanVolume() string {
 	cmd := exec.Command("/bin/bash", "./scanvolume.sh")
-	_, err := cmd.Output()
+	out, err := cmd.Output()
 	if err != nil {
 		fmt.Println("cmd.Output: ", err)
-		return
+		return ""
 	}
+	return string(out)
 }
 
 //clear log method
@@ -155,7 +155,7 @@ func CleanLog() {
 }
 
 //Check if Disk Log contain /dev/sd&& 2 GiB
-func DiskChk(path string, str string) bool {
+func DiskChk(log string, str string) bool {
 	dLog, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -378,10 +378,10 @@ func TestShowAttacDetail(t *testing.T) {
 	attsta := GetVolAttaID()[1]
 	getatt, err := u.GetVolumeAttachment(attID)
 	//scan volume
-	ScanVolume()
+	out := ScanVolume()
 	//read Dsik.log
-	dev := DiskChk(DISKLOG, "/dev/sd")
-	ca := DiskChk(DISKLOG, "2 GiB")
+	dev := DiskChk(out, "/dev/sd")
+	ca := DiskChk(out, "2 GiB")
 	if err != nil || attsta != "available" || dev == false || ca == false {
 		t.Log("Volume attachment detail check fail", err)
 		return
