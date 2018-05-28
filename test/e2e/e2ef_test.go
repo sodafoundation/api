@@ -135,13 +135,14 @@ func GetVolSnapInfo() []string {
 }
 
 //check Attachemnt By scan volume
-func ScanVolume() {
+func ScanVolume string() {
 	cmd := exec.Command("/bin/bash", "./scanvolume.sh")
-	_, err := cmd.Output()
+	out, err := cmd.Output()
 	if err != nil {
 		fmt.Println("cmd.Output: ", err)
-		return
+		return ""
 	}
+	return string(out)
 }
 
 //clear log method
@@ -378,7 +379,8 @@ func TestShowAttacDetail(t *testing.T) {
 	attsta := GetVolAttaID()[1]
 	getatt, err := u.GetVolumeAttachment(attID)
 	//scan volume
-	ScanVolume()
+	out :=ScanVolume()
+	t.Log(out)
 	//read Dsik.log
 	dev := DiskChk(DISKLOG, "/dev/sd")
 	ca := DiskChk(DISKLOG, "2 GiB")
