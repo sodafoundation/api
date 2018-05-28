@@ -1,21 +1,19 @@
 #!bin/bash
 
 CHKLOG=/var/log/scan/hkconfig.log
-#TARGETIP=10.10.3.156:3260
 ISCSILOG=/var/log/scan/iscsi.log
 TARGETLOG=/var/log/scan/target.log
 LOGINLOG=/var/log/scan/login.log
 SESSIONLOG=/var/log/scan/session.log
 DISKLOG=disk.log
 TARGETIPLOG=/var/log/scan/targetip.log
-#DISKRSLOG=/var/log/scan/diskrs.log
 
 declare target
-
+echo "Begin to Scan Attachment Volume"
 #install chkconfig
-
+echo `ll`
 sudo apt install sysv-rc-conf>$CHKLOG
-
+echo $CHKLOG
 #check if install is finish
 
 count=1
