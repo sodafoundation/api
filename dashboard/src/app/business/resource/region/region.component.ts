@@ -20,7 +20,7 @@ import { I18nPluralPipe } from '@angular/common';
             transition('visible => hidden', animate('400ms ease-in')),
             transition('hidden => visible', animate('400ms ease-out'))
         ]),
-    
+
         trigger('notificationTopbar', [
             state('hidden', style({
             height: '0',
@@ -39,19 +39,19 @@ export class RegionComponent implements OnInit{
     regions = [];
 
     constructor(
-        // private I18N: I18NService,
+         private I18N: I18NService,
         // private router: Router
     ){}
-    
+
     ngOnInit() {
         this.regions = [
-            { "name": "Region_Chengdu", "role": "Primary Region", }
+            { "name": this.I18N.keyID['sds_resource_region_default'], "role": "Primary Region", }
         ];
     }
 
     rowSelect(rowdata){
         console.log(rowdata);
     }
-    
+
 }
 
