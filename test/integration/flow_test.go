@@ -45,7 +45,7 @@ var UPDATESNAPDESC = "UpdateSnapDesc"
 
 //Get Profile ID
 func GetProfileID() string {
-	proList, _ := client.ListProfiles()
+	proList, _ := auth.ListProfiles()
 	projs, _ := json.Marshal(proList)
 	var pros []model.ProfileSpec
 	var prfID string
@@ -60,7 +60,7 @@ func GetProfileID() string {
 
 //Get volume ID & status
 func GetVolumeID(volName string) []string {
-	volList, err := client.ListVolumes()
+	volList, err := auth.ListVolumes()
 	if err != nil {
 		fmt.Println("Can't list volume!")
 		return []string{}
@@ -88,7 +88,7 @@ func GetVolumeID(volName string) []string {
 
 //Get volume Attachment ID & status
 func GetVolAttaID() []string {
-	attList, err := client.ListVolumeAttachments()
+	attList, err := auth.ListVolumeAttachments()
 	if err != nil {
 		return []string{}
 	}
@@ -111,7 +111,7 @@ func GetVolAttaID() []string {
 //Get volume snapInfo
 
 func GetVolSnapInfo() []string {
-	snapList, err := client.ListVolumeSnapshots()
+	snapList, err := auth.ListVolumeSnapshots()
 	if err != nil {
 		return []string{}
 	}
@@ -181,7 +181,7 @@ func DiskChk(path string, str string) bool {
 	return false
 }
 
-var client = client.NewClient(&client.Config{
+var auth = client.NewClient(&client.Config{
 	Endpoint:    "http://localhost:50040",
 	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
@@ -191,7 +191,7 @@ func TestCreateProfile(t *testing.T) {
 		Name:        "default",
 		Description: "default policy",
 	}
-	_, err := client.CreateProfile(body)
+	_, err := auth.CreateProfile(body)
 	if err != nil {
 		t.Error("create profile in client failed:", err)
 		return
@@ -200,7 +200,7 @@ func TestCreateProfile(t *testing.T) {
 }
 
 func TestGetProfileList(t *testing.T) {
-	_, err := client.ListProfiles()
+	_, err := auth.ListProfiles()
 	if err != nil {
 		t.Error("list profiles in client failed:", err)
 		return
@@ -212,7 +212,7 @@ func TestGetProfileDetail(t *testing.T) {
 	//get create profile id
 	prfID := GetProfileID()
 	//Get ProfileDetail
-	_, err := client.GetProfile(prfID)
+	_, err := auth.GetProfile(prfID)
 	if err != nil {
 		t.Error("get profile in client failed:", err)
 		return
@@ -226,7 +226,7 @@ func TestCreateVolume(t *testing.T) {
 		Description: VOLDESC,
 		Size:        int64(1),
 	}
-	_, err := client.CreateVolume(volbody)
+	_, err := auth.CreateVolume(volbody)
 	if err != nil {
 		t.Log("Create Volume Fail")
 	}
@@ -240,7 +240,7 @@ func TestUpdateVolume(t *testing.T) {
 		Name:        UPDATENAME,
 		Description: UPDATEDESC,
 	}
-	_, err := client.UpdateVolume(volID, body)
+	_, err := auth.UpdateVolume(volID, body)
 	volary := GetVolumeID(UPDATENAME)
 	name := volary[2]
 	desc := volary[3]
@@ -259,7 +259,7 @@ func TestExtendVolume(t *testing.T) {
 		Extend: model.ExtendSpec{EXTENDSIZE},
 	}
 
-	_, err := client.ExtendVolume(volID, body)
+	_, err := auth.ExtendVolume(volID, body)
 	volext := GetVolumeID(UPDATENAME)
 	size := volext[4]
 	if err != nil || size != string(EXTENDSIZE) {
@@ -275,7 +275,7 @@ func TestGetVolume(t *testing.T) {
 	volID := volary[0]
 	status := volary[1]
 
-	_, err := client.GetVolume(volID)
+	_, err := auth.GetVolume(volID)
 	if err != nil || status != "available" {
 		t.Error("get volume in client failed:", err)
 		return
@@ -292,7 +292,7 @@ func TestCreateSnapshot(t *testing.T) {
 		Description: SNAPDESC,
 		VolumeId:    volID,
 	}
-	_, err := client.CreateVolumeSnapshot(body)
+	_, err := auth.CreateVolumeSnapshot(body)
 	if err != nil {
 		t.Error("create volume snapshot in client failed:", err)
 		return
@@ -308,7 +308,7 @@ func TestUpdateSnapshot(t *testing.T) {
 		Name:        UPDATESNAPNAME,
 		Description: UPDATESNAPDESC,
 	}
-	_, err := client.UpdateVolumeSnapshot(snpID, body)
+	_, err := auth.UpdateVolumeSnapshot(snpID, body)
 	if err != nil {
 		t.Error("update volume snapshot in client failed:", err)
 		return
@@ -320,7 +320,7 @@ func TestUpdateSnapshot(t *testing.T) {
 //Get Volume snapshot Detail
 func TestGetSnapshotDetail(t *testing.T) {
 	snpID := GetVolSnapInfo()[0]
-	_, err := client.GetVolumeSnapshot(snpID)
+	_, err := auth.GetVolumeSnapshot(snpID)
 	if err != nil || GetVolSnapInfo()[1] != UPDATESNAPNAME || GetVolSnapInfo()[2] != UPDATESNAPDESC {
 		t.Error("get volume snapshot in client failed:", err)
 		return
@@ -332,7 +332,7 @@ func TestGetSnapshotDetail(t *testing.T) {
 //Delete Volume Snapshot
 func TestDelSnapshot(t *testing.T) {
 	snapId := GetVolSnapInfo()[0]
-	if err := client.DeleteVolumeSnapshot(snapId, nil); err != nil {
+	if err := auth.DeleteVolumeSnapshot(snapId, nil); err != nil {
 		t.Error("Delete Snapshot Fail")
 		return
 	}
@@ -347,7 +347,7 @@ func TestCreateVolAttch(t *testing.T) {
 		HostInfo: model.HostInfo{},
 	}
 
-	_, err := client.CreateVolumeAttachment(body)
+	_, err := auth.CreateVolumeAttachment(body)
 	if err != nil {
 		t.Error("create volume attachment in client failed:", err)
 		return
@@ -360,7 +360,7 @@ func TestCreateVolAttch(t *testing.T) {
 func TestShowAttacDetail(t *testing.T) {
 	attID := GetVolAttaID()[0]
 	attsta := GetVolAttaID()[1]
-	_, err := client.GetVolumeAttachment(attID)
+	_, err := auth.GetVolumeAttachment(attID)
 	//scan volume
 	ScanVolume()
 	//read Dsik.log
@@ -376,10 +376,10 @@ func TestShowAttacDetail(t *testing.T) {
 //delete volume attachment
 func TestDeleteVolAttach(t *testing.T) {
 	attID := GetVolAttaID()[0]
-	err := client.DeleteVolumeAttachment(attID, nil)
+	err := auth.DeleteVolumeAttachment(attID, nil)
 	//check if attachment is exist after
 	for i := 0; i < 5; i++ {
-		chk, _ := client.GetVolumeAttachment(attID)
+		chk, _ := auth.GetVolumeAttachment(attID)
 		if chk == nil {
 			break
 		} else {
@@ -389,7 +389,7 @@ func TestDeleteVolAttach(t *testing.T) {
 	//Chk volume scan
 	ScanVolume()
 	b := DiskChk(DISKLOG, "/dev/sdb")
-	chk2, _ := client.GetVolumeAttachment(attID)
+	chk2, _ := auth.GetVolumeAttachment(attID)
 	if err != nil || chk2 != nil || b == true {
 		t.Log("Delete Attachment Fail", err)
 	}
@@ -400,17 +400,17 @@ func TestDeleteVolAttach(t *testing.T) {
 func TestDeleteVolume(t *testing.T) {
 	volID := GetVolumeID(UPDATENAME)[0]
 	body := &model.VolumeSpec{}
-	err := client.DeleteVolume(volID, body)
+	err := auth.DeleteVolume(volID, body)
 	//check if attachment is exist
 	for i := 0; i < 10; i++ {
-		chk, _ := client.GetVolume(volID)
+		chk, _ := auth.GetVolume(volID)
 		if chk == nil {
 			break
 		} else {
 			time.Sleep(1 * 1e9)
 		}
 	}
-	chk2, _ := client.GetVolume(volID)
+	chk2, _ := auth.GetVolume(volID)
 	if err != nil || chk2 != nil {
 		t.Error("delete volume in client failed:", err)
 	}
@@ -421,7 +421,7 @@ func TestDeleteVolume(t *testing.T) {
 //delete profile
 func TestDeleteProfile(t *testing.T) {
 	prfID := GetProfileID()
-	err := client.DeleteProfile(prfID)
+	err := auth.DeleteProfile(prfID)
 	if err != nil {
 		t.Error("delete profile in client failed:", err)
 		return
