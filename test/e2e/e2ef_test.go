@@ -226,7 +226,7 @@ func TestGetProfileDetail(t *testing.T) {
 	t.Log("Get Profile Detail Success")
 }
 
-func TestCreateVolume(t *testing.T) {
+func TestCreateVolumeFlow(t *testing.T) {
 	var volbody = &model.VolumeSpec{
 		Name:        VOLNAME,
 		Description: VOLDESC,
@@ -242,7 +242,7 @@ func TestCreateVolume(t *testing.T) {
 }
 
 //update volume
-func TestUpdateVolume(t *testing.T) {
+func TestUpdateVolumeFlow(t *testing.T) {
 	volID := GetVolumeID(VOLNAME)[0]
 	body := &model.VolumeSpec{
 		Name:        UPDATENAME,
@@ -262,7 +262,7 @@ func TestUpdateVolume(t *testing.T) {
 }
 
 //extend volume
-func TestExtendVolume(t *testing.T) {
+func TestExtendVolumeFlow(t *testing.T) {
 	volID := GetVolumeID(UPDATENAME)[0]
 
 	body := &model.ExtendVolumeSpec{
@@ -281,7 +281,7 @@ func TestExtendVolume(t *testing.T) {
 }
 
 //get volume detail
-func TestGetVolume(t *testing.T) {
+func TestGetVolumeFlow(t *testing.T) {
 	time.Sleep(5 * 1e9)
 	volary := GetVolumeID(UPDATENAME)
 	volID := volary[0]
