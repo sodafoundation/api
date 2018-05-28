@@ -256,7 +256,7 @@ func TestExtendVolume(t *testing.T) {
 	volID := GetVolumeID(UPDATENAME)[0]
 
 	body := &model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: int64(2)},
+		model.ExtendSpec{NewSize: EXTENDSIZE},
 	}
 
 	_, err := auth.ExtendVolume(volID, body)
