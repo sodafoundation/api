@@ -191,20 +191,24 @@ func TestCreateProfile(t *testing.T) {
 		Name:        "default",
 		Description: "default policy",
 	}
-	_, err := u.CreateProfile(body)
+	cprf, err := u.CreateProfile(body)
 	if err != nil {
 		t.Error("create profile in client failed:", err)
 		return
 	}
+	prfBody, _ := json.MarshalIndent(cprf, "", "    ")
+	t.Log(string(prfBody))
 	t.Log("Create Profile Success")
 }
 
 func TestGetProfileList(t *testing.T) {
-	_, err := u.ListProfiles()
+	listRs, err := u.ListProfiles()
 	if err != nil {
 		t.Error("list profiles in client failed:", err)
 		return
 	}
+	prflist, _ := json.MarshalIndent(listRs, "", "    ")
+	t.Log(string(prflist))
 	t.Log("Get Profile List Success")
 }
 
@@ -212,11 +216,13 @@ func TestGetProfileDetail(t *testing.T) {
 	//get create profile id
 	prfID := GetProfileID()
 	//Get ProfileDetail
-	_, err := u.GetProfile(prfID)
+	detail, err := u.GetProfile(prfID)
 	if err != nil {
 		t.Error("get profile in client failed:", err)
 		return
 	}
+	prfdet, _ := json.MarshalIndent(detail, "", "    ")
+	t.Log(string(prfdet))
 	t.Log("Get Profile Detail Success")
 }
 
@@ -226,10 +232,12 @@ func TestCreateVolume(t *testing.T) {
 		Description: VOLDESC,
 		Size:        int64(1),
 	}
-	_, err := u.CreateVolume(volbody)
+	create, err := u.CreateVolume(volbody)
 	if err != nil {
 		t.Log("Create Volume Fail")
 	}
+	volrs, _ := json.MarshalIndent(create, "", "    ")
+	t.Log(string(volrs))
 	t.Log("Create Volume Success")
 }
 
@@ -240,7 +248,7 @@ func TestUpdateVolume(t *testing.T) {
 		Name:        UPDATENAME,
 		Description: UPDATEDESC,
 	}
-	_, err := u.UpdateVolume(volID, body)
+	upvol, err := u.UpdateVolume(volID, body)
 	volary := GetVolumeID(UPDATENAME)
 	name := volary[2]
 	desc := volary[3]
@@ -248,6 +256,8 @@ func TestUpdateVolume(t *testing.T) {
 		t.Error("update volume fail!", err)
 		return
 	}
+	volrs, _ := json.MarshalIndent(upvol, "", "    ")
+	t.Log(string(volrs))
 	t.Log("Update Volume Success")
 }
 
@@ -259,12 +269,14 @@ func TestExtendVolume(t *testing.T) {
 		Extend: model.ExtendSpec{NewSize: EXTENDSIZE},
 	}
 
-	_, err := u.ExtendVolume(volID, body)
+	ext, err := u.ExtendVolume(volID, body)
 	volext := GetVolumeID(UPDATENAME)
 	size := volext[4]
 	if err != nil || size != string(EXTENDSIZE) {
 		t.Error("Extend volume fail", err)
 	}
+	extrs, _ := json.MarshalIndent(ext, "", "    ")
+	t.Log(string(extrs))
 	t.Log("Extend Volume Success")
 }
 
@@ -275,12 +287,13 @@ func TestGetVolume(t *testing.T) {
 	volID := volary[0]
 	status := volary[1]
 
-	_, err := u.GetVolume(volID)
+	volinfo, err := u.GetVolume(volID)
 	if err != nil || status != "available" {
 		t.Error("get volume in client failed:", err)
 		return
 	}
-
+	detail, _ := json.MarshalIndent(volinfo, "", "    ")
+	t.Log(string(detail))
 	t.Log("Get volume detail Success")
 }
 
@@ -292,12 +305,13 @@ func TestCreateSnapshot(t *testing.T) {
 		Description: SNAPDESC,
 		VolumeId:    volID,
 	}
-	_, err := u.CreateVolumeSnapshot(body)
+	snap, err := u.CreateVolumeSnapshot(body)
 	if err != nil {
 		t.Error("create volume snapshot in client failed:", err)
 		return
 	}
-
+	snapcre, _ := json.MarshalIndent(snap, "", "    ")
+	t.Log(string(snapcre))
 	t.Log("---Create Volume Snapshot Success----")
 }
 
@@ -308,24 +322,26 @@ func TestUpdateSnapshot(t *testing.T) {
 		Name:        UPDATESNAPNAME,
 		Description: UPDATESNAPDESC,
 	}
-	_, err := u.UpdateVolumeSnapshot(snpID, body)
+	upsnap, err := u.UpdateVolumeSnapshot(snpID, body)
 	if err != nil {
 		t.Error("update volume snapshot in client failed:", err)
 		return
 	}
-
+	upsnaprs, _ := json.MarshalIndent(upsnap, "", "    ")
+	t.Log(string(upsnaprs))
 	t.Log("-----Update Snapshot Success-----")
 }
 
 //Get Volume snapshot Detail
 func TestGetSnapshotDetail(t *testing.T) {
 	snpID := GetVolSnapInfo()[0]
-	_, err := u.GetVolumeSnapshot(snpID)
+	snapdet, err := u.GetVolumeSnapshot(snpID)
 	if err != nil || GetVolSnapInfo()[1] != UPDATESNAPNAME || GetVolSnapInfo()[2] != UPDATESNAPDESC {
 		t.Error("get volume snapshot in client failed:", err)
 		return
 	}
-
+	detail, _ := json.MarshalIndent(snapdet, "", "    ")
+	t.Log(string(detail))
 	t.Log("---Get Snapshot Detail Success----")
 }
 
@@ -346,12 +362,13 @@ func TestCreateVolAttch(t *testing.T) {
 		VolumeId: volID,
 		HostInfo: model.HostInfo{},
 	}
-	_, err := u.CreateVolumeAttachment(body)
+	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
 		t.Error("create volume attachment in client failed:", err)
 		return
 	}
-
+	attrs, _ := json.MarshalIndent(attc, "", "    ")
+	t.Log(string(attrs))
 	t.Log("Create Volume Attachment Success")
 }
 
@@ -359,7 +376,7 @@ func TestCreateVolAttch(t *testing.T) {
 func TestShowAttacDetail(t *testing.T) {
 	attID := GetVolAttaID()[0]
 	attsta := GetVolAttaID()[1]
-	_, err := u.GetVolumeAttachment(attID)
+	getatt, err := u.GetVolumeAttachment(attID)
 	//scan volume
 	ScanVolume()
 	//read Dsik.log
@@ -369,6 +386,8 @@ func TestShowAttacDetail(t *testing.T) {
 		t.Log("Volume attachment detail check fail", err)
 		return
 	}
+	detail, _ := json.MarshalIndent(getatt, "", "    ")
+	t.Log(string(detail))
 	t.Log("Volume attach detail Check Success!")
 }
 
