@@ -11,9 +11,9 @@ TARGETIPLOG=/var/log/scan/targetip.log
 declare target
 echo "Begin to Scan Attachment Volume"
 #install chkconfig
-echo `ll`
-sudo apt install sysv-rc-conf>$CHKLOG
-echo $CHKLOG
+echo "Begin to install chkconfig"
+#sudo apt install sysv-rc-conf>$CHKLOG
+echo `sudo apt install sysv-rc-conf`
 #check if install is finish
 
 count=1
