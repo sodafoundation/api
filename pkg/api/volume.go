@@ -249,7 +249,7 @@ func (this *VolumePortal) ExtendVolume() {
 	// after volume extension is completed.
 	var errchan = make(chan error, 1)
 	defer close(errchan)
-	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), id, extendRequestBody.Extend.NewSize, errchan)
+	go controller.Brain.ExtendVolume(c.GetContext(this.Ctx), id, extendRequestBody.NewSize, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		log.Error(reason)
