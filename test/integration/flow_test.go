@@ -144,7 +144,7 @@ func ScanVolume() {
 	}
 }
 
-//clear log method
+//clear log method 
 func CleanLog() {
 	cmd := exec.Command("/bin/bash", "./clscanlog.sh")
 	_, err := cmd.Output()
