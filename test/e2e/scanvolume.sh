@@ -8,7 +8,6 @@ LOGINLOG=/var/log/scan/login.log
 SESSIONLOG=/var/log/scan/session.log
 DISKLOG=/var/log/scan/disk.log
 TARGETIPLOG=/var/log/scan/targetip.log
-DISKRSLOG=/var/log/scan/diskrs.log
 
 declare target
 
@@ -94,12 +93,6 @@ fi
 
 #show disk info
 fdisk -l|grep Disk >$DISKLOG
-#if [ `grep -c "Disk /dev/sd: 2 GiB" $DISKLOG` -eq 1 ];then
-#     echo "volume attachment successfully!"
-#   else
-#     echo "volume attachment fail!"
-#fi
-grep "Disk /dev/sd" $DISKLOG |grep "2 GiB">$DISKRSLOG
 
 #login out from the target 
 iscsiadm -m node –T $target -p $ip -u
