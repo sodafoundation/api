@@ -1,7 +1,7 @@
 import { Http, XHRBackend, RequestOptions, Request, RequestOptionsArgs, Response, Headers, BaseRequestOptions } from '@angular/http';
 import { Injectable, Injector } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Mask } from '../utils/Mask';
+import { Mask } from '../utils/mask';
 import { BaseRequestOptionsArgs } from './api';
 import { ExceptionService } from './Exception.service';
 
