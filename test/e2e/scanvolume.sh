@@ -12,10 +12,10 @@ declare target
 echo "Begin to Scan Attachment Volume"
 #install chkconfig
 echo "Begin to install chkconfig"
-#sudo apt install sysv-rc-conf>$CHKLOG
-echo `sudo apt install sysv-rc-conf`
-#check if install is finish
+touch /var/log/scan/hkconfig.log
+sudo apt install sysv-rc-conf>$CHKLOG
 
+#check if install is finish
 count=1
 while ( [ $? -ne 0 ] || [ `grep -c "newly installed" $CHKLOG` -ne 1 ] )
    do
@@ -36,19 +36,25 @@ else
 fi
 
 
-#GET TARGETIP 
+#GET TARGETIP
+touch ip.log
+touch addr.log
 echo >ip.log
 echo >addr.log
+echo `ifconfig |grep -w "inet"|grep addr`
 ifconfig |grep -w "inet"|grep addr >>addr.log
 cat addr.log|while read line
 do
    array=(${line// / })
    for var in ${array[@]}
    do
+      echo `$var | grep "addr"`
       echo $var | grep "addr">>ip.log
    done
 done
 ##Echo IP to log
+echo "Get Ip:"
+cat ip.log
 cat ip.log|while read line
 do
   TARGETIP=`echo $line | cut -d \: -f 2`
