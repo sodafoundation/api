@@ -73,8 +73,8 @@ cat ip.log|while read line
 do
   TARGETIP=`echo $line | cut -d \: -f 2`
   TARGETIP=$TARGETIP:3260
-  echo $TARGETIP
   echo $TARGETIP>$TARGETIPLOG
+  cat $TARGETIPLOG
 done
 
 ##get ip from log
@@ -85,7 +85,10 @@ do
    #find target
   chkconfig iscsi on
   chkconfig iscsi --list > $ISCSILOG
+  echo "GET ISCILOG:"
+  cat $ISCSILOG
   iscsiadm -m discovery -t sendtargets -p $ip>$TARGETLOG
+  
   cat $TARGETLOG
   #login target
  cat $TARGETLOG |while read line
