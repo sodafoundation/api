@@ -5,15 +5,23 @@ ISCSILOG=/var/log/scan/iscsi.log
 TARGETLOG=/var/log/scan/target.log
 LOGINLOG=/var/log/scan/login.log
 SESSIONLOG=/var/log/scan/session.log
-DISKLOG=disk.log
+DISKLOG=/var/log/scan/disk.log
 TARGETIPLOG=/var/log/scan/targetip.log
+
+touch $CHKLOG
+touch $ISCSILOG
+touch $TARGETLOG
+touch $LOGINLOG
+touch $SESSIONLOG
+touch $DISKLOG
+touch $TARGETIPLOG
 
 declare target
 echo "Begin to Scan Attachment Volume"
 #install chkconfig
-echo "Begin to install chkconfig"
-touch /var/log/scan/hkconfig.log
 sudo apt install sysv-rc-conf>$CHKLOG
+echo "print install chkconfig result:"
+cat $CHKLOG
 
 #check if install is finish
 count=1
@@ -28,6 +36,8 @@ while ( [ $? -ne 0 ] || [ `grep -c "newly installed" $CHKLOG` -ne 1 ] )
 echo "sysv_rc_conf install finished"
 
 #link chkconfig
+echo "locate the sysv-rc-conf:"
+echo `locate sysv-rc-conf`
 cp /usr/sbin/sysv-rc-conf /usr/sbin/chkconfig
 if [ $? -eq 0  ];then
   echo "link chkconfig sucsee!"
@@ -55,14 +65,20 @@ done
 ##Echo IP to log
 echo "Get Ip:"
 cat ip.log
+echo "Get AddrIp:"
+cat addr.log
+
+echo "Get Target Ip:"
 cat ip.log|while read line
 do
   TARGETIP=`echo $line | cut -d \: -f 2`
   TARGETIP=$TARGETIP:3260
+  echo $TARGETIP
   echo $TARGETIP>$TARGETIPLOG
 done
 
 ##get ip from log
+echo "Get TARGETLOG:"
 cat $TARGETIPLOG |while read line
 do
    ip=`echo $line`
@@ -70,9 +86,9 @@ do
   chkconfig iscsi on
   chkconfig iscsi --list > $ISCSILOG
   iscsiadm -m discovery -t sendtargets -p $ip>$TARGETLOG
-
+  cat $TARGETLOG
   #login target
-cat $TARGETLOG |while read line
+ cat $TARGETLOG |while read line
   do
      a=$line
      echo $a
@@ -80,6 +96,7 @@ cat $TARGETLOG |while read line
       echo $target
   #login
     iscsiadm -m node –T $ip，$target -l >$LOGINLOG
+    cat $LOGINLOG
    done
 
 if [ `grep -c "successful" $LOGINLOG` -eq 1 ];then
