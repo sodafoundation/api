@@ -32,7 +32,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var DISKLOG = "/var/log/scan/diskrs.log"
+var DISKLOG = "/var/log/scan/disk.log"
 var VOLNAME = "flowvolume"
 var VOLDESC = "description"
 var UPDATENAME = "Update Name"
