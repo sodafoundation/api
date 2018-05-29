@@ -116,6 +116,11 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 	if err != nil {
 		return err
 	}
+	// clean up replication driver data in volume database
+	primaryVol.ReplicationDriverData = make(map[string]string)
+	db.C.UpdateVolume(ctx, primaryVol)
+	secondaryVol.ReplicationDriverData = make(map[string]string)
+	db.C.UpdateVolume(ctx, secondaryVol)
 	return db.C.DeleteReplication(ctx, replica.Id)
 }
 
@@ -245,7 +250,7 @@ func (h *HostPairOperator) attach(ctx *c.Context, vol *VolumeSpec, provisionerDo
 		DriverName: provisionerDock.DriverName,
 		Context:    ctx.ToJson(),
 	}
-	log.Info("Createopt", createAttachOpt)
+
 	atm, err := h.volumeController.CreateVolumeAttachment(createAttachOpt)
 	if err != nil {
 		log.Errorf("create attachment failed, %v", err)
@@ -445,14 +450,17 @@ func (h *HostPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol 
 		DriverName:                     pool.ReplicationDriverName,
 		Context:                        ctx.ToJson(),
 		Metadata:                       replica.Metadata,
+		IsPrimary:                      h.isPrimary,
+	}
+
+	// invoke both side
+	h.volumeController.SetDock(provisionerDock)
+	if err = h.volumeController.DeleteReplication(opt); err != nil {
+		return err
 	}
 
 	var attachmentId string
 	if h.isPrimary {
-		h.volumeController.SetDock(provisionerDock)
-		if err = h.volumeController.DeleteReplication(opt); err != nil {
-			return err
-		}
 		attachmentId = replica.PrimaryReplicationDriverData["AttachmentId"]
 	} else {
 		attachmentId = replica.SecondaryReplicationDriverData["AttachmentId"]
@@ -475,10 +483,6 @@ type ArrayPairOperator struct {
 }
 
 func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol *VolumeSpec) (*ReplicationSpec, error) {
-	if !a.isPrimary {
-		// TODO: create replication pair in remote device.
-		return &ReplicationSpec{}, nil
-	}
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("get pool failed", err)
@@ -513,9 +517,6 @@ func (a *ArrayPairOperator) Create(ctx *c.Context, replica *ReplicationSpec, vol
 }
 
 func (a *ArrayPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol *VolumeSpec) error {
-	if !a.isPrimary {
-		return nil
-	}
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("get pool failed", err)
@@ -542,6 +543,7 @@ func (a *ArrayPairOperator) Delete(ctx *c.Context, replica *ReplicationSpec, vol
 		DriverName:                     provisionerDock.DriverName,
 		Context:                        ctx.ToJson(),
 		Metadata:                       replica.Metadata,
+		IsPrimary:                      a.isPrimary,
 	}
 	return a.volumeController.DeleteReplication(opt)
 }
@@ -552,9 +554,6 @@ type BaseOperator struct {
 }
 
 func (h *BaseOperator) Enable(ctx *c.Context, replica *ReplicationSpec, vol *VolumeSpec) error {
-	if !h.isPrimary {
-		return nil
-	}
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("get pool failed", err)
@@ -580,15 +579,13 @@ func (h *BaseOperator) Enable(ctx *c.Context, replica *ReplicationSpec, vol *Vol
 		DriverName:                     pool.ReplicationDriverName,
 		Context:                        ctx.ToJson(),
 		Metadata:                       replica.Metadata,
+		IsPrimary:                      h.isPrimary,
 	}
 	h.volumeController.SetDock(provisionerDock)
 	return h.volumeController.EnableReplication(opt)
 }
 
 func (h *BaseOperator) Disable(ctx *c.Context, replica *ReplicationSpec, vol *VolumeSpec) error {
-	if !h.isPrimary {
-		return nil
-	}
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("get pool failed", err)
@@ -614,15 +611,13 @@ func (h *BaseOperator) Disable(ctx *c.Context, replica *ReplicationSpec, vol *Vo
 		DriverName:                     pool.ReplicationDriverName,
 		Context:                        ctx.ToJson(),
 		Metadata:                       replica.Metadata,
+		IsPrimary:                      h.isPrimary,
 	}
 	h.volumeController.SetDock(provisionerDock)
 	return h.volumeController.DisableReplication(opt)
 }
 
 func (h *BaseOperator) Failover(ctx *c.Context, replica *ReplicationSpec, failover *FailoverReplicationSpec, vol *VolumeSpec) error {
-	if !h.isPrimary {
-		return nil
-	}
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("get pool failed", err)
@@ -650,6 +645,7 @@ func (h *BaseOperator) Failover(ctx *c.Context, replica *ReplicationSpec, failov
 		Metadata:                       replica.Metadata,
 		AllowAttachedVolume:            failover.AllowAttachedVolume,
 		SecondaryBackendId:             failover.SecondaryBackendId,
+		IsPrimary:                      h.isPrimary,
 	}
 	h.volumeController.SetDock(provisionerDock)
 	return h.volumeController.FailoverReplication(opt)
