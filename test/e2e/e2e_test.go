@@ -169,7 +169,7 @@ func TestExtendVolume(t *testing.T) {
 
 	t.Log("Start extending volume...")
 	body := &model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: int64(vol.Size + 1)},
+		NewSize: int64(vol.Size + 1),
 	}
 
 	newVol, err := c.ExtendVolume(vol.Id, body)

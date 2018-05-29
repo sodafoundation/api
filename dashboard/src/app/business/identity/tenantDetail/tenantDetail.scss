@@ -1,0 +1,15 @@
+.table-detail-con > ul{
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    padding-bottom: 0.25rem;
+}
+.table-detail-con > ul li{
+    color: #666;
+    width: 30%;
+}
+.table-detail-con > ul li span{
+    padding-left: 0.1rem;
+    font-size: 20px;
+    color: #40BCEC;
+}
