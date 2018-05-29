@@ -64,7 +64,7 @@ tgtConfDir: /etc/tgt/conf.d
 pool:
   $DEFAULT_VOLUME_GROUP_NAME:
     diskType: NL-SAS
-    AZ: default
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin

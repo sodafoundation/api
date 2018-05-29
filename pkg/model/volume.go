@@ -74,7 +74,8 @@ type VolumeSpec struct {
 	// The uuid of the replication which the volume belongs to.
 	ReplicationDriverData map[string]string `json:"replicationDriverData,omitempty"`
 	// Attach status of the volume.
-	AttachStatus string}
+	AttachStatus string
+}
 
 // VolumeAttachmentSpec is a description of volume attached resource.
 type VolumeAttachmentSpec struct {
@@ -107,6 +108,9 @@ type VolumeAttachmentSpec struct {
 
 	// See details in `ConnectionInfo`
 	ConnectionInfo `json:"connectionInfo,omitempty"`
+
+	// The protocl
+	AccessProtocol string `json:"accessProtocol,omitempty"`
 }
 
 // HostInfo is a structure for all properties of host when create a volume
@@ -167,14 +171,9 @@ type VolumeSnapshotSpec struct {
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
-// ExtendSpec ...
-type ExtendSpec struct {
-	NewSize int64 `json:"newSize,omitempty"`
-}
-
 // ExtendVolumeSpec ...
 type ExtendVolumeSpec struct {
-	Extend ExtendSpec `json:"extend,omitempty"`
+	NewSize int64 `json:"newSize,omitempty"`
 }
 
 type VolumeGroupSpec struct {
