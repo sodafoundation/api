@@ -165,10 +165,11 @@ type InitiatorsResp struct {
 }
 
 type Host struct {
-	Id     string `json:"ID"`
-	Name   string `json:"NAME"`
-	OsType string `json:"OPERATIONSYSTEM"`
-	Ip     string `json:"IP"`
+	Id               string `json:"ID"`
+	Name             string `json:"NAME"`
+	OsType           string `json:"OPERATIONSYSTEM"`
+	Ip               string `json:"IP"`
+	IsAddToHostGroup bool   `json:"ISADD2HOSTGROUP"`
 }
 
 type HostResp struct {
@@ -300,7 +301,7 @@ type ReplicationPair struct {
 	RemoteDeviceSn      string `json:"REMOTEDEVICESN"`
 	RemoteResId         string `json:"REMOTERESID"`
 	RemoteResName       string `json:"REMOTERESNAME"`
-	replicationMode    string `json:"REPLICATIONMODEL"`
+	replicationMode     string `json:"REPLICATIONMODEL"`
 	ReplicationProgress string `json:"REPLICATIONPROGRESS"`
 	RunningStatus       string `json:"RUNNINGSTATUS"`
 	SecResAccess        string `json:"SECRESACCESS"`
@@ -326,4 +327,37 @@ type SimpleStruct struct {
 type SimpleResp struct {
 	Data  []SimpleStruct `json:"data"`
 	Error Error          `json:"error"`
+}
+
+type FCInitiatorsResp struct {
+	Data  []FCInitiator `json:"data"`
+	Error Error         `json:"error"`
+}
+
+type FCInitiator struct {
+	Isfree        bool   `json:"ISFREE"`
+	Id            string `json:"ID"`
+	Type          int    `json:"TYPE"`
+	RunningStatus string `json:"RUNNINGSTATUS"`
+	ParentId      string `json:"PARENTID"`
+	ParentType    int    `json:"PARENTTYPE"`
+}
+
+type FCTargWWPNResp struct {
+	Data  []FCTargWWPN `json:"data"`
+	Error Error        `json:"error"`
+}
+
+type FCTargWWPN struct {
+	IniPortWWN  string `json:"INITIATOR_PORT_WWN"`
+	TargPortWWN string `json:"TARGET_PORT_WWN"`
+}
+
+type ObjCount struct {
+	Data  data  `json:"data"`
+	Error Error `json:"error"`
+}
+
+type data struct {
+	count int `json:"COUNT"`
 }
