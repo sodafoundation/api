@@ -51,6 +51,9 @@ export class CreateProfileComponent implements OnInit {
     description: string;
 
     profileform: FormGroup;
+    qosPolicy:FormGroup;
+    repPolicy:FormGroup;
+    snapPolicy:FormGroup;
     paramData= {
         extras:{protocol:""},
         storageType:""
@@ -94,7 +97,7 @@ export class CreateProfileComponent implements OnInit {
         {
             label: 'Mirror',
             value: 'mirror'
-        },
+        }/*,
         {
             label: 'Snapshot',
             value: 'snapshot'
@@ -106,7 +109,7 @@ export class CreateProfileComponent implements OnInit {
         {
             label: 'Tokenized Clone',
             value: 'tokenized'
-        }
+        }*/
     ];
 
     replicationRGOOptions = [
@@ -203,6 +206,24 @@ export class CreateProfileComponent implements OnInit {
             value: 'Quantity'
         }
     ];
+    snapSchedule = [
+        {
+            label: 'Hourly',
+            value: 'Hourly'
+        },
+        {
+            label: 'Daily',
+            value: 'Daily'
+        },
+        {
+            label: 'Weekly',
+            value: 'Weekly'
+        },
+        {
+            label: 'Monthly',
+            value: 'Monthly'
+        }
+    ];
 
     weekDays;
 
@@ -263,7 +284,7 @@ export class CreateProfileComponent implements OnInit {
             key: 'Key',
             value: 'Value',
             maxIOPS: 'MaxIOPS',
-            MBPS: 'MBWS',
+            MBPS: 'MaxBWS',
             replicationLabel: {
                 type: 'Type',
                 RGO: 'RGO',
@@ -284,10 +305,35 @@ export class CreateProfileComponent implements OnInit {
         this.profileform = this.fb.group({
             'name': new FormControl('', Validators.required),
             'protocol': new FormControl('iSCSI'),
-            'storageType': new FormControl('', Validators.required),
+            'storageType': new FormControl('Thin', Validators.required),
             'policys': new FormControl(''),
             'snapshotRetention': new FormControl('Time')
         });
+        this.qosPolicy = this.fb.group({
+            "maxIOPS": new FormControl(6000, Validators.required),
+            "maxBWS" : new FormControl(100, Validators.required),
+        });
+        this.repPolicy = this.fb.group({
+            "repType": new FormControl(this.replicationTypeOptions[0], Validators.required),
+            "repMode": new FormControl(this.replicationModeOptions[0], Validators.required),
+            "repPeriod": new FormControl(60, Validators.required),
+            "repBandwidth": new FormControl(10, Validators.required),
+            "repRGO": new FormControl(this.replicationRGOOptions[0], Validators.required),
+            "repRTO": new FormControl(this.replicationRTOOptions[0], Validators.required),
+            "repRPO": new FormControl(0, Validators.required),
+            "repCons": new FormControl(false)
+        });
+        this.snapPolicy = this.fb.group({
+            "Schedule": new FormControl(this.snapSchedule[0], Validators.required),
+            "datetime": new FormControl("00:00", Validators.required),
+            "snapNum": new FormControl(1, Validators.required),
+            "duration": new FormControl(0, Validators.required),
+            "retentionOptions": new FormControl(this.snapshotRetentionOptions[0])
+        });
+        this.paramData= {
+            extras:{protocol:this.profileform.value.protocol},
+            storageType:this.profileform.value.storageType
+        };
         this.profileform.get("protocol").valueChanges.subscribe(
             (value:string)=>{
                 this.paramData = {
