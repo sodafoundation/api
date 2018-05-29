@@ -4,7 +4,7 @@
 </div>
 
 <div class="create-profile-form">
-<form [formGroup]="profileform" [grid]="{label: 'ui-g-2', content:'ui-g-2'}" (ngSubmit)="onSubmit(profileform.value)">
+<form [formGroup]="profileform" [grid]="{label: 'ui-g-2', content:'ui-g-2'}" (ngSubmit)="onSubmit(profileform.value)" [errorMessage]="errorMessage">
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <form-item label="{{label.name}}" [required]="true">
             <input pInputText type="text" size="80" formControlName="name" />
@@ -25,7 +25,7 @@
             </div>
             <div class="ui-grid-col-10">
                 <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
-                    <form [formGroup]="qosPolicy" [grid]="{label: 'ui-g-1', content:'ui-g-3'}">
+                    <form [formGroup]="qosPolicy" [grid]="{label: 'ui-g-1', content:'ui-g-3'}" [errorMessage]="errorMessage">
                         <form-item label="{{label.maxIOPS}}" [required]="true">
                             <div class="input-text-vertical-align">
                                 <input pInputText type="text" formControlName="maxIOPS" />
@@ -50,7 +50,7 @@
             </div>
             <div class="ui-grid-col-10">
                 <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
-                    <form [formGroup]="repPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-5'}">
+                    <form [formGroup]="repPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-5'}" [errorMessage]="errorMessage">
                         <div class="ui-grid-col-6">
                             <form-item label="{{label.replicationLabel.type}}" [required]="true">
                                 <p-dropdown [style]="{'min-width':150}" formControlName="repType" [options]="replicationTypeOptions"></p-dropdown>
@@ -59,12 +59,12 @@
                                 <p-dropdown [style]="{'min-width':150}" formControlName="repMode" [options]="replicationModeOptions"></p-dropdown>
                             </form-item>
                             <form-item label="{{label.replicationLabel.Period}}" [required]="true">
-                                <div class="ui-grid-col-11 input-text-vertical-align">
+                                <div class="ui-grid-col-14 input-text-vertical-align">
                                     <input pInputText type="text" formControlName="repPeriod" placeholder="Period" /><span>Minutes</span>
                                 </div>
                             </form-item>
                             <form-item label="{{label.replicationLabel.Bandwidth}}" [required]="true">
-                                <div class="ui-grid-col-11 input-text-vertical-align">
+                                <div class="ui-grid-col-14 input-text-vertical-align">
                                     <input pInputText type="text" formControlName="repBandwidth" placeholder="Bandwidth"/><span>MBWS/TB</span>
                                 </div>
                             </form-item>
@@ -95,17 +95,17 @@
             </div>
             <div class="ui-grid-col-10">
                 <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
-                    <form [formGroup]="snapPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-3'}">
+                    <form [formGroup]="snapPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-3'}" [errorMessage]="errorMessage">
                         <form-item label="{{label.snapshotLabel.Schedule}}" [required]="true">
                             <p-dropdown [style]="{'min-width':150}" formControlName="Schedule"  [options]="snapSchedule"></p-dropdown>
                         </form-item>
                         <form-item label="{{label.snapshotLabel.executionTime}}" [required]="true">
-                            <div class="ui-grid-col-6 input-text-vertical-align">
+                            <div class="create-profile-snap-col-6 input-text-vertical-align" >
                                 <input pInputText type="time" formControlName="datetime" />
                             </div>
                         </form-item>
                         <form-item label="{{label.snapshotLabel.Retention}}" [required]="true">
-                            <div class="ui-grid-col-8 input-text-vertical-align">
+                            <div class="create-profile-snap-col-8 input-text-vertical-align">
                                 <p-dropdown [style]="{'min-width':200}"  formControlName="retentionOptions" [options]="snapshotRetentionOptions"></p-dropdown>
                                 <div class="create-profile-snap-policy">
                                     <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" pInputText type="number" formControlName="snapNum"/>

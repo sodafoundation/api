@@ -41,7 +41,6 @@ import { ProfileService } from './../profile.service';
     ]
 })
 export class CreateProfileComponent implements OnInit {
-    errorMessage;
     showCustomization = false;
     showStoragePool = false;
     msgs: Message[] = [];
@@ -195,7 +194,17 @@ export class CreateProfileComponent implements OnInit {
             value: 3600
         }
     ];
-
+    errorMessage={
+        "name": { required: this.I18N.keyID['sds_profile_create_name_require']},
+        "maxIOPS": { required: this.I18N.keyID['sds_required'].replace("{0}","MaxIOPS")},
+        "maxBWS" :{ required: this.I18N.keyID['sds_required'].replace("{0}","MaxBWS")},
+        "repPeriod" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Period")},
+        "repBandwidth" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Bandwidth")},
+        "repRPO" :{ required: this.I18N.keyID['sds_required'].replace("{0}","RPO")},
+        "datetime" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Execution Time")},
+        "snapNum" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+        "duration" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+    };
     snapshotRetentionOptions = [
         {
             label: 'Time',
@@ -228,7 +237,7 @@ export class CreateProfileComponent implements OnInit {
     weekDays;
 
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         private router: Router,
         private ProfileService: ProfileService,
         private fb: FormBuilder
