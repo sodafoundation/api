@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	FC_Driver = "fc"
+	FCDriver = "fc"
 )
 
 type fcDriver struct {
@@ -27,7 +27,7 @@ type fcDriver struct {
 }
 
 func init() {
-	connector.RegisterConnector(FC_Driver,
+	connector.RegisterConnector(FCDriver,
 		&fcDriver{
 			self: &fibreChannel{
 				helper: &linuxfc{},
