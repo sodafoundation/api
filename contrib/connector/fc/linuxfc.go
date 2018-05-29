@@ -107,7 +107,6 @@ func (l *linuxfc) getFChbas() ([]map[string]string, error) {
 		}
 		lastline = line
 	}
-
 	return hbas, nil
 }
 
