@@ -1,28 +1,77 @@
-## Summary
-OpenSDS dashboard uses the front-end development framework Angular 2 (https://angular.io/)
+# Summary
+OpenSDS dashboard uses the front-end development framework Angular5 (https://angular.io/)
 and relies on PrimeNG UI Components (https://www.primefaces.org/primeng/). Regardless of 
 deployment or two development, prepare the corresponding environment.
 
-## Environment
-* NodeJS
-Download the latest version of NodeJS package from [NodeJS](https://nodejs.org/)
-official website for installation.
+# Prerequisite 
 
-* Angular CLI (https://cli.angular.io/)
+### 1. Ubuntu
+* Version information
 ```shell
-npm install -g @angular/cli
+root@proxy:~# cat /etc/issue
+Ubuntu 16.04.2 LTS \n \l
 ```
 
-## Deployment
-* Install Angular "node_modules"
+### 2. Nginx installation
 ```shell
-cd dashboard && npm install
+sudo apt-get install nginx
 ```
 
-* Build OpenSDS dashboard
+### 3. NodeJS installation, NPM will be installed with nodejs.
 ```shell
-ng build --prod
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
-After the build work finished, the files in the `dist` folder should be copied to the root
-directory of the web server.
 
+### 4. Angular CLI installation
+Specify the version[1.7.4] of angular5 suitable for installation.
+```shell
+sudo npm install -g @angular/cli@1.7.4
+```
+
+
+# Build & Start
+### 1. Git clone dashboard code.
+```shell
+git clone https://github.com/opensds/opensds.git
+```
+
+### 2. Build opensds dashboard.
+After the build work finished, the files in the `dist` folder should be copied to the folder ` /var/www/html/`.
+```shell
+cd opensds/dashboard
+sudo npm install
+sudo ng build --prod
+```
+
+```shell
+cp -R opensds/dashboard/dist/* /var/www/html/
+```
+
+### 3. Set nginx default config.
+```shell
+vi /etc/nginx/sites-available/default 
+```
+Configure proxy, points to the resource server and the authentication server respectively.
+Such as: 
+* Keystone server `http://1.1.1.0:5000`
+* Resource server `http://1.1.1.0:50040`
+```shell
+location /v3/ {
+    proxy_pass http://1.1.1.0:5000/v3/;
+}
+
+location /v1beta/ {
+    proxy_pass http://1.1.1.0:50040/v1beta/;
+}
+```
+
+### 4. Restart nginx
+```shell
+service nginx restart 
+```
+
+### 5. Access dashboard in browser.
+```shell
+http://localhost/
+```
