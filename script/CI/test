@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,4 +45,5 @@ split_line "Start lvm e2e test"
 sudo $OPENSDS_DIR/script/devsds/install.sh
 ps -ef|grep osds
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
+go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
 sudo $OPENSDS_DIR/script/devsds/uninstall.sh
