@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build e2e
+// +build e2ef
 
 package e2e
 
@@ -156,7 +156,7 @@ func CleanLog() {
 
 //Check if Disk Log contain /dev/sd&& 2 GiB
 func DiskChk(log string, str string) bool {
-	dLog, err := os.Open(path)
+	dLog, err := os.Open(log)
 	if err != nil {
 		panic(err)
 	}
@@ -405,10 +405,11 @@ func TestDeleteVolAttach(t *testing.T) {
 		}
 	}
 	//Chk volume scan
-	ScanVolume()
-	b := DiskChk(DISKLOG, "/dev/sdb")
+	out := ScanVolume()
+	dev := DiskChk(out, "/dev/sd")
+	ca := DiskChk(out, "2 GiB")
 	chk2, _ := u.GetVolumeAttachment(attID)
-	if err != nil || chk2 != nil || b == true {
+	if err != nil || chk2 != nil || dev == true || ca == true {
 		t.Log("Delete Attachment Fail", err)
 	}
 	t.Log("Delete attachment Success")

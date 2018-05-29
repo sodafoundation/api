@@ -13,7 +13,7 @@ TARGETIPLOG=/var/log/scan/targetip.log
 declare target
 
 #install chkconfig
-
+echo "Begin to Scan Volume"
 sudo apt install sysv-rc-conf>$CHKLOG
 
 #check if install is finish
