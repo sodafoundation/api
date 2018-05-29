@@ -293,6 +293,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("GetPool", context.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("UpdateStatus", context.NewAdminContext(), volattm, volattm.Status).Return(nil)
 
 	db.C = mockClient
@@ -539,10 +540,10 @@ func TestFailoverReplication(t *testing.T) {
 	mockClient.On("UpdateReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
 
-	var failover = &model.FailoverReplicationSpec{Failover: struct {
-		AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
-		SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
-	}{AllowAttachedVolume: true, SecondaryBackendId: model.ReplicationDefaultBackendId}}
+	var failover = &model.FailoverReplicationSpec{
+		AllowAttachedVolume: true,
+		SecondaryBackendId:  model.ReplicationDefaultBackendId,
+	}
 	var c = &Controller{
 		volumeController: NewFakeVolumeController(),
 		drController:     NewFakeDrController(),

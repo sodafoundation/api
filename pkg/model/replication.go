@@ -104,11 +104,7 @@ type ReplicationSpec struct {
 	VolumeDataList []*proto.VolumeData `json:"volumeDataList,omitempty"`
 }
 
-type Failover struct {
+type FailoverReplicationSpec struct {
 	AllowAttachedVolume bool   `json:"allowAttachedVolume,omitempty"`
 	SecondaryBackendId  string `json:"secondaryBackendId,omitempty"`
-}
-
-type FailoverReplicationSpec struct {
-	Failover `json:"failoverReplication"`
 }

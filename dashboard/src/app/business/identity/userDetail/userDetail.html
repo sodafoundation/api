@@ -1,0 +1,7 @@
+<div class="table-detail-con" *ngIf="!isUserDetailFinished"><div>Loading...</div></div>
+<div class="table-detail-con" *ngIf="isUserDetailFinished">
+    <ul>
+        <li><label>Tenants:</label><span [style.color]="unspecified ? '#999' : ''">{{ ownedTenant }}</span></li>
+        <li><label>User ID:</label><span>{{ userID }}</span></li>
+    </ul>
+</div>

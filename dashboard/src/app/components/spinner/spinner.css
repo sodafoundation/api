@@ -1,0 +1,72 @@
+.ui-spinner {
+    display: inline-block;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+    vertical-align: middle;
+}
+
+.ui-spinner-input {
+    vertical-align: middle;
+    padding-right: 1.5em;
+}
+
+.ui-spinner-button {
+    cursor: default;
+    display: block;
+    height: 50%;
+    margin: 0 !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
+    overflow: hidden;
+    padding: 0 !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
+    position: absolute !important;
+    /* !important 覆盖掉.ui-button 给的样式*/
+    right: 0;
+    text-align: center !important;
+    /* 覆盖掉.ui-button 给的样式*/
+    vertical-align: middle;
+    width: 1.5em;
+    min-width: 2em !important;
+    /* 覆盖掉.ui-button 给的样式*/
+    border-radius: 0 !important;
+    /* 覆盖掉.ui-button 给的样式*/
+}
+
+.ui-spinner .fa {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -.5em;
+    margin-left: -.5em;
+    width: 1em;
+}
+
+.ui-spinner-up {
+    top: 0;
+}
+
+.ui-spinner-down {
+    bottom: 0;
+}
+
+
+/* Fluid */
+
+.ui-fluid .ui-spinner {
+    width: 100%;
+}
+
+.ui-fluid .ui-spinner .ui-spinner-input {
+    padding-right: 2em;
+    width: 100%;
+}
+
+.ui-fluid .ui-spinner .ui-spinner-button {
+    width: 1.5em;
+}
+
+.ui-fluid .ui-spinner .ui-spinner-button .fa {
+    left: 50%;
+    /* 避免上下箭头没有居中 */
+}
