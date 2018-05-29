@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,7 +101,7 @@ func waitForPathToExistInternal(devicePath *string, maxRetries int, deviceTransp
 
 // GetInitiator returns all the ISCSI Initiator Name
 func GetInitiator() ([]string, error) {
-	res, err := exec.Command("cat", "/etc/iscsi/initiatorname.iscsi").CombinedOutput()
+	res, err := execCmd("cat", "/etc/iscsi/initiatorname.iscsi")
 	iqns := []string{}
 	if err != nil {
 		log.Printf("Error encountered gathering initiator names: %v", err)
@@ -118,10 +119,28 @@ func GetInitiator() ([]string, error) {
 	return iqns, nil
 }
 
+// Login ISCSI Target
+func SetAuth(portal string, targetiqn string, name string, passwd string) error {
+	// Set UserName
+	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
+		"--op=update", "--name", "node.session.auth.username", "--value", name)
+	if err != nil {
+		log.Fatalf("Received error on set income username: %v, %v", err, info)
+		return err
+	}
+	// Set Password
+	info, err = execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
+		"--op=update", "--name", "node.session.auth.password", "--value", passwd)
+	if err != nil {
+		log.Fatalf("Received error on set income password: %v, %v", err, info)
+		return err
+	}
+	return nil
+}
+
 // Discovery ISCSI Target
 func Discovery(portal string) error {
-	log.Printf("Discovery portal: %s", portal)
-	info, err := exec.Command("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal).CombinedOutput()
+	info, err := execCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
 	if err != nil {
 		log.Println("Error encountered in sendtargets:", string(info), err)
 		return err
@@ -131,8 +150,7 @@ func Discovery(portal string) error {
 
 // Login ISCSI Target
 func Login(portal string, targetiqn string) error {
-	log.Printf("Login portal: %s targetiqn: %s", portal, targetiqn)
-	info, err := exec.Command("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--login").CombinedOutput()
+	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--login")
 	if err != nil {
 		log.Println("Received error on login attempt:", string(info), err)
 		return err
@@ -142,8 +160,7 @@ func Login(portal string, targetiqn string) error {
 
 // Logout ISCSI Target
 func Logout(portal string, targetiqn string) error {
-	log.Printf("Logout portal: %s targetiqn: %s", portal, targetiqn)
-	info, err := exec.Command("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--logout").CombinedOutput()
+	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--logout")
 	if err != nil {
 		log.Println("Received error on logout attempt:", string(info), err)
 		return err
@@ -153,8 +170,7 @@ func Logout(portal string, targetiqn string) error {
 
 // Delete ISCSI Node
 func Delete(targetiqn string) error {
-	log.Printf("Delete targetiqn: %s", targetiqn)
-	info, err := exec.Command("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn).CombinedOutput()
+	info, err := execCmd("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
 	if err != nil {
 		log.Println("Received error on Delete attempt:", string(info), err)
 		return err
@@ -163,8 +179,12 @@ func Delete(targetiqn string) error {
 }
 
 // Connect ISCSI Target
-func Connect(portal string, targetiqn string, targetlun string) (string, error) {
-	log.Printf("Connect portal: %s targetiqn: %s targetlun: %s", portal, targetiqn, targetlun)
+func Connect(connMap map[string]interface{}) (string, error) {
+	conn := ParseIscsiConnectInfo(connMap)
+	portal := conn.TgtPortal
+	targetiqn := conn.TgtIQN
+	targetlun := strconv.Itoa(conn.TgtLun)
+
 	devicePath := strings.Join([]string{
 		"/dev/disk/by-path/ip",
 		portal,
@@ -181,7 +201,10 @@ func Connect(portal string, targetiqn string, targetlun string) (string, error) 
 		if err != nil {
 			return "", err
 		}
-
+		// Set authentication messages,if is has.
+		if len(conn.AuthMethod) != 0 {
+			SetAuth(portal, targetiqn, conn.AuthUser, conn.AuthPass)
+		}
 		//Login
 		err = Login(portal, targetiqn)
 		if err != nil {
@@ -189,7 +212,6 @@ func Connect(portal string, targetiqn string, targetlun string) (string, error) 
 		}
 
 		isexist = waitForPathToExist(&devicePath, 10, ISCSITranslateTCP)
-
 		if !isexist {
 			return "", errors.New("Could not connect volume: Timeout after 10s")
 		}
@@ -199,7 +221,7 @@ func Connect(portal string, targetiqn string, targetlun string) (string, error) 
 }
 
 func sessionExists(portal string, tgtIqn string) bool {
-	info, err := exec.Command("iscsiadm", "-m", "session", "-s").CombinedOutput()
+	info, err := execCmd("iscsiadm", "-m", "session", "-s")
 	if err != nil {
 		log.Println("Warning: get session failed,", string(info))
 		return false
@@ -214,8 +236,8 @@ func sessionExists(portal string, tgtIqn string) bool {
 }
 
 func recordExists(portal string, tgtIqn string) bool {
-	_, err := exec.Command("iscsiadm", "-m", "node", "-o", "show",
-		"-T", tgtIqn, "-p", portal).CombinedOutput()
+	_, err := execCmd("iscsiadm", "-m", "node", "-o", "show",
+		"-T", tgtIqn, "-p", portal)
 	return err == nil
 }
 
@@ -236,9 +258,8 @@ func Disconnect(portal string, targetiqn string) error {
 
 // GetFSType returns the File System Type of device
 func GetFSType(device string) string {
-	log.Printf("GetFSType: %s", device)
 	fsType := ""
-	res, err := exec.Command("blkid", device).CombinedOutput()
+	res, err := execCmd("blkid", device)
 	if err != nil {
 		log.Printf("failed to GetFSType: %v", err)
 		return fsType
@@ -266,7 +287,7 @@ func Format(device string, fstype string) error {
 		if fstype == "" {
 			fstype = "ext4"
 		}
-		_, err := exec.Command("mkfs", "-t", fstype, "-F", device).CombinedOutput()
+		_, err := execCmd("mkfs", "-t", fstype, "-F", device)
 		if err != nil {
 			log.Printf("failed to Format: %v", err)
 			return err
@@ -281,11 +302,11 @@ func Format(device string, fstype string) error {
 func Mount(device string, mountpoint string) error {
 	log.Printf("Mount device: %s mountpoint: %s", device, mountpoint)
 
-	_, err := exec.Command("mkdir", "-p", mountpoint).CombinedOutput()
+	_, err := execCmd("mkdir", "-p", mountpoint)
 	if err != nil {
 		log.Printf("failed to mkdir: %v", err)
 	}
-	_, err = exec.Command("mount", device, mountpoint).CombinedOutput()
+	_, err = execCmd("mount", device, mountpoint)
 	if err != nil {
 		log.Printf("failed to mount: %v", err)
 		return err
@@ -293,8 +314,8 @@ func Mount(device string, mountpoint string) error {
 	return nil
 }
 
-// FormatandMount device
-func FormatandMount(device string, fstype string, mountpoint string) error {
+// FormatAndMount device
+func FormatAndMount(device string, fstype string, mountpoint string) error {
 	log.Printf("FormatandMount device: %s fstype: %s mountpoint: %s", device, fstype, mountpoint)
 
 	// Format
@@ -316,7 +337,7 @@ func FormatandMount(device string, fstype string, mountpoint string) error {
 func Umount(mountpoint string) error {
 	log.Printf("Umount mountpoint: %s", mountpoint)
 
-	_, err := exec.Command("umount", mountpoint).CombinedOutput()
+	_, err := execCmd("umount", mountpoint)
 	if err != nil {
 		log.Printf("failed to Umount: %v", err)
 		return err
@@ -345,4 +366,10 @@ func GetHostIp() string {
 	}
 
 	return "127.0.0.1"
+}
+
+func execCmd(name string, arg ...string) (string, error) {
+	log.Printf("Command: %s %s:\n", name, strings.Join(arg, " "))
+	info, err := exec.Command(name, arg...).CombinedOutput()
+	return string(info), err
 }
