@@ -190,5 +190,6 @@ func (f *fibreChannel) getFChbasInfo() ([]map[string]string, error) {
 
 		hbasInfos = append(hbasInfos, hbasInfo)
 	}
+
 	return hbasInfos, nil
 }
