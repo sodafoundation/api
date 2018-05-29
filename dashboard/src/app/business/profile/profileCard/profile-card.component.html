@@ -17,7 +17,7 @@
                 <div class="fa fa-check icon-color-class margin-right-class">
                     <span class="font-color-class">{{policy}}</span>
                 </div>
-                <app-suspension-frame [policy]="policy" [ngStyle]="{'display':i === index && isHover ? 'block' : 'none'}"></app-suspension-frame>
+                <app-suspension-frame [policy]="[policy,data.extras]" [ngStyle]="{'display':i === index && isHover ? 'block' : 'none'}"></app-suspension-frame>
             </div>
 
         </div>
