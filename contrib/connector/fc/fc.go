@@ -22,14 +22,21 @@ var (
 	FC_Driver = "fc"
 )
 
-type fcDriver struct{}
+type fcDriver struct {
+	self *fibreChannel
+}
 
 func init() {
-	connector.RegisterConnector(FC_Driver, &fcDriver{})
+	connector.RegisterConnector(FC_Driver,
+		&fcDriver{
+			self: &fibreChannel{
+				helper: &linuxfc{},
+			},
+		})
 }
 
 func (f *fcDriver) Attach(conn map[string]interface{}) (string, error) {
-	deviceInfo, err := connectVolume(conn)
+	deviceInfo, err := f.self.connectVolume(conn)
 	if err != nil {
 		return "", err
 	}
@@ -37,6 +44,5 @@ func (f *fcDriver) Attach(conn map[string]interface{}) (string, error) {
 }
 
 func (f *fcDriver) Detach(conn map[string]interface{}) error {
-
-	return disconnectVolume(conn)
+	return f.self.disconnectVolume(conn)
 }
