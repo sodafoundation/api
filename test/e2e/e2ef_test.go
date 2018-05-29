@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 package e2e
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -156,27 +153,8 @@ func CleanLog() {
 
 //Check if Disk Log contain /dev/sd&& 2 GiB
 func DiskChk(log string, str string) bool {
-	dLog, err := os.Open(log)
-	if err != nil {
-		panic(err)
-	}
-	defer dLog.Close()
-	disk := bufio.NewReader(dLog)
-	count := 0
-	for {
-		line, _ := disk.ReadString('\n')
-		if strings.Index(line, str) != -1 {
-			return true
-		} else {
-			count++
-			if count > 25 {
-				break
-			}
-			continue
-		}
-		if err != nil || io.EOF == err {
-			return false
-		}
+	if strings.Index(log, str) != -1 {
+		return true
 	}
 	return false
 }
@@ -378,7 +356,10 @@ func TestShowAttacDetail(t *testing.T) {
 	attsta := GetVolAttaID()[1]
 	getatt, err := u.GetVolumeAttachment(attID)
 	//scan volume
+	t.Log("Begin to Scan Volume:")
 	out := ScanVolume()
+	t.Log(out)
+	t.Log("Scan Volume End!")
 	//read Dsik.log
 	dev := DiskChk(out, "/dev/sd")
 	ca := DiskChk(out, "2 GiB")
@@ -405,7 +386,10 @@ func TestDeleteVolAttach(t *testing.T) {
 		}
 	}
 	//Chk volume scan
+	t.Log("Begin to Scan Volume")
 	out := ScanVolume()
+	t.Log(out)
+	t.Log("Scan Volume End!")
 	dev := DiskChk(out, "/dev/sd")
 	ca := DiskChk(out, "2 GiB")
 	chk2, _ := u.GetVolumeAttachment(attID)
