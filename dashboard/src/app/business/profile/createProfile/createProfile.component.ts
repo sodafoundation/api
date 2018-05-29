@@ -63,8 +63,7 @@ export class CreateProfileComponent implements OnInit {
         storageType: '',
         description: '',
         extras: {
-            protocol: 'iSCSI',
-            policys: []
+            protocol: 'iSCSI'
         }
     };
     qosIsChecked = false;
@@ -323,21 +322,21 @@ export class CreateProfileComponent implements OnInit {
             "maxBWS" : new FormControl(100, Validators.required),
         });
         this.repPolicy = this.fb.group({
-            "repType": new FormControl(this.replicationTypeOptions[0], Validators.required),
-            "repMode": new FormControl(this.replicationModeOptions[0], Validators.required),
+            "repType": new FormControl("mirror", Validators.required),
+            "repMode": new FormControl(this.replicationModeOptions[0].value, Validators.required),
             "repPeriod": new FormControl(60, Validators.required),
             "repBandwidth": new FormControl(10, Validators.required),
-            "repRGO": new FormControl(this.replicationRGOOptions[0], Validators.required),
-            "repRTO": new FormControl(this.replicationRTOOptions[0], Validators.required),
+            "repRGO": new FormControl(this.replicationRGOOptions[0].value, Validators.required),
+            "repRTO": new FormControl(this.replicationRTOOptions[0].value, Validators.required),
             "repRPO": new FormControl(0, Validators.required),
-            "repCons": new FormControl(false)
+            "repCons": new FormControl([])
         });
         this.snapPolicy = this.fb.group({
-            "Schedule": new FormControl(this.snapSchedule[0], Validators.required),
+            "Schedule": new FormControl(this.snapSchedule[0].value, Validators.required),
             "datetime": new FormControl("00:00", Validators.required),
             "snapNum": new FormControl(1, Validators.required),
             "duration": new FormControl(0, Validators.required),
-            "retentionOptions": new FormControl(this.snapshotRetentionOptions[0])
+            "retentionOptions": new FormControl(this.snapshotRetentionOptions[0].value)
         });
         this.paramData= {
             extras:{protocol:this.profileform.value.protocol},
@@ -371,7 +370,61 @@ export class CreateProfileComponent implements OnInit {
         this.param.name = value.name;
         this.param.storageType = value.storageType;
         this.param.extras.protocol = value.protocol;
-        this.param.extras.policys = value.policys;
+        if(this.qosIsChecked){
+            if(!this.qosPolicy.valid){
+                for(let i in this.qosPolicy.controls){
+                    this.qosPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            this.param.extras[":provisionPolicy"]= {
+                "ioConnectivityLoS": {
+                    "maxIOPS": this.qosPolicy.value.maxIOPS,
+                    "maxBWS": this.qosPolicy.value.maxBWS
+                }
+            }
+        }
+        if(this.replicationIsChecked){
+            if(!this.repPolicy.valid){
+                for(let i in this.repPolicy.controls){
+                    this.repPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            this.param.extras["replicationType"]= "ArrayBased";
+            this.param.extras[":replicationPolicy"]={
+                "dataProtectionLoS": {
+                    "replicaTypes": this.repPolicy.value.repType,
+                    "recoveryGeographicObject": this.repPolicy.value.repRGO,
+                    "recoveryPointObjective": this.repPolicy.value.repRPO,
+                    "recoveryTimeObjective": this.repPolicy.value.repRTO,
+                },
+                "replicaInfos": {
+                    "replicaUpdateMode": this.repPolicy.value.repMode,
+                    "consistencyEnabled": this.repPolicy.value.repCons.length==0 ? false:true,
+                    "replicationPeriod": this.repPolicy.value.repPeriod,
+                    "replicationBandwidth": this.repPolicy.value.repBandwidth
+                }
+            }
+        }
+        if(this.snapPolicy){
+            if(!this.snapPolicy.valid){
+                for(let i in this.snapPolicy.controls){
+                    this.snapPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            let reten = this.snapPolicy.value.retentionOptions === "Quantity" ? {
+                    "number": this.snapPolicy.value.snapNum,
+                }:{"duration": this.snapPolicy.value.duration}
+            this.param.extras[":snapshotPolicy"]= {
+                "schedule": {
+                    "datetime": "1970-01-01T"+this.snapPolicy.value.datetime+":00",
+                    "occurrence": this.snapPolicy.value.Schedule //Monthly, Weekly, Daily, Hourly
+                },
+                "retention": reten
+            }
+        }
         if (this.customizationItems.length > 0) {
             let arrLength = this.customizationItems.length;
             for (let i = 0; i < arrLength; i++) {
