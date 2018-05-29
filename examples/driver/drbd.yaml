@@ -1,0 +1,14 @@
+---
+# Minumum and Maximum TCP/IP ports used for DRBD replication.
+PortMin: 7000
+PortMax: 8000
+# Exaclty two hosts between resources are replicated.
+# Never ever change the Node-ID associated with a Host(name)
+Hosts:
+   - Hostname: rckdeba
+     IP: 10.43.70.115
+     Node-ID: 0
+
+   - Hostname: rckdebb
+     IP: 10.43.70.116
+     Node-ID: 1
