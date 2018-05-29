@@ -15,8 +15,6 @@
 package iscsi
 
 import (
-	"strconv"
-
 	"github.com/opensds/opensds/contrib/connector"
 )
 
@@ -31,9 +29,7 @@ func init() {
 }
 
 func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Connect(iscsiCon.TgtPortal, iscsiCon.TgtIQN, strconv.Itoa(iscsiCon.TgtLun))
+	return Connect(conn)
 }
 
 func (isc *Iscsi) Detach(conn map[string]interface{}) error {
