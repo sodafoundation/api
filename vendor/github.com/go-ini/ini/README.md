@@ -87,7 +87,7 @@ key1, err := sec1.GetKey("Key")
 key2, err := sec2.GetKey("KeY")
 ```
 
-#### MySQL-like boolean key
+#### MySQL-like boolean key 
 
 MySQL's configuration allows a key without value as follows:
 
@@ -101,7 +101,7 @@ skip-name-resolve
 By default, this is considered as missing value. But if you know you're going to deal with those cases, you can assign advanced load options:
 
 ```go
-cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, "my.cnf"))
+cfg, err := LoadSources(LoadOptions{AllowBooleanKeys: true}, "my.cnf"))
 ```
 
 The value of those keys are always `true`, and when you save to a file, it will keep in the same foramt as you read.
@@ -125,7 +125,7 @@ If you want to save a value with `#` or `;`, please quote them with ``` ` ``` or
 Alternatively, you can use following `LoadOptions` to completely ignore inline comments:
 
 ```go
-cfg, err := ini.LoadSources(ini.LoadOptions{IgnoreInlineComment: true}, "app.ini"))
+cfg, err := LoadSources(LoadOptions{IgnoreInlineComment: true}, "app.ini"))
 ```
 
 ### Working with sections
@@ -320,27 +320,13 @@ cfg, err := ini.LoadSources(ini.LoadOptions{
 }, "filename")
 ```
 
-Holy crap!
+Holy crap! 
 
 Note that single quotes around values will be stripped:
 
 ```ini
 foo = "some value" // foo: some value
 bar = 'some value' // bar: some value
-```
-
-Sometimes you downloaded file from [Crowdin](https://crowdin.com/) has values like the following (value is surrounded by double quotes and quotes in the value are escaped):
-
-```ini
-create_repo="created repository <a href=\"%s\">%s</a>"
-```
-
-How do you transform this to regular format automatically?
-
-```go
-cfg, err := ini.LoadSources(ini.LoadOptions{UnescapeValueDoubleQuotes: true}, "en-US.ini"))
-cfg.Section("<name of your section>").Key("create_repo").String()
-// You got: created repository <a href="%s">%s</a>
 ```
 
 That's all? Hmm, no.
@@ -440,7 +426,7 @@ By default, spaces are used to align "=" sign between key and values, to disable
 
 ```go
 ini.PrettyFormat = false
-```
+``` 
 
 ## Advanced Usage
 
@@ -489,39 +475,12 @@ cfg.Section("package.sub").Key("CLONE_URL").String()	// https://gopkg.in/ini.v1
 cfg.Section("package.sub").ParentKeys() // ["CLONE_URL"]
 ```
 
-### Same Key with Multiple Values
-
-Do you ever have a configuration file like this?
-
-```ini
-[remote "origin"]
-url = https://github.com/Antergone/test1.git
-url = https://github.com/Antergone/test2.git
-fetch = +refs/heads/*:refs/remotes/origin/*
-```
-
-By default, only the last read value will be kept for the key `url`. If you want to keep all copies of value of this key, you can use `ShadowLoad` to achieve it:
-
-```go
-cfg, err := ini.ShadowLoad(".gitconfig")
-// ...
-
-f.Section(`remote "origin"`).Key("url").String() 
-// Result: https://github.com/Antergone/test1.git
-
-f.Section(`remote "origin"`).Key("url").ValueWithShadows()
-// Result:  []string{
-//              "https://github.com/Antergone/test1.git",
-//              "https://github.com/Antergone/test2.git",
-//          }
-```
-
 ### Unparseable Sections
 
 Sometimes, you have sections that do not contain key-value pairs but raw content, to handle such case, you can use `LoadOptions.UnparsableSections`:
 
 ```go
-cfg, err := ini.LoadSources(ini.LoadOptions{UnparseableSections: []string{"COMMENTS"}}, `[COMMENTS]
+cfg, err := LoadSources(LoadOptions{UnparseableSections: []string{"COMMENTS"}}, `[COMMENTS]
 <1><L.Slide#2> This slide has the fuel listed in the wrong units <e.1>`))
 
 body := cfg.Section("COMMENTS").Body()
@@ -614,7 +573,7 @@ Why not?
 
 ```go
 type Embeded struct {
-	Dates  []time.Time `delim:"|" comment:"Time data"`
+	Dates  []time.Time `delim:"|"`
 	Places []string    `ini:"places,omitempty"`
 	None   []int       `ini:",omitempty"`
 }
@@ -622,10 +581,10 @@ type Embeded struct {
 type Author struct {
 	Name      string `ini:"NAME"`
 	Male      bool
-	Age       int `comment:"Author's age"`
+	Age       int
 	GPA       float64
 	NeverMind string `ini:"-"`
-	*Embeded `comment:"Embeded section"`
+	*Embeded
 }
 
 func main() {
@@ -646,13 +605,10 @@ So, what do I get?
 ```ini
 NAME = Unknwon
 Male = true
-; Author's age
 Age = 21
 GPA = 2.8
 
-; Embeded section
 [Embeded]
-; Time data
 Dates = 2015-08-07T22:14:22+08:00|2015-08-07T22:14:22+08:00
 places = HangZhou,Boston
 ```

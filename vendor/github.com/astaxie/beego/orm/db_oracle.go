@@ -34,7 +34,6 @@ var oracleTypes = map[string]string{
 	"pk":              "NOT NULL PRIMARY KEY",
 	"bool":            "bool",
 	"string":          "VARCHAR2(%d)",
-	"string-char":     "CHAR(%d)",
 	"string-text":     "VARCHAR2(%d)",
 	"time.Time-date":  "DATE",
 	"time.Time":       "TIMESTAMP",

@@ -78,8 +78,6 @@ func (fs *FileSessionStore) SessionID() string {
 
 // SessionRelease Write file session to local file with Gob string
 func (fs *FileSessionStore) SessionRelease(w http.ResponseWriter) {
-	filepder.lock.Lock()
-	defer filepder.lock.Unlock()
 	b, err := EncodeGob(fs.values)
 	if err != nil {
 		SLogger.Println(err)
@@ -166,7 +164,7 @@ func (fp *FileProvider) SessionRead(sid string) (Store, error) {
 }
 
 // SessionExist Check file session exist.
-// it checks the file named from sid exist or not.
+// it checkes the file named from sid exist or not.
 func (fp *FileProvider) SessionExist(sid string) bool {
 	filepder.lock.Lock()
 	defer filepder.lock.Unlock()

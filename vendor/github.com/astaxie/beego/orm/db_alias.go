@@ -119,7 +119,7 @@ type alias struct {
 func detectTZ(al *alias) {
 	// orm timezone system match database
 	// default use Local
-	al.TZ = DefaultTimeLoc
+	al.TZ = time.Local
 
 	if al.DriverName == "sphinx" {
 		return
@@ -136,9 +136,7 @@ func detectTZ(al *alias) {
 			}
 			t, err := time.Parse("-07:00:00", tz)
 			if err == nil {
-				if t.Location().String() != "" {
-					al.TZ = t.Location()
-				}
+				al.TZ = t.Location()
 			} else {
 				DebugLog.Printf("Detect DB timezone: %s %s\n", tz, err.Error())
 			}

@@ -51,14 +51,12 @@ checkColumn:
 	switch fieldType {
 	case TypeBooleanField:
 		col = T["bool"]
-	case TypeVarCharField:
+	case TypeCharField:
 		if al.Driver == DRPostgres && fi.toText {
 			col = T["string-text"]
 		} else {
 			col = fmt.Sprintf(T["string"], fieldSize)
 		}
-	case TypeCharField:
-		col = fmt.Sprintf(T["string-char"], fieldSize)
 	case TypeTextField:
 		col = T["string-text"]
 	case TypeTimeField:
@@ -98,13 +96,13 @@ checkColumn:
 		}
 	case TypeJSONField:
 		if al.Driver != DRPostgres {
-			fieldType = TypeVarCharField
+			fieldType = TypeCharField
 			goto checkColumn
 		}
 		col = T["json"]
 	case TypeJsonbField:
 		if al.Driver != DRPostgres {
-			fieldType = TypeVarCharField
+			fieldType = TypeCharField
 			goto checkColumn
 		}
 		col = T["jsonb"]

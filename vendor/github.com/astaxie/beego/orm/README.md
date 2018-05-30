@@ -61,9 +61,6 @@ func init() {
 
 	// set default database
 	orm.RegisterDataBase("default", "mysql", "root:root@/my_db?charset=utf8", 30)
-	
-	// create table
-	orm.RunSyncdb("default", false, true)	
 }
 
 func main() {
