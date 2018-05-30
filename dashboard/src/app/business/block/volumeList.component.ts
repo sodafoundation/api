@@ -254,7 +254,7 @@ export class VolumeListComponent implements OnInit {
                 "availabilityZone": this.replicationGroup.value.az.value,
                 "profileId": this.replicationGroup.value.profileOption,
                 "replicationMode":"async",
-                "replicationPeriod":this.repPeriod,
+                "replicationPeriod":Number(this.repPeriod),
                 "secondaryVolumeId":res.json().id
             }
             this.ReplicationService.createReplication(param).subscribe((res) => {

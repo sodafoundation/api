@@ -265,12 +265,12 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		log.Error(err)
 		return nil, err
 	}
-	var charAuth []string
+	var chapAuth []string
 	if d.conf.EnableChapAuth {
-		charAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
+		chapAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
 	}
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
-	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator, charAuth)
+	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator, chapAuth)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err

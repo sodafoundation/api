@@ -12,7 +12,7 @@
         <p-button (click)="showWarningDialogFun(profile.id)" styleClass="close-class profile-card-close" icon="fa fa-fw fa-close">
         </p-button>
     </div>
-    <p-card [routerLink]="['/modifyProfile/' + profile.id]" styleClass="new-card-class ui-card-shadow">
+    <p-card styleClass="new-card-class ui-card-shadow">
         <profile-card [data]="profile"></profile-card>
     </p-card>
 </div>
