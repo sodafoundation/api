@@ -26,7 +26,7 @@
         <p-column field="createdAt" header="{{I18N.keyID['sds_block_volume_createat']}}"></p-column>
         <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '25%'}">
             <ng-template let-snapshot="rowData" pTemplate="body">
-                <a [routerLink]="['/createVolume']">{{I18N.keyID['sds_block_volume_createVol']}}</a>
+                <a style="opacity: 0.2">{{I18N.keyID['sds_block_volume_createVol']}}</a>
                 <a (click)="showSnapshotPropertyDialog('modify',snapshot)">{{I18N.keyID['sds_block_volume_modify']}}</a>
                 <a (click)="batchDeleteSnapshot([snapshot])">{{I18N.keyID['sds_block_volume_delete']}}</a>
             </ng-template>

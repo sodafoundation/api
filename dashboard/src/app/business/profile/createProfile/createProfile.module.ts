@@ -20,7 +20,7 @@ let routers = [{
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,  
+    FormsModule,
     RouterModule.forChild(routers),
     InputTextModule,
     CheckboxModule,
@@ -30,8 +30,9 @@ let routers = [{
     DialogModule,
     GrowlModule,
     PoolModule,
-    SelectButtonModule
-  ],  
+    SelectButtonModule,
+    FormModule
+  ],
   providers: [
     HttpService,
     ProfileService,
