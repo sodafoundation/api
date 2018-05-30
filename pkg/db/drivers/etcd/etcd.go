@@ -1905,6 +1905,9 @@ func (c *Client) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, erro
 
 func (c *Client) filterByName(param map[string][]string, spec interface{}, filterList map[string]interface{}) bool {
 	v := reflect.ValueOf(spec)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
 	for key := range param {
 		_, ok := filterList[key]
 		if !ok {

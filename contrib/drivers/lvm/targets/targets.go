@@ -21,7 +21,7 @@ const (
 // Target is an interface for exposing some operations of different targets,
 // currently support iscsiTarget.
 type Target interface {
-	CreateExport(volId, path, hostIp, initiator string, charAuth []string) (map[string]interface{}, error)
+	CreateExport(volId, path, hostIp, initiator string, chapAuth []string) (map[string]interface{}, error)
 
 	RemoveExport(volId string) error
 }
