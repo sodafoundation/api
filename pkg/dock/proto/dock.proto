@@ -331,6 +331,8 @@ message DeleteReplicationOpts {
     string context = 15;
     // The replication metadata
     map<string, string> metadata = 16;
+    // Whether is primary replication
+    bool  isPrimary = 17;
 }
 
 
@@ -366,6 +368,8 @@ message EnableReplicationOpts {
     string context = 15;
     // The replication metadata
     map<string, string> metadata = 16;
+    // Whether is primary replication
+    bool  isPrimary = 17;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -400,6 +404,8 @@ message DisableReplicationOpts {
     string context = 15;
     // The replication metadata
     map<string, string> metadata = 16;
+    // Whether is primary replication
+    bool  isPrimary = 17;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -438,6 +444,8 @@ message FailoverReplicationOpts {
     string secondaryBackendId = 17;
     // The replication metadata
     map<string, string> metadata = 18;
+    // Whether is primary replication
+    bool  isPrimary = 19;
 }
 
 // CreateVolumeGroupOpts is a structure which indicates all required

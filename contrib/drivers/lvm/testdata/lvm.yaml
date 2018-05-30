@@ -1,5 +1,6 @@
 tgtBindIp: 192.168.56.105
 tgtConfDir: /etc/tgt/conf.d
+enableChapAuth: true
 pool:
   vg001:
     storageType: block

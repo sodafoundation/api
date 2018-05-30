@@ -41,7 +41,6 @@ import { ProfileService } from './../profile.service';
     ]
 })
 export class CreateProfileComponent implements OnInit {
-    errorMessage;
     showCustomization = false;
     showStoragePool = false;
     msgs: Message[] = [];
@@ -51,6 +50,9 @@ export class CreateProfileComponent implements OnInit {
     description: string;
 
     profileform: FormGroup;
+    qosPolicy:FormGroup;
+    repPolicy:FormGroup;
+    snapPolicy:FormGroup;
     paramData= {
         extras:{protocol:""},
         storageType:""
@@ -94,7 +96,7 @@ export class CreateProfileComponent implements OnInit {
         {
             label: 'Mirror',
             value: 'mirror'
-        },
+        }/*,
         {
             label: 'Snapshot',
             value: 'snapshot'
@@ -106,7 +108,7 @@ export class CreateProfileComponent implements OnInit {
         {
             label: 'Tokenized Clone',
             value: 'tokenized'
-        }
+        }*/
     ];
 
     replicationRGOOptions = [
@@ -192,7 +194,17 @@ export class CreateProfileComponent implements OnInit {
             value: 3600
         }
     ];
-
+    errorMessage={
+        "name": { required: this.I18N.keyID['sds_profile_create_name_require']},
+        "maxIOPS": { required: this.I18N.keyID['sds_required'].replace("{0}","MaxIOPS")},
+        "maxBWS" :{ required: this.I18N.keyID['sds_required'].replace("{0}","MaxBWS")},
+        "repPeriod" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Period")},
+        "repBandwidth" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Bandwidth")},
+        "repRPO" :{ required: this.I18N.keyID['sds_required'].replace("{0}","RPO")},
+        "datetime" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Execution Time")},
+        "snapNum" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+        "duration" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+    };
     snapshotRetentionOptions = [
         {
             label: 'Time',
@@ -203,11 +215,29 @@ export class CreateProfileComponent implements OnInit {
             value: 'Quantity'
         }
     ];
+    snapSchedule = [
+        {
+            label: 'Hourly',
+            value: 'Hourly'
+        },
+        {
+            label: 'Daily',
+            value: 'Daily'
+        },
+        {
+            label: 'Weekly',
+            value: 'Weekly'
+        },
+        {
+            label: 'Monthly',
+            value: 'Monthly'
+        }
+    ];
 
     weekDays;
 
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         private router: Router,
         private ProfileService: ProfileService,
         private fb: FormBuilder
@@ -263,7 +293,7 @@ export class CreateProfileComponent implements OnInit {
             key: 'Key',
             value: 'Value',
             maxIOPS: 'MaxIOPS',
-            MBPS: 'MBWS',
+            MBPS: 'MaxBWS',
             replicationLabel: {
                 type: 'Type',
                 RGO: 'RGO',
@@ -284,10 +314,35 @@ export class CreateProfileComponent implements OnInit {
         this.profileform = this.fb.group({
             'name': new FormControl('', Validators.required),
             'protocol': new FormControl('iSCSI'),
-            'storageType': new FormControl('', Validators.required),
+            'storageType': new FormControl('Thin', Validators.required),
             'policys': new FormControl(''),
             'snapshotRetention': new FormControl('Time')
         });
+        this.qosPolicy = this.fb.group({
+            "maxIOPS": new FormControl(6000, Validators.required),
+            "maxBWS" : new FormControl(100, Validators.required),
+        });
+        this.repPolicy = this.fb.group({
+            "repType": new FormControl("mirror", Validators.required),
+            "repMode": new FormControl(this.replicationModeOptions[0].value, Validators.required),
+            "repPeriod": new FormControl(60, Validators.required),
+            "repBandwidth": new FormControl(10, Validators.required),
+            "repRGO": new FormControl(this.replicationRGOOptions[0].value, Validators.required),
+            "repRTO": new FormControl(this.replicationRTOOptions[0].value, Validators.required),
+            "repRPO": new FormControl(0, Validators.required),
+            "repCons": new FormControl([])
+        });
+        this.snapPolicy = this.fb.group({
+            "Schedule": new FormControl(this.snapSchedule[0].value, Validators.required),
+            "datetime": new FormControl("00:00", Validators.required),
+            "snapNum": new FormControl(1, Validators.required),
+            "duration": new FormControl(0, Validators.required),
+            "retentionOptions": new FormControl(this.snapshotRetentionOptions[0].value)
+        });
+        this.paramData= {
+            extras:{protocol:this.profileform.value.protocol},
+            storageType:this.profileform.value.storageType
+        };
         this.profileform.get("protocol").valueChanges.subscribe(
             (value:string)=>{
                 this.paramData = {
@@ -317,6 +372,61 @@ export class CreateProfileComponent implements OnInit {
         this.param.storageType = value.storageType;
         this.param.extras.protocol = value.protocol;
         this.param.extras.policys = value.policys;
+        if(this.qosIsChecked){
+            if(!this.qosPolicy.valid){
+                for(let i in this.qosPolicy.controls){
+                    this.qosPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            this.param.extras[":provisionPolicy"]= {
+                "ioConnectivityLoS": {
+                    "maxIOPS": this.qosPolicy.value.maxIOPS,
+                    "maxBWS": this.qosPolicy.value.maxBWS
+                }
+            }
+        }
+        if(this.replicationIsChecked){
+            if(!this.repPolicy.valid){
+                for(let i in this.repPolicy.controls){
+                    this.repPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            this.param.extras["replicationType"]= "ArrayBased";
+            this.param.extras[":replicationPolicy"]={
+                "dataProtectionLoS": {
+                    "replicaTypes": this.repPolicy.value.repType,
+                    "recoveryGeographicObject": this.repPolicy.value.repRGO,
+                    "recoveryPointObjective": this.repPolicy.value.repRPO,
+                    "recoveryTimeObjective": this.repPolicy.value.repRTO,
+                },
+                "replicaInfos": {
+                    "replicaUpdateMode": this.repPolicy.value.repMode,
+                    "consistencyEnabled": this.repPolicy.value.repCons.length==0 ? false:true,
+                    "replicationPeriod": this.repPolicy.value.repPeriod,
+                    "replicationBandwidth": this.repPolicy.value.repBandwidth
+                }
+            }
+        }
+        if(this.snapPolicy){
+            if(!this.snapPolicy.valid){
+                for(let i in this.snapPolicy.controls){
+                    this.snapPolicy.controls[i].markAsTouched();
+                }
+                return;
+            }
+            let reten = this.snapPolicy.value.retentionOptions === "Quantity" ? {
+                    "number": this.snapPolicy.value.snapNum,
+                }:{"duration": this.snapPolicy.value.duration}
+            this.param.extras[":snapshotPolicy"]= {
+                "schedule": {
+                    "datetime": "1970-01-01T"+this.snapPolicy.value.datetime+":00",
+                    "occurrence": this.snapPolicy.value.Schedule //Monthly, Weekly, Daily, Hourly
+                },
+                "retention": reten
+            }
+        }
         if (this.customizationItems.length > 0) {
             let arrLength = this.customizationItems.length;
             for (let i = 0; i < arrLength; i++) {

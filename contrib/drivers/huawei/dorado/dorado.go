@@ -376,7 +376,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.Co
 			"initiator_target_map": initTargMap,
 			"description":          "huawei",
 			"host_name":            opt.GetHostInfo().Host,
-			"targetLun":            tgtLun,
+			"target_lun":           tgtLun,
 		},
 	}
 	return fcInfo, nil

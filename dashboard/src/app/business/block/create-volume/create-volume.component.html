@@ -19,7 +19,7 @@
             <div class="ui-grid-col-2">
                 <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.capacity}}:
             </div>
-            <div class="ui-grid-col-1">
+            <div class="ui-grid-col-1" *ngIf="false">
                 {{label.quantity}}:
             </div>
         </div>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <div class="ui-grid-col-1">
+            <div class="ui-grid-col-1" *ngIf="false">
                 <p-spinner formControlName="{{'quantity'+i}}" [min]="1" value=100></p-spinner>
             </div>
             <div class="ui-grid-col-1 item-flex" *ngIf="i !== 0">
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <div class="volume-item">
+        <div class="volume-item" *ngIf="false">
             <a class="item-flex">
                 <img width="24" height="24" src="assets/business/images/volume/u937.png" (click)="addVolumeItem()">
                 <span class="margin-between-img-text">{{i18n.keyID["sds_block_volume_addvolu"]}}</span>
@@ -77,7 +77,7 @@
         </div>
 
         <div class="volume-item">
-            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" [disabled]="true" name="replicationCheckbox" value="value" label="{{i18n.keyID['sds_block_volume_conf_rep']}}"></p-checkbox>
+            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" [disabled]="false" name="replicationCheckbox" value="value" label="{{i18n.keyID['sds_block_volume_conf_rep']}}"></p-checkbox>
         </div>
 
         <div *ngIf="showReplicationConf">

@@ -27,6 +27,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -46,9 +47,10 @@ type LvInfo struct {
 }
 
 type LVMConfig struct {
-	TgtBindIp  string                    `yaml:"tgtBindIp"`
-	TgtConfDir string                    `yaml:"tgtConfDir"`
-	Pool       map[string]PoolProperties `yaml:"pool,flow"`
+	TgtBindIp      string                    `yaml:"tgtBindIp"`
+	TgtConfDir     string                    `yaml:"tgtConfDir"`
+	EnableChapAuth bool                      `yaml:"enableChapAuth"`
+	Pool           map[string]PoolProperties `yaml:"pool,flow"`
 }
 
 type Driver struct {
@@ -263,9 +265,12 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		log.Error(err)
 		return nil, err
 	}
-
+	var chapAuth []string
+	if d.conf.EnableChapAuth {
+		chapAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
+	}
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
-	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator)
+	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator, chapAuth)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err
