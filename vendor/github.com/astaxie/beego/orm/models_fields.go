@@ -23,7 +23,6 @@ import (
 // Define the Type enum
 const (
 	TypeBooleanField = 1 << iota
-	TypeVarCharField
 	TypeCharField
 	TypeTextField
 	TypeTimeField
@@ -50,9 +49,9 @@ const (
 
 // Define some logic enum
 const (
-	IsIntegerField         = ^-TypePositiveBigIntegerField >> 6 << 7
-	IsPositiveIntegerField = ^-TypePositiveBigIntegerField >> 10 << 11
-	IsRelField             = ^-RelReverseMany >> 18 << 19
+	IsIntegerField         = ^-TypePositiveBigIntegerField >> 5 << 6
+	IsPositiveIntegerField = ^-TypePositiveBigIntegerField >> 9 << 10
+	IsRelField             = ^-RelReverseMany >> 17 << 18
 	IsFieldType            = ^-RelReverseMany<<1 + 1
 )
 
@@ -127,7 +126,7 @@ func (e *CharField) String() string {
 
 // FieldType return the enum type
 func (e *CharField) FieldType() int {
-	return TypeVarCharField
+	return TypeCharField
 }
 
 // SetRaw set the interface to string
@@ -233,7 +232,7 @@ func (e *DateField) Set(d time.Time) {
 	*e = DateField(d)
 }
 
-// String convert datetime to string
+// String convert datatime to string
 func (e *DateField) String() string {
 	return e.Value().String()
 }
@@ -273,12 +272,12 @@ var _ Fielder = new(DateField)
 // Takes the same extra arguments as DateField.
 type DateTimeField time.Time
 
-// Value return the datetime value
+// Value return the datatime value
 func (e DateTimeField) Value() time.Time {
 	return time.Time(e)
 }
 
-// Set set the time.Time to datetime
+// Set set the time.Time to datatime
 func (e *DateTimeField) Set(d time.Time) {
 	*e = DateTimeField(d)
 }
@@ -310,12 +309,12 @@ func (e *DateTimeField) SetRaw(value interface{}) error {
 	return nil
 }
 
-// RawValue return the datetime value
+// RawValue return the datatime value
 func (e *DateTimeField) RawValue() interface{} {
 	return e.Value()
 }
 
-// verify datetime implement fielder
+// verify datatime implement fielder
 var _ Fielder = new(DateTimeField)
 
 // FloatField A floating-point number represented in go by a float32 value.

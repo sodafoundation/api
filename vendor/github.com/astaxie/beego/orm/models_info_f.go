@@ -244,10 +244,8 @@ checkType:
 		if err != nil {
 			goto end
 		}
-		if fieldType == TypeVarCharField {
+		if fieldType == TypeCharField {
 			switch tags["type"] {
-			case "char":
-				fieldType = TypeCharField
 			case "text":
 				fieldType = TypeTextField
 			case "json":
@@ -359,7 +357,7 @@ checkType:
 
 	switch fieldType {
 	case TypeBooleanField:
-	case TypeVarCharField, TypeCharField, TypeJSONField, TypeJsonbField:
+	case TypeCharField, TypeJSONField, TypeJsonbField:
 		if size != "" {
 			v, e := StrTo(size).Int32()
 			if e != nil {

@@ -52,7 +52,7 @@ func (mc *_modelCache) all() map[string]*modelInfo {
 	return m
 }
 
-// get ordered model info
+// get orderd model info
 func (mc *_modelCache) allOrdered() []*modelInfo {
 	m := make([]*modelInfo, 0, len(mc.orders))
 	for _, table := range mc.orders {

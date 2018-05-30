@@ -1,18 +1,29 @@
 package: github.com/opensds/opensds
 import:
+- package: github.com/LINBIT/godrbdutils
+  version: 65b98a0f103a76a594d9862fb6f33c43c2b46123
 - package: github.com/astaxie/beego
-  version: ^1.9.0
+  version: v1.9.0
   subpackages:
   - context
   - httplib
+- package: github.com/ceph/go-ceph
+  version: 81e4191e131b21e282a9289621383237677d2437
+  subpackages:
+  - rados
+  - rbd
 - package: github.com/coreos/etcd
   version: ^3.2.7
   subpackages:
   - clientv3
 - package: github.com/go-ini/ini
-  version: ^1.28.2
+  version: v1.28.2
 - package: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- package: github.com/golang/protobuf
+  version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
+  subpackages:
+  - proto
 - package: github.com/gophercloud/gophercloud
   version: 754e57e7867bfa48062ff2a237caad538085700a
   subpackages:
@@ -22,24 +33,23 @@ import:
   - openstack/blockstorage/noauth
   - openstack/blockstorage/v2/snapshots
   - openstack/blockstorage/v2/volumes
+  - openstack/identity/v3/tokens
+- package: github.com/mitchellh/mapstructure
+  version: bb74f1db0675b241733089d5a1faa5dd8b0ef57b
 - package: github.com/satori/go.uuid
   version: v1.1.0
 - package: github.com/spf13/cobra
   version: a1e4933ab784095895e33dbe9f001ba10cfe2060
+- package: github.com/spf13/pflag
+  version: v1.0.0
+- package: github.com/stretchr/testify
+  version: v1.2.1
+  subpackages:
+  - mock
 - package: golang.org/x/net
   subpackages:
   - context
+- package: google.golang.org/grpc
+  version: v1.7.5
 - package: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
-- package: github.com/spf13/pflag
-  version: v1.0.0
-- package: github.com/golang/protobuf
-  version: 1e59b77b52bf8e4b449a57e6f79f21226d571845
-- package: github.com/ceph/go-ceph
-  version: 81e4191e131b21e282a9289621383237677d2437
-- package: google.golang.org/grpc
-  version: ^1.7.5
-- package: github.com/stretchr/testify
-  version: v1.2.1
-- package: github.com/mitchellh/mapstructure
-- package: github.com/LINBIT/godrbdutils

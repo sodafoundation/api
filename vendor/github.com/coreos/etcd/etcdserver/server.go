@@ -532,6 +532,11 @@ func (s *EtcdServer) adjustTicks() {
 		return
 	}
 
+	if !s.Cfg.InitialElectionTickAdvance {
+		plog.Infof("skipping initial election tick advance (election tick %d)", s.Cfg.ElectionTicks)
+		return
+	}
+
 	// retry up to "rafthttp.ConnReadTimeout", which is 5-sec
 	// until peer connection reports; otherwise:
 	// 1. all connections failed, or
@@ -809,10 +814,13 @@ func (s *EtcdServer) run() {
 					lid := lease.ID
 					s.goAttach(func() {
 						ctx := s.authStore.WithRoot(s.ctx)
-						if _, lerr := s.LeaseRevoke(ctx, &pb.LeaseRevokeRequest{ID: int64(lid)}); lerr != nil {
+						_, lerr := s.LeaseRevoke(ctx, &pb.LeaseRevokeRequest{ID: int64(lid)})
+						if lerr == nil {
+							leaseExpired.Inc()
+						} else {
 							plog.Warningf("failed to revoke %016x (%q)", lid, lerr.Error())
 						}
-						leaseExpired.Inc()
+
 						<-c
 					})
 				}
