@@ -45,6 +45,7 @@ export class ReplicationGroupComponent implements OnInit {
   @Output() checkParam = new EventEmitter();
   period = 60;
   selectedProfile;
+  availabilityZone=[];
   profileOptions = [
     {
       label: 'Select Profile',
@@ -68,6 +69,11 @@ export class ReplicationGroupComponent implements OnInit {
         value: 'existingGroup'
       }
     ];
+      this.availabilityZone = [
+          {
+              label: 'Default', value: 'default'
+          }
+      ];
     this.getProfiles();
   }
 

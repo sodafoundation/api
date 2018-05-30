@@ -26,7 +26,7 @@
     <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '28%'}">
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
             <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
-            <a style="opacity: 0.2">{{I18N.keyID['sds_block_volume_createrep']}}</a>
+            <a (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
             <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
         </ng-template>
     </p-column>
