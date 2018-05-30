@@ -36,6 +36,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/constants"
 
+	_ "github.com/opensds/opensds/contrib/connector/fc"
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
 	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
@@ -251,6 +252,7 @@ func (d *DockHub) DetachVolume(opt *pb.DetachVolumeOpts) error {
 
 	return con.Detach(connData)
 }
+
 func (d *DockHub) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	//Get the storage drivers and do some initializations.
 	driver, err := drivers.InitReplicationDriver(opt.GetDriverName())

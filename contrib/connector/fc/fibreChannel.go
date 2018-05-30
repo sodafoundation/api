@@ -35,15 +35,14 @@ func (f *fibreChannel) connectVolume(conn map[string]interface{}) (map[string]st
 	}
 	volPaths := f.getVolumePaths(conn, hbas)
 	if len(volPaths) == 0 {
-		errMsg := fmt.Sprintf("No fc devices found.")
+		errMsg := fmt.Sprintf("No FC devices found.")
 		log.Println(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	var tries = 3
 	devicePath, deviceName := f.volPathDiscovery(volPaths, tries, conn["target_wwn"].([]string), hbas)
 	if devicePath != "" && deviceName != "" {
-		log.Printf("Found fibre channel volume name, devicePath is %s, deviceName is %s", devicePath, deviceName)
+		log.Printf("Found Fibre Channel volume name, devicePath is %s, deviceName is %s", devicePath, deviceName)
 	}
 
 	deviceWWN, err := f.helper.getSCSIWWN(devicePath)
@@ -72,6 +71,7 @@ func (f *fibreChannel) volPathDiscovery(volPaths []string, tries int, tgtWWN []s
 				f.helper.rescanHosts(tgtWWN, hbas)
 			}
 		}
+
 		time.Sleep(2 * time.Second)
 	}
 	return "", ""

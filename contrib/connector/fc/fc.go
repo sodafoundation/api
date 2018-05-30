@@ -20,6 +20,7 @@ import (
 
 var (
 	FCDriver = "fc"
+	tries    = 3
 )
 
 type fcDriver struct {
