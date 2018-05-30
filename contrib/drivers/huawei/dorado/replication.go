@@ -58,6 +58,10 @@ func (r *ReplicationDriver) Unset() error { return nil }
 // CreateReplication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
 	log.Info("dorado replication start ...")
+	//just be invoked on the primary side.
+	if !opt.GetIsPrimary() {
+		return &model.ReplicationSpec{}, nil
+	}
 	pLunId := opt.PrimaryReplicationDriverData[KLunId]
 	sLunId := opt.SecondaryReplicationDriverData[KLunId]
 	replicationPeriod := strconv.FormatInt(opt.ReplicationPeriod, 10)
@@ -81,6 +85,9 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 }
 
 func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
+	if !opt.GetIsPrimary() {
+		return nil
+	}
 	pairId, ok := opt.GetMetadata()[KPairId]
 	var sLunId string
 	if opt.SecondaryVolumeId == "" {
@@ -95,6 +102,9 @@ func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) err
 }
 
 func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) error {
+	if !opt.GetIsPrimary() {
+		return nil
+	}
 	pairId, ok := opt.GetMetadata()[KPairId]
 	if !ok {
 		msg := fmt.Sprintf("Can find pair id in metadata")
@@ -105,6 +115,9 @@ func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) err
 }
 
 func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) error {
+	if !opt.GetIsPrimary() {
+		return nil
+	}
 	pairId, ok := opt.GetMetadata()[KPairId]
 	if !ok {
 		msg := fmt.Sprintf("Can find pair id in metadata")
@@ -115,6 +128,9 @@ func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) e
 }
 
 func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
+	if !opt.GetIsPrimary() {
+		return nil
+	}
 	pairId, ok := opt.GetMetadata()[KPairId]
 	if !ok {
 		msg := fmt.Sprintf("Can find pair id in metadata")

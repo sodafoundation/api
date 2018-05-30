@@ -12,28 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iscsi
+package fc
 
 import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
 var (
-	ISCSI_DRIVER = "iscsi"
+	FCDriver = "fc"
+	tries    = 3
 )
 
-type Iscsi struct{}
+type fcDriver struct {
+	self *fibreChannel
+}
 
 func init() {
-	connector.RegisterConnector(ISCSI_DRIVER, &Iscsi{})
+	connector.RegisterConnector(FCDriver,
+		&fcDriver{
+			self: &fibreChannel{
+				helper: &linuxfc{},
+			},
+		})
 }
 
-func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	return Connect(conn)
+func (f *fcDriver) Attach(conn map[string]interface{}) (string, error) {
+	deviceInfo, err := f.self.connectVolume(conn)
+	if err != nil {
+		return "", err
+	}
+	return deviceInfo["path"], nil
 }
 
-func (isc *Iscsi) Detach(conn map[string]interface{}) error {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Disconnect(iscsiCon.TgtPortal, iscsiCon.TgtIQN)
+func (f *fcDriver) Detach(conn map[string]interface{}) error {
+	return f.self.disconnectVolume(conn)
 }
