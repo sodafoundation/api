@@ -14,7 +14,7 @@
 
         <div class="padding-class item-flex" *ngIf="data.extras && data.extras.policys">
             <div (mouseenter)="showSuspensionFrame($event)" (mouseleave)="showSuspensionFrame($event)" *ngFor="let policy of data.extras.policys; index as i" class="position-relative mouse-cursor">
-                <div class="fa fa-check icon-color-class margin-right-class">
+                <div style="width:114px" class="fa fa-check icon-color-class margin-right-class">
                     <span class="font-color-class">{{policy}}</span>
                 </div>
                 <app-suspension-frame [policy]="[policy,data.extras]" [ngStyle]="{'display':i === index && isHover ? 'block' : 'none'}"></app-suspension-frame>
