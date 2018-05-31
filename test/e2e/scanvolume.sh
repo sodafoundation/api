@@ -1,31 +1,40 @@
 #!bin/bash
 
 CHKLOG=/var/log/scan/hkconfig.log
-#TARGETIP=10.10.3.156:3260
+LINUXLOG=/var/log/scan/linuxinstall.log
 ISCSILOG=/var/log/scan/iscsi.log
-TARGETLOG=/var/log/scan/target.log
+ISCITARLOG=/var/log/scan/iscitar.log
 LOGINLOG=/var/log/scan/login.log
 SESSIONLOG=/var/log/scan/session.log
 DISKLOG=/var/log/scan/disk.log
 TARGETIPLOG=/var/log/scan/targetip.log
-#DISKRSLOG=/var/log/scan/diskrs.log
+TARGETLOG=/var/log/scan/target.log
 
-#echo >$CHKLOG
-#echo >$ISCSILOG
-#echo >$TARGETLOG
-#echo >$LOGINLOG
-#echo >$SESSIONLOG
-#echo >$DISKLOG
-#echo >$TARGETIPLOG
+echo >$CHKLOG
+echo >$LINUXLOG
+echo >$ISCSILOG
+echo >$ISCITARLOG
+echo >$LOGINLOG
+echo >$SESSIONLOG
+echo >$DISKLOG
+echo >$TARGETIPLOG
+echo >$TARGETLOG
 
 declare target
 
 #install chkconfig
 echo "Begin to Scan Volume"
 sudo apt install sysv-rc-conf>$CHKLOG
+sudo apt-get install chkconfig>$LINUXLOG
 
-#check if install is finish
+#echo out install log to stdio
+echo "install result:"
+echo "apt-get install chkconfig result:"
+cat $LINUXLOG
+echo "apt install sysv-rc-conf result:"
+cat $CHKLOG
 
+#check if sysv-rc-conf install is finish
 count=1
 while ( [ $? -ne 0 ] || [ `grep -c "newly installed" $CHKLOG` -ne 1 ] )
    do
@@ -37,13 +46,18 @@ while ( [ $? -ne 0 ] || [ `grep -c "newly installed" $CHKLOG` -ne 1 ] )
    done
 echo "sysv_rc_conf install finished"
 
-#link chkconfig
-cp /usr/sbin/sysv-rc-conf /usr/sbin/chkconfig
+#force link chkconfig
+cp -f /usr/sbin/sysv-rc-conf /usr/sbin/chkconfig
+echo `$?`
 if [ $? -eq 0  ];then
   echo "link chkconfig sucsee!"
 else
   echo "link chkconfig fail!"
 fi
+
+#check /usr/sbin/chkconfig is exist
+echo "detail of /usr/sbin/chkconfig"
+echo `ls /usr/sbin/chkconfig`
 
 #GET TARGETIP 
 echo >ip.log
@@ -57,6 +71,10 @@ do
       echo $var | grep "addr">>ip.log
    done
 done
+#echo ip out
+echo "get ip log:"
+cat ip.log
+
 ##Echo IP to log
 cat ip.log|while read line
 do
@@ -65,6 +83,9 @@ do
   echo $TARGETIP>$TARGETIPLOG
 done
 
+echo "targerip log:"
+cat $TARGETIPLOG
+
 ##get ip from log
 cat $TARGETIPLOG |while read line
 do
@@ -72,24 +93,30 @@ do
    #find target
   chkconfig iscsi on
   chkconfig iscsi --list > $ISCSILOG
-  iscsiadm -m discovery -t sendtargets -p $ip>$TARGETLOG
+  echo >$TARGETLOG
+  iscsiadm -m discovery -t sendtargets -p $ip>$ISCITARLOG
 
+   #Check TARGETLOG
+   echo "TARGET LOG SHOW:"
+   cat $TARGETLOG
   #login target
-cat $TARGETLOG |while read line
+cat $ISCITARLOG |while read line
   do
      a=$line
      echo $a
       target=`echo $a | cut -d \, -f 2` #iqn.2017-10.io.opensds:d3a3059d-7e31-4093-8c44-391528e748b0
-      echo $target
+      echo $target>$TARGETLOG
   #login
 
         echo "Login Out all session before login"
-         iscsiadm -m node -U all
+        iscsiadm -m node -U all
+
+                #check if all session have been Login OUT
+
         echo `iscsiadm -m session`
 
-        echo "login target:`$target` -p `$ip`"
+        echo "login target:$target -p $ip"
         #if $target or ip ="",exit
-        count=0
         iscsiadm -m node –T $target -p $ip -l >$LOGINLOG
 
         echo "check login session:"
@@ -132,6 +159,25 @@ if [ -s $SESSIONLOG];then
 fi
 echo "Scan volume end!"
 
+##remove target
+ echo "remove target:"
+ # iscsiadm -m node -o delete -T $target -p $ip
+ echo "Tagget Ip Log:"
+ cat $TARGETIPLOG   #127.0.0.1:3260
+echo "Target log:"
+ cat $TARGETLOG  #1 iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
+
+ iqn=`cat $TARGETLOG`
+ tariqn=`echo $iqn | cut -d \  -f 2`
+  echo $tariqn #iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
+
+ tarip=`cat $TARGETIPLOG`
+ iscsiadm -m node -o delete -T $iqn -p $tarip
+
+ iscsiadm -m node > node.log
+ if [[ ! -s node.log ]];then
+   echo "remove target node fai"
+ else
+   echo "remove target node success"
+ fi
 done
-
-

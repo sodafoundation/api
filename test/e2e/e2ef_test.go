@@ -333,6 +333,7 @@ func TestCreateAttach(t *testing.T) {
 		t.Error("create volume attachment failed:", err2)
 		return
 	}
+	defer DeleteAttachment(attc.Id)
 	attrs, _ := json.MarshalIndent(attc, "", "    ")
 	t.Log(string(attrs))
 	t.Log("Create Volume Attachment Success")
@@ -404,7 +405,7 @@ func TestDeleteAttach(t *testing.T) {
 	out := ScanVolume()
 	t.Log(out)
 	t.Log("Scan Volume End!")
-	tar := DiskChk(out, "login target: -p")
+	tar := DiskChk(out, "login target note fail")
 	//dev := DiskChk(out, "/dev/sd")
 	//ca := DiskChk(out, "1 GiB")
 	chk2, _ := u.GetVolumeAttachment(attc.Id)
