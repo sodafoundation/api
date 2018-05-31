@@ -1,14 +1,14 @@
 #!bin/bash
 
-CHKLOG=/var/log/scan/hkconfig.log
-LINUXLOG=/var/log/scan/linuxinstall.log
-ISCSILOG=/var/log/scan/iscsi.log
-ISCITARLOG=/var/log/scan/iscitar.log
-LOGINLOG=/var/log/scan/login.log
-SESSIONLOG=/var/log/scan/session.log
-DISKLOG=/var/log/scan/disk.log
-TARGETIPLOG=/var/log/scan/targetip.log
-TARGETLOG=/var/log/scan/target.log
+CHKLOG=hkconfig.log
+LINUXLOG=linuxinstall.log
+ISCSILOG=iscsi.log
+ISCITARLOG=iscitar.log
+LOGINLOG=login.log
+SESSIONLOG=session.log
+DISKLOG=disk.log
+TARGETIPLOG=targetip.log
+TARGETLOG=target.log
 
 echo >$CHKLOG
 echo >$LINUXLOG
@@ -20,7 +20,6 @@ echo >$DISKLOG
 echo >$TARGETIPLOG
 echo >$TARGETLOG
 
-declare target
 
 #install chkconfig
 echo "Begin to Scan Volume"
@@ -78,101 +77,89 @@ cat ip.log
 ##Echo IP to log
 cat ip.log|while read line
 do
-  TARGETIP=`echo $line | cut -d \: -f 2`
-  TARGETIP=$TARGETIP:3260
-  echo $TARGETIP>$TARGETIPLOG
+  echo $line,${#line}
+  #if len(line) !=0,get it and break
+  if [ ${#line} -ne 0 ];then
+     TARGETIP=`echo $line | cut -d \: -f 2`
+     echo $TARGETIP:3260 >$TARGETIPLOG
+     break
+  fi
 done
 
 echo "targerip log:"
 cat $TARGETIPLOG
 
-##get ip from log
-cat $TARGETIPLOG |while read line
-do
-   ip=`echo $line`
-   #find target
-  chkconfig iscsi on
-  chkconfig iscsi --list > $ISCSILOG
-  echo >$TARGETLOG
-  iscsiadm -m discovery -t sendtargets -p $ip>$ISCITARLOG
+#show isci status 
+chkconfig iscsi on
+chkconfig iscsi --list > $ISCSILOG
 
-   #Check TARGETLOG
-   echo "TARGET LOG SHOW:"
-   cat $TARGETLOG
-  #login target
-cat $ISCITARLOG |while read line
-  do
-     a=$line
-     echo $a
-      target=`echo $a | cut -d \, -f 2` #iqn.2017-10.io.opensds:d3a3059d-7e31-4093-8c44-391528e748b0
-      echo $target>$TARGETLOG
-  #login
+#get the target
+ip=`cat $TARGETIPLOG`
+iscsiadm -m discovery -t sendtargets -p $ip>$ISCITARLOG
 
-        echo "Login Out all session before login"
-        iscsiadm -m node -U all
+#Check TARGETLOG
+echo "TARGET LOG SHOW:"
+cat $ISCITARLOG
 
-                #check if all session have been Login OUT
-
-        echo `iscsiadm -m session`
-
-        echo "login target:$target -p $ip"
-        #if $target or ip ="",exit
-        iscsiadm -m node –T $target -p $ip -l >$LOGINLOG
-
-        echo "check login session:"
-        echo `iscsiadm -m session`
-   done
-
+#login target
+ echo "begin to login target..."
+ iscitar=`cat $ISCITARLOG`
+  isciqn=`echo $iscitar | cut -d \, -f 2` #1 iqn.2017-10.io.opensds:d3a3059d-7e31-4093-8c44-391528e748b0
+ targetiqn=`echo $iscitar | cut -d \  -f 2`
+ echo "target ipn:"
+ echo $targetiqn
+ echo $targetiqn > $TARGETLOG
+##print log to CI
+ echo "TARGET LOG(1 IPN):"
+ cat $TARGETLOG
+##Login out all node
+  iscsiadm -m node -U all
+##Login
+  iscsiadm -m node –T $targetiqn -p $ip -l >$LOGINLOG
+##Print Login Log to CI
+  echo "Login Log:"
+  cat $LOGINLOG
+##Check if exist 'successful' in $LOGINLOG
 echo `grep -c "successful" $LOGINLOG`
-
 if [ `grep -c "successful" $LOGINLOG` -ne 0 ];then
       echo "login target note success!"
-   elif [ `grep -c "already present" $LOGINLOG` -eq 1 ];then
-     echo "the not has been login in,please login out first!"
    else
      echo "login target note fail!"
 fi
 #view login session
+echo `iscsiadm -m session`
 iscsiadm -m session >$SESSIONLOG
+echo "Print Session Log after Login:"
+cat $SESSIONLOG
+##Check the number of Row
 if [ `awk '{print NR}' $SESSIONLOG|tail -n1` -eq 1 ];then
    echo "Have been Login in Target!"
 fi
-
 #show disk info
-echo > $DISKLOG
 fdisk -l|grep Disk >$DISKLOG
-#if [ `grep -c "Disk /dev/sd: 2 GiB" $DISKLOG` -eq 1 ];then
-#     echo "volume attachment successfully!"
-#   else
-#     echo "volume attachment fail!"
-#fi
+cat $DISKLOG
 echo `grep "Disk /dev/sd" $DISKLOG |grep "1 GiB"`
 
 #login out from the target 
-iscsiadm -m node –T $target -p $ip -u
+iscsiadm -m node –T $targetiqn -p $ip -u
 echo >$SESSIONLOG
 iscsiadm -m session >>$SESSIONLOG
-if [ -s $SESSIONLOG];then
-     echo "LOGIN OUT FAIL"
-   else
-     echo "LOGIN OUT SUCCESS"
-fi
-echo "Scan volume end!"
-
+echo "Print Session Log after Login Out:"
+cat $SESSIONLOG
 ##remove target
- echo "remove target:"
+ echo "start to remove target:"
  # iscsiadm -m node -o delete -T $target -p $ip
  echo "Tagget Ip Log:"
  cat $TARGETIPLOG   #127.0.0.1:3260
 echo "Target log:"
- cat $TARGETLOG  #1 iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
+ echo $targetiqn  #iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
 
- iqn=`cat $TARGETLOG`
- tariqn=`echo $iqn | cut -d \  -f 2`
-  echo $tariqn #iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
+# iqn=`cat $TARGETLOG`
+# tariqn=`echo $iqn | cut -d \  -f 2`
+#  echo $tariqn #iqn.2017-10.io.opensds:18f9ba11-543a-4bf2-b15e-10de92aba274
 
  tarip=`cat $TARGETIPLOG`
- iscsiadm -m node -o delete -T $iqn -p $tarip
+ iscsiadm -m node -o delete -T $targetiqn -p $tarip
 
  iscsiadm -m node > node.log
  if [[ ! -s node.log ]];then
@@ -180,4 +167,5 @@ echo "Target log:"
  else
    echo "remove target node success"
  fi
-done
+echo "Scan volume end!"
+
