@@ -19,7 +19,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -128,6 +127,7 @@ func init() {
 
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 	volumeCommand.AddCommand(volumeAttachmentCommand)
+	volumeCommand.AddCommand(volumeGroupCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -157,7 +157,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -169,7 +169,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -200,7 +200,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -213,7 +213,6 @@ func volumeDeleteAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete volume(%s) success.\n", args[0])
 }
 
 func volumeUpdateAction(cmd *cobra.Command, args []string) {
@@ -229,7 +228,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -241,7 +240,7 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 	}
 
 	body := &model.ExtendVolumeSpec{
-		Extend: model.ExtendSpec{NewSize: int64(newSize)},
+		NewSize: int64(newSize),
 	}
 
 	resp, err := client.ExtendVolume(args[0], body)
@@ -250,6 +249,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
 	PrintDict(resp, keys, FormatterList{})
 }

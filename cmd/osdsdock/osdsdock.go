@@ -22,7 +22,7 @@ package main
 import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
-	dockServer "github.com/opensds/opensds/pkg/dock/server"
+	"github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -34,7 +34,7 @@ func init() {
 	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of controller service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	// flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
 	daemon.SetDaemonFlag(&CONF.OsdsDock.Daemon, def.OsdsDock.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
@@ -49,13 +49,15 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Automatically discover dock and pool resources from backends.
-	dock.Brain = dock.NewDockHub()
+	dock.Brain = dock.NewDockHub(CONF.OsdsDock.DockType)
 	if err := dock.Brain.TriggerDiscovery(); err != nil {
 		panic(err)
 	}
 
-	// Construct dock module grpc server struct and do some initialization.
-	ds := dockServer.NewDockServer(CONF.OsdsDock.ApiEndpoint)
-	// Start the listen mechanism of dock module.
-	dockServer.ListenAndServe(ds)
+	// Construct dock module grpc server struct and start the listen mechanism
+	// of dock module.
+	ds := server.NewDockServer(CONF.OsdsDock.ApiEndpoint)
+	if err := ds.Run(); err != nil {
+		panic(err)
+	}
 }

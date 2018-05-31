@@ -20,7 +20,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -182,7 +181,6 @@ func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete snapshot(%s) success.\n", snapID)
 }
 
 func volumeSnapshotUpdateAction(cmd *cobra.Command, args []string) {

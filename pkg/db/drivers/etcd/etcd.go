@@ -30,9 +30,12 @@ import (
 	"strconv"
 	"strings"
 
+	"reflect"
+
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
 	"github.com/satori/go.uuid"
@@ -45,12 +48,13 @@ const (
 	defaultSortKey = "ID"
 )
 
+var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
+
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
 }
 
-func AuthorizeProjectContext(ctx *c.Context) bool {
-	tenantId := strings.Split(ctx.Uri, "/")[1]
+func AuthorizeProjectContext(ctx *c.Context, tenantId string) bool {
 	return ctx.TenantId == tenantId
 }
 
@@ -84,7 +88,7 @@ func (c *Client) IsInArray(e string, s []string) bool {
 
 func (c *Client) SelectOrNot(m map[string][]string) bool {
 	for key := range m {
-		if key != "limit" && key != "offset" && key != "sortDir" && key != "sortKey" {
+		if !utils.Contained(key, validKey) {
 			return true
 		}
 	}
@@ -341,8 +345,11 @@ func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*
 	for _, dock := range docks {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindDockValue(key, dock)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -370,6 +377,7 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List docks failed: ", err.Error())
 		return nil, err
 	}
+
 	dcks := c.SelectDocks(m, docks)
 
 	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
@@ -512,8 +520,11 @@ func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSp
 	for _, pool := range pools {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindPoolValue(key, pool)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -543,10 +554,10 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List pools failed: ", err.Error())
 		return nil, err
 	}
+
 	pols := c.SelectPools(m, pools)
 	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
 	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
-
 }
 
 // GetPool
@@ -648,7 +659,7 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 	if prf.CreatedAt == "" {
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
+	prf.TenantId = ctx.TenantId
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err
@@ -790,8 +801,11 @@ func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.Profile
 	for _, profile := range profiles {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindProfileValue(key, profile)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -810,6 +824,7 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		log.Error("List profiles failed: ", err)
 		return nil, err
 	}
+
 	prfs := c.SelectProfiles(m, profiles)
 
 	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
@@ -889,7 +904,7 @@ func (c *Client) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraS
 
 	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return nil, err
 	}
 	return &prf.Extras, nil
@@ -912,7 +927,7 @@ func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) err
 	}
 
 	delete(prf.Extras, extraKey)
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return err
 	}
 	return nil
@@ -920,13 +935,7 @@ func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) err
 
 // CreateVolume
 func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
-	if vol.Id == "" {
-		vol.Id = uuid.NewV4().String()
-	}
-
-	if vol.CreatedAt == "" {
-		vol.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
+	vol.TenantId = ctx.TenantId
 	volBody, err := json.Marshal(vol)
 	if err != nil {
 		return nil, err
@@ -987,7 +996,7 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 		Url: urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId),
 	}
 
-	// list all volumes not just belong specified project.
+	// Admin user should get all volumes including the volumes whose tenant is not admin.
 	if IsAdminContext(ctx) {
 		dbReq.Url = urls.GenerateVolumeURL(urls.Etcd, "")
 	}
@@ -1088,8 +1097,11 @@ func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpe
 	for _, vol := range volumes {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindVolumeValue(key, vol)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1121,6 +1133,7 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+
 	vols := c.SelectVolumes(m, volumes)
 
 	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION"})
@@ -1134,14 +1147,34 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if err != nil {
 		return nil, err
 	}
-
 	if vol.Name != "" {
 		result.Name = vol.Name
 	}
-
+	if vol.AvailabilityZone != "" {
+		result.AvailabilityZone = vol.AvailabilityZone
+	}
 	if vol.Description != "" {
 		result.Description = vol.Description
 	}
+	if vol.Metadata != nil {
+		result.Metadata = vol.Metadata
+	}
+	if vol.PoolId != "" {
+		result.PoolId = vol.PoolId
+	}
+	if vol.ProfileId != "" {
+		result.ProfileId = vol.ProfileId
+	}
+	if vol.Size != 0 {
+		result.Size = vol.Size
+	}
+	if vol.Status != "" {
+		result.Status = vol.Status
+	}
+	if vol.ReplicationDriverData != nil {
+		result.ReplicationDriverData = vol.ReplicationDriverData
+	}
+	result.GroupId = vol.GroupId
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -1151,8 +1184,13 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		return nil, err
 	}
 
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
 	dbReq := &Request{
-		Url:        urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, vol.Id),
+		Url:        urls.GenerateVolumeURL(urls.Etcd, result.TenantId, vol.Id),
 		NewContent: string(body),
 	}
 
@@ -1166,9 +1204,20 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // DeleteVolume
 func (c *Client) DeleteVolume(ctx *c.Context, volID string) error {
-	dbReq := &Request{
-		Url: urls.GenerateVolumeURL(urls.Etcd, ctx.TenantId, volID),
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		vol, err := c.GetVolume(ctx, volID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = vol.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateVolumeURL(urls.Etcd, tenantId, volID),
+	}
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume in db:", dbRes.Error)
@@ -1187,7 +1236,7 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.Size > 0 {
 		result.Size = vol.Size
 	}
-
+	result.Status = vol.Status
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -1211,19 +1260,12 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	if attachment.Id == "" {
-		attachment.Id = uuid.NewV4().String()
-	}
-
-	if attachment.CreatedAt == "" {
-		attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
+	attachment.TenantId = ctx.TenantId
 
 	atcBody, err := json.Marshal(attachment)
 	if err != nil {
 		return nil, err
 	}
-
 	dbReq := &Request{
 		Url:     urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachment.Id),
 		Content: string(atcBody),
@@ -1236,12 +1278,13 @@ func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.Volume
 
 	return attachment, nil
 }
+
 func (c *Client) GetVolumeAttachment(ctx *c.Context, attachmentId string) (*model.VolumeAttachmentSpec, error) {
 	attach, err := c.getVolumeAttachment(ctx, attachmentId)
 	if !IsAdminContext(ctx) || err == nil {
 		return attach, err
 	}
-	attachs, err := c.ListVolumeAttachments(ctx, attachmentId)
+	attachs, err := c.ListVolumeAttachments(ctx, "")
 	if err != nil {
 		return nil, err
 	}
@@ -1362,8 +1405,11 @@ func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*m
 	for _, attachment := range attachments {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindAttachmentValue(key, attachment)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1399,6 +1445,7 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+
 	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
 	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID"})
 
@@ -1454,10 +1501,16 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		return nil, err
 	}
 
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
 	dbReq := &Request{
-		Url:        urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
+		Url:        urls.GenerateAttachmentURL(urls.Etcd, result.TenantId, attachmentId),
 		NewContent: string(atcBody),
 	}
+
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When update volume attachment in db:", dbRes.Error)
@@ -1468,9 +1521,21 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 
 // DeleteVolumeAttachment
 func (c *Client) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error {
-	dbReq := &Request{
-		Url: urls.GenerateAttachmentURL(urls.Etcd, ctx.TenantId, attachmentId),
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		attach, err := c.GetVolumeAttachment(ctx, attachmentId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = attach.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateAttachmentURL(urls.Etcd, tenantId, attachmentId),
+	}
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume attachment in db:", dbRes.Error)
@@ -1481,13 +1546,7 @@ func (c *Client) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) err
 
 // CreateVolumeSnapshot
 func (c *Client) CreateVolumeSnapshot(ctx *c.Context, snp *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	if snp.Id == "" {
-		snp.Id = uuid.NewV4().String()
-	}
-
-	if snp.CreatedAt == "" {
-		snp.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
+	snp.TenantId = ctx.TenantId
 	snpBody, err := json.Marshal(snp)
 	if err != nil {
 		return nil, err
@@ -1505,6 +1564,7 @@ func (c *Client) CreateVolumeSnapshot(ctx *c.Context, snp *model.VolumeSnapshotS
 
 	return snp, nil
 }
+
 func (c *Client) GetVolumeSnapshot(ctx *c.Context, snpID string) (*model.VolumeSnapshotSpec, error) {
 	snap, err := c.getVolumeSnapshot(ctx, snpID)
 	if !IsAdminContext(ctx) || err == nil {
@@ -1637,8 +1697,11 @@ func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.Volum
 	for _, snapshot := range snapshots {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindSnapshotsValue(key, snapshot)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1670,6 +1733,7 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		log.Error("List volumeSnapshots failed: ", err)
 		return nil, err
 	}
+
 	snps := c.SelectSnapshots(m, volumeSnapshots)
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID"})
 
@@ -1682,15 +1746,24 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 	if err != nil {
 		return nil, err
 	}
-
 	if snp.Name != "" {
 		result.Name = snp.Name
 	}
-
+	if snp.Metadata != nil {
+		result.Metadata = snp.Metadata
+	}
+	if snp.Size > 0 {
+		result.Size = snp.Size
+	}
+	if snp.VolumeId != "" {
+		result.VolumeId = snp.VolumeId
+	}
 	if snp.Description != "" {
 		result.Description = snp.Description
 	}
-
+	if snp.Status != "" {
+		result.Status = snp.Status
+	}
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -1699,8 +1772,13 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 		return nil, err
 	}
 
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
 	dbReq := &Request{
-		Url:        urls.GenerateSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
+		Url:        urls.GenerateSnapshotURL(urls.Etcd, result.TenantId, snpID),
 		NewContent: string(atcBody),
 	}
 
@@ -1714,13 +1792,518 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 
 // DeleteVolumeSnapshot
 func (c *Client) DeleteVolumeSnapshot(ctx *c.Context, snpID string) error {
-	dbReq := &Request{
-		Url: urls.GenerateSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		snap, err := c.GetVolumeSnapshot(ctx, snpID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = snap.TenantId
 	}
+	dbReq := &Request{
+		Url: urls.GenerateSnapshotURL(urls.Etcd, tenantId, snpID),
+	}
+
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When delete volume snapshot in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
+}
+
+func (c *Client) CreateReplication(ctx *c.Context, r *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	if r.Id == "" {
+		r.Id = uuid.NewV4().String()
+	}
+
+	r.TenantId = ctx.TenantId
+	r.CreatedAt = time.Now().Format(constants.TimeFormat)
+	rBody, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &Request{
+		Url:     urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, r.Id),
+		Content: string(rBody),
+	}
+	resp := c.Create(req)
+	if resp.Status != "Success" {
+		log.Error("When create replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	return r, nil
+}
+
+func (c *Client) GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	replication, err := c.getReplication(ctx, replicationId)
+	if !IsAdminContext(ctx) || err == nil {
+		return replication, err
+	}
+	replications, err := c.ListReplication(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range replications {
+		if r.Id == replicationId {
+			return r, nil
+		}
+	}
+	return nil, fmt.Errorf("specified replication(%s) can't find", replicationId)
+}
+
+func (c *Client) getReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, replicationId),
+	}
+	resp := c.Get(req)
+	if resp.Status != "Success" {
+		log.Error("When get pool in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	var r = &model.ReplicationSpec{}
+	if err := json.Unmarshal([]byte(resp.Message[0]), r); err != nil {
+		log.Error("When parsing replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+	return r, nil
+}
+
+func (c *Client) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error) {
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId),
+	}
+	if IsAdminContext(ctx) {
+		req.Url = urls.GenerateReplicationURL(urls.Etcd, "")
+	}
+	resp := c.List(req)
+	if resp.Status != "Success" {
+		log.Error("When list replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+
+	var replicas = []*model.ReplicationSpec{}
+	if len(resp.Message) == 0 {
+		return replicas, nil
+	}
+	for _, msg := range resp.Message {
+		var r = &model.ReplicationSpec{}
+		if err := json.Unmarshal([]byte(msg), r); err != nil {
+			log.Error("When parsing replication in db:", resp.Error)
+			return nil, errors.New(resp.Error)
+		}
+		replicas = append(replicas, r)
+	}
+	return replicas, nil
+
+}
+
+func (c *Client) filterByName(param map[string][]string, spec interface{}, filterList map[string]interface{}) bool {
+	v := reflect.ValueOf(spec)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	for key := range param {
+		_, ok := filterList[key]
+		if !ok {
+			continue
+		}
+		filed := v.FieldByName(key)
+		if !filed.IsValid() {
+			continue
+		}
+		paramVal := param[key][0]
+		var val string
+		switch filed.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			val = strconv.FormatInt(filed.Int(), 10)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			val = strconv.FormatUint(filed.Uint(), 10)
+		case reflect.String:
+			val = filed.String()
+		default:
+			return false
+		}
+		if !strings.EqualFold(paramVal, val) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (c *Client) SelectReplication(param map[string][]string, replications []*model.ReplicationSpec) []*model.ReplicationSpec {
+
+	if !c.SelectOrNot(param) {
+		return replications
+	}
+
+	filterList := map[string]interface{}{
+		"Id":                nil,
+		"CreatedAt":         nil,
+		"UpdatedAt":         nil,
+		"Name":              nil,
+		"Description":       nil,
+		"PrimaryVolumeId":   nil,
+		"SecondaryVolumeId": nil,
+	}
+
+	var rlist = []*model.ReplicationSpec{}
+	for _, r := range replications {
+		if c.filterByName(param, r, filterList) {
+			rlist = append(rlist, r)
+		}
+	}
+	return rlist
+
+}
+
+type ReplicationsCompareFunc func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool
+
+var replicationsCompareFunc ReplicationsCompareFunc
+
+type ReplicationSlice []*model.ReplicationSpec
+
+func (r ReplicationSlice) Len() int           { return len(r) }
+func (r ReplicationSlice) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+func (r ReplicationSlice) Less(i, j int) bool { return replicationsCompareFunc(r[i], r[j]) }
+
+var replicationSortKey2Func = map[string]ReplicationsCompareFunc{
+	"ID":   func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Id > b.Id },
+	"NAME": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.Name > b.Name },
+	"REPLICATIONSTATUS": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
+		return a.ReplicationStatus > b.ReplicationStatus
+	},
+	"AVAILABILITYZONE": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool {
+		return a.AvailabilityZone > b.AvailabilityZone
+	},
+	"PROFILEID": func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.ProfileId > b.ProfileId },
+	"TENANTID":  func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.TenantId > b.TenantId },
+	"POOLID":    func(a *model.ReplicationSpec, b *model.ReplicationSpec) bool { return a.PoolId > b.PoolId },
+}
+
+func (c *Client) SortReplications(replications []*model.ReplicationSpec, p *Parameter) []*model.ReplicationSpec {
+
+	replicationsCompareFunc = replicationSortKey2Func[p.sortKey]
+
+	if strings.EqualFold(p.sortDir, "asc") {
+		sort.Sort(ReplicationSlice(replications))
+
+	} else {
+		sort.Sort(sort.Reverse(ReplicationSlice(replications)))
+	}
+	return replications
+}
+
+func (c *Client) ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error) {
+	replicas, err := c.ListReplication(ctx)
+	if err != nil {
+		log.Error("List replications failed: ", err)
+		return nil, err
+	}
+
+	rlist := c.SelectReplication(m, replicas)
+
+	var sortKeys []string
+	for k := range replicationSortKey2Func {
+		sortKeys = append(sortKeys, k)
+	}
+	p := c.ParameterFilter(m, len(rlist), sortKeys)
+	return c.SortReplications(rlist, p)[p.beginIdx:p.endIdx], nil
+}
+
+func (c *Client) DeleteReplication(ctx *c.Context, replicationId string) error {
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		r, err := c.GetReplication(ctx, replicationId)
+		if err != nil {
+			return err
+		}
+		tenantId = r.TenantId
+	}
+	req := &Request{
+		Url: urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
+	}
+	reps := c.Delete(req)
+	if reps.Status != "Success" {
+		log.Error("When delete replication in db:", reps.Error)
+		return errors.New(reps.Error)
+	}
+	return nil
+}
+
+func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	r, err := c.GetReplication(ctx, replicationId)
+	if err != nil {
+		return nil, err
+	}
+	if input.ProfileId != "" {
+		r.ProfileId = input.ProfileId
+	}
+	if input.Name != "" {
+		r.Name = input.Name
+	}
+	if input.Description != "" {
+		r.Description = input.Description
+	}
+	if input.PrimaryReplicationDriverData != nil {
+		r.PrimaryReplicationDriverData = input.PrimaryReplicationDriverData
+	}
+	if input.SecondaryReplicationDriverData != nil {
+		r.SecondaryReplicationDriverData = input.SecondaryReplicationDriverData
+	}
+	if input.Metadata != nil {
+		r.Metadata = input.Metadata
+	}
+	if input.ReplicationStatus != "" {
+		r.ReplicationStatus = input.ReplicationStatus
+	}
+
+	r.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	b, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		tenantId = r.TenantId
+	}
+	req := &Request{
+		Url:        urls.GenerateReplicationURL(urls.Etcd, tenantId, replicationId),
+		NewContent: string(b),
+	}
+	resp := c.Update(req)
+	if resp.Status != "Success" {
+		log.Error("When update replication in db:", resp.Error)
+		return nil, errors.New(resp.Error)
+	}
+	return r, nil
+}
+func (c *Client) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg.TenantId = ctx.TenantId
+	vgBody, err := json.Marshal(vg)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vg.Id),
+		Content: string(vgBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When create volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return vg, nil
+}
+
+func (c *Client) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vgId),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var vg = &model.VolumeGroupSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), vg); err != nil {
+		log.Error("When parsing volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return vg, nil
+}
+
+func (c *Client) UpdateVolumeGroup(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	vg, err := c.GetVolumeGroup(ctx, vgUpdate.Id)
+	if err != nil {
+		return nil, err
+	}
+	if vgUpdate.Name != "" && vgUpdate.Name != vg.Name {
+		vg.Name = vgUpdate.Name
+	}
+	if vgUpdate.AvailabilityZone != "" && vgUpdate.AvailabilityZone != vg.AvailabilityZone {
+		vg.AvailabilityZone = vgUpdate.AvailabilityZone
+	}
+	if vgUpdate.Description != "" && vgUpdate.Description != vg.Description {
+		vg.Description = vgUpdate.Description
+	}
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
+	}
+	if vg.Status != "" && vgUpdate.Status != vg.Status {
+		vg.Status = vgUpdate.Status
+	}
+	if vgUpdate.PoolId != "" && vgUpdate.PoolId != vg.PoolId {
+		vg.PoolId = vgUpdate.PoolId
+	}
+	if vgUpdate.CreatedAt != "" && vgUpdate.CreatedAt != vg.CreatedAt {
+		vg.CreatedAt = vgUpdate.CreatedAt
+	}
+	if vgUpdate.UpdatedAt != "" && vgUpdate.UpdatedAt != vg.UpdatedAt {
+		vg.UpdatedAt = vgUpdate.UpdatedAt
+	}
+
+	vgBody, err := json.Marshal(vg)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId, vgUpdate.Id),
+		NewContent: string(vgBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update volume group in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return vg, nil
+}
+
+func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
+	switch in.(type) {
+
+	case *model.VolumeSnapshotSpec:
+		snap := in.(*model.VolumeSnapshotSpec)
+		snap.Status = status
+		if _, errUpdate := c.UpdateVolumeSnapshot(ctx, snap.Id, snap); errUpdate != nil {
+			log.Error("Error occurs when update volume snapshot status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.VolumeAttachmentSpec:
+		attm := in.(*model.VolumeAttachmentSpec)
+		attm.Status = status
+		if _, errUpdate := c.UpdateVolumeAttachment(ctx, attm.Id, attm); errUpdate != nil {
+			log.Error("Error occurred in dock module when update volume attachment status in db:", errUpdate)
+			return errUpdate
+		}
+
+	case *model.VolumeSpec:
+		volume := in.(*model.VolumeSpec)
+		volume.Status = status
+		if _, errUpdate := c.UpdateVolume(ctx, volume); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.VolumeGroupSpec:
+		vg := in.(*model.VolumeGroupSpec)
+		vg.Status = status
+		if _, errUpdate := c.UpdateVolumeGroup(ctx, vg); errUpdate != nil {
+			log.Error("When update volume status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case []*model.VolumeSpec:
+		vols := in.([]*model.VolumeSpec)
+		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
+			return errUpdate
+		}
+	}
+	return nil
+}
+
+func (c *Client) ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error) {
+	volumes, err := c.ListVolumes(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var volumesInSameGroup []*model.VolumeSpec
+	for _, v := range volumes {
+		if v.GroupId == vgId {
+			volumesInSameGroup = append(volumesInSameGroup, v)
+		}
+	}
+
+	return volumesInSameGroup, nil
+}
+
+func (c *Client) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
+	var volumeRefs []*model.VolumeSpec
+	for _, values := range volumeList {
+		v, err := c.UpdateVolume(ctx, values)
+		if err != nil {
+			return nil, err
+		}
+		volumeRefs = append(volumeRefs, v)
+	}
+	return volumeRefs, nil
+}
+
+// ListVolumes
+func (c *Client) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId),
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When list volume groups in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var groups []*model.VolumeGroupSpec
+	if len(dbRes.Message) == 0 {
+		return groups, nil
+	}
+	for _, msg := range dbRes.Message {
+		var group = &model.VolumeGroupSpec{}
+		if err := json.Unmarshal([]byte(msg), group); err != nil {
+			log.Error("When parsing volume group in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		groups = append(groups, group)
+	}
+	return groups, nil
+}
+
+func (c *Client) DeleteVolumeGroup(ctx *c.Context, volumeGroupId string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		group, err := c.GetVolumeGroup(ctx, volumeGroupId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = group.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateVolumeGroupURL(urls.Etcd, tenantId, volumeGroupId),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When delete volume group in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+func (c *Client) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeSnapshotSpec, error) {
+	snaps, err := c.ListVolumeSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.VolumeSnapshotSpec
+	for _, snap := range snaps {
+		if snap.VolumeId == volumeId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
 }

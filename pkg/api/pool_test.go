@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
@@ -47,12 +48,18 @@ var (
 		TotalCapacity:    99999,
 		FreeCapacity:     6999,
 		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Extras: model.ExtraSpec{
-			"key1": "val1",
-			"key2": "val2",
-			"key3": map[string]string{
-				"subKey1": "subVal1",
-				"subKey2": "subVal2",
+		Extras: model.StoragePoolExtraSpec{
+			DataStorage: model.DataStorageLoS{
+				ProvisioningPolicy: "Thin",
+				IsSpaceEfficient:   true,
+			},
+			IOConnectivity: model.IOConnectivityLoS{
+				AccessProtocol: "rbd",
+				MaxIOPS:        1000,
+			},
+			Advanced: map[string]interface{}{
+				"diskType":   "SSD",
+				"throughput": float64(1000),
 			},
 		},
 	}
@@ -68,7 +75,7 @@ func TestListPools(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListPoolsWithFilter", m).Return(fakePools, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(fakePools, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -91,11 +98,17 @@ func TestListPools(t *testing.T) {
 			"freeCapacity": 6999,
 			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
 			"extras": {
-				"key1": "val1",
-				"key2": "val2",
-				"key3": {
-					"subKey1": "subVal1",
-					"subKey2": "subVal2"
+				"dataStorage": {
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true
+				},
+				"ioConnectivity": {
+					"accessProtocol": "rbd",
+					"maxIOPS":        1000
+				},
+				"advanced": {
+					"diskType":   "SSD",
+					"throughput": 1000
 				}
 			}	
 		}		
@@ -122,7 +135,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 		"sortDir": []string{"asc"},
 		"sortKey": []string{"name"},
 	}
-	mockClient.On("ListPoolsWithFilter", m).Return(nil, errors.New("db error"))
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -137,7 +150,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 func TestGetPool(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetPool", "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
@@ -160,11 +173,17 @@ func TestGetPool(t *testing.T) {
 			"freeCapacity": 6999,
 			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
 			"extras": {
-				"key1": "val1",
-				"key2": "val2",
-				"key3": {
-					"subKey1": "subVal1",
-					"subKey2": "subVal2"
+				"dataStorage": {
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true
+				},
+				"ioConnectivity": {
+					"accessProtocol": "rbd",
+					"maxIOPS":        1000
+				},
+				"advanced": {
+					"diskType":   "SSD",
+					"throughput": 1000
 				}
 			}	
 		}`
@@ -184,7 +203,7 @@ func TestGetPool(t *testing.T) {
 func TestGetPoolWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("GetPool", "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
+	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
 

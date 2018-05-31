@@ -103,6 +103,7 @@ func (d *Driver) initConn() error {
 		log.Error("New connect failed:", err)
 		return err
 	}
+
 	if err = conn.ReadConfigFile(d.conf.ConfigFile); err != nil {
 		log.Error("Read config file failed:", err)
 		return err
@@ -136,7 +137,7 @@ func (d *Driver) destroy() {
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	size := opt.GetSize()
-	id := uuid.NewV4().String()
+	id := opt.GetId()
 	name := opensdsPrefix + id
 	if err := d.init(opt.GetPoolName()); err != nil {
 		log.Error("Connect ceph failed.")
@@ -296,11 +297,17 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	poolName, ok := opt.GetMetadata()["poolName"]
+	if !ok {
+		err := errors.New("Failed to find poolName in volume metadata!")
+		log.Error(err)
+		return nil, err
+	}
 	return &model.ConnectionInfo{
 		DriverVolumeType: "rbd",
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
-			"name":         "rbd/" + opensdsPrefix + opt.GetVolumeId(),
+			"name":         poolName + "/" + opensdsPrefix + opt.GetVolumeId(),
 			"cluster_name": "ceph",
 			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    opt.GetVolumeId(),
@@ -334,7 +341,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		log.Error("When open image:", err)
 		return nil, err
 	}
-	id := uuid.NewV4().String()
+	id := opt.GetId()
 	name := opensdsPrefix + id
 	if _, err = img.CreateSnapshot(name); err != nil {
 		log.Error("When create snapshot:", err)
@@ -358,6 +365,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 			"poolName": poolName,
 		},
 	}, nil
+
 }
 
 func (d *Driver) visitSnapshot(snapID string, fn func(imgName string, img *rbd.Image, snap *rbd.SnapInfo) error) error {
@@ -530,17 +538,17 @@ func (d *Driver) getPoolsAttr() (map[string][]string, error) {
 	return poolDetail, nil
 }
 
-func (d *Driver) buildPoolParam(line []string, proper PoolProperties) *map[string]interface{} {
-	param := BuildDefaultPoolParam(proper)
-
-	param["redundancyType"] = line[poolType]
-	if param["redundancyType"] == "replicated" {
-		param["replicateSize"] = line[poolTypeSize]
+func (d *Driver) buildPoolExtras(line []string, extras model.StoragePoolExtraSpec) model.StoragePoolExtraSpec {
+	extras.Advanced = make(map[string]interface{})
+	extras.Advanced["redundancyType"] = line[poolType]
+	if extras.Advanced["redundancyType"] == "replicated" {
+		extras.Advanced["replicateSize"] = line[poolTypeSize]
 	} else {
-		param["erasureSize"] = line[poolTypeSize]
+		extras.Advanced["erasureSize"] = line[poolTypeSize]
 	}
-	param["crushRuleset"] = line[poolCrushRuleset]
-	return &param
+	extras.Advanced["crushRuleset"] = line[poolCrushRuleset]
+
+	return extras
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
@@ -567,7 +575,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := c.Pool[name]; !ok {
 			continue
 		}
-		param := d.buildPoolParam(pa[name], c.Pool[name])
+
+		extras := d.buildPoolExtras(pa[name], c.Pool[name].Extras)
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
@@ -580,8 +589,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
 			TotalCapacity:    totalCap * maxAvailCap / availCap,
 			FreeCapacity:     maxAvailCap,
-			Extras:           *param,
-			AvailabilityZone: c.Pool[name].AZ,
+			StorageType:      c.Pool[name].StorageType,
+			Extras:           extras,
+			AvailabilityZone: c.Pool[name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ
@@ -589,4 +599,16 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
+}
+
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
+}
+
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
+	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+}
+
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
+	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
 }

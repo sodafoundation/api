@@ -3,13 +3,26 @@ authOptions:
   username: "opensds"
   password: "Opensds@123"
   insecure: true
+
+replication:
+  remoteAuthOptions:
+    endpoints: "https://8.46.185.104:8088/deviceManager/rest"
+    username: "opensds"
+    password: "Opensds@123"
+    insecure: true
+
 pool:
   StoragePool001:
-    diskType: SSD
-    AZ: dorado1
-    accessProtocol: iscsi
-    thinProvisioned: true
-    compressed: true
-    advanced:
-      deduped: true
+    storageType: block
+    availabilityZone: dorado1
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 1000
+      advanced:
+        diskType: SSD
+        throughput: 1000
 targetIp: 8.46.192.247

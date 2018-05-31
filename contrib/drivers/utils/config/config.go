@@ -18,20 +18,22 @@ import (
 	"io/ioutil"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/model"
 	"gopkg.in/yaml.v2"
 )
 
 type PoolProperties struct {
-	DiskType        string `yaml:"diskType,omitempty"`
-	AZ              string `yaml:"AZ,omitempty"`
-	AccessProtocol  string `yaml:"accessProtocol,omitempty"`
-	ThinProvisioned bool   `yaml:"thinProvisioned,omitempty"`
-	Compressed      bool   `yaml:"compressed,omitempty"`
-	// Besides those basic pool properties above, vendors can configure some
-	// advanced features (IOPS, throughout, latency, etc) themselves, all these
-	// properties can be exposed to controller scheduler and filtered by
-	// selector in a extensible way.
-	Advanced map[string]interface{} `yaml:"advanced,omitempty"`
+	// The storage type of the storage pool.
+	// One of: "block", "file" or "object".
+	StorageType string `yaml:"storageType,omitempty"`
+
+	// The locality that pool belongs to.
+	AvailabilityZone string `yaml:"availabilityZone,omitempty"`
+
+	// Map of keys and StoragePoolExtraSpec object that represents the properties
+	// of the pool, such as supported capabilities.
+	// +optional
+	Extras model.StoragePoolExtraSpec `yaml:"extras,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {
@@ -45,25 +47,4 @@ func Parse(conf interface{}, p string) (interface{}, error) {
 		return nil, err
 	}
 	return conf, nil
-}
-
-func BuildDefaultPoolParam(proper PoolProperties) map[string]interface{} {
-	param := make(map[string]interface{})
-	if proper.DiskType != "" {
-		param["diskType"] = proper.DiskType
-	}
-	if proper.AccessProtocol != "" {
-		param["accessProtocol"] = proper.AccessProtocol
-	}
-	if proper.ThinProvisioned {
-		param["thinProvisioned"] = proper.ThinProvisioned
-	}
-	if proper.Compressed {
-		param["compressed"] = proper.Compressed
-	}
-	if len(proper.Advanced) != 0 {
-		param["advanced"] = proper.Advanced
-	}
-
-	return param
 }

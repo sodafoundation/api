@@ -27,19 +27,30 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
 
 const (
-	defaultConfPath = "/etc/opensds/driver/lvm.yaml"
-	volumePrefix    = "volume-"
-	snapshotPrefix  = "_snapshot-"
+	defaultTgtConfDir = "/etc/tgt/conf.d"
+	defaultTgtBindIp  = "127.0.0.1"
+	defaultConfPath   = "/etc/opensds/driver/lvm.yaml"
+	volumePrefix      = "volume-"
+	snapshotPrefix    = "_snapshot-"
 )
 
+type LvInfo struct {
+	Name string
+	Vg   string
+	Size int64
+}
+
 type LVMConfig struct {
-	TgtBindIp string                    `yaml:"tgtBindIp"`
-	Pool      map[string]PoolProperties `yaml:"pool,flow"`
+	TgtBindIp      string                    `yaml:"tgtBindIp"`
+	TgtConfDir     string                    `yaml:"tgtConfDir"`
+	EnableChapAuth bool                      `yaml:"enableChapAuth"`
+	Pool           map[string]PoolProperties `yaml:"pool,flow"`
 }
 
 type Driver struct {
@@ -50,7 +61,7 @@ type Driver struct {
 
 func (d *Driver) Setup() error {
 	// Read lvm config file
-	d.conf = &LVMConfig{TgtBindIp: "127.0.0.1"}
+	d.conf = &LVMConfig{TgtBindIp: defaultTgtBindIp, TgtConfDir: defaultTgtConfDir}
 	p := config.CONF.OsdsDock.Backends.LVM.ConfigPath
 	if "" == p {
 		p = defaultConfPath
@@ -68,7 +79,7 @@ func (*Driver) Unset() error { return nil }
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var polName = opt.GetPoolName()
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var name = volumePrefix + id
 
 	if _, err := d.handler("lvcreate", []string{
@@ -101,7 +112,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: id,
+			Id: opt.GetId(),
 		},
 		Name:        opt.GetName(),
 		Size:        opt.GetSize(),
@@ -132,16 +143,74 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	}, nil
 }
 
+func (d *Driver) geLvInfos() ([]*LvInfo, error) {
+	var lvList []*LvInfo
+	args := []string{"--noheadings", "--unit=g", "-o", "vg_name,name,size", "--nosuffix"}
+	info, err := d.handler("lvs", args)
+	if err != nil {
+		log.Error("Get volume failed", err)
+		return lvList, err
+	}
+	for _, line := range strings.Split(info, "\n") {
+		if len(line) == 0 {
+			continue
+		}
+		words := strings.Fields(line)
+		size, _ := strconv.ParseInt(words[2], 10, 64)
+		lv := &LvInfo{
+			Vg:   words[0],
+			Name: words[1],
+			Size: size,
+		}
+		lvList = append(lvList, lv)
+	}
+	return lvList, nil
+}
+
+func (d *Driver) volumeExists(id string) bool {
+	lvList, _ := d.geLvInfos()
+	name := volumePrefix + id
+	for _, lv := range lvList {
+		if lv.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *Driver) lvHasSnapshot(lvPath string) bool {
+	args := []string{"--noheading", "-C", "-o", "Attr", lvPath}
+	info, err := d.handler("lvdisplay", args)
+	if err != nil {
+		log.Error("Failed to remove logic volume:", err)
+		return false
+	}
+	info = strings.Trim(info, " ")
+	return info[0] == 'o' || info[0] == 'O'
+}
+
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+
+	id := opt.GetId()
+	if !d.volumeExists(id) {
+		log.Warningf("Volume(%s) does not exist, nothing to remove", id)
+		return nil
+	}
+
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
-		err := errors.New("Failed to find logic volume path in volume metadata!")
+		err := errors.New("failed to find logic volume path in volume metadata")
 		log.Error(err)
 		return err
 	}
-	if _, err := d.handler("lvremove", []string{
-		"-f", lvPath,
-	}); err != nil {
+
+	if d.lvHasSnapshot(lvPath) {
+		err := fmt.Errorf("unable to delete due to existing snapshot for volume: %s", id)
+		log.Error(err)
+		return err
+	}
+
+	if _, err := d.handler("lvremove", []string{"-f", lvPath}); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -180,20 +249,28 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	var initiator string
-	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
+	initiator := opt.HostInfo.GetInitiator()
+	if initiator == "" {
 		initiator = "ALL"
 	}
-	// TODO	Add lvm path in Metadata field.
+
+	hostIP := opt.HostInfo.GetIp()
+	if hostIP == "" {
+		hostIP = "ALL"
+	}
+
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
 		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
 		log.Error(err)
 		return nil, err
 	}
-
-	t := targets.NewTarget(d.conf.TgtBindIp)
-	expt, err := t.CreateExport(lvPath, initiator)
+	var chapAuth []string
+	if d.conf.EnableChapAuth {
+		chapAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
+	}
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator, chapAuth)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err
@@ -206,30 +283,17 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	var initiator string
-	if initiator = opt.HostInfo.GetInitiator(); initiator == "" {
-		initiator = "ALL"
-	}
-	// TODO	Add lvm path in Metadata field.
-	lvPath, ok := opt.GetMetadata()["lvPath"]
-	if !ok {
-		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
-		log.Error(err)
-		return err
-	}
-
-	t := targets.NewTarget(d.conf.TgtBindIp)
-	if err := t.RemoveExport(lvPath, initiator); err != nil {
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return err
 	}
-
 	return nil
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
-	var id = uuid.NewV4().String()
+	var id = opt.GetId()
 	var snapName = snapshotPrefix + id
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
@@ -319,38 +383,39 @@ type VolumeGroup struct {
 	Name          string
 	TotalCapacity int64
 	FreeCapacity  int64
+	UUID          string
 }
 
 func (d *Driver) getVGList() (*[]VolumeGroup, error) {
-	const vgInfoLineCount = 10
-	info, err := d.handler("vgdisplay", []string{})
+	info, err := d.handler("vgs", []string{
+		"--noheadings", "--nosuffix",
+		"--unit=g",
+		"-o", "name,size,free,uuid",
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	lines := strings.Split(info, "\n")
-	vgs := make([]VolumeGroup, len(lines)/vgInfoLineCount)
-
-	var vgIdx = -1
+	var vgs []VolumeGroup
 	for _, line := range lines {
-		if strings.Contains(line, "--- Volume group ---") {
-			vgIdx++
+		val := strings.Fields(line)
+		if len(val) != 4 {
 			continue
 		}
-		if strings.Contains(line, "VG Name") {
-			slice := strings.Fields(line)
-			vgs[vgIdx].Name = slice[2]
+
+		capa, _ := strconv.ParseFloat(val[1], 64)
+		total := int64(capa)
+		capa, _ = strconv.ParseFloat(val[2], 64)
+		free := int64(capa)
+
+		vg := VolumeGroup{
+			Name:          val[0],
+			TotalCapacity: total,
+			FreeCapacity:  free,
+			UUID:          val[3],
 		}
-		if strings.Contains(line, "VG Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[2], 64)
-			vgs[vgIdx].TotalCapacity = int64(capa)
-		}
-		if strings.Contains(line, "Free  PE / Size") {
-			slice := strings.Fields(line)
-			capa, _ := strconv.ParseFloat(slice[len(slice)-2], 64)
-			vgs[vgIdx].FreeCapacity = int64(capa)
-		}
+		vgs = append(vgs, vg)
 	}
 	return &vgs, nil
 }
@@ -370,13 +435,14 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, vg.Name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, vg.UUID).String(),
 			},
 			Name:             vg.Name,
 			TotalCapacity:    vg.TotalCapacity,
 			FreeCapacity:     vg.FreeCapacity,
-			Extras:           BuildDefaultPoolParam(d.conf.Pool[vg.Name]),
-			AvailabilityZone: d.conf.Pool[vg.Name].AZ,
+			StorageType:      d.conf.Pool[vg.Name].StorageType,
+			Extras:           d.conf.Pool[vg.Name].Extras,
+			AvailabilityZone: d.conf.Pool[vg.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = "default"
@@ -386,13 +452,25 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
+}
+
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
+	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+}
+
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
+	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+}
+
 func execCmd(script string, cmd []string) (string, error) {
 	log.Infof("Command: %s %s", script, strings.Join(cmd, " "))
-	ret, err := exec.Command(script, cmd...).Output()
+	info, err := exec.Command(script, cmd...).Output()
 	if err != nil {
-		log.Error(err.Error())
+		log.Error(info, err.Error())
 		return "", err
 	}
-	log.Infof("Command Result:\n%s", string(ret))
-	return string(ret), nil
+	log.V(8).Infof("Command Result:\n%s", string(info))
+	return string(info), nil
 }

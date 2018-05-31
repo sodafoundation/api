@@ -38,7 +38,7 @@ func NewInternalTenantContext(tenantId, userId string) *Context {
 	}
 }
 
-func NewContextFormJson(s string) *Context {
+func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
 	if err != nil {

@@ -31,7 +31,8 @@ import (
 
 // Selector is an interface that exposes some operation of different selectors.
 type Selector interface {
-	SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error)
+	SelectSupportedPool(map[string]interface{}) (*model.StoragePoolSpec, error)
+	SelectSupportedPoolForVG(*model.VolumeGroupSpec) (*model.StoragePoolSpec, error)
 }
 
 type selector struct{}
@@ -55,10 +56,54 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 		return nil, err
 	}
 
-	// Now, we just return the firt supported pool which will be improved in
+	// Now, we just return the first supported pool which will be improved in
 	// the future.
 	return supportedPools[0], nil
 
+}
+
+func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
+	profiles, err := db.C.ListProfiles(c.NewAdminContext())
+	if err != nil {
+		return nil, err
+	}
+
+	pools, err := db.C.ListPools(c.NewAdminContext())
+	if err != nil {
+		return nil, err
+	}
+
+	var filterRequest map[string]interface{}
+
+	for _, pool := range pools {
+
+		var poolIsFound = true
+
+		for _, profile := range profiles {
+
+			if profile.Extras != nil {
+				filterRequest = profile.Extras
+			} else {
+				filterRequest = make(map[string]interface{})
+			}
+			filterRequest["availabilityZone"] = in.AvailabilityZone
+
+			isAvailable, err := IsAvailablePool(filterRequest, pool)
+			if nil != err {
+				return nil, err
+			}
+			if !isAvailable {
+				poolIsFound = false
+				break
+			}
+		}
+
+		if poolIsFound {
+			return pool, nil
+		}
+	}
+
+	return nil, errors.New("No valid pool found for group.")
 }
 
 // SelectSupportedPools ...
@@ -84,5 +129,5 @@ func SelectSupportedPools(maxNum int, filterReq map[string]interface{}, pools []
 		return supportedPools, nil
 	}
 
-	return nil, errors.New("No available pool to meet user's requirement")
+	return nil, errors.New("no available pool to meet user's requirement")
 }

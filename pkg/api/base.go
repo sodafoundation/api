@@ -15,9 +15,13 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
+	"reflect"
 
 	"github.com/astaxie/beego"
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 type BasePortal struct {
@@ -35,4 +39,45 @@ func (this *BasePortal) GetParameters() (map[string][]string, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+// Filter some items in spec that no need to transfer to users.
+func (this *BasePortal) outputFilter(resp interface{}, whiteList []string) interface{} {
+	v := reflect.ValueOf(resp)
+	if v.Kind() == reflect.Slice {
+		var s []map[string]interface{}
+		for i := 0; i < v.Len(); i++ {
+			m := this.doFilter(v.Index(i).Interface(), whiteList)
+			s = append(s, m)
+		}
+		return s
+	} else {
+		return this.doFilter(resp, whiteList)
+	}
+}
+
+func (this *BasePortal) doFilter(resp interface{}, whiteList []string) map[string]interface{} {
+	v := reflect.ValueOf(resp).Elem()
+	m := map[string]interface{}{}
+	for _, name := range whiteList {
+		field := v.FieldByName(name)
+		if field.IsValid() {
+			m[name] = field.Interface()
+		}
+	}
+	return m
+}
+
+func (this *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
+	reason := fmt.Sprintf(errMsg+": %s", err.Error())
+	this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+	this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+	log.Error(reason)
+}
+
+func (this *BasePortal) SuccessHandle(status int, body []byte) {
+	this.Ctx.Output.SetStatus(status)
+	if body != nil {
+		this.Ctx.Output.Body(body)
+	}
 }

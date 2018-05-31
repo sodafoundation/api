@@ -21,7 +21,6 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -53,7 +52,7 @@ var volumeAttachmentListCommand = &cobra.Command{
 }
 
 var volumeAttachmentDeleteCommand = &cobra.Command{
-	Use:   "delete <volume id> <attachment id>",
+	Use:   "delete <attachment id>",
 	Short: "delete a volume attachment of specified volume in the cluster",
 	Run:   volumeAttachmentDeleteAction,
 }
@@ -116,7 +115,6 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		os.Exit(1)
 	}
-
 	resp, err := client.CreateVolumeAttachment(attachment)
 	PrintResponse(resp)
 	if err != nil {
@@ -135,7 +133,7 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
+		"Mountpoint", "Status", "VolumeId", "AccessProtocol"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
@@ -162,20 +160,17 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId"}
+	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId", "AccessProtocol"}
 	PrintList(resp, keys, attachmentFormatters)
 }
 
 func volumeAttachmentDeleteAction(cmd *cobra.Command, args []string) {
-	ArgsNumCheck(cmd, args, 2)
-	attachment := &model.VolumeAttachmentSpec{
-		VolumeId: args[0],
-	}
-	err := client.DeleteVolumeAttachment(args[1], attachment)
+	ArgsNumCheck(cmd, args, 1)
+	attachment := &model.VolumeAttachmentSpec{}
+	err := client.DeleteVolumeAttachment(args[0], attachment)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	fmt.Printf("Delete attachment(%s) success.\n", args[1])
 }
 
 func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
