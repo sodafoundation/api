@@ -411,7 +411,7 @@ func TestVolumeDeAttach(t *testing.T) {
 		return
 	}
 	getatt, err := u.GetVolumeAttachment(attc.Id)
-	err = DeleteAttachment(attc.Id)
+	err = DeleteAttachment(getatt.Id)
 	if err != nil {
 		t.Log("Delete Attachment Fail!", err)
 		return
@@ -477,7 +477,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 }
 
 //delete attachment
-func DeleteAttachment(attId string) {
+func DeleteAttachment(attId string) error {
 	err := u.DeleteVolumeAttachment(attId, nil)
 	//check if attachment is exist after
 	for i := 0; i < 5; i++ {
@@ -490,8 +490,10 @@ func DeleteAttachment(attId string) {
 	}
 	if err != nil {
 		fmt.Println("Delete Attachment Fail", err)
+		return err
 	}
 	fmt.Println("Delete Attachment Success!")
+	return nil
 }
 
 //prepare sanpshot
