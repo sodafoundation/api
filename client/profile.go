@@ -75,6 +75,20 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	return &res, nil
 }
 
+// UpdateProfile ...
+func (p *ProfileMgr) UpdateProfile(prfID string, body ProfileBuilder) (*model.ProfileSpec, error) {
+	var res model.ProfileSpec
+	url := strings.Join([]string{
+		p.Endpoint,
+		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
+
+	if err := p.Recv(url, "PUT", body, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // ListProfiles
 func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec

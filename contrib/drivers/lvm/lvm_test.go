@@ -52,9 +52,10 @@ func TestSetup(t *testing.T) {
 	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/lvm.yaml"
 	var expectedDriver = &Driver{
 		conf: &LVMConfig{
-			Pool:       fp,
-			TgtBindIp:  "192.168.56.105",
-			TgtConfDir: "/etc/tgt/conf.d",
+			Pool:           fp,
+			TgtBindIp:      "192.168.56.105",
+			TgtConfDir:     "/etc/tgt/conf.d",
+			EnableChapAuth: true,
 		},
 		handler: execCmd,
 	}
@@ -90,6 +91,8 @@ func fakeHandler(script string, cmd []string) (string, error) {
 		return "", nil
 	case "vgdisplay":
 		return string(sampleVG), nil
+	case "vgs":
+		return string(sampleVGS), nil
 	default:
 		break
 	}
@@ -273,87 +276,91 @@ func TestListPools(t *testing.T) {
 
 var (
 	sampleLV = `
-		--- Logical volume ---
-		LV Path                /dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71
-		LV Name                test001
-		VG Name                vg001
-		LV UUID                mFdrHm-uiQS-TRK2-Iwua-jdQr-7sYd-ReayKW
-		LV Write Access        read/write
-		LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 16:43:20 +0800
-		LV Status              available
-		# open                 0
-		LV Size                1.00 GiB
-		Current LE             256
-		Segments               1
-		Allocation             inherit
-		Read ahead sectors     auto
-		- currently set to     256
-		Block device           253:0
+  --- Logical volume ---
+  LV Path                /dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71
+  LV Name                test001
+  VG Name                vg001
+  LV UUID                mFdrHm-uiQS-TRK2-Iwua-jdQr-7sYd-ReayKW
+  LV Write Access        read/write
+  LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 16:43:20 +0800
+  LV Status              available
+  # open                 0
+  LV Size                1.00 GiB
+  Current LE             256
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
 	`
 	sampleVG = `
-		--- Volume group ---
-		VG Name               vg001
-		System ID
-		Format                lvm2
-		Metadata Areas        1
-		Metadata Sequence No  3
-		VG Access             read/write
-		VG Status             resizable
-		MAX LV                0
-		Cur LV                0
-		Open LV               0
-		Max PV                0
-		Cur PV                1
-		Act PV                1
-		VG Size               18.62 GiB
-		PE Size               4.00 MiB
-		Total PE              4768
-		Alloc PE / Size       0 / 0
-		Free  PE / Size       4768 / 18.62 GiB
-		VG UUID               Yn9utl-eqjH-1sJG-0fdb-dGTX-PLJI-FjMO0v
+  --- Volume group ---
+  VG Name               vg001
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               18.62 GiB
+  PE Size               4.00 MiB
+  Total PE              4768
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       4768 / 18.62 GiB
+  VG UUID               Yn9utl-eqjH-1sJG-0fdb-dGTX-PLJI-FjMO0v
 
-		--- Volume group ---
-		VG Name               ubuntu-vg
-		System ID
-		Format                lvm2
-		Metadata Areas        1
-		Metadata Sequence No  3
-		VG Access             read/write
-		VG Status             resizable
-		MAX LV                0
-		Cur LV                2
-		Open LV               2
-		Max PV                0
-		Cur PV                1
-		Act PV                1
-		VG Size               127.52 GiB
-		PE Size               4.00 MiB
-		Total PE              32645
-		Alloc PE / Size       32638 / 127.49 GiB
-		Free  PE / Size       7 / 28.00 MiB
-		VG UUID               fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
+  --- Volume group ---
+  VG Name               ubuntu-vg
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               127.52 GiB
+  PE Size               4.00 MiB
+  Total PE              32645
+  Alloc PE / Size       32638 / 127.49 GiB
+  Free  PE / Size       7 / 28.00 MiB
+  VG UUID               fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
 	`
 	sampleLVS = `
-		--- Logical volume ---
-		LV Path                /dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3
-		LV Name                snap001
-		VG Name                vg001
-		LV UUID                We6GmQ-H675-mfQv-iQkO-rVUI-LuBx-YBIBwr
-		LV Write Access        read only
-		LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 17:05:02 +0800
-		LV snapshot status     active destination for test001
-		LV Status              available
-		# open                 0
-		LV Size                1.00 GiB
-		Current LE             256
-		COW-table size         1.00 GiB
-		COW-table LE           256
-		Allocated to snapshot  0.00%
-		Snapshot chunk size    4.00 KiB
-		Segments               1
-		Allocation             inherit
-		Read ahead sectors     auto
-		- currently set to     256
-		Block device           253:3
+  --- Logical volume ---
+  LV Path                /dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3
+  LV Name                snap001
+  VG Name                vg001
+  LV UUID                We6GmQ-H675-mfQv-iQkO-rVUI-LuBx-YBIBwr
+  LV Write Access        read only
+  LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 17:05:02 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  # open                 0
+  LV Size                1.00 GiB
+  Current LE             256
+  COW-table size         1.00 GiB
+  COW-table LE           256
+  Allocated to snapshot  0.00%
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:3
 	`
+	sampleVGS = `
+  vg001      18.62  18.62 6fBbT0-MrAT-eLfh-cySE-Guqf-YLkw-Vyfcrb
+  ubuntu-vg  127.52  0.03 fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
+`
 )

@@ -1,0 +1,29 @@
+<div>
+    <div class="ui-g-12 ui-md-7">
+        <div class="font-primary">
+            <h2>{{data.name}}</h2>
+        </div>
+        <div class="padding-class">
+            <span class="label-class">Access Protocol:</span>
+            <span>{{data.extras && data.extras.protocol}}</span>
+        </div>
+        <div class="padding-class">
+            <span class="label-class">Provisioning Type:</span>
+            <span>{{data.storageType}}</span>
+        </div>
+
+        <div class="padding-class item-flex" *ngIf="data.extras && data.extras.policys">
+            <div (mouseenter)="showSuspensionFrame($event)" (mouseleave)="showSuspensionFrame($event)" *ngFor="let policy of data.extras.policys; index as i" class="position-relative mouse-cursor">
+                <div style="width:114px" class="fa fa-check icon-color-class margin-right-class">
+                    <span class="font-color-class">{{policy}}</span>
+                </div>
+                <app-suspension-frame [policy]="[policy,data.extras]" [ngStyle]="{'display':i === index && isHover ? 'block' : 'none'}"></app-suspension-frame>
+            </div>
+
+        </div>
+    </div>
+    <div class="ui-g-12 ui-md-5">
+        <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
+    </div>
+    <div class="ui-helper-clearfix"></div>
+</div>

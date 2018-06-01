@@ -19,13 +19,14 @@ import (
 	"fmt"
 	"strings"
 
+	"os"
+
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"os"
 )
 
 type Driver struct {
@@ -148,6 +149,16 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	if opt.GetAccessProtocol() == "iscsi" {
+		return d.InitializeConnectionIscsi(opt)
+	}
+	if opt.GetAccessProtocol() == "fc" {
+		return d.InitializeConnectionFC(opt)
+	}
+	return nil, errors.New("No supported protocol for dorado driver.")
+}
+
+func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
@@ -202,6 +213,16 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+	if opt.GetAccessProtocol() == "iscsi" {
+		return d.TerminateConnectionIscsi(opt)
+	}
+	if opt.GetAccessProtocol() == "fc" {
+		return d.TerminateConnectionFC(opt)
+	}
+	return nil
+}
+
+func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteAttachmentOpts) error {
 	lunId := opt.GetMetadata()[KLunId]
 	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
 	if err != nil {
@@ -308,6 +329,295 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
+}
+
+func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+	lunId := opt.GetMetadata()[KLunId]
+	hostInfo := opt.GetHostInfo()
+	// Create host if not exist.
+	hostId, err := d.client.AddHostWithCheck(hostInfo)
+	if err != nil {
+		log.Errorf("Add host failed, host name =%s, error: %v", hostInfo.Host, err)
+		return nil, err
+	}
+
+	// Add host to hostgroup.
+	hostGrpId, err := d.client.AddHostToHostGroup(hostId)
+	if err != nil {
+		log.Errorf("Add host to group failed, host id=%s, error: %v", hostId, err)
+		return nil, err
+	}
+
+	// Not use FC switch
+	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, opt.GetHostInfo().GetInitiator(), hostId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mapping lungroup and hostgroup to view.
+	if err = d.client.DoMapping(lunId, hostGrpId, hostId); err != nil {
+		log.Errorf("Do mapping failed, lun id=%s, hostGrpId=%s, hostId=%s, error: %v",
+			lunId, hostGrpId, hostId, err)
+		return nil, err
+	}
+
+	tgtLun, err := d.client.GetHostLunId(hostId, lunId)
+	if err != nil {
+		log.Error("Get the get host lun id failed,", err)
+		return nil, err
+	}
+
+	fcInfo := &model.ConnectionInfo{
+		DriverVolumeType: "fibre_channel",
+		ConnectionData: map[string]interface{}{
+			"targetDiscovered":     true,
+			"target_wwn":           tgtPortWWNs,
+			"volume_id":            opt.GetVolumeId(),
+			"initiator_target_map": initTargMap,
+			"description":          "huawei",
+			"host_name":            opt.GetHostInfo().Host,
+			"target_lun":           tgtLun,
+		},
+	}
+	return fcInfo, nil
+}
+
+func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
+	wwns := strings.Split(wwpns, ",")
+
+	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
+	if err != nil {
+		return nil, nil, err
+	}
+	onlineFreeWWNs, err := d.client.GetOnlineFreeWWNs()
+	if err != nil {
+		return nil, nil, err
+	}
+	onlineFCInitiators, err := d.client.GetOnlineFCInitiatorOnArray()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var wwnsNew []string
+	for _, w := range wwns {
+		if d.isInStringArray(w, onlineFCInitiators) {
+			wwnsNew = append(wwnsNew, w)
+		}
+	}
+	log.Info(fmt.Sprintf("initialize connection, online initiators on the array:%s"), wwnsNew)
+
+	if wwnsNew == nil {
+		return nil, nil, errors.New("no available host initiator")
+	}
+
+	for _, wwn := range wwnsNew {
+		if !d.isInStringArray(wwn, onlineWWNsInHost) && !d.isInStringArray(wwn, onlineFreeWWNs) {
+			wwnsInHost, err := d.client.GetHostFCInitiators(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+			iqnsInHost, err := d.client.GetHostIscsiInitiators(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+			flag, err := d.client.IsHostAssociatedToHostgroup(hostId)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			if wwnsInHost == nil && iqnsInHost == nil && flag == false {
+				if err = d.client.RemoveHost(hostId); err != nil {
+					return nil, nil, err
+				}
+			}
+
+			msg := fmt.Sprintf("host initiator occupied: Can not add FC initiator %s to host %s, please check if this initiator has been added to other host.", wwn, hostId)
+			log.Errorf(msg)
+			return nil, nil, errors.New(msg)
+		}
+	}
+
+	for _, wwn := range wwnsNew {
+		if d.isInStringArray(wwn, onlineFreeWWNs) {
+			if err = d.client.AddFCPortTohost(hostId, wwn); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
+
+	tgtPortWWNs, initTargMap, err := d.client.GetIniTargMap(wwnsNew)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return tgtPortWWNs, initTargMap, nil
+
+}
+
+func (d *Driver) isInStringArray(s string, source []string) bool {
+	for _, i := range source {
+		if s == i {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *Driver) TerminateConnectionFC(opt *pb.DeleteAttachmentOpts) error {
+	// Detach lun
+	fcInfo, err := d.detachVolumeFC(opt)
+	if err != nil {
+		return err
+	}
+	log.Info(fmt.Sprintf("terminate connection fc, return data is: %s", fcInfo))
+	return nil
+}
+
+func (d *Driver) detachVolumeFC(opt *pb.DeleteAttachmentOpts) (string, error) {
+	wwns := strings.Split(opt.GetHostInfo().GetInitiator(), ",")
+	lunId := opt.GetMetadata()[KLunId]
+
+	log.Info(fmt.Sprintf("terminate connection, wwpns: %s,lun id: %s"), wwns, lunId)
+
+	hostId, lunGrpId, hostGrpId, viewId, err := d.getMappedInfo(opt.GetHostInfo().GetHost())
+	if err != nil {
+		return "", err
+	}
+
+	if lunId != "" && lunGrpId != "" {
+		if err := d.client.RemoveLunFromLunGroup(lunGrpId, lunId); err != nil {
+			return "", err
+		}
+	}
+
+	var leftObjectCount = -1
+	if lunGrpId != "" {
+		if leftObjectCount, err = d.client.getObjectCountFromLungroup(lunGrpId); err != nil {
+			return "", err
+		}
+	}
+
+	var fcInfo string
+	if leftObjectCount > 0 {
+		fcInfo = "driver_volume_type: fibre_channel, data: {}"
+	} else {
+		if fcInfo, err = d.deleteZoneAndRemoveFCInitiators(wwns, hostId, hostGrpId, viewId); err != nil {
+			return "", err
+		}
+
+		if err := d.clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId); err != nil {
+			return "", err
+		}
+	}
+
+	log.Info(fmt.Sprintf("Return target backend FC info is: %s", fcInfo))
+	return fcInfo, nil
+}
+
+func (d *Driver) deleteZoneAndRemoveFCInitiators(wwns []string, hostId, hostGrpId, viewId string) (string, error) {
+	tgtPortWWNs, initTargMap, err := d.client.GetIniTargMap(wwns)
+	if err != nil {
+		return "", err
+	}
+
+	// Remove the initiators from host if need.
+	hostGroupNum, err := d.client.getHostGroupNumFromHost(hostId)
+	if err != nil {
+		return "", err
+	}
+	if hostGrpId != "" && hostGroupNum <= 1 || (hostGrpId == "" && hostGroupNum <= 0) {
+		fcInitiators, err := d.client.GetHostFCInitiators(hostId)
+		if err != nil {
+			return "", err
+		}
+		for _, wwn := range wwns {
+			if d.isInStringArray(wwn, fcInitiators) {
+				if err := d.client.removeFCFromHost(wwn); err != nil {
+					return "", err
+				}
+			}
+		}
+	}
+
+	return fmt.Sprintf("driver_volume_type: fibre_channel, target_wwn: %s, initiator_target_map: %s", tgtPortWWNs, initTargMap), nil
+}
+
+func (d *Driver) getMappedInfo(hostName string) (string, string, string, string, error) {
+	hostId, err := d.client.GetHostIdByName(hostName)
+	if err != nil {
+		return "", "", "", "", err
+	}
+
+	lunGrpId, err := d.client.FindLunGroup(LunGroupPrefix + hostId)
+	if err != nil {
+		return "", "", "", "", err
+	}
+	hostGrpId, err := d.client.FindHostGroup(HostGroupPrefix + hostId)
+	if err != nil {
+		return "", "", "", "", err
+	}
+	viewId, err := d.client.FindMappingView(MappingViewPrefix + hostId)
+	if err != nil {
+		return "", "", "", "", err
+	}
+
+	return hostId, lunGrpId, hostGrpId, viewId, nil
+}
+
+func (d *Driver) clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId string) error {
+	if lunGrpId != "" {
+		if viewId != "" {
+			d.client.RemoveLunGroupFromMappingView(viewId, lunGrpId)
+		}
+		d.client.DeleteLunGroup(lunGrpId)
+	}
+	if hostId != "" {
+		if hostGrpId != "" {
+
+			if viewId != "" {
+				d.client.RemoveHostGroupFromMappingView(viewId, hostGrpId)
+			}
+
+			views, err := d.client.getHostgroupAssociatedViews(hostGrpId)
+			if err != nil {
+				return err
+			}
+
+			if len(views) <= 0 {
+				if err := d.client.RemoveHostFromHostGroup(hostGrpId, hostId); err != nil {
+					return err
+				}
+				hosts, err := d.client.getHostsInHostgroup(hostGrpId)
+				if err != nil {
+					return err
+				}
+
+				if len(hosts) <= 0 {
+					if err := d.client.DeleteHostGroup(hostGrpId); err != nil {
+						return err
+					}
+				}
+			}
+		}
+
+		flag, err := d.client.checkFCInitiatorsExistInHost(hostId)
+		if err != nil {
+			return err
+		}
+		if !flag {
+			if err := d.client.RemoveHost(hostId); err != nil {
+				return err
+			}
+		}
+	}
+
+	if viewId != "" {
+		if err := d.client.DeleteMappingView(viewId); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {

@@ -87,7 +87,13 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 	if nil != err {
 		return false, err
 	}
+
 	for key, reqValue := range filterReq {
+		if strings.HasPrefix(key, ":") {
+			log.Info("Because " + key + " is prefixed with a colon, it is not used to filter the pool")
+			continue
+		}
+
 		poolValue, ok := poolMap[key]
 		if !ok {
 			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)

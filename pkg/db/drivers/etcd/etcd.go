@@ -30,13 +30,15 @@ import (
 	"strconv"
 	"strings"
 
+	"reflect"
+
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
 	"github.com/satori/go.uuid"
-	"reflect"
 )
 
 const (
@@ -45,6 +47,8 @@ const (
 	defaultSortDir = "desc"
 	defaultSortKey = "ID"
 )
+
+var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
 
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
@@ -84,7 +88,7 @@ func (c *Client) IsInArray(e string, s []string) bool {
 
 func (c *Client) SelectOrNot(m map[string][]string) bool {
 	for key := range m {
-		if key != "limit" && key != "offset" && key != "sortDir" && key != "sortKey" {
+		if !utils.Contained(key, validKey) {
 			return true
 		}
 	}
@@ -341,8 +345,11 @@ func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*
 	for _, dock := range docks {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindDockValue(key, dock)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -370,6 +377,7 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List docks failed: ", err.Error())
 		return nil, err
 	}
+
 	dcks := c.SelectDocks(m, docks)
 
 	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
@@ -512,8 +520,11 @@ func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSp
 	for _, pool := range pools {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindPoolValue(key, pool)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -543,10 +554,10 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		log.Error("List pools failed: ", err.Error())
 		return nil, err
 	}
+
 	pols := c.SelectPools(m, pools)
 	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
 	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
-
 }
 
 // GetPool
@@ -790,8 +801,11 @@ func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.Profile
 	for _, profile := range profiles {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindProfileValue(key, profile)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -810,6 +824,7 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		log.Error("List profiles failed: ", err)
 		return nil, err
 	}
+
 	prfs := c.SelectProfiles(m, profiles)
 
 	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
@@ -889,7 +904,7 @@ func (c *Client) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraS
 
 	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return nil, err
 	}
 	return &prf.Extras, nil
@@ -912,7 +927,7 @@ func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) err
 	}
 
 	delete(prf.Extras, extraKey)
-	if _, err = c.CreateProfile(nil, prf); err != nil {
+	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return err
 	}
 	return nil
@@ -1082,8 +1097,11 @@ func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpe
 	for _, vol := range volumes {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindVolumeValue(key, vol)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1115,6 +1133,7 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+
 	vols := c.SelectVolumes(m, volumes)
 
 	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION"})
@@ -1386,8 +1405,11 @@ func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*m
 	for _, attachment := range attachments {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindAttachmentValue(key, attachment)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1423,6 +1445,7 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+
 	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
 	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
@@ -1674,8 +1697,11 @@ func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.Volum
 	for _, snapshot := range snapshots {
 		flag = true
 		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
 			v := c.FindSnapshotsValue(key, snapshot)
-			if v != "" && !strings.EqualFold(m[key][0], v) {
+			if !strings.EqualFold(m[key][0], v) {
 				flag = false
 				break
 			}
@@ -1707,6 +1733,7 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		log.Error("List volumeSnapshots failed: ", err)
 		return nil, err
 	}
+
 	snps := c.SelectSnapshots(m, volumeSnapshots)
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
@@ -1878,6 +1905,9 @@ func (c *Client) ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, erro
 
 func (c *Client) filterByName(param map[string][]string, spec interface{}, filterList map[string]interface{}) bool {
 	v := reflect.ValueOf(spec)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
 	for key := range param {
 		_, ok := filterList[key]
 		if !ok {
@@ -1899,7 +1929,7 @@ func (c *Client) filterByName(param map[string][]string, spec interface{}, filte
 		default:
 			return false
 		}
-		if val != "" && !strings.EqualFold(paramVal, val) {
+		if !strings.EqualFold(paramVal, val) {
 			return false
 		}
 	}

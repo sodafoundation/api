@@ -132,7 +132,7 @@ func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model
 	var res model.VolumeSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateNewVolumeURL(urls.Client, v.TenantId, volID+"/action")}, "/")
+		urls.GenerateNewVolumeURL(urls.Client, v.TenantId, volID, "resize")}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
