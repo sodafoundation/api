@@ -19,12 +19,12 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/opensds/opensds/client"
+	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
@@ -88,8 +88,8 @@ func TestDeleteProfile(t *testing.T) {
 		t.Error("Prepare Profile Fail!", err)
 		return
 	}
-	errdel := u.DeleteProfile(pro.Id)
-	if errdel != nil {
+	err = u.DeleteProfile(pro.Id)
+	if err != nil {
 		t.Error("delete profile in client failed:", err)
 		return
 	}
@@ -162,9 +162,9 @@ func TestGetVolumeList(t *testing.T) {
 		return
 	}
 	defer DeleteVolume(vol.Id)
-	vols, err2 := u.ListVolumes()
-	if err2 != nil {
-		t.Error("List Volume Fail", err2)
+	vols, err := u.ListVolumes()
+	if err != nil {
+		t.Error("List Volume Fail", err)
 		return
 	}
 	list, _ := json.MarshalIndent(vols, "", "    ")
@@ -181,9 +181,9 @@ func TestGetVolumeDetail(t *testing.T) {
 		return
 	}
 	defer DeleteVolume(vol.Id)
-	Info, err2 := u.GetVolume(vol.Id)
-	if err2 != nil {
-		t.Error("Get Volume Detail Fail", err2)
+	Info, err := u.GetVolume(vol.Id)
+	if err != nil {
+		t.Error("Get Volume Detail Fail", err)
 		return
 	}
 	detail, _ := json.MarshalIndent(Info, "", "    ")
@@ -199,9 +199,9 @@ func TestDeleteVolume(t *testing.T) {
 		t.Error("Prepare Volume Fail", err)
 		return
 	}
-	errd := u.DeleteVolume(vol.Id, nil)
-	if errd != nil {
-		t.Error("Delete Volume fail", errd)
+	err = u.DeleteVolume(vol.Id, nil)
+	if err != nil {
+		t.Error("Delete Volume fail", err)
 		return
 	}
 	t.Log("Delete Volume Success!")
@@ -224,9 +224,9 @@ func TestCreateSnapshot(t *testing.T) {
 		Description: "This is a snapshot test for new",
 		VolumeId:    vol.Id,
 	}
-	snp, errs := u.CreateVolumeSnapshot(body)
-	if errs != nil {
-		t.Error("prepare volume snapshot failed:", errs)
+	snp, err := u.CreateVolumeSnapshot(body)
+	if err != nil {
+		t.Error("prepare volume snapshot failed:", err)
 		//cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
 		return
 	}
@@ -250,9 +250,9 @@ func TestUpdateSnapshot(t *testing.T) {
 		Name:        "UpSnapshot",
 		Description: "Update Snapshot Description",
 	}
-	upsnap, errup := u.UpdateVolumeSnapshot(snap.Id, body)
-	if errup != nil {
-		t.Error("update volume snapshot failed:", errup)
+	upsnap, err := u.UpdateVolumeSnapshot(snap.Id, body)
+	if err != nil {
+		t.Error("update volume snapshot failed:", err)
 		return
 	}
 	upsnaprs, _ := json.MarshalIndent(upsnap, "", "    ")
@@ -270,9 +270,9 @@ func TestListSnapshot(t *testing.T) {
 	defer DeleteVolume(snap.VolumeId)
 	defer DeleteSnapshot(snap.Id)
 
-	snpli, errli := u.ListVolumeSnapshots()
-	if errli != nil {
-		t.Error("List Snapshot Fail", errli)
+	snpli, err := u.ListVolumeSnapshots()
+	if err != nil {
+		t.Error("List Snapshot Fail", err)
 		return
 	}
 	snapli, _ := json.MarshalIndent(snpli, "", "    ")
@@ -290,9 +290,9 @@ func TestGetSnapDetail(t *testing.T) {
 	defer DeleteVolume(snap.VolumeId)
 	defer DeleteSnapshot(snap.Id)
 
-	snapinfo, err2 := u.GetVolumeSnapshot(snap.Id)
-	if err2 != nil {
-		t.Error("Get Snapshot Detail Fail!", err2)
+	snapinfo, err := u.GetVolumeSnapshot(snap.Id)
+	if err != nil {
+		t.Error("Get Snapshot Detail Fail!", err)
 		return
 	}
 	sndetail, _ := json.MarshalIndent(snapinfo, "", "    ")
@@ -308,9 +308,9 @@ func TestDeleteSnapshot(t *testing.T) {
 		return
 	}
 	defer DeleteVolume(snap.VolumeId)
-	err2 := u.DeleteVolumeSnapshot(snap.Id, nil)
-	if err2 != nil {
-		t.Error("Delete Snapshot Fail!", err2)
+	err = u.DeleteVolumeSnapshot(snap.Id, nil)
+	if err != nil {
+		t.Error("Delete Snapshot Fail!", err)
 		return
 	}
 	t.Log("Delete Snapshot Success!")
@@ -328,9 +328,9 @@ func TestCreateAttach(t *testing.T) {
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{},
 	}
-	attc, err2 := u.CreateVolumeAttachment(body)
-	if err2 != nil {
-		t.Error("create volume attachment failed:", err2)
+	attc, err := u.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("create volume attachment failed:", err)
 		return
 	}
 	defer DeleteAttachment(attc.Id)
@@ -341,9 +341,9 @@ func TestCreateAttach(t *testing.T) {
 
 //Test Case:List Attachment
 func TestListAttachment(t *testing.T) {
-	attc, errp := PrepareAttachment(t)
-	if errp != nil {
-		t.Error("Prepare Attachment Fail!", errp)
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
 	defer DeleteVolume(attc.VolumeId)
@@ -361,77 +361,96 @@ func TestListAttachment(t *testing.T) {
 
 //Test Case:Get Attachment Detail
 func TestShowAttachDetail(t *testing.T) {
-	attc, errp := PrepareAttachment(t)
-	if errp != nil {
-		t.Error("Prepare Attachment Fail!", errp)
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
+		return
+	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	t.Log("err:", err)
+	t.Log("Status:", getatt.Status)
+	if err != nil || getatt.Status != "available" {
+		t.Error("Get Volume Attachment Detail Fail!", err)
+		return
+	}
+	t.Log("Get Volume Attachment Detail Success")
+}
+
+//Test Case:Volume Attach
+func TestVolumeAttach(t *testing.T) {
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	t.Log("Begin to Scan Volume:")
-	out := ScanVolume()
-	t.Log(string(out))
-	t.Log("Scan Volume End!")
-	//read Dsik.log
-	dev := DiskChk(out, "/dev/sd")
-	ca := DiskChk(out, "1 GiB")
-	t.Log(err)
-	t.Log(dev)
-	t.Log(ca)
-	if err != nil || dev == false || ca == false {
-		t.Error("Volume attachment detail check fail", err)
+	//switch map[string]string to map[string]interface{}
+	t.Log("getatt.Metadata", getatt.ConnectionData)
+	var isc = &iscsi.Iscsi{}
+	str, err := isc.Attach(getatt.ConnectionData)
+	if err != nil {
+		t.Error("Iscsi Attachment fail!", err)
+		return
+	}
+	t.Log("Scan Result:", str)
+	detail, _ := json.MarshalIndent(getatt, "", "    ")
+	t.Log("getatt:", string(detail))
+	t.Log("Volume attach detail Check Success!")
+}
+
+//Test Case:Volume Deattach
+func TestVolumeDeAttach(t *testing.T) {
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
+		return
+	}
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	err = DeleteAttachment(attc.Id)
+	if err != nil {
+		t.Log("Delete Attachment Fail!", err)
+		return
+	}
+	t.Log("Begin to Scan volume:")
+	t.Log("getatt.Metadata", getatt.ConnectionData)
+	var isc = &iscsi.Iscsi{}
+	err = isc.Detach(getatt.ConnectionData)
+	if err != nil {
+		t.Error("Iscsi Attachment fail!", err)
 		return
 	}
 	detail, _ := json.MarshalIndent(getatt, "", "    ")
-	t.Log(string(detail))
-	t.Log("Volume attach detail Check Success!")
+	t.Log("getatt:", string(detail))
+	t.Log("Volume Deattch Success!")
+
 }
 
 //Test Case:Delete Attachment
 func TestDeleteAttach(t *testing.T) {
-	attc, errp := PrepareAttachment(t)
-	if errp != nil {
-		t.Error("Prepare Attachment Fail!", errp)
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
 	defer DeleteVolume(attc.VolumeId)
-	err := u.DeleteVolumeAttachment(attc.Id, nil)
+	err = u.DeleteVolumeAttachment(attc.Id, nil)
 	if err != nil {
 		t.Error("Delete Attachment Fail", err)
 		return
 	}
-	t.Log("Begin to Scan Volume:")
-	out := ScanVolume()
-	t.Log(out)
-	t.Log("Scan Volume End!")
-	tar := DiskChk(out, "login target note fail")
-	//dev := DiskChk(out, "/dev/sd")
-	//ca := DiskChk(out, "1 GiB")
-	chk2, _ := u.GetVolumeAttachment(attc.Id)
-	if err != nil || chk2 != nil || tar != true {
-		t.Error("Delete Attachment Fail", err)
+	_, err = u.GetVolumeAttachment(attc.Id)
+	t.Log("err:", err)
+	if strings.Contains(err.Error(), "can't find") {
+		t.Log("Delete attachment Success")
+		return
+	} else {
+		t.Error("Delete Attachment Fail!", err)
 	}
-	t.Log("Delete attachment Success")
-}
-
-//check Attachemnt By scan volume
-func ScanVolume() string {
-	cmd := exec.Command("/bin/bash", "./scanvolume.sh")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println("cmd.Output: ", err)
-		return ""
-	}
-	return string(out)
-}
-
-//Check if Disk Log contain /dev/sd&& 2 GiB
-func DiskChk(log string, str string) bool {
-	if strings.Index(log, str) != -1 {
-		return true
-	}
-	return false
 }
 
 //prepare attachment
@@ -446,10 +465,10 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{},
 	}
-	attc, err2 := u.CreateVolumeAttachment(body)
-	if err2 != nil {
-		t.Error("prepare volume attachment failed:", err2)
-		return nil, err2
+	attc, err := u.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("prepare volume attachment failed:", err)
+		return nil, err
 	}
 	attrs, _ := json.MarshalIndent(attc, "", "    ")
 	t.Log(string(attrs))
@@ -488,11 +507,11 @@ func PrepareSnapshot() (*model.VolumeSnapshotSpec, error) {
 		Description: "This is a snapshot test for flow",
 		VolumeId:    vol.Id,
 	}
-	snp, errs := u.CreateVolumeSnapshot(body)
-	if errs != nil {
-		fmt.Println("prepare volume snapshot failed:", errs)
+	snp, err := u.CreateVolumeSnapshot(body)
+	if err != nil {
+		fmt.Println("prepare volume snapshot failed:", err)
 		//cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
-		return nil, errs
+		return nil, err
 	}
 	fmt.Println("End preparing volume snapshot...")
 	return snp, nil
