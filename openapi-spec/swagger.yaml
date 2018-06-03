@@ -1336,6 +1336,9 @@ definitions:
           poolId:
             type: string
             readOnly: true
+          groupId:
+            type: string 
+            readOnly: true
   Attachment:
     description: ''
     allOf:
