@@ -122,14 +122,14 @@ func GetInitiator() ([]string, error) {
 // Login ISCSI Target
 func SetAuth(portal string, targetiqn string, name string, passwd string) error {
 	// Set UserName
-	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
+	info, err := execCmd("sudo", "iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
 		"--op=update", "--name", "node.session.auth.username", "--value", name)
 	if err != nil {
 		log.Fatalf("Received error on set income username: %v, %v", err, info)
 		return err
 	}
 	// Set Password
-	info, err = execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
+	info, err = execCmd("sudo", "iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
 		"--op=update", "--name", "node.session.auth.password", "--value", passwd)
 	if err != nil {
 		log.Fatalf("Received error on set income password: %v, %v", err, info)
@@ -140,7 +140,7 @@ func SetAuth(portal string, targetiqn string, name string, passwd string) error 
 
 // Discovery ISCSI Target
 func Discovery(portal string) error {
-	info, err := execCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
+	info, err := execCmd("sudo", "iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
 	if err != nil {
 		log.Println("Error encountered in sendtargets:", string(info), err)
 		return err
@@ -150,7 +150,7 @@ func Discovery(portal string) error {
 
 // Login ISCSI Target
 func Login(portal string, targetiqn string) error {
-	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--login")
+	info, err := execCmd("sudo", "iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--login")
 	if err != nil {
 		log.Println("Received error on login attempt:", string(info), err)
 		return err
@@ -160,7 +160,7 @@ func Login(portal string, targetiqn string) error {
 
 // Logout ISCSI Target
 func Logout(portal string, targetiqn string) error {
-	info, err := execCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--logout")
+	info, err := execCmd("sudo", "iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--logout")
 	if err != nil {
 		log.Println("Received error on logout attempt:", string(info), err)
 		return err
@@ -170,7 +170,7 @@ func Logout(portal string, targetiqn string) error {
 
 // Delete ISCSI Node
 func Delete(targetiqn string) error {
-	info, err := execCmd("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
+	info, err := execCmd("sudo", "iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
 	if err != nil {
 		log.Println("Received error on Delete attempt:", string(info), err)
 		return err
