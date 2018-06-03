@@ -62,7 +62,11 @@ func TestClientGetProfile(t *testing.T) {
 }
 
 func TestClientListProfiles(t *testing.T) {
-	prfs, err := c.ListProfiles()
+	sortFilter := []string{}
+	selectkey := &model.ProfileSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	prfs, err := c.ListProfiles(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list profiles in client failed:", err)
 		return
@@ -138,7 +142,11 @@ func TestClientGetDock(t *testing.T) {
 }
 
 func TestClientListDocks(t *testing.T) {
-	dcks, err := c.ListDocks()
+	sortFilter := []string{}
+	selectkey := &model.DockSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	dcks, err := c.ListDocks(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list docks in client failed:", err)
 		return
@@ -162,7 +170,11 @@ func TestClientGetPool(t *testing.T) {
 }
 
 func TestClientListPools(t *testing.T) {
-	pols, err := c.ListPools()
+	sortFilter := []string{}
+	selectkey := &model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	pols, err := c.ListPools(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list pools in client failed:", err)
 		return
@@ -203,7 +215,11 @@ func TestClientGetVolume(t *testing.T) {
 }
 
 func TestClientListVolumes(t *testing.T) {
-	vols, err := c.ListVolumes()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	vols, err := c.ListVolumes(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list volumes in client failed:", err)
 		return
@@ -295,7 +311,11 @@ func TestClientGetVolumeAttachment(t *testing.T) {
 }
 
 func TestClientListVolumeAttachments(t *testing.T) {
-	atcs, err := c.ListVolumeAttachments()
+	sortFilter := []string{}
+	selectkey := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	atcs, err := c.ListVolumeAttachments(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list volume attachments in client failed:", err)
 		return
@@ -347,7 +367,11 @@ func TestClientGetVolumeSnapshot(t *testing.T) {
 }
 
 func TestClientListVolumeSnapshots(t *testing.T) {
-	snps, err := c.ListVolumeSnapshots()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	snps, err := c.ListVolumeSnapshots(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list volume snapshots in client failed:", err)
 		return
