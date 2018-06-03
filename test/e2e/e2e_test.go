@@ -56,7 +56,11 @@ func init() {
 
 func TestListDocks(t *testing.T) {
 	t.Log("Start listing docks...")
-	dcks, err := c.ListDocks()
+	sortFilter := []string{}
+	selectkey := &model.DockSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	dcks, err := c.ListDocks(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list docks failed:", err)
 		return
@@ -67,7 +71,11 @@ func TestListDocks(t *testing.T) {
 
 func TestListPools(t *testing.T) {
 	t.Log("Start listing pools...")
-	pols, err := c.ListPools()
+	sortFilter := []string{}
+	selectkey := &model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	pols, err := c.ListPools(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list pools failed:", err)
 		return
@@ -127,7 +135,11 @@ func TestListVolumes(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
-	vols, err := c.ListVolumes()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	vols, err := c.ListVolumes(sortFilter, selectkey)
 	if err != nil {
 		t.Error("Check all volumes failed:", err)
 		return
@@ -357,7 +369,11 @@ func TestListVolumeSnapshots(t *testing.T) {
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking all volume snapshots...")
-	snps, err := c.ListVolumeSnapshots()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	snps, err := c.ListVolumeSnapshots(sortFilter, selectkey)
 	if err != nil {
 		t.Error("list volume snapshots failed:", err)
 		return
