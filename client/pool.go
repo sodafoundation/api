@@ -64,21 +64,23 @@ func (p *PoolMgr) ListPools(v []string, pool *model.StoragePoolSpec) ([]*model.S
 	var limit, offset, sortDir, sortKey, availabilityZone, createdAt, description, dockId, freeCapacity, id, name, status,
 		storageType, totalCapacity, updatedAt string
 	var urlpara []string
-	if v[0] != "" {
-		limit = "limit=" + v[0]
-		urlpara = append(urlpara, limit)
-	}
-	if v[1] != "" {
-		offset = "offset=" + v[1]
-		urlpara = append(urlpara, offset)
-	}
-	if v[2] != "" {
-		sortDir = "sortDir=" + v[2]
-		urlpara = append(urlpara, sortDir)
-	}
-	if v[3] != "" {
-		sortKey = "sortKey=" + v[3]
-		urlpara = append(urlpara, sortKey)
+	if len(v) > 0 {
+		if v[0] != "" {
+			limit = "limit=" + v[0]
+			urlpara = append(urlpara, limit)
+		}
+		if v[1] != "" {
+			offset = "offset=" + v[1]
+			urlpara = append(urlpara, offset)
+		}
+		if v[2] != "" {
+			sortDir = "sortDir=" + v[2]
+			urlpara = append(urlpara, sortDir)
+		}
+		if v[3] != "" {
+			sortKey = "sortKey=" + v[3]
+			urlpara = append(urlpara, sortKey)
+		}
 	}
 	if pool.AvailabilityZone != "" {
 		availabilityZone = "AvailabilityZone=" + pool.AvailabilityZone

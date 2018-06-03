@@ -195,7 +195,7 @@ type VolumeGroupSpec struct {
 	Description string `json:"description,omitempty"`
 
 	// The uuid of the profile which the volume group belongs to.
-	Profiles []string `json:"profileId,omitempty"`
+	Profiles []string `json:"profiles,omitempty"`
 
 	// The locality that volume group belongs to.
 	// +optional

@@ -83,7 +83,11 @@ func (portal *AttachmentPortal) GetAttachment() {
 
 // ListAttachmentsDetails ...
 func (portal *AttachmentPortal) ListAttachmentsDetails() {
-	attachments, err := client.ListVolumeAttachments()
+	sortFilter := []string{}
+	selectkey := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	attachments, err := client.ListVolumeAttachments(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -109,7 +113,11 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 
 // ListAttachments ...
 func (portal *AttachmentPortal) ListAttachments() {
-	attachments, err := client.ListVolumeAttachments()
+	sortFilter := []string{}
+	selectkey := &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	attachments, err := client.ListVolumeAttachments(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List attachments failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

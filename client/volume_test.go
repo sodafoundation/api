@@ -651,7 +651,15 @@ func TestListVolumeGroups(t *testing.T) {
 		},
 	}
 
-	vg, err := fv.ListVolumeGroups()
+	v := []string{"50", "0", "asc", "id"}
+
+	vgPara := &model.VolumeGroupSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+	}
+
+	vg, err := fv.ListVolumeGroups(v, vgPara)
 	if err != nil {
 		t.Error(err)
 		return

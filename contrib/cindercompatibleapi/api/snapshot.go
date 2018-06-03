@@ -37,7 +37,11 @@ type SnapshotPortal struct {
 
 // ListSnapshotsDetails ...
 func (portal *SnapshotPortal) ListSnapshotsDetails() {
-	snapshots, err := client.ListVolumeSnapshots()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	snapshots, err := client.ListVolumeSnapshots(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List snapshots and details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -107,7 +111,11 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 
 // ListSnapshots ...
 func (portal *SnapshotPortal) ListSnapshots() {
-	snapshots, err := client.ListVolumeSnapshots()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	snapshots, err := client.ListVolumeSnapshots(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible snapshots failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

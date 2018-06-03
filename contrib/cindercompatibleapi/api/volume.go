@@ -41,7 +41,11 @@ type VolumePortal struct {
 
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
-	volumes, err := client.ListVolumes()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	volumes, err := client.ListVolumes(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -112,7 +116,11 @@ func (portal *VolumePortal) CreateVolume() {
 
 // ListVolumes ...
 func (portal *VolumePortal) ListVolumes() {
-	volumes, err := client.ListVolumes()
+	sortFilter := []string{}
+	selectkey := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	volumes, err := client.ListVolumes(sortFilter, selectkey)
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

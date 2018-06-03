@@ -187,7 +187,9 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
-	if in.Status != model.VolumeSnapAvailable {
+	invalidStatus := []string{model.VolumeSnapAvailable, model.VolumeSnapError,
+		model.VolumeSnapErrorDeleting, model.VolumeSnapDeleted, model.VolumeSnapDeleting}
+	if !utils.Contained(in.Status, invalidStatus) {
 		errMsg := "Only the volume snapshot with the status available can be deleted"
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -203,7 +205,7 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	invalidStatus := []string{model.VolumeAvailable, model.VolumeError,
-		model.VolumeErrorDeleting, model.VolumeErrorExtending}
+		model.VolumeErrorDeleting, model.VolumeErrorExtending, model.VolumeDeleted}
 	if !utils.Contained(in.Status, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
 		log.Error(errMsg)
@@ -290,7 +292,14 @@ func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secon
 	}
 	return nil
 }
+
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	if len(in.Profiles) == 0 {
+		msg := fmt.Sprintf("Profiles must be provided to create volume group.")
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
@@ -308,6 +317,7 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 		Description:      in.Description,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VolumeGroupCreating,
+		Profiles:         in.Profiles,
 	}
 	result, err := db.C.CreateVolumeGroup(ctx, vg)
 	if err != nil {
@@ -339,6 +349,9 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	} else {
 		description = vgUpdate.Description
 	}
+
+	vgUpdate.Profiles = vg.Profiles
+	vgUpdate.PoolId = vg.PoolId
 
 	var invalid_uuids []string
 	for _, uuidAdd := range vgUpdate.AddVolumes {
@@ -437,10 +450,19 @@ func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes 
 			return nil, err
 		}
 		if addVolRef.GroupId != "" {
-			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse it is already in group %s", addVolRef.Id, vg.Id, addVolRef.GroupId)
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is already in group %s.", addVolRef.Id, vg.Id, addVolRef.GroupId)
+		}
+		if addVolRef.ProfileId == "" {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume has no profile.", addVolRef.Id, vg.Id)
+		}
+		if !utils.Contained(addVolRef.ProfileId, vg.Profiles) {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume profile is not supported by the group.", addVolRef.Id, vg.Id)
 		}
 		if addVolRef.Status != model.VolumeAvailable && addVolRef.Status != model.VolumeInUse {
-			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse volume is in invalid status %s", addVolRef.Id, vg.Id, addVolRef.Status)
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is in invalid status %s.", addVolRef.Id, vg.Id, addVolRef.Status)
+		}
+		if addVolRef.PoolId != vg.PoolId {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is not local to the pool of group.", addVolRef.Id, vg.Id)
 		}
 
 		addVolumesNew = append(addVolumesNew, addVolRef.Id)

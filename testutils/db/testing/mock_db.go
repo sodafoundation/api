@@ -882,6 +882,29 @@ func (_m *MockClient) ListVolumeGroups(ctx *context.Context) ([]*model.VolumeGro
 	return r0, r1
 }
 
+// ListVolumeGroupsWithFilter provides a mock function with given fields: ctx, m
+func (_m *MockClient) ListVolumeGroupsWithFilter(ctx *context.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx, m)
+
+	var r0 []*model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.VolumeGroupSpec); ok {
+		r0 = rf(ctx, m)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
+		r1 = rf(ctx, m)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumeSnapshots provides a mock function with given fields: ctx
 func (_m *MockClient) ListVolumeSnapshots(ctx *context.Context) ([]*model.VolumeSnapshotSpec, error) {
 	ret := _m.Called(ctx)

@@ -59,21 +59,23 @@ func (d *DockMgr) ListDocks(v []string, dock *model.DockSpec) ([]*model.DockSpec
 	var limit, offset, sortDir, sortKey, createdAt, description, driverName, endpoint, id, name, status, storageType, updatedAt string
 	var urlpara []string
 
-	if v[0] != "" {
-		limit = "limit=" + v[0]
-		urlpara = append(urlpara, limit)
-	}
-	if v[1] != "" {
-		offset = "offset=" + v[1]
-		urlpara = append(urlpara, offset)
-	}
-	if v[2] != "" {
-		sortDir = "sortDir=" + v[2]
-		urlpara = append(urlpara, sortDir)
-	}
-	if v[3] != "" {
-		sortKey = "sortKey=" + v[3]
-		urlpara = append(urlpara, sortKey)
+	if len(v) > 0 {
+		if v[0] != "" {
+			limit = "limit=" + v[0]
+			urlpara = append(urlpara, limit)
+		}
+		if v[1] != "" {
+			offset = "offset=" + v[1]
+			urlpara = append(urlpara, offset)
+		}
+		if v[2] != "" {
+			sortDir = "sortDir=" + v[2]
+			urlpara = append(urlpara, sortDir)
+		}
+		if v[3] != "" {
+			sortKey = "sortKey=" + v[3]
+			urlpara = append(urlpara, sortKey)
+		}
 	}
 	if dock.CreatedAt != "" {
 		createdAt = "CreatedAt=" + dock.CreatedAt
