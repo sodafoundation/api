@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 package iscsi
 
 import (
+	"strconv"
+
 	"github.com/opensds/opensds/contrib/connector"
 )
 
@@ -25,11 +27,14 @@ var (
 type Iscsi struct{}
 
 func init() {
-	connector.RegisterConnector(ISCSI_DRIVER, &Iscsi{})
+	//connector.RegisterConnector(ISCSI_DRIVER, &Iscsi{})
+	connector.NewConnector(ISCSI_DRIVER)
 }
 
 func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	return Connect(conn)
+	iscsiCon := ParseIscsiConnectInfo(conn)
+
+	return Connect(iscsiCon.TgtPortal, iscsiCon.TgtIQN, strconv.Itoa(iscsiCon.TgtLun))
 }
 
 func (isc *Iscsi) Detach(conn map[string]interface{}) error {
