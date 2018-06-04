@@ -17,6 +17,9 @@ package client
 import (
 	"log"
 
+	"errors"
+	"strings"
+
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
@@ -116,4 +119,29 @@ func NewClient(c *Config) *Client {
 func (c *Client) Reset() *Client {
 	c = &Client{}
 	return c
+}
+
+func processListPara(args []interface{}) (string, error) {
+	var filter map[string]string
+	var u string
+	var urlpara []string
+
+	if len(args) > 0 {
+		if len(args) > 1 {
+			return "", errors.New("only support one parameter that must be map[string]string")
+		}
+		filter = args[0].(map[string]string)
+	}
+
+	if filter != nil {
+		for k, v := range filter {
+			urlpara = append(urlpara, k+"="+v)
+		}
+	}
+
+	if len(urlpara) > 0 {
+		u = strings.Join(urlpara, "&")
+	}
+
+	return u, nil
 }

@@ -190,25 +190,7 @@ func TestListVolumes(t *testing.T) {
 		},
 	}
 
-	v := []string{"50", "0", "asc", "id"}
-
-	var vol = &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			CreatedAt: "20120909",
-			UpdatedAt: "20120909",
-		},
-		Name:             "sample-volume",
-		Description:      "This is a sample volume for testing",
-		UserId:           "9",
-		Size:             int64(1),
-		AvailabilityZone: "zone",
-		Status:           "available",
-		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
-	}
-
-	vols, err := fv.ListVolumes(v, vol)
+	vols, err := fv.ListVolumes(map[string]string{"limit": "3", "offset": "4"})
 	if err != nil {
 		t.Error(err)
 		return
@@ -412,23 +394,8 @@ func TestListVolumeAttachments(t *testing.T) {
 			},
 		},
 	}
-	v := []string{"50", "0", "desc", "id"}
 
-	var volAtm = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			CreatedAt: "20120909",
-			UpdatedAt: "20150909",
-		},
-
-		UserId:     "90",
-		TenantId:   "02",
-		VolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		Status:     "available",
-		Mountpoint: "Mountpoint",
-	}
-
-	atcs, err := fv.ListVolumeAttachments(v, volAtm)
+	atcs, err := fv.ListVolumeAttachments()
 	if err != nil {
 		t.Error(err)
 		return
@@ -525,24 +492,8 @@ func TestListVolumeSnapshots(t *testing.T) {
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
 	}
-	v := []string{"50", "0", "asc", "id"}
 
-	var volSnap = &model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			CreatedAt: "20120908",
-			UpdatedAt: "20150908",
-		},
-		TenantId:    "02",
-		UserId:      "03",
-		Name:        "sample-snapshot-02",
-		Description: "This is the second sample snapshot for testing",
-		Status:      "created",
-		Size:        int64(1),
-		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
-	}
-
-	snps, err := fv.ListVolumeSnapshots(v, volSnap)
+	snps, err := fv.ListVolumeSnapshots()
 	if err != nil {
 		t.Error(err)
 		return
@@ -651,15 +602,7 @@ func TestListVolumeGroups(t *testing.T) {
 		},
 	}
 
-	v := []string{"50", "0", "asc", "id"}
-
-	vgPara := &model.VolumeGroupSpec{
-		BaseModel: &model.BaseModel{
-			Id: "3769855c-a102-11e7-b772-17b880d2f537",
-		},
-	}
-
-	vg, err := fv.ListVolumeGroups(v, vgPara)
+	vg, err := fv.ListVolumeGroups()
 	if err != nil {
 		t.Error(err)
 		return

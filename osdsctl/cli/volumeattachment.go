@@ -71,7 +71,6 @@ var (
 	volAtmId         string
 	volAtmCreatedAt  string
 	volAtmUpdatedAt  string
-	volAtmTenantId   string
 	volAtmUserId     string
 	volAtmVolumeId   string
 	volAtmMountpoint string
@@ -87,7 +86,6 @@ func init() {
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmId, "id", "", "", "list volume attachment by id")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmCreatedAt, "createdAt", "", "", "list volume attachment by created time")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmUpdatedAt, "updatedAt", "", "", "list volume attachment by updated time")
-	volumeAttachmentListCommand.Flags().StringVarP(&volAtmTenantId, "tenantId", "", "", "list volume attachment by tenantId")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmUserId, "userId", "", "", "list volume attachment by storage userId")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmVolumeId, "volumeId", "", "", "list volume attachment by volumeId")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmStatus, "status", "", "", "list volume attachment by status")
@@ -139,23 +137,14 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 
 func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	v := []string{volAtmLimit, volAtmOffset, volAtmSortDir, volAtmSortKey}
 
-	var volAtm = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{
-			Id:        volAtmId,
-			CreatedAt: volAtmCreatedAt,
-			UpdatedAt: volAtmUpdatedAt,
-		},
+	var opts = map[string]string{"limit": volAtmLimit, "offset": volAtmOffset,
+		"sortDir": volAtmSortDir, "sortKey": volAtmSortKey, "Id": volAtmId,
+		"CreatedAt": volAtmCreatedAt, "UpdatedAt": volAtmUpdatedAt,
+		"UserId": volAtmUserId, "VolumeId": volAtmVolumeId,
+		"Status": volAtmStatus, "Mountpoint": volAtmMountpoint}
 
-		UserId:     volAtmUserId,
-		TenantId:   volAtmTenantId,
-		VolumeId:   volAtmVolumeId,
-		Status:     volAtmStatus,
-		Mountpoint: volAtmMountpoint,
-	}
-
-	resp, err := client.ListVolumeAttachments(v, volAtm)
+	resp, err := client.ListVolumeAttachments(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

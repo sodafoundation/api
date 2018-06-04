@@ -155,25 +155,7 @@ func TestListPools(t *testing.T) {
 		},
 	}
 
-	v := []string{"50", "0", "", "id"}
-
-	var pool = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "a594b8ac-a103-11e7-985f-d723bcf01b5f",
-			CreatedAt: "20120202",
-			UpdatedAt: "20150902",
-		},
-		Name:             "sample-pool-02",
-		Description:      "This is the second sample storage pool for testing",
-		Status:           "available",
-		DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-		AvailabilityZone: "zone",
-		TotalCapacity:    int64(200),
-		FreeCapacity:     int64(170),
-		StorageType:      "FF",
-	}
-
-	pols, err := fp.ListPools(v, pool)
+	pols, err := fp.ListPools()
 	if err != nil {
 		t.Error(err)
 		return

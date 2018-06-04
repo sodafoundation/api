@@ -15,7 +15,6 @@
 package client
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -53,82 +52,20 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 }
 
 // ListPools
-func (p *PoolMgr) ListPools(v []string, pool *model.StoragePoolSpec) ([]*model.StoragePoolSpec, error) {
+func (p *PoolMgr) ListPools(args ...interface{}) ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
-	var u string
 
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GeneratePoolURL(urls.Client, p.TenantId)}, "/")
 
-	var limit, offset, sortDir, sortKey, availabilityZone, createdAt, description, dockId, freeCapacity, id, name, status,
-		storageType, totalCapacity, updatedAt string
-	var urlpara []string
-	if len(v) > 0 {
-		if v[0] != "" {
-			limit = "limit=" + v[0]
-			urlpara = append(urlpara, limit)
-		}
-		if v[1] != "" {
-			offset = "offset=" + v[1]
-			urlpara = append(urlpara, offset)
-		}
-		if v[2] != "" {
-			sortDir = "sortDir=" + v[2]
-			urlpara = append(urlpara, sortDir)
-		}
-		if v[3] != "" {
-			sortKey = "sortKey=" + v[3]
-			urlpara = append(urlpara, sortKey)
-		}
+	para, err := processListPara(args)
+	if err != nil {
+		return nil, err
 	}
-	if pool.AvailabilityZone != "" {
-		availabilityZone = "AvailabilityZone=" + pool.AvailabilityZone
-		urlpara = append(urlpara, availabilityZone)
-	}
-	if pool.CreatedAt != "" {
-		createdAt = "CreatedAt=" + pool.CreatedAt
-		urlpara = append(urlpara, createdAt)
-	}
-	if pool.Description != "" {
-		description = "Description=" + pool.Description
-		urlpara = append(urlpara, description)
-	}
-	if pool.DockId != "" {
-		dockId = "DockId=" + pool.DockId
-		urlpara = append(urlpara, dockId)
-	}
-	if pool.FreeCapacity != 0 {
-		freeCapacity = "FreeCapacity=" + strconv.FormatInt(pool.FreeCapacity, 10)
-		urlpara = append(urlpara, freeCapacity)
-	}
-	if pool.Id != "" {
-		id = "Id=" + pool.Id
-		urlpara = append(urlpara, id)
-	}
-	if pool.Name != "" {
-		name = "Name=" + pool.Name
-		urlpara = append(urlpara, name)
-	}
-	if pool.Status != "" {
-		status = "Status=" + pool.Status
-		urlpara = append(urlpara, status)
-	}
-	if pool.StorageType != "" {
-		storageType = "StorageType=" + pool.StorageType
-		urlpara = append(urlpara, storageType)
-	}
-	if pool.TotalCapacity != 0 {
-		totalCapacity = "TotalCapacity=" + strconv.FormatInt(pool.TotalCapacity, 10)
-		urlpara = append(urlpara, totalCapacity)
-	}
-	if pool.UpdatedAt != "" {
-		updatedAt = "UpdatedAt=" + pool.UpdatedAt
-		urlpara = append(urlpara, updatedAt)
-	}
-	if len(urlpara) > 0 {
-		u = strings.Join(urlpara, "&")
-		url += "?" + u
+
+	if para != "" {
+		url += "?" + para
 	}
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {

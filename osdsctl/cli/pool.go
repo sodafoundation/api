@@ -20,9 +20,7 @@ package cli
 
 import (
 	"os"
-	"strconv"
 
-	"github.com/opensds/opensds/pkg/model"
 	"github.com/spf13/cobra"
 )
 
@@ -102,27 +100,13 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 func poolListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
 
-	totalCapacity, _ := strconv.ParseInt(poolTotalCapacity, 10, 64)
-	freeCapacity, _ := strconv.ParseInt(poolFreeCapacity, 10, 64)
+	var opts = map[string]string{"limit": poolLimit, "offset": poolOffset, "sortDir": poolSortDir,
+		"sortKey": poolSortKey, "Id": poolId, "CreatedAt": poolCreatedAt, "UpdatedAt": poolUpdatedAt,
+		"Name": poolName, "Description": poolDescription, "AvailabilityZone": poolAvailabilityZone,
+		"TotalCapacity": poolTotalCapacity, "Status": poolStatus, "FreeCapacity": poolFreeCapacity,
+		"DockId": poolDockId, "StorageType": poolStorageType}
 
-	v := []string{poolLimit, dockOffset, dockSortDir, dockSortKey}
-
-	var pool = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        poolId,
-			CreatedAt: poolCreatedAt,
-			UpdatedAt: poolUpdatedAt,
-		},
-		Name:             poolName,
-		Description:      poolDescription,
-		Status:           poolStatus,
-		DockId:           poolDockId,
-		AvailabilityZone: poolAvailabilityZone,
-		TotalCapacity:    totalCapacity,
-		FreeCapacity:     freeCapacity,
-		StorageType:      poolStorageType,
-	}
-	pols, err := client.ListPools(v, pool)
+	pols, err := client.ListPools(opts)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

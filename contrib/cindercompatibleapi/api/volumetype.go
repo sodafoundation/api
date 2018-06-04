@@ -278,11 +278,7 @@ func (portal *TypePortal) GetType() {
 
 		profile = foundProfile
 	} else {
-		sortFilter := []string{}
-		selectkey := &model.ProfileSpec{
-			BaseModel: &model.BaseModel{},
-		}
-		profiles, err := client.ListProfiles(sortFilter, selectkey)
+		profiles, err := client.ListProfiles()
 		if err != nil {
 			reason := fmt.Sprintf("List profiles failed: %v", err)
 			portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -340,11 +336,7 @@ func (portal *TypePortal) DeleteType() {
 
 // ListTypes ...
 func (portal *TypePortal) ListTypes() {
-	sortFilter := []string{}
-	selectkey := &model.ProfileSpec{
-		BaseModel: &model.BaseModel{},
-	}
-	profiles, err := client.ListProfiles(sortFilter, selectkey)
+	profiles, err := client.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List all volume types failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

@@ -98,22 +98,12 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 
 func dockListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	v := []string{dockLimit, dockOffset, dockSortDir, dockSortKey}
-	var dock = &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id:        dockId,
-			CreatedAt: dockCreatedAt,
-			UpdatedAt: dockUpdatedAt,
-		},
-		Name:        dockName,
-		Description: dockDescription,
-		Status:      dockStatus,
-		StorageType: dockStorageType,
-		Endpoint:    dockEndpoint,
-		DriverName:  dockDriverName,
-	}
+	var opts = map[string]string{"limit": dockLimit, "offset": dockOffset, "sortDir": dockSortDir,
+		"sortKey": dockSortKey, "Id": dockId, "CreatedAt": dockCreatedAt, "UpdatedAt": dockUpdatedAt,
+		"Name": dockName, "Description": dockDescription, "DriverName": dockDriverName,
+		"Endpoint": dockEndpoint, "Status": dockStatus, "StorageType": dockStorageType}
 
-	resp, err := client.ListDocks(v, dock)
+	resp, err := client.ListDocks(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

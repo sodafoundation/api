@@ -224,21 +224,13 @@ func replicationShowAction(cmd *cobra.Command, args []string) {
 
 func replicationListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	v := []string{repLimit, repOffset, repSortDir, repSortKey}
 
-	var rep = &model.ReplicationSpec{
-		BaseModel: &model.BaseModel{
-			Id:        repId,
-			CreatedAt: repCreatedAt,
-			UpdatedAt: repUpdatedAt,
-		},
-		Name:              repName,
-		Description:       repDesp,
-		PrimaryVolumeId:   repPrimaryVolumeId,
-		SecondaryVolumeId: repSecondaryVolumeId,
-	}
+	var opts = map[string]string{"limit": repLimit, "offset": repOffset, "sortDir": repSortDir,
+		"sortKey": repSortKey, "Id": repId, "CreatedAt": repCreatedAt, "UpdatedAt": repUpdatedAt,
+		"Name": repName, "Description": repDesp, "PrimaryVolumeId": repPrimaryVolumeId,
+		"SecondaryVolumeId": repSecondaryVolumeId}
 
-	resp, err := client.ListReplications(v, rep)
+	resp, err := client.ListReplications(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

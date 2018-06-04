@@ -175,26 +175,13 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 
 func volumeListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	size, _ := strconv.ParseInt(volSize, 10, 64)
-	v := []string{volLimit, volOffset, volSortDir, volSortKey}
 
-	var vol = &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id:        volId,
-			CreatedAt: volCreatedAt,
-			UpdatedAt: volUpdatedAt,
-		},
-		Name:             volName,
-		Description:      volDesp,
-		UserId:           volUserId,
-		Size:             size,
-		AvailabilityZone: volAz,
-		Status:           volStatus,
-		PoolId:           volPoolId,
-		ProfileId:        volProfileId,
-	}
+	var opts = map[string]string{"limit": volLimit, "offset": volOffset, "sortDir": volSortDir,
+		"sortKey": volSortKey, "Id": volId, "CreatedAt": volCreatedAt, "UpdatedAt": volUpdatedAt,
+		"Name": volName, "Description": volDesp, "UserId": volUserId, "AvailabilityZone": volAz,
+		"Size": volSize, "Status": volStatus, "PoolId": volPoolId, "ProfileId": volProfileId}
 
-	resp, err := client.ListVolumes(v, vol)
+	resp, err := client.ListVolumes(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

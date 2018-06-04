@@ -21,7 +21,6 @@ package cli
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/spf13/cobra"
@@ -76,7 +75,6 @@ var (
 	volSnapId          string
 	volSnapCreatedAt   string
 	volSnapUpdatedAt   string
-	volSnapTenantId    string
 	volSnapUserId      string
 	volSnapName        string
 	volSnapDescription string
@@ -94,7 +92,6 @@ func init() {
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapId, "id", "", "", "list volume snapshot by id")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapCreatedAt, "createdAt", "", "", "list volume snapshot by created time")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapUpdatedAt, "updatedAt", "", "", "list volume snapshot by updated time")
-	volumeSnapshotListCommand.Flags().StringVarP(&volSnapTenantId, "tenantId", "", "", "list volume snapshot by tenantId")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapUserId, "userId", "", "", "list volume snapshot by storage userId")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapVolumeId, "volumeId", "", "", "list volume snapshot by volume id")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapStatus, "status", "", "", "list volume snapshot by status")
@@ -148,24 +145,13 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	size, _ := strconv.ParseInt(volSnapSize, 10, 64)
-	v := []string{volSnapLimit, volSnapOffset, volSnapSortDir, volSnapSortKey}
-	var volSnap = &model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{
-			Id:        volSnapId,
-			CreatedAt: volSnapCreatedAt,
-			UpdatedAt: volSnapUpdatedAt,
-		},
-		TenantId:    volSnapTenantId,
-		UserId:      volSnapUserId,
-		Name:        volSnapName,
-		Description: volSnapDescription,
-		Status:      volSnapStatus,
-		Size:        size,
-		VolumeId:    volSnapVolumeId,
-	}
 
-	resp, err := client.ListVolumeSnapshots(v, volSnap)
+	var opts = map[string]string{"limit": volSnapLimit, "offset": volSnapOffset, "sortDir": volSnapSortDir,
+		"sortKey": volSnapSortKey, "Id": volSnapId, "CreatedAt": volSnapCreatedAt, "UpdatedAt": volSnapUpdatedAt,
+		"Name": volSnapName, "Description": volSnapDescription, "UserId": volSnapUserId,
+		"Size": volSnapSize, "Status": volSnapStatus, "VolumeId": volSnapVolumeId}
+
+	resp, err := client.ListVolumeSnapshots(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

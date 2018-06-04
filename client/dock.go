@@ -48,75 +48,22 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	return &res, nil
 }
 
-func (d *DockMgr) ListDocks(v []string, dock *model.DockSpec) ([]*model.DockSpec, error) {
+func (d *DockMgr) ListDocks(args ...interface{}) ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
-	var u string
 
 	url := strings.Join([]string{
 		d.Endpoint,
 		urls.GenerateDockURL(urls.Client, d.TenantId)}, "/")
 
-	var limit, offset, sortDir, sortKey, createdAt, description, driverName, endpoint, id, name, status, storageType, updatedAt string
-	var urlpara []string
+	para, err := processListPara(args)
+	if err != nil {
+		return nil, err
+	}
 
-	if len(v) > 0 {
-		if v[0] != "" {
-			limit = "limit=" + v[0]
-			urlpara = append(urlpara, limit)
-		}
-		if v[1] != "" {
-			offset = "offset=" + v[1]
-			urlpara = append(urlpara, offset)
-		}
-		if v[2] != "" {
-			sortDir = "sortDir=" + v[2]
-			urlpara = append(urlpara, sortDir)
-		}
-		if v[3] != "" {
-			sortKey = "sortKey=" + v[3]
-			urlpara = append(urlpara, sortKey)
-		}
+	if para != "" {
+		url += "?" + para
 	}
-	if dock.CreatedAt != "" {
-		createdAt = "CreatedAt=" + dock.CreatedAt
-		urlpara = append(urlpara, createdAt)
-	}
-	if dock.Description != "" {
-		description = "Description=" + dock.Description
-		urlpara = append(urlpara, description)
-	}
-	if dock.DriverName != "" {
-		driverName = "DriverName=" + dock.DriverName
-		urlpara = append(urlpara, driverName)
-	}
-	if dock.Endpoint != "" {
-		endpoint = "Endpoint=" + dock.Endpoint
-		urlpara = append(urlpara, endpoint)
-	}
-	if dock.Id != "" {
-		id = "id=" + dock.Id
-		urlpara = append(urlpara, id)
-	}
-	if dock.Name != "" {
-		name = "Name=" + dock.Name
-		urlpara = append(urlpara, name)
-	}
-	if dock.Status != "" {
-		status = "Status=" + dock.Status
-		urlpara = append(urlpara, status)
-	}
-	if dock.StorageType != "" {
-		storageType = "StorageType=" + dock.StorageType
-		urlpara = append(urlpara, storageType)
-	}
-	if dock.UpdatedAt != "" {
-		updatedAt = "UpdatedAt=" + dock.UpdatedAt
-		urlpara = append(urlpara, updatedAt)
-	}
-	if len(urlpara) > 0 {
-		u = strings.Join(urlpara, "&")
-		url += "?" + u
-	}
+
 	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}

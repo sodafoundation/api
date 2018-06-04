@@ -152,27 +152,18 @@ func volumeGroupShowAction(cmd *cobra.Command, args []string) {
 
 func volumeGroupListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	v := []string{vgLimit, vgOffset, vgSortDir, vgSortKey}
 
-	var vg = &model.VolumeGroupSpec{
-		BaseModel: &model.BaseModel{
-			Id:        vgId,
-			CreatedAt: vgCreatedAt,
-			UpdatedAt: vgUpdatedAt,
-		},
-		Name:             vgName,
-		Description:      vgDesp,
-		UserId:           vgUserId,
-		AvailabilityZone: vgAZ,
-		Status:           vgStatus,
-		PoolId:           vgPoolId,
-	}
+	var opts = map[string]string{"limit": vgLimit, "offset": vgOffset, "sortDir": vgSortDir,
+		"sortKey": vgSortKey, "Id": vgId, "CreatedAt": vgCreatedAt, "UpdatedAt": vgUpdatedAt,
+		"Name": vgName, "Description": vgDesp, "UserId": vgUserId, "AvailabilityZone": vgAZ,
+		"Status": vgStatus, "PoolId": vgPoolId}
 
-	resp, err := client.ListVolumeGroups(v, vg)
+	resp, err := client.ListVolumeGroups(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
+
 	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintList(resp, keys, FormatterList{})
 }

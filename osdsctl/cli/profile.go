@@ -125,20 +125,11 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 
 func profileListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	v := []string{profLimit, profOffset, profSortDir, profSortKey}
+	var opts = map[string]string{"limit": profLimit, "offset": profOffset, "sortDir": profSortDir,
+		"sortKey": profSortKey, "Id": profId, "CreatedAt": profCreatedAt, "UpdatedAt": profUpdatedAt,
+		"Name": profName, "Description": profDescription, "StorageType": profStorageType}
 
-	var prof = &model.ProfileSpec{
-		BaseModel: &model.BaseModel{
-			Id:        profId,
-			CreatedAt: profCreatedAt,
-			UpdatedAt: profUpdatedAt,
-		},
-		Name:        profName,
-		Description: profDescription,
-		StorageType: profStorageType,
-	}
-
-	resp, err := client.ListProfiles(v, prof)
+	resp, err := client.ListProfiles(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
