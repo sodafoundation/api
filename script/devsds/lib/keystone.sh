@@ -96,6 +96,14 @@ osds::keystone::create_user_and_endpoint(){
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION admin http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
 }
 
+osds::keystone::delete_redundancy_data() {
+    . $DEV_STACK_DIR/openrc admin admin
+    openstack project delete demo
+    openstack project delete alt_demo
+    openstack project delete invisible_to_admin
+    openstack user delete demo
+    openstack user delete alt_demo
+}
 
 osds::keystone::download_code(){
     if [ ! -d ${DEV_STACK_DIR} ];then
@@ -118,6 +126,7 @@ osds::keystone::install(){
     cd ${DEV_STACK_DIR}
     su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
     osds::keystone::create_user_and_endpoint
+    osds::keystone::delete_redundancy_data
 }
 
 osds::keystone::cleanup() {
