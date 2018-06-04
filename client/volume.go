@@ -15,7 +15,6 @@
 package client
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -105,7 +104,7 @@ func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error
 	if para != "" {
 		url += "?" + para
 	}
-	fmt.Println("url is ", url)
+
 	var res []*model.VolumeSpec
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
