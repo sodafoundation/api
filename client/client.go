@@ -135,6 +135,9 @@ func processListPara(args []interface{}) (string, error) {
 
 	if filter != nil {
 		for k, v := range filter {
+			if v == "" {
+				continue
+			}
 			urlpara = append(urlpara, k+"="+v)
 		}
 	}
