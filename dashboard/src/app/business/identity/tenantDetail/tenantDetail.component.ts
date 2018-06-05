@@ -66,7 +66,7 @@ export class TenantDetailComponent implements OnInit {
             // get roles
             let reqRole: any = { params:{} };
             this.http.get("/v3/roles", reqRole).subscribe((roleRES) => {
-                let currentRoleName = this.projectName == "admin" ? "admin" : "Member";
+                let currentRoleName = this.projectName == "admin" ? "admin" : (this.projectName == "service" ? "service" : "Member");
 
                 roleRES.json().roles.forEach((item, index) => {
                     if(item.name == currentRoleName){ // more role can be expand
