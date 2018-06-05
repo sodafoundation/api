@@ -74,6 +74,7 @@ var (
 	volName   string
 	volDesp   string
 	volAz     string
+	volSnap   string
 )
 
 func init() {
@@ -83,6 +84,7 @@ func init() {
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
+	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
@@ -114,6 +116,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		AvailabilityZone: volAz,
 		Size:             int64(size),
 		ProfileId:        profileId,
+		SnapshotId:       volSnap,
 	}
 
 	resp, err := client.CreateVolume(vol)
@@ -135,7 +138,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
