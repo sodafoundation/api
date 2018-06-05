@@ -7,6 +7,7 @@ import { I18NService } from 'app/shared/api';
 @Component({
   selector: 'app-snapshot-list',
   templateUrl: './snapshot-list.component.html',
+  providers: [ConfirmationService],
   styleUrls: [
 
   ]

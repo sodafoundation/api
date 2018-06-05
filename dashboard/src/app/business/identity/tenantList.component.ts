@@ -30,6 +30,7 @@ export class TenantListComponent implements OnInit {
 
     tenantFormGroup;
     projectID: string;
+    projectName: string;
 
     validRule= {
         'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
@@ -223,6 +224,7 @@ export class TenantListComponent implements OnInit {
     onRowExpand(evt) {
         this.isDetailFinished = false;
         this.projectID = evt.data.id;
+        this.projectName = evt.data.name;
     }
 
     tablePaginate() {

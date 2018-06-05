@@ -68,7 +68,7 @@ export class ZoneComponent implements OnInit {
                     if(!AZs.includes(ele.availabilityZone)){
                         AZs.push(ele.availabilityZone);
 
-                        let [name,region,description] = [ele.availabilityZone, "Region_Chengdu", "--"];
+                        let [name,region,description] = [ele.availabilityZone, "default_region", "--"];
                         this.zones.push({name,region,description});
                     }
                 })

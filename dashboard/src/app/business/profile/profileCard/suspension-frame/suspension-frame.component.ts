@@ -14,7 +14,7 @@ export class SuspensionFrameComponent implements OnInit {
     set policy(policy: any) {
         let extra = policy[1];
         this.policyName = policy[0];
-        if(this.policyName === "Qos"){
+        if(this.policyName === "QoS"){
             let maxIpos ="MaxIOPS = " + extra[":provisionPolicy"].ioConnectivityLoS.maxIOPS + " IOPS/TB";
             this.data.push(maxIpos);
             let maxBWS = "MaxBWS = " + extra[":provisionPolicy"].ioConnectivityLoS.maxBWS + " MBPS/TB";

@@ -65,7 +65,7 @@ export class StorageComponent implements OnInit{
             let reqDock: any = { params:{} };
             this.http.get("/v1beta/"+ project_id +"/docks", reqDock).subscribe((dockRES) => {
                 dockRES.json().forEach(ele => {
-                        let [name,ip,status,description,region,az] = [ele.name, ele.endpoint.split(":")[0], "Enabled", ele.description, "Region_Chengdu", "default"];
+                        let [name,ip,status,description,region,az] = [ele.name, ele.endpoint.split(":")[0], "Enabled", ele.description, "default_region", "default"];
                         this.storages.push({name,ip,status,description,region,az});
                 })
                 console.log(this.storages);
