@@ -51,5 +51,8 @@
     "sds_block_volume_totalcapa":"Total Capacity After Expansion",
     "sds_block_volume_deleVolu":"Delete Volume",
     "sds_resource_region_default":"default_region",
-    "sds_profile_create_name_require":"name is required."
+    "sds_profile_create_name_require":"name is required.",
+    "sds_block_volume_replication_disable":"Disable",
+    "sds_block_volume_replication_failover":"Failover"
+
 }

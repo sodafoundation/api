@@ -52,7 +52,7 @@
         </form-item>
 
         <form-item *ngIf="!isEditUser" label="{{label.tenantLabel}}" [required]="false">
-            <p-multiSelect [options]="tenantLists" formControlName="form_tenant"></p-multiSelect>
+            <p-multiSelect [options]="tenantLists" [filter]="false" formControlName="form_tenant"></p-multiSelect>
         </form-item>
 
         <form-item *ngIf="isEditUser" class="hide" [required]="false">

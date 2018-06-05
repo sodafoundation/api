@@ -108,7 +108,7 @@
                             <div class="create-profile-snap-col-8 input-text-vertical-align">
                                 <p-dropdown [style]="{'min-width':200}"  formControlName="retentionOptions" [options]="snapshotRetentionOptions"></p-dropdown>
                                 <div class="create-profile-snap-policy">
-                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" pInputText type="number" formControlName="snapNum"/>
+                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" min="1" step="1" pInputText type="number" formControlName="snapNum"/>
                                     <input *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'" pInputText type="number" formControlName="duration"/>
                                 </div>
                                 <span *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'">Days</span>

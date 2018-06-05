@@ -86,7 +86,6 @@ export class SnapshotService {
     if(filter){
       url = this.url + "?" + filter.key + "=" + filter.value;
     }
-    console.log(url);
     return this.http.get(url);
   }
 
@@ -104,11 +103,34 @@ export class ReplicationService {
     ) { }
 
     project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
-    replicationUrl = 'v1beta/'+ this.project_id +'/block/replications';
+    replicationUrl = 'v1beta/{project_id}/block/replications';
     //create replication
     createReplication(param){
         let url = this.replicationUrl;
         return this.http.post(url,param);
+    }
+    getReplicationDetailByVolumeId(filter?){
+        let url = this.replicationUrl+"/detail";
+        if(filter){
+            url = url + "?" + filter.key + "=" + filter.value;
+        }
+        return this.http.get(url);
+    }
+    disableReplication(param){
+        let url = this.replicationUrl+"/"+param+"/disable";
+        return this.http.post(url,param);
+    }
+    failoverReplication(id){
+        let url = this.replicationUrl+"/"+id+"/failover";
+        let param = {
+            "allowAttachedVolume": true,
+            "secondaryBackendId": id
+        }
+        return this.http.post(url,param);
+    }
+    deleteReplication(param){
+        let url = this.replicationUrl+"/"+param;
+        return this.http.delete(url);
     }
 }
 @Injectable()

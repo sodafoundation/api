@@ -60,11 +60,9 @@ export class CreateProfileComponent implements OnInit {
     label;
     param = {
         name: '',
-        storageType: '',
         description: '',
         extras: {
-            protocol: 'iSCSI',
-            policys: []
+             
         }
     };
     qosIsChecked = false;
@@ -369,9 +367,9 @@ export class CreateProfileComponent implements OnInit {
         this.msgs = [];
         this.msgs.push({ severity: 'info', summary: 'Success', detail: 'Form Submitted' });
         this.param.name = value.name;
-        this.param.storageType = value.storageType;
-        this.param.extras.protocol = value.protocol;
-        this.param.extras.policys = value.policys;
+        // this.param.storageType = value.storageType;
+        // this.param.extras.protocol = value.protocol;
+        // this.param.extras.policys = value.policys;
         if(this.qosIsChecked){
             if(!this.qosPolicy.valid){
                 for(let i in this.qosPolicy.controls){
@@ -382,7 +380,20 @@ export class CreateProfileComponent implements OnInit {
             this.param.extras[":provisionPolicy"]= {
                 "ioConnectivityLoS": {
                     "maxIOPS": this.qosPolicy.value.maxIOPS,
-                    "maxBWS": this.qosPolicy.value.maxBWS
+                    "maxBWS": this.qosPolicy.value.maxBWS,
+                    "accessProtocol": value.protocol
+                }, 
+                "dataStorageLoS": {
+                    "provisioningPolicy": value.storageType
+                }
+            }
+        }else{
+            this.param.extras[":provisionPolicy"]= {
+                "ioConnectivityLoS": {
+                    "accessProtocol": value.protocol
+                }, 
+                "dataStorageLoS": {
+                    "provisioningPolicy": value.storageType
                 }
             }
         }

@@ -213,7 +213,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.dropMenuItems = [
                         { 
                             label: "Switch Region", 
-                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                            items: [{ label: "default_region", command:()=>{} }]
                         },
                         { 
                             label: "Logout", 
@@ -225,7 +225,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.dropMenuItems = [
                         { 
                             label: "Switch Region", 
-                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                            items: [{ label: "default_region", command:()=>{} }]
                         },
                         { 
                             label: "Switch Tenant", 
