@@ -367,9 +367,6 @@ export class CreateProfileComponent implements OnInit {
         this.msgs = [];
         this.msgs.push({ severity: 'info', summary: 'Success', detail: 'Form Submitted' });
         this.param.name = value.name;
-        // this.param.storageType = value.storageType;
-        // this.param.extras.protocol = value.protocol;
-        // this.param.extras.policys = value.policys;
         if(this.qosIsChecked){
             if(!this.qosPolicy.valid){
                 for(let i in this.qosPolicy.controls){
@@ -453,8 +450,7 @@ export class CreateProfileComponent implements OnInit {
 
     createProfile(param) {
         this.ProfileService.createProfile(param).subscribe((res) => {
-            // return res.json();
-            // this.profiles = res.json();
+            
             this.router.navigate(['/profile']);
         });
     }

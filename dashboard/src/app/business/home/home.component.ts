@@ -179,7 +179,7 @@ export class HomeComponent implements OnInit {
             this.tenants.forEach((item, i)=>{
                 this.getAllvolumes(item.id, i);
                 this.getAllSnapshots(item.id);
-                this.getAllReplication(item.id);
+                this.getAllReplications(item.id);
                 if(item.name == "admin"){
                     this.getAllPools(item.id);
                     this.getAllDocks(item.id);
@@ -238,7 +238,7 @@ export class HomeComponent implements OnInit {
             this.items[5].countNum = this.items[5].countNum + res.json().length;
         });
     }
-    getAllReplication(projectId){
+    getAllReplications(projectId){
         let url = 'v1beta/'+projectId+'/block/replications';
         this.http.get(url).subscribe((res)=>{
             if(res.json()){
@@ -292,6 +292,6 @@ export class HomeComponent implements OnInit {
         let tenantId = this.paramStor.CURRENT_TENANT().split("|")[1];
         this.getAllvolumes(tenantId);
         this.getAllSnapshots(tenantId);
-        this.getAllReplication(tenantId);
+        this.getAllReplications(tenantId);
     }
 }
