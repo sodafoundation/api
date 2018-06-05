@@ -2,6 +2,7 @@ import { Component, Input, OnInit, ViewContainerRef, ViewChild, Directive, Eleme
 import { Http } from '@angular/http';
 import { I18NService, Utils } from 'app/shared/api';
 import { AppService } from 'app/app.service';
+import { ParamStorService } from 'app/shared/api';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem, ConfirmationService} from '../../../components/common/api';
@@ -14,7 +15,8 @@ import { MenuItem, ConfirmationService} from '../../../components/common/api';
     animations: []
 })
 export class TenantDetailComponent implements OnInit {
-    @Input() projectID = [];
+    @Input() projectID;
+    @Input() projectName;
     @Input() isDetailFinished: Boolean;
     addUserDisplay: boolean=false;
     userfilter: string="";
@@ -30,6 +32,7 @@ export class TenantDetailComponent implements OnInit {
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
+        private paramStor: ParamStorService,
         // private I18N: I18NService,
         // private router: Router
     ) { }
@@ -63,8 +66,10 @@ export class TenantDetailComponent implements OnInit {
             // get roles
             let reqRole: any = { params:{} };
             this.http.get("/v3/roles", reqRole).subscribe((roleRES) => {
+                let currentRoleName = this.projectName == "admin" ? "admin" : "Member";
+
                 roleRES.json().roles.forEach((item, index) => {
-                    if(item.name == "Member"){ // more role can be expand
+                    if(item.name == currentRoleName){ // more role can be expand
                         let roleJson = {};
                         roleJson["id"] = item.id;
                         roleJson["name"] = item.name;

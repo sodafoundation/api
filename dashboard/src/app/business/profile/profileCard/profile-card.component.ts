@@ -43,8 +43,25 @@ import { ButtonModule } from './../../../components/common/api';
     ]
 })
 export class ProfileCardComponent implements OnInit {
-
-    @Input() data;
+    policys = [];
+    data:any;
+    @Input() 
+    set cardData(data: any) {
+        this.data = data;
+        this.policys = [];
+        if(data.extras){
+            if(data.extras[':provisionPolicy'].ioConnectivityLoS.maxIOPS){
+                this.policys.push("QoS");
+            }
+            if(data.extras[':snapshotPolicy']){
+                this.policys.push("Snapshot");
+            }
+            if(data.extras[':replicationPolicy']){
+                this.policys.push("Replication");
+            }
+        }
+        
+    };
 
     chartDatas: any;
     constructor(
