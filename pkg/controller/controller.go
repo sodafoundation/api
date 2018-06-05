@@ -165,6 +165,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanvol chan error) {
 	prf, err := db.C.GetProfile(ctx, in.ProfileId)
 	if err != nil {
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
 		log.Error("when search profile in db:", err)
 		errchanvol <- err
 		return
@@ -176,6 +180,10 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
 	if err != nil {
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
 		log.Error("When search dock in db by pool id: ", err)
 		errchanvol <- err
 		return
@@ -195,6 +203,10 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 	go c.policyController.ExecuteAsyncPolicy(opt, "", errChan)
 
 	if err := <-errChan; err != nil {
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
 		log.Error("When execute async policy:", err)
 		errchanvol <- err
 		return

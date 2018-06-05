@@ -121,10 +121,10 @@ func (c *Client) Reset() *Client {
 	return c
 }
 
-func processListPara(args []interface{}) (string, error) {
+func processListParam(args []interface{}) (string, error) {
 	var filter map[string]string
 	var u string
-	var urlpara []string
+	var urlParam []string
 
 	if len(args) > 0 {
 		if len(args) > 1 {
@@ -138,12 +138,12 @@ func processListPara(args []interface{}) (string, error) {
 			if v == "" {
 				continue
 			}
-			urlpara = append(urlpara, k+"="+v)
+			urlParam = append(urlParam, k+"="+v)
 		}
 	}
 
-	if len(urlpara) > 0 {
-		u = strings.Join(urlpara, "&")
+	if len(urlParam) > 0 {
+		u = strings.Join(urlParam, "&")
 	}
 
 	return u, nil

@@ -55,13 +55,13 @@ func (d *DockMgr) ListDocks(args ...interface{}) ([]*model.DockSpec, error) {
 		d.Endpoint,
 		urls.GenerateDockURL(urls.Client, d.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	if err := d.Recv(url, "GET", nil, &res); err != nil {

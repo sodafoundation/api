@@ -96,13 +96,13 @@ func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error
 		v.Endpoint,
 		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	var res []*model.VolumeSpec
@@ -197,13 +197,13 @@ func (v *VolumeMgr) ListVolumeAttachments(args ...interface{}) ([]*model.VolumeA
 		v.Endpoint,
 		urls.GenerateAttachmentURL(urls.Client, v.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 	var res []*model.VolumeAttachmentSpec
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
@@ -257,13 +257,13 @@ func (v *VolumeMgr) ListVolumeSnapshots(args ...interface{}) ([]*model.VolumeSna
 		v.Endpoint,
 		urls.GenerateSnapshotURL(urls.Client, v.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
@@ -331,13 +331,13 @@ func (v *VolumeMgr) ListVolumeGroups(args ...interface{}) ([]*model.VolumeGroupS
 		v.Endpoint,
 		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {

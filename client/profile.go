@@ -97,13 +97,13 @@ func (p *ProfileMgr) ListProfiles(args ...interface{}) ([]*model.ProfileSpec, er
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {

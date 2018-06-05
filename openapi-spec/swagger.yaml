@@ -750,7 +750,7 @@ paths:
             application/json:
               - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
                 name: volumeGroup-demo
-                stauts: available
+                status: available
                 description: volumeGroup test
                 profiles: 
                   - 993c87dc-1928-498b-9767-9da8f901d6ce 
@@ -782,7 +782,7 @@ paths:
             application/json:
               - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
                 name: volumeGroup-demo
-                stauts: creating
+                status: creating
                 description: volumeGroup test
                 profiles: 
                   - 993c87dc-1928-498b-9767-9da8f901d6ce 
@@ -812,7 +812,7 @@ paths:
               - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
                 createdAt: "2018-06-03T07:02:35.389Z"
                 name: volumeGroup-demo
-                stauts: available
+                status: available
                 description: volumeGroup test
                 profiles: 
                   - 993c87dc-1928-498b-9767-9da8f901d6ce 

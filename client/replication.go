@@ -76,13 +76,13 @@ func (v *ReplicationMgr) ListReplications(args ...interface{}) ([]*model.Replica
 		v.Endpoint,
 		urls.GenerateReplicationURL(urls.Client, v.TenantId, "detail")}, "/")
 
-	para, err := processListPara(args)
+	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
-	if para != "" {
-		url += "?" + para
+	if param != "" {
+		url += "?" + param
 	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
