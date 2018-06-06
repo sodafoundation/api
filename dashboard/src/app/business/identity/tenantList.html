@@ -22,9 +22,9 @@
     <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '20%'}"></p-column>
     <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
     <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '20%'}">
-        <ng-template pTemplate="body" let-tenant="rowData">
-            <a (click)="showCreateTenant(tenant)">{{I18N.keyID['sds_block_volume_modify']}}</a>
-            <a (click)="deleteTenant(tenant)">{{I18N.keyID['sds_block_volume_delete']}}</a>
+        <ng-template pTemplate="body" let-tenant="rowData" >
+            <a (click)="showCreateTenant(tenant)" *ngIf="tenant.name!='admin'&&tenant.name!='service'">{{I18N.keyID['sds_block_volume_modify']}}</a>
+            <a (click)="deleteTenant(tenant)" *ngIf="tenant.name!='admin'&&tenant.name!='service'">{{I18N.keyID['sds_block_volume_delete']}}</a>
         </ng-template>
     </p-column>
     <ng-template pTemplate="rowexpansion">
