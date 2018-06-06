@@ -280,32 +280,32 @@ export class CreateProfileComponent implements OnInit {
 
     ngOnInit() {
         this.label = {
-            name: 'Name',
-            protocol: 'Access Protocol',
-            type: 'Provisioning Type',
-            qosPolicy: 'QoS Policy',
-            replicationPolicy: 'Replication Policy',
-            snapshotPolicy: 'Snapshot Policy',
-            customization: 'Customization',
-            storagePool: 'Available Storage Pool',
-            key: 'Key',
-            value: 'Value',
-            maxIOPS: 'MaxIOPS',
-            MBPS: 'MaxBWS',
+            name: this.I18N.keyID['sds_block_volume_name'],
+            protocol: this.I18N.keyID['sds_profile_access_pro'],
+            type: this.I18N.keyID['sds_profile_pro_type'],
+            qosPolicy: this.I18N.keyID['sds_profile_qos_policy'],
+            replicationPolicy: this.I18N.keyID['sds_profile_replication_policy'],
+            snapshotPolicy: this.I18N.keyID['sds_profile_snap_policy'],
+            customization: this.I18N.keyID['sds_profile_create_customization'],
+            storagePool: this.I18N.keyID['sds_profile_avai_pool'],
+            key: this.I18N.keyID['sds_profile_extra_key'],
+            value: this.I18N.keyID['sds_profile_extra_value'],
+            maxIOPS: this.I18N.keyID['sds_profile_create_maxIOPS'],
+            MBPS: this.I18N.keyID['sds_profile_create_maxBWS'],
             replicationLabel: {
-                type: 'Type',
-                RGO: 'RGO',
-                Mode: 'Mode',
-                RTO: 'RTO',
-                Period: 'Period',
-                RPO: 'RPO',
-                Bandwidth: 'Bandwidth',
-                Consistency: 'Consistency'
+                type:this.I18N.keyID['sds_profile_rep_type'] ,
+                RGO: this.I18N.keyID['sds_profile_rep_rgo'],
+                Mode:this.I18N.keyID['sds_profile_rep_mode'],
+                RTO: this.I18N.keyID['sds_profile_rep_rto'],
+                Period: this.I18N.keyID['sds_profile_rep_period'],
+                RPO: this.I18N.keyID['sds_profile_rep_rpo'],
+                Bandwidth: this.I18N.keyID['sds_profile_rep_bandwidth'],
+                Consistency: this.I18N.keyID['sds_profile_rep_consis']
             },
             snapshotLabel: {
-                Schedule: 'Schedule',
-                executionTime: 'Execution Time',
-                Retention: 'Retention'
+                Schedule: this.I18N.keyID['sds_profile_snap_sche'],
+                executionTime:this.I18N.keyID['sds_profile_snap_exetime'],
+                Retention: this.I18N.keyID['sds_profile_snap_reten']
             }
         };
 
