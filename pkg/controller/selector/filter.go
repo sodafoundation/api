@@ -99,6 +99,7 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)
 			return false, nil
 		}
+
 		ismatch, err := match(key, poolValue, reqValue)
 		if nil != err {
 			return false, err

@@ -28,50 +28,95 @@ import (
 
 func TestCreateVolumeDBEntry(t *testing.T) {
 	var req = &model.VolumeSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "volume sample",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "creating",
+		BaseModel: &model.BaseModel{
+			Id:        "9f1514a7-ca31-4de9-8a27-54c9e6fdba9b",
+			CreatedAt: "2018-06-06T21:48:04",
+		},
+		Name:             "volume sample",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		Status:           "creating",
+		AvailabilityZone: "az1",
+	}
+	var newReq = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "9f1514a7-ca31-4de9-8a27-54c9e6fdba9b",
+			CreatedAt: "2018-06-06T21:48:04",
+		},
+		Name:             "volume sample",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		Status:           "creating",
+		AvailabilityZone: "az1",
+		PoolId:           "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
+	PoolA := model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+			CreatedAt: "2017-10-24T15:04:05",
+		},
+		FreeCapacity:     int64(50),
+		AvailabilityZone: "az1",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SSD",
+			},
+		},
+	}
+
+	pools := []*model.StoragePoolSpec{
+		&PoolA,
+	}
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(&SampleVolumes[0], nil)
+	mockClient.On("CreateVolume", context.NewAdminContext(), newReq).Return(nil, errors.New("db error"))
+	mockClient.On("GetDock", context.NewAdminContext(), "").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("ListPools", context.NewAdminContext()).Return(pools, nil)
+
 	db.C = mockClient
 
-	var expected = &SampleVolumes[0]
-	result, err := CreateVolumeDBEntry(context.NewAdminContext(), req)
-
-	if err != nil {
-		t.Errorf("Failed to create volume asynchronously, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-
-	var req2 = &model.VolumeSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "volume sample",
-		Description: "This is a sample volume for testing",
-		Size:        int64(-2),
-		Status:      "creating",
-	}
-	result, err = CreateVolumeDBEntry(context.NewAdminContext(), req2)
-
-	mockClient = new(dbtest.MockClient)
-	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(nil, errors.New("not find the volume"))
-	db.C = mockClient
-	result, err = CreateVolumeDBEntry(context.NewAdminContext(), req)
+	CreateVolumeDBEntry(context.NewAdminContext(), req)
 }
 
 func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
+	PoolA := model.StoragePoolSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+			CreatedAt: "2017-10-24T15:04:05",
+		},
+		FreeCapacity:     int64(50),
+		AvailabilityZone: "az1",
+		Extras: model.StoragePoolExtraSpec{
+			Advanced: model.ExtraSpec{
+				"thin":     true,
+				"dedupe":   true,
+				"compress": true,
+				"diskType": "SSD",
+			},
+		},
+	}
+
+	pools := []*model.StoragePoolSpec{
+		&PoolA,
+	}
 	var req = &model.VolumeSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "volume sample",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "creating",
-		SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
+		BaseModel: &model.BaseModel{
+			Id:        "9f1514a7-ca31-4de9-8a27-54c9e6fdba9b",
+			CreatedAt: "2018-06-06T21:48:04",
+		},
+		Name:             "volume sample",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		Status:           "creating",
+		SnapshotId:       "3769855c-a102-11e7-b772-17b880d2f537",
+		AvailabilityZone: "az1",
+		PoolId:           "f4486139-78d5-462d-a7b9-fdaf6c797e11",
 	}
 	var snap = &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
@@ -80,21 +125,32 @@ func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
 		Size:   int64(1),
 		Status: "available",
 	}
+	var newReq = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id:        "9f1514a7-ca31-4de9-8a27-54c9e6fdba9b",
+			CreatedAt: "2018-06-06T21:48:04",
+		},
+		Name:             "volume sample",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		Status:           "creating",
+		AvailabilityZone: "az1",
+		SnapshotId:       "3769855c-a102-11e7-b772-17b880d2f537",
+		PoolId:           "f4486139-78d5-462d-a7b9-fdaf6c797e11",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
 
 	mockClient := new(dbtest.MockClient)
-	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(&SampleVolumes[1], nil)
+	mockClient.On("CreateVolume", context.NewAdminContext(), newReq).Return(nil, errors.New("DB error"))
 	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
+	mockClient.On("GetDock", context.NewAdminContext(), "").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "").Return(req, nil)
+	mockClient.On("ListPools", context.NewAdminContext()).Return(pools, nil)
 	db.C = mockClient
 
-	var expected = &SampleVolumes[1]
-	result, err := CreateVolumeDBEntry(context.NewAdminContext(), req)
-
-	if err != nil {
-		t.Errorf("Failed to create volume with snapshot, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
+	CreateVolumeDBEntry(context.NewAdminContext(), req)
 }
 
 func TestDeleteVolumeDBEntry(t *testing.T) {
