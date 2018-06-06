@@ -161,7 +161,7 @@ func (r *Rules) Load(data []byte, defaultRules []DefaultRule) error {
 	err := json.Unmarshal(data, &rulesMap)
 	if err != nil {
 		err := fmt.Errorf("Json unmarshal failed:", err)
-		log.Errorf(err.Error())
+		log.Error(err.Error())
 		return err
 	}
 	// add default value
