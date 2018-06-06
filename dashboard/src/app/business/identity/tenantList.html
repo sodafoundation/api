@@ -22,9 +22,9 @@
     <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
     <p-column field="description" header="Description"></p-column>
     <p-column header="Operation" [style]="{'width': '20%'}">
-        <ng-template pTemplate="body" let-tenant="rowData">
-            <a (click)="showCreateTenant(tenant)">Modify</a>
-            <a (click)="deleteTenant(tenant)">Delete</a>
+        <ng-template pTemplate="body" let-tenant="rowData" >
+            <a (click)="showCreateTenant(tenant)" *ngIf="tenant.name!='admin'&&tenant.name!='service'">Modify</a>
+            <a (click)="deleteTenant(tenant)" *ngIf="tenant.name!='admin'&&tenant.name!='service'">Delete</a>
         </ng-template>
     </p-column>
     <ng-template pTemplate="rowexpansion">
