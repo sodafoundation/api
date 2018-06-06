@@ -53,7 +53,8 @@
     "sds_resource_region_default":"default_region",
     "sds_profile_create_name_require":"name is required.",
     "sds_block_volume_replication_disable":"Disable",
-    "sds_block_volume_replication_failover":"Failover"
+    "sds_block_volume_replication_failover":"Failover",
+    "sds_profile_list_descrip":"A profile is a set of configurations on service capabilities (including resource tuning, QoS) of storage resources. A profile must be specified when volume is created."
 
 
 }
