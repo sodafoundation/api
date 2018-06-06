@@ -1617,10 +1617,16 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
     toggleRowsWithCheckbox(event) {
         if(event.checked){
             this.selection = this.headerCheckboxToggleAllPages ? this.value.slice() : this.dataToRender.slice();
+            let [...selectionTemp] = this.selection;
             this.selection.forEach((ele, i)=>{
-                if(ele.disabled)
-                    this.selection.splice(i, 1);
+                if(ele.disabled){
+                    let index = selectionTemp.findIndex((value, index, arr)=>{
+                        return value === ele;
+                    })
+                    selectionTemp.splice(index, 1);
+                }
             })
+            this.selection = selectionTemp;
         }else{
             this.selection = [];
         } 
@@ -1725,6 +1731,11 @@ export class DataTable implements AfterViewChecked,AfterViewInit,AfterContentIni
             else {
                 val = false;
             }
+
+            if(this.selection.length == 0){
+                val = false;
+            }
+
             return val;
         }
     }
