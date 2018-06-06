@@ -1291,6 +1291,9 @@ definitions:
           poolId:
             type: string
             readOnly: true
+          SnapshotId:
+            type: string
+            readOnly: true
   Attachment:
     description: ''
     allOf:
