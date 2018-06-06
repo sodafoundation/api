@@ -264,7 +264,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         this.http.get("/v3/projects", request).subscribe((res) => {
             res.json().projects.map((item, index) => {
                 let tenant = {};
-                if(item.name != "admin"){
+                if(item.name != "admin" && item.name != "service"){
                     tenant["label"] = item.name;
                     tenant["value"] = item.id;
                     this.tenantLists.push(tenant);
