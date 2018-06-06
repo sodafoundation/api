@@ -82,6 +82,8 @@ type CreateVolumeOpts struct {
 	ReplicationDriverData map[string]string `protobuf:"bytes,13,rep,name=replicationDriverData" json:"replicationDriverData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// The uuid of replication
 	ReplicationId string `protobuf:"bytes,14,opt,name=replicationId" json:"replicationId,omitempty"`
+	// The size of snapshot
+	SnapshotSize int64 `protobuf:"varint,15,opt,name=snapshotSize" json:"snapshotSize,omitempty"`
 }
 
 func (m *CreateVolumeOpts) Reset()                    { *m = CreateVolumeOpts{} }
@@ -185,6 +187,13 @@ func (m *CreateVolumeOpts) GetReplicationId() string {
 		return m.ReplicationId
 	}
 	return ""
+}
+
+func (m *CreateVolumeOpts) GetSnapshotSize() int64 {
+	if m != nil {
+		return m.SnapshotSize
+	}
+	return 0
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties

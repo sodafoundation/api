@@ -44,6 +44,23 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	if in.SnapshotId != "" {
+		snap, err := db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
+		if err != nil {
+			log.Error("Get snapshot failed in create volume method: ", err)
+			return nil, err
+		}
+		if snap.Status != model.VolumeSnapAvailable {
+			var errMsg = "Only if the snapshot is available, the volume can be created"
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+		if snap.Size > in.Size {
+			var errMsg = "Size of volume must be equal to or bigger than size of the snapshot"
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
 	if in.AvailabilityZone == "" {
 		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
 		in.AvailabilityZone = "default"
@@ -63,6 +80,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VolumeCreating,
+		SnapshotId:       in.SnapshotId,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
