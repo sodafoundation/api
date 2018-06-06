@@ -33,7 +33,7 @@ export class TenantDetailComponent implements OnInit {
         private http: Http,
         private confirmationService: ConfirmationService,
         private paramStor: ParamStorService,
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router
     ) { }
 

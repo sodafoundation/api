@@ -94,6 +94,9 @@
     "sds_identity_user":"User",
     "sds_identity_tenant_descrip":"A tenant is used to group and manage resources and users.",
     "sds_identity_res_usage":"Resource Usage",
-    "sds_identity_tenant_cap":"Storage Capacity"
+    "sds_identity_tenant_cap":"Storage Capacity",
+    "sds_identity_tenant_manage":"User Management",
+    "sds_identity_tenant_add":"Add User"
+
 
 }
