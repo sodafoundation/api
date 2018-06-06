@@ -621,6 +621,7 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.Volu
 			volumesUpdate = append(volumesUpdate, v)
 			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volumeRef.Id))
 		} else {
+			// Delete the volume entry in DB after successfully deleting the volume on the storage.
 			if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), volumeRef.Id); err != nil {
 				log.Error(fmt.Sprintf("Error occurred in dock module when delete volume %s in db:", volumeRef.Id, err))
 				vgUpdate.Status = model.VolumeGroupError
