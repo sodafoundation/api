@@ -146,25 +146,17 @@ export class TenantDetailComponent implements OnInit {
             });
 
             //Filter added users
-            newarr.forEach((user, i) => {
-                if(this.users.length > 0){
-                    let added = false;
-                    this.users.forEach((addedUser) => {
-                        if(user.id == addedUser.id ){
-                            added = true;
-                        }
-                    });
-                    if('admin' != user.name && !added){
-                        this.allUsers.push(user);
-                    }
-                }else{
-                    if('admin' == user.name){
-                        newarr.splice(i, 1);
-                        this.allUsers = newarr;
-                    }
-                }
-                
-            });
+            if(this.users.length > 0){
+                this.users.forEach((addedUser) => {
+                    this.allUsers = newarr.filter((user, idx, arr)=>{
+                        return (user.name != 'admin' && user.name != 'opensds'  && user.name != addedUser.name);
+                    })
+                })
+            }else{
+                this.allUsers = newarr.filter((user, idx, arr)=>{
+                    return (user.name != 'admin' && user.name != 'opensds');
+                })
+            }
 
         });
     }

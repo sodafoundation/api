@@ -53,7 +53,7 @@ func TestPolicy(t *testing.T) {
 	p := "./testdata/token.json"
 	body, err := ioutil.ReadFile(p)
 	if err != nil {
-		fmt.Println("Read token json file (%s) failed, reason:(%v)", p, err)
+		fmt.Printf("Read token json file (%s) failed, reason:(%v)\n", p, err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func TestPolicy(t *testing.T) {
 	p = "./testdata/policy.json"
 	data, err := ioutil.ReadFile(p)
 	if err != nil {
-		fmt.Println("Read token json file (%s) failed, reason:(%v)", p, err)
+		fmt.Printf("Read token json file (%s) failed, reason:(%v)\n", p, err)
 		return
 	}
 	target := map[string]string{"project_id": to.Project.ID}

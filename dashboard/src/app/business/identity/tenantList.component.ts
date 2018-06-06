@@ -90,6 +90,9 @@ export class TenantListComponent implements OnInit {
             this.tenants = res.json().projects;
             this.tenants.forEach((item)=>{
                 item["description"] = item.description == '' ? '--' : item.description;
+                if(item.name == "admin" || item.name == "service"){
+                    item["disabled"] = true;
+                }
             })
         });
     }

@@ -112,6 +112,8 @@ message CreateVolumeOpts {
     map<string, string> replicationDriverData = 13;
     // The uuid of replication
     string replicationId = 14;
+    // The size of snapshot
+    int64 snapshotSize = 15;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties

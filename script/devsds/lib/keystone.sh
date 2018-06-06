@@ -90,6 +90,9 @@ osds::keystone::create_user_and_endpoint(){
     . $DEV_STACK_DIR/openrc admin admin
     openstack user create --domain default --password $STACK_PASSWORD $OPENSDS_SERVER_NAME
     openstack role add --project service --user opensds admin
+    openstack group create service
+    openstack group add user service opensds
+    openstack role add service --project service --group service
     openstack service create --name opensds$OPENSDS_VERSION --description "OpenSDS Block Storage" opensds$OPENSDS_VERSION
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION public http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION internal http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
