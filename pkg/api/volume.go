@@ -74,20 +74,7 @@ func (this *VolumePortal) CreateVolume() {
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
-	this.Ctx.Output.Body(body)
-
-	// NOTE:The real volume creation process.
-	// CreateVolume request is sent to the Dock. Dock will update volume status to "available"
-	// after volume creation is completed.
-	var errchan = make(chan error, 1)
-	defer close(errchan)
-	go controller.Brain.CreateVolume(c.GetContext(this.Ctx), result, errchan)
-	if err := <-errchan; err != nil {
-		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
-		log.Error(reason)
-		return
-	}
+	this.SuccessHandle(StatusOK, body)
 	return
 }
 

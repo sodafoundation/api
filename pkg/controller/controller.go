@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -62,85 +61,7 @@ type Controller struct {
 	policyController policy.Controller
 }
 
-func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanVolume chan error) {
-	var err error
-	var profile *model.ProfileSpec
-	var snap *model.VolumeSnapshotSpec
-	var snapVol *model.VolumeSpec
-	var snapSize int64
-
-	if in.SnapshotId != "" {
-		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
-		if err != nil {
-			log.Error("Get snapshot failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
-			errchanVolume <- err
-			return
-		}
-		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
-		if err != nil {
-			log.Error("Get volume failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
-			errchanVolume <- err
-			return
-		}
-		snapSize = snapVol.Size
-	}
-
-	if in.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		profile, err = db.C.GetDefaultProfile(ctx)
-	} else {
-		profile, err = db.C.GetProfile(ctx, in.ProfileId)
-	}
-	if err != nil {
-		log.Error("Get profile failed: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
-	}
-
-	var filterRequest map[string]interface{}
-	if profile.Extras != nil {
-		filterRequest = profile.Extras
-	} else {
-		filterRequest = make(map[string]interface{})
-	}
-	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
-	filterRequest["availabilityZone"] = in.AvailabilityZone
-	if snapVol != nil {
-		filterRequest["id"] = snapVol.PoolId
-	}
-
-	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
-	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
-	}
-
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err.Error())
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
-	}
+func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, poolName string, dockInfo *model.DockSpec, snapSize int64) error {
 	c.volumeController.SetDock(dockInfo)
 	opt := &pb.CreateVolumeOpts{
 		Id:               in.Id,
@@ -148,11 +69,11 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		Description:      in.Description,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
-		ProfileId:        profile.Id,
-		PoolId:           polInfo.Id,
+		ProfileId:        in.ProfileId,
+		PoolId:           in.PoolId,
 		SnapshotId:       in.SnapshotId,
 		SnapshotSize:     snapSize,
-		PoolName:         polInfo.Name,
+		PoolName:         poolName,
 		DriverName:       dockInfo.DriverName,
 		Context:          ctx.ToJson(),
 	}
@@ -161,20 +82,25 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	if err != nil {
 		//Change the status of the volume to error when the creation faild
 		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
+			return errUpdate
 		}
-		log.Error("When create volume:", err.Error())
-		errchanVolume <- err
-		return
+		log.Error("When create volume:", err)
+		return err
 	}
-
-	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.
 	if err = db.C.UpdateStatus(ctx, result, model.VolumeAvailable); err != nil {
-		errchanVolume <- err
-		return
+		return err
+	}
+
+	profile, err := db.C.GetProfile(ctx, in.ProfileId)
+	if err != nil {
+		//Change the status of the volume to error when the creation faild
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+			return errUpdate
+		}
+		log.Error("When create volume:", err)
+		return err
 	}
 
 	// Select the storage tag according to the lifecycle flag.
@@ -185,13 +111,12 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	var errChanPolicy = make(chan error, 1)
 	defer close(errChanPolicy)
 	volBody, _ := json.Marshal(result)
-	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChanPolicy)
+	c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChanPolicy)
 	if err := <-errChanPolicy; err != nil {
 		log.Error("When execute async policy:", err)
-		errchanVolume <- err
-		return
+		return err
 	}
-	errchanVolume <- nil
+	return nil
 }
 
 func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanvol chan error) {

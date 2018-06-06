@@ -180,9 +180,10 @@ func TestCreateVolume(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	var errchan = make(chan error, 1)
-	ctrl.CreateVolume(context.NewAdminContext(), req, errchan)
-	if err := <-errchan; err != nil {
+	var poolName = "pool for test"
+	var snapSize int64 = 3
+	err := ctrl.CreateVolume(context.NewAdminContext(), req, poolName, &SampleDocks[0], snapSize)
+	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
 }
@@ -213,9 +214,10 @@ func TestCreateVolumeFromSnapshot(t *testing.T) {
 		volumeController: NewFakeVolumeController(),
 	}
 
-	var errchan = make(chan error, 1)
-	ctrl.CreateVolume(context.NewAdminContext(), req, errchan)
-	if err := <-errchan; err != nil {
+	var poolName = "pool for test"
+	var snapSize int64 = 3
+	err := ctrl.CreateVolume(context.NewAdminContext(), req, poolName, &SampleDocks[0], snapSize)
+	if err != nil {
 		t.Errorf("Failed to create volume, err is %v\n", err)
 	}
 }

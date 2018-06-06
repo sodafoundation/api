@@ -23,11 +23,13 @@ import (
 	"fmt"
 	"strings"
 
+	"strconv"
 	"time"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
+	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
@@ -36,6 +38,11 @@ import (
 )
 
 func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
+	var err error
+	var profile *model.ProfileSpec
+	var snap *model.VolumeSnapshotSpec
+	var snapVol *model.VolumeSpec
+	var snapSize int64
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
@@ -44,8 +51,14 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+
 	if in.SnapshotId != "" {
-		snap, err := db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
+		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
 		if err != nil {
 			log.Error("Get snapshot failed in create volume method: ", err)
 			return nil, err
@@ -60,11 +73,50 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 			log.Error(errMsg)
 			return nil, errors.New(errMsg)
 		}
+
+		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
+		if err != nil {
+			log.Error("Get volume failed in create volume method: ", err)
+			return nil, err
+		}
+		snapSize = snapVol.Size
+
 	}
-	if in.AvailabilityZone == "" {
-		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
-		in.AvailabilityZone = "default"
+
+	if in.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		profile, err = db.C.GetDefaultProfile(ctx)
+	} else {
+		profile, err = db.C.GetProfile(ctx, in.ProfileId)
 	}
+	if err != nil {
+		log.Error("Get profile failed: ", err)
+		return nil, err
+	}
+
+	var filterRequest map[string]interface{}
+	if profile.Extras != nil {
+		filterRequest = profile.Extras
+	} else {
+		filterRequest = make(map[string]interface{})
+	}
+	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
+	filterRequest["availabilityZone"] = in.AvailabilityZone
+	if snapVol != nil {
+		filterRequest["id"] = snapVol.PoolId
+	}
+
+	polInfo, err := selector.NewSelector().SelectSupportedPool(filterRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		return nil, err
+	}
+
 	if in.CreatedAt == "" {
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
@@ -76,17 +128,24 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		UserId:           ctx.UserId,
 		Name:             in.Name,
 		Description:      in.Description,
-		ProfileId:        in.ProfileId,
+		ProfileId:        profile.Id,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VolumeCreating,
 		SnapshotId:       in.SnapshotId,
+		PoolId:           polInfo.Id,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
 		log.Error("When add volume to db:", err)
 		return nil, err
 	}
+
+	// TODO:rpc call
+	// NOTE:The real volume creation process.
+	// CreateVolume request is sent to the Dock. Dock will update volume status to "available"
+	// after volume creation is completed.
+	controller.Brain.CreateVolume(ctx, vol, polInfo.Name, dockInfo, snapSize)
 
 	return result, nil
 }
