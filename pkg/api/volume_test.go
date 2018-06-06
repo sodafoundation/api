@@ -39,7 +39,7 @@ func init() {
 	beego.Router("/v1beta/block/volumes/:volumeId", &VolumePortal{},
 		"get:GetVolume;put:UpdateVolume;delete:DeleteVolume")
 
-	beego.Router("/v1beta/volumes/:volumeId/resize", &VolumePortal{},
+	beego.Router("/v1beta/block/volumes/:volumeId/resize", &VolumePortal{},
 		"post:ExtendVolume")
 
 	beego.Router("/v1beta/block/attachments", &VolumeAttachmentPortal{},
@@ -740,7 +740,7 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 func TestExtendVolumeWithBadRequest(t *testing.T) {
 	var jsonStr = []byte(`{"extend":{"newSize": 0}}`)
 	r, _ := http.NewRequest("POST",
-		"/v1beta/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
+		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
 
@@ -772,7 +772,7 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 
 	jsonStr = []byte(`{"extend":{"newSize": 92}}`)
 	r, _ = http.NewRequest("POST",
-		"/v1beta/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
+		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
 	w = httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
