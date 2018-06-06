@@ -38,6 +38,8 @@ const (
 	defaultConfPath   = "/etc/opensds/driver/lvm.yaml"
 	volumePrefix      = "volume-"
 	snapshotPrefix    = "_snapshot-"
+	blocksize         = 4096
+	sizeShiftBit      = 30
 )
 
 type LvInfo struct {
@@ -107,6 +109,24 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		}
 		if strings.Contains(line, "LV Status") {
 			lvStatus = strings.Fields(line)[2]
+		}
+	}
+
+	// Copy snapshot to volume
+	var snap = opt.GetSnapshotId()
+	if snap != "" {
+		var snapSize = uint64(opt.GetSnapshotSize())
+		var count = (snapSize<<sizeShiftBit)/blocksize
+		var snapName = snapshotPrefix + snap
+		var snapPath = path.Join("/dev", polName, snapName)
+		if _, err := d.handler("dd", []string{
+			"if=" + snapPath,
+			"of=" + lvPath,
+			"count=" + fmt.Sprint(count),
+			"bs=" + fmt.Sprint(blocksize),
+		}); err != nil {
+			log.Error("Failed to create logic volume:", err)
+			return nil, err
 		}
 	}
 

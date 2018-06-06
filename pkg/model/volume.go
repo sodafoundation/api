@@ -68,6 +68,9 @@ type VolumeSpec struct {
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty"`
 
+	// The uuid of the snapshot which the volume is created
+	SnapshotId string `json:"snapshotId, omitempty"`
+
 	// The uuid of the replication which the volume belongs to.
 	ReplicationId string `json:"replicationId,omitempty"`
 
