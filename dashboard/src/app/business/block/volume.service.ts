@@ -55,7 +55,7 @@ export class VolumeService {
     return this.http.get(this.url);
   }
   expandVolume(id,param):Observable<any> {
-      let expandVolumeUrl = 'v1beta/{project_id}/volumes' + '/' + id + "/action"
+      let expandVolumeUrl = 'v1beta/{project_id}/block/volumes' + '/' + id + "/resize"
       return this.http.post(expandVolumeUrl,param);
   }
 }

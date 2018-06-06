@@ -39,7 +39,7 @@ export class TenantListComponent implements OnInit {
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router,
         private fb: FormBuilder
     ) {
