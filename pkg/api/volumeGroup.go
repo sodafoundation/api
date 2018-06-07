@@ -91,7 +91,6 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 
 	this.SuccessHandle(StatusOK, body)
-
 	return
 }
 
