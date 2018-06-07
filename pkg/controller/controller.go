@@ -73,15 +73,20 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
 		if err != nil {
 			log.Error("Get snapshot failed in create volume method: ", err)
-			// If error occurs in controller, we delete the db entry to roll back the operation of volume creation.
-			db.C.DeleteVolume(ctx, in.Id)
+			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+				errchanVolume <- errUpdate
+				return
+			}
 			errchanVolume <- err
 			return
 		}
 		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
 		if err != nil {
 			log.Error("Get volume failed in create volume method: ", err)
-			db.C.DeleteVolume(ctx, in.Id)
+			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+				errchanVolume <- errUpdate
+				return
+			}
 			errchanVolume <- err
 			return
 		}
@@ -96,7 +101,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
-		db.C.DeleteVolume(ctx, in.Id)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -115,7 +123,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
 	if err != nil {
-		db.C.DeleteVolume(ctx, in.Id)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -123,7 +134,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err.Error())
-		db.C.DeleteVolume(ctx, in.Id)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
 		errchanVolume <- err
 		return
 	}
@@ -181,9 +195,26 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 }
 
 func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanvol chan error) {
+	// Profile id or pool id of the volume is not exist which means that volume creation failed before the driver
+	// was called , the volume entry should be delete from db directly.
+	if in.ProfileId == "" || in.PoolId == "" {
+		if err := db.C.DeleteVolume(ctx, in.Id); err != nil {
+			log.Error("when delete volume in db:", err)
+			errchanvol <- err
+			return
+		}
+		errchanvol <- nil
+		return
+	}
+
 	prf, err := db.C.GetProfile(ctx, in.ProfileId)
 	if err != nil {
 		log.Error("when search profile in db:", err)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
+
 		errchanvol <- err
 		return
 	}
@@ -195,6 +226,11 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
+
 		errchanvol <- err
 		return
 	}
@@ -214,6 +250,11 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 
 	if err := <-errChan; err != nil {
 		log.Error("When execute async policy:", err)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
+			errchanvol <- errUpdate
+			return
+		}
+
 		errchanvol <- err
 		return
 	}
