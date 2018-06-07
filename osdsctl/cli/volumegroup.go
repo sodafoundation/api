@@ -101,7 +101,6 @@ func init() {
 	volumeGroupCreateCommand.Flags().StringVarP(&vgDesp, "description", "d", "", "the description of created volume group")
 	volumeGroupCreateCommand.Flags().StringVarP(&vgAZ, "availabilityZone", "a", "", "the availabilityZone of created volume group")
 	vgprofiles = volumeGroupCreateCommand.Flags().StringSliceP("profiles", "", nil, "the profiles of created volume group")
-
 	volumeGroupCommand.AddCommand(volumeGroupShowCommand)
 	volumeGroupCommand.AddCommand(volumeGroupListCommand)
 	volumeGroupCommand.AddCommand(volumeGroupDeleteCommand)
@@ -159,7 +158,6 @@ func volumeGroupListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-
 	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintList(resp, keys, FormatterList{})
 }

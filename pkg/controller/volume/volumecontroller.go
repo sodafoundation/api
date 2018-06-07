@@ -296,7 +296,7 @@ func (c *controller) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 		return err
 	}
 	defer c.Client.Close()
-
+	
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
 	}
@@ -466,6 +466,7 @@ func (c *controller) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 		log.Error("Delete volume group failed in volume controller:", err)
 		return err
 	}
+	
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
