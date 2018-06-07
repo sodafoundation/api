@@ -73,20 +73,15 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
 		if err != nil {
 			log.Error("Get snapshot failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
+			// If error occurs in controller, we delete the db entry to roll back the operation of volume creation.
+			db.C.DeleteVolume(ctx, in.Id)
 			errchanVolume <- err
 			return
 		}
 		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
 		if err != nil {
 			log.Error("Get volume failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
+			db.C.DeleteVolume(ctx, in.Id)
 			errchanVolume <- err
 			return
 		}
@@ -101,10 +96,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
@@ -123,10 +115,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
 	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
@@ -134,10 +123,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err.Error())
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
