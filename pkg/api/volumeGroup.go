@@ -107,7 +107,6 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	}
 
 	this.SuccessHandle(StatusAccepted, nil)
-
 	return
 }
 
