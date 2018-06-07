@@ -85,6 +85,18 @@
     "sds_profile_enable":"Enable",
     "sds_profile_nuit_days":"Days",
     "sds_profile_extra_add":"Add",
-    "sds_profile_pool_match":"Matching"
+    "sds_profile_pool_match":"Matching",
+    "sds_resource_region":"Region",
+    "sds_resource_storage":"Storage",
+    "sds_resource_region_role":"Region Role",
+    "sds_resource_storage_ip":"IP Address",
+    "sds_identity_tenant":"Tenant",
+    "sds_identity_user":"User",
+    "sds_identity_tenant_descrip":"A tenant is used to group and manage resources and users.",
+    "sds_identity_res_usage":"Resource Usage",
+    "sds_identity_tenant_cap":"Storage Capacity",
+    "sds_identity_tenant_manage":"User Management",
+    "sds_identity_tenant_add":"Add User"
+
 
 }

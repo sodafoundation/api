@@ -225,9 +225,7 @@ export class VolumeListComponent implements OnInit {
             return;
         }
         let param = {
-            "extend": {
-                "newSize": this.selectVolumeSize
-            }
+            "newSize": this.selectVolumeSize
         }
         this.VolumeService.expandVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
