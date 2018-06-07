@@ -205,8 +205,10 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
-	if in.Status != model.VolumeSnapAvailable {
-		errMsg := "Only the volume snapshot with the status available can be deleted"
+	validStatus := []string{model.VolumeSnapAvailable, model.VolumeSnapError,
+		model.VolumeSnapErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("Only the volume snapshot with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -220,10 +222,10 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
-	invalidStatus := []string{model.VolumeAvailable, model.VolumeError,
+	validStatus := []string{model.VolumeAvailable, model.VolumeError,
 		model.VolumeErrorDeleting, model.VolumeErrorExtending}
-	if !utils.Contained(in.Status, invalidStatus) {
-		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("Only the volume with the status available, error, error_deleting, error_extending can be deleted, the volume status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -308,6 +310,7 @@ func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secon
 	}
 	return nil
 }
+
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	if len(in.Profiles) == 0 {
 		msg := fmt.Sprintf("Profiles must be provided to create volume group.")
