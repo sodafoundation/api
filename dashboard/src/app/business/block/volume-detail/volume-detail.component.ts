@@ -17,6 +17,8 @@ export class VolumeDetailComponent implements OnInit {
   label;
   volume;
   volumeId;
+  showVolumeSource: boolean = false;
+  volumeSource: string = "";
 
   constructor(
     private VolumeService: VolumeService,
@@ -51,6 +53,11 @@ export class VolumeDetailComponent implements OnInit {
       this.ProfileService.getProfileById(this.volume.profileId).subscribe((res)=>{
           this.volume.profileName = res.json().name;
       })
+
+      if(this.volume.snapshotId != ""){
+        this.showVolumeSource = true;
+        this.volumeSource = this.i18n.keyID['sds_block_volume_source'].replace("{{}}", this.volume.snapshotId);
+      }
     });
   }
 

@@ -39,7 +39,7 @@ export class StorageComponent implements OnInit{
     storages = [];
 
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         private http: Http,
         private paramStor: ParamStorService
     ){}
