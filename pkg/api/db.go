@@ -206,9 +206,9 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
 	validStatus := []string{model.VolumeSnapAvailable, model.VolumeSnapError,
-		model.VolumeSnapErrorDeleting, model.VolumeSnapDeleting}
+		model.VolumeSnapErrorDeleting}
 	if !utils.Contained(in.Status, validStatus) {
-		errMsg := "Only the volume snapshot with the status available can be deleted"
+		errMsg := fmt.Sprintf("Only the volume snapshot with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -225,7 +225,7 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	validStatus := []string{model.VolumeAvailable, model.VolumeError,
 		model.VolumeErrorDeleting, model.VolumeErrorExtending}
 	if !utils.Contained(in.Status, validStatus) {
-		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
+		errMsg := fmt.Sprintf("Only the volume with the status available, error, error_deleting, error_extending can be deleted, the volume status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
