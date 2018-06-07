@@ -242,7 +242,7 @@ func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
 
-	if utils.Contained(in.ReplicationStatus, validStatus) {
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -259,7 +259,7 @@ func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, validStatus) {
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't enable the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -276,7 +276,7 @@ func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, validStatus) {
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't disable the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -293,7 +293,7 @@ func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error 
 func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secondaryBackendId string) error {
 	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, validStatus) {
+	if utils.Contained(in.ReplicationStatus, invalidStatus) {
 		errMsg := fmt.Sprintf("Can't fail over/back the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
