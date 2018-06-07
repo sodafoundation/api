@@ -1,10 +1,10 @@
 <p-tabView styleClass="ui-tabview-large">
-    <p-tabPanel header="Tenant" [cache]="false">
+    <p-tabPanel header="{{I18N.keyID['sds_identity_tenant']}}" [cache]="false">
         <ng-template pTemplate="content">
             <tenant-list #tenantList></tenant-list>
         </ng-template>
     </p-tabPanel>
-    <p-tabPanel header="User" [cache]="false">
+    <p-tabPanel header="{{I18N.keyID['sds_identity_user']}}" [cache]="false">
         <ng-template pTemplate="content">
             <user-list #userList></user-list>
         </ng-template>

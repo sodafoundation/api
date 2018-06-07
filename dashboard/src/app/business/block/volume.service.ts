@@ -11,51 +11,51 @@ export class VolumeService {
 
   url = 'v1beta/{project_id}/block/volumes';
 
-  //创建 volume
+  //Create volume
   createVolume(param) {
     return this.http.post(this.url, param);
   }
 
-  //修改 volume
+  //Update volume
   modifyVolume(id,param) {
     let modifyUrl = this.url + '/' + id
     return this.http.put(modifyUrl, param);
   }
 
-  //删除 volume
+  //Delete volume
   deleteVolume(id): Observable<any> {
     let deleteUrl = this.url + '/' + id
     return this.http.delete(deleteUrl);
   }
 
-  //查询 volumes
+  //Search all volumes
   getVolumes(): Observable<any> {
     return this.http.get(this.url);
   }
 
-  //查询指定Id volume
+  //Search volume
   getVolumeById(id): Observable<any> {
     let url = this.url + '/' + id;
     return this.http.get(url);
   }
 
-  //创建 volumesGroup
+  //Create volumesGroup
   createVolumesGroup(param) {
     return this.http.post(this.url, param);
   }
 
-  //删除 volumesGroup
+  //Delete volumesGroup
   deleteVolumesGroup(id): Observable<any> {
     let deleteUrl = this.url + '/' + id
     return this.http.delete(deleteUrl);
   }
 
-  //查询 volumesGroups
+  //Search volumesGroups
   getVolumesGroups(): Observable<any> {
     return this.http.get(this.url);
   }
   expandVolume(id,param):Observable<any> {
-      let expandVolumeUrl = 'v1beta/{project_id}/volumes' + '/' + id + "/action"
+      let expandVolumeUrl = 'v1beta/{project_id}/block/volumes' + '/' + id + "/resize"
       return this.http.post(expandVolumeUrl,param);
   }
 }
@@ -69,18 +69,18 @@ export class SnapshotService {
 
   url = 'v1beta/{project_id}/block/snapshots';
 
-  //创建 snapshot
+  //Create snapshot
   createSnapshot(param) {
     return this.http.post(this.url, param);
   }
 
-  //删除 snapshot
+  //Delete snapshot
   deleteSnapshot(id){
     let url = this.url + "/" + id;
     return this.http.delete(url);
   }
 
-  //查询 snapshot
+  //Search snapshot
   getSnapshots(filter?){
     let url = this.url;
     if(filter){
@@ -89,7 +89,7 @@ export class SnapshotService {
     return this.http.get(url);
   }
 
-  //修改 snapshot
+  //Update snapshot
   modifySnapshot(id,param){
     let url = this.url + "/" + id;
     return this.http.put(url,param);
@@ -147,7 +147,7 @@ export class VolumeGroupService {
         let url = this.volumeGroupUrl;
         return this.http.post(url,param);
     }
-    //查询 volumes
+    //Search volumes
     getVolumeGroups(): Observable<any> {
         return this.http.get(this.volumeGroupUrl);
     }

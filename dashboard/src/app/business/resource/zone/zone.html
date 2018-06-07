@@ -1,6 +1,6 @@
 
 <p-dataTable [immutable]="false" [value]="zones" [paginator]="false" >
-    <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
-    <p-column field="region" header="Region"></p-column>
-    <p-column field="description" header="Description"></p-column>
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '20%'}"></p-column>
+    <p-column field="region" header="{{I18N.keyID['sds_resource_region']}}"></p-column>
+    <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
 </p-dataTable>
