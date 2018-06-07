@@ -205,7 +205,9 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
-	if in.Status != model.VolumeSnapAvailable {
+	validStatus := []string{model.VolumeSnapAvailable, model.VolumeSnapError,
+		model.VolumeSnapErrorDeleting, model.VolumeSnapDeleted, model.VolumeSnapDeleting}
+	if !utils.Contained(in.Status, validStatus) {
 		errMsg := "Only the volume snapshot with the status available can be deleted"
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -220,12 +222,21 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 
 //Just modify the state of the volume to be deleted in the DB, the real deletion in another thread
 func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
-	invalidStatus := []string{model.VolumeAvailable, model.VolumeError,
-		model.VolumeErrorDeleting, model.VolumeErrorExtending}
-	if !utils.Contained(in.Status, invalidStatus) {
+	validStatus := []string{model.VolumeAvailable, model.VolumeError,
+		model.VolumeErrorDeleting, model.VolumeErrorExtending, model.VolumeDeleted}
+	if !utils.Contained(in.Status, validStatus) {
 		errMsg := fmt.Sprintf("Can't delete the volume in %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
+	}
+
+	// Volume creation faild and has no pool infomation. Delete its db entry directly.
+	if in.PoolId == "" {
+		if err := db.C.DeleteVolume(ctx, in.Id); err != nil {
+			log.Error("Error occurred in dock module when delete volume in db:", err.Error())
+			return err
+		}
+		return nil
 	}
 
 	in.Status = model.VolumeDeleting
@@ -237,10 +248,10 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 }
 
 func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
-	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+	validStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
 
-	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+	if utils.Contained(in.ReplicationStatus, validStatus) {
 		errMsg := fmt.Sprintf("Can't delete the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -255,9 +266,9 @@ func DeleteReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 }
 
 func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
-	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+	validStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+	if utils.Contained(in.ReplicationStatus, validStatus) {
 		errMsg := fmt.Sprintf("Can't enable the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -272,9 +283,9 @@ func EnableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
 }
 
 func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error {
-	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+	validStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+	if utils.Contained(in.ReplicationStatus, validStatus) {
 		errMsg := fmt.Sprintf("Can't disable the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -289,9 +300,9 @@ func DisableReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) error 
 }
 
 func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secondaryBackendId string) error {
-	invalidStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
+	validStatus := []string{model.ReplicationCreating, model.ReplicationDeleting, model.ReplicationEnabling,
 		model.ReplicationDisabling, model.ReplicationFailingOver, model.ReplicationFailingBack}
-	if utils.Contained(in.ReplicationStatus, invalidStatus) {
+	if utils.Contained(in.ReplicationStatus, validStatus) {
 		errMsg := fmt.Sprintf("Can't fail over/back the replication in %s", in.ReplicationStatus)
 		log.Error(errMsg)
 		return errors.New(errMsg)
@@ -308,7 +319,14 @@ func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secon
 	}
 	return nil
 }
+
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+	if len(in.Profiles) == 0 {
+		msg := fmt.Sprintf("Profiles must be provided to create volume group.")
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
@@ -326,6 +344,7 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 		Description:      in.Description,
 		AvailabilityZone: in.AvailabilityZone,
 		Status:           model.VolumeGroupCreating,
+		Profiles:         in.Profiles,
 	}
 	result, err := db.C.CreateVolumeGroup(ctx, vg)
 	if err != nil {
@@ -357,6 +376,9 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	} else {
 		description = vgUpdate.Description
 	}
+
+	vgUpdate.Profiles = vg.Profiles
+	vgUpdate.PoolId = vg.PoolId
 
 	var invalid_uuids []string
 	for _, uuidAdd := range vgUpdate.AddVolumes {
@@ -455,10 +477,19 @@ func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes 
 			return nil, err
 		}
 		if addVolRef.GroupId != "" {
-			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse it is already in group %s", addVolRef.Id, vg.Id, addVolRef.GroupId)
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is already in group %s.", addVolRef.Id, vg.Id, addVolRef.GroupId)
+		}
+		if addVolRef.ProfileId == "" {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume has no profile.", addVolRef.Id, vg.Id)
+		}
+		if !utils.Contained(addVolRef.ProfileId, vg.Profiles) {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume profile is not supported by the group.", addVolRef.Id, vg.Id)
 		}
 		if addVolRef.Status != model.VolumeAvailable && addVolRef.Status != model.VolumeInUse {
-			return nil, fmt.Errorf("Cannot add volume %s to group %s beacuse volume is in invalid status %s", addVolRef.Id, vg.Id, addVolRef.Status)
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is in invalid status %s.", addVolRef.Id, vg.Id, addVolRef.Status)
+		}
+		if addVolRef.PoolId != vg.PoolId {
+			return nil, fmt.Errorf("Cannot add volume %s to group %s , volume is not local to the pool of group.", addVolRef.Id, vg.Id)
 		}
 
 		addVolumesNew = append(addVolumesNew, addVolRef.Id)

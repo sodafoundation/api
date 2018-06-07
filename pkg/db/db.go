@@ -168,4 +168,6 @@ type Client interface {
 	ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error)
 
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
+
+	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 }

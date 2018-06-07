@@ -42,7 +42,41 @@ var poolListCommand = &cobra.Command{
 	Run:   poolListAction,
 }
 
+var (
+	poolLimit            string
+	poolOffset           string
+	poolSortDir          string
+	poolSortKey          string
+	poolId               string
+	poolCreatedAt        string
+	poolUpdatedAt        string
+	poolName             string
+	poolDescription      string
+	poolStatus           string
+	poolDockId           string
+	poolAvailabilityZone string
+	poolTotalCapacity    string
+	poolStorageType      string
+	poolFreeCapacity     string
+)
+
 func init() {
+	poolListCommand.Flags().StringVarP(&poolLimit, "limit", "", "50", "the number of ertries displayed per page")
+	poolListCommand.Flags().StringVarP(&poolOffset, "offset", "", "0", "all requested data offsets")
+	poolListCommand.Flags().StringVarP(&poolSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	poolListCommand.Flags().StringVarP(&poolSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, status, availabilityzone, dock id, description")
+	poolListCommand.Flags().StringVarP(&poolId, "id", "", "", "list pools by id")
+	poolListCommand.Flags().StringVarP(&poolCreatedAt, "createdAt", "", "", "list pools by created time")
+	poolListCommand.Flags().StringVarP(&poolName, "name", "", "", "list pools by name")
+	poolListCommand.Flags().StringVarP(&poolUpdatedAt, "updatedAt", "", "", "list pools by updated time")
+	poolListCommand.Flags().StringVarP(&poolDescription, "description", "", "", "list pools by description")
+	poolListCommand.Flags().StringVarP(&poolStatus, "status", "", "", "list pools by status")
+	poolListCommand.Flags().StringVarP(&poolStorageType, "storageType", "", "", "list pools by storage type")
+	poolListCommand.Flags().StringVarP(&poolDockId, "dockId", "", "", "list pools by dock id")
+	poolListCommand.Flags().StringVarP(&poolAvailabilityZone, "availabilityZone", "", "", "list pools by availability zone")
+	poolListCommand.Flags().StringVarP(&poolTotalCapacity, "totalCapacity", "", "", "list pools by totalCapacity")
+	poolListCommand.Flags().StringVarP(&poolFreeCapacity, "freeCapacity", "", "", "list pools by freeCapacity")
+
 	poolCommand.AddCommand(poolShowCommand)
 	poolCommand.AddCommand(poolListCommand)
 }
@@ -65,7 +99,14 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 
 func poolListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	pols, err := client.ListPools()
+
+	var opts = map[string]string{"limit": poolLimit, "offset": poolOffset, "sortDir": poolSortDir,
+		"sortKey": poolSortKey, "Id": poolId, "CreatedAt": poolCreatedAt, "UpdatedAt": poolUpdatedAt,
+		"Name": poolName, "Description": poolDescription, "AvailabilityZone": poolAvailabilityZone,
+		"TotalCapacity": poolTotalCapacity, "Status": poolStatus, "FreeCapacity": poolFreeCapacity,
+		"DockId": poolDockId, "StorageType": poolStorageType}
+
+	pols, err := client.ListPools(opts)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

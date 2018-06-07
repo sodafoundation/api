@@ -190,7 +190,7 @@ func TestListVolumes(t *testing.T) {
 		},
 	}
 
-	vols, err := fv.ListVolumes()
+	vols, err := fv.ListVolumes(map[string]string{"limit": "3", "offset": "4"})
 	if err != nil {
 		t.Error(err)
 		return

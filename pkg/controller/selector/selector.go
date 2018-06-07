@@ -63,9 +63,13 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 }
 
 func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
-	profiles, err := db.C.ListProfiles(c.NewAdminContext())
-	if err != nil {
-		return nil, err
+	var profiles []*model.ProfileSpec
+	for _, profId := range in.Profiles {
+		profile, err := db.C.GetProfile(c.NewAdminContext(), profId)
+		if err != nil {
+			return nil, err
+		}
+		profiles = append(profiles, profile)
 	}
 
 	pools, err := db.C.ListPools(c.NewAdminContext())
