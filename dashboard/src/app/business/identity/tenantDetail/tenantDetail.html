@@ -9,7 +9,7 @@
     </ul>
 
     <h3>User Management</h3>
-    <div class="table-toolbar" *ngIf="projectName!='admin'">
+    <div class="table-toolbar" *ngIf="projectName!='admin' && projectName!='service'">
         <div class="left"><button pButton type="button" label="Add User" (click)="showAddUsers()"></button></div>
     </div>
 
@@ -22,7 +22,7 @@
         </p-column>
         <p-column field="role" header="Role"></p-column>
         <p-column field="description" header="Description"></p-column>
-        <p-column header="Operation" [style]="{'width': '20%'}" *ngIf="projectName!='admin'">
+        <p-column header="Operation" [style]="{'width': '20%'}" *ngIf="projectName!='admin' && projectName!='service'">
             <ng-template let-user="rowData" pTemplate="body">
                 <a (click)="removeUser(user)">Remove</a>
             </ng-template>
