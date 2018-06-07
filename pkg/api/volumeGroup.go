@@ -91,7 +91,6 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 
 	this.SuccessHandle(StatusOK, body)
-
 	return
 }
 
@@ -107,7 +106,6 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	}
 
 	this.SuccessHandle(StatusAccepted, nil)
-
 	return
 }
 
@@ -127,6 +125,34 @@ func (this *VolumeGroupPortal) GetVolumeGroup() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		this.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
+		return
+	}
+
+	this.SuccessHandle(StatusOK, body)
+	return
+}
+
+func (this *VolumeGroupPortal) ListVolumeGroups() {
+	if !policy.Authorize(this.Ctx, "volumeGroup:get") {
+		return
+	}
+
+	m, err := this.GetParameters()
+	if err != nil {
+		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		return
+	}
+
+	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(this.Ctx), m)
+	if err != nil {
+		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		return
+	}
+
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		this.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
