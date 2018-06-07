@@ -68,6 +68,7 @@ var (
 	vgAZ          string
 	addVolumes    *[]string
 	removeVolumes *[]string
+	vgprofiles    *[]string
 )
 
 func init() {
@@ -75,6 +76,7 @@ func init() {
 	volumeGroupCreateCommand.Flags().StringVarP(&vgName, "name", "n", "", "the name of created volume group")
 	volumeGroupCreateCommand.Flags().StringVarP(&vgDesp, "description", "d", "", "the description of created volume group")
 	volumeGroupCreateCommand.Flags().StringVarP(&vgAZ, "availabilityZone", "a", "", "the availabilityZone of created volume group")
+	vgprofiles = volumeGroupCreateCommand.Flags().StringSliceP("profiles", "", nil, "the profiles of created volume group")
 	volumeGroupCommand.AddCommand(volumeGroupShowCommand)
 	volumeGroupCommand.AddCommand(volumeGroupListCommand)
 	volumeGroupCommand.AddCommand(volumeGroupDeleteCommand)
@@ -96,6 +98,7 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 		Name:             vgName,
 		Description:      vgDesp,
 		AvailabilityZone: vgAZ,
+		Profiles:         *vgprofiles,
 	}
 
 	resp, err := client.CreateVolumeGroup(vg)
@@ -103,7 +106,7 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -114,7 +117,7 @@ func volumeGroupShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -152,6 +155,6 @@ func volumeGroupUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
