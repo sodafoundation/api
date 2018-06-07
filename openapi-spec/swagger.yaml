@@ -490,7 +490,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/volumes/{volumeId}/resize':
+  '/v1beta/{projectId}/block/volumes/{volumeId}/resize':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeId'
@@ -1334,6 +1334,9 @@ definitions:
           profileId:
             type: string
           poolId:
+            type: string
+            readOnly: true
+          SnapshotId:
             type: string
             readOnly: true
           groupId:

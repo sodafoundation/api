@@ -18,10 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
-
-	"net/http"
 
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
@@ -160,14 +159,13 @@ func (r *Rules) Load(data []byte, defaultRules []DefaultRule) error {
 	rulesMap := map[string]string{}
 	err := json.Unmarshal(data, &rulesMap)
 	if err != nil {
-		err := fmt.Errorf("Json unmarshal failed:", err)
-		log.Errorf(err.Error())
+		log.Error(err.Error())
 		return err
 	}
 	// add default value
 	for _, r := range defaultRules {
 		if v, ok := rulesMap[r.Name]; ok {
-			log.Warning("Policy rule (%s:%s) has conflict with default rule(%s:%s),abandon default value",
+			log.Warningf("Policy rule (%s:%s) has conflict with default rule(%s:%s),abandon default value\n",
 				r.Name, v, r.Name, r.CheckStr)
 		} else {
 			rulesMap[r.Name] = r.CheckStr

@@ -65,6 +65,28 @@ type Controller struct {
 func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanVolume chan error) {
 	var err error
 	var profile *model.ProfileSpec
+	var snap *model.VolumeSnapshotSpec
+	var snapVol *model.VolumeSpec
+	var snapSize int64
+
+	if in.SnapshotId != "" {
+		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
+		if err != nil {
+			log.Error("Get snapshot failed in create volume method: ", err)
+			// If error occurs in controller, we delete the db entry to roll back the operation of volume creation.
+			db.C.DeleteVolume(ctx, in.Id)
+			errchanVolume <- err
+			return
+		}
+		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
+		if err != nil {
+			log.Error("Get volume failed in create volume method: ", err)
+			db.C.DeleteVolume(ctx, in.Id)
+			errchanVolume <- err
+			return
+		}
+		snapSize = snapVol.Size
+	}
 
 	if in.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
@@ -74,10 +96,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
@@ -90,13 +109,13 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
 	filterRequest["availabilityZone"] = in.AvailabilityZone
+	if snapVol != nil {
+		filterRequest["id"] = snapVol.PoolId
+	}
 
 	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
 	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
@@ -104,10 +123,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err.Error())
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		db.C.DeleteVolume(ctx, in.Id)
 		errchanVolume <- err
 		return
 	}
@@ -120,6 +136,8 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		AvailabilityZone: in.AvailabilityZone,
 		ProfileId:        profile.Id,
 		PoolId:           polInfo.Id,
+		SnapshotId:       in.SnapshotId,
+		SnapshotSize:     snapSize,
 		PoolName:         polInfo.Name,
 		DriverName:       dockInfo.DriverName,
 		Context:          ctx.ToJson(),
