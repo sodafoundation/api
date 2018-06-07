@@ -138,6 +138,7 @@ export class VolumeListComponent implements OnInit {
     }
 
     getVolumes() {
+        this.selectedVolumes = [];
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
             this.volumes.forEach((item)=>
@@ -225,9 +226,7 @@ export class VolumeListComponent implements OnInit {
             return;
         }
         let param = {
-            "extend": {
-                "newSize": this.selectVolumeSize
-            }
+            "newSize": this.selectVolumeSize
         }
         this.VolumeService.expandVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
@@ -289,5 +288,9 @@ export class VolumeListComponent implements OnInit {
             reject:()=>{}
         })
 
+    }
+
+    tablePaginate() {
+        this.selectedVolumes = [];
     }
 }
