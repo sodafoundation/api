@@ -14,8 +14,8 @@ env:
   - TARGET=amd64
   # - TARGET=arm64
   # - TARGET=arm
-  - TARGET=386
-  - TARGET=ppc64le
+  # - TARGET=386
+  # - TARGET=ppc64le
   global:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
@@ -32,10 +32,10 @@ matrix:
   #   env: TARGET=arm
   # - go: tip
   #   env: TARGET=arm64
-  - go: tip
-    env: TARGET=386
-  - go: tip
-    env: TARGET=ppc64le
+  # - go: tip
+  #   env: TARGET=386
+  # - go: tip
+  #   env: TARGET=ppc64le
 
 install:
   - go get github.com/mattn/goveralls
