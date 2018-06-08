@@ -100,10 +100,15 @@ func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
 func TestDeleteVolumeDBEntry(t *testing.T) {
 	var vol = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
-		Status:    "available"}
+		Status:    "available",
+		ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
+		PoolId:    "3762355c-a102-11e7-b772-17b880d2f537",
+	}
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(nil, nil)
+	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
+	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
