@@ -1482,6 +1482,9 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
+	if len(attachment.AccessProtocol) > 0 {
+		result.AccessProtocol = attachment.AccessProtocol
+	}
 	// Update metadata
 	if result.Metadata == nil {
 		result.Metadata = make(map[string]string)

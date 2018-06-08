@@ -23,10 +23,11 @@ import (
 	"os"
 
 	"encoding/json"
+	"strings"
+
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var replicationCommand = &cobra.Command{
@@ -93,7 +94,30 @@ var (
 	secondaryBackendId             string
 )
 
+var (
+	repLimit             string
+	repOffset            string
+	repSortDir           string
+	repSortKey           string
+	repId                string
+	repName              string
+	repDesp              string
+	repPrimaryVolumeId   string
+	repSecondaryVolumeId string
+)
+
 func init() {
+	replicationListCommand.Flags().StringVarP(&repLimit, "limit", "", "50", "the number of ertries displayed per page")
+	replicationListCommand.Flags().StringVarP(&repOffset, "offset", "", "0", "all requested data offsets")
+	replicationListCommand.Flags().StringVarP(&repSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	replicationListCommand.Flags().StringVarP(&repSortKey, "sortKey", "", "id",
+		"the sort key of all requested data. supports id(default), name, primaryVolumeId, secondaryVolumeId,  description, create time, updatetime")
+	replicationListCommand.Flags().StringVarP(&repId, "id", "", "", "list replication by id")
+	replicationListCommand.Flags().StringVarP(&repName, "name", "", "", "list replication by name")
+	replicationListCommand.Flags().StringVarP(&repDesp, "description", "", "", "list replication by description")
+	replicationListCommand.Flags().StringVarP(&repPrimaryVolumeId, "primaryVolumeId", "", "", "list replication by PrimaryVolumeId")
+	replicationListCommand.Flags().StringVarP(&repSecondaryVolumeId, "secondaryVolumeId", "", "", "list replication by storage userId")
+
 	replicationCommand.AddCommand(replicationCreateCommand)
 	flags := replicationCreateCommand.Flags()
 	flags.StringVarP(&replicationName, "name", "n", "", "the name of created replication")
@@ -196,7 +220,13 @@ func replicationShowAction(cmd *cobra.Command, args []string) {
 
 func replicationListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListReplications()
+
+	var opts = map[string]string{"limit": repLimit, "offset": repOffset, "sortDir": repSortDir,
+		"sortKey": repSortKey, "Id": repId,
+		"Name": repName, "Description": repDesp, "PrimaryVolumeId": repPrimaryVolumeId,
+		"SecondaryVolumeId": repSecondaryVolumeId}
+
+	resp, err := client.ListReplications(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))

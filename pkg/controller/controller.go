@@ -426,6 +426,12 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 		errchanVolAtm <- err
 		return
 	}
+	result.Status = model.VolumeAttachAvailable
+	result.AccessProtocol = protocol
+	if _, err = db.C.UpdateVolumeAttachment(ctx, result.Id, result); err != nil {
+		errchanVolAtm <- err
+		return
+	}
 	errchanVolAtm <- nil
 }
 

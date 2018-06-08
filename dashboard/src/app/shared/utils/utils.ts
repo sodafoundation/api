@@ -93,6 +93,33 @@ export class Utils {
     }
 
     /**
+     * Returns the capacity value of the adaptive unit for display (with units).
+     * @param capacity  (GB)
+     * @param decimals  (number)
+     * @return {[type]} [description]
+     */
+    static getDisplayGBCapacity(capacity, decimals = 3) {
+        let ret;
+        let unit = this.capacityUnit.GB;
+
+        if (capacity / 1024 < 1) {
+            ret = capacity;
+        } else if (capacity / (1024 * 1024) < 1) {
+            ret = capacity / 1024;
+            unit = this.capacityUnit.TB;
+        } else if (capacity / (1024 * 1024 * 1024) < 1) {
+            ret = capacity / (1024 * 1024);
+            unit = this.capacityUnit.PB;
+        } else if (capacity / (1024 * 1024 * 1024 * 1024) < 1) {
+            ret = capacity / (1024 * 1024 * 1024);
+            unit = this.capacityUnit.EB;
+        }
+
+        ret = this.numberFormat(ret, decimals);
+        return ret + " " + unit;
+    }
+
+    /**
      * Help get validation information.
      * @param control form information
      * @param page extra validation information param

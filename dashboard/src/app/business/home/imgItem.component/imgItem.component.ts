@@ -9,8 +9,6 @@ import { Http } from '@angular/http';
     ]
 })
 export class ImgItemComponent implements OnInit{
-    // countNum:number = 0;
-    // label:string = '';
     @Input() item;
 
     
