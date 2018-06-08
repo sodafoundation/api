@@ -49,7 +49,7 @@ export class TenantDetailComponent implements OnInit {
                 originCapacity += ele.size;
             })
             this.statistics_volumes = res.json().length;
-            this.statistics_capacity = Utils.getDisplayCapacity(originCapacity*1024*1024*1024, 3, "GB");
+            this.statistics_capacity = Utils.getDisplayGBCapacity(originCapacity);
         })
 
         this.http.get("/v1beta/"+ this.projectID +"/block/snapshots").subscribe((res)=>{

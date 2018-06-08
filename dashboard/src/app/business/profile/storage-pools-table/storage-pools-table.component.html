@@ -20,10 +20,10 @@
                     {{pool['name']}}
                 </td>
                 <td>
-                    {{pool['freeCapacity']}}
+                    {{pool['freeCapacityFormat']}}
                 </td>
                 <td>
-                    {{pool['totalCapacity']}}
+                    {{pool['totalCapacityFormat']}}
                 </td>
                 <td>
                     <span *ngIf="pool.extras && pool.extras.advanced && pool.extras.advanced.diskType; else elseBlock">
