@@ -230,8 +230,27 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 		return errors.New(errMsg)
 	}
 
+	// Profile id or pool id of the volume is not exist which means that volume creation failed before the driver
+	// was called , the volume entry should be delete from db directly.
+	if in.ProfileId == "" || in.PoolId == "" {
+		if err := db.C.DeleteVolume(ctx, in.Id); err != nil {
+			log.Error("when delete volume in db:", err)
+			return err
+		}
+		return errors.New(fmt.Sprintf("Volume %s can not be deleted, because its profile or pool is empty.", in.Id))
+	}
+
+	snaps, err := db.C.ListSnapshotsByVolumeId(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+
+	if len(snaps) > 0 {
+		return errors.New(fmt.Sprintf("Volume %s can not be deleted, because it still has snapshots", in.Id))
+	}
+
 	in.Status = model.VolumeDeleting
-	_, err := db.C.UpdateVolume(ctx, in)
+	_, err = db.C.UpdateVolume(ctx, in)
 	if err != nil {
 		return err
 	}
