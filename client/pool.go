@@ -52,11 +52,21 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 }
 
 // ListPools
-func (p *PoolMgr) ListPools() ([]*model.StoragePoolSpec, error) {
+func (p *PoolMgr) ListPools(args ...interface{}) ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
+
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GeneratePoolURL(urls.Client, p.TenantId)}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

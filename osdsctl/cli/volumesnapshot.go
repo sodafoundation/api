@@ -67,7 +67,32 @@ var (
 	volSnapshotDesp string
 )
 
+var (
+	volSnapLimit       string
+	volSnapOffset      string
+	volSnapSortDir     string
+	volSnapSortKey     string
+	volSnapId          string
+	volSnapUserId      string
+	volSnapName        string
+	volSnapDescription string
+	volSnapStatus      string
+	volSnapVolumeId    string
+)
+
 func init() {
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapOffset, "offset", "", "0", "all requested data offsets")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapSortKey, "sortKey", "", "id",
+		"the sort key of all requested data. supports id(default), volumeid, status, userid, tenantid, size")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapId, "id", "", "", "list volume snapshot by id")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapUserId, "userId", "", "", "list volume snapshot by storage userId")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapVolumeId, "volumeId", "", "", "list volume snapshot by volume id")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapStatus, "status", "", "", "list volume snapshot by status")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapName, "name", "", "", "list volume snapshot by Name")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapDescription, "description", "", "", "list volume snapshot by description")
+
 	volumeSnapshotCommand.AddCommand(volumeSnapshotCreateCommand)
 	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotName, "name", "n", "", "the name of created volume snapshot")
 	volumeSnapshotCreateCommand.Flags().StringVarP(&volSnapshotDesp, "description", "d", "", "the description of created volume snapshot")
@@ -114,7 +139,13 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 
 func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListVolumeSnapshots()
+
+	var opts = map[string]string{"limit": volSnapLimit, "offset": volSnapOffset, "sortDir": volSnapSortDir,
+		"sortKey": volSnapSortKey, "Id": volSnapId,
+		"Name": volSnapName, "Description": volSnapDescription, "UserId": volSnapUserId,
+		"Status": volSnapStatus, "VolumeId": volSnapVolumeId}
+
+	resp, err := client.ListVolumeSnapshots(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
