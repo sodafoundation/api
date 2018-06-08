@@ -105,7 +105,6 @@ func (p *ProfileMgr) ListProfiles(args ...interface{}) ([]*model.ProfileSpec, er
 	if param != "" {
 		url += "?" + param
 	}
-
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
