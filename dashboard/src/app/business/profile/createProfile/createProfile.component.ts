@@ -215,10 +215,6 @@ export class CreateProfileComponent implements OnInit {
     ];
     snapSchedule = [
         {
-            label: 'Hourly',
-            value: 'Hourly'
-        },
-        {
             label: 'Daily',
             value: 'Daily'
         },
