@@ -32,4 +32,4 @@ RUN chmod 755 ./image_builder.sh \
 RUN sudo ./image_builder.sh --rebuild
 
 # Define default command.
-CMD ["/usr/bin/nginx", "-g "daemon off;""]
+CMD /usr/sbin/nginx -g "daemon off;"
