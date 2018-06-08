@@ -555,7 +555,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	groupUpdate, volumesUpdate, err := d.Driver.DeleteVolumeGroup(opt, group, volumes)
 
 	if _, ok := err.(*model.NotImplementError); ok {
-		groupUpdate, volumesUpdate = d.deleteGroupGeneric(d.Driver, group, volumes)
+		groupUpdate, volumesUpdate = d.deleteGroupGeneric(d.Driver, group, volumes, opt)
 	} else {
 		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupError)
 		// If driver returns none for volumesUpdate, set volume status to error.
@@ -599,7 +599,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	return nil
 }
 
-func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
+func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec, opt *pb.DeleteVolumeGroupOpts) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
 	//Delete a group and volumes in the group
 	var volumesUpdate []*model.VolumeSpec
 	vgUpdate := &model.VolumeGroupSpec{
@@ -618,11 +618,15 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.Volu
 		if err := driver.DeleteVolume(&pb.DeleteVolumeOpts{Metadata: volumeRef.Metadata}); err != nil {
 			v.Status = model.VolumeError
 			vgUpdate.Status = model.VolumeGroupError
-			log.Error("Error occurred when delete volume " + volumeRef.Id + " from group.")
+			volumesUpdate = append(volumesUpdate, v)
+			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volumeRef.Id))
 		} else {
-			v.Status = model.VolumeDeleted
+			// Delete the volume entry in DB after successfully deleting the volume on the storage.
+			if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), volumeRef.Id); err != nil {
+				log.Error(fmt.Sprintf("Error occurred in dock module when delete volume %s in db:", volumeRef.Id, err))
+				vgUpdate.Status = model.VolumeGroupError
+			}
 		}
-		volumesUpdate = append(volumesUpdate, v)
 	}
 
 	return vgUpdate, volumesUpdate

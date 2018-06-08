@@ -42,7 +42,7 @@ import (
 )
 
 const (
-	defaultLimit   = -1
+	defaultLimit   = 50
 	defaultOffset  = 0
 	defaultSortDir = "desc"
 	defaultSortKey = "ID"
@@ -1482,6 +1482,9 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
+	if len(attachment.AccessProtocol) > 0 {
+		result.AccessProtocol = attachment.AccessProtocol
+	}
 	// Update metadata
 	if result.Metadata == nil {
 		result.Metadata = make(map[string]string)
@@ -2248,6 +2251,9 @@ func (c *Client) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, err
 	dbReq := &Request{
 		Url: urls.GenerateVolumeGroupURL(urls.Etcd, ctx.TenantId),
 	}
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateVolumeGroupURL(urls.Etcd, "")
+	}
 
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
@@ -2306,4 +2312,86 @@ func (c *Client) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*mo
 		}
 	}
 	return snapList, nil
+}
+
+func (c *Client) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
+	vgs, err := c.ListVolumeGroups(ctx)
+	if err != nil {
+		log.Error("List volume groups failed: ", err)
+		return nil, err
+	}
+
+	rlist := c.SelectVolumeGroup(m, vgs)
+
+	var sortKeys []string
+	for k := range volumeGroupSortKey2Func {
+		sortKeys = append(sortKeys, k)
+	}
+	p := c.ParameterFilter(m, len(rlist), sortKeys)
+	return c.SortVolumeGroups(rlist, p)[p.beginIdx:p.endIdx], nil
+
+}
+
+type VolumeGroupCompareFunc func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool
+
+var volumeGroupCompareFunc VolumeGroupCompareFunc
+
+type VolumeGroupSlice []*model.VolumeGroupSpec
+
+func (v VolumeGroupSlice) Len() int           { return len(v) }
+func (v VolumeGroupSlice) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+func (v VolumeGroupSlice) Less(i, j int) bool { return volumeGroupCompareFunc(v[i], v[j]) }
+
+var volumeGroupSortKey2Func = map[string]VolumeGroupCompareFunc{
+	"ID":   func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool { return a.Id > b.Id },
+	"NAME": func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool { return a.Name > b.Name },
+	"STATUS": func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool {
+		return a.Status > b.Status
+	},
+	"AVAILABILITYZONE": func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool {
+		return a.AvailabilityZone > b.AvailabilityZone
+	},
+	"TENANTID": func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool { return a.TenantId > b.TenantId },
+	"POOLID":   func(a *model.VolumeGroupSpec, b *model.VolumeGroupSpec) bool { return a.PoolId > b.PoolId },
+}
+
+func (c *Client) SortVolumeGroups(vgs []*model.VolumeGroupSpec, p *Parameter) []*model.VolumeGroupSpec {
+
+	volumeGroupCompareFunc = volumeGroupSortKey2Func[p.sortKey]
+
+	if strings.EqualFold(p.sortDir, "asc") {
+		sort.Sort(VolumeGroupSlice(vgs))
+
+	} else {
+		sort.Sort(sort.Reverse(VolumeGroupSlice(vgs)))
+	}
+	return vgs
+}
+
+func (c *Client) SelectVolumeGroup(param map[string][]string, vgs []*model.VolumeGroupSpec) []*model.VolumeGroupSpec {
+
+	if !c.SelectOrNot(param) {
+		return vgs
+	}
+
+	filterList := map[string]interface{}{
+		"Id":               nil,
+		"CreatedAt":        nil,
+		"UpdatedAt":        nil,
+		"Name":             nil,
+		"Status":           nil,
+		"TenantId":         nil,
+		"UserId":           nil,
+		"Description":      nil,
+		"AvailabilityZone": nil,
+		"PoolId":           nil,
+	}
+
+	var vglist = []*model.VolumeGroupSpec{}
+	for _, vg := range vgs {
+		if c.filterByName(param, vg, filterList) {
+			vglist = append(vglist, vg)
+		}
+	}
+	return vglist
 }
