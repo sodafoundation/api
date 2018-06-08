@@ -20,8 +20,7 @@
     </p-column>
     <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" [style]="{'width': '10%'}"></p-column>
     <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}" [style]="{'width': '10%'}"></p-column>
-    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}">
-    </p-column>
+    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}"></p-column>
     <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '12%'}"></p-column>
     <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '28%'}">
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
@@ -75,12 +74,12 @@
             </form-item>
             <form-item label="{{I18N.keyID['sds_block_volume_expandby']}}" >
                 <div style="display: inline-flex;" class="ui-fluid">
-                        <input *ngIf="!isEditUser" type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
+                        <input type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
                         <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
                 </div>
             </form-item>
             <form-item label="{{I18N.keyID['sds_block_volume_totalcapa']}}" >
-                    <span class="text-only">{{selectVolumeSize}}</span>
+                    <span class="text-only">{{newVolumeSizeFormat}}</span>
             </form-item>
         </form>
         <p-footer>
