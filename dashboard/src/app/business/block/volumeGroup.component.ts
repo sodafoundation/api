@@ -24,8 +24,11 @@ export class VolumeGroupComponent implements OnInit{
     availabilityZones = [];
     selectedOption :string;
     selectedVolumeGroups=[];
+    profileJson = {};
     showVolumeGroupDialog :boolean = false;
+    showModifyGroup :boolean = false;
     volumeGroupForm:any;
+    modifyGroupForm:any;
     validRule= {
         'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
     };
@@ -42,6 +45,10 @@ export class VolumeGroupComponent implements OnInit{
             "description":[""],
             "profile":["",Validators.required],
             "zone":[""]
+        });
+        this.modifyGroupForm = this.fb.group({
+            "group_name":["",{validators:[Validators.required, Validators.pattern(this.validRule.name)], updateOn:'change'} ],
+            "description":[""]
         });
     }
     errorMessage = {
@@ -66,7 +73,6 @@ export class VolumeGroupComponent implements OnInit{
           label: 'Default', value: 'default'
         }
       ];
-      this.getVolumeGroups();
       this.volemeOptions = [];
       this.getProfiles();
     }
@@ -74,6 +80,13 @@ export class VolumeGroupComponent implements OnInit{
     createVolumeGroup(){
         this.volumeGroupForm.reset();
         this.showVolumeGroupDialog = true;
+    }
+    ModifyVolumeGroupDisplay(volumeGroup){
+        this.modifyGroupForm.reset();
+        this.currentGroup = volumeGroup;
+        this.modifyGroupForm.controls['group_name'].setValue(this.currentGroup.name);
+        this.modifyGroupForm.controls['description'].setValue("");
+        this.showModifyGroup = true;
     }
     submit(group){
         if(!this.volumeGroupForm.valid){
@@ -96,7 +109,20 @@ export class VolumeGroupComponent implements OnInit{
     }
     getVolumeGroups(){
         this.volumeGroupService.getVolumeGroups().subscribe((res) => {
-            this.volumeGroups = res.json();
+            let volumeGroups = res.json();
+            if(volumeGroups && volumeGroups.length != 0){
+                volumeGroups.forEach((item)=>{
+                    if(!item.description){
+                        item.description = "--";
+                    }
+                    let profileName = [];
+                    item.profiles.forEach((profileId)=>{
+                        profileName.push(this.profileJson[profileId]);
+                    });
+                    item.profileName = profileName;
+                });
+            }
+            this.volumeGroups = volumeGroups;
         });
     }
     getProfiles() {
@@ -107,7 +133,9 @@ export class VolumeGroupComponent implements OnInit{
                     label: profile.name,
                     value: profile.id
                 });
+                this.profileJson[profile.id] = profile.name;
             });
+            this.getVolumeGroups();
         });
     }
     deleteVolumeGroup(volumeGroup){
@@ -124,6 +152,23 @@ export class VolumeGroupComponent implements OnInit{
         let acceptLabel = "Delete";
         let warming = true;
         this.confirmDialog([msg,header,acceptLabel,warming,"multiDelete"])
+    }
+    modifyGroup(value){
+        if(!this.modifyGroupForm.valid){
+            for(let i in this.modifyGroupForm.controls){
+                this.modifyGroupForm.controls[i].markAsTouched();
+            }
+            return;
+        }else{
+            let param = {
+                name:value.group_name,
+                description:value.description,
+            }
+            this.volumeGroupService.modifyVolumeGroup(this.currentGroup.id,param).subscribe((res) => {
+                this.getVolumeGroups();
+            });
+        }
+        this.showModifyGroup = false;
     }
     confirmDialog([msg,header,acceptLabel,warming=true,func]){
         this.confirmationService.confirm({

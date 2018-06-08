@@ -155,5 +155,10 @@ export class VolumeGroupService {
     deleteVolumeGroup(groupId): Observable<any> {
       let url = this.volumeGroupUrl+"/" + groupId
       return this.http.delete(url);
-  }
+    }
+    //modify volume group
+    modifyVolumeGroup(groupId,param): Observable<any> {
+      let url = this.volumeGroupUrl+"/" + groupId
+      return this.http.put(url,param);
+    }
 }
