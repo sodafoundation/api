@@ -88,6 +88,7 @@ var (
 	volStatus    string
 	volPoolId    string
 	volProfileId string
+	volGroupId   string
 )
 
 func init() {
@@ -105,6 +106,7 @@ func init() {
 	volumeListCommand.Flags().StringVarP(&volPoolId, "poolId", "", "", "list volume by poolId")
 	volumeListCommand.Flags().StringVarP(&volAz, "availabilityZone", "", "", "list volume by availability zone")
 	volumeListCommand.Flags().StringVarP(&volProfileId, "profileId", "", "", "list volume by profile id")
+	volumeListCommand.Flags().StringVarP(&volGroupId, "groupId", "", "", "list volume by volume group id")
 
 	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the name of profile configured by admin")
 
@@ -176,7 +178,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	var opts = map[string]string{"limit": volLimit, "offset": volOffset, "sortDir": volSortDir,
 		"sortKey": volSortKey, "Id": volId,
 		"Name": volName, "Description": volDesp, "UserId": volUserId, "AvailabilityZone": volAz,
-		"Status": volStatus, "PoolId": volPoolId, "ProfileId": volProfileId}
+		"Status": volStatus, "PoolId": volPoolId, "ProfileId": volProfileId, "GroupId": volGroupId}
 
 	resp, err := client.ListVolumes(opts)
 	PrintResponse(resp)
