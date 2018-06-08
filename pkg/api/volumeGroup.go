@@ -104,7 +104,6 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 		this.ErrorHandle("Delete volume group failed", model.ErrorInternalServer, err)
 		return
 	}
-
 	this.SuccessHandle(StatusAccepted, nil)
 	return
 }
