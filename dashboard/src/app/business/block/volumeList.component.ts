@@ -138,6 +138,7 @@ export class VolumeListComponent implements OnInit {
     }
 
     getVolumes() {
+        this.selectedVolumes = [];
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
             this.volumes.forEach((item)=>
@@ -287,5 +288,9 @@ export class VolumeListComponent implements OnInit {
             reject:()=>{}
         })
 
+    }
+
+    tablePaginate() {
+        this.selectedVolumes = [];
     }
 }
