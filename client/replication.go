@@ -69,11 +69,21 @@ func (v *ReplicationMgr) GetReplication(replicaId string) (*model.ReplicationSpe
 }
 
 // ListReplications
-func (v *ReplicationMgr) ListReplications() ([]*model.ReplicationSpec, error) {
+func (v *ReplicationMgr) ListReplications(args ...interface{}) ([]*model.ReplicationSpec, error) {
 	var res []*model.ReplicationSpec
+
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateReplicationURL(urls.Client, v.TenantId, "detail")}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

@@ -48,11 +48,21 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	return &res, nil
 }
 
-func (d *DockMgr) ListDocks() ([]*model.DockSpec, error) {
+func (d *DockMgr) ListDocks(args ...interface{}) ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
+
 	url := strings.Join([]string{
 		d.Endpoint,
 		urls.GenerateDockURL(urls.Client, d.TenantId)}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 
 	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
