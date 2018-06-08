@@ -15,6 +15,7 @@ let _ = require("underscore");
 @Component({
     selector: 'volume-list',
     templateUrl: 'volumeList.html',
+    providers: [ConfirmationService],
     styleUrls: [],
     animations: []
 })

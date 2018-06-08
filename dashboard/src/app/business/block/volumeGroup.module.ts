@@ -4,15 +4,17 @@ import { ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpService } from './../../shared/service/Http.service';
 import { VolumeService ,VolumeGroupService} from './volume.service';
+import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 
 @NgModule({
   declarations: [ VolumeGroupComponent ],
-  imports: [ ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule,MultiSelectModule,DropdownModule,ReactiveFormsModule,FormsModule],
+  imports: [ ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule,MultiSelectModule,DropdownModule,ReactiveFormsModule,FormsModule,ConfirmDialogModule],
   exports: [ VolumeGroupComponent ],
   providers: [
     HttpService,
     VolumeService,
-    VolumeGroupService
+    VolumeGroupService,
+    ConfirmationService
   ]
 })
 export class VolumeGroupModule { }

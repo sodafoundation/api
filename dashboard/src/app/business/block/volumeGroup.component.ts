@@ -6,16 +6,22 @@ import { trigger, state, style, transition, animate} from '@angular/animations';
 import { DialogModule } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
 import { VolumeService ,VolumeGroupService} from './volume.service';
+import { ProfileService } from './../profile/profile.service';
+import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 
 @Component({
     selector: 'volume-group-list',
     templateUrl: 'volumeGroup.html',
+    providers: [ConfirmationService],
     styleUrls: [],
     animations: []
 })
 export class VolumeGroupComponent implements OnInit{
     volumeGroups=[];
     volemeOptions = [];
+    profileOptions = [];
+    currentGroup:any;
+    availabilityZones = [];
     selectedOption :string;
     selectedVolumeGroups=[];
     showVolumeGroupDialog :boolean = false;
@@ -24,14 +30,18 @@ export class VolumeGroupComponent implements OnInit{
         'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
     };
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router
         private volumeGroupService : VolumeGroupService,
-        private fb : FormBuilder
+        private fb : FormBuilder,
+        private profileService :ProfileService,
+        private confirmationService:ConfirmationService
     ){
         this.volumeGroupForm = this.fb.group({
             "group_name":["",{validators:[Validators.required, Validators.pattern(this.validRule.name)], updateOn:'change'} ],
-            "profile":[""]
+            "description":[""],
+            "profile":["",Validators.required],
+            "zone":[""]
         });
     }
     errorMessage = {
@@ -41,7 +51,9 @@ export class VolumeGroupComponent implements OnInit{
     
     label = {
         group_name_lable:'Group Name',
-        profile_label:'Profile'
+        profile_label:'Profile',
+        description:this.I18N.keyID['sds_block_volume_descri'],
+        zone:this.I18N.keyID['sds_block_volume_az']
     }
 
     ngOnInit() {
@@ -49,11 +61,14 @@ export class VolumeGroupComponent implements OnInit{
           {"name": "group_for_REP", "status": "Available", "profile": "PF_block_01", "volumes": "2"},
           {"name": "group_app01", "status": "Error", "profile": "PF_block_02", "volumes": "5"}
       ];
+      this.availabilityZones = [
+        {
+          label: 'Default', value: 'default'
+        }
+      ];
       this.getVolumeGroups();
-      this.volemeOptions = [
-          {label: "group_for_REP",value:1},
-          {label: "group_app01",value:2}
-          ]
+      this.volemeOptions = [];
+      this.getProfiles();
     }
     //show create volumes group
     createVolumeGroup(){
@@ -66,21 +81,80 @@ export class VolumeGroupComponent implements OnInit{
                 this.volumeGroupForm.controls[i].markAsTouched();
             }
             return;
-        }/*else{
+        }else{
             let param = {
-
+                name : group.group_name,
+                profiles : group.profile,
+                description:group.description,
+                availabilityZone:group.zone
             }
             this.volumeGroupService.createVolumeGroup(param).subscribe((res) => {
                 this.getVolumeGroups();
             });
-        }*/
+        }
         this.showVolumeGroupDialog = false;
     }
     getVolumeGroups(){
         this.volumeGroupService.getVolumeGroups().subscribe((res) => {
-            console.log(res);
             this.volumeGroups = res.json();
         });
+    }
+    getProfiles() {
+        this.profileService.getProfiles().subscribe((res) => {
+            let profiles = res.json();
+            profiles.forEach(profile => {
+                this.profileOptions.push({
+                    label: profile.name,
+                    value: profile.id
+                });
+            });
+        });
+    }
+    deleteVolumeGroup(volumeGroup){
+        this.currentGroup = volumeGroup;
+        let msg = "<div>Are you sure you want to delete the Volume Group?</div><h3>[ "+ volumeGroup.name +" ]</h3>";
+        let header ="Delete Volume Group";
+        let acceptLabel = "Delete";
+        let warming = true;
+        this.confirmDialog([msg,header,acceptLabel,warming,"delete"])
+    }
+    deleteMultiVolumeGroups(){
+        let msg = "<div>Are you sure you want to delete the selected Volume Groups?</div><h3>[ "+ this.selectedVolumeGroups.length +" Volume Group ]</h3>";
+        let header ="Delete Volume Group";
+        let acceptLabel = "Delete";
+        let warming = true;
+        this.confirmDialog([msg,header,acceptLabel,warming,"multiDelete"])
+    }
+    confirmDialog([msg,header,acceptLabel,warming=true,func]){
+        this.confirmationService.confirm({
+            message: msg,
+            header: header,
+            acceptLabel: acceptLabel,
+            isWarning: warming,
+            accept: ()=>{
+                try {
+                    if(func === "delete"){
+                        this.volumeGroupService.deleteVolumeGroup(this.currentGroup.id).subscribe((res) => {
+                            this.getVolumeGroups();
+                        })
+                    }else if(func === "multiDelete"){
+                        this.selectedVolumeGroups.forEach(item=>{
+                            this.volumeGroupService.deleteVolumeGroup(item.id).subscribe((res) => {
+                                this.getVolumeGroups();
+                            })
+                        });
+                        this.selectedVolumeGroups = [];
+                    }
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    
+                }
+            },
+            reject:()=>{}
+        })
     }
 
 }
