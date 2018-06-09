@@ -15,7 +15,7 @@
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
     <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '12%'}">
         <ng-template pTemplate="body" let-volume="rowData">
-            <a [routerLink]="['/volumeDetails/' + volume.id]">{{volume.name}}</a>
+            <a [routerLink]="['/volumeDetails/' + volume.id]"  title="{{volume.name}}">{{volume.name}}</a>
         </ng-template>
     </p-column>
     <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" [style]="{'width': '10%'}"></p-column>
