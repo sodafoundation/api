@@ -1051,8 +1051,9 @@ func (volume VolumeSlice) Less(i, j int) bool {
 		return volume[i].PoolId < volume[j].PoolId
 	case "DESCRIPTION":
 		return volume[i].Description < volume[j].Description
+	case "GROUPID":
+		return volume[i].GroupId < volume[j].GroupId
 		// TODO:case "lun_id" (admin_only)
-		// TODO:case "GroupId"
 	}
 	return false
 }
@@ -1083,6 +1084,8 @@ func (c *Client) FindVolumeValue(k string, p *model.VolumeSpec) string {
 		return p.PoolId
 	case "ProfileId":
 		return p.ProfileId
+	case "GroupId":
+		return p.GroupId
 	}
 	return ""
 }
@@ -1136,7 +1139,7 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 
 	vols := c.SelectVolumes(m, volumes)
 
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION"})
+	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"})
 
 	return c.SortVolumes(vols, p)[p.beginIdx:p.endIdx], nil
 }

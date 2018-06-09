@@ -55,6 +55,7 @@ const (
 
 // volume group status
 const (
+
 	VolumeGroupCreating      = "creating"
 	VolumeGroupAvailable     = "available"
 	VolumeGroupErrorDeleting = "errorDeleting"
