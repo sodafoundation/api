@@ -15,16 +15,15 @@
 package client
 
 import (
-	"log"
-
 	"errors"
+	"log"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 const (
-	Keystone = "keystone" // Keystone == 0
+	Keystone = "keystone"
 	Noauth   = "noauth"
 )
 

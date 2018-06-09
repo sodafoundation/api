@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
 	"time"
 
 	log "github.com/golang/glog"

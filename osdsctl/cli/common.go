@@ -15,10 +15,10 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
-	"encoding/json"
 	c "github.com/opensds/opensds/client"
 	"github.com/spf13/cobra"
 )
