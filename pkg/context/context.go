@@ -19,9 +19,10 @@ package context
 
 import (
 	"encoding/json"
+	"reflect"
+
 	"github.com/astaxie/beego/context"
 	"github.com/golang/glog"
-	"reflect"
 )
 
 func NewAdminContext() *Context {
@@ -42,7 +43,7 @@ func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
 	if err != nil {
-		glog.Errorf("Unmarshal json to context failed, reason:%v", err)
+		glog.Errorf("Unmarshal json to context failed, reason: %v", err)
 	}
 	return ctx
 }
@@ -87,10 +88,10 @@ type Context struct {
 }
 
 func (ctx *Context) ToPolicyValue() map[string]interface{} {
-
 	ctxMap := map[string]interface{}{}
 	t := reflect.TypeOf(ctx).Elem()
 	v := reflect.ValueOf(ctx).Elem()
+
 	for i := 0; i < t.NumField(); i++ {
 		field := v.Field(i)
 		name := t.Field(i).Tag.Get("json")
@@ -114,7 +115,7 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 func (ctx *Context) ToJson() string {
 	b, err := json.Marshal(ctx)
 	if err != nil {
-		glog.Errorf("Context convert to json failed, %v", err)
+		glog.Errorf("Context convert to json failed, reason: %v", err)
 	}
 	return string(b)
 }

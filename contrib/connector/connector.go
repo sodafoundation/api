@@ -23,6 +23,14 @@ type Connector interface {
 	Detach(map[string]interface{}) error
 }
 
+func NewConnector(cType string) Connector {
+	if cnt, exist := cnts[cType]; exist {
+		return cnt
+	}
+
+	return nil
+}
+
 var cnts = map[string]Connector{}
 
 func RegisterConnector(cType string, cnt Connector) error {
@@ -41,12 +49,4 @@ func UnregisterConnector(cType string) {
 
 	delete(cnts, cType)
 	return
-}
-
-func NewConnector(cType string) Connector {
-	if cnt, exist := cnts[cType]; exist {
-		return cnt
-	}
-
-	return nil
 }
