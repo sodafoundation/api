@@ -39,7 +39,7 @@ func Run(host string) {
 
 	// add router for v1beta api
 	ns :=
-		beego.NewNamespace("/"+constants.ApiVersion,
+		beego.NewNamespace("/"+constants.APIVersion,
 			beego.NSCond(func(ctx *bctx.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -99,7 +99,7 @@ func Run(host string) {
 				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 		)
-	pattern := fmt.Sprintf("/%s/*", constants.ApiVersion)
+	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
 	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)
