@@ -215,10 +215,6 @@ export class CreateProfileComponent implements OnInit {
     ];
     snapSchedule = [
         {
-            label: 'Hourly',
-            value: 'Hourly'
-        },
-        {
             label: 'Daily',
             value: 'Daily'
         },
@@ -417,7 +413,7 @@ export class CreateProfileComponent implements OnInit {
                 }
             }
         }
-        if(this.snapPolicy){
+        if(this.snapshotIsChecked){
             if(!this.snapPolicy.valid){
                 for(let i in this.snapPolicy.controls){
                     this.snapPolicy.controls[i].markAsTouched();

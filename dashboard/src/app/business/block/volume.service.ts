@@ -141,14 +141,24 @@ export class VolumeGroupService {
     ) { }
 
     project_id = this.paramStor.CURRENT_TENANT().split("|")[1];
-    volumeGroupUrl = 'v1beta/'+ this.project_id +'/block/volumeGroup';
+    volumeGroupUrl = 'v1beta/{project_id}/block/volumeGroup';
     //create volume group
     createVolumeGroup(param){
         let url = this.volumeGroupUrl;
         return this.http.post(url,param);
     }
-    //Search volumes
+    //get volume group
     getVolumeGroups(): Observable<any> {
         return this.http.get(this.volumeGroupUrl);
+    }
+    //delete volume group
+    deleteVolumeGroup(groupId): Observable<any> {
+      let url = this.volumeGroupUrl+"/" + groupId
+      return this.http.delete(url);
+    }
+    //modify volume group
+    modifyVolumeGroup(groupId,param): Observable<any> {
+      let url = this.volumeGroupUrl+"/" + groupId
+      return this.http.put(url,param);
     }
 }

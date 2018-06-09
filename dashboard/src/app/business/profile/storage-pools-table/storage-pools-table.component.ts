@@ -1,5 +1,6 @@
 import { Component, OnInit,Input } from '@angular/core';
 import { PoolService } from './../profile.service';
+import { Utils } from '../../../shared/api';
 
 @Component({
   selector: 'app-storage-pools-table',
@@ -30,12 +31,18 @@ export class StoragePoolsTableComponent implements OnInit {
           let arrLength = pools.length
           for (let i = 0; i < arrLength; i++) {
               if (this.selectData.extras.protocol.toLowerCase() == pools[i].extras.ioConnectivity.accessProtocol &&  this.selectData.storageType == pools[i].extras.dataStorage.provisioningPolicy){
-                  this.pools.push(pools[i]);
+                this.pools.push(pools[i]);
               }
           }
       }else{
           this.pools = pools;
       }
+
+      this.pools.map((pool)=>{
+        pool.freeCapacityFormat = Utils.getDisplayGBCapacity(pool.freeCapacity);
+        pool.totalCapacityFormat = Utils.getDisplayGBCapacity(pool.totalCapacity);
+      })
+      
       this.totalFreeCapacity = this.getSumCapacity(this.pools, 'free');
     });
   }

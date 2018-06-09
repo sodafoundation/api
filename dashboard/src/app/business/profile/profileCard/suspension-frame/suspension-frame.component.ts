@@ -39,7 +39,7 @@ export class SuspensionFrameComponent implements OnInit {
         }else{
             let schedule ="Schedule = " + extra[":snapshotPolicy"].schedule.occurrence;
             this.data.push(schedule);
-            let execution = "Execution Time = " + extra[":snapshotPolicy"].schedule.datetime ;
+            let execution = "Execution Time = " + extra[":snapshotPolicy"].schedule.datetime.split("T")[1] ;
             this.data.push(execution);
             let Retention  = "Retention  = " + (extra[":snapshotPolicy"].retention["number"] ? extra[":snapshotPolicy"].retention["number"]: (extra[":snapshotPolicy"].retention.duration+" Days"));
             this.data.push(Retention );

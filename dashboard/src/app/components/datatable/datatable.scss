@@ -76,10 +76,14 @@
 .ui-datatable tbody .ui-cell-data {
     height: .32rem;
     line-height: .32rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
 }
 
 .ui-datatable tbody .ui-cell-data > a{
-    margin-right: .2rem;
+    margin-right: 0.2rem;
 }
 
 .ui-datatable tbody tr.ui-expanded-row-content {

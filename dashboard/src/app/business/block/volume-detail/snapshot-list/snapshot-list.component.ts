@@ -2,7 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { VolumeService,SnapshotService } from './../../volume.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../../../components/common/api';
-import { I18NService, MsgBoxService } from 'app/shared/api';
+import { I18NService, MsgBoxService, Utils } from 'app/shared/api';
 
 @Component({
   selector: 'app-snapshot-list',
@@ -136,6 +136,10 @@ export class SnapshotListComponent implements OnInit {
     this.SnapshotService.getSnapshots(filter).subscribe((res) => {
       this.snapshots = res.json();
       this.snapshotPropertyDisplay = false;
+
+      this.snapshots.map((item, index, arr)=>{
+        item.size = Utils.getDisplayGBCapacity(item.size);
+      })
     });
   }
 
