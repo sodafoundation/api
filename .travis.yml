@@ -20,8 +20,8 @@ env:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev ceph-common lvm2 -y
+  - go get github.com/mattn/goveralls
+  - go get github.com/wadey/gocovmerge
 
 matrix:
   fast_finish: true
@@ -38,8 +38,7 @@ matrix:
   #   env: TARGET=ppc64le
 
 install:
-  - go get github.com/mattn/goveralls
-  - go get github.com/wadey/gocovmerge
+  # Build OpenSDS Controller source code
   - make
 
 script:
@@ -48,3 +47,5 @@ script:
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
+  # Clean OpenSDS Controller built data
+  - make clean
