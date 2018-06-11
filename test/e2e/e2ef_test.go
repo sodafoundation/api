@@ -469,7 +469,7 @@ func TestVolumeAttach(t *testing.T) {
   //link
    link,err :=execCmd("go","tool","link","-o","attach.bin","-L",alocate,olocate)
    if err !=nil{
-     t.Eroor("link .o file fail")
+     t.Error("link .o file fail")
    }
   t.Log("link result:",link)
  //run bin file
