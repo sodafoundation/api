@@ -20,11 +20,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
-        "strconv"
-        "reflect"
 
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/contrib/connector/iscsi"
@@ -392,99 +391,99 @@ func TestVolumeAttach(t *testing.T) {
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
-        //execute bin file
-        
-        date:=getatt.ConnectionData
-        t.Log("lun && discard type")
-        t.Log(reflect.TypeOf(date["targetLun"]))
-        t.Log(reflect.TypeOf(date["discard"]))
-        attach:=date["attachment"].(string)
-        card:=strconv.FormatBool(date["discard"].(bool))
-         discovered:=strconv.FormatBool(date["targetDiscovered"].(bool))
-         iqn:=date["targetIQN"].(string)
-         lun:=date["targetLun"].(float64)
-         luns:=strconv.FormatFloat(lun, 'f', 0, 64) 
-        portal:=date["targetPortal"].(string)
-       // CompileAttach(t,attach,card,discovered,iqn,lun,portal)
-        CompileAttach(t,attach,card,discovered,iqn,luns,portal) 
+	//execute bin file
+	date := getatt.ConnectionData
+	attach := date["attachment"].(string)
+	card := strconv.FormatBool(date["discard"].(bool))
+	discovered := strconv.FormatBool(date["targetDiscovered"].(bool))
+	iqn := date["targetIQN"].(string)
+	lun := date["targetLun"].(float64)
+	luns := strconv.FormatFloat(lun, 'f', 0, 64)
+	portal := date["targetPortal"].(string)
+	CompileAttach(t, attach, card, discovered, iqn, luns, portal)
 	detail, _ := json.MarshalIndent(getatt, "", "    ")
 	t.Log("getatt:", string(detail))
 	t.Log("Volume attach detail Check Success!")
 }
 
- func CompileAttach(t *testing.T,attach string,card string,discovered string,iqn string,lun string,portal string){
-  //cp attach file to $GOPATH/src/attach 
-   gopath := GetGopath()
-   t.Log("gopath:",gopath)
-   attachPath := strings.Join([]string{gopath,"/src"},"")
-   t.Log("attachPath:",attachPath)
-   goroot := GetGoroot()
-   t.Log("goroot:",goroot) 
-  info1,err :=  execCmd("mkdir","-p",attachPath)
-   if err !=nil{
-     t.Log("mkdir fail!")
-   }
-   t.Log("info1:",info1)
-   info2,err :=execCmd("cp","-r","../../testutils/attach",attachPath)
-   if err!=nil{
-    t.Error("cp fail")
-   }
-   t.Log("info2:",info2)
-  //go install attach
-  execCmd("cd",attachPath)
-  install,err:=execCmd("go","install","attach")
-  if err !=nil{
-    t.Error("Go Install Fail",err)
-  }
-  t.Log("Go Install:",install)
-  //find the path of attach.a
-  alocate,err := execCmd("find",gopath,"-name","attach.a")
-  if err !=nil{
-    t.Error("Can't find the file!")
-  }
-  alocate=strings.Replace(alocate,"/attach.a","",-1)
-  alocate = strings.Replace(alocate, "\n", "", -1)
-  t.Log("alocate:",alocate) 
-  //compile attach.go
-   //cp attach.go to $GOPATH/src
-  attgoPath := strings.Join([]string{gopath,"/src/attach"},"")
-  execCmd("cp","../../testutils/attach.go",attgoPath)
-  attgopath:=attgoPath+"/attach.go"
-  t.Log("attach.go path attgopath:",attgopath)
-   //begin compile,get .o file
-  attgopath = strings.Replace(attgopath, "\n", "", -1) 
-  com,err :=execCmd("go","tool","compile","-I",alocate,attgopath) 
-  if err !=nil{
-    t.Error("compile attach.go fail")
-  }
-  t.Log("compile atach.go result:",com)
-  //link .o file,get .bin file
-    //find .o file locate
-  olocate,err := execCmd("find",gopath,"-name","attach.o")
-  if err !=nil{
-    t.Error("Can't find .o file")
-  }
-  olocate = strings.Replace(olocate, "\n", "", -1)
-  t.Log("olocate:",olocate)
-  //link
-   link,err :=execCmd("go","tool","link","-o","attach.bin","-L",alocate,olocate)
-   if err !=nil{
-     t.Error("link .o file fail")
-   }
-  t.Log("link result:",link)
- //run bin file
-   binpath,err := execCmd("find",gopath,"-name","attach.bin")
-   if err !=nil{
-     t.Error("Can't find bin file from gopath")
-   }
-   binpath = strings.Replace(binpath, "\n", "", -1)
-   t.Log("binpath:",binpath)
-   execCmd("cd",binpath)
-   run,err :=execCmd("sudo","./attach.bin",attach,card,discovered,iqn,lun,portal)
-  if err !=nil{
-    t.Error("run bin file fail",err)
-  }
-  t.Log("run:",run)
+//compile the attach method,and call it
+func CompileAttach(t *testing.T, attach string, card string, discovered string, iqn string, lun string, portal string) {
+	//1)cp attach file to $GOPATH/src/attach
+	//1.1) Get gopath
+	gopath := GetGopath()
+	t.Log("gopath:", gopath)
+	//1.2) Create src folder under $GOPATH
+	attachPath := strings.Join([]string{gopath, "/src"}, "")
+	t.Log("attachPath:", attachPath)
+	info1, err := execCmd("mkdir", "-p", attachPath)
+	if err != nil {
+		t.Error("mkdir fail!")
+	}
+	t.Log("info1:", info1)
+	//1.3) cp attach folder that contain attach method to $GOPATH/src/
+	info2, err := execCmd("cp", "-r", "../../testutils/attach", attachPath)
+	if err != nil {
+		t.Error("cp fail")
+	}
+	t.Log("info2:", info2)
+	//2) go install attach,and you will get the .a file
+	execCmd("cd", attachPath)
+	install, err := execCmd("go", "install", "attach")
+	if err != nil {
+		t.Log("Go Install Fail", err)
+	}
+	t.Log("Go Install:", install)
+	//3)get .o file from .a file
+	//3.1)find the path of attach.a
+	alocate, err := execCmd("find", gopath, "-name", "attach.a")
+	if err != nil {
+		t.Log("Can't find the file!")
+	}
+	//3.2) cut the attach.a from path
+	alocate = strings.Replace(alocate, "/attach.a", "", -1)
+	//3.3)remove the enter(\n) at the end of the alocate
+	alocate = strings.Replace(alocate, "\n", "", -1)
+	t.Log("alocate:", alocate)
+	//4) compile attach.go
+	//4.1) cp attach.go to $GOPATH/src/attach/
+	attgoPath := strings.Join([]string{gopath, "/src/attach"}, "")
+	execCmd("cp", "../../testutils/attach.go", attgoPath)
+	attgopath := attgoPath + "/attach.go"
+	t.Log("attach.go path attgopath:", attgopath)
+	//4.2) begin compile,get .o file
+	attgopath = strings.Replace(attgopath, "\n", "", -1)
+	com, err := execCmd("go", "tool", "compile", "-I", alocate, attgopath)
+	if err != nil {
+		t.Error("compile attach.go fail")
+	}
+	t.Log("compile atach.go result:", com)
+	//5) link .o file,get .bin file
+	// 5.1) find .o file locate
+	olocate, err := execCmd("find", gopath, "-name", "attach.o")
+	if err != nil {
+		t.Error("Can't find .o file")
+	}
+	olocate = strings.Replace(olocate, "\n", "", -1)
+	t.Log("olocate:", olocate)
+	//5.2) link .o file
+	link, err := execCmd("go", "tool", "link", "-o", "attach.bin", "-L", alocate, olocate)
+	if err != nil {
+		t.Error("link .o file fail")
+	}
+	t.Log("link result:", link)
+	//6) run bin file with param
+	binpath, err := execCmd("find", gopath, "-name", "attach.bin")
+	if err != nil {
+		t.Error("Can't find bin file from gopath")
+	}
+	binpath = strings.Replace(binpath, "\n", "", -1)
+	t.Log("binpath:", binpath)
+	execCmd("cd", binpath)
+	run, err := execCmd("sudo", "./attach.bin", attach, card, discovered, iqn, lun, portal)
+	if err != nil {
+		t.Error("run bin file fail", err)
+	}
+	t.Log("run:", run)
 }
 
 //Test Case:Volume Detach
@@ -536,10 +535,11 @@ func TestDeleteAttach(t *testing.T) {
 }
 
 func execCmd(name string, arg ...string) (string, error) {
-        fmt.Println("Command: %s %s:\n", name, strings.Join(arg, " "))
+	fmt.Println("Command: %s %s:\n", name, strings.Join(arg, " "))
 	info, err := exec.Command(name, arg...).CombinedOutput()
 	return string(info), err
 }
+
 //prepare attachment
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
