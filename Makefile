@@ -19,8 +19,8 @@ all:build
 build:package osdsdock osdslet osdsctl
 
 package:
-	sudo apt-get update && \
-	  sudo apt-get install -y gcc librados-dev librbd-dev lvm2 tgt
+	sudo apt-get update && sudo apt-get install -y \
+	  build-essential gcc librados-dev librbd-dev lvm2 tgt
 
 osdsdock:
 	mkdir -p  ./build/out/bin/
