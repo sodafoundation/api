@@ -26,8 +26,8 @@ cp -R ./dist/* /var/www/html/
 
 cat > /etc/nginx/sites-available/default <<EOF
     server {
-        listen 8080 default_server;
-        listen [::]:8080 default_server;
+        listen 8088 default_server;
+        listen [::]:8088 default_server;
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
         server_name _;
