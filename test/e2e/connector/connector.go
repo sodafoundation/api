@@ -26,6 +26,9 @@ import (
 
 const (
 	iscsiProtocol = "iscsi"
+
+	attachCommand = "attach"
+	detachCommand = "detach"
 )
 
 var (
@@ -38,7 +41,7 @@ func init() {
 }
 
 func main() {
-	if connInput == "" {
+	if len(os.Args) != 1 && connInput == "" {
 		fmt.Println("The number of args is not correct!")
 		os.Exit(-1)
 	}
@@ -48,11 +51,24 @@ func main() {
 		fmt.Println("The format of connection data is not correct!")
 		os.Exit(-1)
 	}
-	dev, err := connector.NewConnector(iscsiProtocol).Attach(connData)
-	if err != nil {
-		fmt.Println("Failed to attach volume to the host:", err)
+
+	switch os.Args[0] {
+	case attachCommand:
+		dev, err := connector.NewConnector(iscsiProtocol).Attach(connData)
+		if err != nil {
+			fmt.Println("Failed to attach volume to the host:", err)
+			os.Exit(-1)
+		}
+		fmt.Println("Got device:", dev)
+		break
+	case detachCommand:
+		if err := connector.NewConnector(iscsiProtocol).Detach(connData); err != nil {
+			fmt.Println("Failed to detach volume to the host:", err)
+			os.Exit(-1)
+		}
+		fmt.Println("Detach volume success!")
+		break
+	default:
 		os.Exit(-1)
 	}
-
-	fmt.Println("Got device:", dev)
 }

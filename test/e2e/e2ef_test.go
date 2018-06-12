@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
@@ -285,7 +284,7 @@ func TestListSnapshot(t *testing.T) {
 	}
 	snapli, _ := json.MarshalIndent(snpli, "", "    ")
 	t.Log(string(snapli))
-	t.Log("-----Update Snapshot Success-----")
+	t.Log("-----List Snapshot Success-----")
 }
 
 //Test Case:Get Snapshot detail
@@ -376,9 +375,8 @@ func TestShowAttachDetail(t *testing.T) {
 	}
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
+
 	getatt, err := u.GetVolumeAttachment(attc.Id)
-	t.Log("err:", err)
-	t.Log("Status:", getatt.Status)
 	if err != nil || getatt.Status != "available" {
 		t.Error("Get Volume Attachment Detail Fail!", err)
 		return
@@ -397,16 +395,25 @@ func TestVolumeAttach(t *testing.T) {
 	defer DeleteAttachment(attc.Id)
 
 	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return
+	}
+
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
 	//execute bin file
-	conn, err := json.Marshal(&getatt.ConnectionData)
-	if _, err = execRootCmd("attacher/attacher", string(conn)); err != nil {
+	conn, _ := json.Marshal(&getatt.ConnectionData)
+	output, err := execRootCmd("volume-connector",
+		"attach",
+		"--connection", string(conn))
+	if err != nil {
 		t.Error("Failed to attach volume:", err)
+		return
 	}
-	t.Log("getatt:", string(conn))
-	t.Log("Volume attach detail Check Success!")
+	t.Log(output)
+	t.Log("Volume attach success!")
 }
 
 //Test Case:Volume Detach
@@ -416,22 +423,29 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
 	getatt, err := u.GetVolumeAttachment(attc.Id)
-	defer DeleteAttachment(getatt.Id)
-	t.Log("Begin to Scan volume:")
-	t.Log("getatt.Metadata", getatt.ConnectionData)
-	var isc = &iscsi.Iscsi{}
-	//var isc = &attach.Iscsi{}
-	err = isc.Detach(getatt.ConnectionData)
-	if err != nil {
-		t.Error("Iscsi Attachment fail!", err)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
 		return
 	}
 
-	detail, _ := json.MarshalIndent(getatt, "", "    ")
-	t.Log("getatt:", string(detail))
-	t.Log("Volume Deattch Success!")
+	t.Log("Begin to Scan volume:")
+	t.Log("getatt.Metadata", getatt.ConnectionData)
 
+	//execute bin file
+	conn, _ := json.Marshal(&getatt.ConnectionData)
+	output, err := execRootCmd("volume-connector",
+		"detach",
+		"--connection", string(conn))
+	if err != nil {
+		t.Error("Failed to detach volume:", err)
+		return
+	}
+	t.Log(output)
+	t.Log("Volume Detach Success!")
 }
 
 //Test Case:Delete Attachment
