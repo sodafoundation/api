@@ -143,14 +143,22 @@ func TestExtendVolumeFlow(t *testing.T) {
 	body := &model.ExtendVolumeSpec{
 		NewSize: int64(2),
 	}
-	ext, err := u.ExtendVolume(vol.Id, body)
+	_, err := u.ExtendVolume(vol.Id, body)
 	if err != nil {
 		t.Error("Extend volume fail", err)
 	}
 	defer DeleteVolume(vol.Id)
-	extrs, _ := json.MarshalIndent(ext, "", "    ")
-	t.Log(string(extrs))
-	t.Log("Extend Volume Success")
+	 time.Sleep(3*1e9)
+         info, _ := u.GetVolume(vol.Id)
+         t.Log("SIZE:",info.Size)
+	 if info.Size !=2{
+           t.Error("Extend Volume Size is wrong!")
+           return
+         } 
+          t.Log("Extend Size is Right!")
+          extrs, _ := json.MarshalIndent(info, "", "    ")
+          t.Log(string(extrs))
+          t.Log("Extend Volume Success")
 
 }
 
@@ -408,7 +416,7 @@ func TestVolumeAttach(t *testing.T) {
 
 //compile the attach method,and call it
 func CompileAttach(t *testing.T, attach string, card string, discovered string, iqn string, lun string, portal string) {
-	//1)cp attach file to $GOPATH/src/attach
+        //1)cp attach file to $GOPATH/src/attach
 	//1.1) Get gopath
 	gopath := GetGopath()
 	t.Log("gopath:", gopath)
