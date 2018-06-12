@@ -20,7 +20,7 @@ env:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
-  - apt-get install -y lvm2 tgt open-iscsi
+  - sudo apt-get install -y lvm2 tgt open-iscsi
 
 matrix:
   fast_finish: true
