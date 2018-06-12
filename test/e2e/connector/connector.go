@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 
@@ -35,24 +34,14 @@ var (
 	connInput string
 )
 
-func init() {
-	flag.StringVar(&connInput, "connection", "", "Connectoin data for attaching the volume to host")
-	flag.Parse()
-}
-
 func main() {
-	if len(os.Args) != 1 && connInput == "" {
-		fmt.Println("The number of args is not correct!")
-		os.Exit(-1)
-	}
-
 	connData := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(connInput), &connData); err != nil {
-		fmt.Println("The format of connection data is not correct!")
+	if err := json.Unmarshal([]byte(os.Args[2]), &connData); err != nil {
+		fmt.Printf("The format of connection data(%v) is not correct!\n", connData)
 		os.Exit(-1)
 	}
 
-	switch os.Args[0] {
+	switch os.Args[1] {
 	case attachCommand:
 		dev, err := connector.NewConnector(iscsiProtocol).Attach(connData)
 		if err != nil {
@@ -69,6 +58,7 @@ func main() {
 		fmt.Println("Detach volume success!")
 		break
 	default:
+		fmt.Println(os.Args)
 		os.Exit(-1)
 	}
 }

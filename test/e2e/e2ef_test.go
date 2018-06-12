@@ -404,12 +404,15 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
 	//execute bin file
-	conn, _ := json.Marshal(&getatt.ConnectionData)
-	output, err := execRootCmd("volume-connector",
-		"attach",
-		"--connection", string(conn))
+	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
-		t.Error("Failed to attach volume:", err)
+		t.Error("Failed to marshal connection data:", err)
+		return
+	}
+	output, err := execCmd("sudo", "./volume-connector",
+		"attach", string(conn))
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
 		return
 	}
 	t.Log(output)
@@ -436,12 +439,15 @@ func TestVolumeDetach(t *testing.T) {
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
 	//execute bin file
-	conn, _ := json.Marshal(&getatt.ConnectionData)
-	output, err := execRootCmd("volume-connector",
-		"detach",
-		"--connection", string(conn))
+	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
-		t.Error("Failed to detach volume:", err)
+		t.Error("Failed to marshal connection data:", err)
+		return
+	}
+	output, err := execCmd("sudo", "./volume-connector",
+		"detach", string(conn))
+	if err != nil {
+		t.Error("Failed to detach volume:", output, err)
 		return
 	}
 	t.Log(output)
@@ -471,11 +477,9 @@ func TestDeleteAttach(t *testing.T) {
 	}
 }
 
-func execRootCmd(name string, arg ...string) (string, error) {
-	param := []string{name}
-	param = append(param, arg...)
-
-	info, err := exec.Command("sudo", param...).CombinedOutput()
+func execCmd(name string, arg ...string) (string, error) {
+	fmt.Println("Command: %s %s:\n", name, strings.Join(arg, " "))
+	info, err := exec.Command(name, arg...).CombinedOutput()
 	return string(info), err
 }
 
@@ -483,10 +487,10 @@ func execRootCmd(name string, arg ...string) (string, error) {
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
 	if err != nil {
-		t.Log("Prepare Volume Fail", err)
+		t.Error("Prepare Volume Fail", err)
 		return nil, err
 	}
-	defer DeleteVolume(vol.Id)
+
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{},
@@ -496,8 +500,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		t.Error("prepare volume attachment failed:", err)
 		return nil, err
 	}
-	attrs, _ := json.MarshalIndent(attc, "", "    ")
-	t.Log(string(attrs))
+
 	t.Log("prepare Volume Attachment Success")
 	return attc, nil
 }
@@ -566,8 +569,7 @@ func PrepareVolume() (*model.VolumeSpec, error) {
 		fmt.Println("Prepare Volume Fail")
 		return nil, err
 	}
-	volrs, _ := json.MarshalIndent(create, "", "    ")
-	fmt.Println(string(volrs))
+
 	fmt.Println("Prepare Volume Success")
 	return create, nil
 }
