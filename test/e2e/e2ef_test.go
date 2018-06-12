@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -402,11 +401,11 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
 	//execute bin file
-	conn, err := json.Marshal(&data)
-	if _, err = execRootCmd("attacher", string(conn)); err != nil {
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if _, err = execRootCmd("attacher/attacher", string(conn)); err != nil {
 		t.Error("Failed to attach volume:", err)
 	}
-	t.Log("getatt:", string(detail))
+	t.Log("getatt:", string(conn))
 	t.Log("Volume attach detail Check Success!")
 }
 
