@@ -20,8 +20,7 @@ env:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
-  - go get github.com/mattn/goveralls
-  - go get github.com/wadey/gocovmerge
+  - sudo apt-get install -y lvm2 tgt open-iscsi
 
 matrix:
   fast_finish: true
@@ -38,6 +37,8 @@ matrix:
   #   env: TARGET=ppc64le
 
 install:
+  - go get github.com/mattn/goveralls
+  - go get github.com/wadey/gocovmerge
   # Build OpenSDS Controller source code
   - make
 
