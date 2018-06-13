@@ -13,7 +13,11 @@
 
 <p-dataTable [value]="volumeGroups" [(selection)]="selectedVolumeGroups" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
-    <p-column field="name" header="Name"></p-column>
+    <p-column field="name" header="Name">
+        <ng-template pTemplate="body" let-group="rowData">
+            <a [routerLink]="['/volumeGroupDetails/' + group.id]">{{group.name}}</a>
+        </ng-template>
+    </p-column>
     <p-column field="description" header="Description"></p-column>
     <p-column field="status" header="Status"></p-column>
     <p-column field="profileName" header="Profile"></p-column>

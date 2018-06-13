@@ -26,16 +26,16 @@ cp -R ./dist/* /var/www/html/
 
 cat > /etc/nginx/sites-available/default <<EOF
     server {
-        listen 8088 default_server;
-        listen [::]:8088 default_server;
+        listen 8080 default_server;
+        listen [::]:8080 default_server;
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
         server_name _;
         location /v3/ {
-            proxy_pass http://127.0.0.1/identity/v3/;
+            proxy_pass http://10.10.3.173/identity/v3/;
         }
         location /v1beta/ {
-            proxy_pass http://127.0.0.1:50040/v1beta/;
+            proxy_pass http://10.10.3.173:50040/v1beta/;
         }
     }
 EOF

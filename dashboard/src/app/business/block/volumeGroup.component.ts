@@ -8,6 +8,7 @@ import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractC
 import { VolumeService ,VolumeGroupService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'volume-group-list',
@@ -34,7 +35,7 @@ export class VolumeGroupComponent implements OnInit{
     };
     constructor(
         public I18N: I18NService,
-        // private router: Router
+         private router: Router,
         private volumeGroupService : VolumeGroupService,
         private fb : FormBuilder,
         private profileService :ProfileService,
@@ -64,10 +65,6 @@ export class VolumeGroupComponent implements OnInit{
     }
 
     ngOnInit() {
-      this.volumeGroups = [
-          {"name": "group_for_REP", "status": "Available", "profile": "PF_block_01", "volumes": "2"},
-          {"name": "group_app01", "status": "Error", "profile": "PF_block_02", "volumes": "5"}
-      ];
       this.availabilityZones = [
         {
           label: 'Default', value: 'default'

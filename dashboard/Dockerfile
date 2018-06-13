@@ -1,7 +1,7 @@
 # Docker build usage:
 # 	docker build . -t opensdsio/dashboard:latest
 # Docker run usage:
-# 	docker run -d -p 8088:8088 opensdsio/dashboard:latest
+# 	docker run -d -p 8080:8080 opensdsio/dashboard:latest
 
 FROM ubuntu:16.04
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>

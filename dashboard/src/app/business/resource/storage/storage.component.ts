@@ -62,15 +62,20 @@ export class StorageComponent implements OnInit{
                 }
             })
 
-            let reqDock: any = { params:{} };
-            this.http.get("/v1beta/"+ project_id +"/docks", reqDock).subscribe((dockRES) => {
-                dockRES.json().forEach(ele => {
-                        let [name,ip,status,description,region,az] = [ele.name, ele.endpoint.split(":")[0], "Enabled", ele.description, "default_region", "default"];
+            let reqPool: any = { params:{} };
+            this.http.get("/v1beta/"+ project_id +"/pools", reqPool).subscribe((poolRES) => {
+                let reqDock: any = { params:{} };
+                this.http.get("/v1beta/"+ project_id +"/docks", reqDock).subscribe((dockRES) => {
+                    dockRES.json().forEach(ele => {
+                        let zone = poolRES.json().filter((pool)=>{
+                            return pool.dockId == ele.id;
+                        })[0].availabilityZone;
+                        let [name,ip,status,description,region,az] = [ele.name, ele.endpoint.split(":")[0], "Enabled", ele.description, "default_region", zone];
                         this.storages.push({name,ip,status,description,region,az});
+                    })
+                    console.log(this.storages);
                 })
-                console.log(this.storages);
             })
-
         })
     }
     

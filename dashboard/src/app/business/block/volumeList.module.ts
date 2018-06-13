@@ -7,6 +7,7 @@ import { ButtonModule, DataTableModule, DropMenuModule, DialogModule, FormModule
 import { HttpService } from './../../shared/service/Http.service';
 import {VolumeService, SnapshotService, ReplicationService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [ VolumeListComponent ],
@@ -22,7 +23,8 @@ import { ProfileService } from './../profile/profile.service';
     DropMenuModule,
     DialogModule,
     FormModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    RouterModule
   ],
   exports: [ VolumeListComponent ],
   providers: [

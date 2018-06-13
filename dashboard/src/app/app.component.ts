@@ -166,10 +166,12 @@ export class AppComponent implements OnInit, AfterViewInit{
         // Get user owned tenants
         let reqUser: any = { params:{} };
         this.http.get("/v3/users/"+ user.id +"/projects", reqUser).subscribe((objRES) => {
-            let project = tenant===undefined ? objRES.json().projects[0] : tenant;
+            let projects = objRES.json().projects;
+            let defaultProject = user.name != 'admin' ? projects[0] : projects.filter((project) => { return project.name == 'admin'})[0]; 
+            let project = tenant===undefined ? defaultProject : tenant;
 
             this.tenantItems = [];
-            objRES.json().projects.map(item => {
+            projects.map(item => {
                 let tenantItemObj = {};
                 tenantItemObj["label"] = item.name;
                 tenantItemObj["command"] = ()=>{

@@ -1,8 +1,9 @@
 <div *ngIf="showReplication">
     <div class="table-toolbar">
         <div class="left">
-            <button pButton type="button" label="{{I18N.keyID['sds_block_volume_replication_disable']}}" (click)="disableReplication()" class="ui-button-secondary"></button>
-            <button pButton type="button" label="{{I18N.keyID['sds_block_volume_replication_failover']}}" (click)="failoverReplication()"  ></button>
+            <button pButton type="button" *ngIf="operationStatus['enableBtnDisplay']" [disabled]="operationStatus['enableBtnDisabled']" label="{{I18N.keyID['sds_profile_enable']}}" (click)="enableReplication()" class="ui-button-secondary"></button>
+            <button pButton type="button" *ngIf="operationStatus['disableBtnDisplay']" [disabled]="operationStatus['disableBtnDisabled']" label="{{I18N.keyID['sds_block_volume_replication_disable']}}" (click)="disableReplication()" class="ui-button-secondary"></button>
+            <button pButton type="button" [disabled]="operationStatus['failoverBtnDisabled']" label="{{I18N.keyID['sds_block_volume_replication_failover']}}" (click)="failoverReplication()"  ></button>
             <button pButton type="button" label="{{I18N.keyID['sds_block_volume_delete']}}" (click)="deleteReplication()" ></button>
         </div>
     </div>
@@ -20,7 +21,7 @@
                     <div>
                         <div style="min-height:40px" class="item-flex">
                             <img style="margin:0 5px 0 30%" src="assets/business/images/volume/u436.png">
-                            <span>{{I18N.keyID['sds_resource_region_default']}}</span>
+                            <span>default</span>
                         </div>
                     </div>
                 </div>
@@ -35,7 +36,8 @@
                                 <input  class="margin-between-img-text" pInputText style="width:30px;" value="{{replication.replicationPeriod}}" disabled="true" type="text" />
                                 <span class="margin-between-img-text">Minutes</span>
                             </div>
-                            <img src="assets/business/images/volume/u760p000.png">
+                            <div [ngClass]="{'enabled':arrowEnable}" class="line-arrow-right"></div>
+                            <div style="margin-top:10px;text-align: center">{{replication['replicationStatus']}}</div>      
                         </div>
                     </div>
                 </div>
@@ -52,7 +54,7 @@
                         <div>
                             <div style="min-height:40px" class="item-flex">
                                 <img style="margin:0 5px 0 30%" src="assets/business/images/volume/u436.png">
-                                <span>{{I18N.keyID['sds_resource_region_default']}}</span>
+                                <span>secondary</span>
                             </div>
                         </div>
                     </div>

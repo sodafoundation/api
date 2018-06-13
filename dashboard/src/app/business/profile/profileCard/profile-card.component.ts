@@ -65,7 +65,7 @@ export class ProfileCardComponent implements OnInit {
 
     chartDatas: any;
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router
         private http: HttpService
     ) { }

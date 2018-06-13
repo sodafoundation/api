@@ -1,4 +1,4 @@
-import { Router } from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { I18NService } from 'app/shared/api';
 import { AppService } from 'app/app.service';
@@ -35,14 +35,17 @@ import { I18nPluralPipe } from '@angular/common';
     ]
 })
 export class BlockComponent implements OnInit{
-
+    fromGroup:boolean=false;
     constructor(
-         public I18N: I18NService,
-        // private router: Router
+        public I18N: I18NService,
+        private router: Router,
+        private ActivatedRoute:ActivatedRoute
     ){}
 
     ngOnInit() {
-
+        this.ActivatedRoute.params.subscribe(
+            (params) => this.fromGroup = !!params.fromRoute
+          );
     }
 
 }
