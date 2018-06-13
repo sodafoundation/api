@@ -28,7 +28,6 @@ dashboard:package
 
 package:
 	apt-get update && apt-get install -y --no-install-recommends \
-	  sudo \
 	  wget \
 	  make \
 	  g++ \
@@ -45,9 +44,10 @@ docker:
 .PHONY: docker
 
 clean:
+	service nginx stop
 	rm -rf /etc/nginx/sites-available/default /var/www/html/* ./dist warn=False
 	npm uninstall --unsafe-perm
 	npm uninstall --unsafe-perm -g @angular/cli@1.7.4
-	apt-get --purge remove -y nodejs \
+	apt-get --purge remove -y nodejs nginx \
 	  && rm -rf ./setup_8.x warn=False
 .PHONY: clean
