@@ -19,9 +19,10 @@ package context
 
 import (
 	"encoding/json"
+	"reflect"
+
 	"github.com/astaxie/beego/context"
 	"github.com/golang/glog"
-	"reflect"
 )
 
 func NewAdminContext() *Context {

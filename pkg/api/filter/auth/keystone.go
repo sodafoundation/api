@@ -95,7 +95,7 @@ func (k *Keystone) setPolicyContext(ctx *bctx.Context, r tokens.GetResult) error
 		"TenantId":       project.ID,
 		"Roles":          roleNames,
 		"UserId":         user.ID,
-		"IsAdminProject": project.Name == "admin",
+		"IsAdminProject": strings.ToLower(project.Name) == "admin",
 	}
 	context.UpdateContext(ctx, param)
 
