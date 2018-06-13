@@ -5,10 +5,11 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpService } from './../../shared/service/Http.service';
 import { VolumeService ,VolumeGroupService} from './volume.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [ VolumeGroupComponent ],
-  imports: [ ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule,MultiSelectModule,DropdownModule,ReactiveFormsModule,FormsModule,ConfirmDialogModule,InputTextareaModule],
+  imports: [ ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule,MultiSelectModule,DropdownModule,ReactiveFormsModule,FormsModule,ConfirmDialogModule,InputTextareaModule,RouterModule],
   exports: [ VolumeGroupComponent ],
   providers: [
     HttpService,

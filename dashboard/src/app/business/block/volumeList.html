@@ -25,8 +25,8 @@
     <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '28%'}">
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
             <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
-            <a (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
-            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
+            <a [ngClass]="{'a-rep-disabled':volume['isDisableRep']}" (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
+            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="volumeCanDelete(menuItems,volume)" (click)="returnSelectedVolume(volume)"></p-dropmenu>
         </ng-template>
     </p-column>
 </p-dataTable>
@@ -101,7 +101,7 @@
                             </div>
                             <div style="padding-top: 30px" class="item-flex">
                                 <span><img src="assets/business/images/volume/u436.png"></span>
-                                <span class="margin-between-img-text">{{I18N.keyID['sds_resource_region_default']}}</span>
+                                <span class="margin-between-img-text">default</span>
                             </div>
                         </div>
                     </div>
@@ -135,11 +135,6 @@
                     <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" [errorMessage]="errorMessage" >
                         <form-item label="Secondary Name" [required]="true">
                             <input type="text" pInputText formControlName="repName" [style]="{'min-width':'100px'}"/>
-                        </form-item>
-                        <form-item label="Target Region" >
-                            <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" ></p-dropdown>
-                            </div>
                         </form-item>
                         <form-item label="Target Availability Zone" [required]="true" >
                             <div style="display: inline-flex;" class="ui-fluid">

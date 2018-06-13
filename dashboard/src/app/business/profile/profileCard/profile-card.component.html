@@ -4,6 +4,10 @@
             <h2>{{data.name}}</h2>
         </div>
         <div class="padding-class">
+            <div style="float:left;margin-right:2px" class="label-class">{{I18N.keyID['sds_block_volume_descri']}}:</div>
+            <div style="overflow: hidden; text-overflow:ellipsis; white-space: nowrap;" title="{{data && data.description ?data.description :'--'}}">{{data && data.description ?data.description :"--"}}</div>
+        </div>
+        <div class="padding-class"style="clear:both;">
             <span class="label-class">Access Protocol:</span>
             <span>{{data.extras && data.extras[':provisionPolicy'].ioConnectivityLoS.accessProtocol}}</span>
         </div>

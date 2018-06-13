@@ -71,7 +71,7 @@ export class ReplicationGroupComponent implements OnInit {
     ];
       this.availabilityZone = [
           {
-              label: 'Default', value: 'default'
+              label: 'Secondary', value: 'secondary'
           }
       ];
     this.getProfiles();

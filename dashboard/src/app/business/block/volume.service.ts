@@ -38,6 +38,11 @@ export class VolumeService {
     let url = this.url + '/' + id;
     return this.http.get(url);
   }
+  //Search volume by groupId
+  getVolumeByGroupId(id): Observable<any> {
+    let url = this.url + '?GroupId=' + id;
+    return this.http.get(url);
+  }
 
   //Create volumesGroup
   createVolumesGroup(param) {
@@ -120,11 +125,15 @@ export class ReplicationService {
         let url = this.replicationUrl+"/"+param+"/disable";
         return this.http.post(url,param);
     }
+    enableReplication(param){
+      let url = this.replicationUrl+"/"+param+"/enable";
+      return this.http.post(url,param);
+  }
     failoverReplication(id){
         let url = this.replicationUrl+"/"+id+"/failover";
         let param = {
             "allowAttachedVolume": true,
-            "secondaryBackendId": id
+            "secondaryBackendId": "default"
         }
         return this.http.post(url,param);
     }
@@ -132,6 +141,11 @@ export class ReplicationService {
         let url = this.replicationUrl+"/"+param;
         return this.http.delete(url);
     }
+    //get all replications
+    getAllReplicationsDetail(){
+      let url = this.replicationUrl+"/detail";
+      return this.http.get(url);
+  }
 }
 @Injectable()
 export class VolumeGroupService {
@@ -159,6 +173,16 @@ export class VolumeGroupService {
     //modify volume group
     modifyVolumeGroup(groupId,param): Observable<any> {
       let url = this.volumeGroupUrl+"/" + groupId
+      return this.http.put(url,param);
+    }
+    //get volume group by id
+    getVolumeGroupById(groupId): Observable<any> {
+      let url = this.volumeGroupUrl+"/"+groupId;
+      return this.http.get(url);
+    }
+    //add or remove volumes 
+    addOrRemovevolumes(groupId,param): Observable<any> {
+      let url = this.volumeGroupUrl+"/"+groupId;
       return this.http.put(url,param);
     }
 }

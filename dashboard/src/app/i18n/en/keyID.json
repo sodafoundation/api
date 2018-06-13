@@ -97,7 +97,11 @@
     "sds_identity_res_usage":"Resource Usage",
     "sds_identity_tenant_cap":"Storage Capacity",
     "sds_identity_tenant_manage":"User Management",
-    "sds_identity_tenant_add":"Add User"
+    "sds_identity_tenant_add":"Add User",
+    "sds_block_volume_group_id":"Group ID",
+    "sds_block_volume_group_detail":"Volume Group detail",
+    "sds_block_volume_group_router":"Volume Group",
+    "sds_validate_max_length":"The maximum length is 200."
 
 
 

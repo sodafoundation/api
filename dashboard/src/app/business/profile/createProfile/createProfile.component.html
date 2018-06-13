@@ -9,6 +9,9 @@
         <form-item label="{{label.name}}" [required]="true">
             <input pInputText type="text" size="80" formControlName="name" />
         </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="48"  pInputTextarea formControlName="description"></textarea>
+        </form-item>
         <form-item label="{{label.protocol}}" [required]="true">
             <p-dropdown [style]="{'min-width':150}" formControlName="protocol" [options]="protocolOptions"></p-dropdown>
         </form-item>

@@ -202,6 +202,7 @@ export class CreateProfileComponent implements OnInit {
         "datetime" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Execution Time")},
         "snapNum" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
         "duration" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+        "description":{maxlength:this.I18N.keyID['sds_validate_max_length']}
     };
     snapshotRetentionOptions = [
         {
@@ -277,6 +278,7 @@ export class CreateProfileComponent implements OnInit {
     ngOnInit() {
         this.label = {
             name: this.I18N.keyID['sds_block_volume_name'],
+            description: this.I18N.keyID['sds_block_volume_descri'],
             protocol: this.I18N.keyID['sds_profile_access_pro'],
             type: this.I18N.keyID['sds_profile_pro_type'],
             qosPolicy: this.I18N.keyID['sds_profile_qos_policy'],
@@ -307,6 +309,7 @@ export class CreateProfileComponent implements OnInit {
 
         this.profileform = this.fb.group({
             'name': new FormControl('', Validators.required),
+            'description':new FormControl('',Validators.maxLength(200)),
             'protocol': new FormControl('iSCSI'),
             'storageType': new FormControl('Thin', Validators.required),
             'policys': new FormControl(''),
@@ -363,6 +366,7 @@ export class CreateProfileComponent implements OnInit {
         this.msgs = [];
         this.msgs.push({ severity: 'info', summary: 'Success', detail: 'Form Submitted' });
         this.param.name = value.name;
+        this.param.description = value.description;
         if(this.qosIsChecked){
             if(!this.qosPolicy.valid){
                 for(let i in this.qosPolicy.controls){

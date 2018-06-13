@@ -46,7 +46,7 @@ export class VolumeListComponent implements OnInit {
             value: null
         }
     ];
-    azOption=[{label:"default",value:"default"}];
+    azOption=[{label:"Secondary",value:"secondary"}];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
@@ -117,7 +117,8 @@ export class VolumeListComponent implements OnInit {
                 "label": this.I18N.keyID['sds_block_volume_modify'],
                 command: () => {
                     this.modifyDisplay = true;
-                }
+                },
+                disabled:false
             },
             {
                 "label": this.I18N.keyID['sds_block_volume_expand'],
@@ -126,14 +127,17 @@ export class VolumeListComponent implements OnInit {
                     this.expandFormGroup.reset();
                     this.expandFormGroup.controls["expandSize"].setValue(1);
                     this.unit = 1;
-                }
+                },
+                disabled:false
             },
             {
-                "label": this.I18N.keyID['sds_block_volume_delete'], command: () => {
+                "label": this.I18N.keyID['sds_block_volume_delete'], 
+                command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
                         this.deleteVolumes(this.selectedVolume);
                     }
-                }
+                },
+                disabled:false
             }
         ];
 
@@ -144,15 +148,36 @@ export class VolumeListComponent implements OnInit {
         this.selectedVolumes = [];
         this.VolumeService.getVolumes().subscribe((res) => {
             this.volumes = res.json();
-            this.volumes.map((item)=>
-                {
-                    item['profileName'] = this.profiles.filter((profile,index,arr)=>{
-                        return profile.id == item.profileId;
-                    })[0].name;
-
-                    item.size = Utils.getDisplayGBCapacity(item.size);
-                }
-            )
+            this.ReplicationService.getAllReplicationsDetail().subscribe((resRep)=>{
+                let replications = resRep.json();
+                this.volumes.map((item)=>
+                    {
+                        item['profileName'] = this.profiles.filter((profile,index,arr)=>{
+                            return profile.id == item.profileId;
+                        })[0].name;
+                        item['isDisableRep'] = false;
+                        replications.map((rep)=>{
+                            if(rep.primaryVolumeId == item.id || rep.secondaryVolumeId == item.id){
+                                item['isDisableRep'] = true;
+                            }
+                        });
+                        item.size = Utils.getDisplayGBCapacity(item.size);
+                    }
+                );
+            });
+            this.SnapshotService.getSnapshots().subscribe((resSnap)=>{
+                let snaps = resSnap.json();
+                this.volumes.map((item)=>
+                    {
+                        item['disabled'] = false;
+                        snaps.map((snap)=>{
+                            if(snap.volumeId == item.id){
+                                item['disabled'] = true;
+                            }
+                        });
+                    }
+                );
+            });
         });
     }
 
@@ -200,6 +225,7 @@ export class VolumeListComponent implements OnInit {
         }
         this.SnapshotService.createSnapshot(param).subscribe((res) => {
             this.createSnapshotDisplay = false;
+            this.getProfiles();
         });
     }
 
@@ -252,7 +278,7 @@ export class VolumeListComponent implements OnInit {
         }
         let param = {
             "name":this.replicationGroup.value.repName ,
-            "size": this.selectedVolume.size,
+            "size": Number(this.selectedVolume.size.replace(" GB","")),
             "availabilityZone": this.replicationGroup.value.az.value,
             "profileId": this.replicationGroup.value.profileOption,
         }
@@ -302,5 +328,9 @@ export class VolumeListComponent implements OnInit {
 
     tablePaginate() {
         this.selectedVolumes = [];
+    }
+    volumeCanDelete(param1,param2){
+        param1[2].disabled = param2['disabled'];
+        return param1;
     }
 }
