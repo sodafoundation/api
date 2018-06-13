@@ -20,13 +20,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
@@ -148,17 +146,17 @@ func TestExtendVolumeFlow(t *testing.T) {
 		t.Error("Extend volume fail", err)
 	}
 	defer DeleteVolume(vol.Id)
-	 time.Sleep(3*1e9)
-         info, _ := u.GetVolume(vol.Id)
-         t.Log("SIZE:",info.Size)
-	 if info.Size !=2{
-           t.Error("Extend Volume Size is wrong!")
-           return
-         } 
-          t.Log("Extend Size is Right!")
-          extrs, _ := json.MarshalIndent(info, "", "    ")
-          t.Log(string(extrs))
-          t.Log("Extend Volume Success")
+	time.Sleep(3 * 1e9)
+	info, _ := u.GetVolume(vol.Id)
+	t.Log("SIZE:", info.Size)
+	if info.Size != 2 {
+		t.Error("Extend Volume Size is wrong!")
+		return
+	}
+	t.Log("Extend Size is Right!")
+	extrs, _ := json.MarshalIndent(info, "", "    ")
+	t.Log(string(extrs))
+	t.Log("Extend Volume Success")
 
 }
 
@@ -286,7 +284,7 @@ func TestListSnapshot(t *testing.T) {
 	}
 	snapli, _ := json.MarshalIndent(snpli, "", "    ")
 	t.Log(string(snapli))
-	t.Log("-----Update Snapshot Success-----")
+	t.Log("-----List Snapshot Success-----")
 }
 
 //Test Case:Get Snapshot detail
@@ -377,9 +375,8 @@ func TestShowAttachDetail(t *testing.T) {
 	}
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
+
 	getatt, err := u.GetVolumeAttachment(attc.Id)
-	t.Log("err:", err)
-	t.Log("Status:", getatt.Status)
 	if err != nil || getatt.Status != "available" {
 		t.Error("Get Volume Attachment Detail Fail!", err)
 		return
@@ -391,107 +388,35 @@ func TestShowAttachDetail(t *testing.T) {
 func TestVolumeAttach(t *testing.T) {
 	attc, err := PrepareAttachment(t)
 	if err != nil {
-		t.Error("Prepare Attachment Fail!", err)
+		t.Error("Prepare Attachment Fail:", err)
 		return
 	}
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
+
 	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return
+	}
+
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
-	//execute bin file
-	date := getatt.ConnectionData
-	attach := date["attachment"].(string)
-	card := strconv.FormatBool(date["discard"].(bool))
-	discovered := strconv.FormatBool(date["targetDiscovered"].(bool))
-	iqn := date["targetIQN"].(string)
-	lun := date["targetLun"].(float64)
-	luns := strconv.FormatFloat(lun, 'f', 0, 64)
-	portal := date["targetPortal"].(string)
-	CompileAttach(t, attach, card, discovered, iqn, luns, portal)
-	detail, _ := json.MarshalIndent(getatt, "", "    ")
-	t.Log("getatt:", string(detail))
-	t.Log("Volume attach detail Check Success!")
-}
 
-//compile the attach method,and call it
-func CompileAttach(t *testing.T, attach string, card string, discovered string, iqn string, lun string, portal string) {
-        //1)cp attach file to $GOPATH/src/attach
-	//1.1) Get gopath
-	gopath := GetGopath()
-	t.Log("gopath:", gopath)
-	//1.2) Create src folder under $GOPATH
-	attachPath := strings.Join([]string{gopath, "/src"}, "")
-	t.Log("attachPath:", attachPath)
-	info1, err := execCmd("mkdir", "-p", attachPath)
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
-		t.Error("mkdir fail!")
+		t.Error("Failed to marshal connection data:", err)
+		return
 	}
-	t.Log("info1:", info1)
-	//1.3) cp attach folder that contain attach method to $GOPATH/src/
-	info2, err := execCmd("cp", "-r", "../../testutils/attach", attachPath)
+	output, err := execCmd("sudo", "./volume-connector",
+		"attach", string(conn))
 	if err != nil {
-		t.Error("cp fail")
+		t.Error("Failed to attach volume:", output, err)
+		return
 	}
-	t.Log("info2:", info2)
-	//2) go install attach,and you will get the .a file
-	execCmd("cd", attachPath)
-	install, err := execCmd("go", "install", "attach")
-	if err != nil {
-		t.Log("Go Install Fail", err)
-	}
-	t.Log("Go Install:", install)
-	//3)get .o file from .a file
-	//3.1)find the path of attach.a
-	alocate, err := execCmd("find", gopath, "-name", "attach.a")
-	if err != nil {
-		t.Log("Can't find the file!")
-	}
-	//3.2) cut the attach.a from path
-	alocate = strings.Replace(alocate, "/attach.a", "", -1)
-	//3.3)remove the enter(\n) at the end of the alocate
-	alocate = strings.Replace(alocate, "\n", "", -1)
-	t.Log("alocate:", alocate)
-	//4) compile attach.go
-	//4.1) cp attach.go to $GOPATH/src/attach/
-	attgoPath := strings.Join([]string{gopath, "/src/attach"}, "")
-	execCmd("cp", "../../testutils/attach.go", attgoPath)
-	attgopath := attgoPath + "/attach.go"
-	t.Log("attach.go path attgopath:", attgopath)
-	//4.2) begin compile,get .o file
-	attgopath = strings.Replace(attgopath, "\n", "", -1)
-	com, err := execCmd("go", "tool", "compile", "-I", alocate, attgopath)
-	if err != nil {
-		t.Error("compile attach.go fail")
-	}
-	t.Log("compile atach.go result:", com)
-	//5) link .o file,get .bin file
-	// 5.1) find .o file locate
-	olocate, err := execCmd("find", gopath, "-name", "attach.o")
-	if err != nil {
-		t.Error("Can't find .o file")
-	}
-	olocate = strings.Replace(olocate, "\n", "", -1)
-	t.Log("olocate:", olocate)
-	//5.2) link .o file
-	link, err := execCmd("go", "tool", "link", "-o", "attach.bin", "-L", alocate, olocate)
-	if err != nil {
-		t.Error("link .o file fail")
-	}
-	t.Log("link result:", link)
-	//6) run bin file with param
-	binpath, err := execCmd("find", gopath, "-name", "attach.bin")
-	if err != nil {
-		t.Error("Can't find bin file from gopath")
-	}
-	binpath = strings.Replace(binpath, "\n", "", -1)
-	t.Log("binpath:", binpath)
-	execCmd("cd", binpath)
-	run, err := execCmd("sudo", "./attach.bin", attach, card, discovered, iqn, lun, portal)
-	if err != nil {
-		t.Error("run bin file fail", err)
-	}
-	t.Log("run:", run)
+	t.Log(output)
+	t.Log("Volume attach success!")
 }
 
 //Test Case:Volume Detach
@@ -501,22 +426,32 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
 	getatt, err := u.GetVolumeAttachment(attc.Id)
-	defer DeleteAttachment(getatt.Id)
-	t.Log("Begin to Scan volume:")
-	t.Log("getatt.Metadata", getatt.ConnectionData)
-	var isc = &iscsi.Iscsi{}
-	//var isc = &attach.Iscsi{}
-	err = isc.Detach(getatt.ConnectionData)
-	if err != nil {
-		t.Error("Iscsi Attachment fail!", err)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
 		return
 	}
 
-	detail, _ := json.MarshalIndent(getatt, "", "    ")
-	t.Log("getatt:", string(detail))
-	t.Log("Volume Deattch Success!")
+	t.Log("Begin to Scan volume:")
+	t.Log("getatt.Metadata", getatt.ConnectionData)
 
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if err != nil {
+		t.Error("Failed to marshal connection data:", err)
+		return
+	}
+	output, err := execCmd("sudo", "./volume-connector",
+		"detach", string(conn))
+	if err != nil {
+		t.Error("Failed to detach volume:", output, err)
+		return
+	}
+	t.Log(output)
+	t.Log("Volume Detach Success!")
 }
 
 //Test Case:Delete Attachment
@@ -552,10 +487,10 @@ func execCmd(name string, arg ...string) (string, error) {
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
 	if err != nil {
-		t.Log("Prepare Volume Fail", err)
+		t.Error("Prepare Volume Fail", err)
 		return nil, err
 	}
-	defer DeleteVolume(vol.Id)
+
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{},
@@ -565,8 +500,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		t.Error("prepare volume attachment failed:", err)
 		return nil, err
 	}
-	attrs, _ := json.MarshalIndent(attc, "", "    ")
-	t.Log(string(attrs))
+
 	t.Log("prepare Volume Attachment Success")
 	return attc, nil
 }
@@ -635,8 +569,7 @@ func PrepareVolume() (*model.VolumeSpec, error) {
 		fmt.Println("Prepare Volume Fail")
 		return nil, err
 	}
-	volrs, _ := json.MarshalIndent(create, "", "    ")
-	fmt.Println(string(volrs))
+
 	fmt.Println("Prepare Volume Success")
 	return create, nil
 }
@@ -675,4 +608,3 @@ func DeleteProfile(t *testing.T, proId string) error {
 	fmt.Println("Delete Profile Success")
 	return nil
 }
-
