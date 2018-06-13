@@ -50,7 +50,32 @@ func NewContextFromJson(s string) *Context {
 
 func GetContext(httpCtx *context.Context) *Context {
 	ctx, _ := httpCtx.Input.GetData("context").(*Context)
+	if ctx == nil {
+		ctx = &Context{}
+	}
 	return ctx
+}
+
+func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Context, error) {
+
+	ctx := GetContext(httpCtx)
+	if param == nil || len(param) == 0 {
+		glog.Warning("Context parameter is empty, nothing to be updated")
+		return ctx, nil
+	}
+	ctxV := reflect.ValueOf(ctx).Elem()
+	for key, val := range param {
+		field := ctxV.FieldByName(key)
+		pv := reflect.ValueOf(val)
+		if field.Kind() == pv.Kind() && field.CanSet() {
+			field.Set(pv)
+		} else {
+			glog.Errorf("Invalid parameter %s : %v", key, val)
+		}
+	}
+
+	httpCtx.Input.SetData("context", ctx)
+	return ctx, nil
 }
 
 type Context struct {
