@@ -22,7 +22,7 @@ const (
 	DefaultOpensdsEndpoint = "http://localhost:50040"
 
 	// This is set for None Auth
-	DefaultTenantId = "ef305038-cd12-4f3b-90bd-0612f83e14ee"
+	DefaultTenantId = "e93b4c0934da416eb9c8d120c5d04d96"
 
 	// Token parameter name
 	AuthTokenHeader    = "X-Auth-Token"
