@@ -33,53 +33,31 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-const (
-	// OpensdsEndpoint ...
-	OpensdsEndpoint = "OPENSDS_ENDPOINT"
-	// OpensdsAuthStrategy ...
-	OpensdsAuthStrategy = "OPENSDS_AUTH_STRATEGY"
-	// OpensdsTenantID ...
-	OpensdsTenantID = "OPENSDS_TENANT_ID"
-
-	// OsAuthURL ...
-	OsAuthURL = "OS_AUTH_URL"
-	// OsUsername ...
-	OsUsername = "OS_USERNAME"
-	// OsPassword ...
-	OsPassword = "OS_PASSWORD"
-	// OsTenantName ...
-	OsTenantName = "OS_TENANT_NAME"
-	// OsProjectName ...
-	OsProjectName = "OS_PROJECT_NAME"
-	// OsUserDomainID ...
-	OsUserDomainID = "OS_USER_DOMAIN_ID"
-)
-
 var (
 	client *c.Client
 )
 
 // Run ...
 func Run(CinderEndPoint string) {
-	ep, ok := os.LookupEnv(OpensdsEndpoint)
+	ep, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
-			"the environment variable " + OpensdsEndpoint)
+			"the environment variable " + c.OpensdsEndpoint)
 		return
 	}
 	cfg := &c.Config{Endpoint: ep}
 
-	authStrategy, ok := os.LookupEnv(OpensdsAuthStrategy)
+	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
-		fmt.Println("WARNING: Not found Env " + OpensdsAuthStrategy + ", use default(noauth)")
+		fmt.Println("WARNING: Not found Env " + c.OpensdsAuthStrategy + ", use default(noauth)")
 	}
 
 	switch authStrategy {
 	case c.Keystone:
-		cfg.AuthOptions = LoadKeystoneAuthOptionsFromEnv()
+		cfg.AuthOptions = c.LoadKeystoneAuthOptionsFromEnv()
 	case c.Noauth:
-		cfg.AuthOptions = LoadNoAuthOptionsFromEnv()
+		cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
 	default:
 		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
 	}
@@ -151,28 +129,4 @@ func Run(CinderEndPoint string) {
 
 	// start service
 	beego.Run(words[2])
-}
-
-// LoadKeystoneAuthOptionsFromEnv ...
-func LoadKeystoneAuthOptionsFromEnv() *c.KeystoneAuthOptions {
-	opt := c.NewKeystoneAuthOptions()
-	opt.IdentityEndpoint = os.Getenv(OsAuthURL)
-	opt.Username = os.Getenv(OsUsername)
-	opt.Password = os.Getenv(OsPassword)
-	opt.TenantName = os.Getenv(OsTenantName)
-	projectName := os.Getenv(OsProjectName)
-	opt.DomainID = os.Getenv(OsUserDomainID)
-	if opt.TenantName == "" {
-		opt.TenantName = projectName
-	}
-	return opt
-}
-
-// LoadNoAuthOptionsFromEnv ...
-func LoadNoAuthOptionsFromEnv() *c.NoAuthOptions {
-	tenantID, ok := os.LookupEnv(OpensdsTenantID)
-	if !ok {
-		return c.NewNoauthOptions(constants.DefaultTenantId)
-	}
-	return c.NewNoauthOptions(tenantID)
 }
