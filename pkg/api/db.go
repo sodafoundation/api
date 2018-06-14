@@ -236,7 +236,7 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 			log.Error("when delete volume in db:", err)
 			return err
 		}
-		return fmt.Errorf("Volume %s can not be deleted, because its profile or pool is empty.", in.Id)
+		return nil
 	}
 
 	snaps, err := db.C.ListSnapshotsByVolumeId(ctx, in.Id)
