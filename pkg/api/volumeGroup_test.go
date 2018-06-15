@@ -309,7 +309,7 @@ func TestDeleteVolumeGroup(t *testing.T) {
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroupDelete, nil)
 	mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
 	mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), fakeGroupVolumes[0].Id).Return(Snapshots, nil)
-
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fakeVolumeGroupDelete.PoolId).Return(nil, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("DELETE", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
