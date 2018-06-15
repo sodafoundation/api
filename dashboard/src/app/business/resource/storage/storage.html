@@ -9,11 +9,11 @@
     </div>
 </div>
 
-<p-dataTable [immutable]="false" [globalFilter]="searchByName" [value]="storages" selectionMode="single" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
-    <p-column field="name" header="Name" [style]="{'width': '20%'}"></p-column>
-    <p-column field="ip" header="IP Address"></p-column>
-    <p-column field="status" header="Status"></p-column>
-    <p-column field="description" header="Description"></p-column>
-    <p-column field="region" header="Region"></p-column>
-    <p-column field="az" header="Availability Zone"></p-column>
+<p-dataTable [immutable]="false" [globalFilter]="searchByName" [value]="storages" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '20%'}"></p-column>
+    <p-column field="ip" header="{{I18N.keyID['sds_resource_storage_ip']}}"></p-column>
+    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}"></p-column>
+    <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
+    <p-column field="region" header="{{I18N.keyID['sds_resource_region']}}"></p-column>
+    <p-column field="az" header="{{I18N.keyID['sds_block_volume_az']}}"></p-column>
 </p-dataTable>

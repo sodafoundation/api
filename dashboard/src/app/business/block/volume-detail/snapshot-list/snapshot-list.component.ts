@@ -2,11 +2,12 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { VolumeService,SnapshotService } from './../../volume.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../../../components/common/api';
-import { I18NService } from 'app/shared/api';
+import { I18NService, MsgBoxService, Utils } from 'app/shared/api';
 
 @Component({
   selector: 'app-snapshot-list',
   templateUrl: './snapshot-list.component.html',
+  providers: [ConfirmationService],
   styleUrls: [
 
   ]
@@ -18,11 +19,12 @@ export class SnapshotListComponent implements OnInit {
   label;
   selectedSnapshotId;
   selectedSnapshots = [];
-  snapshortfilter;
   snapshots;
   snapshotfilter;
   snapshotPropertyDisplay = false;
   snapshotFormGroup;
+  createVolumeFormGroup;
+  createVolumeDisplay: boolean = false;
 
   isCreate = false;
   isModify = false;
@@ -36,15 +38,24 @@ export class SnapshotListComponent implements OnInit {
       "name": { required: "Name is required." },
       "description": { maxlength: "Max. length is 200." }
   };
-
+  param = {
+    key: 'VolumeId',
+    value: null
+  }
   constructor(
     private VolumeService: VolumeService,
     private SnapshotService: SnapshotService,
     private fb: FormBuilder,
     private confirmationService:ConfirmationService,
-    public I18N:I18NService
+    public I18N:I18NService,
+    private msg: MsgBoxService
   ) {
     this.snapshotFormGroup = this.fb.group({
+      "name": ["", Validators.required],
+      "description": ["", Validators.maxLength(200)]
+    });
+
+    this.createVolumeFormGroup = this.fb.group({
       "name": ["", Validators.required],
       "description": ["", Validators.maxLength(200)]
     });
@@ -57,12 +68,11 @@ export class SnapshotListComponent implements OnInit {
       volume:  this.I18N.keyID['sds_block_volume_title'],
       description:  this.I18N.keyID['sds_block_volume_descri']
     }
-    this.getSnapshots(
-      {
-        key: 'VolumeId',
-        value: this.volumeId
-      }
-    );
+    this.param={
+      key: 'VolumeId',
+      value: this.volumeId
+    };
+    this.getSnapshots(this.param);
   }
 
   getVolumeById(volumeId){
@@ -128,6 +138,10 @@ export class SnapshotListComponent implements OnInit {
     this.SnapshotService.getSnapshots(filter).subscribe((res) => {
       this.snapshots = res.json();
       this.snapshotPropertyDisplay = false;
+
+      this.snapshots.map((item, index, arr)=>{
+        item.size = Utils.getDisplayGBCapacity(item.size);
+      })
     });
   }
 
@@ -171,6 +185,34 @@ export class SnapshotListComponent implements OnInit {
       this.createSnapshot();
     }
 
+  }
+
+  showCreateVolumeBasedonSnapshot(snapshot){
+    this.createVolumeDisplay = true;
+    this.selectedSnapshotId = snapshot.id;
+  }
+
+  createVolumeBasedonSnapshot(snapshot) {
+    let param = {
+      name: this.createVolumeFormGroup.value.name,
+      description: this.createVolumeFormGroup.value.description,
+      size: this.volume.size,
+      availabilityZone: this.volume.availabilityZone,
+      profileId: this.volume.profileId,
+      snapshotId: this.selectedSnapshotId
+    }
+
+    if(this.createVolumeFormGroup.status == "VALID"){
+      this.VolumeService.createVolume(param).subscribe((res) => {
+        this.createVolumeDisplay = false;
+        this.msg.info("The volume is being created, please go to the volume list and check it.");
+      });
+    }else{
+      // validate
+      for(let i in this.createVolumeFormGroup.controls){
+          this.createVolumeFormGroup.controls[i].markAsTouched();
+      }
+    }
   }
 
 }

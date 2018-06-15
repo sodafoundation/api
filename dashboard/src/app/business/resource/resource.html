@@ -1,11 +1,11 @@
 <p-tabView styleClass="ui-tabview-large">
-    <p-tabPanel header="Region">
+    <p-tabPanel header="{{I18N.keyID['sds_resource_region']}}">
         <region-table></region-table>
     </p-tabPanel>
-    <p-tabPanel header="Availability Zone">
+    <p-tabPanel header="{{I18N.keyID['sds_block_volume_az']}}">
         <zone-table></zone-table>
     </p-tabPanel>
-    <p-tabPanel header="Storage">
+    <p-tabPanel header="{{I18N.keyID['sds_resource_storage']}}">
         <storage-table></storage-table>
     </p-tabPanel>
 </p-tabView>

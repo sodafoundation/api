@@ -1,3 +1,69 @@
-<p>
-    replication-list works!(TODO)
-</p>
+<div *ngIf="showReplication">
+    <div class="table-toolbar">
+        <div class="left">
+            <button pButton type="button" *ngIf="operationStatus['enableBtnDisplay']" [disabled]="operationStatus['enableBtnDisabled']" label="{{I18N.keyID['sds_profile_enable']}}" (click)="enableReplication()" class="ui-button-secondary"></button>
+            <button pButton type="button" *ngIf="operationStatus['disableBtnDisplay']" [disabled]="operationStatus['disableBtnDisabled']" label="{{I18N.keyID['sds_block_volume_replication_disable']}}" (click)="disableReplication()" class="ui-button-secondary"></button>
+            <button pButton type="button" [disabled]="operationStatus['failoverBtnDisabled']" label="{{I18N.keyID['sds_block_volume_replication_failover']}}" (click)="failoverReplication()"  ></button>
+            <button pButton type="button" label="{{I18N.keyID['sds_block_volume_delete']}}" (click)="deleteReplication()" ></button>
+        </div>
+    </div>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" style="margin-top: 50px">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2 "></div>
+            <div class="ui-grid-col-2 item-content-backgroud">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                    <div class="ui-grid-row replication-img-item-height">
+                        <div class="ui-grid-col-12 text-align-center">
+                            <img src="assets/business/images/volume/u583.png">
+                        </div>
+                    </div>
+                    <div style="text-align: center;font-size: 16px">{{volume.name}}</div>
+                    <div>
+                        <div style="min-height:40px" class="item-flex">
+                            <img style="margin:0 5px 0 30%" src="assets/business/images/volume/u436.png">
+                            <span>default</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-2">
+                <div class="ui-grid-col-12">
+                    <div class="replication-img-item-padding position-relative">
+                        <div class="replication-img-item-height">
+                            <div class="item-flex item-flex-justify" >
+                                <span>Period</span>
+                                <span class="margin-between-img-text">=</span>
+                                <input  class="margin-between-img-text" pInputText style="width:30px;" value="{{replication.replicationPeriod}}" disabled="true" type="text" />
+                                <span class="margin-between-img-text">Minutes</span>
+                            </div>
+                            <div [ngClass]="{'enabled':arrowEnable}" class="line-arrow-right"></div>
+                            <div style="margin-top:10px;text-align: center">{{replication['replicationStatus']}}</div>      
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-2 item-content-backgroud">
+                <div class="ui-grid-col-12" >
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-img-item-height">
+                            <div class="ui-grid-col-12 text-align-center">
+                                <img src="assets/business/images/volume/u585.png" height="61px">
+                            </div>
+                        </div>
+                        <div style="text-align: center;font-size: 16px">{{replication.name}}</div>
+                        <div>
+                            <div style="min-height:40px" class="item-flex">
+                                <img style="margin:0 5px 0 30%" src="assets/business/images/volume/u436.png">
+                                <span>secondary</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div *ngIf="!showReplication">
+    no data available
+</div>
+<p-confirmDialog></p-confirmDialog>

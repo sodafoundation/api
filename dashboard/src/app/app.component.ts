@@ -39,12 +39,12 @@ export class AppComponent implements OnInit, AfterViewInit{
     menuItems_tenant = [
         {
             "title": "Home",
-            "description": "Update 5 minutes ago",
+            "description": "Resources statistics",
             "routerLink": "/home"
         },
         {
             "title": "Volume",
-            "description": "23 volumes",
+            "description": "Block storage resources",
             "routerLink": "/block"
         }
     ]
@@ -52,12 +52,12 @@ export class AppComponent implements OnInit, AfterViewInit{
     menuItems_admin = [
         {
             "title": "Home",
-            "description": "Update 5 minutes ago",
+            "description": "Resources statistics",
             "routerLink": "/home"
         },
         {
             "title": "Volume",
-            "description": "23 volumes",
+            "description": "Block storage resources",
             "routerLink": "/block"
         },
         // {
@@ -67,12 +67,12 @@ export class AppComponent implements OnInit, AfterViewInit{
         // },
         {
             "title": "Profile",
-            "description": "7 profiles have been created",
+            "description": "Block profiles",
             "routerLink": "/profile"
         },
         {
             "title": "Resource",
-            "description": "5 storages, 2 availability zone",
+            "description": "Regions, availability zones and storages",
             "routerLink": "/resource"
         },
         {
@@ -166,10 +166,12 @@ export class AppComponent implements OnInit, AfterViewInit{
         // Get user owned tenants
         let reqUser: any = { params:{} };
         this.http.get("/v3/users/"+ user.id +"/projects", reqUser).subscribe((objRES) => {
-            let project = tenant===undefined ? objRES.json().projects[0] : tenant;
+            let projects = objRES.json().projects;
+            let defaultProject = user.name != 'admin' ? projects[0] : projects.filter((project) => { return project.name == 'admin'})[0]; 
+            let project = tenant===undefined ? defaultProject : tenant;
 
             this.tenantItems = [];
-            objRES.json().projects.map(item => {
+            projects.map(item => {
                 let tenantItemObj = {};
                 tenantItemObj["label"] = item.name;
                 tenantItemObj["command"] = ()=>{
@@ -213,7 +215,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.dropMenuItems = [
                         { 
                             label: "Switch Region", 
-                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                            items: [{ label: "default_region", command:()=>{} }]
                         },
                         { 
                             label: "Logout", 
@@ -225,7 +227,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.dropMenuItems = [
                         { 
                             label: "Switch Region", 
-                            items: [{ label: "Region-Beijing", command:()=>{} }]
+                            items: [{ label: "default_region", command:()=>{} }]
                         },
                         { 
                             label: "Switch Tenant", 

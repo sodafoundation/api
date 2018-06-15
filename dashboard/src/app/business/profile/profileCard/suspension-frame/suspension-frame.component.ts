@@ -14,7 +14,7 @@ export class SuspensionFrameComponent implements OnInit {
     set policy(policy: any) {
         let extra = policy[1];
         this.policyName = policy[0];
-        if(this.policyName === "Qos"){
+        if(this.policyName === "QoS"){
             let maxIpos ="MaxIOPS = " + extra[":provisionPolicy"].ioConnectivityLoS.maxIOPS + " IOPS/TB";
             this.data.push(maxIpos);
             let maxBWS = "MaxBWS = " + extra[":provisionPolicy"].ioConnectivityLoS.maxBWS + " MBPS/TB";
@@ -39,7 +39,7 @@ export class SuspensionFrameComponent implements OnInit {
         }else{
             let schedule ="Schedule = " + extra[":snapshotPolicy"].schedule.occurrence;
             this.data.push(schedule);
-            let execution = "Execution Time = " + extra[":snapshotPolicy"].schedule.datetime ;
+            let execution = "Execution Time = " + extra[":snapshotPolicy"].schedule.datetime.split("T")[1] ;
             this.data.push(execution);
             let Retention  = "Retention  = " + (extra[":snapshotPolicy"].retention["number"] ? extra[":snapshotPolicy"].retention["number"]: (extra[":snapshotPolicy"].retention.duration+" Days"));
             this.data.push(Retention );

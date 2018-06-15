@@ -90,12 +90,21 @@ func (p *ProfileMgr) UpdateProfile(prfID string, body ProfileBuilder) (*model.Pr
 }
 
 // ListProfiles
-func (p *ProfileMgr) ListProfiles() ([]*model.ProfileSpec, error) {
+func (p *ProfileMgr) ListProfiles(args ...interface{}) ([]*model.ProfileSpec, error) {
 	var res []*model.ProfileSpec
+
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
 
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}

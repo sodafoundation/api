@@ -1,0 +1,84 @@
+<div>
+  <div class="custom-breadcrumb">
+      <span *ngFor="let item of items; index as i">
+        <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url,'fromGroup']">{{item.label}}</a>
+        <span *ngIf="(i+1) !== items.length">></span>
+      </span>
+  </div>
+  <div class="volume-basic-info">
+      <h3>Basic Information</h3>
+      <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" *ngIf="volumeGroup">
+          <div class="ui-grid-row volume-basic-item-class">
+              <div class="ui-grid-col-1">
+                  {{label.Name}}:
+              </div>
+              <div class="ui-grid-col-2 volume-basic-item-value-color" >
+                  {{volumeGroup.name}}
+              </div>
+              <div class="ui-grid-col-1">
+                  {{label.description}}:
+              </div>
+              <div class="ui-grid-col-3 volume-basic-item-value-color" >
+                  {{volumeGroup.description}}
+              </div>
+              <div class="ui-grid-col-1">
+                  {{label.Status}}:
+              </div>
+              <div class="ui-grid-col-2 volume-basic-item-value-color" >
+                  {{volumeGroup.status}}
+              </div>
+          </div>
+          <div class="ui-grid-row volume-basic-item-class">
+              <div class="ui-grid-col-1">
+                  {{label.Profile}}:
+              </div>
+              <div class="ui-grid-col-2 volume-basic-item-value-color" >
+                  {{volumeGroup.profileName}}
+              </div>
+              <div class="ui-grid-col-1">
+                  {{label.groupId}}:
+              </div>
+              <div class="ui-grid-col-3 volume-basic-item-value-color" >
+                  {{volumeGroup.id}}
+              </div>
+              <div class="ui-grid-col-1">
+                  {{label.CreatedAt}}:
+              </div>
+              <div class="ui-grid-col-2 volume-basic-item-value-color" >
+                  {{volumeGroup.createdAt}}
+              </div>
+          </div>
+      </div>
+      <div class="table-toolbar">
+        <div class="left">
+            <button pButton type="button" label="Add" (click)="showAddVolumes=true"></button>
+        </div>
+      </div>
+      <p-dataTable [value]="volumes" [rows]="5" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20,40]">
+        <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '10%'}"></p-column>
+        <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" [style]="{'width': '10%'}"></p-column>
+        <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}" [style]="{'width': '10%'}"></p-column>
+        <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}" [style]="{'width': '10%'}"></p-column>
+        <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '12%'}"></p-column>
+        <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '10%'}">
+            <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
+                <a (click)=removeVolumeFromGroup(volume)>Remove</a>
+            </ng-template>
+        </p-column>
+      </p-dataTable>
+  </div>
+</div>
+<p-dialog header="Add Volumes" [(visible)]="showAddVolumes" [modal]="true" [responsive]="true" [width]="800">
+  <p-dataTable [value]="allOptionalVolumes" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="5" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20,40]">
+    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
+    <p-column field="name" header="Name"></p-column>
+    <p-column field="status" header="Status"></p-column>
+    <p-column field="size" header="Capacity"></p-column>
+    <p-column field="profileName" header="Profile"></p-column>
+  </p-dataTable>
+  <p-footer>
+      <button type="button" pButton (click)="addVolumesToGroup()" label="OK"></button>
+      <button type="button" pButton (click)="showAddVolumes=false"  label="Cancel"></button>
+  </p-footer>
+</p-dialog>
+<p-confirmDialog></p-confirmDialog>

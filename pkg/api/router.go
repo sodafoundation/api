@@ -39,7 +39,7 @@ func Run(host string) {
 
 	// add router for v1beta api
 	ns :=
-		beego.NewNamespace("/"+constants.ApiVersion,
+		beego.NewNamespace("/"+constants.APIVersion,
 			beego.NSCond(func(ctx *bctx.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -75,6 +75,8 @@ func Run(host string) {
 				// All operations of volume can be used for both admin and users.
 				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
 				beego.NSRouter("/volumes/:volumeId", &VolumePortal{}, "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
+				// Extend Volume
+				beego.NSRouter("/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
 
 				// Creates, shows, lists, unpdates and deletes attachment.
 				beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
@@ -93,13 +95,11 @@ func Run(host string) {
 				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
 				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup"),
+				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
 				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
-			// Extend Volume
-			beego.NSRouter("/:tenantId/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
 		)
-	pattern := fmt.Sprintf("/%s/*", constants.ApiVersion)
+	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
 	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)

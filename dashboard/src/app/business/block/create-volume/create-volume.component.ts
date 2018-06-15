@@ -199,11 +199,13 @@ export class CreateVolumeComponent implements OnInit {
           if(this.showReplicationConf){
               let repVolume = {
                   name:null,
-                  profileId:null
+                  profileId:null,
+                  availabilityZone: null
               };
               Object.assign(repVolume,volumeData[i]);
               repVolume.name = this.createVolumes["formGroup"].value["name"+i];
               repVolume.profileId = this.createVolumes["formGroup"].value["profileId"+i];
+              repVolume.availabilityZone = "secondary";
               this.createVolumeAndReplication(volumeData[i],repVolume);
           }else{
               this.createVolume(volumeData[i]);

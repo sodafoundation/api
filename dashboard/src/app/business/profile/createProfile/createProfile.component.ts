@@ -60,11 +60,9 @@ export class CreateProfileComponent implements OnInit {
     label;
     param = {
         name: '',
-        storageType: '',
         description: '',
         extras: {
-            protocol: 'iSCSI',
-            policys: []
+             
         }
     };
     qosIsChecked = false;
@@ -204,6 +202,7 @@ export class CreateProfileComponent implements OnInit {
         "datetime" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Execution Time")},
         "snapNum" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
         "duration" :{ required: this.I18N.keyID['sds_required'].replace("{0}","Retention")},
+        "description":{maxlength:this.I18N.keyID['sds_validate_max_length']}
     };
     snapshotRetentionOptions = [
         {
@@ -216,10 +215,6 @@ export class CreateProfileComponent implements OnInit {
         }
     ];
     snapSchedule = [
-        {
-            label: 'Hourly',
-            value: 'Hourly'
-        },
         {
             label: 'Daily',
             value: 'Daily'
@@ -282,37 +277,39 @@ export class CreateProfileComponent implements OnInit {
 
     ngOnInit() {
         this.label = {
-            name: 'Name',
-            protocol: 'Access Protocol',
-            type: 'Provisioning Type',
-            qosPolicy: 'QoS Policy',
-            replicationPolicy: 'Replication Policy',
-            snapshotPolicy: 'Snapshot Policy',
-            customization: 'Customization',
-            storagePool: 'Available Storage Pool',
-            key: 'Key',
-            value: 'Value',
-            maxIOPS: 'MaxIOPS',
-            MBPS: 'MaxBWS',
+            name: this.I18N.keyID['sds_block_volume_name'],
+            description: this.I18N.keyID['sds_block_volume_descri'],
+            protocol: this.I18N.keyID['sds_profile_access_pro'],
+            type: this.I18N.keyID['sds_profile_pro_type'],
+            qosPolicy: this.I18N.keyID['sds_profile_qos_policy'],
+            replicationPolicy: this.I18N.keyID['sds_profile_replication_policy'],
+            snapshotPolicy: this.I18N.keyID['sds_profile_snap_policy'],
+            customization: this.I18N.keyID['sds_profile_create_customization'],
+            storagePool: this.I18N.keyID['sds_profile_avai_pool'],
+            key: this.I18N.keyID['sds_profile_extra_key'],
+            value: this.I18N.keyID['sds_profile_extra_value'],
+            maxIOPS: this.I18N.keyID['sds_profile_create_maxIOPS'],
+            MBPS: this.I18N.keyID['sds_profile_create_maxBWS'],
             replicationLabel: {
-                type: 'Type',
-                RGO: 'RGO',
-                Mode: 'Mode',
-                RTO: 'RTO',
-                Period: 'Period',
-                RPO: 'RPO',
-                Bandwidth: 'Bandwidth',
-                Consistency: 'Consistency'
+                type:this.I18N.keyID['sds_profile_rep_type'] ,
+                RGO: this.I18N.keyID['sds_profile_rep_rgo'],
+                Mode:this.I18N.keyID['sds_profile_rep_mode'],
+                RTO: this.I18N.keyID['sds_profile_rep_rto'],
+                Period: this.I18N.keyID['sds_profile_rep_period'],
+                RPO: this.I18N.keyID['sds_profile_rep_rpo'],
+                Bandwidth: this.I18N.keyID['sds_profile_rep_bandwidth'],
+                Consistency: this.I18N.keyID['sds_profile_rep_consis']
             },
             snapshotLabel: {
-                Schedule: 'Schedule',
-                executionTime: 'Execution Time',
-                Retention: 'Retention'
+                Schedule: this.I18N.keyID['sds_profile_snap_sche'],
+                executionTime:this.I18N.keyID['sds_profile_snap_exetime'],
+                Retention: this.I18N.keyID['sds_profile_snap_reten']
             }
         };
 
         this.profileform = this.fb.group({
             'name': new FormControl('', Validators.required),
+            'description':new FormControl('',Validators.maxLength(200)),
             'protocol': new FormControl('iSCSI'),
             'storageType': new FormControl('Thin', Validators.required),
             'policys': new FormControl(''),
@@ -369,9 +366,7 @@ export class CreateProfileComponent implements OnInit {
         this.msgs = [];
         this.msgs.push({ severity: 'info', summary: 'Success', detail: 'Form Submitted' });
         this.param.name = value.name;
-        this.param.storageType = value.storageType;
-        this.param.extras.protocol = value.protocol;
-        this.param.extras.policys = value.policys;
+        this.param.description = value.description;
         if(this.qosIsChecked){
             if(!this.qosPolicy.valid){
                 for(let i in this.qosPolicy.controls){
@@ -382,7 +377,20 @@ export class CreateProfileComponent implements OnInit {
             this.param.extras[":provisionPolicy"]= {
                 "ioConnectivityLoS": {
                     "maxIOPS": this.qosPolicy.value.maxIOPS,
-                    "maxBWS": this.qosPolicy.value.maxBWS
+                    "maxBWS": this.qosPolicy.value.maxBWS,
+                    "accessProtocol": value.protocol
+                }, 
+                "dataStorageLoS": {
+                    "provisioningPolicy": value.storageType
+                }
+            }
+        }else{
+            this.param.extras[":provisionPolicy"]= {
+                "ioConnectivityLoS": {
+                    "accessProtocol": value.protocol
+                }, 
+                "dataStorageLoS": {
+                    "provisioningPolicy": value.storageType
                 }
             }
         }
@@ -409,7 +417,7 @@ export class CreateProfileComponent implements OnInit {
                 }
             }
         }
-        if(this.snapPolicy){
+        if(this.snapshotIsChecked){
             if(!this.snapPolicy.valid){
                 for(let i in this.snapPolicy.controls){
                     this.snapPolicy.controls[i].markAsTouched();
@@ -442,8 +450,7 @@ export class CreateProfileComponent implements OnInit {
 
     createProfile(param) {
         this.ProfileService.createProfile(param).subscribe((res) => {
-            // return res.json();
-            // this.profiles = res.json();
+            
             this.router.navigate(['/profile']);
         });
     }

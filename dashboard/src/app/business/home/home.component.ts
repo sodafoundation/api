@@ -2,7 +2,7 @@ import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, 
 import { Http } from '@angular/http';
 import { ParamStorService } from 'app/shared/api';
 import { ProfileService } from 'app/business/profile/profile.service';
-import {Observable} from "rxjs/Rx";
+import { Observable } from "rxjs/Rx";
 import { I18NService } from 'app/shared/api';
 
 @Component({
@@ -27,7 +27,6 @@ export class HomeComponent implements OnInit {
         private paramStor: ParamStorService,
         private profileService: ProfileService,
         private I18N: I18NService,
-        // private router: Router
     ) { }
 
     ngOnInit() {
@@ -78,28 +77,9 @@ export class HomeComponent implements OnInit {
             }
         ];
 
-        // this.chartDatasbar = {
-        //     datasets: [
-        //         {
-        //             label: 'Total Capacity',
-        //             backgroundColor: '#438bd3',
-        //             data: [65]
-        //         },
-        //         {
-        //             label: 'Free Capacity',
-        //             backgroundColor: '#438bd3',
-        //             data: [28]
-        //         },
-        //         {
-        //             label: 'Free Capacity',
-        //             backgroundColor: '#438bd3',
-        //             data: [18]
-        //         }]
-        // };
+        
         this.option = {
             cutoutPercentage: 80,
-            // rotation: (0.5 * Math.PI),
-            // circumference: (Math.PI),
             title: {
                 display: false,
                 text: 'My Title',
@@ -179,6 +159,7 @@ export class HomeComponent implements OnInit {
             this.tenants.forEach((item, i)=>{
                 this.getAllvolumes(item.id, i);
                 this.getAllSnapshots(item.id);
+                this.getAllReplications(item.id);
                 if(item.name == "admin"){
                     this.getAllPools(item.id);
                     this.getAllDocks(item.id);
@@ -221,9 +202,8 @@ export class HomeComponent implements OnInit {
                     this.chartDatasbar = {
                         labels: chartLabel,
                         datasets: [{
-                            label:"Used Capacity",
+                            label:"Used Capacity (GB)",
                             backgroundColor: '#42A5F5',
-                            // backgroundColor: pattern.draw('circle', '#36a2eb'),
                             data: chartData
                         }]
                     }
@@ -235,6 +215,14 @@ export class HomeComponent implements OnInit {
         let url = 'v1beta/'+projectId+'/block/snapshots';
         this.http.get(url).subscribe((res)=>{
             this.items[5].countNum = this.items[5].countNum + res.json().length;
+        });
+    }
+    getAllReplications(projectId){
+        let url = 'v1beta/'+projectId+'/block/replications';
+        this.http.get(url).subscribe((res)=>{
+            if(res.json()){
+                this.items[6].countNum = this.items[6].countNum + res.json().length;
+            }
         });
     }
     getAllPools(projectId){
@@ -249,7 +237,7 @@ export class HomeComponent implements OnInit {
             });
 
             this.chartDatas = {
-                labels: [this.I18N.keyID["sds_home_used_capacity"],this.I18N.keyID["sds_home_free_capacity"]],
+                labels: [this.I18N.keyID["sds_home_used_capacity"] + " (GB)",this.I18N.keyID["sds_home_free_capacity"] + " (GB)"],
                 datasets: [
                     {
                         label: 'high_capacity',
@@ -258,11 +246,6 @@ export class HomeComponent implements OnInit {
                             "#438bd3",
                             "rgba(224, 224, 224, .5)"
                         ]
-                        // hoverBackgroundColor: [
-                        //     "#FF6384",
-                        //     "#36A2EB",
-                        //     "#FFCE56"
-                        // ]
                     }]
             };
         });
@@ -283,5 +266,6 @@ export class HomeComponent implements OnInit {
         let tenantId = this.paramStor.CURRENT_TENANT().split("|")[1];
         this.getAllvolumes(tenantId);
         this.getAllSnapshots(tenantId);
+        this.getAllReplications(tenantId);
     }
 }

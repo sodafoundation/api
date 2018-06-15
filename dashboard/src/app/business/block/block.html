@@ -5,7 +5,7 @@
         </div>
         <volume-list #volumeList></volume-list>
     </p-tabPanel>
-    <p-tabPanel header="{{I18N.keyID['sds_block_volume_grouptitle']}}">
+    <p-tabPanel header="{{I18N.keyID['sds_block_volume_grouptitle']}}" [selected]="fromGroup">
         <div class="content-header">
             <p>{{I18N.keyID['sds_block_volumesGroup_descrip']}}</p>
         </div>

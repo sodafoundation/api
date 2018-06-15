@@ -490,7 +490,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/volumes/{volumeId}/resize':
+  '/v1beta/{projectId}/block/volumes/{volumeId}/resize':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeId'
@@ -704,8 +704,6 @@ paths:
                 type: string
               description:
                 type: string
-            required:
-              - name
       responses:
         '200':
           description: OK
@@ -748,6 +746,17 @@ paths:
             type: array
             items:
               $ref: '#/definitions/VolumeGroup'
+          examples:
+            application/json:
+              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                name: volumeGroup-demo
+                status: available
+                description: volumeGroup test
+                profiles: 
+                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                availabilityZone: default
+                poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
           description: Unauthorized
         '403':
@@ -761,6 +770,7 @@ paths:
       parameters:
         - name: body
           in: body
+          required: true
           schema:
             $ref: '#/definitions/VolumeGroup'
       responses:
@@ -768,6 +778,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/VolumeGroup'
+          examples:
+            application/json:
+              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                name: volumeGroup-demo
+                status: creating
+                description: volumeGroup test
+                profiles: 
+                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                availabilityZone: default
         '401':
           description: Unauthorized
         '403':
@@ -787,6 +807,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/VolumeGroup'
+          examples:
+            application/json:
+              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                createdAt: "2018-06-03T07:02:35.389Z"
+                name: volumeGroup-demo
+                status: available
+                description: volumeGroup test
+                profiles: 
+                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                availabilityZone: default         
+                poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
           description: Unauthorized
         '403':
@@ -802,15 +834,28 @@ paths:
       parameters:
         - name: body
           in: body
+          required: true
           schema:
             type: object
             properties:
               name:
                 type: string
+                example: volumeGroup-demo
               description:
                 type: string
-            required:
-              - name
+                example: volumeGroup test
+              addVolumes:
+                type: array
+                items: 
+                  type: string
+                  example: 
+                    - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                    - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+              removeVolumes:
+                type: array
+                items: 
+                  type: string
+                  example: 1b7277b8-493a-4c8d-bccd-89db580e5f60
       responses:
         '200':
           description: OK
@@ -1291,6 +1336,12 @@ definitions:
           poolId:
             type: string
             readOnly: true
+          SnapshotId:
+            type: string
+            readOnly: true
+          groupId:
+            type: string 
+            readOnly: true
   Attachment:
     description: ''
     allOf:
@@ -1382,8 +1433,10 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - profiles
           - name
           - description
+          - availabilityZone
         properties:
           projectId:
             type: string
@@ -1393,10 +1446,13 @@ definitions:
             readOnly: true
           name:
             type: string
+            example: volumeGroup-demo
           description:
             type: string
+            example: volume group test
           availabilityZone:
             type: string
+            example: default
             readOnly: true
           status:
             type: string
@@ -1404,21 +1460,13 @@ definitions:
           poolId:
             type: string
             readOnly: true
-          AddVolumes:
+          profiles:
             type: array
             items: 
               type: string
-            readOnly: true
-          RemoveVolumes:
-            type: array
-            items: 
-              type: string
-            readOnly: true
-          GroupSnapshots:
-            type: array
-            items: 
-              type: string
-            readOnly: true
+            example: 
+              - 993c87dc-1928-498b-9767-9da8f901d6ce 
+              - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
   Replication:
     description: '""'
     allOf:

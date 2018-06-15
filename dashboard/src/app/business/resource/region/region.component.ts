@@ -39,7 +39,7 @@ export class RegionComponent implements OnInit{
     regions = [];
 
     constructor(
-         private I18N: I18NService,
+         public I18N: I18NService,
         // private router: Router
     ){}
 

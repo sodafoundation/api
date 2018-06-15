@@ -28,9 +28,9 @@
     <p-column field="description" header="Description"></p-column>
     <p-column header="Operation" [style]="{'width': '20%'}">
         <ng-template let-user="rowData" pTemplate="body" >
-            <a *ngIf="user.username!='admin'" (click)="showUserForm(user)">Modify</a>
-            <a *ngIf="user.username!='admin'" (click)="userStatus(user)">{{ (user.enabled == true) ? "Disable" : "Enable" }}</a>
-            <a *ngIf="user.username!='admin'" (click)="deleteUsers(user)">Delete</a>
+            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="showUserForm(user)">Modify</a>
+            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="userStatus(user)">{{ (user.enabled == true) ? "Disable" : "Enable" }}</a>
+            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="deleteUsers(user)">Delete</a>
         </ng-template>
     </p-column>
 
@@ -52,7 +52,7 @@
         </form-item>
 
         <form-item *ngIf="!isEditUser" label="{{label.tenantLabel}}" [required]="false">
-            <p-multiSelect [options]="tenantLists" formControlName="form_tenant"></p-multiSelect>
+            <p-multiSelect [options]="tenantLists" [filter]="false" formControlName="form_tenant"></p-multiSelect>
         </form-item>
 
         <form-item *ngIf="isEditUser" class="hide" [required]="false">

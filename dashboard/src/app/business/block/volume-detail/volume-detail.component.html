@@ -7,12 +7,13 @@
     </div>
     <div class="volume-basic-info">
         <h3>Basic Information</h3>
+        <p *ngIf="showVolumeSource">{{ volumeSource }}</p>
         <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
             <div class="ui-grid-row volume-basic-item-class">
                 <div class="ui-grid-col-1">
                     {{label.Name}}:
                 </div>
-                <div class="ui-grid-col-1 volume-basic-item-value-color" *ngIf="volume">
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
                     {{volume.name}}
                 </div>
                 <div class="ui-grid-col-1">
@@ -32,8 +33,8 @@
                 <div class="ui-grid-col-1">
                     {{label.Capacity}}:
                 </div>
-                <div class="ui-grid-col-1 volume-basic-item-value-color" *ngIf="volume">
-                    {{volume.size}} GB
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.size}}
                 </div>
                 <div class="ui-grid-col-1">
                     {{label.VolumeID}}:
@@ -52,11 +53,11 @@
     </div>
     <div>
         <p-tabView>
-            <p-tabPanel header="{{i18n.keyID['sds_block_volume_snapshort']}}">
+            <p-tabPanel header="{{i18n.keyID['sds_block_volume_snapshot']}}">
                 <app-snapshot-list [volumeId]="volumeId"></app-snapshot-list>
             </p-tabPanel>
             <p-tabPanel header="{{i18n.keyID['sds_block_volume_replication']}}">
-                <app-replication-list></app-replication-list>
+                <app-replication-list [volumeId]="volumeId"></app-replication-list>
             </p-tabPanel>
         </p-tabView>
     </div>

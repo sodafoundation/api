@@ -30,6 +30,7 @@ export class TenantListComponent implements OnInit {
 
     tenantFormGroup;
     projectID: string;
+    projectName: string;
 
     validRule= {
         'name':'^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,127}$'
@@ -38,7 +39,7 @@ export class TenantListComponent implements OnInit {
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router,
         private fb: FormBuilder
     ) {
@@ -89,6 +90,9 @@ export class TenantListComponent implements OnInit {
             this.tenants = res.json().projects;
             this.tenants.forEach((item)=>{
                 item["description"] = item.description == '' ? '--' : item.description;
+                if(item.name == "admin" || item.name == "service"){
+                    item["disabled"] = true;
+                }
             })
         });
     }
@@ -223,6 +227,7 @@ export class TenantListComponent implements OnInit {
     onRowExpand(evt) {
         this.isDetailFinished = false;
         this.projectID = evt.data.id;
+        this.projectName = evt.data.name;
     }
 
     tablePaginate() {

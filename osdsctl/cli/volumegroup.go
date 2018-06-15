@@ -63,18 +63,44 @@ var volumeGroupUpdateCommand = &cobra.Command{
 }
 
 var (
+	vgLimit    string
+	vgOffset   string
+	vgSortDir  string
+	vgSortKey  string
+	vgId       string
+	vgTenantId string
+	vgUserId   string
+
 	vgName        string
 	vgDesp        string
 	vgAZ          string
 	addVolumes    *[]string
 	removeVolumes *[]string
+	vgprofiles    *[]string
+	vgStatus      string
+	vgPoolId      string
 )
 
 func init() {
+	volumeGroupListCommand.Flags().StringVarP(&vgLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeGroupListCommand.Flags().StringVarP(&vgOffset, "offset", "", "0", "all requested data offsets")
+	volumeGroupListCommand.Flags().StringVarP(&vgSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	volumeGroupListCommand.Flags().StringVarP(&vgSortKey, "sortKey", "", "id",
+		"the sort key of all requested data. supports id(default), name, status, availability zone, tenantid, pool id")
+	volumeGroupListCommand.Flags().StringVarP(&vgId, "id", "", "", "list volume group by id")
+	volumeGroupListCommand.Flags().StringVarP(&vgTenantId, "tenantId", "", "", "list volume group by tenantId")
+	volumeGroupListCommand.Flags().StringVarP(&vgUserId, "userId", "", "", "list volume group by storage userId")
+	volumeGroupListCommand.Flags().StringVarP(&vgStatus, "status", "", "", "list volume group by status")
+	volumeGroupListCommand.Flags().StringVarP(&vgName, "name", "", "", "list volume group by Name")
+	volumeGroupListCommand.Flags().StringVarP(&vgDesp, "description", "", "", "list volume group by description")
+	volumeGroupListCommand.Flags().StringVarP(&vgAZ, "availabilityZone", "", "", "list volume group by availability zone")
+	volumeGroupListCommand.Flags().StringVarP(&vgPoolId, "poolId", "", "", "list volume group by pool id")
+
 	volumeGroupCommand.AddCommand(volumeGroupCreateCommand)
 	volumeGroupCreateCommand.Flags().StringVarP(&vgName, "name", "n", "", "the name of created volume group")
 	volumeGroupCreateCommand.Flags().StringVarP(&vgDesp, "description", "d", "", "the description of created volume group")
 	volumeGroupCreateCommand.Flags().StringVarP(&vgAZ, "availabilityZone", "a", "", "the availabilityZone of created volume group")
+	vgprofiles = volumeGroupCreateCommand.Flags().StringSliceP("profiles", "", nil, "the profiles of created volume group")
 	volumeGroupCommand.AddCommand(volumeGroupShowCommand)
 	volumeGroupCommand.AddCommand(volumeGroupListCommand)
 	volumeGroupCommand.AddCommand(volumeGroupDeleteCommand)
@@ -96,6 +122,7 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 		Name:             vgName,
 		Description:      vgDesp,
 		AvailabilityZone: vgAZ,
+		Profiles:         *vgprofiles,
 	}
 
 	resp, err := client.CreateVolumeGroup(vg)
@@ -103,7 +130,7 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -114,18 +141,24 @@ func volumeGroupShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
 func volumeGroupListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListVolumeGroups()
+
+	var opts = map[string]string{"limit": vgLimit, "offset": vgOffset, "sortDir": vgSortDir,
+		"sortKey": vgSortKey, "Id": vgId,
+		"Name": vgName, "Description": vgDesp, "UserId": vgUserId, "AvailabilityZone": vgAZ,
+		"Status": vgStatus, "PoolId": vgPoolId}
+
+	resp, err := client.ListVolumeGroups(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -152,6 +185,6 @@ func volumeGroupUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }

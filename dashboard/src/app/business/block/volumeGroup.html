@@ -1,36 +1,47 @@
 <div class="table-toolbar">
     <div class="left">
         <button class="ui-button-secondary" pButton type="button" label="Create" (click)="createVolumeGroup()"></button>
-        <button pButton type="button" label="Delete" [disabled]="selectedVolumeGroups.length == 0"></button></div>
+        <button pButton type="button" label="Delete" [disabled]="selectedVolumeGroups.length == 0" (click)="deleteMultiVolumeGroups()"></button></div>
     <div class="right">
         <div class="ui-inputsearch">
-            <input type="text" pInputText placeholder="search">
+            <input type="text" #searchByName pInputText placeholder="search">
             <button pButton type="button" icon="fa-search"></button>
         </div>
-        <button class="" pButton type="button" icon="fa-refresh"></button>
+        <button class="" pButton type="button" (click)="getProfiles()" icon="fa-refresh"></button>
     </div>
 </div>
 
-<p-dataTable [value]="volumeGroups" [(selection)]="selectedVolumeGroups" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+<p-dataTable [value]="volumeGroups" [globalFilter]="searchByName" [(selection)]="selectedVolumeGroups" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
-    <p-column field="name" header="Name"></p-column>
+    <p-column field="name" header="Name">
+        <ng-template pTemplate="body" let-group="rowData">
+            <a [routerLink]="['/volumeGroupDetails/' + group.id]">{{group.name}}</a>
+        </ng-template>
+    </p-column>
+    <p-column field="description" header="Description"></p-column>
     <p-column field="status" header="Status"></p-column>
-    <p-column field="profile" header="Profile"></p-column>
-    <p-column field="volumes" header="Number of Volumes"></p-column>
+    <p-column field="profileName" header="Profile"></p-column>
+    <!-- <p-column field="volumes" header="Number of Volumes"></p-column> -->
     <p-column header="Operation">
-        <ng-template pTemplate="body">
-            <a href="#">Modify</a><a href="#">Delete</a>
+        <ng-template pTemplate="body" let-volumeGroup="rowData">
+            <a (click)="ModifyVolumeGroupDisplay(volumeGroup)">Modify</a><a (click)="deleteVolumeGroup(volumeGroup)">Delete</a>
         </ng-template>
     </p-column>
 </p-dataTable>
 <!--create volumes group-->
-<p-dialog header="Create Volume Group" [(visible)]="showVolumeGroupDialog" [modal]="true" [responsive]="true" [width]="800">
+<p-dialog header="Create Volume Group" [(visible)]="showVolumeGroupDialog" [modal]="true" [responsive]="true" [width]="800" [contentStyle]="{'min-height':'300px'}">
     <form [grid]="{label: 'ui-g-2', content:'ui-g-10'}" [formGroup]="volumeGroupForm" [errorMessage]="errorMessage">
-        <form-item label="{ {label.group_name_lable }}" [required]="true">
+        <form-item label="{{label.group_name_lable }}" [required]="true">
             <input type="text" pInputText formControlName="group_name" />
         </form-item>
-        <form-item label="{{ label.profile_label }}" >
-            <p-dropdown [options]="volemeOptions" formControlName="profile" [style]="{'width':'150px'}" placeholder="Please choose"></p-dropdown>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description" ></textarea>
+        </form-item>
+        <form-item [required]="false" label="{{label.zone}}">
+            <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':'100px'}"></p-dropdown>
+        </form-item>
+        <form-item label="{{label.profile_label}}" [required]="true" >
+            <p-multiSelect [options]="profileOptions" [filter]="false" formControlName="profile" [style]="{'width':'150px'}" placeholder="Please choose"></p-multiSelect>
         </form-item>
     </form>
     <p-footer>
@@ -38,3 +49,18 @@
         <button type="button" pButton (click)="showVolumeGroupDialog=false"  label="Cancel"></button>
     </p-footer>
 </p-dialog>
+<p-dialog header="Modify Volume Group" [(visible)]="showModifyGroup" [modal]="true" [responsive]="true" [width]="800">
+    <form [grid]="{label: 'ui-g-2', content:'ui-g-10'}" [formGroup]="modifyGroupForm" [errorMessage]="errorMessage">
+        <form-item label="{{label.group_name_lable }}" [required]="true">
+            <input type="text" pInputText formControlName="group_name"  />
+        </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description"></textarea>
+        </form-item>
+    </form>
+    <p-footer>
+        <button type="button" pButton (click)="modifyGroup(modifyGroupForm.value)"  label="OK"></button>
+        <button type="button" pButton (click)="showModifyGroup=false"  label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+<p-confirmDialog></p-confirmDialog>

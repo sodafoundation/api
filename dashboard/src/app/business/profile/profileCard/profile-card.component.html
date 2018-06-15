@@ -4,16 +4,20 @@
             <h2>{{data.name}}</h2>
         </div>
         <div class="padding-class">
+            <div style="float:left;margin-right:2px" class="label-class">{{I18N.keyID['sds_block_volume_descri']}}:</div>
+            <div style="overflow: hidden; text-overflow:ellipsis; white-space: nowrap;" title="{{data && data.description ?data.description :'--'}}">{{data && data.description ?data.description :"--"}}</div>
+        </div>
+        <div class="padding-class"style="clear:both;">
             <span class="label-class">Access Protocol:</span>
-            <span>{{data.extras && data.extras.protocol}}</span>
+            <span>{{data.extras && data.extras[':provisionPolicy'].ioConnectivityLoS.accessProtocol}}</span>
         </div>
         <div class="padding-class">
             <span class="label-class">Provisioning Type:</span>
-            <span>{{data.storageType}}</span>
+            <span>{{data.extras && data.extras[':provisionPolicy'].dataStorageLoS.provisioningPolicy}}</span>
         </div>
 
-        <div class="padding-class item-flex" *ngIf="data.extras && data.extras.policys">
-            <div (mouseenter)="showSuspensionFrame($event)" (mouseleave)="showSuspensionFrame($event)" *ngFor="let policy of data.extras.policys; index as i" class="position-relative mouse-cursor">
+        <div class="padding-class item-flex" *ngIf="data.extras && policys">
+            <div (mouseenter)="showSuspensionFrame($event)" (mouseleave)="showSuspensionFrame($event)" *ngFor="let policy of policys; index as i" class="position-relative mouse-cursor">
                 <div style="width:114px" class="fa fa-check icon-color-class margin-right-class">
                     <span class="font-color-class">{{policy}}</span>
                 </div>
