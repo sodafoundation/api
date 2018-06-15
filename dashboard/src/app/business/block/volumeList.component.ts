@@ -152,9 +152,10 @@ export class VolumeListComponent implements OnInit {
                 let replications = resRep.json();
                 volumes.map((item)=>
                     {
-                        item['profileName'] = this.profiles.filter((profile,index,arr)=>{
-                            return profile.id == item.profileId;
-                        })[0].name;
+                        let _profile = this.profiles.filter((profile,index,arr)=>{
+                                return profile.id == item.profileId;
+                            })[0];
+                        item['profileName'] = _profile != undefined ? _profile.name : "--";
                         item['isDisableRep'] = false;
                         replications.map((rep)=>{
                             if(rep.primaryVolumeId == item.id || rep.secondaryVolumeId == item.id){
