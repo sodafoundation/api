@@ -5,13 +5,13 @@
     </div>
     <div class="right">
         <div class="ui-inputsearch">
-            <input type="text" pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
+            <input type="text" #searchByName pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
             <button pButton type="button" icon="fa-search"></button>
         </div>
-        <button class="" pButton type="button" icon="fa-refresh"></button>
+        <button class="" pButton type="button" (click)="getProfiles()" icon="fa-refresh"></button>
     </div>
 </div>
-<p-dataTable [value]="volumes" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+<p-dataTable [value]="volumes" [globalFilter]="searchByName" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
     <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '12%'}">
         <ng-template pTemplate="body" let-volume="rowData">
@@ -26,7 +26,7 @@
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
             <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
             <a [ngClass]="{'a-rep-disabled':volume['isDisableRep']}" (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
-            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="volumeCanDelete(menuItems,volume)" (click)="returnSelectedVolume(volume)"></p-dropmenu>
+            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
         </ng-template>
     </p-column>
 </p-dataTable>
