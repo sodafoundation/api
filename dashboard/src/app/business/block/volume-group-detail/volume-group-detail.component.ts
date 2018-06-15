@@ -81,7 +81,7 @@ export class VolumeGroupDetailComponent implements OnInit {
         this.allOptionalVolumes = [];
         if(allVolumes){
           allVolumes.forEach((item)=>{
-            if(item.pooId == this.volumeGroup.pooId && !item.groupId){
+            if(item.pooId == this.volumeGroup.pooId && !item.groupId && this.volumeGroup.profiles.includes(item.profileId)){
               item.size = Utils.getDisplayGBCapacity(item.size);
               item.profileName = this.profileJson[item.profileId];
               this.allOptionalVolumes.push(item);
