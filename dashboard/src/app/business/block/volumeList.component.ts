@@ -147,10 +147,10 @@ export class VolumeListComponent implements OnInit {
     getVolumes() {
         this.selectedVolumes = [];
         this.VolumeService.getVolumes().subscribe((res) => {
-            this.volumes = res.json();
+            let volumes = res.json();
             this.ReplicationService.getAllReplicationsDetail().subscribe((resRep)=>{
                 let replications = resRep.json();
-                this.volumes.map((item)=>
+                volumes.map((item)=>
                     {
                         item['profileName'] = this.profiles.filter((profile,index,arr)=>{
                             return profile.id == item.profileId;
@@ -164,19 +164,20 @@ export class VolumeListComponent implements OnInit {
                         item.size = Utils.getDisplayGBCapacity(item.size);
                     }
                 );
-            });
-            this.SnapshotService.getSnapshots().subscribe((resSnap)=>{
-                let snaps = resSnap.json();
-                this.volumes.map((item)=>
-                    {
-                        item['disabled'] = false;
-                        snaps.map((snap)=>{
-                            if(snap.volumeId == item.id){
-                                item['disabled'] = true;
-                            }
-                        });
-                    }
-                );
+                this.SnapshotService.getSnapshots().subscribe((resSnap)=>{
+                    let snaps = resSnap.json();
+                    volumes.map((item)=>
+                        {
+                            item['disabled'] = false;
+                            snaps.map((snap)=>{
+                                if(snap.volumeId == item.id){
+                                    item['disabled'] = true;
+                                }
+                            });
+                        }
+                    );
+                    this.volumes = volumes;
+                });
             });
         });
     }
@@ -330,7 +331,7 @@ export class VolumeListComponent implements OnInit {
         this.selectedVolumes = [];
     }
     volumeCanDelete(param1,param2){
-        param1[2].disabled = param2['disabled'];
+        param1[2].disabled = param2;
         return param1;
     }
 }

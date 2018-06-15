@@ -39,12 +39,12 @@ export class AppComponent implements OnInit, AfterViewInit{
     menuItems_tenant = [
         {
             "title": "Home",
-            "description": "Update 5 minutes ago",
+            "description": "Resources statistics",
             "routerLink": "/home"
         },
         {
             "title": "Volume",
-            "description": "23 volumes",
+            "description": "Block storage resources",
             "routerLink": "/block"
         }
     ]
@@ -52,12 +52,12 @@ export class AppComponent implements OnInit, AfterViewInit{
     menuItems_admin = [
         {
             "title": "Home",
-            "description": "Update 5 minutes ago",
+            "description": "Resources statistics",
             "routerLink": "/home"
         },
         {
             "title": "Volume",
-            "description": "23 volumes",
+            "description": "Block storage resources",
             "routerLink": "/block"
         },
         // {
@@ -67,12 +67,12 @@ export class AppComponent implements OnInit, AfterViewInit{
         // },
         {
             "title": "Profile",
-            "description": "7 profiles have been created",
+            "description": "Block profiles",
             "routerLink": "/profile"
         },
         {
             "title": "Resource",
-            "description": "5 storages, 2 availability zone",
+            "description": "Regions, availability zones and storages",
             "routerLink": "/resource"
         },
         {

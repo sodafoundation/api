@@ -38,7 +38,10 @@ export class SnapshotListComponent implements OnInit {
       "name": { required: "Name is required." },
       "description": { maxlength: "Max. length is 200." }
   };
-
+  param = {
+    key: 'VolumeId',
+    value: null
+  }
   constructor(
     private VolumeService: VolumeService,
     private SnapshotService: SnapshotService,
@@ -65,12 +68,11 @@ export class SnapshotListComponent implements OnInit {
       volume:  this.I18N.keyID['sds_block_volume_title'],
       description:  this.I18N.keyID['sds_block_volume_descri']
     }
-    this.getSnapshots(
-      {
-        key: 'VolumeId',
-        value: this.volumeId
-      }
-    );
+    this.param={
+      key: 'VolumeId',
+      value: this.volumeId
+    };
+    this.getSnapshots(this.param);
   }
 
   getVolumeById(volumeId){

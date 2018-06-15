@@ -40,5 +40,10 @@
   "replication:delete": "rule:admin_or_owner",
   "replication:action:enable": "rule:admin_or_owner",
   "replication:action:disable": "rule:admin_or_owner",
-  "replication:action:failover": "rule:admin_or_owner"
+  "replication:action:failover": "rule:admin_or_owner",
+  "volume_group:create": "rule:admin_or_owner",
+  "volume_group:list": "rule:admin_or_owner",
+  "volume_group:get": "rule:admin_or_owner",
+  "volume_group:update": "rule:admin_or_owner",
+  "volume_group:delete": "rule:admin_or_owner"
 }

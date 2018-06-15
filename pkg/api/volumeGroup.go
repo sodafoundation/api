@@ -29,7 +29,7 @@ type VolumeGroupPortal struct {
 }
 
 func (this *VolumeGroupPortal) CreateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:create") {
+	if !policy.Authorize(this.Ctx, "volume_group:create") {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 }
 
 func (this *VolumeGroupPortal) UpdateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:update") {
+	if !policy.Authorize(this.Ctx, "volume_group:update") {
 		return
 	}
 	var vg = &model.VolumeGroupSpec{
@@ -95,7 +95,7 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 }
 
 func (this *VolumeGroupPortal) DeleteVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:delete") {
+	if !policy.Authorize(this.Ctx, "volume_group:delete") {
 		return
 	}
 
@@ -109,7 +109,7 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 }
 
 func (this *VolumeGroupPortal) GetVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:get") {
+	if !policy.Authorize(this.Ctx, "volume_group:get") {
 		return
 	}
 
@@ -132,7 +132,7 @@ func (this *VolumeGroupPortal) GetVolumeGroup() {
 }
 
 func (this *VolumeGroupPortal) ListVolumeGroups() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:get") {
+	if !policy.Authorize(this.Ctx, "volume_group:get") {
 		return
 	}
 
