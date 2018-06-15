@@ -211,8 +211,20 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
+
+	// If volume id is invalid, it would mean that volume snapshot creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetVolume(ctx, in.VolumeId)
+	if err != nil {
+		if err := db.C.DeleteVolumeSnapshot(ctx, in.Id); err != nil {
+			log.Error("when delete volume snapshot in db:", err)
+			return err
+		}
+		return nil
+	}
+
 	in.Status = model.VolumeSnapDeleting
-	_, err := db.C.UpdateVolumeSnapshot(ctx, in.Id, in)
+	_, err = db.C.UpdateVolumeSnapshot(ctx, in.Id, in)
 	if err != nil {
 		return err
 	}
@@ -540,6 +552,18 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	if err != nil {
 		return err
 	}
+
+	// If pool id is invalid, it would mean that volume group creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err = db.C.GetDockByPoolId(ctx, vg.PoolId)
+	if err != nil {
+		if err := db.C.DeleteVolumeGroup(ctx, vg.Id); err != nil {
+			log.Error("when delete volume group in db:", err)
+			return err
+		}
+		return nil
+	}
+
 	//TODO DeleteVolumes tag is set by policy.
 	deleteVolumes := true
 
