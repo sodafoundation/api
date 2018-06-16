@@ -260,6 +260,15 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 		return fmt.Errorf("Volume %s can not be deleted, because it still has snapshots", in.Id)
 	}
 
+	volAttachments, err := db.C.ListVolumeAttachments(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+
+	if len(volAttachments) > 0 {
+		return fmt.Errorf("Volume %s can not be deleted, because it's in using", in.Id)
+	}
+
 	in.Status = model.VolumeDeleting
 	_, err = db.C.UpdateVolume(ctx, in)
 	if err != nil {
