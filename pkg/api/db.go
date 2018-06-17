@@ -266,7 +266,7 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 	}
 
 	if len(volAttachments) > 0 {
-		return fmt.Errorf("Volume %s can not be deleted, because it's in using", in.Id)
+		return fmt.Errorf("Volume %s can not be deleted, because it's in use", in.Id)
 	}
 
 	in.Status = model.VolumeDeleting

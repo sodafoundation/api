@@ -256,18 +256,6 @@ func TestClientListVolumes(t *testing.T) {
 	}
 }
 
-func TestClientDeleteVolume(t *testing.T) {
-	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	body := &model.VolumeSpec{}
-
-	if err := c.DeleteVolume(volID, body); err != nil {
-		t.Error("delete volume in client failed:", err)
-		return
-	}
-
-	t.Log("Delete volume success!")
-}
-
 func TestClientUpdateVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	body := &model.VolumeSpec{
@@ -437,6 +425,18 @@ func TestClientUpdateVolumeSnapshot(t *testing.T) {
 	if !reflect.DeepEqual(snp, expected) {
 		t.Errorf("expected %+v, got %+v\n", expected, snp)
 	}
+}
+
+func TestClientDeleteVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	body := &model.VolumeSpec{}
+
+	if err := c.DeleteVolume(volID, body); err != nil {
+		t.Error("delete volume in client failed:", err)
+		return
+	}
+
+	t.Log("Delete volume success!")
 }
 
 // TODO: There are some deployment issues when testing Replicaiton operation,
