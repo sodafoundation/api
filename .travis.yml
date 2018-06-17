@@ -40,7 +40,7 @@ install:
   - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
   # Build OpenSDS Controller source code
-  - make
+  - make all
 
 script:
   - ./script/CI/coverage
