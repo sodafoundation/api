@@ -261,10 +261,9 @@ func (this *ReplicationPortal) DeleteReplication() {
 	this.Ctx.Output.SetStatus(StatusAccepted)
 }
 
-// This is action function so use ctx instead of this.Ctx
 func (this *ReplicationPortal) EnableReplication() {
 	ctx := this.Ctx
-	if !policy.Authorize(ctx, "replication:action:enable") {
+	if !policy.Authorize(ctx, "replication:enable") {
 		return
 	}
 
@@ -293,7 +292,7 @@ func (this *ReplicationPortal) EnableReplication() {
 
 func (this *ReplicationPortal) DisableReplication() {
 	ctx := this.Ctx
-	if !policy.Authorize(ctx, "replication:actions:disable") {
+	if !policy.Authorize(ctx, "replication:disable") {
 		return
 	}
 
