@@ -43,12 +43,29 @@ import { ButtonModule } from './../../../components/common/api';
     ]
 })
 export class ProfileCardComponent implements OnInit {
-
-    @Input() data;
+    policys = [];
+    data:any;
+    @Input() 
+    set cardData(data: any) {
+        this.data = data;
+        this.policys = [];
+        if(data.extras){
+            if(data.extras[':provisionPolicy'].ioConnectivityLoS.maxIOPS){
+                this.policys.push("QoS");
+            }
+            if(data.extras[':snapshotPolicy']){
+                this.policys.push("Snapshot");
+            }
+            if(data.extras[':replicationPolicy']){
+                this.policys.push("Replication");
+            }
+        }
+        
+    };
 
     chartDatas: any;
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router
         private http: HttpService
     ) { }
@@ -124,7 +141,7 @@ export class ProfileCardComponent implements OnInit {
         let SumCapacity: number = 0;
         let arrLength = pools.length;
         for (let i = 0; i < arrLength; i++) {
-            if(this.data.extras && this.data.extras.protocol && this.data.extras.protocol.toLowerCase() == pools[i].extras.ioConnectivity.accessProtocol &&  this.data.storageType == pools[i].extras.dataStorage.provisioningPolicy){
+            if(this.data.extras && this.data.extras[":provisionPolicy"].ioConnectivityLoS.accessProtocol.toLowerCase() == pools[i].extras.ioConnectivity.accessProtocol &&  this.data.extras[":provisionPolicy"].dataStorageLoS.provisioningPolicy == pools[i].extras.dataStorage.provisioningPolicy){
                 if (FreeOrTotal === 'free') {
                     SumCapacity += pools[i].freeCapacity;
                 } else {

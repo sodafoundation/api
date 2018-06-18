@@ -187,6 +187,39 @@ func TestCreateVolume(t *testing.T) {
 	}
 }
 
+func TestCreateVolumeFromSnapshot(t *testing.T) {
+	var req = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "sample-volume",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
+	}
+	var vol = &SampleVolumes[0]
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(&SampleSnapshots[0], nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+	mockClient.On("UpdateStatus", context.NewAdminContext(), vol, vol.Status).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			err: nil,
+		},
+		volumeController: NewFakeVolumeController(),
+	}
+
+	var errchan = make(chan error, 1)
+	ctrl.CreateVolume(context.NewAdminContext(), req, errchan)
+	if err := <-errchan; err != nil {
+		t.Errorf("Failed to create volume, err is %v\n", err)
+	}
+}
+
 func TestDeleteVolume(t *testing.T) {
 
 	var req = &model.VolumeSpec{
@@ -295,6 +328,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("GetPool", context.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("UpdateStatus", context.NewAdminContext(), volattm, volattm.Status).Return(nil)
+	mockClient.On("UpdateVolumeAttachment", context.NewAdminContext(), volattm.Id, volattm).Return(volattm, nil)
 
 	db.C = mockClient
 

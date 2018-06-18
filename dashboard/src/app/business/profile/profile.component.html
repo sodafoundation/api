@@ -1,28 +1,26 @@
 <div class="content-header">
-    <h1>Profile</h1>
-    <p>A profile is a set of configurations on service capabilities (including resource tuning, QoS) of storage resources. A profile must be specified when volume is created.</p>
+    <h1>{{I18N.keyID['sds_block_volume_profile']}}</h1>
+    <p>{{I18N.keyID['sds_profile_list_descrip']}}</p>
 </div>
 
 <div class="content-header">
-    <p-button label="Create" styleClass="ui-button-secondary ui-button-large" [routerLink]="['/createProfile']"></p-button>
+    <p-button label="{{I18N.keyID['sds_block_volume_create']}}" styleClass="ui-button-secondary ui-button-large" [routerLink]="['/createProfile']"></p-button>
 </div>
 
 <div class="ui-g-12 ui-md-6 relative-class" *ngFor="let profile of profiles">
     <div class="table-toolbar">
-        <p-button (click)="showWarningDialogFun(profile.id)" styleClass="close-class profile-card-close" icon="fa fa-fw fa-close">
+        <p-button (click)="showWarningDialogFun(profile)" styleClass="close-class profile-card-close" icon="fa fa-fw fa-close">
         </p-button>
     </div>
     <p-card styleClass="new-card-class ui-card-shadow">
-        <profile-card [data]="profile"></profile-card>
+        <profile-card [cardData]="profile"></profile-card>
     </p-card>
 </div>
 
 <p-dialog header="Warning" [(visible)]="showWarningDialog" [width]="500" modal="modal">
-    <div>
-        确定要删除{{profileId}}？
-    </div>
     <p-footer>
         <button type="button" pButton (click)="deleteProfile(profileId)" label="OK"></button>
         <button type="button" pButton (click)="showWarningDialog=false" label="Cancel"></button>
     </p-footer>
 </p-dialog>
+<p-confirmDialog></p-confirmDialog>

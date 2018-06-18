@@ -218,13 +218,17 @@ func (fc *FakeDbClient) GetVolume(ctx *c.Context, volID string) (*model.VolumeSp
 func (fc *FakeDbClient) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error) {
 	var vols []*model.VolumeSpec
 
-	vols = append(vols, &SampleVolumes[0])
+	for i := range SampleVolumes {
+		vols = append(vols, &SampleVolumes[i])
+	}
 	return vols, nil
 }
 func (fc *FakeDbClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	var vols []*model.VolumeSpec
 
-	vols = append(vols, &SampleVolumes[0])
+	for i := range SampleVolumes {
+		vols = append(vols, &SampleVolumes[i])
+	}
 	return vols, nil
 }
 
@@ -258,13 +262,17 @@ func (fc *FakeDbClient) GetVolumeAttachment(ctx *c.Context, attachmentId string)
 func (fc *FakeDbClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
 	var atcs []*model.VolumeAttachmentSpec
 
-	atcs = append(atcs, &SampleAttachments[0])
+	for i := range SampleAttachments {
+		atcs = append(atcs, &SampleAttachments[i])
+	}
 	return atcs, nil
 }
 func (fc *FakeDbClient) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
 	var atcs []*model.VolumeAttachmentSpec
 
-	atcs = append(atcs, &SampleAttachments[0])
+	for i := range SampleAttachments {
+		atcs = append(atcs, &SampleAttachments[i])
+	}
 	return atcs, nil
 }
 
@@ -275,6 +283,7 @@ func (fc *FakeDbClient) UpdateVolumeAttachment(ctx *c.Context, attachmentId stri
 
 // DeleteVolumeAttachment
 func (fc *FakeDbClient) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error {
+	SampleAttachments = []model.VolumeAttachmentSpec{}
 	return nil
 }
 
@@ -293,13 +302,17 @@ func (fc *FakeDbClient) GetVolumeSnapshot(ctx *c.Context, snapshotID string) (*m
 func (fc *FakeDbClient) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
 	var snps []*model.VolumeSnapshotSpec
 
-	snps = append(snps, &SampleSnapshots[0], &SampleSnapshots[1])
+	for i := range SampleSnapshots {
+		snps = append(snps, &SampleSnapshots[i])
+	}
 	return snps, nil
 }
 func (fc *FakeDbClient) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpec, error) {
 	var snps []*model.VolumeSnapshotSpec
 
-	snps = append(snps, &SampleSnapshots[0], &SampleSnapshots[1])
+	for i := range SampleSnapshots {
+		snps = append(snps, &SampleSnapshots[i])
+	}
 	return snps, nil
 }
 

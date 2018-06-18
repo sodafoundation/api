@@ -1,5 +1,5 @@
 
 <p-dataTable [value]="regions" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
-    <p-column algin="left" field="name" header="Name" [style]="{'width': '20%'}"></p-column>
-    <p-column field="role" header="Region Role"></p-column>
+    <p-column algin="left" field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '20%'}"></p-column>
+    <p-column field="role" header="{{I18N.keyID['sds_resource_region_role']}}"></p-column>
 </p-dataTable>

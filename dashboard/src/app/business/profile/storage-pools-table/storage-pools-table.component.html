@@ -1,6 +1,6 @@
 <div class="footer-button-class">
     <div>
-        <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools, <span class="storage-count-capacity">{{totalFreeCapacity}} TB</span> Free Capacity
+        <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools, <span class="storage-count-capacity">{{totalFreeCapacity}} GB</span> Free Capacity
     </div>
     <p-table [value]="pools" styleClass="custom-table-class">
         <ng-template pTemplate="header">
@@ -20,10 +20,10 @@
                     {{pool['name']}}
                 </td>
                 <td>
-                    {{pool['freeCapacity']}}
+                    {{pool['freeCapacityFormat']}}
                 </td>
                 <td>
-                    {{pool['totalCapacity']}}
+                    {{pool['totalCapacityFormat']}}
                 </td>
                 <td>
                     <span *ngIf="pool.extras && pool.extras.advanced && pool.extras.advanced.diskType; else elseBlock">

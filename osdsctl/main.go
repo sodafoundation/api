@@ -28,7 +28,7 @@ import (
 )
 
 func main() {
-	// assign it to the standard logger
+	// Assign it to the standard logger
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	if err := cli.Run(); err != nil {

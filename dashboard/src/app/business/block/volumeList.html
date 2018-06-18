@@ -5,28 +5,27 @@
     </div>
     <div class="right">
         <div class="ui-inputsearch">
-            <input type="text" pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
+            <input type="text" #searchByName pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
             <button pButton type="button" icon="fa-search"></button>
         </div>
-        <button class="" pButton type="button" icon="fa-refresh"></button>
+        <button class="" pButton type="button" (click)="getProfiles()" icon="fa-refresh"></button>
     </div>
 </div>
-<p-dataTable [value]="volumes" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+<p-dataTable [value]="volumes" [globalFilter]="searchByName" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
-    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" [style]="{'width': '12%'}">
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" >
         <ng-template pTemplate="body" let-volume="rowData">
-            <a [routerLink]="['/volumeDetails/' + volume.id]">{{volume.name}}</a>
+            <a [routerLink]="['/volumeDetails/' + volume.id]"  title="{{volume.name}}">{{volume.name}}</a>
         </ng-template>
     </p-column>
-    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" [style]="{'width': '10%'}"></p-column>
-    <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}" [style]="{'width': '10%'}"></p-column>
-    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}">
-    </p-column>
-    <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '12%'}"></p-column>
-    <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '28%'}">
+    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" ></p-column>
+    <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}"></p-column>
+    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}"></p-column>
+    <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '15%'}"></p-column>
+    <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '335px'}">
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
             <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
-            <a (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
+            <a [ngClass]="{'a-rep-disabled':volume['isDisableRep']}" (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
             <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
         </ng-template>
     </p-column>
@@ -75,12 +74,12 @@
             </form-item>
             <form-item label="{{I18N.keyID['sds_block_volume_expandby']}}" >
                 <div style="display: inline-flex;" class="ui-fluid">
-                        <input *ngIf="!isEditUser" type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
+                        <input type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
                         <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
                 </div>
             </form-item>
             <form-item label="{{I18N.keyID['sds_block_volume_totalcapa']}}" >
-                    <span class="text-only">{{selectVolumeSize}}</span>
+                    <span class="text-only">{{newVolumeSizeFormat}}</span>
             </form-item>
         </form>
         <p-footer>
@@ -102,7 +101,7 @@
                             </div>
                             <div style="padding-top: 30px" class="item-flex">
                                 <span><img src="assets/business/images/volume/u436.png"></span>
-                                <span class="margin-between-img-text">region_beijing</span>
+                                <span class="margin-between-img-text">default</span>
                             </div>
                         </div>
                     </div>
@@ -136,11 +135,6 @@
                     <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" [errorMessage]="errorMessage" >
                         <form-item label="Secondary Name" [required]="true">
                             <input type="text" pInputText formControlName="repName" [style]="{'min-width':'100px'}"/>
-                        </form-item>
-                        <form-item label="Target Region" >
-                            <div style="display: inline-flex;" class="ui-fluid">
-                                <p-dropdown [style]="{'min-width':'136px'}" [options]="" ></p-dropdown>
-                            </div>
                         </form-item>
                         <form-item label="Target Availability Zone" [required]="true" >
                             <div style="display: inline-flex;" class="ui-fluid">

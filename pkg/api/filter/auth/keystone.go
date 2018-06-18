@@ -44,7 +44,6 @@ func NewKeystone() AuthBase {
 
 type Keystone struct {
 	identity *gophercloud.ServiceClient
-	ctx      *bctx.Context
 }
 
 func (k *Keystone) SetUp() error {
@@ -71,10 +70,10 @@ func (k *Keystone) SetUp() error {
 	return nil
 }
 
-func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
+func (k *Keystone) setPolicyContext(ctx *bctx.Context, r tokens.GetResult) error {
 	roles, err := r.ExtractRoles()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract roles failed,%v", err)
+		return model.HttpError(ctx, http.StatusUnauthorized, "extract roles failed,%v", err)
 	}
 
 	var roleNames []string
@@ -84,27 +83,28 @@ func (k *Keystone) setPolicyContext(r tokens.GetResult) error {
 
 	project, err := r.ExtractProject()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract project failed,%v", err)
+		return model.HttpError(ctx, http.StatusUnauthorized, "extract project failed,%v", err)
 	}
 
 	user, err := r.ExtractUser()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract user failed,%v", err)
+		return model.HttpError(ctx, http.StatusUnauthorized, "extract user failed,%v", err)
 	}
 
-	ctx := &context.Context{
-		TenantId:       project.ID,
-		Roles:          roleNames,
-		UserId:         user.ID,
-		IsAdminProject: project.Name == "admin",
+	param := map[string]interface{}{
+		"TenantId":       project.ID,
+		"Roles":          roleNames,
+		"UserId":         user.ID,
+		"IsAdminProject": strings.ToLower(project.Name) == "admin",
 	}
-	k.ctx.Input.SetData("context", ctx)
+	context.UpdateContext(ctx, param)
+
 	return nil
 }
 
-func (k *Keystone) validateToken(token string) error {
+func (k *Keystone) validateToken(ctx *bctx.Context, token string) error {
 	if token == "" {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "token not found in header")
+		return model.HttpError(ctx, http.StatusUnauthorized, "token not found in header")
 	}
 
 	var r tokens.GetResult
@@ -122,26 +122,25 @@ func (k *Keystone) validateToken(token string) error {
 		return r.Err
 	})
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "get token failed,%v", r.Err)
+		return model.HttpError(ctx, http.StatusUnauthorized, "get token failed,%v", r.Err)
 	}
 
 	t, err := r.ExtractToken()
 	if err != nil {
-		return model.HttpError(k.ctx, http.StatusUnauthorized, "extract token failed,%v", err)
+		return model.HttpError(ctx, http.StatusUnauthorized, "extract token failed,%v", err)
 
 	}
 	log.V(8).Infof("token: %v", t)
 
 	if time.Now().After(t.ExpiresAt) {
-		return model.HttpError(k.ctx, http.StatusUnauthorized,
+		return model.HttpError(ctx, http.StatusUnauthorized,
 			"token has expired, expire time %v", t.ExpiresAt)
 	}
-	return k.setPolicyContext(r)
+	return k.setPolicyContext(ctx, r)
 }
 
 func (k *Keystone) Filter(ctx *bctx.Context) {
 	// Strip the spaces around the token
 	token := strings.TrimSpace(ctx.Input.Header(constants.AuthTokenHeader))
-	k.ctx = ctx
-	k.validateToken(token)
+	k.validateToken(ctx, token)
 }

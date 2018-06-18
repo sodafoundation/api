@@ -93,6 +93,8 @@ func fakeHandler(script string, cmd []string) (string, error) {
 		return string(sampleVG), nil
 	case "vgs":
 		return string(sampleVGS), nil
+	case "dd":
+		return "", nil
 	default:
 		break
 	}
@@ -106,6 +108,35 @@ func TestCreateVolume(t *testing.T) {
 		Description: "volume for testing",
 		Size:        int64(1),
 		PoolName:    "vg001",
+	}
+	var expected = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "test001",
+		Description: "volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		Metadata: map[string]string{
+			"lvPath": "/dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71",
+		},
+	}
+	vol, err := fd.CreateVolume(opt)
+	if err != nil {
+		t.Error("Failed to create volume:", err)
+	}
+	vol.Id = ""
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, vol)
+	}
+}
+
+func TestCreateVolumeFromSnapshot(t *testing.T) {
+	opt := &pb.CreateVolumeOpts{
+		Name:         "test001",
+		Description:  "volume for testing",
+		Size:         int64(1),
+		PoolName:     "vg001",
+		SnapshotId:   "3769855c-a102-11e7-b772-17b880d2f537",
+		SnapshotSize: int64(1),
 	}
 	var expected = &model.VolumeSpec{
 		BaseModel:   &model.BaseModel{},

@@ -5,7 +5,8 @@ import { AppService } from 'app/app.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { I18nPluralPipe } from '@angular/common';
 
-import { ProfileService } from './profile.service'
+import { ProfileService } from './profile.service';
+import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 
 @Component({
     templateUrl: './profile.component.html',
@@ -43,54 +44,53 @@ export class ProfileComponent implements OnInit {
     profiles;
     showWarningDialog = false;
     constructor(
-        // private I18N: I18NService,
+        public I18N: I18NService,
         // private router: Router
-        private ProfileService: ProfileService
+        private ProfileService: ProfileService,
+        private confirmationService:ConfirmationService
     ) { }
     showCard = true;
     ngOnInit() {
         this.getProfiles();
-
-        this.profiles = [
-            // {
-            //     "id": "bbb",
-            //     "name": "Gold",
-            //     "protocol": "FC",
-            //     "type": "Thin",
-            //     "policys": [
-            //         "Qos",
-            //         "Snapshot",
-            //         "Replication"
-            //     ],
-            //     "description": "provide gold storage service",
-            //     "extras": {
-            //         "key1": "value1",
-            //         "key2": {
-            //             "subKey1": "subValue1",
-            //             "subKey2": "subValue2"
-            //         },
-            //         "key3": "value3"
-            //     }
-            // }
-        ];
+        this.profiles = [];
     }
 
     getProfiles() {
         this.ProfileService.getProfiles().subscribe((res) => {
-            // return res.json();
             this.profiles = res.json();
         });
     }
 
-    showWarningDialogFun(id) {
-        this.profileId = id;
-        this.showWarningDialog = true;
+    showWarningDialogFun(profile) {
+        let msg = "<div>Are you sure you want to delete the Profile?</div><h3>[ "+ profile.name +" ]</h3>";
+        let header ="Delete Profile";
+        let acceptLabel = "Delete";
+        let warming = true;
+        this.confirmDialog([msg,header,acceptLabel,warming,profile.id])
     }
     deleteProfile(id) {
         this.ProfileService.deleteProfile(id).subscribe((res) => {
-            // this.profiles = res.json();
             this.getProfiles();
-            this.showWarningDialog = false;
         });
+    }
+    confirmDialog([msg,header,acceptLabel,warming=true,func]){
+        this.confirmationService.confirm({
+            message: msg,
+            header: header,
+            acceptLabel: acceptLabel,
+            isWarning: warming,
+            accept: ()=>{
+                try {
+                    this.deleteProfile(func);
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                finally {
+                    
+                }
+            },
+            reject:()=>{}
+        })
     }
 }

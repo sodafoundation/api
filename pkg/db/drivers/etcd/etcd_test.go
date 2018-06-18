@@ -316,9 +316,7 @@ func TestListVolumes(t *testing.T) {
 	}
 
 	var expected []*model.VolumeSpec
-	for i := range SampleVolumes {
-		expected = append(expected, &SampleVolumes[i])
-	}
+	expected = append(expected, &SampleVolumes[0])
 	if !reflect.DeepEqual(vols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, vols)
 	}

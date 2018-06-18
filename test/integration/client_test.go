@@ -17,12 +17,13 @@
 package integration
 
 import (
-	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/constants"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var c = client.NewClient(&client.Config{
@@ -43,9 +44,15 @@ func TestClientCreateProfile(t *testing.T) {
 		t.Error("create profile in client failed:", err)
 		return
 	}
+	// If extras are not defined, create an empty one.
+	if prf.Extras == nil {
+		prf.Extras = model.ExtraSpec{}
+	}
 
-	prfBody, _ := json.MarshalIndent(prf, "", "	")
-	t.Log(string(prfBody))
+	var expected = &SampleProfiles[0]
+	if !reflect.DeepEqual(prf, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, prf)
+	}
 }
 
 func TestClientGetProfile(t *testing.T) {
@@ -57,8 +64,10 @@ func TestClientGetProfile(t *testing.T) {
 		return
 	}
 
-	prfBody, _ := json.MarshalIndent(prf, "", "	")
-	t.Log(string(prfBody))
+	var expected = &SampleProfiles[1]
+	if !reflect.DeepEqual(prf, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, prf)
+	}
 }
 
 func TestClientListProfiles(t *testing.T) {
@@ -67,9 +76,20 @@ func TestClientListProfiles(t *testing.T) {
 		t.Error("list profiles in client failed:", err)
 		return
 	}
+	// If extras are not defined, create an empty one.
+	for _, prf := range prfs {
+		if prf.Extras == nil {
+			prf.Extras = model.ExtraSpec{}
+		}
+	}
 
-	prfsBody, _ := json.MarshalIndent(prfs, "", "	")
-	t.Log(string(prfsBody))
+	var expected []*model.ProfileSpec
+	for i := range SampleProfiles {
+		expected = append(expected, &SampleProfiles[i])
+	}
+	if !reflect.DeepEqual(prfs, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, prfs)
+	}
 }
 
 func TestClientDeleteProfile(t *testing.T) {
@@ -95,8 +115,10 @@ func TestClientAddExtraProperty(t *testing.T) {
 		return
 	}
 
-	extBody, _ := json.MarshalIndent(ext, "", "	")
-	t.Log(string(extBody))
+	var expected = &SampleProfiles[0].Extras
+	if !reflect.DeepEqual(ext, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, ext)
+	}
 }
 
 func TestClientListExtraProperties(t *testing.T) {
@@ -108,8 +130,10 @@ func TestClientListExtraProperties(t *testing.T) {
 		return
 	}
 
-	extBody, _ := json.MarshalIndent(ext, "", "	")
-	t.Log(string(extBody))
+	var expected = &SampleProfiles[0].Extras
+	if !reflect.DeepEqual(ext, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, ext)
+	}
 }
 
 func TestClientRemoveExtraProperty(t *testing.T) {
@@ -133,8 +157,10 @@ func TestClientGetDock(t *testing.T) {
 		return
 	}
 
-	dckBody, _ := json.MarshalIndent(dck, "", "	")
-	t.Log(string(dckBody))
+	var expected = &SampleDocks[0]
+	if !reflect.DeepEqual(dck, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, dck)
+	}
 }
 
 func TestClientListDocks(t *testing.T) {
@@ -144,8 +170,13 @@ func TestClientListDocks(t *testing.T) {
 		return
 	}
 
-	dcksBody, _ := json.MarshalIndent(dcks, "", "	")
-	t.Log(string(dcksBody))
+	var expected []*model.DockSpec
+	for i := range SampleDocks {
+		expected = append(expected, &SampleDocks[i])
+	}
+	if !reflect.DeepEqual(dcks, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, dcks)
+	}
 }
 
 func TestClientGetPool(t *testing.T) {
@@ -157,8 +188,10 @@ func TestClientGetPool(t *testing.T) {
 		return
 	}
 
-	polBody, _ := json.MarshalIndent(pol, "", "	")
-	t.Log(string(polBody))
+	var expected = &SamplePools[0]
+	if !reflect.DeepEqual(pol, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, pol)
+	}
 }
 
 func TestClientListPools(t *testing.T) {
@@ -168,8 +201,13 @@ func TestClientListPools(t *testing.T) {
 		return
 	}
 
-	polsBody, _ := json.MarshalIndent(pols, "", "	")
-	t.Log(string(polsBody))
+	var expected []*model.StoragePoolSpec
+	for i := range SamplePools {
+		expected = append(expected, &SamplePools[i])
+	}
+	if !reflect.DeepEqual(pols, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, pols)
+	}
 }
 
 func TestClientCreateVolume(t *testing.T) {
@@ -179,14 +217,12 @@ func TestClientCreateVolume(t *testing.T) {
 		Size:        int64(1),
 	}
 
-	vol, err := c.CreateVolume(body)
-	if err != nil {
+	if _, err := c.CreateVolume(body); err != nil {
 		t.Error("create volume in client failed:", err)
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	t.Log("Create volume success!")
 }
 
 func TestClientGetVolume(t *testing.T) {
@@ -198,8 +234,10 @@ func TestClientGetVolume(t *testing.T) {
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	var expected = &SampleVolumes[0]
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vol)
+	}
 }
 
 func TestClientListVolumes(t *testing.T) {
@@ -209,20 +247,13 @@ func TestClientListVolumes(t *testing.T) {
 		return
 	}
 
-	volsBody, _ := json.MarshalIndent(vols, "", "	")
-	t.Log(string(volsBody))
-}
-
-func TestClientDeleteVolume(t *testing.T) {
-	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	body := &model.VolumeSpec{}
-
-	if err := c.DeleteVolume(volID, body); err != nil {
-		t.Error("delete volume in client failed:", err)
-		return
+	var expected []*model.VolumeSpec
+	for i := range SampleVolumes {
+		expected = append(expected, &SampleVolumes[i])
 	}
-
-	t.Log("Delete volume success!")
+	if !reflect.DeepEqual(vols, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vols)
+	}
 }
 
 func TestClientUpdateVolume(t *testing.T) {
@@ -238,14 +269,16 @@ func TestClientUpdateVolume(t *testing.T) {
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	var expected = &SampleVolumes[0]
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vol)
+	}
 }
 
 func TestClientExtendVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	oldVol, err := c.GetVolume(volID)
 
+	oldVol, err := c.GetVolume(volID)
 	if err != nil {
 		t.Error("get volume in client failed:", err)
 		return
@@ -254,15 +287,12 @@ func TestClientExtendVolume(t *testing.T) {
 	body := &model.ExtendVolumeSpec{
 		NewSize: int64(oldVol.Size + 1),
 	}
-	vol, err := c.ExtendVolume(volID, body)
-
-	if err != nil {
+	if _, err := c.ExtendVolume(volID, body); err != nil {
 		t.Error("extend volume in client failed:", err)
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	t.Log("Extend volume success!")
 }
 
 func TestClientCreateVolumeAttachment(t *testing.T) {
@@ -271,14 +301,12 @@ func TestClientCreateVolumeAttachment(t *testing.T) {
 		HostInfo: model.HostInfo{},
 	}
 
-	atc, err := c.CreateVolumeAttachment(body)
-	if err != nil {
+	if _, err := c.CreateVolumeAttachment(body); err != nil {
 		t.Error("create volume attachment in client failed:", err)
 		return
 	}
 
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log(string(atcBody))
+	t.Log("Create volume attachment success!")
 }
 
 func TestClientGetVolumeAttachment(t *testing.T) {
@@ -290,8 +318,10 @@ func TestClientGetVolumeAttachment(t *testing.T) {
 		return
 	}
 
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log(string(atcBody))
+	var expected = &SampleAttachments[0]
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, atc)
+	}
 }
 
 func TestClientListVolumeAttachments(t *testing.T) {
@@ -301,8 +331,13 @@ func TestClientListVolumeAttachments(t *testing.T) {
 		return
 	}
 
-	atcsBody, _ := json.MarshalIndent(atcs, "", "	")
-	t.Log(string(atcsBody))
+	var expected []*model.VolumeAttachmentSpec
+	for i := range SampleAttachments {
+		expected = append(expected, &SampleAttachments[i])
+	}
+	if !reflect.DeepEqual(atcs, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, atcs)
+	}
 }
 
 func TestClientDeleteVolumeAttachment(t *testing.T) {
@@ -323,14 +358,12 @@ func TestClientCreateVolumeSnapshot(t *testing.T) {
 		VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 
-	snp, err := c.CreateVolumeSnapshot(body)
-	if err != nil {
+	if _, err := c.CreateVolumeSnapshot(body); err != nil {
 		t.Error("create volume snapshot in client failed:", err)
 		return
 	}
 
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log(string(snpBody))
+	t.Log("Create volume snapshot success!")
 }
 
 func TestClientGetVolumeSnapshot(t *testing.T) {
@@ -342,8 +375,10 @@ func TestClientGetVolumeSnapshot(t *testing.T) {
 		return
 	}
 
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log(string(snpBody))
+	var expected = &SampleSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snp)
+	}
 }
 
 func TestClientListVolumeSnapshots(t *testing.T) {
@@ -353,8 +388,13 @@ func TestClientListVolumeSnapshots(t *testing.T) {
 		return
 	}
 
-	snpsBody, _ := json.MarshalIndent(snps, "", "	")
-	t.Log(string(snpsBody))
+	var expected []*model.VolumeSnapshotSpec
+	for i := range SampleSnapshots {
+		expected = append(expected, &SampleSnapshots[i])
+	}
+	if !reflect.DeepEqual(snps, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snps)
+	}
 }
 
 func TestClientDeleteVolumeSnapshot(t *testing.T) {
@@ -381,11 +421,25 @@ func TestClientUpdateVolumeSnapshot(t *testing.T) {
 		return
 	}
 
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log(string(snpBody))
+	var expected = &SampleSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snp)
+	}
 }
 
-// There are some deployment issues when testing Replicaiton operation,
+func TestClientDeleteVolume(t *testing.T) {
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	body := &model.VolumeSpec{}
+
+	if err := c.DeleteVolume(volID, body); err != nil {
+		t.Error("delete volume in client failed:", err)
+		return
+	}
+
+	t.Log("Delete volume success!")
+}
+
+// TODO: There are some deployment issues when testing Replicaiton operation,
 // so these test cases would be hidden until we fix the bug.
 /*
 func TestClientCreateReplication(t *testing.T) {

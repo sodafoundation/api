@@ -12,35 +12,35 @@ go:
 env:
   matrix:
   - TARGET=amd64
-  - TARGET=arm64
-  - TARGET=arm
-  - TARGET=386
-  - TARGET=ppc64le
+  # - TARGET=arm64
+  # - TARGET=arm
+  # - TARGET=386
+  # - TARGET=ppc64le
   global:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install librados-dev librbd-dev ceph-common lvm2 -y
+  - sudo apt-get install -y lvm2 tgt open-iscsi
 
 matrix:
   fast_finish: true
   allow_failures:
   - go: tip
   exclude:
-  - go: tip
-    env: TARGET=arm
-  - go: tip
-    env: TARGET=arm64
-  - go: tip
-    env: TARGET=386
-  - go: tip
-    env: TARGET=ppc64le
+  # - go: tip
+  #   env: TARGET=arm
+  # - go: tip
+  #   env: TARGET=arm64
+  # - go: tip
+  #   env: TARGET=386
+  # - go: tip
+  #   env: TARGET=ppc64le
 
 install:
   - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
-  - make
+  # Build OpenSDS Controller source code
+  - make all
 
 script:
   - ./script/CI/coverage
@@ -48,3 +48,5 @@ script:
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
+  # Clean OpenSDS Controller built data
+  - make clean

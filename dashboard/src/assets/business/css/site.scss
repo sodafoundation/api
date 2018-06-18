@@ -1038,6 +1038,9 @@ a {
 .volume-basic-info h3 {
     padding: 0 .08rem .2rem;
 }
+.volume-basic-info p {
+    padding: 0 .08rem .1rem;
+}
 
 .volume-basic-item-class {
     padding: 0.5em 0;
@@ -1526,4 +1529,35 @@ a {
 .create-profile-snap-col-8{
     width:66.66666%;
 }
+.a-rep-disabled{
+    pointer-events:none;
+    cursor:default;
+    opacity:0.5
+}
+.line-arrow-right{ 
+    width:200px; 
+    height:4px; 
+    font-size: 0; 
+    text-align: right; 
+    background-color:#ccc; 
+    margin: auto;
+    margin-top: 10px;
+}
+.line-arrow-right::before{ 
+    content: ''; 
+    font-size:0; 
+    position: relative; 
+    width: 0; 
+    height: 0; 
+    border: 8px solid transparent; 
+    border-left-color: #ccc; 
+    right: -16px; top: 2px;
+}
+.line-arrow-right.enabled{ 
+    background-color: #438bd3; 
+}
+.line-arrow-right.enabled::before{ 
+    border-left-color: #438bd3; 
+}
+
 /* custom breadcrumb end */

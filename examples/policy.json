@@ -38,7 +38,12 @@
   "replication:get": "rule:admin_or_owner",
   "replication:update": "rule:admin_or_owner",
   "replication:delete": "rule:admin_or_owner",
-  "replication:action:enable": "rule:admin_or_owner",
-  "replication:action:disable": "rule:admin_or_owner",
-  "replication:action:failover": "rule:admin_or_owner"
+  "replication:enable": "rule:admin_or_owner",
+  "replication:disable": "rule:admin_or_owner",
+  "replication:failover": "rule:admin_or_owner",
+  "volume_group:create": "rule:admin_or_owner",
+  "volume_group:list": "rule:admin_or_owner",
+  "volume_group:get": "rule:admin_or_owner",
+  "volume_group:update": "rule:admin_or_owner",
+  "volume_group:delete": "rule:admin_or_owner"
 }

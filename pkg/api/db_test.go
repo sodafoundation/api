@@ -64,13 +64,52 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 	result, err = CreateVolumeDBEntry(context.NewAdminContext(), req)
 }
 
+func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
+	var req = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "volume sample",
+		Description: "This is a sample volume for testing",
+		Size:        int64(1),
+		Status:      "creating",
+		SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
+	}
+	var snap = &model.VolumeSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Size:   int64(1),
+		Status: "available",
+	}
+
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(&SampleVolumes[1], nil)
+	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
+	db.C = mockClient
+
+	var expected = &SampleVolumes[1]
+	result, err := CreateVolumeDBEntry(context.NewAdminContext(), req)
+
+	if err != nil {
+		t.Errorf("Failed to create volume with snapshot, err is %v\n", err)
+	}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
+	}
+}
+
 func TestDeleteVolumeDBEntry(t *testing.T) {
 	var vol = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
-		Status:    "available"}
+		Status:    "available",
+		ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
+		PoolId:    "3762355c-a102-11e7-b772-17b880d2f537",
+	}
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(nil, nil)
+	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
+	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+	mockClient.On("ListVolumeAttachments", context.NewAdminContext(), vol.Id).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
@@ -194,6 +233,7 @@ func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", req).Return(nil, nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeSnapshotDBEntry(context.NewAdminContext(), req)

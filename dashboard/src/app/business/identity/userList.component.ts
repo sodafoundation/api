@@ -264,9 +264,11 @@ export class UserListComponent implements OnInit, AfterViewChecked {
         this.http.get("/v3/projects", request).subscribe((res) => {
             res.json().projects.map((item, index) => {
                 let tenant = {};
-                tenant["label"] = item.name;
-                tenant["value"] = item.id;
-                this.tenantLists.push(tenant);
+                if(item.name != "admin" && item.name != "service"){
+                    tenant["label"] = item.name;
+                    tenant["value"] = item.id;
+                    this.tenantLists.push(tenant);
+                }
             });
         });
     }
@@ -319,7 +321,7 @@ export class UserListComponent implements OnInit, AfterViewChecked {
                 user["defaultTenant"] = item.default_project_id;
                 user["description"] = !item.description ? '--' : item.description=='' ? '--' : item.description;
 
-                if(item.name == "admin"){
+                if(item.name == "admin" || item.name == "opensds"){
                     user["disabled"] = true;
                 }
                 this.tenantUsers.push(user);

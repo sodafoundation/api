@@ -2,6 +2,7 @@ import { Component, Input, OnInit, ViewContainerRef, ViewChild, Directive, Eleme
 import { Http } from '@angular/http';
 import { I18NService, Utils } from 'app/shared/api';
 import { AppService } from 'app/app.service';
+import { ParamStorService } from 'app/shared/api';
 import { I18nPluralPipe } from '@angular/common';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MenuItem, ConfirmationService} from '../../../components/common/api';
@@ -14,7 +15,8 @@ import { MenuItem, ConfirmationService} from '../../../components/common/api';
     animations: []
 })
 export class TenantDetailComponent implements OnInit {
-    @Input() projectID = [];
+    @Input() projectID;
+    @Input() projectName;
     @Input() isDetailFinished: Boolean;
     addUserDisplay: boolean=false;
     userfilter: string="";
@@ -30,7 +32,8 @@ export class TenantDetailComponent implements OnInit {
     constructor(
         private http: Http,
         private confirmationService: ConfirmationService,
-        // private I18N: I18NService,
+        private paramStor: ParamStorService,
+        public I18N: I18NService,
         // private router: Router
     ) { }
 
@@ -46,7 +49,7 @@ export class TenantDetailComponent implements OnInit {
                 originCapacity += ele.size;
             })
             this.statistics_volumes = res.json().length;
-            this.statistics_capacity = Utils.getDisplayCapacity(originCapacity*1024*1024*1024, 3, "GB");
+            this.statistics_capacity = Utils.getDisplayGBCapacity(originCapacity);
         })
 
         this.http.get("/v1beta/"+ this.projectID +"/block/snapshots").subscribe((res)=>{
@@ -63,8 +66,10 @@ export class TenantDetailComponent implements OnInit {
             // get roles
             let reqRole: any = { params:{} };
             this.http.get("/v3/roles", reqRole).subscribe((roleRES) => {
+                let currentRoleName = this.projectName == "admin" ? "admin" : (this.projectName == "service" ? "service" : "Member");
+
                 roleRES.json().roles.forEach((item, index) => {
-                    if(item.name == "Member"){ // more role can be expand
+                    if(item.name == currentRoleName){ // more role can be expand
                         let roleJson = {};
                         roleJson["id"] = item.id;
                         roleJson["name"] = item.name;
@@ -141,25 +146,17 @@ export class TenantDetailComponent implements OnInit {
             });
 
             //Filter added users
-            newarr.forEach((user, i) => {
-                if(this.users.length > 0){
-                    let added = false;
-                    this.users.forEach((addedUser) => {
-                        if(user.id == addedUser.id ){
-                            added = true;
-                        }
-                    });
-                    if('admin' != user.name && !added){
-                        this.allUsers.push(user);
-                    }
-                }else{
-                    if('admin' == user.name){
-                        newarr.splice(i, 1);
-                        this.allUsers = newarr;
-                    }
-                }
-                
-            });
+            if(this.users.length > 0){
+                this.users.forEach((addedUser) => {
+                    this.allUsers = newarr.filter((user, idx, arr)=>{
+                        return (user.name != 'admin' && user.name != 'opensds'  && user.name != addedUser.name);
+                    })
+                })
+            }else{
+                this.allUsers = newarr.filter((user, idx, arr)=>{
+                    return (user.name != 'admin' && user.name != 'opensds');
+                })
+            }
 
         });
     }

@@ -91,16 +91,24 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 }
 
 // ListVolumes
-func (v *VolumeMgr) ListVolumes() ([]*model.VolumeSpec, error) {
-	var res []*model.VolumeSpec
+func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error) {
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
 
-	if err := v.Recv(url, "GET", nil, &res); err != nil {
+	param, err := processListParam(args)
+	if err != nil {
 		return nil, err
 	}
 
+	if param != "" {
+		url += "?" + param
+	}
+
+	var res []*model.VolumeSpec
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
@@ -132,7 +140,7 @@ func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model
 	var res model.VolumeSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateNewVolumeURL(urls.Client, v.TenantId, volID, "resize")}, "/")
+		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID, "resize")}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -184,16 +192,23 @@ func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSp
 }
 
 // ListVolumeAttachments
-func (v *VolumeMgr) ListVolumeAttachments() ([]*model.VolumeAttachmentSpec, error) {
-	var res []*model.VolumeAttachmentSpec
+func (v *VolumeMgr) ListVolumeAttachments(args ...interface{}) ([]*model.VolumeAttachmentSpec, error) {
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateAttachmentURL(urls.Client, v.TenantId)}, "/")
 
-	if err := v.Recv(url, "GET", nil, &res); err != nil {
+	param, err := processListParam(args)
+	if err != nil {
 		return nil, err
 	}
 
+	if param != "" {
+		url += "?" + param
+	}
+	var res []*model.VolumeAttachmentSpec
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
@@ -235,11 +250,21 @@ func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, 
 }
 
 // ListVolumeSnapshots
-func (v *VolumeMgr) ListVolumeSnapshots() ([]*model.VolumeSnapshotSpec, error) {
+func (v *VolumeMgr) ListVolumeSnapshots(args ...interface{}) ([]*model.VolumeSnapshotSpec, error) {
 	var res []*model.VolumeSnapshotSpec
+
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateSnapshotURL(urls.Client, v.TenantId)}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -300,11 +325,20 @@ func (v *VolumeMgr) GetVolumeGroup(vgId string) (*model.VolumeGroupSpec, error) 
 }
 
 // ListVolumeGroups
-func (v *VolumeMgr) ListVolumeGroups() ([]*model.VolumeGroupSpec, error) {
+func (v *VolumeMgr) ListVolumeGroups(args ...interface{}) ([]*model.VolumeGroupSpec, error) {
 	var res []*model.VolumeGroupSpec
 	url := strings.Join([]string{
 		v.Endpoint,
 		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId)}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

@@ -1,6 +1,6 @@
 <div class="content-header">
-    <h1>Create Profile</h1>
-    <p>Create profile to suit your specific use requirements.</p>
+    <h1>{{I18N.keyID['sds_profile_create_title']}}</h1>
+    <p>{{I18N.keyID['sds_profile_create_descrip']}}</p>
 </div>
 
 <div class="create-profile-form">
@@ -8,6 +8,9 @@
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
         <form-item label="{{label.name}}" [required]="true">
             <input pInputText type="text" size="80" formControlName="name" />
+        </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="48"  pInputTextarea formControlName="description"></textarea>
         </form-item>
         <form-item label="{{label.protocol}}" [required]="true">
             <p-dropdown [style]="{'min-width':150}" formControlName="protocol" [options]="protocolOptions"></p-dropdown>
@@ -29,13 +32,13 @@
                         <form-item label="{{label.maxIOPS}}" [required]="true">
                             <div class="input-text-vertical-align">
                                 <input pInputText type="text" formControlName="maxIOPS" />
-                                <span>IOPS/TB</span>
+                                <span>{{I18N.keyID['sds_profile_IOPS_unit']}}</span>
                             </div>
                         </form-item>
                         <form-item label="{{label.MBPS}}" [required]="true">
                             <div class="input-text-vertical-align">
                                 <input pInputText type="text" formControlName="maxBWS" />
-                                <span>MBPS/TB</span>
+                                <span>{{I18N.keyID['sds_profile_BWS_unit']}}</span>
                             </div>
                         </form-item>
                     </form>
@@ -60,12 +63,12 @@
                             </form-item>
                             <form-item label="{{label.replicationLabel.Period}}" [required]="true">
                                 <div class="ui-grid-col-14 input-text-vertical-align">
-                                    <input pInputText type="text" formControlName="repPeriod" placeholder="Period" /><span>Minutes</span>
+                                    <input pInputText type="text" formControlName="repPeriod" placeholder="Period" /><span>{{I18N.keyID['sds_profile_unit_minutes']}}</span>
                                 </div>
                             </form-item>
                             <form-item label="{{label.replicationLabel.Bandwidth}}" [required]="true">
                                 <div class="ui-grid-col-14 input-text-vertical-align">
-                                    <input pInputText type="text" formControlName="repBandwidth" placeholder="Bandwidth"/><span>MBPS/TB</span>
+                                    <input pInputText type="text" formControlName="repBandwidth" placeholder="Bandwidth"/><span>{{I18N.keyID['sds_profile_BWS_unit']}}</span>
                                 </div>
                             </form-item>
                         </div>
@@ -80,7 +83,7 @@
                                 <input pInputText type="text" formControlName="repRPO" />
                             </form-item>
                             <form-item label="{{label.replicationLabel.Consistency}}" [required]="false">
-                                <p-checkbox formControlName="repCons" value="true" label="Enable"></p-checkbox>
+                                <p-checkbox formControlName="repCons" value="true" label="{{I18N.keyID['sds_profile_enable']}}"></p-checkbox>
                             </form-item>
                         </div>
                     </form>
@@ -108,10 +111,10 @@
                             <div class="create-profile-snap-col-8 input-text-vertical-align">
                                 <p-dropdown [style]="{'min-width':200}"  formControlName="retentionOptions" [options]="snapshotRetentionOptions"></p-dropdown>
                                 <div class="create-profile-snap-policy">
-                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" pInputText type="number" formControlName="snapNum"/>
+                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" min="1" step="1" pInputText type="number" formControlName="snapNum"/>
                                     <input *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'" pInputText type="number" formControlName="duration"/>
                                 </div>
-                                <span *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'">Days</span>
+                                <span *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'">{{I18N.keyID['sds_profile_nuit_days']}}</span>
                             </div>
                         </form-item>
                     </form>
@@ -122,7 +125,7 @@
             <div class="ui-grid-col-4">
                 <a class="create-profile-img" (click)="showCustomization=!showCustomization">
                     <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
-                    <span>Add</span>
+                    <span>{{I18N.keyID['sds_profile_extra_add']}}</span>
                 </a>
             </div>
         </form-item>
@@ -145,7 +148,7 @@
             <div class="ui-grid-col-4">
                 <a class="create-profile-img" (click)="showStoragePool=!showStoragePool">
                     <img style="vertical-align:middle;" src="assets/business/images/profile/u2861.png">
-                    <span>Matching</span>
+                    <span>{{I18N.keyID['sds_profile_pool_match']}}</span>
                 </a>
             </div>
         </form-item>

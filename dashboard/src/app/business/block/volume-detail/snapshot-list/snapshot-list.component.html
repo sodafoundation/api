@@ -6,27 +6,23 @@
         </div>
         <div class="right">
             <div class="ui-inputsearch">
-                <input type="text" [(ngModel)]="snapshotfilter" pInputText placeholder="search" />
+                <input type="text" #searchByName [(ngModel)]="snapshotfilter" pInputText placeholder="search" />
                 <button pButton type="button" icon="fa-search" (click)="getSnapshots(snapshotfilter)"></button>
             </div>
-            <button pButton type="button" icon="fa-refresh" (click)="getSnapshots()"></button>
+            <button pButton type="button" icon="fa-refresh" (click)="getSnapshots(param)"></button>
         </div>
     </div>
 
-    <p-dataTable [immutable]="false" [(selection)]="selectedSnapshots" [value]="snapshots" selectionMode="multiple" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+    <p-dataTable [immutable]="false" [globalFilter]="searchByName" [(selection)]="selectedSnapshots" [value]="snapshots" selectionMode="multiple" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
         <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
         <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}"></p-column>
         <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
-        <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}">
-            <!-- <ng-template let-snapshot="rowData" pTemplate="body">
-                <span>{{(snapshot.enabled == true) ? "Enabled" : "Disabled"}}</span>
-            </ng-template> -->
-        </p-column>
+        <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}"></p-column>
         <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}"></p-column>
         <p-column field="createdAt" header="{{I18N.keyID['sds_block_volume_createat']}}"></p-column>
         <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '25%'}">
             <ng-template let-snapshot="rowData" pTemplate="body">
-                <a style="opacity: 0.2">{{I18N.keyID['sds_block_volume_createVol']}}</a>
+                <a (click)="showCreateVolumeBasedonSnapshot(snapshot)">{{I18N.keyID['sds_block_volume_createVol']}}</a>
                 <a (click)="showSnapshotPropertyDialog('modify',snapshot)">{{I18N.keyID['sds_block_volume_modify']}}</a>
                 <a (click)="batchDeleteSnapshot([snapshot])">{{I18N.keyID['sds_block_volume_delete']}}</a>
             </ng-template>
@@ -52,6 +48,23 @@
         <p-footer>
             <button type="button" pButton (click)="snapshotModifyOrCreate()" label="{{I18N.keyID['ok']}}" [disabled]="okBtnDisabled"></button>
             <button type="button" pButton (click)="snapshotPropertyDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
+        </p-footer>
+    </p-dialog>
+
+    <p-dialog *ngIf="createVolumeDisplay" [(visible)]="createVolumeDisplay" header="{{I18N.keyID['sds_block_volume_createVol']}}" [width]="600" modal="modal">
+        <form [grid]="{label: 'ui-g-4', content:'ui-g-20'}" [formGroup]="createVolumeFormGroup" [errorMessage]="errorMessage">
+            <form-item label="{{label.name}}" [required]="true">
+                <input type="text" pInputText formControlName="name" value=""/>
+            </form-item>
+
+            <form-item label="{{label.description}}" [required]="false">
+                <textarea [rows]="3" [cols]="27" pInputTextarea formControlName="description" ></textarea>
+            </form-item>
+        </form>
+
+        <p-footer>
+            <button type="button" pButton class="ui-button-secondary" (click)="createVolumeBasedonSnapshot()" label="{{I18N.keyID['ok']}}" ></button>
+            <button type="button" pButton (click)="createVolumeDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
         </p-footer>
     </p-dialog>
 </div>

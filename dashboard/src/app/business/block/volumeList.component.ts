@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, HostBinding, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
-import { I18NService } from 'app/shared/api';
+import { I18NService, Utils } from 'app/shared/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { AppService } from 'app/app.service';
 import { I18nPluralPipe } from '@angular/common';
@@ -15,6 +15,7 @@ let _ = require("underscore");
 @Component({
     selector: 'volume-list',
     templateUrl: 'volumeList.html',
+    providers: [ConfirmationService],
     styleUrls: [],
     animations: []
 })
@@ -23,7 +24,9 @@ export class VolumeListComponent implements OnInit {
     createReplicationDisplay = false;
     expandDisplay = false;
     modifyDisplay = false;
-    selectVolumeSize :number;
+    selectVolumeSize;
+    newVolumeSize;
+    newVolumeSizeFormat;
     unit:number = 1;
     repPeriod : number=60;
     capacityOptions = [
@@ -43,7 +46,7 @@ export class VolumeListComponent implements OnInit {
             value: null
         }
     ];
-    azOption=[{label:"default",value:"default"}];
+    azOption=[{label:"Secondary",value:"secondary"}];
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
@@ -89,13 +92,15 @@ export class VolumeListComponent implements OnInit {
         });
         this.expandFormGroup.get("expandSize").valueChanges.subscribe(
             (value:string)=>{
-                this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(value)*this.unit;
+                this.newVolumeSize =  parseInt(this.selectedVolume.size) + parseInt(value)*this.unit;
+                this.newVolumeSizeFormat = Utils.getDisplayGBCapacity(this.newVolumeSize);
             }
         );
         this.expandFormGroup.get("capacityOption").valueChanges.subscribe(
             (value:string)=>{
                 this.unit =(value === "tb" ? 1024: 1);
-                this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize)*this.unit;
+                this.newVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize)*this.unit;
+                this.newVolumeSizeFormat = Utils.getDisplayGBCapacity(this.newVolumeSize);
             }
         )
         this.replicationGroup = this.fb.group({
@@ -112,41 +117,69 @@ export class VolumeListComponent implements OnInit {
                 "label": this.I18N.keyID['sds_block_volume_modify'],
                 command: () => {
                     this.modifyDisplay = true;
-                }
+                },
+                disabled:false
             },
             {
                 "label": this.I18N.keyID['sds_block_volume_expand'],
                 command: () => {
                     this.expandDisplay = true;
                     this.expandFormGroup.reset();
-                    this.selectVolumeSize = parseInt(this.selectedVolume.size);
                     this.expandFormGroup.controls["expandSize"].setValue(1);
                     this.unit = 1;
-                }
+                },
+                disabled:false
             },
             {
-                "label": this.I18N.keyID['sds_block_volume_delete'], command: () => {
+                "label": this.I18N.keyID['sds_block_volume_delete'], 
+                command: () => {
                     if (this.selectedVolume && this.selectedVolume.id) {
                         this.deleteVolumes(this.selectedVolume);
                     }
-                }
+                },
+                disabled:false
             }
         ];
-        this.getVolumes();
 
         this.getProfiles()
     }
 
     getVolumes() {
+        this.selectedVolumes = [];
         this.VolumeService.getVolumes().subscribe((res) => {
-            this.volumes = res.json();
-            this.volumes.forEach((item)=>
-                {
-                    this.ProfileService.getProfileById(item.profileId).subscribe((res)=>{
-                        item.profileName = res.json().name;
-                    })
-                }
-            )
+            let volumes = res.json();
+            this.ReplicationService.getAllReplicationsDetail().subscribe((resRep)=>{
+                let replications = resRep.json();
+                volumes.map((item)=>
+                    {
+                        let _profile = this.profiles.filter((profile,index,arr)=>{
+                                return profile.id == item.profileId;
+                            })[0];
+                        item['profileName'] = _profile != undefined ? _profile.name : "--";
+                        item['isDisableRep'] = false;
+                        replications.map((rep)=>{
+                            if(rep.primaryVolumeId == item.id || rep.secondaryVolumeId == item.id){
+                                item['isDisableRep'] = true;
+                            }
+                        });
+                        item.size = Utils.getDisplayGBCapacity(item.size);
+                    }
+                );
+                this.SnapshotService.getSnapshots().subscribe((resSnap)=>{
+                    let snaps = resSnap.json();
+                    volumes.map((item)=>
+                        {
+                            item['disabled'] = false;
+                            snaps.map((snap)=>{
+                                if(snap.volumeId == item.id){
+                                    item['disabled'] = true;
+                                }
+                            });
+                        }
+                    );
+                    this.volumes = volumes;
+                });
+            });
         });
     }
 
@@ -159,6 +192,8 @@ export class VolumeListComponent implements OnInit {
                     value: profile.id
                 });
             });
+
+            this.getVolumes();
         });
     }
 
@@ -192,20 +227,23 @@ export class VolumeListComponent implements OnInit {
         }
         this.SnapshotService.createSnapshot(param).subscribe((res) => {
             this.createSnapshotDisplay = false;
+            this.getProfiles();
         });
     }
 
-    returnSelectedVolume(selectedVoluem, dialog) {
+    returnSelectedVolume(selectedVolume, dialog) {
         if (dialog === 'snapshot') {
             this.createSnapshotDisplay = true;
         } else if (dialog === 'replication') {
             this.createReplicationDisplay = true;
         }
-        this.selectedVolume = selectedVoluem;
+        let unit = selectedVolume.size.includes("GB") ? 1 : 10;
+
+        this.selectedVolume = selectedVolume;
         this.replicationGroup.reset();
-        this.replicationGroup.controls["repName"].setValue(this.selectedVolume.name+"-replication");
+        this.replicationGroup.controls["repName"].setValue(selectedVolume.name+"-replication");
         this.replicationGroup.controls["az"].setValue(this.azOption[0]);
-        this.selectVolumeSize = parseInt(this.selectedVolume.size) + parseInt(this.expandFormGroup.value.expandSize);
+        this.selectVolumeSize = parseInt(selectedVolume.size)*unit;
     }
 
     modifyVolume() {
@@ -224,10 +262,9 @@ export class VolumeListComponent implements OnInit {
             }
             return;
         }
+        
         let param = {
-            "extend": {
-                "newSize": this.selectVolumeSize
-            }
+            "newSize": this.newVolumeSize
         }
         this.VolumeService.expandVolume(this.selectedVolume.id, param).subscribe((res) => {
             this.getVolumes();
@@ -243,7 +280,7 @@ export class VolumeListComponent implements OnInit {
         }
         let param = {
             "name":this.replicationGroup.value.repName ,
-            "size": this.selectedVolume.size,
+            "size": Number(this.selectedVolume.size.replace(" GB","")),
             "availabilityZone": this.replicationGroup.value.az.value,
             "profileId": this.replicationGroup.value.profileOption,
         }
@@ -289,5 +326,13 @@ export class VolumeListComponent implements OnInit {
             reject:()=>{}
         })
 
+    }
+
+    tablePaginate() {
+        this.selectedVolumes = [];
+    }
+    volumeCanDelete(param1,param2){
+        param1[2].disabled = param2;
+        return param1;
     }
 }
