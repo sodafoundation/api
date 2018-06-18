@@ -283,6 +283,7 @@ func (fc *FakeDbClient) UpdateVolumeAttachment(ctx *c.Context, attachmentId stri
 
 // DeleteVolumeAttachment
 func (fc *FakeDbClient) DeleteVolumeAttachment(ctx *c.Context, attachmentId string) error {
+	SampleAttachments = []model.VolumeAttachmentSpec{}
 	return nil
 }
 
