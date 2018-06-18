@@ -14,9 +14,10 @@
 
 .PHONY: all build protoc osdsdock osdslet osdsctl docker clean
 
-all:package build
 
 build:osdsdock osdslet osdsctl
+
+all:package build
 
 package:
 	sudo apt-get update && sudo apt-get install -y \
