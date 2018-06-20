@@ -30,11 +30,13 @@
                 <div class="ui-grid-col-12">
                     <div class="replication-img-item-padding position-relative">
                         <div class="replication-img-item-height">
-                            <div class="item-flex item-flex-justify" >
+                            <div class="item-flex item-flex-justify" style="line-height:32px" >
                                 <span>Period</span>
                                 <span class="margin-between-img-text">=</span>
-                                <input  class="margin-between-img-text" pInputText style="width:30px;" value="{{replication.replicationPeriod}}" disabled="true" type="text" />
+                                <input *ngIf = "!editReplicationDisable" class="margin-between-img-text" pInputText style="width:50px;" min="1" step="1" pInputText type="number" [formControl]="periodControl"/>
+                                <span *ngIf = "editReplicationDisable" class="margin-between-img-text">{{periodControl.value}}</span>
                                 <span class="margin-between-img-text">Minutes</span>
+                                <span [style.color]="'#40bcec'" style="margin-left:5px;font-size: 1.33333333em;" (click)="editReplicationPriod()" class="fa fa-pencil"></span>
                             </div>
                             <div [ngClass]="{'enabled':arrowEnable}" class="line-arrow-right"></div>
                             <div style="margin-top:10px;text-align: center">{{replication['replicationStatus']}}</div>      
