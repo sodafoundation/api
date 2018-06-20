@@ -102,7 +102,8 @@
     "sds_block_volume_group_detail":"Volume Group detail",
     "sds_block_volume_group_router":"Volume Group",
     "sds_validate_max_length":"The maximum length is 200.",
-    "sds_block_volume_group_create_group":"Create Volume Group"
+    "sds_block_volume_group_create_group":"Create Volume Group",
+    "sds_block_volume_rep_pair":"Replication Pair"
 
 
 

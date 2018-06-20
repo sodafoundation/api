@@ -181,13 +181,21 @@ export class ReplicationListComponent implements OnInit {
         let warming = true;
         this.confirmDialog([msg,header,acceptLabel,warming,"delete"])
     }
-    editReplication(){
-        if(this.editReplicationDisable){
-            this.editReplicationDisable = true;
-        }else{
+    editReplicationPriod(){
+        if(!this.editReplicationDisable){
             //wait interface modify period ,icon color:#40bcec
-            this.editReplicationDisable = true;
+            if(this.replication.replicationPeriod != this.periodControl.value){
+                let param = {
+                    name:this.replication.name,
+                    replicationPeriod:this.periodControl.value
+                };
+                this.replicationService.modifyReplication(this.replication.id,param).subscribe((res)=>{
+                    this.getAllReplicationsDetail();
+                });
+            }
         }  
+        this.editReplicationDisable = !this.editReplicationDisable;
+        
     }
     confirmDialog([msg,header,acceptLabel,warming=true,func]){
         this.confirmationService.confirm({

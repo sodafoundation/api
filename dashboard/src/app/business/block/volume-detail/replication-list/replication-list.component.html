@@ -36,7 +36,7 @@
                                 <input *ngIf = "!editReplicationDisable" class="margin-between-img-text" pInputText style="width:50px;" min="1" step="1" pInputText type="number" [formControl]="periodControl"/>
                                 <span *ngIf = "editReplicationDisable" class="margin-between-img-text">{{periodControl.value}}</span>
                                 <span class="margin-between-img-text">Minutes</span>
-                                <span [style.color]="'#ccc'" style="margin-left:5px;font-size: 1.33333333em;" (click)="editReplication()" class="fa fa-pencil"></span>
+                                <span [style.color]="'#40bcec'" style="margin-left:5px;font-size: 1.33333333em;" (click)="editReplicationPriod()" class="fa fa-pencil"></span>
                             </div>
                             <div [ngClass]="{'enabled':arrowEnable}" class="line-arrow-right"></div>
                             <div style="margin-top:10px;text-align: center">{{replication['replicationStatus']}}</div>      
