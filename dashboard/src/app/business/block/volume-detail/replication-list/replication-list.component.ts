@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import { I18NService } from 'app/shared/api';
 import { VolumeService ,ReplicationService} from './../../volume.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../../../components/common/api';
+import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'app-replication-list',
@@ -24,6 +25,8 @@ export class ReplicationListComponent implements OnInit {
     };
     arrowEnable = true;
     showReplication:boolean=false;
+    editReplicationDisable :boolean=true;
+    periodControl:FormControl;
     //[0]:status:enble;[1]:status:disabled;[2]:status:failover;[3]:status:other
     swichMode = [
         {
@@ -65,7 +68,15 @@ export class ReplicationListComponent implements OnInit {
 
     ngOnInit() {
         this.operationStatus = this.swichMode[3];
+        this.periodControl = new FormControl("1");
         this.getAllReplicationsDetail();
+        this.periodControl.valueChanges.subscribe(
+            (value)=>{
+                if(Number(value) < 1){
+                    this.periodControl.setValue("1");
+                }
+            }
+        );
     }
     getAllReplicationsDetail(){
         this.replicationService.getAllReplicationsDetail().subscribe((resRep)=>{
@@ -74,6 +85,7 @@ export class ReplicationListComponent implements OnInit {
                 if(element.primaryVolumeId == this.volumeId){
                     this.getVolumeById(this.volumeId);
                     this.replication = element;
+                    this.periodControl.setValue(this.replication.replicationPeriod);
                     //ReplicationStatus
                     switch(this.replication['replicationStatus']){
                         case "enabled":
@@ -96,6 +108,7 @@ export class ReplicationListComponent implements OnInit {
                 }
                 if(element.secondaryVolumeId == this.volumeId){
                     this.replication = element;
+                    this.periodControl.setValue(this.replication.replicationPeriod);
                     //ReplicationStatus
                     switch(this.replication['replicationStatus']){
                         case "enabled":
@@ -167,6 +180,14 @@ export class ReplicationListComponent implements OnInit {
         let acceptLabel = "Delete";
         let warming = true;
         this.confirmDialog([msg,header,acceptLabel,warming,"delete"])
+    }
+    editReplication(){
+        if(this.editReplicationDisable){
+            this.editReplicationDisable = true;
+        }else{
+            //wait interface modify period ,icon color:#40bcec
+            this.editReplicationDisable = true;
+        }  
     }
     confirmDialog([msg,header,acceptLabel,warming=true,func]){
         this.confirmationService.confirm({
