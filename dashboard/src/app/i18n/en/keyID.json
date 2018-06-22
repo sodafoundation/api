@@ -106,7 +106,8 @@
     "sds_block_volume_rep_pair":"Replication Pair",
     "sds_block_volume_base_info":"Basic Information",
     "sds_block_volume_group_remove":"Remove",
-    "sds_block_volume_group_modify_group":"Modify Volume Group"
+    "sds_block_volume_group_modify_group":"Modify Volume Group",
+    "sds_identity_user_name":"Username"
 
 
 
