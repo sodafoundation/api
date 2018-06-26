@@ -11,7 +11,7 @@
 </div>
 
 
-<div class="layout-wrapper" *ngIf="isLogin">
+<div class="layout-wrapper" (mousemove)="refreshLastTime()" *ngIf="isLogin">
     <div id="layout-topbar">
         <div class="user-info">
             <div>

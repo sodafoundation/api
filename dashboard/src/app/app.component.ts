@@ -31,6 +31,10 @@ export class AppComponent implements OnInit, AfterViewInit{
     showLoginAnimation: boolean=false;
 
     showLogoutAnimation: boolean=false;
+    currentTime=new Date().getTime();
+    lastTime=new Date().getTime();
+    timeOut = 1 * 60 * 1000;
+    interval:any;
 
     tenantItems = [];
 
@@ -111,7 +115,18 @@ export class AppComponent implements OnInit, AfterViewInit{
             this.hideLoginForm = false;
         }
     }
-
+    checkTimeOut(){
+        this.currentTime = new Date().getTime(); //update current time
+        console.log(this.currentTime);
+        if(this.currentTime - this.lastTime > this.timeOut){ //check time out
+            console.log("time out");
+            this.logout();
+        }
+    }
+    refreshLastTime(){
+        this.lastTime = new Date().getTime(); 
+        console.log(this.lastTime);
+    }
     ngAfterViewInit(){
         this.loginBgAnimation();
     }
@@ -163,6 +178,13 @@ export class AppComponent implements OnInit, AfterViewInit{
     }
 
     AuthWithTokenScoped(user, tenant?){
+        if(this.interval){
+            clearInterval(this.interval);
+        }
+        this.lastTime=new Date().getTime();
+        this.interval = window.setInterval(()=>{
+            this.checkTimeOut()
+        }, 10000);
         // Get user owned tenants
         let reqUser: any = { params:{} };
         this.http.get("/v3/users/"+ user.id +"/projects", reqUser).subscribe((objRES) => {
@@ -262,8 +284,9 @@ export class AppComponent implements OnInit, AfterViewInit{
         this.paramStor.AUTH_TOKEN("");
         this.paramStor.CURRENT_USER("");
         this.paramStor.CURRENT_TENANT("");
-
-
+        if(this.interval){
+            clearInterval(this.interval);
+        }
         // annimation for after logout
         this.hideLoginForm = false;
         this.showLogoutAnimation = true;
