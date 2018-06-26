@@ -33,8 +33,9 @@ export class AppComponent implements OnInit, AfterViewInit{
     showLogoutAnimation: boolean=false;
     currentTime=new Date().getTime();
     lastTime=new Date().getTime();
-    timeOut = 1 * 60 * 1000;
+    timeOut = 6 * 60 * 1000;
     interval:any;
+    intervalRefreshToken:any;
 
     tenantItems = [];
 
@@ -117,15 +118,63 @@ export class AppComponent implements OnInit, AfterViewInit{
     }
     checkTimeOut(){
         this.currentTime = new Date().getTime(); //update current time
-        console.log(this.currentTime);
         if(this.currentTime - this.lastTime > this.timeOut){ //check time out
-            console.log("time out");
             this.logout();
         }
     }
     refreshLastTime(){
         this.lastTime = new Date().getTime(); 
-        console.log(this.lastTime);
+    }
+    /**
+     * this function must be called after AuthWithTokenScoped succeed ,because it need username and password
+     */
+    refreshToken(){
+        let request: any = { auth: {} };
+        request.auth = {
+            "identity": {
+                "methods": [
+                    "password"
+                ],
+                "password":{
+                    "user": {
+                        "name": this.paramStor.CURRENT_USER().split("|")[0],
+                        "domain": {
+                            "name": "Default"
+                        },
+                        "password": "opensds@123"
+                    }
+                }
+            }
+        }
+
+        this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            let token_id = res.headers.get('x-subject-token');
+            let projectName = this.paramStor.CURRENT_TENANT().split("|")[0];
+            let req: any = { auth: {} };
+            req.auth = {
+                "identity": {
+                    "methods": [
+                        "token"
+                    ],
+                    "token": {
+                        "id": token_id
+                    }
+                },
+                "scope": {
+                "project": {
+                    "name": projectName,
+                    "domain": { "id": "default" }
+                }
+                }
+            }
+
+            this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
+                this.paramStor.AUTH_TOKEN( r.headers.get('x-subject-token') );
+            });
+        },
+        error=>{
+            console.log("Username or password incorrect.")
+        });
     }
     ngAfterViewInit(){
         this.loginBgAnimation();
@@ -272,7 +321,12 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.showLoginAnimation = false;
                     this.hideLoginForm = true;
                 }, 500);
-
+                if(this.intervalRefreshToken){
+                    clearInterval(this.intervalRefreshToken);
+                }
+                this.intervalRefreshToken = window.setInterval(()=>{
+                    this.refreshToken()
+                },10000);
             })
         },
         error => {
@@ -286,6 +340,9 @@ export class AppComponent implements OnInit, AfterViewInit{
         this.paramStor.CURRENT_TENANT("");
         if(this.interval){
             clearInterval(this.interval);
+        }
+        if(this.intervalRefreshToken){
+            clearInterval(this.intervalRefreshToken);
         }
         // annimation for after logout
         this.hideLoginForm = false;
