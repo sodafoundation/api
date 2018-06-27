@@ -108,7 +108,9 @@
     "sds_block_volume_group_remove":"Remove",
     "sds_block_volume_group_modify_group":"Modify Volume Group",
     "sds_identity_user_name":"Username",
-    "sds_login_error_msg":"Incorrect username or password!"
+    "sds_login_error_msg_401":"Incorrect username or password!",
+    "sds_login_error_msg_503":"Service Unavailable!",
+    "sds_login_error_msg_default":"Internal Server Error!"
 
 
 

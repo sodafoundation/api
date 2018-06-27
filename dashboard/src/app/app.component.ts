@@ -37,6 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit{
     interval:any;
     intervalRefreshToken:any;
     showErrorMsg:boolean=false;
+    errorMsg:string="";
 
     tenantItems = [];
 
@@ -236,8 +237,17 @@ export class AppComponent implements OnInit, AfterViewInit{
             this.showErrorMsg = false;
         },
         error=>{
+            switch(error.status){
+                case 401:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_401'];
+                    break;
+                case 503:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_503'];
+                    break;
+                default:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_default'];                
+            }
             this.showErrorMsg = true;
-            console.log("Username or password incorrect.")
         });
     }
 
