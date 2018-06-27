@@ -34,6 +34,8 @@ export class AppComponent implements OnInit, AfterViewInit{
     currentTime=new Date().getTime();
     lastTime=new Date().getTime();
     minExpireTime = 2 * 60 * 1000;
+    advanceRefreshTime = 1*60*1000;
+    defaultExpireTime = 10*60*1000;
     interval:any;
     intervalRefreshToken:any;
     showErrorMsg:boolean=false;
@@ -121,7 +123,7 @@ export class AppComponent implements OnInit, AfterViewInit{
     checkTimeOut(){
         this.currentTime = new Date().getTime(); //update current time
         console.log(this.currentTime);
-        let timeout = this.paramStor.TOKEN_PERIOD() ? this.paramStor.TOKEN_PERIOD():10*60*1000;
+        let timeout = this.paramStor.TOKEN_PERIOD() ? this.paramStor.TOKEN_PERIOD() : this.defaultExpireTime;
         if(this.currentTime - this.lastTime > timeout){ //check time out
             this.logout();
         }
@@ -349,7 +351,8 @@ export class AppComponent implements OnInit, AfterViewInit{
                 if(this.intervalRefreshToken){
                     clearInterval(this.intervalRefreshToken);
                 }
-                let refreshTime = this.paramStor.TOKEN_PERIOD() ? (this.paramStor.TOKEN_PERIOD() - 1*60*1000):10*60*1000;
+                let tokenPeriod = this.paramStor.TOKEN_PERIOD();
+                let refreshTime = tokenPeriod ? (Number(tokenPeriod) - this.advanceRefreshTime) : this.defaultExpireTime;
                 this.intervalRefreshToken = window.setInterval(()=>{
                     this.refreshToken()
                 },refreshTime);
