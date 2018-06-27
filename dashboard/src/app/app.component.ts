@@ -36,6 +36,7 @@ export class AppComponent implements OnInit, AfterViewInit{
     minExpireTime = 2 * 60 * 1000;
     interval:any;
     intervalRefreshToken:any;
+    showErrorMsg:boolean=false;
 
     tenantItems = [];
 
@@ -96,8 +97,8 @@ export class AppComponent implements OnInit, AfterViewInit{
         private viewContainerRef: ViewContainerRef,
         private http: Http,
         private router: Router,
-        private paramStor: ParamStorService
-        // private I18N: I18NService
+        private paramStor: ParamStorService,
+        public I18N: I18NService
     ){}
     
     ngOnInit() {
@@ -232,8 +233,10 @@ export class AppComponent implements OnInit, AfterViewInit{
             this.paramStor.PASSWORD(this.password);
             let user = res.json().token.user;
             this.AuthWithTokenScoped(user);
+            this.showErrorMsg = false;
         },
         error=>{
+            this.showErrorMsg = true;
             console.log("Username or password incorrect.")
         });
     }

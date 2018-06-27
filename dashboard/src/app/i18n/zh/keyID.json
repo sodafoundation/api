@@ -107,7 +107,8 @@
     "sds_block_volume_base_info":"Basic Information",
     "sds_block_volume_group_remove":"Remove",
     "sds_block_volume_group_modify_group":"Modify Volume Group",
-    "sds_identity_user_name":"Username"
+    "sds_identity_user_name":"Username",
+    "sds_login_error_msg":"Incorrect username or password!"
 
 
 
