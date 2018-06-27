@@ -33,7 +33,7 @@ export class AppComponent implements OnInit, AfterViewInit{
     showLogoutAnimation: boolean=false;
     currentTime=new Date().getTime();
     lastTime=new Date().getTime();
-    timeOut = 6 * 60 * 1000;
+    minExpireTime = 2 * 60 * 1000;
     interval:any;
     intervalRefreshToken:any;
 
@@ -118,7 +118,9 @@ export class AppComponent implements OnInit, AfterViewInit{
     }
     checkTimeOut(){
         this.currentTime = new Date().getTime(); //update current time
-        if(this.currentTime - this.lastTime > this.timeOut){ //check time out
+        console.log(this.currentTime);
+        let timeout = this.paramStor.TOKEN_PERIOD() ? this.paramStor.TOKEN_PERIOD():10*60*1000;
+        if(this.currentTime - this.lastTime > timeout){ //check time out
             this.logout();
         }
     }
@@ -141,7 +143,7 @@ export class AppComponent implements OnInit, AfterViewInit{
                         "domain": {
                             "name": "Default"
                         },
-                        "password": "opensds@123"
+                        "password": this.paramStor.PASSWORD()
                     }
                 }
             }
@@ -217,7 +219,17 @@ export class AppComponent implements OnInit, AfterViewInit{
         }
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            //set token period start
+            let token = res.json().token;
+            let expires_at = token.expires_at;
+            let issued_at = token.issued_at;
+            let tokenPeriod = Date.parse(expires_at) - Date.parse(issued_at);
+            if(tokenPeriod >= this.minExpireTime){
+                this.paramStor.TOKEN_PERIOD(tokenPeriod);
+            }
+            //set token period end
             this.paramStor.AUTH_TOKEN(res.headers.get('x-subject-token'));
+            this.paramStor.PASSWORD(this.password);
             let user = res.json().token.user;
             this.AuthWithTokenScoped(user);
         },
@@ -324,9 +336,10 @@ export class AppComponent implements OnInit, AfterViewInit{
                 if(this.intervalRefreshToken){
                     clearInterval(this.intervalRefreshToken);
                 }
+                let refreshTime = this.paramStor.TOKEN_PERIOD() ? (this.paramStor.TOKEN_PERIOD() - 1*60*1000):10*60*1000;
                 this.intervalRefreshToken = window.setInterval(()=>{
                     this.refreshToken()
-                },10000);
+                },refreshTime);
             })
         },
         error => {
@@ -338,6 +351,8 @@ export class AppComponent implements OnInit, AfterViewInit{
         this.paramStor.AUTH_TOKEN("");
         this.paramStor.CURRENT_USER("");
         this.paramStor.CURRENT_TENANT("");
+        this.paramStor.PASSWORD("");
+        this.paramStor.TOKEN_PERIOD("");
         if(this.interval){
             clearInterval(this.interval);
         }
