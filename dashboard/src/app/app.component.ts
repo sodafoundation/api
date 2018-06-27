@@ -122,7 +122,6 @@ export class AppComponent implements OnInit, AfterViewInit{
     }
     checkTimeOut(){
         this.currentTime = new Date().getTime(); //update current time
-        console.log(this.currentTime);
         let timeout = this.paramStor.TOKEN_PERIOD() ? this.paramStor.TOKEN_PERIOD() : this.defaultExpireTime;
         if(this.currentTime - this.lastTime > timeout){ //check time out
             this.logout();
