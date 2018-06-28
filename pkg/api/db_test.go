@@ -109,6 +109,7 @@ func TestDeleteVolumeDBEntry(t *testing.T) {
 	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(nil, nil)
 	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
 	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+	mockClient.On("ListVolumeAttachments", context.NewAdminContext(), vol.Id).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
@@ -232,6 +233,7 @@ func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
 	mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", req).Return(nil, nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeSnapshotDBEntry(context.NewAdminContext(), req)

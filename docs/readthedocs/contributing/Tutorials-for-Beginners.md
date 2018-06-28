@@ -28,7 +28,7 @@ git fetch upstream
 
 To avoid inconsistency between multiple branches, we SUGGEST checking out to a new branch:
 ```
-git checkout -b new_branch_name upstream/devlopment
+git checkout -b new_branch_name upstream/development
 git pull
 ```
 Then you can change the code arbitrarily.

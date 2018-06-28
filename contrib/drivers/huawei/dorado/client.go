@@ -676,7 +676,9 @@ func (c *DoradoClient) FindMappingView(name string) (string, error) {
 func (c *DoradoClient) CreateLunGroup(groupName string) (string, error) {
 
 	reqBody := map[string]interface{}{
-		"NAME": groupName,
+		"NAME":      groupName,
+		"APPTYPE":   0,
+		"GROUPTYPE": 0,
 	}
 	lunGrpResp := &LunGroupResp{}
 
