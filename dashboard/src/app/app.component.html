@@ -5,13 +5,21 @@
         <div class="form-list">
             <p><input id="username" placeholder="Username" type="text" pInputText [(ngModel)]="username" /></p>
             <p><input id="password" placeholder="Password" type="Password" pInputText [(ngModel)]="password" (keydown)="onKeyDown($event)" /></p>
+            <div class="ui-message-container" *ngIf="showErrorMsg">
+                <div class="ui-message ui-message-error ui-corner-all">
+                    <i class="fa fa-exclamation-circle" ></i>
+                    <span class="ui-message-error-text">
+                        {{errorMsg}}
+                    </span>
+                </div>
+            </div>
             <p><button pButton type="button" label="Login" (click)="login()" class="ui-button-secondary ui-button-large"></button></p>
         </div>
     </div>
 </div>
 
 
-<div class="layout-wrapper" *ngIf="isLogin">
+<div class="layout-wrapper" (mousemove)="refreshLastTime()" *ngIf="isLogin">
     <div id="layout-topbar">
         <div class="user-info">
             <div>
