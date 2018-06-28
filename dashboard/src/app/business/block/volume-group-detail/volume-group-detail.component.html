@@ -6,7 +6,7 @@
       </span>
   </div>
   <div class="volume-basic-info">
-      <h3>Basic Information</h3>
+      <h3>{{I18N.keyID['sds_block_volume_base_info']}}</h3>
       <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid" *ngIf="volumeGroup">
           <div class="ui-grid-row volume-basic-item-class">
               <div class="ui-grid-col-1">
@@ -51,7 +51,7 @@
       </div>
       <div class="table-toolbar">
         <div class="left">
-            <button pButton type="button" label="Add" (click)="showAddVolumes=true"></button>
+            <button pButton type="button" label="{{I18N.keyID['sds_profile_extra_add']}}" (click)="showAddVolumes=true"></button>
         </div>
       </div>
       <p-dataTable [value]="volumes" [rows]="5" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20,40]">
@@ -62,23 +62,23 @@
         <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '12%'}"></p-column>
         <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '10%'}">
             <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
-                <a (click)=removeVolumeFromGroup(volume)>Remove</a>
+                <a (click)=removeVolumeFromGroup(volume)>{{I18N.keyID['sds_block_volume_group_remove']}}</a>
             </ng-template>
         </p-column>
       </p-dataTable>
   </div>
 </div>
-<p-dialog header="Add Volumes" [(visible)]="showAddVolumes" [modal]="true" [responsive]="true" [width]="800">
+<p-dialog header="{{I18N.keyID['sds_block_volume_addvolu']}}" [(visible)]="showAddVolumes" [modal]="true" [responsive]="true" [width]="800">
   <p-dataTable [value]="allOptionalVolumes" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="5" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20,40]">
     <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
-    <p-column field="name" header="Name"></p-column>
-    <p-column field="status" header="Status"></p-column>
-    <p-column field="size" header="Capacity"></p-column>
-    <p-column field="profileName" header="Profile"></p-column>
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}"></p-column>
+    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}"></p-column>
+    <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}"></p-column>
+    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}"></p-column>
   </p-dataTable>
   <p-footer>
-      <button type="button" pButton (click)="addVolumesToGroup()" label="OK"></button>
-      <button type="button" pButton (click)="showAddVolumes=false"  label="Cancel"></button>
+      <button type="button" pButton (click)="addVolumesToGroup()" label="{{I18N.keyID['ok']}}"></button>
+      <button type="button" pButton (click)="showAddVolumes=false"  label="{{I18N.keyID['cancel']}}"></button>
   </p-footer>
 </p-dialog>
 <p-confirmDialog></p-confirmDialog>

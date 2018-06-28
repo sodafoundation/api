@@ -9,7 +9,7 @@
     </div>
     <div class="right">
         <div class="ui-inputsearch">
-            <input #searchByName type="text" pInputText placeholder="{{I18N.keyID['sds_block_volume_searchs']}}" />
+            <input #searchByName type="text" pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}" />
             <button pButton type="button" icon="fa-search" (click)="listTenants()"></button>
         </div>
         <button class="" pButton type="button" icon="fa-refresh" (click)="listTenants()"></button>
@@ -44,9 +44,9 @@
     </form>
 
     <p-footer>
-        <button *ngIf="isEditTenant" type="button" pButton (click)="updateTenant()" label="OK"></button>
-        <button *ngIf="!isEditTenant" type="button" pButton (click)="createTenant()" label="OK"></button>
-        <button type="button" pButton (click)="createTenantDisplay=false" label="Cancel"></button>
+        <button *ngIf="isEditTenant" type="button" pButton (click)="updateTenant()" label="{{I18N.keyID['ok']}}"></button>
+        <button *ngIf="!isEditTenant" type="button" pButton (click)="createTenant()" label="{{I18N.keyID['ok']}}"></button>
+        <button type="button" pButton (click)="createTenantDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
     </p-footer>
 </p-dialog>
 

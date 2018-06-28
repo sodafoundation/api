@@ -31,6 +31,15 @@ export class AppComponent implements OnInit, AfterViewInit{
     showLoginAnimation: boolean=false;
 
     showLogoutAnimation: boolean=false;
+    currentTime=new Date().getTime();
+    lastTime=new Date().getTime();
+    minExpireTime = 2 * 60 * 1000;
+    advanceRefreshTime = 1*60*1000;
+    defaultExpireTime = 10*60*1000;
+    interval:any;
+    intervalRefreshToken:any;
+    showErrorMsg:boolean=false;
+    errorMsg:string="";
 
     tenantItems = [];
 
@@ -91,8 +100,8 @@ export class AppComponent implements OnInit, AfterViewInit{
         private viewContainerRef: ViewContainerRef,
         private http: Http,
         private router: Router,
-        private paramStor: ParamStorService
-        // private I18N: I18NService
+        private paramStor: ParamStorService,
+        public I18N: I18NService
     ){}
     
     ngOnInit() {
@@ -111,7 +120,67 @@ export class AppComponent implements OnInit, AfterViewInit{
             this.hideLoginForm = false;
         }
     }
+    checkTimeOut(){
+        this.currentTime = new Date().getTime(); //update current time
+        let timeout = this.paramStor.TOKEN_PERIOD() ? this.paramStor.TOKEN_PERIOD() : this.defaultExpireTime;
+        if(this.currentTime - this.lastTime > timeout){ //check time out
+            this.logout();
+        }
+    }
+    refreshLastTime(){
+        this.lastTime = new Date().getTime(); 
+    }
+    /**
+     * this function must be called after AuthWithTokenScoped succeed ,because it need username and password
+     */
+    refreshToken(){
+        let request: any = { auth: {} };
+        request.auth = {
+            "identity": {
+                "methods": [
+                    "password"
+                ],
+                "password":{
+                    "user": {
+                        "name": this.paramStor.CURRENT_USER().split("|")[0],
+                        "domain": {
+                            "name": "Default"
+                        },
+                        "password": this.paramStor.PASSWORD()
+                    }
+                }
+            }
+        }
 
+        this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            let token_id = res.headers.get('x-subject-token');
+            let projectName = this.paramStor.CURRENT_TENANT().split("|")[0];
+            let req: any = { auth: {} };
+            req.auth = {
+                "identity": {
+                    "methods": [
+                        "token"
+                    ],
+                    "token": {
+                        "id": token_id
+                    }
+                },
+                "scope": {
+                "project": {
+                    "name": projectName,
+                    "domain": { "id": "default" }
+                }
+                }
+            }
+
+            this.http.post("/v3/auth/tokens", req).subscribe((r)=>{
+                this.paramStor.AUTH_TOKEN( r.headers.get('x-subject-token') );
+            });
+        },
+        error=>{
+            console.log("Username or password incorrect.")
+        });
+    }
     ngAfterViewInit(){
         this.loginBgAnimation();
     }
@@ -153,16 +222,44 @@ export class AppComponent implements OnInit, AfterViewInit{
         }
 
         this.http.post("/v3/auth/tokens", request).subscribe((res)=>{
+            //set token period start
+            let token = res.json().token;
+            let expires_at = token.expires_at;
+            let issued_at = token.issued_at;
+            let tokenPeriod = Date.parse(expires_at) - Date.parse(issued_at);
+            if(tokenPeriod >= this.minExpireTime){
+                this.paramStor.TOKEN_PERIOD(tokenPeriod);
+            }
+            //set token period end
             this.paramStor.AUTH_TOKEN(res.headers.get('x-subject-token'));
+            this.paramStor.PASSWORD(this.password);
             let user = res.json().token.user;
             this.AuthWithTokenScoped(user);
+            this.showErrorMsg = false;
         },
         error=>{
-            console.log("Username or password incorrect.")
+            switch(error.status){
+                case 401:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_401'];
+                    break;
+                case 503:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_503'];
+                    break;
+                default:
+                    this.errorMsg = this.I18N.keyID['sds_login_error_msg_default'];                
+            }
+            this.showErrorMsg = true;
         });
     }
 
     AuthWithTokenScoped(user, tenant?){
+        if(this.interval){
+            clearInterval(this.interval);
+        }
+        this.lastTime=new Date().getTime();
+        this.interval = window.setInterval(()=>{
+            this.checkTimeOut()
+        }, 10000);
         // Get user owned tenants
         let reqUser: any = { params:{} };
         this.http.get("/v3/users/"+ user.id +"/projects", reqUser).subscribe((objRES) => {
@@ -250,7 +347,14 @@ export class AppComponent implements OnInit, AfterViewInit{
                     this.showLoginAnimation = false;
                     this.hideLoginForm = true;
                 }, 500);
-
+                if(this.intervalRefreshToken){
+                    clearInterval(this.intervalRefreshToken);
+                }
+                let tokenPeriod = this.paramStor.TOKEN_PERIOD();
+                let refreshTime = tokenPeriod ? (Number(tokenPeriod) - this.advanceRefreshTime) : this.defaultExpireTime;
+                this.intervalRefreshToken = window.setInterval(()=>{
+                    this.refreshToken()
+                },refreshTime);
             })
         },
         error => {
@@ -262,8 +366,14 @@ export class AppComponent implements OnInit, AfterViewInit{
         this.paramStor.AUTH_TOKEN("");
         this.paramStor.CURRENT_USER("");
         this.paramStor.CURRENT_TENANT("");
-
-
+        this.paramStor.PASSWORD("");
+        this.paramStor.TOKEN_PERIOD("");
+        if(this.interval){
+            clearInterval(this.interval);
+        }
+        if(this.intervalRefreshToken){
+            clearInterval(this.intervalRefreshToken);
+        }
         // annimation for after logout
         this.hideLoginForm = false;
         this.showLogoutAnimation = true;

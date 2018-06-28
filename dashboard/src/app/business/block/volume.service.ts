@@ -141,6 +141,10 @@ export class ReplicationService {
         let url = this.replicationUrl+"/"+param;
         return this.http.delete(url);
     }
+    modifyReplication(replicationId,param){
+      let url = this.replicationUrl+"/"+replicationId;
+      return this.http.put(url,param);
+    }
     //get all replications
     getAllReplicationsDetail(){
       let url = this.replicationUrl+"/detail";
