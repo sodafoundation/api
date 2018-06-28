@@ -6,7 +6,7 @@
         </div>
         <div class="right">
             <div class="ui-inputsearch">
-                <input type="text" #searchByName [(ngModel)]="snapshotfilter" pInputText placeholder="search" />
+                <input type="text" #searchByName [(ngModel)]="snapshotfilter" pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}" />
                 <button pButton type="button" icon="fa-search" (click)="getSnapshots(snapshotfilter)"></button>
             </div>
             <button pButton type="button" icon="fa-refresh" (click)="getSnapshots(param)"></button>

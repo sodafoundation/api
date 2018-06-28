@@ -50,6 +50,7 @@ export class VolumeListComponent implements OnInit {
     selectedVolumes = [];
     volumes = [];
     menuItems: MenuItem[];
+    menuDeleDisableItems: MenuItem[];
     label = {
         name: this.I18N.keyID['sds_block_volume_name'],
         volume:  this.I18N.keyID['sds_block_volume_title'],
@@ -138,6 +139,34 @@ export class VolumeListComponent implements OnInit {
                     }
                 },
                 disabled:false
+            }
+        ];
+        this.menuDeleDisableItems = [
+            {
+                "label": this.I18N.keyID['sds_block_volume_modify'],
+                command: () => {
+                    this.modifyDisplay = true;
+                },
+                disabled:false
+            },
+            {
+                "label": this.I18N.keyID['sds_block_volume_expand'],
+                command: () => {
+                    this.expandDisplay = true;
+                    this.expandFormGroup.reset();
+                    this.expandFormGroup.controls["expandSize"].setValue(1);
+                    this.unit = 1;
+                },
+                disabled:false
+            },
+            {
+                "label": this.I18N.keyID['sds_block_volume_delete'], 
+                command: () => {
+                    if (this.selectedVolume && this.selectedVolume.id) {
+                        this.deleteVolumes(this.selectedVolume);
+                    }
+                },
+                disabled:true
             }
         ];
 
@@ -330,9 +359,5 @@ export class VolumeListComponent implements OnInit {
 
     tablePaginate() {
         this.selectedVolumes = [];
-    }
-    volumeCanDelete(param1,param2){
-        param1[2].disabled = param2;
-        return param1;
     }
 }

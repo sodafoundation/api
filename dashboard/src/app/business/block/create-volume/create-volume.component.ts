@@ -43,7 +43,6 @@ import { I18NService,Utils } from 'app/shared/api';
 })
 export class CreateVolumeComponent implements OnInit {
 
-  bbbbb = 'name';
   label = {
     zone: this.i18n.keyID["sds_block_volume_az"],
     name: this.i18n.keyID["sds_block_volume_name"],
