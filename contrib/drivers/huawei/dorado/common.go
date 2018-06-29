@@ -4,12 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	log "github.com/golang/glog"
-	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 )
 
 type AuthOptions struct {

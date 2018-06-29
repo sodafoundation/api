@@ -38,6 +38,22 @@ export class ParamStorService {
             this.setParam('current-tenant', param);
         }
     }
+    // user password
+    PASSWORD(param?){
+        if(param === undefined){
+            return this.getParam('password');
+        } else {
+            this.setParam('password', param);
+        }
+    }
+    // token period
+    TOKEN_PERIOD(param?){
+        if(param === undefined){
+            return this.getParam('token_period');
+        } else {
+            this.setParam('token_period', param);
+        }
+    }
 
 
 }
