@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: all build protoc osdsdock osdslet osdsctl docker clean
-
-
-build:osdsdock osdslet osdsctl
+.PHONY: all package build osdsdock osdslet osdsctl docker test protoc clean
 
 all:package build
 
@@ -23,16 +20,18 @@ package:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
+build:osdsdock osdslet osdsctl
+
 osdsdock:
-	mkdir -p  ./build/out/bin/
+	mkdir -p ./build/out/bin/
 	go build -o ./build/out/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
 osdslet:
-	mkdir -p  ./build/out/bin/
+	mkdir -p ./build/out/bin/
 	go build -o ./build/out/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
 osdsctl:
-	mkdir -p  ./build/out/bin/
+	mkdir -p ./build/out/bin/
 	go build -o ./build/out/bin/osdsctl github.com/opensds/opensds/osdsctl
 
 docker:build
