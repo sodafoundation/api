@@ -1,10 +1,13 @@
-# Official Releases
+Official Releases
+=================
 
-## Aruba
+Aruba
+-----
 
-The OpenSDS Aruba release completed June 30, 2018. 
+The OpenSDS Aruba release completed June 30, 2018.
 
-### Features
+Features
+--------
 
 The Aruba release adds the following functionality:
 
@@ -26,8 +29,8 @@ The Aruba release adds the following functionality:
 The OpenSDS controller (Hotpot), the north bound plugins (Sushi), and the
 installer can be downloaded from here:
 
-[Hotpot](https://github.com/opensds/opensds/releases/tag/v0.2.0)
+`Hotpot <https://github.com/opensds/opensds/releases/tag/v0.2.0>`_
 
-[Sushi](https://github.com/opensds/nbp/releases/tag/v0.2.0)
+`Sushi <https://github.com/opensds/nbp/releases/tag/v0.2.0>`_
 
-[Installer](https://github.com/opensds/opensds-installer/releases/tag/v0.2.0)
+`Installer <https://github.com/opensds/opensds-installer/releases/tag/v0.2.0>`_
