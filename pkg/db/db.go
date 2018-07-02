@@ -143,6 +143,8 @@ type Client interface {
 
 	GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error)
 
+	GetReplicationByVolumeId(ctx *c.Context, volumeId string) (*model.ReplicationSpec, error)
+
 	ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error)
 
 	ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error)

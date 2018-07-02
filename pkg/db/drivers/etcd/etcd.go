@@ -1853,6 +1853,20 @@ func (c *Client) GetReplication(ctx *c.Context, replicationId string) (*model.Re
 	return nil, fmt.Errorf("specified replication(%s) can't find", replicationId)
 }
 
+func (c *Client) GetReplicationByVolumeId(ctx *c.Context, volumeId string) (*model.ReplicationSpec, error) {
+	replications, err := c.ListReplication(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range replications {
+		if volumeId == r.PrimaryVolumeId || volumeId == r.SecondaryVolumeId {
+			return r, nil
+		}
+	}
+	return nil, model.NewNotFoundError(fmt.Sprintf("can't find spcified replication by volume id %s", volumeId))
+}
+
 func (c *Client) getReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {
 	req := &Request{
 		Url: urls.GenerateReplicationURL(urls.Etcd, ctx.TenantId, replicationId),
