@@ -404,7 +404,7 @@ func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateAttachmentOpts, wwpns string
 			wwnsNew = append(wwnsNew, w)
 		}
 	}
-	log.Info(fmt.Sprintf("initialize connection, online initiators on the array:%s"), wwnsNew)
+	log.Infof("initialize connection, online initiators on the array:%s", wwnsNew)
 
 	if wwnsNew == nil {
 		return nil, nil, errors.New("no available host initiator")
@@ -477,7 +477,7 @@ func (d *Driver) detachVolumeFC(opt *pb.DeleteAttachmentOpts) (string, error) {
 	wwns := strings.Split(opt.GetHostInfo().GetInitiator(), ",")
 	lunId := opt.GetMetadata()[KLunId]
 
-	log.Info(fmt.Sprintf("terminate connection, wwpns: %s,lun id: %s"), wwns, lunId)
+	log.Infof("terminate connection, wwpns: %s,lun id: %s", wwns, lunId)
 
 	hostId, lunGrpId, hostGrpId, viewId, err := d.getMappedInfo(opt.GetHostInfo().GetHost())
 	if err != nil {
