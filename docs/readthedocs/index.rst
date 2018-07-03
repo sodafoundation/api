@@ -32,10 +32,11 @@ APIs, with the objective of providing applicaiton-oriented storage services.
    introduction/opensds-installer
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Installation
 
    installation/Local-Cluster-Installation
+   releases
 
 .. toctree::
    :maxdepth: 3
