@@ -29,7 +29,7 @@ func (l *linuxfc) getSCSIWWN(devicePath string) (string, error) {
 	out, err := exec.Command("/lib/udev/scsi_id", "--page", "0x83", "--whitelisted", devicePath).CombinedOutput()
 	outString := string(out)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device wwn:", outString, err)
+		errMsg := fmt.Sprintf("Error occurred when get device wwn:%s, %v", outString, err)
 		log.Println(errMsg)
 		return "", errors.New(errMsg)
 	}
@@ -48,7 +48,7 @@ func (l *linuxfc) rescanHosts(tgtWWN []string, hbas []map[string]string) error {
 
 		outString := string(out)
 		if err != nil {
-			errMsg := fmt.Sprintf("Error occurred when rescan hosts", outString, err)
+			errMsg := fmt.Sprintf("Error occurred when rescan hosts:%s, %v", outString, err)
 			log.Println(errMsg)
 			return errors.New(errMsg)
 		}
@@ -67,7 +67,7 @@ func (l *linuxfc) getFChbas() ([]map[string]string, error) {
 	outString := string(out)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get FC hbas info: systool is not installed", outString, err)
+		errMsg := fmt.Sprintf("Error occurred when get FC hbas info: systool is not installed, %s, %v", outString, err)
 		log.Println(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -114,7 +114,7 @@ func (l *linuxfc) removeSCSIDevice(path string) error {
 	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
 	outString := string(out)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when remove scsi device:", outString, err)
+		errMsg := fmt.Sprintf("Error occurred when remove scsi device:%s, %v", outString, err)
 		log.Println(errMsg)
 		return errors.New(errMsg)
 	}
@@ -126,7 +126,7 @@ func (l *linuxfc) flushDeviceIO(device string) error {
 	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
 	outString := string(out)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device info when detach volume:", outString, err)
+		errMsg := fmt.Sprintf("Error occurred when get device info when detach volume:%s,%v", outString, err)
 		log.Println(errMsg)
 		return errors.New(errMsg)
 	}
@@ -138,7 +138,7 @@ func (l *linuxfc) getDeviceInfo(devicePath string) (map[string]string, error) {
 	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
 	outString := string(out)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device info:", outString, err)
+		errMsg := fmt.Sprintf("Error occurred when get device info:%s, %v", outString, err)
 		log.Println(errMsg)
 		return nil, errors.New(errMsg)
 	}
