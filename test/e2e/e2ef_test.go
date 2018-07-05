@@ -156,6 +156,38 @@ func TestExtendVolumeFlow(t *testing.T) {
 	t.Log("Extend Size is Right!")
 	extrs, _ := json.MarshalIndent(info, "", "    ")
 	t.Log(string(extrs))
+
+	t.Log("Creates a volume snapshot...")
+	snpBody := &model.VolumeSnapshotSpec{
+		Name:        "new-snapshot",
+		Description: "This is a snapshot test for new",
+		VolumeId:    vol.Id,
+	}
+
+	snp, err := u.CreateVolumeSnapshot(snpBody)
+	if err != nil {
+		t.Error("prepare volume snapshot failed:", err)
+		return
+	}
+
+	defer DeleteSnapshot(snp.Id)
+
+	body = &model.ExtendVolumeSpec{
+		NewSize: int64(3),
+	}
+	_, err = u.ExtendVolume(vol.Id, body)
+	if err != nil {
+		t.Error("Extend volume fail", err)
+	}
+
+	time.Sleep(3 * 1e9)
+	info, _ = u.GetVolume(vol.Id)
+	t.Log("SIZE:", info.Size)
+	if info.Size != 3 {
+		t.Error("Extend Volume Size is wrong!")
+		return
+	}
+
 	t.Log("Extend Volume Success")
 
 }
