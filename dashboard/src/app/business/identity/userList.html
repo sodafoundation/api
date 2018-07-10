@@ -4,12 +4,12 @@
 
 <div class="table-toolbar">
     <div class="left">
-        <button pButton type="button" label="Create" (click)="showUserForm()" class="ui-button-secondary"></button>
-        <button pButton type="button" label="Delete" [disabled]="selectedUsers.length==0?'disabled':''" (click)="deleteUsers(selectedUsers)"></button>
+        <button pButton type="button" label="{{I18N.keyID['sds_block_volume_create']}}" (click)="showUserForm()" class="ui-button-secondary"></button>
+        <button pButton type="button" label="{{I18N.keyID['sds_block_volume_delete']}}" [disabled]="selectedUsers.length==0?'disabled':''" (click)="deleteUsers(selectedUsers)"></button>
     </div>
     <div class="right">
         <div class="ui-inputsearch">
-            <input #searchByName type="text" pInputText placeholder="search" />
+            <input #searchByName type="text" pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}" />
             <button pButton type="button" icon="fa-search" (click)="listUsers()"></button>
         </div>
         <button pButton type="button" icon="fa-refresh" (click)="listUsers()"></button>
@@ -19,18 +19,18 @@
 <p-dataTable [globalFilter]="searchByName" [immutable]="false" [(selection)]="selectedUsers" [sortField]="sortField" [value]="tenantUsers" [showHeaderCheckbox]="true" expandableRows="true" rowExpandMode="single" [rows]="10" [paginator]="true" (onPage)="tablePaginate()" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]" (onRowExpand)="onRowExpand($event)">
     <p-column expander="true" styleClass="table-col-expander" ></p-column>
     <p-column selectionMode="multiple" styleClass="table-col-selection" ></p-column>
-    <p-column field="username" header="Username"></p-column>
-    <p-column header="Status">
+    <p-column field="username" header="{{I18N.keyID['sds_identity_user_name']}}"></p-column>
+    <p-column header="{{I18N.keyID['sds_block_volume_status']}}">
         <ng-template let-user="rowData" pTemplate="body">
             <div class="badge-inline" [pBadge] status="{{(user.enabled == true) ? 'success' : 'default'}}" text="{{(user.enabled == true) ? 'Enabled' : 'Disabled'}}"></div>
         </ng-template>
     </p-column>
-    <p-column field="description" header="Description"></p-column>
-    <p-column header="Operation" [style]="{'width': '20%'}">
+    <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
+    <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '20%'}">
         <ng-template let-user="rowData" pTemplate="body" >
-            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="showUserForm(user)">Modify</a>
+            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="showUserForm(user)">{{I18N.keyID['sds_block_volume_modify']}}</a>
             <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="userStatus(user)">{{ (user.enabled == true) ? "Disable" : "Enable" }}</a>
-            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="deleteUsers(user)">Delete</a>
+            <a *ngIf="user.username!='admin'&&user.username!='opensds'" (click)="deleteUsers(user)">{{I18N.keyID['sds_block_volume_delete']}}</a>
         </ng-template>
     </p-column>
 

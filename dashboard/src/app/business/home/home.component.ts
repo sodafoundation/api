@@ -157,10 +157,10 @@ export class HomeComponent implements OnInit {
             this.items[0].countNum = res.json().projects.length;
             this.tenants = res.json().projects;
             this.tenants.forEach((item, i)=>{
-                this.getAllvolumes(item.id, i);
-                this.getAllSnapshots(item.id);
-                this.getAllReplications(item.id);
                 if(item.name == "admin"){
+                    this.getAllvolumes(item.id, this.tenants.length - 1);
+                    this.getAllSnapshots(item.id);
+                    this.getAllReplications(item.id);
                     this.getAllPools(item.id);
                     this.getAllDocks(item.id);
                 }

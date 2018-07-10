@@ -26,7 +26,7 @@
         <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
             <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
             <a [ngClass]="{'a-rep-disabled':volume['isDisableRep']}" (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
-            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
+            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="volume['disabled'] ? menuDeleDisableItems: menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
         </ng-template>
     </p-column>
 </p-dataTable>
@@ -64,7 +64,7 @@
     </p-footer>
 </p-dialog>
 
-<p-dialog *ngIf="expandDisplay" header="{{I18N.keyID['sds_block_volume_modify']}}" [(visible)]="expandDisplay" [width]="650" modal="modal">
+<p-dialog *ngIf="expandDisplay" header="{{I18N.keyID['sds_block_volume_expand']}}" [(visible)]="expandDisplay" [width]="650" modal="modal">
         <form [grid]="{label: 'ui-g-5', content:'ui-g-20'}" [formGroup]="expandFormGroup" [errorMessage]="errorMessage">
             <form-item label="{{I18N.keyID['sds_block_volume_title']}}Volume" >
                 <span class="text-only">{{selectedVolume.name}}</span>

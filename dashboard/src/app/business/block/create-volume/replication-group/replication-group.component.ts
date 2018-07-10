@@ -3,6 +3,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
 import { ProfileService } from './../../../profile/profile.service';
 import {FormBuilder, FormControl, Validators} from "@angular/forms";
+import { I18NService,Utils } from 'app/shared/api';
 
 @Component({
   selector: 'app-replication-group',
@@ -55,7 +56,8 @@ export class ReplicationGroupComponent implements OnInit {
 
   constructor(
     private ProfileService: ProfileService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    public I18N:I18NService
   ) { }
 
   ngOnInit() {
