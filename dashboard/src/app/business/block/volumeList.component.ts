@@ -325,8 +325,10 @@ export class VolumeListComponent implements OnInit {
                 "secondaryVolumeId":res.json().id
             }
             this.createReplicationDisplay = false;
-            this.getVolumes();
             this.ReplicationService.createReplication(param).subscribe((res) => {
+                this.getVolumes();
+            },
+            error=>{
                 this.getVolumes();
             });
         });

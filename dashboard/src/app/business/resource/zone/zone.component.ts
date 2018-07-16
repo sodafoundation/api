@@ -3,6 +3,7 @@ import { Component, OnInit, ViewContainerRef, ViewChild, Directive, ElementRef, 
 import { I18NService, ParamStorService} from 'app/shared/api';
 import { Http } from '@angular/http';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import {AvailabilityZonesService} from '../resource.service';
 
 @Component({
     selector: 'zone-table',
@@ -41,7 +42,8 @@ export class ZoneComponent implements OnInit {
     constructor(
         public I18N: I18NService,
         private http: Http,
-        private paramStor: ParamStorService
+        private paramStor: ParamStorService,
+        private availabilityZonesService: AvailabilityZonesService
     ) { }
 
     ngOnInit() {
@@ -51,30 +53,14 @@ export class ZoneComponent implements OnInit {
 
     listAZ(){
         this.zones = [];
-        let reqUser: any = { params:{} };
-        let user_id = this.paramStor.CURRENT_USER().split("|")[1];
-        this.http.get("/v3/users/"+ user_id +"/projects", reqUser).subscribe((objRES) => {
-            let project_id;
-            objRES.json().projects.forEach(element => {
-                if(element.name == "admin"){
-                    project_id = element.id;
-                }
-            })
-
-            let reqPool: any = { params:{} };
-            this.http.get("/v1beta/"+ project_id +"/pools", reqPool).subscribe((poolRES) => {
-                let AZs=[];
-                poolRES.json().forEach(ele => {
-                    if(!AZs.includes(ele.availabilityZone)){
-                        AZs.push(ele.availabilityZone);
-
-                        let [name,region,description] = [ele.availabilityZone, "default_region", "--"];
-                        this.zones.push({name,region,description});
-                    }
+        this.availabilityZonesService.getAZ().subscribe((azRes) => {
+            let AZs=azRes.json();
+            if(AZs && AZs.length !== 0){
+                AZs.forEach(item =>{
+                    let [name,region,description] = [item, "default_region", "--"];
+                    this.zones.push({name,region,description});
                 })
-                console.log(this.zones);
-            })
-
+            }
         })
     }
 }
