@@ -22,6 +22,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"path/filepath"
 )
 
 // ReplicationDriver
@@ -85,10 +86,11 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 
 	primaryVolID := opt.GetPrimaryVolumeId()
 	secondaryVolID := opt.GetSecondaryVolumeId()
-
-	primaryBackingDevice := primaryData["lvPath"]
-	secondaryBackingDevice := secondaryData["lvPath"]
-
+	path, _ := filepath.EvalSymlinks(primaryData["Mountpoint"])
+	primaryBackingDevice,_ :=filepath.Abs(path)
+	path, _ = filepath.EvalSymlinks(secondaryData["Mountpoint"])
+	secondaryBackingDevice,_ := filepath.Abs(path)
+	log.Info(primaryBackingDevice, secondaryBackingDevice)
 	// as we use the same minors/ports in primary/secondary, make them a set:
 	usedPort := make(map[int]bool)
 	usedMinor := make(map[int]bool)
