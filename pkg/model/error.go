@@ -110,3 +110,15 @@ type NotImplementError struct {
 func (e *NotImplementError) Error() string {
 	return e.S
 }
+
+type NotFoundError struct {
+	S string
+}
+
+func NewNotFoundError(msg string) error {
+	return &NotFoundError{S: msg}
+}
+
+func (e *NotFoundError) Error() string {
+	return e.S
+}
