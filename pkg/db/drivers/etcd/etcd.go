@@ -1864,7 +1864,7 @@ func (c *Client) GetReplicationByVolumeId(ctx *c.Context, volumeId string) (*mod
 			return r, nil
 		}
 	}
-	return nil, model.NewNotFoundError(fmt.Sprintf("can't find spcified replication by volume id %s", volumeId))
+	return nil, model.NewNotFoundError(fmt.Sprintf("can't find specified replication by volume id %s", volumeId))
 }
 
 func (c *Client) getReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error) {

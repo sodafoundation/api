@@ -69,7 +69,7 @@ func (this *ReplicationPortal) CreateReplication() {
 		return
 	}
 
-	// check if specified volume has already used in other replication.
+	// check if specified volume has already been used in other replication.
 	v, err := db.C.GetReplicationByVolumeId(ctx, replication.PrimaryVolumeId)
 	if err != nil {
 		if _, ok := err.(*model.NotFoundError); !ok {
@@ -85,7 +85,7 @@ func (this *ReplicationPortal) CreateReplication() {
 		return
 	}
 
-	// check if specified volume has already used in other replication.
+	// check if specified volume has already been used in other replication.
 	v, err = db.C.GetReplicationByVolumeId(ctx, replication.SecondaryVolumeId)
 	if err != nil {
 		if _, ok := err.(*model.NotFoundError); !ok {
