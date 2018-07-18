@@ -510,7 +510,7 @@ func TestDeleteAttach(t *testing.T) {
 }
 
 func execCmd(name string, arg ...string) (string, error) {
-	fmt.Println("Command: %s %s:\n", name, strings.Join(arg, " "))
+	fmt.Printf("Command: %s %s:\n", name, strings.Join(arg, " "))
 	info, err := exec.Command(name, arg...).CombinedOutput()
 	return string(info), err
 }
