@@ -96,7 +96,7 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 	// Load replication operator
 	d.LoadOperator(ctx, primaryVol, secondaryVol)
 
-	// Host-Based replication needs to do some extra operations including attach adn volume data list
+	// Host-Based replication needs to do some extra operations including attaching volume and initializing volume data list
 	if pPool.ReplicationType == ReplicationTypeHost {
 		var err error
 		replica.VolumeDataList, err = d.getVolumeDataList(ctx)
@@ -166,7 +166,7 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 
 	if pPool.ReplicationType == ReplicationTypeHost {
 		var err error
-		// attach
+		// dettach
 		err = d.primaryOp.Detach(ctx, replica, primaryVol)
 		if err != nil {
 			log.Errorf("Detach primary volume failed, %s", err)
