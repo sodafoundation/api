@@ -370,7 +370,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}
 
 	return &model.ConnectionInfo{
-		DriverVolumeType: "iscsi",
+		DriverVolumeType: ISCSIProtocol,
 		ConnectionData:   expt,
 	}, nil
 }

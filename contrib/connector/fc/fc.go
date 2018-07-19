@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	fcDriver = "fc"
+	fcDriver = "fibre_channel"
 )
 
 type FC struct {
