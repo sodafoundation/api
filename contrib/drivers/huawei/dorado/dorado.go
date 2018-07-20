@@ -17,9 +17,8 @@ package dorado
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"os"
+	"strings"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -149,10 +148,10 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	if opt.GetAccessProtocol() == "iscsi" {
+	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.InitializeConnectionIscsi(opt)
 	}
-	if opt.GetAccessProtocol() == "fc" {
+	if opt.GetAccessProtocol() == FCProtocol {
 		return d.InitializeConnectionFC(opt)
 	}
 	return nil, errors.New("No supported protocol for dorado driver.")
@@ -200,7 +199,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 		return nil, err
 	}
 	connInfo := &model.ConnectionInfo{
-		DriverVolumeType: "iscsi",
+		DriverVolumeType: ISCSIProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
 			"targetIQN":        tgtIqn,
@@ -213,10 +212,10 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	if opt.GetAccessProtocol() == "iscsi" {
+	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.TerminateConnectionIscsi(opt)
 	}
-	if opt.GetAccessProtocol() == "fc" {
+	if opt.GetAccessProtocol() == FCProtocol {
 		return d.TerminateConnectionFC(opt)
 	}
 	return nil
@@ -368,7 +367,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.Co
 	}
 
 	fcInfo := &model.ConnectionInfo{
-		DriverVolumeType: "fibre_channel",
+		DriverVolumeType: FCProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered":     true,
 			"target_wwn":           tgtPortWWNs,
