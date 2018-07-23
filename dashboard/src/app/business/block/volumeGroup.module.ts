@@ -4,6 +4,7 @@ import { ButtonModule, DataTableModule, InputTextModule, DialogModule,FormModule
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpService } from './../../shared/service/Http.service';
 import { VolumeService ,VolumeGroupService} from './volume.service';
+import { AvailabilityZonesService } from './../resource/resource.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 import { RouterModule } from '@angular/router';
 
@@ -15,7 +16,8 @@ import { RouterModule } from '@angular/router';
     HttpService,
     VolumeService,
     VolumeGroupService,
-    ConfirmationService
+    ConfirmationService,
+    AvailabilityZonesService
   ]
 })
 export class VolumeGroupModule { }
