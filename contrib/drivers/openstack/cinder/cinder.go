@@ -258,7 +258,9 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 		return nil, err
 	}
 
+	log.Error(conn)
 	data := conn["data"].(map[string]interface{})
+	log.Error(data)
 	connData := map[string]interface{}{
 		"accessMode":       data["access_mode"],
 		"targetDiscovered": data["target_discovered"],
@@ -274,7 +276,7 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 		connData["authUsername"] = data["auth_username"]
 	}
 	return &model.ConnectionInfo{
-		DriverVolumeType: "iscsi",
+		DriverVolumeType: conn["driver_volume_type"].(string),
 		ConnectionData:   connData,
 	}, nil
 }
