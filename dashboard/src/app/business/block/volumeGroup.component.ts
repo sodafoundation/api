@@ -7,6 +7,7 @@ import { DialogModule } from '../../components/common/api';
 import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl} from '@angular/forms';
 import { VolumeService ,VolumeGroupService} from './volume.service';
 import { ProfileService } from './../profile/profile.service';
+import { AvailabilityZonesService } from './../resource/resource.service';
 import { ConfirmationService,ConfirmDialogModule} from '../../components/common/api';
 import { Router } from '@angular/router';
 
@@ -39,7 +40,8 @@ export class VolumeGroupComponent implements OnInit{
         private volumeGroupService : VolumeGroupService,
         private fb : FormBuilder,
         private profileService :ProfileService,
-        private confirmationService:ConfirmationService
+        private confirmationService:ConfirmationService,
+        private availabilityZonesService:AvailabilityZonesService
     ){
         this.volumeGroupForm = this.fb.group({
             "group_name":["",{validators:[Validators.required, Validators.pattern(this.validRule.name)], updateOn:'change'} ],
@@ -65,14 +67,23 @@ export class VolumeGroupComponent implements OnInit{
     }
 
     ngOnInit() {
-      this.availabilityZones = [
-        {
-          label: 'Default', value: 'default'
-        }
-      ];
       this.volemeOptions = [];
       this.getProfiles();
+      this.getAZ();
     }
+    getAZ(){
+        this.availabilityZonesService.getAZ().subscribe((azRes) => {
+          let AZs=azRes.json();
+          let azArr = [];
+          if(AZs && AZs.length !== 0){
+              AZs.forEach(item =>{
+                  let obj = {label: item, value: item};
+                  azArr.push(obj);
+              })
+          }
+          this.availabilityZones = azArr;
+        })
+      }
     //show create volumes group
     createVolumeGroup(){
         this.volumeGroupForm.reset();

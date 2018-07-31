@@ -7,6 +7,7 @@ import { Message, SelectItem } from './../../../components/common/api';
 
 import { VolumeService ,ReplicationService} from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
+import { AvailabilityZonesService } from './../../resource/resource.service';
 import { I18NService,Utils } from 'app/shared/api';
 
 @Component({
@@ -75,16 +76,12 @@ export class CreateVolumeComponent implements OnInit {
     private ProfileService: ProfileService,
     private VolumeService: VolumeService,
     private replicationService:ReplicationService,
+    private availabilityZonesService:AvailabilityZonesService,
     public i18n:I18NService
   ) {}
 
   ngOnInit() {
-    this.availabilityZones = [
-      {
-        label: 'Default', value: 'default'
-      }
-    ];
-
+    this.getAZ();
     this.getProfiles();
 
     this.capacityUnit = [
@@ -127,7 +124,19 @@ export class CreateVolumeComponent implements OnInit {
       }
     });
   }
-
+  getAZ(){
+    this.availabilityZonesService.getAZ().subscribe((azRes) => {
+      let AZs=azRes.json();
+      let azArr = [];
+      if(AZs && AZs.length !== 0){
+          AZs.forEach(item =>{
+              let obj = {label: item, value: item};
+              azArr.push(obj);
+          })
+      }
+      this.availabilityZones = azArr;
+    })
+  }
   getProfiles() {
     this.ProfileService.getProfiles().subscribe((res) => {
       let profiles = res.json();
