@@ -115,8 +115,8 @@ export class SnapshotListComponent implements OnInit {
             accept: ()=>{
                 param.forEach(snapshot => {
                     this.deleteSnapshot(snapshot.id);
+                    
                 });
-
             },
             reject:()=>{}
         })
@@ -125,6 +125,9 @@ export class SnapshotListComponent implements OnInit {
 
   deleteSnapshot(id) {
     this.SnapshotService.deleteSnapshot(id).subscribe((res) => {
+      Utils.arrayRemoveOneElement(this.selectedSnapshots,id,function(value,index,arr){
+        return value.id === id;
+      });
       this.getSnapshots(
         {
           key: 'VolumeId',
