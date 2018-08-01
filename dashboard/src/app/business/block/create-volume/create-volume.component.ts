@@ -93,7 +93,7 @@ export class CreateVolumeComponent implements OnInit {
       }
     ];
     this.volumeform = this.fb.group({
-      'zone': new FormControl('default', Validators.required),
+      'zone': new FormControl('', Validators.required),
       'name0': new FormControl('', {validators:[Validators.required,Validators.pattern(this.validRule.name)]}),
       'profileId0': new FormControl(this.defaultProfile, {validators:[Validators.required,this.checkProfile]}),
       'size0': new FormControl(1, Validators.required),

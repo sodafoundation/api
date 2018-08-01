@@ -5,7 +5,7 @@
 
 <form [formGroup]="volumeform" [grid]="{label: 'ui-g-2', content:'ui-g-20'}" (ngSubmit)="onSubmit(volumeform.value)" [errorMessage]="errorMessage">
     <form-item [required]="true" label="{{label.zone}}">
-        <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':96}"></p-dropdown>
+        <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':96}" placeholder="Please choose"></p-dropdown>
     </form-item>
 
     <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid volume-item">
