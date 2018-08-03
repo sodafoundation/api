@@ -131,5 +131,16 @@ export class Utils {
             return page ? "sds_"+ page +key:"sds_"+key;
         }
     }
-
+    /**
+     * remove one of array element
+     * @param prevArr origin array
+     * @param element remove element
+     * @param func remove methods
+     */
+    static arrayRemoveOneElement(prevArr,element,func){
+        let index = prevArr.findIndex(func);
+        if(index > -1){
+            prevArr.splice(index,1);
+        }
+    }
 }

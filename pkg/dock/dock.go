@@ -570,7 +570,7 @@ func (d *DockHub) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 
 	if volumesUpdate != nil {
 		for _, v := range volumesUpdate {
-			if (v.Status == model.VolumeError || v.Status == model.VolumeErrorDeleting) && (groupUpdate.Status != model.VolumeGroupErrorDeleting || groupUpdate.Status != model.VolumeGroupError) {
+			if (v.Status == model.VolumeError || v.Status == model.VolumeErrorDeleting) && (groupUpdate.Status != model.VolumeGroupErrorDeleting && groupUpdate.Status != model.VolumeGroupError) {
 				groupUpdate.Status = v.Status
 				break
 			}
@@ -623,7 +623,7 @@ func (d *DockHub) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.Volu
 		} else {
 			// Delete the volume entry in DB after successfully deleting the volume on the storage.
 			if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), volumeRef.Id); err != nil {
-				log.Error(fmt.Sprintf("Error occurred in dock module when delete volume %s in db:", volumeRef.Id, err))
+				log.Errorf("Error occurred in dock module when delete volume %s in db:%v", volumeRef.Id, err)
 				vgUpdate.Status = model.VolumeGroupError
 			}
 		}

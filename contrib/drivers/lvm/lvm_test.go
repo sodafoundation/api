@@ -83,7 +83,30 @@ func fakeHandler(script string, cmd []string) (string, error) {
 	switch script {
 	case "lvcreate":
 		return "", nil
+	case "lvchange":
+		return "", nil
 	case "lvdisplay":
+		args := []string{"--noheading", "-C", "-o", "Attr", "/dev/vg001/test001"}
+		isForLvHasSnapshotFun := true
+
+		if len(args) != len(cmd) {
+			isForLvHasSnapshotFun = false
+		} else {
+			for i, arg := range args {
+				if cmd[i] != arg {
+					isForLvHasSnapshotFun = false
+				}
+			}
+		}
+
+		if true == isForLvHasSnapshotFun {
+			return string(lvdisplayAttr), nil
+		}
+
+		if 0 == len(cmd) {
+			return string(sampleLVs), nil
+		}
+
 		return string(sampleLV), nil
 	case "lvremove":
 		return "", nil
@@ -323,6 +346,62 @@ var (
   Read ahead sectors     auto
   - currently set to     256
   Block device           253:0
+	`
+	lvdisplayAttr = "owi-a-s---"
+
+	sampleLVs = `
+  --- Logical volume ---
+  LV Path                /dev/vg001/test001
+  LV Name                test001
+  VG Name                opensds-volumes-default
+  LV UUID                5i8pFK-XWif-eleN-eHkW-B80u-sG3k-qhX4fW
+  LV Write Access        read/write
+  LV Creation host, time ecs-6fee, 2018-07-03 09:56:23 +0800
+  LV snapshot status     source of
+                         _snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0 [active]
+                         _snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e [active]
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+   
+  --- Logical volume ---
+  LV Path                /dev/opensds-volumes-default/_snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0
+  LV Name                _snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0
+  VG Name                opensds-volumes-default
+  LV UUID                qe9JyV-hWrz-cFbK-FCXk-qN1C-JCQI-I54MIY
+  LV Write Access        read only
+  LV Creation host, time ecs-6fee, 2018-07-03 10:41:37 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  COW-table size         3.00 GiB
+  COW-table LE           768
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+   
+  --- Logical volume ---
+  LV Path                /dev/opensds-volumes-default/_snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e
+  LV Name                _snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e
+  VG Name                opensds-volumes-default
+  LV UUID                e8hEGw-uK1S-L1DN-Ym8Z-NDz9-lqWY-FfhXXK
+  LV Write Access        read only
+  LV Creation host, time ecs-6fee, 2018-07-03 11:34:13 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  COW-table size         3.00 GiB
+  COW-table LE           768
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
 	`
 	sampleVG = `
   --- Volume group ---

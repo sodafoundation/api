@@ -26,6 +26,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	sample "github.com/opensds/opensds/testutils/driver"
@@ -78,16 +79,16 @@ type VolumeDriver interface {
 func Init(resourceType string) VolumeDriver {
 	var d VolumeDriver
 	switch resourceType {
-	case "cinder":
+	case config.CinderDriverType:
 		d = &cinder.Driver{}
 		break
-	case "ceph":
+	case config.CephDriverType:
 		d = &ceph.Driver{}
 		break
-	case "lvm":
+	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
-	case "huawei_dorado":
+	case config.HuaweiDoradoDriverType:
 		d = &dorado.Driver{}
 		break
 	default:
