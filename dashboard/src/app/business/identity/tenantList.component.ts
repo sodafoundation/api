@@ -67,7 +67,7 @@ export class TenantListComponent implements OnInit {
                     isExisting = true;
                 }
             })
-            if(isExisting){
+            if(isExisting && this.isEditTenant == false){
                 return {'ifTenantExisting': true};
             }else{
                 return null;

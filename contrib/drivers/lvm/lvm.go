@@ -40,6 +40,11 @@ const (
 	snapshotPrefix    = "_snapshot-"
 	blocksize         = 4096
 	sizeShiftBit      = 30
+
+	//LVPath "LV Path"
+	LVPath = "LV Path"
+	//LVSnapshotStatus "LV snapshot status"
+	LVSnapshotStatus = "LV snapshot status"
 )
 
 type LvInfo struct {
@@ -116,7 +121,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	var snap = opt.GetSnapshotId()
 	if snap != "" {
 		var snapSize = uint64(opt.GetSnapshotSize())
-		var count = (snapSize<<sizeShiftBit)/blocksize
+		var count = (snapSize << sizeShiftBit) / blocksize
 		var snapName = snapshotPrefix + snap
 		var snapPath = path.Join("/dev", polName, snapName)
 		if _, err := d.handler("dd", []string{
@@ -202,11 +207,63 @@ func (d *Driver) lvHasSnapshot(lvPath string) bool {
 	args := []string{"--noheading", "-C", "-o", "Attr", lvPath}
 	info, err := d.handler("lvdisplay", args)
 	if err != nil {
-		log.Error("Failed to remove logic volume:", err)
+		log.Error("Failed to display logic volume:", err)
 		return false
 	}
 	info = strings.Trim(info, " ")
 	return info[0] == 'o' || info[0] == 'O'
+}
+
+func (d *Driver) getActiveSnapshotsPathsOfLv(lvPath string) ([]string, error) {
+	array := strings.Split(lvPath, "/")
+	lvName := array[len(array)-1]
+	var snapshotsPaths []string
+
+	args := []string{}
+	info, err := d.handler("lvdisplay", args)
+	if err != nil {
+		log.Error("Failed to display logic volume:", err)
+		return snapshotsPaths, err
+	}
+
+	lvInfoList := strings.Split(info, "--- Logical volume ---")
+	for _, lvInfo := range lvInfoList {
+		lines := strings.Split(lvInfo, "\n")
+		var path string
+
+		for _, line := range lines {
+			line = strings.Trim(line, " ")
+
+			if strings.HasPrefix(line, LVPath) {
+				path = strings.Split(line, LVPath)[1]
+				path = strings.Trim(path, " ")
+			}
+
+			if strings.HasPrefix(line, LVSnapshotStatus) {
+				snapshotStatus := strings.Split(line, LVSnapshotStatus)[1]
+				snapshotStatus = strings.Trim(snapshotStatus, " ")
+
+				if ("active destination for " + lvName) == snapshotStatus {
+					snapshotsPaths = append(snapshotsPaths, path)
+				}
+			}
+		}
+	}
+
+	return snapshotsPaths, nil
+}
+
+func (d *Driver) deactivateSnapshotsOfLv(snapshotsPaths []string) error {
+	for _, snapshotPath := range snapshotsPaths {
+		if _, err := d.handler("lvchange", []string{
+			"-an", "-y", snapshotPath,
+		}); err != nil {
+			log.Error("Failed to deactivate snapshot:", err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
@@ -245,6 +302,22 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 		err := errors.New("failed to find logic volume path in volume metadata")
 		log.Error(err)
 		return nil, err
+	}
+
+	if d.lvHasSnapshot(lvPath) {
+		snapshotsPathsOfLv, err := d.getActiveSnapshotsPathsOfLv(lvPath)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+
+		if len(snapshotsPathsOfLv) > 0 {
+			err = d.deactivateSnapshotsOfLv(snapshotsPathsOfLv)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+		}
 	}
 
 	var size = fmt.Sprint(opt.GetSize()) + "G"

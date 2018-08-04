@@ -341,6 +341,10 @@ func (fc *FakeDbClient) ListReplication(ctx *c.Context) ([]*model.ReplicationSpe
 	return replications, nil
 }
 
+func (fc *FakeDbClient) GetReplicationByVolumeId(ctx *c.Context, volumeId string) (*model.ReplicationSpec, error) {
+	return &SampleReplications[0], nil
+}
+
 func (fc *FakeDbClient) ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error) {
 	var replications = []*model.ReplicationSpec{
 		&SampleReplications[0], &SampleReplications[1],

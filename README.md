@@ -8,10 +8,10 @@
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
-## Latest Release: v0.1.0 Zealand
-[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)
+## Latest Release: v0.2.0 Aruba
+[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.2.0/openapi-spec/swagger.yaml)
 
-[Release notes](https://github.com/opensds/opensds/releases/tag/v0.1.0)
+[Release notes](https://github.com/opensds/opensds/releases/tag/v0.2.0)
 
 ## Introduction
 
@@ -69,4 +69,4 @@ development for OpenSDS.
 
 ## License
 
-Opensds is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+OpenSDS is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
