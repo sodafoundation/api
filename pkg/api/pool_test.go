@@ -20,8 +20,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/pkg/context"
@@ -33,6 +33,7 @@ import (
 func init() {
 	var poolPortal PoolPortal
 	beego.Router("/v1beta/pools", &poolPortal, "get:ListPools")
+	beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
