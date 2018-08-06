@@ -66,6 +66,22 @@ var (
 	fakePools = []*model.StoragePoolSpec{fakePool}
 )
 
+func TestListAvailabilityZones(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakePools, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	expectedZones := "unknow"
+	t.Log(w)
+	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
+		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
+	}
+}
+
 func TestListPools(t *testing.T) {
 
 	mockClient := new(dbtest.MockClient)
