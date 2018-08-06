@@ -262,6 +262,7 @@ export class VolumeListComponent implements OnInit {
 
     returnSelectedVolume(selectedVolume, dialog) {
         if (dialog === 'snapshot') {
+            this.snapshotFormGroup.reset();
             this.createSnapshotDisplay = true;
         } else if (dialog === 'replication') {
             this.createReplicationDisplay = true;
@@ -323,9 +324,12 @@ export class VolumeListComponent implements OnInit {
                 "replicationPeriod":Number(this.repPeriod),
                 "secondaryVolumeId":res.json().id
             }
+            this.createReplicationDisplay = false;
             this.ReplicationService.createReplication(param).subscribe((res) => {
                 this.getVolumes();
-                this.createReplicationDisplay = false;
+            },
+            error=>{
+                this.getVolumes();
             });
         });
     }

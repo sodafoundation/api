@@ -12,6 +12,11 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 
+/*
+This module defines some essential configuration infos for all storage drivers.
+
+*/
+
 package config
 
 import (

@@ -38,7 +38,7 @@
             <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description" ></textarea>
         </form-item>
         <form-item [required]="false" label="{{label.zone}}">
-            <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':'100px'}"></p-dropdown>
+            <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':'100px'}" placeholder="Please choose" ></p-dropdown>
         </form-item>
         <form-item label="{{label.profile_label}}" [required]="true" >
             <p-multiSelect [options]="profileOptions" [filter]="false" formControlName="profile" [style]="{'width':'150px'}" placeholder="Please choose"></p-multiSelect>
