@@ -36,6 +36,7 @@ var (
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 	localIqn = "iqn.2017-10.io.opensds:volume:00000001"
+	profileId string
 )
 
 func init() {
@@ -52,6 +53,7 @@ func init() {
 	}
 	prfBody, _ := json.MarshalIndent(prf, "", "	")
 	fmt.Println("create profile success, got:", string(prfBody))
+	profileId = prf.Id
 }
 
 func TestListDocks(t *testing.T) {
@@ -534,4 +536,164 @@ func getHostIp() string {
 	}
 
 	return "127.0.0.1"
+}
+ 
+func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
+	vol, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function: ", err)
+		return nil, err
+	}
+	vol1, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function: ", err)
+		return nil, err
+	}
+	t.Log("starting to prepare VolumeGroupSpec......")
+
+	var body = &model.VolumeGroupSpec{
+		Name:        "VGStest",
+		Description: "This is a test",
+		AddVolumes:  []string{vol.Id, vol1.Id},
+		Profiles:    []string{profileId, profileId},
+	}
+	vg, err := c.CreateVolumeGroup(body)
+	if err != nil {
+		t.Error("prepare volume group failed: ", err)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		cleanVolumeIfFailedOrFinished(t, vol1.Id)
+		return nil,err
+	}
+	t.Log("End preparing volume group...")
+	return vg,nil
+}
+
+func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *model.VolumeGroupSpec) error {
+	t.Log("Start cleaning volume group...")
+	if err := c.DeleteVolumeGroup(vgId, body); err != nil {
+		t.Error("Clean volume group failed:", err)
+		return err
+	}
+	t.Log("End cleaning volume group...")
+
+	t.Log("Start cleaning volume...")
+	for i, _ := range body.AddVolumes {
+		if err := c.DeleteVolume(body.AddVolumes[i], nil); err != nil {
+			t.Error("Clean volume failed: ", err)
+			return err
+		}
+	}
+	t.Log("End cleaning volume...")
+	return nil
+}
+
+func TestCreateVolumeGroup(t *testing.T) {
+	vol, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function : ", err)
+		return
+	}
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
+	vol1, err := prepareVolume(t)
+	if err != nil {
+		t.Error("Failed to run volume prepare function : ", err)
+		return
+	}
+	defer cleanVolumeIfFailedOrFinished(t, vol1.Id)
+	t.Log("Start creating volume group...")
+	var body = &model.VolumeGroupSpec{
+		Name:        "testvolumegroup",
+		Description: "This is a volume group test",
+		AddVolumes:  []string{vol.Id, vol1.Id},
+		Profiles:    []string{profileId, profileId},
+	}
+	vg, err := c.CreateVolumeGroup(body)
+	if err != nil {
+		t.Error("create volume group failed : ", err)
+		return
+	}
+	vgBody, _ := json.MarshalIndent(vg, "", " ")
+	t.Log("create volume group success, got: ", string(vgBody))
+	t.Log("Starting cleaning volume group...")
+	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
+		t.Error("Clean volume group failed : ", err)
+		return
+	}
+	t.Log("End cleaning volume group...")
+}
+
+func TestGetVolumeGroup(t *testing.T) {
+	vg, err := prepareVolumeGroup(t)
+	if err != nil {
+		t.Error("prepare Volume Group failed :", err)
+		return
+	}
+	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+
+	t.Log("Start checking volume group...")
+	result, err := c.GetVolumeGroup(vg.Id)
+	if err != nil {
+		t.Error("Check volume group failed:", err)
+		return
+	}
+	if result.Status != "available" {
+		t.Error("The status of volume group is not available!", result.Status)
+		//  return
+	}
+	vgBody, _ := json.MarshalIndent(result, "", "   ")
+	t.Log("Check volume group success, got:", string(vgBody))
+}
+func TestListVolumeGroups(t *testing.T) {
+	vg, err := prepareVolumeGroup(t)
+	if err != nil {
+		t.Error("Failed to run volume group prepare function :", err)
+		return
+	}
+	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+	t.Log("Start checking all volume group...")
+	vgs, err := c.ListVolumeGroups()
+	if err != nil {
+		t.Error("list volume groups failed :", err)
+		return
+	}
+	vgsBody, _ := json.MarshalIndent(vgs, "", "   ")
+	t.Log("Check all volume groups success , got :", string(vgsBody))
+}
+func TestDeleteVolumeGroup(t *testing.T) {
+	vg, err := prepareVolumeGroup(t)
+	if err != nil {
+		t.Error("Failed to run volume group prepare function: ", err)
+		return
+	}
+	t.Log("Start delete volume group...")
+	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
+		t.Error("delete volume group failed :", err)
+		cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+		return
+	}
+	t.Log("Delete volume group success")
+	for i, _ := range vg.AddVolumes {
+		cleanVolumeIfFailedOrFinished(t, vg.AddVolumes[i])
+	}
+}
+func TestUpdateVolumeGroup(t *testing.T) {
+	vg, err := prepareVolumeGroup(t)
+	if err != nil {
+		t.Error("Failed to run volume group prepare function: ", err)
+		return
+	}
+	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+	t.Log("Start updating volume group...")
+	var body = &model.VolumeGroupSpec{
+		Name:        "Update Volume Group Name",
+		Description: "Update Volume Group Description",
+		AddVolumes:  vg.AddVolumes,
+	}
+	newVg, err := c.UpdateVolumeGroup(vg.Id, body)
+	if err != nil {
+		t.Error("Update volume group failed: ", err)
+		return
+	}
+	newVgBody, _ := json.MarshalIndent(newVg, "", "   ")
+	t.Log("Update volume group success ,got: ", string(newVgBody))
 }
