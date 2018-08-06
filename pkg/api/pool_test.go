@@ -21,6 +21,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"strings"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/pkg/context"
