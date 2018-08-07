@@ -579,6 +579,33 @@ func (c *Client) GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, 
 	return pol, nil
 }
 
+//ListAvailabilityZones
+func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
+	dbReq := &Request{
+		Url: urls.GeneratePoolURL(urls.Etcd, ""),
+	}
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("Failed to get AZ for pools in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	var azs = []string{}
+	if len(dbRes.Message) == 0 {
+		return azs, nil
+	}
+	for _, msg := range dbRes.Message {
+		var pol = &model.StoragePoolSpec{}
+		if err := json.Unmarshal([]byte(msg), pol); err != nil {
+			log.Error("When parsing pool in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		azs = append(azs, pol.AvailabilityZone)
+	}
+	//remove redundant AZ
+	azs = utils.RvRepElement(azs)
+	return azs, nil
+}
+
 // ListPools
 func (c *Client) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error) {
 	dbReq := &Request{
