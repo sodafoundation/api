@@ -273,6 +273,17 @@ func TestListAvailabilityZones(t *testing.T) {
 	}
 }
 
+func TestListVolumeTypes(t *testing.T) {
+	types, err := fc.ListVolumeTypes(c.NewAdminContext())
+	if err != nil {
+		t.Error("List volume types failed:", err)
+	}
+	expected := SamplePools[0].Extras.Advanced["diskType"].(string)
+	if !reflect.DeepEqual(types[0], expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, types[0])
+	}
+}
+
 func TestListPools(t *testing.T) {
 	m := map[string][]string{
 		"offset":  []string{"0"},

@@ -160,6 +160,25 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{projectId}/listVolumeTypes':
+    parameters:
+      - $ref: '#/parameters/projectId'
+    get:
+      tags:
+        - Volume Type
+      description: Lists volume types.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+              items:string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/pools/{poolId}':
     parameters:
       - $ref: '#/parameters/projectId'
