@@ -34,6 +34,7 @@ func init() {
 	var poolPortal PoolPortal
 	beego.Router("/v1beta/pools", &poolPortal, "get:ListPools")
 	beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
+	beego.Router("/v1beta/listVolumeTypes", &poolPortal, "get:ListVolumeTypes")
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
@@ -81,6 +82,22 @@ func TestListAvailabilityZones(t *testing.T) {
 	t.Log(w)
 	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
 		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
+	}
+}
+
+func TestListVolumeTypes(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("ListVolumeTypes", c.NewAdminContext()).Return(fakePools, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1beta/listVolumeTypes", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	expectedType := "SSD"
+	t.Log(w)
+	if !strings.Contains(string(w.Body.Bytes()), expectedType) {
+		t.Errorf("Expected %v, actual %v", expectedType, w.Body.Bytes())
 	}
 }
 

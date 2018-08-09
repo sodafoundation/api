@@ -88,6 +88,16 @@ func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]string, error) 
 	return azs, nil
 }
 
+//ListVolumeTypes
+func (fc *FakeDbClient) ListVolumeTypes(ctx *c.Context) ([]string, error) {
+	var types []string
+	for i := range SamplePools {
+		voltype := SamplePools[i].Extras.Advanced["diskType"].(string)
+		types = append(types, voltype)
+	}
+	return types, nil
+}
+
 // UpdateDock
 func (fc *FakeDbClient) UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error) {
 	return nil, nil

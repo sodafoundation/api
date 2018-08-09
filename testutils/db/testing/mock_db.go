@@ -700,6 +700,31 @@ func (_m *MockClient) ListAvailabilityZones(ctx *context.Context) ([]string, err
 	return azs, r1
 }
 
+//ListVolumeTypes
+func (_m *MockClient) ListVolumeTypes(ctx *context.Context) ([]string, error) {
+	ret := _m.Called(ctx)
+	var r0 []*model.StoragePoolSpec
+	var types []string
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.StoragePoolSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.StoragePoolSpec)
+		}
+	}
+	for i := 0; i < len(r0); i++ {
+		types = append(types, r0[i].Extras.Advanced["diskType"])
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return types, r1
+}
+
 // ListPools provides a mock function with given fields: ctx
 func (_m *MockClient) ListPools(ctx *context.Context) ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called(ctx)

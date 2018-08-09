@@ -75,6 +75,8 @@ type Client interface {
 
 	ListAvailabilityZones(ctx *c.Context) ([]string, error)
 
+	ListVolumeTypes(ctx *c.Context) ([]string, error)
+
 	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
 	ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error)

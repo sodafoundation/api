@@ -606,6 +606,33 @@ func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
 	return azs, nil
 }
 
+//ListVolumeTypes
+func (c *Client) ListVolumeTypes(ctx *c.Context) ([]string, error) {
+	dbReq := &Request{
+		Url: urls.GeneratePoolURL(urls.Etcd, ""),
+	}
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("Failed to get Disk Type for pools in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	var volTypes = []string{}
+	if len(dbRes.Message) == 0 {
+		return volTypes, nil
+	}
+	for _, msg := range dbRes.Message {
+		var pol = &model.StoragePoolSpec{}
+		if err := json.Unmarshal([]byte(msg), pol); err != nil {
+			log.Error("When parsing pool in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		volTypes = append(volTypes, pol.Extras.Advanced["diskType"].(string))
+	}
+	//remove redundant Type
+	volTypes = utils.RvRepElement(volTypes)
+	return volTypes, nil
+}
+
 // ListPools
 func (c *Client) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error) {
 	dbReq := &Request{

@@ -61,6 +61,33 @@ func (this *PoolPortal) ListAvailabilityZones() {
 	return
 }
 
+func (this *PoolPortal) ListVolumeTypes() {
+	if !policy.Authorize(this.Ctx, "volume_type:list") {
+		return
+	}
+	types, err := db.C.ListVolumeTypes(c.GetContext(this.Ctx))
+	if err != nil {
+		reason := fmt.Sprintf("Get Volume Types for pools failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
+		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	body, err := json.Marshal(types)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal AvailabilityZones failed: %s", err.Error())
+		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
+		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
+		log.Error(reason)
+		return
+	}
+
+	this.Ctx.Output.SetStatus(StatusOK)
+	this.Ctx.Output.Body(body)
+	return
+}
+
 func (this *PoolPortal) ListPools() {
 	if !policy.Authorize(this.Ctx, "pool:list") {
 		return

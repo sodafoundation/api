@@ -69,6 +69,7 @@ func Run(host string) {
 			beego.NSRouter("/:tenantId/pools", &PoolPortal{}, "get:ListPools"),
 			beego.NSRouter("/:tenantId/pools/:poolId", &PoolPortal{}, "get:GetPool"),
 			beego.NSRouter("/:tenantId/availabilityZones", &PoolPortal{}, "get:ListAvailabilityZones"),
+			beego.NSRouter("/:tenantId/listVolumeTypes", &PoolPortal{}, "get:ListVolumeTypes"),
 
 			beego.NSNamespace("/:tenantId/block",
 
