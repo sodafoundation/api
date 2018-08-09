@@ -713,7 +713,7 @@ func (_m *MockClient) ListVolumeTypes(ctx *context.Context) ([]string, error) {
 		}
 	}
 	for i := 0; i < len(r0); i++ {
-		types = append(types, r0[i].Extras.Advanced["diskType"])
+		types = append(types, r0[i].Extras.Advanced["diskType"].(string))
 	}
 
 	var r1 error
