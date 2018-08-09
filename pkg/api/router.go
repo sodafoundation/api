@@ -59,9 +59,9 @@ func Run(host string) {
 			beego.NSRouter("/:tenantId/profiles", &ProfilePortal{}, "post:CreateProfile;get:ListProfiles"),
 			beego.NSRouter("/:tenantId/profiles/:profileId", &ProfilePortal{}, "get:GetProfile;put:UpdateProfile;delete:DeleteProfile"),
 
-			// All operations of extras are used for Admin only
-			beego.NSRouter("/:tenantId/profiles/:profileId/extras", &ProfilePortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
-			beego.NSRouter("/:tenantId/profiles/:profileId/extras/:extraKey", &ProfilePortal{}, "delete:RemoveExtraProperty"),
+			// All operations of customProperties are used for admin only
+			beego.NSRouter("/:tenantId/profiles/:profileId/customProperties", &ProfilePortal{}, "post:AddCustomProperty;get:ListCustomProperties"),
+			beego.NSRouter("/:tenantId/profiles/:profileId/customProperties/:customKey", &ProfilePortal{}, "put:UpdateCustomProperty;delete:RemoveCustomProperty"),
 
 			// Pool is the virtual description of backend storage, usually divided into block, file and object,
 			// and every pool is atomic, which means every pool contains a specific set of features.

@@ -29,9 +29,9 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 			},
-			Name:        "default",
-			Description: "default policy",
-			Extras:      model.ExtraSpec{},
+			Name:             "default",
+			Description:      "default policy",
+			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -39,7 +39,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extras: model.ExtraSpec{
+			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true,
@@ -53,7 +53,7 @@ var (
 		},
 	}
 
-	SampleExtras = model.ExtraSpec{
+	SampleCustom = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
 			"isSpaceEfficient":   true,
