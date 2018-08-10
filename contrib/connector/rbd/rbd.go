@@ -27,12 +27,14 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
+const (
+	rbdDriver = "rbd"
+)
+
 var (
 	rbdBusPath    = "/sys/bus/rbd"
 	rbdDevicePath = path.Join(rbdBusPath, "devices")
 	rbdDev        = "/dev/rbd"
-
-	RBD_DRIVER = "rbd"
 )
 
 type RBD struct{}
@@ -40,7 +42,7 @@ type RBD struct{}
 var _ connector.Connector = &RBD{}
 
 func init() {
-	connector.RegisterConnector(RBD_DRIVER, &RBD{})
+	connector.RegisterConnector(rbdDriver, &RBD{})
 }
 
 func (*RBD) Attach(conn map[string]interface{}) (string, error) {

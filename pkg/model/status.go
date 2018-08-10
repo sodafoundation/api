@@ -34,7 +34,6 @@ const (
 	VolumeReserved       = "reserved"
 	VolumeErrorAttaching = "errorAttaching"
 	VolumeErrorDetaching = "errorDetaching"
-	VolumeDeleted        = "deleted"
 )
 
 // volume snapshot status
@@ -44,7 +43,6 @@ const (
 	VolumeSnapDeleting      = "deleting"
 	VolumeSnapError         = "error"
 	VolumeSnapErrorDeleting = "errorDeleting"
-	VolumeSnapDeleted       = "deleted"
 )
 
 // volume attachment status
@@ -62,7 +60,6 @@ const (
 	VolumeGroupErrorDeleting = "errorDeleting"
 	VolumeGroupError         = "error"
 	VolumeGroupDeleting      = "deleting"
-	VolumeGroupDeleted       = "deleted"
 	VolumeGroupUpdating      = "updating"
 	VolumeGroupInUse         = "inUse"
 )

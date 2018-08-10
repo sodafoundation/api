@@ -156,7 +156,6 @@ func TestArrayBasedCreateReplication(t *testing.T) {
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", &SampleReplications[0]).Return(&SampleReplications[0], nil)
 	db.C = mockClient
 
 	r := &model.ReplicationSpec{
@@ -208,7 +207,6 @@ func TestHostBasedCreateReplication(t *testing.T) {
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), mock.Anything).Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8", &SampleReplications[0]).Return(&SampleReplications[0], nil)
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), &SampleAttachments[0]).Return(&SampleAttachments[0], nil)
 	mockClient.On("UpdateVolumeAttachment", context.NewAdminContext(), SampleAttachments[0].Id, &SampleAttachments[0]).Return(&SampleAttachments[0], nil)
 	volumeList := []*model.VolumeSpec{}
@@ -272,6 +270,7 @@ func TestArrayBasedDeleteReplication(t *testing.T) {
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(nil)
+	mockClient.On("UpdateVolume", context.NewAdminContext(), mock.Anything).Return(&SampleVolumes[0], nil)
 	db.C = mockClient
 
 	r := &model.ReplicationSpec{
@@ -302,6 +301,8 @@ func TestHostBasedDeleteReplication(t *testing.T) {
 	mockClient.On("DeleteReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(nil)
 	mockClient.On("GetVolumeAttachment", context.NewAdminContext(), "f2dda3d2-bf79-11e7-8665-f750b088f63e").Return(&SampleAttachments[0], nil)
 	mockClient.On("DeleteVolumeAttachment", context.NewAdminContext(), "f2dda3d2-bf79-11e7-8665-f750b088f63e").Return(nil)
+	mockClient.On("UpdateVolume", context.NewAdminContext(), mock.Anything).Return(&SampleVolumes[0], nil)
+
 	db.C = mockClient
 
 	r := &model.ReplicationSpec{
@@ -411,10 +412,8 @@ func TestFailoverReplication(t *testing.T) {
 		ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	f := &model.FailoverReplicationSpec{
-		Failover: model.Failover{
-			AllowAttachedVolume: true,
-			SecondaryBackendId:  model.ReplicationDefaultBackendId,
-		},
+		AllowAttachedVolume: true,
+		SecondaryBackendId:  model.ReplicationDefaultBackendId,
 	}
 	c := NewController(NewFakeVolumeController())
 	err := c.FailoverReplication(context.NewAdminContext(), r, f, &volumes[0], &volumes[1])

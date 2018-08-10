@@ -491,6 +491,29 @@ func (_m *Client) GetReplication(ctx *context.Context, replicationId string) (*m
 	return r0, r1
 }
 
+// GetReplicationByVolumeId provides a mock function with given fields: ctx, volumeId
+func (_m *MockClient) GetReplicationByVolumeId(ctx *context.Context, volumeId string) (*model.ReplicationSpec, error) {
+	ret := _m.Called(ctx, volumeId)
+
+	var r0 *model.ReplicationSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.ReplicationSpec); ok {
+		r0 = rf(ctx, volumeId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ReplicationSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, volumeId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetVolume provides a mock function with given fields: ctx, volID
 func (_m *Client) GetVolume(ctx *context.Context, volID string) (*model.VolumeSpec, error) {
 	ret := _m.Called(ctx, volID)
@@ -650,6 +673,31 @@ func (_m *Client) ListExtraProperties(ctx *context.Context, prfID string) (*mode
 	}
 
 	return r0, r1
+}
+
+//ListAvaliableZones
+func (_m *MockClient) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
+	ret := _m.Called(ctx)
+	var r0 []*model.StoragePoolSpec
+	var azs []string
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.StoragePoolSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.StoragePoolSpec)
+		}
+	}
+	for i := 0; i < len(r0); i++ {
+		azs = append(azs, r0[i].AvailabilityZone)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return azs, r1
 }
 
 // ListPools provides a mock function with given fields: ctx
@@ -875,6 +923,29 @@ func (_m *Client) ListVolumeGroups(ctx *context.Context) ([]*model.VolumeGroupSp
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
 		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListVolumeGroupsWithFilter provides a mock function with given fields: ctx, m
+func (_m *MockClient) ListVolumeGroupsWithFilter(ctx *context.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
+	ret := _m.Called(ctx, m)
+
+	var r0 []*model.VolumeGroupSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.VolumeGroupSpec); ok {
+		r0 = rf(ctx, m)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.VolumeGroupSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
+		r1 = rf(ctx, m)
 	} else {
 		r1 = ret.Error(1)
 	}

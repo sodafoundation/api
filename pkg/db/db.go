@@ -73,6 +73,8 @@ type Client interface {
 
 	GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, error)
 
+	ListAvailabilityZones(ctx *c.Context) ([]string, error)
+
 	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
 	ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error)
@@ -143,6 +145,8 @@ type Client interface {
 
 	GetReplication(ctx *c.Context, replicationId string) (*model.ReplicationSpec, error)
 
+	GetReplicationByVolumeId(ctx *c.Context, volumeId string) (*model.ReplicationSpec, error)
+
 	ListReplication(ctx *c.Context) ([]*model.ReplicationSpec, error)
 
 	ListReplicationWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ReplicationSpec, error)
@@ -168,4 +172,6 @@ type Client interface {
 	ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error)
 
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
+
+	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 }

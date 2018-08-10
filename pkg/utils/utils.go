@@ -17,11 +17,30 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"os"
 	"reflect"
 
 	log "github.com/golang/glog"
 )
+
+//remove redundant elements
+func RvRepElement(arr []string) []string {
+	result := []string{}
+	for i := 0; i < len(arr); i++ {
+		flag := true
+		for j := range result {
+			if arr[i] == result[j] {
+				flag = false
+				break
+			}
+		}
+		if flag == true {
+			result = append(result, arr[i])
+		}
+	}
+	return result
+}
 
 func Contained(obj, target interface{}) bool {
 	targetValue := reflect.ValueOf(target)
@@ -162,4 +181,17 @@ func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) 
 	default:
 		return false, errors.New("the type of " + key + " must be bool or float64 or string")
 	}
+}
+
+func RandSeqWithAlnum(n int) string {
+	alnum := []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	return RandSeq(n, alnum)
+}
+
+func RandSeq(n int, chs []rune) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = chs[rand.Intn(len(chs))]
+	}
+	return string(b)
 }

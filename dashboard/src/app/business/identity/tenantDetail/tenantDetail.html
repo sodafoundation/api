@@ -1,0 +1,61 @@
+<div class="table-detail-con" *ngIf="!isDetailFinished"><div>Loading...</div></div>
+<div class="table-detail-con" *ngIf="isDetailFinished">
+
+    <h3>{{I18N.keyID['sds_identity_res_usage']}}</h3>
+    <ul>
+        <li>{{I18N.keyID['sds_identity_tenant_cap']}}: <span>{{ statistics_capacity }}</span></li>
+        <li>{{I18N.keyID['sds_home_volumes']}}: <span>{{ statistics_volumes }}</span></li>
+        <li>{{I18N.keyID['sds_home_snapshots']}}: <span>{{ statistics_volumeSnapshots }}</span></li>
+    </ul>
+
+    <h3>{{I18N.keyID['sds_identity_tenant_manage']}}</h3>
+    <div class="table-toolbar" *ngIf="projectName!='admin' && projectName!='service'">
+        <div class="left"><button pButton type="button" label="{{I18N.keyID['sds_identity_tenant_add']}}" (click)="showAddUsers()"></button></div>
+    </div>
+
+    <p-dataTable [value]="users" [rows]="5" [paginator]="true" [pageLinks]="3">
+        <p-column field="name" header="Username"></p-column>
+        <p-column header="Status">
+            <ng-template let-user="rowData" pTemplate="body">
+                <div class="badge-inline" [pBadge] status="{{(user.enabled == true) ? 'success' : 'default'}}" text="{{(user.enabled == true) ? 'Enabled' : 'Disabled'}}"></div>
+            </ng-template>
+        </p-column>
+        <p-column field="role" header="Role"></p-column>
+        <p-column field="description" header="Description"></p-column>
+        <p-column header="Operation" [style]="{'width': '20%'}" *ngIf="projectName!='admin' && projectName!='service'">
+            <ng-template let-user="rowData" pTemplate="body">
+                <a (click)="removeUser(user)">Remove</a>
+            </ng-template>
+        </p-column>
+    </p-dataTable>
+</div>
+
+<p-dialog *ngIf="addUserDisplay" [contentStyle]="{'overflow':'visible', 'height': '415px'}" header="Add User" [(visible)]="addUserDisplay" [width]="700" modal="modal">
+    <div class="table-toolbar">
+        <div class="left"></div>
+        <div class="right">
+            <div class="ui-inputsearch">
+                <input #searchNewUserByName type="text" pInputText placeholder="search" />
+                <button pButton type="button" icon="fa-search" (click)="listAllUsers()"></button>
+            </div>
+            <button class="" pButton type="button" icon="fa-refresh" (click)="listAllUsers()"></button>
+        </div>
+    </div>
+    <p-dataTable [globalFilter]="searchNewUserByName" [immutable]="false" [(selection)]="popSelectedUsers" sortField="name" [value]="allUsers" scrollable="true" scrollHeight="300px" selectionMode="multiple" [showHeaderCheckbox]="true"  >
+        <p-column selectionMode="multiple" [style]="{'width': '40px'}"></p-column>
+        <p-column field="name" header="Username"></p-column>
+        <p-column header="Status">
+            <ng-template let-user="rowData" pTemplate="body">
+                <div class="badge-inline" [pBadge] status="{{(user.enabled == true) ? 'success' : 'default'}}" text="{{(user.enabled == true) ? 'Enabled' : 'Disabled'}}"></div>
+            </ng-template>
+        </p-column>
+        <p-column field="description" header="Description"></p-column>
+    </p-dataTable>
+
+    <p-footer>
+        <button type="button" pButton  (click)="addUsers()" label="OK" class="ui-button-secondary"></button>
+        <button type="button" pButton (click)="addUserDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

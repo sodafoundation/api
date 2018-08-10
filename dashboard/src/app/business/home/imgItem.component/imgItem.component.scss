@@ -1,0 +1,13 @@
+@import "./../../scss-variable";
+.img-item-float-class {
+    float: left;
+}
+
+.img-width {
+    width: 80px;
+}
+
+.title-font-class {
+    color: map-get($color-primary, normal);
+    font-size: 2em;
+}

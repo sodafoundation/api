@@ -15,14 +15,15 @@
 package client
 
 import (
+	"errors"
 	"log"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 const (
-	Keystone = "keystone" // Keystone == 0
-	Noauth   = "noauth"
+	OpensdsEndpoint = "OPENSDS_ENDPOINT"
 )
 
 // Client is a struct for exposing some operations of opensds resources.
@@ -35,43 +36,6 @@ type Client struct {
 	*ReplicationMgr
 
 	cfg *Config
-}
-
-type AuthOptions interface {
-	GetTenantId() string
-}
-
-func NewKeystoneAuthOptions() *KeystoneAuthOptions {
-	return &KeystoneAuthOptions{}
-}
-
-type KeystoneAuthOptions struct {
-	IdentityEndpoint string
-	Username         string
-	UserID           string
-	Password         string
-	DomainID         string
-	DomainName       string
-	TenantID         string
-	TenantName       string
-	AllowReauth      bool
-	TokenID          string
-}
-
-func (k *KeystoneAuthOptions) GetTenantId() string {
-	return k.TenantID
-}
-
-func NewNoauthOptions(tenantId string) *NoAuthOptions {
-	return &NoAuthOptions{TenantID: tenantId}
-}
-
-type NoAuthOptions struct {
-	TenantID string
-}
-
-func (n *NoAuthOptions) GetTenantId() string {
-	return n.TenantID
 }
 
 // Config is a struct that defines some options for calling the Client.
@@ -116,4 +80,32 @@ func NewClient(c *Config) *Client {
 func (c *Client) Reset() *Client {
 	c = &Client{}
 	return c
+}
+
+func processListParam(args []interface{}) (string, error) {
+	var filter map[string]string
+	var u string
+	var urlParam []string
+
+	if len(args) > 0 {
+		if len(args) > 1 {
+			return "", errors.New("only support one parameter that must be map[string]string")
+		}
+		filter = args[0].(map[string]string)
+	}
+
+	if filter != nil {
+		for k, v := range filter {
+			if v == "" {
+				continue
+			}
+			urlParam = append(urlParam, k+"="+v)
+		}
+	}
+
+	if len(urlParam) > 0 {
+		u = strings.Join(urlParam, "&")
+	}
+
+	return u, nil
 }

@@ -1,0 +1,64 @@
+<div>
+    <div class="custom-breadcrumb">
+        <span *ngFor="let item of items; index as i">
+          <a [ngClass]="{'font-color-class': i===0}" [routerLink]="[item.url]">{{item.label}}</a>
+          <span *ngIf="(i+1) !== items.length">></span>
+        </span>
+    </div>
+    <div class="volume-basic-info">
+        <h3>{{i18n.keyID['sds_block_volume_base_info']}}</h3>
+        <p *ngIf="showVolumeSource">{{ volumeSource }}</p>
+        <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+            <div class="ui-grid-row volume-basic-item-class">
+                <div class="ui-grid-col-1">
+                    {{label.Name}}:
+                </div>
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.name}}
+                </div>
+                <div class="ui-grid-col-1">
+                    {{label.Profile}}:
+                </div>
+                <div class="ui-grid-col-3 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.profileName}}
+                </div>
+                <div class="ui-grid-col-1">
+                    {{label.Status}}:
+                </div>
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.status}}
+                </div>
+            </div>
+            <div class="ui-grid-row volume-basic-item-class">
+                <div class="ui-grid-col-1">
+                    {{label.Capacity}}:
+                </div>
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.size}}
+                </div>
+                <div class="ui-grid-col-1">
+                    {{label.VolumeID}}:
+                </div>
+                <div class="ui-grid-col-3 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.id}}
+                </div>
+                <div class="ui-grid-col-1">
+                    {{label.CreatedAt}}:
+                </div>
+                <div class="ui-grid-col-2 volume-basic-item-value-color" *ngIf="volume">
+                    {{volume.createdAt}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <p-tabView>
+            <p-tabPanel header="{{i18n.keyID['sds_block_volume_snapshot']}}">
+                <app-snapshot-list [volumeId]="volumeId"></app-snapshot-list>
+            </p-tabPanel>
+            <p-tabPanel header="{{i18n.keyID['sds_block_volume_replication']}}">
+                <app-replication-list [volumeId]="volumeId"></app-replication-list>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+</div>

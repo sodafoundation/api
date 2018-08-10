@@ -1,0 +1,66 @@
+<div class="table-toolbar">
+    <div class="left">
+        <button class="ui-button-secondary" pButton type="button" label="{{I18N.keyID['sds_block_volume_create']}}" (click)="createVolumeGroup()"></button>
+        <button pButton type="button" label="{{I18N.keyID['sds_block_volume_delete']}}" [disabled]="selectedVolumeGroups.length == 0" (click)="deleteMultiVolumeGroups()"></button></div>
+    <div class="right">
+        <div class="ui-inputsearch">
+            <input type="text" #searchByName pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
+            <button pButton type="button" icon="fa-search"></button>
+        </div>
+        <button class="" pButton type="button" (click)="getProfiles()" icon="fa-refresh"></button>
+    </div>
+</div>
+
+<p-dataTable [value]="volumeGroups" [globalFilter]="searchByName" [(selection)]="selectedVolumeGroups" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}">
+        <ng-template pTemplate="body" let-group="rowData">
+            <a [routerLink]="['/volumeGroupDetails/' + group.id]">{{group.name}}</a>
+        </ng-template>
+    </p-column>
+    <p-column field="description" header="{{I18N.keyID['sds_block_volume_descri']}}"></p-column>
+    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}"></p-column>
+    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}"></p-column>
+    <!-- <p-column field="volumes" header="Number of Volumes"></p-column> -->
+    <p-column header="{{I18N.keyID['sds_block_volume_operation']}}">
+        <ng-template pTemplate="body" let-volumeGroup="rowData">
+            <a (click)="ModifyVolumeGroupDisplay(volumeGroup)">{{I18N.keyID['sds_block_volume_modify']}}</a><a (click)="deleteVolumeGroup(volumeGroup)">{{I18N.keyID['sds_block_volume_delete']}}</a>
+        </ng-template>
+    </p-column>
+</p-dataTable>
+<!--create volumes group-->
+<p-dialog header="{{I18N.keyID['sds_block_volume_group_create_group']}}" [(visible)]="showVolumeGroupDialog" [modal]="true" [responsive]="true" [width]="800" [contentStyle]="{'min-height':'300px'}">
+    <form [grid]="{label: 'ui-g-2', content:'ui-g-10'}" [formGroup]="volumeGroupForm" [errorMessage]="errorMessage">
+        <form-item label="{{label.group_name_lable }}" [required]="true">
+            <input type="text" pInputText formControlName="group_name" />
+        </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description" ></textarea>
+        </form-item>
+        <form-item [required]="false" label="{{label.zone}}">
+            <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':'100px'}" placeholder="Please choose" ></p-dropdown>
+        </form-item>
+        <form-item label="{{label.profile_label}}" [required]="true" >
+            <p-multiSelect [options]="profileOptions" [filter]="false" formControlName="profile" [style]="{'width':'150px'}" placeholder="Please choose"></p-multiSelect>
+        </form-item>
+    </form>
+    <p-footer>
+        <button type="button" pButton (click)="submit(volumeGroupForm.value)"  label="{{I18N.keyID['ok']}}"></button>
+        <button type="button" pButton (click)="showVolumeGroupDialog=false"  label="{{I18N.keyID['cancel']}}"></button>
+    </p-footer>
+</p-dialog>
+<p-dialog header="{{I18N.keyID['sds_block_volume_group_modify_group']}}" [(visible)]="showModifyGroup" [modal]="true" [responsive]="true" [width]="800">
+    <form [grid]="{label: 'ui-g-2', content:'ui-g-10'}" [formGroup]="modifyGroupForm" [errorMessage]="errorMessage">
+        <form-item label="{{label.group_name_lable }}" [required]="true">
+            <input type="text" pInputText formControlName="group_name"  />
+        </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="30" pInputTextarea formControlName="description"></textarea>
+        </form-item>
+    </form>
+    <p-footer>
+        <button type="button" pButton (click)="modifyGroup(modifyGroupForm.value)"  label="{{I18N.keyID['ok']}}"></button>
+        <button type="button" pButton (click)="showModifyGroup=false"  label="{{I18N.keyID['cancel']}}"></button>
+    </p-footer>
+</p-dialog>
+<p-confirmDialog></p-confirmDialog>

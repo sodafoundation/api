@@ -63,7 +63,30 @@ var volumeAttachmentUpdateCommand = &cobra.Command{
 	Run:   volumeAttachmentUpdateAction,
 }
 
+var (
+	volAtmLimit      string
+	volAtmOffset     string
+	volAtmSortDir    string
+	volAtmSortKey    string
+	volAtmId         string
+	volAtmUserId     string
+	volAtmVolumeId   string
+	volAtmMountpoint string
+	volAtmStatus     string
+)
+
 func init() {
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmOffset, "offset", "", "0", "all requested data offsets")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmSortKey, "sortKey", "", "id",
+		"the sort key of all requested data. supports id(default), volumeid, status, userid, tenantid")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmId, "id", "", "", "list volume attachment by id")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmUserId, "userId", "", "", "list volume attachment by storage userId")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmVolumeId, "volumeId", "", "", "list volume attachment by volumeId")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmStatus, "status", "", "", "list volume attachment by status")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmMountpoint, "mountpoint", "", "", "list volume attachment by mountpoint")
+
 	volumeAttachmentCommand.AddCommand(volumeAttachmentCreateCommand)
 	volumeAttachmentCommand.AddCommand(volumeAttachmentShowCommand)
 	volumeAttachmentCommand.AddCommand(volumeAttachmentListCommand)
@@ -104,18 +127,24 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
+		"Mountpoint", "Status", "VolumeId", "AccessProtocol"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
 func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-	resp, err := client.ListVolumeAttachments()
+
+	var opts = map[string]string{"limit": volAtmLimit, "offset": volAtmOffset,
+		"sortDir": volAtmSortDir, "sortKey": volAtmSortKey, "Id": volAtmId,
+		"UserId": volAtmUserId, "VolumeId": volAtmVolumeId,
+		"Status": volAtmStatus, "Mountpoint": volAtmMountpoint}
+
+	resp, err := client.ListVolumeAttachments(opts)
 	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId"}
+	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId", "AccessProtocol"}
 	PrintList(resp, keys, attachmentFormatters)
 }
 

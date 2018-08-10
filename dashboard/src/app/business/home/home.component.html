@@ -1,0 +1,125 @@
+<div class="home-font-color-class" *ngIf="showAdminStatis">
+    <div>
+        <header>
+            <h2 class="header-h2-title-font">{{I18N.keyID["sds_home_overvew"]}}</h2>
+            <p class="header-p-text">{{I18N.keyID["sds_home_update"]}}</p>
+        </header>
+        <div class="ui-inputgroup">
+            <div class="ui-g-12 ui-md-5">
+                <div class="img-item-div-height" style="padding: 2em 0;">
+                    <div class="img-item-div statisBg" style="margin-top:-2em;">
+                        <div class="ui-g-12 ui-md-6">
+                            <img-item [item]="items[0]"></img-item>
+                        </div>
+                        <div class="ui-g-12 ui-md-6">
+                            <img-item [item]="items[1]"></img-item>
+                        </div>
+                        <div class="ui-helper-clearfix"></div>
+                    </div>
+                    <div class="user-img-item-margin img-item-div statisBg">
+                        <div class="ui-g-12 ui-md-6">
+                            <img-item [item]="items[2]"></img-item>
+                        </div>
+                        <div class="ui-g-12 ui-md-6">
+                            <img-item [item]="items[3]"></img-item>
+                        </div>
+                        <div class="ui-helper-clearfix"></div>
+                    </div>
+                    <div class="ui-helper-clearfix"></div>
+                </div>
+            </div>
+
+            <div class="ui-g-12 ui-md-5">
+                <div class="img-item-div-height img-item-div statisBg">
+                    <div>
+                        <img-item [item]="items[4]"></img-item>
+                    </div>
+                    <div class="home-img-item-margin">
+                        <img-item [item]="items[5]"></img-item>
+                    </div>
+                    <div class="home-img-item-margin">
+                        <img-item [item]="items[6]"></img-item>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="ui-g-12 ui-md-4">
+                <div class="img-item-div-height img-item-div statisBg">
+                    <div>
+                        <img-item [item]="items[7]"></img-item>
+                    </div>
+                    <div class="home-img-item-margin">
+                        <img-item [item]="items[8]"></img-item>
+                    </div>
+                </div>
+            </div> -->
+            <div class="ui-helper-clearfix"></div>
+        </div>
+    </div>
+    <hr>
+    <div>
+        <h2 class="header-h2-title-font">{{I18N.keyID["Capacity"]}}</h2>
+        <div class="ui-inputgroup"></div>
+        <div class="ui-g-12 ui-md-4">
+            <div class="capacity-secondary">{{I18N.keyID["sds_home_block_capacity"]}}</div>
+            <p class="capacity-secondary">{{I18N.keyID["sds_home_update"]}}</p>
+            <div>
+                <p-chart [options]="option" type="doughnut" [data]="chartDatas"></p-chart>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-2"></div>
+        <div class="ui-g-12 ui-md-4">
+            <div class="capacity-secondary">{{I18N.keyID["sds_home_top5"]}}</div>
+            <p class="capacity-secondary">{{I18N.keyID["sds_home_update"]}}</p>
+            <p-chart [options]="chartBarOpion" type="bar" [data]="chartDatasbar"></p-chart>
+        </div>
+        <div class="ui-helper-clearfix"></div>
+    </div>
+</div>
+
+<div class="home-font-color-class" *ngIf="!showAdminStatis">
+        <div>
+            <header>
+                <h2 class="header-h2-title-font">Overview</h2>
+                <p class="header-p-text">Updated 5 minutes ago</p>
+            </header>
+            <div class="ui-inputgroup">
+
+
+                <div class="ui-g-12 ui-md-12">
+                    <div class="img-item-div-height img-item-div statisBg" style="height: 100px; margin-left: 0; margin-right: 0;">
+                        <div class="ui-g-12 ui-md-4">
+                            <img-item [item]="items[4]"></img-item>
+                        </div>
+                        <div class="ui-g-12 ui-md-4">
+                            <img-item [item]="items[5]"></img-item>
+                        </div>
+                        <div class="ui-g-12 ui-md-4">
+                            <img-item [item]="items[6]"></img-item>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--<hr>-->
+        <div *ngIf="false">
+            <h2 class="header-h2-title-font">Trend</h2>
+            <div class="ui-inputgroup"></div>
+            <div class="ui-g-12 ui-md-4">
+                <div class="capacity-secondary">Trend of block storage capacity growth</div>
+                <p class="capacity-secondary">Updated 5 minutes ago</p>
+                <div>
+                    <p-chart [options]="optionLine" type="line" [data]="lineData_capacity"></p-chart>
+                </div>
+            </div>
+            <div class="ui-g-12 ui-md-2"></div>
+            <div class="ui-g-12 ui-md-4">
+                <div class="capacity-secondary">Trend of quantity of volumes growth</div>
+                <p class="capacity-secondary">Updated 5 minutes ago</p>
+                <div>
+                    <p-chart [options]="optionLine" type="line" [data]="lineData_nums"></p-chart>
+                </div>
+            </div>
+            <div class="ui-helper-clearfix"></div>
+        </div>
+</div>

@@ -262,6 +262,17 @@ func TestListDocks(t *testing.T) {
 	}
 }
 
+func TestListAvailabilityZones(t *testing.T) {
+	azs, err := fc.ListAvailabilityZones(c.NewAdminContext())
+	if err != nil {
+		t.Error("List pools failed:", err)
+	}
+	expected := SamplePools[0].AvailabilityZone
+	if !reflect.DeepEqual(azs[0], expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, azs[0])
+	}
+}
+
 func TestListPools(t *testing.T) {
 	m := map[string][]string{
 		"offset":  []string{"0"},
@@ -316,9 +327,7 @@ func TestListVolumes(t *testing.T) {
 	}
 
 	var expected []*model.VolumeSpec
-	for i := range SampleVolumes {
-		expected = append(expected, &SampleVolumes[i])
-	}
+	expected = append(expected, &SampleVolumes[0])
 	if !reflect.DeepEqual(vols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, vols)
 	}

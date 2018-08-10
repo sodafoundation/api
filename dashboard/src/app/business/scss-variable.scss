@@ -1,0 +1,75 @@
+$color-primary: (normal: #438bd3, hover: #4596e8, active: #1f5fac);
+$color-disabled: #c9d1d8;
+$color-text: (primary: #657D95, secondary: #8893a6, tertary: #b9c3c8, auxiliary: #c9d1d8);
+$color-title: (primary: #2e3039, secondary: #657D95);
+$color-splitline: #ecf0f2;
+$color-panelbg: #f3f6f7;
+$widget-border: (normal: #cfd7db, hover: #98a5bc, focus: #98a5bc, active: #98a5bc);
+$widget-bg: (normal: #fdfdfd, hover: #ffffff, focus: #ffffff, active: #f1f1f1);
+$border-radius: (small, 3px),
+(medium, 10px),
+(large, 20px);
+@each $type,
+$size in $border-radius {
+    $radius-pos: (tl, $size 0 0 0), (tr, 0 $size 0 0), (br, 0 0 $size 0), (bl, 0 0 0 $size), (top, $size $size 0 0), (right, 0 $size $size 0), (left, $size 0 0 $size), (bottom, 0 0 $size $size), (all, $size);
+    @each $pos,
+    $cornerStyle in $radius-pos {
+        .ui-corner-#{ $pos }-#{ $type } {
+            -moz-border-radius: $cornerStyle;
+            -webkit-border-radius: $cornerStyle;
+            ;
+            border-radius: $cornerStyle;
+        }
+    }
+}
+
+$fontFamily: "Roboto",
+"Trebuchet MS",
+Arial,
+Helvetica,
+sans-serif;
+$fontSize: 0.14rem;
+$borderRadius: 3px;
+$disabledOpacity: 0.35;
+//Header
+$headerBorderWidth: 1px;
+$headerBorderColor: #d9d9d9;
+$headerBgColor: #f6f7f9;
+$headerTextColor: #1b1d1f;
+$headerFontWeight: normal;
+$headerIconTextColor: #1b1d1f;
+//Content
+$contentBorderWidth: 1px;
+$contentBorderColor: #D5D5D5;
+$contentBgColor: #ffffff;
+$contentTextColor: map-get($color-text, primary);
+//Default State
+$stateDefaultBorderWidth: 1px;
+$stateDefaultBorderColor: map-get($widget-border, normal);
+$stateDefaultBgColor: map-get($widget-bg, normal);
+$stateDefaultTextColor: map-get($color-text, primary);
+//Active State
+$stateActiveBorderColor: map-get($widget-border, active);
+$stateActiveBgColor: map-get($widget-bg, active);
+$stateActiveTextColor: map-get($color-text, primary);
+//Highlight State
+$stateHighlightBorderColor: map-get($color-primary, normal);
+$stateHighlightBgColor: map-get($color-primary, normal);
+$stateHighlightTextColor: #FFFFFF;
+//Focus State
+$stateFocusBorderColor: map-get($widget-border, focus);
+$stateFocusBgColor: map-get($widget-bg, focus);
+$stateFocusTextColor: map-get($color-text, primary);
+//Error State
+$stateErrorBorderColor: #f44336;
+$stateErrorBgColor: #f5554a;
+$stateErrorTextColor: #cd0a0a;
+//Hover State
+$stateHoverBorderColor: map-get($widget-border, hover);
+$stateHoverBgColor: map-get($widget-bg, hover);
+$stateHoverTextColor: map-get($color-text, primary);
+//Forms
+$inputBgColor: #ffffff;
+$inputTextColor: map-get($color-text, primary);
+$invalidInputBorderColor: #f44336;
+$inputGroupTextColor: map-get($color-text, primary);

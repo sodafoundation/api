@@ -26,6 +26,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	sample "github.com/opensds/opensds/testutils/driver"
@@ -57,14 +58,18 @@ type VolumeDriver interface {
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
-	// NOTE Parameter vg means complete volume group information, because driver may use it to do something and return volume group status.
+	// NOTE Parameter vg means complete volume group information, because driver
+	// may use it to do something and return volume group status.
 	CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
 
-	// NOTE Parameter addVolumesRef or removeVolumesRef means complete volume information that
-	//  will be added or removed from group. Driver may use them to do some related operations and return their status.
+	// NOTE Parameter addVolumesRef or removeVolumesRef means complete volume
+	// information that will be added or removed from group. Driver may use
+	// them to do some related operations and return their status.
 	UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error)
 
-	// NOTE Parameter volumes means volumes deleted from group, driver may use their compelete information to do some related operations and return their status.
+	// NOTE Parameter volumes means volumes deleted from group, driver may use
+	// their compelete information to do some related operations and return
+	// their status.
 	DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error)
 
 	ListPools() ([]*model.StoragePoolSpec, error)
@@ -74,16 +79,16 @@ type VolumeDriver interface {
 func Init(resourceType string) VolumeDriver {
 	var d VolumeDriver
 	switch resourceType {
-	case "cinder":
+	case config.CinderDriverType:
 		d = &cinder.Driver{}
 		break
-	case "ceph":
+	case config.CephDriverType:
 		d = &ceph.Driver{}
 		break
-	case "lvm":
+	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
-	case "huawei_dorado":
+	case config.HuaweiDoradoDriverType:
 		d = &dorado.Driver{}
 		break
 	default:

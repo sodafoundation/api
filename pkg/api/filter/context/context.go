@@ -22,11 +22,8 @@ import (
 
 func Factory() beego.FilterFunc {
 	return func(httpCtx *bctx.Context) {
-		ctx := c.GetContext(httpCtx)
-		if ctx == nil {
-			ctx = &c.Context{}
-		}
-		ctx.Uri = httpCtx.Input.URI()
-		httpCtx.Input.SetData("context", ctx)
+		c.UpdateContext(httpCtx, map[string]interface{}{
+			"Uri": httpCtx.Input.URI(),
+		})
 	}
 }

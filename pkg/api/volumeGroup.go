@@ -29,7 +29,7 @@ type VolumeGroupPortal struct {
 }
 
 func (this *VolumeGroupPortal) CreateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:create") {
+	if !policy.Authorize(this.Ctx, "volume_group:create") {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 }
 
 func (this *VolumeGroupPortal) UpdateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:update") {
+	if !policy.Authorize(this.Ctx, "volume_group:update") {
 		return
 	}
 	var vg = &model.VolumeGroupSpec{
@@ -91,12 +91,11 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 
 	this.SuccessHandle(StatusOK, body)
-
 	return
 }
 
 func (this *VolumeGroupPortal) DeleteVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:delete") {
+	if !policy.Authorize(this.Ctx, "volume_group:delete") {
 		return
 	}
 
@@ -105,14 +104,12 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 		this.ErrorHandle("Delete volume group failed", model.ErrorInternalServer, err)
 		return
 	}
-
 	this.SuccessHandle(StatusAccepted, nil)
-
 	return
 }
 
 func (this *VolumeGroupPortal) GetVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volumeGroup:get") {
+	if !policy.Authorize(this.Ctx, "volume_group:get") {
 		return
 	}
 
@@ -127,6 +124,34 @@ func (this *VolumeGroupPortal) GetVolumeGroup() {
 	body, err := json.Marshal(result)
 	if err != nil {
 		this.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
+		return
+	}
+
+	this.SuccessHandle(StatusOK, body)
+	return
+}
+
+func (this *VolumeGroupPortal) ListVolumeGroups() {
+	if !policy.Authorize(this.Ctx, "volume_group:get") {
+		return
+	}
+
+	m, err := this.GetParameters()
+	if err != nil {
+		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		return
+	}
+
+	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(this.Ctx), m)
+	if err != nil {
+		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		return
+	}
+
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		this.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
 		return
 	}
 

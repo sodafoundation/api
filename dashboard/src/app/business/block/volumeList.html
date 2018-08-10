@@ -1,0 +1,159 @@
+<div class="table-toolbar">
+    <div class="left">
+        <button class="ui-button-secondary" pButton type="button" label="{{I18N.keyID['sds_block_volume_create']}}" [routerLink]="['/createVolume']"></button>
+        <button pButton type="button" label="{{I18N.keyID['sds_block_volume_delete']}}" (click)="deleteVolumes(selectedVolumes)" [disabled]="selectedVolumes.length == 0"></button>
+    </div>
+    <div class="right">
+        <div class="ui-inputsearch">
+            <input type="text" #searchByName pInputText placeholder="{{I18N.keyID['sds_block_volume_search']}}">
+            <button pButton type="button" icon="fa-search"></button>
+        </div>
+        <button class="" pButton type="button" (click)="getProfiles()" icon="fa-refresh"></button>
+    </div>
+</div>
+<p-dataTable [value]="volumes" [globalFilter]="searchByName" [(selection)]="selectedVolumes" [showHeaderCheckbox]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[10,20,50,100]">
+    <p-column selectionMode="multiple" [style]="{'width': '60px'}"></p-column>
+    <p-column field="name" header="{{I18N.keyID['sds_block_volume_name']}}" >
+        <ng-template pTemplate="body" let-volume="rowData">
+            <a [routerLink]="['/volumeDetails/' + volume.id]"  title="{{volume.name}}">{{volume.name}}</a>
+        </ng-template>
+    </p-column>
+    <p-column field="status" header="{{I18N.keyID['sds_block_volume_status']}}" ></p-column>
+    <p-column field="size" header="{{I18N.keyID['sds_home_capacity']}}"></p-column>
+    <p-column field="profileName" header="{{I18N.keyID['sds_block_volume_profile']}}"></p-column>
+    <p-column field="availabilityZone" header="{{I18N.keyID['sds_block_volume_az']}}" [style]="{'width': '15%'}"></p-column>
+    <p-column header="{{I18N.keyID['sds_block_volume_operation']}}" [style]="{'width': '335px'}">
+        <ng-template pTemplate="body" let-volume="rowData" let-i="rowIndex">
+            <a (click)="returnSelectedVolume(volume,'snapshot')">{{I18N.keyID['sds_block_volume_createsna']}}</a>
+            <a [ngClass]="{'a-rep-disabled':volume['isDisableRep']}" (click)="returnSelectedVolume(volume,'replication')">{{I18N.keyID['sds_block_volume_createrep']}}</a>
+            <p-dropmenu label="{{I18N.keyID['sds_block_volume_more']}}" [model]="volume['disabled'] ? menuDeleDisableItems: menuItems" (click)="returnSelectedVolume(volume)"></p-dropmenu>
+        </ng-template>
+    </p-column>
+</p-dataTable>
+
+<p-dialog *ngIf="createSnapshotDisplay" header="{{I18N.keyID['sds_block_volume_createsna']}}" [(visible)]="createSnapshotDisplay" [width]="600" modal="modal">
+    <form [grid]="{label: 'ui-g-3', content:'ui-g-20'}" [formGroup]="snapshotFormGroup" [errorMessage]="errorMessage">
+        <form-item label="{{label.volume}}" [required]="false">
+            <span class="text-only">{{selectedVolume.name}}</span>
+        </form-item>
+
+        <form-item label="{{label.name}}" [required]="true">
+            <input type="text" pInputText formControlName="name" />
+        </form-item>
+
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="48" pInputTextarea formControlName="description"></textarea>
+        </form-item>
+    </form>
+
+    <p-footer>
+        <button type="button" pButton (click)="createSnapshot()" label="{{I18N.keyID['ok']}}"></button>
+        <button type="button" pButton (click)="createSnapshotDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
+    </p-footer>
+</p-dialog>
+
+<p-dialog *ngIf="modifyDisplay" header="{{I18N.keyID['sds_block_volume_modify']}}" [(visible)]="modifyDisplay" [width]="450" modal="modal">
+    <form [grid]="{label: 'ui-g-2', content:'ui-g-20'}" [formGroup]="modifyFormGroup" [errorMessage]="errorMessage">
+        <form-item label="{{label.name}}" [required]="true">
+            <input type="text" pInputText formControlName="name" value="{{selectedVolume.name}}" />
+        </form-item>
+    </form>
+    <p-footer>
+        <button type="button" pButton (click)="modifyVolume()" label="{{I18N.keyID['ok']}}" [disabled]="!modifyFormGroup.valid || modifyFormGroup.value.name === selectedVolume.name"></button>
+        <button type="button" pButton (click)="modifyDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
+    </p-footer>
+</p-dialog>
+
+<p-dialog *ngIf="expandDisplay" header="{{I18N.keyID['sds_block_volume_expand']}}" [(visible)]="expandDisplay" [width]="650" modal="modal">
+        <form [grid]="{label: 'ui-g-5', content:'ui-g-20'}" [formGroup]="expandFormGroup" [errorMessage]="errorMessage">
+            <form-item label="{{I18N.keyID['sds_block_volume_title']}}Volume" >
+                <span class="text-only">{{selectedVolume.name}}</span>
+            </form-item>
+            <form-item label="{{I18N.keyID['sds_block_volume_curr_capa']}}">
+                <span class="text-only">{{selectedVolume.size}}</span>
+            </form-item>
+            <form-item label="{{I18N.keyID['sds_block_volume_expandby']}}" >
+                <div style="display: inline-flex;" class="ui-fluid">
+                        <input type="text" pInputText formControlName="expandSize" style="width: 150px; margin-right: 10px;" />
+                        <p-dropdown [style]="{'min-width':150}" [options]="capacityOptions" formControlName="capacityOption"></p-dropdown>
+                </div>
+            </form-item>
+            <form-item label="{{I18N.keyID['sds_block_volume_totalcapa']}}" >
+                    <span class="text-only">{{newVolumeSizeFormat}}</span>
+            </form-item>
+        </form>
+        <p-footer>
+            <button type="button" pButton (click)="expandVolume()" label="{{I18N.keyID['ok']}}" ></button>
+            <button type="button" pButton (click)="expandDisplay=false" label="{{I18N.keyID['cancel']}}"></button>
+        </p-footer>
+    </p-dialog>
+<!--Create Replication-->
+<p-dialog  header="Create Replication" [(visible)]="createReplicationDisplay" [height]="500"  [width]="750" modal="modal">
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-4 item-content-backgroud">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                    <div class="ui-grid-row replication-img-item-height">
+                        <div class="ui-grid-col-6 text-align-center">
+                            <img src="assets/business/images/volume/u583.png">
+                            <div style="padding-top: 76px" class="item-flex">
+                                <span class="margin-between-img-text">{{selectedVolume && selectedVolume.name}}</span>
+                            </div>
+                            <div style="padding-top: 30px" class="item-flex">
+                                <span><img src="assets/business/images/volume/u436.png"></span>
+                                <span class="margin-between-img-text">default</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-8">
+                <div class="ui-grid-col-6">
+                    <div class="replication-img-item-padding position-relative">
+                        <div class="replication-img-item-height">
+                            <div class="item-flex item-flex-justify" >
+                                <span>Period</span>
+                                <span class="margin-between-img-text">=</span>
+                                <input class="margin-between-img-text" pInputText style="width:30px;" type="text" [(ngModel)]="repPeriod" />
+                                <span class="margin-between-img-text">Minutes</span>
+                            </div>
+                            <img src="assets/business/images/volume/u760p000.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-grid-col-6 item-content-backgroud" >
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-img-item-height">
+                            <div class="ui-grid-col-6"></div>
+                            <div class="ui-grid-col-6 text-align-center">
+                                <img src="assets/business/images/volume/u585.png" height="61px">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                    <form style="float:right" [grid]="{label: 'ui-g-7', content:'ui-g-9'}" [formGroup]="replicationGroup" [errorMessage]="errorMessage" >
+                        <form-item label="Secondary Name" [required]="true">
+                            <input type="text" pInputText formControlName="repName" [style]="{'min-width':'100px'}"/>
+                        </form-item>
+                        <form-item label="Target Availability Zone" [required]="true" >
+                            <div style="display: inline-flex;" class="ui-fluid">
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="azOption" formControlName="az"></p-dropdown>
+                            </div>
+                        </form-item>
+                        <form-item label="Secondary Profile" [required]="true">
+                            <div style="display: inline-flex;" class="ui-fluid">
+                                <p-dropdown [style]="{'min-width':'136px'}" [options]="profileOptions" formControlName="profileOption"></p-dropdown>
+                            </div>
+                        </form-item>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p-footer>
+        <button type="button" pButton (click)="createReplication()" label="OK" ></button>
+        <button type="button" pButton (click)="createReplicationDisplay=false" label="Cancel"></button>
+    </p-footer>
+</p-dialog>
+<p-confirmDialog></p-confirmDialog>

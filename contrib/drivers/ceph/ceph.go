@@ -304,7 +304,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		return nil, err
 	}
 	return &model.ConnectionInfo{
-		DriverVolumeType: "rbd",
+		DriverVolumeType: RBDProtocol,
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
 			"name":         poolName + "/" + opensdsPrefix + opt.GetVolumeId(),

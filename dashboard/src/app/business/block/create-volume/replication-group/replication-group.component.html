@@ -1,0 +1,106 @@
+<div>
+    <!--<div class="second-content-header">
+        Replication Group
+    </div>
+    <div class="volume-item">
+        <p-checkbox [(ngModel)]="replicationEnable" binary="true" label="Enable"></p-checkbox>
+    </div>
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid volume-item" *ngIf="replicationEnable">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+                <p-dropdown (onChange)="getReplicationGroup()" [options]="groupOptions" [(ngModel)]="createOrExist"></p-dropdown>
+            </div>
+            <div class="ui-grid-col-2" *ngIf="createOrExist==='createGroup'">
+                <input pInputText type="text" placeholder="Enter a group name" />
+            </div>
+            <div class="ui-grid-col-2" *ngIf="createOrExist==='existingGroup'">
+                <p-dropdown [options]="existingGroupLists"></p-dropdown>
+            </div>
+        </div>
+    </div>-->
+    <div class="second-content-header">
+        {{I18N.keyID['sds_block_volume_rep_pair']}}
+    </div>
+    <div>
+        <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+            <div class="ui-grid-row">
+                <form [formGroup]="volumes.formGroup">
+                <div class="ui-grid-col-3 item-content-backgroud">
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-img-item-height">
+                            <div class="ui-grid-col-3"></div>
+                            <div class="ui-grid-col-6 text-align-center">
+                                <img src="assets/business/images/volume/u583.png">
+                                <div class="item-flex">
+                                    <span><img src="assets/business/images/volume/u436.png"></span>
+                                    <span>{{volumes.length!=0 ? volumes[0].availabilityZone:''}}</span>
+                                </div>
+                            </div>
+                            <div class="ui-grid-col-3"></div>
+                        </div>
+                        <div class="ui-grid-row replication-item-border volume-item" *ngFor="let volume of volumes">
+                            <div class="ui-grid-col-4">
+                                <input pInputText type="text" value={{volume.name}} disabled="true" />
+                            </div>
+                            <div class="ui-grid-col-4">
+                                <input pInputText type="text" value={{volume.size}} disabled="true" />
+                            </div>
+                            <div class="ui-grid-col-4">
+                                <input pInputText type="text" value={{volume.profile.profileName}} disabled="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-grid-col-3">
+                    <div class="replication-img-item-padding position-relative">
+                        <div class="replication-img-item-height">
+                            <div class="item-flex item-flex-justify">
+                                <span>{{I18N.keyID['sds_profile_rep_period']}}</span>
+                                <span class="margin-between-img-text">=</span>
+                                <input class="margin-between-img-text" pInputText style="width:30px;" type="text" formControlName="period"/>
+                                <span class="margin-between-img-text">{{I18N.keyID['sds_profile_unit_minutes']}}</span>
+                            </div>
+                            <img style="left:-50px" src="assets/business/images/volume/u760p000.png">
+                        </div>
+                    </div>
+                    <div *ngFor ="let item of volumes" class="replication-img-item1">
+                        <div class="replication-img-item1-div">
+                            <img style="left:24px" src="assets/business/images/volume/u740p000.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-grid-col-3 item-content-backgroud">
+                    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+                        <div class="ui-grid-row replication-img-item-height">
+                            <div class="ui-grid-col-3"></div>
+                            <div class="ui-grid-col-6 text-align-center">
+                                <img src="assets/business/images/volume/u585.png" height="61px">
+                                <div class="item-flex">
+                                    <span><img src="assets/business/images/volume/u436.png"></span>
+                                    <!--<input class="margin-between-img-text" pInputText type="text" formControlName="{{'zone'}}" />-->
+                                    <p-dropdown [options]="availabilityZone" ></p-dropdown>
+                                </div>
+                            </div>
+                            <div class="ui-grid-col-3"></div>
+                        </div>
+                            <div class="ui-grid-row replication-item-border volume-item" *ngFor="let volume of volumes;index as i">
+                                <div class="ui-grid-col-5">
+                                    <input pInputText type="text" formControlName="{{'name'+i}}" />
+                                </div>
+                                <div class="ui-grid-col-6">
+                                    <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}" ></p-dropdown>
+                                    <div class="ui-message-container" *ngIf="!volumes.formGroup.controls['profileId'+i].valid&&volumes.formGroup.controls['profileId'+i].touched">
+                                        <div class="ui-message ui-message-error ui-corner-all">
+                                            <i class="fa fa-exclamation-circle"></i>
+                                            <span class="ui-message-error-text">ProfileId is required</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

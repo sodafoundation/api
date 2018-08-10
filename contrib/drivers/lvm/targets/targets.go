@@ -21,7 +21,7 @@ const (
 // Target is an interface for exposing some operations of different targets,
 // currently support iscsiTarget.
 type Target interface {
-	CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error)
+	CreateExport(volId, path, hostIp, initiator string, chapAuth []string) (map[string]interface{}, error)
 
 	RemoveExport(volId string) error
 }
@@ -37,19 +37,25 @@ type iscsiTarget struct {
 	ISCSITarget
 }
 
-func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string) (map[string]interface{}, error) {
+func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string, chapAuth []string) (map[string]interface{}, error) {
 	tgtIqn := iscsiTgtPrefix + volId
-	if err := t.CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator, []string{}); err != nil {
+	if err := t.CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator, chapAuth); err != nil {
 		return nil, err
 	}
 	lunId := t.GetLun(path)
-	return map[string]interface{}{
+	conn := map[string]interface{}{
 		"targetDiscovered": true,
 		"targetIQN":        tgtIqn,
 		"targetPortal":     t.ISCSITarget.(*tgtTarget).BindIp + ":3260",
 		"discard":          false,
 		"targetLun":        lunId,
-	}, nil
+	}
+	if len(chapAuth) == 2 {
+		conn["authMethod"] = "chap"
+		conn["authUserName"] = chapAuth[0]
+		conn["authPassword"] = chapAuth[1]
+	}
+	return conn, nil
 }
 
 func (t *iscsiTarget) RemoveExport(volId string) error {

@@ -52,9 +52,10 @@ func TestSetup(t *testing.T) {
 	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/lvm.yaml"
 	var expectedDriver = &Driver{
 		conf: &LVMConfig{
-			Pool:       fp,
-			TgtBindIp:  "192.168.56.105",
-			TgtConfDir: "/etc/tgt/conf.d",
+			Pool:           fp,
+			TgtBindIp:      "192.168.56.105",
+			TgtConfDir:     "/etc/tgt/conf.d",
+			EnableChapAuth: true,
 		},
 		handler: execCmd,
 	}
@@ -82,7 +83,30 @@ func fakeHandler(script string, cmd []string) (string, error) {
 	switch script {
 	case "lvcreate":
 		return "", nil
+	case "lvchange":
+		return "", nil
 	case "lvdisplay":
+		args := []string{"--noheading", "-C", "-o", "Attr", "/dev/vg001/test001"}
+		isForLvHasSnapshotFun := true
+
+		if len(args) != len(cmd) {
+			isForLvHasSnapshotFun = false
+		} else {
+			for i, arg := range args {
+				if cmd[i] != arg {
+					isForLvHasSnapshotFun = false
+				}
+			}
+		}
+
+		if true == isForLvHasSnapshotFun {
+			return string(lvdisplayAttr), nil
+		}
+
+		if 0 == len(cmd) {
+			return string(sampleLVs), nil
+		}
+
 		return string(sampleLV), nil
 	case "lvremove":
 		return "", nil
@@ -90,6 +114,10 @@ func fakeHandler(script string, cmd []string) (string, error) {
 		return "", nil
 	case "vgdisplay":
 		return string(sampleVG), nil
+	case "vgs":
+		return string(sampleVGS), nil
+	case "dd":
+		return "", nil
 	default:
 		break
 	}
@@ -103,6 +131,35 @@ func TestCreateVolume(t *testing.T) {
 		Description: "volume for testing",
 		Size:        int64(1),
 		PoolName:    "vg001",
+	}
+	var expected = &model.VolumeSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "test001",
+		Description: "volume for testing",
+		Size:        int64(1),
+		Status:      "available",
+		Metadata: map[string]string{
+			"lvPath": "/dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71",
+		},
+	}
+	vol, err := fd.CreateVolume(opt)
+	if err != nil {
+		t.Error("Failed to create volume:", err)
+	}
+	vol.Id = ""
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("Expected %+v, got %+v\n", expected, vol)
+	}
+}
+
+func TestCreateVolumeFromSnapshot(t *testing.T) {
+	opt := &pb.CreateVolumeOpts{
+		Name:         "test001",
+		Description:  "volume for testing",
+		Size:         int64(1),
+		PoolName:     "vg001",
+		SnapshotId:   "3769855c-a102-11e7-b772-17b880d2f537",
+		SnapshotSize: int64(1),
 	}
 	var expected = &model.VolumeSpec{
 		BaseModel:   &model.BaseModel{},
@@ -273,87 +330,147 @@ func TestListPools(t *testing.T) {
 
 var (
 	sampleLV = `
-		--- Logical volume ---
-		LV Path                /dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71
-		LV Name                test001
-		VG Name                vg001
-		LV UUID                mFdrHm-uiQS-TRK2-Iwua-jdQr-7sYd-ReayKW
-		LV Write Access        read/write
-		LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 16:43:20 +0800
-		LV Status              available
-		# open                 0
-		LV Size                1.00 GiB
-		Current LE             256
-		Segments               1
-		Allocation             inherit
-		Read ahead sectors     auto
-		- currently set to     256
-		Block device           253:0
+  --- Logical volume ---
+  LV Path                /dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71
+  LV Name                test001
+  VG Name                vg001
+  LV UUID                mFdrHm-uiQS-TRK2-Iwua-jdQr-7sYd-ReayKW
+  LV Write Access        read/write
+  LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 16:43:20 +0800
+  LV Status              available
+  # open                 0
+  LV Size                1.00 GiB
+  Current LE             256
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+	`
+	lvdisplayAttr = "owi-a-s---"
+
+	sampleLVs = `
+  --- Logical volume ---
+  LV Path                /dev/vg001/test001
+  LV Name                test001
+  VG Name                opensds-volumes-default
+  LV UUID                5i8pFK-XWif-eleN-eHkW-B80u-sG3k-qhX4fW
+  LV Write Access        read/write
+  LV Creation host, time ecs-6fee, 2018-07-03 09:56:23 +0800
+  LV snapshot status     source of
+                         _snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0 [active]
+                         _snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e [active]
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+   
+  --- Logical volume ---
+  LV Path                /dev/opensds-volumes-default/_snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0
+  LV Name                _snapshot-9f53d79e-64cc-4d74-876e-556ca0f784b0
+  VG Name                opensds-volumes-default
+  LV UUID                qe9JyV-hWrz-cFbK-FCXk-qN1C-JCQI-I54MIY
+  LV Write Access        read only
+  LV Creation host, time ecs-6fee, 2018-07-03 10:41:37 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  COW-table size         3.00 GiB
+  COW-table LE           768
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+   
+  --- Logical volume ---
+  LV Path                /dev/opensds-volumes-default/_snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e
+  LV Name                _snapshot-7f6673da-d13f-4fdc-9c5e-3bbdf692d17e
+  VG Name                opensds-volumes-default
+  LV UUID                e8hEGw-uK1S-L1DN-Ym8Z-NDz9-lqWY-FfhXXK
+  LV Write Access        read only
+  LV Creation host, time ecs-6fee, 2018-07-03 11:34:13 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  LV Size                3.00 GiB
+  Current LE             768
+  COW-table size         3.00 GiB
+  COW-table LE           768
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
 	`
 	sampleVG = `
-		--- Volume group ---
-		VG Name               vg001
-		System ID
-		Format                lvm2
-		Metadata Areas        1
-		Metadata Sequence No  3
-		VG Access             read/write
-		VG Status             resizable
-		MAX LV                0
-		Cur LV                0
-		Open LV               0
-		Max PV                0
-		Cur PV                1
-		Act PV                1
-		VG Size               18.62 GiB
-		PE Size               4.00 MiB
-		Total PE              4768
-		Alloc PE / Size       0 / 0
-		Free  PE / Size       4768 / 18.62 GiB
-		VG UUID               Yn9utl-eqjH-1sJG-0fdb-dGTX-PLJI-FjMO0v
+  --- Volume group ---
+  VG Name               vg001
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               18.62 GiB
+  PE Size               4.00 MiB
+  Total PE              4768
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       4768 / 18.62 GiB
+  VG UUID               Yn9utl-eqjH-1sJG-0fdb-dGTX-PLJI-FjMO0v
 
-		--- Volume group ---
-		VG Name               ubuntu-vg
-		System ID
-		Format                lvm2
-		Metadata Areas        1
-		Metadata Sequence No  3
-		VG Access             read/write
-		VG Status             resizable
-		MAX LV                0
-		Cur LV                2
-		Open LV               2
-		Max PV                0
-		Cur PV                1
-		Act PV                1
-		VG Size               127.52 GiB
-		PE Size               4.00 MiB
-		Total PE              32645
-		Alloc PE / Size       32638 / 127.49 GiB
-		Free  PE / Size       7 / 28.00 MiB
-		VG UUID               fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
+  --- Volume group ---
+  VG Name               ubuntu-vg
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               127.52 GiB
+  PE Size               4.00 MiB
+  Total PE              32645
+  Alloc PE / Size       32638 / 127.49 GiB
+  Free  PE / Size       7 / 28.00 MiB
+  VG UUID               fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
 	`
 	sampleLVS = `
-		--- Logical volume ---
-		LV Path                /dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3
-		LV Name                snap001
-		VG Name                vg001
-		LV UUID                We6GmQ-H675-mfQv-iQkO-rVUI-LuBx-YBIBwr
-		LV Write Access        read only
-		LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 17:05:02 +0800
-		LV snapshot status     active destination for test001
-		LV Status              available
-		# open                 0
-		LV Size                1.00 GiB
-		Current LE             256
-		COW-table size         1.00 GiB
-		COW-table LE           256
-		Allocated to snapshot  0.00%
-		Snapshot chunk size    4.00 KiB
-		Segments               1
-		Allocation             inherit
-		Read ahead sectors     auto
-		- currently set to     256
-		Block device           253:3
+  --- Logical volume ---
+  LV Path                /dev/vg001/_snapshot-d1916c49-3088-4a40-b6fb-0fda18d074c3
+  LV Name                snap001
+  VG Name                vg001
+  LV UUID                We6GmQ-H675-mfQv-iQkO-rVUI-LuBx-YBIBwr
+  LV Write Access        read only
+  LV Creation host, time krej-Lenovo-IdeaPad-Y470, 2017-11-20 17:05:02 +0800
+  LV snapshot status     active destination for test001
+  LV Status              available
+  # open                 0
+  LV Size                1.00 GiB
+  Current LE             256
+  COW-table size         1.00 GiB
+  COW-table LE           256
+  Allocated to snapshot  0.00%
+  Snapshot chunk size    4.00 KiB
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:3
 	`
+	sampleVGS = `
+  vg001      18.62  18.62 6fBbT0-MrAT-eLfh-cySE-Guqf-YLkw-Vyfcrb
+  ubuntu-vg  127.52  0.03 fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
+`
 )

@@ -38,8 +38,6 @@ func init() {
 		"get:ListReplicationsDetail")
 	beego.Router("/v1beta/block/replications/:replicationId", NewReplicationPortal(),
 		"get:GetReplication;put:UpdateReplication;delete:DeleteReplication")
-	beego.Router("/v1beta/replications/:replicationId/action", NewReplicationPortal(),
-		"post:Action")
 }
 
 var (

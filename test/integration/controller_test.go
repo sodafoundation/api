@@ -17,20 +17,22 @@
 package integration
 
 import (
-	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/volume"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 )
 
-var vc = volume.NewController()
-
-var dckInfo = &model.DockSpec{
-	Endpoint:   "localhost:50050",
-	DriverName: "default",
-}
+var (
+	vc      = volume.NewController()
+	dckInfo = &model.DockSpec{
+		Endpoint:   "localhost:50050",
+		DriverName: "default",
+	}
+)
 
 func TestControllerCreateVolume(t *testing.T) {
 	vc.SetDock(dckInfo)
@@ -41,8 +43,10 @@ func TestControllerCreateVolume(t *testing.T) {
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	var expected = &SampleVolumes[0]
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vol)
+	}
 }
 
 func TestControllerDeleteVolume(t *testing.T) {
@@ -63,8 +67,10 @@ func TestControllerExtendVolume(t *testing.T) {
 		return
 	}
 
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log(string(volBody))
+	var expected = &SampleVolumes[0]
+	if !reflect.DeepEqual(vol, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vol)
+	}
 }
 
 func TestControllerCreateVolumeAttachment(t *testing.T) {
@@ -76,8 +82,13 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 		return
 	}
 
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log(string(atcBody))
+	var expected = &model.VolumeAttachmentSpec{
+		BaseModel:      &model.BaseModel{},
+		ConnectionInfo: SampleConnection,
+	}
+	if !reflect.DeepEqual(atc, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, atc)
+	}
 }
 
 func TestControllerDeleteVolumeAttachment(t *testing.T) {
@@ -98,8 +109,10 @@ func TestControllerCreateVolumeSnapshot(t *testing.T) {
 		return
 	}
 
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log(string(snpBody))
+	var expected = &SampleSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snp)
+	}
 }
 
 func TestControllerDeleteVolumeSnapshot(t *testing.T) {

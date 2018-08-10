@@ -1,0 +1,92 @@
+<div class="content-header">
+    <h1>{{i18n.keyID['sds_block_volume_createVol']}}</h1>
+    <p>{{i18n.keyID['sds_block_volume_createVol_desc']}}</p>
+</div>
+
+<form [formGroup]="volumeform" [grid]="{label: 'ui-g-2', content:'ui-g-20'}" (ngSubmit)="onSubmit(volumeform.value)" [errorMessage]="errorMessage">
+    <form-item [required]="true" label="{{label.zone}}">
+        <p-dropdown [options]="availabilityZones" formControlName="zone" [style]="{'min-width':96}" placeholder="Please choose"></p-dropdown>
+    </form-item>
+
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid volume-item">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-2">
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.name}}:
+            </div>
+            <div class="ui-grid-col-2">
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.profile}}:
+            </div>
+            <div class="ui-grid-col-2">
+                <span style="color:#cd0a0a;padding-right: 0.03rem;">*</span>{{label.capacity}}:
+            </div>
+            <div class="ui-grid-col-1" *ngIf="false">
+                {{label.quantity}}:
+            </div>
+        </div>
+
+        <div class="ui-grid-row volume-item" *ngFor="let volumeItem of volumeItems;index as i">
+            <div class="ui-grid-col-2">
+                <input pInputText type="text" placeholder="{{i18n.keyID['sds_block_volume_name']}}" formControlName="{{'name'+i}}" />
+                <div class="ui-message-container" *ngIf="volumeform.controls['name'+i] && !volumeform.controls['name'+i].valid&&volumeform.controls['name'+i].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            {{getErrorMessage(volumeform.controls['name'+i],"name")}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-2">
+                <p-dropdown [options]="profileOptions" formControlName="{{'profileId'+i}}" placeholder="{{i18n.keyID['sds_block_volume_selectpro']}}"></p-dropdown>
+                <div class="ui-message-container" *ngIf="volumeform.controls['profileId'+i] && !volumeform.controls['profileId'+i].valid&&volumeform.controls['profileId'+i].touched">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                           {{getErrorMessage(volumeform.controls['profileId'+i],"profile")}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-2">
+                <div class="item-flex">
+                    <p-spinner formControlName="{{'size'+i}}" [min]="1"></p-spinner>
+                    <p-dropdown [options]="capacityUnit" formControlName="{{'capacity'+i}}"></p-dropdown>
+                </div>
+                <div class="ui-message-container" *ngIf="volumeform.controls['size'+i] && !volumeform.controls['size'+i].valid&&volumeform.controls['size'+i].dirty">
+                    <div class="ui-message ui-message-error ui-corner-all">
+                        <i class="fa fa-exclamation-circle"></i>
+                        <span class="ui-message-error-text">
+                            {{getErrorMessage(volumeform.controls['size'+i],"Capacity")}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="ui-grid-col-1" *ngIf="false">
+                <p-spinner formControlName="{{'quantity'+i}}" [min]="1" value=100></p-spinner>
+            </div>
+            <div class="ui-grid-col-1 item-flex" *ngIf="i !== 0">
+                <img src="assets/business/images/profile/u1065.png" (click)="deleteVolumeItem(i)">
+            </div>
+        </div>
+
+        <div class="volume-item" *ngIf="false">
+            <a class="item-flex">
+                <img width="24" height="24" src="assets/business/images/volume/u937.png" (click)="addVolumeItem()">
+                <span class="margin-between-img-text">{{i18n.keyID["sds_block_volume_addvolu"]}}</span>
+            </a>
+        </div>
+
+        <div class="volume-item">
+            <p-checkbox (onChange)="showReplicationConf = !showReplicationConf" [disabled]="false" name="replicationCheckbox" value="value" label="{{i18n.keyID['sds_block_volume_conf_rep']}}"></p-checkbox>
+        </div>
+
+        <div *ngIf="showReplicationConf">
+            <app-replication-group [volumes]="createVolumes" (checkParam) = "checkRep($event)"></app-replication-group>
+        </div>
+    </div>
+    <div class="bottom-button-margin">
+        <!--  [disabled]="!volumeform.valid" -->
+        <button pButton type="submit" class="ui-button-secondary" label="{{i18n.keyID['ok']}}"></button>
+        <button pButton type="button" label="{{i18n.keyID['cancel']}}" [routerLink]="['/block']"></button>
+    </div>
+</form>

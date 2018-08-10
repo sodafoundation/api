@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -32,6 +33,7 @@ import (
 func init() {
 	var poolPortal PoolPortal
 	beego.Router("/v1beta/pools", &poolPortal, "get:ListPools")
+	beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
@@ -65,6 +67,22 @@ var (
 	}
 	fakePools = []*model.StoragePoolSpec{fakePool}
 )
+
+func TestListAvailabilityZones(t *testing.T) {
+	mockClient := new(dbtest.MockClient)
+	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakePools, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	expectedZones := "unknow"
+	t.Log(w)
+	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
+		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
+	}
+}
 
 func TestListPools(t *testing.T) {
 

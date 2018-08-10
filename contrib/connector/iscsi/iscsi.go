@@ -15,25 +15,21 @@
 package iscsi
 
 import (
-	"strconv"
-
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-var (
-	ISCSI_DRIVER = "iscsi"
+const (
+	iscsiDriver = "iscsi"
 )
 
 type Iscsi struct{}
 
 func init() {
-	connector.RegisterConnector(ISCSI_DRIVER, &Iscsi{})
+	connector.RegisterConnector(iscsiDriver, &Iscsi{})
 }
 
 func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Connect(iscsiCon.TgtPortal, iscsiCon.TgtIQN, strconv.Itoa(iscsiCon.TgtLun))
+	return Connect(conn)
 }
 
 func (isc *Iscsi) Detach(conn map[string]interface{}) error {

@@ -1,0 +1,10 @@
+{
+    "/v1": {
+        "target": "http://139.159.241.166:5001",
+        "secure": false
+    },
+    "/v3": {
+        "target": "http://139.159.241.166:5000/identity",
+        "secure": false
+    }
+}

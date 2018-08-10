@@ -18,8 +18,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/astaxie/beego/context"
-
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller"
@@ -28,9 +26,7 @@ import (
 )
 
 func NewReplicationPortal() *ReplicationPortal {
-	r := &ReplicationPortal{}
-	r.Self = r
-	return r
+	return &ReplicationPortal{}
 }
 
 type ReplicationPortal struct {
@@ -40,7 +36,7 @@ type ReplicationPortal struct {
 var whiteListSimple = []string{"Id", "Name", "ReplicationStatus"}
 var whiteList = []string{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone", "ReplicationStatus",
 	"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
-	"ReplicationMode", "ReplicationPeriod", "ProfileId"}
+	"ReplicationMode", "ReplicationPeriod", "ProfileId", "Metadata"}
 
 func (this *ReplicationPortal) CreateReplication() {
 	if !policy.Authorize(this.Ctx, "replication:create") {
@@ -70,6 +66,38 @@ func (this *ReplicationPortal) CreateReplication() {
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"can't find the specified secondary volume(%s)", replication.PrimaryVolumeId)
+		return
+	}
+
+	// check if specified volume has already been used in other replication.
+	v, err := db.C.GetReplicationByVolumeId(ctx, replication.PrimaryVolumeId)
+	if err != nil {
+		if _, ok := err.(*model.NotFoundError); !ok {
+			model.HttpError(this.Ctx, http.StatusBadRequest,
+				"get replication by volume id %s failed", replication.PrimaryVolumeId)
+			return
+		}
+	}
+	if v != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest,
+			"specified primary volume(%s) has already been used in replication(%s) ",
+			replication.PrimaryVolumeId, v.Id)
+		return
+	}
+
+	// check if specified volume has already been used in other replication.
+	v, err = db.C.GetReplicationByVolumeId(ctx, replication.SecondaryVolumeId)
+	if err != nil {
+		if _, ok := err.(*model.NotFoundError); !ok {
+			model.HttpError(this.Ctx, http.StatusBadRequest,
+				"get replication by volume id %s failed", replication.SecondaryVolumeId)
+			return
+		}
+	}
+	if v != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest,
+			"specified secondary volume(%s) has already been used in replication(%s) ",
+			replication.SecondaryVolumeId, v.Id)
 		return
 	}
 
@@ -265,9 +293,9 @@ func (this *ReplicationPortal) DeleteReplication() {
 	this.Ctx.Output.SetStatus(StatusAccepted)
 }
 
-// This is action function so use ctx instead of this.Ctx
-func (this *ReplicationPortal) EnableReplication(ctx *context.Context) {
-	if !policy.Authorize(ctx, "replication:action:enable") {
+func (this *ReplicationPortal) EnableReplication() {
+	ctx := this.Ctx
+	if !policy.Authorize(ctx, "replication:enable") {
 		return
 	}
 
@@ -294,8 +322,9 @@ func (this *ReplicationPortal) EnableReplication(ctx *context.Context) {
 	ctx.Output.SetStatus(StatusAccepted)
 }
 
-func (this *ReplicationPortal) DisableReplication(ctx *context.Context) {
-	if !policy.Authorize(ctx, "replication:actions:disable") {
+func (this *ReplicationPortal) DisableReplication() {
+	ctx := this.Ctx
+	if !policy.Authorize(ctx, "replication:disable") {
 		return
 	}
 
@@ -322,14 +351,14 @@ func (this *ReplicationPortal) DisableReplication(ctx *context.Context) {
 	ctx.Output.SetStatus(StatusAccepted)
 }
 
-func (this *ReplicationPortal) FailoverReplication(ctx *context.Context) {
+func (this *ReplicationPortal) FailoverReplication() {
+	ctx := this.Ctx
 	if !policy.Authorize(ctx, "replication:failover") {
 		return
 	}
-	var failover = model.FailoverReplicationSpec{}
 
-	// Unmarshal the request body
-	if err := json.Unmarshal(ctx.Input.RequestBody, &failover); err != nil {
+	var failover = model.FailoverReplicationSpec{}
+	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&failover); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return

@@ -1,0 +1,185 @@
+<div class="content-header">
+    <h1>{{I18N.keyID['sds_profile_create_title']}}</h1>
+    <p>{{I18N.keyID['sds_profile_create_descrip']}}</p>
+</div>
+
+<div class="create-profile-form">
+<form [formGroup]="profileform" [grid]="{label: 'ui-g-2', content:'ui-g-2'}" (ngSubmit)="onSubmit(profileform.value)" [errorMessage]="errorMessage">
+    <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid">
+        <form-item label="{{label.name}}" [required]="true">
+            <input pInputText type="text" size="80" formControlName="name" />
+        </form-item>
+        <form-item label="{{label.description}}" [required]="false">
+            <textarea [rows]="5" [cols]="48"  pInputTextarea formControlName="description"></textarea>
+        </form-item>
+        <form-item label="{{label.protocol}}" [required]="true">
+            <p-dropdown [style]="{'min-width':150}" formControlName="protocol" [options]="protocolOptions"></p-dropdown>
+        </form-item>
+        <form-item label="{{label.type}}" [required]="true">
+            <span *ngIf = "false"><p-radioButton label="Auto" formControlName="storageType" name="typeRadioGroup" value="Auto"></p-radioButton></span>
+            <span><p-radioButton label="Thin" formControlName="storageType" name="typeRadioGroup" value="Thin"></p-radioButton></span>
+            <span style="margin-left: 30px;"><p-radioButton label="Thick" formControlName="storageType" name="typeRadioGroup" value="Thick"></p-radioButton></span>
+        </form-item>
+        <form-item label="{{label.qosPolicy}}" [required]="false">
+            <p-checkbox (onChange)="showDetails('qos')" name="policyCheckbox"  value="Qos" label="Enable" [formControl]="profileform.controls['policys']"></p-checkbox>
+        </form-item>
+        <div class="ui-grid-row" *ngIf="qosIsChecked">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="ui-grid-col-10">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
+                    <form [formGroup]="qosPolicy" [grid]="{label: 'ui-g-1', content:'ui-g-3'}" [errorMessage]="errorMessage">
+                        <form-item label="{{label.maxIOPS}}" [required]="true">
+                            <div class="input-text-vertical-align">
+                                <input pInputText type="text" formControlName="maxIOPS" />
+                                <span>{{I18N.keyID['sds_profile_IOPS_unit']}}</span>
+                            </div>
+                        </form-item>
+                        <form-item label="{{label.MBPS}}" [required]="true">
+                            <div class="input-text-vertical-align">
+                                <input pInputText type="text" formControlName="maxBWS" />
+                                <span>{{I18N.keyID['sds_profile_BWS_unit']}}</span>
+                            </div>
+                        </form-item>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form-item label="{{label.replicationPolicy}}" [required]="false">
+            <p-checkbox (onChange)="showDetails('replication')" name="policyCheckbox" value="Replication" label="Enable" [formControl]="profileform.controls['policys']"></p-checkbox>
+        </form-item>
+        <div class="ui-grid-row" *ngIf="replicationIsChecked">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="ui-grid-col-10">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
+                    <form [formGroup]="repPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-5'}" [errorMessage]="errorMessage">
+                        <div class="ui-grid-col-6">
+                            <form-item label="{{label.replicationLabel.type}}" [required]="true">
+                                <p-dropdown [style]="{'min-width':150}" formControlName="repType" [options]="replicationTypeOptions"></p-dropdown>
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.Mode}}" [required]="true">
+                                <p-dropdown [style]="{'min-width':150}" formControlName="repMode" [options]="replicationModeOptions"></p-dropdown>
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.Period}}" [required]="true">
+                                <div class="ui-grid-col-14 input-text-vertical-align">
+                                    <input pInputText type="text" formControlName="repPeriod" placeholder="Period" /><span>{{I18N.keyID['sds_profile_unit_minutes']}}</span>
+                                </div>
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.Bandwidth}}" [required]="true">
+                                <div class="ui-grid-col-14 input-text-vertical-align">
+                                    <input pInputText type="text" formControlName="repBandwidth" placeholder="Bandwidth"/><span>{{I18N.keyID['sds_profile_BWS_unit']}}</span>
+                                </div>
+                            </form-item>
+                        </div>
+                        <div class="ui-grid-col-6">
+                            <form-item label="{{label.replicationLabel.RGO}}" [required]="true">
+                                <p-dropdown [style]="{'min-width':150}" formControlName="repRGO" [options]="replicationRGOOptions"></p-dropdown>
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.RTO}}" [required]="true">
+                                <p-dropdown [style]="{'min-width':150}" formControlName="repRTO" [options]="replicationRTOOptions"></p-dropdown>
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.RPO}}" [required]="true">
+                                <input pInputText type="text" formControlName="repRPO" />
+                            </form-item>
+                            <form-item label="{{label.replicationLabel.Consistency}}" [required]="false">
+                                <p-checkbox formControlName="repCons" value="true" label="{{I18N.keyID['sds_profile_enable']}}"></p-checkbox>
+                            </form-item>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form-item label="{{label.snapshotPolicy}}" [required]="false">
+            <p-checkbox (onChange)="showDetails('snapshot')" name="policyCheckbox" value="Snapshot" label="Enable" [formControl]="profileform.controls['policys']"></p-checkbox>
+        </form-item>
+        <div class="ui-grid-row" *ngIf="snapshotIsChecked">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="ui-grid-col-10">
+                <div class="ui-grid ui-grid-responsive ui-grid-pad ui-fluid secondary-form">
+                    <form [formGroup]="snapPolicy" [grid]="{label: 'ui-g-2', content:'ui-g-3'}" [errorMessage]="errorMessage">
+                        <form-item label="{{label.snapshotLabel.Schedule}}" [required]="true">
+                            <p-dropdown [style]="{'min-width':150}" formControlName="Schedule"  [options]="snapSchedule"></p-dropdown>
+                        </form-item>
+                        <form-item label="{{label.snapshotLabel.executionTime}}" [required]="true">
+                            <div class="create-profile-snap-col-6 input-text-vertical-align" >
+                                <input pInputText type="time" formControlName="datetime" />
+                            </div>
+                        </form-item>
+                        <form-item label="{{label.snapshotLabel.Retention}}" [required]="true">
+                            <div class="create-profile-snap-col-8 input-text-vertical-align">
+                                <p-dropdown [style]="{'min-width':200}"  formControlName="retentionOptions" [options]="snapshotRetentionOptions"></p-dropdown>
+                                <div class="create-profile-snap-policy">
+                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value ==='Quantity'" min="1" step="1" pInputText type="number" formControlName="snapNum"/>
+                                    <input *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'" pInputText type="number" formControlName="duration"/>
+                                </div>
+                                <span *ngIf="snapPolicy.controls['retentionOptions'].value !=='Quantity'">{{I18N.keyID['sds_profile_nuit_days']}}</span>
+                            </div>
+                        </form-item>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form-item label="{{label.customization}}" [required]="false">
+            <div class="ui-grid-col-4">
+                <a class="create-profile-img" (click)="showCustomization=!showCustomization">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2987.png">
+                    <span>{{I18N.keyID['sds_profile_extra_add']}}</span>
+                </a>
+            </div>
+        </form-item>
+        <div class="ui-grid-row profile-form-padding" *ngFor="let customizationItem of customizationItems;index as i">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="customization-container">
+                <div class="customization-item">
+                    {{customizationItem.key}}:
+                </div>
+                <div class="customization-item">
+                    {{customizationItem.value}}
+                </div>
+                <div class="create-profile-img " (click)="deleteCustomization(i)">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u1065.png">
+                </div>
+            </div>
+        </div>
+        <form-item label="{{label.storagePool}}" [required]="false">
+            <div class="ui-grid-col-4">
+                <a class="create-profile-img" (click)="showStoragePool=!showStoragePool">
+                    <img style="vertical-align:middle;" src="assets/business/images/profile/u2861.png">
+                    <span>{{I18N.keyID['sds_profile_pool_match']}}</span>
+                </a>
+            </div>
+        </form-item>
+        <div class="ui-grid-row profile-form-padding" *ngIf="showStoragePool">
+            <div class="ui-grid-col-2">
+            </div>
+            <div class="ui-grid-col-10 secondary-form">
+                <app-storage-pools-table [selectProfile]="paramData"></app-storage-pools-table>
+            </div>
+        </div>
+    </div>
+    <div class="form-submit-button">
+        <button pButton type="submit" class="ui-button-secondary ui-button-large" label="OK" [disabled]="!profileform.valid"></button>
+        <button pButton type="button" class="ui-button-large" label="Cancel" [routerLink]="['/profile']"></button>
+    </div>
+</form>
+</div>
+
+<p-dialog header="Create Customization" [(visible)]="showCustomization" [width]="500" modal="modal">
+    <div>
+        <div class="ui-inputgroup profile-form-padding">
+            <span class="ui-g-4 ui-md-4">{{label.key}}</span>
+            <input type="text" pInputText placeholder="Key" [(ngModel)]="customizationKey">
+        </div>
+        <div class="ui-inputgroup profile-form-padding">
+            <span class="ui-g-4 ui-md-4">{{label.value}}</span>
+            <input type="text" pInputText placeholder="Value" [(ngModel)]="customizationValue">
+        </div>
+    </div>
+    <p-footer>
+        <p-button label="OK" styleClass="ui-button-secondary" (click)="addCustomization()"></p-button>
+        <p-button label="Cancel" (click)="showCustomization=false"></p-button>
+    </p-footer>
+</p-dialog>

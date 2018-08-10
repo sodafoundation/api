@@ -19,9 +19,10 @@ package context
 
 import (
 	"encoding/json"
+	"reflect"
+
 	"github.com/astaxie/beego/context"
 	"github.com/golang/glog"
-	"reflect"
 )
 
 func NewAdminContext() *Context {
@@ -42,14 +43,39 @@ func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
 	if err != nil {
-		glog.Errorf("Unmarshal json to context failed, reason:%v", err)
+		glog.Errorf("Unmarshal json to context failed, reason: %v", err)
 	}
 	return ctx
 }
 
 func GetContext(httpCtx *context.Context) *Context {
 	ctx, _ := httpCtx.Input.GetData("context").(*Context)
+	if ctx == nil {
+		ctx = &Context{}
+	}
 	return ctx
+}
+
+func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Context, error) {
+
+	ctx := GetContext(httpCtx)
+	if param == nil || len(param) == 0 {
+		glog.Warning("Context parameter is empty, nothing to be updated")
+		return ctx, nil
+	}
+	ctxV := reflect.ValueOf(ctx).Elem()
+	for key, val := range param {
+		field := ctxV.FieldByName(key)
+		pv := reflect.ValueOf(val)
+		if field.Kind() == pv.Kind() && field.CanSet() {
+			field.Set(pv)
+		} else {
+			glog.Errorf("Invalid parameter %s : %v", key, val)
+		}
+	}
+
+	httpCtx.Input.SetData("context", ctx)
+	return ctx, nil
 }
 
 type Context struct {
@@ -87,10 +113,10 @@ type Context struct {
 }
 
 func (ctx *Context) ToPolicyValue() map[string]interface{} {
-
 	ctxMap := map[string]interface{}{}
 	t := reflect.TypeOf(ctx).Elem()
 	v := reflect.ValueOf(ctx).Elem()
+
 	for i := 0; i < t.NumField(); i++ {
 		field := v.Field(i)
 		name := t.Field(i).Tag.Get("json")
@@ -114,7 +140,7 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 func (ctx *Context) ToJson() string {
 	b, err := json.Marshal(ctx)
 	if err != nil {
-		glog.Errorf("Context convert to json failed, %v", err)
+		glog.Errorf("Context convert to json failed, reason: %v", err)
 	}
 	return string(b)
 }

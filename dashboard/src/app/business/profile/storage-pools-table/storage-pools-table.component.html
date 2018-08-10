@@ -1,0 +1,41 @@
+<div class="footer-button-class">
+    <div>
+        <span class="storage-count-capacity">{{pools.length}}</span>Storage Pools, <span class="storage-count-capacity">{{totalFreeCapacity}} GB</span> Free Capacity
+    </div>
+    <p-table [value]="pools" styleClass="custom-table-class">
+        <ng-template pTemplate="header">
+            <tr>
+                <th *ngFor="let col of cols">
+                    {{col.header}}
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-pool>
+            <tr>
+                <!-- <td *ngFor="let col of cols">
+                    {{pool[col.field]}}
+                </td> -->
+                <ng-template #elseBlock>--</ng-template>
+                <td>
+                    {{pool['name']}}
+                </td>
+                <td>
+                    {{pool['freeCapacityFormat']}}
+                </td>
+                <td>
+                    {{pool['totalCapacityFormat']}}
+                </td>
+                <td>
+                    <span *ngIf="pool.extras && pool.extras.advanced && pool.extras.advanced.diskType; else elseBlock">
+                        {{pool.extras.advanced.diskType}}
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="pool.extras && pool.extras.backend; else elseBlock">
+                        {{pool.extras.backend}}
+                    </span>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

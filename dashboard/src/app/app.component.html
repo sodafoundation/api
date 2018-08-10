@@ -1,0 +1,51 @@
+<div class="layout-wrapper" [style.display]="hideLoginForm ? 'none' : 'block'">
+    <div class="login-bg" #loginBG style="background-position: center" [ngClass]="{'login-animation':showLoginAnimation, 'logout-animation':showLogoutAnimation}"></div>
+    <div class="login-form ui-fluid" *ngIf="!isLogin">
+        <div class="logo"></div>
+        <div class="form-list">
+            <p><input id="username" placeholder="Username" type="text" pInputText [(ngModel)]="username" /></p>
+            <p><input id="password" placeholder="Password" type="Password" pInputText [(ngModel)]="password" (keydown)="onKeyDown($event)" /></p>
+            <div class="ui-message-container" *ngIf="showErrorMsg">
+                <div class="ui-message ui-message-error ui-corner-all">
+                    <i class="fa fa-exclamation-circle" ></i>
+                    <span class="ui-message-error-text">
+                        {{errorMsg}}
+                    </span>
+                </div>
+            </div>
+            <p><button pButton type="button" label="Login" (click)="login()" class="ui-button-secondary ui-button-large"></button></p>
+        </div>
+    </div>
+</div>
+
+
+<div class="layout-wrapper" (mousemove)="refreshLastTime()" *ngIf="isLogin">
+    <div id="layout-topbar">
+        <div class="user-info">
+            <div>
+                <h1>{{ username }}</h1>
+                <p-dropmenu icon="fa-ellipsis-v" [model]="dropMenuItems" styleClass="ui-dropmenu-large"></p-dropmenu>
+            </div>
+            <p><span><i class="fa fa-map-marker"></i>default_region</span><span *ngIf=" username!='admin' "><i class="fa fa-users"></i>{{ currentTenant }}</span></p>
+        </div>
+        
+        <ul class="topbar-menu">
+            <li *ngFor="let menuItem of menuItems">
+                <a href="#" [routerLink]="menuItem.routerLink" [ngClass]="{'active-item':menuItem==activeItem}" (click)="menuItemClick($event, menuItem)">
+                    <h1>{{menuItem.title}}</h1>
+                    <p>{{menuItem.description}}</p>
+                </a>
+            </li>
+        </ul>
+
+        <div class="logo">
+            <a href="#" [routerLink]="['/']"></a>
+        </div>
+    </div>
+
+    <div id="layout-content">
+        <div class="content-work">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</div>

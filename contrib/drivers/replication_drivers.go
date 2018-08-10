@@ -26,6 +26,7 @@ import (
 
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
+	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
@@ -47,16 +48,14 @@ type ReplicationDriver interface {
 	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 }
 
-func ReplicationProbe(resourceType string) bool {
+func IsSupportHostBasedReplication(resourceType string) bool {
 	v := reflect.ValueOf(config.CONF.Backends)
 	t := reflect.TypeOf(config.CONF.Backends)
 	for i := 0; i < t.NumField(); i++ {
 		field := v.Field(i)
 		tag := t.Field(i).Tag.Get("conf")
 		if resourceType == tag && field.Interface().(config.BackendProperties).SupportReplication {
-			// Probe whether the replication function is ok.
-			_, err := InitReplicationDriver(resourceType)
-			return err == nil
+			return true
 		}
 	}
 	return false
@@ -66,10 +65,10 @@ func ReplicationProbe(resourceType string) bool {
 func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 	var d ReplicationDriver
 	switch resourceType {
-	case "drbd":
+	case driversConfig.DRBDDriverType:
 		d = &drbd.ReplicationDriver{}
 		break
-	case "huawei_dorado":
+	case driversConfig.HuaweiDoradoDriverType:
 		d = &dorado.ReplicationDriver{}
 		break
 	default:
