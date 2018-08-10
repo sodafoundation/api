@@ -150,7 +150,7 @@ var (
 )
 
 func TestArrayBasedCreateReplication(t *testing.T) {
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	pool.ReplicationType = model.ReplicationTypeArray
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
@@ -202,7 +202,7 @@ func TestArrayBasedCreateReplication(t *testing.T) {
 }
 
 func TestHostBasedCreateReplication(t *testing.T) {
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	pool.ReplicationType = model.ReplicationTypeHost
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
@@ -267,7 +267,7 @@ func TestHostBasedCreateReplication(t *testing.T) {
 
 func TestArrayBasedDeleteReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeArray
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
@@ -295,7 +295,7 @@ func TestArrayBasedDeleteReplication(t *testing.T) {
 
 func TestHostBasedDeleteReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeHost
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), mock.Anything).Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
@@ -339,7 +339,7 @@ func TestHostBasedDeleteReplication(t *testing.T) {
 
 func TestEnableReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeArray
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
@@ -366,7 +366,7 @@ func TestEnableReplication(t *testing.T) {
 
 func TestDisableReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeArray
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
@@ -393,7 +393,7 @@ func TestDisableReplication(t *testing.T) {
 
 func TestFailoverReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeArray
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)

@@ -52,7 +52,7 @@ func TestListDocks(t *testing.T) {
 		},
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -102,7 +102,7 @@ func TestListDocks(t *testing.T) {
 
 func TestListDocksWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -139,7 +139,7 @@ func TestGetDock(t *testing.T) {
 		DriverName:  "cinder",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(fakeDock, nil)
 	db.C = mockClient
 
@@ -180,7 +180,7 @@ func TestGetDock(t *testing.T) {
 }
 
 func TestGetDockWithBadRequestError(t *testing.T) {
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient

@@ -62,7 +62,7 @@ var (
 
 func TestListReplicationsDetail(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -109,7 +109,7 @@ func TestListReplicationsDetail(t *testing.T) {
 
 func TestListReplications(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -149,7 +149,7 @@ func TestListReplications(t *testing.T) {
 
 func TestListReplicationsWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -173,7 +173,7 @@ func TestListReplicationsWithBadRequest(t *testing.T) {
 
 func TestGetReplication(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetReplication", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeReplication, nil)
 	db.C = mockClient
 
@@ -214,7 +214,7 @@ func TestGetReplication(t *testing.T) {
 
 func TestGetReplicationWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetReplication", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -244,7 +244,7 @@ func TestUpdateReplication(t *testing.T) {
 		BaseModel: &model.BaseModel{},
 	}
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id, &replication).Return(fakeReplication, nil)
 	db.C = mockClient
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
@@ -309,7 +309,7 @@ func TestUpdateReplicationWithBadRequest(t *testing.T) {
 	}
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id,
 		&replication).Return(nil, errors.New("db error"))
 	db.C = mockClient

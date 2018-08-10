@@ -68,7 +68,7 @@ var (
 
 func TestListPools(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -128,7 +128,7 @@ func TestListPools(t *testing.T) {
 
 func TestListPoolsWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -149,7 +149,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 
 func TestGetPool(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
 	db.C = mockClient
 
@@ -202,7 +202,7 @@ func TestGetPool(t *testing.T) {
 
 func TestGetPoolWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient

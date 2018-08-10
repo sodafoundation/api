@@ -35,7 +35,7 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		Status:      "creating",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(&SampleVolumes[0], nil)
 	db.C = mockClient
 
@@ -58,7 +58,7 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 	}
 	result, err = CreateVolumeDBEntry(context.NewAdminContext(), req2)
 
-	mockClient = new(dbtest.MockClient)
+	mockClient = new(dbtest.Client)
 	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(nil, errors.New("not find the volume"))
 	db.C = mockClient
 	result, err = CreateVolumeDBEntry(context.NewAdminContext(), req)
@@ -69,7 +69,7 @@ func TestDeleteVolumeDBEntry(t *testing.T) {
 		BaseModel: &model.BaseModel{},
 		Status:    "available"}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(nil, nil)
 	db.C = mockClient
 
@@ -88,7 +88,7 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 		Size:   2,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ExtendVolume", context.NewAdminContext(), vol).Return(nil, nil)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 	db.C = mockClient
@@ -98,7 +98,7 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 		t.Errorf("Failed to delete volume, err is %v\n", err)
 	}
 
-	mockClient = new(dbtest.MockClient)
+	mockClient = new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("error occurs when get volume"))
 	db.C = mockClient
 	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
@@ -110,7 +110,7 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 		Status: "error",
 		Size:   2,
 	}
-	mockClient = new(dbtest.MockClient)
+	mockClient = new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol2, nil)
 	db.C = mockClient
 	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
@@ -131,7 +131,7 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 		},
 		Status: "available",
 	}
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
 	db.C = mockClient
@@ -167,7 +167,7 @@ func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 		Metadata:    m,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 	mockClient.On("CreateVolumeSnapshot", context.NewAdminContext(), req).Return(&SampleSnapshots[0], nil)
 	db.C = mockClient
@@ -192,7 +192,7 @@ func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 		Status:   "available",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", req).Return(nil, nil)
 	db.C = mockClient
 

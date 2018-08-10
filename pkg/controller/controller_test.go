@@ -165,7 +165,7 @@ func TestCreateVolume(t *testing.T) {
 		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 	var vol = &SampleVolumes[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
@@ -197,7 +197,7 @@ func TestDeleteVolume(t *testing.T) {
 		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", context.NewAdminContext(), req.ProfileId).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteVolume", context.NewAdminContext(), req.Id).Return(nil)
@@ -228,7 +228,7 @@ func TestExtendVolume(t *testing.T) {
 		Size:      int64(1),
 	}
 	var vol2 = &SampleVolumes[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), vol.Id).Return(vol, nil)
 	mockClient.On("GetPool", context.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
@@ -290,7 +290,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 	var vol = &SampleVolumes[0]
 	var volattm = &SampleAttachments[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateStatus", context.NewAdminContext(), volattm, volattm.Status).Return(nil)
@@ -318,7 +318,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 		HostInfo: model.HostInfo{},
 	}
 	var vol = &SampleVolumes[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteVolumeAttachment", context.NewAdminContext(), req.Id).Return(nil)
@@ -348,7 +348,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	}
 	var vol = &SampleVolumes[0]
 	var snp = &SampleSnapshots[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateStatus", context.NewAdminContext(), snp, "available").Return(nil)
@@ -375,7 +375,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 	}
 	var vol = &SampleVolumes[0]
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteVolumeSnapshot", context.NewAdminContext(), req.Id).Return(nil)
@@ -409,7 +409,7 @@ func TestCreateReplication(t *testing.T) {
 		ReplicationStatus: model.ReplicationEnabled,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetDefaultProfile", context.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
@@ -446,7 +446,7 @@ func TestDeleteReplication(t *testing.T) {
 		ReplicationStatus: model.ReplicationEnabled,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
@@ -476,7 +476,7 @@ func TestEnableReplication(t *testing.T) {
 		ReplicationStatus: model.ReplicationEnabled,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
@@ -505,7 +505,7 @@ func TestDisableReplication(t *testing.T) {
 		ReplicationStatus: model.ReplicationDisabled,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
@@ -534,7 +534,7 @@ func TestFailoverReplication(t *testing.T) {
 		ReplicationStatus: model.ReplicationFailover,
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
