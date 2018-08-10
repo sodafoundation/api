@@ -70,7 +70,7 @@ func TestCreateProfile(t *testing.T) {
 			"description": "Gold service"
 		}`
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("CreateProfile", c.NewAdminContext(), &model.ProfileSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "Gold",
@@ -116,7 +116,7 @@ func TestCreateProfile(t *testing.T) {
 
 func TestUpdateProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeProfile).Return(fakeProfile, nil)
 	db.C = mockClient
 
@@ -177,7 +177,7 @@ func TestUpdateProfile(t *testing.T) {
 
 func TestListProfiles(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -229,7 +229,7 @@ func TestListProfiles(t *testing.T) {
 
 func TestListProfilesWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -253,7 +253,7 @@ func TestListProfilesWithBadRequest(t *testing.T) {
 
 func TestGetProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeProfile, nil)
 	db.C = mockClient
 
@@ -298,7 +298,7 @@ func TestGetProfile(t *testing.T) {
 
 func TestGetProfileWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
@@ -318,7 +318,7 @@ func TestGetProfileWithBadRequest(t *testing.T) {
 
 func TestDeleteProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		fakeProfile, nil)
 	mockClient.On("DeleteProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil)
@@ -339,7 +339,7 @@ func TestDeleteProfile(t *testing.T) {
 
 func TestDeleteProfileWithBadrequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("Invalid resource uuid"))
 	db.C = mockClient
@@ -363,7 +363,7 @@ func TestDeleteProfileWithBadrequest(t *testing.T) {
 
 func TestListCustomProperties(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListCustomProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(&fakeCustom, nil)
 	db.C = mockClient
 
@@ -374,7 +374,7 @@ func TestListCustomProperties(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output model.CustomProperties
+	var output model.CustomPropertiesSpec
 	json.Unmarshal(w.Body.Bytes(), &output)
 
 	expectedJson := `{
@@ -386,7 +386,7 @@ func TestListCustomProperties(t *testing.T) {
 		}
 	}`
 
-	var expected model.CustomProperties
+	var expected model.CustomPropertiesSpec
 	json.Unmarshal([]byte(expectedJson), &expected)
 
 	if w.Code != 200 {
@@ -400,7 +400,7 @@ func TestListCustomProperties(t *testing.T) {
 
 func TestListCustomPropertiesWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListCustomProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -418,7 +418,7 @@ func TestListCustomPropertiesWithBadRequest(t *testing.T) {
 
 func TestAddCustomProperty(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("AddCustomProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeCustom).Return(&fakeCustom, nil)
 	db.C = mockClient
 
@@ -431,7 +431,7 @@ func TestAddCustomProperty(t *testing.T) {
 					"subKey2": "subVal2"
 				}
 		}`
-	r, _ := http.NewRequest("POST", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras", strings.NewReader(fakeBody))
+	r, _ := http.NewRequest("POST", "/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/customProperties", strings.NewReader(fakeBody))
 	w := httptest.NewRecorder()
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 		httpCtx.Input.SetData("context", c.NewAdminContext())
@@ -465,12 +465,12 @@ func TestAddCustomProperty(t *testing.T) {
 
 func TestRemoveCustomProperty(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("RemoveCustomProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", "key1").Return(nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("DELETE",
-		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/extras/key1", nil)
+		"/v1beta/profiles/f4a5e666-c669-4c64-a2a1-8f9ecd560c78/customProperties/key1", nil)
 	w := httptest.NewRecorder()
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 		httpCtx.Input.SetData("context", c.NewAdminContext())

@@ -85,8 +85,8 @@ func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.S
 
 		for _, profile := range profiles {
 
-			if profile.Extras != nil {
-				filterRequest = profile.Extras
+			if profile.CustomProperties != nil {
+				filterRequest = profile.CustomProperties
 			} else {
 				filterRequest = make(map[string]interface{})
 			}

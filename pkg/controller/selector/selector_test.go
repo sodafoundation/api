@@ -26,7 +26,7 @@ import (
 )
 
 func TestSelectSupportedPool(t *testing.T) {
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListPools", c.NewAdminContext()).Return(fakePools, nil)
 	db.C = mockClient
 

@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
@@ -380,6 +381,7 @@ func TestVolumeAction(t *testing.T) {
 }
 
 func TestVolumeActionInitializeConnectionWithError(t *testing.T) {
+	SleepDuration = time.Nanosecond
 	Req := converter.InitializeConnectionReqSpec{}
 
 	Req.InitializeConnection.Connector.Platform = "x86_64"

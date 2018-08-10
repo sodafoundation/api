@@ -110,8 +110,8 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 
 	var filterRequest map[string]interface{}
-	if profile.Extras != nil {
-		filterRequest = profile.Extras
+	if profile.CustomProperties != nil {
+		filterRequest = profile.CustomProperties
 	} else {
 		filterRequest = make(map[string]interface{})
 	}
