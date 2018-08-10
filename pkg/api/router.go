@@ -68,6 +68,7 @@ func Run(host string) {
 			// ListPools and GetPool are used for checking the status of backend pool, admin only
 			beego.NSRouter("/:tenantId/pools", &PoolPortal{}, "get:ListPools"),
 			beego.NSRouter("/:tenantId/pools/:poolId", &PoolPortal{}, "get:GetPool"),
+			beego.NSRouter("/:tenantId/availabilityZones", &PoolPortal{}, "get:ListAvailabilityZones"),
 
 			beego.NSNamespace("/:tenantId/block",
 

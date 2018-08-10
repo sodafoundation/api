@@ -78,6 +78,16 @@ func (fc *FakeDbClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
+//ListAvailabilityZones
+func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
+	var azs []string
+	for i := range SamplePools {
+		az := SamplePools[i].AvailabilityZone
+		azs = append(azs, az)
+	}
+	return azs, nil
+}
+
 // UpdateDock
 func (fc *FakeDbClient) UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error) {
 	return nil, nil

@@ -31,8 +31,6 @@ Design proposals are drafted here:
 
 ## Contact
 
-## Contact
-
 * Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
 * slack: #[opensds](https://opensds.slack.com)
 * Ideas/Bugs: [issues](https://github.com/opensds/design-specs/issues)
