@@ -492,7 +492,7 @@ func (_m *Client) GetReplication(ctx *context.Context, replicationId string) (*m
 }
 
 // GetReplicationByVolumeId provides a mock function with given fields: ctx, volumeId
-func (_m *MockClient) GetReplicationByVolumeId(ctx *context.Context, volumeId string) (*model.ReplicationSpec, error) {
+func (_m *Client) GetReplicationByVolumeId(ctx *context.Context, volumeId string) (*model.ReplicationSpec, error) {
 	ret := _m.Called(ctx, volumeId)
 
 	var r0 *model.ReplicationSpec
@@ -676,7 +676,7 @@ func (_m *Client) ListExtraProperties(ctx *context.Context, prfID string) (*mode
 }
 
 //ListAvaliableZones
-func (_m *MockClient) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
+func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
 	ret := _m.Called(ctx)
 	var r0 []*model.StoragePoolSpec
 	var azs []string
@@ -931,7 +931,7 @@ func (_m *Client) ListVolumeGroups(ctx *context.Context) ([]*model.VolumeGroupSp
 }
 
 // ListVolumeGroupsWithFilter provides a mock function with given fields: ctx, m
-func (_m *MockClient) ListVolumeGroupsWithFilter(ctx *context.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
+func (_m *Client) ListVolumeGroupsWithFilter(ctx *context.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
 	ret := _m.Called(ctx, m)
 
 	var r0 []*model.VolumeGroupSpec

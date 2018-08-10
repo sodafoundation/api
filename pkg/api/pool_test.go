@@ -69,7 +69,7 @@ var (
 )
 
 func TestListAvailabilityZones(t *testing.T) {
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakePools, nil)
 	db.C = mockClient
 

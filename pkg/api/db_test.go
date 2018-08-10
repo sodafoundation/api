@@ -81,7 +81,7 @@ func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
 		Status: "available",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("CreateVolume", context.NewAdminContext(), req).Return(&SampleVolumes[1], nil)
 	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
 	db.C = mockClient
