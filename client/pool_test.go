@@ -14,49 +14,11 @@
 package client
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
-
-func NewFakePoolReceiver() Receiver {
-	return &fakePoolReceiver{}
-}
-
-type fakePoolReceiver struct{}
-
-func (*fakePoolReceiver) Recv(
-	string,
-	method string,
-	in interface{},
-	out interface{},
-) error {
-	if strings.ToUpper(method) != "GET" {
-		return errors.New("method not supported!")
-	}
-
-	switch out.(type) {
-	case *model.StoragePoolSpec:
-		if err := json.Unmarshal([]byte(BytePool), out); err != nil {
-			return err
-		}
-		break
-	case *[]*model.StoragePoolSpec:
-		if err := json.Unmarshal([]byte(BytePools), out); err != nil {
-			return err
-		}
-		break
-	default:
-		return errors.New("output format not supported!")
-	}
-
-	return nil
-}
 
 var fp = &PoolMgr{
 	Receiver: NewFakePoolReceiver(),

@@ -128,7 +128,7 @@ func (p *ProfileMgr) AddCustomProperty(prfID string, body CustomBuilder) (*model
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
-		"extras"}, "/")
+		"customProperties"}, "/")
 
 	if err := p.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func (p *ProfileMgr) ListCustomProperties(prfID string) (*model.CustomProperties
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
-		"extras"}, "/")
+		"customProperties"}, "/")
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err

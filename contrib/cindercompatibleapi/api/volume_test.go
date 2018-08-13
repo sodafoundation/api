@@ -38,9 +38,9 @@ func init() {
 		"get:ListVolumesDetails")
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+
+	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

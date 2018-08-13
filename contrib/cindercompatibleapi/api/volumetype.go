@@ -97,7 +97,7 @@ func (portal *TypePortal) AddExtraProperty() {
 	}
 
 	profileExtra := converter.AddExtraReq(&cinderReq)
-	profileExtra, err := client.AddExtraProperty(id, profileExtra)
+	profileExtra, err := client.AddCustomProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Create or update extra specs for volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -125,7 +125,7 @@ func (portal *TypePortal) AddExtraProperty() {
 // ListExtraProperties ...
 func (portal *TypePortal) ListExtraProperties() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	profileExtra, err := client.ListExtraProperties(id)
+	profileExtra, err := client.ListCustomProperties(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show all extra specifications for volume type failed: %s", err.Error())
@@ -153,7 +153,7 @@ func (portal *TypePortal) ListExtraProperties() {
 // ShowExtraProperty ...
 func (portal *TypePortal) ShowExtraProperty() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	profileExtra, err := client.ListExtraProperties(id)
+	profileExtra, err := client.ListCustomProperties(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show extra specification for volume type failed: %s", err.Error())
@@ -211,7 +211,7 @@ func (portal *TypePortal) UpdateExtraProperty() {
 		return
 	}
 
-	profileExtra, err = client.AddExtraProperty(id, profileExtra)
+	profileExtra, err = client.AddCustomProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Update extra specification for volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -240,7 +240,7 @@ func (portal *TypePortal) UpdateExtraProperty() {
 func (portal *TypePortal) DeleteExtraProperty() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
-	err := client.RemoveExtraProperty(id, key)
+	err := client.RemoveCustomProperty(id, key)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete extra specification for volume type failed: %s", err.Error())

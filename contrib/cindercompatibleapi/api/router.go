@@ -37,6 +37,13 @@ var (
 	client *c.Client
 )
 
+// ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
+// status code, and a custom error message unique for each failure case.
+type ErrorSpec struct {
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
 // Run ...
 func Run(CinderEndPoint string) {
 	ep, ok := os.LookupEnv(c.OpensdsEndpoint)

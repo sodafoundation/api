@@ -534,7 +534,7 @@ var (
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name":        "default",
 			"description": "default policy",
-			"extras": {}
+			"customProperties": {}
 		}`,
 		`{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",

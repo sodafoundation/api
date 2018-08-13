@@ -12,53 +12,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package client
 
 import (
 	"encoding/json"
 	"errors"
 	"os"
 	"strings"
+	"sync"
 
-	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var (
-	IsFakeClient = false
-	TestEp       = "TestEndPoint"
+	fakeClient *Client
+	once       sync.Once
+	TestEp     = "TestEndPoint"
 )
 
-func NewFakeClient(config *c.Config) *c.Client {
-	os.Setenv("OPENSDS_ENDPOINT", config.Endpoint)
-	IsFakeClient = true
-
-	return &c.Client{
-		ProfileMgr: &c.ProfileMgr{
-			Receiver: NewFakeProfileReceiver(),
-			Endpoint: config.Endpoint,
-		},
-		DockMgr: &c.DockMgr{
-			Receiver: NewFakeDockReceiver(),
-			Endpoint: config.Endpoint,
-		},
-		PoolMgr: &c.PoolMgr{
-			Receiver: NewFakePoolReceiver(),
-			Endpoint: config.Endpoint,
-		},
-		VolumeMgr: &c.VolumeMgr{
-			Receiver: NewFakeVolumeReceiver(),
-			Endpoint: config.Endpoint,
-		},
-		VersionMgr: &c.VersionMgr{
-			Receiver: NewFakeVersionReceiver(),
-			Endpoint: config.Endpoint,
-		},
-	}
+func NewFakeClient(config *Config) *Client {
+	once.Do(func() {
+		os.Setenv("OPENSDS_ENDPOINT", config.Endpoint)
+		fakeClient = &Client{
+			ProfileMgr: &ProfileMgr{
+				Receiver: NewFakeProfileReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			DockMgr: &DockMgr{
+				Receiver: NewFakeDockReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			PoolMgr: &PoolMgr{
+				Receiver: NewFakePoolReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			VolumeMgr: &VolumeMgr{
+				Receiver: NewFakeVolumeReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			ReplicationMgr: &ReplicationMgr{
+				Receiver: NewFakeReplicationReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			VersionMgr: &VersionMgr{
+				Receiver: NewFakeVersionReceiver(),
+				Endpoint: config.Endpoint,
+			},
+		}
+	})
+	return fakeClient
 }
 
-func NewFakeDockReceiver() c.Receiver {
+func NewFakeDockReceiver() Receiver {
 	return &fakeDockReceiver{}
 }
 
@@ -92,7 +98,7 @@ func (*fakeDockReceiver) Recv(
 	return nil
 }
 
-func NewFakePoolReceiver() c.Receiver {
+func NewFakePoolReceiver() Receiver {
 	return &fakePoolReceiver{}
 }
 
@@ -126,7 +132,7 @@ func (*fakePoolReceiver) Recv(
 	return nil
 }
 
-func NewFakeProfileReceiver() c.Receiver {
+func NewFakeProfileReceiver() Receiver {
 	return &fakeProfileReceiver{}
 }
 
@@ -139,15 +145,15 @@ func (*fakeProfileReceiver) Recv(
 	out interface{},
 ) error {
 	switch strings.ToUpper(method) {
-	case "POST", "PUT":
+	case "POST":
 		switch out.(type) {
 		case *model.ProfileSpec:
 			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
 				return err
 			}
 			break
@@ -167,8 +173,19 @@ func (*fakeProfileReceiver) Recv(
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported")
+		}
+		break
+	case "PUT":
+		switch out.(type) {
+		case *model.ProfileSpec:
+			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
 				return err
 			}
 			break
@@ -185,7 +202,7 @@ func (*fakeProfileReceiver) Recv(
 	return nil
 }
 
-func NewFakeVolumeReceiver() c.Receiver {
+func NewFakeVolumeReceiver() Receiver {
 	return &fakeVolumeReceiver{}
 }
 
@@ -212,6 +229,11 @@ func (*fakeVolumeReceiver) Recv(
 			break
 		case *model.VolumeSnapshotSpec:
 			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
+				return err
+			}
+			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
 				return err
 			}
 			break
@@ -251,6 +273,16 @@ func (*fakeVolumeReceiver) Recv(
 				return err
 			}
 			break
+		case *model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.VolumeGroupSpec:
+			if err := json.Unmarshal([]byte(ByteVolumeGroups), out); err != nil {
+				return err
+			}
+			break
 		default:
 			return errors.New("output format not supported")
 		}
@@ -264,7 +296,45 @@ func (*fakeVolumeReceiver) Recv(
 	return nil
 }
 
-func NewFakeVersionReceiver() c.Receiver {
+func NewFakeReplicationReceiver() Receiver {
+	return &fakeReplicationReceiver{}
+}
+
+type fakeReplicationReceiver struct{}
+
+func (*fakeReplicationReceiver) Recv(
+	url string,
+	method string,
+	in interface{},
+	out interface{},
+) error {
+	switch strings.ToUpper(method) {
+	case "POST":
+		if out != nil {
+			return json.Unmarshal([]byte(ByteReplication), out)
+		} else {
+			return nil
+		}
+	case "PUT":
+		return json.Unmarshal([]byte(ByteReplication), out)
+	case "GET":
+		switch out.(type) {
+		case *model.ReplicationSpec:
+			return json.Unmarshal([]byte(ByteReplication), out)
+		case *[]*model.ReplicationSpec:
+			return json.Unmarshal([]byte(ByteReplications), out)
+		default:
+			return errors.New("output format not supported")
+		}
+	case "DELETE":
+		return nil
+	default:
+		return errors.New("inputed method format not supported")
+	}
+	return nil
+}
+
+func NewFakeVersionReceiver() Receiver {
 	return &fakeVersionReceiver{}
 }
 
@@ -300,11 +370,4 @@ func (*fakeVersionReceiver) Recv(
 	}
 
 	return nil
-}
-
-// ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
-// status code, and a custom error message unique for each failure case.
-type ErrorSpec struct {
-	Code    int    `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
 }

@@ -27,7 +27,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-
 	"github.com/opensds/opensds/pkg/model"
 )
 
