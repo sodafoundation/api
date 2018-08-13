@@ -127,7 +127,7 @@ func TestUpdateProfile(t *testing.T) {
 			"description": "Gold service",
 			"createdAt": "2017-10-24T16:21:32",
 			"updatedAt": "",
-			"extras": {
+			"customProperties": {
 				"key1": "val1",
 				"key2": "val2",
 				"key3": {
@@ -153,7 +153,7 @@ func TestUpdateProfile(t *testing.T) {
 			"description": "Gold service",
 			"createdAt": "2017-10-24T16:21:32",
 			"updatedAt": "",
-			"extras": {
+			"customProperties": {
 				"key1": "val1",
 				"key2": "val2",
 				"key3": {
@@ -274,7 +274,7 @@ func TestGetProfile(t *testing.T) {
 			"description": "Gold service",
 			"createdAt": "2017-10-24T16:21:32",
 			"updatedAt": "",
-			"cutomProperties": {
+			"customProperties": {
 				"key1": "val1",
 				"key2": "val2",
 				"key3": {

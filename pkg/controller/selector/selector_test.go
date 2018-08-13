@@ -86,8 +86,8 @@ var (
 					MaxIOPS:        1,
 					MaxBWS:         10,
 				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
+				DataProtection: model.DataProtectionLoS{},
+				Advanced: map[string]interface{}{
 					"thin":     true,
 					"dedupe":   false,
 					"compress": false,
@@ -108,7 +108,7 @@ var (
 			FreeCapacity:     6999,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
 			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
+				Advanced: map[string]interface{}{
 					"thin":     true,
 					"dedupe":   true,
 					"compress": true,
@@ -128,7 +128,7 @@ var (
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     true,
 				"dedupe":   true,
 				"compress": true,
@@ -144,7 +144,7 @@ var (
 		FreeCapacity:     int64(60),
 		AvailabilityZone: "az2",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     false,
 				"dedupe":   false,
 				"compress": false,
@@ -160,7 +160,7 @@ var (
 		FreeCapacity:     int64(70),
 		AvailabilityZone: "az3",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     true,
 				"dedupe":   false,
 				"compress": true,
