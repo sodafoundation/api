@@ -153,8 +153,8 @@ func (*fakeProfileReceiver) Recv(
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
 				return err
 			}
 			break
@@ -174,8 +174,8 @@ func (*fakeProfileReceiver) Recv(
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
 				return err
 			}
 			break

@@ -53,7 +53,7 @@ var (
 		},
 	}
 
-	SampleCustom = model.CustomPropertiesSpec{
+	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
 			"isSpaceEfficient":   true,
@@ -259,7 +259,7 @@ var (
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name": "silver",
 			"description": "silver policy",
-			"extras": {
+			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true
@@ -273,7 +273,7 @@ var (
 		}
 	]`
 
-	ByteExtras = `{
+	ByteCustomProperties = `{
 		"dataStorage": {
 			"provisioningPolicy": "Thin",
 			"isSpaceEfficient":   true
@@ -540,7 +540,7 @@ var (
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name":        "silver",
 			"description": "silver policy",
-			"extras": {
+			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true

@@ -49,8 +49,8 @@ func (*fakeProfileReceiver) Recv(
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
 				return err
 			}
 			break
@@ -70,8 +70,8 @@ func (*fakeProfileReceiver) Recv(
 				return err
 			}
 			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
+		case *model.CustomPropertiesSpec:
+			if err := json.Unmarshal([]byte(ByteCustomProperties), out); err != nil {
 				return err
 			}
 			break
@@ -146,7 +146,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extras: model.ExtraSpec{
+			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true,
@@ -183,40 +183,40 @@ func TestDeleteProfile(t *testing.T) {
 
 func TestAddExtraProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	expected := &SampleExtras
+	expected := &SampleCustomProperties
 
-	exts, err := fpr.AddExtraProperty(prfID, &model.ExtraSpec{})
+	cps, err := fpr.AddCustomProperty(prfID, &model.CustomPropertiesSpec{})
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(exts, expected) {
-		t.Errorf("Expected %v, got %v", expected, exts)
+	if !reflect.DeepEqual(cps, expected) {
+		t.Errorf("Expected %v, got %v", expected, cps)
 		return
 	}
 }
 
 func TestListExtraProperties(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	expected := &SampleExtras
+	expected := &SampleCustomProperties
 
-	exts, err := fpr.ListExtraProperties(prfID)
+	cps, err := fpr.ListCustomProperties(prfID)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(exts, expected) {
-		t.Errorf("Expected %v, got %v", expected, exts)
+	if !reflect.DeepEqual(cps, expected) {
+		t.Errorf("Expected %v, got %v", expected, cps)
 		return
 	}
 }
 
-func TestRemoveExtraProperty(t *testing.T) {
-	var prfID, extraKey = "2f9c0a04-66ef-11e7-ade2-43158893e017", "diskType"
+func TestRemoveCustomProperty(t *testing.T) {
+	var prfID, customKey = "2f9c0a04-66ef-11e7-ade2-43158893e017", "diskType"
 
-	if err := fpr.RemoveExtraProperty(prfID, extraKey); err != nil {
+	if err := fpr.RemoveCustomProperty(prfID, customKey); err != nil {
 		t.Error(err)
 		return
 	}
