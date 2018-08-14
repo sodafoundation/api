@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -69,6 +68,21 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	var snapVol *model.VolumeSpec
 	var snapSize int64
 
+	if in.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		profile, err = db.C.GetDefaultProfile(ctx)
+	} else {
+		profile, err = db.C.GetProfile(ctx, in.ProfileId)
+	}
+	if err != nil {
+		log.Error("Get profile failed: ", err)
+		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
+			errchanVolume <- errUpdate
+			return
+		}
+		errchanVolume <- err
+		return
+	}
 	if in.SnapshotId != "" {
 		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
 		if err != nil {
@@ -91,37 +105,10 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 			return
 		}
 		snapSize = snapVol.Size
+		in.PoolId = snapVol.PoolId
 	}
 
-	if in.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		profile, err = db.C.GetDefaultProfile(ctx)
-	} else {
-		profile, err = db.C.GetProfile(ctx, in.ProfileId)
-	}
-	if err != nil {
-		log.Error("Get profile failed: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
-	}
-
-	var filterRequest map[string]interface{}
-	if profile.CustomProperties != nil {
-		filterRequest = profile.CustomProperties
-	} else {
-		filterRequest = make(map[string]interface{})
-	}
-	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
-	filterRequest["availabilityZone"] = in.AvailabilityZone
-	if snapVol != nil {
-		filterRequest["id"] = snapVol.PoolId
-	}
-
-	polInfo, err := c.selector.SelectSupportedPool(filterRequest)
+	polInfo, err := c.selector.SelectSupportedPool(in)
 	if err != nil {
 		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
 			errchanVolume <- errUpdate
@@ -148,7 +135,6 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		Description:      in.Description,
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
-		ProfileId:        profile.Id,
 		PoolId:           polInfo.Id,
 		SnapshotId:       in.SnapshotId,
 		SnapshotSize:     snapSize,
@@ -168,7 +154,6 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		errchanVolume <- err
 		return
 	}
-
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.

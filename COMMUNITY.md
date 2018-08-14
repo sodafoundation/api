@@ -1,6 +1,6 @@
 # OpenSDS Controller Work Group
 
-Covers discussion of OpenSDS Controller architecture design and featrue development.
+Covers discussion of OpenSDS Controller architecture design and feature development.
 
 ## Meetings
 

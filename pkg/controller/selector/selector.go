@@ -22,6 +22,7 @@ package selector
 
 import (
 	"errors"
+	"strconv"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -31,7 +32,7 @@ import (
 
 // Selector is an interface that exposes some operation of different selectors.
 type Selector interface {
-	SelectSupportedPool(map[string]interface{}) (*model.StoragePoolSpec, error)
+	SelectSupportedPool(*model.VolumeSpec) (*model.StoragePoolSpec, error)
 	SelectSupportedPoolForVG(*model.VolumeGroupSpec) (*model.StoragePoolSpec, error)
 }
 
@@ -43,14 +44,39 @@ func NewSelector() Selector {
 }
 
 // SelectSupportedPool
-func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.StoragePoolSpec, error) {
+func (s *selector) SelectSupportedPool(in *model.VolumeSpec) (*model.StoragePoolSpec, error) {
+	var profile *model.ProfileSpec
+	var err error
+
+	if in.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		profile, err = db.C.GetDefaultProfile(c.NewAdminContext())
+	} else {
+		profile, err = db.C.GetProfile(c.NewAdminContext(), in.ProfileId)
+	}
+	if err != nil {
+		log.Error("Get profile failed: ", err)
+		return nil, err
+	}
 	pools, err := db.C.ListPools(c.NewAdminContext())
 	if err != nil {
 		log.Error("When list pools in resources SelectSupportedPool: ", err)
 		return nil, err
 	}
 
-	supportedPools, err := SelectSupportedPools(1, tags, pools)
+	var filterRequest map[string]interface{}
+	if profile.CustomProperties != nil {
+		filterRequest = profile.CustomProperties
+	} else {
+		filterRequest = make(map[string]interface{})
+	}
+	filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
+	filterRequest["availabilityZone"] = in.AvailabilityZone
+	if in.SnapshotId != "" {
+		filterRequest["id"] = in.PoolId
+	}
+
+	supportedPools, err := SelectSupportedPools(1, filterRequest, pools)
 	if err != nil {
 		log.Error("Filter supported pools failed: ", err)
 		return nil, err
@@ -59,7 +85,6 @@ func (s *selector) SelectSupportedPool(tags map[string]interface{}) (*model.Stor
 	// Now, we just return the first supported pool which will be improved in
 	// the future.
 	return supportedPools[0], nil
-
 }
 
 func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.StoragePoolSpec, error) {
