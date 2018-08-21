@@ -22,11 +22,11 @@ Go SDK.
 package cinder
 
 import (
-	"time"
-
 	"io/ioutil"
 
 	"encoding/json"
+	"os"
+	"time"
 
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
@@ -49,6 +49,7 @@ const (
 	defaultConfPath = "/etc/opensds/driver/cinder.yaml"
 	KCinderVolumeId = "cinderVolumeId"
 	KCinderSnapId   = "cinderSnapId"
+	volTypeConfPath = "/examples/driver/cinder.yaml"
 )
 
 var conf = CinderConfig{}
@@ -437,11 +438,17 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 
 // ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	var typeName []string
-	data, err := ioutil.ReadFile("/root/gopath/src/github.com/opensds/opensds/examples/driver/cinder.yaml")
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Error("Get current path fail")
+		return nil, err
+	}
+	data, err := ioutil.ReadFile(pwd + volTypeConfPath)
 	if err != nil {
 		log.Error("Parse cinder.yaml fail!")
 	}
+
+	var typeName []string
 	ymlconf := CinderConfig{}
 	yaml.Unmarshal(data, &ymlconf)
 	for name, _ := range ymlconf.Pool {
