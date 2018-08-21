@@ -22,6 +22,10 @@ Go SDK.
 package cinder
 
 import (
+	"io/ioutil"
+
+	"encoding/json"
+	"os"
 	"time"
 
 	log "github.com/golang/glog"
@@ -37,12 +41,15 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+
+	"gopkg.in/yaml.v2"
 )
 
 const (
 	defaultConfPath = "/etc/opensds/driver/cinder.yaml"
 	KCinderVolumeId = "cinderVolumeId"
 	KCinderSnapId   = "cinderSnapId"
+	volTypeConfPath = "/examples/driver/cinder.yaml"
 )
 
 var conf = CinderConfig{}
@@ -74,6 +81,56 @@ type AuthOptions struct {
 type CinderConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+}
+
+type ListPoolOpts struct {
+	// ID of the tenant to look up storage pools for.
+	TenantID string `q:"tenant_id"`
+
+	// Whether to list extended details.
+	Detail bool `q:"detail"`
+
+	//Volume_Type of the StoragePool
+	Volume_Type string `q:"volume_type"`
+}
+
+type PoolArray struct {
+	Pools []StoragePool `json:"pools"`
+}
+
+type StoragePool struct {
+	Name         string       `json:"name"`
+	Capabilities Capabilities `json:"capabilities"`
+}
+
+type Capabilities struct {
+	// The following fields should be present in all storage drivers.
+	DriverVersion     string  `json:"driver_version"`
+	FreeCapacityGB    float64 `json:"free_capacity_gb"`
+	StorageProtocol   string  `json:"storage_protocol"`
+	TotalCapacityGB   float64 `json:"total_capacity_gb"`
+	VendorName        string  `json:"vendor_name"`
+	VolumeBackendName string  `json:"volume_backend_name"`
+
+	// The following fields are optional and may have empty values depending
+	// on the storage driver in use.
+	ReservedPercentage       int64   `json:"reserved_percentage"`
+	LocationInfo             string  `json:"location_info"`
+	QoSSupport               bool    `json:"QoS_support"`
+	ProvisionedCapacityGB    float64 `json:"provisioned_capacity_gb"`
+	MaxOverSubscriptionRatio string  `json:"max_over_subscription_ratio"`
+	ThinProvisioningSupport  bool    `json:"thin_provisioning_support"`
+	ThickProvisioningSupport bool    `json:"thick_provisioning_support"`
+	TotalVolumes             int64   `json:"total_volumes"`
+	FilterFunction           string  `json:"filter_function"`
+	GoodnessFuction          string  `json:"goodness_function"`
+	Mutliattach              bool    `json:"multiattach"`
+	SparseCopyVolume         bool    `json:"sparse_copy_volume"`
+}
+
+func (opts ListPoolOpts) ToStoragePoolsListQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(opts)
+	return q.String(), err
 }
 
 // Setup
@@ -381,40 +438,57 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 
 // ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	log.Info("Starting list pools in cinder drivers.")
-	opts := &schedulerstats.ListOpts{Detail: true}
-
-	pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
+	pwd, err := os.Getwd()
 	if err != nil {
-		log.Error("Cannot list storage pools:", err)
+		log.Error("Get current path fail")
 		return nil, err
 	}
-
-	polpages, err := schedulerstats.ExtractStoragePools(pages)
+	data, err := ioutil.ReadFile(pwd + volTypeConfPath)
 	if err != nil {
-		log.Error("Cannot extract storage pools:", err)
-		return nil, err
+		log.Error("Parse cinder.yaml fail!")
 	}
-	var pols []*model.StoragePoolSpec
-	for _, page := range polpages {
-		if _, ok := d.conf.Pool[page.Name]; !ok {
-			continue
+
+	var typeName []string
+	ymlconf := CinderConfig{}
+	yaml.Unmarshal(data, &ymlconf)
+	for name, _ := range ymlconf.Pool {
+		typeName = append(typeName, name)
+	}
+
+	var typePol []*model.StoragePoolSpec
+	for _, typRes := range typeName {
+		opts := ListPoolOpts{Detail: true, Volume_Type: typRes}
+		pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
+		if err != nil {
+			log.Error("Cannot list storage pools:", err)
+			return nil, err
 		}
 
-		pol := &model.StoragePoolSpec{
+		polpage, err := json.Marshal(pages.GetBody())
+		if err != nil {
+			log.Error("Get Storage body fail.")
+			return nil, err
+		}
+		var StoragePools PoolArray
+		json.Unmarshal(polpage, &StoragePools)
+		var freeCaps int64 = 0
+		var totalCaps int64 = 0
+		var pol *model.StoragePoolSpec
+		for _, page := range StoragePools.Pools {
+			freeCaps = freeCaps + int64(page.Capabilities.FreeCapacityGB)
+			totalCaps = totalCaps + int64(page.Capabilities.TotalCapacityGB)
+		}
+		pol = &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, typRes).String(),
 			},
-			Name:             page.Name,
-			TotalCapacity:    int64(page.Capabilities.TotalCapacityGB),
-			FreeCapacity:     int64(page.Capabilities.FreeCapacityGB),
-			StorageType:      d.conf.Pool[page.Name].StorageType,
-			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
-			Extras:           d.conf.Pool[page.Name].Extras,
+			Name:          typRes,
+			TotalCapacity: totalCaps,
+			FreeCapacity:  freeCaps,
 		}
-		pols = append(pols, pol)
+		typePol = append(typePol, pol)
 	}
-	return pols, nil
+	return typePol, nil
 }
 
 func (d *Driver) CreateVolumeGroup(req *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
