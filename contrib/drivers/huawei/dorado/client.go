@@ -188,13 +188,13 @@ func (c *DoradoClient) logout() error {
 	return c.request("DELETE", "/sessions", nil, nil)
 }
 
-func (c *DoradoClient) CreateVolume(name string, size int64, desc string) (*Lun, error) {
+func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId string) (*Lun, error) {
 	data := map[string]interface{}{
 		"NAME":        name,
 		"CAPACITY":    Gb2Sector(size),
 		"DESCRIPTION": desc,
 		"ALLOCTYPE":   1,
-		"PARENTID":    "0",
+		"PARENTID":    poolId,
 		"WRITEPOLICY": 1,
 	}
 	lun := &LunResp{}
