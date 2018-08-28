@@ -71,7 +71,7 @@ func TestCreateProfile(t *testing.T) {
 			"description": "Gold service"
 		}`
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("CreateProfile", c.NewAdminContext(), &model.ProfileSpec{
 		BaseModel:   &model.BaseModel{},
 		Name:        "Gold",
@@ -117,7 +117,7 @@ func TestCreateProfile(t *testing.T) {
 
 func TestUpdateProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeProfile).Return(fakeProfile, nil)
 	db.C = mockClient
 
@@ -178,7 +178,7 @@ func TestUpdateProfile(t *testing.T) {
 
 func TestListProfiles(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -230,7 +230,7 @@ func TestListProfiles(t *testing.T) {
 
 func TestListProfilesWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -254,7 +254,7 @@ func TestListProfilesWithBadRequest(t *testing.T) {
 
 func TestGetProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeProfile, nil)
 	db.C = mockClient
 
@@ -299,7 +299,7 @@ func TestGetProfile(t *testing.T) {
 
 func TestGetProfileWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
@@ -319,7 +319,7 @@ func TestGetProfileWithBadRequest(t *testing.T) {
 
 func TestDeleteProfile(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		fakeProfile, nil)
 	mockClient.On("DeleteProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil)
@@ -340,7 +340,7 @@ func TestDeleteProfile(t *testing.T) {
 
 func TestDeleteProfileWithBadrequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetProfile", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(
 		nil, errors.New("Invalid resource uuid"))
 	db.C = mockClient
@@ -364,7 +364,7 @@ func TestDeleteProfileWithBadrequest(t *testing.T) {
 
 func TestListExtraProperties(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListExtraProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(&fakeExtras, nil)
 	db.C = mockClient
 
@@ -401,7 +401,7 @@ func TestListExtraProperties(t *testing.T) {
 
 func TestListExtraPropertiesWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ListExtraProperties", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -419,7 +419,7 @@ func TestListExtraPropertiesWithBadRequest(t *testing.T) {
 
 func TestAddExtraProperty(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("AddExtraProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", fakeExtras).Return(&fakeExtras, nil)
 	db.C = mockClient
 
@@ -466,7 +466,7 @@ func TestAddExtraProperty(t *testing.T) {
 
 func TestRemoveExtraProperty(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("RemoveExtraProperty", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", "key1").Return(nil)
 	db.C = mockClient
 

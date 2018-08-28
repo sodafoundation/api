@@ -54,7 +54,7 @@ var (
 
 //func TestListVolumeGroups(t *testing.T) {
 
-//	mockClient := new(dbtest.MockClient)
+//	mockClient := new(dbtest.Client)
 //	mockClient.On("ListVolumeGroups").Return(fakeVolumeGroups, nil)
 //	db.C = mockClient
 
@@ -89,7 +89,7 @@ var (
 
 //func TestListVolumeGroupsWithBadRequest(t *testing.T) {
 
-//	mockClient := new(dbtest.MockClient)
+//	mockClient := new(dbtest.Client)
 //	mockClient.On("ListVolumeGroups").Return(nil, errors.New("db error"))
 //	db.C = mockClient
 
@@ -104,7 +104,7 @@ var (
 
 func TestGetVolumeGroup(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroup, nil)
 	db.C = mockClient
 
@@ -139,7 +139,7 @@ func TestGetVolumeGroup(t *testing.T) {
 
 func TestGetVolumeGroupWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -259,7 +259,7 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	}
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&vg)
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeVolumeGroup, nil)
 	mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
@@ -305,7 +305,7 @@ func TestDeleteVolumeGroup(t *testing.T) {
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
 	}
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroupDelete, nil)
 	mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), fakeVolumeGroup.Id).Return(fakeGroupVolumes, nil)
 	mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), fakeGroupVolumes[0].Id).Return(Snapshots, nil)

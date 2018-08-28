@@ -22,6 +22,16 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+func TestRvRepElement(t *testing.T) {
+	var strs = []string{"default", "default"}
+	str := RvRepElement(strs)
+	res := str[0]
+	var expect = "default"
+	if len(str) != 1 || res != expect {
+		t.Errorf("%v remove redundant elements fail,expect:%v,result:%v\n", str, expect, res)
+	}
+}
+
 func TestContained(t *testing.T) {
 	var targets = []interface{}{
 		[]interface{}{"key01", 123, true},

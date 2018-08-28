@@ -73,6 +73,8 @@ type Client interface {
 
 	GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, error)
 
+	ListAvailabilityZones(ctx *c.Context) ([]string, error)
+
 	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
 	ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error)

@@ -45,5 +45,6 @@
   "volume_group:list": "rule:admin_or_owner",
   "volume_group:get": "rule:admin_or_owner",
   "volume_group:update": "rule:admin_or_owner",
-  "volume_group:delete": "rule:admin_or_owner"
+  "volume_group:delete": "rule:admin_or_owner",
+  "availability_zone:list":""
 }

@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -32,6 +33,7 @@ import (
 func init() {
 	var poolPortal PoolPortal
 	beego.Router("/v1beta/pools", &poolPortal, "get:ListPools")
+	beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
@@ -66,9 +68,25 @@ var (
 	fakePools = []*model.StoragePoolSpec{fakePool}
 )
 
+func TestListAvailabilityZones(t *testing.T) {
+	mockClient := new(dbtest.Client)
+	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakePools, nil)
+	db.C = mockClient
+
+	r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	expectedZones := "unknow"
+	t.Log(w)
+	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
+		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
+	}
+}
+
 func TestListPools(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -128,7 +146,7 @@ func TestListPools(t *testing.T) {
 
 func TestListPoolsWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -149,7 +167,7 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 
 func TestGetPool(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
 	db.C = mockClient
 
@@ -202,7 +220,7 @@ func TestGetPool(t *testing.T) {
 
 func TestGetPoolWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
 		nil, errors.New("db error"))
 	db.C = mockClient
