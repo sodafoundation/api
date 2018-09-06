@@ -28,7 +28,7 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/client"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"golang.org/x/net/context"
 )

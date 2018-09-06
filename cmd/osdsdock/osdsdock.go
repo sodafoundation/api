@@ -22,7 +22,6 @@ package main
 import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
-	"github.com/opensds/opensds/pkg/dock/server"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -49,15 +48,8 @@ func main() {
 	// Set up database session.
 	db.Init(&CONF.Database)
 
-	// Automatically discover dock and pool resources from backends.
-	dock.Brain = dock.NewDockHub(CONF.OsdsDock.DockType)
-	if err := dock.Brain.TriggerDiscovery(); err != nil {
-		panic(err)
-	}
-
-	// Construct dock module grpc server struct and start the listen mechanism
-	// of dock module.
-	ds := server.NewDockServer(CONF.OsdsDock.ApiEndpoint)
+	// Construct dock module grpc server struct and run dock server process.
+	ds := dock.NewDockServer(CONF.OsdsDock.DockType, CONF.OsdsDock.ApiEndpoint)
 	if err := ds.Run(); err != nil {
 		panic(err)
 	}

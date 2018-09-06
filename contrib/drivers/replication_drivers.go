@@ -27,7 +27,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
@@ -62,7 +62,7 @@ func IsSupportHostBasedReplication(resourceType string) bool {
 }
 
 // Init
-func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
+func InitReplicationDriver(resourceType string) ReplicationDriver {
 	var d ReplicationDriver
 	switch resourceType {
 	case driversConfig.DRBDDriverType:
@@ -75,8 +75,8 @@ func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 		d = &replication_sample.ReplicationDriver{}
 		break
 	}
-	err := d.Setup()
-	return d, err
+	d.Setup()
+	return d
 }
 
 // Clean

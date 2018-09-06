@@ -18,7 +18,7 @@ This module implements the common data structure.
 
 package model
 
-import "github.com/opensds/opensds/pkg/dock/proto"
+import "github.com/opensds/opensds/pkg/model/proto"
 
 //volume status
 const (

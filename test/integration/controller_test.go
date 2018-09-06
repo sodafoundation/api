@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/volume"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/testutils/collection"
 )
