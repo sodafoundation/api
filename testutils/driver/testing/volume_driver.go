@@ -282,8 +282,8 @@ func (_m *VolumeDriver) TerminateConnection(opt *proto.DeleteAttachmentOpts) err
 	return r0
 }
 
-// Unset provides a mock function with given fields:
-func (_m *VolumeDriver) Unset() error {
+// Teardown provides a mock function with given fields:
+func (_m *VolumeDriver) Teardown() error {
 	ret := _m.Called()
 
 	var r0 error

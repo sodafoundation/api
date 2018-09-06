@@ -127,8 +127,8 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-// Unset
-func (d *Driver) Unset() error { return nil }
+// Teardown
+func (d *Driver) Teardown() error { return nil }
 
 // CreateVolume
 func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {

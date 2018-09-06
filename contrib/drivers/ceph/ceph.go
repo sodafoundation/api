@@ -95,7 +95,7 @@ func (d *Driver) Setup() error {
 	return err
 }
 
-func (d *Driver) Unset() error { return nil }
+func (d *Driver) Teardown() error { return nil }
 
 func (d *Driver) initConn() error {
 	conn, err := rados.NewConn()

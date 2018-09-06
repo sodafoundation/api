@@ -362,7 +362,7 @@ var errTraceSyntax = errors.New("syntax error: expect file.go:234")
 // Note that unlike vmodule the file extension is included here.
 func (t *traceLocation) Set(value string) error {
 	if value == "" {
-		// Unset.
+		// Teardown.
 		t.line = 0
 		t.file = ""
 	}

@@ -34,8 +34,8 @@ type Driver struct{}
 // Setup
 func (*Driver) Setup() error { return nil }
 
-// Unset
-func (*Driver) Unset() error { return nil }
+// Teardown
+func (*Driver) Teardown() error { return nil }
 
 // CreateVolume
 func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {

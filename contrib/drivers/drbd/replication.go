@@ -31,8 +31,8 @@ type ReplicationDriver struct{}
 // Setup
 func (r *ReplicationDriver) Setup() error { return nil }
 
-// Unset
-func (r *ReplicationDriver) Unset() error { return nil }
+// Teardown
+func (r *ReplicationDriver) Teardown() error { return nil }
 
 // CreateReplication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {

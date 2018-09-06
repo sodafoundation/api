@@ -27,8 +27,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
 )
@@ -39,7 +39,7 @@ type ReplicationDriver interface {
 	// Any initialization the replication driver does while starting.
 	Setup() error
 	// Any operation the replication driver does while stopping.
-	Unset() error
+	Teardown() error
 
 	CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error)
 	DeleteReplication(opt *pb.DeleteReplicationOpts) error
@@ -90,7 +90,7 @@ func CleanReplicationDriver(d ReplicationDriver) ReplicationDriver {
 	default:
 		break
 	}
-	d.Unset()
+	d.Teardown()
 	d = nil
 
 	return d

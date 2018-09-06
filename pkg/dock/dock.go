@@ -272,7 +272,9 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 	var res pb.GenericResponse
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
-		return "", fmt.Errorf("Error occurred in dock module when unmarshalling connection data!")
+		log.Error("Error occurred in dock module when unmarshalling connection data!")
+		res.Reply = GenericResponseError("400", fmt.Sprint(err))
+		return &res, err
 	}
 
 	log.Info("Dock server receive attach volume request, vr =", opt)
@@ -300,6 +302,7 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 	var res pb.GenericResponse
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
+		log.Error("Error occurred in dock module when unmarshalling connection data!")
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
 	}

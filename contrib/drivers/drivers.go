@@ -27,8 +27,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	sample "github.com/opensds/opensds/testutils/driver"
 )
 
@@ -38,7 +38,7 @@ type VolumeDriver interface {
 	//Any initialization the volume driver does while starting.
 	Setup() error
 	//Any operation the volume driver does while stopping.
-	Unset() error
+	Teardown() error
 
 	CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 
@@ -114,7 +114,7 @@ func Clean(d VolumeDriver) VolumeDriver {
 	default:
 		break
 	}
-	d.Unset()
+	d.Teardown()
 	d = nil
 
 	return d

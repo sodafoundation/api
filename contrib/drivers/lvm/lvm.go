@@ -81,7 +81,7 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-func (*Driver) Unset() error { return nil }
+func (*Driver) Teardown() error { return nil }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"

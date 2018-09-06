@@ -103,8 +103,8 @@ func (_m *ReplicationDriver) Setup() error {
 	return r0
 }
 
-// Unset provides a mock function with given fields:
-func (_m *ReplicationDriver) Unset() error {
+// Teardown provides a mock function with given fields:
+func (_m *ReplicationDriver) Teardown() error {
 	ret := _m.Called()
 
 	var r0 error

@@ -51,7 +51,7 @@ func (d *Driver) Setup() (err error) {
 	return nil
 }
 
-func (d *Driver) Unset() error {
+func (d *Driver) Teardown() error {
 	d.client.logout()
 	return nil
 }
