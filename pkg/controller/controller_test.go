@@ -33,7 +33,7 @@ type fakeSelector struct {
 	err error
 }
 
-func (s *fakeSelector) SelectSupportedPool(vol *model.VolumeSpec) (*model.StoragePoolSpec, error) {
+func (s *fakeSelector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.StoragePoolSpec, error) {
 	if s.err != nil {
 		return nil, s.err
 	}

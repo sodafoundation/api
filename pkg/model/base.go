@@ -56,6 +56,13 @@ type DataStorageLoS struct {
 	IsSpaceEfficient bool `json:"isSpaceEfficient,omitempty" yaml:"isSpaceEfficient,omitempty"`
 }
 
+func (ds DataStorageLoS) IsEmpty() bool {
+	if (DataStorageLoS{}) == ds {
+		return true
+	}
+	return false
+}
+
 // IOConnectivityLoS can be used to specify the characteristics of storage
 // connectivity.
 type IOConnectivityLoS struct {
@@ -72,6 +79,13 @@ type IOConnectivityLoS struct {
 	// fixed amount of time.
 	// +units:[MB]/s
 	MaxBWS int64 `json:"maxBWS,omitempty" yaml:"maxBWS,omitempty"`
+}
+
+func (ic IOConnectivityLoS) IsEmpty() bool {
+	if (IOConnectivityLoS{}) == ic {
+		return true
+	}
+	return false
 }
 
 // DataProtectionLoS describes a replica that protects data from loss. The
@@ -136,4 +150,11 @@ type DataProtectionLoS struct {
 	// * TokenizedClone: This enumeration literal shall indicate that replication
 	//   shall create a token based clone.
 	ReplicaType string `json:"replicaType,omitempty" yaml:"replicaType,omitempty"`
+}
+
+func (dp DataProtectionLoS) IsEmpty() bool {
+	if (DataProtectionLoS{}) == dp {
+		return true
+	}
+	return false
 }

@@ -74,6 +74,13 @@ type ProvisioningPropertiesSpec struct {
 	IOConnectivity IOConnectivityLoS `json:"ioConnectivity,omitempty"`
 }
 
+func (pps ProvisioningPropertiesSpec) IsEmpty() bool {
+	if (ProvisioningPropertiesSpec{}) == pps {
+		return true
+	}
+	return false
+}
+
 type ReplicationPropertiesSpec struct {
 	// DataProtection represents some suggested data protection capabilities.
 	DataProtection DataProtectionLoS `json:"dataProtection,omitempty"`
@@ -103,6 +110,13 @@ type ReplicationPropertiesSpec struct {
 	} `json:"replicaInfos,omitempty"`
 }
 
+func (rps ReplicationPropertiesSpec) IsEmpty() bool {
+	if (ReplicationPropertiesSpec{}) == rps {
+		return true
+	}
+	return false
+}
+
 type SnapshotPropertiesSpec struct {
 	// The property defines how to take snapshots.
 	Schedule struct {
@@ -126,6 +140,13 @@ type SnapshotPropertiesSpec struct {
 	} `json:"retention,omitempty"`
 }
 
+func (sps SnapshotPropertiesSpec) IsEmpty() bool {
+	if (SnapshotPropertiesSpec{}) == sps {
+		return true
+	}
+	return false
+}
+
 type DataProtectionPropertiesSpec struct {
 	// DataProtection represents some suggested data protection capabilities.
 	DataProtection DataProtectionLoS `json:"dataProtection,omitempty"`
@@ -134,9 +155,23 @@ type DataProtectionPropertiesSpec struct {
 	ConsistencyEnabled bool `json:"consistencyEnabled,omitempty"`
 }
 
+func (dps DataProtectionPropertiesSpec) IsEmpty() bool {
+	if (DataProtectionPropertiesSpec{}) == dps {
+		return true
+	}
+	return false
+}
+
 // CustomPropertiesSpec is a dictionary object that contains unique keys and
 // JSON objects.
 type CustomPropertiesSpec map[string]interface{}
+
+func (cps CustomPropertiesSpec) IsEmpty() bool {
+	if nil == cps {
+		return true
+	}
+	return false
+}
 
 func (cps CustomPropertiesSpec) Encode() []byte {
 	parmBody, _ := json.Marshal(&cps)

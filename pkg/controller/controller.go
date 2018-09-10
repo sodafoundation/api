@@ -108,7 +108,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		in.PoolId = snapVol.PoolId
 	}
 
-	polInfo, err := c.selector.SelectSupportedPool(in)
+	polInfo, err := c.selector.SelectSupportedPoolForVolume(in)
 	if err != nil {
 		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
 			errchanVolume <- errUpdate
