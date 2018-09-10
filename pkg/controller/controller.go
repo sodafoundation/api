@@ -63,16 +63,16 @@ type Controller struct {
 
 func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanVolume chan error) {
 	var err error
-	var profile *model.ProfileSpec
+	var prf *model.ProfileSpec
 	var snap *model.VolumeSnapshotSpec
 	var snapVol *model.VolumeSpec
 	var snapSize int64
 
 	if in.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
-		profile, err = db.C.GetDefaultProfile(ctx)
+		prf, err = db.C.GetDefaultProfile(ctx)
 	} else {
-		profile, err = db.C.GetProfile(ctx, in.ProfileId)
+		prf, err = db.C.GetProfile(ctx, in.ProfileId)
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
@@ -136,6 +136,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		Size:             in.Size,
 		AvailabilityZone: in.AvailabilityZone,
 		PoolId:           polInfo.Id,
+		ProfileId:        prf.Id,
 		SnapshotId:       in.SnapshotId,
 		SnapshotSize:     snapSize,
 		PoolName:         polInfo.Name,
@@ -163,7 +164,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 
 	// Select the storage tag according to the lifecycle flag.
-	c.policyController = policy.NewController(profile)
+	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
 	c.policyController.SetDock(dockInfo)
 

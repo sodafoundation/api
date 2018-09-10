@@ -59,7 +59,11 @@ func (d *Driver) Unset() error {
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	name := EncodeName(opt.GetId())
 	desc := TruncateDescription(opt.GetDescription())
-	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc)
+	poolId, err := d.client.GetPoolIdByName(opt.GetPoolName())
+	if err != nil {
+		return nil, err
+	}
+	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc, poolId)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err
