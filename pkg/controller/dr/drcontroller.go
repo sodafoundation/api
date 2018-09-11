@@ -280,9 +280,12 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	attachmentId := uuid.NewV4().String()
 	// Default protocol is iscsi
 	protocol := config.ISCSIProtocol
-	initiator := attacherDock.Metadata["Initiator"]
 	if len(p.pool.Extras.IOConnectivity.AccessProtocol) != 0 {
 		protocol = p.pool.Extras.IOConnectivity.AccessProtocol
+	}
+
+	initiator := attacherDock.Metadata["Initiator"]
+	if protocol == config.FCProtocol {
 		initiator = attacherDock.Metadata["WWPNS"]
 	}
 
