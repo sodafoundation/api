@@ -34,6 +34,7 @@ import (
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 	"strings"
+	"github.com/opensds/opensds/contrib/connector/fc"
 )
 
 type Context struct {
@@ -215,7 +216,7 @@ func (add *attachDockDiscoverer) Discover() error {
 	if bindIp == "" {
 		bindIp = iscsi.GetHostIp()
 	}
-
+	wwpns, _ := fc.GetWWPNs()
 	segments := strings.Split(CONF.OsdsDock.ApiEndpoint, ":")
 	endpointIp := segments[len(segments)-2]
 	add.dck = &model.DockSpec{
@@ -230,6 +231,7 @@ func (add *attachDockDiscoverer) Discover() error {
 			"OsType":    runtime.GOOS,
 			"HostIp":    bindIp,
 			"Initiator": localIqn,
+			"WWPNS":strings.Join(wwpns, ","),
 		},
 	}
 	return nil

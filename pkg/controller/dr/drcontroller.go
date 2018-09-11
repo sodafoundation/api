@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
@@ -277,11 +278,14 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	attacherDock, err := p.getAttacherDockByProvisioner(ctx, provisionerDock)
 	p.volumeController.SetDock(provisionerDock)
 	attachmentId := uuid.NewV4().String()
-	var protocol = p.pool.Extras.IOConnectivity.AccessProtocol
-	if protocol == "" {
-		// Default protocol is iscsi
-		protocol = "iscsi"
+	// Default protocol is iscsi
+	protocol := config.ISCSIProtocol
+	initiator := attacherDock.Metadata["Initiator"]
+	if len(p.pool.Extras.IOConnectivity.AccessProtocol) != 0 {
+		protocol = p.pool.Extras.IOConnectivity.AccessProtocol
+		initiator = attacherDock.Metadata["WWPNS"]
 	}
+
 	var createAttachOpt = &pb.CreateAttachmentOpts{
 		Id:       attachmentId,
 		VolumeId: vol.Id,
@@ -290,7 +294,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 			OsType:    attacherDock.Metadata["OsType"],
 			Ip:        attacherDock.Metadata["HostIp"],
 			Host:      attacherDock.NodeId,
-			Initiator: attacherDock.Metadata["Initiator"],
+			Initiator: initiator,
 		},
 		AccessProtocol: protocol,
 		Metadata:       vol.Metadata,
@@ -327,6 +331,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 				DriverName: provisionerDock.DriverName,
 				Context:    ctx.ToJson(),
 			}
+			p.volumeController.SetDock(provisionerDock)
 			p.volumeController.DeleteVolumeAttachment(opt)
 			db.C.DeleteVolumeAttachment(ctx, atm.Id)
 		}
