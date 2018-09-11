@@ -24,8 +24,10 @@ import (
 	"os"
 	"runtime"
 	"time"
+	"strings"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/connector/fc"
 	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/contrib/drivers"
 	c "github.com/opensds/opensds/pkg/context"
@@ -33,8 +35,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"strings"
-	"github.com/opensds/opensds/contrib/connector/fc"
 )
 
 type Context struct {
@@ -231,7 +231,7 @@ func (add *attachDockDiscoverer) Discover() error {
 			"OsType":    runtime.GOOS,
 			"HostIp":    bindIp,
 			"Initiator": localIqn,
-			"WWPNS":strings.Join(wwpns, ","),
+			"WWPNS":     strings.Join(wwpns, ","),
 		},
 	}
 	return nil
