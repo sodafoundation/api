@@ -22,6 +22,8 @@ Go SDK.
 package cinder
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"time"
 
 	log "github.com/golang/glog"
@@ -37,6 +39,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -74,6 +77,36 @@ type AuthOptions struct {
 type CinderConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+}
+
+//ListPoolOpts
+type ListPoolOpts struct {
+	// ID of the tenant to look up storage pools for.
+	TenantID string `q:"tenant_id"`
+	// Whether to list extended details.
+	Detail bool `q:"detail"`
+	// Volume_Type of the StoragePool
+	Volume_Type string `q:"volume_type"`
+}
+
+// Struct of Pools listed by volumeType
+type PoolArray struct {
+	Pools []StoragePool `json:"pools"`
+}
+
+type StoragePool struct {
+	Name         string       `json:"name"`
+	Capabilities Capabilities `json:"capabilities"`
+}
+
+type Capabilities struct {
+	FreeCapacityGB  int64 `json:"free_capacity_gb"`
+	TotalCapacityGB int64 `json:"total_capacity_gb"`
+}
+
+func (opts ListPoolOpts) ToStoragePoolsListQuery() (string, error) {
+	q, err := gophercloud.BuildQueryString(opts)
+	return q.String(), err
 }
 
 // Setup
@@ -132,7 +165,7 @@ func (d *Driver) Unset() error { return nil }
 
 // CreateVolume
 func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	//Configure create request body.
+	// Configure create request body.
 	opts := &volumesv2.CreateOpts{
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
@@ -218,7 +251,7 @@ func (d *Driver) DeleteVolume(req *pb.DeleteVolumeOpts) error {
 
 // ExtendVolume ...
 func (d *Driver) ExtendVolume(req *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	//Configure create request body.
+	// Configure create request body.
 	opts := &volumeactions.ExtendSizeOpts{
 		NewSize: int(req.GetSize()),
 	}
@@ -381,40 +414,52 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 
 // ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	log.Info("Starting list pools in cinder drivers.")
-	opts := &schedulerstats.ListOpts{Detail: true}
-
-	pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
+	data, err := ioutil.ReadFile(defaultConfPath)
 	if err != nil {
-		log.Error("Cannot list storage pools:", err)
-		return nil, err
+		log.Error("Parse cinder.yaml fail!")
 	}
 
-	polpages, err := schedulerstats.ExtractStoragePools(pages)
-	if err != nil {
-		log.Error("Cannot extract storage pools:", err)
-		return nil, err
+	var typeName []string
+	ymlconf := CinderConfig{}
+	yaml.Unmarshal(data, &ymlconf)
+	for name, _ := range ymlconf.Pool {
+		typeName = append(typeName, name)
 	}
-	var pols []*model.StoragePoolSpec
-	for _, page := range polpages {
-		if _, ok := d.conf.Pool[page.Name]; !ok {
-			continue
+
+	var typePol []*model.StoragePoolSpec
+	for _, typRes := range typeName {
+		opts := ListPoolOpts{Detail: true, Volume_Type: typRes}
+		pages, err := schedulerstats.List(d.blockStoragev2, opts).AllPages()
+		if err != nil {
+			log.Error("Cannot list storage pools:", err)
+			return nil, err
 		}
 
-		pol := &model.StoragePoolSpec{
+		polpage, err := json.Marshal(pages.GetBody())
+		if err != nil {
+			log.Error("Get Storage body fail.")
+			return nil, err
+		}
+		var StoragePools PoolArray
+		json.Unmarshal(polpage, &StoragePools)
+		var freeCaps int64 = 0
+		var totalCaps int64 = 0
+		var pol *model.StoragePoolSpec
+		for _, page := range StoragePools.Pools {
+			freeCaps = freeCaps + page.Capabilities.FreeCapacityGB
+			totalCaps = totalCaps + page.Capabilities.TotalCapacityGB
+		}
+		pol = &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, page.Name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, typRes).String(),
 			},
-			Name:             page.Name,
-			TotalCapacity:    int64(page.Capabilities.TotalCapacityGB),
-			FreeCapacity:     int64(page.Capabilities.FreeCapacityGB),
-			StorageType:      d.conf.Pool[page.Name].StorageType,
-			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
-			Extras:           d.conf.Pool[page.Name].Extras,
+			Name:          typRes,
+			TotalCapacity: totalCaps,
+			FreeCapacity:  freeCaps,
 		}
-		pols = append(pols, pol)
+		typePol = append(typePol, pol)
 	}
-	return pols, nil
+	return typePol, nil
 }
 
 func (d *Driver) CreateVolumeGroup(req *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
