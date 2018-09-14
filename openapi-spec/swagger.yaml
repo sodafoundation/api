@@ -522,7 +522,7 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/ExtendVolume'
+            $ref: '#/definitions/ExtendVolumeSpec'
       responses:
         '202':
           description: Accepted
@@ -752,7 +752,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups':
+  '/v1beta/{projectId}/block/volumeGroup':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -814,7 +814,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
+  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeGroupId'
@@ -1713,7 +1713,7 @@ definitions:
         type: string
         format: date-time
         example: '2017-04-10T14:36:58.014Z'
-  ExtendVolume:
+  ExtendVolumeSpec:
     description: >-
       Extends the size of a volume to a requested size, in gibibytes (GiB).
     type: object
