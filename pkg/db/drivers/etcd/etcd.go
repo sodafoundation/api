@@ -959,6 +959,14 @@ func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) err
 
 // CreateVolume
 func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {
+	profiles, er := c.ListProfiles(ctx)
+	if er != nil {
+		return nil, er
+	} else if len(profiles) == 0 {
+		log.Error("No profile in db.")
+		return nil, er
+	}
+
 	vol.TenantId = ctx.TenantId
 	volBody, err := json.Marshal(vol)
 	if err != nil {
