@@ -963,8 +963,7 @@ func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if err != nil {
 		return nil, err
 	} else if len(profiles) == 0 {
-		log.Error("No profile in db.")
-		return nil, err
+		return nil, errors.New("No profile in db.")
 	}
 
 	vol.TenantId = ctx.TenantId
