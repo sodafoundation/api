@@ -34,7 +34,7 @@ func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{
 		Name:        "silver",
 		Description: "silver policy",
-		Extras: model.ExtraSpec{
+		CustomProperties: model.CustomPropertiesSpec{
 			"diskType": "SAS",
 		},
 	}
@@ -44,9 +44,9 @@ func TestClientCreateProfile(t *testing.T) {
 		t.Error("create profile in client failed:", err)
 		return
 	}
-	// If extras are not defined, create an empty one.
-	if prf.Extras == nil {
-		prf.Extras = model.ExtraSpec{}
+	// If customized properties are not defined, create an empty one.
+	if prf.CustomProperties == nil {
+		prf.CustomProperties = model.CustomPropertiesSpec{}
 	}
 
 	var expected = &SampleProfiles[0]
@@ -78,8 +78,8 @@ func TestClientListProfiles(t *testing.T) {
 	}
 	// If extras are not defined, create an empty one.
 	for _, prf := range prfs {
-		if prf.Extras == nil {
-			prf.Extras = model.ExtraSpec{}
+		if prf.CustomProperties == nil {
+			prf.CustomProperties = model.CustomPropertiesSpec{}
 		}
 	}
 
@@ -103,49 +103,49 @@ func TestClientDeleteProfile(t *testing.T) {
 	t.Log("Delete profile success!")
 }
 
-func TestClientAddExtraProperty(t *testing.T) {
+func TestClientAddCustomProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	var body = &model.ExtraSpec{
+	var body = &model.CustomPropertiesSpec{
 		"diskType": "SAS",
 	}
 
-	ext, err := c.AddExtraProperty(prfID, body)
+	ext, err := c.AddCustomProperty(prfID, body)
 	if err != nil {
 		t.Error("add profile extra property in client failed:", err)
 		return
 	}
 
-	var expected = &SampleProfiles[0].Extras
+	var expected = &SampleProfiles[0].CustomProperties
 	if !reflect.DeepEqual(ext, expected) {
 		t.Errorf("expected %+v, got %+v\n", expected, ext)
 	}
 }
 
-func TestClientListExtraProperties(t *testing.T) {
+func TestClientListCustomProperties(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
 
-	ext, err := c.ListExtraProperties(prfID)
+	ext, err := c.ListCustomProperties(prfID)
 	if err != nil {
-		t.Error("list profile extra properties in client failed:", err)
+		t.Error("list profile customized properties in client failed:", err)
 		return
 	}
 
-	var expected = &SampleProfiles[0].Extras
+	var expected = &SampleProfiles[0].CustomProperties
 	if !reflect.DeepEqual(ext, expected) {
 		t.Errorf("expected %+v, got %+v\n", expected, ext)
 	}
 }
 
-func TestClientRemoveExtraProperty(t *testing.T) {
+func TestClientRemoveCustomProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	var extraKey = "iops"
+	var customKey = "iops"
 
-	if err := c.RemoveExtraProperty(prfID, extraKey); err != nil {
-		t.Error("remove profile extra property in client failed:", err)
+	if err := c.RemoveCustomProperty(prfID, customKey); err != nil {
+		t.Error("remove profile customized property in client failed:", err)
 		return
 	}
 
-	t.Log("Remove extra property success!")
+	t.Log("Remove customized property <iops> success!")
 }
 
 func TestClientGetDock(t *testing.T) {

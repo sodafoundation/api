@@ -25,28 +25,39 @@ import (
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
-func TestSelectSupportedPool(t *testing.T) {
+func TestSelectSupportedPoolForVolume(t *testing.T) {
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(fakeProfiles[0], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(fakeProfiles[1], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "c611ab76-b4a8-11e8-b76f-97665ba92921").Return(fakeProfiles[2], nil)
 	mockClient.On("ListPools", c.NewAdminContext()).Return(fakePools, nil)
 	db.C = mockClient
 
 	testCases := []struct {
-		request  map[string]interface{}
+		request  *model.VolumeSpec
 		expected *model.StoragePoolSpec
 	}{
 		{
-			request: map[string]interface{}{
-				"freeCapacity":         ">= 5001",
-				"availabilityZone":     "az1",
-				"extras.advanced.thin": true,
+			request: &model.VolumeSpec{
+				Size:             40,
+				AvailabilityZone: "az1",
+				PoolId:           "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+			},
+			expected: fakePools[0],
+		},
+		{
+			request: &model.VolumeSpec{
+				Size:             5001,
+				ProfileId:        "2f9c0a04-66ef-11e7-ade2-43158893e017",
+				AvailabilityZone: "az1",
 			},
 			expected: fakePools[1],
 		},
 		{
-			request: map[string]interface{}{
-				"freeCapacity":             ">= 400",
-				"availabilityZone":         "s== default",
-				"extras.advanced.diskType": "s== SSD",
+			request: &model.VolumeSpec{
+				Size:             400,
+				ProfileId:        "c611ab76-b4a8-11e8-b76f-97665ba92921",
+				AvailabilityZone: "default",
 			},
 			expected: nil,
 		},
@@ -54,7 +65,7 @@ func TestSelectSupportedPool(t *testing.T) {
 
 	s := NewSelector()
 	for _, testCase := range testCases {
-		result, _ := s.SelectSupportedPool(testCase.request)
+		result, _ := s.SelectSupportedPoolForVolume(testCase.request)
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
 		}
@@ -62,6 +73,81 @@ func TestSelectSupportedPool(t *testing.T) {
 }
 
 var (
+	fakeProfiles = []*model.ProfileSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+			},
+			Name:        "default",
+			Description: "default policy",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			},
+			Name:        "profile-01",
+			Description: "silver policy",
+			ProvisioningProperties: model.ProvisioningPropertiesSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "iscsi",
+					MaxIOPS:        50000,
+					MaxBWS:         500,
+				},
+			},
+			ReplicationProperties: model.ReplicationPropertiesSpec{
+				DataProtection: model.DataProtectionLoS{
+					IsIsolated:  true,
+					ReplicaType: "Clone",
+				},
+			},
+			DataProtectionProperties: model.DataProtectionPropertiesSpec{
+				DataProtection: model.DataProtectionLoS{
+					IsIsolated:  true,
+					ReplicaType: "Clone",
+				},
+				ConsistencyEnabled: true,
+			},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "c611ab76-b4a8-11e8-b76f-97665ba92921",
+			},
+			Name:        "profile-02",
+			Description: "silver policy",
+			ProvisioningProperties: model.ProvisioningPropertiesSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy: "Thin",
+					IsSpaceEfficient:   true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "rbd",
+					MaxIOPS:        500,
+					MaxBWS:         500,
+				},
+			},
+			ReplicationProperties: model.ReplicationPropertiesSpec{
+				DataProtection: model.DataProtectionLoS{
+					IsIsolated:  true,
+					ReplicaType: "Clone",
+				},
+			},
+			DataProtectionProperties: model.DataProtectionPropertiesSpec{
+				DataProtection: model.DataProtectionLoS{
+					IsIsolated:  true,
+					ReplicaType: "Clone",
+				},
+				ConsistencyEnabled: true,
+			},
+			CustomProperties: model.CustomPropertiesSpec{
+				"diskType": "SSD",
+			},
+		},
+	}
+
 	fakePools = []*model.StoragePoolSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -82,14 +168,12 @@ var (
 					IsSpaceEfficient:      true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
-					AccessProtocol: "rbd",
-					MaxIOPS:        1,
-					MaxBWS:         10,
+					AccessProtocol: "iscsi",
+					MaxIOPS:        100000,
+					MaxBWS:         1000,
 				},
-				DataProtection: model.DataProtectionLos{},
-				Advanced: model.ExtraSpec{
-					"thin":     true,
-					"dedupe":   false,
+				DataProtection: model.DataProtectionLoS{},
+				Advanced: map[string]interface{}{
 					"compress": false,
 					"diskType": "SSD",
 				},
@@ -97,7 +181,7 @@ var (
 		},
 		{
 			BaseModel: &model.BaseModel{
-				Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
+				Id:        "42a4c0e0-b497-11e8-a14c-3bb1bb1e8caf",
 				CreatedAt: "2017-10-24T15:04:05",
 			},
 			Name:             "fakePool",
@@ -108,10 +192,21 @@ var (
 			FreeCapacity:     6999,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
 			Extras: model.StoragePoolExtraSpec{
-				Advanced: model.ExtraSpec{
-					"thin":     true,
-					"dedupe":   true,
-					"compress": true,
+				DataStorage: model.DataStorageLoS{
+					RecoveryTimeObjective: 1,
+					ProvisioningPolicy:    "Thin",
+					IsSpaceEfficient:      true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "iscsi",
+					MaxIOPS:        60000,
+					MaxBWS:         600,
+				},
+				DataProtection: model.DataProtectionLoS{
+					IsIsolated:  true,
+					ReplicaType: "Clone",
+				},
+				Advanced: map[string]interface{}{
 					"diskType": "SATA",
 				},
 			},
@@ -128,7 +223,7 @@ var (
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     true,
 				"dedupe":   true,
 				"compress": true,
@@ -144,7 +239,7 @@ var (
 		FreeCapacity:     int64(60),
 		AvailabilityZone: "az2",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     false,
 				"dedupe":   false,
 				"compress": false,
@@ -160,7 +255,7 @@ var (
 		FreeCapacity:     int64(70),
 		AvailabilityZone: "az3",
 		Extras: model.StoragePoolExtraSpec{
-			Advanced: model.ExtraSpec{
+			Advanced: map[string]interface{}{
 				"thin":     true,
 				"dedupe":   false,
 				"compress": true,

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	_ "reflect"
 	"runtime"
 	"testing"
 
@@ -35,7 +34,7 @@ var (
 		Endpoint:    "http://localhost:50040",
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
-	localIqn = "iqn.2017-10.io.opensds:volume:00000001"
+	localIqn  = "iqn.2017-10.io.opensds:volume:00000001"
 	profileId string
 )
 
@@ -44,7 +43,6 @@ func init() {
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
-		Extras:      model.ExtraSpec{},
 	}
 	prf, err := c.CreateProfile(body)
 	if err != nil {
@@ -537,7 +535,7 @@ func getHostIp() string {
 
 	return "127.0.0.1"
 }
- 
+
 func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 	vol, err := prepareVolume(t)
 	if err != nil {
@@ -562,10 +560,10 @@ func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 		t.Error("prepare volume group failed: ", err)
 		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		cleanVolumeIfFailedOrFinished(t, vol1.Id)
-		return nil,err
+		return nil, err
 	}
 	t.Log("End preparing volume group...")
-	return vg,nil
+	return vg, nil
 }
 
 func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *model.VolumeGroupSpec) error {

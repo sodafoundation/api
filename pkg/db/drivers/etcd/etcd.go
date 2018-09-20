@@ -870,12 +870,12 @@ func (c *Client) UpdateProfile(ctx *c.Context, prfID string, input *model.Profil
 	}
 	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	if props := input.Extras; len(props) != 0 {
-		if prf.Extras == nil {
-			prf.Extras = make(map[string]interface{})
+	if props := input.CustomProperties; len(props) != 0 {
+		if prf.CustomProperties == nil {
+			prf.CustomProperties = make(map[string]interface{})
 		}
 		for k, v := range props {
-			prf.Extras[k] = v
+			prf.CustomProperties[k] = v
 		}
 	}
 
@@ -911,19 +911,19 @@ func (c *Client) DeleteProfile(ctx *c.Context, prfID string) error {
 	return nil
 }
 
-// AddExtraProperty
-func (c *Client) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
+// AddCustomProperty
+func (c *Client) AddCustomProperty(ctx *c.Context, prfID string, ext model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error) {
 	prf, err := c.GetProfile(ctx, prfID)
 	if err != nil {
 		return nil, err
 	}
 
-	if prf.Extras == nil {
-		prf.Extras = make(map[string]interface{})
+	if prf.CustomProperties == nil {
+		prf.CustomProperties = make(map[string]interface{})
 	}
 
 	for k, v := range ext {
-		prf.Extras[k] = v
+		prf.CustomProperties[k] = v
 	}
 
 	prf.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -931,26 +931,26 @@ func (c *Client) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraS
 	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return nil, err
 	}
-	return &prf.Extras, nil
+	return &prf.CustomProperties, nil
 }
 
-// ListExtraProperties
-func (c *Client) ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error) {
+// ListCustomProperties
+func (c *Client) ListCustomProperties(ctx *c.Context, prfID string) (*model.CustomPropertiesSpec, error) {
 	prf, err := c.GetProfile(ctx, prfID)
 	if err != nil {
 		return nil, err
 	}
-	return &prf.Extras, nil
+	return &prf.CustomProperties, nil
 }
 
-// RemoveExtraProperty
-func (c *Client) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) error {
+// RemoveCustomProperty
+func (c *Client) RemoveCustomProperty(ctx *c.Context, prfID, customKey string) error {
 	prf, err := c.GetProfile(ctx, prfID)
 	if err != nil {
 		return err
 	}
 
-	delete(prf.Extras, extraKey)
+	delete(prf.CustomProperties, customKey)
 	if _, err = c.CreateProfile(ctx, prf); err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ import (
 )
 
 func init() {
-	client = NewFakeClient(&c.Config{Endpoint: TestEp})
+	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 func TestProfileAction(t *testing.T) {

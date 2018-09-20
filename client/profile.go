@@ -26,10 +26,11 @@ import (
 // could be discussed if it's better to define an interface.
 type ProfileBuilder *model.ProfileSpec
 
-// ExtraBuilder contains request body of handling a profile extra request.
-// Currently it's assigned as the pointer of Extra struct, but it
+// CustomBuilder contains request body of handling a profile customized
+// properties request.
+// Currently it's assigned as the pointer of CustomPropertiesSpec struct, but it
 // could be discussed if it's better to define an interface.
-type ExtraBuilder *model.ExtraSpec
+type CustomBuilder *model.CustomPropertiesSpec
 
 // NewProfileMgr
 func NewProfileMgr(r Receiver, edp string, tenantId string) *ProfileMgr {
@@ -121,13 +122,13 @@ func (p *ProfileMgr) DeleteProfile(prfID string) error {
 	return p.Recv(url, "DELETE", nil, nil)
 }
 
-// AddExtraProperty
-func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.ExtraSpec, error) {
-	var res model.ExtraSpec
+// AddCustomProperty
+func (p *ProfileMgr) AddCustomProperty(prfID string, body CustomBuilder) (*model.CustomPropertiesSpec, error) {
+	var res model.CustomPropertiesSpec
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
-		"extras"}, "/")
+		"customProperties"}, "/")
 
 	if err := p.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -136,13 +137,13 @@ func (p *ProfileMgr) AddExtraProperty(prfID string, body ExtraBuilder) (*model.E
 	return &res, nil
 }
 
-// ListExtraProperties
-func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error) {
-	var res model.ExtraSpec
+// ListCustomProperties
+func (p *ProfileMgr) ListCustomProperties(prfID string) (*model.CustomPropertiesSpec, error) {
+	var res model.CustomPropertiesSpec
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
-		"extras"}, "/")
+		"customProperties"}, "/")
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -151,12 +152,12 @@ func (p *ProfileMgr) ListExtraProperties(prfID string) (*model.ExtraSpec, error)
 	return &res, nil
 }
 
-// RemoveExtraProperty
-func (p *ProfileMgr) RemoveExtraProperty(prfID, extraKey string) error {
+// RemoveCustomProperty
+func (p *ProfileMgr) RemoveCustomProperty(prfID, customKey string) error {
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
-		"extras", extraKey}, "/")
+		"customProperties", customKey}, "/")
 
 	return p.Recv(url, "DELETE", nil, nil)
 }

@@ -63,7 +63,7 @@ func CreateTypeReq(cinderReq *CreateTypeReqSpec) (*model.ProfileSpec, error) {
 		return nil, errors.New("OpenSDS does not support os-volume-type-access:is_public = false")
 	}
 	profile.Description = cinderReq.VolumeType.Description
-	profile.Extras = *(CinderExtraToOpenSDSExtra(&(cinderReq.VolumeType.Extras)))
+	profile.CustomProperties = *(CinderExtraToOpenSDSExtra(&(cinderReq.VolumeType.Extras)))
 
 	// The storageType can be block, file, object, default is block
 	profile.StorageType = "block"
@@ -72,8 +72,8 @@ func CreateTypeReq(cinderReq *CreateTypeReqSpec) (*model.ProfileSpec, error) {
 }
 
 // CinderExtraToOpenSDSExtra ...
-func CinderExtraToOpenSDSExtra(typeExtra *ExtraSpec) *model.ExtraSpec {
-	var profileExtras model.ExtraSpec
+func CinderExtraToOpenSDSExtra(typeExtra *ExtraSpec) *model.CustomPropertiesSpec {
+	var profileExtras model.CustomPropertiesSpec
 	profileExtras = make(map[string]interface{})
 	for key, value := range *typeExtra {
 		profileExtras[key] = value
@@ -86,7 +86,7 @@ func CinderExtraToOpenSDSExtra(typeExtra *ExtraSpec) *model.ExtraSpec {
 func CreateTypeResp(profile *model.ProfileSpec) *CreateTypeRespSpec {
 	resp := CreateTypeRespSpec{}
 	resp.VolumeType.IsPublic = true
-	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.Extras)))
+	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.CustomProperties)))
 	resp.VolumeType.Description = profile.Description
 	resp.VolumeType.Name = profile.Name
 	resp.VolumeType.ID = profile.BaseModel.Id
@@ -139,7 +139,7 @@ func UpdateTypeReq(cinderReq *UpdateTypeReqSpec) (*model.ProfileSpec, error) {
 func UpdateTypeResp(profile *model.ProfileSpec) *UpdateTypeRespSpec {
 	resp := UpdateTypeRespSpec{}
 	resp.VolumeType.IsPublic = true
-	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.Extras)))
+	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.CustomProperties)))
 	resp.VolumeType.Description = profile.Description
 	resp.VolumeType.Name = profile.Name
 	resp.VolumeType.ID = profile.BaseModel.Id
@@ -160,8 +160,8 @@ type AddExtraRespSpec struct {
 }
 
 // AddExtraReq ...
-func AddExtraReq(cinderReq *AddExtraReqSpec) *model.ExtraSpec {
-	var profileExtras model.ExtraSpec
+func AddExtraReq(cinderReq *AddExtraReqSpec) *model.CustomPropertiesSpec {
+	var profileExtras model.CustomPropertiesSpec
 
 	if len(cinderReq.Extras) >= 1 {
 		profileExtras = make(map[string]interface{})
@@ -174,7 +174,7 @@ func AddExtraReq(cinderReq *AddExtraReqSpec) *model.ExtraSpec {
 }
 
 // AddExtraResp ...
-func AddExtraResp(profileExtras *model.ExtraSpec) *AddExtraRespSpec {
+func AddExtraResp(profileExtras *model.CustomPropertiesSpec) *AddExtraRespSpec {
 	var resp AddExtraRespSpec
 
 	if len(*profileExtras) >= 1 {
@@ -195,7 +195,7 @@ type ShowAllExtraRespSpec struct {
 }
 
 // ShowAllExtraResp ...
-func ShowAllExtraResp(profileExtras *model.ExtraSpec) *ShowAllExtraRespSpec {
+func ShowAllExtraResp(profileExtras *model.CustomPropertiesSpec) *ShowAllExtraRespSpec {
 	var resp ShowAllExtraRespSpec
 
 	if len(*profileExtras) >= 1 {
@@ -214,7 +214,7 @@ func ShowAllExtraResp(profileExtras *model.ExtraSpec) *ShowAllExtraRespSpec {
 type ShowExtraRespSpec map[string]interface{}
 
 //ShowExtraResp ...
-func ShowExtraResp(reqkey string, profileExtras *model.ExtraSpec) *ShowExtraRespSpec {
+func ShowExtraResp(reqkey string, profileExtras *model.CustomPropertiesSpec) *ShowExtraRespSpec {
 	var resp ShowExtraRespSpec
 
 	if (len(*profileExtras) >= 1) && (nil != (*profileExtras)[reqkey]) {
@@ -234,8 +234,8 @@ type UpdateExtraReqSpec map[string]interface{}
 type UpdateExtraRespSpec map[string]interface{}
 
 // UpdateExtraReq ...
-func UpdateExtraReq(reqkey string, cinderReq *UpdateExtraReqSpec) (*model.ExtraSpec, error) {
-	var profileExtras model.ExtraSpec
+func UpdateExtraReq(reqkey string, cinderReq *UpdateExtraReqSpec) (*model.CustomPropertiesSpec, error) {
+	var profileExtras model.CustomPropertiesSpec
 
 	if (1 == len(*cinderReq)) && (nil != (*cinderReq)[reqkey]) {
 		profileExtras = make(map[string]interface{})
@@ -248,7 +248,7 @@ func UpdateExtraReq(reqkey string, cinderReq *UpdateExtraReqSpec) (*model.ExtraS
 }
 
 // UpdateExtraResp ...
-func UpdateExtraResp(reqkey string, profileExtras *model.ExtraSpec) *UpdateExtraRespSpec {
+func UpdateExtraResp(reqkey string, profileExtras *model.CustomPropertiesSpec) *UpdateExtraRespSpec {
 	var resp UpdateExtraRespSpec
 
 	if (len(*profileExtras) >= 1) && (nil != (*profileExtras)[reqkey]) {
@@ -279,7 +279,7 @@ type ShowRespVolumeType struct {
 func ShowTypeResp(profile *model.ProfileSpec) *ShowTypeRespSpec {
 	resp := ShowTypeRespSpec{}
 	resp.VolumeType.IsPublic = true
-	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.Extras)))
+	resp.VolumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.CustomProperties)))
 	resp.VolumeType.Description = profile.Description
 	resp.VolumeType.Name = profile.Name
 	resp.VolumeType.ID = profile.BaseModel.Id
@@ -313,7 +313,7 @@ func ListTypesResp(profiles []*model.ProfileSpec) *ListTypesRespSpec {
 		resp.VolumeTypes = make([]ListRespVolumeType, 0, 0)
 	} else {
 		for _, profile := range profiles {
-			volumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.Extras)))
+			volumeType.Extras = *(OpenSDSExtraToCinderExtra(&(profile.CustomProperties)))
 			volumeType.Name = profile.Name
 			volumeType.AccessIsPublic = true
 			volumeType.IsPublic = true
@@ -328,7 +328,7 @@ func ListTypesResp(profiles []*model.ProfileSpec) *ListTypesRespSpec {
 }
 
 // OpenSDSExtraToCinderExtra ...
-func OpenSDSExtraToCinderExtra(profileExtras *model.ExtraSpec) *ExtraSpec {
+func OpenSDSExtraToCinderExtra(profileExtras *model.CustomPropertiesSpec) *ExtraSpec {
 	var typeExtra ExtraSpec
 
 	if len(*profileExtras) >= 1 {

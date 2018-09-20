@@ -32,12 +32,10 @@ func init() {
 		"get:GetAttachment;delete:DeleteAttachment;put:UpdateAttachment")
 	beego.Router("/V3/attachments/detail", &AttachmentPortal{},
 		"get:ListAttachmentsDetails")
-
 	beego.Router("/V3/attachments", &AttachmentPortal{},
 		"post:CreateAttachment;get:ListAttachments")
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+
+	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

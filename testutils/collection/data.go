@@ -29,9 +29,9 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 			},
-			Name:        "default",
-			Description: "default policy",
-			Extras:      model.ExtraSpec{},
+			Name:             "default",
+			Description:      "default policy",
+			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -39,7 +39,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extras: model.ExtraSpec{
+			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true,
@@ -53,7 +53,7 @@ var (
 		},
 	}
 
-	SampleExtras = model.ExtraSpec{
+	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
 			"isSpaceEfficient":   true,
@@ -259,7 +259,7 @@ var (
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name": "silver",
 			"description": "silver policy",
-			"extras": {
+			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true
@@ -273,7 +273,7 @@ var (
 		}
 	]`
 
-	ByteExtras = `{
+	ByteCustomProperties = `{
 		"dataStorage": {
 			"provisioningPolicy": "Thin",
 			"isSpaceEfficient":   true
@@ -534,13 +534,13 @@ var (
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name":        "default",
 			"description": "default policy",
-			"extras": {}
+			"customProperties": {}
 		}`,
 		`{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name":        "silver",
 			"description": "silver policy",
-			"extras": {
+			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true
