@@ -66,11 +66,12 @@ var (
 		},
 	}
 	fakePools = []*model.StoragePoolSpec{fakePool}
+	fakeAZs   = []string{fakePool.AvailabilityZone}
 )
 
 func TestListAvailabilityZones(t *testing.T) {
 	mockClient := new(dbtest.Client)
-	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakePools, nil)
+	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakeAZs, nil)
 	db.C = mockClient
 
 	r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
@@ -78,7 +79,6 @@ func TestListAvailabilityZones(t *testing.T) {
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	expectedZones := "unknow"
-	t.Log(w)
 	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
 		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
 	}

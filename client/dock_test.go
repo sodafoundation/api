@@ -15,49 +15,11 @@
 package client
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
-
-func NewFakeDockReceiver() Receiver {
-	return &fakeDockReceiver{}
-}
-
-type fakeDockReceiver struct{}
-
-func (*fakeDockReceiver) Recv(
-	string,
-	method string,
-	in interface{},
-	out interface{},
-) error {
-	if strings.ToUpper(method) != "GET" {
-		return errors.New("method not supported!")
-	}
-
-	switch out.(type) {
-	case *model.DockSpec:
-		if err := json.Unmarshal([]byte(ByteDock), out); err != nil {
-			return err
-		}
-		break
-	case *[]*model.DockSpec:
-		if err := json.Unmarshal([]byte(ByteDocks), out); err != nil {
-			return err
-		}
-		break
-	default:
-		return errors.New("output format not supported!")
-	}
-
-	return nil
-}
 
 var fd = &DockMgr{
 	Receiver: NewFakeDockReceiver(),

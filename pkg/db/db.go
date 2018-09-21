@@ -97,11 +97,11 @@ type Client interface {
 
 	DeleteProfile(ctx *c.Context, prfID string) error
 
-	AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error)
+	AddCustomProperty(ctx *c.Context, prfID string, custom model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error)
 
-	ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error)
+	ListCustomProperties(ctx *c.Context, prfID string) (*model.CustomPropertiesSpec, error)
 
-	RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) error
+	RemoveCustomProperty(ctx *c.Context, prfID, customKey string) error
 
 	CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 

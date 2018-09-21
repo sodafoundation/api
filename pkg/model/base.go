@@ -56,6 +56,13 @@ type DataStorageLoS struct {
 	IsSpaceEfficient bool `json:"isSpaceEfficient,omitempty" yaml:"isSpaceEfficient,omitempty"`
 }
 
+func (ds DataStorageLoS) IsEmpty() bool {
+	if (DataStorageLoS{}) == ds {
+		return true
+	}
+	return false
+}
+
 // IOConnectivityLoS can be used to specify the characteristics of storage
 // connectivity.
 type IOConnectivityLoS struct {
@@ -74,7 +81,80 @@ type IOConnectivityLoS struct {
 	MaxBWS int64 `json:"maxBWS,omitempty" yaml:"maxBWS,omitempty"`
 }
 
+func (ic IOConnectivityLoS) IsEmpty() bool {
+	if (IOConnectivityLoS{}) == ic {
+		return true
+	}
+	return false
+}
+
 // DataProtectionLoS describes a replica that protects data from loss. The
 // requirements must be met collectively by the communication path and the
-// replica. Currently it's empty.
-type DataProtectionLos struct{}
+// replica.
+// The expectation is that the services required to implement this
+// capability are part of the advertising system.
+type DataProtectionLoS struct {
+	// IsIsolated shall indicate if the replica is in a separate fault domain.
+	IsIsolated bool `json:"isIsolated,omitempty" yaml:"isIsolated,omitempty"`
+
+	// MinLifetime shall be an ISO 8601 duration that specifies the minimum
+	// required lifetime of the replica. For example, "P3Y6M4DT12H30M5S"
+	// represents a duration of "3 years, 6 months, 4 days, 12 hours, 30 minutes
+	// and 5 seconds".
+	MinLifetime string `json:"minLifetime,omitempty" yaml:"minLifetime,omitempty"`
+
+	// The enumeration literal specifies the geograhic scope of the failure
+	// domain, and currently contains these options:
+	// * Datacenter: A facility that provides communication, power, or cooling
+	//   infrastructure to a co-located set of servers, networking and storage.
+	// * Rack: A container within a datacenter that provides communication,
+	//   power, or cooling to a set of components.
+	// * RackGroup: A set of racks that may share common communication, power,
+	//   or cooling.
+	// * Region: A set of resources that are required to be either geographically
+	//   or politically isolated from resources not in the resources.
+	// * Row: A set of adjacent racks or rackgroups that may share common
+	//   communication, power, or cooling.
+	// * Server: Components of a CPU/memory complex that share the same
+	//   infrastructure.
+	RecoveryGeographicObject string `json:"recoveryGeographicObjective,omitempty" yaml:"recoveryGeographicObjective,omitempty"`
+
+	// This value shall be an ISO 8601 duration that specifies the maximum time
+	// over which source data may be lost on failure. For example,
+	// "P3Y6M4DT12H30M5S" represents a duration of "3 years, 6 months, 4 days,
+	// 12 hours, 30 minutes and 5 seconds".
+	// In the case that IsIsolated = false, failure of the domain is not a
+	// consideration.
+	RecoveryPointObjectiveTime string `json:"recoveryPointObjectiveTime,omitempty" yaml:"recoveryPointObjectiveTime,omitempty"`
+
+	// The enumeration literal specifies the time after a disaster that the
+	// client shall regain conformant service level access to the primary
+	// store. The possible values of this property could be:
+	// * OnlineActive: Active access to synchronous replicas.
+	// * OnlinePassive: Passive access to replicas via the same front-end
+	//   interconnect.
+	// * Nearline: Access to replica via a different front-end interconnect. A
+	//   restore step is required before recovery can commence.
+	// * Offline: No direct connection to the replica. (i.e. To a bunker
+	//   containing backup media.)
+	RecoveryTimeObjective string `json:"recoveryTimeObjective,omitempty" yaml:"recoveryTimeObjective,omitempty"`
+
+	// The enumeration literals may be used to specify the intended outcome of
+	// the replication. The possible values of this property could be:
+	// * Clone: This enumeration literal shall indicate that replication shall
+	//   create a point in time, full copy the source.
+	// * Mirror: This enumeration literal shall indicate that replication shall
+	//   create and maintain a copy of the source.
+	// * Snapshot: This enumeration literal shall indicate that replication
+	//   shall create a point in time, virtual copy of the source.
+	// * TokenizedClone: This enumeration literal shall indicate that replication
+	//   shall create a token based clone.
+	ReplicaType string `json:"replicaType,omitempty" yaml:"replicaType,omitempty"`
+}
+
+func (dp DataProtectionLoS) IsEmpty() bool {
+	if (DataProtectionLoS{}) == dp {
+		return true
+	}
+	return false
+}

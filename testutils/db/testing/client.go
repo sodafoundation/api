@@ -11,22 +11,22 @@ type Client struct {
 	mock.Mock
 }
 
-// AddExtraProperty provides a mock function with given fields: ctx, prfID, ext
-func (_m *Client) AddExtraProperty(ctx *context.Context, prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
-	ret := _m.Called(ctx, prfID, ext)
+// AddCustomProperty provides a mock function with given fields: ctx, prfID, custom
+func (_m *Client) AddCustomProperty(ctx *context.Context, prfID string, custom model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error) {
+	ret := _m.Called(ctx, prfID, custom)
 
-	var r0 *model.ExtraSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, string, model.ExtraSpec) *model.ExtraSpec); ok {
-		r0 = rf(ctx, prfID, ext)
+	var r0 *model.CustomPropertiesSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string, model.CustomPropertiesSpec) *model.CustomPropertiesSpec); ok {
+		r0 = rf(ctx, prfID, custom)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ExtraSpec)
+			r0 = ret.Get(0).(*model.CustomPropertiesSpec)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context, string, model.ExtraSpec) error); ok {
-		r1 = rf(ctx, prfID, ext)
+	if rf, ok := ret.Get(1).(func(*context.Context, string, model.CustomPropertiesSpec) error); ok {
+		r1 = rf(ctx, prfID, custom)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -606,6 +606,52 @@ func (_m *Client) GetVolumeSnapshot(ctx *context.Context, snapshotID string) (*m
 	return r0, r1
 }
 
+// ListAvailabilityZones provides a mock function with given fields: ctx
+func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(*context.Context) []string); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListCustomProperties provides a mock function with given fields: ctx, prfID
+func (_m *Client) ListCustomProperties(ctx *context.Context, prfID string) (*model.CustomPropertiesSpec, error) {
+	ret := _m.Called(ctx, prfID)
+
+	var r0 *model.CustomPropertiesSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.CustomPropertiesSpec); ok {
+		r0 = rf(ctx, prfID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.CustomPropertiesSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, prfID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListDocks provides a mock function with given fields: ctx
 func (_m *Client) ListDocks(ctx *context.Context) ([]*model.DockSpec, error) {
 	ret := _m.Called(ctx)
@@ -650,54 +696,6 @@ func (_m *Client) ListDocksWithFilter(ctx *context.Context, m map[string][]strin
 	}
 
 	return r0, r1
-}
-
-// ListExtraProperties provides a mock function with given fields: ctx, prfID
-func (_m *Client) ListExtraProperties(ctx *context.Context, prfID string) (*model.ExtraSpec, error) {
-	ret := _m.Called(ctx, prfID)
-
-	var r0 *model.ExtraSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.ExtraSpec); ok {
-		r0 = rf(ctx, prfID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ExtraSpec)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
-		r1 = rf(ctx, prfID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-//ListAvaliableZones
-func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
-	ret := _m.Called(ctx)
-	var r0 []*model.StoragePoolSpec
-	var azs []string
-	if rf, ok := ret.Get(0).(func(*context.Context) []*model.StoragePoolSpec); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.StoragePoolSpec)
-		}
-	}
-	for i := 0; i < len(r0); i++ {
-		azs = append(azs, r0[i].AvailabilityZone)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return azs, r1
 }
 
 // ListPools provides a mock function with given fields: ctx
@@ -1068,13 +1066,13 @@ func (_m *Client) ListVolumesWithFilter(ctx *context.Context, m map[string][]str
 	return r0, r1
 }
 
-// RemoveExtraProperty provides a mock function with given fields: ctx, prfID, extraKey
-func (_m *Client) RemoveExtraProperty(ctx *context.Context, prfID string, extraKey string) error {
-	ret := _m.Called(ctx, prfID, extraKey)
+// RemoveCustomProperty provides a mock function with given fields: ctx, prfID, customKey
+func (_m *Client) RemoveCustomProperty(ctx *context.Context, prfID string, customKey string) error {
+	ret := _m.Called(ctx, prfID, customKey)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*context.Context, string, string) error); ok {
-		r0 = rf(ctx, prfID, extraKey)
+		r0 = rf(ctx, prfID, customKey)
 	} else {
 		r0 = ret.Error(0)
 	}

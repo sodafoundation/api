@@ -15,113 +15,14 @@
 package client
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var fv = &VolumeMgr{
 	Receiver: NewFakeVolumeReceiver(),
-}
-
-func NewFakeVolumeReceiver() Receiver {
-	return &fakeVolumeReceiver{}
-}
-
-type fakeVolumeReceiver struct{}
-
-func (*fakeVolumeReceiver) Recv(
-	string,
-	method string,
-	in interface{},
-	out interface{},
-) error {
-	switch strings.ToUpper(method) {
-	case "POST", "PUT":
-		switch out.(type) {
-		case *model.VolumeSpec:
-			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeGroupSpec:
-			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
-				return err
-			}
-			break
-		default:
-			return errors.New("output format not supported!")
-		}
-		break
-	case "GET":
-		switch out.(type) {
-		case *model.VolumeSpec:
-			if err := json.Unmarshal([]byte(ByteVolume), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.VolumeSpec:
-			if err := json.Unmarshal([]byte(ByteVolumes), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(ByteAttachment), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.VolumeAttachmentSpec:
-			if err := json.Unmarshal([]byte(ByteAttachments), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(ByteSnapshot), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.VolumeSnapshotSpec:
-			if err := json.Unmarshal([]byte(ByteSnapshots), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.VolumeGroupSpec:
-			if err := json.Unmarshal([]byte(ByteVolumeGroups), out); err != nil {
-				return err
-			}
-			break
-		case *model.VolumeGroupSpec:
-			if err := json.Unmarshal([]byte(ByteVolumeGroup), out); err != nil {
-				return err
-			}
-			break
-
-		default:
-			return errors.New("output format not supported!")
-		}
-		break
-	case "DELETE":
-		break
-	default:
-		return errors.New("inputed method format not supported!")
-	}
-
-	return nil
 }
 
 func TestCreateVolume(t *testing.T) {

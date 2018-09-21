@@ -77,7 +77,7 @@ type StoragePoolExtraSpec struct {
 	// IOConnectivity represents some suggested IO connectivity capabilities.
 	IOConnectivity IOConnectivityLoS `json:"ioConnectivity,omitempty" yaml:"ioConnectivity,omitempty"`
 	// DataProtection represents some suggested data protection capabilities.
-	DataProtection DataProtectionLos `json:"dataProtection,omitempty" yaml:"dataProtection,omitempty"`
+	DataProtection DataProtectionLoS `json:"dataProtection,omitempty" yaml:"dataProtection,omitempty"`
 
 	// Besides those basic suggested pool properties above, vendors can configure
 	// some advanced features (diskType, IOPS, throughout, latency, etc)
