@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
@@ -37,9 +38,9 @@ func init() {
 		"get:ListVolumesDetails")
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+
+	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -380,6 +381,7 @@ func TestVolumeAction(t *testing.T) {
 }
 
 func TestVolumeActionInitializeConnectionWithError(t *testing.T) {
+	SleepDuration = time.Nanosecond
 	Req := converter.InitializeConnectionReqSpec{}
 
 	Req.InitializeConnection.Connector.Platform = "x86_64"

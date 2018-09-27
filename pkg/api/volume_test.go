@@ -76,7 +76,7 @@ var (
 
 func TestListVolumes(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -122,7 +122,7 @@ func TestListVolumes(t *testing.T) {
 
 func TestListVolumesWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -146,7 +146,7 @@ func TestListVolumesWithBadRequest(t *testing.T) {
 
 func TestGetVolume(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolume, nil)
 	db.C = mockClient
 
@@ -186,7 +186,7 @@ func TestGetVolume(t *testing.T) {
 
 func TestGetVolumeWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -215,7 +215,7 @@ func TestUpdateVolume(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
 	volume.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolume", c.NewAdminContext(), &volume).Return(fakeVolume, nil)
 	db.C = mockClient
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
@@ -277,7 +277,7 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
 	volume.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolume", c.NewAdminContext(),
 		&volume).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -312,7 +312,7 @@ var (
 
 func TestListVolumeSnapshots(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -356,7 +356,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 
 func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"offset":  []string{"0"},
 		"limit":   []string{"1"},
@@ -380,7 +380,7 @@ func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 
 func TestGetVolumeSnapshot(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeSnapshot", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeSnapshot, nil)
 	db.C = mockClient
 
@@ -418,7 +418,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 
 func TestGetVolumeSnapshotWithBadRequest(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeSnapshot", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
@@ -447,7 +447,7 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
 	snapshot.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolumeSnapshot", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78", &snapshot).Return(fakeSnapshot, nil)
 	db.C = mockClient
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
@@ -506,7 +506,7 @@ func TestUpdateVolumeSnapshotWithBadRequest(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
 	snapshot.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolumeSnapshot", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
 		&snapshot).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -547,7 +547,7 @@ var (
 
 func TestListVolumeAttachments(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	m := map[string][]string{
 		"volumeId": []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
 		"offset":   []string{"0"},
@@ -601,7 +601,7 @@ func TestListVolumeAttachments(t *testing.T) {
 
 func TestGetVolumeAttachment(t *testing.T) {
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolumeAttachment", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeAttachment, nil)
 	db.C = mockClient
 
@@ -656,7 +656,7 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&attachment)
 	attachment.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolumeAttachment", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
 		&attachment).Return(fakeAttachment, nil)
 	db.C = mockClient
@@ -723,7 +723,7 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&attachment)
 	attachment.Id = "f4a5e666-c669-4c64-a2a1-8f9ecd560c78"
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("UpdateVolumeAttachment", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
 		&attachment).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -754,7 +754,7 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
 	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)

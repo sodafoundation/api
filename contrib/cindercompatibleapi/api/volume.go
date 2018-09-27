@@ -30,7 +30,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -38,6 +37,11 @@ import (
 type VolumePortal struct {
 	beego.Controller
 }
+
+var (
+	// SleepDuration When running unit tests, it should be set to time.Nanosecond
+	SleepDuration = time.Second
+)
 
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
@@ -278,7 +282,7 @@ func (portal *VolumePortal) VolumeAction() {
 
 		for {
 			sum++
-			time.Sleep(1e9)
+			time.Sleep(SleepDuration)
 			attachment, _ = client.GetVolumeAttachment(attachment.Id)
 			if ("available" == attachment.Status) && ("" != attachment.ConnectionInfo.DriverVolumeType) &&
 				//(nil != attachment.ConnectionInfo.ConnectionData["authPassword"]) &&
