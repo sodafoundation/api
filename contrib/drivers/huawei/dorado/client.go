@@ -202,6 +202,61 @@ func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId
 	return &lun.Data, err
 }
 
+func (c *DoradoClient) CreateLunCopy(name, srcid, tgtid, copyspeed string) (string, error) {
+	url := "/luncopy"
+	islegal := false
+	for _, x := range LunCopySpeedTypes {
+		if x == copyspeed {
+			islegal = true
+			break
+		}
+	}
+	if !islegal {
+		log.Warningf("The copy speed %s is invalid, using Medium Speed instead", copyspeed)
+		copyspeed = LunCopySpeedMedium
+	}
+	data := map[string]interface{}{
+		"TYPE":        219,
+		"NAME":        name,
+		"DESCRIPTION": name,
+		"COPYSPEED":   copyspeed,
+		"LUNCOPYTYPE": "1",
+		"SOURCELUN":   fmt.Sprintf("INVALID;%s;INVALID;INVALID;INVALID", srcid),
+		"TARGETLUN":   fmt.Sprintf("INVALID;%s;INVALID;INVALID;INVALID", tgtid),
+	}
+	lun := &LunResp{}
+	err := c.request("POST", url, data, lun)
+	if err != nil {
+		log.Errorf("Create LunCopy failed :%v", err)
+		return "", err
+	}
+	return lun.Data.Id, err
+}
+func (c *DoradoClient) GetLunInfo(id string) (*Lun, error) {
+	url := "/LUNCOPY/" + id
+	lun := &LunResp{}
+	err := c.request("GET", url, nil, lun)
+	if err != nil {
+		return nil, err
+	}
+	return &lun.Data, nil
+}
+func (c *DoradoClient) StartLunCopy(luncopyid string) error {
+	url := "/LUNCOPY/start"
+	data := map[string]interface{}{
+		"TYPE": 219,
+		"ID":   luncopyid,
+	}
+	err := c.request("PUT", url, data, nil)
+	return err
+}
+
+func (c *DoradoClient) DeleteLunCopy(luncopyid string) error {
+	url := "/LUNCOPY/" + luncopyid
+	err := c.request("DELETE", url, nil, nil)
+	return err
+}
+
 func (c *DoradoClient) GetVolume(id string) (*Lun, error) {
 	lun := &LunResp{}
 	err := c.request("GET", "/lun/"+id, nil, lun)
@@ -267,10 +322,11 @@ func (c *DoradoClient) GetSnapshot(id string) (*Snapshot, error) {
 }
 
 func (c *DoradoClient) GetSnapshotByName(name string) (*Snapshot, error) {
-	snap := &SnapshotResp{}
+	snap := &SnapshotsResp{}
 	err := c.request("GET", "/snapshot?filter=NAME::"+name, nil, snap)
-	return &snap.Data, err
+	return &snap.Data[0], err
 }
+
 func (c *DoradoClient) DeleteSnapshot(id string) error {
 	return c.request("DELETE", "/snapshot/"+id, nil, nil)
 }
