@@ -56,7 +56,107 @@ func (d *Driver) Unset() error {
 	return nil
 }
 
+func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	metadata := opt.GetMetadata()
+	if metadata["hypermetro"] == "true" && metadata["replication_enabled"] == "true" {
+		msg := "Hypermetro and Replication can not be used in the same volume_type"
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+	snapshot, e1 := d.client.GetSnapshotByName(EncodeName(opt.GetSnapshotId()))
+	if e1 != nil {
+		log.Infof("Get Snapshot failed : %v", e1)
+		return nil, e1
+	}
+	volumeDesc := TruncateDescription(opt.GetDescription())
+	poolId, err1 := d.client.GetPoolIdByName(opt.GetPoolName())
+	if err1 != nil {
+		return nil, err1
+	}
+
+	lun, err := d.client.CreateVolume(opt.GetName(), opt.GetSize(), volumeDesc, poolId)
+	if err != nil {
+		log.Error("Create Volume Failed:", err)
+		return nil, err
+	}
+
+	log.Infof("Create Volume from snapshot, source_lun_id : %s , target_lun_id : %s", snapshot.Id, lun.Id)
+
+	err = WaitForCondition(func() (bool, error) {
+		if lun.HealthStatus == StatusHealth && lun.RunningStatus == StatusVolumeReady {
+			return true, nil
+		} else {
+			msg := fmt.Sprintf("Volume state is not mathch, lun ID : %s , HealthStatus : %s,RunningStatus : %s",
+				lun.Id, lun.HealthStatus, lun.RunningStatus)
+			return false, errors.New(msg)
+		}
+	}, LunReadyWaitInterval, LunReadyWaitTimeout)
+	if err != nil {
+		log.Error(err)
+		d.client.DeleteVolume(lun.Id)
+		return nil, err
+	}
+	err = d.copyVolume(opt, snapshot.Id, lun.Id)
+	if err != nil {
+		d.client.DeleteVolume(lun.Id)
+		return nil, err
+	}
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             Sector2Gb(lun.Capacity),
+		Description:      volumeDesc,
+		AvailabilityZone: opt.GetAvailabilityZone(),
+		Metadata: map[string]string{
+			KLunId: lun.Id,
+		},
+	}, nil
+
+}
+func (d *Driver) copyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error {
+	metadata := opt.GetMetadata()
+	copyspeed := metadata["copyspeed"]
+	luncopyid, err := d.client.CreateLunCopy(opt.GetName(), srcid, tgtid, copyspeed)
+
+	if err != nil {
+		log.Error("Create Lun Copy failed,", err)
+		return err
+	}
+	defer d.client.DeleteLunCopy(luncopyid)
+	err = d.client.StartLunCopy(luncopyid)
+	if err != nil {
+		log.Errorf("Start lun: %s copy failed :%v,", luncopyid, err)
+		return err
+	}
+	lunCopyInfo, err1 := d.client.GetLunInfo(luncopyid)
+	if err1 != nil {
+		log.Errorf("Get lun info failed :%v", err1)
+		return err1
+	}
+	err = WaitForCondition(func() (bool, error) {
+		if lunCopyInfo.RunningStatus == StatusLuncopyReady || lunCopyInfo.RunningStatus == StatusLunCoping {
+			return true, nil
+		} else if lunCopyInfo.HealthStatus != StatusHealth {
+			msg := fmt.Sprintf("An error occurred during the luncopy operation. Lun name : %s  ,Lun copy health status : %s ,Lun copy running status : %s ",
+				lunCopyInfo.Name, lunCopyInfo.HealthStatus, lunCopyInfo.RunningStatus)
+			return false, errors.New(msg)
+		}
+		return true, nil
+	}, LunCopyWaitInterval, LunCopyWaitTimeout)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	log.Infof("Copy Volume %s success", tgtid)
+	return nil
+}
+
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	if opt.GetSnapshotId() != "" {
+		return d.createVolumeFromSnapshot(opt)
+	}
 	name := EncodeName(opt.GetId())
 	desc := TruncateDescription(opt.GetDescription())
 	poolId, err := d.client.GetPoolIdByName(opt.GetPoolName())

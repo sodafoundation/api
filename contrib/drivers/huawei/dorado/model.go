@@ -146,6 +146,11 @@ type SnapshotResp struct {
 	Error Error    `json:"error"`
 }
 
+type SnapshotsResp struct {
+	Data  []Snapshot `json:"data"`
+	Error Error      `json:"error"`
+}
+
 type Initiator struct {
 	Id         string `json:"ID"`
 	Name       string `json:"NAME"`
