@@ -479,6 +479,23 @@ func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapsh
 	}
 	c.volumeController.SetDock(dockInfo)
 
+	if in.Metadata == nil {
+		in.Metadata = map[string]string{}
+	}
+	// Get snapshot profile
+	if in.ProfileId != "" {
+		profile, err := db.C.GetProfile(ctx, in.ProfileId)
+		if err != nil {
+			log.Error("When get profile resource:", err)
+			errchan <- err
+			return
+		}
+
+		if profile.SnapshotProperties.Topology.Bucket != "" {
+			in.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
+		}
+	}
+
 	snp, err := c.volumeController.CreateVolumeSnapshot(
 		&pb.CreateVolumeSnapshotOpts{
 			Id:          in.Id,

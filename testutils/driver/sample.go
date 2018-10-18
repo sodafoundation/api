@@ -102,6 +102,14 @@ func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
+func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
+	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not implement yet."}
+}
+
+func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not implement yet."}
+}
+
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
 }

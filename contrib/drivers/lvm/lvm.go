@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/backup"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
@@ -30,6 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
+	"os"
 )
 
 const (
@@ -384,6 +386,67 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
+func (d *Driver) uploadSnapshot(lvsPath string, bucket string) (string, error) {
+	mc, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver, err: %v", err)
+		return "", err
+	}
+
+	if err := mc.SetUp(); err != nil {
+		return "", err
+	}
+	defer mc.CleanUp()
+
+	file, err := os.Open(lvsPath)
+	if err != nil {
+		log.Errorf("open lvm snapshot file, err: %v", err)
+		return "", err
+	}
+	defer file.Close()
+
+	metadata := map[string]string{
+		"bucket": bucket,
+	}
+	b := &backup.BackupSpec{
+		Id:       uuid.NewV4().String(),
+		Metadata: metadata,
+	}
+
+	if err := mc.Backup(b, file); err != nil {
+		log.Errorf("upload snapshot to multi-cloud failed, err: %v", err)
+		return "", err
+	}
+	return b.Id, nil
+}
+
+func (d *Driver) deleteUploadedSnapshot(backupId string, bucket string) error {
+	mc, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver failed, err: %v", err)
+		return err
+	}
+
+	if err := mc.SetUp(); err != nil {
+		return err
+	}
+	defer mc.CleanUp()
+
+	metadata := map[string]string{
+		"bucket": bucket,
+	}
+	b := &backup.BackupSpec{
+		Id:       backupId,
+		Metadata: metadata,
+	}
+
+	if err := mc.Delete(b); err != nil {
+		log.Errorf("delete backup snapshot  failed, err: %v", err)
+		return err
+	}
+	return nil
+}
+
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var id = opt.GetId()
@@ -421,6 +484,18 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		}
 	}
 
+	metadata := map[string]string{"lvsPath": lvsPath}
+	if bucket, ok := opt.Metadata["bucket"]; ok {
+		log.Info("update load snapshot to :", bucket)
+		backupId, err := d.uploadSnapshot(lvsPath, bucket)
+		if err != nil {
+			d.handler("lvremove", []string{"-f", lvsPath})
+			return nil, err
+		}
+		metadata["backupId"] = backupId
+		metadata["bucket"] = bucket
+	}
+
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: id,
@@ -430,9 +505,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		Description: opt.GetDescription(),
 		Status:      lvStatus,
 		VolumeId:    opt.GetVolumeId(),
-		Metadata: map[string]string{
-			"lvsPath": lvsPath,
-		},
+		Metadata:    metadata,
 	}, nil
 }
 
@@ -458,10 +531,18 @@ func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec,
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	lvsPath, ok := opt.GetMetadata()["lvsPath"]
 	if !ok {
-		err := errors.New("Failed to find logic volume snapshot path in volume snapshot metadata!")
+		err := errors.New("failed to find logic volume snapshot path in volume snapshot " +
+			"metadata! ingnore it")
 		log.Error(err)
-		return err
+		return nil
 	}
+	if bucket, ok := opt.Metadata["bucket"]; ok {
+		log.Info("remove snapshot in multi-cloud :", bucket)
+		if err := d.deleteUploadedSnapshot(opt.Metadata["backupId"], bucket); err != nil {
+			return err
+		}
+	}
+
 	if _, err := d.handler("lvremove", []string{
 		"-f", lvsPath,
 	}); err != nil {
@@ -543,6 +624,14 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
+}
+
+func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
+	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not implement yet."}
+}
+
+func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not implement yet."}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
