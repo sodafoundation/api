@@ -69,16 +69,16 @@ chown stack:stack $DEV_STACK_LOCAL_CONF
 osds::keystone::opensds_conf() {
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [keystone_authtoken]
-memcached_servers = $HOST_IP:11211
+memcached_servers = $KEYSTONE_IP:11211
 signing_dir = /var/cache/opensds
 cafile = /opt/stack/data/ca-bundle.pem
-auth_uri = http://$HOST_IP/identity
+auth_uri = http://$KEYSTONE_IP/identity
 project_domain_name = Default
 project_name = service
 user_domain_name = Default
 password = $STACK_PASSWORD
 username = $OPENSDS_SERVER_NAME
-auth_url = http://$HOST_IP/identity
+auth_url = http://$KEYSTONE_IP/identity
 auth_type = password
 
 OPENSDS_GLOBAL_CONFIG_DOC
@@ -100,6 +100,15 @@ osds::keystone::create_user_and_endpoint(){
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION admin http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
 }
 
+osds::keystone::delete_user(){
+    . $DEV_STACK_DIR/openrc admin admin
+    openstack service delete opensds$OPENSDS_VERSION    
+    openstack role remove service --project service --group service
+    openstack group remove user service opensds
+    openstack group delete service    
+    openstack user delete $OPENSDS_SERVER_NAME --domain default
+}
+
 osds::keystone::delete_redundancy_data() {
     . $DEV_STACK_DIR/openrc admin admin
     openstack project delete demo
@@ -118,19 +127,27 @@ osds::keystone::download_code(){
 }
 
 osds::keystone::install(){
-    osds::keystone::create_user
-    osds::keystone::download_code
-    osds::keystone::opensds_conf
+    if [ "true" != $USE_EXISTING_KEYSTONE] 
+    then
+        KEYSTONE_IP=$HOST_IP
+        osds::keystone::create_user
+        osds::keystone::download_code
+        osds::keystone::opensds_conf
 
-    # If keystone is ready to start, there is no need continue next step.
-    if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
-        return
+        # If keystone is ready to start, there is no need continue next step.
+        if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
+            return
+        fi
+        osds::keystone::devstack_local_conf
+        cd ${DEV_STACK_DIR}
+        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
+        osds::keystone::create_user_and_endpoint
+        osds::keystone::delete_redundancy_data
+    else
+        osds::keystone::opensds_conf
+        cd ${DEV_STACK_DIR}
+        osds::keystone::create_user_and_endpoint
     fi
-    osds::keystone::devstack_local_conf
-    cd ${DEV_STACK_DIR}
-    su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
-    osds::keystone::create_user_and_endpoint
-    osds::keystone::delete_redundancy_data
 }
 
 osds::keystone::cleanup() {
@@ -138,7 +155,12 @@ osds::keystone::cleanup() {
 }
 
 osds::keystone::uninstall(){
-    su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+    if [ "true" != $USE_EXISTING_KEYSTONE] 
+    then
+        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+    else
+        osds::keystone::delete_user
+    fi
 }
 
 osds::keystone::uninstall_purge(){
