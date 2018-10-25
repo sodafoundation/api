@@ -25,7 +25,7 @@ import (
 
 const (
 	ConfFile        = "/etc/opensds/driver/multi-cloud.yaml"
-	UploadChunkSize = 1024 * 1024 * 5
+	UploadChunkSize = 1024 * 1024 * 50
 )
 
 func init() {
