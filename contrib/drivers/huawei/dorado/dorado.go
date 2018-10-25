@@ -724,11 +724,11 @@ func (d *Driver) clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId st
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not implement yet."}
+	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not implement yet."}
+	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {

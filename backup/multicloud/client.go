@@ -28,9 +28,10 @@ import (
 )
 
 const (
-	defaultTenantId = "adminTenantId"
-	defaultTimeOut  = 60 * time.Second
-	ApiVersion      = "v1"
+	DefaultTenantId      = "adminTenantId"
+	DefaultTimeout       = 60 // in Seconds
+	DefaultUploadTimeout = 30 // in Seconds
+	ApiVersion           = "v1"
 )
 
 type AuthOptions struct {
@@ -41,16 +42,17 @@ type AuthOptions struct {
 }
 
 type Client struct {
-	endpoint string
-	userName string
-	password string
-	tenantId string
-	version  string
-	baseURL  string
-	timeOut  time.Duration
+	endpoint      string
+	userName      string
+	password      string
+	tenantId      string
+	version       string
+	baseURL       string
+	timeout       time.Duration
+	uploadTimeout time.Duration
 }
 
-func NewClient(opt *AuthOptions) (*Client, error) {
+func NewClient(opt *AuthOptions, uploadTimeout int64) (*Client, error) {
 	u, err := url.Parse(opt.Endpoint)
 	if err != nil {
 		return nil, err
@@ -59,13 +61,14 @@ func NewClient(opt *AuthOptions) (*Client, error) {
 	baseURL := u.String() + "/"
 
 	c := &Client{
-		endpoint: opt.Endpoint,
-		userName: opt.UserName,
-		password: opt.Password,
-		tenantId: opt.TenantId,
-		version:  ApiVersion,
-		baseURL:  baseURL,
-		timeOut:  defaultTimeOut,
+		endpoint:      opt.Endpoint,
+		userName:      opt.UserName,
+		password:      opt.Password,
+		tenantId:      opt.TenantId,
+		version:       ApiVersion,
+		baseURL:       baseURL,
+		timeout:       time.Duration(DefaultTimeout) * time.Minute,
+		uploadTimeout: time.Duration(uploadTimeout) * time.Minute,
 	}
 
 	return c, nil
@@ -76,7 +79,7 @@ type ReqSettingCB func(req *httplib.BeegoHTTPRequest) error
 func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([]byte, http.Header, error) {
 	req := httplib.NewBeegoRequest(u, method)
 	req.Header("Content-Type", "application/xml")
-	req.SetTimeout(c.timeOut, c.timeOut)
+	req.SetTimeout(c.timeout, c.timeout)
 	if cb != nil {
 		if err := cb(req); err != nil {
 			return nil, nil, err
@@ -125,7 +128,7 @@ func (c *Client) request(method, p string, in, out interface{}, cb ReqSettingCB)
 	}
 
 	if out != nil {
-		log.V(8).Infof("Response:\n%s\n", string(b))
+		log.V(5).Infof("Response:\n%s\n", string(b))
 		err := xml.Unmarshal(b, out)
 		if err != nil {
 			log.Errorf("unmarshal error, reason:%v", err)
@@ -232,7 +235,7 @@ func (c *Client) UploadPart(bucketName, objectKey string, partNum int64, uploadI
 	out := &UploadPartResult{}
 	reqSettingCB := func(req *httplib.BeegoHTTPRequest) error {
 		req.Header("Content-Length", strconv.FormatInt(size, 10))
-		req.SetTimeout(30*time.Minute, 30*time.Minute)
+		req.SetTimeout(c.uploadTimeout, c.uploadTimeout)
 		return nil
 	}
 	if err := c.request("PUT", p, data, out, reqSettingCB); err != nil {
@@ -257,6 +260,7 @@ func (c *Client) CompleteMultipartUpload(
 }
 
 func (c *Client) AbortMultipartUpload(bucketName, objectKey string) error {
+	// TODO: multi-cloud has not implemented it yet. so just comment it.
 	//p := path.Join("s3", "AbortMultipartUpload", bucketName, objectKey)
 	//if err := c.request("DELETE", p, nil, nil); err != nil {
 	//	return err

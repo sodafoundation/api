@@ -16,9 +16,6 @@ package multicloud
 
 import (
 	"fmt"
-	"github.com/opensds/opensds/backup"
-	"github.com/satori/go.uuid"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -34,11 +31,12 @@ func TestLoadConf(t *testing.T) {
 		t.Errorf("load conf file failed")
 	}
 	expect := &MultiCloudConf{
-		Endpoint: "http://127.0.0.1:8088",
-		TenantId: "FakeTenantId",
+		Endpoint:      "http://127.0.0.1:8088",
+		TenantId:      "FakeTenantId",
+		UploadTimeout: DefaultUploadTimeout,
 	}
+	fmt.Println(conf)
 	if !reflect.DeepEqual(expect, conf) {
 		t.Errorf("load conf file error")
 	}
 }
-

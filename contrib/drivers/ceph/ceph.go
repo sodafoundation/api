@@ -602,21 +602,21 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not implement yet."}
+	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet"}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not implement yet."}
+	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet"}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
+	return nil, &model.NotImplementError{"Method CreateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
-	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
-	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
 }
