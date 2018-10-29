@@ -21,20 +21,22 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/astaxie/beego"
+
 	bctx "github.com/astaxie/beego/context"
+	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-	"github.com/opensds/opensds/pkg/api/filter/auth"
-	"github.com/opensds/opensds/pkg/api/filter/context"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 var (
-	client *c.Client
+	OpensdsEndPoint string
+	IsTest          bool
 )
 
 // ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
@@ -46,60 +48,29 @@ type ErrorSpec struct {
 
 // Run ...
 func Run(CinderEndPoint string) {
-	ep, ok := os.LookupEnv(c.OpensdsEndpoint)
+	OpensdsEP, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
 			"the environment variable " + c.OpensdsEndpoint)
 		return
 	}
-	cfg := &c.Config{Endpoint: ep}
 
-	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
-	if !ok {
-		authStrategy = c.Noauth
-		fmt.Println("WARNING: Not found Env " + c.OpensdsAuthStrategy + ", use default(noauth)")
+	if "" == OpensdsEP {
+		OpensdsEndPoint = constants.DefaultOpensdsEndpoint
+		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + OpensdsEndPoint)
+	} else {
+		OpensdsEndPoint = OpensdsEP
 	}
 
-	switch authStrategy {
-	case c.Keystone:
-		cfg.AuthOptions = c.LoadKeystoneAuthOptionsFromEnv()
-	case c.Noauth:
-		cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
-	default:
-		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
-	}
-
-	client = c.NewClient(cfg)
-	// CinderEndPoint: http://127.0.0.1:8777/v3 http://10.10.3.173/volume/v3
+	// CinderEndPoint: http://127.0.0.1:8777/v3
 	words := strings.Split(CinderEndPoint, "/")
-	versionPosition := 3
-	isHaveV3 := false
-
-	for i := 0; i < len(words); i++ {
-		if words[i] == converter.APIVersion {
-			versionPosition = i
-			isHaveV3 = true
-		}
-	}
-
-	fmt.Println(versionPosition)
-	if (versionPosition < 3) || (false == isHaveV3) {
+	if (len(words) < 4) || (words[3] != converter.APIVersion) {
 		fmt.Println("The environment variable CINDER_ENDPOINT is set incorrectly")
 		return
 	}
 
-	prefix := ""
-	for j := 3; j <= versionPosition; j++ {
-		prefix = prefix + words[j]
-		if j != versionPosition {
-			prefix = prefix + "/"
-		}
-	}
-
-	fmt.Println(prefix)
-
 	ns :=
-		beego.NewNamespace(prefix,
+		beego.NewNamespace("/"+converter.APIVersion,
 			beego.NSCond(func(ctx *bctx.Context) bool {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
@@ -128,12 +99,54 @@ func Run(CinderEndPoint string) {
 			),
 		)
 
-	beego.InsertFilter("*", beego.BeforeExec, context.Factory())
-	beego.InsertFilter("*", beego.BeforeExec, auth.Factory())
 	beego.AddNamespace(ns)
-
 	beego.Router("/", &VersionPortal{}, "get:ListAllAPIVersions")
 
 	// start service
+	IsTest = false
 	beego.Run(words[2])
+}
+
+// NewClient method creates a new Client.
+func NewClient(Ctx *bctx.Context) *c.Client {
+	tenantId := GetProjectId(Ctx)
+	tokenID := Ctx.Input.Header(constants.AuthTokenHeader)
+	auth := c.KeystoneAuthOptions{TenantID: tokenID,
+		TokenID: tokenID}
+
+	log.V(5).Info("TenantId:" + tenantId + ", " + "TokenID:" + tokenID + "!!!")
+	var r c.Receiver
+	r = &c.KeystoneReciver{Auth: &auth}
+
+	if IsTest == false {
+		return &c.Client{
+			ProfileMgr:     c.NewProfileMgr(r, OpensdsEndPoint, tenantId),
+			DockMgr:        c.NewDockMgr(r, OpensdsEndPoint, tenantId),
+			PoolMgr:        c.NewPoolMgr(r, OpensdsEndPoint, tenantId),
+			VolumeMgr:      c.NewVolumeMgr(r, OpensdsEndPoint, tenantId),
+			VersionMgr:     c.NewVersionMgr(r, OpensdsEndPoint, tenantId),
+			ReplicationMgr: c.NewReplicationMgr(r, OpensdsEndPoint, tenantId),
+		}
+	}
+
+	return c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+}
+
+func GetProjectId(Ctx *bctx.Context) string {
+	u, err := url.Parse(Ctx.Request.URL.String())
+	if err != nil {
+		log.Error("url.Parse failed:" + err.Error())
+		return ""
+	}
+
+	// /v3/{project_id}/
+	words := strings.Split(u.Path, "/")
+
+	if (len(words) >= 3) && (len(words[2]) > 0) {
+		log.V(5).Info("project_id is" + words[2])
+		return words[2]
+	} else {
+		log.Error("there is no project_id in the path:" + u.Path)
+		return ""
+	}
 }

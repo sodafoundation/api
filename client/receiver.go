@@ -108,26 +108,26 @@ func (*receiver) Recv(url string, method string, input interface{}, output inter
 }
 
 func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
-	k := &KeystoneReciver{auth: auth}
+	k := &KeystoneReciver{Auth: auth}
 	k.GetToken()
 	return k
 }
 
 type KeystoneReciver struct {
-	auth *KeystoneAuthOptions
+	Auth *KeystoneAuthOptions
 }
 
 func (k *KeystoneReciver) GetToken() error {
 	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: k.auth.IdentityEndpoint,
-		Username:         k.auth.Username,
-		UserID:           k.auth.UserID,
-		Password:         k.auth.Password,
-		DomainID:         k.auth.DomainID,
-		DomainName:       k.auth.DomainName,
-		TenantID:         k.auth.TenantID,
-		TenantName:       k.auth.TenantName,
-		AllowReauth:      k.auth.AllowReauth,
+		IdentityEndpoint: k.Auth.IdentityEndpoint,
+		Username:         k.Auth.Username,
+		UserID:           k.Auth.UserID,
+		Password:         k.Auth.Password,
+		DomainID:         k.Auth.DomainID,
+		DomainName:       k.Auth.DomainName,
+		TenantID:         k.Auth.TenantID,
+		TenantName:       k.Auth.TenantName,
+		AllowReauth:      k.Auth.AllowReauth,
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
@@ -149,8 +149,8 @@ func (k *KeystoneReciver) GetToken() error {
 	if err != nil {
 		return fmt.Errorf("When get extract project session: %v", err)
 	}
-	k.auth.TenantID = project.ID
-	k.auth.TokenID = token.ID
+	k.Auth.TenantID = project.ID
+	k.Auth.TokenID = token.ID
 	return nil
 }
 
@@ -167,7 +167,7 @@ func (k *KeystoneReciver) Recv(url string, method string, body interface{}, outp
 		}
 
 		headers := HeaderOption{}
-		headers[constants.AuthTokenHeader] = k.auth.TokenID
+		headers[constants.AuthTokenHeader] = k.Auth.TokenID
 		return request(url, method, headers, body, output)
 	})
 }

@@ -37,7 +37,7 @@ type VersionPortal struct {
 
 // ListAllAPIVersions ...
 func (portal *VersionPortal) ListAllAPIVersions() {
-	volumes, err := client.ListVersions()
+	volumes, err := NewClient(portal.Ctx).ListVersions()
 	if err != nil {
 		reason := fmt.Sprintf("List All Api Versions failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

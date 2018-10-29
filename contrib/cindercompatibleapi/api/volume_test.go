@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
-	c "github.com/opensds/opensds/client"
+
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
@@ -39,7 +39,7 @@ func init() {
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	IsTest = true
 
 }
 

@@ -379,7 +379,7 @@ func UpdateVolumeResp(volume *model.VolumeSpec) *UpdateVolumeRespSpec {
 	resp.Volume.Description = volume.Description
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
-	resp.Volume.VolumeType = volume.BaseModel.CreatedAt
+	resp.Volume.VolumeType = volume.ProfileId
 
 	return &resp
 }

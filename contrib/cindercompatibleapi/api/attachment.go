@@ -39,7 +39,7 @@ type AttachmentPortal struct {
 func (portal *AttachmentPortal) DeleteAttachment() {
 	id := portal.Ctx.Input.Param(":attachmentId")
 	attachment := model.VolumeAttachmentSpec{}
-	err := client.DeleteVolumeAttachment(id, &attachment)
+	err := NewClient(portal.Ctx).DeleteVolumeAttachment(id, &attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete attachment failed: %v", err)
@@ -56,7 +56,7 @@ func (portal *AttachmentPortal) DeleteAttachment() {
 // GetAttachment ...
 func (portal *AttachmentPortal) GetAttachment() {
 	id := portal.Ctx.Input.Param(":attachmentId")
-	attachment, err := client.GetVolumeAttachment(id)
+	attachment, err := NewClient(portal.Ctx).GetVolumeAttachment(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show attachment details failed: %v", err)
@@ -83,7 +83,7 @@ func (portal *AttachmentPortal) GetAttachment() {
 
 // ListAttachmentsDetails ...
 func (portal *AttachmentPortal) ListAttachmentsDetails() {
-	attachments, err := client.ListVolumeAttachments()
+	attachments, err := NewClient(portal.Ctx).ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -109,7 +109,7 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 
 // ListAttachments ...
 func (portal *AttachmentPortal) ListAttachments() {
-	attachments, err := client.ListVolumeAttachments()
+	attachments, err := NewClient(portal.Ctx).ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -146,7 +146,7 @@ func (portal *AttachmentPortal) CreateAttachment() {
 	}
 
 	attachment := converter.CreateAttachmentReq(&cinderReq)
-	attachment, err := client.CreateVolumeAttachment(attachment)
+	attachment, err := NewClient(portal.Ctx).CreateVolumeAttachment(attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Create attachment failed: %s", err.Error())
@@ -185,7 +185,7 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 	}
 
 	attachment := converter.UpdateAttachmentReq(&cinderReq)
-	attachment, err := client.UpdateVolumeAttachment(id, attachment)
+	attachment, err := NewClient(portal.Ctx).UpdateVolumeAttachment(id, attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update an attachment failed: %s", err.Error())

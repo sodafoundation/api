@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
-	c "github.com/opensds/opensds/client"
+
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
@@ -37,7 +37,7 @@ func init() {
 	beego.Router("/v3/types/:volumeTypeId/extra_specs/:key", &TypePortal{},
 		"get:ShowExtraProperty;put:UpdateExtraProperty;delete:DeleteExtraProperty")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	IsTest = true
 }
 
 ////////////////////////////////////////////////////////////////////////////////

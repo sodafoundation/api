@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
-	c "github.com/opensds/opensds/client"
+
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
 )
 
@@ -35,7 +35,7 @@ func init() {
 	beego.Router("/V3/attachments", &AttachmentPortal{},
 		"post:CreateAttachment;get:ListAttachments")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	IsTest = true
 }
 
 ////////////////////////////////////////////////////////////////////////////////
