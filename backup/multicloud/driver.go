@@ -15,12 +15,13 @@
 package multicloud
 
 import (
-	"github.com/golang/glog"
-	"github.com/opensds/opensds/backup"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/golang/glog"
+	"github.com/opensds/opensds/backup"
 )
 
 const (

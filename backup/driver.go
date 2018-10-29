@@ -58,7 +58,7 @@ func RegisterBackupCtor(bType string, fun ctorFun) error {
 	return nil
 }
 
-func UnRegisterBackupCtor(cType string) {
+func UnregisterBackupCtor(cType string) {
 	if _, exist := ctorFunMap[cType]; !exist {
 		return
 	}

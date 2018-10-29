@@ -236,7 +236,6 @@ message DeleteAttachmentOpts {
     string AccessProtocol = 7;
 }
 
-
 // CreateSnapshotAttachmentOpts is a structure which indicates all required
 // properties for creating a snapshot attachment.
 message CreateSnapshotAttachmentOpts {

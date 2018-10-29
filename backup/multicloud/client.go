@@ -15,16 +15,16 @@
 package multicloud
 
 import (
+	"encoding/xml"
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
-
-	"encoding/xml"
-	"fmt"
-	"github.com/astaxie/beego/httplib"
-	log "github.com/golang/glog"
 	"strconv"
 	"time"
+
+	"github.com/astaxie/beego/httplib"
+	log "github.com/golang/glog"
 )
 
 const (
@@ -60,7 +60,7 @@ func NewClient(opt *AuthOptions, uploadTimeout int64) (*Client, error) {
 	u.Path = path.Join(u.Path, ApiVersion)
 	baseURL := u.String() + "/"
 
-	c := &Client{
+	return &Client{
 		endpoint:      opt.Endpoint,
 		userName:      opt.UserName,
 		password:      opt.Password,
@@ -69,9 +69,7 @@ func NewClient(opt *AuthOptions, uploadTimeout int64) (*Client, error) {
 		baseURL:       baseURL,
 		timeout:       time.Duration(DefaultTimeout) * time.Minute,
 		uploadTimeout: time.Duration(uploadTimeout) * time.Minute,
-	}
-
-	return c, nil
+	}, nil
 }
 
 type ReqSettingCB func(req *httplib.BeegoHTTPRequest) error
@@ -135,20 +133,6 @@ func (c *Client) request(method, p string, in, out interface{}, cb ReqSettingCB)
 			return err
 		}
 	}
-	return nil
-}
-
-func (c *Client) CreateBucket(backendId string) error {
-	return nil
-}
-
-func (c *Client) ListBucket() ([]string, error) {
-	var bucketList []string
-	return bucketList, nil
-}
-
-func (c *Client) DeleteBucket(bucketName string) error {
-
 	return nil
 }
 
