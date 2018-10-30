@@ -60,7 +60,8 @@ func (portal *TypePortal) UpdateType() {
 		return
 	}
 
-	profile, err = NewClient(portal.Ctx).UpdateProfile(id, profile)
+	NewClient(portal.Ctx)
+	profile, err = OpensdsClient.UpdateProfile(id, profile)
 	if err != nil {
 		reason := fmt.Sprintf("Update a volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -97,7 +98,8 @@ func (portal *TypePortal) AddExtraProperty() {
 	}
 
 	profileExtra := converter.AddExtraReq(&cinderReq)
-	profileExtra, err := NewClient(portal.Ctx).AddCustomProperty(id, profileExtra)
+	NewClient(portal.Ctx)
+	profileExtra, err := OpensdsClient.AddCustomProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Create or update extra specs for volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -125,7 +127,8 @@ func (portal *TypePortal) AddExtraProperty() {
 // ListExtraProperties ...
 func (portal *TypePortal) ListExtraProperties() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	profileExtra, err := NewClient(portal.Ctx).ListCustomProperties(id)
+	NewClient(portal.Ctx)
+	profileExtra, err := OpensdsClient.ListCustomProperties(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show all extra specifications for volume type failed: %s", err.Error())
@@ -153,7 +156,8 @@ func (portal *TypePortal) ListExtraProperties() {
 // ShowExtraProperty ...
 func (portal *TypePortal) ShowExtraProperty() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	profileExtra, err := NewClient(portal.Ctx).ListCustomProperties(id)
+	NewClient(portal.Ctx)
+	profileExtra, err := OpensdsClient.ListCustomProperties(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show extra specification for volume type failed: %s", err.Error())
@@ -211,7 +215,8 @@ func (portal *TypePortal) UpdateExtraProperty() {
 		return
 	}
 
-	profileExtra, err = NewClient(portal.Ctx).AddCustomProperty(id, profileExtra)
+	NewClient(portal.Ctx)
+	profileExtra, err = OpensdsClient.AddCustomProperty(id, profileExtra)
 	if err != nil {
 		reason := fmt.Sprintf("Update extra specification for volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -240,7 +245,8 @@ func (portal *TypePortal) UpdateExtraProperty() {
 func (portal *TypePortal) DeleteExtraProperty() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
 	key := portal.Ctx.Input.Param(":key")
-	err := NewClient(portal.Ctx).RemoveCustomProperty(id, key)
+	NewClient(portal.Ctx)
+	err := OpensdsClient.RemoveCustomProperty(id, key)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete extra specification for volume type failed: %s", err.Error())
@@ -264,9 +270,10 @@ func (portal *TypePortal) GetType() {
 	}
 
 	var profile *model.ProfileSpec
+	NewClient(portal.Ctx)
 
 	if "default" != id {
-		foundProfile, err := NewClient(portal.Ctx).GetProfile(id)
+		foundProfile, err := OpensdsClient.GetProfile(id)
 
 		if err != nil {
 			reason := fmt.Sprintf("Get profile failed: %v", err)
@@ -278,7 +285,7 @@ func (portal *TypePortal) GetType() {
 
 		profile = foundProfile
 	} else {
-		profiles, err := NewClient(portal.Ctx).ListProfiles()
+		profiles, err := OpensdsClient.ListProfiles()
 		if err != nil {
 			reason := fmt.Sprintf("List profiles failed: %v", err)
 			portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -320,7 +327,8 @@ func (portal *TypePortal) GetType() {
 // DeleteType ...
 func (portal *TypePortal) DeleteType() {
 	id := portal.Ctx.Input.Param(":volumeTypeId")
-	err := NewClient(portal.Ctx).DeleteProfile(id)
+	NewClient(portal.Ctx)
+	err := OpensdsClient.DeleteProfile(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a volume type failed: %v", err)
@@ -336,7 +344,8 @@ func (portal *TypePortal) DeleteType() {
 
 // ListTypes ...
 func (portal *TypePortal) ListTypes() {
-	profiles, err := NewClient(portal.Ctx).ListProfiles()
+	NewClient(portal.Ctx)
+	profiles, err := OpensdsClient.ListProfiles()
 	if err != nil {
 		reason := fmt.Sprintf("List all volume types failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -380,7 +389,8 @@ func (portal *TypePortal) CreateType() {
 		return
 	}
 
-	profile, err = NewClient(portal.Ctx).CreateProfile(profile)
+	NewClient(portal.Ctx)
+	profile, err = OpensdsClient.CreateProfile(profile)
 	if err != nil {
 		reason := fmt.Sprintf("Create a volume type failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)

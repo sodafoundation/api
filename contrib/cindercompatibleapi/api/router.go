@@ -36,7 +36,7 @@ import (
 
 var (
 	OpensdsEndPoint string
-	IsTest          bool
+	OpensdsClient   *c.Client
 )
 
 // ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
@@ -48,18 +48,18 @@ type ErrorSpec struct {
 
 // Run ...
 func Run(CinderEndPoint string) {
-	OpensdsEP, ok := os.LookupEnv(c.OpensdsEndpoint)
+	OpensdsEndPointFromEnv, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
 			"the environment variable " + c.OpensdsEndpoint)
 		return
 	}
 
-	if "" == OpensdsEP {
+	if "" == OpensdsEndPointFromEnv {
 		OpensdsEndPoint = constants.DefaultOpensdsEndpoint
 		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + OpensdsEndPoint)
 	} else {
-		OpensdsEndPoint = OpensdsEP
+		OpensdsEndPoint = OpensdsEndPointFromEnv
 	}
 
 	// CinderEndPoint: http://127.0.0.1:8777/v3
@@ -103,23 +103,19 @@ func Run(CinderEndPoint string) {
 	beego.Router("/", &VersionPortal{}, "get:ListAllAPIVersions")
 
 	// start service
-	IsTest = false
 	beego.Run(words[2])
 }
 
 // NewClient method creates a new Client.
-func NewClient(Ctx *bctx.Context) *c.Client {
+func NewClient(Ctx *bctx.Context) {
 	tenantId := GetProjectId(Ctx)
 	tokenID := Ctx.Input.Header(constants.AuthTokenHeader)
-	auth := c.KeystoneAuthOptions{TenantID: tokenID,
-		TokenID: tokenID}
 
-	log.V(5).Info("TenantId:" + tenantId + ", " + "TokenID:" + tokenID + "!!!")
-	var r c.Receiver
-	r = &c.KeystoneReciver{Auth: &auth}
+	if len(tenantId) > 0 && len(tokenID) > 0 {
+		r := &c.KeystoneReciver{Auth: &c.KeystoneAuthOptions{TenantID: tokenID,
+			TokenID: tokenID}}
 
-	if IsTest == false {
-		return &c.Client{
+		OpensdsClient = &c.Client{
 			ProfileMgr:     c.NewProfileMgr(r, OpensdsEndPoint, tenantId),
 			DockMgr:        c.NewDockMgr(r, OpensdsEndPoint, tenantId),
 			PoolMgr:        c.NewPoolMgr(r, OpensdsEndPoint, tenantId),
@@ -127,11 +123,13 @@ func NewClient(Ctx *bctx.Context) *c.Client {
 			VersionMgr:     c.NewVersionMgr(r, OpensdsEndPoint, tenantId),
 			ReplicationMgr: c.NewReplicationMgr(r, OpensdsEndPoint, tenantId),
 		}
+	} else {
+		log.Error("Failed to create a client, TenantId:" + tenantId + ", " +
+			"TokenID:" + tokenID + "!!!")
 	}
-
-	return c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
+// GetProjectId Get the value of project_id
 func GetProjectId(Ctx *bctx.Context) string {
 	u, err := url.Parse(Ctx.Request.URL.String())
 	if err != nil {
