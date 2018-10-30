@@ -24,17 +24,15 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
-	//"github.com/opensds/opensds/pkg/controller"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	//. "github.com/opensds/opensds/testutils/collection"
-	c "github.com/opensds/opensds/pkg/context"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
 func init() {
-	beego.Router("/v1beta/block/groups", &VolumeGroupPortal{}, "post:CreateVolumeGroup")
-	beego.Router("/v1beta/block/groups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup")
+	beego.Router("/v1beta/block/volumeGroups", &VolumeGroupPortal{}, "get:ListVolumeGroups")
+	beego.Router("/v1beta/block/volumeGroups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup")
 }
 
 var (
@@ -52,55 +50,67 @@ var (
 	fakeVolumeGroups = []*model.VolumeGroupSpec{fakeVolumeGroup}
 )
 
-//func TestListVolumeGroups(t *testing.T) {
+func TestListVolumeGroups(t *testing.T) {
 
-//	mockClient := new(dbtest.Client)
-//	mockClient.On("ListVolumeGroups").Return(fakeVolumeGroups, nil)
-//	db.C = mockClient
+	mockClient := new(dbtest.Client)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumeGroupsWithFilter", c.NewAdminContext(), m).Return(fakeVolumeGroups, nil)
+	db.C = mockClient
 
-//	r, _ := http.NewRequest("GET", "/v1beta/block/groups?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-//	w := httptest.NewRecorder()
-//	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumeGroups?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-//	var output []model.VolumeGroupSpec
-//	json.Unmarshal(w.Body.Bytes(), &output)
+	var output []model.VolumeGroupSpec
+	json.Unmarshal(w.Body.Bytes(), &output)
 
-//	expectedJson := `[{
-//		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-//			"createdAt": "2017-10-24T16:21:32",
-//			"name": "fakeGroup",
-//			"description": "fakeGroup",
-//			"availabilityZone": "unknown",
-//			"status": "available",
-//			"poolId": "831fa5fb-17cf-4410-bec6-1f4b06208eef"
-//		}]`
+	expectedJson := `[{
+		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+			"createdAt": "2017-10-24T16:21:32",
+			"name": "fakeGroup",
+			"description": "fakeGroup",
+			"availabilityZone": "unknown",
+			"status": "available",
+			"poolId": "831fa5fb-17cf-4410-bec6-1f4b06208eef"
+		}]`
 
-//	var expected []model.VolumeGroupSpec
-//	json.Unmarshal([]byte(expectedJson), &expected)
+	var expected []model.VolumeGroupSpec
+	json.Unmarshal([]byte(expectedJson), &expected)
 
-//	if w.Code != 200 {
-//		t.Errorf("Expected 200, actual %v", w.Code)
-//	}
+	if w.Code != 200 {
+		t.Errorf("Expected 200, actual %v", w.Code)
+	}
 
-//	if !reflect.DeepEqual(expected, output) {
-//		t.Errorf("Expected %v, actual %v", expected, output)
-//	}
-//}
+	if !reflect.DeepEqual(expected, output) {
+		t.Errorf("Expected %v, actual %v", expected, output)
+	}
+}
 
-//func TestListVolumeGroupsWithBadRequest(t *testing.T) {
+func TestListVolumeGroupsWithBadRequest(t *testing.T) {
 
-//	mockClient := new(dbtest.Client)
-//	mockClient.On("ListVolumeGroups").Return(nil, errors.New("db error"))
-//	db.C = mockClient
+	mockClient := new(dbtest.Client)
+	m := map[string][]string{
+		"offset":  []string{"0"},
+		"limit":   []string{"1"},
+		"sortDir": []string{"asc"},
+		"sortKey": []string{"name"},
+	}
+	mockClient.On("ListVolumeGroupsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+	db.C = mockClient
 
-//	r, _ := http.NewRequest("GET", "/v1beta/block/groups?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-//	w := httptest.NewRecorder()
-//	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumeGroups?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-//	if w.Code != 400 {
-//		t.Errorf("Expected 400, actual %v", w.Code)
-//	}
-//}
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+}
 
 func TestGetVolumeGroup(t *testing.T) {
 
@@ -108,7 +118,7 @@ func TestGetVolumeGroup(t *testing.T) {
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeVolumeGroup, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumeGroups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -143,7 +153,7 @@ func TestGetVolumeGroupWithBadRequest(t *testing.T) {
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
 	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("GET", "/v1beta/block/volumeGroups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
@@ -250,7 +260,7 @@ func TestUpdateVolumeGroup(t *testing.T) {
             "removeVolumes":["f4a5e666-c669-4c64-a2a1-8f9ecd560c74","f4a5e666-c669-4c64-a2a1-8f9ecd560c75","f4a5e666-c669-4c64-a2a1-8f9ecd560c76"]
 		}`)
 	r, _ := http.NewRequest("PUT",
-		"/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
+		"/v1beta/block/volumeGroups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
 
@@ -312,7 +322,7 @@ func TestDeleteVolumeGroup(t *testing.T) {
 	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fakeVolumeGroupDelete.PoolId).Return(nil, nil)
 	db.C = mockClient
 
-	r, _ := http.NewRequest("DELETE", "/v1beta/block/groups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
+	r, _ := http.NewRequest("DELETE", "/v1beta/block/volumeGroups/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 

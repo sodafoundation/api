@@ -752,7 +752,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroup':
+  '/v1beta/{projectId}/block/volumeGroups':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -814,7 +814,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
+  '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeGroupId'
