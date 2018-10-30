@@ -96,8 +96,8 @@ func Run(host string) {
 				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
 				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
-				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
+				beego.NSRouter("/volumeGroups", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
+				beego.NSRouter("/volumeGroups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)

@@ -9,3 +9,4 @@ To assist and support the OpenSDS community in its objectives by providing techn
 * Yusuke Sato (Yahoo Japan)
 * Kei Kusunoki (NTT Communications)
 * Yuji Yazawa (Toyota ITC)
+* Wim Jacobs (KPN)
