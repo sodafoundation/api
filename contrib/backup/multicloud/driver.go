@@ -26,7 +26,7 @@ import (
 
 const (
 	ConfFile        = "/etc/opensds/driver/multi-cloud.yaml"
-	UploadChunkSize = 1024 * 1024 * 5
+	UploadChunkSize = 1024 * 1024 * 50
 )
 
 func init() {
@@ -38,8 +38,9 @@ func NewMultiCloud() (backup.BackupDriver, error) {
 }
 
 type MultiCloudConf struct {
-	Endpoint string `yaml:"Endpoint,omitempty"`
-	TenantId string `yaml:"TenantId,omitempty"`
+	Endpoint      string `yaml:"Endpoint,omitempty"`
+	TenantId      string `yaml:"TenantId,omitempty"`
+	UploadTimeout int64  `yaml:"UploadTimeout,omitempty"`
 }
 type MultiCloud struct {
 	client *Client
@@ -48,8 +49,9 @@ type MultiCloud struct {
 
 func (m *MultiCloud) loadConf(p string) (*MultiCloudConf, error) {
 	conf := &MultiCloudConf{
-		Endpoint: "http://127.0.0.1:8088",
-		TenantId: defaultTenantId,
+		Endpoint:      "http://127.0.0.1:8088",
+		TenantId:      DefaultTenantId,
+		UploadTimeout: DefaultUploadTimeout,
 	}
 	confYaml, err := ioutil.ReadFile(p)
 	if err != nil {
@@ -74,7 +76,7 @@ func (m *MultiCloud) SetUp() error {
 		Endpoint: m.conf.Endpoint,
 		TenantId: m.conf.TenantId,
 	}
-	if m.client, err = NewClient(opt); err != nil {
+	if m.client, err = NewClient(opt, m.conf.UploadTimeout); err != nil {
 		return err
 	}
 
@@ -125,6 +127,7 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 		glog.Errorf("complete part failed, err:%v", err)
 		return err
 	}
+	m.client.AbortMultipartUpload(bucket, key)
 	glog.Infof("backup success ...")
 	return nil
 }
