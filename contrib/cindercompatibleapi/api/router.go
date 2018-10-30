@@ -35,7 +35,7 @@ import (
 )
 
 var (
-	opensdsEndPoint string
+	opensdsEndpoint string
 	opensdsClient   *c.Client
 )
 
@@ -47,23 +47,23 @@ type ErrorSpec struct {
 }
 
 // Run ...
-func Run(cinderEndPoint string) {
-	opensdsEndPointFromEnv, ok := os.LookupEnv(c.OpensdsEndpoint)
+func Run(cinderEndpoint string) {
+	opensdsEndpointFromEnv, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
 			"the environment variable " + c.OpensdsEndpoint)
 		return
 	}
 
-	if "" == opensdsEndPointFromEnv {
-		opensdsEndPoint = constants.DefaultOpensdsEndpoint
-		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + opensdsEndPoint)
+	if "" == opensdsEndpointFromEnv {
+		opensdsEndpoint = constants.DefaultOpensdsEndpoint
+		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + opensdsEndpoint)
 	} else {
-		opensdsEndPoint = opensdsEndPointFromEnv
+		opensdsEndpoint = opensdsEndpointFromEnv
 	}
 
-	// CinderEndPoint: http://127.0.0.1:8777/v3
-	words := strings.Split(cinderEndPoint, "/")
+	// cinderEndpoint: http://127.0.0.1:8777/v3
+	words := strings.Split(cinderEndpoint, "/")
 	if (len(words) < 4) || (words[3] != converter.APIVersion) {
 		fmt.Println("The environment variable CINDER_ENDPOINT is set incorrectly")
 		return
@@ -116,12 +116,12 @@ func NewClient(ctx *bctx.Context) {
 			TokenID: tokenID}}
 
 		opensdsClient = &c.Client{
-			ProfileMgr:     c.NewProfileMgr(r, opensdsEndPoint, tenantId),
-			DockMgr:        c.NewDockMgr(r, opensdsEndPoint, tenantId),
-			PoolMgr:        c.NewPoolMgr(r, opensdsEndPoint, tenantId),
-			VolumeMgr:      c.NewVolumeMgr(r, opensdsEndPoint, tenantId),
-			VersionMgr:     c.NewVersionMgr(r, opensdsEndPoint, tenantId),
-			ReplicationMgr: c.NewReplicationMgr(r, opensdsEndPoint, tenantId),
+			ProfileMgr:     c.NewProfileMgr(r, opensdsEndpoint, tenantId),
+			DockMgr:        c.NewDockMgr(r, opensdsEndpoint, tenantId),
+			PoolMgr:        c.NewPoolMgr(r, opensdsEndpoint, tenantId),
+			VolumeMgr:      c.NewVolumeMgr(r, opensdsEndpoint, tenantId),
+			VersionMgr:     c.NewVersionMgr(r, opensdsEndpoint, tenantId),
+			ReplicationMgr: c.NewReplicationMgr(r, opensdsEndpoint, tenantId),
 		}
 	} else {
 		log.Error("Failed to create a client, TenantId:" + tenantId + ", " +
