@@ -115,6 +115,7 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 		Name:        volSnapshotName,
 		Description: volSnapshotDesp,
 		VolumeId:    args[0],
+		ProfileId:   profileId,
 	}
 
 	resp, err := client.CreateVolumeSnapshot(snp)

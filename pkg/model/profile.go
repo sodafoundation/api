@@ -138,6 +138,9 @@ type SnapshotPropertiesSpec struct {
 		// +units:day
 		Duration int64 `json:"duration,omitempty"`
 	} `json:"retention,omitempty"`
+	Topology struct {
+		Bucket string `json:"bucket,omitempty"` // This is virtual bucket managed by multi-cloud
+	} `json:"topology,omitempty"`
 }
 
 func (sps SnapshotPropertiesSpec) IsEmpty() bool {
