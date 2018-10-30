@@ -22,7 +22,7 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
-	_ "github.com/opensds/opensds/backup/multicloud"
+	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
