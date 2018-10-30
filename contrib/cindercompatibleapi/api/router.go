@@ -35,8 +35,8 @@ import (
 )
 
 var (
-	OpensdsEndPoint string
-	OpensdsClient   *c.Client
+	opensdsEndPoint string
+	opensdsClient   *c.Client
 )
 
 // ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
@@ -47,23 +47,23 @@ type ErrorSpec struct {
 }
 
 // Run ...
-func Run(CinderEndPoint string) {
-	OpensdsEndPointFromEnv, ok := os.LookupEnv(c.OpensdsEndpoint)
+func Run(cinderEndPoint string) {
+	opensdsEndPointFromEnv, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
 		fmt.Println("ERROR: You must provide the endpoint by setting " +
 			"the environment variable " + c.OpensdsEndpoint)
 		return
 	}
 
-	if "" == OpensdsEndPointFromEnv {
-		OpensdsEndPoint = constants.DefaultOpensdsEndpoint
-		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + OpensdsEndPoint)
+	if "" == opensdsEndPointFromEnv {
+		opensdsEndPoint = constants.DefaultOpensdsEndpoint
+		fmt.Println("Warnning: OpenSDS Endpoint is not specified using the default value:" + opensdsEndPoint)
 	} else {
-		OpensdsEndPoint = OpensdsEndPointFromEnv
+		opensdsEndPoint = opensdsEndPointFromEnv
 	}
 
 	// CinderEndPoint: http://127.0.0.1:8777/v3
-	words := strings.Split(CinderEndPoint, "/")
+	words := strings.Split(cinderEndPoint, "/")
 	if (len(words) < 4) || (words[3] != converter.APIVersion) {
 		fmt.Println("The environment variable CINDER_ENDPOINT is set incorrectly")
 		return
@@ -107,21 +107,21 @@ func Run(CinderEndPoint string) {
 }
 
 // NewClient method creates a new Client.
-func NewClient(Ctx *bctx.Context) {
-	tenantId := GetProjectId(Ctx)
-	tokenID := Ctx.Input.Header(constants.AuthTokenHeader)
+func NewClient(ctx *bctx.Context) {
+	tenantId := GetProjectId(ctx)
+	tokenID := ctx.Input.Header(constants.AuthTokenHeader)
 
 	if len(tenantId) > 0 && len(tokenID) > 0 {
 		r := &c.KeystoneReciver{Auth: &c.KeystoneAuthOptions{TenantID: tokenID,
 			TokenID: tokenID}}
 
-		OpensdsClient = &c.Client{
-			ProfileMgr:     c.NewProfileMgr(r, OpensdsEndPoint, tenantId),
-			DockMgr:        c.NewDockMgr(r, OpensdsEndPoint, tenantId),
-			PoolMgr:        c.NewPoolMgr(r, OpensdsEndPoint, tenantId),
-			VolumeMgr:      c.NewVolumeMgr(r, OpensdsEndPoint, tenantId),
-			VersionMgr:     c.NewVersionMgr(r, OpensdsEndPoint, tenantId),
-			ReplicationMgr: c.NewReplicationMgr(r, OpensdsEndPoint, tenantId),
+		opensdsClient = &c.Client{
+			ProfileMgr:     c.NewProfileMgr(r, opensdsEndPoint, tenantId),
+			DockMgr:        c.NewDockMgr(r, opensdsEndPoint, tenantId),
+			PoolMgr:        c.NewPoolMgr(r, opensdsEndPoint, tenantId),
+			VolumeMgr:      c.NewVolumeMgr(r, opensdsEndPoint, tenantId),
+			VersionMgr:     c.NewVersionMgr(r, opensdsEndPoint, tenantId),
+			ReplicationMgr: c.NewReplicationMgr(r, opensdsEndPoint, tenantId),
 		}
 	} else {
 		log.Error("Failed to create a client, TenantId:" + tenantId + ", " +
@@ -130,8 +130,8 @@ func NewClient(Ctx *bctx.Context) {
 }
 
 // GetProjectId Get the value of project_id
-func GetProjectId(Ctx *bctx.Context) string {
-	u, err := url.Parse(Ctx.Request.URL.String())
+func GetProjectId(ctx *bctx.Context) string {
+	u, err := url.Parse(ctx.Request.URL.String())
 	if err != nil {
 		log.Error("url.Parse failed:" + err.Error())
 		return ""

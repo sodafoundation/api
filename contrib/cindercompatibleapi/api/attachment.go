@@ -40,7 +40,7 @@ func (portal *AttachmentPortal) DeleteAttachment() {
 	id := portal.Ctx.Input.Param(":attachmentId")
 	attachment := model.VolumeAttachmentSpec{}
 	NewClient(portal.Ctx)
-	err := OpensdsClient.DeleteVolumeAttachment(id, &attachment)
+	err := opensdsClient.DeleteVolumeAttachment(id, &attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete attachment failed: %v", err)
@@ -58,7 +58,7 @@ func (portal *AttachmentPortal) DeleteAttachment() {
 func (portal *AttachmentPortal) GetAttachment() {
 	id := portal.Ctx.Input.Param(":attachmentId")
 	NewClient(portal.Ctx)
-	attachment, err := OpensdsClient.GetVolumeAttachment(id)
+	attachment, err := opensdsClient.GetVolumeAttachment(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show attachment details failed: %v", err)
@@ -86,7 +86,7 @@ func (portal *AttachmentPortal) GetAttachment() {
 // ListAttachmentsDetails ...
 func (portal *AttachmentPortal) ListAttachmentsDetails() {
 	NewClient(portal.Ctx)
-	attachments, err := OpensdsClient.ListVolumeAttachments()
+	attachments, err := opensdsClient.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -113,7 +113,7 @@ func (portal *AttachmentPortal) ListAttachmentsDetails() {
 // ListAttachments ...
 func (portal *AttachmentPortal) ListAttachments() {
 	NewClient(portal.Ctx)
-	attachments, err := OpensdsClient.ListVolumeAttachments()
+	attachments, err := opensdsClient.ListVolumeAttachments()
 	if err != nil {
 		reason := fmt.Sprintf("List attachments failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -151,7 +151,7 @@ func (portal *AttachmentPortal) CreateAttachment() {
 
 	attachment := converter.CreateAttachmentReq(&cinderReq)
 	NewClient(portal.Ctx)
-	attachment, err := OpensdsClient.CreateVolumeAttachment(attachment)
+	attachment, err := opensdsClient.CreateVolumeAttachment(attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Create attachment failed: %s", err.Error())
@@ -191,7 +191,7 @@ func (portal *AttachmentPortal) UpdateAttachment() {
 
 	attachment := converter.UpdateAttachmentReq(&cinderReq)
 	NewClient(portal.Ctx)
-	attachment, err := OpensdsClient.UpdateVolumeAttachment(id, attachment)
+	attachment, err := opensdsClient.UpdateVolumeAttachment(id, attachment)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update an attachment failed: %s", err.Error())

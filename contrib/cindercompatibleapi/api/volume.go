@@ -46,7 +46,7 @@ var (
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
 	NewClient(portal.Ctx)
-	volumes, err := OpensdsClient.ListVolumes()
+	volumes, err := opensdsClient.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -92,7 +92,7 @@ func (portal *VolumePortal) CreateVolume() {
 	}
 
 	NewClient(portal.Ctx)
-	volume, err = OpensdsClient.CreateVolume(volume)
+	volume, err = opensdsClient.CreateVolume(volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create a volume failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -119,7 +119,7 @@ func (portal *VolumePortal) CreateVolume() {
 // ListVolumes ...
 func (portal *VolumePortal) ListVolumes() {
 	NewClient(portal.Ctx)
-	volumes, err := OpensdsClient.ListVolumes()
+	volumes, err := opensdsClient.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -147,7 +147,7 @@ func (portal *VolumePortal) ListVolumes() {
 func (portal *VolumePortal) GetVolume() {
 	id := portal.Ctx.Input.Param(":volumeId")
 	NewClient(portal.Ctx)
-	volume, err := OpensdsClient.GetVolume(id)
+	volume, err := opensdsClient.GetVolume(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show a volume's details failed: %v", err)
@@ -195,7 +195,7 @@ func (portal *VolumePortal) UpdateVolume() {
 	}
 
 	NewClient(portal.Ctx)
-	volume, err = OpensdsClient.UpdateVolume(id, volume)
+	volume, err = opensdsClient.UpdateVolume(id, volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update a volume failed: %s", err.Error())
@@ -225,7 +225,7 @@ func (portal *VolumePortal) DeleteVolume() {
 	id := portal.Ctx.Input.Param(":volumeId")
 	volume := model.VolumeSpec{}
 	NewClient(portal.Ctx)
-	err := OpensdsClient.DeleteVolume(id, &volume)
+	err := opensdsClient.DeleteVolume(id, &volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a volume failed: %v", err)
@@ -273,7 +273,7 @@ func (portal *VolumePortal) VolumeAction() {
 
 		attachment := converter.InitializeConnectionReq(&cinderReq, id)
 		NewClient(portal.Ctx)
-		attachment, err := OpensdsClient.CreateVolumeAttachment(attachment)
+		attachment, err := opensdsClient.CreateVolumeAttachment(attachment)
 
 		if err != nil {
 			reason := fmt.Sprintf("Initialize connection failed: %s", err.Error())
@@ -289,7 +289,7 @@ func (portal *VolumePortal) VolumeAction() {
 		for {
 			sum++
 			time.Sleep(SleepDuration)
-			attachment, _ = OpensdsClient.GetVolumeAttachment(attachment.Id)
+			attachment, _ = opensdsClient.GetVolumeAttachment(attachment.Id)
 			if ("available" == attachment.Status) && ("" != attachment.ConnectionInfo.DriverVolumeType) &&
 				//(nil != attachment.ConnectionInfo.ConnectionData["authPassword"]) &&
 				(nil != attachment.ConnectionInfo.ConnectionData["targetDiscovered"]) &&

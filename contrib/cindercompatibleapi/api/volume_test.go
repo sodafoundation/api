@@ -39,7 +39,7 @@ func init() {
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
 
-	OpensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

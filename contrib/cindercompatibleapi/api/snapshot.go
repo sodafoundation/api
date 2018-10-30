@@ -38,7 +38,7 @@ type SnapshotPortal struct {
 // ListSnapshotsDetails ...
 func (portal *SnapshotPortal) ListSnapshotsDetails() {
 	NewClient(portal.Ctx)
-	snapshots, err := OpensdsClient.ListVolumeSnapshots()
+	snapshots, err := opensdsClient.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List snapshots and details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -83,7 +83,7 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 	}
 
 	NewClient(portal.Ctx)
-	snapshot, err = OpensdsClient.CreateVolumeSnapshot(snapshot)
+	snapshot, err = opensdsClient.CreateVolumeSnapshot(snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create a snapshot failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -110,7 +110,7 @@ func (portal *SnapshotPortal) CreateSnapshot() {
 // ListSnapshots ...
 func (portal *SnapshotPortal) ListSnapshots() {
 	NewClient(portal.Ctx)
-	snapshots, err := OpensdsClient.ListVolumeSnapshots()
+	snapshots, err := opensdsClient.ListVolumeSnapshots()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible snapshots failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -138,7 +138,7 @@ func (portal *SnapshotPortal) ListSnapshots() {
 func (portal *SnapshotPortal) GetSnapshot() {
 	id := portal.Ctx.Input.Param(":snapshotId")
 	NewClient(portal.Ctx)
-	snapshot, err := OpensdsClient.GetVolumeSnapshot(id)
+	snapshot, err := opensdsClient.GetVolumeSnapshot(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show a snapshot's details failed: %v", err)
@@ -178,7 +178,7 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 
 	snapshot := converter.UpdateSnapshotReq(&cinderUpdateReq)
 	NewClient(portal.Ctx)
-	snapshot, err := OpensdsClient.UpdateVolumeSnapshot(id, snapshot)
+	snapshot, err := opensdsClient.UpdateVolumeSnapshot(id, snapshot)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update a snapshot failed: %s", err.Error())
@@ -207,7 +207,7 @@ func (portal *SnapshotPortal) UpdateSnapshot() {
 func (portal *SnapshotPortal) DeleteSnapshot() {
 	id := portal.Ctx.Input.Param(":snapshotId")
 	NewClient(portal.Ctx)
-	err := OpensdsClient.DeleteVolumeSnapshot(id, nil)
+	err := opensdsClient.DeleteVolumeSnapshot(id, nil)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a snapshot failed: %v", err)
