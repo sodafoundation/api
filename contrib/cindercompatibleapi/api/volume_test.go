@@ -39,8 +39,7 @@ func init() {
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
-
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -287,6 +286,7 @@ func TestUpdateVolume(t *testing.T) {
 	expected.Volume.ID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected.Volume.Size = 1
 	expected.Volume.Metadata = make(map[string]string)
+	expected.Volume.VolumeType = "1106b972-66ef-11e7-b172-db03f3689c9c"
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
 	}

@@ -33,12 +33,12 @@ func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	cinderEndPoint, ok := os.LookupEnv("CINDER_ENDPOINT")
+	cinderEndpoint, ok := os.LookupEnv("CINDER_ENDPOINT")
 	if !ok {
 		fmt.Println("ERROR: You must provide the cinder endpoint by setting " +
 			"the environment variable CINDER_ENDPOINT")
 		return
 	}
 
-	api.Run(cinderEndPoint)
+	api.Run(cinderEndpoint)
 }

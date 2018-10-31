@@ -37,7 +37,8 @@ type VersionPortal struct {
 
 // ListAllAPIVersions ...
 func (portal *VersionPortal) ListAllAPIVersions() {
-	volumes, err := client.ListVersions()
+	NewClient(portal.Ctx)
+	versions, err := opensdsClient.ListVersions()
 	if err != nil {
 		reason := fmt.Sprintf("List All Api Versions failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -46,10 +47,10 @@ func (portal *VersionPortal) ListAllAPIVersions() {
 		return
 	}
 
-	result := converter.ListAllAPIVersionsResp(volumes)
+	result := converter.ListAllAPIVersionsResp(versions)
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("List accessible volumes with details, marshal result failed: %v", err)
+		reason := fmt.Sprintf("List All Api Versions, marshal result failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
 		portal.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
 		log.Error(reason)

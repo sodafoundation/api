@@ -35,7 +35,7 @@ func init() {
 	beego.Router("/V3/attachments", &AttachmentPortal{},
 		"post:CreateAttachment;get:ListAttachments")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

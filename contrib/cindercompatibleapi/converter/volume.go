@@ -27,8 +27,8 @@ import (
 var (
 	// APIVersion ...
 	APIVersion = "v3"
-	// EndPoint ...
-	EndPoint = "http://127.0.0.1:8777/v3"
+	// Endpoint ...
+	Endpoint = "http://127.0.0.1:8777/v3"
 )
 
 // *******************List accessible volumes with details*******************
@@ -379,7 +379,7 @@ func UpdateVolumeResp(volume *model.VolumeSpec) *UpdateVolumeRespSpec {
 	resp.Volume.Description = volume.Description
 	resp.Volume.Name = volume.Name
 	resp.Volume.CreatedAt = volume.BaseModel.CreatedAt
-	resp.Volume.VolumeType = volume.BaseModel.CreatedAt
+	resp.Volume.VolumeType = volume.ProfileId
 
 	return &resp
 }
