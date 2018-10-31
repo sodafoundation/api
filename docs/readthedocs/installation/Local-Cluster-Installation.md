@@ -4,7 +4,7 @@ Here is a tutorial guiding users and new contributors to get familiar with [Open
 
 If you are an end-user who are interested in this project, some links for installation and testing are as follows:
 - [OpenSDS Local Cluster Installation through Ansible](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible)
-- [OpenSDS Aruba PoC Test Plan](https://github.com/opensds/opensds/blob/master/docs/test-plans/OpenSDS_Aruba_POC_Plan_v0.3.pdf)
+- [OpenSDS Aruba PoC Test Plan](https://github.com/opensds/opensds/blob/master/docs/test-plans/OpenSDS_Aruba_POC_Plan.pdf)
 
 If you are a code developer and wish to contribute in this project, here are some links for quickly installing OpenSDS
 Hotpot project:
