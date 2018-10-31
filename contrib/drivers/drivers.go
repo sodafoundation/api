@@ -22,6 +22,7 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
+	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
@@ -57,6 +58,10 @@ type VolumeDriver interface {
 	PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error)
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
+
+	InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error)
+
+	TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error
 
 	// NOTE Parameter vg means complete volume group information, because driver
 	// may use it to do something and return volume group status.
