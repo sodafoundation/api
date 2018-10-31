@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/client"
@@ -128,7 +127,8 @@ func Run(cinderEndpoint string) {
 	beego.Run(words[2])
 }
 
-// NewClient method creates a new Client.
+// NewClient Recreate the client only when authStrategy == c.Keystone
+// and copy it to the global variable opensdsClient
 func NewClient(ctx *bctx.Context) {
 	if authStrategy == c.Keystone {
 		tenantId := GetProjectId(ctx)
