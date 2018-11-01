@@ -1562,6 +1562,8 @@ definitions:
             readOnly: true
           volumeId:
             type: string
+          profileId:
+            type: string
   VolumeGroup:
     description: >-
       Volume group contains a list of volumes that are used in the same
