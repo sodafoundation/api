@@ -23,7 +23,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	c "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/execute"
+	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
 var startServer = `[2018-10-30 17:25:50] [INFO] [fsc_cli.start_dsware_api_daemon:59] INFO - Start FSCTool service successfully.
@@ -82,7 +82,7 @@ type FakeResp struct {
 	err error
 }
 
-func NewFakeExecuter(respMap map[string]*FakeResp) execute.Executer {
+func NewFakeExecuter(respMap map[string]*FakeResp) exec.Executer {
 	return &FakeExecuter{RespMap: respMap}
 }
 
@@ -101,7 +101,7 @@ func (f *FakeExecuter) Run(name string, args ...string) (string, error) {
 
 func TestSetup(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer": &FakeResp{startServer, nil},
 	}
@@ -165,7 +165,7 @@ func TestSetup(t *testing.T) {
 
 func TestCreateVolume(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":  &FakeResp{startServer, nil},
 		"createVolume": &FakeResp{createVolume, nil},
@@ -200,7 +200,7 @@ func TestCreateVolume(t *testing.T) {
 
 func TestCreateVolumeFromSnapshot(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":          &FakeResp{startServer, nil},
 		"createVolumeFromSnap": &FakeResp{createVolumeFromSnap, nil},
@@ -237,7 +237,7 @@ func TestCreateVolumeFromSnapshot(t *testing.T) {
 
 func TestDeleteVolume(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":  &FakeResp{startServer, nil},
 		"deleteVolume": &FakeResp{deleteVolume, nil},
@@ -270,7 +270,7 @@ func TestDeleteVolume(t *testing.T) {
 
 func TestCreateSnapshot(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":    &FakeResp{startServer, nil},
 		"createSnapshot": &FakeResp{createSnapshot, nil},
@@ -304,7 +304,7 @@ func TestCreateSnapshot(t *testing.T) {
 
 func TestDeleteSnapshot(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":    &FakeResp{startServer, nil},
 		"deleteSnapshot": &FakeResp{deleteSnapshot, nil},
@@ -339,7 +339,7 @@ func TestDeleteSnapshot(t *testing.T) {
 
 func TestListPool(t *testing.T) {
 	f := Driver{}
-	c.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath = "./testdata/fusionstorage.yaml"
+	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
 	respMap := map[string]*FakeResp{
 		"startServer":      &FakeResp{startServer, nil},
 		"queryAllPoolInfo": &FakeResp{queryAllPoolInfo, nil},

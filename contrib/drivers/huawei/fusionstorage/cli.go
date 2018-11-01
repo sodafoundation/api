@@ -23,7 +23,7 @@ import (
 	"time"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/utils/execute"
+	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
 const (
@@ -103,16 +103,16 @@ type Cli struct {
 	// FusionStorage agent ip list
 	fsaIp []string
 	// Command executer
-	BaseExecuter execute.Executer
+	BaseExecuter exec.Executer
 	// Command Root exectuer
-	RootExecuter execute.Executer
+	RootExecuter exec.Executer
 }
 
 var once sync.Once
 
 // for unit testing
-var baseExecuter = execute.NewBaseExecuter()
-var rootExecuter = execute.NewRootExecuter()
+var baseExecuter = exec.NewBaseExecuter()
+var rootExecuter = exec.NewRootExecuter()
 
 func NewCli(fmIp string, fsaIP []string) (*Cli, error) {
 	if len(fmIp) == 0 || len(fsaIP) == 0 {
@@ -150,9 +150,10 @@ func (c *Cli) StartServer() error {
 func (c *Cli) doRunCmd(args ...string) (string, error) {
 
 	fsaIp := c.fsaIp
-	rand.Shuffle(len(fsaIp), func(i, j int) {
+	for i := range fsaIp {
+		j := rand.Intn(i + 1)
 		fsaIp[i], fsaIp[j] = fsaIp[j], fsaIp[i]
-	})
+	}
 	if len(fsaIp) > MaxRetryNode {
 		fsaIp = fsaIp[:3]
 	}
