@@ -1412,6 +1412,11 @@ definitions:
             type: integer
           duration:
             type: integer
+      topology:
+        type: object
+        properties:
+          bucket:
+            type: string
   DataProtectionProperties:
     description: >-
       DataProtectionProperties represents some suggested properties for
