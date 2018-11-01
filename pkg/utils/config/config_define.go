@@ -50,11 +50,12 @@ type BackendProperties struct {
 }
 
 type Backends struct {
-	Ceph         BackendProperties `conf:"ceph"`
-	Cinder       BackendProperties `conf:"cinder"`
-	Sample       BackendProperties `conf:"sample"`
-	LVM          BackendProperties `conf:"lvm"`
-	HuaweiDorado BackendProperties `conf:"huawei_dorado"`
+	Ceph                BackendProperties `conf:"ceph"`
+	Cinder              BackendProperties `conf:"cinder"`
+	Sample              BackendProperties `conf:"sample"`
+	LVM                 BackendProperties `conf:"lvm"`
+	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
+	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
 }
 
 type KeystoneAuthToken struct {
