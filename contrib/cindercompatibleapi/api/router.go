@@ -131,10 +131,19 @@ func Run(cinderEndpoint string) {
 // and copy it to the global variable opensdsClient
 func NewClient(ctx *bctx.Context) {
 	if authStrategy == c.Keystone {
-		tenantId := GetProjectId(ctx)
-		tokenID := ctx.Input.Header(constants.AuthTokenHeader)
+		reqURL := strings.TrimSpace(ctx.Request.URL.String())
 
-		if len(tenantId) > 0 && len(tokenID) > 0 {
+		// When "List Api Versions", the URL has no project_id,
+		// so no authentication
+		if "/" == reqURL {
+			cfg := &c.Config{Endpoint: opensdsEndpoint}
+			cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
+			opensdsClient = c.NewClient(cfg)
+		} else {
+			tenantId := GetProjectId(reqURL)
+			tokenID := ctx.Input.Header(constants.AuthTokenHeader)
+			log.V(5).Info("TenantId:" + tenantId + ", " + "TokenID:" + tokenID + "!!!")
+
 			r := &c.KeystoneReciver{Auth: &c.KeystoneAuthOptions{TenantID: tokenID,
 				TokenID: tokenID}}
 
@@ -146,16 +155,13 @@ func NewClient(ctx *bctx.Context) {
 				VersionMgr:     c.NewVersionMgr(r, opensdsEndpoint, tenantId),
 				ReplicationMgr: c.NewReplicationMgr(r, opensdsEndpoint, tenantId),
 			}
-		} else {
-			log.Error("Failed to create a client, TenantId:" + tenantId + ", " +
-				"TokenID:" + tokenID + "!!!")
 		}
 	}
 }
 
 // GetProjectId Get the value of project_id
-func GetProjectId(ctx *bctx.Context) string {
-	u, err := url.Parse(ctx.Request.URL.String())
+func GetProjectId(reqURL string) string {
+	u, err := url.Parse(reqURL)
 	if err != nil {
 		log.Error("url.Parse failed:" + err.Error())
 		return ""
@@ -168,7 +174,7 @@ func GetProjectId(ctx *bctx.Context) string {
 		log.V(5).Info("project_id is" + words[2])
 		return words[2]
 	} else {
-		log.Error("there is no project_id in the path:" + u.Path)
+		log.Error("there is no project_id in the request URL:" + reqURL)
 		return ""
 	}
 }
