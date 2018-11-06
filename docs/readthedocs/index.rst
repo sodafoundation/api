@@ -44,3 +44,4 @@ APIs, with the objective of providing applicaiton-oriented storage services.
 
    contributing/Tutorials-for-Beginners
    contributing/Community-Contributing
+   contributing/How-to-Develop-OpenSDS-Native-Storage-Driver

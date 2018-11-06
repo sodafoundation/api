@@ -1,44 +1,33 @@
 # TSC
-OpenSDS Technical Steering Committee
+OpenSDS Technical Steering Commitee
 
 ## Mission
-The primary decision makeing forum for OpenSDS projects and servers to set the overall technical direction and strategy for OpenSDS.
+To provide technical guidance for OpenSDS community development.
 
 ## Members
-* Steven Tan (Huawei)
-* Rakesh Jain (IBM)
-* Allen Samuels (Western Digital)
 * Anjaneya Chagam (Intel)
+* Rakesh Jain (IBM)
+* Allen Samuels (WD/SanDisk)
+* Steven Tan (Huawei)
 * Jay Bryant (Lenovo)
+* Shinya Hamano (Fujitsu)
 
 
-## Weekly Meetings
-This meeting is hosted on zoom every Thursday 8:00pm to 9:00pm EDT (Friday 8:00am - 9:00am APAC)
+## Bi-Weekly Meetings
+This meeting is hosted on zoom. Join the TSC mailing list for info on meetings
 
-Join from PC, Mac, Linux, iOS or Android: https://zoom.us/j/269355859
-Or iPhone one-tap (US Toll): +16465588656,,269355859# or +14086380968,,269355859#
+Zoom Meeting: https://zoom.us/j/477192859
+
+Or iPhone one-tap :
+US: +19294362866,,477192859# or +16699006833,,477192859#
 Or Telephone:
-Dial: +1 646 558 8656 (US Toll) or +1 408 638 0968 (US Toll)
-+1 855 880 1246 (US Toll Free)
-+1 877 369 0926 (US Toll Free)
-Meeting ID: 269 355 859
-International numbers available: https://zoom.us/zoomconference?m=deJ85KgsJiMSJ5jdarJ_cpJY84d8IBfK
+Dial(for higher quality, dial a number based on your current location):
+US: +1 929 436 2866 or +1 669 900 6833
+Meeting ID: 477 192 859
+International numbers available: https://zoom.us/zoomconference?m=h0x5xsxAwYr_grrKRsEx_7PLkOfvL3bm
 
 ## Meeting Minutes
-* [2017-07-29 Minute](tsc-meeting-2017-07-29.md)
-* [2017-08-04 Minute](tsc-meeting-2017-08-04.md)
-* [2017-08-17 Minute](tsc-meeting-2017-08-17.md)
-* [2017-08-25 Minute](tsc-meeting-2017-08-25.md)
-* [2017-08-31 Minute](tsc-meeting-2017-08-31.md)
-* [2017-09-14 Minute](tsc-meeting-2017-09-14.md)
-
-
-
-## Past Arch WG Meeting Minutes
-* [April 4, 2017](https://docs.google.com/document/d/1BDU7LsDrq4NyA2UWMZLcBSNzEbGMzRg6QPJAnPo6Eag/edit?usp=sharing)
-* [April 19, 2017](https://docs.google.com/document/d/1mR0aa3eoU10A8TFTVpKZD6hRSGOfdPafIa7mmGloNeY/edit?usp=sharing)
-* [April 26, 2017](https://docs.google.com/document/d/1mR0aa3eoU10A8TFTVpKZD6hRSGOfdPafIa7mmGloNeY/edit?usp=sharing)
-* [May 3, 2017](https://docs.google.com/document/d/1mR0aa3eoU10A8TFTVpKZD6hRSGOfdPafIa7mmGloNeY/edit?usp=sharing)
+* [TSC Meeting Minutes](https://github.com/opensds/tsc)
 
 
 ## Kubernetes Storage SIG
