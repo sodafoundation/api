@@ -215,3 +215,24 @@ func (f *fibreChannel) getFChbasInfo() ([]map[string]string, error) {
 
 	return hbasInfos, nil
 }
+
+func (f *fibreChannel) getInitiatorInfo() (string, error) {
+	hbas, err := f.getFChbasInfo()
+	if err != nil {
+		return "", err
+	}
+
+	var initiatorInfo []string
+
+	for _, hba := range hbas {
+		if v, ok := hba[PortName]; ok {
+			initiatorInfo = append(initiatorInfo, Wwpn+":"+v)
+		}
+
+		if v, ok := hba[NodeName]; ok {
+			initiatorInfo = append(initiatorInfo, Wwnn+":"+v)
+		}
+	}
+
+	return strings.Join(initiatorInfo, ","), nil
+}

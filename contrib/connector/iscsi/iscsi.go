@@ -20,6 +20,7 @@ import (
 
 const (
 	iscsiDriver = "iscsi"
+	Iqn = "iqn"
 )
 
 type Iscsi struct{}
@@ -36,4 +37,9 @@ func (isc *Iscsi) Detach(conn map[string]interface{}) error {
 	iscsiCon := ParseIscsiConnectInfo(conn)
 
 	return Disconnect(iscsiCon.TgtPortal, iscsiCon.TgtIQN)
+}
+
+// GetInitiatorInfo implementation
+func (isc *Iscsi) GetInitiatorInfo() (string, error) {
+	return getInitiatorInfo()
 }

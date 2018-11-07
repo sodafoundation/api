@@ -21,6 +21,7 @@ import (
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
 	Detach(map[string]interface{}) error
+	GetInitiatorInfo() (string, error)
 }
 
 func NewConnector(cType string) Connector {
