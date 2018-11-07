@@ -23,10 +23,11 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"time"
 	"strings"
+	"time"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/connector/fc"
 	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/contrib/drivers"
@@ -214,7 +215,7 @@ func (add *attachDockDiscoverer) Discover() error {
 
 	bindIp := CONF.BindIp
 	if bindIp == "" {
-		bindIp = iscsi.GetHostIp()
+		bindIp = connector.GetHostIp()
 	}
 	wwpns, _ := fc.GetWWPNs()
 	segments := strings.Split(CONF.OsdsDock.ApiEndpoint, ":")
