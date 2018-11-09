@@ -26,7 +26,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/testutils/collection"
@@ -760,7 +759,6 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
 
 	db.C = mockClient
-	controller.Brain = controller.NewController()
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 		httpCtx.Input.SetData("context", c.NewAdminContext())
 	})

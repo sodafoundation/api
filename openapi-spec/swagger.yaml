@@ -752,7 +752,7 @@ paths:
           description: The resource does not exist.
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroup':
+  '/v1beta/{projectId}/block/volumeGroups':
     parameters:
       - $ref: '#/parameters/projectId'
     get:
@@ -814,7 +814,7 @@ paths:
           description: Forbidden
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroup/{volumeGroupId}':
+  '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
     parameters:
       - $ref: '#/parameters/projectId'
       - $ref: '#/parameters/volumeGroupId'
@@ -1412,6 +1412,11 @@ definitions:
             type: integer
           duration:
             type: integer
+      topology:
+        type: object
+        properties:
+          bucket:
+            type: string
   DataProtectionProperties:
     description: >-
       DataProtectionProperties represents some suggested properties for
@@ -1561,6 +1566,8 @@ definitions:
             type: string
             readOnly: true
           volumeId:
+            type: string
+          profileId:
             type: string
   VolumeGroup:
     description: >-

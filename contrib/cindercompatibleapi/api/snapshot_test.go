@@ -35,7 +35,7 @@ func init() {
 	beego.Router("/V3/snapshots/detail", &SnapshotPortal{},
 		"get:ListSnapshotsDetails")
 
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

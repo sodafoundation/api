@@ -22,10 +22,11 @@ package config
 // These constants below represent the vendor name of all storage drivers which
 // can be supported by now.
 const (
-	CinderDriverType       = "cinder"
-	CephDriverType         = "ceph"
-	LVMDriverType          = "lvm"
-	HuaweiDoradoDriverType = "huawei_dorado"
+	CinderDriverType              = "cinder"
+	CephDriverType                = "ceph"
+	LVMDriverType                 = "lvm"
+	HuaweiDoradoDriverType        = "huawei_dorado"
+	HuaweiFusionStorageDriverType = "huawei_fusionstorage"
 
 	DRBDDriverType = "drbd"
 )
@@ -35,6 +36,7 @@ const (
 // constants can NOT be used by all methods except InitializeConnection().
 const (
 	ISCSIProtocol = "iscsi"
+	DSWARE        = "DSWARE"
 	RBDProtocol   = "rbd"
 	FCProtocol    = "fibre_channel"
 )

@@ -236,6 +236,48 @@ message DeleteAttachmentOpts {
     string AccessProtocol = 7;
 }
 
+// CreateSnapshotAttachmentOpts is a structure which indicates all required
+// properties for creating a snapshot attachment.
+message CreateSnapshotAttachmentOpts {
+    // The uuid of the snapshot attachment, optional.
+    string id = 1;
+    // The uuid of the snapshot, required.
+    string snapshotId = 2;
+    // This field indicates if the snapshot is attached locally, optional.
+    bool doLocalAttach = 3;
+    // This field indicates if the snapshot is attached multiple times, optional.
+    bool multiPath = 4;
+    // The infomation of the host node on which the snapshot will be attached.
+    HostInfo hostInfo = 5;
+    // The metadata of the snapshot attachment, optional.
+    map<string, string> metadata = 6;
+    // The storage driver type.
+    string driverName = 7;
+    // The Context
+    string context = 8;
+    // The protocol
+    string AccessProtocol = 9;
+}
+
+// DeleteSnapshotAttachmentOpts is a structure which indicates all required
+// properties for deleting a snapshot attachment.
+message DeleteSnapshotAttachmentOpts {
+    // The uuid of the snapshot attachment, optional.
+    string id = 1;
+    // The uuid of the snapshot, required.
+    string snapshotId = 2;
+    // The infomation of the host node on which the volume will be attached.
+    HostInfo hostInfo = 3;
+    // The metadata of the snapshot attachment, optional.
+    map<string, string> metadata = 4;
+    // The storage driver type.
+    string driverName = 5;
+    // The Context
+    string context = 6;
+    // The protocol
+    string AccessProtocol = 7;
+}
+
 message HostInfo {
     // The platform of the host, such as "x86_64"
     string platform = 1;
