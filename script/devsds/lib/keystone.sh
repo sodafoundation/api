@@ -127,7 +127,7 @@ osds::keystone::download_code(){
 }
 
 osds::keystone::install(){
-    if [ "true" != $USE_EXISTING_KEYSTONE] 
+    if [ "true" != $USE_EXISTING_KEYSTONE ] 
     then
         KEYSTONE_IP=$HOST_IP
         osds::keystone::create_user
