@@ -101,7 +101,7 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 		return nil, nil, err
 	}
 
-	log.Errorf("%s: %s OK\n", method, u)
+	log.V(5).Infof("%s: %s OK\n", method, u)
 	b, err := req.Bytes()
 	if err != nil {
 		log.Errorf("Get byte[] from response failed, method: %s\n url: %s\n error: %v", method, u, err)
