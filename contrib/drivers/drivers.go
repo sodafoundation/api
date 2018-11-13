@@ -22,13 +22,16 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
+	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
+	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
-	sample "github.com/opensds/opensds/testutils/driver"
+	"github.com/opensds/opensds/testutils/driver"
 )
 
 // VolumeDriver is an interface for exposing some operations of different volume
@@ -57,6 +60,10 @@ type VolumeDriver interface {
 
 	DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error
 
+	InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error)
+
+	TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error
+
 	// NOTE Parameter vg means complete volume group information, because driver
 	// may use it to do something and return volume group status.
 	CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
@@ -78,18 +85,20 @@ type VolumeDriver interface {
 func Init(resourceType string) VolumeDriver {
 	var d VolumeDriver
 	switch resourceType {
-	case "cinder":
+	case config.CinderDriverType:
 		d = &cinder.Driver{}
 		break
-	case "ceph":
+	case config.CephDriverType:
 		d = &ceph.Driver{}
 		break
-	case "lvm":
+	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
-	case "huawei_dorado":
+	case config.HuaweiDoradoDriverType:
 		d = &dorado.Driver{}
 		break
+	case config.HuaweiFusionStorageDriverType:
+		d = &fusionstorage.Driver{}
 	default:
 		d = &sample.Driver{}
 		break
@@ -109,6 +118,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *lvm.Driver:
 		break
 	case *dorado.Driver:
+		break
+	case *fusionstorage.Driver:
 		break
 	default:
 		break

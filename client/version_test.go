@@ -15,56 +15,14 @@
 package client
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var fakeVersion = &VersionMgr{
 	Receiver: NewFakeVersionReceiver(),
-}
-
-func NewFakeVersionReceiver() Receiver {
-	return &fakeVersionReceiver{}
-}
-
-type fakeVersionReceiver struct{}
-
-func (*fakeVersionReceiver) Recv(
-	string,
-	method string,
-	in interface{},
-	out interface{},
-) error {
-	switch strings.ToUpper(method) {
-	case "GET":
-		switch out.(type) {
-		case *model.VersionSpec:
-			if err := json.Unmarshal([]byte(ByteVersion), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.VersionSpec:
-			if err := json.Unmarshal([]byte(ByteVersions), out); err != nil {
-				return err
-			}
-			break
-		default:
-			return errors.New("output format not supported")
-		}
-		break
-	case "DELETE":
-		break
-	default:
-		return errors.New("inputed method format not supported")
-	}
-
-	return nil
 }
 
 func TestGetVersion(t *testing.T) {

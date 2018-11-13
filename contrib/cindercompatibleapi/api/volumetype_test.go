@@ -37,9 +37,7 @@ func init() {
 	beego.Router("/v3/types/:volumeTypeId/extra_specs/:key", &TypePortal{},
 		"get:ShowExtraProperty;put:UpdateExtraProperty;delete:DeleteExtraProperty")
 
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -13,17 +13,20 @@ services:
   osdsdock:
     image: 'opensdsio/opensds-dock:latest'
     tty: true
-    network_mode: "host"
     privileged: true
     volumes:
     - /etc/opensds:/etc/opensds
     - /etc/ceph:/etc/ceph
-    - /dev/:/dev/
+    - /etc/tgt:/etc/tgt:shared
     - /run/:/run/:shared
+    - /dev/:/dev/
     - /etc/localtime:/etc/localtime:ro
     - /lib/modules:/lib/modules:ro
     depends_on:
     - osdsdb
+    ports:
+    - 3260:3260
+    network_mode: "host"
     restart: on-failure
     command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsdock -logtostderr'
   osdsdb:

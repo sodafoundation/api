@@ -53,7 +53,7 @@ type controller struct {
 }
 
 func (c *controller) Setup(flag int) {
-	c.Tag = NewStorageTag(c.Profile.Extras, flag)
+	c.Tag = NewStorageTag(c.Profile.CustomProperties, flag)
 }
 
 func (c *controller) StorageTag() *StorageTag {

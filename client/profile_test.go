@@ -15,77 +15,14 @@
 package client
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
 )
 
 var fpr = &ProfileMgr{
 	Receiver: NewFakeProfileReceiver(),
-}
-
-func NewFakeProfileReceiver() Receiver {
-	return &fakeProfileReceiver{}
-}
-
-type fakeProfileReceiver struct{}
-
-func (*fakeProfileReceiver) Recv(
-	string,
-	method string,
-	in interface{},
-	out interface{},
-) error {
-	switch strings.ToUpper(method) {
-	case "POST":
-		switch out.(type) {
-		case *model.ProfileSpec:
-			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
-				return err
-			}
-			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
-				return err
-			}
-			break
-		default:
-			return errors.New("output format not supported!")
-		}
-		break
-	case "GET":
-		switch out.(type) {
-		case *model.ProfileSpec:
-			if err := json.Unmarshal([]byte(ByteProfile), out); err != nil {
-				return err
-			}
-			break
-		case *[]*model.ProfileSpec:
-			if err := json.Unmarshal([]byte(ByteProfiles), out); err != nil {
-				return err
-			}
-			break
-		case *model.ExtraSpec:
-			if err := json.Unmarshal([]byte(ByteExtras), out); err != nil {
-				return err
-			}
-			break
-		default:
-			return errors.New("output format not supported!")
-		}
-		break
-	case "DELETE":
-		break
-	default:
-		return errors.New("inputed method format not supported!")
-	}
-
-	return nil
 }
 
 func TestCreateProfile(t *testing.T) {
@@ -146,7 +83,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "silver",
 			Description: "silver policy",
-			Extras: model.ExtraSpec{
+			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true,
@@ -181,42 +118,62 @@ func TestDeleteProfile(t *testing.T) {
 	}
 }
 
-func TestAddExtraProperty(t *testing.T) {
+func TestAddCustomProperty(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	expected := &SampleExtras
+	expected := &model.CustomPropertiesSpec{
+		"dataStorage": map[string]interface{}{
+			"provisioningPolicy": "Thin",
+			"isSpaceEfficient":   true,
+		},
+		"ioConnectivity": map[string]interface{}{
+			"accessProtocol": "rbd",
+			"maxIOPS":        float64(5000000),
+			"maxBWS":         float64(500),
+		},
+	}
 
-	exts, err := fpr.AddExtraProperty(prfID, &model.ExtraSpec{})
+	cps, err := fpr.AddCustomProperty(prfID, &model.CustomPropertiesSpec{})
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(exts, expected) {
-		t.Errorf("Expected %v, got %v", expected, exts)
+	if !reflect.DeepEqual(cps, expected) {
+		t.Errorf("Expected %v, got %v", expected, cps)
 		return
 	}
 }
 
-func TestListExtraProperties(t *testing.T) {
+func TestListCustomProperties(t *testing.T) {
 	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-	expected := &SampleExtras
+	expected := &model.CustomPropertiesSpec{
+		"dataStorage": map[string]interface{}{
+			"provisioningPolicy": "Thin",
+			"isSpaceEfficient":   true,
+		},
+		"ioConnectivity": map[string]interface{}{
+			"accessProtocol": "rbd",
+			"maxIOPS":        float64(5000000),
+			"maxBWS":         float64(500),
+		},
+	}
 
-	exts, err := fpr.ListExtraProperties(prfID)
+	cps, err := fpr.ListCustomProperties(prfID)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !reflect.DeepEqual(exts, expected) {
-		t.Errorf("Expected %v, got %v", expected, exts)
+	if !reflect.DeepEqual(cps, expected) {
+		t.Errorf("Expected %v, got %v", expected, cps)
 		return
 	}
 }
 
-func TestRemoveExtraProperty(t *testing.T) {
-	var prfID, extraKey = "2f9c0a04-66ef-11e7-ade2-43158893e017", "diskType"
+func TestRemoveCustomProperty(t *testing.T) {
+	var prfID, customKey = "2f9c0a04-66ef-11e7-ade2-43158893e017", "diskType"
 
-	if err := fpr.RemoveExtraProperty(prfID, extraKey); err != nil {
+	if err := fpr.RemoveCustomProperty(prfID, customKey); err != nil {
 		t.Error(err)
 		return
 	}

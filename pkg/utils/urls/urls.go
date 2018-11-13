@@ -59,8 +59,9 @@ func GenerateReplicationURL(urlType int, tenantId string, in ...string) string {
 }
 
 func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
-	return generateURL("block/volumeGroup", urlType, tenantId, in...)
+	return generateURL("block/volumeGroups", urlType, tenantId, in...)
 }
+
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {
 	// If project id is not specified, ignore it.
 	if tenantId == "" {

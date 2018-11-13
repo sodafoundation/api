@@ -30,7 +30,6 @@ import (
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/converter"
-
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -39,9 +38,15 @@ type VolumePortal struct {
 	beego.Controller
 }
 
+var (
+	// SleepDuration When running unit tests, it should be set to time.Nanosecond
+	SleepDuration = time.Second
+)
+
 // ListVolumesDetails ...
 func (portal *VolumePortal) ListVolumesDetails() {
-	volumes, err := client.ListVolumes()
+	NewClient(portal.Ctx)
+	volumes, err := opensdsClient.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes with details failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -86,7 +91,8 @@ func (portal *VolumePortal) CreateVolume() {
 		return
 	}
 
-	volume, err = client.CreateVolume(volume)
+	NewClient(portal.Ctx)
+	volume, err = opensdsClient.CreateVolume(volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create a volume failed: %s", err.Error())
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -112,7 +118,8 @@ func (portal *VolumePortal) CreateVolume() {
 
 // ListVolumes ...
 func (portal *VolumePortal) ListVolumes() {
-	volumes, err := client.ListVolumes()
+	NewClient(portal.Ctx)
+	volumes, err := opensdsClient.ListVolumes()
 	if err != nil {
 		reason := fmt.Sprintf("List accessible volumes failed: %v", err)
 		portal.Ctx.Output.SetStatus(model.ErrorInternalServer)
@@ -139,7 +146,8 @@ func (portal *VolumePortal) ListVolumes() {
 // GetVolume ...
 func (portal *VolumePortal) GetVolume() {
 	id := portal.Ctx.Input.Param(":volumeId")
-	volume, err := client.GetVolume(id)
+	NewClient(portal.Ctx)
+	volume, err := opensdsClient.GetVolume(id)
 
 	if err != nil {
 		reason := fmt.Sprintf("Show a volume's details failed: %v", err)
@@ -186,7 +194,8 @@ func (portal *VolumePortal) UpdateVolume() {
 		return
 	}
 
-	volume, err = client.UpdateVolume(id, volume)
+	NewClient(portal.Ctx)
+	volume, err = opensdsClient.UpdateVolume(id, volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Update a volume failed: %s", err.Error())
@@ -215,8 +224,8 @@ func (portal *VolumePortal) UpdateVolume() {
 func (portal *VolumePortal) DeleteVolume() {
 	id := portal.Ctx.Input.Param(":volumeId")
 	volume := model.VolumeSpec{}
-
-	err := client.DeleteVolume(id, &volume)
+	NewClient(portal.Ctx)
+	err := opensdsClient.DeleteVolume(id, &volume)
 
 	if err != nil {
 		reason := fmt.Sprintf("Delete a volume failed: %v", err)
@@ -263,7 +272,8 @@ func (portal *VolumePortal) VolumeAction() {
 		}
 
 		attachment := converter.InitializeConnectionReq(&cinderReq, id)
-		attachment, err := client.CreateVolumeAttachment(attachment)
+		NewClient(portal.Ctx)
+		attachment, err := opensdsClient.CreateVolumeAttachment(attachment)
 
 		if err != nil {
 			reason := fmt.Sprintf("Initialize connection failed: %s", err.Error())
@@ -278,8 +288,8 @@ func (portal *VolumePortal) VolumeAction() {
 
 		for {
 			sum++
-			time.Sleep(1e9)
-			attachment, _ = client.GetVolumeAttachment(attachment.Id)
+			time.Sleep(SleepDuration)
+			attachment, _ = opensdsClient.GetVolumeAttachment(attachment.Id)
 			if ("available" == attachment.Status) && ("" != attachment.ConnectionInfo.DriverVolumeType) &&
 				//(nil != attachment.ConnectionInfo.ConnectionData["authPassword"]) &&
 				(nil != attachment.ConnectionInfo.ConnectionData["targetDiscovered"]) &&

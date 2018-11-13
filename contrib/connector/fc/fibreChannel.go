@@ -21,7 +21,19 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
+
+type FCConnectorInfo struct {
+	TargetDiscovered   bool                `mapstructure:"targetDiscovered"`
+	TargetWwn          []string            `mapstructure:"target_wwn"`
+	TargetLun          int                 `mapstructure:"target_lun"`
+	VolumeID           string              `mapstructure:"volume_id"`
+	InitiatorTargetMap map[string][]string `mapstructure:"initiator_target_map"`
+	Description        string              `mapstructure:"description"`
+	HostName           string              `mapstructure:"host_name"`
+}
 
 var (
 	tries = 3
@@ -31,11 +43,18 @@ type fibreChannel struct {
 	helper *linuxfc
 }
 
-func (f *fibreChannel) connectVolume(conn map[string]interface{}) (map[string]string, error) {
+func (f *fibreChannel) parseIscsiConnectInfo(connInfo map[string]interface{}) *FCConnectorInfo {
+	var conn FCConnectorInfo
+	mapstructure.Decode(connInfo, &conn)
+	return &conn
+}
+
+func (f *fibreChannel) connectVolume(connInfo map[string]interface{}) (map[string]string, error) {
 	hbas, err := f.getFChbasInfo()
 	if err != nil {
 		return nil, err
 	}
+	conn := f.parseIscsiConnectInfo(connInfo)
 	volPaths := f.getVolumePaths(conn, hbas)
 	if len(volPaths) == 0 {
 		errMsg := fmt.Sprintf("No FC devices found.")
@@ -43,7 +62,7 @@ func (f *fibreChannel) connectVolume(conn map[string]interface{}) (map[string]st
 		return nil, errors.New(errMsg)
 	}
 
-	devicePath, deviceName := f.volPathDiscovery(volPaths, tries, conn["target_wwn"].([]string), hbas)
+	devicePath, deviceName := f.volPathDiscovery(volPaths, tries, conn.TargetWwn, hbas)
 	if devicePath != "" && deviceName != "" {
 		log.Printf("Found Fibre Channel volume name, devicePath is %s, deviceName is %s", devicePath, deviceName)
 	}
@@ -56,11 +75,10 @@ func (f *fibreChannel) connectVolume(conn map[string]interface{}) (map[string]st
 	return map[string]string{"scsi_wwn": deviceWWN, "path": devicePath}, nil
 }
 
-func (f *fibreChannel) getVolumePaths(conn map[string]interface{}, hbas []map[string]string) []string {
-	wwnports := conn["target_wwn"].([]string)
-	devices := f.getDevices(hbas, wwnports)
-	lun := conn["target_lun"].(string)
-	hostPaths := f.getHostDevices(devices, lun)
+func (f *fibreChannel) getVolumePaths(conn *FCConnectorInfo, hbas []map[string]string) []string {
+
+	devices := f.getDevices(hbas, conn.TargetWwn)
+	hostPaths := f.getHostDevices(devices, strconv.Itoa(conn.TargetLun))
 	return hostPaths
 }
 
@@ -92,7 +110,8 @@ func (f *fibreChannel) getHostDevices(devices []map[string]string, lun string) [
 	return hostDevices
 }
 
-func (f *fibreChannel) disconnectVolume(conn map[string]interface{}) error {
+func (f *fibreChannel) disconnectVolume(connInfo map[string]interface{}) error {
+	conn := f.parseIscsiConnectInfo(connInfo)
 	volPaths, err := f.getVolumePathsForDetach(conn)
 	if err != nil {
 		return err
@@ -138,7 +157,7 @@ func (f *fibreChannel) getPciNum(hba map[string]string) string {
 	return ""
 }
 
-func (f *fibreChannel) getVolumePathsForDetach(conn map[string]interface{}) ([]string, error) {
+func (f *fibreChannel) getVolumePathsForDetach(conn *FCConnectorInfo) ([]string, error) {
 	var volPaths []string
 	hbas, err := f.getFChbasInfo()
 	if err != nil {

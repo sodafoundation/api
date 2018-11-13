@@ -34,9 +34,8 @@ func init() {
 		"post:CreateSnapshot;get:ListSnapshots")
 	beego.Router("/V3/snapshots/detail", &SnapshotPortal{},
 		"get:ListSnapshotsDetails")
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////

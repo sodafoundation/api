@@ -64,7 +64,7 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 	}
 	pLunId := opt.PrimaryReplicationDriverData[KLunId]
 	sLunId := opt.SecondaryReplicationDriverData[KLunId]
-	replicationPeriod := strconv.FormatInt(opt.ReplicationPeriod, 10)
+	replicationPeriod := strconv.FormatInt(opt.ReplicationPeriod*60, 10)
 
 	replicationMode := ReplicaAsyncMode
 	if opt.ReplicationMode == model.ReplicationModeSync {
@@ -269,7 +269,7 @@ func (r *ReplicaPairMgr) CreateRemoteLun(localLun *Lun) (*Lun, error) {
 	if err != nil {
 		return nil, err
 	}
-	rmtLun, err := r.remoteClient.CreateVolume(localLun.Name, sector, localLun.Description)
+	rmtLun, err := r.remoteClient.CreateVolume(localLun.Name, sector, localLun.Description, "0")
 	if err != nil {
 		return nil, err
 	}

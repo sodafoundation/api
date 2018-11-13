@@ -22,6 +22,16 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
+func TestRvRepElement(t *testing.T) {
+	var strs = []string{"default", "default"}
+	str := RvRepElement(strs)
+	res := str[0]
+	var expect = "default"
+	if len(str) != 1 || res != expect {
+		t.Errorf("%v remove redundant elements fail,expect:%v,result:%v\n", str, expect, res)
+	}
+}
+
 func TestContained(t *testing.T) {
 	var targets = []interface{}{
 		[]interface{}{"key01", 123, true},
@@ -111,7 +121,7 @@ func TestStructToMap(t *testing.T) {
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage:    model.DataStorageLoS{ProvisioningPolicy: "Thin", IsSpaceEfficient: false},
 			IOConnectivity: model.IOConnectivityLoS{AccessProtocol: "iscsi", MaxIOPS: 700000, MaxBWS: 600},
-			DataProtection: struct{}{},
+			DataProtection: model.DataProtectionLoS{IsIsolated: true, ReplicaType: "Mirror"},
 			Advanced:       map[string]interface{}{"diskType": "SSD", "latency": 5},
 		},
 	}

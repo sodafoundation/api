@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/client"
@@ -37,9 +38,8 @@ func init() {
 		"get:ListVolumesDetails")
 	beego.Router("/v3/volumes", &VolumePortal{},
 		"post:CreateVolume;get:ListVolumes")
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,6 +286,7 @@ func TestUpdateVolume(t *testing.T) {
 	expected.Volume.ID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected.Volume.Size = 1
 	expected.Volume.Metadata = make(map[string]string)
+	expected.Volume.VolumeType = "1106b972-66ef-11e7-b172-db03f3689c9c"
 	if !reflect.DeepEqual(expected, output) {
 		t.Errorf("Expected %v, actual %v", expected, output)
 	}
@@ -380,6 +381,7 @@ func TestVolumeAction(t *testing.T) {
 }
 
 func TestVolumeActionInitializeConnectionWithError(t *testing.T) {
+	SleepDuration = time.Nanosecond
 	Req := converter.InitializeConnectionReqSpec{}
 
 	Req.InitializeConnection.Connector.Platform = "x86_64"

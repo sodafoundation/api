@@ -59,15 +59,16 @@ func Run(host string) {
 			beego.NSRouter("/:tenantId/profiles", &ProfilePortal{}, "post:CreateProfile;get:ListProfiles"),
 			beego.NSRouter("/:tenantId/profiles/:profileId", &ProfilePortal{}, "get:GetProfile;put:UpdateProfile;delete:DeleteProfile"),
 
-			// All operations of extras are used for Admin only
-			beego.NSRouter("/:tenantId/profiles/:profileId/extras", &ProfilePortal{}, "post:AddExtraProperty;get:ListExtraProperties"),
-			beego.NSRouter("/:tenantId/profiles/:profileId/extras/:extraKey", &ProfilePortal{}, "delete:RemoveExtraProperty"),
+			// All operations of customProperties are used for admin only
+			beego.NSRouter("/:tenantId/profiles/:profileId/customProperties", &ProfilePortal{}, "post:AddCustomProperty;get:ListCustomProperties"),
+			beego.NSRouter("/:tenantId/profiles/:profileId/customProperties/:customKey", &ProfilePortal{}, "delete:RemoveCustomProperty"),
 
 			// Pool is the virtual description of backend storage, usually divided into block, file and object,
 			// and every pool is atomic, which means every pool contains a specific set of features.
 			// ListPools and GetPool are used for checking the status of backend pool, admin only
 			beego.NSRouter("/:tenantId/pools", &PoolPortal{}, "get:ListPools"),
 			beego.NSRouter("/:tenantId/pools/:poolId", &PoolPortal{}, "get:GetPool"),
+			beego.NSRouter("/:tenantId/availabilityZones", &PoolPortal{}, "get:ListAvailabilityZones"),
 
 			beego.NSNamespace("/:tenantId/block",
 
@@ -95,8 +96,8 @@ func Run(host string) {
 				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
 				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/volumeGroup", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
-				beego.NSRouter("/volumeGroup/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
+				beego.NSRouter("/volumeGroups", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
+				beego.NSRouter("/volumeGroups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)

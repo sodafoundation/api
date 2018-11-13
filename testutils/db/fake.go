@@ -78,6 +78,16 @@ func (fc *FakeDbClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
+//ListAvailabilityZones
+func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
+	var azs []string
+	for i := range SamplePools {
+		az := SamplePools[i].AvailabilityZone
+		azs = append(azs, az)
+	}
+	return azs, nil
+}
+
 // UpdateDock
 func (fc *FakeDbClient) UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error) {
 	return nil, nil
@@ -186,20 +196,20 @@ func (fc *FakeDbClient) DeleteProfile(ctx *c.Context, prfID string) error {
 	return nil
 }
 
-// AddExtraProperty
-func (fc *FakeDbClient) AddExtraProperty(ctx *c.Context, prfID string, ext model.ExtraSpec) (*model.ExtraSpec, error) {
-	extra := SampleProfiles[0].Extras
-	return &extra, nil
+// AddCustomProperty
+func (fc *FakeDbClient) AddCustomProperty(ctx *c.Context, prfID string, custom model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error) {
+	custom = SampleProfiles[0].CustomProperties
+	return &custom, nil
 }
 
-// ListExtraProperties
-func (fc *FakeDbClient) ListExtraProperties(ctx *c.Context, prfID string) (*model.ExtraSpec, error) {
-	extra := SampleProfiles[0].Extras
-	return &extra, nil
+// ListCustomProperties
+func (fc *FakeDbClient) ListCustomProperties(ctx *c.Context, prfID string) (*model.CustomPropertiesSpec, error) {
+	custom := SampleProfiles[0].CustomProperties
+	return &custom, nil
 }
 
-// RemoveExtraProperty
-func (fc *FakeDbClient) RemoveExtraProperty(ctx *c.Context, prfID, extraKey string) error {
+// RemoveCustomProperty
+func (fc *FakeDbClient) RemoveCustomProperty(ctx *c.Context, prfID, customKey string) error {
 	return nil
 }
 

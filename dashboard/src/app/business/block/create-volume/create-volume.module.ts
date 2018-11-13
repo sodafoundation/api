@@ -9,6 +9,7 @@ import { ReplicationGroupComponent } from './replication-group/replication-group
 import { HttpService } from './../../../shared/api';
 import { VolumeService,ReplicationService } from './../volume.service';
 import { ProfileService } from './../../profile/profile.service';
+import { AvailabilityZonesService } from './../../resource/resource.service';
 import { InputTextModule, CheckboxModule, ButtonModule, DropdownModule, DialogModule, Message, GrowlModule, SpinnerModule, FormModule } from './../../../components/common/api';
 
 let routers = [{
@@ -39,7 +40,8 @@ let routers = [{
     HttpService,
     VolumeService,
     ProfileService,
-    ReplicationService
+    ReplicationService,
+    AvailabilityZonesService
   ]
 })
 export class CreateVolumeModule { }

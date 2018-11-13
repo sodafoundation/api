@@ -3,8 +3,8 @@
 Here is a tutorial guiding users and new contributors to get familiar with [OpenSDS](https://github.com/opensds/opensds) by installing a simple local cluster.
 
 If you are an end-user who are interested in this project, some links for installation and testing are as follows:
-- [OpenSDS Local Cluster Installation through Ansible](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible)
-- [OpenSDS Aruba PoC Test Plan](https://github.com/opensds/opensds/blob/master/docs/test-plans/OpenSDS_Aruba_POC_Plan_v0.3.pdf)
+- [OpenSDS Local Cluster Installation through Ansible On Ubuntu](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible) (Recommended)
+- [OpenSDS Local Cluster Instlalltion On Redhat](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-On-Redhat)
 
 If you are a code developer and wish to contribute in this project, here are some links for quickly installing OpenSDS
 Hotpot project:

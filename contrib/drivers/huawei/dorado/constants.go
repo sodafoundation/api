@@ -15,6 +15,22 @@ package dorado
 
 import "time"
 
+var LunCopySpeedTypes = []string{"1", "2", "3", "4"}
+
+const (
+	LunCopySpeedLow    = "1"
+	LunCopySpeedMedium = "2"
+	LunCopySpeedHigh   = "3"
+	LunCopySpeedHigest = "4"
+)
+
+const (
+	LunReadyWaitInterval = 2 * time.Second
+	LunReadyWaitTimeout  = 20 * time.Second
+	LunCopyWaitInterval  = 2 * time.Second
+	LunCopyWaitTimeout   = 200 * time.Second
+)
+
 const (
 	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
 	defaultAZ       = "default"
@@ -32,13 +48,17 @@ const (
 )
 
 const (
-	StatusHealth       = "1"
-	StatusActive       = "43"
-	StatusRunning      = "10"
-	StatusVolumeReady  = "27"
-	StatusLuncopyReady = "40"
-	StatusQosActive    = "2"
-	StatusQosInactive  = "45"
+	StatusHealth          = "1"
+	StatusActive          = "43"
+	StatusRunning         = "10"
+	StatusVolumeReady     = "27"
+	StatusLuncopyReady    = "40"
+	StatusLunCoping       = "39"
+	StatusLunCopyStop     = "38"
+	StatusLunCopyQueue    = "37"
+	StatusLunCopyNotStart = "36"
+	StatusQosActive       = "2"
+	StatusQosInactive     = "45"
 )
 
 // Array type

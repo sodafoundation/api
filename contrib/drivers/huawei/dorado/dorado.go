@@ -17,9 +17,8 @@ package dorado
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"os"
+	"strings"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -57,10 +56,114 @@ func (d *Driver) Unset() error {
 	return nil
 }
 
+func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	metadata := opt.GetMetadata()
+	if metadata["hypermetro"] == "true" && metadata["replication_enabled"] == "true" {
+		msg := "Hypermetro and Replication can not be used in the same volume_type"
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+	snapshot, e1 := d.client.GetSnapshotByName(EncodeName(opt.GetSnapshotId()))
+	if e1 != nil {
+		log.Infof("Get Snapshot failed : %v", e1)
+		return nil, e1
+	}
+	volumeDesc := TruncateDescription(opt.GetDescription())
+	poolId, err1 := d.client.GetPoolIdByName(opt.GetPoolName())
+	if err1 != nil {
+		return nil, err1
+	}
+
+	lun, err := d.client.CreateVolume(opt.GetName(), opt.GetSize(), volumeDesc, poolId)
+	if err != nil {
+		log.Error("Create Volume Failed:", err)
+		return nil, err
+	}
+
+	log.Infof("Create Volume from snapshot, source_lun_id : %s , target_lun_id : %s", snapshot.Id, lun.Id)
+
+	err = WaitForCondition(func() (bool, error) {
+		if lun.HealthStatus == StatusHealth && lun.RunningStatus == StatusVolumeReady {
+			return true, nil
+		} else {
+			msg := fmt.Sprintf("Volume state is not mathch, lun ID : %s , HealthStatus : %s,RunningStatus : %s",
+				lun.Id, lun.HealthStatus, lun.RunningStatus)
+			return false, errors.New(msg)
+		}
+	}, LunReadyWaitInterval, LunReadyWaitTimeout)
+	if err != nil {
+		log.Error(err)
+		d.client.DeleteVolume(lun.Id)
+		return nil, err
+	}
+	err = d.copyVolume(opt, snapshot.Id, lun.Id)
+	if err != nil {
+		d.client.DeleteVolume(lun.Id)
+		return nil, err
+	}
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             Sector2Gb(lun.Capacity),
+		Description:      volumeDesc,
+		AvailabilityZone: opt.GetAvailabilityZone(),
+		Metadata: map[string]string{
+			KLunId: lun.Id,
+		},
+	}, nil
+
+}
+func (d *Driver) copyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error {
+	metadata := opt.GetMetadata()
+	copyspeed := metadata["copyspeed"]
+	luncopyid, err := d.client.CreateLunCopy(opt.GetName(), srcid, tgtid, copyspeed)
+
+	if err != nil {
+		log.Error("Create Lun Copy failed,", err)
+		return err
+	}
+	defer d.client.DeleteLunCopy(luncopyid)
+	err = d.client.StartLunCopy(luncopyid)
+	if err != nil {
+		log.Errorf("Start lun: %s copy failed :%v,", luncopyid, err)
+		return err
+	}
+	lunCopyInfo, err1 := d.client.GetLunInfo(luncopyid)
+	if err1 != nil {
+		log.Errorf("Get lun info failed :%v", err1)
+		return err1
+	}
+	err = WaitForCondition(func() (bool, error) {
+		if lunCopyInfo.RunningStatus == StatusLuncopyReady || lunCopyInfo.RunningStatus == StatusLunCoping {
+			return true, nil
+		} else if lunCopyInfo.HealthStatus != StatusHealth {
+			msg := fmt.Sprintf("An error occurred during the luncopy operation. Lun name : %s  ,Lun copy health status : %s ,Lun copy running status : %s ",
+				lunCopyInfo.Name, lunCopyInfo.HealthStatus, lunCopyInfo.RunningStatus)
+			return false, errors.New(msg)
+		}
+		return true, nil
+	}, LunCopyWaitInterval, LunCopyWaitTimeout)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	log.Infof("Copy Volume %s success", tgtid)
+	return nil
+}
+
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	if opt.GetSnapshotId() != "" {
+		return d.createVolumeFromSnapshot(opt)
+	}
 	name := EncodeName(opt.GetId())
 	desc := TruncateDescription(opt.GetDescription())
-	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc)
+	poolId, err := d.client.GetPoolIdByName(opt.GetPoolName())
+	if err != nil {
+		return nil, err
+	}
+	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc, poolId)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err
@@ -149,10 +252,10 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	if opt.GetAccessProtocol() == "iscsi" {
+	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.InitializeConnectionIscsi(opt)
 	}
-	if opt.GetAccessProtocol() == "fc" {
+	if opt.GetAccessProtocol() == FCProtocol {
 		return d.InitializeConnectionFC(opt)
 	}
 	return nil, errors.New("No supported protocol for dorado driver.")
@@ -200,7 +303,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 		return nil, err
 	}
 	connInfo := &model.ConnectionInfo{
-		DriverVolumeType: "iscsi",
+		DriverVolumeType: ISCSIProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
 			"targetIQN":        tgtIqn,
@@ -213,10 +316,10 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
-	if opt.GetAccessProtocol() == "iscsi" {
+	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.TerminateConnectionIscsi(opt)
 	}
-	if opt.GetAccessProtocol() == "fc" {
+	if opt.GetAccessProtocol() == FCProtocol {
 		return d.TerminateConnectionFC(opt)
 	}
 	return nil
@@ -368,7 +471,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.Co
 	}
 
 	fcInfo := &model.ConnectionInfo{
-		DriverVolumeType: "fibre_channel",
+		DriverVolumeType: FCProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered":     true,
 			"target_wwn":           tgtPortWWNs,
@@ -618,6 +721,14 @@ func (d *Driver) clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId st
 	}
 
 	return nil
+}
+
+func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
+	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
+}
+
+func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {

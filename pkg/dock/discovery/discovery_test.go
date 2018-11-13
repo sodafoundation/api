@@ -103,7 +103,7 @@ func TestReport(t *testing.T) {
 		fdd.pols = append(fdd.pols, &SamplePools[i])
 	}
 
-	mockClient := new(dbtest.MockClient)
+	mockClient := new(dbtest.Client)
 	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
 	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
 	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)

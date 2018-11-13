@@ -30,9 +30,7 @@ func init() {
 	beego.Router("/", &VersionPortal{},
 		"get:ListAllAPIVersions")
 
-	if false == IsFakeClient {
-		client = NewFakeClient(&c.Config{Endpoint: TestEp})
-	}
+	opensdsClient = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
