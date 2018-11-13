@@ -269,7 +269,8 @@ func GetFSType(device string) string {
 		for _, v := range strings.Split(string(res), " ") {
 			if strings.Contains(v, "TYPE=") {
 				fsType = strings.Split(v, "=")[1]
-				fsType = strings.Replace(fsType, "\"", "", -1)
+				fsType = strings.TrimSpace(fsType)
+				fsType = strings.Trim(fsType, "\"")
 			}
 		}
 	}
