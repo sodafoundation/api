@@ -17,9 +17,7 @@ package iscsi
 import (
 	"errors"
 	"log"
-
 	"os"
-
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -265,15 +263,29 @@ func ParseIscsiConnectInfo(connectInfo map[string]interface{}) *IscsiConnectorIn
 }
 
 // getInitiatorInfo implementation
-func getInitiatorInfo() (string, error) {
+func getInitiatorInfo() (connector.InitiatorInfo, error) {
+	var initiatorInfo connector.InitiatorInfo
+
 	initiators, err := GetInitiator()
 	if err != nil {
-		return "", err
+		return initiatorInfo, err
 	}
 
 	if len(initiators) == 0 {
-		return "", errors.New("The number of iqn is wrong")
+		return initiatorInfo, errors.New("The number of iqn is wrong")
 	}
 
-	return initiators[0], nil
+	initiatorInfo.InitiatorData = make(map[string]interface{})
+	initiatorInfo.InitiatorData[Iqn] = initiators[0]
+
+	hostName, err := connector.GetHostName()
+	if err != nil {
+		return initiatorInfo, err
+	}
+
+	initiatorInfo.HostName = hostName
+	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
+		iscsiDriver, initiatorInfo)
+
+	return initiatorInfo, nil
 }

@@ -16,33 +16,39 @@ package connector
 
 import (
 	"fmt"
+	"log"
 )
 
+// Connector implementation
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
 	Detach(map[string]interface{}) error
-	GetInitiatorInfo() (string, error)
+	GetInitiatorInfo() (InitiatorInfo, error)
 }
 
+// NewConnector implementation
 func NewConnector(cType string) Connector {
 	if cnt, exist := cnts[cType]; exist {
 		return cnt
 	}
 
+	log.Printf("%s is not registered to connector", cType)
 	return nil
 }
 
 var cnts = map[string]Connector{}
 
+// RegisterConnector implementation
 func RegisterConnector(cType string, cnt Connector) error {
 	if _, exist := cnts[cType]; exist {
-		return fmt.Errorf("Connector %s already exist.", cType)
+		return fmt.Errorf("Connector %s already exist", cType)
 	}
 
 	cnts[cType] = cnt
 	return nil
 }
 
+// UnregisterConnector implementation
 func UnregisterConnector(cType string) {
 	if _, exist := cnts[cType]; !exist {
 		return

@@ -52,6 +52,6 @@ func (f *FC) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (f *FC) GetInitiatorInfo() (string, error) {
+func (f *FC) GetInitiatorInfo() (connector.InitiatorInfo, error) {
 	return f.self.getInitiatorInfo()
 }

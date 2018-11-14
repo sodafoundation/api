@@ -21,7 +21,13 @@ import (
 	"strings"
 )
 
-// execCmd ...
+// InitiatorInfo implementation
+type InitiatorInfo struct {
+	HostName      string                 `json:"hostName"`
+	InitiatorData map[string]interface{} `json:"initiatorData"`
+}
+
+// ExecCmd Log and convert the result of exec.Command
 func ExecCmd(name string, arg ...string) (string, error) {
 	log.Printf("Command: %s %s:\n", name, strings.Join(arg, " "))
 	info, err := exec.Command(name, arg...).CombinedOutput()
@@ -137,11 +143,12 @@ func GetHostIp() string {
 func GetHostName() (string, error) {
 	hostName, err := ExecCmd("hostname")
 	if err != nil {
-		log.Printf("failed to get host name: %v", err)
+		log.Printf("failed to get hostname: %v", err)
 		return "", err
 	}
 
 	hostName = strings.Replace(hostName, "\n", "", -1)
+	log.Printf("GetHostName result: %v", hostName)
 
 	return hostName, nil
 }

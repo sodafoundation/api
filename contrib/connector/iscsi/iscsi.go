@@ -20,7 +20,7 @@ import (
 
 const (
 	iscsiDriver = "iscsi"
-	Iqn = "iqn"
+	Iqn         = "iqn"
 )
 
 type Iscsi struct{}
@@ -40,6 +40,6 @@ func (isc *Iscsi) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (isc *Iscsi) GetInitiatorInfo() (string, error) {
+func (isc *Iscsi) GetInitiatorInfo() (connector.InitiatorInfo, error) {
 	return getInitiatorInfo()
 }
