@@ -137,5 +137,7 @@ func (m *MultiCloud) Restore(backup *backup.BackupSpec, volId string, volFile *o
 }
 
 func (m *MultiCloud) Delete(backup *backup.BackupSpec) error {
-	return nil
+	bucket := backup.Metadata["bucket"]
+	key := backup.Id
+	return m.client.RemoveObject(bucket, key)
 }
