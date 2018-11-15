@@ -204,10 +204,6 @@ func (r *ReplicaPairMgr) CheckRemoteAvailable() bool {
 	return false
 }
 
-func (r *ReplicaPairMgr) UpdateReplicationCapability(stats []string) {
-	//rmtOk := r.CheckRemoteAvailable()
-}
-
 func (r *ReplicaPairMgr) GetRemoteDevInfo() (id, name string) {
 	wwn := r.TryGetRemoteWwn()
 	if wwn == "" {
@@ -218,24 +214,6 @@ func (r *ReplicaPairMgr) GetRemoteDevInfo() (id, name string) {
 		return "", ""
 	}
 	return dev.Id, dev.Name
-}
-
-func (r *ReplicaPairMgr) BuildRemoteLunParams(localLun *Lun) map[string]interface{} {
-	return map[string]interface{}{
-		"Type":        "11",
-		"Name":        localLun.Name,
-		"Parenttype":  "216",
-		"ParentId":    "",
-		"Description": localLun.Description,
-		"Alloctype":   localLun.AllocType,
-		"Capacity":    localLun.Capability,
-		//"Writepolicy":        Self.Conf.Lun_Write_Type,
-		//"Prefetchpolicy":     Self.Conf.Lun_Prefetch_Type,
-		//"Prefetchvalue":      Self.Conf.Lun_Prefetch_Value,
-		//"Datatransferpolicy": Self.Conf.Lun_Policy,
-		//"Readcachepolicy":    Self.Conf.Lun_Read_Cache_Policy,
-		//"Writecachepolicy":   Self.Conf.Lun_Write_Cache_Policy,
-	}
 }
 
 func (r *ReplicaPairMgr) WaitVolumeOnline(client *DoradoClient, lun *Lun, interval, timeout time.Duration) error {
@@ -263,32 +241,6 @@ func (r *ReplicaPairMgr) WaitVolumeOnline(client *DoradoClient, lun *Lun, interv
 	}, interval, timeout)
 }
 
-func (r *ReplicaPairMgr) CreateRemoteLun(localLun *Lun) (*Lun, error) {
-	//params := r.BuildRemoteLunParams(localLun)
-	sector, err := strconv.ParseInt(localLun.SectorSize, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	rmtLun, err := r.remoteClient.CreateVolume(localLun.Name, sector, localLun.Description, "0")
-	if err != nil {
-		return nil, err
-	}
-	interval := DefaultReplicaWaitInterval
-	timeout := DefaultReplicaWaitTimeout
-	if err := r.WaitVolumeOnline(r.remoteClient, rmtLun, interval, timeout); err != nil {
-		r.remoteClient.DeleteVolume(rmtLun.Id)
-		return nil, err
-	}
-	return rmtLun, err
-}
-
-func (r *ReplicaPairMgr) DeleteRemoteLun(id string) error {
-	if r.remoteClient.CheckLunExist(id, "") {
-		return r.remoteClient.DeleteVolume(id)
-	}
-	return nil
-}
-
 func (r *ReplicaPairMgr) DeletePair(id string) error {
 	if !r.localClient.CheckPairExist(id) {
 		return nil
@@ -303,12 +255,12 @@ func (r *ReplicaPairMgr) DeletePair(id string) error {
 	return nil
 }
 
-func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationMode string, replicaPeriod string) (map[string]string, error) {
+func (r *ReplicaPairMgr) CreateReplication(localLunId, rmtLunId, replicationMode string, replicaPeriod string) (map[string]string, error) {
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
 	var respMap = make(map[string]string)
 
-	localLun, err := r.localClient.GetVolume(pLunId)
+	localLun, err := r.localClient.GetVolume(localLunId)
 	if err != nil {
 		return nil, err
 	}
@@ -317,39 +269,20 @@ func (r *ReplicaPairMgr) CreateReplication(pLunId, sLunId, replicationMode strin
 	if err != nil {
 		return nil, err
 	}
-	var rmtLunId = sLunId
-	if sLunId == "" {
-		rmtLun, err := r.CreateRemoteLun(localLun)
-		if err != nil {
-			return nil, err
-		}
-		rmtLunId = rmtLun.Id
-		respMap[KSecondaryLunId] = rmtLunId
-	}
-
-	var cleanlun = false
-	defer func() {
-		if cleanlun && sLunId == "" {
-			r.DeleteRemoteLun(rmtLunId)
-		}
-	}()
 
 	rmtDevId, rmtDevName := r.GetRemoteDevInfo()
 	log.Errorf("rmtDevId:%s, rmtDevName:%s", rmtDevId, rmtDevName)
 	if rmtDevId == "" || rmtDevName == "" {
-		cleanlun = true
 		return nil, fmt.Errorf("get remote deivce info failed")
 	}
 
 	pair, err := r.localOp.Create(localLun.Id, rmtLunId, rmtDevId, rmtDevName, replicationMode, ReplicaSpeed, replicaPeriod)
 	if err != nil {
-		cleanlun = true
 		return nil, err
 	}
 	log.Error("start sync ....", pair)
 	if err := r.localDriver.Sync(pair.Id, replicationMode == ReplicaSyncMode); err != nil {
 		r.DeletePair(pair.Id)
-		cleanlun = true
 		return nil, err
 	}
 	respMap[KPairId] = pair.Id
@@ -360,9 +293,6 @@ func (r *ReplicaPairMgr) DeleteReplication(pairId, rmtLunId string) error {
 	if err := r.DeletePair(pairId); err != nil {
 		log.Error("Delete pair failed,", err)
 		return err
-	}
-	if rmtLunId != "" {
-		return r.DeleteRemoteLun(rmtLunId)
 	}
 	return nil
 }
@@ -376,10 +306,9 @@ func (r *ReplicaPairMgr) DeleteReplication(pairId, rmtLunId string) error {
 // 5. Enable replications.
 
 func (r *ReplicaPairMgr) Failback(pairId string) error {
+	r.remoteDriver.Enable(pairId, true)
+	r.remoteDriver.WaitReplicaReady(pairId)
 	r.localDriver.Enable(pairId, false)
-	r.localDriver.WaitReplicaReady(pairId)
-	r.remoteDriver.Failover(pairId)
-	r.remoteDriver.Enable(pairId, false)
 	return nil
 }
 
