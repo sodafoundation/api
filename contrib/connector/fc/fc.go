@@ -20,6 +20,10 @@ import (
 
 const (
 	fcDriver = "fibre_channel"
+	PortName = "port_name"
+	NodeName = "node_name"
+	Wwpn     = "wwpn"
+	Wwnn     = "wwnn"
 )
 
 type FC struct {
@@ -45,4 +49,9 @@ func (f *FC) Attach(conn map[string]interface{}) (string, error) {
 
 func (f *FC) Detach(conn map[string]interface{}) error {
 	return f.self.disconnectVolume(conn)
+}
+
+// GetInitiatorInfo implementation
+func (f *FC) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+	return f.self.getInitiatorInfo()
 }
