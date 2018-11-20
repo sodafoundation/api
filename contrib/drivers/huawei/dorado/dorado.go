@@ -74,7 +74,16 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 		return nil, err1
 	}
 
-	lun, err := d.client.CreateVolume(opt.GetName(), opt.GetSize(), volumeDesc, poolId)
+	name := opt.GetName()
+	// If the volume is created from snapshot, the volume name cannot exceed 31.
+	if len(opt.GetSnapshotId()) > 0 {
+		if len(name) > 31 {
+			name = string([]byte(name)[:31])
+			log.Infof("volume name is shortened from %s to %s", opt.GetName(), name)
+		}
+	}
+
+	lun, err := d.client.CreateVolume(name, opt.GetSize(), volumeDesc, poolId)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err

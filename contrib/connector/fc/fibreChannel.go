@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/opensds/opensds/contrib/connector"
 )
 
 type FCConnectorInfo struct {
@@ -214,4 +215,42 @@ func (f *fibreChannel) getFChbasInfo() ([]map[string]string, error) {
 	}
 
 	return hbasInfos, nil
+}
+
+func (f *fibreChannel) getInitiatorInfo() (connector.InitiatorInfo, error) {
+	var initiatorInfo connector.InitiatorInfo
+
+	hbas, err := f.getFChbasInfo()
+	if err != nil {
+		log.Printf("getFChbasInfo failed: %v", err.Error())
+		return initiatorInfo, err
+	}
+
+	var wwpns []string
+	var wwnns []string
+
+	for _, hba := range hbas {
+		if v, ok := hba[PortName]; ok {
+			wwpns = append(wwpns, v)
+		}
+
+		if v, ok := hba[NodeName]; ok {
+			wwnns = append(wwnns, v)
+		}
+	}
+
+	initiatorInfo.InitiatorData = make(map[string]interface{})
+	initiatorInfo.InitiatorData[Wwpn] = wwpns
+	initiatorInfo.InitiatorData[Wwnn] = wwnns
+
+	hostName, err := connector.GetHostName()
+	if err != nil {
+		return initiatorInfo, err
+	}
+
+	initiatorInfo.HostName = hostName
+	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
+		fcDriver, initiatorInfo)
+
+	return initiatorInfo, nil
 }

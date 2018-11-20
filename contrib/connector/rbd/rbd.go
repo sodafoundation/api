@@ -96,6 +96,20 @@ func (*RBD) Detach(conn map[string]interface{}) error {
 	return err
 }
 
+// GetInitiatorInfo implementation
+func (*RBD) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+	var initiatorInfo connector.InitiatorInfo
+	hostName, err := connector.GetHostName()
+
+	if err != nil {
+		return initiatorInfo, err
+	}
+
+	initiatorInfo.HostName = hostName
+
+	return initiatorInfo, nil
+}
+
 func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, error) {
 	devName, err := findDevice(poolName, imageName, 1)
 	if err == nil {
