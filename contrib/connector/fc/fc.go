@@ -18,20 +18,12 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-const (
-	fcDriver = "fibre_channel"
-	PortName = "port_name"
-	NodeName = "node_name"
-	Wwpn     = "wwpn"
-	Wwnn     = "wwnn"
-)
-
 type FC struct {
 	self *fibreChannel
 }
 
 func init() {
-	connector.RegisterConnector(fcDriver,
+	connector.RegisterConnector(connector.FcDriver,
 		&FC{
 			self: &fibreChannel{
 				helper: &linuxfc{},

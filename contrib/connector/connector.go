@@ -19,6 +19,19 @@ import (
 	"log"
 )
 
+const (
+	FcDriver = "fibre_channel"
+	PortName = "port_name"
+	NodeName = "node_name"
+	Wwpn     = "wwpn"
+	Wwnn     = "wwnn"
+
+	IscsiDriver = "iscsi"
+	Iqn         = "iqn"
+
+	RbdDriver = "rbd"
+)
+
 // Connector implementation
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
