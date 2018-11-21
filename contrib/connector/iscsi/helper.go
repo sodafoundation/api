@@ -276,7 +276,7 @@ func getInitiatorInfo() (connector.InitiatorInfo, error) {
 	}
 
 	initiatorInfo.InitiatorData = make(map[string]interface{})
-	initiatorInfo.InitiatorData[Iqn] = initiators[0]
+	initiatorInfo.InitiatorData[connector.Iqn] = initiators[0]
 
 	hostName, err := connector.GetHostName()
 	if err != nil {
@@ -285,7 +285,7 @@ func getInitiatorInfo() (connector.InitiatorInfo, error) {
 
 	initiatorInfo.HostName = hostName
 	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
-		iscsiDriver, initiatorInfo)
+		connector.IscsiDriver, initiatorInfo)
 
 	return initiatorInfo, nil
 }
