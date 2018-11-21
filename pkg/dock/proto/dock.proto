@@ -114,6 +114,8 @@ message CreateVolumeOpts {
     string replicationId = 14;
     // The size of snapshot
     int64 snapshotSize = 15;
+    // Down load snapshot from cloud
+    bool snapshotFromCloud = 16;
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties

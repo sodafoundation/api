@@ -28,7 +28,7 @@ type BackupSpec struct {
 type BackupDriver interface {
 	SetUp() error
 	Backup(backup *BackupSpec, volumeFile *os.File) error
-	Restore(backup *BackupSpec, volId string, volFile *os.File) error
+	Restore(backup *BackupSpec, backupId string, volFile *os.File) error
 	Delete(backup *BackupSpec) error
 	CleanUp() error
 }

@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -71,9 +72,16 @@ func request(url string, method string, headers HeaderOption, input interface{},
 	// Set the request timeout a little bit longer upload snapshot to cloud temporarily.
 	req.SetTimeout(time.Minute*6, time.Minute*6)
 	// init body
+	log.Printf("%s %s\n", strings.ToUpper(method), url)
 	if input != nil {
-		req.JSONBody(input)
+		body, err := json.MarshalIndent(input, "", "  ")
+		if err != nil {
+			return err
+		}
+		log.Printf("Request body:\n%s\n", string(body))
+		req.Body(body)
 	}
+
 	//init header
 	if headers != nil {
 		for k, v := range headers {
@@ -90,6 +98,7 @@ func request(url string, method string, headers HeaderOption, input interface{},
 		return err
 	}
 
+	log.Printf("\nStatusCode: %s\nResponse Body:\n%s\n", resp.Status, string(rbody))
 	if 400 <= resp.StatusCode && resp.StatusCode <= 599 {
 		return NewHttpError(resp.StatusCode, string(rbody))
 	}

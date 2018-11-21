@@ -25,6 +25,7 @@ import (
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
+	"io/ioutil"
 )
 
 const (
@@ -102,11 +103,12 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 	}
 
 	log.V(5).Infof("%s: %s OK\n", method, u)
-	b, err := req.Bytes()
+	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Get byte[] from response failed, method: %s\n url: %s\n error: %v", method, u, err)
+		return nil, nil, err
 	}
-	return b, resp.Header, nil
+	return rbody, resp.Header, nil
 }
 
 func (c *Client) request(method, p string, in, out interface{}, cb ReqSettingCB) error {
@@ -250,4 +252,31 @@ func (c *Client) AbortMultipartUpload(bucketName, objectKey string) error {
 	//	return err
 	//}
 	return nil
+}
+
+func (c *Client) DownloadPart(bucketName, objectKey string, offset, size int64) ([]byte, error) {
+	p := path.Join("s3", bucketName, objectKey)
+
+	reqSettingCB := func(req *httplib.BeegoHTTPRequest) error {
+		rangeStr := fmt.Sprintf("bytes:%d-%d", offset, offset+size-1)
+		req.Header("Range", rangeStr)
+		req.SetTimeout(c.uploadTimeout, c.uploadTimeout)
+		return nil
+	}
+
+	u, err := url.Parse(p)
+	if err != nil {
+		return nil, err
+	}
+	base, err := url.Parse(c.baseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	fullUrl := base.ResolveReference(u)
+	body, _, err := c.doRequest("GET", fullUrl.String(), nil, reqSettingCB)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }

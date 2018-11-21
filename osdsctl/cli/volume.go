@@ -78,17 +78,18 @@ var (
 )
 
 var (
-	volLimit     string
-	volOffset    string
-	volSortDir   string
-	volSortKey   string
-	volId        string
-	volTenantId  string
-	volUserId    string
-	volStatus    string
-	volPoolId    string
-	volProfileId string
-	volGroupId   string
+	volLimit          string
+	volOffset         string
+	volSortDir        string
+	volSortKey        string
+	volId             string
+	volTenantId       string
+	volUserId         string
+	volStatus         string
+	volPoolId         string
+	volProfileId      string
+	volGroupId        string
+	snapshotFromCloud bool
 )
 
 func init() {
@@ -115,6 +116,7 @@ func init() {
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
+	volumeCreateCommand.Flags().BoolVarP(&snapshotFromCloud, "snapshotFromCloud", "c", false, "download snapshot from cloud")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
 	volumeCommand.AddCommand(volumeDeleteCommand)
@@ -141,16 +143,16 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	vol := &model.VolumeSpec{
-		Name:             volName,
-		Description:      volDesp,
-		AvailabilityZone: volAz,
-		Size:             int64(size),
-		ProfileId:        profileId,
-		SnapshotId:       volSnap,
+		Name:              volName,
+		Description:       volDesp,
+		AvailabilityZone:  volAz,
+		Size:              int64(size),
+		ProfileId:         profileId,
+		SnapshotId:        volSnap,
+		SnapshotFromCloud: snapshotFromCloud,
 	}
 
 	resp, err := client.CreateVolume(vol)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -163,7 +165,6 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 func volumeShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVolume(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -181,7 +182,6 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		"Status": volStatus, "PoolId": volPoolId, "ProfileId": volProfileId, "GroupId": volGroupId}
 
 	resp, err := client.ListVolumes(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -209,7 +209,6 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.UpdateVolume(args[0], vol)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -230,7 +229,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.ExtendVolume(args[0], body)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

@@ -56,7 +56,6 @@ func versionAction(cmd *cobra.Command, args []string) {
 func versionShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVersion(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -67,7 +66,6 @@ func versionShowAction(cmd *cobra.Command, args []string) {
 func versionListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
 	resp, err := client.ListVersions()
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

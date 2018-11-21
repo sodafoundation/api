@@ -87,7 +87,57 @@ func (d *Driver) Setup() error {
 
 func (*Driver) Unset() error { return nil }
 
-func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+func (d *Driver) copySnapshotToVolume(opt *pb.CreateVolumeOpts, lvPath string) error {
+	var snapSize = uint64(opt.GetSnapshotSize())
+	var count = (snapSize << sizeShiftBit) / blocksize
+	var snapName = snapshotPrefix + opt.GetSnapshotId()
+	var snapPath = path.Join("/dev", opt.GetPoolName(), snapName)
+	if _, err := d.handler("dd", []string{
+		"if=" + snapPath,
+		"of=" + lvPath,
+		"count=" + fmt.Sprint(count),
+		"bs=" + fmt.Sprint(blocksize),
+	}); err != nil {
+		log.Error("Failed to create logic volume:", err)
+		return err
+	}
+	return nil
+}
+
+func (d *Driver) downloadSnapshot(bucket, backupId, dest string) error {
+	mc, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver, err: %v", err)
+		return err
+	}
+
+	if err := mc.SetUp(); err != nil {
+		return err
+	}
+	defer mc.CleanUp()
+
+	file, err := os.OpenFile(dest, os.O_RDWR, 0666)
+	if err != nil {
+		log.Errorf("open lvm snapshot file, err: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	metadata := map[string]string{
+		"bucket": bucket,
+	}
+	b := &backup.BackupSpec{
+		Metadata: metadata,
+	}
+
+	if err := mc.Restore(b, backupId, file); err != nil {
+		log.Errorf("upload snapshot to multi-cloud failed, err: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, err error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var polName = opt.GetPoolName()
 	var id = opt.GetId()
@@ -121,21 +171,41 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		}
 	}
 
-	// Copy snapshot to volume
-	var snap = opt.GetSnapshotId()
-	if snap != "" {
-		var snapSize = uint64(opt.GetSnapshotSize())
-		var count = (snapSize << sizeShiftBit) / blocksize
-		var snapName = snapshotPrefix + snap
-		var snapPath = path.Join("/dev", polName, snapName)
-		if _, err := d.handler("dd", []string{
-			"if=" + snapPath,
-			"of=" + lvPath,
-			"count=" + fmt.Sprint(count),
-			"bs=" + fmt.Sprint(blocksize),
-		}); err != nil {
-			log.Error("Failed to create logic volume:", err)
-			return nil, err
+	// remove created volume if got error
+	defer func() {
+		// using return value as the error flag
+		if vol == nil {
+			_, err := d.handler("lvremove", []string{"-f", lvPath})
+			if err != nil {
+				log.Error("Failed to remove logic volume:", err)
+			}
+		}
+	}()
+
+	// Create volume from snapshot
+	if opt.GetSnapshotId() != "" {
+		if opt.SnapshotFromCloud {
+			// download cloud snapshot to volume
+			data := opt.GetMetadata()
+			backupId, ok := data["backupId"]
+			if !ok {
+				return nil, errors.New("can't find backupId in metadata")
+			}
+			bucket, ok := data["bucket"]
+			if !ok {
+				return nil, errors.New("can't find bucket name in metadata")
+			}
+			err := d.downloadSnapshot(bucket, backupId, lvPath)
+			if err != nil {
+				log.Errorf("Download snapshot failed, %v", err)
+				return nil, err
+			}
+		} else {
+			// copy local snapshot to volume
+			if err := d.copySnapshotToVolume(opt, lvPath); err != nil {
+				log.Errorf("Copy snapshot to volume failed, %v", err)
+				return nil, err
+			}
 		}
 	}
 
@@ -502,11 +572,10 @@ func (d *Driver) deleteUploadedSnapshot(backupId string, bucket string) error {
 	return nil
 }
 
-func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
+func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.VolumeSnapshotSpec, err error) {
 	var size = fmt.Sprint(opt.GetSize()) + "G"
 	var id = opt.GetId()
 	var snapName = snapshotPrefix + id
-	var err error
 
 	lvPath, ok := opt.GetMetadata()["lvPath"]
 	if !ok {
@@ -542,7 +611,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	}
 
 	defer func() {
-		if err != nil {
+		if snap == nil {
 			log.Errorf("create snapshot failed, rollback it")
 			d.handler("lvremove", []string{"-f", lvsPath})
 		}

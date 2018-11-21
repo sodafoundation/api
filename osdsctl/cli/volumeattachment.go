@@ -110,7 +110,6 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	resp, err := client.CreateVolumeAttachment(attachment)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -122,7 +121,6 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVolumeAttachment(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -140,7 +138,6 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 		"Status": volAtmStatus, "Mountpoint": volAtmMountpoint}
 
 	resp, err := client.ListVolumeAttachments(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -167,7 +164,6 @@ func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.UpdateVolumeAttachment(args[0], attachment)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

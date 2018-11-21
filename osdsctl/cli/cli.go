@@ -54,17 +54,27 @@ func init() {
 	flags.BoolVar(&Debug, "debug", false, "shows debugging output.")
 }
 
-type Writer struct{}
+type DummyWriter struct{}
 
 // do nothing
-func (writer Writer) Write(data []byte) (n int, err error) {
+func (writer DummyWriter) Write(data []byte) (n int, err error) {
+	return len(data), nil
+}
+
+type DebugWriter struct{}
+
+// do nothing
+func (writer DebugWriter) Write(data []byte) (n int, err error) {
+	Debugf("%s", string(data))
 	return len(data), nil
 }
 
 // Run method indicates how to start a cli tool through cobra.
 func Run() error {
 	if !utils.Contained("--debug", os.Args) {
-		log.SetOutput(Writer{})
+		log.SetOutput(DummyWriter{})
+	} else {
+		log.SetOutput(DebugWriter{})
 	}
 
 	ep, ok := os.LookupEnv(c.OpensdsEndpoint)
