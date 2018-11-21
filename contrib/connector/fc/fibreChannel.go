@@ -230,18 +230,18 @@ func (f *fibreChannel) getInitiatorInfo() (connector.InitiatorInfo, error) {
 	var wwnns []string
 
 	for _, hba := range hbas {
-		if v, ok := hba[PortName]; ok {
+		if v, ok := hba[connector.PortName]; ok {
 			wwpns = append(wwpns, v)
 		}
 
-		if v, ok := hba[NodeName]; ok {
+		if v, ok := hba[connector.NodeName]; ok {
 			wwnns = append(wwnns, v)
 		}
 	}
 
 	initiatorInfo.InitiatorData = make(map[string]interface{})
-	initiatorInfo.InitiatorData[Wwpn] = wwpns
-	initiatorInfo.InitiatorData[Wwnn] = wwnns
+	initiatorInfo.InitiatorData[connector.Wwpn] = wwpns
+	initiatorInfo.InitiatorData[connector.Wwnn] = wwnns
 
 	hostName, err := connector.GetHostName()
 	if err != nil {
@@ -250,7 +250,7 @@ func (f *fibreChannel) getInitiatorInfo() (connector.InitiatorInfo, error) {
 
 	initiatorInfo.HostName = hostName
 	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
-		fcDriver, initiatorInfo)
+		connector.FcDriver, initiatorInfo)
 
 	return initiatorInfo, nil
 }
