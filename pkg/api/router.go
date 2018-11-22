@@ -25,6 +25,7 @@ import (
 
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
+	"github.com/opensds/opensds/pkg/api/filter/accesslog"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
 	"github.com/opensds/opensds/pkg/utils/constants"
@@ -103,6 +104,7 @@ func Run(host string) {
 	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
 	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
+	beego.InsertFilter("*", beego.BeforeExec, accesslog.Factory())
 	beego.AddNamespace(ns)
 
 	// add router for api version
