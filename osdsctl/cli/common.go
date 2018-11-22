@@ -15,7 +15,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -95,12 +94,5 @@ func ArgsNumCheck(cmd *cobra.Command, args []string, invalidNum int) {
 		Errorln("The number of args is not correct!")
 		cmd.Usage()
 		os.Exit(1)
-	}
-}
-
-func PrintResponse(v interface{}) {
-	if Debug {
-		b, _ := json.Marshal(v)
-		Debugln(string(b))
 	}
 }

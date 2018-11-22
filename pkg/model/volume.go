@@ -71,6 +71,9 @@ type VolumeSpec struct {
 	// The uuid of the snapshot which the volume is created
 	SnapshotId string `json:"snapshotId, omitempty"`
 
+	// Download Snapshot From Cloud
+	SnapshotFromCloud bool `json:"snapshotFromCloud, omitempty"`
+
 	// The uuid of the replication which the volume belongs to.
 	ReplicationId string `json:"replicationId,omitempty"`
 

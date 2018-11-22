@@ -72,14 +72,15 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 			Id:        in.Id,
 			CreatedAt: in.CreatedAt,
 		},
-		UserId:           ctx.UserId,
-		Name:             in.Name,
-		Description:      in.Description,
-		ProfileId:        in.ProfileId,
-		Size:             in.Size,
-		AvailabilityZone: in.AvailabilityZone,
-		Status:           model.VolumeCreating,
-		SnapshotId:       in.SnapshotId,
+		UserId:            ctx.UserId,
+		Name:              in.Name,
+		Description:       in.Description,
+		ProfileId:         in.ProfileId,
+		Size:              in.Size,
+		AvailabilityZone:  in.AvailabilityZone,
+		Status:            model.VolumeCreating,
+		SnapshotId:        in.SnapshotId,
+		SnapshotFromCloud: in.SnapshotFromCloud,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {

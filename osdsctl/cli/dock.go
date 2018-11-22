@@ -83,7 +83,6 @@ func dockAction(cmd *cobra.Command, args []string) {
 func dockShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetDock(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -99,7 +98,6 @@ func dockListAction(cmd *cobra.Command, args []string) {
 		"Endpoint": dockEndpoint, "Status": dockStatus, "StorageType": dockStorageType}
 
 	resp, err := client.ListDocks(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
