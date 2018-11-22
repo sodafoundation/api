@@ -16,16 +16,16 @@ package logs
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"fmt"
 	"github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"os/signal"
-	"syscall"
 )
 
 const DefaultLogDir = "/var/log/opensds"
