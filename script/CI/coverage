@@ -24,7 +24,7 @@ for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/... ./contrib/...); do
   test $testpkg == "$MODEL_PACKAGE" && continue
   test $testpkg == "$PROTOBUF_PACKAGE" && continue
   covpkg="${testpkg/"/testing"/}"
-  go test -covermode count -coverprofile "testing_"$n.coverprofile -coverpkg $covpkg $testpkg 2>/dev/null
+  go test -covermode count -coverprofile "testing_"$n.coverprofile -coverpkg $covpkg $testpkg
   n=$((n+1))
 done
 

@@ -76,7 +76,7 @@ func Value(data map[string]string, v reflect.Value) error {
 		case reflect.String:
 			iv.SetString(s)
 		default:
-			return fmt.Errorf("fsc: Unexpected key type", iv.Kind()) // should never occur
+			return fmt.Errorf("fsc: Unexpected key type %v", iv.Kind()) // should never occur
 		}
 	}
 	return nil
@@ -112,7 +112,7 @@ func unmarshalSlice(data string, v reflect.Value) error {
 func Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return fmt.Errorf("invalid type of %s ,reflect.TypeOf(v) ")
+		return fmt.Errorf("invalid value kind %v", rv.Kind())
 	}
 	rv = rv.Elem()
 	switch rv.Kind() {
