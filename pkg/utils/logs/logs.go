@@ -16,14 +16,26 @@ package logs
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/utils/config"
 )
 
 const DefaultLogDir = "/var/log/opensds"
+
+// flushDaemon periodically flushes the log file buffers.
+func flushDaemon(period time.Duration) {
+	for _ = range time.NewTicker(period).C {
+		glog.Flush()
+	}
+}
 
 func init() {
 	//Set OpenSDS default log directory.
@@ -42,6 +54,18 @@ func (writer GlogWriter) Write(data []byte) (n int, err error) {
 	return len(data), nil
 }
 
+// flush log when be interrupted.
+func handleInterrupt() {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
+	go func() {
+		sig := <-sigs
+		fmt.Println(sig)
+		FlushLogs()
+		os.Exit(-1)
+	}()
+}
+
 func InitLogs() {
 	log.SetOutput(GlogWriter{})
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -49,6 +73,8 @@ func InitLogs() {
 	if exist, _ := utils.PathExists(logDir); !exist {
 		os.MkdirAll(logDir, 0755)
 	}
+	go flushDaemon(config.CONF.LogFlushFrequency)
+	handleInterrupt()
 }
 
 func FlushLogs() {
