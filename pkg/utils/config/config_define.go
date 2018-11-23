@@ -29,12 +29,13 @@ type OsdsLet struct {
 }
 
 type OsdsDock struct {
-	ApiEndpoint                string   `conf:"api_endpoint,localhost:50050"`
-	DockType                   string   `conf:"dock_type,provisioner"`
-	EnabledBackends            []string `conf:"enabled_backends,lvm"`
-	Daemon                     bool     `conf:"daemon,false"`
-	BindIp                     string   `conf:"bind_ip"` // Just used for attacher dock
-	HostBasedReplicationDriver string   `conf:"host_based_replication_driver,drbd"`
+	ApiEndpoint                string        `conf:"api_endpoint,localhost:50050"`
+	DockType                   string        `conf:"dock_type,provisioner"`
+	EnabledBackends            []string      `conf:"enabled_backends,lvm"`
+	Daemon                     bool          `conf:"daemon,false"`
+	BindIp                     string        `conf:"bind_ip"` // Just used for attacher dock
+	HostBasedReplicationDriver string        `conf:"host_based_replication_driver,drbd"`
+	LogFlushFrequency          time.Duration `conf:"log_flush_frequency,5000000000"` // Default value is 5s
 	Backends
 }
 

@@ -25,7 +25,6 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/utils"
-	"github.com/opensds/opensds/pkg/utils/config"
 )
 
 const DefaultLogDir = "/var/log/opensds"
@@ -66,14 +65,15 @@ func handleInterrupt() {
 	}()
 }
 
-func InitLogs() {
+func InitLogs(LogFlushFrequency time.Duration) {
 	log.SetOutput(GlogWriter{})
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	logDir := flag.CommandLine.Lookup("log_dir").Value.String()
 	if exist, _ := utils.PathExists(logDir); !exist {
 		os.MkdirAll(logDir, 0755)
 	}
-	go flushDaemon(config.CONF.LogFlushFrequency)
+	glog.Infof("[Info] LogFlushFrequency: %v", LogFlushFrequency)
+	go flushDaemon(LogFlushFrequency)
 	handleInterrupt()
 }
 

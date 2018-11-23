@@ -43,7 +43,7 @@ func init() {
 
 func main() {
 	// Open OpenSDS orchestrator service log file.
-	logs.InitLogs()
+	logs.InitLogs(CONF.OsdsLet.LogFlushFrequency)
 	defer logs.FlushLogs()
 
 	// Set up database session.

@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-ini/ini"
 	log "github.com/golang/glog"
@@ -134,6 +135,13 @@ func parseItems(section string, v reflect.Value, cfg *ini.File) {
 		case reflect.Bool:
 			val, _ := strconv.ParseBool(strVal)
 			field.SetBool(val)
+		case reflect.ValueOf(time.Second).Kind():
+			if field.Type().String() == "time.Duration" {
+				v, _ := time.ParseDuration(strVal)
+				field.SetInt(int64(v))
+				break
+			}
+			fallthrough
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			val, _ := strconv.ParseInt(strVal, 10, 64)
 			field.SetInt(val)

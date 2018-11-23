@@ -17,23 +17,25 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 type TestStruct struct {
-	Bool    bool    `conf:"bool,true"`
-	Int     int     `conf:"int,-456789"`
-	Int8    int8    `conf:"int8,-111"`
-	Int16   int     `conf:"int16,-4567"`
-	Int32   int     `conf:"int32,-456789"`
-	Int64   int64   `conf:"int64,-456789"`
-	Uint    uint    `conf:"uint,456789"`
-	Uint8   uint8   `conf:"uint8,111"`
-	Uint16  uint16  `conf:"uint16,4567"`
-	Uint32  uint32  `conf:"uint32,456789"`
-	Uint64  uint64  `conf:"uint64,456789"`
-	Float32 float32 `conf:"float32,0.456789"`
-	Float64 float64 `conf:"float64,0.456789"`
-	String  string  `conf:"string,DefaultValue"`
+	Bool     bool          `conf:"bool,true"`
+	Int      int           `conf:"int,-456789"`
+	Int8     int8          `conf:"int8,-111"`
+	Int16    int           `conf:"int16,-4567"`
+	Int32    int           `conf:"int32,-456789"`
+	Int64    int64         `conf:"int64,-456789"`
+	Uint     uint          `conf:"uint,456789"`
+	Uint8    uint8         `conf:"uint8,111"`
+	Uint16   uint16        `conf:"uint16,4567"`
+	Uint32   uint32        `conf:"uint32,456789"`
+	Uint64   uint64        `conf:"uint64,456789"`
+	Float32  float32       `conf:"float32,0.456789"`
+	Float64  float64       `conf:"float64,0.456789"`
+	String   string        `conf:"string,DefaultValue"`
+	Duration time.Duration `conf:"duration,10000000000"`
 }
 
 type TestSliceStruct struct {
@@ -104,6 +106,9 @@ func TestFunctionAllType(t *testing.T) {
 	}
 	if conf.TestStruct.Float64 != 0.123456 {
 		t.Error("Test TestStuct Float64 error")
+	}
+	if conf.TestStruct.Duration != 5*time.Second {
+		t.Error("Test TestStuct time Duration error")
 	}
 	if conf.TestStruct.String != "HelloWorld" {
 		t.Error("Test TestStuct String error")
@@ -263,7 +268,13 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.OsdsLet.SocketOrder != "inc" {
 		t.Error("Test OsdsLet.SocketOrder error")
 	}
+	if CONF.OsdsLet.LogFlushFrequency != 2*time.Second {
+		t.Error("Test OsdsDock.ApiEndpoint error")
+	}
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
+		t.Error("Test OsdsDock.ApiEndpoint error")
+	}
+	if CONF.OsdsDock.LogFlushFrequency != 4*time.Second {
 		t.Error("Test OsdsDock.ApiEndpoint error")
 	}
 	if CONF.OsdsDock.EnabledBackends[0] != "ceph" {
