@@ -35,7 +35,7 @@ type TestStruct struct {
 	Float32  float32       `conf:"float32,0.456789"`
 	Float64  float64       `conf:"float64,0.456789"`
 	String   string        `conf:"string,DefaultValue"`
-	Duration time.Duration `conf:"duration,10000000000"`
+	Duration time.Duration `conf:"duration,10s"`
 }
 
 type TestSliceStruct struct {
@@ -210,6 +210,9 @@ func TestFunctionDefaultValue(t *testing.T) {
 		t.Error("Test TestStuct Float64 error")
 	}
 	if conf.TestStruct.String != "DefaultValue" {
+		t.Error("Test TestStuct String error")
+	}
+	if conf.TestStruct.Duration != 10*time.Second {
 		t.Error("Test TestStuct String error")
 	}
 
