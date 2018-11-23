@@ -284,7 +284,7 @@ func getInitiatorInfo() (connector.InitiatorInfo, error) {
 	}
 
 	initiatorInfo.HostName = hostName
-	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
+	log.Printf("getInitiatorInfo success: protocol=%v, initiatorInfo=%v",
 		connector.IscsiDriver, initiatorInfo)
 
 	return initiatorInfo, nil
