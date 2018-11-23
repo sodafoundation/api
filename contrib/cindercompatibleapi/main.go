@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/opensds/opensds/contrib/cindercompatibleapi/api"
 	"github.com/opensds/opensds/pkg/utils/logs"
@@ -30,7 +31,7 @@ import (
 
 func main() {
 	flag.Parse()
-	logs.InitLogs()
+	logs.InitLogs(5 * time.Second)
 	defer logs.FlushLogs()
 
 	cinderEndpoint, ok := os.LookupEnv("CINDER_ENDPOINT")
