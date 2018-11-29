@@ -152,7 +152,7 @@ func Create(ioctx *rados.IOContext, name string, size uint64, order int,
 	defer C.free(unsafe.Pointer(c_name))
 
 	switch len(args) {
-	case 2:
+	case 3:
 		ret = C.rbd_create3(C.rados_ioctx_t(ioctx.Pointer()),
 			c_name, C.uint64_t(size),
 			C.uint64_t(args[0]), &c_order,
@@ -817,6 +817,10 @@ func (image *Image) GetParentInfo(p_pool, p_name, p_snapname []byte) error {
 
 // int rbd_snap_remove(rbd_image_t image, const char *snapname);
 func (snapshot *Snapshot) Remove() error {
+	if snapshot.image.image == nil {
+		return RbdErrorImageNotOpen
+	}
+
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
 
@@ -827,6 +831,10 @@ func (snapshot *Snapshot) Remove() error {
 // int rbd_snap_rollback_with_progress(rbd_image_t image, const char *snapname,
 //                  librbd_progress_fn_t cb, void *cbdata);
 func (snapshot *Snapshot) Rollback() error {
+	if snapshot.image.image == nil {
+		return RbdErrorImageNotOpen
+	}
+
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
 
@@ -835,6 +843,10 @@ func (snapshot *Snapshot) Rollback() error {
 
 // int rbd_snap_protect(rbd_image_t image, const char *snap_name);
 func (snapshot *Snapshot) Protect() error {
+	if snapshot.image.image == nil {
+		return RbdErrorImageNotOpen
+	}
+
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
 
@@ -843,6 +855,10 @@ func (snapshot *Snapshot) Protect() error {
 
 // int rbd_snap_unprotect(rbd_image_t image, const char *snap_name);
 func (snapshot *Snapshot) Unprotect() error {
+	if snapshot.image.image == nil {
+		return RbdErrorImageNotOpen
+	}
+
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
 
@@ -852,6 +868,10 @@ func (snapshot *Snapshot) Unprotect() error {
 // int rbd_snap_is_protected(rbd_image_t image, const char *snap_name,
 //               int *is_protected);
 func (snapshot *Snapshot) IsProtected() (bool, error) {
+	if snapshot.image.image == nil {
+		return false, RbdErrorImageNotOpen
+	}
+
 	var c_is_protected C.int
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
@@ -867,6 +887,10 @@ func (snapshot *Snapshot) IsProtected() (bool, error) {
 
 // int rbd_snap_set(rbd_image_t image, const char *snapname);
 func (snapshot *Snapshot) Set() error {
+	if snapshot.image.image == nil {
+		return RbdErrorImageNotOpen
+	}
+
 	var c_snapname *C.char = C.CString(snapshot.name)
 	defer C.free(unsafe.Pointer(c_snapname))
 

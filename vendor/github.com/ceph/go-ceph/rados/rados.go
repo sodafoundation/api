@@ -17,6 +17,8 @@ func (e RadosError) Error() string {
 	return fmt.Sprintf("rados: %s", C.GoString(C.strerror(C.int(-e))))
 }
 
+var RadosAllNamespaces = "\x01"
+
 var RadosErrorNotFound = RadosError(-C.ENOENT)
 var RadosErrorPermissionDenied = RadosError(-C.EPERM)
 

@@ -42,8 +42,8 @@
   version = "1.33.0"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/golang/glog"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/satori/go.uuid"
@@ -60,6 +60,10 @@
 [[constraint]]
   name = "gopkg.in/yaml.v2"
   version = "2.0.0"
+
+[[constraint]]
+  name = "github.com/ceph/go-ceph"
+  revision = "92db4f867c819fe661d5990dcc7c6c9d7ae788c3"
 
 [prune]
   go-tests = true
