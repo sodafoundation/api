@@ -22,7 +22,7 @@ OPT_DIR=/opt/opensds
 mkdir -p $OPT_DIR
 
 # Golang version
-GOLANG_VERSION=${GOLANG_VERSION:-1.9.2}
+MINIMUM_GO_VERSION=${MINIMUM_GO_VERSION:-go1.11.1}
 GOENV_PROFILE=${GOENV_PROFILE:-/etc/profile.d/goenv.sh}
 
 # Log file
@@ -49,16 +49,25 @@ log OpenSDS bootstrap starting ...
 
 # load profile
 source /etc/profile
-# Install Golang environment
-if ! which go &>/dev/null; then
+
+# if not found, install it.
+if [[ -z "$(which go)" ]]; then
     log "Golang is not exist, downloading..."
-	wget https://storage.googleapis.com/golang/go${GOLANG_VERSION}.linux-amd64.tar.gz -O $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz > /dev/null
-	log "tar xzf $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/"
-	tar xzf $OPT_DIR/go${GOLANG_VERSION}.linux-amd64.tar.gz -C /usr/local/
-	echo 'export GOROOT=/usr/local/go' > $GOENV_PROFILE
-	echo 'export GOPATH=$HOME/gopath' >> $GOENV_PROFILE
-	echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> $GOENV_PROFILE
-	source $GOENV_PROFILE
+    wget https://storage.googleapis.com/golang/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -O $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz > /dev/null
+    log "tar xzf $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -C /usr/local/"
+    tar xzf $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -C /usr/local/
+    echo 'export GOROOT=/usr/local/go' > $GOENV_PROFILE
+    echo 'export GOPATH=$HOME/gopath' >> $GOENV_PROFILE
+    echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> $GOENV_PROFILE
+    source $GOENV_PROFILE
+fi
+
+# verify go version
+IFS=" " read -ra go_version <<< "$(go version)"
+if [[ "${MINIMUM_GO_VERSION}" != $(echo -e "${MINIMUM_GO_VERSION}\n${go_version[2]}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "${go_version[2]}" != "devel" ]]; then
+    log_error "Detected go version: ${go_version[*]}, OpenSDS requires ${MINIMUM_GO_VERSION} or greater."
+    log_error "Please remove golang old version ${go_version[2]}, bootstrap will install ${MINIMUM_GO_VERSION} automatically"
+    exit 2
 fi
 
 GOPATH=${GOPATH:-$HOME/gopath}
@@ -68,16 +77,16 @@ mkdir -p ${OPENSDS_ROOT}
 
 cd ${OPENSDS_ROOT}
 if [ ! -d ${OPENSDS_DIR} ]; then
-    log "Download the OpenSDS source code."
-	git clone https://github.com/opensds/opensds.git -b master
+    log "Downloading the OpenSDS source code..."
+    git clone https://github.com/opensds/opensds.git -b master
 fi
 
 cd ${OPENSDS_DIR}
 if [ ! -d ${OPENSDS_DIR}/build ]; then
+    log "Building OpenSDS ..."
     sudo apt-get update > /dev/null
-	sudo apt-get install librados-dev librbd-dev -y > /dev/null
-	log "Build OpenSDS ..."
-	make
+    sudo apt-get install librados-dev librbd-dev -y > /dev/null
+    make
 fi
 
 log OpenSDS bootstrapped successfully. you can execute 'source /etc/profile' to load golang ENV.

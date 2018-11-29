@@ -126,7 +126,6 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.CreateVolumeGroup(vg)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -137,7 +136,6 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 func volumeGroupShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetVolumeGroup(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -154,7 +152,6 @@ func volumeGroupListAction(cmd *cobra.Command, args []string) {
 		"Status": vgStatus, "PoolId": vgPoolId}
 
 	resp, err := client.ListVolumeGroups(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -181,7 +178,6 @@ func volumeGroupUpdateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.UpdateVolumeGroup(args[0], snp)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

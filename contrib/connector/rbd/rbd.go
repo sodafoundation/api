@@ -27,10 +27,6 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-const (
-	rbdDriver = "rbd"
-)
-
 var (
 	rbdBusPath    = "/sys/bus/rbd"
 	rbdDevicePath = path.Join(rbdBusPath, "devices")
@@ -42,7 +38,7 @@ type RBD struct{}
 var _ connector.Connector = &RBD{}
 
 func init() {
-	connector.RegisterConnector(rbdDriver, &RBD{})
+	connector.RegisterConnector(connector.RbdDriver, &RBD{})
 }
 
 func (*RBD) Attach(conn map[string]interface{}) (string, error) {
@@ -94,6 +90,20 @@ func (*RBD) Detach(conn map[string]interface{}) error {
 
 	_, err = exec.Command("rbd", "unmap", device).CombinedOutput()
 	return err
+}
+
+// GetInitiatorInfo implementation
+func (*RBD) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+	var initiatorInfo connector.InitiatorInfo
+	hostName, err := connector.GetHostName()
+
+	if err != nil {
+		return initiatorInfo, err
+	}
+
+	initiatorInfo.HostName = hostName
+
+	return initiatorInfo, nil
 }
 
 func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, error) {

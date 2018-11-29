@@ -30,11 +30,12 @@ import (
 
 func init() {
 	def := GetDefaultConfig()
-	flag := CONF.Flag
+	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", def.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
 	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	daemon.SetDaemonFlag(&CONF.OsdsLet.Daemon, def.OsdsLet.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
@@ -42,7 +43,7 @@ func init() {
 
 func main() {
 	// Open OpenSDS orchestrator service log file.
-	logs.InitLogs()
+	logs.InitLogs(CONF.OsdsLet.LogFlushFrequency)
 	defer logs.FlushLogs()
 
 	// Set up database session.

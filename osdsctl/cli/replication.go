@@ -195,7 +195,6 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.CreateReplication(replica)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -208,7 +207,6 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 func replicationShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetReplication(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -227,7 +225,6 @@ func replicationListAction(cmd *cobra.Command, args []string) {
 		"SecondaryVolumeId": repSecondaryVolumeId}
 
 	resp, err := client.ListReplications(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -244,7 +241,6 @@ func replicationUpdateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.UpdateReplication(args[0], replica)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

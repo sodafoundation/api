@@ -30,12 +30,13 @@ import (
 
 func init() {
 	def := GetDefaultConfig()
-	flag := CONF.Flag
+	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of dock service")
 	flag.StringVar(&CONF.OsdsDock.DockType, "dock-type", def.OsdsDock.DockType, "Type of dock service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
 	// flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
+	flag.DurationVar(&CONF.OsdsDock.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	daemon.SetDaemonFlag(&CONF.OsdsDock.Daemon, def.OsdsDock.Daemon)
 	CONF.Load("/etc/opensds/opensds.conf")
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
@@ -43,7 +44,7 @@ func init() {
 
 func main() {
 	// Open OpenSDS dock service log file.
-	logs.InitLogs()
+	logs.InitLogs(CONF.OsdsDock.LogFlushFrequency)
 	defer logs.FlushLogs()
 
 	// Set up database session.

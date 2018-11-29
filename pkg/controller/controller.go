@@ -106,6 +106,9 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		}
 		snapSize = snapVol.Size
 		in.PoolId = snapVol.PoolId
+		if in.SnapshotFromCloud {
+			in.Metadata = utils.MergeStringMaps(in.Metadata, snap.Metadata)
+		}
 	}
 
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(in)
@@ -130,18 +133,20 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	}
 	c.volumeController.SetDock(dockInfo)
 	opt := &pb.CreateVolumeOpts{
-		Id:               in.Id,
-		Name:             in.Name,
-		Description:      in.Description,
-		Size:             in.Size,
-		AvailabilityZone: in.AvailabilityZone,
-		PoolId:           polInfo.Id,
-		ProfileId:        prf.Id,
-		SnapshotId:       in.SnapshotId,
-		SnapshotSize:     snapSize,
-		PoolName:         polInfo.Name,
-		DriverName:       dockInfo.DriverName,
-		Context:          ctx.ToJson(),
+		Id:                in.Id,
+		Name:              in.Name,
+		Description:       in.Description,
+		Size:              in.Size,
+		AvailabilityZone:  in.AvailabilityZone,
+		PoolId:            polInfo.Id,
+		ProfileId:         prf.Id,
+		SnapshotId:        in.SnapshotId,
+		SnapshotSize:      snapSize,
+		PoolName:          polInfo.Name,
+		DriverName:        dockInfo.DriverName,
+		Context:           ctx.ToJson(),
+		Metadata:          in.Metadata,
+		SnapshotFromCloud: in.SnapshotFromCloud,
 	}
 
 	result, err := c.volumeController.CreateVolume(opt)

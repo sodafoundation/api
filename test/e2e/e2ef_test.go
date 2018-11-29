@@ -175,6 +175,7 @@ func TestExtendVolumeFlow(t *testing.T) {
 	body = &model.ExtendVolumeSpec{
 		NewSize: int64(3),
 	}
+	time.Sleep(3 * 1e9)
 	_, err = u.ExtendVolume(vol.Id, body)
 	if err != nil {
 		t.Error("Extend volume fail", err)

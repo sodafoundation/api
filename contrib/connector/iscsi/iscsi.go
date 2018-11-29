@@ -18,14 +18,10 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-const (
-	iscsiDriver = "iscsi"
-)
-
 type Iscsi struct{}
 
 func init() {
-	connector.RegisterConnector(iscsiDriver, &Iscsi{})
+	connector.RegisterConnector(connector.IscsiDriver, &Iscsi{})
 }
 
 func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
@@ -36,4 +32,9 @@ func (isc *Iscsi) Detach(conn map[string]interface{}) error {
 	iscsiCon := ParseIscsiConnectInfo(conn)
 
 	return Disconnect(iscsiCon.TgtPortal, iscsiCon.TgtIQN)
+}
+
+// GetInitiatorInfo implementation
+func (isc *Iscsi) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+	return getInitiatorInfo()
 }

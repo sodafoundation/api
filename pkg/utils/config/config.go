@@ -16,12 +16,14 @@ package config
 
 import (
 	gflag "flag"
+	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-ini/ini"
-	log "github.com/golang/glog"
 )
 
 const (
@@ -29,73 +31,112 @@ const (
 	ConfDefaultValue
 )
 
-func setSlice(v reflect.Value, str string) {
+func setSlice(v reflect.Value, str string) error {
 	sList := strings.Split(str, ",")
 	s := reflect.MakeSlice(v.Type(), 0, 5)
 	switch v.Type().Elem().Kind() {
 	case reflect.Bool:
 		for _, elm := range sList {
-			val, _ := strconv.ParseBool(elm)
+			val, err := strconv.ParseBool(elm)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Bool, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(val))
 		}
 	case reflect.Int:
 		for _, elm := range sList {
-			val, _ := strconv.Atoi(elm)
+			val, err := strconv.Atoi(elm)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Int, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(val))
 		}
 	case reflect.Int8:
 		for _, elm := range sList {
-			val, _ := strconv.ParseInt(elm, 10, 64)
+			val, err := strconv.ParseInt(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Int8, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(int8(val)))
 		}
 	case reflect.Int16:
 		for _, elm := range sList {
-			val, _ := strconv.ParseInt(elm, 10, 64)
+			val, err := strconv.ParseInt(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Int16, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(int16(val)))
 		}
 	case reflect.Int32:
 		for _, elm := range sList {
-			val, _ := strconv.ParseInt(elm, 10, 64)
+			val, err := strconv.ParseInt(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Int32, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(int32(val)))
 		}
 	case reflect.Int64:
 		for _, elm := range sList {
-			val, _ := strconv.ParseInt(elm, 10, 64)
+			val, err := strconv.ParseInt(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Int64, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(int64(val)))
 		}
 	case reflect.Uint:
 		for _, elm := range sList {
-			val, _ := strconv.ParseUint(elm, 10, 64)
+			val, err := strconv.ParseUint(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Uint, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(uint(val)))
 		}
 	case reflect.Uint8:
 		for _, elm := range sList {
-			val, _ := strconv.ParseUint(elm, 10, 64)
+			val, err := strconv.ParseUint(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Uint8, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(uint8(val)))
 		}
 	case reflect.Uint16:
 		for _, elm := range sList {
-			val, _ := strconv.ParseUint(elm, 10, 64)
+			val, err := strconv.ParseUint(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Uint16, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(uint16(val)))
 		}
 	case reflect.Uint32:
 		for _, elm := range sList {
-			val, _ := strconv.ParseUint(elm, 10, 64)
+			val, err := strconv.ParseUint(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Uint32, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(uint32(val)))
 		}
 	case reflect.Uint64:
 		for _, elm := range sList {
-			val, _ := strconv.ParseUint(elm, 10, 64)
+			val, err := strconv.ParseUint(elm, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Uint64, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(uint64(val)))
 		}
 	case reflect.Float32:
 		for _, elm := range sList {
-			val, _ := strconv.ParseFloat(elm, 64)
+			val, err := strconv.ParseFloat(elm, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Float32, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(float32(val)))
 		}
 	case reflect.Float64:
 		for _, elm := range sList {
-			val, _ := strconv.ParseFloat(elm, 64)
+			val, err := strconv.ParseFloat(elm, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert slice item %s to Float54, %v", elm, err)
+			}
 			s = reflect.Append(s, reflect.ValueOf(val))
 		}
 	case reflect.String:
@@ -103,12 +144,13 @@ func setSlice(v reflect.Value, str string) {
 			s = reflect.Append(s, reflect.ValueOf(elm))
 		}
 	default:
-		log.Error("Not support this type of slice.")
+		log.Printf("[ERROR] Does not support this type of slice.")
 	}
 	v.Set(s)
+	return nil
 }
 
-func parseItems(section string, v reflect.Value, cfg *ini.File) {
+func parseItems(section string, v reflect.Value, cfg *ini.File) error {
 	for i := 0; i < v.Type().NumField(); i++ {
 
 		field := v.Field(i)
@@ -132,16 +174,38 @@ func parseItems(section string, v reflect.Value, cfg *ini.File) {
 		}
 		switch field.Kind() {
 		case reflect.Bool:
-			val, _ := strconv.ParseBool(strVal)
+			val, err := strconv.ParseBool(strVal)
+			if err != nil {
+				return fmt.Errorf("cann't convert %s:%s to Bool, %v", tags[0], strVal, err)
+			}
 			field.SetBool(val)
+		case reflect.ValueOf(time.Second).Kind():
+			if field.Type().String() == "time.Duration" {
+				v, err := time.ParseDuration(strVal)
+				if err != nil {
+					return fmt.Errorf("cann't convert %s:%s to Duration, %v", tags[0], strVal, err)
+				}
+				field.SetInt(int64(v))
+				break
+			}
+			fallthrough
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			val, _ := strconv.ParseInt(strVal, 10, 64)
+			val, err := strconv.ParseInt(strVal, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert %s:%s to Int, %v", tags[0], strVal, err)
+			}
 			field.SetInt(val)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			val, _ := strconv.ParseUint(strVal, 10, 64)
+			val, err := strconv.ParseUint(strVal, 10, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert %s:%s to Uint, %v", tags[0], strVal, err)
+			}
 			field.SetUint(val)
 		case reflect.Float32, reflect.Float64:
-			val, _ := strconv.ParseFloat(strVal, 64)
+			val, err := strconv.ParseFloat(strVal, 64)
+			if err != nil {
+				return fmt.Errorf("cann't convert %s:%s to Float, %v", tags[0], strVal, err)
+			}
 			field.SetFloat(val)
 		case reflect.String:
 			field.SetString(strVal)
@@ -150,9 +214,10 @@ func parseItems(section string, v reflect.Value, cfg *ini.File) {
 		default:
 		}
 	}
+	return nil
 }
 
-func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) {
+func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) error {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 		t = t.Elem()
@@ -164,21 +229,27 @@ func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) {
 			continue
 		}
 		if "" == section {
-			parseSections(cfg, field.Type(), field)
+			if err := parseSections(cfg, field.Type(), field); err != nil {
+				return err
+			}
 		}
-		parseItems(section, field, cfg)
+		if err := parseItems(section, field, cfg); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func initConf(confFile string, conf interface{}) {
 	cfg, err := ini.Load(confFile)
 	if err != nil && confFile != "" {
-		log.Info("Read configuration failed, use default value")
+		log.Printf("[ERROR] Read configuration failed, use default value")
 	}
 	t := reflect.TypeOf(conf)
 	v := reflect.ValueOf(conf)
-	parseSections(cfg, t, v)
-
+	if err := parseSections(cfg, t, v); err != nil {
+		log.Fatalf("[ERROR] parse configure file failed: %v", err)
+	}
 }
 
 // Global Configuration Variable

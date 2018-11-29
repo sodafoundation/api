@@ -17,8 +17,7 @@ package config
 import (
 	gflag "flag"
 	"reflect"
-
-	log "github.com/golang/glog"
+	"time"
 )
 
 type Flag struct {
@@ -83,6 +82,13 @@ func (f *FlagSet) StringVar(p *string, name string, defValue string, usage strin
 	f.Add(name, flag)
 }
 
+func (f *FlagSet) DurationVar(p *time.Duration, name string, defValue time.Duration, usage string) {
+	inVal := new(time.Duration)
+	flag := &Flag{Value: p, InValue: inVal}
+	gflag.DurationVar(inVal, name, defValue, usage)
+	f.Add(name, flag)
+}
+
 func (f *FlagSet) Add(name string, flag *Flag) {
 	if f.flagMap == nil {
 		f.flagMap = make(map[string]*Flag)
@@ -103,25 +109,8 @@ func (f *FlagSet) AssignValue() {
 		if _, ok := f.flagMap[name]; !ok {
 			continue
 		}
-		typ := reflect.TypeOf(f.flagMap[name].InValue)
-		val := reflect.ValueOf(f.flagMap[name].InValue)
-		switch typ.Elem().Kind() {
-		case reflect.String:
-			*f.flagMap[name].Value.(*string) = val.Elem().String()
-		case reflect.Bool:
-			*f.flagMap[name].Value.(*bool) = val.Elem().Bool()
-		case reflect.Int:
-			*f.flagMap[name].Value.(*int) = int(val.Elem().Int())
-		case reflect.Int64:
-			*f.flagMap[name].Value.(*int64) = val.Elem().Int()
-		case reflect.Uint:
-			*f.flagMap[name].Value.(*uint) = uint(val.Elem().Uint())
-		case reflect.Uint64:
-			*f.flagMap[name].Value.(*uint64) = val.Elem().Uint()
-		case reflect.Float64:
-			*f.flagMap[name].Value.(*float64) = val.Elem().Float()
-		default:
-			log.Error("Flag do not support this type.")
-		}
+		iv := reflect.ValueOf(f.flagMap[name].InValue).Elem()
+		v := reflect.ValueOf(f.flagMap[name].Value).Elem()
+		v.Set(iv)
 	}
 }

@@ -100,7 +100,6 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	resp, err := client.CreateProfile(prf)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -111,7 +110,6 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 func profileShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	resp, err := client.GetProfile(args[0])
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -126,7 +124,6 @@ func profileListAction(cmd *cobra.Command, args []string) {
 		"Name": profName, "Description": profDescription, "StorageType": profStorageType}
 
 	resp, err := client.ListProfiles(opts)
-	PrintResponse(resp)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

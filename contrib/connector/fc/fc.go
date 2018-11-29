@@ -18,16 +18,12 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-const (
-	fcDriver = "fibre_channel"
-)
-
 type FC struct {
 	self *fibreChannel
 }
 
 func init() {
-	connector.RegisterConnector(fcDriver,
+	connector.RegisterConnector(connector.FcDriver,
 		&FC{
 			self: &fibreChannel{
 				helper: &linuxfc{},
@@ -45,4 +41,9 @@ func (f *FC) Attach(conn map[string]interface{}) (string, error) {
 
 func (f *FC) Detach(conn map[string]interface{}) error {
 	return f.self.disconnectVolume(conn)
+}
+
+// GetInitiatorInfo implementation
+func (f *FC) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+	return f.self.getInitiatorInfo()
 }

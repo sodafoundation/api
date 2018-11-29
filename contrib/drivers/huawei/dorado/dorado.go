@@ -74,23 +74,29 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 		return nil, err1
 	}
 
-	lun, err := d.client.CreateVolume(opt.GetName(), opt.GetSize(), volumeDesc, poolId)
+	lun, err := d.client.CreateVolume(EncodeName(opt.GetId()), opt.GetSize(),
+		volumeDesc, poolId)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err
 	}
 
 	log.Infof("Create Volume from snapshot, source_lun_id : %s , target_lun_id : %s", snapshot.Id, lun.Id)
-
 	err = WaitForCondition(func() (bool, error) {
-		if lun.HealthStatus == StatusHealth && lun.RunningStatus == StatusVolumeReady {
-			return true, nil
+		getVolumeResult, getVolumeErr := d.client.GetVolume(lun.Id)
+		if nil == getVolumeErr {
+			if getVolumeResult.HealthStatus == StatusHealth && getVolumeResult.RunningStatus == StatusVolumeReady {
+				return true, nil
+			} else {
+				log.V(5).Infof("Current lun HealthStatus : %s , RunningStatus : %s",
+					getVolumeResult.HealthStatus, getVolumeResult.RunningStatus)
+				return false, nil
+			}
 		} else {
-			msg := fmt.Sprintf("Volume state is not mathch, lun ID : %s , HealthStatus : %s,RunningStatus : %s",
-				lun.Id, lun.HealthStatus, lun.RunningStatus)
-			return false, errors.New(msg)
+			return false, getVolumeErr
 		}
 	}, LunReadyWaitInterval, LunReadyWaitTimeout)
+
 	if err != nil {
 		log.Error(err)
 		d.client.DeleteVolume(lun.Id)
@@ -118,37 +124,35 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 func (d *Driver) copyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error {
 	metadata := opt.GetMetadata()
 	copyspeed := metadata["copyspeed"]
-	luncopyid, err := d.client.CreateLunCopy(opt.GetName(), srcid, tgtid, copyspeed)
+	luncopyid, err := d.client.CreateLunCopy(EncodeName(opt.GetId()), srcid,
+		tgtid, copyspeed)
 
 	if err != nil {
 		log.Error("Create Lun Copy failed,", err)
 		return err
 	}
-	defer d.client.DeleteLunCopy(luncopyid)
+
 	err = d.client.StartLunCopy(luncopyid)
 	if err != nil {
 		log.Errorf("Start lun: %s copy failed :%v,", luncopyid, err)
+		d.client.DeleteLunCopy(luncopyid)
 		return err
 	}
-	lunCopyInfo, err1 := d.client.GetLunInfo(luncopyid)
-	if err1 != nil {
-		log.Errorf("Get lun info failed :%v", err1)
-		return err1
-	}
+
 	err = WaitForCondition(func() (bool, error) {
-		if lunCopyInfo.RunningStatus == StatusLuncopyReady || lunCopyInfo.RunningStatus == StatusLunCoping {
+		deleteLunCopyErr := d.client.DeleteLunCopy(luncopyid)
+		if nil == deleteLunCopyErr {
 			return true, nil
-		} else if lunCopyInfo.HealthStatus != StatusHealth {
-			msg := fmt.Sprintf("An error occurred during the luncopy operation. Lun name : %s  ,Lun copy health status : %s ,Lun copy running status : %s ",
-				lunCopyInfo.Name, lunCopyInfo.HealthStatus, lunCopyInfo.RunningStatus)
-			return false, errors.New(msg)
 		}
-		return true, nil
+
+		return false, nil
 	}, LunCopyWaitInterval, LunCopyWaitTimeout)
+
 	if err != nil {
 		log.Error(err)
 		return err
 	}
+
 	log.Infof("Copy Volume %s success", tgtid)
 	return nil
 }

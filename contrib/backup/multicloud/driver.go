@@ -15,6 +15,7 @@
 package multicloud
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -25,8 +26,8 @@ import (
 )
 
 const (
-	ConfFile        = "/etc/opensds/driver/multi-cloud.yaml"
-	UploadChunkSize = 1024 * 1024 * 50
+	ConfFile  = "/etc/opensds/driver/multi-cloud.yaml"
+	ChunkSize = 1024 * 1024 * 50
 )
 
 func init() {
@@ -89,10 +90,13 @@ func (m *MultiCloud) CleanUp() error {
 }
 
 func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
-	buf := make([]byte, UploadChunkSize)
+	buf := make([]byte, ChunkSize)
 	input := &CompleteMultipartUpload{}
 
-	bucket := backup.Metadata["bucket"]
+	bucket, ok := backup.Metadata["bucket"]
+	if !ok {
+		return errors.New("can't find bucket in metadata")
+	}
 	key := backup.Id
 	initResp, err := m.client.InitMultiPartUpload(bucket, key)
 	if err != nil {
@@ -132,10 +136,39 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 	return nil
 }
 
-func (m *MultiCloud) Restore(backup *backup.BackupSpec, volId string, volFile *os.File) error {
+func (m *MultiCloud) Restore(backup *backup.BackupSpec, backupId string, volFile *os.File) error {
+	bucket, ok := backup.Metadata["bucket"]
+	if !ok {
+		return errors.New("can't find bucket in metadata")
+	}
+	var downloadSize = ChunkSize
+	// if the size of data of smaller than require download size
+	// downloading is completed.
+	for offset := int64(0); downloadSize == ChunkSize; offset += ChunkSize {
+		data, err := m.client.DownloadPart(bucket, backupId, offset, ChunkSize)
+		if err != nil {
+			glog.Errorf("download part failed: %v", err)
+			return err
+		}
+		downloadSize = len(data)
+		glog.V(5).Infof("download size: %d\n", downloadSize)
+		volFile.Seek(offset, 0)
+		size, err := volFile.Write(data)
+		if err != nil {
+			glog.Errorf("write part failed: %v", err)
+			return err
+		}
+		if size != downloadSize {
+			return errors.New("size not equal to download size")
+		}
+		glog.V(5).Infof("write buf size len:%d", size)
+	}
+	glog.Infof("restore success ...")
 	return nil
 }
 
 func (m *MultiCloud) Delete(backup *backup.BackupSpec) error {
-	return nil
+	bucket := backup.Metadata["bucket"]
+	key := backup.Id
+	return m.client.RemoveObject(bucket, key)
 }

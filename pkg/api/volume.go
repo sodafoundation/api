@@ -51,7 +51,6 @@ func (this *VolumePortal) CreateVolume() {
 		log.Error(reason)
 		return
 	}
-
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
