@@ -1,6 +1,5 @@
-dist: trusty
+dist: xenial
 sudo: required
-group: deprecated-2017Q4
 
 language: go
 go_import_path: github.com/opensds/opensds
@@ -21,10 +20,10 @@ env:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
-  - sudo apt-add-repository 'deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main'
+  - sudo apt-add-repository 'deb https://download.ceph.com/debian-luminous/ xenial main'
   - sudo apt-get update
   - sudo apt-get install -y build-essential gcc
-  - sudo apt-get install -y librados-dev librbd-dev
+  - sudo apt-get install -y librados-dev librbd-dev --allow-unauthenticated
   - sudo apt-get install -y lvm2 tgt open-iscsi
 
 matrix:
