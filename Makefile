@@ -23,6 +23,7 @@ BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
 all: build
 
 ubuntu-dev-setup:
+	sudo apt-add-repository 'deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main'
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 

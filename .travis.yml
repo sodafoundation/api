@@ -21,6 +21,7 @@ env:
   - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
 
 before_install:
+  - sudo apt-add-repository 'deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main'
   - sudo apt-get update
   - sudo apt-get install -y build-essential gcc
   - sudo apt-get install -y librados-dev librbd-dev
