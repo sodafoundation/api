@@ -100,8 +100,8 @@ type StoragePool struct {
 }
 
 type Capabilities struct {
-	FreeCapacityGB  int64 `json:"free_capacity_gb"`
-	TotalCapacityGB int64 `json:"total_capacity_gb"`
+	FreeCapacityGB  float64 `json:"free_capacity_gb"`
+	TotalCapacityGB float64 `json:"total_capacity_gb"`
 }
 
 func (opts ListPoolOpts) ToStoragePoolsListQuery() (string, error) {
@@ -412,17 +412,33 @@ func (d *Driver) DeleteSnapshot(req *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-// ListPools
-func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	data, err := ioutil.ReadFile(defaultConfPath)
+func (ymlConf *CinderConfig) getConf() *CinderConfig {
+	yamlFile, err := ioutil.ReadFile(defaultConfPath)
 	if err != nil {
-		log.Error("Parse cinder.yaml fail!")
+		log.Error(err.Error())
 	}
 
+	err = yaml.UnmarshalStrict(yamlFile, ymlConf)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	return ymlConf
+}
+
+// Build Extra for Pool
+func (d *Driver) buildExtras(volType PoolProperties) model.StoragePoolExtraSpec {
+	extras := model.StoragePoolExtraSpec{}
+	extras = volType.Extras
+	return extras
+}
+
+// ListPools
+func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+	var c CinderConfig
+	conf := c.getConf()
 	var typeName []string
-	ymlconf := CinderConfig{}
-	yaml.Unmarshal(data, &ymlconf)
-	for name, _ := range ymlconf.Pool {
+	for name, _ := range conf.Pool {
 		typeName = append(typeName, name)
 	}
 
@@ -434,7 +450,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			log.Error("Cannot list storage pools:", err)
 			return nil, err
 		}
-
+		log.Info("pages:%v", pages)
 		polpage, err := json.Marshal(pages.GetBody())
 		if err != nil {
 			log.Error("Get Storage body fail.")
@@ -442,20 +458,24 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		}
 		var StoragePools PoolArray
 		json.Unmarshal(polpage, &StoragePools)
-		var freeCaps int64 = 0
-		var totalCaps int64 = 0
+		var freeCaps float64 = 0
+		var totalCaps float64 = 0
 		var pol *model.StoragePoolSpec
 		for _, page := range StoragePools.Pools {
 			freeCaps = freeCaps + page.Capabilities.FreeCapacityGB
 			totalCaps = totalCaps + page.Capabilities.TotalCapacityGB
 		}
+		extra := d.buildExtras(conf.Pool[typRes])
 		pol = &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, typRes).String(),
 			},
-			Name:          typRes,
-			TotalCapacity: totalCaps,
-			FreeCapacity:  freeCaps,
+			Name:             typRes,
+			AvailabilityZone: conf.Pool[typRes].AvailabilityZone,
+			StorageType:      conf.Pool[typRes].StorageType,
+			TotalCapacity:    int64(totalCaps),
+			FreeCapacity:     int64(freeCaps),
+			Extras:           extra,
 		}
 		typePol = append(typePol, pol)
 	}
