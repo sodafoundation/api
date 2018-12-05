@@ -170,6 +170,7 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
 		Size:        int(req.GetSize()),
+		VolumeType:  req.GetPoolName(),
 	}
 
 	vol, err := volumesv2.Create(d.blockStoragev2, opts).Extract()
@@ -426,13 +427,6 @@ func (ymlConf *CinderConfig) getConf() *CinderConfig {
 	return ymlConf
 }
 
-// Build Extra for Pool
-func (d *Driver) buildExtras(volType PoolProperties) model.StoragePoolExtraSpec {
-	extras := model.StoragePoolExtraSpec{}
-	extras = volType.Extras
-	return extras
-}
-
 // ListPools
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var c CinderConfig
@@ -450,7 +444,6 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			log.Error("Cannot list storage pools:", err)
 			return nil, err
 		}
-		log.Info("pages:%v", pages)
 		polpage, err := json.Marshal(pages.GetBody())
 		if err != nil {
 			log.Error("Get Storage body fail.")
@@ -465,7 +458,9 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			freeCaps = freeCaps + page.Capabilities.FreeCapacityGB
 			totalCaps = totalCaps + page.Capabilities.TotalCapacityGB
 		}
-		extra := d.buildExtras(conf.Pool[typRes])
+		conf.Pool[typRes].Extras.Advanced["name"] = typRes
+		extras := conf.Pool[typRes].Extras
+
 		pol = &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, typRes).String(),
@@ -475,7 +470,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      conf.Pool[typRes].StorageType,
 			TotalCapacity:    int64(totalCaps),
 			FreeCapacity:     int64(freeCaps),
-			Extras:           extra,
+			Extras:           extras,
 		}
 		typePol = append(typePol, pol)
 	}
