@@ -1,6 +1,5 @@
-dist: trusty
+dist: xenial
 sudo: required
-group: deprecated-2017Q4
 
 language: go
 go_import_path: github.com/opensds/opensds
