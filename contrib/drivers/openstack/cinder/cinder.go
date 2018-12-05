@@ -170,7 +170,6 @@ func (d *Driver) CreateVolume(req *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
 		Size:        int(req.GetSize()),
-		VolumeType:  req.GetPoolName(),
 	}
 
 	vol, err := volumesv2.Create(d.blockStoragev2, opts).Extract()
@@ -449,6 +448,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			log.Error("Get Storage body fail.")
 			return nil, err
 		}
+
 		var StoragePools PoolArray
 		json.Unmarshal(polpage, &StoragePools)
 		var freeCaps float64 = 0
