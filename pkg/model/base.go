@@ -53,7 +53,7 @@ type DataStorageLoS struct {
 
 	// IsSpaceEfficient indicates that the storage is compressed or deduplicated.
 	// The default value for this prperty is false.
-	IsSpaceEfficient bool `json:"isSpaceEfficient,omitempty" yaml:"isSpaceEfficient,omitempty"`
+	IsSpaceEfficient bool `json:"isSpaceEfficient" yaml:"isSpaceEfficient,omitempty"`
 }
 
 func (ds DataStorageLoS) IsEmpty() bool {
@@ -95,7 +95,7 @@ func (ic IOConnectivityLoS) IsEmpty() bool {
 // capability are part of the advertising system.
 type DataProtectionLoS struct {
 	// IsIsolated shall indicate if the replica is in a separate fault domain.
-	IsIsolated bool `json:"isIsolated,omitempty" yaml:"isIsolated,omitempty"`
+	IsIsolated bool `json:"isIsolated" yaml:"isIsolated,omitempty"`
 
 	// MinLifetime shall be an ISO 8601 duration that specifies the minimum
 	// required lifetime of the replica. For example, "P3Y6M4DT12H30M5S"
