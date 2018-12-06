@@ -201,6 +201,8 @@ func CompareOperator(op string, key string, reqValue string, value interface{}) 
 
 // StringCompare ...
 func StringCompare(op string, key string, a string, b string) (bool, error) {
+	a = strings.ToLower(a)
+	b = strings.ToLower(b)
 	switch op {
 	case "s==", "":
 		return a == b, nil
