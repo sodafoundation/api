@@ -22,6 +22,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/backup"
+	"github.com/opensds/opensds/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -38,11 +39,21 @@ func NewMultiCloud() (backup.BackupDriver, error) {
 	return &MultiCloud{}, nil
 }
 
+type AuthOptions struct {
+	Strategy   string `yaml:"Strategy"`
+	AuthUrl    string `yaml:"AuthUrl,omitempty"`
+	DomainName string `yaml:"DomainName,omitempty"`
+	UserName   string `yaml:"UserName,omitempty"`
+	Password   string `yaml:"Password,omitempty"`
+	TenantName string `yaml:"TenantName,omitempty"`
+}
+
 type MultiCloudConf struct {
 	Endpoint      string `yaml:"Endpoint,omitempty"`
-	TenantId      string `yaml:"TenantId,omitempty"`
 	UploadTimeout int64  `yaml:"UploadTimeout,omitempty"`
+	AuthOptions   `yaml:"AuthOptions,omitempty"`
 }
+
 type MultiCloud struct {
 	client *Client
 	conf   *MultiCloudConf
@@ -51,7 +62,6 @@ type MultiCloud struct {
 func (m *MultiCloud) loadConf(p string) (*MultiCloudConf, error) {
 	conf := &MultiCloudConf{
 		Endpoint:      "http://127.0.0.1:8088",
-		TenantId:      DefaultTenantId,
 		UploadTimeout: DefaultUploadTimeout,
 	}
 	confYaml, err := ioutil.ReadFile(p)
@@ -73,11 +83,7 @@ func (m *MultiCloud) SetUp() error {
 		return err
 	}
 
-	opt := &AuthOptions{
-		Endpoint: m.conf.Endpoint,
-		TenantId: m.conf.TenantId,
-	}
-	if m.client, err = NewClient(opt, m.conf.UploadTimeout); err != nil {
+	if m.client, err = NewClient(m.conf.Endpoint, &m.conf.AuthOptions, m.conf.UploadTimeout); err != nil {
 		return err
 	}
 
@@ -118,7 +124,12 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 		if size == 0 {
 			break
 		}
-		uploadResp, err := m.client.UploadPart(bucket, key, partNum, initResp.UploadId, buf[:size], int64(size))
+		var uploadResp *UploadPartResult
+		err = utils.Retry(3, "upload part", false, func(retryIdx int, lastErr error) error {
+			var inErr error
+			uploadResp, inErr = m.client.UploadPart(bucket, key, partNum, initResp.UploadId, buf[:size], int64(size))
+			return inErr
+		})
 		if err != nil {
 			glog.Errorf("upload part failed, err:%v", err)
 			return err
@@ -145,7 +156,12 @@ func (m *MultiCloud) Restore(backup *backup.BackupSpec, backupId string, volFile
 	// if the size of data of smaller than require download size
 	// downloading is completed.
 	for offset := int64(0); downloadSize == ChunkSize; offset += ChunkSize {
-		data, err := m.client.DownloadPart(bucket, backupId, offset, ChunkSize)
+		var data []byte
+		err := utils.Retry(3, "download part", false, func(retryIdx int, lastErr error) error {
+			var inErr error
+			data, inErr = m.client.DownloadPart(bucket, backupId, offset, ChunkSize)
+			return inErr
+		})
 		if err != nil {
 			glog.Errorf("download part failed: %v", err)
 			return err

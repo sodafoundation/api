@@ -32,10 +32,17 @@ func TestLoadConf(t *testing.T) {
 	}
 	expect := &MultiCloudConf{
 		Endpoint:      "http://127.0.0.1:8088",
-		TenantId:      "FakeTenantId",
 		UploadTimeout: DefaultUploadTimeout,
+		AuthOptions: AuthOptions{
+			Strategy:   "keystone",
+			AuthUrl:    "http://127.0.0.1/identity",
+			DomainName: "Default",
+			UserName:   "admin",
+			Password:   "opensds@123",
+			TenantName: "admin",
+		},
 	}
-	fmt.Println(conf)
+	fmt.Printf("%+v", conf)
 	if !reflect.DeepEqual(expect, conf) {
 		t.Errorf("load conf file error")
 	}
