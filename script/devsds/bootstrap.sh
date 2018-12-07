@@ -81,11 +81,16 @@ if [ ! -d ${OPENSDS_DIR} ]; then
     git clone https://github.com/opensds/opensds.git -b master
 fi
 
+# make sure 'make' has been installed.
+if [[ -z "$(which make)" ]]; then
+    log "Installing make ..."
+    sudo apt-get install make -y
+fi
+
 cd ${OPENSDS_DIR}
 if [ ! -d ${OPENSDS_DIR}/build ]; then
     log "Building OpenSDS ..."
-    sudo apt-get update > /dev/null
-    sudo apt-get install librados-dev librbd-dev -y > /dev/null
+    make ubuntu-dev-setup
     make
 fi
 

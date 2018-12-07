@@ -108,6 +108,18 @@ find $LOGFILE_DIR -maxdepth 1 -name $LOGFILE_NAME.\* -mtime +$LOGDAYS -exec rm {
 LOGFILE=$LOGFILE.${CURRENT_LOG_TIME}
 SUMFILE=$LOGFILE.summary.${CURRENT_LOG_TIME}
 
+# Before set log output, make sure python has already been installed.
+if [[ -z "$(which python)" ]]; then
+    python_path=${python_path:-}
+    test -n "$(which python2)" && python_path=$(which python2)
+    test -n "$(which python3)" && python_path=$(which python3)
+    if [[ -z $python_path ]]; then
+        log_error "Can not find python, please install it."
+        exit 2
+    fi
+    ln -s $python_path /usr/bin/python
+fi
+
 # Set fd 3 to a copy of stdout. So we can set fd 1 without losing
 # stdout later.
 exec 3>&1

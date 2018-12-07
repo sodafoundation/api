@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -63,6 +64,14 @@ const (
 	poolType = iota
 	poolTypeSize
 	poolCrushRuleset
+)
+
+const (
+	KiB uint64 = 1024
+	MiB uint64 = 1024 * KiB
+	GiB uint64 = 1024 * MiB
+	TiB uint64 = 1024 * GiB
+	PiB uint64 = 1024 * TiB
 )
 
 type CephConfig struct {
@@ -454,29 +463,91 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return err
 }
 
-func (d *Driver) parseCapStr(cap string) int64 {
-	if cap == "0" {
+func (d *Driver) parseCapStr(cap string) float64 {
+	rValue, _ := regexp.Compile("[0-9.]+")
+	rUnit, _ := regexp.Compile("[A-Za-z]+")
+	valueIndex := rValue.FindStringIndex(cap)
+	unitIndex := rUnit.FindStringIndex(cap)
+	log.V(5).Infof("cap = %v, valueIndex = %v, unitIndex = %v", cap, valueIndex, unitIndex)
+
+	if (2 != len(valueIndex)) || (2 != len(unitIndex)) || (valueIndex[1] != unitIndex[0]) {
+		log.Error("Cap format is wrong")
 		return 0
 	}
-	UnitMapper := map[string]uint64{
-		"K": 0, //shift bit
-		"M": 10,
-		"G": 20,
-		"T": 30,
-		"P": 40,
-	}
-	unit := strings.ToUpper(cap[len(cap)-1:])
-	num, err := strconv.ParseInt(cap[:len(cap)-1], 10, 64)
-	if err != nil {
-		log.Error("Cannot convert this number", err)
-		return 0
-	}
-	if val, ok := UnitMapper[unit]; ok {
-		return num << val >> 20 //Convert to unit GB
+
+	valueStr := cap[valueIndex[0]:valueIndex[1]]
+	var value float64
+
+	if strings.Contains(valueStr, ".") {
+		valueFloat, err := strconv.ParseFloat(valueStr, 64)
+		if err != nil {
+			log.Errorf("strconv.ParseFloat failed: %v", err)
+			return 0
+		}
+
+		value = valueFloat
 	} else {
-		log.Error("strage unit is not found.")
-		return 0
+		valueInt, err := strconv.ParseInt(valueStr, 10, 64)
+		if err != nil {
+			log.Errorf("strconv.ParseInt failed: %v", err)
+			return 0
+		}
+
+		value = float64(valueInt)
 	}
+
+	unitStr := strings.ToUpper(cap[unitIndex[0]:unitIndex[1]])
+	oldUnitMapper := map[string]uint64{
+		"K": KiB,
+		"M": MiB,
+		"G": GiB,
+		"T": TiB,
+		"P": PiB,
+	}
+	newUnitMapper := map[string]uint64{
+		"KIB": KiB,
+		"MIB": MiB,
+		"GIB": GiB,
+		"TIB": TiB,
+		"PIB": PiB,
+	}
+	var unitInt uint64
+
+	if val, ok := newUnitMapper[unitStr]; ok {
+		unitInt = val
+	} else {
+		if val, ok := oldUnitMapper[unitStr]; ok {
+			unitInt = val
+		} else {
+			log.Errorf("strage unitStr = %v is not found!", unitStr)
+			return 0
+		}
+	}
+
+	var result float64
+	switch unitInt {
+	case KiB:
+		result = value / float64(MiB)
+		break
+	case MiB:
+		result = value / float64(KiB)
+		break
+	case GiB:
+		result = value
+		break
+	case TiB:
+		result = value * float64(KiB)
+		break
+	case PiB:
+		result = value * float64(MiB)
+		break
+	default:
+		log.Errorf("strage unitStr = %v is not found!", unitStr)
+		break
+	}
+
+	log.V(5).Infof("parseCapStr result = %v", result)
+	return result
 }
 
 func (d *Driver) getPoolsCapInfo() ([][]string, error) {
@@ -580,6 +651,11 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		totalCap := d.parseCapStr(gc[globalSize])
 		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
 		availCap := d.parseCapStr(gc[globalAvail])
+		log.Infof("totalCap = %v, availCap = %v, maxAvailCap=%v", totalCap, availCap, maxAvailCap)
+		if 0 == availCap {
+			return nil, errors.New("ceph GLOBAL AVAIL = 0")
+		}
+
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
@@ -587,8 +663,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			Name: name,
 			//if redundancy type is replicate, MAX AVAIL =  AVAIL / replicate number,
 			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
-			TotalCapacity:    totalCap * maxAvailCap / availCap,
-			FreeCapacity:     maxAvailCap,
+			TotalCapacity:    int64(totalCap * maxAvailCap / availCap),
+			FreeCapacity:     int64(maxAvailCap),
 			StorageType:      c.Pool[name].StorageType,
 			Extras:           extras,
 			AvailabilityZone: c.Pool[name].AvailabilityZone,
