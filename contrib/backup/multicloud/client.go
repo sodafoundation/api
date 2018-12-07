@@ -17,6 +17,7 @@ package multicloud
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -25,7 +26,9 @@ import (
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
-	"io/ioutil"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 )
 
 const (
@@ -35,49 +38,106 @@ const (
 	ApiVersion           = "v1"
 )
 
-type AuthOptions struct {
-	Endpoint string
-	UserName string
-	Password string
-	TenantId string
-}
-
 type Client struct {
 	endpoint      string
-	userName      string
-	password      string
 	tenantId      string
 	version       string
 	baseURL       string
+	auth          *AuthOptions
+	token         *tokens.Token
 	timeout       time.Duration
 	uploadTimeout time.Duration
 }
 
-func NewClient(opt *AuthOptions, uploadTimeout int64) (*Client, error) {
-	u, err := url.Parse(opt.Endpoint)
+func NewClient(endpooint string, opt *AuthOptions, uploadTimeout int64) (*Client, error) {
+	u, err := url.Parse(endpooint)
 	if err != nil {
 		return nil, err
 	}
 	u.Path = path.Join(u.Path, ApiVersion)
 	baseURL := u.String() + "/"
 
-	return &Client{
-		endpoint:      opt.Endpoint,
-		userName:      opt.UserName,
-		password:      opt.Password,
-		tenantId:      opt.TenantId,
+	client := &Client{
+		endpoint:      endpooint,
+		tenantId:      DefaultTenantId,
 		version:       ApiVersion,
 		baseURL:       baseURL,
 		timeout:       time.Duration(DefaultTimeout) * time.Minute,
 		uploadTimeout: time.Duration(uploadTimeout) * time.Minute,
-	}, nil
+		auth:          opt,
+	}
+
+	if opt.Strategy == "keystone" {
+		if err := client.UpdateToken(); err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 type ReqSettingCB func(req *httplib.BeegoHTTPRequest) error
 
+func (c *Client) getToken(opt *AuthOptions) (*tokens.CreateResult, error) {
+	auth := gophercloud.AuthOptions{
+		IdentityEndpoint: opt.AuthUrl,
+		DomainName:       opt.DomainName,
+		Username:         opt.UserName,
+		Password:         opt.Password,
+		TenantName:       opt.TenantName,
+	}
+
+	provider, err := openstack.AuthenticatedClient(auth)
+	if err != nil {
+		log.Error("When get auth client:", err)
+		return nil, err
+	}
+
+	// Only support keystone v3
+	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
+	if err != nil {
+		log.Error("When get identity session:", err)
+		return nil, err
+	}
+	r := tokens.Create(identity, &auth)
+	return &r, nil
+}
+
+func (c *Client) UpdateToken() error {
+	t, err := c.getToken(c.auth)
+	if err != nil {
+		log.Errorf("Get token failed, %v", err)
+		return err
+	}
+	project, err := t.ExtractProject()
+	if err != nil {
+		log.Errorf("extract project failed, %v", err)
+		return err
+	}
+	c.tenantId = project.ID
+	token, err := t.ExtractToken()
+	if err != nil {
+		log.Errorf("extract token failed, %v", err)
+		return err
+	}
+	c.token = token
+	log.V(5).Infof("TokenId:%s, ExpiresAt:%v", token.ID, token.ExpiresAt)
+	return nil
+}
+
 func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([]byte, http.Header, error) {
 	req := httplib.NewBeegoRequest(u, method)
 	req.Header("Content-Type", "application/xml")
+	if c.auth.Strategy == "keystone" {
+		beforeExpires := c.token.ExpiresAt.Add(time.Minute)
+		if time.Now().After(beforeExpires) {
+			log.Warning("token is about to expire, update it")
+			if err := c.UpdateToken(); err != nil {
+				return nil, nil, err
+			}
+		}
+		req.Header("X-Auth-Token", c.token.ID)
+	}
+
 	req.SetTimeout(c.timeout, c.timeout)
 	if cb != nil {
 		if err := cb(req); err != nil {
