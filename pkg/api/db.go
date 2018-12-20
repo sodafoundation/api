@@ -188,6 +188,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 			Id:        in.Id,
 			CreatedAt: in.CreatedAt,
 		},
+		ProfileId:   in.ProfileId,
 		Name:        in.Name,
 		Description: in.Description,
 		VolumeId:    in.VolumeId,
