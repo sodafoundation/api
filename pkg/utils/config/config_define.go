@@ -18,13 +18,17 @@ import "time"
 
 type Default struct{}
 
-type OsdsLet struct {
+type OsdsApiServer struct {
 	ApiEndpoint       string        `conf:"api_endpoint,localhost:50040"`
-	Graceful          bool          `conf:"graceful,true"`
-	SocketOrder       string        `conf:"socket_order"`
 	AuthStrategy      string        `conf:"auth_strategy,noauth"`
-	Daemon            bool          `conf:"daemon,false"`
 	PolicyPath        string        `conf:"policy_path,/etc/opensds/policy.json"`
+	Daemon            bool          `conf:"daemon,false"`
+	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+}
+
+type OsdsLet struct {
+	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
+	Daemon            bool          `conf:"daemon,false"`
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 }
 
@@ -78,6 +82,7 @@ type KeystoneAuthToken struct {
 
 type Config struct {
 	Default           `conf:"default"`
+	OsdsApiServer     `conf:"osdsapiserver"`
 	OsdsLet           `conf:"osdslet"`
 	OsdsDock          `conf:"osdsdock"`
 	Database          `conf:"database"`

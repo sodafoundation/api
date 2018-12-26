@@ -55,7 +55,11 @@
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.7.5"
+  version = "1.17.0"
+
+[[constraint]]
+  name = "github.com/golang/protobuf"
+  branch = "master"
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"

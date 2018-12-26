@@ -262,23 +262,27 @@ func TestFunctionDefaultValue(t *testing.T) {
 
 func TestOpensdsConfig(t *testing.T) {
 	CONF.Load("testdata/opensds.conf")
-	if CONF.OsdsLet.ApiEndpoint != "localhost:50040" {
+
+	if CONF.OsdsApiServer.ApiEndpoint != "localhost:50040" {
+		t.Error("Test OsdsApiServer.ApiEndpoint error")
+	}
+	if CONF.OsdsApiServer.LogFlushFrequency != 2*time.Second {
+		t.Error("Test OsdsApiServer.ApiEndpoint error")
+	}
+	if CONF.OsdsLet.ApiEndpoint != "localhost:50049" {
 		t.Error("Test OsdsLet.ApiEndpoint error")
 	}
-	if CONF.OsdsLet.Graceful != true {
-		t.Error("Test OsdsLet.Graceful error")
-	}
-	if CONF.OsdsLet.SocketOrder != "inc" {
-		t.Error("Test OsdsLet.SocketOrder error")
-	}
-	if CONF.OsdsLet.LogFlushFrequency != 2*time.Second {
-		t.Error("Test OsdsDock.ApiEndpoint error")
+	if CONF.OsdsLet.LogFlushFrequency != 3*time.Second {
+		t.Error("Test OsdsLet.LogFlushFrequency error")
 	}
 	if CONF.OsdsDock.ApiEndpoint != "localhost:50050" {
 		t.Error("Test OsdsDock.ApiEndpoint error")
 	}
+	if CONF.OsdsDock.DockType != "provisioner" {
+		t.Error("Test OsdsDock.DockType error")
+	}
 	if CONF.OsdsDock.LogFlushFrequency != 4*time.Second {
-		t.Error("Test OsdsDock.ApiEndpoint error")
+		t.Error("Test OsdsDock.LogFlushFrequency error")
 	}
 	if CONF.OsdsDock.EnabledBackends[0] != "ceph" {
 		t.Error("OsdsDock.EnabledBackends[0] error")

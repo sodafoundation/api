@@ -53,6 +53,7 @@ test: build
 
 protoc:
 	cd pkg/dock/proto && protoc --go_out=plugins=grpc:. dock.proto
+	cd pkg/controller/proto && protoc --go_out=plugins=grpc:. controller.proto
 
 clean:
 	rm -rf $(BUILD_DIR) ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
