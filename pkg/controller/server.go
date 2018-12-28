@@ -287,30 +287,132 @@ func (cs *ctlServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplic
 
 // Enable a replication
 func (cs *ctlServer) EnableReplication(ctx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
+	var req model.ReplicationSpec
+
+	log.Info("Controller server receive enable volume replication request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle enable replication request.
+	if err := Brain.EnableReplication(c.NewAdminContext(), &req); err != nil {
+		reason := fmt.Sprintf("Enable replication failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // Disable a replication
 func (cs *ctlServer) DisableReplication(ctx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
+	var req model.ReplicationSpec
+
+	log.Info("Controller server receive disable volume replication request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle disable replication request.
+	if err := Brain.DisableReplication(c.NewAdminContext(), &req); err != nil {
+		reason := fmt.Sprintf("Disable replication failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // Failover a replication
 func (cs *ctlServer) FailoverReplication(ctx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
+	var req model.ReplicationSpec
+	var foReq model.FailoverReplicationSpec
+
+	log.Info("Controller server receive failover volume replication request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	if err := json.Unmarshal([]byte(opt.FailoverMessage), &foReq); err != nil {
+		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle failover replication request.
+	if err := Brain.FailoverReplication(c.NewAdminContext(), &req, &foReq); err != nil {
+		reason := fmt.Sprintf("Failover replication failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // Create a volume group
 func (cs *ctlServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var req model.VolumeGroupSpec
+
+	log.Info("Controller server receive create volume group request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume group request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle create volume group request.
+	if err := Brain.CreateVolumeGroup(c.NewAdminContext(), &req); err != nil {
+		reason := fmt.Sprintf("Create volume group failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // Update volume group
 func (cs *ctlServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var req model.VolumeGroupSpec
+
+	log.Info("Controller server receive update volume group request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume group request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle update volume group request.
+	if err := Brain.UpdateVolumeGroup(c.NewAdminContext(), &req, opt.AddVolMessage, opt.RmVolMessage); err != nil {
+		reason := fmt.Sprintf("Update volume group failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }
 
 // Delete volume group
 func (cs *ctlServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
+	var req model.VolumeGroupSpec
+
+	log.Info("Controller server receive delete volume group request, vr =", opt)
+
+	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
+		reason := fmt.Sprintf("Decode volume group request failed: %s", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+	// Call global controller variable to handle delete volume group request.
+	if err := Brain.DeleteVolumeGroup(c.NewAdminContext(), &req); err != nil {
+		reason := fmt.Sprintf("Delete volume group failed: %v", err.Error())
+		log.Error(reason)
+		return nil, err
+	}
+
 	return nil, nil
 }

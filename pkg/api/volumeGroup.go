@@ -17,11 +17,15 @@ package api
 import (
 	"encoding/json"
 
-	c "github.com/opensds/opensds/pkg/context"
-	//"github.com/opensds/opensds/pkg/controller"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
+	c "github.com/opensds/opensds/pkg/context"
+	"github.com/opensds/opensds/pkg/controller/client"
+	pb "github.com/opensds/opensds/pkg/controller/proto"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"golang.org/x/net/context"
 )
 
 type VolumeGroupPortal struct {
@@ -47,18 +51,39 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	// and will return result immediately.
 	result, err := CreateVolumeGroupDBEntry(c.GetContext(this.Ctx), volumeGroup)
 	if err != nil {
-		this.ErrorHandle("Create volume group failed", model.ErrorInternalServer, err)
+		this.ErrorHandle("Create volume group failed",
+			model.ErrorInternalServer, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal profile created result failed", model.ErrorBadRequest, err)
+		this.ErrorHandle("Marshal volume group created result failed",
+			model.ErrorInternalServer, err)
+		return
+	}
+	this.SuccessHandle(StatusOK, body)
+
+	// NOTE:The real volume group creation process.
+	// Volume group creation request is sent to the Dock. Dock will set
+	// volume group status to 'available' after volume group creation operation
+	// is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	opt := &pb.CreateVolumeGroupOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -86,11 +111,31 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group updated result failed", model.ErrorInternalServer, err)
+		this.ErrorHandle("Marshal volume group updated result failed",
+			model.ErrorInternalServer, err)
+		return
+	}
+	this.SuccessHandle(StatusOK, body)
+
+	// NOTE:The real volume group creation process.
+	// Volume group creation request is sent to the Dock. Dock will set
+	// volume group status to 'available' after volume group creation operation
+	// is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	opt := &pb.CreateVolumeGroupOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -99,12 +144,41 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 		return
 	}
 
-	err := DeleteVolumeGroupDBEntry(c.GetContext(this.Ctx), this.Ctx.Input.Param(":groupId"))
+	id := this.Ctx.Input.Param(":groupId")
+	vg, err := db.C.GetVolumeGroup(c.GetContext(this.Ctx), id)
 	if err != nil {
-		this.ErrorHandle("Delete volume group failed", model.ErrorInternalServer, err)
+		this.ErrorHandle("Delete volume group failed",
+			model.ErrorBadRequest, err)
 		return
 	}
+
+	if err = DeleteVolumeGroupDBEntry(c.GetContext(this.Ctx), id); err != nil {
+		this.ErrorHandle("Delete volume group failed",
+			model.ErrorInternalServer, err)
+		return
+	}
+
 	this.SuccessHandle(StatusAccepted, nil)
+
+	// NOTE:The real volume group deletion process.
+	// Volume group deletion request is sent to the Dock. Dock will remove
+	// volume group record after volume group deletion operation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	body, _ := json.Marshal(vg)
+	opt := &pb.DeleteVolumeGroupOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
+		log.Error("Delete volume group failed in controller service:", err)
+		return
+	}
+
 	return
 }
 

@@ -52,6 +52,8 @@ func main() {
 	// Initialize Controller object.
 	c.Brain = c.NewController()
 
-	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsLet.ApiEndpoint)
+	// Construct controller module grpc server struct and run controller server process.
+	if err := c.NewCtlServer(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
+		panic(err)
+	}
 }

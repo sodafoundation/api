@@ -182,8 +182,8 @@ message CreateVolumeGroupOpts {
 message UpdateVolumeGroupOpts{
     // The message of request, required.
     string message = 1;
-	string addVolMessage = 2;
-	string rmVolMessage = 3;
+	repeated string addVolMessage = 2;
+	repeated string rmVolMessage = 3;
 }
 
 message DeleteVolumeGroupOpts{

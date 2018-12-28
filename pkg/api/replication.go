@@ -18,11 +18,15 @@ import (
 	"encoding/json"
 	"net/http"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller"
+	"github.com/opensds/opensds/pkg/controller/client"
+	pb "github.com/opensds/opensds/pkg/controller/proto"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"golang.org/x/net/context"
 )
 
 func NewReplicationPortal() *ReplicationPortal {
@@ -108,24 +112,36 @@ func (this *ReplicationPortal) CreateReplication() {
 			"create replication in db failed")
 		return
 	}
-	// Call global controller variable to handle create replication request.
-	result, err := controller.Brain.CreateReplication(ctx, replication)
-	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
-			"create replication failed: %s", err.Error())
-		return
-	}
 
 	// Marshal the result.
-	body, err := json.Marshal(result)
+	body, err := json.Marshal(replication)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"marshal replication created result failed: %s", err.Error())
 		return
 	}
-
 	this.Ctx.Output.SetStatus(StatusAccepted)
 	this.Ctx.Output.Body(body)
+
+	// NOTE:The real volume replication creation process.
+	// Volume replication creation request is sent to the Dock. Dock will update volume status to "available"
+	// after volume replication creation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	opt := &pb.CreateReplicationOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.CreateReplication(context.Background(), opt); err != nil {
+		log.Error("Create volume replication failed in controller service:", err)
+		return
+	}
+
+	return
 }
 
 func (this *ReplicationPortal) ListReplications() {
@@ -282,15 +298,29 @@ func (this *ReplicationPortal) DeleteReplication() {
 		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.DeleteReplication(c.GetContext(this.Ctx), r)
-	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
-			"delete replication failed: %v", err.Error())
+
+	this.Ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication deletion process.
+	// Volume replication deletion request is sent to the Dock. Dock will remove
+	// replicaiton record after volume replication creation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	body, _ := json.Marshal(r)
+	opt := &pb.DeleteReplicationOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.DeleteReplication(context.Background(), opt); err != nil {
+		log.Error("Delete volume replication failed in controller service:", err)
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	return
 }
 
 func (this *ReplicationPortal) EnableReplication() {
@@ -311,15 +341,30 @@ func (this *ReplicationPortal) EnableReplication() {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.EnableReplication(c.GetContext(ctx), r)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"enable replication failed: %v", err.Error())
+
+	ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication enable process.
+	// Volume replication enable request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication enable
+	// operation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	body, _ := json.Marshal(r)
+	opt := &pb.EnableReplicationOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.EnableReplication(context.Background(), opt); err != nil {
+		log.Error("Enable volume replication failed in controller service:", err)
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }
 
 func (this *ReplicationPortal) DisableReplication() {
@@ -340,15 +385,30 @@ func (this *ReplicationPortal) DisableReplication() {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	// Call global controller variable to handle delete r request.
-	err = controller.Brain.DisableReplication(c.GetContext(ctx), r)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"enable replication failed: %v", err.Error())
+
+	ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication disable process.
+	// Volume replication diable request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication disable
+	// operation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	body, _ := json.Marshal(r)
+	opt := &pb.DisableReplicationOpts{
+		Message: string(body),
+	}
+	if _, err = ctrClient.DisableReplication(context.Background(), opt); err != nil {
+		log.Error("Disable volume replication failed in controller service:", err)
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }
 
 func (this *ReplicationPortal) FailoverReplication() {
@@ -377,13 +437,29 @@ func (this *ReplicationPortal) FailoverReplication() {
 		return
 	}
 
-	// Call global controller variable to handle delete r request.
-	err = controller.Brain.FailoverReplication(c.GetContext(ctx), r, &failover)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"failover replication failed: %v", err.Error())
+	ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication failover process.
+	// Volume replication failover request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication failover
+	// operation is completed.
+	ctrClient := client.NewClient()
+	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("When connecting controller client:", err)
+		return
+	}
+	defer ctrClient.Close()
+
+	body, _ := json.Marshal(r)
+	foBody, _ := json.Marshal(&failover)
+	opt := &pb.FailoverReplicationOpts{
+		Message:         string(body),
+		FailoverMessage: string(foBody),
+	}
+	if _, err = ctrClient.FailoverReplication(context.Background(), opt); err != nil {
+		log.Error("Failover volume replication failed in controller service:", err)
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }
