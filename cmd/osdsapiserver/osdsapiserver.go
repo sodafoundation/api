@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,23 +32,23 @@ func init() {
 	CONF.Load("/etc/opensds/opensds.conf")
 
 	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of api-server service")
+	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", CONF.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
 	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", CONF.Database.Endpoint, "Connection endpoint of database service")
 	flag.StringVar(&CONF.Database.Driver, "db-driver", CONF.Database.Driver, "Driver name of database service")
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
 
-	daemon.SetDaemonFlag(&CONF.OsdsLet.Daemon, CONF.OsdsLet.Daemon)
-	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
+	daemon.SetDaemonFlag(&CONF.OsdsApiServer.Daemon, CONF.OsdsApiServer.Daemon)
+	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)
 }
 
 func main() {
 	// Open OpenSDS orchestrator service log file.
-	logs.InitLogs(CONF.OsdsLet.LogFlushFrequency)
+	logs.InitLogs(CONF.OsdsApiServer.LogFlushFrequency)
 	defer logs.FlushLogs()
 
 	// Set up database session.
 	db.Init(&CONF.Database)
 
 	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsLet.ApiEndpoint)
+	api.Run(CONF.OsdsApiServer.ApiEndpoint)
 }

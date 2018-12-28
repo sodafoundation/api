@@ -330,7 +330,7 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateReplicationOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Dock server receive create replication request, vr =", opt)
@@ -359,7 +359,7 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Dock server receive delete replication request, vr =", opt)
@@ -383,7 +383,7 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Dock server receive enable replication request, vr =", opt)
@@ -402,7 +402,7 @@ func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableRepli
 func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Dock server receive disable replication request, vr =", opt)
@@ -421,7 +421,7 @@ func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableRep
 func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
-	driver := drivers.InitReplicationDriver(opt.GetDriverName())
+	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
 	log.Info("Dock server receive failover replication request, vr =", opt)
