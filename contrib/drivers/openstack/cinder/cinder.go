@@ -96,8 +96,8 @@ type StoragePool struct {
 }
 
 type Capabilities struct {
-	FreeCapacityGB  int64 `json:"free_capacity_gb"`
-	TotalCapacityGB int64 `json:"total_capacity_gb"`
+	FreeCapacityGB  float64 `json:"free_capacity_gb"`
+	TotalCapacityGB float64 `json:"total_capacity_gb"`
 }
 
 func (opts ListPoolOpts) ToStoragePoolsListQuery() (string, error) {
