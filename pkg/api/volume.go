@@ -34,8 +34,16 @@ import (
 	"golang.org/x/net/context"
 )
 
+func NewVolumePortal() *VolumePortal {
+	return &VolumePortal{
+		CtrClient: client.NewClient(),
+	}
+}
+
 type VolumePortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 func (this *VolumePortal) CreateVolume() {
@@ -74,17 +82,16 @@ func (this *VolumePortal) CreateVolume() {
 	// NOTE:The real volume creation process.
 	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume creation is completed.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateVolumeOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateVolume(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateVolume(context.Background(), opt); err != nil {
 		log.Error("Create volume failed in controller service:", err)
 		return
 	}
@@ -217,19 +224,18 @@ func (this *VolumePortal) ExtendVolume() {
 	// NOTE:The real volume extension process.
 	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
 	// after volume extension is completed.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ = json.Marshal(&extendRequestBody)
 	opt := &pb.ExtendVolumeOpts{
 		Id:      id,
 		Message: string(body),
 	}
-	if _, err = ctrClient.ExtendVolume(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
 		log.Error("Extend volume failed in controller service:", err)
 		return
 	}
@@ -266,18 +272,17 @@ func (this *VolumePortal) DeleteVolume() {
 	// NOTE:The real volume deletion process.
 	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
 	// and database or update volume status to "errorDeleting" if deletion from driver faild.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(volume)
 	opt := &pb.DeleteVolumeOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DeleteVolume(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("Delete volume failed in controller service:", err)
 		return
 	}
@@ -285,8 +290,16 @@ func (this *VolumePortal) DeleteVolume() {
 	return
 }
 
+func NewVolumeAttachmentPortal() *VolumeAttachmentPortal {
+	return &VolumeAttachmentPortal{
+		CtrClient: client.NewClient(),
+	}
+}
+
 type VolumeAttachmentPortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
@@ -325,17 +338,16 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// NOTE:The real volume attachment creation process.
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
 	// after volume attachment creation is completed.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateVolumeAttachmentOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Create volume attachment failed in controller service:", err)
 		return
 	}
@@ -452,18 +464,17 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	// NOTE:The real volume attachment deletion process.
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(attachment)
 	opt := &pb.DeleteVolumeAttachmentOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Delete volume attachment failed in controller service:", err)
 		return
 	}
@@ -471,8 +482,16 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	return
 }
 
+func NewVolumeSnapshotPortal() *VolumeSnapshotPortal {
+	return &VolumeSnapshotPortal{
+		CtrClient: client.NewClient(),
+	}
+}
+
 type VolumeSnapshotPortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
@@ -511,17 +530,16 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
 	// after volume snapshot creation complete.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateVolumeSnapshotOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Create volume snapthot failed in controller service:", err)
 		return
 	}
@@ -647,18 +665,17 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
 	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
-	ctrClient := client.NewClient()
-	if err := ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(snapshot)
 	opt := &pb.DeleteVolumeSnapshotOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Delete volume snapthot failed in controller service:", err)
 		return
 	}

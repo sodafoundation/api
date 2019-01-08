@@ -71,7 +71,7 @@ func (cs *ctlServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts)
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume creation process.
 	// CreateVolume request is sent to the Dock. Dock will update volume status to "available"
@@ -82,10 +82,10 @@ func (cs *ctlServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // DeleteVolume implements pb.ControllerServer.DeleteVolume
@@ -97,7 +97,7 @@ func (cs *ctlServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts)
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume deletion process.
 	// DeleteVolume request is sent to the Dock. Dock will remove volume record
@@ -108,10 +108,10 @@ func (cs *ctlServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // ExtendVolume implements pb.ControllerServer.ExtendVolume
@@ -123,7 +123,7 @@ func (cs *ctlServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts)
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume extention process.
 	// ExtendVolume request is sent to the Dock. Dock will update volume status to "available"
@@ -134,9 +134,9 @@ func (cs *ctlServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // CreateVolumeAttachment implements pb.ControllerServer.CreateVolumeAttachment
@@ -148,7 +148,7 @@ func (cs *ctlServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateV
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume attachment request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume attachment creation process.
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
@@ -159,10 +159,10 @@ func (cs *ctlServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateV
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // DeleteVolumeAttachment implements pb.ControllerServer.DeleteVolumeAttachment
@@ -174,7 +174,7 @@ func (cs *ctlServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteV
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume attachment request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume attachment deletion process.
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
@@ -185,10 +185,10 @@ func (cs *ctlServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteV
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume attachment failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // CreateVolumeSnapshot implements pb.ControllerServer.CreateVolumeSnapshot
@@ -200,7 +200,7 @@ func (cs *ctlServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVol
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume snapshot request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
@@ -211,10 +211,10 @@ func (cs *ctlServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVol
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // DeleteVolumeSnapshot implements pb.ControllerServer.DeleteVolumeSnapshot
@@ -226,7 +226,7 @@ func (cs *ctlServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVol
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume snapshot request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from database
@@ -237,10 +237,10 @@ func (cs *ctlServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVol
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // CreateReplication implements pb.ControllerServer.CreateReplication
@@ -252,16 +252,16 @@ func (cs *ctlServer) CreateReplication(ctx context.Context, opt *pb.CreateReplic
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle create replication request.
 	if _, err := Brain.CreateReplication(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Create replication failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // DeleteReplication implements pb.ControllerServer.DeleteReplication
@@ -273,16 +273,16 @@ func (cs *ctlServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplic
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle delete replication request.
 	if _, err := Brain.CreateReplication(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Delete replication failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Enable a replication
@@ -294,16 +294,16 @@ func (cs *ctlServer) EnableReplication(ctx context.Context, opt *pb.EnableReplic
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle enable replication request.
 	if err := Brain.EnableReplication(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Enable replication failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Disable a replication
@@ -315,16 +315,16 @@ func (cs *ctlServer) DisableReplication(ctx context.Context, opt *pb.DisableRepl
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle disable replication request.
 	if err := Brain.DisableReplication(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Disable replication failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Failover a replication
@@ -337,21 +337,21 @@ func (cs *ctlServer) FailoverReplication(ctx context.Context, opt *pb.FailoverRe
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	if err := json.Unmarshal([]byte(opt.FailoverMessage), &foReq); err != nil {
 		reason := fmt.Sprintf("Decode volume replication request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle failover replication request.
 	if err := Brain.FailoverReplication(c.NewAdminContext(), &req, &foReq); err != nil {
 		reason := fmt.Sprintf("Failover replication failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Create a volume group
@@ -363,16 +363,16 @@ func (cs *ctlServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolume
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume group request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle create volume group request.
 	if err := Brain.CreateVolumeGroup(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Create volume group failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Update volume group
@@ -390,10 +390,10 @@ func (cs *ctlServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolume
 	if err := Brain.UpdateVolumeGroup(c.NewAdminContext(), &req, opt.AddVolMessage, opt.RmVolMessage); err != nil {
 		reason := fmt.Sprintf("Update volume group failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }
 
 // Delete volume group
@@ -405,14 +405,14 @@ func (cs *ctlServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolume
 	if err := json.Unmarshal([]byte(opt.Message), &req); err != nil {
 		reason := fmt.Sprintf("Decode volume group request failed: %s", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle delete volume group request.
 	if err := Brain.DeleteVolumeGroup(c.NewAdminContext(), &req); err != nil {
 		reason := fmt.Sprintf("Delete volume group failed: %v", err.Error())
 		log.Error(reason)
-		return nil, err
+		return new(pb.GenericResponse), err
 	}
 
-	return nil, nil
+	return new(pb.GenericResponse), nil
 }

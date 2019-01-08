@@ -75,19 +75,19 @@ func Run(host string) {
 
 				// Volume is the logical description of a piece of storage, which can be directly used by users.
 				// All operations of volume can be used for both admin and users.
-				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
-				beego.NSRouter("/volumes/:volumeId", &VolumePortal{}, "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
+				beego.NSRouter("/volumes", NewVolumePortal(), "post:CreateVolume;get:ListVolumes"),
+				beego.NSRouter("/volumes/:volumeId", NewVolumePortal(), "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
 				// Extend Volume
-				beego.NSRouter("/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
+				beego.NSRouter("/volumes/:volumeId/resize", NewVolumePortal(), "post:ExtendVolume"),
 
 				// Creates, shows, lists, unpdates and deletes attachment.
-				beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
-				beego.NSRouter("/attachments/:attachmentId", &VolumeAttachmentPortal{}, "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
+				beego.NSRouter("/attachments", NewVolumeAttachmentPortal(), "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
+				beego.NSRouter("/attachments/:attachmentId", NewVolumeAttachmentPortal(), "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
 
 				// Snapshot is a point-in-time copy of the data that a volume contains.
 				// Creates, shows, lists, unpdates and deletes snapshot.
-				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
-				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
+				beego.NSRouter("/snapshots", NewVolumeSnapshotPortal(), "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
+				beego.NSRouter("/snapshots/:snapshotId", NewVolumeSnapshotPortal(), "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
 
 				// Creates, shows, lists, unpdates and deletes replication.
 				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplications"),
@@ -97,8 +97,8 @@ func Run(host string) {
 				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
 				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/volumeGroups", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
-				beego.NSRouter("/volumeGroups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
+				beego.NSRouter("/volumeGroups", NewVolumeGroupPortal(), "post:CreateVolumeGroup;get:ListVolumeGroups"),
+				beego.NSRouter("/volumeGroups/:groupId", NewVolumeGroupPortal(), "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)

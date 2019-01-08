@@ -30,11 +30,15 @@ import (
 )
 
 func NewReplicationPortal() *ReplicationPortal {
-	return &ReplicationPortal{}
+	return &ReplicationPortal{
+		CtrClient: client.NewClient(),
+	}
 }
 
 type ReplicationPortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 var whiteListSimple = []string{"Id", "Name", "ReplicationStatus"}
@@ -126,17 +130,16 @@ func (this *ReplicationPortal) CreateReplication() {
 	// NOTE:The real volume replication creation process.
 	// Volume replication creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume replication creation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateReplicationOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateReplication(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateReplication(context.Background(), opt); err != nil {
 		log.Error("Create volume replication failed in controller service:", err)
 		return
 	}
@@ -304,18 +307,17 @@ func (this *ReplicationPortal) DeleteReplication() {
 	// NOTE:The real volume replication deletion process.
 	// Volume replication deletion request is sent to the Dock. Dock will remove
 	// replicaiton record after volume replication creation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(r)
 	opt := &pb.DeleteReplicationOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DeleteReplication(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DeleteReplication(context.Background(), opt); err != nil {
 		log.Error("Delete volume replication failed in controller service:", err)
 		return
 	}
@@ -348,18 +350,17 @@ func (this *ReplicationPortal) EnableReplication() {
 	// Volume replication enable request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication enable
 	// operation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(r)
 	opt := &pb.EnableReplicationOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.EnableReplication(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.EnableReplication(context.Background(), opt); err != nil {
 		log.Error("Enable volume replication failed in controller service:", err)
 		return
 	}
@@ -392,18 +393,17 @@ func (this *ReplicationPortal) DisableReplication() {
 	// Volume replication diable request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication disable
 	// operation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(r)
 	opt := &pb.DisableReplicationOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DisableReplication(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DisableReplication(context.Background(), opt); err != nil {
 		log.Error("Disable volume replication failed in controller service:", err)
 		return
 	}
@@ -443,12 +443,11 @@ func (this *ReplicationPortal) FailoverReplication() {
 	// Volume replication failover request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication failover
 	// operation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(r)
 	foBody, _ := json.Marshal(&failover)
@@ -456,7 +455,7 @@ func (this *ReplicationPortal) FailoverReplication() {
 		Message:         string(body),
 		FailoverMessage: string(foBody),
 	}
-	if _, err = ctrClient.FailoverReplication(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.FailoverReplication(context.Background(), opt); err != nil {
 		log.Error("Failover volume replication failed in controller service:", err)
 		return
 	}

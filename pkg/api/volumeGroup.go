@@ -28,8 +28,16 @@ import (
 	"golang.org/x/net/context"
 )
 
+func NewVolumeGroupPortal() *VolumeGroupPortal {
+	return &VolumeGroupPortal{
+		CtrClient: client.NewClient(),
+	}
+}
+
 type VolumeGroupPortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 func (this *VolumeGroupPortal) CreateVolumeGroup() {
@@ -69,17 +77,16 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	// Volume group creation request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
@@ -121,17 +128,16 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	// Volume group creation request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
@@ -163,18 +169,17 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	// NOTE:The real volume group deletion process.
 	// Volume group deletion request is sent to the Dock. Dock will remove
 	// volume group record after volume group deletion operation is completed.
-	ctrClient := client.NewClient()
-	if err = ctrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer ctrClient.Close()
+	defer this.CtrClient.Close()
 
 	body, _ := json.Marshal(vg)
 	opt := &pb.DeleteVolumeGroupOpts{
 		Message: string(body),
 	}
-	if _, err = ctrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = this.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Delete volume group failed in controller service:", err)
 		return
 	}

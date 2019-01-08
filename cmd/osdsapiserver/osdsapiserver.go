@@ -29,15 +29,16 @@ import (
 
 func init() {
 	// Load global configuration from specified config file.
-	CONF.Load("/etc/opensds/opensds.conf")
+	def := GetDefaultConfig()
 
 	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", CONF.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
-	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", CONF.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&CONF.Database.Driver, "db-driver", CONF.Database.Driver, "Driver name of database service")
-	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", def.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
+	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", def.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", def.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
+	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
+	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
+	CONF.Load("/etc/opensds/opensds.conf")
 
-	daemon.SetDaemonFlag(&CONF.OsdsApiServer.Daemon, CONF.OsdsApiServer.Daemon)
 	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)
 }
 
