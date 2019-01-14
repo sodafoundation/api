@@ -78,7 +78,7 @@ func (cs *ctlServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts)
 	// after volume creation is completed.
 	var errchan = make(chan error, 1)
 	defer close(errchan)
-	go Brain.CreateVolume(c.NewAdminContext(), &req, errchan)
+	go Brain.CreateVolume(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Marshal volume created result failed: %s", err.Error())
 		log.Error(reason)
@@ -104,7 +104,7 @@ func (cs *ctlServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts)
 	// after volume deletion is completed.
 	var errchan = make(chan error, 1)
 	defer close(errchan)
-	go Brain.DeleteVolume(c.NewAdminContext(), &req, errchan)
+	go Brain.DeleteVolume(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %s", err.Error())
 		log.Error(reason)
@@ -130,7 +130,7 @@ func (cs *ctlServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts)
 	// after volume extention is completed.
 	var errchan = make(chan error, 1)
 	defer close(errchan)
-	go Brain.ExtendVolume(c.NewAdminContext(), opt.Id, req.NewSize, errchan)
+	go Brain.ExtendVolume(c.NewContextFromJson(opt.GetContext()), opt.Id, req.NewSize, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		log.Error(reason)
@@ -155,7 +155,7 @@ func (cs *ctlServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateV
 	// after volume attachment creation is completed.
 	errchan := make(chan error, 1)
 	defer close(errchan)
-	go Brain.CreateVolumeAttachment(c.NewAdminContext(), &req, errchan)
+	go Brain.CreateVolumeAttachment(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		log.Error(reason)
@@ -180,7 +180,7 @@ func (cs *ctlServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteV
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
 	var errchan = make(chan error, 1)
-	go Brain.DeleteVolumeAttachment(c.NewAdminContext(), &req, errchan)
+	go Brain.DeleteVolumeAttachment(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	defer close(errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume attachment failed: %v", err.Error())
@@ -207,7 +207,7 @@ func (cs *ctlServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVol
 	// after volume snapshot creation is completed.
 	errchan := make(chan error, 1)
 	defer close(errchan)
-	go Brain.CreateVolumeSnapshot(c.NewAdminContext(), &req, errchan)
+	go Brain.CreateVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		log.Error(reason)
@@ -232,7 +232,7 @@ func (cs *ctlServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVol
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
 	var errchan = make(chan error, 1)
-	go Brain.DeleteVolumeSnapshot(c.NewAdminContext(), &req, errchan)
+	go Brain.DeleteVolumeSnapshot(c.NewContextFromJson(opt.GetContext()), &req, errchan)
 	defer close(errchan)
 	if err := <-errchan; err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
@@ -255,7 +255,7 @@ func (cs *ctlServer) CreateReplication(ctx context.Context, opt *pb.CreateReplic
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle create replication request.
-	if _, err := Brain.CreateReplication(c.NewAdminContext(), &req); err != nil {
+	if _, err := Brain.CreateReplication(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Create replication failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -276,7 +276,7 @@ func (cs *ctlServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplic
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle delete replication request.
-	if _, err := Brain.CreateReplication(c.NewAdminContext(), &req); err != nil {
+	if _, err := Brain.CreateReplication(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Delete replication failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -297,7 +297,7 @@ func (cs *ctlServer) EnableReplication(ctx context.Context, opt *pb.EnableReplic
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle enable replication request.
-	if err := Brain.EnableReplication(c.NewAdminContext(), &req); err != nil {
+	if err := Brain.EnableReplication(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Enable replication failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -318,7 +318,7 @@ func (cs *ctlServer) DisableReplication(ctx context.Context, opt *pb.DisableRepl
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle disable replication request.
-	if err := Brain.DisableReplication(c.NewAdminContext(), &req); err != nil {
+	if err := Brain.DisableReplication(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Disable replication failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -345,7 +345,7 @@ func (cs *ctlServer) FailoverReplication(ctx context.Context, opt *pb.FailoverRe
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle failover replication request.
-	if err := Brain.FailoverReplication(c.NewAdminContext(), &req, &foReq); err != nil {
+	if err := Brain.FailoverReplication(c.NewContextFromJson(opt.GetContext()), &req, &foReq); err != nil {
 		reason := fmt.Sprintf("Failover replication failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -366,7 +366,7 @@ func (cs *ctlServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolume
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle create volume group request.
-	if err := Brain.CreateVolumeGroup(c.NewAdminContext(), &req); err != nil {
+	if err := Brain.CreateVolumeGroup(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Create volume group failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -387,7 +387,7 @@ func (cs *ctlServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolume
 		return nil, err
 	}
 	// Call global controller variable to handle update volume group request.
-	if err := Brain.UpdateVolumeGroup(c.NewAdminContext(), &req, opt.AddVolMessage, opt.RmVolMessage); err != nil {
+	if err := Brain.UpdateVolumeGroup(c.NewContextFromJson(opt.GetContext()), &req, opt.AddVolMessage, opt.RmVolMessage); err != nil {
 		reason := fmt.Sprintf("Update volume group failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err
@@ -408,7 +408,7 @@ func (cs *ctlServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolume
 		return new(pb.GenericResponse), err
 	}
 	// Call global controller variable to handle delete volume group request.
-	if err := Brain.DeleteVolumeGroup(c.NewAdminContext(), &req); err != nil {
+	if err := Brain.DeleteVolumeGroup(c.NewContextFromJson(opt.GetContext()), &req); err != nil {
 		reason := fmt.Sprintf("Delete volume group failed: %v", err.Error())
 		log.Error(reason)
 		return new(pb.GenericResponse), err

@@ -44,6 +44,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	if !policy.Authorize(this.Ctx, "volume_group:create") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
 	var volumeGroup = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
@@ -57,7 +58,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	// NOTE:It will create a volume group entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume group process creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeGroupDBEntry(c.GetContext(this.Ctx), volumeGroup)
+	result, err := CreateVolumeGroupDBEntry(ctx, volumeGroup)
 	if err != nil {
 		this.ErrorHandle("Create volume group failed",
 			model.ErrorInternalServer, err)
@@ -85,6 +86,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
@@ -98,6 +100,7 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	if !policy.Authorize(this.Ctx, "volume_group:update") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	var vg = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -110,7 +113,7 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 
 	vg.Id = id
 
-	result, err := UpdateVolumeGroupDBEntry(c.GetContext(this.Ctx), vg)
+	result, err := UpdateVolumeGroupDBEntry(ctx, vg)
 	if err != nil {
 		this.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
 		return
@@ -136,6 +139,7 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
@@ -149,9 +153,10 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	if !policy.Authorize(this.Ctx, "volume_group:delete") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
 	id := this.Ctx.Input.Param(":groupId")
-	vg, err := db.C.GetVolumeGroup(c.GetContext(this.Ctx), id)
+	vg, err := db.C.GetVolumeGroup(ctx, id)
 	if err != nil {
 		this.ErrorHandle("Delete volume group failed",
 			model.ErrorBadRequest, err)
@@ -178,6 +183,7 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	body, _ := json.Marshal(vg)
 	opt := &pb.DeleteVolumeGroupOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Delete volume group failed in controller service:", err)

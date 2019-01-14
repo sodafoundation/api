@@ -50,6 +50,7 @@ func (this *VolumePortal) CreateVolume() {
 	if !policy.Authorize(this.Ctx, "volume:create") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	var volume = model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -65,7 +66,7 @@ func (this *VolumePortal) CreateVolume() {
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeDBEntry(c.GetContext(this.Ctx), &volume)
+	result, err := CreateVolumeDBEntry(ctx, &volume)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -90,6 +91,7 @@ func (this *VolumePortal) CreateVolume() {
 
 	opt := &pb.CreateVolumeOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateVolume(context.Background(), opt); err != nil {
 		log.Error("Create volume failed in controller service:", err)
@@ -194,6 +196,7 @@ func (this *VolumePortal) ExtendVolume() {
 	if !policy.Authorize(this.Ctx, "volume:extend") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	var extendRequestBody = model.ExtendVolumeSpec{}
 
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&extendRequestBody); err != nil {
@@ -207,7 +210,7 @@ func (this *VolumePortal) ExtendVolume() {
 	id := this.Ctx.Input.Param(":volumeId")
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
-	result, err := ExtendVolumeDBEntry(c.GetContext(this.Ctx), id)
+	result, err := ExtendVolumeDBEntry(ctx, id)
 	if err != nil {
 		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -234,6 +237,7 @@ func (this *VolumePortal) ExtendVolume() {
 	opt := &pb.ExtendVolumeOpts{
 		Id:      id,
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
 		log.Error("Extend volume failed in controller service:", err)
@@ -247,9 +251,11 @@ func (this *VolumePortal) DeleteVolume() {
 	if !policy.Authorize(this.Ctx, "volume:delete") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
+
 	var err error
 	id := this.Ctx.Input.Param(":volumeId")
-	volume, err := db.C.GetVolume(c.GetContext(this.Ctx), id)
+	volume, err := db.C.GetVolume(ctx, id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -260,7 +266,7 @@ func (this *VolumePortal) DeleteVolume() {
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
-	if err = DeleteVolumeDBEntry(c.GetContext(this.Ctx), volume); err != nil {
+	if err = DeleteVolumeDBEntry(ctx, volume); err != nil {
 		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
 		this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
@@ -281,6 +287,7 @@ func (this *VolumePortal) DeleteVolume() {
 	body, _ := json.Marshal(volume)
 	opt := &pb.DeleteVolumeOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("Delete volume failed in controller service:", err)
@@ -306,6 +313,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	if !policy.Authorize(this.Ctx, "volume:create_attachment") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	var attachment = model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -321,7 +329,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// NOTE:It will create a volume attachment entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume attachment creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeAttachmentDBEntry(c.GetContext(this.Ctx), &attachment)
+	result, err := CreateVolumeAttachmentDBEntry(ctx, &attachment)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -346,6 +354,7 @@ func (this *VolumeAttachmentPortal) CreateVolumeAttachment() {
 
 	opt := &pb.CreateVolumeAttachmentOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Create volume attachment failed in controller service:", err)
@@ -448,8 +457,10 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	if !policy.Authorize(this.Ctx, "volume:delete_attachment") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
+
 	id := this.Ctx.Input.Param(":attachmentId")
-	attachment, err := db.C.GetVolumeAttachment(c.GetContext(this.Ctx), id)
+	attachment, err := db.C.GetVolumeAttachment(ctx, id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -473,6 +484,7 @@ func (this *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	body, _ := json.Marshal(attachment)
 	opt := &pb.DeleteVolumeAttachmentOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Delete volume attachment failed in controller service:", err)
@@ -498,6 +510,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	if !policy.Authorize(this.Ctx, "snapshot:create") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	var snapshot = model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -513,7 +526,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// NOTE:It will create a volume snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume snapshot creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeSnapshotDBEntry(c.GetContext(this.Ctx), &snapshot)
+	result, err := CreateVolumeSnapshotDBEntry(ctx, &snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -538,6 +551,7 @@ func (this *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 
 	opt := &pb.CreateVolumeSnapshotOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Create volume snapthot failed in controller service:", err)
@@ -640,9 +654,10 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	if !policy.Authorize(this.Ctx, "snapshot:delete") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 	id := this.Ctx.Input.Param(":snapshotId")
 
-	snapshot, err := db.C.GetVolumeSnapshot(c.GetContext(this.Ctx), id)
+	snapshot, err := db.C.GetVolumeSnapshot(ctx, id)
 	if err != nil {
 		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -653,7 +668,7 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
 	// the database to "deleting" and return the result immediately.
-	err = DeleteVolumeSnapshotDBEntry(c.GetContext(this.Ctx), snapshot)
+	err = DeleteVolumeSnapshotDBEntry(ctx, snapshot)
 	if err != nil {
 		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
 		this.Ctx.Output.SetStatus(model.ErrorBadRequest)
@@ -674,6 +689,7 @@ func (this *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	body, _ := json.Marshal(snapshot)
 	opt := &pb.DeleteVolumeSnapshotOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Delete volume snapthot failed in controller service:", err)

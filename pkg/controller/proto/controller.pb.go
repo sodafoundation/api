@@ -27,7 +27,9 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 // for creating a volume.
 type CreateVolumeOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -37,7 +39,7 @@ func (m *CreateVolumeOpts) Reset()         { *m = CreateVolumeOpts{} }
 func (m *CreateVolumeOpts) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeOpts) ProtoMessage()    {}
 func (*CreateVolumeOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{0}
+	return fileDescriptor_controller_479d4b827088cbae, []int{0}
 }
 func (m *CreateVolumeOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeOpts.Unmarshal(m, b)
@@ -64,11 +66,20 @@ func (m *CreateVolumeOpts) GetMessage() string {
 	return ""
 }
 
+func (m *CreateVolumeOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // DeleteVolumeOpts is a structure which indicates all required properties
 // for deleting a volume.
 type DeleteVolumeOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -78,7 +89,7 @@ func (m *DeleteVolumeOpts) Reset()         { *m = DeleteVolumeOpts{} }
 func (m *DeleteVolumeOpts) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeOpts) ProtoMessage()    {}
 func (*DeleteVolumeOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{1}
+	return fileDescriptor_controller_479d4b827088cbae, []int{1}
 }
 func (m *DeleteVolumeOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeOpts.Unmarshal(m, b)
@@ -105,13 +116,22 @@ func (m *DeleteVolumeOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DeleteVolumeOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // ExtendVolumeOpts is a structure which indicates all required properties
 // for Extending a volume.
 type ExtendVolumeOpts struct {
 	// The id of volume, required.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -121,7 +141,7 @@ func (m *ExtendVolumeOpts) Reset()         { *m = ExtendVolumeOpts{} }
 func (m *ExtendVolumeOpts) String() string { return proto.CompactTextString(m) }
 func (*ExtendVolumeOpts) ProtoMessage()    {}
 func (*ExtendVolumeOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{2}
+	return fileDescriptor_controller_479d4b827088cbae, []int{2}
 }
 func (m *ExtendVolumeOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExtendVolumeOpts.Unmarshal(m, b)
@@ -155,11 +175,20 @@ func (m *ExtendVolumeOpts) GetMessage() string {
 	return ""
 }
 
+func (m *ExtendVolumeOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // CreateVolumeAttachmentOpts is a structure which indicates all required properties
 // for creating a volume attachment.
 type CreateVolumeAttachmentOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -169,7 +198,7 @@ func (m *CreateVolumeAttachmentOpts) Reset()         { *m = CreateVolumeAttachme
 func (m *CreateVolumeAttachmentOpts) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeAttachmentOpts) ProtoMessage()    {}
 func (*CreateVolumeAttachmentOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{3}
+	return fileDescriptor_controller_479d4b827088cbae, []int{3}
 }
 func (m *CreateVolumeAttachmentOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeAttachmentOpts.Unmarshal(m, b)
@@ -196,11 +225,20 @@ func (m *CreateVolumeAttachmentOpts) GetMessage() string {
 	return ""
 }
 
+func (m *CreateVolumeAttachmentOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // CreateVolumeAttachmentOpts is a structure which indicates all required properties
 // for deleting a volume attachment.
 type DeleteVolumeAttachmentOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -210,7 +248,7 @@ func (m *DeleteVolumeAttachmentOpts) Reset()         { *m = DeleteVolumeAttachme
 func (m *DeleteVolumeAttachmentOpts) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeAttachmentOpts) ProtoMessage()    {}
 func (*DeleteVolumeAttachmentOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{4}
+	return fileDescriptor_controller_479d4b827088cbae, []int{4}
 }
 func (m *DeleteVolumeAttachmentOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeAttachmentOpts.Unmarshal(m, b)
@@ -237,11 +275,20 @@ func (m *DeleteVolumeAttachmentOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DeleteVolumeAttachmentOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // CreateVolumeSnapshotOpts is a structure which indicates all required properties
 // for creating a volume snapshot.
 type CreateVolumeSnapshotOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -251,7 +298,7 @@ func (m *CreateVolumeSnapshotOpts) Reset()         { *m = CreateVolumeSnapshotOp
 func (m *CreateVolumeSnapshotOpts) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeSnapshotOpts) ProtoMessage()    {}
 func (*CreateVolumeSnapshotOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{5}
+	return fileDescriptor_controller_479d4b827088cbae, []int{5}
 }
 func (m *CreateVolumeSnapshotOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeSnapshotOpts.Unmarshal(m, b)
@@ -278,11 +325,20 @@ func (m *CreateVolumeSnapshotOpts) GetMessage() string {
 	return ""
 }
 
+func (m *CreateVolumeSnapshotOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // DeleteVolumeSnapshotOpts is a structure which indicates all required properties
 // for deleting a volume snapshot.
 type DeleteVolumeSnapshotOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -292,7 +348,7 @@ func (m *DeleteVolumeSnapshotOpts) Reset()         { *m = DeleteVolumeSnapshotOp
 func (m *DeleteVolumeSnapshotOpts) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeSnapshotOpts) ProtoMessage()    {}
 func (*DeleteVolumeSnapshotOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{6}
+	return fileDescriptor_controller_479d4b827088cbae, []int{6}
 }
 func (m *DeleteVolumeSnapshotOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeSnapshotOpts.Unmarshal(m, b)
@@ -319,12 +375,21 @@ func (m *DeleteVolumeSnapshotOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DeleteVolumeSnapshotOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // CreateReplicationOpts is a structure which indicates all required properties
 // for creating a replication.
 // NOTE: Need to figure out how to handle more than 2 sites.
 type CreateReplicationOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -334,7 +399,7 @@ func (m *CreateReplicationOpts) Reset()         { *m = CreateReplicationOpts{} }
 func (m *CreateReplicationOpts) String() string { return proto.CompactTextString(m) }
 func (*CreateReplicationOpts) ProtoMessage()    {}
 func (*CreateReplicationOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{7}
+	return fileDescriptor_controller_479d4b827088cbae, []int{7}
 }
 func (m *CreateReplicationOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateReplicationOpts.Unmarshal(m, b)
@@ -361,12 +426,21 @@ func (m *CreateReplicationOpts) GetMessage() string {
 	return ""
 }
 
+func (m *CreateReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // Delete ReplicationOpts is a structure which indicates all required properties
 // for deleting a replication.
 // NOTE: Need to figure out how to handle more than 2 sites.
 type DeleteReplicationOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -376,7 +450,7 @@ func (m *DeleteReplicationOpts) Reset()         { *m = DeleteReplicationOpts{} }
 func (m *DeleteReplicationOpts) String() string { return proto.CompactTextString(m) }
 func (*DeleteReplicationOpts) ProtoMessage()    {}
 func (*DeleteReplicationOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{8}
+	return fileDescriptor_controller_479d4b827088cbae, []int{8}
 }
 func (m *DeleteReplicationOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteReplicationOpts.Unmarshal(m, b)
@@ -403,10 +477,19 @@ func (m *DeleteReplicationOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DeleteReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // Delete ReplicationOpts is a structure which indicates all required properties
 type EnableReplicationOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -416,7 +499,7 @@ func (m *EnableReplicationOpts) Reset()         { *m = EnableReplicationOpts{} }
 func (m *EnableReplicationOpts) String() string { return proto.CompactTextString(m) }
 func (*EnableReplicationOpts) ProtoMessage()    {}
 func (*EnableReplicationOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{9}
+	return fileDescriptor_controller_479d4b827088cbae, []int{9}
 }
 func (m *EnableReplicationOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EnableReplicationOpts.Unmarshal(m, b)
@@ -443,10 +526,19 @@ func (m *EnableReplicationOpts) GetMessage() string {
 	return ""
 }
 
+func (m *EnableReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // Delete ReplicationOpts is a structure which indicates all required properties
 type DisableReplicationOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -456,7 +548,7 @@ func (m *DisableReplicationOpts) Reset()         { *m = DisableReplicationOpts{}
 func (m *DisableReplicationOpts) String() string { return proto.CompactTextString(m) }
 func (*DisableReplicationOpts) ProtoMessage()    {}
 func (*DisableReplicationOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{10}
+	return fileDescriptor_controller_479d4b827088cbae, []int{10}
 }
 func (m *DisableReplicationOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DisableReplicationOpts.Unmarshal(m, b)
@@ -483,11 +575,20 @@ func (m *DisableReplicationOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DisableReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // Delete ReplicationOpts is a structure which indicates all required properties
 type FailoverReplicationOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	FailoverMessage      string   `protobuf:"bytes,2,opt,name=failoverMessage,proto3" json:"failoverMessage,omitempty"`
+	Message         string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	FailoverMessage string `protobuf:"bytes,2,opt,name=failoverMessage,proto3" json:"failoverMessage,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -497,7 +598,7 @@ func (m *FailoverReplicationOpts) Reset()         { *m = FailoverReplicationOpts
 func (m *FailoverReplicationOpts) String() string { return proto.CompactTextString(m) }
 func (*FailoverReplicationOpts) ProtoMessage()    {}
 func (*FailoverReplicationOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{11}
+	return fileDescriptor_controller_479d4b827088cbae, []int{11}
 }
 func (m *FailoverReplicationOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_FailoverReplicationOpts.Unmarshal(m, b)
@@ -531,11 +632,20 @@ func (m *FailoverReplicationOpts) GetFailoverMessage() string {
 	return ""
 }
 
+func (m *FailoverReplicationOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 // CreateVolumeGroupOpts is a structure which indicates all required
 // properties for creating a volume group.
 type CreateVolumeGroupOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -545,7 +655,7 @@ func (m *CreateVolumeGroupOpts) Reset()         { *m = CreateVolumeGroupOpts{} }
 func (m *CreateVolumeGroupOpts) String() string { return proto.CompactTextString(m) }
 func (*CreateVolumeGroupOpts) ProtoMessage()    {}
 func (*CreateVolumeGroupOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{12}
+	return fileDescriptor_controller_479d4b827088cbae, []int{12}
 }
 func (m *CreateVolumeGroupOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateVolumeGroupOpts.Unmarshal(m, b)
@@ -572,11 +682,20 @@ func (m *CreateVolumeGroupOpts) GetMessage() string {
 	return ""
 }
 
+func (m *CreateVolumeGroupOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 type UpdateVolumeGroupOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	AddVolMessage        []string `protobuf:"bytes,2,rep,name=addVolMessage,proto3" json:"addVolMessage,omitempty"`
-	RmVolMessage         []string `protobuf:"bytes,3,rep,name=rmVolMessage,proto3" json:"rmVolMessage,omitempty"`
+	Message       string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	AddVolMessage []string `protobuf:"bytes,2,rep,name=addVolMessage,proto3" json:"addVolMessage,omitempty"`
+	RmVolMessage  []string `protobuf:"bytes,3,rep,name=rmVolMessage,proto3" json:"rmVolMessage,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -586,7 +705,7 @@ func (m *UpdateVolumeGroupOpts) Reset()         { *m = UpdateVolumeGroupOpts{} }
 func (m *UpdateVolumeGroupOpts) String() string { return proto.CompactTextString(m) }
 func (*UpdateVolumeGroupOpts) ProtoMessage()    {}
 func (*UpdateVolumeGroupOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{13}
+	return fileDescriptor_controller_479d4b827088cbae, []int{13}
 }
 func (m *UpdateVolumeGroupOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateVolumeGroupOpts.Unmarshal(m, b)
@@ -627,9 +746,18 @@ func (m *UpdateVolumeGroupOpts) GetRmVolMessage() []string {
 	return nil
 }
 
+func (m *UpdateVolumeGroupOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 type DeleteVolumeGroupOpts struct {
 	// The message of request, required.
-	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -639,7 +767,7 @@ func (m *DeleteVolumeGroupOpts) Reset()         { *m = DeleteVolumeGroupOpts{} }
 func (m *DeleteVolumeGroupOpts) String() string { return proto.CompactTextString(m) }
 func (*DeleteVolumeGroupOpts) ProtoMessage()    {}
 func (*DeleteVolumeGroupOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{14}
+	return fileDescriptor_controller_479d4b827088cbae, []int{14}
 }
 func (m *DeleteVolumeGroupOpts) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteVolumeGroupOpts.Unmarshal(m, b)
@@ -666,6 +794,13 @@ func (m *DeleteVolumeGroupOpts) GetMessage() string {
 	return ""
 }
 
+func (m *DeleteVolumeGroupOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 type GenericResponse struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -676,7 +811,7 @@ func (m *GenericResponse) Reset()         { *m = GenericResponse{} }
 func (m *GenericResponse) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse) ProtoMessage()    {}
 func (*GenericResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_controller_6c0bce2cb3f4ff63, []int{15}
+	return fileDescriptor_controller_479d4b827088cbae, []int{15}
 }
 func (m *GenericResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenericResponse.Unmarshal(m, b)
@@ -1279,39 +1414,39 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 	Metadata: "controller.proto",
 }
 
-func init() { proto.RegisterFile("controller.proto", fileDescriptor_controller_6c0bce2cb3f4ff63) }
+func init() { proto.RegisterFile("controller.proto", fileDescriptor_controller_479d4b827088cbae) }
 
-var fileDescriptor_controller_6c0bce2cb3f4ff63 = []byte{
-	// 481 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xcf, 0x6f, 0xd3, 0x30,
-	0x14, 0xc7, 0x59, 0x27, 0x40, 0x7d, 0x1a, 0xac, 0x33, 0xac, 0xab, 0x2a, 0x7e, 0x56, 0x1c, 0x7a,
-	0x40, 0x93, 0x18, 0x68, 0x27, 0x2e, 0xd3, 0x56, 0x7a, 0x40, 0x55, 0x45, 0x50, 0xb9, 0x71, 0x70,
-	0x93, 0x07, 0x8d, 0x94, 0xd8, 0x91, 0xe3, 0x22, 0x24, 0xfe, 0x10, 0xfe, 0xdd, 0xa9, 0x4d, 0xea,
-	0x3a, 0x8e, 0xe3, 0x3a, 0xa7, 0xaa, 0xf6, 0xfb, 0x7e, 0xde, 0xab, 0x5f, 0xbf, 0x5f, 0xe8, 0x85,
-	0x9c, 0x49, 0xc1, 0x93, 0x04, 0xc5, 0x65, 0x26, 0xb8, 0xe4, 0xe4, 0xe1, 0xf6, 0x63, 0xf4, 0x1e,
-	0x7a, 0xb7, 0x02, 0xa9, 0xc4, 0x1f, 0x3c, 0x59, 0xa7, 0x38, 0xcf, 0x64, 0x4e, 0x06, 0xf0, 0x38,
-	0xc5, 0x3c, 0xa7, 0xbf, 0x71, 0x70, 0xf4, 0xe6, 0x68, 0xdc, 0x0d, 0x76, 0x5f, 0x37, 0xd5, 0x77,
-	0x98, 0xa0, 0x67, 0xf5, 0x67, 0xe8, 0x4d, 0xfe, 0x4a, 0x64, 0x91, 0x56, 0xfd, 0x14, 0x3a, 0x71,
-	0x54, 0x16, 0x76, 0xe2, 0x48, 0x57, 0x77, 0xaa, 0xea, 0x6b, 0x18, 0xea, 0x93, 0xdd, 0x48, 0x49,
-	0xc3, 0x55, 0x8a, 0x4c, 0x1e, 0xe8, 0x7a, 0x0d, 0x43, 0x7d, 0x46, 0x6f, 0xdd, 0x27, 0x18, 0xe8,
-	0xfd, 0xbe, 0x33, 0x9a, 0xe5, 0x2b, 0xee, 0xa1, 0xd2, 0xbb, 0x79, 0xaa, 0x3e, 0xc0, 0x79, 0xd1,
-	0x2b, 0xc0, 0x2c, 0x89, 0x43, 0x2a, 0x63, 0xce, 0x0e, 0x4b, 0x8a, 0x46, 0xad, 0x24, 0x13, 0x46,
-	0x97, 0x49, 0x0b, 0xc9, 0x15, 0xf4, 0xef, 0xe2, 0xbc, 0x9d, 0xe6, 0x27, 0x5c, 0x7c, 0xa1, 0x71,
-	0xc2, 0xff, 0xa0, 0xf0, 0x16, 0x91, 0x31, 0x9c, 0xfe, 0x2a, 0x45, 0xb3, 0xca, 0xfe, 0xcd, 0xe3,
-	0xfd, 0x5b, 0x15, 0x2f, 0x3c, 0x15, 0x7c, 0x9d, 0x1d, 0x98, 0xe8, 0x1f, 0x9c, 0x2f, 0xb2, 0xa8,
-	0x8d, 0x84, 0xbc, 0x83, 0x27, 0x34, 0xda, 0xfc, 0x51, 0xf7, 0xd3, 0x1c, 0x8f, 0xbb, 0x41, 0xf5,
-	0x90, 0x8c, 0xe0, 0x44, 0xa4, 0x5a, 0xd1, 0xf1, 0xb6, 0xa8, 0x72, 0xb6, 0x5f, 0x94, 0xff, 0xbc,
-	0x67, 0x70, 0x3a, 0x45, 0x86, 0x22, 0x0e, 0x03, 0xcc, 0x33, 0xce, 0x72, 0xbc, 0xfa, 0xdf, 0x05,
-	0xb8, 0x55, 0x9e, 0x25, 0x37, 0x70, 0xa2, 0x3f, 0x02, 0xb9, 0x28, 0x5c, 0x7c, 0x69, 0x7a, 0x77,
-	0xd8, 0x2f, 0x2f, 0x0c, 0xde, 0xe8, 0xc1, 0x06, 0xa1, 0xcf, 0xa5, 0x10, 0xa6, 0xa1, 0xdd, 0x08,
-	0xdd, 0xd0, 0x0a, 0x61, 0xba, 0xdc, 0x81, 0xf8, 0x06, 0xcf, 0x6d, 0x2e, 0x23, 0xaf, 0x2d, 0x3f,
-	0x48, 0x37, 0x93, 0x1b, 0x69, 0xb3, 0xa0, 0x42, 0x36, 0xf9, 0xd3, 0x81, 0x5c, 0x40, 0xdf, 0x9e,
-	0x3d, 0xe4, 0xad, 0x65, 0xce, 0x6a, 0xc4, 0xb8, 0xb1, 0xf6, 0x68, 0x52, 0xd8, 0xe6, 0xe4, 0x72,
-	0x60, 0xbf, 0xc2, 0x59, 0x2d, 0x4d, 0xc8, 0x8b, 0xca, 0xa0, 0x86, 0x31, 0xdd, 0xb0, 0x5a, 0xce,
-	0x28, 0x98, 0x35, 0x81, 0xdc, 0xb0, 0x5a, 0x02, 0x29, 0x98, 0x35, 0x9b, 0x1c, 0xb0, 0x19, 0x90,
-	0x7a, 0x36, 0x91, 0x97, 0xbb, 0xd1, 0xac, 0xb1, 0xe5, 0xc0, 0xcd, 0xe1, 0x99, 0x25, 0xb6, 0xc8,
-	0xab, 0x52, 0xd0, 0x10, 0x69, 0x3e, 0x6b, 0xd0, 0x8c, 0x6f, 0xac, 0xc1, 0x88, 0x04, 0x37, 0xac,
-	0x16, 0x61, 0x0a, 0x66, 0x0d, 0x37, 0x9f, 0x9d, 0xda, 0x60, 0xd6, 0xb0, 0x6a, 0x86, 0x2d, 0x1f,
-	0x6d, 0x2f, 0x3e, 0xde, 0x07, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x87, 0x22, 0x15, 0x53, 0x08, 0x00,
-	0x00,
+var fileDescriptor_controller_479d4b827088cbae = []byte{
+	// 494 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0xdd, 0x6e, 0xd3, 0x30,
+	0x14, 0xc7, 0x69, 0xca, 0x87, 0x7a, 0x34, 0x58, 0x67, 0x58, 0x17, 0x55, 0x7c, 0x56, 0x5c, 0xf4,
+	0x6a, 0x17, 0xf0, 0x04, 0xd3, 0xbe, 0x2e, 0xc6, 0xd8, 0x08, 0xda, 0xee, 0xbd, 0xe4, 0xc0, 0x22,
+	0x25, 0x76, 0xe4, 0xb8, 0xd0, 0x17, 0x41, 0xbc, 0x2e, 0x4a, 0x93, 0x1a, 0xc7, 0x71, 0xac, 0xae,
+	0xc9, 0x55, 0x65, 0x1f, 0xfb, 0xa7, 0xff, 0xe9, 0x71, 0x7e, 0x30, 0x0e, 0x39, 0x93, 0x82, 0x27,
+	0x09, 0x8a, 0xc3, 0x4c, 0x70, 0xc9, 0xc9, 0x93, 0xd5, 0xcf, 0xec, 0x0c, 0xc6, 0xc7, 0x02, 0xa9,
+	0xc4, 0x5b, 0x9e, 0x2c, 0x52, 0xbc, 0xca, 0x64, 0x4e, 0x7c, 0x78, 0x96, 0x62, 0x9e, 0xd3, 0x9f,
+	0xe8, 0x0f, 0xde, 0x0f, 0xe6, 0xa3, 0x60, 0xbd, 0x2c, 0x2a, 0x05, 0x08, 0x97, 0xd2, 0xf7, 0xca,
+	0x4a, 0xb5, 0x2c, 0x38, 0x27, 0x98, 0x60, 0x67, 0xce, 0x2d, 0x8c, 0x4f, 0x97, 0x12, 0x59, 0xa4,
+	0x71, 0x5e, 0x80, 0x17, 0x47, 0x15, 0xc2, 0x8b, 0x23, 0x9d, 0xeb, 0xb5, 0x72, 0x87, 0x75, 0xee,
+	0x35, 0x4c, 0xf5, 0x3e, 0x8f, 0xa4, 0xa4, 0xe1, 0x7d, 0x8a, 0x4c, 0x6e, 0x9d, 0xf4, 0x1a, 0xa6,
+	0x7a, 0xc7, 0x3d, 0x10, 0xbf, 0x82, 0xaf, 0x67, 0xfc, 0xce, 0x68, 0x96, 0xdf, 0xf3, 0x4e, 0x3c,
+	0x3d, 0x61, 0x67, 0xde, 0x05, 0xec, 0x97, 0xf9, 0x02, 0xcc, 0x92, 0x38, 0xa4, 0x32, 0xe6, 0xac,
+	0x0b, 0xac, 0x0c, 0xd7, 0x13, 0xec, 0x94, 0xd1, 0xbb, 0xa4, 0x17, 0xd8, 0x17, 0x98, 0x9c, 0xc4,
+	0x79, 0x5f, 0xb4, 0xdf, 0x70, 0x70, 0x46, 0xe3, 0x84, 0xff, 0x42, 0xb1, 0x39, 0x6e, 0x0e, 0xbb,
+	0x3f, 0xaa, 0x4b, 0x97, 0xb5, 0x97, 0x6e, 0x6e, 0x3b, 0x5e, 0xbc, 0x9a, 0x56, 0x39, 0xfd, 0x73,
+	0xc1, 0x17, 0xd9, 0xd6, 0x5d, 0xfc, 0x19, 0xc0, 0xfe, 0x4d, 0x16, 0x3d, 0x88, 0xf6, 0x11, 0x9e,
+	0xd3, 0xa8, 0xf8, 0x8e, 0xff, 0xb7, 0x30, 0x9c, 0x8f, 0x82, 0xfa, 0x26, 0x99, 0xc1, 0x8e, 0x48,
+	0xb5, 0x43, 0xc3, 0xd5, 0xa1, 0xda, 0x9e, 0x9e, 0xeb, 0x71, 0xcb, 0x2b, 0xea, 0xa3, 0xc9, 0x3d,
+	0xd8, 0x3d, 0x47, 0x86, 0x22, 0x0e, 0x03, 0xcc, 0x33, 0xce, 0x72, 0xfc, 0xf4, 0x77, 0x04, 0x70,
+	0xac, 0xd4, 0x49, 0x8e, 0x60, 0x47, 0xff, 0x4f, 0xc9, 0x41, 0x29, 0xd3, 0x43, 0x53, 0xa1, 0xd3,
+	0x49, 0x55, 0x30, 0x78, 0xb3, 0x47, 0x05, 0x42, 0x4f, 0xac, 0x10, 0xa6, 0x3d, 0xdd, 0x08, 0xdd,
+	0x91, 0x0a, 0x61, 0x8a, 0xd3, 0x81, 0xf8, 0x06, 0xaf, 0x6c, 0xaa, 0x21, 0xef, 0x2c, 0x0d, 0xe9,
+	0xde, 0x70, 0x23, 0x6d, 0xb6, 0x51, 0xc8, 0x36, 0x15, 0x39, 0x90, 0x37, 0x30, 0xb1, 0x4b, 0x9b,
+	0x7c, 0xb0, 0xe4, 0xac, 0x1b, 0xd8, 0x8d, 0xb5, 0x9b, 0x5b, 0x61, 0xdb, 0xc5, 0xee, 0xc0, 0x5e,
+	0xc0, 0x5e, 0x43, 0x8f, 0xe4, 0x75, 0x2d, 0xa8, 0x61, 0x00, 0x37, 0xac, 0xa1, 0x47, 0x05, 0xb3,
+	0x8a, 0xd3, 0x0d, 0x6b, 0xe8, 0x51, 0xc1, 0xac, 0xe2, 0x74, 0xc0, 0x2e, 0x81, 0x34, 0xf5, 0x48,
+	0xde, 0xac, 0xa3, 0x59, 0xcd, 0xe9, 0xc0, 0x5d, 0xc1, 0x4b, 0x8b, 0x1f, 0xc9, 0xdb, 0xea, 0x42,
+	0x8b, 0x3b, 0x37, 0x19, 0x83, 0xa6, 0x04, 0x63, 0x0c, 0x86, 0x2c, 0xdc, 0xb0, 0x86, 0xf6, 0x14,
+	0xcc, 0x2a, 0xc4, 0x4d, 0x66, 0x6a, 0x83, 0x59, 0x35, 0xd6, 0x0e, 0xbb, 0x7b, 0xba, 0x2a, 0x7c,
+	0xfe, 0x17, 0x00, 0x00, 0xff, 0xff, 0x40, 0x5d, 0xf7, 0xaa, 0xda, 0x09, 0x00, 0x00,
 }

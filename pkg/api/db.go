@@ -26,7 +26,6 @@ import (
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
@@ -383,10 +382,7 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 		log.Error("When add volume to db:", err)
 		return nil, err
 	}
-	// TODO:Rpc call to create group.
-	// Create volume group request is sent to the Dock. Dock will update volume status to "available"
-	// after volume group creation is completed.
-	controller.Brain.CreateVolumeGroup(ctx, vg)
+
 	return result, nil
 }
 
@@ -473,11 +469,6 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	if err != nil {
 		log.Error("When update volume group in db:", err.Error())
 		return nil, err
-	}
-
-	//TODO: Do an RPC call only if addVolumesNew or removeVolumeNew is not nil.
-	if len(addVolumesNew) > 0 || len(removeVolumeNew) > 0 {
-		controller.Brain.UpdateVolumeGroup(ctx, vg, addVolumesNew, removeVolumeNew)
 	}
 
 	return result, nil
@@ -629,10 +620,7 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	}
 
 	db.C.UpdateStatus(ctx, volumesUpdate, "")
-
 	db.C.UpdateStatus(ctx, vg, model.VolumeGroupDeleting)
-	//TODO Rpc call to delete group.
-	controller.Brain.DeleteVolumeGroup(ctx, vg)
 
 	return nil
 }

@@ -138,6 +138,7 @@ func (this *ReplicationPortal) CreateReplication() {
 
 	opt := &pb.CreateReplicationOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.CreateReplication(context.Background(), opt); err != nil {
 		log.Error("Create volume replication failed in controller service:", err)
@@ -288,16 +289,17 @@ func (this *ReplicationPortal) DeleteReplication() {
 	if !policy.Authorize(this.Ctx, "replication:delete") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
 	id := this.Ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(this.Ctx), id)
+	r, err := db.C.GetReplication(ctx, id)
 	if err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DeleteReplicationDBEntry(c.GetContext(this.Ctx), r); err != nil {
+	if err := DeleteReplicationDBEntry(ctx, r); err != nil {
 		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -316,6 +318,7 @@ func (this *ReplicationPortal) DeleteReplication() {
 	body, _ := json.Marshal(r)
 	opt := &pb.DeleteReplicationOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DeleteReplication(context.Background(), opt); err != nil {
 		log.Error("Delete volume replication failed in controller service:", err)
@@ -326,25 +329,25 @@ func (this *ReplicationPortal) DeleteReplication() {
 }
 
 func (this *ReplicationPortal) EnableReplication() {
-	ctx := this.Ctx
-	if !policy.Authorize(ctx, "replication:enable") {
+	if !policy.Authorize(this.Ctx, "replication:enable") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
-	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	id := this.Ctx.Input.Param(":replicationId")
+	r, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := EnableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+	if err := EnableReplicationDBEntry(ctx, r); err != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusAccepted)
 
 	// NOTE:The real volume replication enable process.
 	// Volume replication enable request is sent to the Dock. Dock will set
@@ -359,6 +362,7 @@ func (this *ReplicationPortal) EnableReplication() {
 	body, _ := json.Marshal(r)
 	opt := &pb.EnableReplicationOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.EnableReplication(context.Background(), opt); err != nil {
 		log.Error("Enable volume replication failed in controller service:", err)
@@ -369,25 +373,25 @@ func (this *ReplicationPortal) EnableReplication() {
 }
 
 func (this *ReplicationPortal) DisableReplication() {
-	ctx := this.Ctx
-	if !policy.Authorize(ctx, "replication:disable") {
+	if !policy.Authorize(this.Ctx, "replication:disable") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
-	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	id := this.Ctx.Input.Param(":replicationId")
+	r, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DisableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+	if err := DisableReplicationDBEntry(ctx, r); err != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusAccepted)
 
 	// NOTE:The real volume replication disable process.
 	// Volume replication diable request is sent to the Dock. Dock will set
@@ -402,6 +406,7 @@ func (this *ReplicationPortal) DisableReplication() {
 	body, _ := json.Marshal(r)
 	opt := &pb.DisableReplicationOpts{
 		Message: string(body),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.DisableReplication(context.Background(), opt); err != nil {
 		log.Error("Disable volume replication failed in controller service:", err)
@@ -412,32 +417,32 @@ func (this *ReplicationPortal) DisableReplication() {
 }
 
 func (this *ReplicationPortal) FailoverReplication() {
-	ctx := this.Ctx
-	if !policy.Authorize(ctx, "replication:failover") {
+	if !policy.Authorize(this.Ctx, "replication:failover") {
 		return
 	}
+	ctx := c.GetContext(this.Ctx)
 
 	var failover = model.FailoverReplicationSpec{}
 	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&failover); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
-	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	id := this.Ctx.Input.Param(":replicationId")
+	r, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(this.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := FailoverReplicationDBEntry(c.GetContext(ctx), r, failover.SecondaryBackendId); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+	if err := FailoverReplicationDBEntry(ctx, r, failover.SecondaryBackendId); err != nil {
+		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	this.Ctx.Output.SetStatus(StatusAccepted)
 
 	// NOTE:The real volume replication failover process.
 	// Volume replication failover request is sent to the Dock. Dock will set
@@ -454,6 +459,7 @@ func (this *ReplicationPortal) FailoverReplication() {
 	opt := &pb.FailoverReplicationOpts{
 		Message:         string(body),
 		FailoverMessage: string(foBody),
+		Context: ctx.ToJson(),
 	}
 	if _, err = this.CtrClient.FailoverReplication(context.Background(), opt); err != nil {
 		log.Error("Failover volume replication failed in controller service:", err)
