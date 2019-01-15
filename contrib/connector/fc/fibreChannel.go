@@ -89,9 +89,8 @@ func (f *fibreChannel) volPathDiscovery(volPaths []string, tries int, tgtWWN []s
 			if f.helper.pathExists(path) {
 				deviceName := f.helper.getContentfromSymboliclink(path)
 				return path, deviceName
-			} else {
-				f.helper.rescanHosts(tgtWWN, hbas)
 			}
+			f.helper.rescanHosts(tgtWWN, hbas)
 		}
 
 		time.Sleep(2 * time.Second)

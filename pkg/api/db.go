@@ -411,16 +411,16 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	vgUpdate.Profiles = vg.Profiles
 	vgUpdate.PoolId = vg.PoolId
 
-	var invalid_uuids []string
+	var invalidUuids []string
 	for _, uuidAdd := range vgUpdate.AddVolumes {
 		for _, uuidRemove := range vgUpdate.RemoveVolumes {
 			if uuidAdd == uuidRemove {
-				invalid_uuids = append(invalid_uuids, uuidAdd)
+				invalidUuids = append(invalidUuids, uuidAdd)
 			}
 		}
 	}
-	if len(invalid_uuids) > 0 {
-		msg := fmt.Sprintf("UUID %s is in both add and remove volume list", strings.Join(invalid_uuids, ","))
+	if len(invalidUuids) > 0 {
+		msg := fmt.Sprintf("UUID %s is in both add and remove volume list", strings.Join(invalidUuids, ","))
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}

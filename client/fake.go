@@ -312,9 +312,8 @@ func (*fakeReplicationReceiver) Recv(
 	case "POST":
 		if out != nil {
 			return json.Unmarshal([]byte(ByteReplication), out)
-		} else {
-			return nil
 		}
+		return nil
 	case "PUT":
 		return json.Unmarshal([]byte(ByteReplication), out)
 	case "GET":
