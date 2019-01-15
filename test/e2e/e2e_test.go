@@ -575,7 +575,7 @@ func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *mode
 	t.Log("End cleaning volume group...")
 
 	t.Log("Start cleaning volume...")
-	for i, _ := range body.AddVolumes {
+	for i := range body.AddVolumes {
 		if err := c.DeleteVolume(body.AddVolumes[i], nil); err != nil {
 			t.Error("Clean volume failed: ", err)
 			return err
@@ -670,7 +670,7 @@ func TestDeleteVolumeGroup(t *testing.T) {
 		return
 	}
 	t.Log("Delete volume group success")
-	for i, _ := range vg.AddVolumes {
+	for i := range vg.AddVolumes {
 		cleanVolumeIfFailedOrFinished(t, vg.AddVolumes[i])
 	}
 }

@@ -54,11 +54,11 @@ func TestContained(t *testing.T) {
 
 func TestMergeGeneralMaps(t *testing.T) {
 	input := []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"Lee": 100,
 			"fat": false,
 		},
-		map[string]interface{}{
+		{
 			"Ming": 50,
 			"tall": true,
 		},
@@ -78,10 +78,10 @@ func TestMergeGeneralMaps(t *testing.T) {
 
 func TestMergeStringMaps(t *testing.T) {
 	input := []map[string]string{
-		map[string]string{
+		{
 			"Lee": "fat",
 		},
-		map[string]string{
+		{
 			"Ming": "thin",
 		},
 	}
