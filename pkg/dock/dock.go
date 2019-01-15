@@ -459,7 +459,7 @@ func (d *DockHub) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
 				return err
 			}
 		}
-		return errors.New("Error occured when updating group" + opt.GetId() + "," + err.Error())
+		return errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
 	}
 
 	// Group update successfully...

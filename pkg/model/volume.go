@@ -115,7 +115,7 @@ type VolumeAttachmentSpec struct {
 	// See details in `ConnectionInfo`
 	ConnectionInfo `json:"connectionInfo,omitempty"`
 
-	// The protocl
+	// The protocol
 	AccessProtocol string `json:"accessProtocol,omitempty"`
 }
 

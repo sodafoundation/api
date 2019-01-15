@@ -676,7 +676,7 @@ func (c *DoradoClient) DoMapping(lunId, hostGrpId, hostId string) error {
 		}
 	}
 
-	log.Infof("DoMapping sucessufully, with params lunId:%s, hostGrpId:%s, hostId:%s",
+	log.Infof("DoMapping successfully, with params lunId:%s, hostGrpId:%s, hostId:%s",
 		lunId, lunGrpId, hostId)
 	return nil
 }
@@ -1136,7 +1136,7 @@ func (c *DoradoClient) GetHostOnlineFCInitiators(hostId string) ([]string, error
 			}
 		}
 	}
-	log.Infof("Get host online fc initiators from host %s sucess.", hostId)
+	log.Infof("Get host online fc initiators from host %s success.", hostId)
 	return initiators, nil
 }
 
@@ -1157,7 +1157,7 @@ func (c *DoradoClient) GetOnlineFreeWWNs() ([]string, error) {
 		}
 	}
 
-	log.Infof("Get online free wwns sucess.")
+	log.Infof("Get online free wwns success.")
 	return wwns, nil
 }
 
@@ -1176,7 +1176,7 @@ func (c *DoradoClient) GetOnlineFCInitiatorOnArray() ([]string, error) {
 		}
 	}
 
-	log.Infof("Get online fc initiators sucess.")
+	log.Infof("Get online fc initiators success.")
 	return fcInitiators, nil
 }
 
@@ -1216,7 +1216,7 @@ func (c *DoradoClient) GetHostIscsiInitiators(hostId string) ([]string, error) {
 		}
 	}
 
-	log.Infof("Get host iscsi initiators sucess.")
+	log.Infof("Get host iscsi initiators success.")
 	return initiators, nil
 }
 
