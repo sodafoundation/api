@@ -1050,8 +1050,8 @@ func (c *DoradoClient) ListRemoteDevices() (*[]RemoteDevice, error) {
 	dev := &RemoteDevicesResp{}
 	err := c.request("GET", "/remote_device", nil, dev)
 	if err != nil {
-		return nil, err
 		log.Error("List remote devices failed,", err)
+		return nil, err
 	}
 	return &dev.Data, nil
 }
@@ -1334,7 +1334,7 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 		return 0, nil
 	}
 
-	return resp.Data.count, nil
+	return resp.Data.Count, nil
 }
 
 var (
@@ -1364,7 +1364,7 @@ func (c *DoradoClient) getHostGroupNumFromHost(hostId string) (int, error) {
 		return 0, err
 	}
 
-	return resp.Data.count, nil
+	return resp.Data.Count, nil
 }
 
 func (c *DoradoClient) removeFCFromHost(wwn string) error {

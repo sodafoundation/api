@@ -328,10 +328,8 @@ func (*fakeReplicationReceiver) Recv(
 		}
 	case "DELETE":
 		return nil
-	default:
-		return errors.New("inputed method format not supported")
 	}
-	return nil
+	return errors.New("inputed method format not supported")
 }
 
 func NewFakeVersionReceiver() Receiver {

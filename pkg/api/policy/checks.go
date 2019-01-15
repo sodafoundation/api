@@ -223,7 +223,6 @@ func keyWorkFormatter(target map[string]string, match string) (string, error) {
 		for key, val := range target {
 			if s == key {
 				return val, nil
-				break
 			}
 		}
 		return "", fmt.Errorf("target key doesn`t match")

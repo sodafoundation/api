@@ -362,7 +362,7 @@ func (r *ReplicaCommonDriver) Sync(replicaId string, waitComplete bool) error {
 		ReplicaRunningStatusSync,
 		ReplicaRunningStatusInitialSync,
 	}
-	if replicaPair.replicationMode == ReplicaSyncMode && r.op.isRunningStatus(expectStatus, replicaPair) {
+	if replicaPair.ReplicationMode == ReplicaSyncMode && r.op.isRunningStatus(expectStatus, replicaPair) {
 		return nil
 	}
 	if err := r.op.Sync(replicaId); err != nil {
