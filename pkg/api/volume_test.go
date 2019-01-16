@@ -77,10 +77,10 @@ func TestListVolumes(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumesWithFilter", c.NewAdminContext(), m).Return(fakeVolumes, nil)
 	db.C = mockClient
@@ -123,10 +123,10 @@ func TestListVolumesWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -313,10 +313,10 @@ func TestListVolumeSnapshots(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumeSnapshotsWithFilter", c.NewAdminContext(), m).Return(fakeSnapshots, nil)
 	db.C = mockClient
@@ -357,10 +357,10 @@ func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumeSnapshotsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -548,11 +548,11 @@ func TestListVolumeAttachments(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"volumeId": []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
-		"offset":   []string{"0"},
-		"limit":    []string{"1"},
-		"sortDir":  []string{"asc"},
-		"sortKey":  []string{"name"},
+		"volumeId": {"bd5b12a8-a101-11e7-941e-d77981b584d8"},
+		"offset":   {"0"},
+		"limit":    {"1"},
+		"sortDir":  {"asc"},
+		"sortKey":  {"name"},
 	}
 	mockClient.On("ListVolumeAttachmentsWithFilter", c.NewAdminContext(), m).Return(fakeAttachments, nil)
 	db.C = mockClient

@@ -254,7 +254,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 
 	var img *rbd.Image
 	var name string
-	for poolName, _ := range d.conf.Pool {
+	for poolName := range d.conf.Pool {
 		d.ioctx, err = d.conn.OpenIOContext(poolName)
 		if err != nil {
 			log.Error("Open IO context failed:", err)
