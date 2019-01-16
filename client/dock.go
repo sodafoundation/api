@@ -15,25 +15,27 @@
 package client
 
 import (
+	"strings"
+
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
-func NewDockMgr(r Receiver, edp string) *DockMgr {
-	return &DockMgr{
-		Receiver: r,
-		Endpoint: edp,
-	}
+func NewDockMgr(r Receiver) *DockMgr {
+	return &DockMgr{Receiver: r}
 }
 
 type DockMgr struct {
 	Receiver
-	Endpoint string
 }
 
 func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 	var res model.DockSpec
-	if err := d.Receiver.Recv(urls.DockResource, d.Endpoint, "GET", nil, &res); err != nil {
+	url := strings.Join([]string{
+		config.Endpoint,
+		urls.GenerateDockURL(urls.Client, config.AuthOptions.GetTenantId(), dckID)}, "/")
+
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 
@@ -42,17 +44,21 @@ func (d *DockMgr) GetDock(dckID string) (*model.DockSpec, error) {
 
 func (d *DockMgr) ListDocks(args ...interface{}) ([]*model.DockSpec, error) {
 	var res []*model.DockSpec
-	var filter string
+
+	url := strings.Join([]string{
+		config.Endpoint,
+		urls.GenerateDockURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
+
 	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
 	if param != "" {
-		filter += "?" + param
+		url += "?" + param
 	}
 
-	if err := d.Receiver.Recv(urls.DockResource, d.Endpoint, "GET", nil, &res, filter); err != nil {
+	if err := d.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
 	}
 

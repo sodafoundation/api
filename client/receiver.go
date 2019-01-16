@@ -30,6 +30,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
 func NewHttpError(code int, msg string) error {
@@ -59,12 +60,12 @@ type HeaderOption map[string]string
 
 // Receiver
 type Receiver interface {
-	Recv(url string, endPoint string, method string, input interface{}, output interface{}, in ...string) error
+	Recv(url string, method string, input interface{}, output interface{}) error
 }
 
 // NewReceiver
-func NewReceiver(auth *NoAuthOptions) Receiver {
-	return &receiver{Auth: auth}
+func NewReceiver() Receiver {
+	return &receiver{}
 }
 
 func request(url string, method string, headers HeaderOption, input interface{}, output interface{}) error {
@@ -113,82 +114,74 @@ func request(url string, method string, headers HeaderOption, input interface{},
 	return nil
 }
 
-type receiver struct {
-	Auth *NoAuthOptions
-}
+type receiver struct{}
 
-func (r *receiver) Recv(url string, endPoint string, method string, input interface{}, output interface{}, in ...string) error {
-	url := strings.Join([]string{
-		endPoint,
-		urls.GenerateURL(resource, urls.Client, k.Auth.GetTenantId(), in...)}, "/")
+func (*receiver) Recv(url string, method string, input interface{}, output interface{}) error {
 	return request(url, method, nil, input, output)
 }
 
-func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
-	k := &KeystoneReciver{Auth: auth}
-	k.GetToken()
-	return k
+func NewKeystoneReciver() Receiver {
+	return &KeystoneReciver{}
 }
 
 type KeystoneReciver struct {
 	Auth *KeystoneAuthOptions
 }
 
-func (k *KeystoneReciver) GetToken() error {
+func GetToken(k *KeystoneAuthOptions) (*KeystoneAuthOptions, error) {
 	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: k.Auth.IdentityEndpoint,
-		Username:         k.Auth.Username,
-		UserID:           k.Auth.UserID,
-		Password:         k.Auth.Password,
-		DomainID:         k.Auth.DomainID,
-		DomainName:       k.Auth.DomainName,
-		TenantID:         k.Auth.TenantID,
-		TenantName:       k.Auth.TenantName,
-		AllowReauth:      k.Auth.AllowReauth,
+		IdentityEndpoint: k.IdentityEndpoint,
+		Username:         k.Username,
+		UserID:           k.UserID,
+		Password:         k.Password,
+		DomainID:         k.DomainID,
+		DomainName:       k.DomainName,
+		TenantID:         k.TenantID,
+		TenantName:       k.TenantName,
+		AllowReauth:      k.AllowReauth,
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		return fmt.Errorf("When get auth client: %v", err)
+		return nil, fmt.Errorf("When get auth client: %v", err)
 	}
 
 	// Only support keystone v3
 	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		return fmt.Errorf("When get identity session: %v", err)
+		return nil, fmt.Errorf("When get identity session: %v", err)
 	}
 	r := tokens.Create(identity, &opts)
 	token, err := r.ExtractToken()
 	if err != nil {
-		return fmt.Errorf("When get extract token session: %v", err)
+		return nil, fmt.Errorf("When get extract token session: %v", err)
 	}
 	project, err := r.ExtractProject()
 	if err != nil {
-		return fmt.Errorf("When get extract project session: %v", err)
+		return nil, fmt.Errorf("When get extract project session: %v", err)
 	}
-	k.Auth.TenantID = project.ID
-	k.Auth.TokenID = token.ID
-	return nil
+	k.SetTenantId(project.ID)
+	k.SetTokenId(token.ID)
+	return k, nil
 }
 
-func (k *KeystoneReciver) Recv(resource string, endPoint string, method string, body interface{}, output interface{}, in ...string) error {
-
-	desc := fmt.Sprintf("%s %s", method, resource)
+func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
+	desc := fmt.Sprintf("%s %s", method, url)
 	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
 		if retryIdx > 0 {
 			err, ok := lastErr.(*HttpError)
 			if ok && err.Code == http.StatusUnauthorized {
-				k.GetToken()
+				oldTenantId := config.AuthOptions.GetTenantId()
+				config.AuthOptions, _ = GetToken(config.AuthOptions.(*KeystoneAuthOptions))
+				newTenantId := config.AuthOptions.GetTenantId()
+				url = urls.ChangeURL(url, oldTenantId, newTenantId)
 			} else {
 				return lastErr
 			}
 		}
-		url := strings.Join([]string{
-			endPoint,
-			urls.GenerateURL(resource, urls.Client, k.Auth.GetTenantId(), in...)}, "/")
 
 		headers := HeaderOption{}
-		headers[constants.AuthTokenHeader] = k.Auth.TokenID
+		headers[constants.AuthTokenHeader] = config.AuthOptions.GetTokenId()
 		return request(url, method, headers, body, output)
 	})
 }

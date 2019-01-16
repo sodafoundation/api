@@ -21,57 +21,48 @@ import (
 )
 
 const (
-	Etcd                           = iota // Etcd == 0
-	Client                                // Client == 1
-	DockResource                   = "docks"
-	PoolResource                   = "pools"
-	ProfileResource                = "profiles"
-	VolumeResource                 = "block/volumes"
-	NewVolumeResource              = "volumes"
-	AttachmentResource             = "block/attachments"
-	SnapshotResource               = "block/snapshots"
-	ReplicationReplicationResource = "block/replications"
-	VolumeGroupResource            = "block/volumeGroups"
+	Etcd   = iota // Etcd == 0
+	Client        // Client == 1
 )
 
-//func GenerateDockURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("docks", urlType, tenantId, in...)
-//}
+func GenerateDockURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("docks", urlType, tenantId, in...)
+}
 
-//func GeneratePoolURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("pools", urlType, tenantId, in...)
-//}
+func GeneratePoolURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("pools", urlType, tenantId, in...)
+}
 
-//func GenerateProfileURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("profiles", urlType, tenantId, in...)
-//}
+func GenerateProfileURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("profiles", urlType, tenantId, in...)
+}
 
-//func GenerateVolumeURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("block/volumes", urlType, tenantId, in...)
-//}
+func GenerateVolumeURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/volumes", urlType, tenantId, in...)
+}
 
-//// GenerateNewVolumeURL ...
-//func GenerateNewVolumeURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("volumes", urlType, tenantId, in...)
-//}
+// GenerateNewVolumeURL ...
+func GenerateNewVolumeURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("volumes", urlType, tenantId, in...)
+}
 
-//func GenerateAttachmentURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("block/attachments", urlType, tenantId, in...)
-//}
+func GenerateAttachmentURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/attachments", urlType, tenantId, in...)
+}
 
-//func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("block/snapshots", urlType, tenantId, in...)
-//}
+func GenerateSnapshotURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/snapshots", urlType, tenantId, in...)
+}
 
-//func GenerateReplicationURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("block/replications", urlType, tenantId, in...)
-//}
+func GenerateReplicationURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/replications", urlType, tenantId, in...)
+}
 
-//func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
-//	return GenerateURL("block/volumeGroups", urlType, tenantId, in...)
-//}
+func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("block/volumeGroups", urlType, tenantId, in...)
+}
 
-func GenerateURL(resource string, urlType int, tenantId string, in ...string) string {
+func generateURL(resource string, urlType int, tenantId string, in ...string) string {
 	// If project id is not specified, ignore it.
 	if tenantId == "" {
 		value := []string{CurrentVersion(), resource}
@@ -93,4 +84,16 @@ func GenerateURL(resource string, urlType int, tenantId string, in ...string) st
 
 func CurrentVersion() string {
 	return constants.APIVersion
+}
+
+func ChangeURL(url, oldTenantId, newTenantId string) string {
+	u := strings.Split(url, "/")
+	for k, v := range u {
+		if v == oldTenantId {
+			u[k] = newTenantId
+			break
+		}
+	}
+
+	return strings.Join(u, "/")
 }

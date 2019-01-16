@@ -27,6 +27,7 @@ import (
 
 var (
 	fakeClient *Client
+	fakeConfig *Config
 	once       sync.Once
 	TestEp     = "TestEndPoint"
 )
@@ -34,30 +35,31 @@ var (
 func NewFakeClient(config *Config) *Client {
 	once.Do(func() {
 		os.Setenv("OPENSDS_ENDPOINT", config.Endpoint)
+		fakeConfig = &Config{
+			Endpoint: config.Endpoint,
+			AuthOptions: &KeystoneAuthOptions{
+				TenantID: "0105e3e4d44d40b59472688a3f28d469",
+				TokenID:  "MIIDcQYJKoZIhvcNAQcCoIIDYjCCA14CAQ",
+			},
+		}
 		fakeClient = &Client{
 			ProfileMgr: &ProfileMgr{
 				Receiver: NewFakeProfileReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			DockMgr: &DockMgr{
 				Receiver: NewFakeDockReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			PoolMgr: &PoolMgr{
 				Receiver: NewFakePoolReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			VolumeMgr: &VolumeMgr{
 				Receiver: NewFakeVolumeReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			ReplicationMgr: &ReplicationMgr{
 				Receiver: NewFakeReplicationReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			VersionMgr: &VersionMgr{
 				Receiver: NewFakeVersionReceiver(),
-				Endpoint: config.Endpoint,
 			},
 		}
 	})

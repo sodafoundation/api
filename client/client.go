@@ -26,12 +26,15 @@ const (
 	OpensdsEndpoint = "OPENSDS_ENDPOINT"
 )
 
-//// Client is a struct for exposing some operations of opensds resources.
-//type Client struct {
-//	cfg *Config
-//}
-
 // Config is a struct that defines some options for calling the Client.
+type Config struct {
+	Endpoint    string
+	AuthOptions AuthOptions
+}
+
+var config *Config
+
+// Client is a struct for exposing some operations of opensds resources.
 type Client struct {
 	*ProfileMgr
 	*DockMgr
@@ -42,33 +45,35 @@ type Client struct {
 }
 
 // NewClient method creates a new Client.
-func NewClient(endPoint string, authOptions AuthOptions) *Client {
+func NewClient(c *Config) *Client {
 	// If endpoint field not specified,use the default value localhost.
-	if endPoint == "" {
-		endPoint = constants.DefaultOpensdsEndpoint
-		log.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)", endPoint)
+	if c.Endpoint == "" {
+		c.Endpoint = constants.DefaultOpensdsEndpoint
+		log.Printf("Warnning: OpenSDS endpoint is not specified using the default value(%s)", c.Endpoint)
 	}
 
 	var receiver Receiver
-	switch authOptions.(type) {
+	switch c.AuthOptions.(type) {
 	case *NoAuthOptions:
-		receiver = NewReceiver(authOptions.(*NoAuthOptions))
+		receiver = NewReceiver()
 	case *KeystoneAuthOptions:
-		receiver = NewKeystoneReciver(authOptions.(*KeystoneAuthOptions))
+		receiver = NewKeystoneReciver()
+		c.AuthOptions, _ = GetToken(c.AuthOptions.(*KeystoneAuthOptions))
 	default:
 		log.Printf("Warnning: Not support auth options, use default")
-
-		authOptions = NewNoauthOptions(constants.DefaultTenantId)
-		receiver = NewReceiver(authOptions.(*NoAuthOptions))
+		c.AuthOptions = NewNoauthOptions(constants.DefaultTenantId)
+		receiver = NewReceiver()
 	}
 
+	config = c
+
 	return &Client{
-		ProfileMgr:     NewProfileMgr(receiver, endPoint),
-		DockMgr:        NewDockMgr(receiver, endPoint),
-		PoolMgr:        NewPoolMgr(receiver, endPoint),
-		VolumeMgr:      NewVolumeMgr(receiver, endPoint),
-		VersionMgr:     NewVersionMgr(receiver, endPoint),
-		ReplicationMgr: NewReplicationMgr(receiver, endPoint),
+		ProfileMgr:     NewProfileMgr(receiver),
+		DockMgr:        NewDockMgr(receiver),
+		PoolMgr:        NewPoolMgr(receiver),
+		VolumeMgr:      NewVolumeMgr(receiver),
+		VersionMgr:     NewVersionMgr(receiver),
+		ReplicationMgr: NewReplicationMgr(receiver),
 	}
 }
 
