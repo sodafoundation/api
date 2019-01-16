@@ -58,9 +58,9 @@ func RegisterAsynchronizedWorkflow(
 			if err := ise.Init(in); err != nil {
 				log.Errorf("When register async policy %s: %v\n", key, err)
 				return asynWorkflow, err
-			} else {
-				asynWorkflow[key] = ise
 			}
+			asynWorkflow[key] = ise
+
 		case "deleteSnapshotPolicy":
 			ise := &DeleteSnapshotExecutor{
 				Request:  req.(*pb.DeleteVolumeSnapshotOpts),
@@ -70,9 +70,8 @@ func RegisterAsynchronizedWorkflow(
 			if err := ise.Init(in); err != nil {
 				log.Errorf("When register async policy %s: %v\n", key, err)
 				return asynWorkflow, err
-			} else {
-				asynWorkflow[key] = ise
 			}
+			asynWorkflow[key] = ise
 		}
 	}
 

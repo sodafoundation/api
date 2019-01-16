@@ -537,7 +537,8 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 				return &res, err
 			}
 		}
-		err = errors.New("Error occured when updating group" + opt.GetId() + "," + err.Error())
+
+		err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
 		res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		return &res, err
 	}

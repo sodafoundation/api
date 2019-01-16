@@ -284,7 +284,7 @@ func (c *Client) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
-var dock_sortKey string
+var dockSortKey string
 
 type DockSlice []*model.DockSpec
 
@@ -293,7 +293,7 @@ func (dock DockSlice) Len() int { return len(dock) }
 func (dock DockSlice) Swap(i, j int) { dock[i], dock[j] = dock[j], dock[i] }
 
 func (dock DockSlice) Less(i, j int) bool {
-	switch dock_sortKey {
+	switch dockSortKey {
 
 	case "ID":
 		return dock[i].Id < dock[j].Id
@@ -362,7 +362,7 @@ func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*
 }
 
 func (c *Client) SortDocks(dcks []*model.DockSpec, p *Parameter) []*model.DockSpec {
-	dock_sortKey = p.sortKey
+	dockSortKey = p.sortKey
 	if strings.EqualFold(p.sortDir, "asc") {
 		sort.Sort(DockSlice(dcks))
 	} else {
@@ -455,7 +455,7 @@ func (c *Client) CreatePool(ctx *c.Context, pol *model.StoragePoolSpec) (*model.
 	return pol, nil
 }
 
-var pool_sortKey string
+var poolSortKey string
 
 type StoragePoolSlice []*model.StoragePoolSpec
 
@@ -464,7 +464,7 @@ func (pool StoragePoolSlice) Len() int { return len(pool) }
 func (pool StoragePoolSlice) Swap(i, j int) { pool[i], pool[j] = pool[j], pool[i] }
 
 func (pool StoragePoolSlice) Less(i, j int) bool {
-	switch pool_sortKey {
+	switch poolSortKey {
 
 	case "ID":
 		return pool[i].Id < pool[j].Id
@@ -538,7 +538,7 @@ func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSp
 
 func (c *Client) SortPools(pools []*model.StoragePoolSpec, p *Parameter) []*model.StoragePoolSpec {
 
-	pool_sortKey = p.sortKey
+	poolSortKey = p.sortKey
 
 	if strings.EqualFold(p.sortDir, "asc") {
 		sort.Sort(StoragePoolSlice(pools))
@@ -765,7 +765,7 @@ func (c *Client) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	return prfs, nil
 }
 
-var profile_sortKey string
+var profileSortKey string
 
 type ProfileSlice []*model.ProfileSpec
 
@@ -774,7 +774,7 @@ func (profile ProfileSlice) Len() int { return len(profile) }
 func (profile ProfileSlice) Swap(i, j int) { profile[i], profile[j] = profile[j], profile[i] }
 
 func (profile ProfileSlice) Less(i, j int) bool {
-	switch profile_sortKey {
+	switch profileSortKey {
 
 	case "ID":
 		return profile[i].Id < profile[j].Id
@@ -805,7 +805,7 @@ func (c *Client) FindProfileValue(k string, p *model.ProfileSpec) string {
 }
 
 func (c *Client) SortProfiles(profiles []*model.ProfileSpec, p *Parameter) []*model.ProfileSpec {
-	profile_sortKey = p.sortKey
+	profileSortKey = p.sortKey
 
 	if strings.EqualFold(p.sortDir, "asc") {
 		sort.Sort(ProfileSlice(profiles))
@@ -1378,7 +1378,7 @@ func (c *Client) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*mode
 
 }
 
-var volumeAttachment_sortKey string
+var volumeAttachmentSortKey string
 
 type VolumeAttachmentSlice []*model.VolumeAttachmentSpec
 
@@ -1390,7 +1390,7 @@ func (volumeAttachment VolumeAttachmentSlice) Swap(i, j int) {
 }
 
 func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
-	switch volumeAttachment_sortKey {
+	switch volumeAttachmentSortKey {
 	case "ID":
 		return volumeAttachment[i].Id < volumeAttachment[j].Id
 	case "VOLUMEID":
@@ -1455,7 +1455,7 @@ func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*m
 }
 
 func (c *Client) SortVolumeAttachments(attachments []*model.VolumeAttachmentSpec, p *Parameter) []*model.VolumeAttachmentSpec {
-	volumeAttachment_sortKey = p.sortKey
+	volumeAttachmentSortKey = p.sortKey
 
 	if strings.EqualFold(p.sortDir, "asc") {
 		sort.Sort(VolumeAttachmentSlice(attachments))
@@ -1663,7 +1663,7 @@ func (c *Client) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpe
 	return vss, nil
 }
 
-var volumeSnapshot_sortKey string
+var volumeSnapshotSortKey string
 
 type VolumeSnapshotSlice []*model.VolumeSnapshotSpec
 
@@ -1675,7 +1675,7 @@ func (volumeSnapshot VolumeSnapshotSlice) Swap(i, j int) {
 }
 
 func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
-	switch volumeSnapshot_sortKey {
+	switch volumeSnapshotSortKey {
 	case "ID":
 		return volumeSnapshot[i].Id < volumeSnapshot[j].Id
 	case "VOLUMEID":
@@ -1747,7 +1747,7 @@ func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.Volum
 }
 
 func (c *Client) SortSnapshots(snapshots []*model.VolumeSnapshotSpec, p *Parameter) []*model.VolumeSnapshotSpec {
-	volumeSnapshot_sortKey = p.sortKey
+	volumeSnapshotSortKey = p.sortKey
 
 	if strings.EqualFold(p.sortDir, "asc") {
 		sort.Sort(VolumeSnapshotSlice(snapshots))

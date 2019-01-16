@@ -40,19 +40,19 @@ type VolumeGroupPortal struct {
 	CtrClient client.Client
 }
 
-func (this *VolumeGroupPortal) CreateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:create") {
+func (v *VolumeGroupPortal) CreateVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:create") {
 		return
 	}
-	ctx := c.GetContext(this.Ctx)
+	ctx := c.GetContext(v.Ctx)
 
 	var volumeGroup = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
 	// Unmarshal the request body
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&volumeGroup); err != nil {
-		this.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
+	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volumeGroup); err != nil {
+		v.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
 		return
 	}
 	// NOTE:It will create a volume group entry into the database and initialize its status
@@ -60,7 +60,7 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	// and will return result immediately.
 	result, err := CreateVolumeGroupDBEntry(ctx, volumeGroup)
 	if err != nil {
-		this.ErrorHandle("Create volume group failed",
+		v.ErrorHandle("Create volume group failed",
 			model.ErrorInternalServer, err)
 		return
 	}
@@ -68,27 +68,27 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group created result failed",
+		v.ErrorHandle("Marshal volume group created result failed",
 			model.ErrorInternalServer, err)
 		return
 	}
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 
 	// NOTE:The real volume group creation process.
 	// Volume group creation request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer this.CtrClient.Close()
+	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
 		Context: ctx.ToJson(),
 	}
-	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = v.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
@@ -96,52 +96,51 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	return
 }
 
-func (this *VolumeGroupPortal) UpdateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:update") {
+func (v *VolumeGroupPortal) UpdateVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:update") {
 		return
 	}
-	ctx := c.GetContext(this.Ctx)
+	ctx := c.GetContext(v.Ctx)
 	var vg = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
-	id := this.Ctx.Input.Param(":groupId")
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&vg); err != nil {
-		this.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
+	id := v.Ctx.Input.Param(":groupId")
+	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&vg); err != nil {
+		v.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	vg.Id = id
-
 	result, err := UpdateVolumeGroupDBEntry(ctx, vg)
 	if err != nil {
-		this.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
 		return
 	}
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group updated result failed",
+		v.ErrorHandle("Marshal volume group updated result failed",
 			model.ErrorInternalServer, err)
 		return
 	}
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 
 	// NOTE:The real volume group creation process.
 	// Volume group creation request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer this.CtrClient.Close()
+	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Message: string(body),
 		Context: ctx.ToJson(),
 	}
-	if _, err = this.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = v.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Create volume group failed in controller service:", err)
 		return
 	}
@@ -149,43 +148,43 @@ func (this *VolumeGroupPortal) UpdateVolumeGroup() {
 	return
 }
 
-func (this *VolumeGroupPortal) DeleteVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:delete") {
+func (v *VolumeGroupPortal) DeleteVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:delete") {
 		return
 	}
-	ctx := c.GetContext(this.Ctx)
+	ctx := c.GetContext(v.Ctx)
 
-	id := this.Ctx.Input.Param(":groupId")
+	id := v.Ctx.Input.Param(":groupId")
 	vg, err := db.C.GetVolumeGroup(ctx, id)
 	if err != nil {
-		this.ErrorHandle("Delete volume group failed",
+		v.ErrorHandle("Delete volume group failed",
 			model.ErrorBadRequest, err)
 		return
 	}
 
-	if err = DeleteVolumeGroupDBEntry(c.GetContext(this.Ctx), id); err != nil {
-		this.ErrorHandle("Delete volume group failed",
+	if err = DeleteVolumeGroupDBEntry(c.GetContext(v.Ctx), id); err != nil {
+		v.ErrorHandle("Delete volume group failed",
 			model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusAccepted, nil)
+	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume group deletion process.
 	// Volume group deletion request is sent to the Dock. Dock will remove
 	// volume group record after volume group deletion operation is completed.
-	if err = this.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("When connecting controller client:", err)
 		return
 	}
-	defer this.CtrClient.Close()
+	defer v.CtrClient.Close()
 
 	body, _ := json.Marshal(vg)
 	opt := &pb.DeleteVolumeGroupOpts{
 		Message: string(body),
 		Context: ctx.ToJson(),
 	}
-	if _, err = this.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
+	if _, err = v.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
 		log.Error("Delete volume group failed in controller service:", err)
 		return
 	}
@@ -193,53 +192,53 @@ func (this *VolumeGroupPortal) DeleteVolumeGroup() {
 	return
 }
 
-func (this *VolumeGroupPortal) GetVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:get") {
+func (v *VolumeGroupPortal) GetVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:get") {
 		return
 	}
 
 	// Call db api module to handle get volume request.
-	result, err := db.C.GetVolumeGroup(c.GetContext(this.Ctx), this.Ctx.Input.Param(":groupId"))
+	result, err := db.C.GetVolumeGroup(c.GetContext(v.Ctx), v.Ctx.Input.Param(":groupId"))
 	if err != nil {
-		this.ErrorHandle("Get volume group failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("Get volume group failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
 
-func (this *VolumeGroupPortal) ListVolumeGroups() {
-	if !policy.Authorize(this.Ctx, "volume_group:get") {
+func (v *VolumeGroupPortal) ListVolumeGroups() {
+	if !policy.Authorize(v.Ctx, "volume_group:get") {
 		return
 	}
 
-	m, err := this.GetParameters()
+	m, err := v.GetParameters()
 	if err != nil {
-		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
 		return
 	}
 
-	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(this.Ctx), m)
+	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }

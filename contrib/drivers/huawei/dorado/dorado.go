@@ -87,14 +87,13 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 		if nil == getVolumeErr {
 			if getVolumeResult.HealthStatus == StatusHealth && getVolumeResult.RunningStatus == StatusVolumeReady {
 				return true, nil
-			} else {
-				log.V(5).Infof("Current lun HealthStatus : %s , RunningStatus : %s",
-					getVolumeResult.HealthStatus, getVolumeResult.RunningStatus)
-				return false, nil
 			}
-		} else {
-			return false, getVolumeErr
+			log.V(5).Infof("Current lun HealthStatus : %s , RunningStatus : %s",
+				getVolumeResult.HealthStatus, getVolumeResult.RunningStatus)
+			return false, nil
 		}
+		return false, getVolumeErr
+
 	}, LunReadyWaitInterval, LunReadyWaitTimeout)
 
 	if err != nil {
