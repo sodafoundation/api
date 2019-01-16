@@ -22,11 +22,10 @@ import (
 )
 
 // NewPoolMgr
-func NewPoolMgr(r Receiver, edp string, tenantId string) *PoolMgr {
+func NewPoolMgr(r Receiver, edp string) *PoolMgr {
 	return &PoolMgr{
 		Receiver: r,
 		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
@@ -34,17 +33,12 @@ func NewPoolMgr(r Receiver, edp string, tenantId string) *PoolMgr {
 type PoolMgr struct {
 	Receiver
 	Endpoint string
-	TenantId string
 }
 
 // GetPool
 func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	var res model.StoragePoolSpec
-	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GeneratePoolURL(urls.Client, p.TenantId, polID)}, "/")
-
-	if err := p.Recv(url, "GET", nil, &res); err != nil {
+	if err := p.Receiver.Recv(urls.PoolResource, p.Endpoint, "GET", nil, &res, polID); err != nil {
 		return nil, err
 	}
 
@@ -54,21 +48,17 @@ func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 // ListPools
 func (p *PoolMgr) ListPools(args ...interface{}) ([]*model.StoragePoolSpec, error) {
 	var res []*model.StoragePoolSpec
-
-	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GeneratePoolURL(urls.Client, p.TenantId)}, "/")
-
+	var filter string
 	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
 	}
 
 	if param != "" {
-		url += "?" + param
+		filter += "?" + param
 	}
 
-	if err := p.Recv(url, "GET", nil, &res); err != nil {
+	if err := p.Receiver.Recv(urls.PoolResource, p.Endpoint, "GET", nil, &res, filter); err != nil {
 		return nil, err
 	}
 

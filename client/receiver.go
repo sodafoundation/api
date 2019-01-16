@@ -59,12 +59,12 @@ type HeaderOption map[string]string
 
 // Receiver
 type Receiver interface {
-	Recv(url string, method string, input interface{}, output interface{}) error
+	Recv(url string, endPoint string, method string, input interface{}, output interface{}, in ...string) error
 }
 
 // NewReceiver
-func NewReceiver() Receiver {
-	return &receiver{}
+func NewReceiver(auth *NoAuthOptions) Receiver {
+	return &receiver{Auth: auth}
 }
 
 func request(url string, method string, headers HeaderOption, input interface{}, output interface{}) error {
@@ -113,9 +113,14 @@ func request(url string, method string, headers HeaderOption, input interface{},
 	return nil
 }
 
-type receiver struct{}
+type receiver struct {
+	Auth *NoAuthOptions
+}
 
-func (*receiver) Recv(url string, method string, input interface{}, output interface{}) error {
+func (r *receiver) Recv(url string, endPoint string, method string, input interface{}, output interface{}, in ...string) error {
+	url := strings.Join([]string{
+		endPoint,
+		urls.GenerateURL(resource, urls.Client, k.Auth.GetTenantId(), in...)}, "/")
 	return request(url, method, nil, input, output)
 }
 
@@ -166,8 +171,9 @@ func (k *KeystoneReciver) GetToken() error {
 	return nil
 }
 
-func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
-	desc := fmt.Sprintf("%s %s", method, url)
+func (k *KeystoneReciver) Recv(resource string, endPoint string, method string, body interface{}, output interface{}, in ...string) error {
+
+	desc := fmt.Sprintf("%s %s", method, resource)
 	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
 		if retryIdx > 0 {
 			err, ok := lastErr.(*HttpError)
@@ -177,6 +183,9 @@ func (k *KeystoneReciver) Recv(url string, method string, body interface{}, outp
 				return lastErr
 			}
 		}
+		url := strings.Join([]string{
+			endPoint,
+			urls.GenerateURL(resource, urls.Client, k.Auth.GetTenantId(), in...)}, "/")
 
 		headers := HeaderOption{}
 		headers[constants.AuthTokenHeader] = k.Auth.TokenID

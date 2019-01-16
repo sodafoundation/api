@@ -26,7 +26,7 @@ import (
 type VersionBuilder *model.VersionSpec
 
 // NewVersionMgr ...
-func NewVersionMgr(r Receiver, edp string, tenantId string) *VersionMgr {
+func NewVersionMgr(r Receiver, edp string) *VersionMgr {
 	return &VersionMgr{
 		Receiver: r,
 		Endpoint: edp,
@@ -37,7 +37,6 @@ func NewVersionMgr(r Receiver, edp string, tenantId string) *VersionMgr {
 type VersionMgr struct {
 	Receiver
 	Endpoint string
-	tenantId string
 }
 
 // GetVersion ...

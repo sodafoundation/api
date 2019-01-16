@@ -33,11 +33,10 @@ type ProfileBuilder *model.ProfileSpec
 type CustomBuilder *model.CustomPropertiesSpec
 
 // NewProfileMgr
-func NewProfileMgr(r Receiver, edp string, tenantId string) *ProfileMgr {
+func NewProfileMgr(r Receiver, edp string) *ProfileMgr {
 	return &ProfileMgr{
 		Receiver: r,
 		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
@@ -45,17 +44,12 @@ func NewProfileMgr(r Receiver, edp string, tenantId string) *ProfileMgr {
 type ProfileMgr struct {
 	Receiver
 	Endpoint string
-	TenantId string
 }
 
 // CreateProfile
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
-
-	if err := p.Recv(url, "POST", body, &res); err != nil {
+	if err := p.Receiver.Recv(urls.ProfileResource, p.Endpoint, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -65,11 +59,8 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 // GetProfile
 func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
 
-	if err := p.Recv(url, "GET", nil, &res); err != nil {
+	if err := p.Receiver.Recv(urls.ProfileResource, p.Endpoint, "GET", nil, &res, "", prfID); err != nil {
 		return nil, err
 	}
 
@@ -79,11 +70,8 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 // UpdateProfile ...
 func (p *ProfileMgr) UpdateProfile(prfID string, body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
-	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
 
-	if err := p.Recv(url, "PUT", body, &res); err != nil {
+	if err := p.Receiver.Recv(urls.ProfileResource, p.Endpoint, "PUT", body, &res, "", prfID); err != nil {
 		return nil, err
 	}
 

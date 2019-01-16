@@ -25,11 +25,10 @@ type ReplicationBuilder *model.ReplicationSpec
 type FailoverReplicationBuilder *model.FailoverReplicationSpec
 
 // NewReplicationMgr
-func NewReplicationMgr(r Receiver, edp string, tenantId string) *ReplicationMgr {
+func NewReplicationMgr(r Receiver, edp string) *ReplicationMgr {
 	return &ReplicationMgr{
 		Receiver: r,
 		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
@@ -37,7 +36,6 @@ func NewReplicationMgr(r Receiver, edp string, tenantId string) *ReplicationMgr 
 type ReplicationMgr struct {
 	Receiver
 	Endpoint string
-	TenantId string
 }
 
 // CreateReplication

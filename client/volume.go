@@ -47,11 +47,10 @@ type VolumeSnapshotBuilder *model.VolumeSnapshotSpec
 type VolumeGroupBuilder *model.VolumeGroupSpec
 
 // NewVolumeMgr
-func NewVolumeMgr(r Receiver, edp string, tenantId string) *VolumeMgr {
+func NewVolumeMgr(r Receiver, edp string) *VolumeMgr {
 	return &VolumeMgr{
 		Receiver: r,
 		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
@@ -59,17 +58,12 @@ func NewVolumeMgr(r Receiver, edp string, tenantId string) *VolumeMgr {
 type VolumeMgr struct {
 	Receiver
 	Endpoint string
-	TenantId string
 }
 
 // CreateVolume
 func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
-
-	if err := v.Recv(url, "POST", body, &res); err != nil {
+	if err := v.Receiver.Recv(url.VolumeResource, v.Endpoint, "POST", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -79,11 +73,7 @@ func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) 
 // GetVolume
 func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
-
-	if err := v.Recv(url, "GET", nil, &res); err != nil {
+	if err := v.Receiver.Recv(url.VolumeResource, v.EndPoint, "GET", body, &res, volID); err != nil {
 		return nil, err
 	}
 
@@ -92,10 +82,11 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 
 // ListVolumes
 func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error) {
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
+	//	url := strings.Join([]string{
+	//		v.Endpoint,
+	//		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
 
+	//	v.Receiver.Recv(url.VolumeResource, c.EndPoint, "POST", body, &res, volID)
 	param, err := processListParam(args)
 	if err != nil {
 		return nil, err
@@ -106,7 +97,8 @@ func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error
 	}
 
 	var res []*model.VolumeSpec
-	if err := v.Recv(url, "GET", nil, &res); err != nil {
+
+	if err := v.Receiver.Recv(url.VolumeResource, v.EndPoint, "POST", body, &res, "?"+param); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -114,21 +106,14 @@ func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error
 
 // DeleteVolume
 func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
-
-	return v.Recv(url, "DELETE", body, nil)
+	return v.Receiver.Recv(url.VolumeResource, v.EndPoint, "DELETE", body, nil)
 }
 
 // UpdateVolume
 func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
 
-	if err := v.Recv(url, "PUT", body, &res); err != nil {
+	if err := v.Receiver.Recv(url.VolumeResource, v.EndPoint, "PUT", body, &res); err != nil {
 		return nil, err
 	}
 
@@ -138,11 +123,8 @@ func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.Volum
 // ExtendVolume ...
 func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
-	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID, "resize")}, "/")
 
-	if err := v.Recv(url, "POST", body, &res); err != nil {
+	if err := v.Receiver.Recv(url.VolumeResource, v.EndPoint, "POST", body, &res, volID, "resize"); err != nil {
 		return nil, err
 	}
 
