@@ -27,21 +27,14 @@ import (
 
 var (
 	fakeClient *Client
-	fakeConfig *Config
 	once       sync.Once
 	TestEp     = "TestEndPoint"
 )
 
-func NewFakeClient(config *Config) *Client {
+func NewFakeClient(c *Config) *Client {
 	once.Do(func() {
-		os.Setenv("OPENSDS_ENDPOINT", config.Endpoint)
-		fakeConfig = &Config{
-			Endpoint: config.Endpoint,
-			AuthOptions: &KeystoneAuthOptions{
-				TenantID: "0105e3e4d44d40b59472688a3f28d469",
-				TokenID:  "MIIDcQYJKoZIhvcNAQcCoIIDYjCCA14CAQ",
-			},
-		}
+		os.Setenv("OPENSDS_ENDPOINT", c.Endpoint)
+		config = c
 		fakeClient = &Client{
 			ProfileMgr: &ProfileMgr{
 				Receiver: NewFakeProfileReceiver(),

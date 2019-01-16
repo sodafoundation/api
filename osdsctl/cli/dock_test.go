@@ -23,7 +23,14 @@ import (
 )
 
 func init() {
-	client = c.NewFakeClient(&c.Config{Endpoint: c.TestEp})
+	client = c.NewFakeClient(
+		&c.Config{
+			Endpoint: c.TestEp,
+			AuthOptions: &c.KeystoneAuthOptions{
+				TenantID: "0105e3e4d44d40b59472688a3f28d469",
+				TokenID:  "MIIDcQYJKoZIhvcNAQcCoIIDYjCCA14CAQ",
+			},
+		})
 }
 
 func TestDockAction(t *testing.T) {

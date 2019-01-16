@@ -31,6 +31,7 @@ import (
 
 var (
 	client      *c.Client
+	config      *c.Config
 	rootCommand = &cobra.Command{
 		Use:   "osdsctl",
 		Short: "Administer the opensds storage cluster",
