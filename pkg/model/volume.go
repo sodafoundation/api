@@ -69,10 +69,10 @@ type VolumeSpec struct {
 	Metadata map[string]string `json:"metadata,omitempty"`
 
 	// The uuid of the snapshot which the volume is created
-	SnapshotId string `json:"snapshotId, omitempty"`
+	SnapshotId string `json:"snapshotId,omitempty"`
 
 	// Download Snapshot From Cloud
-	SnapshotFromCloud bool `json:"snapshotFromCloud, omitempty"`
+	SnapshotFromCloud bool `json:"snapshotFromCloud,omitempty"`
 
 	// The uuid of the replication which the volume belongs to.
 	ReplicationId string `json:"replicationId,omitempty"`
@@ -115,7 +115,7 @@ type VolumeAttachmentSpec struct {
 	// See details in `ConnectionInfo`
 	ConnectionInfo `json:"connectionInfo,omitempty"`
 
-	// The protocl
+	// The protocol
 	AccessProtocol string `json:"accessProtocol,omitempty"`
 }
 

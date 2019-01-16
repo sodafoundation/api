@@ -38,8 +38,8 @@ var whiteList = []string{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", 
 	"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
 	"ReplicationMode", "ReplicationPeriod", "ProfileId", "Metadata"}
 
-func (this *ReplicationPortal) CreateReplication() {
-	if !policy.Authorize(this.Ctx, "replication:create") {
+func (r *ReplicationPortal) CreateReplication() {
+	if !policy.Authorize(r.Ctx, "replication:create") {
 		return
 	}
 
@@ -48,23 +48,23 @@ func (this *ReplicationPortal) CreateReplication() {
 	}
 
 	// Unmarshal the request body
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(replication); err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(replication); err != nil {
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
 	// Body check
-	ctx := c.GetContext(this.Ctx)
+	ctx := c.GetContext(r.Ctx)
 	_, err := db.C.GetVolume(ctx, replication.PrimaryVolumeId)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"can't find the specified primary volume(%s)", replication.PrimaryVolumeId)
 		return
 	}
 	_, err = db.C.GetVolume(ctx, replication.SecondaryVolumeId)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"can't find the specified secondary volume(%s)", replication.PrimaryVolumeId)
 		return
 	}
@@ -73,13 +73,13 @@ func (this *ReplicationPortal) CreateReplication() {
 	v, err := db.C.GetReplicationByVolumeId(ctx, replication.PrimaryVolumeId)
 	if err != nil {
 		if _, ok := err.(*model.NotFoundError); !ok {
-			model.HttpError(this.Ctx, http.StatusBadRequest,
+			model.HttpError(r.Ctx, http.StatusBadRequest,
 				"get replication by volume id %s failed", replication.PrimaryVolumeId)
 			return
 		}
 	}
 	if v != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"specified primary volume(%s) has already been used in replication(%s) ",
 			replication.PrimaryVolumeId, v.Id)
 		return
@@ -89,13 +89,13 @@ func (this *ReplicationPortal) CreateReplication() {
 	v, err = db.C.GetReplicationByVolumeId(ctx, replication.SecondaryVolumeId)
 	if err != nil {
 		if _, ok := err.(*model.NotFoundError); !ok {
-			model.HttpError(this.Ctx, http.StatusBadRequest,
+			model.HttpError(r.Ctx, http.StatusBadRequest,
 				"get replication by volume id %s failed", replication.SecondaryVolumeId)
 			return
 		}
 	}
 	if v != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"specified secondary volume(%s) has already been used in replication(%s) ",
 			replication.SecondaryVolumeId, v.Id)
 		return
@@ -104,14 +104,14 @@ func (this *ReplicationPortal) CreateReplication() {
 	replication.ReplicationStatus = model.ReplicationCreating
 	replication, err = db.C.CreateReplication(ctx, replication)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, http.StatusInternalServerError,
 			"create replication in db failed")
 		return
 	}
 	// Call global controller variable to handle create replication request.
 	result, err := controller.Brain.CreateReplication(ctx, replication)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"create replication failed: %s", err.Error())
 		return
 	}
@@ -119,65 +119,65 @@ func (this *ReplicationPortal) CreateReplication() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"marshal replication created result failed: %s", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
-	this.Ctx.Output.Body(body)
+	r.Ctx.Output.SetStatus(StatusAccepted)
+	r.Ctx.Output.Body(body)
 }
 
-func (this *ReplicationPortal) ListReplications() {
-	if !policy.Authorize(this.Ctx, "replication:list") {
+func (r *ReplicationPortal) ListReplications() {
+	if !policy.Authorize(r.Ctx, "replication:list") {
 		return
 	}
 
 	// Call db api module to handle list replications request.
-	params, err := this.GetParameters()
+	params, err := r.GetParameters()
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"list replications failed: %s", err.Error())
 		return
 	}
 
-	result, err := db.C.ListReplicationWithFilter(c.GetContext(this.Ctx), params)
+	result, err := db.C.ListReplicationWithFilter(c.GetContext(r.Ctx), params)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"list replications failed: %s", err.Error())
 		return
 	}
 
 	// Marshal the result.
-	body, err := json.Marshal(this.outputFilter(result, whiteListSimple))
+	body, err := json.Marshal(r.outputFilter(result, whiteListSimple))
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"marshal replications listed result failed: %s", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	r.Ctx.Output.SetStatus(StatusOK)
+	r.Ctx.Output.Body(body)
 	return
 
 }
 
-func (this *ReplicationPortal) ListReplicationsDetail() {
-	if !policy.Authorize(this.Ctx, "replication:list_detail") {
+func (r *ReplicationPortal) ListReplicationsDetail() {
+	if !policy.Authorize(r.Ctx, "replication:list_detail") {
 		return
 	}
 
 	// Call db api module to handle list replications request.
-	params, err := this.GetParameters()
+	params, err := r.GetParameters()
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"list replications detail failed: %s", err.Error())
 		return
 	}
 
-	result, err := db.C.ListReplicationWithFilter(c.GetContext(this.Ctx), params)
+	result, err := db.C.ListReplicationWithFilter(c.GetContext(r.Ctx), params)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"list replications detail failed: %s", err.Error())
 		return
 	}
@@ -185,70 +185,70 @@ func (this *ReplicationPortal) ListReplicationsDetail() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, http.StatusInternalServerError,
 			"marshal replications detail listed result failed: %s", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	r.Ctx.Output.SetStatus(StatusOK)
+	r.Ctx.Output.Body(body)
 	return
 }
 
-func (this *ReplicationPortal) GetReplication() {
-	if !policy.Authorize(this.Ctx, "replication:get") {
+func (r *ReplicationPortal) GetReplication() {
+	if !policy.Authorize(r.Ctx, "replication:get") {
 		return
 	}
 
-	id := this.Ctx.Input.Param(":replicationId")
+	id := r.Ctx.Input.Param(":replicationId")
 	// Call db api module to handle get volume request.
-	result, err := db.C.GetReplication(c.GetContext(this.Ctx), id)
+	result, err := db.C.GetReplication(c.GetContext(r.Ctx), id)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
 	// Marshal the result.
-	body, err := json.Marshal(this.outputFilter(result, whiteList))
+	body, err := json.Marshal(r.outputFilter(result, whiteList))
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, http.StatusInternalServerError,
 			"marshal replication showed result failed: %s", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	r.Ctx.Output.SetStatus(StatusOK)
+	r.Ctx.Output.Body(body)
 }
 
-func (this *ReplicationPortal) UpdateReplication() {
-	if !policy.Authorize(this.Ctx, "replication:update") {
+func (r *ReplicationPortal) UpdateReplication() {
+	if !policy.Authorize(r.Ctx, "replication:update") {
 		return
 	}
-	var r = model.ReplicationSpec{
+	var mr = model.ReplicationSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
-	id := this.Ctx.Input.Param(":replicationId")
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&r); err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+	id := r.Ctx.Input.Param(":replicationId")
+	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(&mr); err != nil {
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
-	if r.ProfileId != "" {
-		_, err := db.C.GetProfile(c.GetContext(this.Ctx), r.ProfileId)
+	if mr.ProfileId != "" {
+		_, err := db.C.GetProfile(c.GetContext(r.Ctx), mr.ProfileId)
 		if err != nil {
-			model.HttpError(this.Ctx, http.StatusBadRequest,
+			model.HttpError(r.Ctx, http.StatusBadRequest,
 				"get profile failed: %s", err.Error())
 			return
 		}
 		// TODO:compare with the original profile_id to get the differences
 	}
 
-	result, err := db.C.UpdateReplication(c.GetContext(this.Ctx), id, &r)
+	result, err := db.C.UpdateReplication(c.GetContext(r.Ctx), id, &mr)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"update replication failed: %s", err.Error())
 		return
 	}
@@ -256,63 +256,63 @@ func (this *ReplicationPortal) UpdateReplication() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, http.StatusInternalServerError,
 			"marshal replication updated result failed: %s", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	r.Ctx.Output.SetStatus(StatusOK)
+	r.Ctx.Output.Body(body)
 }
 
-func (this *ReplicationPortal) DeleteReplication() {
-	if !policy.Authorize(this.Ctx, "replication:delete") {
+func (r *ReplicationPortal) DeleteReplication() {
+	if !policy.Authorize(r.Ctx, "replication:delete") {
 		return
 	}
 
-	id := this.Ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(this.Ctx), id)
+	id := r.Ctx.Input.Param(":replicationId")
+	rep, err := db.C.GetReplication(c.GetContext(r.Ctx), id)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DeleteReplicationDBEntry(c.GetContext(this.Ctx), r); err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest, err.Error())
+	if err := DeleteReplicationDBEntry(c.GetContext(r.Ctx), rep); err != nil {
+		model.HttpError(r.Ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.DeleteReplication(c.GetContext(this.Ctx), r)
+	err = controller.Brain.DeleteReplication(c.GetContext(r.Ctx), rep)
 	if err != nil {
-		model.HttpError(this.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, http.StatusBadRequest,
 			"delete replication failed: %v", err.Error())
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusAccepted)
+	r.Ctx.Output.SetStatus(StatusAccepted)
 }
 
-func (this *ReplicationPortal) EnableReplication() {
-	ctx := this.Ctx
+func (r *ReplicationPortal) EnableReplication() {
+	ctx := r.Ctx
 	if !policy.Authorize(ctx, "replication:enable") {
 		return
 	}
 
 	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := EnableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+	if err := EnableReplicationDBEntry(c.GetContext(ctx), rep); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.EnableReplication(c.GetContext(ctx), r)
+	err = controller.Brain.EnableReplication(c.GetContext(ctx), rep)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"enable replication failed: %v", err.Error())
@@ -322,26 +322,26 @@ func (this *ReplicationPortal) EnableReplication() {
 	ctx.Output.SetStatus(StatusAccepted)
 }
 
-func (this *ReplicationPortal) DisableReplication() {
-	ctx := this.Ctx
+func (r *ReplicationPortal) DisableReplication() {
+	ctx := r.Ctx
 	if !policy.Authorize(ctx, "replication:disable") {
 		return
 	}
 
 	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DisableReplicationDBEntry(c.GetContext(ctx), r); err != nil {
+	if err := DisableReplicationDBEntry(c.GetContext(ctx), rep); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 	// Call global controller variable to handle delete r request.
-	err = controller.Brain.DisableReplication(c.GetContext(ctx), r)
+	err = controller.Brain.DisableReplication(c.GetContext(ctx), rep)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"enable replication failed: %v", err.Error())
@@ -351,34 +351,34 @@ func (this *ReplicationPortal) DisableReplication() {
 	ctx.Output.SetStatus(StatusAccepted)
 }
 
-func (this *ReplicationPortal) FailoverReplication() {
-	ctx := this.Ctx
+func (r *ReplicationPortal) FailoverReplication() {
+	ctx := r.Ctx
 	if !policy.Authorize(ctx, "replication:failover") {
 		return
 	}
 
 	var failover = model.FailoverReplicationSpec{}
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&failover); err != nil {
+	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(&failover); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
 	id := ctx.Input.Param(":replicationId")
-	r, err := db.C.GetReplication(c.GetContext(ctx), id)
+	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := FailoverReplicationDBEntry(c.GetContext(ctx), r, failover.SecondaryBackendId); err != nil {
+	if err := FailoverReplicationDBEntry(c.GetContext(ctx), rep, failover.SecondaryBackendId); err != nil {
 		model.HttpError(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// Call global controller variable to handle delete r request.
-	err = controller.Brain.FailoverReplication(c.GetContext(ctx), r, &failover)
+	err = controller.Brain.FailoverReplication(c.GetContext(ctx), rep, &failover)
 	if err != nil {
 		model.HttpError(ctx, http.StatusBadRequest,
 			"failover replication failed: %v", err.Error())

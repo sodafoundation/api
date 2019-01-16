@@ -241,10 +241,8 @@ type CompleteMultipartUploadResult struct {
 
 func (c *Client) UploadObject(bucketName, objectKey string, data []byte) error {
 	p := path.Join("s3", bucketName, objectKey)
-	if err := c.request("PUT", p, data, nil, nil); err != nil {
-		return err
-	}
-	return nil
+	err := c.request("PUT", p, data, nil, nil)
+	return err
 }
 
 func (c *Client) ListObject(bucketName string) (*ListObjectResponse, error) {
@@ -258,10 +256,8 @@ func (c *Client) ListObject(bucketName string) (*ListObjectResponse, error) {
 
 func (c *Client) RemoveObject(bucketName, objectKey string) error {
 	p := path.Join("s3", bucketName, objectKey)
-	if err := c.request("DELETE", p, nil, nil, nil); err != nil {
-		return err
-	}
-	return nil
+	err := c.request("DELETE", p, nil, nil, nil)
+	return err
 }
 
 func (c *Client) InitMultiPartUpload(bucketName, objectKey string) (*InitiateMultipartUploadResult, error) {

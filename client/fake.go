@@ -312,9 +312,8 @@ func (*fakeReplicationReceiver) Recv(
 	case "POST":
 		if out != nil {
 			return json.Unmarshal([]byte(ByteReplication), out)
-		} else {
-			return nil
 		}
+		return nil
 	case "PUT":
 		return json.Unmarshal([]byte(ByteReplication), out)
 	case "GET":
@@ -328,10 +327,8 @@ func (*fakeReplicationReceiver) Recv(
 		}
 	case "DELETE":
 		return nil
-	default:
-		return errors.New("inputed method format not supported")
 	}
-	return nil
+	return errors.New("input method format not supported")
 }
 
 func NewFakeVersionReceiver() Receiver {

@@ -273,7 +273,7 @@ func repeat(time int, char rune) string {
 }
 
 func table(coln []string, colw []int, rows [][]string, b bd) (table string) {
-	head := [][]rune{[]rune{b.DR}, []rune{b.V}, []rune{b.VR}}
+	head := [][]rune{{b.DR}, {b.V}, {b.VR}}
 	bttm := []rune{b.UR}
 	for i, v := range colw {
 		head[0] = append(head[0], []rune(repeat(v+2, b.H)+string(b.HD))...)

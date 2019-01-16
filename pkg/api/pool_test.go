@@ -88,10 +88,10 @@ func TestListPools(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(fakePools, nil)
 	db.C = mockClient
@@ -148,10 +148,10 @@ func TestListPoolsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient

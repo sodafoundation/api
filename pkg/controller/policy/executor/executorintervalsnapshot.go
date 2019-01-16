@@ -83,7 +83,7 @@ func (ise *IntervalSnapshotExecutor) Asynchronized() error {
 
 func ParseInterval(interval string) (int, error) {
 	var times int
-	unit := strings.ToLower(interval[len(interval)-1 : len(interval)])
+	unit := strings.ToLower(interval[len(interval)-1:])
 	if unit != "s" && unit != "m" && unit != "h" && unit != "d" {
 		return 0, errors.New("interval unit is not correct")
 	}
