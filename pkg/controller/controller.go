@@ -258,33 +258,45 @@ func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanv
 // ExtendVolume ...
 func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, errchanVolume chan error) {
 	vol, err := db.C.GetVolume(ctx, volID)
-	var volumeSize = vol.Size
 	if err != nil {
 		log.Error("Get volume failed in extend volume method: ", err.Error())
 		errchanVolume <- err
 		return
 	}
 
-	if newSize > vol.Size {
-		pool, err := db.C.GetPool(ctx, vol.PoolId)
-		if nil != err {
-			log.Error("Get pool failed in extend volume method: ", err.Error())
-			errchanVolume <- err
-			return
+	// roll back size and status
+	var rollBack = false
+	defer func() {
+		if rollBack {
+			vol.Status = model.VolumeAvailable
+			if errUpdate, _ := db.C.UpdateVolume(ctx, vol); errUpdate != nil {
+				log.Errorf("update volume failed: %v", errUpdate)
+			}
 		}
+	}()
 
-		if pool.FreeCapacity >= (newSize - vol.Size) {
-			vol.Size = newSize
-		} else {
-			reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
-				pool.FreeCapacity, newSize, vol.Size)
-			errchanVolume <- errors.New(reason)
-			return
-		}
-	} else {
-		reason := fmt.Sprintf("new size(%d) <= old size(%d)", newSize, vol.Size)
+	if newSize <= vol.Size {
+		reason := fmt.Sprintf("New size for extend must be greater than current size."+
+			"(current: %d GB, extended: %d GB).", vol.Size, newSize)
 		errchanVolume <- errors.New(reason)
 		log.Error(reason)
+		rollBack = true
+		return
+	}
+
+	pool, err := db.C.GetPool(ctx, vol.PoolId)
+	if nil != err {
+		log.Error("Get pool failed in extend volume method: ", err.Error())
+		errchanVolume <- err
+		rollBack = true
+		return
+	}
+
+	if pool.FreeCapacity <= (newSize - vol.Size) {
+		reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
+			pool.FreeCapacity, newSize, vol.Size)
+		errchanVolume <- errors.New(reason)
+		rollBack = true
 		return
 	}
 
@@ -292,6 +304,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	if err != nil {
 		log.Error("when search profile in db:", err)
 		errchanVolume <- err
+		rollBack = true
 		return
 	}
 
@@ -303,6 +316,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 	if err != nil {
 		log.Error("When search dock in db by pool id: ", err.Error())
 		errchanVolume <- err
+		rollBack = true
 		return
 
 	}
@@ -311,7 +325,7 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 
 	opt := &pb.ExtendVolumeOpts{
 		Id:         vol.Id,
-		Size:       vol.Size,
+		Size:       newSize,
 		Metadata:   vol.Metadata,
 		DriverName: dockInfo.DriverName,
 		Context:    ctx.ToJson(),
@@ -319,22 +333,22 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 
 	result, err := c.volumeController.ExtendVolume(opt)
 	if err != nil {
-		vol.Size = volumeSize
-		if errUpdate := db.C.UpdateStatus(ctx, vol, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
+		log.Error("extend volume failed: ", err.Error())
+		errchanVolume <- err
+		rollBack = true
+		return
+	}
+
+	// Update the volume data in database.
+	vol.Size = newSize
+	vol.Status = model.VolumeAvailable
+	if errUpdate, _ := db.C.UpdateVolume(ctx, vol); errUpdate != nil {
+		log.Errorf("update volume failed: %v", errUpdate)
 		errchanVolume <- err
 		return
 	}
+
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
-
-	// Update the volume data in database.
-	if errUpdate := db.C.UpdateStatus(ctx, result, model.VolumeAvailable); errUpdate != nil {
-		errchanVolume <- errUpdate
-		return
-	}
-
 	volBody, _ := json.Marshal(result)
 	var errChan = make(chan error, 1)
 	defer close(errChan)
