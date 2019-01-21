@@ -28,6 +28,7 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
@@ -735,7 +736,7 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 	}
 }
 
-func TestExtendVolumeWithBadRequest(t *testing.T) {
+func TestExtendVolume(t *testing.T) {
 	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
 	r, _ := http.NewRequest("POST",
 		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
@@ -763,5 +764,44 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 
 	if w.Code != StatusAccepted {
 		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
+	}
+}
+
+func TestExtendVolumeWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
+	r, _ := http.NewRequest("POST",
+		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	volume := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    "available",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	volumeExtending := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    model.VolumeExtending,
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volumeExtending, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
+
+	db.C = mockClient
+
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
 	}
 }
