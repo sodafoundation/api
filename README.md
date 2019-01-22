@@ -9,6 +9,7 @@
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
 ## Latest Release: v0.4.0 Bali
+
 [OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.4.0/openapi-spec/swagger.yaml)
 
 [Release notes](https://github.com/opensds/opensds/releases/tag/v0.4.0)
@@ -20,9 +21,9 @@ Foundation supported by storage users and vendors, including
 Dell EMC, Intel, Huawei, Fujitsu, Western Digital, Vodafone, NTT and Oregon State University. The project
 will also seek to collaborate with other upstream open source communities
 such as Cloud Native Computing Foundation, Docker, OpenStack, and Open
-Container Initiative. 
+Container Initiative.
 
-It is a software defined storage controller that provides 
+It is a software defined storage controller that provides
 unified block, file, object storage services and focuses on:
 
 * *Simple*: well-defined API that follows the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification.
@@ -33,7 +34,7 @@ unified block, file, object storage services and focuses on:
 
 The OpenSDS community welcomes anyone who is interested in software defined
 storage and shaping the future of cloud-era storage. If you are a company,
-you should consider joining the [OpenSDS Project](https://opensds.io/). 
+you should consider joining the [OpenSDS Project](https://opensds.io/).
 If you are a developer and would like to be part of the code development
 that is happening now, please refer to the Contributing sections below.
 
