@@ -25,6 +25,16 @@ var fd = &DockMgr{
 	Receiver: NewFakeDockReceiver(),
 }
 
+func init() {
+	config = &Config{
+		Endpoint: "fakeEndpoint",
+		AuthOptions: &KeystoneAuthOptions{
+			TenantID: "0105e3e4d44d40b59472688a3f28d469",
+			TokenID:  "MIIDcQYJKoZIhvcNAQcCoIIDYjCCA14CAQ",
+		},
+	}
+}
+
 func TestGetDock(t *testing.T) {
 	var dckID = "b7602e18-771e-11e7-8f38-dbd6d291f4e0"
 	expected := &model.DockSpec{

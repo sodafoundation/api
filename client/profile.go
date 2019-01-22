@@ -33,27 +33,23 @@ type ProfileBuilder *model.ProfileSpec
 type CustomBuilder *model.CustomPropertiesSpec
 
 // NewProfileMgr
-func NewProfileMgr(r Receiver, edp string, tenantId string) *ProfileMgr {
+func NewProfileMgr(r Receiver) *ProfileMgr {
 	return &ProfileMgr{
 		Receiver: r,
-		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
 // ProfileMgr
 type ProfileMgr struct {
 	Receiver
-	Endpoint string
-	TenantId string
 }
 
 // CreateProfile
 func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := p.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -66,8 +62,8 @@ func (p *ProfileMgr) CreateProfile(body ProfileBuilder) (*model.ProfileSpec, err
 func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID)}, "/")
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -80,8 +76,8 @@ func (p *ProfileMgr) GetProfile(prfID string) (*model.ProfileSpec, error) {
 func (p *ProfileMgr) UpdateProfile(prfID string, body ProfileBuilder) (*model.ProfileSpec, error) {
 	var res model.ProfileSpec
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID)}, "/")
 
 	if err := p.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -95,8 +91,8 @@ func (p *ProfileMgr) ListProfiles(args ...interface{}) ([]*model.ProfileSpec, er
 	var res []*model.ProfileSpec
 
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -116,8 +112,8 @@ func (p *ProfileMgr) ListProfiles(args ...interface{}) ([]*model.ProfileSpec, er
 // DeleteProfile
 func (p *ProfileMgr) DeleteProfile(prfID string) error {
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID)}, "/")
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID)}, "/")
 
 	return p.Recv(url, "DELETE", nil, nil)
 }
@@ -126,8 +122,8 @@ func (p *ProfileMgr) DeleteProfile(prfID string) error {
 func (p *ProfileMgr) AddCustomProperty(prfID string, body CustomBuilder) (*model.CustomPropertiesSpec, error) {
 	var res model.CustomPropertiesSpec
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID),
 		"customProperties"}, "/")
 
 	if err := p.Recv(url, "POST", body, &res); err != nil {
@@ -141,8 +137,8 @@ func (p *ProfileMgr) AddCustomProperty(prfID string, body CustomBuilder) (*model
 func (p *ProfileMgr) ListCustomProperties(prfID string) (*model.CustomPropertiesSpec, error) {
 	var res model.CustomPropertiesSpec
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID),
 		"customProperties"}, "/")
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
@@ -155,8 +151,8 @@ func (p *ProfileMgr) ListCustomProperties(prfID string) (*model.CustomProperties
 // RemoveCustomProperty
 func (p *ProfileMgr) RemoveCustomProperty(prfID, customKey string) error {
 	url := strings.Join([]string{
-		p.Endpoint,
-		urls.GenerateProfileURL(urls.Client, p.TenantId, prfID),
+		config.Endpoint,
+		urls.GenerateProfileURL(urls.Client, config.AuthOptions.GetTenantId(), prfID),
 		"customProperties", customKey}, "/")
 
 	return p.Recv(url, "DELETE", nil, nil)

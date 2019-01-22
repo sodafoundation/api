@@ -31,33 +31,28 @@ var (
 	TestEp     = "TestEndPoint"
 )
 
-func NewFakeClient(config *Config) *Client {
+func NewFakeClient(c *Config) *Client {
 	once.Do(func() {
-		os.Setenv("OPENSDS_ENDPOINT", config.Endpoint)
+		os.Setenv("OPENSDS_ENDPOINT", c.Endpoint)
+		config = c
 		fakeClient = &Client{
 			ProfileMgr: &ProfileMgr{
 				Receiver: NewFakeProfileReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			DockMgr: &DockMgr{
 				Receiver: NewFakeDockReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			PoolMgr: &PoolMgr{
 				Receiver: NewFakePoolReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			VolumeMgr: &VolumeMgr{
 				Receiver: NewFakeVolumeReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			ReplicationMgr: &ReplicationMgr{
 				Receiver: NewFakeReplicationReceiver(),
-				Endpoint: config.Endpoint,
 			},
 			VersionMgr: &VersionMgr{
 				Receiver: NewFakeVersionReceiver(),
-				Endpoint: config.Endpoint,
 			},
 		}
 	})

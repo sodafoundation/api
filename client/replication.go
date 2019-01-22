@@ -25,27 +25,23 @@ type ReplicationBuilder *model.ReplicationSpec
 type FailoverReplicationBuilder *model.FailoverReplicationSpec
 
 // NewReplicationMgr
-func NewReplicationMgr(r Receiver, edp string, tenantId string) *ReplicationMgr {
+func NewReplicationMgr(r Receiver) *ReplicationMgr {
 	return &ReplicationMgr{
 		Receiver: r,
-		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
 // ReplicationMgr
 type ReplicationMgr struct {
 	Receiver
-	Endpoint string
-	TenantId string
 }
 
 // CreateReplication
 func (v *ReplicationMgr) CreateReplication(body ReplicationBuilder) (*model.ReplicationSpec, error) {
 	var res model.ReplicationSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -58,8 +54,8 @@ func (v *ReplicationMgr) CreateReplication(body ReplicationBuilder) (*model.Repl
 func (v *ReplicationMgr) GetReplication(replicaId string) (*model.ReplicationSpec, error) {
 	var res model.ReplicationSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId)}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -73,8 +69,8 @@ func (v *ReplicationMgr) ListReplications(args ...interface{}) ([]*model.Replica
 	var res []*model.ReplicationSpec
 
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, "detail")}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), "detail")}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -95,8 +91,8 @@ func (v *ReplicationMgr) ListReplications(args ...interface{}) ([]*model.Replica
 // DeleteReplication
 func (v *ReplicationMgr) DeleteReplication(replicaId string, body ReplicationBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId)}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId)}, "/")
 	return v.Recv(url, "DELETE", body, nil)
 }
 
@@ -104,8 +100,8 @@ func (v *ReplicationMgr) DeleteReplication(replicaId string, body ReplicationBui
 func (v *ReplicationMgr) UpdateReplication(replicaId string, body ReplicationBuilder) (*model.ReplicationSpec, error) {
 	var res model.ReplicationSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId)}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -116,23 +112,23 @@ func (v *ReplicationMgr) UpdateReplication(replicaId string, body ReplicationBui
 // EnableReplication
 func (v *ReplicationMgr) EnableReplication(replicaId string) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "enable")}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId, "enable")}, "/")
 	return v.Recv(url, "POST", nil, nil)
 }
 
 // EnableReplication
 func (v *ReplicationMgr) DisableReplication(replicaId string) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "disable")}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId, "disable")}, "/")
 	return v.Recv(url, "POST", nil, nil)
 }
 
 // EnableReplication
 func (v *ReplicationMgr) FailoverReplication(replicaId string, body FailoverReplicationBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateReplicationURL(urls.Client, v.TenantId, replicaId, "failover")}, "/")
+		config.Endpoint,
+		urls.GenerateReplicationURL(urls.Client, config.AuthOptions.GetTenantId(), replicaId, "failover")}, "/")
 	return v.Recv(url, "POST", body, nil)
 }

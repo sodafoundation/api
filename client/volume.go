@@ -47,27 +47,23 @@ type VolumeSnapshotBuilder *model.VolumeSnapshotSpec
 type VolumeGroupBuilder *model.VolumeGroupSpec
 
 // NewVolumeMgr
-func NewVolumeMgr(r Receiver, edp string, tenantId string) *VolumeMgr {
+func NewVolumeMgr(r Receiver) *VolumeMgr {
 	return &VolumeMgr{
 		Receiver: r,
-		Endpoint: edp,
-		TenantId: tenantId,
 	}
 }
 
 // VolumeMgr
 type VolumeMgr struct {
 	Receiver
-	Endpoint string
-	TenantId string
 }
 
 // CreateVolume
 func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -80,8 +76,8 @@ func (v *VolumeMgr) CreateVolume(body VolumeBuilder) (*model.VolumeSpec, error) 
 func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId(), volID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -93,8 +89,8 @@ func (v *VolumeMgr) GetVolume(volID string) (*model.VolumeSpec, error) {
 // ListVolumes
 func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error) {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -115,8 +111,8 @@ func (v *VolumeMgr) ListVolumes(args ...interface{}) ([]*model.VolumeSpec, error
 // DeleteVolume
 func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId(), volID)}, "/")
 
 	return v.Recv(url, "DELETE", body, nil)
 }
@@ -125,8 +121,8 @@ func (v *VolumeMgr) DeleteVolume(volID string, body VolumeBuilder) error {
 func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId(), volID)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -139,8 +135,8 @@ func (v *VolumeMgr) UpdateVolume(volID string, body VolumeBuilder) (*model.Volum
 func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model.VolumeSpec, error) {
 	var res model.VolumeSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeURL(urls.Client, v.TenantId, volID, "resize")}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeURL(urls.Client, config.AuthOptions.GetTenantId(), volID, "resize")}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -153,8 +149,8 @@ func (v *VolumeMgr) ExtendVolume(volID string, body ExtendVolumeBuilder) (*model
 func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateAttachmentURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateAttachmentURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -167,8 +163,8 @@ func (v *VolumeMgr) CreateVolumeAttachment(body VolumeAttachmentBuilder) (*model
 func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBuilder) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateAttachmentURL(urls.Client, v.TenantId, atcID)}, "/")
+		config.Endpoint,
+		urls.GenerateAttachmentURL(urls.Client, config.AuthOptions.GetTenantId(), atcID)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -181,8 +177,8 @@ func (v *VolumeMgr) UpdateVolumeAttachment(atcID string, body VolumeAttachmentBu
 func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSpec, error) {
 	var res model.VolumeAttachmentSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateAttachmentURL(urls.Client, v.TenantId, atcID)}, "/")
+		config.Endpoint,
+		urls.GenerateAttachmentURL(urls.Client, config.AuthOptions.GetTenantId(), atcID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -194,8 +190,8 @@ func (v *VolumeMgr) GetVolumeAttachment(atcID string) (*model.VolumeAttachmentSp
 // ListVolumeAttachments
 func (v *VolumeMgr) ListVolumeAttachments(args ...interface{}) ([]*model.VolumeAttachmentSpec, error) {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateAttachmentURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateAttachmentURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -215,8 +211,8 @@ func (v *VolumeMgr) ListVolumeAttachments(args ...interface{}) ([]*model.VolumeA
 // DeleteVolumeAttachment
 func (v *VolumeMgr) DeleteVolumeAttachment(atcID string, body VolumeAttachmentBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateAttachmentURL(urls.Client, v.TenantId, atcID)}, "/")
+		config.Endpoint,
+		urls.GenerateAttachmentURL(urls.Client, config.AuthOptions.GetTenantId(), atcID)}, "/")
 
 	return v.Recv(url, "DELETE", body, nil)
 }
@@ -225,8 +221,8 @@ func (v *VolumeMgr) DeleteVolumeAttachment(atcID string, body VolumeAttachmentBu
 func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateSnapshotURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateSnapshotURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -239,8 +235,8 @@ func (v *VolumeMgr) CreateVolumeSnapshot(body VolumeSnapshotBuilder) (*model.Vol
 func (v *VolumeMgr) GetVolumeSnapshot(snpID string) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateSnapshotURL(urls.Client, v.TenantId, snpID)}, "/")
+		config.Endpoint,
+		urls.GenerateSnapshotURL(urls.Client, config.AuthOptions.GetTenantId(), snpID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -254,8 +250,8 @@ func (v *VolumeMgr) ListVolumeSnapshots(args ...interface{}) ([]*model.VolumeSna
 	var res []*model.VolumeSnapshotSpec
 
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateSnapshotURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateSnapshotURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -276,8 +272,8 @@ func (v *VolumeMgr) ListVolumeSnapshots(args ...interface{}) ([]*model.VolumeSna
 // DeleteVolumeSnapshot
 func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateSnapshotURL(urls.Client, v.TenantId, snpID)}, "/")
+		config.Endpoint,
+		urls.GenerateSnapshotURL(urls.Client, config.AuthOptions.GetTenantId(), snpID)}, "/")
 
 	return v.Recv(url, "DELETE", body, nil)
 }
@@ -286,8 +282,8 @@ func (v *VolumeMgr) DeleteVolumeSnapshot(snpID string, body VolumeSnapshotBuilde
 func (v *VolumeMgr) UpdateVolumeSnapshot(snpID string, body VolumeSnapshotBuilder) (*model.VolumeSnapshotSpec, error) {
 	var res model.VolumeSnapshotSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateSnapshotURL(urls.Client, v.TenantId, snpID)}, "/")
+		config.Endpoint,
+		urls.GenerateSnapshotURL(urls.Client, config.AuthOptions.GetTenantId(), snpID)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -300,8 +296,8 @@ func (v *VolumeMgr) UpdateVolumeSnapshot(snpID string, body VolumeSnapshotBuilde
 func (v *VolumeMgr) CreateVolumeGroup(body VolumeGroupBuilder) (*model.VolumeGroupSpec, error) {
 	var res model.VolumeGroupSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeGroupURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	if err := v.Recv(url, "POST", body, &res); err != nil {
 		return nil, err
@@ -314,8 +310,8 @@ func (v *VolumeMgr) CreateVolumeGroup(body VolumeGroupBuilder) (*model.VolumeGro
 func (v *VolumeMgr) GetVolumeGroup(vgId string) (*model.VolumeGroupSpec, error) {
 	var res model.VolumeGroupSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeGroupURL(urls.Client, config.AuthOptions.GetTenantId(), vgId)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -328,8 +324,8 @@ func (v *VolumeMgr) GetVolumeGroup(vgId string) (*model.VolumeGroupSpec, error) 
 func (v *VolumeMgr) ListVolumeGroups(args ...interface{}) ([]*model.VolumeGroupSpec, error) {
 	var res []*model.VolumeGroupSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeGroupURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {
@@ -350,8 +346,8 @@ func (v *VolumeMgr) ListVolumeGroups(args ...interface{}) ([]*model.VolumeGroupS
 // DeleteVolumeGroup
 func (v *VolumeMgr) DeleteVolumeGroup(vgId string, body VolumeGroupBuilder) error {
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeGroupURL(urls.Client, config.AuthOptions.GetTenantId(), vgId)}, "/")
 
 	return v.Recv(url, "DELETE", body, nil)
 }
@@ -360,8 +356,8 @@ func (v *VolumeMgr) DeleteVolumeGroup(vgId string, body VolumeGroupBuilder) erro
 func (v *VolumeMgr) UpdateVolumeGroup(vgId string, body VolumeGroupBuilder) (*model.VolumeGroupSpec, error) {
 	var res model.VolumeGroupSpec
 	url := strings.Join([]string{
-		v.Endpoint,
-		urls.GenerateVolumeGroupURL(urls.Client, v.TenantId, vgId)}, "/")
+		config.Endpoint,
+		urls.GenerateVolumeGroupURL(urls.Client, config.AuthOptions.GetTenantId(), vgId)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err

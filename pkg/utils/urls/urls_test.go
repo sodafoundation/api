@@ -50,3 +50,29 @@ func TestGenerateURL(t *testing.T) {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}
 }
+
+func TestChangeURL(t *testing.T) {
+	var org = "v1beta/docks/d3c7e0c7-6e92-406c-9767-3ab73b39b64f"
+	var expected = "v1beta/docks/0105e3e4d44d40b59472688a3f28d469"
+	if url := ChangeURL(org, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "0105e3e4d44d40b59472688a3f28d469"); url != expected {
+		t.Errorf("Expected %v, got %v\n", expected, url)
+	}
+
+	org = "v1beta/pools/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	expected = "v1beta/pools/0105e3e4d44d40b59472688a3f28d469/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	if url := ChangeURL(org, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "0105e3e4d44d40b59472688a3f28d469"); url != expected {
+		t.Errorf("Expected %v, got %v\n", expected, url)
+	}
+
+	org = "v1beta/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/docks"
+	expected = "v1beta/0105e3e4d44d40b59472688a3f28d469/docks"
+	if url := ChangeURL(org, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "0105e3e4d44d40b59472688a3f28d469"); url != expected {
+		t.Errorf("Expected %v, got %v\n", expected, url)
+	}
+
+	org = "v1beta/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/pools/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	expected = "v1beta/0105e3e4d44d40b59472688a3f28d469/pools/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	if url := ChangeURL(org, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "0105e3e4d44d40b59472688a3f28d469"); url != expected {
+		t.Errorf("Expected %v, got %v\n", expected, url)
+	}
+}

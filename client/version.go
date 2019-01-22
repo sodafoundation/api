@@ -26,25 +26,22 @@ import (
 type VersionBuilder *model.VersionSpec
 
 // NewVersionMgr ...
-func NewVersionMgr(r Receiver, edp string, tenantId string) *VersionMgr {
+func NewVersionMgr(r Receiver) *VersionMgr {
 	return &VersionMgr{
 		Receiver: r,
-		Endpoint: edp,
 	}
 }
 
 // VersionMgr ...
 type VersionMgr struct {
 	Receiver
-	Endpoint string
-	tenantId string
 }
 
 // GetVersion ...
 func (v *VersionMgr) GetVersion(apiVersion string) (*model.VersionSpec, error) {
 	var res model.VersionSpec
 	url := strings.Join([]string{
-		v.Endpoint, apiVersion}, "/")
+		config.Endpoint, apiVersion}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -56,7 +53,7 @@ func (v *VersionMgr) GetVersion(apiVersion string) (*model.VersionSpec, error) {
 // ListVersions ...
 func (v *VersionMgr) ListVersions() ([]*model.VersionSpec, error) {
 	var res []*model.VersionSpec
-	url := v.Endpoint
+	url := config.Endpoint
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
