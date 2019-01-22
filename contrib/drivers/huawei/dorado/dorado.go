@@ -261,7 +261,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	if opt.GetAccessProtocol() == FCProtocol {
 		return d.InitializeConnectionFC(opt)
 	}
-	return nil, errors.New("No supported protocol for dorado driver.")
+	return nil, errors.New("No supported protocol for dorado driver")
 }
 
 func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {

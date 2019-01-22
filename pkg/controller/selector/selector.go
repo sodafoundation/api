@@ -183,7 +183,7 @@ func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.S
 		}
 	}
 
-	return nil, errors.New("No valid pool found for group.")
+	return nil, errors.New("No valid pool found for group")
 }
 
 // SelectSupportedPools ...

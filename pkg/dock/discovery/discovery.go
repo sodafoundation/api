@@ -159,7 +159,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		pdd.pols = append(pdd.pols, pols...)
 	}
 	if len(pdd.pols) == 0 {
-		return fmt.Errorf("There is no pool can be found.")
+		return fmt.Errorf("There is no pool can be found")
 	}
 
 	return nil

@@ -558,7 +558,7 @@ func (c *DoradoClient) FindHostGroup(groupName string) (string, error) {
 
 	if len(hostGrpsResp.Data) == 0 {
 		log.Infof("No host group with name %s was found.", groupName)
-		return "", fmt.Errorf("No host group with name %s was found.", groupName)
+		return "", fmt.Errorf("No host group with name %s was found", groupName)
 	}
 
 	return hostGrpsResp.Data[0].Id, nil
