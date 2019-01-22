@@ -30,4 +30,10 @@ const (
 
 	// OpenSDS current api version
 	APIVersion = "v1beta"
+
+	// BeegoServerTimeOut ...
+	BeegoServerTimeOut = 60
+
+	// OpensdsCaCertFile ...
+	OpensdsCaCertFile = "/opt/opensds-security/ca/ca-cert.pem"
 )
