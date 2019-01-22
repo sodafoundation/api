@@ -22,21 +22,27 @@ import (
 )
 
 // NewPoolMgr
-func NewPoolMgr(r Receiver) *PoolMgr {
-	return &PoolMgr{Receiver: r}
+func NewPoolMgr(r Receiver, edp string, tenantId string) *PoolMgr {
+	return &PoolMgr{
+		Receiver: r,
+		Endpoint: edp,
+		TenantId: tenantId,
+	}
 }
 
 // PoolMgr
 type PoolMgr struct {
 	Receiver
+	Endpoint string
+	TenantId string
 }
 
 // GetPool
 func (p *PoolMgr) GetPool(polID string) (*model.StoragePoolSpec, error) {
 	var res model.StoragePoolSpec
 	url := strings.Join([]string{
-		config.Endpoint,
-		urls.GeneratePoolURL(urls.Client, config.AuthOptions.GetTenantId(), polID)}, "/")
+		p.Endpoint,
+		urls.GeneratePoolURL(urls.Client, p.TenantId, polID)}, "/")
 
 	if err := p.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -50,8 +56,8 @@ func (p *PoolMgr) ListPools(args ...interface{}) ([]*model.StoragePoolSpec, erro
 	var res []*model.StoragePoolSpec
 
 	url := strings.Join([]string{
-		config.Endpoint,
-		urls.GeneratePoolURL(urls.Client, config.AuthOptions.GetTenantId())}, "/")
+		p.Endpoint,
+		urls.GeneratePoolURL(urls.Client, p.TenantId)}, "/")
 
 	param, err := processListParam(args)
 	if err != nil {

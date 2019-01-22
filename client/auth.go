@@ -39,7 +39,6 @@ const (
 
 type AuthOptions interface {
 	GetTenantId() string
-	GetTokenId() string
 }
 
 func NewKeystoneAuthOptions() *KeystoneAuthOptions {
@@ -63,18 +62,6 @@ func (k *KeystoneAuthOptions) GetTenantId() string {
 	return k.TenantID
 }
 
-func (k *KeystoneAuthOptions) GetTokenId() string {
-	return k.TokenID
-}
-
-func (k *KeystoneAuthOptions) SetTenantId(tenantId string) {
-	k.TenantID = tenantId
-}
-
-func (k *KeystoneAuthOptions) SetTokenId(tokenId string) {
-	k.TokenID = tokenId
-}
-
 func NewNoauthOptions(tenantId string) *NoAuthOptions {
 	return &NoAuthOptions{TenantID: tenantId}
 }
@@ -87,15 +74,6 @@ func (n *NoAuthOptions) GetTenantId() string {
 	return n.TenantID
 }
 
-func (n *NoAuthOptions) GetTokenId() string {
-	return ""
-}
-
-func (n *NoAuthOptions) SetTenantId(tenantId string) {
-	n.TenantID = tenantId
-}
-
-func (n *NoAuthOptions) SetTokenId() {}
 func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
 	opt := NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)

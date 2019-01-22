@@ -26,14 +26,6 @@ const (
 	OpensdsEndpoint = "OPENSDS_ENDPOINT"
 )
 
-// Config is a struct that defines some options for calling the Client.
-type Config struct {
-	Endpoint    string
-	AuthOptions AuthOptions
-}
-
-var config *Config
-
 // Client is a struct for exposing some operations of opensds resources.
 type Client struct {
 	*ProfileMgr
@@ -42,6 +34,14 @@ type Client struct {
 	*VolumeMgr
 	*VersionMgr
 	*ReplicationMgr
+
+	cfg *Config
+}
+
+// Config is a struct that defines some options for calling the Client.
+type Config struct {
+	Endpoint    string
+	AuthOptions AuthOptions
 }
 
 // NewClient method creates a new Client.
@@ -49,31 +49,30 @@ func NewClient(c *Config) *Client {
 	// If endpoint field not specified,use the default value localhost.
 	if c.Endpoint == "" {
 		c.Endpoint = constants.DefaultOpensdsEndpoint
-		log.Printf("Warnning: OpenSDS endpoint is not specified using the default value(%s)", c.Endpoint)
+		log.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)", c.Endpoint)
 	}
 
-	var receiver Receiver
+	var r Receiver
 	switch c.AuthOptions.(type) {
 	case *NoAuthOptions:
-		receiver = NewReceiver()
+		r = NewReceiver()
 	case *KeystoneAuthOptions:
-		receiver = NewKeystoneReciver()
-		c.AuthOptions, _ = GetToken(c.AuthOptions.(*KeystoneAuthOptions))
+		r = NewKeystoneReciver(c.AuthOptions.(*KeystoneAuthOptions))
 	default:
 		log.Printf("Warnning: Not support auth options, use default")
+		r = NewReceiver()
 		c.AuthOptions = NewNoauthOptions(constants.DefaultTenantId)
-		receiver = NewReceiver()
 	}
 
-	config = c
-
+	t := c.AuthOptions.GetTenantId()
 	return &Client{
-		ProfileMgr:     NewProfileMgr(receiver),
-		DockMgr:        NewDockMgr(receiver),
-		PoolMgr:        NewPoolMgr(receiver),
-		VolumeMgr:      NewVolumeMgr(receiver),
-		VersionMgr:     NewVersionMgr(receiver),
-		ReplicationMgr: NewReplicationMgr(receiver),
+		cfg:            c,
+		ProfileMgr:     NewProfileMgr(r, c.Endpoint, t),
+		DockMgr:        NewDockMgr(r, c.Endpoint, t),
+		PoolMgr:        NewPoolMgr(r, c.Endpoint, t),
+		VolumeMgr:      NewVolumeMgr(r, c.Endpoint, t),
+		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
+		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
 	}
 }
 

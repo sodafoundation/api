@@ -85,15 +85,3 @@ func generateURL(resource string, urlType int, tenantId string, in ...string) st
 func CurrentVersion() string {
 	return constants.APIVersion
 }
-
-func ChangeURL(url, oldTenantId, newTenantId string) string {
-	u := strings.Split(url, "/")
-	for k, v := range u {
-		if v == oldTenantId {
-			u[k] = newTenantId
-			break
-		}
-	}
-
-	return strings.Join(u, "/")
-}
