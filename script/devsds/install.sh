@@ -73,6 +73,9 @@ OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
 OPENSDS_CONFIG_DIR=${OPENSDS_CONFIG_DIR:-/etc/opensds}
 OPENSDS_DRIVER_CONFIG_DIR=${OPENSDS_CONFIG_DIR}/driver
 
+# Export openssl config file
+export OPENSSL_CONF="${TOP_DIR}"/lib/openssl.cnf
+
 mkdir -p $OPENSDS_DRIVER_CONFIG_DIR
 
 # Temporary directory for testing
