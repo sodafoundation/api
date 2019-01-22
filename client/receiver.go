@@ -15,6 +15,8 @@
 package client
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -67,8 +69,34 @@ func NewReceiver() Receiver {
 	return &receiver{}
 }
 
+func customVerify(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+	roots := x509.NewCertPool()
+	caStr, err := ioutil.ReadFile(constants.OpensdsCaCertFile)
+	if err != nil {
+		msg := fmt.Sprintf("Read certfile failed,error:%v ", err)
+		log.Println(msg)
+		return err
+	}
+
+	roots.AppendCertsFromPEM(caStr)
+
+	for _, rawCert := range rawCerts {
+		cert, _ := x509.ParseCertificate(rawCert)
+		opts := x509.VerifyOptions{
+			Roots: roots,
+		}
+		_, err := cert.Verify(opts)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func request(url string, method string, headers HeaderOption, input interface{}, output interface{}) error {
 	req := httplib.NewBeegoRequest(url, strings.ToUpper(method))
+	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true, VerifyPeerCertificate: customVerify})
 	// Set the request timeout a little bit longer upload snapshot to cloud temporarily.
 	req.SetTimeout(time.Minute*6, time.Minute*6)
 	// init body
