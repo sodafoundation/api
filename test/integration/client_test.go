@@ -27,7 +27,7 @@ import (
 )
 
 var c = client.NewClient(&client.Config{
-	Endpoint:    "http://localhost:50040",
+	Endpoint:    "https://localhost:50040",
 	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 func TestClientCreateProfile(t *testing.T) {

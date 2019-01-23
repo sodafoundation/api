@@ -18,18 +18,16 @@
 _XTRACE_CEPH=$(set +o | grep xtrace)
 set +o xtrace
 
-CUR_DIR=$(cd "$(dirname "$0")" || exit; pwd)
-
 COMPONENT=("opensds" "nbp")
 OPENSDS_CERT_DIR="/opt/opensds-security"
 ROOT_CERT_DIR=${ROOT_CERT_DIR:-"${OPENSDS_CERT_DIR}"/ca}
 
 osds::certificate::install(){
-	osds::certificate::cleanup
+    osds::certificate::cleanup
     osds::certificate::check_openssl_installed
-	osds::certificate::prepare
-	osds::certificate::create_ca_cert
-	osds::certificate::create_component_cert
+    osds::certificate::prepare
+    osds::certificate::create_ca_cert
+    osds::certificate::create_component_cert
 }
 
 osds::certificate::cleanup() {
@@ -37,7 +35,6 @@ osds::certificate::cleanup() {
 }
 
 osds::certificate::uninstall(){
-	# Clean up installation file
     if [ -d "${OPENSDS_CERT_DIR}" ];then
         rm -rf "${OPENSDS_CERT_DIR}"
     fi
@@ -51,7 +48,7 @@ osds::certificate::check_openssl_installed(){
 	openssl version >& /dev/null
     if [ $? -ne 0 ];then
         echo "Failed to run openssl. Please ensure openssl is installed."
-	    exit 1
+        exit 1
     fi
 }
 
@@ -66,7 +63,7 @@ osds::certificate::prepare(){
 }
 
 osds::certificate::create_ca_cert(){
-	# Create ca cert
+    # Create ca cert
     cd "${ROOT_CERT_DIR}"
     openssl genrsa -passout pass:xxxxx -out "${ROOT_CERT_DIR}"/ca-key.pem -aes256 2048
     openssl req -new -x509 -sha256 -key "${ROOT_CERT_DIR}"/ca-key.pem -out "${ROOT_CERT_DIR}"/ca-cert.pem -days 365 -subj "/CN=opensds" -passin pass:xxxxx
@@ -80,7 +77,7 @@ osds::certificate::create_component_cert(){
 	    openssl ca -batch -in "${ROOT_CERT_DIR}"/"${com}"-csr.pem -cert "${ROOT_CERT_DIR}"/ca-cert.pem -keyfile "${ROOT_CERT_DIR}"/ca-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-cert.pem -md sha256 -days 365 -passin pass:xxxxx
 	
 	    # Cancel the password for the private key
-		openssl rsa -in "${ROOT_CERT_DIR}"/"${com}"-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-key.pem -passin pass:xxxxx
+        openssl rsa -in "${ROOT_CERT_DIR}"/"${com}"-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-key.pem -passin pass:xxxxx
 	   
 	    mkdir -p "${OPENSDS_CERT_DIR}"/"${com}"
 	    mv "${ROOT_CERT_DIR}"/"${com}"-key.pem "${OPENSDS_CERT_DIR}"/"${com}"/
@@ -88,7 +85,7 @@ osds::certificate::create_component_cert(){
 	    rm -rf "${ROOT_CERT_DIR}"/"${com}"-csr.pem
     done
 	
-	rm -rf "${ROOT_CERT_DIR}"/demoCA
+    rm -rf "${ROOT_CERT_DIR}"/demoCA
 }
 
 # Restore xtrace
