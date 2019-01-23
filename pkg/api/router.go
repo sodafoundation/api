@@ -35,10 +35,10 @@ import (
 )
 
 const (
+	AddressIdx = iota
+	PortIdx
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
-	AddressIdx     = iota
-	PortIdx
 )
 
 func Run(host, key, cert string) {
