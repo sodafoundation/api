@@ -26,8 +26,6 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/opensds/opensds/pkg/utils/config"
-
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	"github.com/opensds/opensds/pkg/api/filter/accesslog"
@@ -39,9 +37,11 @@ import (
 const (
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
+	AddressIdx     = iota
+	PortIdx
 )
 
-func Run(host OsdsLet) {
+func Run(host, key, cert string) {
 
 	// add router for v1beta api
 	ns :=
@@ -119,11 +119,11 @@ func Run(host OsdsLet) {
 	// beego https config
 	beego.BConfig.Listen.EnableHTTP = false
 	beego.BConfig.Listen.EnableHTTPS = true
-	strs := strings.Split(host.ApiEndpoint, ":")
-	beego.BConfig.Listen.HTTPSAddr = strs[0]
-	beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[1])
-	beego.BConfig.Listen.HTTPSCertFile = host.BeegoHTTPSCertFile
-	beego.BConfig.Listen.HTTPSKeyFile = host.BeegoHTTPSKeyFile
+	strs := strings.Split(host, ":")
+	beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
+	beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
+	beego.BConfig.Listen.HTTPSCertFile = cert
+	beego.BConfig.Listen.HTTPSKeyFile = key
 	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.EnableErrorsShow = false
@@ -141,5 +141,5 @@ func Run(host OsdsLet) {
 	beego.BeeApp.Server.TLSConfig = tlsConfig
 
 	// start service
-	beego.Run(host.ApiEndpoint)
+	beego.Run(host)
 }
