@@ -19,7 +19,7 @@ const (
 	// exactly precision to seconds.
 	TimeFormat = `2006-01-02T15:04:05`
 
-	DefaultOpensdsEndpoint = "http://localhost:50040"
+	DefaultOpensdsEndpoint = "https://localhost:50040"
 
 	// This is set for None Auth
 	DefaultTenantId = "e93b4c0934da416eb9c8d120c5d04d96"
@@ -30,4 +30,10 @@ const (
 
 	// OpenSDS current api version
 	APIVersion = "v1beta"
+
+	// BeegoServerTimeOut ...
+	BeegoServerTimeOut = 60
+
+	// OpensdsCaCertFile ...
+	OpensdsCaCertFile = "/opt/opensds-security/ca/ca-cert.pem"
 )

@@ -61,7 +61,7 @@ osds::opensds::install(){
         $xtrace
     fi
     export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
-    export OPENSDS_ENDPOINT=http://localhost:50040
+    export OPENSDS_ENDPOINT=https://localhost:50040
     build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
     # Copy bash completion script to system.
     cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/

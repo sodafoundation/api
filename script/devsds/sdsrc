@@ -48,9 +48,9 @@ ETCD_DIR=${OPT_DIR}/etcd
 ETCD_LOGFILE=${ETCD_DIR}/etcd.log
 ETCD_DATADIR=${ETCD_DIR}/data
 
-OPENSDS_ENABLED_SERVICES=opensds,etcd
+OPENSDS_ENABLED_SERVICES=opensds,etcd,certificate
 if [ $OPENSDS_AUTH_STRATEGY = keystone ];then
     OPENSDS_ENABLED_SERVICES+=,keystone
 fi
 OPENSDS_ENABLED_SERVICES+=,$OPENSDS_BACKEND_LIST
-SUPPORT_SERVICES=keystone,lvm,ceph,etcd,opensds
+SUPPORT_SERVICES=certificate,keystone,lvm,ceph,etcd,opensds
