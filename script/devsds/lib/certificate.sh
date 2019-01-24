@@ -66,14 +66,14 @@ osds::certificate::create_ca_cert(){
     # Create ca cert
     cd "${ROOT_CERT_DIR}"
     openssl genrsa -passout pass:xxxxx -out "${ROOT_CERT_DIR}"/ca-key.pem -aes256 2048
-    openssl req -new -x509 -sha256 -key "${ROOT_CERT_DIR}"/ca-key.pem -out "${ROOT_CERT_DIR}"/ca-cert.pem -days 365 -subj "/CN=opensds" -passin pass:xxxxx
+    openssl req -new -x509 -sha256 -key "${ROOT_CERT_DIR}"/ca-key.pem -out "${ROOT_CERT_DIR}"/ca-cert.pem -days 365 -subj "/CN=CA" -passin pass:xxxxx
 }
 
 osds::certificate::create_component_cert(){
 	# Create component cert
     for com in ${COMPONENT[*]};do
 	    openssl genrsa -aes256 -passout pass:xxxxx -out "${ROOT_CERT_DIR}"/"${com}"-key.pem 2048
-	    openssl req -new -sha256 -key "${ROOT_CERT_DIR}"/"${com}"-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-csr.pem -days 365 -subj "/CN=component" -passin pass:xxxxx
+	    openssl req -new -sha256 -key "${ROOT_CERT_DIR}"/"${com}"-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-csr.pem -days 365 -subj "/CN=${com}" -passin pass:xxxxx
 	    openssl ca -batch -in "${ROOT_CERT_DIR}"/"${com}"-csr.pem -cert "${ROOT_CERT_DIR}"/ca-cert.pem -keyfile "${ROOT_CERT_DIR}"/ca-key.pem -out "${ROOT_CERT_DIR}"/"${com}"-cert.pem -md sha256 -days 365 -passin pass:xxxxx
 	
 	    # Cancel the password for the private key
