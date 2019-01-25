@@ -26,7 +26,7 @@ func main() {
 	fmt.Print("Enter password: ")
 	plainText, err := gopass.GetPasswdMasked()
 	if err != nil {
-		fmt.Println("Input password error: %v", err)
+		fmt.Printf("Input password error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -35,7 +35,7 @@ func main() {
 	pwd, err := pwdTool.Encrypter(string(plainText))
 
 	if err != nil {
-		fmt.Println("Encrypt password error: %v", err)
+		fmt.Printf("Encrypt password error: %v\n", err)
 		os.Exit(1)
 	}
 
