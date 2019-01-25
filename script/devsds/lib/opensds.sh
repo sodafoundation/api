@@ -68,7 +68,7 @@ osds::opensds::install(){
     cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/
 
     export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
-    export OPENSDS_ENDPOINT=http://localhost:50040
+    export OPENSDS_ENDPOINT=https://localhost:50040
     build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
     if [ $? == 0 ]; then
         osds::echo_summary devsds installed successfully !!

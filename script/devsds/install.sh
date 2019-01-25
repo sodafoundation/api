@@ -73,6 +73,9 @@ OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
 OPENSDS_CONFIG_DIR=${OPENSDS_CONFIG_DIR:-/etc/opensds}
 OPENSDS_DRIVER_CONFIG_DIR=${OPENSDS_CONFIG_DIR}/driver
 
+# Export openssl config file as environment variable
+export OPENSSL_CONF="${TOP_DIR}"/lib/openssl.cnf
+
 mkdir -p $OPENSDS_DRIVER_CONFIG_DIR
 
 # Temporary directory for testing
@@ -154,7 +157,7 @@ echo
 echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
 echo "------------------------------------------------------------------"
 echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"
-echo "export OPENSDS_ENDPOINT=http://localhost:50040"
+echo "export OPENSDS_ENDPOINT=https://localhost:50040"
 if osds::util::is_service_enabled keystone; then
     echo "source $DEV_STACK_DIR/openrc"
 fi

@@ -50,6 +50,11 @@ driver_name = default
 driver = fake
 OPENSDS_GLOBAL_CONFIG_DOC
 
+# Create certs
+export OPENSSL_CONF="${OPENSDS_DIR}"/script/devsds/lib/openssl.cnf
+source "${OPENSDS_DIR}"/script/devsds/lib/certificate.sh
+osds::certificate::install
+
 # Run osdsdock and osdslet daemon in background.
 cd ${OPENSDS_DIR}
 sudo ${OPENSDS_DIR}/build/out/bin/osdsdock -daemon

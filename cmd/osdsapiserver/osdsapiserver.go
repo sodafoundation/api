@@ -51,5 +51,5 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsApiServer.ApiEndpoint)
+	api.Run(CONF.OsdsApiServer.ApiEndpoint, CONF.OsdsApiServer.BeegoHTTPSKeyFile, CONF.OsdsApiServer.BeegoHTTPSCertFile)
 }
