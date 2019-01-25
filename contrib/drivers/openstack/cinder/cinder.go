@@ -37,6 +37,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/pwd"
 	"github.com/satori/go.uuid"
 )
 
@@ -65,6 +66,7 @@ type AuthOptions struct {
 	DomainName       string `yaml:"domainName,omitempty"`
 	Username         string `yaml:"username,omitempty"`
 	Password         string `yaml:"password,omitempty"`
+	PasswordTool     string `yaml:"passwordtool,omitempty"`
 	TenantID         string `yaml:"tenantId,omitempty"`
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
@@ -115,12 +117,20 @@ func (d *Driver) Setup() error {
 	}
 	Parse(d.conf, p)
 
+	// Decrypte the password
+	pwdCiphertext := d.conf.Password
+	pwdTool := pwd.NewPwdTool(d.conf.PasswordTool)
+	pwd, err := pwdTool.Decrypter(pwdCiphertext)
+	if err != nil {
+		return err
+	}
+
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: d.conf.IdentityEndpoint,
 		DomainID:         d.conf.DomainID,
 		DomainName:       d.conf.DomainName,
 		Username:         d.conf.Username,
-		Password:         d.conf.Password,
+		Password:         pwd,
 		TenantID:         d.conf.TenantID,
 		TenantName:       d.conf.TenantName,
 	}
