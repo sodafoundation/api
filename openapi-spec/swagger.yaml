@@ -48,7 +48,7 @@ paths:
               versions:
                 type: array
                 items:
-                  $ref: '#/definitions/Version'
+                  $ref: '#/definitions/VersionSpec'
           examples:
             application/json:
               - name: v1beta
@@ -70,14 +70,14 @@ paths:
             type: object
             properties:
               version:
-                $ref: '#/definitions/Version'
+                $ref: '#/definitions/VersionSpec'
           examples:
             application/json:
               name: v1beta
               status: SUPPORTED
               updated: '2017-04-10T14:36:58.014Z'
         '404':
-          description: The resource does not exist
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/docks':
@@ -93,11 +93,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Dock'
+              $ref: '#/definitions/DockSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/docks/{dockId}':
@@ -112,13 +112,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Dock'
+            $ref: '#/definitions/DockSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/pools':
@@ -134,11 +134,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Pool'
+              $ref: '#/definitions/StoragePoolSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/availabilityZones':
@@ -156,9 +156,9 @@ paths:
             items: 
               type: string
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/pools/{poolId}':
@@ -173,13 +173,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Pool'
+            $ref: '#/definitions/StoragePoolSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/profiles':
@@ -195,12 +195,44 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Profile'
+              $ref: '#/definitions/ProfileSpec'
           examples:
             application/json:
             - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
               name: Gold
               description: provide gold storage service
+              storageType: block
+              provisioningProperties:
+                dataStorage:
+                  recoveryTimeObjective: 10
+                  provisioningPolicy: Thin
+                  IsSpaceEfficient: true
+                ioConnectivity:
+                  accessProtocol: iscsi
+                  maxIOPS: 100000
+                  maxBWS: 60000
+              replicationProperties:
+                dataProtection:
+                  isIsolated: true
+                  minLifetime: P3Y6M4DT12H30M5S
+                  recoveryGeographicObjective: Datacenter
+                  recoveryPointObjectiveTime: P3Y6M4DT12H30M5S
+                  RecoveryTimeObjective: OnlineActive
+                  replicaType: Clone
+                replicaInfos:
+                  replicaUpdateMode: Active
+                  consistencyEnabled: true
+                  replicationPeriod: P3Y6M4DT12H30M5S
+                  replicationBandwidth: 60000
+              snapshotProperties:
+                schedule:
+                  datetime: 2008-09-15T15:53:00
+                  occurrence: Weekly
+                retention:
+                  number: 10
+                  duration: 60
+                topology:
+                  bucket: s3
               customProperties:
                 key1: value1
                 key2:
@@ -210,13 +242,18 @@ paths:
             - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
               name: Silver
               description: provide silver storage service
+              provisioningProperties:
+                dataStorage:
+                  provisioningPolicy: Thin
+                ioConnectivity:
+                  accessProtocol: iscsi
               customProperties:
                 key1: value1
                 key2: value2
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -228,27 +265,31 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/ProfileSpec'
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/ProfileSpec'
           examples:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-              name: Gold
-              description: provide gold storage service
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+              name: Silver
+              description: provide silver storage service
+              provisioningProperties:
+                dataStorage:
+                  provisioningPolicy: Thin
+                ioConnectivity:
+                  accessProtocol: iscsi
               customProperties:
                 key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
+                key2: value2
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/profiles/{profileId}':
@@ -263,22 +304,26 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/ProfileSpec'
           examples:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-              name: Gold
-              description: provide gold storage service
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+              name: Silver
+              description: provide silver storage service
+              provisioningProperties:
+                dataStorage:
+                  provisioningPolicy: Thin
+                ioConnectivity:
+                  accessProtocol: iscsi
               customProperties:
                 key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
+                key2: value2
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -290,27 +335,31 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/ProfileSpec'
       responses:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/ProfileSpec'
           examples:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-              name: Gold
-              description: provide gold storage service
+              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+              name: Silver
+              description: provide silver storage service
+              provisioningProperties:
+                dataStorage:
+                  provisioningPolicy: Thin
+                ioConnectivity:
+                  accessProtocol: iscsi
               customProperties:
                 key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
+                key2: value2
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -321,11 +370,11 @@ paths:
         '200':
           description: OK
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/profiles/{profileId}/customeProperties':
@@ -340,12 +389,12 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/CustomProperties'
+            $ref: '#/definitions/CustomPropertiesSpec'
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
           schema:
-            $ref: '#/definitions/CustomProperties'
+            $ref: '#/definitions/CustomPropertiesSpec'
           examples:
             application/json:
               key1: value1
@@ -353,12 +402,14 @@ paths:
                 subKey1: subValue1
                 subKey2: subValue2
               key3: value3
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     get:
@@ -369,7 +420,7 @@ paths:
         '200':
           description: OK
           schema:
-              $ref: '#/definitions/CustomProperties'
+              $ref: '#/definitions/CustomPropertiesSpec'
           examples:
             application/json:
               key1: value1
@@ -378,11 +429,11 @@ paths:
                 subKey2: subValue2
               key3: value3
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/profiles/{profileId}/customProperties/{customKey}':
@@ -398,11 +449,11 @@ paths:
         '200':
           description: OK
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/volumes':
@@ -418,11 +469,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Volume'
+              $ref: '#/definitions/VolumeSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -433,16 +484,18 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/Volume'
+            $ref: '#/definitions/VolumeSpec'
       responses:
         '202':
-          description: OK
+          description: Accepted
           schema:
-            $ref: '#/definitions/Volume'
+            $ref: '#/definitions/VolumeSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/volumes/{volumeId}':
@@ -457,13 +510,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Volume'
+            $ref: '#/definitions/VolumeSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -486,13 +539,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Volume'
+            $ref: '#/definitions/VolumeSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -503,11 +556,11 @@ paths:
         '202':
           description: Accepted
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/volumes/{volumeId}/resize':
@@ -527,13 +580,13 @@ paths:
         '202':
           description: Accepted
           schema:
-            $ref: '#/definitions/Volume'
+            $ref: '#/definitions/VolumeSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/attachments':
@@ -555,11 +608,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Attachment'
+              $ref: '#/definitions/VolumeAttachmentSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -570,19 +623,21 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/VolumeAttachmentSpec'
       responses:
         '202':
-          description: OK
+          description: Accepted
           schema:
             type: object
             properties:
               attachment:
-                $ref: '#/definitions/Attachment'
+                $ref: '#/definitions/VolumeAttachmentSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/attachments/{attachmentId}':
@@ -597,13 +652,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/VolumeAttachmentSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -614,18 +669,20 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/VolumeAttachmentSpec'
       responses:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Attachment'
+            $ref: '#/definitions/VolumeAttachmentSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -634,13 +691,13 @@ paths:
       description: Deletes a volume attachment.
       responses:
         '202':
-          description: OK
+          description: Accepted
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/snapshots':
@@ -651,7 +708,7 @@ paths:
         - uniqueItems: true
           type: string
           name: volumeId
-          description: The UUID of the volume assosicated with the attachment.
+          description: The UUID of the volume assosicated with the snapshot.
           in: query
       tags:
         - Block volume snapshots
@@ -662,11 +719,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Snapshot'
+              $ref: '#/definitions/VolumeSnapshotSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -677,16 +734,18 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/VolumeSnapshotSpec'
       responses:
         '202':
-          description: OK
+          description: Accepted
           schema:
-            $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/VolumeSnapshotSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/snapshots/{snapshotId}':
@@ -701,13 +760,13 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/VolumeSnapshotSpec'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -728,13 +787,15 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Snapshot'
+            $ref: '#/definitions/VolumeSnapshotSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -742,14 +803,14 @@ paths:
         - Block volume snapshots
       description: Deletes a volume snapshot.
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/volumeGroups':
@@ -765,7 +826,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/VolumeGroup'
+              $ref: '#/definitions/VolumeGroupSpec'
           examples:
             application/json:
               - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
@@ -778,9 +839,9 @@ paths:
                 availabilityZone: default
                 poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -792,12 +853,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/VolumeGroup'
+            $ref: '#/definitions/VolumeGroupSpec'
       responses:
         '202':
-          description: OK
+          description: Accepted
           schema:
-            $ref: '#/definitions/VolumeGroup'
+            $ref: '#/definitions/VolumeGroupSpec'
           examples:
             application/json:
               - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
@@ -808,10 +869,12 @@ paths:
                   - 993c87dc-1928-498b-9767-9da8f901d6ce 
                   - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
                 availabilityZone: default
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
@@ -826,25 +889,25 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/VolumeGroup'
+            $ref: '#/definitions/VolumeGroupSpec'
           examples:
             application/json:
-              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
-                createdAt: "2018-06-03T07:02:35.389Z"
-                name: volumeGroup-demo
-                status: available
-                description: volumeGroup test
-                profiles: 
-                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
-                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-                availabilityZone: default         
-                poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
+              id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+              createdAt: "2018-06-03T07:02:35.389Z"
+              name: volumeGroup-demo
+              status: available
+              description: volumeGroup test
+              profiles:
+                - 993c87dc-1928-498b-9767-9da8f901d6ce
+                - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+              availabilityZone: default
+              poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -880,13 +943,15 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/VolumeGroup'
+            $ref: '#/definitions/VolumeGroupSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -894,14 +959,14 @@ paths:
         - Block volume group
       description: Deletes a volume group.
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications':
@@ -917,18 +982,16 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Replication'
+              $ref: '#/definitions/ReplicationSpec'
           examples:
             application/json:
               - id: e416db95-b6f4-4669-a075-5a873d050a93
                 name: replication-demo
                 ReplicationStatus: enabled
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
     post:
@@ -939,12 +1002,12 @@ paths:
         - name: body
           in: body
           schema:
-             $ref: '#/definitions/Replication'
+             $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
-          description: OK
+          description: Accepted
           schema:
-            $ref: '#/definitions/Replication'
+            $ref: '#/definitions/ReplicationSpec'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -972,11 +1035,11 @@ paths:
               replicationPeriod: 0
               profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications/{replicationId}':
@@ -991,7 +1054,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Replication'
+            $ref: '#/definitions/ReplicationSpec'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -1018,14 +1081,12 @@ paths:
               replicationMode: sync
               replicationPeriod: 0
               profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     put:
@@ -1048,7 +1109,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Replication'
+            $ref: '#/definitions/ReplicationSpec'
           examples:
             application/json:
               id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -1076,13 +1137,13 @@ paths:
               replicationPeriod: 0
               profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
     delete:
@@ -1090,16 +1151,16 @@ paths:
         - Block Replications
       description: Deletes a replication.
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications/detail':
@@ -1115,7 +1176,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Replication'
+              $ref: '#/definitions/ReplicationSpec'
           examples:
             application/json:
               - id: e416db95-b6f4-4669-a075-5a873d050a93
@@ -1142,12 +1203,10 @@ paths:
                 replicationMode: sync
                 replicationPeriod: 0
                 profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications/{replicationId}/enable':
@@ -1158,17 +1217,22 @@ paths:
       tags:
         - Block Replications
       description: Enable Replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications/{replicationId}/disable':
@@ -1179,17 +1243,22 @@ paths:
       tags:
         - Block Replications
       description: Disable Replication.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
   '/v1beta/{projectId}/block/replications/{replicationId}/failover':
@@ -1204,39 +1273,41 @@ paths:
         - name: body
           in: body
           schema:
-            type: object
-            properties:
-              allowAttachedVolume:
-                type: boolean
-              secondaryBackendId:
-                type: string
+            $ref: '#/definitions/FailoverReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          description: Bad Request
+          $ref: '#/responses/HTTPStatus400'
         '401':
-          description: Unauthorized
+          $ref: '#/responses/HTTPStatus401'
         '403':
-          description: Forbidden
+          $ref: '#/responses/HTTPStatus403'
         '404':
-          description: The resource does not exist.
+          $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
 definitions:
   BaseModel:
     type: object
+    required:
+      - id
+      - createdAt
+      - updatedAt
     properties:
       id:
         type: string
+        example: 084bf71e-a102-11e7-88a8-e31fe6d52248
         readOnly: true
       createdAt:
         type: string
         format: date-time
+        example: 2017-07-10T14:36:58.014Z
         readOnly: true
       updatedAt:
         type: string
         format: date-time
+        example: 2017-07-10T14:36:58.014Z
         readOnly: true
   DataStorageLoS:
     description: >-
@@ -1246,8 +1317,12 @@ definitions:
     properties:
       recoveryTimeObjective:
         type: integer
+        format: int64
       provisioningPolicy:
         type: string
+        enum:
+          - Thin
+          - Thick
       isSpaceEfficient:
         type: boolean
   IOConnectivityLoS:
@@ -1255,13 +1330,22 @@ definitions:
       IOConnectivityLoS can be used to specify the characteristics of storage
       connectivity.
     type: object
+    required:
+      - accessProtocol
     properties:
       accessProtocol:
         type: string
+        enum:
+          - iscsi
+          - rbd
+          - fibre_channel
+          - DSWARE
       maxIOPS:
         type: integer
+        format: int64
       maxBWS:
         type: integer
+        format: int64
   DataProtectionLoS:
     description: >-
       DataProtectionLoS describes a replica that protects data from loss. The
@@ -1273,15 +1357,34 @@ definitions:
         type: boolean
       minLifetime:
         type: string
+        example: P3Y6M4DT12H30M5S
       RecoveryGeographicObjective:
         type: string
+        enum:
+          - Datacenter
+          - Rack
+          - RackGroup
+          - Region
+          - Row
+          - Server
       RecoveryPointObjectiveTime:
         type: string
+        example: P3Y6M4DT12H30M5S
       RecoveryTimeObjective:
         type: string
+        enum:
+          - OnlineActive
+          - OnlinePassive
+          - Nearline
+          - Offline
       ReplicaType:
         type: string
-  Dock:
+        enum:
+          - Clone
+          - Mirror
+          - Snapshot
+          - TokenizedClone
+  DockSpec:
     description: >-
       A backend is initialized by specific driver configuration. Each backend
       can be regarded as a docking service between SDS controller and storage
@@ -1289,20 +1392,51 @@ definitions:
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
+        required:
+          - name
+          - status
+          - driverName
+          - endpoint
+          - nodeId
         properties:
-          name:
+          type:
             type: string
-          storageType:
+            enum:
+              - provisioner
+              - attacher
+          name:
             type: string
           description:
             type: string
+          storageType:
+            type: string
+            enum:
+              - block
+              - file
+              - object
           status:
             type: string
+            enum:
+              - available
+              - unavailable
           driverName:
             type: string
+            enum:
+              - default
+              - lvm
+              - ceph
+              - cinder
+              - huawei_dorado
+              - huawei_fusionstorage
           endpoint:
             type: string
-  Pool:
+            example: 0.0.0.0:50050
+          nodeId:
+            type: string
+            example: 127.0.0.1
+          metadata:
+            type: object
+  StoragePoolSpec:
     description: >-
       A pool is discoveried and updated by a dock service. Each pool can be
       regarded as a physical storage pool or a virtual storage pool. It is a
@@ -1310,28 +1444,65 @@ definitions:
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
+        required:
+          - name
+          - status
+          - availabilityZone
+          - totalCapacity
+          - freeCapacity
+          - dockId
         properties:
           name:
             type: string
           storageType:
-            type: string            
+            type: string
+            enum:
+              - block
+              - file
+              - object
           description:
             type: string
           status:
             type: string
+            enum:
+              - available
+              - unavailable
           availabilityZone:
             type: string
+            default: default
           totalCapacity:
             type: integer
+            format: int64
           freeCapacity:
             type: integer
+            format: int64
           dockId:
             type: string
+            example: f4a5e666-c669-4c64-a2a1-8f9ecd560c78
           extras:
-            type: object
-            additionalProperties:
-              type: object            
-  Profile:
+            $ref: '#/definitions/StoragePoolExtraSpec'
+  StoragePoolExtraSpec:
+    description: >-
+      StoragePoolExtraSpec object represents the extra properties of the pool,
+      such as supported capabilities.
+    type: object
+    properties:
+      dataStorage:
+        $ref: '#/definitions/DataStorageLoS'
+      ioConnectivity:
+        $ref: '#/definitions/IOConnectivityLoS'
+      dataProtection:
+        $ref: '#/definitions/DataProtectionLoS'
+      customProperties:
+        type: object
+        additionalProperties:
+          type: object
+        example:
+          key1: value1
+          key2: false
+          key3:
+            key31: value31
+  ProfileSpec:
     description: >-
       An OpenSDS profile is identified by a unique name and ID. With adding
       extra properties, each profile can contains a set of tags of storage
@@ -1341,30 +1512,31 @@ definitions:
       - type: object
         required:
           - name
-          - storageType
+          - description
         properties:
-          id:
-            type: string
-            readOnly: true
           name:
             type: string
           storageType:
-            type: string            
+            type: string
+            enum:
+              - block
+              - file
+              - object
           description:
             type: string
           provisioningProperties:
-            $ref: '#/definitions/ProvisioningProperties'
+            $ref: '#/definitions/ProvisioningPropertiesSpec'
           replicationProperties:
-            $ref: '#/definitions/ReplicationProperties'
+            $ref: '#/definitions/ReplicationPropertiesSpec'
           snapshotProperties:
-            $ref: '#/definitions/SnapshotProperties'
+            $ref: '#/definitions/SnapshotPropertiesSpec'
           dataProtectionProperties:
-            $ref: '#/definitions/DataProtectionProperties'
+            $ref: '#/definitions/DataProtectionPropertiesSpec'
           customProperties:
-            $ref: '#/definitions/CustomProperties'
-  ProvisioningProperties:
+            $ref: '#/definitions/CustomPropertiesSpec'
+  ProvisioningPropertiesSpec:
     description: >-
-      ProvisioningProperties represents some suggested properties for performing
+      ProvisioningPropertiesSpec represents some suggested properties for performing
       provisioning policies.
     type: object
     properties:
@@ -1372,10 +1544,10 @@ definitions:
         $ref: '#/definitions/DataStorageLoS'
       ioConnectivity:
         $ref: '#/definitions/IOConnectivityLoS'
-  ReplicationProperties:
+  ReplicationPropertiesSpec:
     description: >-
-      ReplicationProperties represents some suggested properties for performing
-      replicaiton policies.
+      ReplicationPropertiesSpec represents some suggested properties for performing
+      replication policies.
     type: object
     properties:
       dataProtection:
@@ -1385,15 +1557,22 @@ definitions:
         properties:
           replicaUpdateMode:
             type: string
+            enum:
+              - Active
+              - Adaptive
+              - Asynchronous
+              - Synchronous
           consistencyEnalbed:
             type: boolean
           replicationPeriod:
             type: string
+            example: P3Y6M4DT12H30M5S
           replcationBandwidth:
             type: integer
-  SnapshotProperties:
+            format: int64
+  SnapshotPropertiesSpec:
     description: >-
-      SnapshotProperties represents some suggested properties for performing
+      SnapshotPropertiesSpec represents some suggested properties for performing
       snapshot policies.
     type: object
     properties:
@@ -1405,21 +1584,27 @@ definitions:
             format: date-time
           occurrence:
             type: string
-      replicaInfos:
+            enum:
+              - Daily
+              - Weekly
+              - Monthly
+      retention:
         type: object
         properties:
           number:
             type: integer
+            format: int64
           duration:
             type: integer
+            format: int64
       topology:
         type: object
         properties:
           bucket:
             type: string
-  DataProtectionProperties:
+  DataProtectionPropertiesSpec:
     description: >-
-      DataProtectionProperties represents some suggested properties for
+      DataProtectionPropertiesSpec represents some suggested properties for
       performing data protection policies.
     type: object
     properties:
@@ -1427,15 +1612,20 @@ definitions:
         $ref: '#/definitions/DataProtectionLoS'
       consistencyEnalbed:
         type: boolean	
-  CustomProperties:
+  CustomPropertiesSpec:
     description: >-
-      CustomProperties is a map of keys and JSON object that represents the
+      CustomPropertiesSpec is a map of keys and JSON object that represents the
       customized properties of profile, such as requested capabilities
       including diskType, latency, deduplicaiton, compression and so forth.
     type: object
     additionalProperties:
       type: object
-  Volume:
+    example:
+      key1: value1
+      key2: false
+      key3:
+        key31: value31
+  VolumeSpec:
     description: >-
       Volume is an block device created by storage service, it can be attached
       to physical machine or virtual machine instance. 
@@ -1443,10 +1633,12 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - projectId
           - name
           - availabilityZone
           - size
           - profileId
+          - poolId
         properties:
           projectId:
             type: string
@@ -1460,9 +1652,11 @@ definitions:
             type: string
           size:
             type: integer
+            format: int64
             example: 2
           availabilityZone:
             type: string
+            default: default
           status:
             type: string
             readOnly: true
@@ -1476,16 +1670,45 @@ definitions:
             type: string
           snapshotFromCloud:
             type: boolean
-  Attachment:
+          replicationId:
+            type: string
+          replicationDriverData:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              key1: value1
+              key2: value2
+          metadata:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              key1: value1
+              key2: value2
+  ExtendVolumeSpec:
+    description: >-
+      Extends the size of a volume to a requested size, in gibibytes (GiB).
+    type: object
+    required:
+      - newSize
+    properties:
+      newSize:
+        type: integer
+        format: int64
+        example: 2
+  VolumeAttachmentSpec:
     description: >-
       Attachment is a description of volume attached resource.
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - projectId
           - hostInfo
           - connectionInfo
           - mountpoint
+          - status
           - volumeId
         properties:
           projectId:
@@ -1536,17 +1759,32 @@ definitions:
         type: string
       data:
         type: object
-      additionalProperties:
+        example:
+          key1: value1
+          key2: false
+          key3:
+            key31: value31
+      extraProperties:
         type: object
-  Snapshot:
+          additionalProperties:
+            type: object
+          example:
+            key1: value1
+            key2: false
+            key3:
+              key31: value31
+  VolumeSnapshotSpec:
     description: >-
       Snapshot is a description of volume snapshot resource.
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - projectId
           - name
+          - status
           - volumeId
+          - profileId
         properties:
           projectId:
             type: string
@@ -1560,6 +1798,7 @@ definitions:
             type: string
           size:
             type: integer
+            format: int64
             readOnly: true
           status:
             type: string
@@ -1568,7 +1807,12 @@ definitions:
             type: string
           profileId:
             type: string
-  VolumeGroup:
+          metadata:
+            type: object
+            example:
+              key1: value1
+              key2: value2
+  VolumeGroupSpec:
     description: >-
       Volume group contains a list of volumes that are used in the same
       application.
@@ -1576,10 +1820,12 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - projectId
           - profiles
           - name
           - description
           - availabilityZone
+          - status
         properties:
           projectId:
             type: string
@@ -1610,7 +1856,7 @@ definitions:
             example: 
               - 993c87dc-1928-498b-9767-9da8f901d6ce 
               - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-  Replication:
+  ReplicationSpec:
     description: >-
       Replication represents a replication relationship between the volumes
       on the primary and secondary sites.
@@ -1618,6 +1864,7 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
+          - projectId
           - name
           - primaryVolumeId
           - scondaryVolumeId
@@ -1626,7 +1873,7 @@ definitions:
           - replicationMode
           - profileId
         properties:
-          tenantId:
+          projectId:
             type: string
             readOnly: true
           userId:
@@ -1671,10 +1918,16 @@ definitions:
             type: object
             additionalProperties:
               type: string
+            example:
+              key1: value1
+              key2: value2
           secondaryReplicationDriverData:
             type: object
             additionalProperties:
               type: string
+            example:
+              key1: value1
+              key2: value2
           replicationMode:
             type: string
             enum:
@@ -1682,11 +1935,22 @@ definitions:
               - async
           replicationPeriod:
             type: integer
+            format: int64
             minimum: 0
           profileId:
             type: string
             example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
-  Error:
+  FailoverReplicationSpec:
+    description: >-
+      FailoverReplicationSpec represents failover replication relationship between the volumes
+      on the primary and secondary sites.
+    type: object
+    properties:
+      allowAttachedVolume:
+        type: boolean
+      secondaryBackendId:
+        type: string
+  ErrorSpec:
     description: >-
       Detailed HTTP error response, which consists of a HTTP status code, and a
       custom error message unique for each failure case.
@@ -1699,12 +1963,16 @@ definitions:
         type: integer
       message:
         type: string
-  Version:
+  VersionSpec:
     description: >-
       Lists information for all SDS controller API versions. An API version is
       a  string that consists of a 'v' + number, or 'v' + number + 'alpha'  or
       'beta' + number.
     type: object
+    required:
+      - name
+      - status
+      - updated
     properties:
       name:
         type: string
@@ -1719,16 +1987,6 @@ definitions:
         type: string
         format: date-time
         example: '2017-04-10T14:36:58.014Z'
-  ExtendVolumeSpec:
-    description: >-
-      Extends the size of a volume to a requested size, in gibibytes (GiB).
-    type: object
-    required:
-      - newSize
-    properties:
-      newSize:
-        type: integer
-        example: 2
 parameters:
   apiVersion:
     name: apiVersion
@@ -1798,7 +2056,23 @@ parameters:
     description: The UUID of the relication.
     type: string
 responses:
+  HTTPStatus400:
+    description: BadRequest
+      schema:
+        $ref: '#/definitions/ErrorSpec'
+  HTTPStatus401:
+    description: NotAuthorized
+      schema:
+        $ref: '#/definitions/ErrorSpec'
+  HTTPStatus403:
+    description: Forbidden
+      schema:
+        $ref: '#/definitions/ErrorSpec'
+  HTTPStatus404:
+    description: The resource does not exist
+      schema:
+        $ref: '#/definitions/ErrorSpec'
   HTTPStatus500:
     description: An unexpected error occured.
     schema:
-      $ref: '#/definitions/Error'
+      $ref: '#/definitions/ErrorSpec'
