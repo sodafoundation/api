@@ -1768,13 +1768,13 @@ definitions:
             key31: value31
       extraProperties:
         type: object
-          additionalProperties:
-            type: object
-          example:
-            key1: value1
-            key2: false
-            key3:
-              key31: value31
+        additionalProperties:
+          type: object
+        example:
+          key1: value1
+          key2: false
+          key3:
+            key31: value31
   VolumeSnapshotSpec:
     description: >-
       Snapshot is a description of volume snapshot resource.
@@ -2060,21 +2060,31 @@ parameters:
 responses:
   HTTPStatus400:
     description: BadRequest
-      schema:
-        $ref: '#/definitions/ErrorSpec'
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/ErrorSpec'
   HTTPStatus401:
     description: NotAuthorized
-      schema:
-        $ref: '#/definitions/ErrorSpec'
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/ErrorSpec'
   HTTPStatus403:
     description: Forbidden
+    content:
+    application/json:
       schema:
         $ref: '#/definitions/ErrorSpec'
   HTTPStatus404:
     description: The resource does not exist
-      schema:
-        $ref: '#/definitions/ErrorSpec'
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/ErrorSpec'
   HTTPStatus500:
     description: An unexpected error occured.
-    schema:
-      $ref: '#/definitions/ErrorSpec'
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/ErrorSpec'
