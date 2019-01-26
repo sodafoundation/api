@@ -31,6 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/api/filter/accesslog"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
+	cfg "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
@@ -41,7 +42,7 @@ const (
 	StatusAccepted = http.StatusAccepted
 )
 
-func Run(host, key, cert string) {
+func Run(osdsletCfg cfg.OsdsLet) {
 
 	// add router for v1beta api
 	ns :=
@@ -50,6 +51,12 @@ func Run(host, key, cert string) {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
 					return false
+				}
+
+				if osdsletCfg.EnableHTTPS == true {
+					if ctx.Input.Scheme() != "https" || osdsletCfg.BeegoHTTPSCertFile == "" || osdsletCfg.BeegoHTTPSKeyFile == "" {
+						return false
+					}
 				}
 				return true
 			}),
@@ -116,30 +123,33 @@ func Run(host, key, cert string) {
 	beego.Router("/", &VersionPortal{}, "get:ListVersions")
 	beego.Router("/:apiVersion", &VersionPortal{}, "get:GetVersion")
 
-	// beego https config
-	beego.BConfig.Listen.EnableHTTP = false
-	beego.BConfig.Listen.EnableHTTPS = true
-	strs := strings.Split(host, ":")
-	beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
-	beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
-	beego.BConfig.Listen.HTTPSCertFile = cert
-	beego.BConfig.Listen.HTTPSKeyFile = key
+	if osdsletCfg.EnableHTTPS == true {
+		// beego https config
+		beego.BConfig.Listen.EnableHTTP = false
+		beego.BConfig.Listen.EnableHTTPS = true
+		strs := strings.Split(osdsletCfg.ApiEndpoint, ":")
+		beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
+		beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
+		beego.BConfig.Listen.HTTPSCertFile = osdsletCfg.BeegoHTTPSCertFile
+		beego.BConfig.Listen.HTTPSKeyFile = osdsletCfg.BeegoHTTPSKeyFile
+		tlsConfig := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			},
+		}
+
+		beego.BeeApp.Server.TLSConfig = tlsConfig
+	}
+
 	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.EnableErrorsShow = false
 	beego.BConfig.EnableErrorsRender = false
 	beego.BConfig.WebConfig.AutoRender = false
-	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		},
-	}
-
-	beego.BeeApp.Server.TLSConfig = tlsConfig
 
 	// start service
-	beego.Run(host)
+	beego.Run(osdsletCfg.ApiEndpoint)
 }

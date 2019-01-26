@@ -96,7 +96,11 @@ func customVerify(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error
 
 func request(url string, method string, headers HeaderOption, input interface{}, output interface{}) error {
 	req := httplib.NewBeegoRequest(url, strings.ToUpper(method))
-	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true, VerifyPeerCertificate: customVerify})
+
+	if httpsEnabled && cacert != "" {
+		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true, VerifyPeerCertificate: customVerify})
+	}
+
 	// Set the request timeout a little bit longer upload snapshot to cloud temporarily.
 	req.SetTimeout(time.Minute*6, time.Minute*6)
 	// init body

@@ -17,6 +17,7 @@ package client
 import (
 	"errors"
 	"log"
+	"net/url"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
@@ -24,6 +25,11 @@ import (
 
 const (
 	OpensdsEndpoint = "OPENSDS_ENDPOINT"
+)
+
+var (
+	httpsEnabled bool
+	cacert       string
 )
 
 // Client is a struct for exposing some operations of opensds resources.
@@ -41,6 +47,8 @@ type Client struct {
 // Config is a struct that defines some options for calling the Client.
 type Config struct {
 	Endpoint    string
+	CACert      string
+	EnableHTTPS bool
 	AuthOptions AuthOptions
 }
 
@@ -50,6 +58,22 @@ func NewClient(c *Config) *Client {
 	if c.Endpoint == "" {
 		c.Endpoint = constants.DefaultOpensdsEndpoint
 		log.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)", c.Endpoint)
+	}
+
+	if c.EnableHTTPS {
+		if c.CACert == "" {
+			log.Printf("If https is enabled, CA cert file should be provided.")
+			return nil
+		}
+
+		u, _ := url.Parse(c.Endpoint)
+		if u.Scheme != "https" {
+			log.Printf("If https is enabled, the scheme of the url should be https.")
+			return nil
+		}
+
+		httpsEnabled = true
+		cacert = c.CACert
 	}
 
 	var r Receiver
