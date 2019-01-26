@@ -1768,13 +1768,13 @@ definitions:
             key31: value31
       extraProperties:
         type: object
-          additionalProperties:
-            type: object
-          example:
-            key1: value1
-            key2: false
-            key3:
-              key31: value31
+        additionalProperties:
+          type: object
+        example:
+          key1: value1
+          key2: false
+          key3:
+            key31: value31
   VolumeSnapshotSpec:
     description: >-
       Snapshot is a description of volume snapshot resource.
