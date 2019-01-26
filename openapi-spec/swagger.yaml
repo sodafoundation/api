@@ -1759,6 +1759,8 @@ definitions:
         type: string
       data:
         type: object
+        additionalProperties:
+          type: object
         example:
           key1: value1
           key2: false
