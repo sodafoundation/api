@@ -28,7 +28,6 @@ const (
 )
 
 var (
-	httpsEnabled bool
 	cacert       string
 )
 
@@ -48,7 +47,6 @@ type Client struct {
 type Config struct {
 	Endpoint    string
 	CACert      string
-	EnableHTTPS bool
 	AuthOptions AuthOptions
 }
 
@@ -60,19 +58,12 @@ func NewClient(c *Config) *Client {
 		log.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)", c.Endpoint)
 	}
 
-	if c.EnableHTTPS {
+	u, _ := url.Parse(c.Endpoint)
+	if u.Scheme == "https" {
 		if c.CACert == "" {
 			log.Printf("If https is enabled, CA cert file should be provided.")
 			return nil
 		}
-
-		u, _ := url.Parse(c.Endpoint)
-		if u.Scheme != "https" {
-			log.Printf("If https is enabled, the scheme of the url should be https.")
-			return nil
-		}
-
-		httpsEnabled = true
 		cacert = c.CACert
 	}
 
