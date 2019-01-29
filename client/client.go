@@ -16,7 +16,7 @@ package client
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	cacert       string
+	cacert string
 )
 
 // Client is a struct for exposing some operations of opensds resources.
@@ -55,13 +55,13 @@ func NewClient(c *Config) *Client {
 	// If endpoint field not specified,use the default value localhost.
 	if c.Endpoint == "" {
 		c.Endpoint = constants.DefaultOpensdsEndpoint
-		log.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)", c.Endpoint)
+		fmt.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)\n", c.Endpoint)
 	}
 
 	u, _ := url.Parse(c.Endpoint)
 	if u.Scheme == "https" {
 		if c.CACert == "" {
-			log.Printf("If https is enabled, CA cert file should be provided.")
+			fmt.Println("If https is enabled, CA cert file should be provided.")
 			return nil
 		}
 		cacert = c.CACert
@@ -74,7 +74,7 @@ func NewClient(c *Config) *Client {
 	case *KeystoneAuthOptions:
 		r = NewKeystoneReciver(c.AuthOptions.(*KeystoneAuthOptions))
 	default:
-		log.Printf("Warnning: Not support auth options, use default")
+		fmt.Println("Warnning: Not support auth options, use default")
 		r = NewReceiver()
 		c.AuthOptions = NewNoauthOptions(constants.DefaultTenantId)
 	}

@@ -21,8 +21,7 @@ set +o xtrace
 
 
 osds:opensds:configuration(){
-# Set global configuration. If https is enabled, the default value of cert file
-# is /opt/opensds-security/opensds/opensds-cert.pem, and key file is /opt/opensds-security/opensds/opensds-key.pem
+# Set global configuration.
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [osdslet]
 api_endpoint = 0.0.0.0:50040
@@ -30,6 +29,10 @@ graceful = True
 log_file = /var/log/opensds/osdslet.log
 socket_order = inc
 auth_strategy = $OPENSDS_AUTH_STRATEGY
+#If https is enabled, the default value of cert file
+# is /opt/opensds-security/opensds/opensds-cert.pem, 
+#and key file is /opt/opensds-security/opensds/opensds-key.pem
+https_enabled = False
 beego_https_cert_file = ""
 beego_https_key_file = ""
 
