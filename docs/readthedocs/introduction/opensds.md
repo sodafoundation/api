@@ -34,5 +34,6 @@ now, please refer to the Contributing sections below.
 
 ### OpenAPI
 
-* [Zealand](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)
+* [Bali](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.4.0/openapi-spec/swagger.yaml)
 * [Aruba](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.2.0/openapi-spec/swagger.yaml)
+* [Zealand](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)

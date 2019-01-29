@@ -31,7 +31,6 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
 func NewKeystone() AuthBase {
@@ -49,19 +48,12 @@ type Keystone struct {
 
 func (k *Keystone) SetUp() error {
 	c := config.CONF.KeystoneAuthToken
-	// Decrypte the password
-	pwdCiphertext := c.Password
-	pwdTool := pwd.NewPwdTool(config.CONF.OsdsLet.PasswordDecryptTool)
-	password, err := pwdTool.Decrypter(pwdCiphertext)
-	if err != nil {
-		return err
-	}
 
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: c.AuthUrl,
 		DomainName:       c.UserDomainName,
 		Username:         c.Username,
-		Password:         password,
+		Password:         c.Password,
 		TenantName:       c.ProjectName,
 	}
 	provider, err := openstack.AuthenticatedClient(opts)
