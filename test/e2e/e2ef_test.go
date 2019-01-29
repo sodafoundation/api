@@ -30,7 +30,7 @@ import (
 )
 
 var u = client.NewClient(&client.Config{
-	Endpoint:    "https://localhost:50040",
+	Endpoint:    "http://localhost:50040",
 	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 //init Create Profile
