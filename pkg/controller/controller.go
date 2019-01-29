@@ -106,9 +106,7 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 		}
 		snapSize = snapVol.Size
 		in.PoolId = snapVol.PoolId
-		if in.SnapshotFromCloud {
-			in.Metadata = utils.MergeStringMaps(in.Metadata, snap.Metadata)
-		}
+		in.Metadata = utils.MergeStringMaps(in.Metadata, snap.Metadata)
 	}
 
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(in)
@@ -325,6 +323,8 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 
 	opt := &pb.ExtendVolumeOpts{
 		Id:         vol.Id,
+		PoolName:   pool.Name,
+		PoolId:     pool.Id,
 		Size:       newSize,
 		Metadata:   vol.Metadata,
 		DriverName: dockInfo.DriverName,
