@@ -74,7 +74,7 @@ func NewClient(c *Config) *Client {
 	case *KeystoneAuthOptions:
 		r = NewKeystoneReciver(c.AuthOptions.(*KeystoneAuthOptions))
 	default:
-		fmt.Println("Warnning: Not support auth options, use default")
+		fmt.Println("Warning: Not support auth options, use default.")
 		r = NewReceiver()
 		c.AuthOptions = NewNoauthOptions(constants.DefaultTenantId)
 	}
