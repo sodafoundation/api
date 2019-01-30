@@ -18,6 +18,7 @@ import (
 	"os"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
 const (
@@ -32,9 +33,9 @@ const (
 	OsTenantName   = "OS_TENANT_NAME"
 	OsProjectName  = "OS_PROJECT_NAME"
 	OsUserDomainId = "OS_USER_DOMAIN_ID"
-
-	Keystone = "keystone"
-	Noauth   = "noauth"
+	OsPasswordTool = "OS_PASSWORD_DECRYPT_TOOL"
+	Keystone       = "keystone"
+	Noauth         = "noauth"
 )
 
 type AuthOptions interface {
@@ -78,13 +79,18 @@ func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
 	opt := NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
-	opt.Password = os.Getenv(OsPassword)
+	// Decrypte the password
+	pwdCiphertext := os.Getenv(OsPassword)
+	pwdTool := pwd.NewPwdTool(os.Getenv(OsPasswordTool))
+	opt.Password, _ = pwdTool.Decrypter(pwdCiphertext)
+
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
 	opt.DomainID = os.Getenv(OsUserDomainId)
 	if opt.TenantName == "" {
 		opt.TenantName = projectName
 	}
+
 	return opt
 }
 
