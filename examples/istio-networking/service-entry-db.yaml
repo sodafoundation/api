@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: external-etcd-db
+spec:
+  hosts:
+    - localhost
+  location: MESH_EXTERNAL
+  ports:
+    - number: 2379
+      name: http1
+      protocol: HTTP
+    - number: 2380
+        name: http2
+        protocol: HTTP
+    resolution: DNS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: external-etcd-db
+spec:
+  hosts:
+    - localhost
+  http:
+    - timeout: 5s
+      route:
+        - destination:
+            host: localhost
+---
