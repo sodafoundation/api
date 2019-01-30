@@ -65,7 +65,7 @@ func TestParseTokenize(t *testing.T) {
 		{"string", "a-string"}, {"string", "another-string"}}
 	// please synchronized update the index when if modified the unit test.
 	results[13].value = "check:%(miss)s"
-	for i, _ := range results {
+	for i := range results {
 		if results[i].token != expected[i].token || results[i].value != expected[i].value {
 			t.Errorf("Test parseTokenize failed, results:%v, expected:%v", results[i], expected[i])
 		}

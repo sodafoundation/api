@@ -77,10 +77,10 @@ func TestListVolumes(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumesWithFilter", c.NewAdminContext(), m).Return(fakeVolumes, nil)
 	db.C = mockClient
@@ -123,10 +123,10 @@ func TestListVolumesWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -313,10 +313,10 @@ func TestListVolumeSnapshots(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumeSnapshotsWithFilter", c.NewAdminContext(), m).Return(fakeSnapshots, nil)
 	db.C = mockClient
@@ -357,10 +357,10 @@ func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"offset":  []string{"0"},
-		"limit":   []string{"1"},
-		"sortDir": []string{"asc"},
-		"sortKey": []string{"name"},
+		"offset":  {"0"},
+		"limit":   {"1"},
+		"sortDir": {"asc"},
+		"sortKey": {"name"},
 	}
 	mockClient.On("ListVolumeSnapshotsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 	db.C = mockClient
@@ -548,11 +548,11 @@ func TestListVolumeAttachments(t *testing.T) {
 
 	mockClient := new(dbtest.Client)
 	m := map[string][]string{
-		"volumeId": []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
-		"offset":   []string{"0"},
-		"limit":    []string{"1"},
-		"sortDir":  []string{"asc"},
-		"sortKey":  []string{"name"},
+		"volumeId": {"bd5b12a8-a101-11e7-941e-d77981b584d8"},
+		"offset":   {"0"},
+		"limit":    {"1"},
+		"sortDir":  {"asc"},
+		"sortKey":  {"name"},
 	}
 	mockClient.On("ListVolumeAttachmentsWithFilter", c.NewAdminContext(), m).Return(fakeAttachments, nil)
 	db.C = mockClient
@@ -736,26 +736,24 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 	}
 }
 
-func TestExtendVolumeWithBadRequest(t *testing.T) {
-	var jsonStr = []byte(`{"extend":{"newSize": 0}}`)
+func TestExtendVolume(t *testing.T) {
+	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
 	r, _ := http.NewRequest("POST",
 		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
 
-	var ExtendVolumeBody = model.ExtendVolumeSpec{}
-
-	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
-
 	volume := &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
 		Status:    "available",
 		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
 	}
 
 	mockClient := new(dbtest.Client)
 	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
 	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
 
 	db.C = mockClient
@@ -767,18 +765,40 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 	if w.Code != StatusAccepted {
 		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
 	}
+}
 
-	jsonStr = []byte(`{"extend":{"newSize": 92}}`)
-	r, _ = http.NewRequest("POST",
+func TestExtendVolumeWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
+	r, _ := http.NewRequest("POST",
 		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 	r.Header.Set("Content-Type", "application/JSON")
-	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&ExtendVolumeBody)
 
+	volume := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    "available",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	volumeExtending := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    model.VolumeExtending,
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	mockClient := new(dbtest.Client)
 	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
-	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volumeExtending, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
 	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
 
+	db.C = mockClient
+
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	if w.Code != 400 {

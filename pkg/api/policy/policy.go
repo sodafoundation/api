@@ -105,9 +105,8 @@ func (e *Enforcer) LoadRules(forcedReload bool) error {
 			}
 		}
 		return nil
-	} else {
-		return e.LoadPolicyFile(path, forcedReload, e.OverWrite)
 	}
+	return e.LoadPolicyFile(path, forcedReload, e.OverWrite)
 }
 
 func (e *Enforcer) UpdateRules(rules map[string]BaseCheck) {
