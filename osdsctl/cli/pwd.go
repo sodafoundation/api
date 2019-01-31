@@ -1,6 +1,6 @@
-//// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
-////
-//// Licensed under the Apache License, Version 2.0 (the "License");
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -12,32 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cli
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/howeyc/gopass"
 	"github.com/opensds/opensds/pkg/utils/pwd"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	fmt.Print("Enter password: ")
-	plainText, err := gopass.GetPasswdMasked()
-	if err != nil {
-		fmt.Printf("Input password error: %v\n", err)
-		os.Exit(1)
-	}
+var aesCommand = &cobra.Command{
+	Use:   "aes <password>",
+	Short: "encryption tool",
+	Run:   encrypter,
+}
 
+func encrypter(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		cmd.Usage()
+		os.Exit(0)
+	}
+	ArgsNumCheck(cmd, args, 1)
 	// Encrypt the password
 	pwdTool := pwd.NewPwdTool("aes")
-	pwd, err := pwdTool.Encrypter(string(plainText))
-
+	pwd, err := pwdTool.Encrypter(args[0])
+	fmt.Print(pwd)
 	if err != nil {
-		fmt.Printf("Encrypt password error: %v\n", err)
-		os.Exit(1)
+		Fatalln("Encrypt password error: %v", err)
 	}
-
-	fmt.Println("Encrypted password:", pwd)
 }
