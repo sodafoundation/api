@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsctl
+build:osdsdock osdslet osdsctl pwdtool
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -41,6 +41,9 @@ osdslet: prebuild
 
 osdsctl: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+
+pwdtool: prebuild
+    go build -o $(BUILD_DIR)/bin/pwdtool github.com/opensds/opensds/pkg/utils/pwdTool
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
