@@ -25,6 +25,7 @@ import (
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
+	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
 type ArrayInnerError struct {
@@ -58,13 +59,21 @@ type DoradoClient struct {
 
 func NewClient(opt *AuthOptions) (*DoradoClient, error) {
 	endpoints := strings.Split(opt.Endpoints, ",")
+	// Decrypte the password
+	pwdCiphertext := opt.Password
+	pwdTool := pwd.NewPwdTool(opt.PasswordTool)
+	pwd, err := pwdTool.Decrypter(pwdCiphertext)
+	if err != nil {
+		return nil, err
+	}
+
 	c := &DoradoClient{
 		user:      opt.Username,
-		passwd:    opt.Password,
+		passwd:    pwd,
 		endpoints: endpoints,
 		insecure:  opt.Insecure,
 	}
-	err := c.login()
+	err = c.login()
 	return c, err
 }
 

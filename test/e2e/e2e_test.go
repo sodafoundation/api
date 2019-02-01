@@ -31,7 +31,7 @@ import (
 
 var (
 	c = client.NewClient(&client.Config{
-		Endpoint:    "https://localhost:50040",
+		Endpoint:    "http://localhost:50040",
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
 
 	localIqn  = "iqn.2017-10.io.opensds:volume:00000001"
