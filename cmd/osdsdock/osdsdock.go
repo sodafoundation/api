@@ -23,22 +23,22 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
 	// Load global configuration from specified config file.
-	def := GetDefaultConfig()
+	CONF.Load(constants.OpensdsConfigPath)
 
+	// Parse some configuration fields from command line.
+	def := CONF
 	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of dock service")
 	flag.StringVar(&CONF.OsdsDock.DockType, "dock-type", def.OsdsDock.DockType, "Type of dock service")
 	flag.BoolVar(&CONF.OsdsDock.Daemon, "daemon", def.OsdsDock.Daemon, "Run app as a daemon with -daemon=true")
 	flag.DurationVar(&CONF.OsdsDock.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	CONF.Load("/etc/opensds/opensds.conf")
 
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
 }

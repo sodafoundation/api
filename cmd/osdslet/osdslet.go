@@ -23,21 +23,21 @@ import (
 	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
 	// Load global configuration from specified config file.
-	def := GetDefaultConfig()
+	CONF.Load(constants.OpensdsConfigPath)
 
+	// Parse some configuration fields from command line.
+	def := CONF
 	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", def.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
 	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", def.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	CONF.Load("/etc/opensds/opensds.conf")
 
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
 }
@@ -53,13 +53,8 @@ func main() {
 	// Initialize Controller object.
 	c.Brain = c.NewController()
 
-<<<<<<< HEAD
 	// Construct controller module grpc server struct and run controller server process.
 	if err := c.NewCtlServer(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
 		panic(err)
 	}
-=======
-	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsLet)
->>>>>>> d4dd43e2880bf3d63c36d3df3c14168d5b931c72
 }

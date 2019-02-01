@@ -23,21 +23,21 @@ import (
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
 	// Load global configuration from specified config file.
-	def := GetDefaultConfig()
+	CONF.Load(constants.OpensdsConfigPath)
 
+	// Parse some configuration fields from command line.
+	def := CONF
 	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", def.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
 	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", def.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", def.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
-	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	CONF.Load("/etc/opensds/opensds.conf")
 
 	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)
 }
@@ -51,5 +51,5 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsApiServer.ApiEndpoint, CONF.OsdsApiServer.BeegoHTTPSKeyFile, CONF.OsdsApiServer.BeegoHTTPSCertFile)
+	api.Run(CONF.OsdsApiServer)
 }

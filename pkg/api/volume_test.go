@@ -355,7 +355,7 @@ func TestExtendVolumeWithBadRequest(t *testing.T) {
 
 	volume := &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
-		Status:    "available",
+		Status:    model.VolumeAvailable,
 		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		Size:      1,
 	}

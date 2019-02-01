@@ -69,6 +69,10 @@
   branch = "master"
   name = "github.com/howeyc/gopass"
 
+[[constraint]]
+  name = "github.com/gophercloud/gophercloud"
+  revision = "754e57e7867bfa48062ff2a237caad538085700a"
+
 [prune]
   go-tests = true
   non-go = true

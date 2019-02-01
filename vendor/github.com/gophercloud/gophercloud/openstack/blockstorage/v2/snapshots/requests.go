@@ -65,20 +65,8 @@ type ListOptsBuilder interface {
 // ListOpts hold options for listing Snapshots. It is passed to the
 // snapshots.List function.
 type ListOpts struct {
-	// AllTenants will retrieve snapshots of all tenants/projects.
-	AllTenants bool `q:"all_tenants"`
-
-	// Name will filter by the specified snapshot name.
-	Name string `q:"name"`
-
-	// Status will filter by the specified status.
-	Status string `q:"status"`
-
-	// TenantID will filter by a specific tenant/project ID.
-	// Setting AllTenants is required to use this.
-	TenantID string `q:"project_id"`
-
-	// VolumeID will filter by a specified volume ID.
+	Name     string `q:"name"`
+	Status   string `q:"status"`
 	VolumeID string `q:"volume_id"`
 }
 
@@ -142,12 +130,7 @@ func UpdateMetadata(client *gophercloud.ServiceClient, id string, opts UpdateMet
 func IDFromName(client *gophercloud.ServiceClient, name string) (string, error) {
 	count := 0
 	id := ""
-
-	listOpts := ListOpts{
-		Name: name,
-	}
-
-	pages, err := List(client, listOpts).AllPages()
+	pages, err := List(client, nil).AllPages()
 	if err != nil {
 		return "", err
 	}

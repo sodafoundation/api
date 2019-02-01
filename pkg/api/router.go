@@ -38,11 +38,14 @@ import (
 const (
 	AddressIdx = iota
 	PortIdx
+)
+
+const (
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
 )
 
-func Run(osdsletCfg cfg.OsdsLet) {
+func Run(apiServerCfg cfg.OsdsApiServer) {
 
 	// add router for v1beta api
 	ns :=
@@ -54,7 +57,7 @@ func Run(osdsletCfg cfg.OsdsLet) {
 				}
 
 				if ctx.Input.Scheme() == "https" {
-					if osdsletCfg.BeegoHTTPSCertFile == "" || osdsletCfg.BeegoHTTPSKeyFile == "" {
+					if apiServerCfg.BeegoHTTPSCertFile == "" || apiServerCfg.BeegoHTTPSKeyFile == "" {
 						fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
 						return false
 					}
@@ -62,11 +65,11 @@ func Run(osdsletCfg cfg.OsdsLet) {
 					// beego https config
 					beego.BConfig.Listen.EnableHTTP = false
 					beego.BConfig.Listen.EnableHTTPS = true
-					strs := strings.Split(osdsletCfg.ApiEndpoint, ":")
+					strs := strings.Split(apiServerCfg.ApiEndpoint, ":")
 					beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
 					beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
-					beego.BConfig.Listen.HTTPSCertFile = osdsletCfg.BeegoHTTPSCertFile
-					beego.BConfig.Listen.HTTPSKeyFile = osdsletCfg.BeegoHTTPSKeyFile
+					beego.BConfig.Listen.HTTPSCertFile = apiServerCfg.BeegoHTTPSCertFile
+					beego.BConfig.Listen.HTTPSKeyFile = apiServerCfg.BeegoHTTPSKeyFile
 					tlsConfig := &tls.Config{
 						MinVersion: tls.VersionTLS12,
 						CipherSuites: []uint16{
@@ -151,5 +154,5 @@ func Run(osdsletCfg cfg.OsdsLet) {
 	beego.BConfig.WebConfig.AutoRender = false
 
 	// start service
-	beego.Run(osdsletCfg.ApiEndpoint)
+	beego.Run(apiServerCfg.ApiEndpoint)
 }
