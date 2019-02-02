@@ -13,11 +13,11 @@ opensds is Apache 2.0 licensed and accepts contributions via GitHub pull request
 ## Email and chat
 
 - Email: [opensds-dev](https://lists.opensds.io/mailman/listinfo)
-- Slack: #[opensds](https://opensds.slack.com) 
+- Slack: #[opensds](https://opensds.slack.com)
 
 Before you start, NOTICE that ```master``` branch is the relatively stable version
 provided for customers and users. So all code modifications SHOULD be submitted to
-```development``` branch.
+`development` branch.
 
 ## Getting started
 
@@ -50,7 +50,7 @@ When reporting issues, refer to this format:
 
 - Raise your idea as an [issue](https://github.com/opensds/opensds/issues)
 - If it is a new feature that needs lots of design details, a design proposal should also be submitted [here](https://github.com/opensds/design-specs/pulls).
-- After reaching consensus in the issue discussions and design proposal reviews, complete the development on the forked repo and submit a PR. 
+- After reaching consensus in the issue discussions and design proposal reviews, complete the development on the forked repo and submit a PR.
   Here are the [PRs](https://github.com/opensds/opensds/pulls?q=is%3Apr+is%3Aclosed) that are already closed.
 - If a PR is submitted by one of the core members, it has to be merged by a different core member.
 - After PR is sufficiently discussed, it will get merged, abondoned or rejected depending on the outcome of the discussion.
