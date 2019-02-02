@@ -16,7 +16,6 @@ package iscsi
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -30,16 +29,16 @@ import (
 
 // IscsiConnectorInfo define
 type IscsiConnectorInfo struct {
-	AccessMode string   `mapstructure:"accessMode"`
-	AuthUser   string   `mapstructure:"authUserName"`
-	AuthPass   string   `mapstructure:"authPassword"`
-	AuthMethod string   `mapstructure:"authMethod"`
-	TgtDisco   bool     `mapstructure:"targetDiscovered"`
-	TgtIQN     []string `mapstructure:"targetIqn"`
-	TgtPortal  []string `mapstructure:"targetPortal"`
-	VolumeID   string   `mapstructure:"volumeId"`
-	TgtLun     int      `mapstructure:"targetLun"`
-	Encrypted  bool     `mapstructure:"encrypted"`
+	AccessMode string `mapstructure:"accessMode"`
+	AuthUser   string `mapstructure:"authUserName"`
+	AuthPass   string `mapstructure:"authPassword"`
+	AuthMethod string `mapstructure:"authMethod"`
+	TgtDisco   bool   `mapstructure:"targetDiscovered"`
+	TgtIQN     string `mapstructure:"targetIqn"`
+	TgtPortal  string `mapstructure:"targetPortal"`
+	VolumeID   string `mapstructure:"volumeId"`
+	TgtLun     int    `mapstructure:"targetLun"`
+	Encrypted  bool   `mapstructure:"encrypted"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,9 +179,10 @@ func Delete(targetiqn string) error {
 
 // Connect ISCSI Target
 func Connect(connMap map[string]interface{}) (string, error) {
-	portal, targetiqn, targetlunInteger, authMethod, authUser, authPass := ParseIscsiConnectInfo(connMap)
-
-	targetlun := strconv.Itoa(targetlunInteger)
+	conn := ParseIscsiConnectInfo(connMap)
+	portal := conn.TgtPortal
+	targetiqn := conn.TgtIQN
+	targetlun := strconv.Itoa(conn.TgtLun)
 
 	devicePath := strings.Join([]string{
 		"/dev/disk/by-path/ip",
@@ -201,8 +201,8 @@ func Connect(connMap map[string]interface{}) (string, error) {
 			return "", err
 		}
 		// Set authentication messages,if is has.
-		if len(authMethod) != 0 {
-			SetAuth(portal, targetiqn, authUser, authPass)
+		if len(conn.AuthMethod) != 0 {
+			SetAuth(portal, targetiqn, conn.AuthUser, conn.AuthPass)
 		}
 		//Login
 		err = Login(portal, targetiqn)
@@ -256,41 +256,10 @@ func Disconnect(portal string, targetiqn string) error {
 }
 
 // ParseIscsiConnectInfo decode
-func ParseIscsiConnectInfo(connectInfo map[string]interface{}) (string, string, int, string, string, string, error) {
+func ParseIscsiConnectInfo(connectInfo map[string]interface{}) *IscsiConnectorInfo {
 	var con IscsiConnectorInfo
 	mapstructure.Decode(connectInfo, &con)
-
-	if len(con.TgtPortal) == 0 || len(con.TgtIQN) == 0 || con.TgtLun == 0 {
-		msg := fmt.Sprintf("iscsi connection data invalid.")
-		log.Println(msg)
-		return "", "", "", "", "", "", "", errors.New(msg)
-	}
-
-	var index int
-	log.Println("TgtPortal:", con.TgtPortal)
-	for i, portal := range con.TgtPortal {
-		strs := strings.Split(portal, ":")
-		ip := strs[0]
-		cmd := "ping -c 2 " + ip
-		res, err := connector.ExecCmd("/bin/bash", "-c", cmd)
-		log.Println("ping result:%v", res)
-		if err != nil {
-			log.Println("ping error:%v", res)
-			if i == len(conn.TgtPortal)-1 {
-				msg := fmt.Sprintf("no available iscsi portal.")
-				log.Println(msg)
-				return "", errors.New(msg)
-			}
-			continue
-		}
-		index = i
-		break
-	}
-
-	portalValid := con.TgtPortal[index]
-	targetiqnValid := con.TgtIQN[index]
-
-	return portalValid, targetiqnValid, targetlun, con.AuthMethod, con.AuthUser, con.AuthPass, nil
+	return &con
 }
 
 // getInitiatorInfo implementation
