@@ -28,8 +28,8 @@ type VolumeGroupPortal struct {
 	BasePortal
 }
 
-func (this *VolumeGroupPortal) CreateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:create") {
+func (v *VolumeGroupPortal) CreateVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:create") {
 		return
 	}
 
@@ -38,123 +38,123 @@ func (this *VolumeGroupPortal) CreateVolumeGroup() {
 	}
 
 	// Unmarshal the request body
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&volumeGroup); err != nil {
-		this.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
+	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volumeGroup); err != nil {
+		v.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
 		return
 	}
 	// NOTE:It will create a volume group entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume group process creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeGroupDBEntry(c.GetContext(this.Ctx), volumeGroup)
+	result, err := CreateVolumeGroupDBEntry(c.GetContext(v.Ctx), volumeGroup)
 	if err != nil {
-		this.ErrorHandle("Create volume group failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Create volume group failed", model.ErrorInternalServer, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal profile created result failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("Marshal profile created result failed", model.ErrorBadRequest, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
 
-func (this *VolumeGroupPortal) UpdateVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:update") {
+func (v *VolumeGroupPortal) UpdateVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:update") {
 		return
 	}
 	var vg = &model.VolumeGroupSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
-	id := this.Ctx.Input.Param(":groupId")
-	if err := json.NewDecoder(this.Ctx.Request.Body).Decode(&vg); err != nil {
-		this.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
+	id := v.Ctx.Input.Param(":groupId")
+	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&vg); err != nil {
+		v.ErrorHandle("Parse volume group request body failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	vg.Id = id
 
-	result, err := UpdateVolumeGroupDBEntry(c.GetContext(this.Ctx), vg)
+	result, err := UpdateVolumeGroupDBEntry(c.GetContext(v.Ctx), vg)
 	if err != nil {
-		this.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Update volume group failed", model.ErrorInternalServer, err)
 		return
 	}
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group updated result failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Marshal volume group updated result failed", model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
 
-func (this *VolumeGroupPortal) DeleteVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:delete") {
+func (v *VolumeGroupPortal) DeleteVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:delete") {
 		return
 	}
 
-	err := DeleteVolumeGroupDBEntry(c.GetContext(this.Ctx), this.Ctx.Input.Param(":groupId"))
+	err := DeleteVolumeGroupDBEntry(c.GetContext(v.Ctx), v.Ctx.Input.Param(":groupId"))
 	if err != nil {
-		this.ErrorHandle("Delete volume group failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Delete volume group failed", model.ErrorInternalServer, err)
 		return
 	}
-	this.SuccessHandle(StatusAccepted, nil)
+	v.SuccessHandle(StatusAccepted, nil)
 	return
 }
 
-func (this *VolumeGroupPortal) GetVolumeGroup() {
-	if !policy.Authorize(this.Ctx, "volume_group:get") {
+func (v *VolumeGroupPortal) GetVolumeGroup() {
+	if !policy.Authorize(v.Ctx, "volume_group:get") {
 		return
 	}
 
 	// Call db api module to handle get volume request.
-	result, err := db.C.GetVolumeGroup(c.GetContext(this.Ctx), this.Ctx.Input.Param(":groupId"))
+	result, err := db.C.GetVolumeGroup(c.GetContext(v.Ctx), v.Ctx.Input.Param(":groupId"))
 	if err != nil {
-		this.ErrorHandle("Get volume group failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("Get volume group failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Marshal volume group showed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
 
-func (this *VolumeGroupPortal) ListVolumeGroups() {
-	if !policy.Authorize(this.Ctx, "volume_group:get") {
+func (v *VolumeGroupPortal) ListVolumeGroups() {
+	if !policy.Authorize(v.Ctx, "volume_group:get") {
 		return
 	}
 
-	m, err := this.GetParameters()
+	m, err := v.GetParameters()
 	if err != nil {
-		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
 		return
 	}
 
-	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(this.Ctx), m)
+	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		this.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
+		v.ErrorHandle("List volume groups failed", model.ErrorBadRequest, err)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		this.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
+		v.ErrorHandle("Marshal volume groups listed result failed", model.ErrorInternalServer, err)
 		return
 	}
 
-	this.SuccessHandle(StatusOK, body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }

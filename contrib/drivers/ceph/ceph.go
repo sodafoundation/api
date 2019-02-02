@@ -20,12 +20,9 @@ operation requests about volume to go-ceph module.
 package ceph
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
-	"regexp"
-	"strconv"
-	"strings"
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
@@ -45,33 +42,8 @@ const (
 )
 
 const (
-	globalSize = iota
-	globalAvail
-	globalRawUsed
-	globalRawUsedPercentage
-)
-
-const (
-	poolName = iota
-	poolId
-	poolUsed
-	poolUsedPer
-	poolMaxAvail
-	poolObjects
-)
-
-const (
-	poolType = iota
-	poolTypeSize
-	poolCrushRuleset
-)
-
-const (
-	KiB uint64 = 1024
-	MiB uint64 = 1024 * KiB
-	GiB uint64 = 1024 * MiB
-	TiB uint64 = 1024 * GiB
-	PiB uint64 = 1024 * TiB
+	KPoolName  = "CephPoolName"
+	KImageName = "CephImageName"
 )
 
 type CephConfig struct {
@@ -79,19 +51,95 @@ type CephConfig struct {
 	Pool       map[string]PoolProperties `yaml:"pool,flow"`
 }
 
-func execCmd(cmd string) (string, error) {
-	ret, err := exec.Command("bash", "-c", cmd).Output()
-	if err != nil {
-		log.Error(err.Error())
-		return "", err
+func EncodeName(id string) string {
+	return opensdsPrefix + id
+}
+
+func NewSrcMgr(conf *CephConfig) *SrcMgr {
+	return &SrcMgr{conf: conf}
+}
+
+type SrcMgr struct {
+	conn  *rados.Conn
+	ioctx *rados.IOContext
+	img   *rbd.Image
+	conf  *CephConfig
+}
+
+func (s *SrcMgr) GetConn() (*rados.Conn, error) {
+	if s.conn != nil {
+		return s.conn, nil
 	}
-	return string(ret[:len(ret)-1]), nil
+	conn, err := rados.NewConn()
+	if err != nil {
+		log.Error("New connect failed:", err)
+		return nil, err
+	}
+
+	if err = conn.ReadConfigFile(s.conf.ConfigFile); err != nil {
+		log.Error("Read config file failed:", err)
+		return nil, err
+	}
+	if err = conn.Connect(); err != nil {
+		log.Error("Connect failed:", err)
+		return nil, err
+	}
+	s.conn = conn
+	return s.conn, nil
+}
+
+func (s *SrcMgr) GetIoctx(poolName string) (*rados.IOContext, error) {
+	if s.ioctx != nil {
+		return s.ioctx, nil
+	}
+
+	conn, err := s.GetConn()
+	if err != nil {
+		return nil, err
+	}
+	ioctx, err := conn.OpenIOContext(poolName)
+	if err != nil {
+		log.Error("Open IO context failed, poolName:", poolName, err)
+		return nil, err
+	}
+	s.ioctx = ioctx
+	return s.ioctx, err
+}
+
+func (s *SrcMgr) GetImage(poolName string, imgName string, args ...interface{}) (*rbd.Image, error) {
+	if s.img != nil {
+		return s.img, nil
+	}
+	ioctx, err := s.GetIoctx(poolName)
+	if err != nil {
+		return nil, err
+	}
+	img := rbd.GetImage(ioctx, imgName)
+	if err := img.Open(args...); err != nil {
+		log.Error("When open image:", err)
+		return nil, err
+	}
+	s.img = img
+	return s.img, nil
+}
+
+func (s *SrcMgr) destroy() {
+	if s.img != nil {
+		s.img.Close()
+		s.img = nil
+	}
+	if s.ioctx != nil {
+		s.ioctx.Destroy()
+		s.ioctx = nil
+	}
+	if s.conn != nil {
+		s.conn.Shutdown()
+		s.conn = nil
+	}
 }
 
 type Driver struct {
-	conn  *rados.Conn
-	ioctx *rados.IOContext
-	conf  *CephConfig
+	conf *CephConfig
 }
 
 func (d *Driver) Setup() error {
@@ -106,97 +154,105 @@ func (d *Driver) Setup() error {
 
 func (d *Driver) Unset() error { return nil }
 
-func (d *Driver) initConn() error {
-	conn, err := rados.NewConn()
+func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	poolName := opt.GetPoolName()
+	srcSnapName := EncodeName(opt.GetSnapshotId())
+	srcImgName := opt.GetMetadata()[KImageName]
+	destImgName := EncodeName(opt.GetId())
+
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
+
+	ioctx, err := mgr.GetIoctx(poolName)
 	if err != nil {
-		log.Error("New connect failed:", err)
-		return err
-	}
-
-	if err = conn.ReadConfigFile(d.conf.ConfigFile); err != nil {
-		log.Error("Read config file failed:", err)
-		return err
-	}
-	if err = conn.Connect(); err != nil {
-		log.Error("Connect failed:", err)
-		return err
-	}
-
-	d.conn = conn
-	return nil
-}
-
-func (d *Driver) init(poolName string) error {
-	err := d.initConn()
-	if err != nil {
-		return err
-	}
-	d.ioctx, err = d.conn.OpenIOContext(poolName)
-	if err != nil {
-		log.Error("Open IO context failed:", err)
-		return err
-	}
-	return nil
-}
-
-func (d *Driver) destroy() {
-	defer d.conn.Shutdown()
-	defer d.ioctx.Destroy()
-}
-
-func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	size := opt.GetSize()
-	id := opt.GetId()
-	name := opensdsPrefix + id
-	if err := d.init(opt.GetPoolName()); err != nil {
-		log.Error("Connect ceph failed.")
 		return nil, err
 	}
-	defer d.destroy()
 
-	_, err := rbd.Create(d.ioctx, name, uint64(size)<<sizeShiftBit, 20)
+	img, err := mgr.GetImage(poolName, srcImgName, srcSnapName)
+	if err != nil {
+		return nil, err
+	}
+	snap := img.GetSnapshot(srcSnapName)
+	if ok, _ := snap.IsProtected(); !ok {
+		if err := snap.Protect(); err != nil {
+			log.Errorf("protect failed, %v", err)
+			return nil, err
+		}
+		defer snap.Unprotect()
+	}
+
+	_, err = img.Clone(srcSnapName, ioctx, destImgName, rbd.RbdFeatureLayering, 20)
+	if err != nil {
+		log.Errorf("create volume (%s) from snapshot (%s) failed, %v",
+			opt.GetId(), opt.GetSnapshotId(), err)
+		return nil, err
+	}
+	log.Infof("create volume (%s) from snapshot (%s) success",
+		opt.GetId(), opt.GetSnapshotId())
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             opt.GetSize(),
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+		Metadata: map[string]string{
+			KPoolName: opt.GetPoolName(),
+		},
+	}, nil
+}
+
+func (d *Driver) createVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
+
+	ioctx, err := mgr.GetIoctx(opt.GetPoolName())
+	if err != nil {
+		return nil, err
+	}
+
+	name := EncodeName(opt.GetId())
+	_, err = rbd.Create(ioctx, name, uint64(opt.GetSize())<<sizeShiftBit, 20)
 	if err != nil {
 		log.Errorf("Create rbd image (%s) failed, (%v)", name, err)
 		return nil, err
 	}
 
-	log.Infof("Create volume %s (%s) success.", opt.GetName(), id)
+	log.Infof("Create volume %s (%s) success.", opt.GetName(), opt.GetId())
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
-			Id: id,
+			Id: opt.GetId(),
 		},
 		Name:             opt.GetName(),
-		Size:             size,
+		Size:             opt.GetSize(),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
 		Metadata: map[string]string{
-			"poolName": opt.GetPoolName(),
+			KPoolName: opt.GetPoolName(),
 		},
 	}, nil
 }
 
+func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	// create a volume from snapshot
+	if opt.GetSnapshotId() != "" {
+		return d.createVolumeFromSnapshot(opt)
+	}
+	return d.createVolume(opt)
+}
+
 // ExtendVolume ...
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	if err := d.init(opt.GetPoolName()); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroy()
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
 
-	img, _, err := d.getImage(opt.GetId())
+	img, err := mgr.GetImage(opt.GetPoolName(), EncodeName(opt.GetId()))
 	if err != nil {
-		log.Error("When get image:", err)
 		return nil, err
 	}
 
-	if err = img.Open(); err != nil {
-		log.Error("When open image:", err)
-		return nil, err
-	}
-	defer img.Close()
-
-	size := opt.GetSize()
-	if err = img.Resize(uint64(size) << sizeShiftBit); err != nil {
+	if err := img.Resize(uint64(opt.GetSize()) << sizeShiftBit); err != nil {
 		log.Error("When resize image:", err)
 		return nil, err
 	}
@@ -207,106 +263,39 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 			Id: opt.GetId(),
 		},
 		Name:             opt.GetName(),
-		Size:             size,
+		Size:             opt.GetSize(),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
 	}, nil
 }
 
-func (d *Driver) getImage(volID string) (*rbd.Image, string, error) {
-	imgName := opensdsPrefix + volID
-	imgNames, err := rbd.GetImageNames(d.ioctx)
-	if err != nil {
-		log.Error("When getImageNames:", err)
-		return nil, "", err
-	}
-	for _, name := range imgNames {
-		if name == imgName {
-			return rbd.GetImage(d.ioctx, imgName), name, nil
-		}
-	}
-	return nil, "", rbd.RbdErrorNotFound
-}
-
-func (d *Driver) getSize(img *rbd.Image) int64 {
-	if img.Open() != nil {
-		log.Error("When open image!")
-		return 0
-	}
-	defer img.Close()
-
-	size, err := img.GetSize()
-	if err != nil {
-		log.Error("When get image size:", err)
-		return 0
-	}
-	return int64(size >> sizeShiftBit)
-}
-
 func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
-
-	err := d.initConn()
-	if err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.conn.Shutdown()
-
-	var img *rbd.Image
-	var name string
-	for poolName, _ := range d.conf.Pool {
-		d.ioctx, err = d.conn.OpenIOContext(poolName)
-		if err != nil {
-			log.Error("Open IO context failed:", err)
-			return nil, err
-		}
-		img, name, err = d.getImage(volID)
-		d.ioctx.Destroy()
-		if err != nil {
-			if err.Error() == rbd.RbdErrorNotFound.Error() {
-				continue
-			}
-			log.Error("When get image:", err)
-			return nil, err
-		}
-		break
-	}
-
-	return &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: name,
-		},
-		Size: d.getSize(img),
-	}, nil
+	// Not used, do nothing.
+	return nil, nil
 }
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
-	poolName, ok := opt.GetMetadata()["poolName"]
-	if !ok {
-		err := errors.New("Failed to find poolName in volume metadata!")
-		log.Error(err)
-		return err
-	}
-	if err := d.init(poolName); err != nil {
-		log.Error("Connect ceph failed.")
-		return err
-	}
-	defer d.destroy()
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
 
-	img, _, err := d.getImage(opt.GetId())
+	log.Info(opt.GetMetadata()[KPoolName], EncodeName(opt.GetId()))
+	ioctx, err := mgr.GetIoctx(opt.GetMetadata()[KPoolName])
 	if err != nil {
 		return err
 	}
-	if err = img.Remove(); err != nil {
-		log.Error("When remove image:", err)
+
+	err = rbd.GetImage(ioctx, EncodeName(opt.GetId())).Remove()
+	if err != nil && err != rbd.RbdErrorNotFound {
+		log.Errorf("Remove volume(%s) filed, %v", opt.GetId(), err)
 		return err
 	}
-	log.Info("Remove image success, volume id =", opt.GetId())
+
+	log.Infof("Remove volume (%s) success", opt.GetId())
 	return nil
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
-	poolName, ok := opt.GetMetadata()["poolName"]
+	poolName, ok := opt.GetMetadata()[KPoolName]
 	if !ok {
 		err := errors.New("Failed to find poolName in volume metadata!")
 		log.Error(err)
@@ -329,345 +318,129 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
-	poolName, ok := opt.GetMetadata()["poolName"]
-	if !ok {
-		err := errors.New("Failed to find poolName in volume metadata!")
-		log.Error(err)
-		return nil, err
-	}
-	if err := d.init(poolName); err != nil {
-		log.Error("Connect ceph failed.")
-		return nil, err
-	}
-	defer d.destroy()
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
 
-	img, _, err := d.getImage(opt.GetVolumeId())
+	poolName := opt.GetMetadata()[KPoolName]
+	img, err := mgr.GetImage(poolName, EncodeName(opt.GetVolumeId()))
 	if err != nil {
-		log.Error("When get image:", err)
 		return nil, err
 	}
-	if err = img.Open(); err != nil {
-		log.Error("When open image:", err)
-		return nil, err
-	}
-	id := opt.GetId()
-	name := opensdsPrefix + id
-	if _, err = img.CreateSnapshot(name); err != nil {
+
+	if _, err := img.CreateSnapshot(EncodeName(opt.GetId())); err != nil {
 		log.Error("When create snapshot:", err)
 		return nil, err
 	}
 
-	img.Close()
-
 	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success",
-		opt.GetName(), id, opt.GetVolumeId())
+		opt.GetName(), opt.GetId(), opt.GetVolumeId())
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
-			Id: id,
+			Id: opt.GetId(),
 		},
 		Name:        opt.GetName(),
 		Description: opt.GetDescription(),
 		VolumeId:    opt.GetVolumeId(),
-		Size:        d.getSize(img),
+		Size:        opt.GetSize(),
 		Metadata: map[string]string{
-			"poolName": poolName,
+			KPoolName:  poolName,
+			KImageName: EncodeName(opt.GetVolumeId()),
 		},
 	}, nil
 
 }
 
-func (d *Driver) visitSnapshot(snapID string, fn func(imgName string, img *rbd.Image, snap *rbd.SnapInfo) error) error {
-	imageNames, err := rbd.GetImageNames(d.ioctx)
-	if err != nil {
-		log.Error("When getImageNames:", err)
-		return err
-	}
-	for _, imgName := range imageNames {
-		//Filter the snapshots that not belong OpenSDS
-		if !strings.HasPrefix(imgName, opensdsPrefix) {
-			continue
-		}
-		img := rbd.GetImage(d.ioctx, imgName)
-		if err = img.Open(); err != nil {
-			log.Error("When open image:", err)
-			return err
-		}
-		snapInfos, err := img.GetSnapshotNames()
-		img.Close()
-		if err != nil {
-			log.Error("When GetSnapshotNames:", err)
-			continue
-		}
-
-		snapName := opensdsPrefix + snapID
-		for _, snapInfo := range snapInfos {
-			if snapName == snapInfo.Name {
-				return fn(imgName, img, &snapInfo)
-			}
-		}
-	}
-	return fmt.Errorf("Not found the snapshot(%s)", snapID)
-}
-
 func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) {
 	return nil, fmt.Errorf("Ceph PullSnapshot has not implemented yet.")
-	/*
-		if err := d.init(); err != nil {
-			log.Error("Connect ceph failed.")
-			return nil, err
-		}
-		defer d.destroy()
-		var snapshot *model.VolumeSnapshotSpec
-		err := d.visitSnapshot(snapID, func(volName *Name, img *rbd.Image, snap *rbd.SnapInfo) error {
-			snapName := ParseName(snap.Name)
-			snapshot = &model.VolumeSnapshotSpec{
-				BaseModel: &model.BaseModel{
-					Id: snapName.GetUUID(),
-				},
-				Name:     snapName.GetName(),
-				Size:     int64(snap.Size >> sizeShiftBit),
-				VolumeId: volName.ID,
-			}
-			return nil
-		})
-		return snapshot, err
-	*/
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	poolName, ok := opt.GetMetadata()["poolName"]
-	if !ok {
-		err := errors.New("Failed to find poolName in volume metadata!")
-		log.Error(err)
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
+
+	poolName := opt.GetMetadata()[KPoolName]
+	img, err := mgr.GetImage(poolName, EncodeName(opt.GetVolumeId()), EncodeName(opt.GetId()))
+	if err == rbd.RbdErrorNotFound {
+		log.Warningf("Specified snapshot (%s) does not exist, ignore it", opt.GetId())
+		return nil
+	}
+	if err != nil {
 		return err
 	}
-	if err := d.init(poolName); err != nil {
-		log.Error("Connect ceph failed.")
-		return err
-	}
-	defer d.destroy()
-	err := d.visitSnapshot(opt.GetId(), func(volName string, img *rbd.Image, snap *rbd.SnapInfo) error {
-		if err := img.Open(snap.Name); err != nil {
-			log.Error("When open image:", err)
-		}
-		snapshot := img.GetSnapshot(snap.Name)
-		if err := snapshot.Remove(); err != nil {
-			log.Error("When remove snapshot:", err)
+
+	snap := img.GetSnapshot(EncodeName(opt.GetId()))
+	if ok, _ := snap.IsProtected(); ok {
+		if err := snap.Unprotect(); err != nil {
+			log.Errorf("unprotect failed, %v", err)
 			return err
 		}
-		img.Close()
-		log.Infof("Delete snapshot (%s) success", opt.GetVolumeId())
-		return nil
-	})
-	return err
+	}
+
+	err = snap.Remove()
+	if err != nil && err != rbd.RbdErrorNotFound {
+		log.Error("When remove snapshot:", err)
+		return err
+	}
+
+	log.Infof("Delete snapshot (%s) success", opt.GetId())
+	return nil
 }
 
-func (d *Driver) parseCapStr(cap string) float64 {
-	rValue, _ := regexp.Compile("[0-9.]+")
-	rUnit, _ := regexp.Compile("[A-Za-z]+")
-	valueIndex := rValue.FindStringIndex(cap)
-	unitIndex := rUnit.FindStringIndex(cap)
-	log.V(5).Infof("cap = %v, valueIndex = %v, unitIndex = %v", cap, valueIndex, unitIndex)
-
-	if (2 != len(valueIndex)) || (2 != len(unitIndex)) || (valueIndex[1] != unitIndex[0]) {
-		log.Error("Cap format is wrong")
-		return 0
-	}
-
-	valueStr := cap[valueIndex[0]:valueIndex[1]]
-	var value float64
-
-	if strings.Contains(valueStr, ".") {
-		valueFloat, err := strconv.ParseFloat(valueStr, 64)
-		if err != nil {
-			log.Errorf("strconv.ParseFloat failed: %v", err)
-			return 0
-		}
-
-		value = valueFloat
-	} else {
-		valueInt, err := strconv.ParseInt(valueStr, 10, 64)
-		if err != nil {
-			log.Errorf("strconv.ParseInt failed: %v", err)
-			return 0
-		}
-
-		value = float64(valueInt)
-	}
-
-	unitStr := strings.ToUpper(cap[unitIndex[0]:unitIndex[1]])
-	oldUnitMapper := map[string]uint64{
-		"K": KiB,
-		"M": MiB,
-		"G": GiB,
-		"T": TiB,
-		"P": PiB,
-	}
-	newUnitMapper := map[string]uint64{
-		"KIB": KiB,
-		"MIB": MiB,
-		"GIB": GiB,
-		"TIB": TiB,
-		"PIB": PiB,
-	}
-	var unitInt uint64
-
-	if val, ok := newUnitMapper[unitStr]; ok {
-		unitInt = val
-	} else {
-		if val, ok := oldUnitMapper[unitStr]; ok {
-			unitInt = val
-		} else {
-			log.Errorf("strage unitStr = %v is not found!", unitStr)
-			return 0
-		}
-	}
-
-	var result float64
-	switch unitInt {
-	case KiB:
-		result = value / float64(MiB)
-		break
-	case MiB:
-		result = value / float64(KiB)
-		break
-	case GiB:
-		result = value
-		break
-	case TiB:
-		result = value * float64(KiB)
-		break
-	case PiB:
-		result = value * float64(MiB)
-		break
-	default:
-		log.Errorf("strage unitStr = %v is not found!", unitStr)
-		break
-	}
-
-	log.V(5).Infof("parseCapStr result = %v", result)
-	return result
+type TotalStats struct {
+	TotalBytes      int64 `json:"total_bytes,omitempty"`
+	TotalUsedBytes  int64 `json:"total_used_bytes,omitempty"`
+	TotalAvailBytes int64 `json:"total_avail_bytes,omitempty"`
 }
 
-func (d *Driver) getPoolsCapInfo() ([][]string, error) {
-	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
-	if err != nil {
-		log.Error("[Error]:", err)
-		return nil, err
-	}
-	lines := strings.Split(output, "\n")
-	var poolsInfo [][]string
-	var started = false
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
-		if started {
-			poolsInfo = append(poolsInfo, strings.Fields(line))
-		}
-		if strings.HasPrefix(line, "POOLS:") {
-			started = true
-			i++
-		}
-	}
-	return poolsInfo, nil
+type PoolStats struct {
+	Name  string `json:"name,omitempty"`
+	Id    int64  `json:"id,omitempty"`
+	Stats struct {
+		KbUsed      int64 `json:"kb_used,omitempty"`
+		BytesUsed   int64 `json:"bytes_used,omitempty"`
+		PercentUsed int64 `json:"percent_used,omitempty"`
+		MaxAvail    int64 `json:"max_avail,omitempty"`
+		Objects     int64 `json:"objects,omitempty"`
+	} `json:"stats,omitempty"`
 }
 
-func (d *Driver) getGlobalCapInfo() ([]string, error) {
-	output, err := execCmd("ceph df -c " + d.conf.ConfigFile)
-	if err != nil {
-		log.Error("[Error]:", err)
-		return nil, err
-	}
-	lines := strings.Split(output, "\n")
-	var globalCapInfoLine int
-	for i, line := range lines {
-		if strings.HasPrefix(line, "GLOBAL:") {
-			globalCapInfoLine = i + 2
-		}
-	}
-	return strings.Fields(lines[globalCapInfoLine]), nil
-}
-
-func (d *Driver) getPoolsAttr() (map[string][]string, error) {
-	cmd := "ceph osd pool ls detail -c " + d.conf.ConfigFile + "| grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
-	output, err := execCmd(cmd)
-	if err != nil {
-		log.Error("[Error]:", err)
-		return nil, err
-	}
-	lines := strings.Split(output, "\n")
-	var poolDetail = make(map[string][]string)
-	for i := range lines {
-		if lines[i] == "" {
-			continue
-		}
-		str := strings.Fields(lines[i])
-		key := strings.Replace(str[0], "'", "", -1)
-		val := str[1:]
-		poolDetail[key] = val
-	}
-	return poolDetail, nil
-}
-
-func (d *Driver) buildPoolExtras(line []string, extras model.StoragePoolExtraSpec) model.StoragePoolExtraSpec {
-	extras.Advanced = make(map[string]interface{})
-	extras.Advanced["redundancyType"] = line[poolType]
-	if extras.Advanced["redundancyType"] == "replicated" {
-		extras.Advanced["replicateSize"] = line[poolTypeSize]
-	} else {
-		extras.Advanced["erasureSize"] = line[poolTypeSize]
-	}
-	extras.Advanced["crushRuleset"] = line[poolCrushRuleset]
-
-	return extras
+type DfInfo struct {
+	Stats TotalStats  `json:"stats,omitempty"`
+	Pools []PoolStats `json:"pools,omitempty"`
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	pc, err := d.getPoolsCapInfo()
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
+
+	conn, err := mgr.GetConn()
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
-	gc, err := d.getGlobalCapInfo()
+	buf, info, err := conn.MonCommand([]byte(`{"prefix":"df", "format":"json"}`))
 	if err != nil {
-		log.Error(err)
+		log.Errorf("get mon df info filed, info: %s, err:%v", info, err)
 		return nil, err
 	}
-	pa, err := d.getPoolsAttr()
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
+	dfinfo := DfInfo{}
+	json.Unmarshal([]byte(buf), &dfinfo)
 
 	var pols []*model.StoragePoolSpec
-	for i := range pc {
-		name := pc[i][poolName]
-		c := d.conf
-		if _, ok := c.Pool[name]; !ok {
+	for _, p := range dfinfo.Pools {
+		if _, ok := d.conf.Pool[p.Name]; !ok {
 			continue
-		}
-
-		extras := d.buildPoolExtras(pa[name], c.Pool[name].Extras)
-		totalCap := d.parseCapStr(gc[globalSize])
-		maxAvailCap := d.parseCapStr(pc[i][poolMaxAvail])
-		availCap := d.parseCapStr(gc[globalAvail])
-		log.Infof("totalCap = %v, availCap = %v, maxAvailCap=%v", totalCap, availCap, maxAvailCap)
-		if 0 == availCap {
-			return nil, errors.New("ceph GLOBAL AVAIL = 0")
 		}
 
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, p.Name).String(),
 			},
-			Name: name,
-			//if redundancy type is replicate, MAX AVAIL =  AVAIL / replicate number,
-			//and if it is erasure, MAX AVAIL =  AVAIL * k / (m + k)
-			TotalCapacity:    int64(totalCap * maxAvailCap / availCap),
-			FreeCapacity:     int64(maxAvailCap),
-			StorageType:      c.Pool[name].StorageType,
-			Extras:           extras,
-			AvailabilityZone: c.Pool[name].AvailabilityZone,
+			Name:             p.Name,
+			TotalCapacity:    (p.Stats.BytesUsed + p.Stats.MaxAvail) >> sizeShiftBit,
+			FreeCapacity:     p.Stats.MaxAvail >> sizeShiftBit,
+			StorageType:      d.conf.Pool[p.Name].StorageType,
+			AvailabilityZone: d.conf.Pool[p.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ
@@ -678,11 +451,28 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet"}
+	poolName, ok := opt.GetMetadata()[KPoolName]
+	if !ok {
+		err := errors.New("Failed to find poolName in snapshot metadata!")
+		log.Error(err)
+		return nil, err
+	}
+	return &model.ConnectionInfo{
+		DriverVolumeType: RBDProtocol,
+		ConnectionData: map[string]interface{}{
+			"secret_type":  "ceph",
+			"name":         poolName + "/" + opensdsPrefix + opt.GetSnapshotId(),
+			"cluster_name": "ceph",
+			"hosts":        []string{opt.GetHostInfo().Host},
+			"volume_id":    opt.GetSnapshotId(),
+			"access_mode":  "rw",
+			"ports":        []string{"6789"},
+		},
+	}, nil
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet"}
+	return nil
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {

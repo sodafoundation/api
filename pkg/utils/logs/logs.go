@@ -31,7 +31,7 @@ const DefaultLogDir = "/var/log/opensds"
 
 // flushDaemon periodically flushes the log file buffers.
 func flushDaemon(period time.Duration) {
-	for _ = range time.NewTicker(period).C {
+	for range time.NewTicker(period).C {
 		glog.Flush()
 	}
 }

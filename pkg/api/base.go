@@ -28,8 +28,8 @@ type BasePortal struct {
 	beego.Controller
 }
 
-func (this *BasePortal) GetParameters() (map[string][]string, error) {
-	u, err := url.Parse(this.Ctx.Request.URL.String())
+func (b *BasePortal) GetParameters() (map[string][]string, error) {
+	u, err := url.Parse(b.Ctx.Request.URL.String())
 	if err != nil {
 		return nil, err
 	}
@@ -41,21 +41,21 @@ func (this *BasePortal) GetParameters() (map[string][]string, error) {
 }
 
 // Filter some items in spec that no need to transfer to users.
-func (this *BasePortal) outputFilter(resp interface{}, whiteList []string) interface{} {
+func (b *BasePortal) outputFilter(resp interface{}, whiteList []string) interface{} {
 	v := reflect.ValueOf(resp)
 	if v.Kind() == reflect.Slice {
 		var s []map[string]interface{}
 		for i := 0; i < v.Len(); i++ {
-			m := this.doFilter(v.Index(i).Interface(), whiteList)
+			m := b.doFilter(v.Index(i).Interface(), whiteList)
 			s = append(s, m)
 		}
 		return s
 	} else {
-		return this.doFilter(resp, whiteList)
+		return b.doFilter(resp, whiteList)
 	}
 }
 
-func (this *BasePortal) doFilter(resp interface{}, whiteList []string) map[string]interface{} {
+func (b *BasePortal) doFilter(resp interface{}, whiteList []string) map[string]interface{} {
 	v := reflect.ValueOf(resp).Elem()
 	m := map[string]interface{}{}
 	for _, name := range whiteList {
@@ -67,16 +67,16 @@ func (this *BasePortal) doFilter(resp interface{}, whiteList []string) map[strin
 	return m
 }
 
-func (this *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
+func (b *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
 	reason := fmt.Sprintf(errMsg+": %s", err.Error())
-	this.Ctx.Output.SetStatus(model.ErrorBadRequest)
-	this.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
+	b.Ctx.Output.SetStatus(model.ErrorBadRequest)
+	b.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
 	log.Error(reason)
 }
 
-func (this *BasePortal) SuccessHandle(status int, body []byte) {
-	this.Ctx.Output.SetStatus(status)
+func (b *BasePortal) SuccessHandle(status int, body []byte) {
+	b.Ctx.Output.SetStatus(status)
 	if body != nil {
-		this.Ctx.Output.Body(body)
+		b.Ctx.Output.Body(body)
 	}
 }
