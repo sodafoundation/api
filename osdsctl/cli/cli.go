@@ -51,7 +51,6 @@ func init() {
 	rootCommand.AddCommand(poolCommand)
 	rootCommand.AddCommand(profileCommand)
 	rootCommand.AddCommand(replicationCommand)
-	rootCommand.AddCommand(aesCommand)
 	flags := rootCommand.PersistentFlags()
 	flags.BoolVar(&Debug, "debug", false, "shows debugging output.")
 }

@@ -67,13 +67,6 @@ chown stack:stack $DEV_STACK_LOCAL_CONF
 }
 
 osds::keystone::opensds_conf() {
-	cd ${OPENSDS_DIR}
-    local pwd=$(sudo build/out/bin/osdsctl aes "${STACK_PASSWORD}")
-	if [ $? -ne 0 ];then
-	    echo "Encryption failed."
-		exit 1
-	fi
-	
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [keystone_authtoken]
 memcached_servers = $KEYSTONE_IP:11211
@@ -83,7 +76,7 @@ auth_uri = http://$KEYSTONE_IP/identity
 project_domain_name = Default
 project_name = service
 user_domain_name = Default
-password = ${pwd}
+password = $STACK_PASSWORD
 username = $OPENSDS_SERVER_NAME
 auth_url = http://$KEYSTONE_IP/identity
 auth_type = password
