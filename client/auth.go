@@ -80,8 +80,11 @@ func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
 	// Decrypte the password
+	// Get the cipher text of the password
 	pwdCiphertext := os.Getenv(OsPassword)
+	// Instantiate an encryption tool
 	pwdTool := pwd.NewPwdTool(os.Getenv(OsPasswordTool))
+	// Decrypt the password and obtain the password.
 	opt.Password, _ = pwdTool.Decrypter(pwdCiphertext)
 
 	opt.TenantName = os.Getenv(OsTenantName)
