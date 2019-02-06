@@ -20,23 +20,29 @@ This module implements a entry into the OpenSDS northbound REST service.
 package api
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	"github.com/opensds/opensds/pkg/api/filter/accesslog"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
+	cfg "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 const (
+	AddressIdx = iota
+	PortIdx
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
 )
 
-func Run(host string) {
+func Run(osdsletCfg cfg.OsdsLet) {
 
 	// add router for v1beta api
 	ns :=
@@ -46,6 +52,7 @@ func Run(host string) {
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
 					return false
 				}
+
 				return true
 			}),
 
@@ -111,6 +118,38 @@ func Run(host string) {
 	beego.Router("/", &VersionPortal{}, "get:ListVersions")
 	beego.Router("/:apiVersion", &VersionPortal{}, "get:GetVersion")
 
+	if osdsletCfg.HTTPSEnabled {
+		if osdsletCfg.BeegoHTTPSCertFile == "" || osdsletCfg.BeegoHTTPSKeyFile == "" {
+			fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
+			return
+		}
+
+		// beego https config
+		beego.BConfig.Listen.EnableHTTP = false
+		beego.BConfig.Listen.EnableHTTPS = true
+		strs := strings.Split(osdsletCfg.ApiEndpoint, ":")
+		beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
+		beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
+		beego.BConfig.Listen.HTTPSCertFile = osdsletCfg.BeegoHTTPSCertFile
+		beego.BConfig.Listen.HTTPSKeyFile = osdsletCfg.BeegoHTTPSKeyFile
+		tlsConfig := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			},
+		}
+
+		beego.BeeApp.Server.TLSConfig = tlsConfig
+	}
+
+	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
+	beego.BConfig.CopyRequestBody = true
+	beego.BConfig.EnableErrorsShow = false
+	beego.BConfig.EnableErrorsRender = false
+	beego.BConfig.WebConfig.AutoRender = false
+
 	// start service
-	beego.Run(host)
+	beego.Run(osdsletCfg.ApiEndpoint)
 }

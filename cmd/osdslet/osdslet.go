@@ -53,5 +53,5 @@ func main() {
 	c.Brain = c.NewController()
 
 	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsLet.ApiEndpoint)
+	api.Run(CONF.OsdsLet)
 }

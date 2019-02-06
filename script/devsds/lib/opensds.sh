@@ -29,6 +29,14 @@ graceful = True
 log_file = /var/log/opensds/osdslet.log
 socket_order = inc
 auth_strategy = $OPENSDS_AUTH_STRATEGY
+# If https is enabled, the default value of cert file
+# is /opt/opensds-security/opensds/opensds-cert.pem, 
+# and key file is /opt/opensds-security/opensds/opensds-key.pem
+https_enabled = False
+beego_https_cert_file =
+beego_https_key_file =
+# Encryption and decryption tool. Default value is aes.
+password_decrypt_tool = aes
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050

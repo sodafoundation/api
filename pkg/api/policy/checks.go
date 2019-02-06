@@ -15,6 +15,7 @@
 package policy
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -223,7 +224,6 @@ func keyWorkFormatter(target map[string]string, match string) (string, error) {
 		for key, val := range target {
 			if s == key {
 				return val, nil
-				break
 			}
 		}
 		return "", fmt.Errorf("target key doesn`t match")
@@ -240,15 +240,15 @@ type RoleCheck struct {
 	match string
 }
 
-func (this *RoleCheck) String() string {
-	return fmt.Sprintf("%s:%s", this.kind, this.match)
+func (r *RoleCheck) String() string {
+	return fmt.Sprintf("%s:%s", r.kind, r.match)
 }
 
-func (this *RoleCheck) Exec(target map[string]string,
+func (r *RoleCheck) Exec(target map[string]string,
 	cred map[string]interface{},
 	enforcer Enforcer,
 	currentRule string) bool {
-	match, err := keyWorkFormatter(target, this.match)
+	match, err := keyWorkFormatter(target, r.match)
 	if err != nil {
 		return false
 	}
@@ -271,11 +271,11 @@ type GenericCheck struct {
 	match string
 }
 
-func (this *GenericCheck) String() string {
-	return fmt.Sprintf("%s:%s", this.kind, this.match)
+func (g *GenericCheck) String() string {
+	return fmt.Sprintf("%s:%s", g.kind, g.match)
 }
 
-func (this *GenericCheck) simpleLiteral(expr string) (string, error) {
+func (g *GenericCheck) simpleLiteral(expr string) (string, error) {
 	s := fmt.Sprintf("%c%c", expr[0], expr[len(expr)-1])
 	if len(expr) >= 2 && (s == "\"\"" || s == "''") {
 		return expr[1 : len(expr)-1], nil
@@ -283,10 +283,10 @@ func (this *GenericCheck) simpleLiteral(expr string) (string, error) {
 	if utils.Contained(strings.ToLower(expr), []string{"true", "false"}) {
 		return strings.ToLower(expr), nil
 	}
-	return "", fmt.Errorf("Not support right now")
+	return "", errors.New("Not support right now")
 }
 
-func (this *GenericCheck) findInMap(testVal interface{}, pathSegs []string, match string) bool {
+func (g *GenericCheck) findInMap(testVal interface{}, pathSegs []string, match string) bool {
 	if len(pathSegs) == 0 {
 		switch testVal.(type) {
 		case string:
@@ -310,37 +310,36 @@ func (this *GenericCheck) findInMap(testVal interface{}, pathSegs []string, matc
 	if reflect.TypeOf(testVal).Kind() == reflect.Slice {
 		if vList, ok := testVal.([]interface{}); ok {
 			for _, val := range vList {
-				if this.findInMap(val, pathSegs, match) {
+				if g.findInMap(val, pathSegs, match) {
 					return true
 				}
 			}
 		} else {
 			for _, val := range testVal.([]string) {
-				if this.findInMap(val, pathSegs, match) {
+				if g.findInMap(val, pathSegs, match) {
 					return true
 				}
 			}
 		}
 		return false
-	} else {
-		return this.findInMap(testVal, pathSegs, match)
 	}
+	return g.findInMap(testVal, pathSegs, match)
 }
 
-func (this *GenericCheck) Exec(target map[string]string,
+func (g *GenericCheck) Exec(target map[string]string,
 	cred map[string]interface{},
 	enforcer Enforcer,
 	currentRule string) bool {
-	match, err := keyWorkFormatter(target, strings.ToLower(this.match))
+	match, err := keyWorkFormatter(target, strings.ToLower(g.match))
 	if err != nil {
 		return false
 	}
 
-	if test_value, err := this.simpleLiteral(this.kind); err == nil {
-		return strings.ToLower(match) == test_value
+	if testValue, err := g.simpleLiteral(g.kind); err == nil {
+		return strings.ToLower(match) == testValue
 	}
 	if len(cred) == 0 {
 		return false
 	}
-	return this.findInMap(cred, strings.Split(this.kind, "."), match)
+	return g.findInMap(cred, strings.Split(g.kind, "."), match)
 }
