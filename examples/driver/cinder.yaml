@@ -17,6 +17,10 @@ authOptions:
   domainName: "Default"
   username: "admin"
   password: "admin"
+  # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+  EnableEncrypted: false
+  # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+  PwdEncrypter: "aes"
   tenantName: "admin"
 pool:
   pool1:

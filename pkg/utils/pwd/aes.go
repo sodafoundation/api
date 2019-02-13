@@ -25,6 +25,10 @@ import (
 
 type AES struct{}
 
+func NewAES() *AES {
+	return &AES{}
+}
+
 var (
 	key = []byte("8RcY34!7dce3,cdcaeb*faeC3cd9fQfe")
 )

@@ -33,8 +33,6 @@ auth_strategy = $OPENSDS_AUTH_STRATEGY
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
-# Encryption and decryption tool. Default value is aes.
-password_decrypt_tool = aes
 
 [osdslet]
 api_endpoint = $HOST_IP:50049
