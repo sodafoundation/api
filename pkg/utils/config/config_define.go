@@ -20,8 +20,6 @@ type Default struct{}
 
 type OsdsApiServer struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
-	Graceful           bool          `conf:"graceful,true"`
-	SocketOrder        string        `conf:"socket_order"`
 	AuthStrategy       string        `conf:"auth_strategy,noauth"`
 	Daemon             bool          `conf:"daemon,false"`
 	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
