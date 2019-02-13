@@ -26,12 +26,12 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsctl
+build:osdsdock osdslet osdsapiserver osdsctl
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
 
-.PHONY: osdsdock osdslet osdsctl docker test protoc
+.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
 
 osdsdock: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
@@ -39,23 +39,29 @@ osdsdock: prebuild
 osdslet: prebuild
 	go build -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
+osdsapiserver: prebuild
+	go build -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+
 osdsctl: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
+	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
 	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
 	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
+	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
 	script/CI/test
 
 protoc:
 	cd pkg/dock/proto && protoc --go_out=plugins=grpc:. dock.proto
+	cd pkg/controller/proto && protoc --go_out=plugins=grpc:. controller.proto
 
 clean:
-	rm -rf $(BUILD_DIR) ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
+	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
 
 version:
 	@echo ${VERSION}

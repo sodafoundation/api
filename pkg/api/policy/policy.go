@@ -85,7 +85,7 @@ func (e *Enforcer) Authorize(rule string, target map[string]string, cred map[str
 }
 
 func (e *Enforcer) LoadRules(forcedReload bool) error {
-	path := config.CONF.OsdsLet.PolicyPath
+	path := config.CONF.OsdsApiServer.PolicyPath
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		return err

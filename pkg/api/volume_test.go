@@ -26,19 +26,25 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	c "github.com/opensds/opensds/pkg/context"
+	pb "github.com/opensds/opensds/pkg/controller/proto"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/testutils/collection"
+	ctrtest "github.com/opensds/opensds/testutils/controller/testing"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	ctx "golang.org/x/net/context"
 )
 
-func init() {
-	beego.Router("/v1beta/block/volumes", &VolumePortal{},
-		"post:CreateVolume;get:ListVolumes")
-	beego.Router("/v1beta/block/volumes/:volumeId", &VolumePortal{},
-		"get:GetVolume;put:UpdateVolume;delete:DeleteVolume")
+////////////////////////////////////////////////////////////////////////////////
+//                      Prepare for mock server                               //
+////////////////////////////////////////////////////////////////////////////////
 
-	beego.Router("/v1beta/block/volumes/:volumeId/resize", &VolumePortal{},
+func init() {
+	beego.Router("/v1beta/block/volumes", NewFakeVolumePortal(),
+		"post:CreateVolume;get:ListVolumes")
+	beego.Router("/v1beta/block/volumes/:volumeId", NewFakeVolumePortal(),
+		"get:GetVolume;put:UpdateVolume;delete:DeleteVolume")
+	beego.Router("/v1beta/block/volumes/:volumeId/resize", NewFakeVolumePortal(),
 		"post:ExtendVolume")
 
 	beego.Router("/v1beta/block/attachments", &VolumeAttachmentPortal{},
@@ -52,8 +58,32 @@ func init() {
 		"get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot")
 }
 
+func NewFakeVolumePortal() *VolumePortal {
+	mockClient := new(ctrtest.Client)
+
+	mockClient.On("Connect", "localhost:50049").Return(nil)
+	mockClient.On("Close").Return(nil)
+	mockClient.On("CreateVolume", ctx.Background(), &pb.CreateVolumeOpts{
+		Context: c.NewAdminContext().ToJson(),
+	}).
+		Return(&pb.GenericResponse{}, nil)
+	mockClient.On("ExtendVolume", ctx.Background(), &pb.ExtendVolumeOpts{
+		Id:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Message: string(`{"newSize":20}`),
+		Context: c.NewAdminContext().ToJson(),
+	}).Return(&pb.GenericResponse{}, nil)
+	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
+		Context: c.NewAdminContext().ToJson(),
+	}).
+		Return(&pb.GenericResponse{}, nil)
+
+	return &VolumePortal{
+		CtrClient: mockClient,
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-//                            Tests for volume                               //
+//                            Tests for volume                                //
 ////////////////////////////////////////////////////////////////////////////////
 
 var (
@@ -280,6 +310,76 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 	mockClient.On("UpdateVolume", c.NewAdminContext(),
 		&volume).Return(nil, errors.New("db error"))
 	db.C = mockClient
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != 400 {
+		t.Errorf("Expected 400, actual %v", w.Code)
+	}
+}
+
+func TestExtendVolume(t *testing.T) {
+	var jsonStr = []byte(`{"newSize":20}`)
+	r, _ := http.NewRequest("POST",
+		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	volume := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    model.VolumeAvailable,
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
+
+	db.C = mockClient
+	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+		httpCtx.Input.SetData("context", c.NewAdminContext())
+	})
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+	if w.Code != StatusOK {
+		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	}
+}
+
+func TestExtendVolumeWithBadRequest(t *testing.T) {
+	var jsonStr = []byte(`{"newSize":20}`)
+	r, _ := http.NewRequest("POST",
+		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
+	w := httptest.NewRecorder()
+	r.Header.Set("Content-Type", "application/JSON")
+
+	volume := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    model.VolumeAvailable,
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	volumeExtending := &model.VolumeSpec{
+		BaseModel: &model.BaseModel{},
+		Status:    model.VolumeExtending,
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Size:      1,
+	}
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volumeExtending, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
+	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
+
+	db.C = mockClient
+
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 		httpCtx.Input.SetData("context", c.NewAdminContext())
 	})
@@ -726,76 +826,6 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 	mockClient.On("UpdateVolumeAttachment", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
 		&attachment).Return(nil, errors.New("db error"))
 	db.C = mockClient
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
-	}
-}
-
-func TestExtendVolume(t *testing.T) {
-	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
-	r, _ := http.NewRequest("POST",
-		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
-	w := httptest.NewRecorder()
-	r.Header.Set("Content-Type", "application/JSON")
-
-	volume := &model.VolumeSpec{
-		BaseModel: &model.BaseModel{},
-		Status:    "available",
-		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		Size:      1,
-	}
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
-	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volume, nil)
-	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
-	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
-
-	db.C = mockClient
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != StatusAccepted {
-		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
-	}
-}
-
-func TestExtendVolumeWithBadRequest(t *testing.T) {
-	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
-	r, _ := http.NewRequest("POST",
-		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
-	w := httptest.NewRecorder()
-	r.Header.Set("Content-Type", "application/JSON")
-
-	volume := &model.VolumeSpec{
-		BaseModel: &model.BaseModel{},
-		Status:    "available",
-		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		Size:      1,
-	}
-
-	volumeExtending := &model.VolumeSpec{
-		BaseModel: &model.BaseModel{},
-		Status:    model.VolumeExtending,
-		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		Size:      1,
-	}
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("ExtendVolume", c.NewAdminContext(), volume).Return(volume, nil)
-	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(volumeExtending, nil)
-	mockClient.On("UpdateVolume", c.NewAdminContext(), volume).Return(volume, nil)
-	mockClient.On("GetPool", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SamplePools[0], nil)
-
-	db.C = mockClient
-
 	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 		httpCtx.Input.SetData("context", c.NewAdminContext())
 	})

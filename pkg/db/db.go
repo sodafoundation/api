@@ -165,6 +165,8 @@ type Client interface {
 
 	ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error)
 
+	ListAttachmentsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeAttachmentSpec, error)
+
 	ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeGroup(ctx *c.Context, vgId string) error

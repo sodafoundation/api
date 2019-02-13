@@ -3,3 +3,4 @@ build/
 *.log
 .DS_Store
 *.retry
+.idea/
