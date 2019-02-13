@@ -18,10 +18,20 @@ import (
 	"fmt"
 	"os"
 
-	config "github.com/opensds/opensds/pkg/utils/config"
+	"io/ioutil"
+
 	"github.com/opensds/opensds/pkg/utils/pwd"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
+
+const (
+	confFile = "github.com/opensds/opensds/script/tools/pwdEncrypter/pwdEncrypter.yaml"
+)
+
+type tool struct {
+	encrypter string `yaml:"PwdEncrypter,omitempty"`
+}
 
 var encrypterCommand = &cobra.Command{
 	Use:   "pwdEncrypter <password>",
@@ -42,13 +52,14 @@ func encrypter(cmd *cobra.Command, args []string) {
 	}
 
 	// Initialize configuration file
-	if config.CONF == nil {
-		fmt.Println("feafeaf")
-		config.CONF.Load("/etc/opensds/opensds.conf")
+	pwdEncrypter, err := loadConf(confFile)
+	if err != nil {
+		fmt.Println("Encrypt password error:", err)
+		os.Exit(1)
 	}
 
 	// Encrypt the password
-	encrypterTool := pwd.NewPwdEncrypter(config.CONF.PwdEncrypter)
+	encrypterTool := pwd.NewPwdEncrypter(pwdEncrypter.encrypter)
 	plaintext, err := encrypterTool.Encrypter(args[0])
 	if err != nil {
 		fmt.Println("Encrypt password error:", err)
@@ -56,6 +67,18 @@ func encrypter(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(plaintext)
+}
+
+func loadConf(f string) (*tool, error) {
+	var conf = &tool{}
+	confYaml, err := ioutil.ReadFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("Read config yaml file (%s) failed, reason:(%v)", f, err)
+	}
+	if err = yaml.Unmarshal(confYaml, conf); err != nil {
+		return nil, fmt.Errorf("Parse error: %v", err)
+	}
+	return conf, nil
 }
 
 func main() {

@@ -16,12 +16,7 @@ package config
 
 import "time"
 
-type Default struct {
-	// Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
-	PwdEncrypter string `conf:"pwd_encrypter,aes"`
-	// Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
-	EnableEncrypted bool `conf:"enable_encrypted,false"`
-}
+type Default struct{}
 
 type OsdsLet struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
@@ -79,9 +74,13 @@ type KeystoneAuthToken struct {
 	ProjectName       string `conf:"project_name"`
 	UserDomainName    string `conf:"user_domain_name"`
 	Password          string `conf:"password"`
-	Username          string `conf:"username"`
-	AuthUrl           string `conf:"auth_url"`
-	AuthType          string `conf:"auth_type"`
+	// Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+	PwdEncrypter string `conf:"pwd_encrypter,aes"`
+	// Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+	EnableEncrypted bool   `conf:"enable_encrypted,false"`
+	Username        string `conf:"username"`
+	AuthUrl         string `conf:"auth_url"`
+	AuthType        string `conf:"auth_type"`
 }
 
 type Config struct {
