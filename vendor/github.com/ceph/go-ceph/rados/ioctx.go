@@ -11,17 +11,6 @@ package rados
 // 	*idx += strlen(*idx) + 1;
 // 	return copy;
 // }
-//
-// #if __APPLE__
-// #define ceph_time_t __darwin_time_t
-// #define ceph_suseconds_t __darwin_suseconds_t
-// #elif __GLIBC__
-// #define ceph_time_t __time_t
-// #define ceph_suseconds_t __suseconds_t
-// #else
-// #define ceph_time_t time_t
-// #define ceph_suseconds_t suseconds_t
-// #endif
 import "C"
 
 import (
@@ -99,13 +88,8 @@ func (ioctx *IOContext) Write(oid string, data []byte, offset uint64) error {
 	c_oid := C.CString(oid)
 	defer C.free(unsafe.Pointer(c_oid))
 
-	dataPointer := unsafe.Pointer(nil)
-	if len(data) > 0 {
-		dataPointer = unsafe.Pointer(&data[0])
-	}
-
 	ret := C.rados_write(ioctx.ioctx, c_oid,
-		(*C.char)(dataPointer),
+		(*C.char)(unsafe.Pointer(&data[0])),
 		(C.size_t)(len(data)),
 		(C.uint64_t)(offset))
 
@@ -141,18 +125,17 @@ func (ioctx *IOContext) Append(oid string, data []byte) error {
 // Read reads up to len(data) bytes from the object with key oid starting at byte
 // offset offset. It returns the number of bytes read and an error, if any.
 func (ioctx *IOContext) Read(oid string, data []byte, offset uint64) (int, error) {
+	if len(data) == 0 {
+		return 0, nil
+	}
+
 	c_oid := C.CString(oid)
 	defer C.free(unsafe.Pointer(c_oid))
-
-	var buf *C.char
-	if len(data) > 0 {
-		buf = (*C.char)(unsafe.Pointer(&data[0]))
-	}
 
 	ret := C.rados_read(
 		ioctx.ioctx,
 		c_oid,
-		buf,
+		(*C.char)(unsafe.Pointer(&data[0])),
 		(C.size_t)(len(data)),
 		(C.uint64_t)(offset))
 
@@ -220,7 +203,7 @@ func (ioctx *IOContext) GetPoolName() (name string, err error) {
 	for {
 		ret := C.rados_ioctx_get_pool_name(ioctx.ioctx,
 			(*C.char)(unsafe.Pointer(&buf[0])), C.unsigned(len(buf)))
-		if ret == -C.ERANGE {
+		if ret == -34 { // FIXME
 			buf = make([]byte, len(buf)*2)
 			continue
 		} else if ret < 0 {
@@ -237,27 +220,27 @@ type ObjectListFunc func(oid string)
 
 // ListObjects lists all of the objects in the pool associated with the I/O
 // context, and called the provided listFn function for each object, passing
-// to the function the name of the object. Call SetNamespace with
-// RadosAllNamespaces before calling this function to return objects from all
-// namespaces
+// to the function the name of the object.
 func (ioctx *IOContext) ListObjects(listFn ObjectListFunc) error {
 	var ctx C.rados_list_ctx_t
-	ret := C.rados_nobjects_list_open(ioctx.ioctx, &ctx)
+	ret := C.rados_objects_list_open(ioctx.ioctx, &ctx)
 	if ret < 0 {
 		return GetRadosError(int(ret))
 	}
-	defer func() { C.rados_nobjects_list_close(ctx) }()
+	defer func() { C.rados_objects_list_close(ctx) }()
 
 	for {
 		var c_entry *C.char
-		ret := C.rados_nobjects_list_next(ctx, &c_entry, nil, nil)
-		if ret == -C.ENOENT {
+		ret := C.rados_objects_list_next(ctx, &c_entry, nil)
+		if ret == -2 { // FIXME
 			return nil
 		} else if ret < 0 {
 			return GetRadosError(int(ret))
 		}
 		listFn(C.GoString(c_entry))
 	}
+
+	panic("invalid state")
 }
 
 // Stat returns the size of the object and its last modification time
@@ -450,13 +433,12 @@ func (ioctx *IOContext) ListOmapValues(oid string, startAfter string, filterPref
 
 	var c_iter C.rados_omap_iter_t
 	var c_prval C.int
-	C.rados_read_op_omap_get_vals2(
+	C.rados_read_op_omap_get_vals(
 		op,
 		c_start_after,
 		c_filter_prefix,
 		c_max_return,
 		&c_iter,
-		nil,
 		&c_prval,
 	)
 
@@ -587,10 +569,9 @@ func (ioctx *IOContext) CleanOmap(oid string) error {
 }
 
 type Iter struct {
-	ctx       C.rados_list_ctx_t
-	err       error
-	entry     string
-	namespace string
+	ctx   C.rados_list_ctx_t
+	err   error
+	entry string
 }
 
 type IterToken uint32
@@ -598,7 +579,7 @@ type IterToken uint32
 // Return a Iterator object that can be used to list the object names in the current pool
 func (ioctx *IOContext) Iter() (*Iter, error) {
 	iter := Iter{}
-	if cerr := C.rados_nobjects_list_open(ioctx.ioctx, &iter.ctx); cerr < 0 {
+	if cerr := C.rados_objects_list_open(ioctx.ioctx, &iter.ctx); cerr < 0 {
 		return nil, GetRadosError(int(cerr))
 	}
 	return &iter, nil
@@ -606,11 +587,11 @@ func (ioctx *IOContext) Iter() (*Iter, error) {
 
 // Returns a token marking the current position of the iterator. To be used in combination with Iter.Seek()
 func (iter *Iter) Token() IterToken {
-	return IterToken(C.rados_nobjects_list_get_pg_hash_position(iter.ctx))
+	return IterToken(C.rados_objects_list_get_pg_hash_position(iter.ctx))
 }
 
 func (iter *Iter) Seek(token IterToken) {
-	C.rados_nobjects_list_seek(iter.ctx, C.uint32_t(token))
+	C.rados_objects_list_seek(iter.ctx, C.uint32_t(token))
 }
 
 // Next retrieves the next object name in the pool/namespace iterator.
@@ -629,13 +610,11 @@ func (iter *Iter) Seek(token IterToken) {
 //
 func (iter *Iter) Next() bool {
 	var c_entry *C.char
-	var c_namespace *C.char
-	if cerr := C.rados_nobjects_list_next(iter.ctx, &c_entry, nil, &c_namespace); cerr < 0 {
+	if cerr := C.rados_objects_list_next(iter.ctx, &c_entry, nil); cerr < 0 {
 		iter.err = GetRadosError(int(cerr))
 		return false
 	}
 	iter.entry = C.GoString(c_entry)
-	iter.namespace = C.GoString(c_namespace)
 	return true
 }
 
@@ -645,14 +624,6 @@ func (iter *Iter) Value() string {
 		return ""
 	}
 	return iter.entry
-}
-
-// Returns the namespace associated with the current value of the iterator (object name), after a successful call to Next.
-func (iter *Iter) Namespace() string {
-	if iter.err != nil {
-		return ""
-	}
-	return iter.namespace
 }
 
 // Checks whether the iterator has encountered an error.
@@ -666,7 +637,7 @@ func (iter *Iter) Err() error {
 // Closes the iterator cursor on the server. Be aware that iterators are not closed automatically
 // at the end of iteration.
 func (iter *Iter) Close() {
-	C.rados_nobjects_list_close(iter.ctx)
+	C.rados_objects_list_close(iter.ctx)
 }
 
 // Take an exclusive lock on an object.
@@ -679,7 +650,7 @@ func (ioctx *IOContext) LockExclusive(oid, name, cookie, desc string, duration t
 	var c_duration C.struct_timeval
 	if duration != 0 {
 		tv := syscall.NsecToTimeval(duration.Nanoseconds())
-		c_duration = C.struct_timeval{tv_sec: C.ceph_time_t(tv.Sec), tv_usec: C.ceph_suseconds_t(tv.Usec)}
+		c_duration = C.struct_timeval{tv_sec: C.__time_t(tv.Sec), tv_usec: C.__suseconds_t(tv.Usec)}
 	}
 
 	var c_flags C.uint8_t
@@ -708,9 +679,9 @@ func (ioctx *IOContext) LockExclusive(oid, name, cookie, desc string, duration t
 	switch ret {
 	case 0:
 		return int(ret), nil
-	case -C.EBUSY:
+	case -16: // EBUSY
 		return int(ret), nil
-	case -C.EEXIST:
+	case -17: // EEXIST
 		return int(ret), nil
 	default:
 		return int(ret), RadosError(int(ret))
@@ -728,7 +699,7 @@ func (ioctx *IOContext) LockShared(oid, name, cookie, tag, desc string, duration
 	var c_duration C.struct_timeval
 	if duration != 0 {
 		tv := syscall.NsecToTimeval(duration.Nanoseconds())
-		c_duration = C.struct_timeval{tv_sec: C.ceph_time_t(tv.Sec), tv_usec: C.ceph_suseconds_t(tv.Usec)}
+		c_duration = C.struct_timeval{tv_sec: C.__time_t(tv.Sec), tv_usec: C.__suseconds_t(tv.Usec)}
 	}
 
 	var c_flags C.uint8_t
@@ -759,9 +730,9 @@ func (ioctx *IOContext) LockShared(oid, name, cookie, tag, desc string, duration
 	switch ret {
 	case 0:
 		return int(ret), nil
-	case -C.EBUSY:
+	case -16: // EBUSY
 		return int(ret), nil
-	case -C.EEXIST:
+	case -17: // EEXIST
 		return int(ret), nil
 	default:
 		return int(ret), RadosError(int(ret))
@@ -790,7 +761,7 @@ func (ioctx *IOContext) Unlock(oid, name, cookie string) (int, error) {
 	switch ret {
 	case 0:
 		return int(ret), nil
-	case -C.ENOENT:
+	case -2: // -ENOENT
 		return int(ret), nil
 	default:
 		return int(ret), RadosError(int(ret))
@@ -880,9 +851,9 @@ func (ioctx *IOContext) BreakLock(oid, name, client, cookie string) (int, error)
 	switch ret {
 	case 0:
 		return int(ret), nil
-	case -C.ENOENT:
+	case -2: // -ENOENT
 		return int(ret), nil
-	case -C.EINVAL: // -EINVAL
+	case -22: // -EINVAL
 		return int(ret), nil
 	default:
 		return int(ret), RadosError(int(ret))

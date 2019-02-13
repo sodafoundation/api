@@ -73,6 +73,10 @@
   name = "github.com/gophercloud/gophercloud"
   revision = "754e57e7867bfa48062ff2a237caad538085700a"
 
+[[constraint]]
+  name = "github.com/ceph/go-ceph"
+  revision = "81e4191e131b21e282a9289621383237677d2437"
+
 [prune]
   go-tests = true
   non-go = true
