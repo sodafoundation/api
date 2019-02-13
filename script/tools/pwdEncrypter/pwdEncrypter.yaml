@@ -1,2 +1,2 @@
 # Encryption tool. Default value is aes.
-PwdEncrypter: "fuck"
+PwdEncrypter: "aes"
