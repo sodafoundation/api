@@ -399,6 +399,10 @@ func (fc *FakeDbClient) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string)
 	return nil, nil
 }
 
+func (fc *FakeDbClient) ListAttachmentsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	return nil, nil
+}
+
 func (fc *FakeDbClient) DeleteVolumeGroup(ctx *c.Context, volumeId string) error {
 	return nil
 }

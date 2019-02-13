@@ -109,7 +109,7 @@ func TestDeleteVolumeDBEntry(t *testing.T) {
 	mockClient.On("UpdateVolume", context.NewAdminContext(), vol).Return(nil, nil)
 	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
 	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
-	mockClient.On("ListVolumeAttachments", context.NewAdminContext(), vol.Id).Return(nil, nil)
+	mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
 	db.C = mockClient
 
 	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)

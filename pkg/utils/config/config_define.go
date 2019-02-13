@@ -18,7 +18,7 @@ import "time"
 
 type Default struct{}
 
-type OsdsLet struct {
+type OsdsApiServer struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
 	Graceful           bool          `conf:"graceful,true"`
 	SocketOrder        string        `conf:"socket_order"`
@@ -29,6 +29,12 @@ type OsdsLet struct {
 	HTTPSEnabled       bool          `conf:"https_enabled,false"`
 	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
 	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
+}
+
+type OsdsLet struct {
+	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
+	Daemon            bool          `conf:"daemon,false"`
+	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 }
 
 type OsdsDock struct {
@@ -85,6 +91,7 @@ type KeystoneAuthToken struct {
 
 type Config struct {
 	Default           `conf:"default"`
+	OsdsApiServer     `conf:"osdsapiserver"`
 	OsdsLet           `conf:"osdslet"`
 	OsdsDock          `conf:"osdsdock"`
 	Database          `conf:"database"`

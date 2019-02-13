@@ -2352,6 +2352,10 @@ func (c *Client) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*mo
 	return snapList, nil
 }
 
+func (c *Client) ListAttachmentsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	return c.ListVolumeAttachments(ctx, volumeId)
+}
+
 func (c *Client) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
 	vgs, err := c.ListVolumeGroups(ctx)
 	if err != nil {

@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	confFile = "github.com/opensds/opensds/script/tools/pwdEncrypter/pwdEncrypter.yaml"
+	confFile = "./pwdEncrypter.yaml"
 )
 
 type tool struct {

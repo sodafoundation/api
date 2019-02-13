@@ -153,11 +153,11 @@ exec 1>&3
 # Force all output to stdout and logs now
 exec 1> >( tee -a "${LOGFILE}" ) 2>&1
 
-echo -e "\n"
+echo
 echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
 echo "------------------------------------------------------------------"
 echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"
-echo "export OPENSDS_ENDPOINT=http://localhost:50040"
+echo "export OPENSDS_ENDPOINT=https://localhost:50040"
 if osds::util::is_service_enabled keystone; then
     echo "source $DEV_STACK_DIR/openrc"
 fi
