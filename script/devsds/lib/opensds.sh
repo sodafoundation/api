@@ -23,6 +23,12 @@ set +o xtrace
 osds:opensds:configuration(){
 # Set global configuration.
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
+[default]
+# Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+enable_encrypted = False
+# Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+pwd_encrypter = aes
+
 [osdslet]
 api_endpoint = 0.0.0.0:50040
 graceful = True
@@ -35,8 +41,6 @@ auth_strategy = $OPENSDS_AUTH_STRATEGY
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
-# Encryption and decryption tool. Default value is aes.
-password_decrypt_tool = aes
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050
