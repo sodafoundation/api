@@ -29,15 +29,17 @@ import (
 )
 
 func init() {
-	// Load global configuration from specified config file.
-	CONF.Load(constants.OpensdsConfigPath)
+	// Get the default global configuration.
+	def := GetDefaultConfig()
 
 	// Parse some configuration fields from command line.
-	def := CONF
 	flag := &CONF.Flag
 	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", def.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
 	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", def.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", def.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
+
+	// Load global configuration from specified config file.
+	CONF.Load(constants.OpensdsConfigPath)
 
 	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)
 }
