@@ -48,6 +48,7 @@ type Keystone struct {
 
 func (k *Keystone) SetUp() error {
 	c := config.CONF.KeystoneAuthToken
+
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: c.AuthUrl,
 		DomainName:       c.UserDomainName,

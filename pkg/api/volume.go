@@ -22,6 +22,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
@@ -537,8 +538,8 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-					v.Ctx.Output.Body(body)
-					v.Ctx.Output.SetStatus(StatusAccepted)
+	v.Ctx.Output.Body(body)
+	v.Ctx.Output.SetStatus(StatusAccepted)
 
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"

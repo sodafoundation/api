@@ -56,32 +56,6 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 					return false
 				}
 
-				if ctx.Input.Scheme() == "https" {
-					if apiServerCfg.BeegoHTTPSCertFile == "" || apiServerCfg.BeegoHTTPSKeyFile == "" {
-						fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
-						return false
-					}
-
-					// beego https config
-					beego.BConfig.Listen.EnableHTTP = false
-					beego.BConfig.Listen.EnableHTTPS = true
-					strs := strings.Split(apiServerCfg.ApiEndpoint, ":")
-					beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
-					beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
-					beego.BConfig.Listen.HTTPSCertFile = apiServerCfg.BeegoHTTPSCertFile
-					beego.BConfig.Listen.HTTPSKeyFile = apiServerCfg.BeegoHTTPSKeyFile
-					tlsConfig := &tls.Config{
-						MinVersion: tls.VersionTLS12,
-						CipherSuites: []uint16{
-							tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-							tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-							tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-						},
-					}
-
-					beego.BeeApp.Server.TLSConfig = tlsConfig
-				}
-
 				return true
 			}),
 
@@ -146,6 +120,32 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 	// add router for api version
 	beego.Router("/", &VersionPortal{}, "get:ListVersions")
 	beego.Router("/:apiVersion", &VersionPortal{}, "get:GetVersion")
+
+	if apiServerCfg.HTTPSEnabled {
+		if apiServerCfg.BeegoHTTPSCertFile == "" || apiServerCfg.BeegoHTTPSKeyFile == "" {
+			fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
+			return
+		}
+
+		// beego https config
+		beego.BConfig.Listen.EnableHTTP = false
+		beego.BConfig.Listen.EnableHTTPS = true
+		strs := strings.Split(apiServerCfg.ApiEndpoint, ":")
+		beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
+		beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
+		beego.BConfig.Listen.HTTPSCertFile = apiServerCfg.BeegoHTTPSCertFile
+		beego.BConfig.Listen.HTTPSKeyFile = apiServerCfg.BeegoHTTPSKeyFile
+		tlsConfig := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			},
+		}
+
+		beego.BeeApp.Server.TLSConfig = tlsConfig
+	}
 
 	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
 	beego.BConfig.CopyRequestBody = true

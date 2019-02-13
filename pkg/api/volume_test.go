@@ -63,13 +63,18 @@ func NewFakeVolumePortal() *VolumePortal {
 
 	mockClient.On("Connect", "localhost:50049").Return(nil)
 	mockClient.On("Close").Return(nil)
-	mockClient.On("CreateVolume", ctx.Background(), &pb.CreateVolumeOpts{}).
+	mockClient.On("CreateVolume", ctx.Background(), &pb.CreateVolumeOpts{
+		Context: c.NewAdminContext().ToJson(),
+	}).
 		Return(&pb.GenericResponse{}, nil)
 	mockClient.On("ExtendVolume", ctx.Background(), &pb.ExtendVolumeOpts{
 		Id:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		Message: string(`{}`),
+		Message: string(`{"newSize":20}`),
+		Context: c.NewAdminContext().ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
-	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{}).
+	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
+		Context: c.NewAdminContext().ToJson(),
+	}).
 		Return(&pb.GenericResponse{}, nil)
 
 	return &VolumePortal{
@@ -316,7 +321,7 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 }
 
 func TestExtendVolume(t *testing.T) {
-	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
+	var jsonStr = []byte(`{"newSize":20}`)
 	r, _ := http.NewRequest("POST",
 		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()
@@ -324,7 +329,7 @@ func TestExtendVolume(t *testing.T) {
 
 	volume := &model.VolumeSpec{
 		BaseModel: &model.BaseModel{},
-		Status:    "available",
+		Status:    model.VolumeAvailable,
 		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		Size:      1,
 	}
@@ -347,7 +352,7 @@ func TestExtendVolume(t *testing.T) {
 }
 
 func TestExtendVolumeWithBadRequest(t *testing.T) {
-	var jsonStr = []byte(`{"extend":{"newSize": 20}}`)
+	var jsonStr = []byte(`{"newSize":20}`)
 	r, _ := http.NewRequest("POST",
 		"/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))
 	w := httptest.NewRecorder()

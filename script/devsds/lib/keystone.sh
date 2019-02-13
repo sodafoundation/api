@@ -155,7 +155,7 @@ osds::keystone::cleanup() {
 }
 
 osds::keystone::uninstall(){
-    if [ "true" != $USE_EXISTING_KEYSTONE] 
+    if [ "true" != $USE_EXISTING_KEYSTONE ] 
     then
         su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
     else

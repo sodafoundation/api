@@ -21,15 +21,20 @@ set +o xtrace
 
 
 osds:opensds:configuration(){
-# Set global configuration. If https is enabled, the default value of cert file
-# is /opt/opensds-security/opensds/opensds-cert.pem, and key file is /opt/opensds-security/opensds/opensds-key.pem
+# Set global configuration.
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
 log_file = /var/log/opensds/osdsapiserver.log
 auth_strategy = $OPENSDS_AUTH_STRATEGY
-beego_https_cert_file = ""
-beego_https_key_file = ""
+# If https is enabled, the default value of cert file
+# is /opt/opensds-security/opensds/opensds-cert.pem, 
+# and key file is /opt/opensds-security/opensds/opensds-key.pem
+https_enabled = False
+beego_https_cert_file =
+beego_https_key_file =
+# Encryption and decryption tool. Default value is aes.
+password_decrypt_tool = aes
 
 [osdslet]
 api_endpoint = $HOST_IP:50049
@@ -66,18 +71,12 @@ osds::opensds::install(){
         source $DEV_STACK_DIR/openrc admin admin
         $xtrace
     fi
-<<<<<<< HEAD
 
-=======
-    export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
-    export OPENSDS_ENDPOINT=http://localhost:50040
-    build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
->>>>>>> d4dd43e2880bf3d63c36d3df3c14168d5b931c72
     # Copy bash completion script to system.
     cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/
 
     export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
-    export OPENSDS_ENDPOINT=https://localhost:50040
+    export OPENSDS_ENDPOINT=http://localhost:50040
     build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
     if [ $? == 0 ]; then
         osds::echo_summary devsds installed successfully !!
