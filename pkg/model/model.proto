@@ -548,6 +548,10 @@ message FailoverReplicationOpts {
     map<string, string> metadata = 18;
     // Whether is primary replication
     bool  isPrimary = 19;
+    message FailoverRequest {
+        bool allowAttachedVolume = 1;
+        string secondaryBackendId = 2;
+    }
 }
 
 // CreateVolumeGroupOpts is a structure which indicates all required
