@@ -20,27 +20,25 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
+	"flag"
+
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
-	// Get the default global configuration.
-	def := GetDefaultConfig()
-
-	// Parse some configuration fields from command line.
-	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", def.OsdsDock.ApiEndpoint, "Listen endpoint of dock service")
-	flag.StringVar(&CONF.OsdsDock.DockType, "dock-type", def.OsdsDock.DockType, "Type of dock service")
-	flag.BoolVar(&CONF.OsdsDock.Daemon, "daemon", def.OsdsDock.Daemon, "Run app as a daemon with -daemon=true")
-	flag.DurationVar(&CONF.OsdsDock.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-
 	// Load global configuration from specified config file.
-	CONF.Load(constants.OpensdsConfigPath)
+	CONF.Load()
+
+	// Parse some configuration fields from command line. and it will override the value which is got from config file.
+	flag.StringVar(&CONF.OsdsDock.ApiEndpoint, "api-endpoint", CONF.OsdsDock.ApiEndpoint, "Listen endpoint of dock service")
+	flag.StringVar(&CONF.OsdsDock.DockType, "dock-type", CONF.OsdsDock.DockType, "Type of dock service")
+	flag.BoolVar(&CONF.OsdsDock.Daemon, "daemon", CONF.OsdsDock.Daemon, "Run app as a daemon with -daemon=true")
+	flag.DurationVar(&CONF.OsdsDock.LogFlushFrequency, "log-flush-frequency", CONF.OsdsDock.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsDock.Daemon)
 }
