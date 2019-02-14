@@ -66,31 +66,13 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 	if in.CreatedAt == "" {
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
-	vol := &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id:        in.Id,
-			CreatedAt: in.CreatedAt,
-		},
-		UserId:            ctx.UserId,
-		Name:              in.Name,
-		Description:       in.Description,
-		ProfileId:         in.ProfileId,
-		Size:              in.Size,
-		AvailabilityZone:  in.AvailabilityZone,
-		Status:            model.VolumeCreating,
-		SnapshotId:        in.SnapshotId,
-		SnapshotFromCloud: in.SnapshotFromCloud,
-	}
-	result, err := db.C.CreateVolume(ctx, vol)
-	if err != nil {
-		log.Error("When add volume to db:", err)
-		return nil, err
-	}
 
-	return result, nil
+	in.Status = model.VolumeCreating
+	// Store the volume data into database.
+	return db.C.CreateVolume(ctx, in)
 }
 
-func ExtendVolumeDBEntry(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
+func ExtendVolumeDBEntry(ctx *c.Context, volID string, newSize int64) (*model.VolumeSpec, error) {
 	volume, err := db.C.GetVolume(ctx, volID)
 	if err != nil {
 		log.Error("Get volume failed in extend volume method: ", err)
@@ -102,14 +84,16 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string) (*model.VolumeSpec, error
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	if newSize <= volume.Size {
+		errMsg := fmt.Sprintf("New size for extend must be greater than current size."+
+			"(current: %d GB, extended: %d GB).", volume.Size, newSize)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
 	volume.Status = model.VolumeExtending
 	// Store the volume data into database.
-	result, err := db.C.ExtendVolume(ctx, volume)
-	if err != nil {
-		log.Error("When extend volume in db module:", err)
-		return nil, err
-	}
-	return result, nil
+	return db.C.ExtendVolume(ctx, volume)
 }
 
 func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
@@ -136,30 +120,9 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 		in.ConnectionData = map[string]interface{}{"attachment": "attachment"}
 	}
 
-	var atc = &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{
-			Id:        in.Id,
-			CreatedAt: in.CreatedAt,
-		},
-		VolumeId: in.VolumeId,
-		HostInfo: model.HostInfo{
-			Platform:  in.Platform,
-			OsType:    in.OsType,
-			Ip:        in.Ip,
-			Host:      in.Host,
-			Initiator: in.Initiator,
-		},
-		Status:         model.VolumeAttachCreating,
-		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		ConnectionInfo: in.ConnectionInfo,
-	}
-
-	result, err := db.C.CreateVolumeAttachment(ctx, atc)
-	if err != nil {
-		log.Error("Error occurred in dock module when create volume attachment in db:", err)
-		return nil, err
-	}
-	return result, nil
+	in.Status = model.VolumeAttachCreating
+	in.Metadata = utils.MergeStringMaps(in.Metadata, vol.Metadata)
+	return db.C.CreateVolumeAttachment(ctx, in)
 }
 
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
@@ -177,31 +140,75 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
-
 	if in.CreatedAt == "" {
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
-	var snap = &model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{
-			Id:        in.Id,
-			CreatedAt: in.CreatedAt,
-		},
-		ProfileId:   in.ProfileId,
-		Name:        in.Name,
-		Description: in.Description,
-		VolumeId:    in.VolumeId,
-		Size:        vol.Size,
-		Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		Status:      model.VolumeSnapCreating,
-	}
+	in.Status = model.VolumeSnapCreating
+	return db.C.CreateVolumeSnapshot(ctx, in)
+}
 
-	result, err := db.C.CreateVolumeSnapshot(ctx, snap)
+func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+	pVol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		log.Error("Error occurred in dock module when create volume snapshot in db:", err)
+		log.Error("Get primary volume failed in create volume replication method: ", err)
 		return nil, err
 	}
-	return result, nil
+	if pVol.Status != model.VolumeAvailable && pVol.Status != model.VolumeInUse {
+		var errMsg = fmt.Errorf("Only the status of primary volume is available or in-use, the replicaiton can be created")
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+	sVol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	if err != nil {
+		log.Error("Get secondary volume failed in create volume replication method: ", err)
+		return nil, err
+	}
+	if sVol.Status != model.VolumeAvailable && sVol.Status != model.VolumeInUse {
+		var errMsg = fmt.Errorf("Only the status of secondary volume is available or in-use, the replicaiton can be created")
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+
+	// check if specified volume has already been used in other replication.
+	v, err := db.C.GetReplicationByVolumeId(ctx, in.PrimaryVolumeId)
+	if err != nil {
+		var errMsg = fmt.Errorf("Get replication by primary volume id %s failed: %v",
+			in.PrimaryVolumeId, err)
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+	if v != nil {
+		var errMsg = fmt.Errorf("Specified primary volume(%s) has already been used in replication(%s)",
+			in.PrimaryVolumeId, v.Id)
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+
+	// check if specified volume has already been used in other replication.
+	v, err = db.C.GetReplicationByVolumeId(ctx, in.SecondaryVolumeId)
+	if err != nil {
+		var errMsg = fmt.Errorf("Get replication by secondary volume id %s failed: %v",
+			in.SecondaryVolumeId, err)
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+	if v != nil {
+		var errMsg = fmt.Errorf("Specified secondary volume(%s) has already been used in replication(%s)",
+			in.SecondaryVolumeId, v.Id)
+		log.Error(errMsg)
+		return nil, errMsg
+	}
+
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.ReplicationStatus = model.ReplicationCreating
+	return db.C.CreateReplication(ctx, in)
 }
 
 func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) error {
@@ -366,24 +373,8 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 		in.AvailabilityZone = "default"
 	}
 
-	vg := &model.VolumeGroupSpec{
-		BaseModel: &model.BaseModel{
-			Id: in.Id,
-		},
-		UserId:           ctx.UserId,
-		Name:             in.Name,
-		Description:      in.Description,
-		AvailabilityZone: in.AvailabilityZone,
-		Status:           model.VolumeGroupCreating,
-		Profiles:         in.Profiles,
-	}
-	result, err := db.C.CreateVolumeGroup(ctx, vg)
-	if err != nil {
-		log.Error("When add volume to db:", err)
-		return nil, err
-	}
-
-	return result, nil
+	in.Status = model.VolumeGroupCreating
+	return db.C.CreateVolumeGroup(ctx, in)
 }
 
 func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
@@ -465,13 +456,7 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 		vgNew.Status = model.VolumeGroupUpdating
 	}
 
-	result, err := db.C.UpdateVolumeGroup(ctx, vgNew)
-	if err != nil {
-		log.Error("When update volume group in db:", err.Error())
-		return nil, err
-	}
-
-	return result, nil
+	return db.C.UpdateVolumeGroup(ctx, vgNew)
 }
 
 func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes []string, vg *model.VolumeGroupSpec) ([]string, error) {

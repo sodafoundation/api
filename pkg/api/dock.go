@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -43,33 +42,26 @@ func (d *DockPortal) ListDocks() {
 	// Call db api module to handle list docks request.
 	m, err := d.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
-		d.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		d.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List docks failed: %s", err.Error())
+		d.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	result, err := db.C.ListDocksWithFilter(c.GetContext(d.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List docks failed: %s", err.Error())
-		d.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		d.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List docks failed: %s", err.Error())
+		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal docks failed: %s", err.Error())
-		d.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		d.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Marshal docks failed: %s", err.Error())
+		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	d.Ctx.Output.SetStatus(StatusOK)
-	d.Ctx.Output.Body(body)
+	d.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -81,24 +73,19 @@ func (d *DockPortal) GetDock() {
 	id := d.Ctx.Input.Param(":dockId")
 	result, err := db.C.GetDock(c.GetContext(d.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get dock failed: %s", err.Error())
-		d.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		d.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Dock %s not found: %s", id, err.Error())
+		d.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal dock failed: %s", err.Error())
-		d.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		d.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Marshal dock failed: %s", err.Error())
+		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	d.Ctx.Output.SetStatus(StatusOK)
-	d.Ctx.Output.Body(body)
+	d.SuccessHandle(StatusOK, body)
 	return
 }

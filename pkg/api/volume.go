@@ -27,9 +27,9 @@ import (
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
-	pb "github.com/opensds/opensds/pkg/controller/proto"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"golang.org/x/net/context"
 )
@@ -57,10 +57,8 @@ func (v *VolumePortal) CreateVolume() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volume); err != nil {
-		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	// NOTE:It will create a volume entry into the database and initialize its status
@@ -68,17 +66,14 @@ func (v *VolumePortal) CreateVolume() {
 	// and will return result immediately.
 	result, err := CreateVolumeDBEntry(ctx, &volume)
 	if err != nil {
-		reason := fmt.Sprintf("Create volume failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Create volume failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, body)
 
 	// NOTE:The real volume creation process.
 	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
@@ -90,8 +85,16 @@ func (v *VolumePortal) CreateVolume() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:                result.Id,
+		Name:              result.Name,
+		Description:       result.Description,
+		Size:              result.Size,
+		AvailabilityZone:  result.AvailabilityZone,
+		ProfileId:         result.ProfileId,
+		SnapshotId:        result.SnapshotId,
+		Metadata:          result.Metadata,
+		SnapshotFromCloud: result.SnapshotFromCloud,
+		Context:           ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolume(context.Background(), opt); err != nil {
 		log.Error("Create volume failed in controller service:", err)
@@ -108,26 +111,21 @@ func (v *VolumePortal) ListVolumes() {
 	// Call db api module to handle list volumes request.
 	m, err := v.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volumes failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumesWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List volumes failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volumes failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -141,17 +139,14 @@ func (v *VolumePortal) GetVolume() {
 	// Call db api module to handle get volume request.
 	result, err := db.C.GetVolume(c.GetContext(v.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -166,27 +161,22 @@ func (v *VolumePortal) UpdateVolume() {
 
 	id := v.Ctx.Input.Param(":volumeId")
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volume); err != nil {
-		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	volume.Id = id
 	result, err := db.C.UpdateVolume(c.GetContext(v.Ctx), &volume)
 	if err != nil {
-		reason := fmt.Sprintf("Update volume failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Update volume failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -200,29 +190,24 @@ func (v *VolumePortal) ExtendVolume() {
 	var extendRequestBody = model.ExtendVolumeSpec{}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&extendRequestBody); err != nil {
-		reason := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	id := v.Ctx.Input.Param(":volumeId")
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
-	result, err := ExtendVolumeDBEntry(ctx, id)
+	result, err := ExtendVolumeDBEntry(ctx, id, extendRequestBody.NewSize)
 	if err != nil {
-		reason := fmt.Sprintf("Extend volume failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Extend volume failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, body)
 
 	// NOTE:The real volume extension process.
 	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
@@ -233,11 +218,11 @@ func (v *VolumePortal) ExtendVolume() {
 	}
 	defer v.CtrClient.Close()
 
-	body, _ = json.Marshal(&extendRequestBody)
 	opt := &pb.ExtendVolumeOpts{
-		Id:      id,
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:       id,
+		Size:     extendRequestBody.NewSize,
+		Metadata: result.Metadata,
+		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
 		log.Error("Extend volume failed in controller service:", err)
@@ -257,23 +242,19 @@ func (v *VolumePortal) DeleteVolume() {
 	id := v.Ctx.Input.Param(":volumeId")
 	volume, err := db.C.GetVolume(ctx, id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = DeleteVolumeDBEntry(ctx, volume); err != nil {
-		reason := fmt.Sprintf("Delete volume failed: %v", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Delete volume failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume deletion process.
 	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
@@ -284,10 +265,10 @@ func (v *VolumePortal) DeleteVolume() {
 	}
 	defer v.CtrClient.Close()
 
-	body, _ := json.Marshal(volume)
 	opt := &pb.DeleteVolumeOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:       volume.Id,
+		Metadata: volume.Metadata,
+		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("Delete volume failed in controller service:", err)
@@ -319,10 +300,8 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&attachment); err != nil {
-		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
@@ -331,17 +310,14 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// and will return result immediately.
 	result, err := CreateVolumeAttachmentDBEntry(ctx, &attachment)
 	if err != nil {
-		reason := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, body)
 
 	// NOTE:The real volume attachment creation process.
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
@@ -353,8 +329,17 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeAttachmentOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:       result.Id,
+		VolumeId: result.VolumeId,
+		HostInfo: &pb.HostInfo{
+			Platform:  result.Platform,
+			OsType:    result.OsType,
+			Ip:        result.Ip,
+			Host:      result.Host,
+			Initiator: result.Initiator,
+		},
+		Metadata: result.Metadata,
+		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Create volume attachment failed in controller service:", err)
@@ -371,26 +356,21 @@ func (v *VolumeAttachmentPortal) ListVolumeAttachments() {
 
 	m, err := v.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volume attachments failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List volume attachments failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volume attachments failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -403,17 +383,14 @@ func (v *VolumeAttachmentPortal) GetVolumeAttachment() {
 
 	result, err := db.C.GetVolumeAttachment(c.GetContext(v.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume attachment %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -428,27 +405,22 @@ func (v *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	id := v.Ctx.Input.Param(":attachmentId")
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&attachment); err != nil {
-		reason := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	attachment.Id = id
 
 	result, err := db.C.UpdateVolumeAttachment(c.GetContext(v.Ctx), id, &attachment)
 	if err != nil {
-		reason := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -463,15 +435,13 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	id := v.Ctx.Input.Param(":attachmentId")
 	attachment, err := db.C.GetVolumeAttachment(ctx, id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume attachment failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume attachment %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 	// NOTE:It will not wait for the real volume attachment deletion to complete
 	// and will return ok immediately.
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume attachment deletion process.
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
@@ -482,10 +452,18 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	}
 	defer v.CtrClient.Close()
 
-	body, _ := json.Marshal(attachment)
 	opt := &pb.DeleteVolumeAttachmentOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:       attachment.Id,
+		VolumeId: attachment.VolumeId,
+		HostInfo: &pb.HostInfo{
+			Platform:  attachment.Platform,
+			OsType:    attachment.OsType,
+			Ip:        attachment.Ip,
+			Host:      attachment.Host,
+			Initiator: attachment.Initiator,
+		},
+		Metadata: attachment.Metadata,
+		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("Delete volume attachment failed in controller service:", err)
@@ -517,10 +495,8 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&snapshot); err != nil {
-		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
@@ -529,17 +505,14 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// and will return result immediately.
 	result, err := CreateVolumeSnapshotDBEntry(ctx, &snapshot)
 	if err != nil {
-		reason := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusAccepted)
+	v.SuccessHandle(StatusAccepted, body)
 
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
@@ -551,8 +524,13 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeSnapshotOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:          result.Id,
+		Name:        result.Name,
+		Description: result.Description,
+		VolumeId:    result.VolumeId,
+		Size:        result.Size,
+		Metadata:    result.Metadata,
+		Context:     ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Create volume snapthot failed in controller service:", err)
@@ -568,26 +546,21 @@ func (v *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	}
 	m, err := v.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -600,17 +573,14 @@ func (v *VolumeSnapshotPortal) GetVolumeSnapshot() {
 
 	result, err := db.C.GetVolumeSnapshot(c.GetContext(v.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume snapshot %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -626,27 +596,22 @@ func (v *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 	id := v.Ctx.Input.Param(":snapshotId")
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&snapshot); err != nil {
-		reason := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	snapshot.Id = id
 
 	result, err := db.C.UpdateVolumeSnapshot(c.GetContext(v.Ctx), id, &snapshot)
 	if err != nil {
-		reason := fmt.Sprintf("Update volume snapshot failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Update volume snapshot failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)
-	v.Ctx.Output.Body(body)
-	v.Ctx.Output.SetStatus(StatusOK)
+	v.SuccessHandle(StatusOK, body)
 
 	return
 }
@@ -660,10 +625,8 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 
 	snapshot, err := db.C.GetVolumeSnapshot(ctx, id)
 	if err != nil {
-		reason := fmt.Sprintf("Get volume snapshot failed: %s", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Volume snapshot %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
@@ -671,10 +634,8 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// the database to "deleting" and return the result immediately.
 	err = DeleteVolumeSnapshotDBEntry(ctx, snapshot)
 	if err != nil {
-		reason := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
-		v.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		v.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
@@ -687,10 +648,11 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	}
 	defer v.CtrClient.Close()
 
-	body, _ := json.Marshal(snapshot)
 	opt := &pb.DeleteVolumeSnapshotOpts{
-		Message: string(body),
-		Context: ctx.ToJson(),
+		Id:       snapshot.Id,
+		VolumeId: snapshot.VolumeId,
+		Metadata: snapshot.Metadata,
+		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("Delete volume snapthot failed in controller service:", err)

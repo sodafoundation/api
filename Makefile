@@ -57,7 +57,7 @@ test: build
 	script/CI/test
 
 protoc:
-	cd pkg/model && protoc --go_out=plugins=grpc:. model.proto
+	protoc --go_out=plugins=grpc:. pkg/model/proto/model.proto
 
 clean:
 	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock

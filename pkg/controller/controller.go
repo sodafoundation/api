@@ -273,15 +273,6 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 		}
 	}()
 
-	if newSize <= vol.Size {
-		reason := fmt.Sprintf("New size for extend must be greater than current size."+
-			"(current: %d GB, extended: %d GB).", vol.Size, newSize)
-		errchanVolume <- errors.New(reason)
-		log.Error(reason)
-		rollBack = true
-		return
-	}
-
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if nil != err {
 		log.Error("Get pool failed in extend volume method: ", err.Error())

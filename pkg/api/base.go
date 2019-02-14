@@ -15,7 +15,6 @@
 package api
 
 import (
-	"fmt"
 	"net/url"
 	"reflect"
 
@@ -67,11 +66,27 @@ func (b *BasePortal) doFilter(resp interface{}, whiteList []string) map[string]i
 	return m
 }
 
-func (b *BasePortal) ErrorHandle(errMsg string, errType int, err error) {
-	reason := fmt.Sprintf(errMsg+": %s", err.Error())
-	b.Ctx.Output.SetStatus(model.ErrorBadRequest)
-	b.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-	log.Error(reason)
+func (b *BasePortal) ErrorHandle(errType int, errMsg string) {
+	var errBody []byte
+
+	switch errType {
+	case model.ErrorBadRequest:
+		errBody = model.ErrorBadRequestStatus(errMsg)
+	case model.ErrorUnauthorized:
+		errBody = model.ErrorUnauthorizedStatus(errMsg)
+	case model.ErrorForbidden:
+		errBody = model.ErrorForbiddenStatus(errMsg)
+	case model.ErrorNotFound:
+		errBody = model.ErrorNotFoundStatus(errMsg)
+	case model.ErrorInternalServer:
+		errBody = model.ErrorInternalServerStatus(errMsg)
+	default:
+		errBody = model.ErrorNotImplementedStatus(errMsg)
+	}
+
+	b.Ctx.Output.SetStatus(errType)
+	b.Ctx.Output.Body(errBody)
+	log.Error(errMsg)
 }
 
 func (b *BasePortal) SuccessHandle(status int, body []byte) {
