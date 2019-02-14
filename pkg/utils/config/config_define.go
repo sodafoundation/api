@@ -94,5 +94,4 @@ type Config struct {
 	OsdsDock          `conf:"osdsdock"`
 	Database          `conf:"database"`
 	KeystoneAuthToken `conf:"keystone_authtoken"`
-	Flag              FlagSet
 }
