@@ -30,7 +30,7 @@ const (
 )
 
 type tool struct {
-	encrypter string `yaml:"PwdEncrypter,omitempty"`
+	PwdEncrypter string `yaml:"PwdEncrypter,omitempty"`
 }
 
 var encrypterCommand = &cobra.Command{
@@ -59,7 +59,7 @@ func encrypter(cmd *cobra.Command, args []string) {
 	}
 
 	// Encrypt the password
-	encrypterTool := pwd.NewPwdEncrypter(pwdEncrypter.encrypter)
+	encrypterTool := pwd.NewPwdEncrypter(pwdEncrypter.PwdEncrypter)
 	plaintext, err := encrypterTool.Encrypter(args[0])
 	if err != nil {
 		fmt.Println("Encrypt password error:", err)
@@ -70,7 +70,7 @@ func encrypter(cmd *cobra.Command, args []string) {
 }
 
 func loadConf(f string) (*tool, error) {
-	var conf = &tool{}
+	conf := &tool{}
 	confYaml, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("Read config yaml file (%s) failed, reason:(%v)", f, err)
