@@ -14,11 +14,12 @@ import (
 )
 
 type AuthOptions struct {
-	Username     string `yaml:"username,omitempty"`
-	Password     string `yaml:"password,omitempty"`
-	PasswordTool string `yaml:"passwordtool,omitempty"`
-	Endpoints    string `yaml:"endpoints,omitempty"`
-	Insecure     bool   `yaml:"insecure,omitempty"`
+	Username        string `yaml:"username,omitempty"`
+	Password        string `yaml:"password,omitempty"`
+	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
+	Endpoints       string `yaml:"endpoints,omitempty"`
+	Insecure        bool   `yaml:"insecure,omitempty"`
 }
 
 type Replication struct {

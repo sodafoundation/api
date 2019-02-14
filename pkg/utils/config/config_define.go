@@ -19,15 +19,14 @@ import "time"
 type Default struct{}
 
 type OsdsApiServer struct {
-	ApiEndpoint         string        `conf:"api_endpoint,localhost:50040"`
-	AuthStrategy        string        `conf:"auth_strategy,noauth"`
-	PolicyPath          string        `conf:"policy_path,/etc/opensds/policy.json"`
-	Daemon              bool          `conf:"daemon,false"`
-	LogFlushFrequency   time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
-	HTTPSEnabled        bool          `conf:"https_enabled,false"`
-	BeegoHTTPSCertFile  string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
-	BeegoHTTPSKeyFile   string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
-	PasswordDecryptTool string        `conf:"password_decrypt_tool,aes"`
+	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
+	AuthStrategy       string        `conf:"auth_strategy,noauth"`
+	Daemon             bool          `conf:"daemon,false"`
+	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
+	LogFlushFrequency  time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	HTTPSEnabled       bool          `conf:"https_enabled,false"`
+	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
+	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
 }
 
 type OsdsLet struct {
@@ -79,9 +78,13 @@ type KeystoneAuthToken struct {
 	ProjectName       string `conf:"project_name"`
 	UserDomainName    string `conf:"user_domain_name"`
 	Password          string `conf:"password"`
-	Username          string `conf:"username"`
-	AuthUrl           string `conf:"auth_url"`
-	AuthType          string `conf:"auth_type"`
+	// Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+	PwdEncrypter string `conf:"pwd_encrypter,aes"`
+	// Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+	EnableEncrypted bool   `conf:"enable_encrypted,false"`
+	Username        string `conf:"username"`
+	AuthUrl         string `conf:"auth_url"`
+	AuthType        string `conf:"auth_type"`
 }
 
 type Config struct {
@@ -91,5 +94,4 @@ type Config struct {
 	OsdsDock          `conf:"osdsdock"`
 	Database          `conf:"database"`
 	KeystoneAuthToken `conf:"keystone_authtoken"`
-	Flag              FlagSet
 }

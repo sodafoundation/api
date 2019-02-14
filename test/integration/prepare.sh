@@ -26,15 +26,12 @@ mkdir -p /etc/opensds
 cat > ${OPENSDS_CONF} << OPENSDS_GLOBAL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
-log_file = /var/log/opensds/osdsapiserver.log
 
 [osdslet]
 api_endpoint = 0.0.0.0:50049
-log_file = /var/log/opensds/osdslet.log
 
 [osdsdock]
 api_endpoint = 0.0.0.0:50050
-log_file = /var/log/opensds/osdsdock.log
 # Choose the type of dock resource, only support 'provisioner' and 'attacher'.
 dock_type = provisioner
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
