@@ -261,7 +261,7 @@ func TestFunctionDefaultValue(t *testing.T) {
 }
 
 func TestOpensdsConfig(t *testing.T) {
-	CONF.Load("testdata/opensds.conf")
+	initConf("testdata/opensds.conf", CONF)
 
 	if CONF.OsdsApiServer.ApiEndpoint != "localhost:50040" {
 		t.Error("Test OsdsApiServer.ApiEndpoint error")

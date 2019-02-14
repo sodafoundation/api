@@ -20,26 +20,24 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
+	"flag"
+
 	"github.com/opensds/opensds/pkg/api"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
-	// Get the default global configuration.
-	def := GetDefaultConfig()
-
-	// Parse some configuration fields from command line.
-	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", def.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
-	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", def.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", def.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
-
 	// Load global configuration from specified config file.
-	CONF.Load(constants.OpensdsConfigPath)
+	CONF.Load()
+
+	// Parse some configuration fields from command line. and it will override the value which is got from config file.
+	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", CONF.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
+	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", CONF.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", CONF.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
+	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)
 }

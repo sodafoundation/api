@@ -20,26 +20,24 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
+	"flag"
+
 	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
 
 func init() {
-	// Get the default global configuration.
-	def := GetDefaultConfig()
-
-	// Parse some configuration fields from command line.
-	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", def.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
-	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", def.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
-	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-
 	// Load global configuration from specified config file.
-	CONF.Load(constants.OpensdsConfigPath)
+	CONF.Load()
+
+	// Parse some configuration fields from command line. and it will override the value which is got from config file.
+	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
+	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
+	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
 }
