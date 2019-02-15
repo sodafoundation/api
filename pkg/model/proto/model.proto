@@ -179,12 +179,16 @@ message CreateVolumeOpts {
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
+    // The service level that volume belongs to, required.
+    string profileId = 2;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 3;
     // The metadata of the volume, optional.
-    map<string, string> metadata = 2;
+    map<string, string> metadata = 4;
     // The storage driver type.
-    string driverName = 3;
+    string driverName = 5;
     // The Context
-    string context = 4;
+    string context = 6;
 }
 
 // ExtendVolumeOpts is a structure which indicates all required properties
@@ -229,12 +233,14 @@ message CreateVolumeSnapshotOpts {
     string description = 4;
     // The uuid of the volume that snapshot belongs to, required.
     string volumeId = 5;
+    // The service level that volume belongs to, required.
+    string profileId = 6;
     // The metadata of the volume snapshot, optional.
-    map<string, string> metadata = 6;
+    map<string, string> metadata = 7;
     // The storage driver type.
-    string driverName = 7;
+    string driverName = 8;
     // The Context
-    string context = 8;
+    string context = 9;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
