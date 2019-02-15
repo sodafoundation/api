@@ -29,8 +29,8 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
@@ -415,7 +415,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	}, nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	initiator := opt.HostInfo.GetInitiator()
 	if initiator == "" {
 		initiator = "ALL"
@@ -449,7 +449,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
 	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)

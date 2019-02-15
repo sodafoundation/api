@@ -21,8 +21,8 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/volume"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
@@ -76,7 +76,7 @@ func TestControllerExtendVolume(t *testing.T) {
 func TestControllerCreateVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	atc, err := vc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
+	atc, err := vc.CreateVolumeAttachment(&pb.CreateVolumeAttachmentOpts{})
 	if err != nil {
 		t.Error("create volume attachment in controller failed:", err)
 		return
@@ -94,7 +94,7 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 func TestControllerDeleteVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	err := vc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
+	err := vc.DeleteVolumeAttachment(&pb.DeleteVolumeAttachmentOpts{})
 	if err != nil {
 		t.Error("delete volume attachment in controller failed:", err)
 	}

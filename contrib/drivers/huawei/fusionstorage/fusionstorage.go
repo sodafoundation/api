@@ -20,8 +20,8 @@ import (
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	. "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -157,7 +157,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*VolumeSpec, error) {
 	}, nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*ConnectionInfo, error) {
 	connInfo := &ConnectionInfo{
 
 		DriverVolumeType: DSWARE,
@@ -169,7 +169,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*Connection
 	return connInfo, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	// do nothing
 	return nil
 }

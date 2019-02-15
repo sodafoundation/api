@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/dock/client"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -72,7 +72,7 @@ func (fc *fakeClient) ExtendVolume(ctx context.Context, in *pb.ExtendVolumeOpts,
 }
 
 // Create a volume attachment
-func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+func (fc *fakeClient) CreateVolumeAttachment(ctx context.Context, in *pb.CreateVolumeAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{
 			Result: &pb.GenericResponse_Result{
@@ -82,7 +82,7 @@ func (fc *fakeClient) CreateAttachment(ctx context.Context, in *pb.CreateAttachm
 	}, nil
 }
 
-func (fc *fakeClient) DeleteAttachment(ctx context.Context, in *pb.DeleteAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+func (fc *fakeClient) DeleteVolumeAttachment(ctx context.Context, in *pb.DeleteVolumeAttachmentOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{
 			Result: &pb.GenericResponse_Result{},
@@ -256,7 +256,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	fc := NewFakeController()
 	var expected = &SampleAttachments[0]
 
-	result, err := fc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
+	result, err := fc.CreateVolumeAttachment(&pb.CreateVolumeAttachmentOpts{})
 	if err != nil {
 		t.Errorf("Failed to create volume attachment, err is %v\n", err)
 	}
@@ -269,7 +269,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 func TestDeleteVolumeAttachment(t *testing.T) {
 	fc := NewFakeController()
 
-	result := fc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
+	result := fc.DeleteVolumeAttachment(&pb.DeleteVolumeAttachmentOpts{})
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}

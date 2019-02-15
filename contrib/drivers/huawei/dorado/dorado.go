@@ -22,8 +22,8 @@ import (
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -254,7 +254,7 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 	return "", "", errors.New(msg)
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.InitializeConnectionIscsi(opt)
 	}
@@ -264,7 +264,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	return nil, errors.New("No supported protocol for dorado driver.")
 }
 
-func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
@@ -318,7 +318,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 	return connInfo, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.TerminateConnectionIscsi(opt)
 	}
@@ -328,7 +328,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
-func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) error {
 	lunId := opt.GetMetadata()[KLunId]
 	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
 	if err != nil {
@@ -437,7 +437,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
 	// Create host if not exist.
@@ -488,7 +488,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.Co
 	return fcInfo, nil
 }
 
-func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
+func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
 	wwns := strings.Split(wwpns, ",")
 
 	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
@@ -569,7 +569,7 @@ func (d *Driver) isInStringArray(s string, source []string) bool {
 	return false
 }
 
-func (d *Driver) TerminateConnectionFC(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnectionFC(opt *pb.DeleteVolumeAttachmentOpts) error {
 	// Detach lun
 	fcInfo, err := d.detachVolumeFC(opt)
 	if err != nil {
@@ -579,7 +579,7 @@ func (d *Driver) TerminateConnectionFC(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
-func (d *Driver) detachVolumeFC(opt *pb.DeleteAttachmentOpts) (string, error) {
+func (d *Driver) detachVolumeFC(opt *pb.DeleteVolumeAttachmentOpts) (string, error) {
 	wwns := strings.Split(opt.GetHostInfo().GetInitiator(), ",")
 	lunId := opt.GetMetadata()[KLunId]
 

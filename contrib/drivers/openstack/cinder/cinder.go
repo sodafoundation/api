@@ -34,8 +34,8 @@ import (
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 	"github.com/satori/go.uuid"
@@ -285,7 +285,7 @@ func (d *Driver) ExtendVolume(req *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 // InitializeConnection
-func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(req *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	opts := &volumeactions.InitializeConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),
@@ -326,7 +326,7 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 // TerminateConnection
-func (d *Driver) TerminateConnection(req *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(req *pb.DeleteVolumeAttachmentOpts) error {
 	opts := volumeactions.TerminateConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),

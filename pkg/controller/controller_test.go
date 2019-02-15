@@ -15,7 +15,7 @@
 package controller
 
 import (
-	"reflect"
+	// "fmt"
 	"testing"
 
 	c "github.com/opensds/opensds/pkg/context"
@@ -177,7 +177,12 @@ func TestCreateVolume(t *testing.T) {
 
 	var ctrl = &Controller{
 		selector: &fakeSelector{
-			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
 			err: nil,
 		},
 		volumeController: NewFakeVolumeController(),
@@ -209,7 +214,12 @@ func TestCreateVolumeFromSnapshot(t *testing.T) {
 
 	var ctrl = &Controller{
 		selector: &fakeSelector{
-			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
 			err: nil,
 		},
 		volumeController: NewFakeVolumeController(),
@@ -236,7 +246,12 @@ func TestDeleteVolume(t *testing.T) {
 
 	var ctrl = &Controller{
 		selector: &fakeSelector{
-			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
 			err: nil,
 		},
 		volumeController: NewFakeVolumeController(),
@@ -267,25 +282,20 @@ func TestExtendVolume(t *testing.T) {
 
 	var ctrl = &Controller{
 		selector: &fakeSelector{
-			res: &model.StoragePoolSpec{BaseModel: &model.BaseModel{}, DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0"},
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
 			err: nil,
 		},
 		volumeController: NewFakeVolumeController(),
 	}
 
-	req.Size = int64(1)
-	_, err := ctrl.ExtendVolume(context.Background(), req)
-	expectedError := "New size for extend must be greater than current size.(current: 1 GB, extended: 1 GB)."
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	}
-	if expectedError != err.Error() {
-		t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
-	}
-
 	req.Size = int64(92)
-	_, err = ctrl.ExtendVolume(context.Background(), req)
-	expectedError = "pool free capacity(90) < new size(92) - old size(1)"
+	_, err := ctrl.ExtendVolume(context.Background(), req)
+	expectedError := "pool free capacity(90) < new size(92) - old size(1)"
 	if err == nil {
 		t.Errorf("Expected Non-%v, got %v\n", nil, err)
 	} else {
@@ -414,25 +424,22 @@ func TestCreateReplication(t *testing.T) {
 		Context:           c.NewAdminContext().ToJson(),
 	}
 
+	var replica = &SampleReplications[0]
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(replica, nil)
 	mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
 	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), replica, model.ReplicationAvailable).Return(nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{
 		drController: NewFakeDrController(),
 	}
-	var expected = &SampleReplications[0]
 
-	result, err := ctrl.CreateReplication(context.Background(), req)
-	if err != nil {
+	if _, err := ctrl.CreateReplication(context.Background(), req); err != nil {
 		t.Errorf("Failed to create volume replication: %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 }
 
@@ -450,8 +457,8 @@ func TestDeleteReplication(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(&SampleReplications[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{
@@ -477,8 +484,9 @@ func TestEnableReplication(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(&SampleReplications[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleReplications[0], model.ReplicationEnabled).Return(nil)
 	db.C = mockClient
 	var ctrl = &Controller{
 		drController: NewFakeDrController(),
@@ -503,8 +511,9 @@ func TestDisableReplication(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(&SampleReplications[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleReplications[0], model.ReplicationDisabled).Return(nil)
 	db.C = mockClient
 	var ctrl = &Controller{
 		drController: NewFakeDrController(),
@@ -531,8 +540,9 @@ func TestFailoverReplication(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.Client)
+	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(&SampleReplications[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359", req).Return(&SampleReplications[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleReplications[0], model.ReplicationFailover).Return(nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{

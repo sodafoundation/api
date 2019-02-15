@@ -178,42 +178,27 @@ type Client interface {
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 }
 
-func UpdateVolumeStatus(ctx *c.Context, c Client, volID, status string) error {
-	return c.UpdateStatus(ctx, &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: volID,
-		},
-	}, status)
+func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
+	vol, _ := client.GetVolume(ctx, volID)
+	return client.UpdateStatus(ctx, vol, status)
 }
 
-func UpdateVolumeAttachmentStatus(ctx *c.Context, c Client, atcID, status string) error {
-	return c.UpdateStatus(ctx, &model.VolumeAttachmentSpec{
-		BaseModel: &model.BaseModel{
-			Id: atcID,
-		},
-	}, status)
+func UpdateVolumeAttachmentStatus(ctx *c.Context, client Client, atcID, status string) error {
+	atc, _ := client.GetVolumeAttachment(ctx, atcID)
+	return client.UpdateStatus(ctx, atc, status)
 }
 
-func UpdateVolumeSnapshotStatus(ctx *c.Context, c Client, snapID, status string) error {
-	return c.UpdateStatus(ctx, &model.VolumeSnapshotSpec{
-		BaseModel: &model.BaseModel{
-			Id: snapID,
-		},
-	}, status)
+func UpdateVolumeSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetVolumeSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
 }
 
-func UpdateReplicationStatus(ctx *c.Context, c Client, repID, status string) error {
-	return c.UpdateStatus(ctx, &model.ReplicationSpec{
-		BaseModel: &model.BaseModel{
-			Id: repID,
-		},
-	}, status)
+func UpdateReplicationStatus(ctx *c.Context, client Client, replicaID, status string) error {
+	replica, _ := client.GetReplication(ctx, replicaID)
+	return client.UpdateStatus(ctx, replica, status)
 }
 
-func UpdateVolumeGroupStatus(ctx *c.Context, c Client, vgID, status string) error {
-	return c.UpdateStatus(ctx, &model.VolumeGroupSpec{
-		BaseModel: &model.BaseModel{
-			Id: vgID,
-		},
-	}, status)
+func UpdateVolumeGroupStatus(ctx *c.Context, client Client, vgID, status string) error {
+	vg, _ := client.GetVolumeGroup(ctx, vgID)
+	return client.UpdateStatus(ctx, vg, status)
 }

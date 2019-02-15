@@ -32,8 +32,8 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -171,8 +171,8 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 	return &res, nil
 }
 
-// CreateAttachment implements pb.DockServer.CreateAttachment
-func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttachmentOpts) (*pb.GenericResponse, error) {
+// CreateVolumeAttachment implements pb.DockServer.CreateVolumeAttachment
+func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
@@ -207,8 +207,8 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 	return &res, nil
 }
 
-// DeleteAttachment implements pb.DockServer.DeleteAttachment
-func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttachmentOpts) (*pb.GenericResponse, error) {
+// DeleteVolumeAttachment implements pb.DockServer.DeleteVolumeAttachment
+func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())

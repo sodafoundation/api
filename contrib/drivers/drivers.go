@@ -29,8 +29,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/testutils/driver"
 )
 
@@ -50,9 +50,9 @@ type VolumeDriver interface {
 
 	ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
 
-	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
+	InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error)
 
-	TerminateConnection(opt *pb.DeleteAttachmentOpts) error
+	TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error
 
 	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
