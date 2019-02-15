@@ -592,17 +592,21 @@ message UpdateVolumeGroupOpts{
     repeated string addVolumes = 3;
     // The removeVolumes contains the volumes to be removed from the group.
     repeated string removeVolumes = 4;
+    // The pool belongs to the group.
+    string poolId =5;
     // The Context
-    string context = 5;
+    string context = 6;
 }
 
 message DeleteVolumeGroupOpts{
     // The uuid of the volume group, optional when deleting.
     string id = 1;
+    // The pool belongs to the group.
+    string poolId =2;
     // The driver of the volume group.
-    string driverName = 2;
+    string driverName = 3;
     // The Context
-    string context = 3;
+    string context = 4;
 }
 service AttachDock {
     // Attach a volume
