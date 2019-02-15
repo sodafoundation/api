@@ -234,6 +234,7 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 	log.Info("Controller server receive extend volume request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	fmt.Println("volume id:", opt.Id)
 	vol, err := db.C.GetVolume(ctx, opt.Id)
 	if err != nil {
 		log.Error("Get volume failed in extend volume method: ", err.Error())
@@ -247,6 +248,8 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeAvailable)
 		}
 	}()
+
+	fmt.Printf("volume: %+v\n", vol)
 
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if nil != err {

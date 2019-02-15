@@ -132,15 +132,15 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 	db.C = mockClient
 
-	_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
+	_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
 	if err != nil {
-		t.Errorf("Failed to delete volume, err is %v\n", err)
+		t.Errorf("Failed to extend volume: %v\n", err)
 	}
 
 	mockClient = new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("error occurs when get volume"))
 	db.C = mockClient
-	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
+	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
 
 	var vol2 = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
@@ -152,7 +152,7 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 	mockClient = new(dbtest.Client)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol2, nil)
 	db.C = mockClient
-	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id)
+	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
 }
 
 func TestCreateVolumeAttachmentDBEntry(t *testing.T) {

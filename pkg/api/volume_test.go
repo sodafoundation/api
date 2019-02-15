@@ -69,7 +69,7 @@ func NewFakeVolumePortal() *VolumePortal {
 		Return(&pb.GenericResponse{}, nil)
 	mockClient.On("ExtendVolume", ctx.Background(), &pb.ExtendVolumeOpts{
 		Id:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		Message: string(`{"newSize":20}`),
+		Size:    int64(20),
 		Context: c.NewAdminContext().ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
@@ -168,8 +168,8 @@ func TestListVolumesWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
 
@@ -226,8 +226,8 @@ func TestGetVolumeWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 404 {
+		t.Errorf("Expected 404, actual %v", w.Code)
 	}
 }
 
@@ -315,8 +315,8 @@ func TestUpdateVolumeWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
 
@@ -346,8 +346,8 @@ func TestExtendVolume(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != StatusOK {
-		t.Errorf("Expected %v, actual %v", StatusOK, w.Code)
+	if w.Code != StatusAccepted {
+		t.Errorf("Expected %v, actual %v", StatusAccepted, w.Code)
 	}
 }
 
@@ -472,8 +472,8 @@ func TestListVolumeSnapshotsWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
 
@@ -528,8 +528,8 @@ func TestGetVolumeSnapshotWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 404 {
+		t.Errorf("Expected 404, actual %v", w.Code)
 	}
 }
 
@@ -614,8 +614,8 @@ func TestUpdateVolumeSnapshotWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
 
@@ -831,7 +831,7 @@ func TestUpdateVolumeAttachmentWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
