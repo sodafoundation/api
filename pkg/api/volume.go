@@ -91,6 +91,7 @@ func (v *VolumePortal) CreateVolume() {
 		Size:              result.Size,
 		AvailabilityZone:  result.AvailabilityZone,
 		ProfileId:         result.ProfileId,
+		PoolId:            result.PoolId,
 		SnapshotId:        result.SnapshotId,
 		Metadata:          result.Metadata,
 		SnapshotFromCloud: result.SnapshotFromCloud,
@@ -266,9 +267,11 @@ func (v *VolumePortal) DeleteVolume() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeOpts{
-		Id:       volume.Id,
-		Metadata: volume.Metadata,
-		Context:  ctx.ToJson(),
+		Id:        volume.Id,
+		ProfileId: volume.ProfileId,
+		PoolId:    volume.PoolId,
+		Metadata:  volume.Metadata,
+		Context:   ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("Delete volume failed in controller service:", err)
@@ -453,8 +456,9 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeAttachmentOpts{
-		Id:       attachment.Id,
-		VolumeId: attachment.VolumeId,
+		Id:             attachment.Id,
+		VolumeId:       attachment.VolumeId,
+		AccessProtocol: attachment.AccessProtocol,
 		HostInfo: &pb.HostInfo{
 			Platform:  attachment.Platform,
 			OsType:    attachment.OsType,

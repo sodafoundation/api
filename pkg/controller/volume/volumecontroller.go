@@ -26,8 +26,8 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/dock/client"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"golang.org/x/net/context"
 )
 
@@ -40,9 +40,9 @@ type Controller interface {
 
 	ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
 
-	CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error)
+	CreateVolumeAttachment(opt *pb.CreateVolumeAttachmentOpts) (*model.VolumeAttachmentSpec, error)
 
-	DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error
+	DeleteVolumeAttachment(opt *pb.DeleteVolumeAttachmentOpts) error
 
 	CreateVolumeSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
@@ -160,13 +160,13 @@ func (c *controller) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, 
 	return vol, nil
 }
 
-func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
+func (c *controller) CreateVolumeAttachment(opt *pb.CreateVolumeAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("When connecting dock client:", err)
 		return nil, err
 	}
 
-	response, err := c.Client.CreateAttachment(context.Background(), opt)
+	response, err := c.Client.CreateVolumeAttachment(context.Background(), opt)
 	if err != nil {
 		log.Error("Create volume attachment failed in volume controller:", err)
 		return nil, err
@@ -188,13 +188,13 @@ func (c *controller) CreateVolumeAttachment(opt *pb.CreateAttachmentOpts) (*mode
 	return atc, nil
 }
 
-func (c *controller) DeleteVolumeAttachment(opt *pb.DeleteAttachmentOpts) error {
+func (c *controller) DeleteVolumeAttachment(opt *pb.DeleteVolumeAttachmentOpts) error {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("When connecting dock client:", err)
 		return err
 	}
 
-	response, err := c.Client.DeleteAttachment(context.Background(), opt)
+	response, err := c.Client.DeleteVolumeAttachment(context.Background(), opt)
 	if err != nil {
 		log.Error("Delete volume attachment failed in volume controller:", err)
 		return err
