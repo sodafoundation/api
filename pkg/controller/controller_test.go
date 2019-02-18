@@ -317,14 +317,12 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		HostInfo: &pb.HostInfo{},
 		Context:  c.NewAdminContext().ToJson(),
 	}
-	var vol = &SampleVolumes[0]
-	var volattm = &SampleAttachments[0]
+	var vol, volatm = &SampleVolumes[0], &SampleAttachments[0]
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", c.NewAdminContext(), req.VolumeId).Return(vol, nil)
-	mockClient.On("GetDockByPoolId", c.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("GetPool", c.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
-	mockClient.On("UpdateStatus", c.NewAdminContext(), volattm, volattm.Status).Return(nil)
-	mockClient.On("UpdateVolumeAttachment", c.NewAdminContext(), volattm.Id, volattm).Return(volattm, nil)
+	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), volatm, volatm.Status).Return(nil)
 
 	db.C = mockClient
 
@@ -427,9 +425,6 @@ func TestCreateReplication(t *testing.T) {
 	var replica = &SampleReplications[0]
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(replica, nil)
-	mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
-	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
-	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), replica, model.ReplicationAvailable).Return(nil)
 	db.C = mockClient

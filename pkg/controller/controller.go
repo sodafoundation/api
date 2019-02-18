@@ -92,7 +92,6 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	var prf *model.ProfileSpec
 	var snap *model.VolumeSnapshotSpec
 	var snapVol *model.VolumeSpec
-	var snapSize int64
 
 	log.Info("Controller server receive create volume request, vr =", opt)
 
@@ -100,6 +99,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	if opt.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
+		opt.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, opt.ProfileId)
 	}
@@ -121,7 +121,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 			log.Error("Get volume failed in create volume method: ", err)
 			return pb.GenericResponseError(err), err
 		}
-		snapSize = snapVol.Size
+		opt.SnapshotSize = snapVol.Size
 		opt.PoolId = snapVol.PoolId
 		opt.Metadata = utils.MergeStringMaps(opt.Metadata, snap.Metadata)
 	}
@@ -139,6 +139,10 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
+	if opt.PoolId == "" {
+		opt.PoolId = polInfo.Id
+		opt.PoolName = polInfo.Name
+	}
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
@@ -147,9 +151,6 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
-	opt.PoolId = polInfo.Id
-	opt.SnapshotSize = snapSize
-	opt.PoolName = polInfo.Name
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.CreateVolume(opt)
@@ -262,6 +263,8 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 		rollBack = true
 		return pb.GenericResponseError(reason), errors.New(reason)
 	}
+	opt.PoolId = pool.Id
+	opt.PoolName = pool.Name
 
 	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
 	if err != nil {
@@ -283,8 +286,6 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 	}
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
-	opt.PoolId = pool.Id
-	opt.PoolName = pool.Name
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.ExtendVolume(opt)
@@ -324,13 +325,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
 		return pb.GenericResponseError(err), err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		return pb.GenericResponseError(err), err
-	}
-	c.volumeController.SetDock(dockInfo)
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 
 	pol, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
@@ -338,15 +333,20 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
 		return pb.GenericResponseError(err), err
 	}
-
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
 		protocol = "iscsi"
 	}
-
 	opt.AccessProtocol = protocol
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
+	dockInfo, err := db.C.GetDock(ctx, pol.DockId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.CreateVolumeAttachment(opt)
@@ -372,20 +372,21 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 		log.Error("Get volume failed in delete volume attachment method: ", err)
 		return pb.GenericResponseError(err), err
 	}
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 	opt.DriverName = dockInfo.DriverName
 
 	if err = c.volumeController.DeleteVolumeAttachment(opt); err != nil {
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
-	if err := db.C.DeleteVolumeAttachment(ctx, opt.Id); err != nil {
+	if err = db.C.DeleteVolumeAttachment(ctx, opt.Id); err != nil {
 		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -399,21 +400,6 @@ func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateV
 	log.Info("Controller server receive create volume snapshot request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
-	if err != nil {
-		log.Error("Get volume failed in create volume snapshot method: ", err)
-		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
-		return pb.GenericResponseError(err), err
-	}
-
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
-		return pb.GenericResponseError(err), err
-	}
-	c.volumeController.SetDock(dockInfo)
-
 	if opt.Metadata == nil {
 		opt.Metadata = map[string]string{}
 	}
@@ -431,8 +417,22 @@ func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateV
 		}
 	}
 
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
+	if err != nil {
+		log.Error("Get volume failed in create volume snapshot method: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
+		return pb.GenericResponseError(err), err
+	}
 	opt.Size = vol.Size
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Error("When search supported dock resource:", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.CreateVolumeSnapshot(opt)
@@ -456,13 +456,14 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 		log.Error("Get volume failed in delete volume snapshot method: ", err)
 		return pb.GenericResponseError(err), err
 	}
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
 		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 	opt.DriverName = dockInfo.DriverName
 
 	if err = c.volumeController.DeleteVolumeSnapshot(opt); err != nil {
@@ -690,15 +691,15 @@ func (c *Controller) CreateVolumeGroup(contx context.Context, opt *pb.CreateVolu
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 		return pb.GenericResponseError(err), err
 	}
+	opt.PoolId = polInfo.Id
+
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		log.Error("No valid dock find for group: ", err)
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 		return pb.GenericResponseError(err), err
 	}
-
 	c.volumeController.SetDock(dockInfo)
-	opt.PoolId = polInfo.Id
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.CreateVolumeGroup(opt)
@@ -737,7 +738,6 @@ func (c *Controller) UpdateVolumeGroup(contx context.Context, opt *pb.UpdateVolu
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 		return pb.GenericResponseError(err), err
 	}
-
 	c.volumeController.SetDock(dock)
 	opt.DriverName = dock.DriverName
 
@@ -777,7 +777,6 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
-
 	c.volumeController.SetDock(dock)
 	opt.DriverName = dock.DriverName
 
