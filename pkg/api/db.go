@@ -80,7 +80,7 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, newSize int64) (*model.Vo
 	}
 
 	if volume.Status != model.VolumeAvailable {
-		errMsg := "The status of the volume to be extended must be available"
+		errMsg := "The status of the volume to be extended must be available!"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -367,6 +367,9 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 	if in.AvailabilityZone == "" {
 		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")

@@ -365,8 +365,6 @@ func (c *controller) FailoverReplication(opt *pb.FailoverReplicationOpts) error 
 }
 
 func (c *controller) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
-	fmt.Println(c.Client)
-	fmt.Println(c.DockInfo)
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("When connecting dock client:", err)
 		return "", err

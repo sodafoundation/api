@@ -370,6 +370,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume attachment method: ", err)
+		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
@@ -377,6 +378,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
+		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
@@ -388,6 +390,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	}
 	if err = db.C.DeleteVolumeAttachment(ctx, opt.Id); err != nil {
 		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
+		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -454,6 +457,7 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
 		log.Error("Get volume failed in delete volume snapshot method: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
@@ -461,6 +465,7 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
 		log.Error("When search supported dock resource:", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
@@ -473,6 +478,7 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 	}
 	if err = db.C.DeleteVolumeSnapshot(ctx, opt.Id); err != nil {
 		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 

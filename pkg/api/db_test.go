@@ -123,36 +123,60 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Status: "available",
+		Status: model.VolumeAvailable,
+		Size:   2,
+	}
+	var in = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status: model.VolumeExtending,
 		Size:   2,
 	}
 
+	// Test case 1: Everything should goes well.
 	mockClient := new(dbtest.Client)
-	mockClient.On("ExtendVolume", context.NewAdminContext(), vol).Return(nil, nil)
 	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
 	db.C = mockClient
-
 	_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
 	if err != nil {
 		t.Errorf("Failed to extend volume: %v\n", err)
 	}
 
+	// Test case 2: The status of volume should always be available.
+	vol.Status = model.VolumeCreating
 	mockClient = new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("error occurs when get volume"))
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
 	db.C = mockClient
 	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
-
-	var vol2 = &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		},
-		Status: "error",
-		Size:   2,
+	expectedError := "The status of the volume to be extended must be available!"
+	if err == nil {
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
 	}
+
+	// Test case 3: The extended size should always be larger than current size.
+	vol.Size, vol.Status = 20, model.VolumeAvailable
+	in.Size = 20
 	mockClient = new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol2, nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
 	db.C = mockClient
-	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 20)
+	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, 2)
+	expectedError = "New size for extend must be greater than current size." +
+		"(current: 20 GB, extended: 2 GB)."
+	if err == nil {
+		t.Errorf("Expected Non-%v, got %v\n", nil, err)
+	} else {
+		if expectedError != err.Error() {
+			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		}
+	}
 }
 
 func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
