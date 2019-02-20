@@ -147,6 +147,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 		Id:            result.Id,
 		AddVolumes:    result.AddVolumes,
 		RemoveVolumes: result.RemoveVolumes,
+		PoolId:        result.PoolId,
 		Context:       ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.UpdateVolumeGroup(context.Background(), opt); err != nil {
@@ -164,7 +165,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 	ctx := c.GetContext(v.Ctx)
 
 	id := v.Ctx.Input.Param(":groupId")
-	_, err := db.C.GetVolumeGroup(ctx, id)
+	vg, err := db.C.GetVolumeGroup(ctx, id)
 	if err != nil {
 		errMsg := fmt.Sprintf("Volume group %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
@@ -190,6 +191,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 
 	opt := &pb.DeleteVolumeGroupOpts{
 		Id:      id,
+		PoolId:  vg.PoolId,
 		Context: ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
