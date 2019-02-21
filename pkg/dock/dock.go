@@ -488,7 +488,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 
 func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
