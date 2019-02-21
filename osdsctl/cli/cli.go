@@ -21,7 +21,6 @@ package cli
 import (
 	"fmt"
 	"log"
-	"net/url"
 	"os"
 
 	c "github.com/opensds/opensds/client"
@@ -86,30 +85,33 @@ func Run() error {
 
 	cfg := &c.Config{Endpoint: ep}
 
-	u, _ := url.Parse(ep)
-	if u.Scheme == "https" {
-		cfg.CACert = constants.OpensdsCaCertFile
-	}
-
 	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
 		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
 	}
 
+	var authOptions c.AuthOptions
+	var err error
+
 	switch authStrategy {
 	case c.Keystone:
-		cfg.AuthOptions = c.LoadKeystoneAuthOptionsFromEnv()
+		authOptions, err = c.LoadKeystoneAuthOptionsFromEnv()
+		if err != nil {
+			return err
+		}
 	case c.Noauth:
-		cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
+		authOptions = c.LoadNoAuthOptionsFromEnv()
 	default:
-		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
+		authOptions = c.NewNoauthOptions(constants.DefaultTenantId)
 	}
 
-	client = c.NewClient(cfg)
+	cfg.AuthOptions = authOptions
 
-	if client == nil {
-		return fmt.Errorf("ERROR: osdsctl client is nil.")
+	client, err := c.NewClient(cfg)
+
+	if client == nil || err != nil {
+		return fmt.Errorf("ERROR: osdsctl client is nil, %v", err)
 	}
 
 	return rootCommand.Execute()

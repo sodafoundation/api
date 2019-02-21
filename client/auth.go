@@ -102,9 +102,6 @@ func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
 	}
 
 	opt.Password = pwdCiphertext
-
-	fmt.Println("2 password", opt.Password)
-
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
 	opt.DomainID = os.Getenv(OsUserDomainId)
