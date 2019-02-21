@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
@@ -46,25 +47,27 @@ type Client struct {
 // Config is a struct that defines some options for calling the Client.
 type Config struct {
 	Endpoint    string
-	CACert      string
 	AuthOptions AuthOptions
 }
 
 // NewClient method creates a new Client.
-func NewClient(c *Config) *Client {
+func NewClient(c *Config) (*Client, error) {
 	// If endpoint field not specified,use the default value localhost.
 	if c.Endpoint == "" {
 		c.Endpoint = constants.DefaultOpensdsEndpoint
 		fmt.Printf("Warnning: OpenSDS Endpoint is not specified using the default value(%s)\n", c.Endpoint)
 	}
 
+	// If https is enabled, CA cert file should be provided.
 	u, _ := url.Parse(c.Endpoint)
 	if u.Scheme == "https" {
-		if c.CACert == "" {
-			fmt.Println("If https is enabled, CA cert file should be provided.")
-			return nil
+		cacert = constants.OpensdsCaCertFile
+		_, err := os.Stat(cacert)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("Cannot open file %s", cacert)
+			}
 		}
-		cacert = c.CACert
 	}
 
 	var r Receiver
@@ -88,7 +91,7 @@ func NewClient(c *Config) *Client {
 		VolumeMgr:      NewVolumeMgr(r, c.Endpoint, t),
 		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
 		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
-	}
+	}, nil
 }
 
 // Reset method is defined to clean Client struct.

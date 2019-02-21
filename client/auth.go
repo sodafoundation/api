@@ -79,30 +79,31 @@ func (n *NoAuthOptions) GetTenantId() string {
 	return n.TenantID
 }
 
-func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
+func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
 	opt := NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
 
 	var pwdCiphertext = os.Getenv(OsPassword)
-
-	if os.Getenv(EnableEncrypted) == "true" {
+	fmt.Println("1 password", pwdCiphertext)
+	fmt.Println("enable dfaefad", os.Getenv(EnableEncrypted))
+	if os.Getenv(EnableEncrypted) == "T" {
 		// Decrypte the password
 		pwdTool := os.Getenv(PwdEncrypter)
 		if pwdTool == "" {
-			fmt.Println("The password encrypter can not be empty if password encrypted is enabled.")
-			return nil
+			return nil, fmt.Errorf("The password encrypter can not be empty if password encrypted is enabled.")
 		}
 
 		password, err := pwd.NewPwdEncrypter(pwdTool).Decrypter(pwdCiphertext)
 		if err != nil {
-			fmt.Println("Decryption failed.", err)
-			return nil
+			return nil, fmt.Errorf("Decryption failed.", err)
 		}
 		pwdCiphertext = password
 	}
 
 	opt.Password = pwdCiphertext
+
+	fmt.Println("2 password", opt.Password)
 
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
@@ -111,7 +112,7 @@ func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
 		opt.TenantName = projectName
 	}
 
-	return opt
+	return opt, nil
 }
 
 func LoadNoAuthOptionsFromEnv() *NoAuthOptions {
