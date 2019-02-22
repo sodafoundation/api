@@ -18,10 +18,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"runtime"
-	"strconv"
 	"strings"
 
 	log "github.com/golang/glog"
@@ -44,18 +42,12 @@ const (
 	snapshotPrefix    = "_snapshot-"
 	blocksize         = 4096
 	sizeShiftBit      = 30
-
-	//LVPath "LV Path"
-	LVPath = "LV Path"
-	//LVSnapshotStatus "LV snapshot status"
-	LVSnapshotStatus = "LV snapshot status"
 )
 
-type LvInfo struct {
-	Name string
-	Vg   string
-	Size int64
-}
+const (
+	KLvPath  = "lvPath"
+	KLvsPath = "lvsPath"
+)
 
 type LVMConfig struct {
 	TgtBindIp      string                    `yaml:"tgtBindIp"`
@@ -66,8 +58,7 @@ type LVMConfig struct {
 
 type Driver struct {
 	conf *LVMConfig
-
-	handler func(script string, cmd []string) (string, error)
+	cli  *Cli
 }
 
 func (d *Driver) Setup() error {
@@ -80,29 +71,16 @@ func (d *Driver) Setup() error {
 	if _, err := Parse(d.conf, p); err != nil {
 		return err
 	}
-	d.handler = execCmd
+	cli, err := NewCli()
+	if err != nil {
+		return err
+	}
+	d.cli = cli
 
 	return nil
 }
 
 func (*Driver) Unset() error { return nil }
-
-func (d *Driver) copySnapshotToVolume(opt *pb.CreateVolumeOpts, lvPath string) error {
-	var snapSize = uint64(opt.GetSnapshotSize())
-	var count = (snapSize << sizeShiftBit) / blocksize
-	var snapName = snapshotPrefix + opt.GetSnapshotId()
-	var snapPath = path.Join("/dev", opt.GetPoolName(), snapName)
-	if _, err := d.handler("dd", []string{
-		"if=" + snapPath,
-		"of=" + lvPath,
-		"count=" + fmt.Sprint(count),
-		"bs=" + fmt.Sprint(blocksize),
-	}); err != nil {
-		log.Error("Failed to create logic volume:", err)
-		return err
-	}
-	return nil
-}
 
 func (d *Driver) downloadSnapshot(bucket, backupId, dest string) error {
 	mc, err := backup.NewBackup("multi-cloud")
@@ -138,50 +116,23 @@ func (d *Driver) downloadSnapshot(bucket, backupId, dest string) error {
 }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, err error) {
-	var size = fmt.Sprint(opt.GetSize()) + "G"
-	var polName = opt.GetPoolName()
-	var id = opt.GetId()
-	var name = volumePrefix + id
-
-	if _, err := d.handler("lvcreate", []string{
-		"-Z", "n",
-		"-n", name, // use uuid instead of name.
-		"-L", size,
-		polName,
-	}); err != nil {
-		log.Error("Failed to create logic volume:", err)
-		return nil, err
-	}
-
-	var lvPath, lvStatus string
-	// Display and parse some metadata in logic volume returned.
-	lvPath = path.Join("/dev", polName, name)
-	lv, err := d.handler("lvdisplay", []string{lvPath})
-	if err != nil {
-		log.Error("Failed to display logic volume:", err)
-		return nil, err
-	}
-
-	for _, line := range strings.Split(lv, "\n") {
-		if strings.Contains(line, "LV Path") {
-			lvPath = strings.Fields(line)[2]
-		}
-		if strings.Contains(line, "LV Status") {
-			lvStatus = strings.Fields(line)[2]
-		}
+	var name = volumePrefix + opt.GetId()
+	var vg = opt.GetPoolName()
+	if err = d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
+		return
 	}
 
 	// remove created volume if got error
 	defer func() {
 		// using return value as the error flag
 		if vol == nil {
-			_, err := d.handler("lvremove", []string{"-f", lvPath})
-			if err != nil {
+			if err := d.cli.Delete(name, vg); err != nil {
 				log.Error("Failed to remove logic volume:", err)
 			}
 		}
 	}()
 
+	var lvPath = path.Join("/dev", vg, name)
 	// Create volume from snapshot
 	if opt.GetSnapshotId() != "" {
 		if opt.SnapshotFromCloud {
@@ -202,8 +153,9 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 			}
 		} else {
 			// copy local snapshot to volume
-			if err := d.copySnapshotToVolume(opt, lvPath); err != nil {
-				log.Errorf("Copy snapshot to volume failed, %v", err)
+			var lvsPath = path.Join("/dev", vg, snapshotPrefix+opt.GetSnapshotId())
+			if err := d.cli.CopyVolume(lvsPath, lvPath, opt.GetSize()); err != nil {
+				log.Error("Failed to create logic volume:", err)
 				return nil, err
 			}
 		}
@@ -216,152 +168,41 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 		Name:        opt.GetName(),
 		Size:        opt.GetSize(),
 		Description: opt.GetDescription(),
-		Status:      lvStatus,
 		Metadata: map[string]string{
-			"lvPath": lvPath,
+			KLvPath: lvPath,
 		},
 	}, nil
 }
 
 func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
-	// Display and parse some metadata in logic volume returned.
-	lv, err := d.handler("lvdisplay", []string{volIdentifier})
-	if err != nil {
-		log.Error("Failed to display logic volume:", err)
-		return nil, err
-	}
-	var lvStatus string
-	for _, line := range strings.Split(lv, "\n") {
-		if strings.Contains(line, "LV Status") {
-			lvStatus = strings.Fields(line)[2]
-		}
-	}
-
-	return &model.VolumeSpec{
-		Status: lvStatus,
-	}, nil
-}
-
-func (d *Driver) geLvInfos() ([]*LvInfo, error) {
-	var lvList []*LvInfo
-	args := []string{"--noheadings", "--unit=g", "-o", "vg_name,name,size", "--nosuffix"}
-	info, err := d.handler("lvs", args)
-	if err != nil {
-		log.Error("Get volume failed", err)
-		return lvList, err
-	}
-	for _, line := range strings.Split(info, "\n") {
-		if len(line) == 0 {
-			continue
-		}
-		words := strings.Fields(line)
-		size, _ := strconv.ParseInt(words[2], 10, 64)
-		lv := &LvInfo{
-			Vg:   words[0],
-			Name: words[1],
-			Size: size,
-		}
-		lvList = append(lvList, lv)
-	}
-	return lvList, nil
-}
-
-func (d *Driver) volumeExists(id string) bool {
-	lvList, _ := d.geLvInfos()
-	name := volumePrefix + id
-	for _, lv := range lvList {
-		if lv.Name == name {
-			return true
-		}
-	}
-	return false
-}
-
-func (d *Driver) lvHasSnapshot(lvPath string) bool {
-	args := []string{"--noheading", "-C", "-o", "Attr", lvPath}
-	info, err := d.handler("lvdisplay", args)
-	if err != nil {
-		log.Error("Failed to display logic volume:", err)
-		return false
-	}
-	info = strings.Trim(info, " ")
-	return info[0] == 'o' || info[0] == 'O'
-}
-
-func (d *Driver) getActiveSnapshotsPathsOfLv(lvPath string) ([]string, error) {
-	array := strings.Split(lvPath, "/")
-	lvName := array[len(array)-1]
-	var snapshotsPaths []string
-
-	args := []string{}
-	info, err := d.handler("lvdisplay", args)
-	if err != nil {
-		log.Error("Failed to display logic volume:", err)
-		return snapshotsPaths, err
-	}
-
-	lvInfoList := strings.Split(info, "--- Logical volume ---")
-	for _, lvInfo := range lvInfoList {
-		lines := strings.Split(lvInfo, "\n")
-		var path string
-
-		for _, line := range lines {
-			line = strings.Trim(line, " ")
-
-			if strings.HasPrefix(line, LVPath) {
-				path = strings.Split(line, LVPath)[1]
-				path = strings.Trim(path, " ")
-			}
-
-			if strings.HasPrefix(line, LVSnapshotStatus) {
-				snapshotStatus := strings.Split(line, LVSnapshotStatus)[1]
-				snapshotStatus = strings.Trim(snapshotStatus, " ")
-
-				if ("active destination for " + lvName) == snapshotStatus {
-					snapshotsPaths = append(snapshotsPaths, path)
-				}
-			}
-		}
-	}
-
-	return snapshotsPaths, nil
-}
-
-func (d *Driver) deactivateSnapshotsOfLv(snapshotsPaths []string) error {
-	for _, snapshotPath := range snapshotsPaths {
-		if _, err := d.handler("lvchange", []string{
-			"-an", "-y", snapshotPath,
-		}); err != nil {
-			log.Error("Failed to deactivate snapshot:", err)
-			return err
-		}
-	}
-
-	return nil
+	// Not used , do nothing
+	return nil, nil
 }
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
-	id := opt.GetId()
-	if !d.volumeExists(id) {
-		log.Warningf("Volume(%s) does not exist, nothing to remove", id)
+	var name = volumePrefix + opt.GetId()
+	if !d.cli.Exists(name) {
+		log.Warningf("Volume(%s) does not exist, nothing to remove", name)
 		return nil
 	}
 
-	lvPath, ok := opt.GetMetadata()["lvPath"]
+	lvPath, ok := opt.GetMetadata()[KLvPath]
 	if !ok {
-		err := errors.New("failed to find logic volume path in volume metadata")
+		err := errors.New("can't find 'lvPath' in volume metadata")
 		log.Error(err)
 		return err
 	}
 
-	if d.lvHasSnapshot(lvPath) {
-		err := fmt.Errorf("unable to delete due to existing snapshot for volume: %s", id)
+	field := strings.Split(lvPath, "/")
+	vg := field[2]
+	if d.cli.LvHasSnapshot(name, vg) {
+		err := fmt.Errorf("unable to delete due to existing snapshot for volume: %s", name)
 		log.Error(err)
 		return err
 	}
 
-	if _, err := d.handler("lvremove", []string{"-f", lvPath}); err != nil {
+	if err := d.cli.Delete(name, vg); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -371,39 +212,11 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
 // ExtendVolume ...
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	lvPath, ok := opt.GetMetadata()["lvPath"]
-	if !ok {
-		err := errors.New("failed to find logic volume path in volume metadata")
-		log.Error(err)
+	var name = volumePrefix + opt.GetId()
+	if err := d.cli.ExtendVolume(name, opt.GetPoolName(), opt.GetSize()); err != nil {
+		log.Errorf("extend volume(%s) failed, error: %v", name, err)
 		return nil, err
 	}
-
-	if d.lvHasSnapshot(lvPath) {
-		snapshotsPathsOfLv, err := d.getActiveSnapshotsPathsOfLv(lvPath)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-
-		if len(snapshotsPathsOfLv) > 0 {
-			err = d.deactivateSnapshotsOfLv(snapshotsPathsOfLv)
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-		}
-	}
-
-	var size = fmt.Sprint(opt.GetSize()) + "G"
-
-	if _, err := d.handler("lvresize", []string{
-		"-L", size,
-		lvPath,
-	}); err != nil {
-		log.Error("Failed to extend logic volume:", err)
-		return nil, err
-	}
-
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -426,9 +239,9 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 		hostIP = "ALL"
 	}
 
-	lvPath, ok := opt.GetMetadata()["lvPath"]
+	lvPath, ok := opt.GetMetadata()[KLvPath]
 	if !ok {
-		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
+		err := errors.New("can't find 'lvPath' in volume metadata")
 		log.Error(err)
 		return nil, err
 	}
@@ -464,7 +277,7 @@ func (d *Driver) AttachSnapshot(snapshotId string, lvsPath string) (string, *mod
 	createOpt := &pb.CreateSnapshotAttachmentOpts{
 		SnapshotId: snapshotId,
 		Metadata: map[string]string{
-			"lvsPath": lvsPath,
+			KLvsPath: lvsPath,
 		},
 		HostInfo: &pb.HostInfo{
 			Platform:  runtime.GOARCH,
@@ -573,109 +386,62 @@ func (d *Driver) deleteUploadedSnapshot(backupId string, bucket string) error {
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.VolumeSnapshotSpec, err error) {
-	var size = fmt.Sprint(opt.GetSize()) + "G"
-	var id = opt.GetId()
-	var snapName = snapshotPrefix + id
+	var snapName = snapshotPrefix + opt.GetId()
 
-	lvPath, ok := opt.GetMetadata()["lvPath"]
+	lvPath, ok := opt.GetMetadata()[KLvPath]
 	if !ok {
-		err := errors.New("Failed to find logic volume path in volume snapshot metadata!")
+		err := errors.New("can't find 'lvPath' in snapshot metadata")
 		log.Error(err)
 		return nil, err
 	}
 
-	if _, err := d.handler("lvcreate", []string{
-		"-n", snapName,
-		"-L", size,
-		"-p", "r",
-		"-s", lvPath,
-	}); err != nil {
+	fields := strings.Split(lvPath, "/")
+	vg, sourceLvName := fields[2], fields[3]
+	if err := d.cli.CreateLvSnapshot(snapName, sourceLvName, vg, opt.GetSize()); err != nil {
 		log.Error("Failed to create logic volume snapshot:", err)
 		return nil, err
 	}
 
-	var lvsDir, lvsPath string
-	lvsDir, _ = path.Split(lvPath)
-	lvsPath = path.Join(lvsDir, snapName)
-	// Display and parse some metadata in logic volume snapshot returned.
-	lvs, err := d.handler("lvdisplay", []string{lvsPath})
-	if err != nil {
-		log.Error("Failed to display logic volume snapshot:", err)
-		return nil, err
-	}
-	var lvStatus string
-	for _, line := range strings.Split(lvs, "\n") {
-		if strings.Contains(line, "LV Status") {
-			lvStatus = strings.Fields(line)[2]
-		}
-	}
+	lvsPath := path.Join("/dev", vg, snapName)
+	metadata := map[string]string{KLvsPath: lvsPath}
 
-	defer func() {
-		if snap == nil {
-			log.Errorf("create snapshot failed, rollback it")
-			d.handler("lvremove", []string{"-f", lvsPath})
-		}
-	}()
-
-	metadata := map[string]string{"lvsPath": lvsPath}
 	if bucket, ok := opt.Metadata["bucket"]; ok {
-		mountPoint, info, err := d.AttachSnapshot(id, lvsPath)
+		mountPoint, info, err := d.AttachSnapshot(opt.GetId(), lvsPath)
 		if err != nil {
+			d.cli.Delete(snapName, vg)
 			return nil, err
 		}
-		defer d.DetachSnapshot(id, info)
+		defer d.DetachSnapshot(opt.GetId(), info)
 
 		log.Info("update load snapshot to :", bucket)
 		backupId, err := d.uploadSnapshot(mountPoint, bucket)
 		if err != nil {
-			d.handler("lvremove", []string{"-f", lvsPath})
+			d.cli.Delete(snapName, vg)
 			return nil, err
 		}
 		metadata["backupId"] = backupId
 		metadata["bucket"] = bucket
-
 	}
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
-			Id: id,
+			Id: opt.GetId(),
 		},
 		Name:        opt.GetName(),
 		Size:        opt.GetSize(),
 		Description: opt.GetDescription(),
-		Status:      lvStatus,
 		VolumeId:    opt.GetVolumeId(),
 		Metadata:    metadata,
 	}, nil
 }
 
 func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
-	// Display and parse some metadata in logic volume snapshot returned.
-	lv, err := d.handler("lvdisplay", []string{snapIdentifier})
-	if err != nil {
-		log.Error("Failed to display logic volume snapshot:", err)
-		return nil, err
-	}
-	var lvStatus string
-	for _, line := range strings.Split(lv, "\n") {
-		if strings.Contains(line, "LV Status") {
-			lvStatus = strings.Fields(line)[2]
-		}
-	}
-
-	return &model.VolumeSnapshotSpec{
-		Status: lvStatus,
-	}, nil
+	// not used, do nothing
+	return nil, nil
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	lvsPath, ok := opt.GetMetadata()["lvsPath"]
-	if !ok {
-		err := errors.New("failed to find logic volume snapshot path in volume snapshot " +
-			"metadata! ingnore it")
-		log.Error(err)
-		return nil
-	}
+
 	if bucket, ok := opt.Metadata["bucket"]; ok {
 		log.Info("remove snapshot in multi-cloud :", bucket)
 		if err := d.deleteUploadedSnapshot(opt.Metadata["backupId"], bucket); err != nil {
@@ -683,9 +449,20 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		}
 	}
 
-	if _, err := d.handler("lvremove", []string{
-		"-f", lvsPath,
-	}); err != nil {
+	lvsPath, ok := opt.GetMetadata()[KLvsPath]
+	if !ok {
+		err := errors.New("can't find 'lvsPath' in snapshot metadata, ingnore it!")
+		log.Error(err)
+		return nil
+	}
+	fields := strings.Split(lvsPath, "/")
+	vg, snapName := fields[2], fields[3]
+	if !d.cli.Exists(snapName) {
+		log.Warningf("Snapshot(%s) does not exist, nothing to remove", snapName)
+		return nil
+	}
+
+	if err := d.cli.Delete(snapName, vg); err != nil {
 		log.Error("Failed to remove logic volume:", err)
 		return err
 	}
@@ -693,50 +470,9 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-type VolumeGroup struct {
-	Name          string
-	TotalCapacity int64
-	FreeCapacity  int64
-	UUID          string
-}
-
-func (d *Driver) getVGList() (*[]VolumeGroup, error) {
-	info, err := d.handler("vgs", []string{
-		"--noheadings", "--nosuffix",
-		"--unit=g",
-		"-o", "name,size,free,uuid",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.Split(info, "\n")
-	var vgs []VolumeGroup
-	for _, line := range lines {
-		val := strings.Fields(line)
-		if len(val) != 4 {
-			continue
-		}
-
-		capa, _ := strconv.ParseFloat(val[1], 64)
-		total := int64(capa)
-		capa, _ = strconv.ParseFloat(val[2], 64)
-		free := int64(capa)
-
-		vg := VolumeGroup{
-			Name:          val[0],
-			TotalCapacity: total,
-			FreeCapacity:  free,
-			UUID:          val[3],
-		}
-		vgs = append(vgs, vg)
-	}
-	return &vgs, nil
-}
-
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
-	vgs, err := d.getVGList()
+	vgs, err := d.cli.ListVgs()
 	if err != nil {
 		return nil, err
 	}
@@ -777,7 +513,7 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 		hostIP = "ALL"
 	}
 
-	lvsPath, ok := opt.GetMetadata()["lvsPath"]
+	lvsPath, ok := opt.GetMetadata()[KLvsPath]
 	if !ok {
 		err := errors.New("Failed to find logic volume path in volume attachment metadata!")
 		log.Error(err)
@@ -821,15 +557,4 @@ func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.Volu
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
 	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
-}
-
-func execCmd(script string, cmd []string) (string, error) {
-	log.Infof("Command: %s %s", script, strings.Join(cmd, " "))
-	info, err := exec.Command(script, cmd...).Output()
-	if err != nil {
-		log.Error(info, err.Error())
-		return "", err
-	}
-	log.V(8).Infof("Command Result:\n%s", string(info))
-	return string(info), nil
 }

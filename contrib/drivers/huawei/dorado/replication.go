@@ -227,7 +227,7 @@ func (r *ReplicaPairMgr) WaitVolumeOnline(client *DoradoClient, lun *Lun, interv
 		timeout = DefaultReplicaWaitTimeout
 	}
 
-	return WaitForCondition(func() (bool, error) {
+	return utils.WaitForCondition(func() (bool, error) {
 		lunInfo, err := client.GetVolume(lun.Id)
 		if err != nil {
 			log.Errorf("Get lun failed,%v ", err)
@@ -424,7 +424,7 @@ func (r *ReplicaCommonDriver) Switch(replicaId string) error {
 
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
-	return WaitForCondition(func() (bool, error) {
+	return utils.WaitForCondition(func() (bool, error) {
 		replicaPair, err := r.op.GetReplicationInfo(replicaId)
 		if err != nil {
 			return false, nil
@@ -476,7 +476,7 @@ func (r *ReplicaCommonDriver) WaitReplicaReady(replicaId string) error {
 	}
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
-	return WaitForCondition(func() (bool, error) {
+	return utils.WaitForCondition(func() (bool, error) {
 		replicaPair, err := r.op.GetReplicationInfo(replicaId)
 		if err != nil {
 			return false, nil
@@ -495,7 +495,7 @@ func (r *ReplicaCommonDriver) WaitReplicaReady(replicaId string) error {
 func (r *ReplicaCommonDriver) WaitSecondAccess(replicaId string, accessMode string) {
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
-	WaitForCondition(func() (bool, error) {
+	utils.WaitForCondition(func() (bool, error) {
 		replicaPair, err := r.op.GetReplicationInfo(replicaId)
 		if err != nil {
 			return false, nil
@@ -507,7 +507,7 @@ func (r *ReplicaCommonDriver) WaitSecondAccess(replicaId string, accessMode stri
 func (r *ReplicaCommonDriver) WaitExpectState(replicaId string, runningStatus, healthStatus []string) error {
 	interval := DefaultReplicaWaitInterval
 	timeout := DefaultReplicaWaitTimeout
-	return WaitForCondition(func() (bool, error) {
+	return utils.WaitForCondition(func() (bool, error) {
 		replicaPair, err := r.op.GetReplicationInfo(replicaId)
 		if err != nil {
 			return false, nil

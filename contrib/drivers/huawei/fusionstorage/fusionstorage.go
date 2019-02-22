@@ -183,7 +183,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*VolumeSnapsh
 		return nil, err
 	}
 
-	log.Errorf("Create snapshot %s (%s) success.", opt.GetName(), opt.GetId())
+	log.Infof("Create snapshot %s (%s) success.", opt.GetName(), opt.GetId())
 	return &VolumeSnapshotSpec{
 		BaseModel: &BaseModel{
 			Id: opt.GetId(),

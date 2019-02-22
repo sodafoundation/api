@@ -17,9 +17,11 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"reflect"
+	"time"
 
 	log "github.com/golang/glog"
 )
@@ -194,4 +196,25 @@ func RandSeq(n int, chs []rune) string {
 		b[i] = chs[rand.Intn(len(chs))]
 	}
 	return string(b)
+}
+
+func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
+	endAt := time.Now().Add(timeout)
+	time.Sleep(time.Duration(interval))
+	for {
+		startTime := time.Now()
+		ok, err := f()
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
+		if time.Now().After(endAt) {
+			break
+		}
+		elapsed := time.Now().Sub(startTime)
+		time.Sleep(interval - elapsed)
+	}
+	return fmt.Errorf("wait for condition timeout")
 }
