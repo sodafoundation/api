@@ -19,6 +19,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 func TestEncodeName(t *testing.T) {
@@ -96,7 +98,7 @@ func TestTruncateDescription(t *testing.T) {
 
 func TestWaitForCondition(t *testing.T) {
 	var count = 0
-	err := WaitForCondition(func() (bool, error) {
+	err := utils.WaitForCondition(func() (bool, error) {
 		count++
 		time.Sleep(2 * time.Microsecond)
 		if count >= 5 {
@@ -109,7 +111,7 @@ func TestWaitForCondition(t *testing.T) {
 	}
 
 	count = 0
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		count++
 		time.Sleep(1 * time.Millisecond)
 		if count >= 5 {
@@ -121,7 +123,7 @@ func TestWaitForCondition(t *testing.T) {
 		t.Errorf("Test WaitForCondition failed, %v", err)
 	}
 
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		return true, fmt.Errorf("test error....")
 	}, 4*time.Millisecond, 100*time.Millisecond)
 	if err == nil {
@@ -129,7 +131,7 @@ func TestWaitForCondition(t *testing.T) {
 	}
 
 	count = 0
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		count++
 		time.Sleep(2 * time.Millisecond)
 		if count >= 5 {
