@@ -96,12 +96,13 @@ func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
 
 		password, err := pwd.NewPwdEncrypter(pwdTool).Decrypter(pwdCiphertext)
 		if err != nil {
-			return nil, fmt.Errorf("Decryption failed.", err)
+			return nil, fmt.Errorf("Decryption failed, %v", err)
 		}
 		pwdCiphertext = password
 	}
 
 	opt.Password = pwdCiphertext
+	fmt.Println("1 password", pwdCiphertext)
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
 	opt.DomainID = os.Getenv(OsUserDomainId)

@@ -294,7 +294,13 @@ func disconnect(conn map[string]interface{}) error {
 	targetiqn := iscsiCon.TgtIQN[index]
 	cmd := "ls /dev/disk/by-path/ |grep -w " + portal + "|grep -w " + targetiqn + "|wc -l |awk '{if($1>1) print 1; else print 0}'"
 	logoutFlag, err := connector.ExecCmd("/bin/bash", "-c", cmd)
-	if err == nil && logoutFlag == "0" {
+	if err != nil {
+		log.Printf("Disconnect iscsi target failed, %v\n", err)
+		return err
+	}
+
+	logoutFlag = strings.Replace(logoutFlag, "\n", "", -1)
+	if logoutFlag == "0" {
 		log.Printf("Disconnect portal: %s targetiqn: %s\n", portal, targetiqn)
 		// Logout
 		err = logout(portal, targetiqn)
