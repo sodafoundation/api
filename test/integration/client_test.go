@@ -28,7 +28,7 @@ import (
 
 var c *client.Client
 
-func ini() {
+func init() {
 	c, _ = client.NewClient(&client.Config{
 		Endpoint:    "http://localhost:50040",
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
