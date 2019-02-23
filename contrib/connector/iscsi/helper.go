@@ -185,7 +185,7 @@ func logout(portal string, targetiqn string) error {
 
 // Delete ISCSI Node
 func delete(targetiqn string) (err error) {
-	log.Println("Delete targetiqn: %s", targetiqn)
+	log.Printf("Delete targetiqn: %s\n", targetiqn)
 	_, err = connector.ExecCmd("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
 	if err != nil {
 		log.Printf("Received error on Delete attempt: %v\n", err)
