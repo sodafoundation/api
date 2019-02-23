@@ -26,7 +26,7 @@ import (
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
-var c client.Client
+var c *client.Client
 
 func ini() {
 	c, _ = client.NewClient(&client.Config{

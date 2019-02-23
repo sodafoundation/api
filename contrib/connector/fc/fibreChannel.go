@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/opensds/opensds/contrib/connector"
 )
 
 var (
@@ -236,10 +237,10 @@ func getInitiatorInfo() (string, error) {
 	var initiatorInfo []string
 
 	for _, hba := range hbas {
-		if v, ok := hba["port_name"]; ok {
+		if v, ok := hba[connector.PortName]; ok {
 			initiatorInfo = append(initiatorInfo, "port_name:"+v)
 		}
-		if v, ok := hba["node_name"]; ok {
+		if v, ok := hba[connector.NodeName]; ok {
 			initiatorInfo = append(initiatorInfo, "node_name:"+v)
 		}
 	}
