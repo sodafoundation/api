@@ -29,12 +29,14 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var u = client.NewClient(&client.Config{
-	Endpoint:    "http://localhost:50040",
-	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+var u *client.Client
 
 //init Create Profile
 func init() {
+	u, _ = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
