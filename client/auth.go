@@ -85,8 +85,6 @@ func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
 	opt.Username = os.Getenv(OsUsername)
 
 	var pwdCiphertext = os.Getenv(OsPassword)
-	fmt.Println("1 password", pwdCiphertext)
-	fmt.Println("enable dfaefad", os.Getenv(EnableEncrypted))
 	if os.Getenv(EnableEncrypted) == "T" {
 		// Decrypte the password
 		pwdTool := os.Getenv(PwdEncrypter)
@@ -102,7 +100,6 @@ func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
 	}
 
 	opt.Password = pwdCiphertext
-	fmt.Println("1 password", pwdCiphertext)
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
 	opt.DomainID = os.Getenv(OsUserDomainId)
