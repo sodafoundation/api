@@ -461,6 +461,9 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
+
+	out, _ := execCmd("/bin/bash", "-c", "iscsiadm -m session")
+	fmt.Println("session is ", out)
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
 
@@ -479,7 +482,18 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Failed to marshal connection data:", err)
 		return
 	}
+
+	// attach first, then detach
 	output, err := execCmd("sudo", "./volume-connector",
+		"attach", string(conn))
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
+		return
+	}
+
+	t.Log(output)
+
+	output, err = execCmd("sudo", "./volume-connector",
 		"detach", string(conn))
 	if err != nil {
 		t.Error("Failed to detach volume:", output, err)
