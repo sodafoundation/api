@@ -435,17 +435,18 @@ func TestVolumeAttach(t *testing.T) {
 		return
 	}
 
-	execCmd("/bin/bash", "-c", "ps -ef")
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
+	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
+	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
 		t.Error("Failed to marshal connection data:", err)
 		return
 	}
-	output, err := execCmd("sudo", "./volume-connector",
+	output, err = execCmd("sudo", "./volume-connector",
 		"attach", string(conn))
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
