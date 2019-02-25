@@ -25,16 +25,14 @@ func init() {
 }
 
 func (isc *Iscsi) Attach(conn map[string]interface{}) (string, error) {
-	return Connect(conn)
+	return connect(conn)
 }
 
 func (isc *Iscsi) Detach(conn map[string]interface{}) error {
-	iscsiCon := ParseIscsiConnectInfo(conn)
-
-	return Disconnect(iscsiCon.TgtPortal, iscsiCon.TgtIQN)
+	return disconnect(conn)
 }
 
 // GetInitiatorInfo implementation
-func (isc *Iscsi) GetInitiatorInfo() (connector.InitiatorInfo, error) {
+func (isc *Iscsi) GetInitiatorInfo() (string, error) {
 	return getInitiatorInfo()
 }

@@ -45,8 +45,8 @@ func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string, chapAu
 	lunId := t.GetLun(path)
 	conn := map[string]interface{}{
 		"targetDiscovered": true,
-		"targetIQN":        tgtIqn,
-		"targetPortal":     t.ISCSITarget.(*tgtTarget).BindIp + ":3260",
+		"targetIQN":        []string{tgtIqn},
+		"targetPortal":     []string{t.ISCSITarget.(*tgtTarget).BindIp + ":3260"},
 		"discard":          false,
 		"targetLun":        lunId,
 	}
