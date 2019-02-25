@@ -435,6 +435,7 @@ func TestVolumeAttach(t *testing.T) {
 		return
 	}
 
+	execCmd("/bin/bash", "-c", "ps -ef")
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
