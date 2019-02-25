@@ -239,11 +239,11 @@ func connect(connMap map[string]interface{}) (string, error) {
 	targetiqn := conn.TgtIQN[index]
 	targetlun := strconv.Itoa(conn.TgtLun)
 
-	cmd := "pgrep -f /usr/sbin/iscsid"
+	cmd := "pgrep -f /sbin/iscsid"
 	_, err = connector.ExecCmd("/bin/bash", "-c", cmd)
 
 	if err != nil {
-		cmd = "/usr/sbin/iscsid"
+		cmd = "/sbin/iscsid"
 		_, errExec := connector.ExecCmd("/bin/bash", "-c", cmd)
 		if errExec != nil {
 			return "", fmt.Errorf("Please stop the iscsi process outside the container first: %v", errExec)
