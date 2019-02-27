@@ -24,6 +24,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -82,7 +83,7 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 	}
 
 	log.Infof("Create Volume from snapshot, source_lun_id : %s , target_lun_id : %s", snapshot.Id, lun.Id)
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		getVolumeResult, getVolumeErr := d.client.GetVolume(lun.Id)
 		if nil == getVolumeErr {
 			if getVolumeResult.HealthStatus == StatusHealth && getVolumeResult.RunningStatus == StatusVolumeReady {
@@ -138,7 +139,7 @@ func (d *Driver) copyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error
 		return err
 	}
 
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		deleteLunCopyErr := d.client.DeleteLunCopy(luncopyid)
 		if nil == deleteLunCopyErr {
 			return true, nil

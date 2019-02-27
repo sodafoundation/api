@@ -425,6 +425,10 @@ func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 		errchanVolAtm <- err
 		return
 	}
+	if err = db.C.UpdateStatus(ctx, vol, model.VolumeInUse); err != nil {
+		errchanVolAtm <- err
+		return
+	}
 	errchanVolAtm <- nil
 }
 
@@ -479,6 +483,10 @@ func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAtta
 		return
 	}
 
+	if err = db.C.UpdateStatus(ctx, vol, model.VolumeAvailable); err != nil {
+		errchan <- err
+		return
+	}
 	errchan <- nil
 }
 

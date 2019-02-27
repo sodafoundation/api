@@ -29,12 +29,14 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var u = client.NewClient(&client.Config{
-	Endpoint:    "http://localhost:50040",
-	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+var u *client.Client
 
 //init Create Profile
 func init() {
+	u, _ = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
@@ -436,13 +438,15 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
+	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
+	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
 		t.Error("Failed to marshal connection data:", err)
 		return
 	}
-	output, err := execCmd("sudo", "./volume-connector",
+	output, err = execCmd("sudo", "./volume-connector",
 		"attach", string(conn))
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
@@ -459,6 +463,9 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Prepare Attachment Fail!", err)
 		return
 	}
+
+	out, _ := execCmd("/bin/bash", "-c", "iscsiadm -m session")
+	fmt.Println("session is ", out)
 	defer DeleteVolume(attc.VolumeId)
 	defer DeleteAttachment(attc.Id)
 
@@ -477,7 +484,18 @@ func TestVolumeDetach(t *testing.T) {
 		t.Error("Failed to marshal connection data:", err)
 		return
 	}
+
+	// attach first, then detach
 	output, err := execCmd("sudo", "./volume-connector",
+		"attach", string(conn))
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
+		return
+	}
+
+	t.Log(output)
+
+	output, err = execCmd("sudo", "./volume-connector",
 		"detach", string(conn))
 	if err != nil {
 		t.Error("Failed to detach volume:", output, err)

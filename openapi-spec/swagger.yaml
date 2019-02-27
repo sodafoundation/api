@@ -2060,31 +2060,21 @@ parameters:
 responses:
   HTTPStatus400:
     description: BadRequest
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus401:
     description: NotAuthorized
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus403:
     description: Forbidden
-    content:
-    application/json:
-      schema:
-        $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus404:
     description: The resource does not exist
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus500:
     description: An unexpected error occured.
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
