@@ -750,7 +750,29 @@ func (c *Controller) UpdateVolumeGroup(contx context.Context, opt *pb.UpdateVolu
 	if err = c.volumeController.UpdateVolumeGroup(opt); err != nil {
 		log.Error("When create volume group:", err)
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+
+		for _, addVol := range opt.AddVolumes {
+			db.UpdateVolumeStatus(ctx, db.C, addVol, model.VolumeError)
+
+		}
+		for _, remVol := range opt.RemoveVolumes {
+			db.UpdateVolumeStatus(ctx, db.C, remVol, model.VolumeError)
+		}
+
 		return pb.GenericResponseError(err), err
+	}
+
+	// Update group id in the volumes
+	for _, addVolId := range opt.AddVolumes {
+		if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{BaseModel: &model.BaseModel{Id: addVolId}, GroupId: opt.GetId()}); err != nil {
+			return pb.GenericResponseError(err), err
+		}
+	}
+
+	for _, remVolId := range opt.RemoveVolumes {
+		if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{BaseModel: &model.BaseModel{Id: remVolId}, GroupId: ""}); err != nil {
+			return pb.GenericResponseError(err), err
+		}
 	}
 
 	// TODO Policy controller for the vg need to be modified.
@@ -786,10 +808,49 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 	c.volumeController.SetDock(dock)
 	opt.DriverName = dock.DriverName
 
-	if err = c.volumeController.DeleteVolumeGroup(opt); err != nil {
+	if groupUpdate, volumesUpdate, err := c.volumeController.DeleteVolumeGroup(opt); err != nil {
 		log.Error("When delete volume group:", err)
-		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupErrorDeleting)
+		db.C.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		// If driver returns none for volumesUpdate, set volume status to error.
+		if volumesUpdate == nil {
+			volumes, err := db.C.ListVolumesByGroupId(ctx, db.C, opt.GetId())
+			if err != nil {
+				res.Reply = GenericResponseError("400", fmt.Sprint(err))
+				return &res, err
+			}
+			for _, v := range volumes {
+				v.Status = model.VolumeError
+			}
+			db.C.UpdateStatus(ctx, volumes, "")
+		}
 		return pb.GenericResponseError(err), err
+
+	}
+
+	if volumesUpdate != nil {
+		for _, v := range volumesUpdate {
+			if (v.Status == model.VolumeError || v.Status == model.VolumeErrorDeleting) && (groupUpdate.Status != model.VolumeGroupErrorDeleting && groupUpdate.Status != model.VolumeGroupError) {
+				groupUpdate.Status = v.Status
+				break
+			}
+		}
+
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), volumesUpdate, "")
+
+	}
+
+	if groupUpdate != nil {
+		if groupUpdate.Status == model.VolumeGroupError || groupUpdate.Status == model.VolumeGroupErrorDeleting {
+			msg := fmt.Sprintf("Delete group failed")
+			log.Error(msg)
+			res.Reply = GenericResponseError("400", fmt.Sprint(msg))
+			return &res, err
+		}
+		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), groupUpdate, groupUpdate.Status)
+	}
+
+	if err = db.C.DeleteVolumeGroup(ctx, opt.Id); err != nil {
+		log.Error("Error occurred in dock module when delete volume group in db:", err)
 	}
 
 	return pb.GenericResponseResult(nil), nil
