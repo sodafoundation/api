@@ -30,15 +30,17 @@ import (
 )
 
 var (
-	c = client.NewClient(&client.Config{
-		Endpoint:    "http://localhost:50040",
-		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+	c *client.Client
 
 	localIqn  = "iqn.2017-10.io.opensds:volume:00000001"
 	profileId string
 )
 
 func init() {
+	c, _ = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+
 	fmt.Println("Start creating profile...")
 	var body = &model.ProfileSpec{
 		Name:        "default",

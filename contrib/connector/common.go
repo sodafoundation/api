@@ -15,17 +15,12 @@
 package connector
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os/exec"
 	"strings"
 )
-
-// InitiatorInfo implementation
-type InitiatorInfo struct {
-	HostName      string                 `json:"hostName"`
-	InitiatorData map[string]interface{} `json:"initiatorData"`
-}
 
 // ExecCmd Log and convert the result of exec.Command
 func ExecCmd(name string, arg ...string) (string, error) {
@@ -35,98 +30,103 @@ func ExecCmd(name string, arg ...string) (string, error) {
 }
 
 // GetFSType returns the File System Type of device
-func GetFSType(device string) string {
-	fsType := ""
-	res, err := ExecCmd("blkid", device)
+func GetFSType(device string) (string, error) {
+	log.Printf("GetFSType: %s\n", device)
+
+	var fsType string
+	blkidCmd := "blkid"
+	out, err := ExecCmd("blkid", device)
 	if err != nil {
-		log.Printf("failed to GetFSType: %v", err)
-		return fsType
+		log.Printf("failed to GetFSType: %v cmd: %s output: %s\n",
+			err, blkidCmd, string(out))
+		return fsType, nil
 	}
 
-	if strings.Contains(string(res), "TYPE=") {
-		for _, v := range strings.Split(string(res), " ") {
-			if strings.Contains(v, "TYPE=") {
-				fsType = strings.Split(v, "=")[1]
-				fsType = strings.Replace(fsType, "\"", "", -1)
-				fsType = strings.Replace(fsType, "\n", "", -1)
-				fsType = strings.Replace(fsType, "\r", "", -1)
-			}
+	for _, v := range strings.Split(string(out), " ") {
+		if strings.Contains(v, "TYPE=") {
+			fsType = strings.Split(v, "=")[1]
+			fsType = strings.Replace(fsType, "\"", "", -1)
+			fsType = strings.Replace(fsType, "\n", "", -1)
+			fsType = strings.Replace(fsType, "\r", "", -1)
+			return fsType, nil
 		}
 	}
-	return fsType
+
+	return fsType, nil
 }
 
 // Format device by File System Type
-func Format(device string, fstype string) error {
-	log.Printf("Format device: %s fstype: %s", device, fstype)
+func Format(device string, fsType string) error {
+	log.Printf("Format device: %s fstype: %s\n", device, fsType)
 
-	// Get current File System Type
-	curFSType := GetFSType(device)
-	if curFSType == "" {
-		// Default File Sysem Type is ext4
-		if fstype == "" {
-			fstype = "ext4"
+	mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
+
+	_, err := exec.LookPath(mkfsCmd)
+	if err != nil {
+		if err == exec.ErrNotFound {
+			return fmt.Errorf("%q executable not found in $PATH", mkfsCmd)
 		}
-		_, err := ExecCmd("mkfs", "-t", fstype, "-F", device)
-		if err != nil {
-			log.Printf("failed to Format: %v", err)
-			return err
-		}
-	} else {
-		log.Printf("Device: %s has been formatted yet. fsType: %s", device, curFSType)
+		return err
 	}
+
+	mkfsArgs := []string{}
+	mkfsArgs = append(mkfsArgs, device)
+	if fsType == "ext4" || fsType == "ext3" {
+		mkfsArgs = []string{"-F", device}
+	}
+
+	out, err := ExecCmd(mkfsCmd, mkfsArgs...)
+	if err != nil {
+		return fmt.Errorf("formatting disk failed: %v cmd: '%s %s' output: %q",
+			err, mkfsCmd, strings.Join(mkfsArgs, " "), string(out))
+	}
+
 	return nil
 }
 
 // Mount device into mount point
-func Mount(device string, mountpoint string) error {
-	log.Printf("Mount device: %s mountpoint: %s", device, mountpoint)
+func Mount(device, mountpoint, fsType string, mountFlags []string) error {
+	log.Printf("Mount device: %s mountpoint: %s, fsType: %s, mountFlags:　%v\n", device, mountpoint, fsType, mountFlags)
 
 	_, err := ExecCmd("mkdir", "-p", mountpoint)
 	if err != nil {
-		log.Printf("failed to mkdir: %v", err)
-	}
-	_, err = ExecCmd("mount", device, mountpoint)
-	if err != nil {
-		log.Printf("failed to mount: %v", err)
-		return err
-	}
-	return nil
-}
-
-// FormatAndMount device
-func FormatAndMount(device string, fstype string, mountpoint string) error {
-	log.Printf("FormatandMount device: %s fstype: %s mountpoint: %s", device, fstype, mountpoint)
-
-	// Format
-	err := Format(device, fstype)
-	if err != nil {
+		log.Printf("failed to mkdir: %v\n", err)
 		return err
 	}
 
-	// Mount
-	err = Mount(device, mountpoint)
-	if err != nil {
-		return err
+	mountArgs := []string{}
+
+	mountArgs = append(mountArgs, "-t", fsType)
+
+	if len(mountFlags) > 0 {
+		mountArgs = append(mountArgs, "-o", strings.Join(mountFlags, ","))
 	}
 
+	mountArgs = append(mountArgs, device)
+	mountArgs = append(mountArgs, mountpoint)
+
+	_, err = exec.Command("mount", mountArgs...).CombinedOutput()
+	if err != nil {
+		log.Printf("failed to mount: %v\n", err)
+		return err
+	}
 	return nil
 }
 
 // Umount from mountpoint
 func Umount(mountpoint string) error {
-	log.Printf("Umount mountpoint: %s", mountpoint)
+	log.Printf("Umount mountpoint: %s\n", mountpoint)
 
 	_, err := ExecCmd("umount", mountpoint)
 	if err != nil {
-		log.Printf("failed to Umount: %v", err)
+		log.Printf("failed to Umount: %v\n", err)
 		return err
 	}
 	return nil
 }
 
-// GetHostIp return Host IP
-func GetHostIp() string {
+// GetHostIP return Host IP
+func GetHostIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "127.0.0.1"
@@ -141,16 +141,59 @@ func GetHostIp() string {
 	return "127.0.0.1"
 }
 
-// GetHostName return Host Name
+// GetHostName ...
 func GetHostName() (string, error) {
 	hostName, err := ExecCmd("hostname")
 	if err != nil {
-		log.Printf("failed to get hostname: %v", err)
+		log.Printf("failed to get host name: %v\n", err)
 		return "", err
 	}
-
 	hostName = strings.Replace(hostName, "\n", "", -1)
-	log.Printf("GetHostName result: %v", hostName)
-
 	return hostName, nil
+}
+
+// IsMounted ...
+func IsMounted(target string) (bool, error) {
+	findmntCmd := "findmnt"
+	_, err := exec.LookPath(findmntCmd)
+	if err != nil {
+		if err == exec.ErrNotFound {
+			msg := fmt.Sprintf("%s executable not found in $PATH, err: %v\n", findmntCmd, err)
+			log.Printf(msg)
+			return false, fmt.Errorf(msg)
+		}
+		log.Printf("failed to check IsMounted %v\n", err)
+		return false, err
+	}
+
+	findmntArgs := []string{"--target", target}
+
+	log.Printf("findmnt args is %s\n", findmntArgs)
+
+	out, err := ExecCmd(findmntCmd, findmntArgs...)
+	if err != nil {
+		// findmnt exits with non zero exit status if it couldn't find anything
+		if strings.TrimSpace(string(out)) == "" {
+			return false, nil
+		}
+
+		errIsMounted := fmt.Errorf("checking mounted failed: %v cmd: %s output: %s",
+			err, findmntCmd, string(out))
+
+		log.Printf("checking mounted failed: %v\n", errIsMounted)
+		return false, errIsMounted
+	}
+
+	log.Printf("checking mounted result is %s\n", strings.TrimSpace(string(out)))
+	if strings.TrimSpace(string(out)) == "" {
+		return false, nil
+	}
+
+	line := strings.Split(string(out), "\n")
+
+	if strings.Split(line[1], " ")[0] != target {
+		return false, nil
+	}
+
+	return true, nil
 }

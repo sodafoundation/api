@@ -357,6 +357,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 
 	result.AccessProtocol = protocol
 	db.C.UpdateStatus(ctx, result, model.VolumeAttachAvailable)
+	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
 
 	return pb.GenericResponseResult(result), nil
 }
@@ -393,6 +394,8 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
+
+	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
 
 	return pb.GenericResponseResult(nil), nil
 }
