@@ -32,8 +32,10 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
+
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -111,7 +113,6 @@ func (ds *dockServer) Run() error {
 
 // CreateVolume implements pb.DockServer.CreateVolume
 func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
 	//Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
@@ -121,13 +122,10 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 	vol, err := ds.Driver.CreateVolume(opt)
 	if err != nil {
 		log.Error("When create volume in dock module:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult(vol)
-	return &res, nil
+	return pb.GenericResponseResult(vol), nil
 }
 
 // DeleteVolume implements pb.DockServer.DeleteVolume
@@ -141,13 +139,10 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 
 	if err := ds.Driver.DeleteVolume(opt); err != nil {
 		log.Error("Error occurred in dock module when delete volume:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // ExtendVolume implements pb.DockServer.ExtendVolume
@@ -162,17 +157,14 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 	vol, err := ds.Driver.ExtendVolume(opt)
 	if err != nil {
 		log.Error("When extend volume in dock module:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult(vol)
-	return &res, nil
+	return pb.GenericResponseResult(vol), nil
 }
 
-// CreateAttachment implements pb.DockServer.CreateAttachment
-func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttachmentOpts) (*pb.GenericResponse, error) {
+// CreateVolumeAttachment implements pb.DockServer.CreateVolumeAttachment
+func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
@@ -183,9 +175,7 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 	connInfo, err := ds.Driver.InitializeConnection(opt)
 	if err != nil {
 		log.Error("Error occurred in dock module when initialize volume connection:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
 	var atc = &model.VolumeAttachmentSpec{
@@ -203,12 +193,11 @@ func (ds *dockServer) CreateAttachment(ctx context.Context, opt *pb.CreateAttach
 		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
-	res.Reply = GenericResponseResult(atc)
-	return &res, nil
+	return pb.GenericResponseResult(atc), nil
 }
 
-// DeleteAttachment implements pb.DockServer.DeleteAttachment
-func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttachmentOpts) (*pb.GenericResponse, error) {
+// DeleteVolumeAttachment implements pb.DockServer.DeleteVolumeAttachment
+func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
 	//Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
@@ -218,13 +207,10 @@ func (ds *dockServer) DeleteAttachment(ctx context.Context, opt *pb.DeleteAttach
 
 	if err := ds.Driver.TerminateConnection(opt); err != nil {
 		log.Error("Error occurred in dock module when terminate volume connection:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // CreateVolumeSnapshot implements pb.DockServer.CreateVolumeSnapshot
@@ -239,12 +225,10 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 	snp, err := ds.Driver.CreateSnapshot(opt)
 	if err != nil {
 		log.Error("Error occurred in dock module when create snapshot:", err)
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult(snp)
-	return &res, nil
+	return pb.GenericResponseResult(snp), nil
 }
 
 // DeleteVolumeSnapshot implements pb.DockServer.DeleteVolumeSnapshot
@@ -258,13 +242,10 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 
 	if err := ds.Driver.DeleteSnapshot(opt); err != nil {
 		log.Error("Error occurred in dock module when delete snapshot:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // AttachVolume implements pb.DockServer.AttachVolume
@@ -273,8 +254,7 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
 		log.Error("Error occurred in dock module when unmarshalling connection data!")
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
 	log.Info("Dock server receive attach volume request, vr =", opt)
@@ -282,19 +262,15 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 	con := connector.NewConnector(opt.GetAccessProtocol())
 	if con == nil {
 		err := fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	atc, err := con.Attach(connData)
 	if err != nil {
 		log.Error("Error occurred in dock module when attach volume:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult(atc)
-	return &res, nil
+	return pb.GenericResponseResult(atc), nil
 }
 
 // DetachVolume implements pb.DockServer.DetachVolume
@@ -303,8 +279,7 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
 		log.Error("Error occurred in dock module when unmarshalling connection data!")
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
 	log.Info("Dock server receive detach volume request, vr =", opt)
@@ -312,18 +287,14 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 	con := connector.NewConnector(opt.GetAccessProtocol())
 	if con == nil {
 		err := fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	if err := con.Detach(connData); err != nil {
 		log.Error("Error occurred in dock module when detach volume:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // CreateReplication implements opensds.DockServer
@@ -337,23 +308,14 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 	replica, err := driver.CreateReplication(opt)
 	if err != nil {
 		log.Error("Error occurred in dock module when create replication:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
 	replica.PoolId = opt.GetPoolId()
 	replica.ProfileId = opt.GetProfileId()
 	replica.Name = opt.GetName()
-	// TODO: maybe need to update status in DB.
-	// result, err := db.C.CreateReplication(c.NewContextFromJson(opt.GetContext()), replica)
-	// if err != nil {
-	//	log.Error("Error occurred in dock module when create replication in db:", err)
-	//	return nil, err
-	// }
 
-	res.Reply = GenericResponseResult(replica)
-	return &res, nil
+	return pb.GenericResponseResult(replica), nil
 }
 
 func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
@@ -366,18 +328,10 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 
 	if err := driver.DeleteReplication(opt); err != nil {
 		log.Error("Error occurred in dock module when delete snapshot:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
-	// if err = db.C.DeleteReplication(c.NewContextFromJson(opt.GetContext()), opt.GetId()); err != nil {
-	//	log.Error("Error occurred in dock module when delete replication in db:", err)
-	//	return err
-	// }
 
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
@@ -390,13 +344,10 @@ func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableRepli
 
 	if err := driver.EnableReplication(opt); err != nil {
 		log.Error("Error occurred in dock module when enable replication:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+
+	return pb.GenericResponseResult(nil), nil
 }
 
 func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
@@ -409,13 +360,10 @@ func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableRep
 
 	if err := driver.DisableReplication(opt); err != nil {
 		log.Error("Error occurred in dock module when disable replication:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+
+	return pb.GenericResponseResult(nil), nil
 }
 
 func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
@@ -428,13 +376,10 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 
 	if err := driver.FailoverReplication(opt); err != nil {
 		log.Error("Error occurred in dock module when failover replication:", err)
-
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+
+	return pb.GenericResponseResult(nil), nil
 }
 
 // CreateVolumeGroup implements pb.DockServer.CreateVolumeGroup
@@ -449,46 +394,24 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 	// NOTE Opt parameter requires complete volumegroup information, because driver may use it.
 	vg, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
-	vgUpdate, err := ds.Driver.CreateVolumeGroup(opt, vg)
-	if _, ok := err.(*model.NotImplementError); ok {
-		vgUpdate = &model.VolumeGroupSpec{
-			BaseModel: &model.BaseModel{
-				Id: opt.GetId(),
-			},
-			Status: model.VolumeGroupAvailable,
+	_, err = ds.Driver.CreateVolumeGroup(opt, vg)
+	if err != nil {
+		if _, ok := err.(*model.NotImplementError); !ok {
+			log.Error("When calling volume driver to create volume group:", err)
+			return pb.GenericResponseError(err), err
 		}
-	} else {
-		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, model.VolumeGroupError)
-		log.Error("When calling volume driver to create volume group:", err)
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
 	}
-
-	if vgUpdate != nil && vgUpdate.Status == model.VolumeGroupError {
-		msg := fmt.Sprintf("Error occurred when creating volume group %s", opt.GetId())
-		log.Error(msg)
-		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, model.VolumeGroupError)
-		res.Reply = GenericResponseError("400", fmt.Sprint(msg))
-		return &res, err
-	}
-
-	vg.Status = model.VolumeGroupAvailable
-	vg.CreatedAt = time.Now().Format(constants.TimeFormat)
-	vg.PoolId = opt.GetPoolId()
-	db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), vg, vg.Status)
 
 	log.Info("Create group successfully.")
-	res.Reply = GenericResponseResult(vg)
-	return &res, nil
+	return pb.GenericResponseResult(vg), nil
 }
 
 func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
 	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -497,100 +420,31 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 	add := true
 	addVolumesRef, err := ds.getVolumesForGroup(opt, opt.AddVolumes, add)
 	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 	add = false
 	removeVolumesRef, err := ds.getVolumesForGroup(opt, opt.RemoveVolumes, add)
 	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
 	group, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
+		return pb.GenericResponseError(err), err
 	}
 
-	groupUpdate, addVolumesUpdate, removeVolumesUpdate, err := ds.Driver.UpdateVolumeGroup(opt, group, addVolumesRef, removeVolumesRef)
+	_, _, _, err := ds.Driver.UpdateVolumeGroup(opt, group, addVolumesRef, removeVolumesRef)
 	// Group update faild...
 
-	if _, ok := err.(*model.NotImplementError); ok {
-		groupUpdate, addVolumesUpdate, removeVolumesUpdate = nil, nil, nil
-	} else {
-		err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupError)
-		if err != nil {
-			res.Reply = GenericResponseError("400", fmt.Sprint(err))
-			return &res, err
+	if err != nil {
+		if _, ok := err.(*model.NotImplementError); !ok {
+			err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
+			return pb.GenericResponseError(err), err
 		}
-
-		for _, addVol := range addVolumesRef {
-			if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), addVol, model.VolumeError); err != nil {
-				res.Reply = GenericResponseError("400", fmt.Sprint(err))
-				return &res, err
-			}
-		}
-		for _, remVol := range removeVolumesRef {
-			if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), remVol, model.VolumeError); err != nil {
-				res.Reply = GenericResponseError("400", fmt.Sprint(err))
-				return &res, err
-			}
-		}
-
-		err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
-	}
-
-	// Group update successfully...
-	// Update volumes return from driver, because volumes somewhere may be modified by driver.
-	var volumesToUpdate []*model.VolumeSpec
-	if addVolumesUpdate != nil {
-		for _, v := range addVolumesUpdate {
-			volumesToUpdate = append(volumesToUpdate, v)
-		}
-	}
-	if removeVolumesUpdate != nil {
-		for _, v := range removeVolumesUpdate {
-			volumesToUpdate = append(volumesToUpdate, v)
-		}
-	}
-	if len(volumesToUpdate) > 0 {
-		db.C.VolumesToUpdate(c.NewContextFromJson(opt.GetContext()), volumesToUpdate)
-	}
-
-	if groupUpdate != nil {
-		if groupUpdate.Status == model.VolumeGroupError {
-			msg := fmt.Sprintf("Error occurred when updating volume group %s", opt.GetId())
-			log.Error(msg)
-			res.Reply = GenericResponseError("400", fmt.Sprint(msg))
-			return &res, err
-		}
-	}
-
-	for _, addVol := range addVolumesRef {
-		addVol.GroupId = opt.GetId()
-		if _, err = db.C.UpdateVolume(c.NewContextFromJson(opt.GetContext()), addVol); err != nil {
-			res.Reply = GenericResponseError("400", fmt.Sprint(err))
-			return &res, err
-		}
-	}
-	for _, remVol := range removeVolumesRef {
-		remVol.GroupId = ""
-		if _, err = db.C.UpdateVolume(c.NewContextFromJson(opt.GetContext()), remVol); err != nil {
-			res.Reply = GenericResponseError("400", fmt.Sprint(err))
-			return &res, err
-		}
-	}
-	if err = db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupAvailable); err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
 	}
 
 	log.Info("Update group successfully.")
-	res.Reply = GenericResponseResult("")
-	return &res, nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 func (ds *dockServer) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes []string, add bool) ([]*model.VolumeSpec, error) {
@@ -601,12 +455,14 @@ func (ds *dockServer) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes 
 			log.Error("Update group failed", err)
 			return nil, err
 		}
-		if add == true && vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
+
+		if add == true && !utils.Contained(vol.Status, []string{model.VolumeAvailable, model.VolumeInUse}) {
 			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
 		}
-		if add == false && vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse && vol.Status != model.VolumeError && vol.Status != model.VolumeErrorDeleting {
+
+		if add == false && !utils.Contained(vol.Status, []string{model.VolumeAvailable, model.VolumeInUse, model.VolumeError, model.VolumeErrorDeleting}) {
 			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
 			log.Error(msg)
 			return nil, errors.New(msg)
@@ -644,55 +500,20 @@ func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolum
 		return &res, err
 	}
 
-	groupUpdate, volumesUpdate, err := ds.Driver.DeleteVolumeGroup(opt, group, volumes)
+	var groupUpdate *model.VolumeGroupSpec
+	var volumesUpdate *model.VolumeSpec
 
-	if _, ok := err.(*model.NotImplementError); ok {
-		groupUpdate, volumesUpdate = ds.deleteGroupGeneric(ds.Driver, group, volumes, opt)
-	} else {
-		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), group, model.VolumeGroupError)
-		// If driver returns none for volumesUpdate, set volume status to error.
-		if volumesUpdate == nil {
-			for _, v := range volumes {
-				v.Status = model.VolumeError
-			}
-			db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), volumes, "")
+	groupUpdate, volumesUpdate, err = ds.Driver.DeleteVolumeGroup(opt, group, volumes)
+
+	if err != nil {
+		if _, ok := err.(*model.NotImplementError); ok {
+			groupUpdate, volumesUpdate = ds.deleteGroupGeneric(ds.Driver, group, volumes, opt)
+		} else {
+			res.Reply = GenericResponseError("400", fmt.Sprint(err))
 		}
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
 	}
+	return groupUpdate, volumesUpdate, &res, err
 
-	if volumesUpdate != nil {
-		for _, v := range volumesUpdate {
-			if (v.Status == model.VolumeError || v.Status == model.VolumeErrorDeleting) && (groupUpdate.Status != model.VolumeGroupErrorDeleting && groupUpdate.Status != model.VolumeGroupError) {
-				groupUpdate.Status = v.Status
-				break
-			}
-		}
-
-		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), volumesUpdate, "")
-
-	}
-
-	if groupUpdate != nil {
-		if groupUpdate.Status == model.VolumeGroupError || groupUpdate.Status == model.VolumeGroupErrorDeleting {
-			msg := fmt.Sprintf("Delete group failed")
-			log.Error(msg)
-			res.Reply = GenericResponseError("400", fmt.Sprint(msg))
-			return &res, err
-		}
-		db.C.UpdateStatus(c.NewContextFromJson(opt.GetContext()), groupUpdate, groupUpdate.Status)
-	}
-
-	if err = db.C.DeleteVolumeGroup(c.NewContextFromJson(opt.GetContext()), group.Id); err != nil {
-		msg := fmt.Sprintf("Delete volume group failed: %s", err.Error())
-		log.Error(msg)
-		res.Reply = GenericResponseError("400", fmt.Sprint(msg))
-		return &res, err
-	}
-
-	log.Info("Delete group successfully.")
-	res.Reply = GenericResponseResult("")
-	return &res, nil
 }
 
 func (ds *dockServer) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec, opt *pb.DeleteVolumeGroupOpts) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
@@ -726,30 +547,4 @@ func (ds *dockServer) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.
 	}
 
 	return vgUpdate, volumesUpdate
-}
-
-func GenericResponseResult(message interface{}) *pb.GenericResponse_Result_ {
-	var msg string
-	switch message.(type) {
-	case string:
-		msg = message.(string)
-	default:
-		msgJSON, _ := json.Marshal(message)
-		msg = string(msgJSON)
-	}
-
-	return &pb.GenericResponse_Result_{
-		Result: &pb.GenericResponse_Result{
-			Message: msg,
-		},
-	}
-}
-
-func GenericResponseError(code, description string) *pb.GenericResponse_Error_ {
-	return &pb.GenericResponse_Error_{
-		Error: &pb.GenericResponse_Error{
-			Code:        code,
-			Description: description,
-		},
-	}
 }
