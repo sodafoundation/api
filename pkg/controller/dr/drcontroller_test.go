@@ -91,17 +91,19 @@ func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOp
 func (fvc *fakeVolumeController) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
 	return nil
 }
+
 func (fvc *fakeVolumeController) CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	return nil, nil
 }
 
-func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) error {
-	return nil
+func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, nil
 }
 
 func (fvc *fakeVolumeController) DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error {
 	return nil
 }
+
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 var (

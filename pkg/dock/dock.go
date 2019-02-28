@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"time"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
@@ -33,8 +32,6 @@ import (
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"github.com/opensds/opensds/pkg/utils"
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -111,7 +108,7 @@ func (ds *dockServer) Run() error {
 
 // CreateVolume implements pb.DockServer.CreateVolume
 func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -128,8 +125,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 
 // DeleteVolume implements pb.DockServer.DeleteVolume
 func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -145,8 +141,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 
 // ExtendVolume implements pb.DockServer.ExtendVolume
 func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -163,8 +158,7 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 
 // CreateVolumeAttachment implements pb.DockServer.CreateVolumeAttachment
 func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateVolumeAttachmentOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -196,8 +190,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 
 // DeleteVolumeAttachment implements pb.DockServer.DeleteVolumeAttachment
 func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -213,8 +206,7 @@ func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.Delete
 
 // CreateVolumeSnapshot implements pb.DockServer.CreateVolumeSnapshot
 func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVolumeSnapshotOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -231,8 +223,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 
 // DeleteVolumeSnapshot implements pb.DockServer.DeleteVolumeSnapshot
 func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
@@ -248,7 +239,6 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 
 // AttachVolume implements pb.DockServer.AttachVolume
 func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
 		log.Error("Error occurred in dock module when unmarshalling connection data!")
@@ -273,7 +263,6 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 
 // DetachVolume implements pb.DockServer.DetachVolume
 func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
 		log.Error("Error occurred in dock module when unmarshalling connection data!")
@@ -297,7 +286,6 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 
 // CreateReplication implements opensds.DockServer
 func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateReplicationOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
 	//Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
@@ -317,8 +305,7 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 }
 
 func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage replication drivers and do some initializations.
+	// Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
@@ -333,8 +320,7 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 }
 
 func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage replication drivers and do some initializations.
+	// Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
@@ -349,8 +335,7 @@ func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableRepli
 }
 
 func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage replication drivers and do some initializations.
+	// Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
@@ -365,8 +350,7 @@ func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableRep
 }
 
 func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage replication drivers and do some initializations.
+	// Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
 	defer drivers.CleanReplicationDriver(driver)
 
@@ -382,20 +366,18 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 
 // CreateVolumeGroup implements pb.DockServer.CreateVolumeGroup
 func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolumeGroupOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
 	log.Info("Dock server receive create volume group request, vr =", opt)
 
-	// NOTE Opt parameter requires complete volumegroup information, because driver may use it.
 	vg, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
 	if err != nil {
 		return pb.GenericResponseError(err), err
 	}
 
-	_, err = ds.Driver.CreateVolumeGroup(opt, vg)
+	_, err = ds.Driver.CreateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			log.Error("When calling volume driver to create volume group:", err)
@@ -408,7 +390,6 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 }
 
 func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
 	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
@@ -429,14 +410,13 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 }
 
 func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
-	var res pb.GenericResponse
-	//Get the storage drivers and do some initializations.
+	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
 	defer drivers.Clean(ds.Driver)
 
 	log.Info("Dock server receive delete volume group request, vr =", opt)
 
-	if err = ds.Driver.DeleteVolumeGroup(opt); err != nil {
+	if err := ds.Driver.DeleteVolumeGroup(opt); err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			return pb.GenericResponseError(err), err
 		}
@@ -462,11 +442,11 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 			Id:       volRef.Id,
 			Metadata: volRef.Metadata,
 		}); err != nil {
-			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volumeRef.Id))
+			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volRef.Id))
 			db.UpdateVolumeStatus(ctx, db.C, volRef.Id, model.VolumeError)
 		} else {
 			// Delete the volume entry in DB after successfully deleting the volume on the storage.
-			db.C.DeleteVolume(ctx, volumeRef.Id)
+			db.C.DeleteVolume(ctx, volRef.Id)
 		}
 	}
 
