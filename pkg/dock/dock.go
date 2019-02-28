@@ -372,12 +372,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 
 	log.Info("Dock server receive create volume group request, vr =", opt)
 
-	vg, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
-	if err != nil {
-		return pb.GenericResponseError(err), err
-	}
-
-	_, err = ds.Driver.CreateVolumeGroup(opt)
+	vg, err := ds.Driver.CreateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			log.Error("When calling volume driver to create volume group:", err)
@@ -386,6 +381,12 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 	}
 
 	log.Infof("Create volume group (%s) successfully.\n", opt.GetId())
+	// TODO Currently no storage driver has implemented with volume group operations,
+	// So we will fetch the volume group resource from database as the fake one.
+	vg, err = db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 	return pb.GenericResponseResult(vg), nil
 }
 
@@ -397,7 +398,6 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 	log.Info("Dock server receive update volume group request, vr =", opt)
 
 	vg, err := ds.Driver.UpdateVolumeGroup(opt)
-	// Group update faild...
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
@@ -406,6 +406,12 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 	}
 
 	log.Infof("Update volume group (%s) successfully.\n", opt.GetId())
+	// TODO Currently no storage driver has implemented with volume group operations,
+	// So we will fetch the volume group resource from database as the fake one.
+	vg, err = db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 	return pb.GenericResponseResult(vg), nil
 }
 
@@ -436,7 +442,6 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 	if err != nil {
 		return err
 	}
-
 	for _, volRef := range volumes {
 		if err = ds.Driver.DeleteVolume(&pb.DeleteVolumeOpts{
 			Id:       volRef.Id,

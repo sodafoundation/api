@@ -123,3 +123,42 @@ func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 		t.Error("delete volume snapshot in controller failed:", err)
 	}
 }
+
+func TestControllerCreateVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	vg, err := vc.CreateVolumeGroup(&pb.CreateVolumeGroupOpts{})
+	if err != nil {
+		t.Error("create volume group in controller failed:", err)
+		return
+	}
+
+	var expected = &SampleVolumeGroups[0]
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vg)
+	}
+}
+
+func TestControllerUpdateVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	vg, err := vc.UpdateVolumeGroup(&pb.UpdateVolumeGroupOpts{})
+	if err != nil {
+		t.Error("update volume group in controller failed:", err)
+		return
+	}
+
+	var expected = &SampleVolumeGroups[0]
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vg)
+	}
+}
+
+func TestControllerDeleteVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	err := vc.DeleteVolumeGroup(&pb.DeleteVolumeGroupOpts{})
+	if err != nil {
+		t.Error("delete volume group in controller failed:", err)
+	}
+}

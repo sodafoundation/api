@@ -134,7 +134,6 @@ func (fvc *fakeVolumeController) DeleteReplication(opt *pb.DeleteReplicationOpts
 
 func (fvc *fakeVolumeController) EnableReplication(opt *pb.EnableReplicationOpts) error {
 	return nil
-
 }
 
 func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOpts) error {
@@ -144,12 +143,13 @@ func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOp
 func (fvc *fakeVolumeController) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
 	return nil
 }
+
 func (fvc *fakeVolumeController) CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fvc *fakeVolumeController) DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error {
@@ -456,6 +456,7 @@ func TestDeleteReplication(t *testing.T) {
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(&SampleReplications[0], nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+	mockClient.On("DeleteReplication", c.NewAdminContext(), req.Id).Return(nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{
@@ -549,5 +550,85 @@ func TestFailoverReplication(t *testing.T) {
 
 	if _, err := ctrl.FailoverReplication(context.Background(), req); err != nil {
 		t.Errorf("Failed to failover volume replication: %v\n", err)
+	}
+}
+
+func TestCreateVolumeGroup(t *testing.T) {
+	var req = &pb.CreateVolumeGroupOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f555",
+		Name:        "sample-group-01",
+		Description: "This is the first sample group for testing",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var vg = &SampleVolumeGroups[0]
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetVolumeGroup", c.NewAdminContext(), req.Id).Return(vg, nil)
+	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), vg, model.VolumeGroupAvailable).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		volumeController: NewFakeVolumeController(),
+	}
+
+	if _, err := ctrl.CreateVolumeGroup(context.Background(), req); err != nil {
+		t.Errorf("Failed to create volume group: %v\n", err)
+	}
+}
+
+func TestUpdateVolumeGroup(t *testing.T) {
+	var req = &pb.UpdateVolumeGroupOpts{
+		Id:         "3769855c-a102-11e7-b772-17b880d2f555",
+		AddVolumes: []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
+		PoolId:     "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context:    c.NewAdminContext().ToJson(),
+	}
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), &model.VolumeSpec{
+		BaseModel: &model.BaseModel{Id: req.AddVolumes[0]},
+		GroupId:   req.Id,
+	}).Return(&SampleVolumes[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleVolumeGroups[0], model.VolumeGroupAvailable).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	if _, err := ctrl.UpdateVolumeGroup(context.Background(), req); err != nil {
+		t.Errorf("Failed to update volume group: %v\n", err)
+	}
+}
+
+func TestDeleteVolumeGroup(t *testing.T) {
+	var req = &pb.DeleteVolumeGroupOpts{
+		Id:      "3769855c-a102-11e7-b772-17b880d2f555",
+		PoolId:  "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context: c.NewAdminContext().ToJson(),
+	}
+
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteVolumeGroup", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		volumeController: NewFakeVolumeController(),
+	}
+
+	if _, err := ctrl.DeleteVolumeGroup(context.Background(), req); err != nil {
+		t.Errorf("Failed to delete volume group: %v\n", err)
 	}
 }

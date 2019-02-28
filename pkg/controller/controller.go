@@ -722,6 +722,7 @@ func (c *Controller) CreateVolumeGroup(contx context.Context, opt *pb.CreateVolu
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 		return pb.GenericResponseError(err), err
 	}
+	result.PoolId = polInfo.Id
 
 	// TODO Policy controller for the vg need to be modified.
 	//	// Select the storage tag according to the lifecycle flag.
