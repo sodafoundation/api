@@ -34,7 +34,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -404,7 +403,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 		}
 	}
 
-	log.Info("Create group successfully.")
+	log.Infof("Create volume group (%s) successfully.\n", opt.GetId())
 	return pb.GenericResponseResult(vg), nil
 }
 
@@ -416,25 +415,8 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 
 	log.Info("Dock server receive update volume group request, vr =", opt)
 
-	add := true
-	addVolumesRef, err := ds.getVolumesForGroup(opt, opt.AddVolumes, add)
-	if err != nil {
-		return pb.GenericResponseError(err), err
-	}
-	add = false
-	removeVolumesRef, err := ds.getVolumesForGroup(opt, opt.RemoveVolumes, add)
-	if err != nil {
-		return pb.GenericResponseError(err), err
-	}
-
-	group, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
-	if err != nil {
-		return pb.GenericResponseError(err), err
-	}
-
-	_, _, _, err := ds.Driver.UpdateVolumeGroup(opt, group, addVolumesRef, removeVolumesRef)
+	vg, err := ds.Driver.UpdateVolumeGroup(opt)
 	// Group update faild...
-
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
@@ -442,33 +424,8 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 		}
 	}
 
-	log.Info("Update group successfully.")
-	return pb.GenericResponseResult(nil), nil
-}
-
-func (ds *dockServer) getVolumesForGroup(opt *pb.UpdateVolumeGroupOpts, volumes []string, add bool) ([]*model.VolumeSpec, error) {
-	var volumesRef []*model.VolumeSpec
-	for _, v := range volumes {
-		vol, err := db.C.GetVolume(c.NewContextFromJson(opt.GetContext()), v)
-		if err != nil {
-			log.Error("Update group failed", err)
-			return nil, err
-		}
-
-		if add == true && !utils.Contained(vol.Status, []string{model.VolumeAvailable, model.VolumeInUse}) {
-			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-
-		if add == false && !utils.Contained(vol.Status, []string{model.VolumeAvailable, model.VolumeInUse, model.VolumeError, model.VolumeErrorDeleting}) {
-			msg := fmt.Sprintf("Update group failed, wrong status for volume %s %s", vol.Id, vol.Status)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-		volumesRef = append(volumesRef, vol)
-	}
-	return volumesRef, nil
+	log.Infof("Update volume group (%s) successfully.\n", opt.GetId())
+	return pb.GenericResponseResult(vg), nil
 }
 
 func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
@@ -479,71 +436,39 @@ func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolum
 
 	log.Info("Dock server receive delete volume group request, vr =", opt)
 
-	volumes, err := db.C.ListVolumesByGroupId(c.NewContextFromJson(opt.GetContext()), opt.GetId())
-	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
-	}
-
-	for _, vol := range volumes {
-		if vol.AttachStatus == model.VolumeAttached {
-			err = fmt.Errorf("Volume %s is still attached, need to detach first.", vol.Id)
-			res.Reply = GenericResponseError("400", fmt.Sprint(err))
-			return &res, err
+	if err = ds.Driver.DeleteVolumeGroup(opt); err != nil {
+		if _, ok := err.(*model.NotImplementError); !ok {
+			return pb.GenericResponseError(err), err
+		}
+		if err = ds.deleteGroupGeneric(opt); err != nil {
+			return pb.GenericResponseError(err), err
 		}
 	}
 
-	group, err := db.C.GetVolumeGroup(c.NewContextFromJson(opt.GetContext()), opt.GetId())
-	if err != nil {
-		res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		return &res, err
-	}
-
-	var groupUpdate *model.VolumeGroupSpec
-	var volumesUpdate *model.VolumeSpec
-
-	groupUpdate, volumesUpdate, err = ds.Driver.DeleteVolumeGroup(opt, group, volumes)
-
-	if err != nil {
-		if _, ok := err.(*model.NotImplementError); ok {
-			groupUpdate, volumesUpdate = ds.deleteGroupGeneric(ds.Driver, group, volumes, opt)
-		} else {
-			res.Reply = GenericResponseError("400", fmt.Sprint(err))
-		}
-	}
-	return groupUpdate, volumesUpdate, &res, err
-
+	log.Infof("Delete volume group (%s) successfully.\n", opt.GetId())
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (ds *dockServer) deleteGroupGeneric(driver drivers.VolumeDriver, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec, opt *pb.DeleteVolumeGroupOpts) (*model.VolumeGroupSpec, []*model.VolumeSpec) {
-	//Delete a group and volumes in the group
-	var volumesUpdate []*model.VolumeSpec
-	vgUpdate := &model.VolumeGroupSpec{
-		BaseModel: &model.BaseModel{
-			Id: vg.Id,
-		},
-		Status: vg.Status,
+func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
+	ctx := c.NewContextFromJson(opt.GetContext())
+
+	volumes, err := db.C.ListVolumesByGroupId(ctx, opt.GetId())
+	if err != nil {
+		return err
 	}
 
-	for _, volumeRef := range volumes {
-		v := &model.VolumeSpec{
-			BaseModel: &model.BaseModel{
-				Id: volumeRef.Id,
-			},
-		}
-		if err := driver.DeleteVolume(&pb.DeleteVolumeOpts{Metadata: volumeRef.Metadata}); err != nil {
-			v.Status = model.VolumeError
-			vgUpdate.Status = model.VolumeGroupError
-			volumesUpdate = append(volumesUpdate, v)
+	for _, volRef := range volumes {
+		if err = ds.Driver.DeleteVolume(&pb.DeleteVolumeOpts{
+			Id:       volRef.Id,
+			Metadata: volRef.Metadata,
+		}); err != nil {
 			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volumeRef.Id))
+			db.UpdateVolumeStatus(ctx, db.C, volRef.Id, model.VolumeError)
 		} else {
 			// Delete the volume entry in DB after successfully deleting the volume on the storage.
-			if err = db.C.DeleteVolume(c.NewContextFromJson(opt.GetContext()), volumeRef.Id); err != nil {
-				log.Errorf("Error occurred in dock module when delete volume %s in db:%v", volumeRef.Id, err)
-				vgUpdate.Status = model.VolumeGroupError
-			}
+			db.C.DeleteVolume(ctx, volumeRef.Id)
 		}
 	}
 
-	return vgUpdate, volumesUpdate
+	return nil
 }

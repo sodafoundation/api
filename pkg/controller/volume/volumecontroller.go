@@ -64,7 +64,7 @@ type Controller interface {
 
 	CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error)
 
-	UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) error
+	UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error)
 
 	DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error
 
@@ -433,24 +433,31 @@ func (c *controller) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Vo
 	return vg, nil
 }
 
-func (c *controller) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) error {
+func (c *controller) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("When connecting dock client:", err)
-		return err
+		return nil, err
 	}
 
 	response, err := c.Client.UpdateVolumeGroup(context.Background(), opt)
 	if err != nil {
 		log.Error("Update volume group failed in volume controller:", err)
-		return err
+		return nil, err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
-		return fmt.Errorf("Failed to update volume group in volume controller, code: %v, message: %v",
+		return nil, fmt.Errorf("Failed to update volume group in volume controller, code: %v, message: %v",
 			errorMsg.GetCode(), errorMsg.GetDescription())
 	}
-	return nil
+
+	var vg = &model.VolumeGroupSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vg); err != nil {
+		log.Error("create volume group failed in volume controller:", err)
+		return nil, err
+	}
+
+	return vg, nil
 }
 
 func (c *controller) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {

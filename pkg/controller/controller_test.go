@@ -148,8 +148,8 @@ func (fvc *fakeVolumeController) CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*
 	return nil, nil
 }
 
-func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) error {
-	return nil
+func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, nil
 }
 
 func (fvc *fakeVolumeController) DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error {
@@ -319,19 +319,11 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	}
 	var vol, volatm = &SampleVolumes[0], &SampleAttachments[0]
 	mockClient := new(dbtest.Client)
-<<<<<<< HEAD
 	mockClient.On("GetVolume", c.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetPool", c.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), volatm, volatm.Status).Return(nil)
-=======
-	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
-	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("GetPool", context.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
-	mockClient.On("UpdateStatus", context.NewAdminContext(), volattm, volattm.Status).Return(nil)
-	mockClient.On("UpdateStatus", context.NewAdminContext(), vol, model.VolumeInUse).Return(nil)
-	mockClient.On("UpdateVolumeAttachment", context.NewAdminContext(), volattm.Id, volattm).Return(volattm, nil)
->>>>>>> a6bed09027d99fb96a7778629b89f9f9b7b186c8
+	mockClient.On("UpdateStatus", c.NewAdminContext(), vol, model.VolumeInUse).Return(nil)
 
 	db.C = mockClient
 
@@ -353,16 +345,10 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	}
 	var vol = &SampleVolumes[0]
 	mockClient := new(dbtest.Client)
-<<<<<<< HEAD
 	mockClient.On("GetVolume", c.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetDockByPoolId", c.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteVolumeAttachment", c.NewAdminContext(), req.Id).Return(nil)
-=======
-	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(vol, nil)
-	mockClient.On("GetDockByPoolId", context.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("DeleteVolumeAttachment", context.NewAdminContext(), req.Id).Return(nil)
-	mockClient.On("UpdateStatus", context.NewAdminContext(), vol, model.VolumeAvailable).Return(nil)
->>>>>>> a6bed09027d99fb96a7778629b89f9f9b7b186c8
+	mockClient.On("UpdateStatus", c.NewAdminContext(), vol, model.VolumeAvailable).Return(nil)
 
 	db.C = mockClient
 
