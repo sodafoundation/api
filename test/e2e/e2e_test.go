@@ -54,26 +54,22 @@ func init() {
 	}
 	profileId = prf.Id
 }
-/*
+
 func TestListDocks(t *testing.T) {
 	t.Log("Start listing docks...")
-	dcks, err := c.ListDocks()
-	if err != nil {
+	if _, err := c.ListDocks(); err != nil {
 		t.Error("list docks failed:", err)
 		return
 	}
-	dcksBody, _ := json.MarshalIndent(dcks, "", "	")
 	t.Log("list docks success!")
 }
 
 func TestListPools(t *testing.T) {
 	t.Log("Start listing pools...")
-	pols, err := c.ListPools()
-	if err != nil {
+	if _, err := c.ListPools(); err != nil {
 		t.Error("list pools failed:", err)
 		return
 	}
-	polsBody, _ := json.MarshalIndent(pols, "", "	")
 	t.Log("list pools success!")
 }
 
@@ -90,14 +86,13 @@ func TestCreateVolume(t *testing.T) {
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
+
 	// Check if the status of created volume is available.
 	vol, _ = c.GetVolume(vol.Id)
 	if vol.Status != model.VolumeAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, vol.Status)
 		return
 	}
-
-	volBody, _ := json.MarshalIndent(vol, "", "	")
 	t.Log("Create volume success!")
 }
 
@@ -110,18 +105,16 @@ func TestGetVolume(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking volume...")
-	result, err := c.GetVolume(vol.Id)
+	vol, err = c.GetVolume(vol.Id)
 	if err != nil {
 		t.Error("Check volume failed:", err)
 		return
 	}
 	// Test the status of created volume.
-	if result.Status != "available" {
+	if vol.Status != model.VolumeAvailable {
 		t.Error("The status of volume is not available!")
 		return
 	}
-
-	volBody, _ := json.MarshalIndent(result, "", "	")
 	t.Log("Check volume success!")
 }
 
@@ -134,14 +127,11 @@ func TestListVolumes(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
-	vols, err := c.ListVolumes()
-	if err != nil {
+	if _, err := c.ListVolumes(); err != nil {
 		t.Error("Check all volumes failed:", err)
 		return
 	}
-
-	volsBody, _ := json.MarshalIndent(vols, "", "	")
-	t.Log("Check all volumes success")
+	t.Log("Check all volumes success!")
 }
 
 func TestUpdateVolume(t *testing.T) {
@@ -168,9 +158,7 @@ func TestUpdateVolume(t *testing.T) {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, newVol.Status)
 		return
 	}
-
-	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
-	t.Log("Update volume success, got:", string(newVolBody))
+	t.Log("Update volume success!")
 }
 
 func TestExtendVolume(t *testing.T) {
@@ -197,9 +185,7 @@ func TestExtendVolume(t *testing.T) {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, newVol.Status)
 		return
 	}
-
-	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
-	t.Log("Extend volume success, got:", string(newVolBody))
+	t.Log("Extend volume success!")
 }
 
 func TestDeleteVolume(t *testing.T) {
@@ -248,9 +234,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
 		return
 	}
-
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log("create volume attachment success, got", string(atcBody))
+	t.Log("create volume attachment success!")
 
 	t.Log("Start cleaning volume attachment...")
 	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
@@ -278,9 +262,7 @@ func TestGetVolumeAttachment(t *testing.T) {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
 		return
 	}
-
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log("Check volume attachment success, got:", string(atcBody))
+	t.Log("Check volume attachment success!")
 }
 
 func TestListVolumeAttachments(t *testing.T) {
@@ -292,14 +274,11 @@ func TestListVolumeAttachments(t *testing.T) {
 	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking all volume attachments...")
-	atcs, err := c.ListVolumeAttachments()
-	if err != nil {
+	if _, err := c.ListVolumeAttachments(); err != nil {
 		t.Error("Check all volume attachments failed:", err)
 		return
 	}
-
-	atcsBody, _ := json.MarshalIndent(atcs, "", "	")
-	t.Log("list volume attachments success, got:", string(atcsBody))
+	t.Log("list volume attachments success!")
 }
 
 func TestDeleteVolumeAttachment(t *testing.T) {
@@ -342,8 +321,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	if snp.Status != model.VolumeSnapAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, snp.Status)
 	}
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log("create volume snapshot success, got:", string(snpBody))
+	t.Log("create volume snapshot success!")
 
 	t.Log("Start cleaing volume snapshot...")
 	if err := c.DeleteVolumeSnapshot(snp.Id, nil); err != nil {
@@ -372,8 +350,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 		t.Error("The status of volume snapshot is not available!")
 		return
 	}
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log("Check volume snapshot success, got:", string(snpBody))
+	t.Log("Check volume snapshot success!")
 }
 
 func TestListVolumeSnapshots(t *testing.T) {
@@ -385,13 +362,11 @@ func TestListVolumeSnapshots(t *testing.T) {
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking all volume snapshots...")
-	snps, err := c.ListVolumeSnapshots()
-	if err != nil {
+	if _, err := c.ListVolumeSnapshots(); err != nil {
 		t.Error("list volume snapshots failed:", err)
 		return
 	}
-	snpsBody, _ := json.MarshalIndent(snps, "", "	")
-	t.Log("Check all volume snapshots success, got:", string(snpsBody))
+	t.Log("Check all volume snapshots success!")
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
@@ -433,10 +408,8 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 	if newSnp.Status != model.VolumeSnapAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, newSnp.Status)
 	}
-	newSnpBody, _ := json.MarshalIndent(newSnp, "", "	")
-	t.Log("Update volume snapshot success, got:", string(newSnpBody))
+	t.Log("Update volume snapshot success!")
 }
-*/
 
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
@@ -668,8 +641,7 @@ func TestCreateVolumeGroup(t *testing.T) {
 	if vg.Status != model.VolumeGroupAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, vg.Status)
 	}
-	vgBody, _ := json.MarshalIndent(vg, "", " ")
-	t.Log("create volume group success, got: ", string(vgBody))
+	t.Log("create volume group success!")
 
 	t.Log("Starting cleaning volume group...")
 	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
@@ -697,8 +669,7 @@ func TestGetVolumeGroup(t *testing.T) {
 		t.Error("The status of volume group is not available!")
 		return
 	}
-	vgBody, _ := json.MarshalIndent(vg, "", "   ")
-	t.Log("Check volume group success, got:", string(vgBody))
+	t.Log("Check volume group success!")
 }
 
 func TestListVolumeGroups(t *testing.T) {
@@ -710,13 +681,11 @@ func TestListVolumeGroups(t *testing.T) {
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
 
 	t.Log("Start checking all volume group...")
-	vgs, err := c.ListVolumeGroups()
-	if err != nil {
+	if _, err := c.ListVolumeGroups(); err != nil {
 		t.Error("list volume groups failed :", err)
 		return
 	}
-	vgsBody, _ := json.MarshalIndent(vgs, "", "   ")
-	t.Log("Check all volume groups success , got :", string(vgsBody))
+	t.Log("Check all volume groups success!")
 }
 
 func TestDeleteVolumeGroup(t *testing.T) {
@@ -762,7 +731,5 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	if newVg.Status != model.VolumeGroupAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, newVg.Status)
 	}
-
-	newVgBody, _ := json.MarshalIndent(newVg, "", "   ")
-	t.Log("Update volume group success ,got: ", string(newVgBody))
+	t.Log("Update volume group success!")
 }
