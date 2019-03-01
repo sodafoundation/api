@@ -39,7 +39,8 @@ var (
 func init() {
 	c, _ = client.NewClient(&client.Config{
 		Endpoint:    "http://localhost:50040",
-		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId),
+	})
 
 	fmt.Println("Start creating profile...")
 	var body = &model.ProfileSpec{
@@ -51,11 +52,9 @@ func init() {
 		fmt.Printf("create profile failed: %v\n", err)
 		return
 	}
-	prfBody, _ := json.MarshalIndent(prf, "", "	")
-	fmt.Println("create profile success, got:", string(prfBody))
 	profileId = prf.Id
 }
-
+/*
 func TestListDocks(t *testing.T) {
 	t.Log("Start listing docks...")
 	dcks, err := c.ListDocks()
@@ -64,7 +63,7 @@ func TestListDocks(t *testing.T) {
 		return
 	}
 	dcksBody, _ := json.MarshalIndent(dcks, "", "	")
-	t.Log("list docks success, got:", string(dcksBody))
+	t.Log("list docks success!")
 }
 
 func TestListPools(t *testing.T) {
@@ -75,7 +74,7 @@ func TestListPools(t *testing.T) {
 		return
 	}
 	polsBody, _ := json.MarshalIndent(pols, "", "	")
-	t.Log("list pools success, got:", string(polsBody))
+	t.Log("list pools success!")
 }
 
 func TestCreateVolume(t *testing.T) {
@@ -99,7 +98,7 @@ func TestCreateVolume(t *testing.T) {
 	}
 
 	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log("Create volume success, got:", string(volBody))
+	t.Log("Create volume success!")
 }
 
 func TestGetVolume(t *testing.T) {
@@ -123,7 +122,7 @@ func TestGetVolume(t *testing.T) {
 	}
 
 	volBody, _ := json.MarshalIndent(result, "", "	")
-	t.Log("Check volume success, got:", string(volBody))
+	t.Log("Check volume success!")
 }
 
 func TestListVolumes(t *testing.T) {
@@ -142,7 +141,7 @@ func TestListVolumes(t *testing.T) {
 	}
 
 	volsBody, _ := json.MarshalIndent(vols, "", "	")
-	t.Log("Check all volumes success, got", string(volsBody))
+	t.Log("Check all volumes success")
 }
 
 func TestUpdateVolume(t *testing.T) {
@@ -244,8 +243,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		return
 	}
 	// Check if the status of created volume attachment is available.
-	atc, _ = c.GetVolumeVolumeAttachment(atc.Id)
-	if atc.Status != atc.VolumeAttachAvailable {
+	atc, _ = c.GetVolumeAttachment(atc.Id)
+	if atc.Status != model.VolumeAttachAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
 		return
 	}
@@ -275,12 +274,12 @@ func TestGetVolumeAttachment(t *testing.T) {
 		t.Error("Check volume attachment failed:", err)
 		return
 	}
-	if atc.Status != atc.VolumeAttachAvailable {
+	if atc.Status != model.VolumeAttachAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
 		return
 	}
 
-	atcBody, _ := json.MarshalIndent(result, "", "	")
+	atcBody, _ := json.MarshalIndent(atc, "", "	")
 	t.Log("Check volume attachment success, got:", string(atcBody))
 }
 
@@ -339,7 +338,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		return
 	}
 	// Check if the status of created volume snapshot is available.
-	snp, _ = c.GetVolumeVolumeSnapshot(snp.Id)
+	snp, _ = c.GetVolumeSnapshot(snp.Id)
 	if snp.Status != model.VolumeSnapAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, snp.Status)
 	}
@@ -430,13 +429,14 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		return
 	}
 	// Check if the status of updated volume snapshot is available.
-	newSnp, _ = c.GetVolumeVolumeSnapshot(newSnp.Id)
+	newSnp, _ = c.GetVolumeSnapshot(newSnp.Id)
 	if newSnp.Status != model.VolumeSnapAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, newSnp.Status)
 	}
 	newSnpBody, _ := json.MarshalIndent(newSnp, "", "	")
 	t.Log("Update volume snapshot success, got:", string(newSnpBody))
 }
+*/
 
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
@@ -664,7 +664,7 @@ func TestCreateVolumeGroup(t *testing.T) {
 		return
 	}
 	// Check if the status of created volume group is available.
-	vg, _ = c.GetVolumeVolumeGroup(vg.Id)
+	vg, _ = c.GetVolumeGroup(vg.Id)
 	if vg.Status != model.VolumeGroupAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, vg.Status)
 	}
@@ -758,7 +758,7 @@ func TestUpdateVolumeGroup(t *testing.T) {
 		return
 	}
 	// Check if the status of created volume group is available.
-	newVg, _ = c.GetVolumeVolumeGroup(newVg.Id)
+	newVg, _ = c.GetVolumeGroup(newVg.Id)
 	if newVg.Status != model.VolumeGroupAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, newVg.Status)
 	}
