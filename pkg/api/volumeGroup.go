@@ -91,6 +91,8 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 		Name:             result.Name,
 		Description:      result.Description,
 		AvailabilityZone: result.AvailabilityZone,
+		AddVolumes:       result.AddVolumes,
+		RemoveVolumes:    result.RemoveVolumes,
 		Context:          ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
