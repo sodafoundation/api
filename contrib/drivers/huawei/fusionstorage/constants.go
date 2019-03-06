@@ -14,26 +14,11 @@
 
 package main
 
-type requesData struct {
-	Timeout int         `json:"timeout"`
-	Data    interface{} `json:"data`
-}
-
-type responseResult struct {
-	RespCode int `json:"result"`
-}
-
-type version struct {
-	CurrentVersion string `json:"currentVersion"`
-}
-
-type poolResp struct {
-	Pools []pool `json:"storagePools"`
-}
-
-type pool struct {
-	PoolId        int   `json:"poolId"`
-	TotalCapacity int64 `json:"totalCapacity"`
-	AllocCapacity int64 `json:"allocatedCapacity"`
-	UsedCapacity  int64 `json:"usedCapacity"`
-}
+const (
+	BasicURI           = "/dsware/service/"
+	CallTimeout        = 50
+	LoginSocketTimeout = 32
+	UnitGiShiftBit     = 10
+	DefaultAZ          = "default"
+	NamePrefix         = "opensds"
+)
