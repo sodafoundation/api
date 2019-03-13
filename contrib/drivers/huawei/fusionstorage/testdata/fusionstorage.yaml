@@ -1,0 +1,39 @@
+authOptions:
+  username: "admin"
+  password: "IaaS@PORTAL-CLOUD9!"
+  url: "https://8.46.195.74:28443"
+  fmIp: 8.46.195.74
+  fsaIp:
+    - 8.46.195.71
+    - 8.46.195.72
+    - 8.46.195.73
+
+pool:
+  0:
+    storageType: block
+    availabilityZone: nova-01
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: DSWARE
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 3ms
+  1:
+    storageType: block
+    availabilityZone: nova-01
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: DSWARE
+        maxIOPS: 3000000
+        maxBWS: 300
+      advanced:
+        diskType: SSD
+        latency: 500ms

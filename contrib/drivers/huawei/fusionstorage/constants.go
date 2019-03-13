@@ -15,10 +15,17 @@
 package fusionstorage
 
 const (
-	BasicURI           = "/dsware/service/"
-	CallTimeout        = 50
-	LoginSocketTimeout = 32
-	UnitGiShiftBit     = 10
-	DefaultAZ          = "default"
-	NamePrefix         = "opensds"
+	BasicURI                   = "/dsware/service/"
+	CallTimeout                = 50
+	LoginSocketTimeout         = 32
+	UnitGiShiftBit             = 10
+	DefaultAZ                  = "default"
+	NamePrefix                 = "opensds"
+	LunId                      = "lunId"
+	ConnectorType              = "connectorType"
+	FusionstorageIscsi         = "fusionstorage_iscsi"
+	InitiatorNotExistErrorCode = "32155103"
+	VolumeNotExistErrorCode    = "32150005"
+	CmdBin                     = "fsc_cli"
+	MaxRetryNode               = 3
 )

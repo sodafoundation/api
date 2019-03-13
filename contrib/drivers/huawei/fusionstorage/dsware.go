@@ -17,7 +17,9 @@ package fusionstorage
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -27,14 +29,16 @@ import (
 )
 
 type Driver struct {
-	cli  *RestCommon
+	cli  *Cli
 	conf *Config
 }
 
 type AuthOptions struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Url      string `yaml:"url"`
+	Username string   `yaml:"username"`
+	Password string   `yaml:"password"`
+	Url      string   `yaml:"url"`
+	FmIp     string   `yaml:"fmIp,omitempty"`
+	FsaIp    []string `yaml:"fsaIp,flow"`
 }
 
 type Config struct {
@@ -54,11 +58,27 @@ func (d *Driver) Setup() error {
 
 	Parse(conf, path)
 
-	client := newRestCommon(conf.Username, conf.Password, conf.Url)
+	client, err := newRestCommon(conf.Username, conf.Password, conf.Url, conf.FmIp, conf.FsaIp)
+	if err != nil {
+		return err
+	}
 
-	err := client.login()
+	err = client.login()
 	if err != nil {
 		fmt.Printf("Get new client failed, %v", err)
+		return err
+	}
+
+	_, err = exec.LookPath(CmdBin)
+	if err != nil {
+		if err == exec.ErrNotFound {
+			return fmt.Errorf("%q executable not found in $PATH", CmdBin)
+		}
+		return err
+	}
+
+	err = client.StartServer()
+	if err != nil {
 		return err
 	}
 
@@ -76,7 +96,6 @@ func EncodeName(id string) string {
 }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*VolumeSpec, error) {
-
 	name := EncodeName(opt.GetId())
 	err := d.cli.createVolume(name, opt.GetPoolName(), opt.GetSize()<<UnitGiShiftBit)
 	if err != nil {
@@ -93,7 +112,9 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*VolumeSpec, error) {
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
 		PoolId:           opt.GetPoolId(),
-		Metadata:         nil,
+		Metadata: map[string]string{
+			LunId: name,
+		},
 	}, nil
 }
 
@@ -141,4 +162,178 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 		pols = append(pols, pol)
 	}
 	return pols, nil
+}
+
+func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*ConnectionInfo, error) {
+	lunId := opt.GetMetadata()[LunId]
+	if lunId == "" {
+		return nil, fmt.Errorf("Lun id is empty.")
+	}
+
+	connectorType := opt.GetMetadata()[ConnectorType]
+	if connectorType == "" || connectorType != FusionstorageIscsi {
+		return nil, fmt.Errorf("Connector type is empty or mismatch.")
+	}
+
+	hostInfo := opt.GetHostInfo()
+
+	initiator := hostInfo.GetInitiator()
+	hostName := hostInfo.GetHost()
+
+	if initiator == "" || hostName == "" {
+		return nil, fmt.Errorf("Host name or initiator is empty.")
+	}
+
+	// Create port if not exist.
+	err := d.cli.queryPortInfo(initiator)
+	if err != nil {
+		if err.Error() == InitiatorNotExistErrorCode {
+			err := d.cli.createPort(initiator)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	// Create host if not exist.
+	isFind, err := d.cli.queryHostInfo(hostName)
+	if err != nil {
+		return nil, fmt.Errorf("Query host failed, host name =%s, error: %v", hostName, err)
+	}
+
+	if !isFind {
+		err = d.cli.createHost(hostInfo)
+		if err != nil {
+			return nil, fmt.Errorf("Create host failed, host name =%s, error: %v", hostName, err)
+		}
+	}
+
+	// Add port to host if port not add to the host
+	hostPortMap, err := d.cli.queryHostByPort(initiator)
+	if err != nil {
+		return nil, err
+	}
+
+	h, ok := hostPortMap.PortHostMap[initiator]
+	if ok && h[0] != hostName {
+		return nil, fmt.Errorf("Initiator is already added to another host, host name =%s", h[0])
+	}
+
+	if !ok {
+		err = d.cli.addPortToHost(hostName, initiator)
+		if err != nil {
+			return nil, fmt.Errorf("Add port to host failed, error %v", err)
+		}
+	}
+
+	// Map volume to host
+	err = d.cli.addLunsToHost(hostName, lunId)
+	if err != nil {
+		return nil, fmt.Errorf("Add luns to host failed, error %v", err)
+	}
+
+	// Get target lun id
+	hostLunList, err := d.cli.queryHostLunInfo(hostName)
+	if err != nil {
+		return nil, err
+	}
+
+	var targetLunId int
+	for _, v := range hostLunList.LunList {
+		if v.Name == lunId {
+			targetLunId = v.Id
+		}
+	}
+
+	// Get target iscsi portal info
+	targetPortalInfo, err := d.cli.queryIscsiPortal(initiator)
+	if err != nil {
+		return nil, err
+	}
+
+	iscsiTarget := strings.Split(targetPortalInfo, ",")
+
+	connInfo := &ConnectionInfo{
+		DriverVolumeType: ISCSIProtocol,
+		ConnectionData: map[string]interface{}{
+			"target_discovered": true,
+			"volume_id":         opt.GetVolumeId(),
+			"description":       "huawei",
+			"host_name":         hostName,
+			"target_lun":        targetLunId,
+			"connect_type":      FusionstorageIscsi,
+			"host":              hostName,
+			"initiator":         initiator,
+			"targetIQN":         []string{iscsiTarget[1]},
+			"targetPortal":      []string{iscsiTarget[0]},
+		},
+	}
+
+	return connInfo, nil
+}
+
+func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+	lunId := opt.GetMetadata()[LunId]
+	if lunId == "" {
+		return fmt.Errorf("Lun id is empty.")
+	}
+	hostInfo := opt.GetHostInfo()
+
+	initiator := hostInfo.GetInitiator()
+	hostName := hostInfo.GetHost()
+
+	if initiator == "" || hostName == "" {
+		return fmt.Errorf("Host name or initiator is empty.")
+	}
+
+	// Make sure that host is exist.
+	hostIsFind, err := d.cli.queryHostInfo(hostName)
+	if err != nil {
+		return fmt.Errorf("Query host failed, host name =%s, error: %v", hostName, err)
+	}
+
+	if !hostIsFind {
+		return fmt.Errorf("Host can not be found, host name =%s", hostName)
+	}
+
+	// Check whether the volume attach to the host
+	hostLunList, err := d.cli.queryHostLunInfo(hostName)
+	if err != nil {
+		return err
+	}
+
+	var lunIsFind = false
+	for _, v := range hostLunList.LunList {
+		if v.Name == lunId {
+			lunIsFind = true
+			break
+		}
+	}
+
+	if !lunIsFind {
+		return fmt.Errorf("The lun %s is not attach to the host %s", lunId, hostName)
+	}
+
+	// Remove lun from host
+	err = d.cli.deleteLunFromHost(hostName, lunId)
+	if err != nil {
+		return err
+	}
+
+	// Remove initiator and host if there is no lun belong to the host
+	fmt.Println(len(hostLunList.LunList), hostLunList.LunList)
+	hostLunList, err = d.cli.queryHostLunInfo(hostName)
+	if err != nil {
+		return err
+	}
+
+	if len(hostLunList.LunList) == 0 {
+		d.cli.deletePortFromHost(hostName, initiator)
+		d.cli.deleteHost(hostName)
+		d.cli.deletePort(initiator)
+	}
+
+	return nil
 }

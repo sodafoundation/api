@@ -20,7 +20,33 @@ type requesData struct {
 }
 
 type responseResult struct {
-	RespCode int `json:"result"`
+	RespCode int      `json:"result"`
+	Details  []detail `json:"detail"`
+}
+
+type detail struct {
+	Description string `json:"description,omitempty"`
+	ErrorCode   int    `json:"errorCode,omitempty"`
+}
+
+func (r *responseResult) GetDescription() string {
+	for _, v := range r.Details {
+		if v.Description != "" {
+			return v.Description
+		}
+	}
+
+	return ""
+}
+
+func (r *responseResult) GetErrorCode() int {
+	for _, v := range r.Details {
+		if v.ErrorCode != 0 {
+			return v.ErrorCode
+		}
+	}
+
+	return 0
 }
 
 type version struct {
@@ -36,4 +62,25 @@ type pool struct {
 	TotalCapacity int64 `json:"totalCapacity"`
 	AllocCapacity int64 `json:"allocatedCapacity"`
 	UsedCapacity  int64 `json:"usedCapacity"`
+}
+
+type hostList struct {
+	HostList []host `json:"hostList"`
+}
+
+type host struct {
+	HostName string `json:"hostName"`
+}
+
+type portHostMap struct {
+	PortHostMap map[string][]string `json:"portHostMap"`
+}
+
+type hostLunList struct {
+	LunList []lunList `json:"hostLunList"`
+}
+
+type lunList struct {
+	Id   int    `json:"lunId"`
+	Name string `json:"lunName"`
 }
