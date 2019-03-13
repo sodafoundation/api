@@ -53,7 +53,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volumeGroup); err != nil {
-		errMsg := fmt.Sprintf("Parse volume group request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume group request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -62,7 +62,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 	// and will return result immediately.
 	result, err := CreateVolumeGroupDBEntry(ctx, volumeGroup)
 	if err != nil {
-		errMsg := fmt.Sprintf("Create volume group failed: %s", err.Error())
+		errMsg := fmt.Sprintf("create volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -70,7 +70,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal volume group created result failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal volume group created result failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -81,7 +81,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
 	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -96,7 +96,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 		Context:          ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
-		log.Error("Create volume group failed in controller service:", err)
+		log.Error("create volume group failed in controller service:", err)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 
 	id := v.Ctx.Input.Param(":groupId")
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&vg); err != nil {
-		errMsg := fmt.Sprintf("Parse volume group request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume group request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -122,14 +122,14 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	vg.Id = id
 	result, err := UpdateVolumeGroupDBEntry(ctx, vg)
 	if err != nil {
-		errMsg := fmt.Sprintf("Update volume group failed: %s", err.Error())
+		errMsg := fmt.Sprintf("update volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal volume group updated result failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal volume group updated result failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -140,7 +140,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
 	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -153,7 +153,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 		Context:       ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.UpdateVolumeGroup(context.Background(), opt); err != nil {
-		log.Error("Update volume group failed in controller service:", err)
+		log.Error("update volume group failed in controller service:", err)
 		return
 	}
 
@@ -169,13 +169,13 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 	id := v.Ctx.Input.Param(":groupId")
 	vg, err := db.C.GetVolumeGroup(ctx, id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume group %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume group %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	if err = DeleteVolumeGroupDBEntry(c.GetContext(v.Ctx), id); err != nil {
-		errMsg := fmt.Sprintf("Delete volume group failed: %s", err.Error())
+		errMsg := fmt.Sprintf("delete volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -186,7 +186,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 	// Volume group deletion request is sent to the Dock. Dock will remove
 	// volume group record after volume group deletion operation is completed.
 	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -197,7 +197,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 		Context: ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
-		log.Error("Delete volume group failed in controller service:", err)
+		log.Error("delete volume group failed in controller service:", err)
 		return
 	}
 
@@ -213,7 +213,7 @@ func (v *VolumeGroupPortal) GetVolumeGroup() {
 	// Call db api module to handle get volume request.
 	result, err := db.C.GetVolumeGroup(c.GetContext(v.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume group %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume group %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -221,7 +221,7 @@ func (v *VolumeGroupPortal) GetVolumeGroup() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal volume group showed result failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal volume group showed result failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -237,14 +237,14 @@ func (v *VolumeGroupPortal) ListVolumeGroups() {
 
 	m, err := v.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume group parameters failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume group parameters failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumeGroupsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume groups failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume groups failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -252,7 +252,7 @@ func (v *VolumeGroupPortal) ListVolumeGroups() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal volume groups listed result failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal volume groups listed result failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}

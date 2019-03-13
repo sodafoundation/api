@@ -42,13 +42,13 @@ func (d *DockPortal) ListDocks() {
 	// Call db api module to handle list docks request.
 	m, err := d.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List docks failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list docks failed: %s", err.Error())
 		d.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	result, err := db.C.ListDocksWithFilter(c.GetContext(d.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List docks failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list docks failed: %s", err.Error())
 		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -56,7 +56,7 @@ func (d *DockPortal) ListDocks() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal docks failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal docks failed: %s", err.Error())
 		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -73,7 +73,7 @@ func (d *DockPortal) GetDock() {
 	id := d.Ctx.Input.Param(":dockId")
 	result, err := db.C.GetDock(c.GetContext(d.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Dock %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("dock %s not found: %s", id, err.Error())
 		d.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -81,7 +81,7 @@ func (d *DockPortal) GetDock() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal dock failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal dock failed: %s", err.Error())
 		d.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}

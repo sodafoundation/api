@@ -476,13 +476,13 @@ func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpt
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
-	return &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

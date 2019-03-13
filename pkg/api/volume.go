@@ -57,7 +57,7 @@ func (v *VolumePortal) CreateVolume() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volume); err != nil {
-		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -66,7 +66,7 @@ func (v *VolumePortal) CreateVolume() {
 	// and will return result immediately.
 	result, err := CreateVolumeDBEntry(ctx, &volume)
 	if err != nil {
-		errMsg := fmt.Sprintf("Create volume failed: %s", err.Error())
+		errMsg := fmt.Sprintf("create volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -79,7 +79,7 @@ func (v *VolumePortal) CreateVolume() {
 	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume creation is completed.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -98,7 +98,7 @@ func (v *VolumePortal) CreateVolume() {
 		Context:           ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolume(context.Background(), opt); err != nil {
-		log.Error("Create volume failed in controller service:", err)
+		log.Error("create volume failed in controller service:", err)
 		return
 	}
 
@@ -112,14 +112,14 @@ func (v *VolumePortal) ListVolumes() {
 	// Call db api module to handle list volumes request.
 	m, err := v.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List volumes failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volumes failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumesWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List volumes failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volumes failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -140,7 +140,7 @@ func (v *VolumePortal) GetVolume() {
 	// Call db api module to handle get volume request.
 	result, err := db.C.GetVolume(c.GetContext(v.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -162,7 +162,7 @@ func (v *VolumePortal) UpdateVolume() {
 
 	id := v.Ctx.Input.Param(":volumeId")
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volume); err != nil {
-		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -170,7 +170,7 @@ func (v *VolumePortal) UpdateVolume() {
 	volume.Id = id
 	result, err := db.C.UpdateVolume(c.GetContext(v.Ctx), &volume)
 	if err != nil {
-		errMsg := fmt.Sprintf("Update volume failed: %s", err.Error())
+		errMsg := fmt.Sprintf("update volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -191,7 +191,7 @@ func (v *VolumePortal) ExtendVolume() {
 	var extendRequestBody = model.ExtendVolumeSpec{}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&extendRequestBody); err != nil {
-		errMsg := fmt.Sprintf("Parse volume request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -199,9 +199,9 @@ func (v *VolumePortal) ExtendVolume() {
 	id := v.Ctx.Input.Param(":volumeId")
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
-	result, err := ExtendVolumeDBEntry(ctx, id, extendRequestBody.NewSize)
+	result, err := ExtendVolumeDBEntry(ctx, id, &extendRequestBody)
 	if err != nil {
-		errMsg := fmt.Sprintf("Extend volume failed: %s", err.Error())
+		errMsg := fmt.Sprintf("extend volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -213,8 +213,8 @@ func (v *VolumePortal) ExtendVolume() {
 	// NOTE:The real volume extension process.
 	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
 	// after volume extension is completed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -226,7 +226,7 @@ func (v *VolumePortal) ExtendVolume() {
 		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
-		log.Error("Extend volume failed in controller service:", err)
+		log.Error("extend volume failed in controller service:", err)
 		return
 	}
 
@@ -243,7 +243,7 @@ func (v *VolumePortal) DeleteVolume() {
 	id := v.Ctx.Input.Param(":volumeId")
 	volume, err := db.C.GetVolume(ctx, id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -251,7 +251,7 @@ func (v *VolumePortal) DeleteVolume() {
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = DeleteVolumeDBEntry(ctx, volume); err != nil {
-		errMsg := fmt.Sprintf("Delete volume failed: %v", err.Error())
+		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -261,7 +261,7 @@ func (v *VolumePortal) DeleteVolume() {
 	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
 	// and database or update volume status to "errorDeleting" if deletion from driver faild.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -274,7 +274,7 @@ func (v *VolumePortal) DeleteVolume() {
 		Context:   ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
-		log.Error("Delete volume failed in controller service:", err)
+		log.Error("delete volume failed in controller service:", err)
 		return
 	}
 
@@ -303,7 +303,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&attachment); err != nil {
-		errMsg := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume attachment request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -313,7 +313,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// and will return result immediately.
 	result, err := CreateVolumeAttachmentDBEntry(ctx, &attachment)
 	if err != nil {
-		errMsg := fmt.Sprintf("Create volume attachment failed: %s", err.Error())
+		errMsg := fmt.Sprintf("create volume attachment failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -326,7 +326,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
 	// after volume attachment creation is completed.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -345,7 +345,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
-		log.Error("Create volume attachment failed in controller service:", err)
+		log.Error("create volume attachment failed in controller service:", err)
 		return
 	}
 
@@ -359,14 +359,14 @@ func (v *VolumeAttachmentPortal) ListVolumeAttachments() {
 
 	m, err := v.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume attachments failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume attachments failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume attachments failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume attachments failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -386,7 +386,7 @@ func (v *VolumeAttachmentPortal) GetVolumeAttachment() {
 
 	result, err := db.C.GetVolumeAttachment(c.GetContext(v.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume attachment %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume attachment %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -408,7 +408,7 @@ func (v *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 	id := v.Ctx.Input.Param(":attachmentId")
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&attachment); err != nil {
-		errMsg := fmt.Sprintf("Parse volume attachment request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume attachment request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -416,7 +416,7 @@ func (v *VolumeAttachmentPortal) UpdateVolumeAttachment() {
 
 	result, err := db.C.UpdateVolumeAttachment(c.GetContext(v.Ctx), id, &attachment)
 	if err != nil {
-		errMsg := fmt.Sprintf("Update volume attachment failed: %s", err.Error())
+		errMsg := fmt.Sprintf("update volume attachment failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -438,7 +438,7 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	id := v.Ctx.Input.Param(":attachmentId")
 	attachment, err := db.C.GetVolumeAttachment(ctx, id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume attachment %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume attachment %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -450,7 +450,7 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -470,7 +470,7 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
-		log.Error("Delete volume attachment failed in controller service:", err)
+		log.Error("delete volume attachment failed in controller service:", err)
 		return
 	}
 
@@ -499,7 +499,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	}
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&snapshot); err != nil {
-		errMsg := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume snapshot request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -509,7 +509,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// and will return result immediately.
 	result, err := CreateVolumeSnapshotDBEntry(ctx, &snapshot)
 	if err != nil {
-		errMsg := fmt.Sprintf("Create volume snapshot failed: %s", err.Error())
+		errMsg := fmt.Sprintf("create volume snapshot failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -522,7 +522,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
 	// after volume snapshot creation complete.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -537,7 +537,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		Context:     ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
-		log.Error("Create volume snapthot failed in controller service:", err)
+		log.Error("create volume snapthot failed in controller service:", err)
 		return
 	}
 
@@ -550,14 +550,14 @@ func (v *VolumeSnapshotPortal) ListVolumeSnapshots() {
 	}
 	m, err := v.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume snapshots failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListVolumeSnapshotsWithFilter(c.GetContext(v.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List volume snapshots failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list volume snapshots failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -577,7 +577,7 @@ func (v *VolumeSnapshotPortal) GetVolumeSnapshot() {
 
 	result, err := db.C.GetVolumeSnapshot(c.GetContext(v.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume snapshot %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume snapshot %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -600,7 +600,7 @@ func (v *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 	id := v.Ctx.Input.Param(":snapshotId")
 
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&snapshot); err != nil {
-		errMsg := fmt.Sprintf("Parse volume snapshot request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume snapshot request body failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -608,7 +608,7 @@ func (v *VolumeSnapshotPortal) UpdateVolumeSnapshot() {
 
 	result, err := db.C.UpdateVolumeSnapshot(c.GetContext(v.Ctx), id, &snapshot)
 	if err != nil {
-		errMsg := fmt.Sprintf("Update volume snapshot failed: %s", err.Error())
+		errMsg := fmt.Sprintf("update volume snapshot failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -629,7 +629,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 
 	snapshot, err := db.C.GetVolumeSnapshot(ctx, id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Volume snapshot %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("volume snapshot %s not found: %s", id, err.Error())
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -638,7 +638,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// the database to "deleting" and return the result immediately.
 	err = DeleteVolumeSnapshotDBEntry(ctx, snapshot)
 	if err != nil {
-		errMsg := fmt.Sprintf("Delete volume snapshot failed: %v", err.Error())
+		errMsg := fmt.Sprintf("delete volume snapshot failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -647,7 +647,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
 	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
 	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("When connecting controller client:", err)
+		log.Error("when connecting controller client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -659,7 +659,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		Context:  ctx.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
-		log.Error("Delete volume snapthot failed in controller service:", err)
+		log.Error("delete volume snapthot failed in controller service:", err)
 		return
 	}
 

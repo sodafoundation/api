@@ -39,14 +39,14 @@ func (p *PoolPortal) ListAvailabilityZones() {
 	}
 	azs, err := db.C.ListAvailabilityZones(c.GetContext(p.Ctx))
 	if err != nil {
-		errMsg := fmt.Sprintf("Get AvailabilityZones for pools failed: %s", err.Error())
+		errMsg := fmt.Sprintf("get AvailabilityZones for pools failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	body, err := json.Marshal(azs)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal AvailabilityZones failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal AvailabilityZones failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -62,14 +62,14 @@ func (p *PoolPortal) ListPools() {
 	// Call db api module to handle list pools request.
 	m, err := p.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("List pool parameters failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list pool parameters failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListPoolsWithFilter(c.GetContext(p.Ctx), m)
 	if err != nil {
-		errMsg := fmt.Sprintf("List pools failed: %s", err.Error())
+		errMsg := fmt.Sprintf("list pools failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -77,7 +77,7 @@ func (p *PoolPortal) ListPools() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal pools failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal pools failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -93,7 +93,7 @@ func (p *PoolPortal) GetPool() {
 	id := p.Ctx.Input.Param(":poolId")
 	result, err := db.C.GetPool(c.GetContext(p.Ctx), id)
 	if err != nil {
-		errMsg := fmt.Sprintf("Pool %s not found: %s", id, err.Error())
+		errMsg := fmt.Sprintf("pool %s not found: %s", id, err.Error())
 		p.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -101,7 +101,7 @@ func (p *PoolPortal) GetPool() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal pool failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal pool failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}

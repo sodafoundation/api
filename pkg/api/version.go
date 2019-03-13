@@ -45,7 +45,7 @@ type VersionPortal struct {
 func (v *VersionPortal) ListVersions() {
 	body, err := json.Marshal(KnownVersions)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal versions failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal versions failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
@@ -67,7 +67,7 @@ func (v *VersionPortal) GetVersion() {
 		}
 	}
 	if result == nil {
-		errMsg := fmt.Sprintf("Can't find the version: %s", apiVersion)
+		errMsg := fmt.Sprintf("can't find the version: %s", apiVersion)
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
@@ -75,7 +75,7 @@ func (v *VersionPortal) GetVersion() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		errMsg := fmt.Sprintf("Marshal version failed: %s", err.Error())
+		errMsg := fmt.Sprintf("marshal version failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}

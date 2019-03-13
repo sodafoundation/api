@@ -242,21 +242,21 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*ConnectionInfo, error) {
-	return nil, &NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
+	return nil, &NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
+	return &NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*VolumeGroupSpec, error) {
-	return nil, &NotImplementError{"Method CreateVolumeGroup has not been implemented yet"}
+	return nil, &NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*VolumeGroupSpec, error) {
-	return nil, &NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+	return nil, &NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
-	return &NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+	return &NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

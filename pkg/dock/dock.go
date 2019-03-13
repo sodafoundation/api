@@ -83,7 +83,7 @@ func (ds *dockServer) Run() error {
 		go discovery.DiscoveryAndReport(ds.Discoverer, ctx)
 		go func(ctx *discovery.Context) {
 			if err = <-ctx.ErrChan; err != nil {
-				log.Error("When calling capabilty report method:", err)
+				log.Error("when calling capabilty report method:", err)
 				ctx.StopChan <- true
 			}
 		}(ctx)
@@ -116,7 +116,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 
 	vol, err := ds.Driver.CreateVolume(opt)
 	if err != nil {
-		log.Error("When create volume in dock module:", err)
+		log.Error("when create volume in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -132,7 +132,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 	log.Info("Dock server receive delete volume request, vr =", opt)
 
 	if err := ds.Driver.DeleteVolume(opt); err != nil {
-		log.Error("Error occurred in dock module when delete volume:", err)
+		log.Error("error occurred in dock module when delete volume:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -149,7 +149,7 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 
 	vol, err := ds.Driver.ExtendVolume(opt)
 	if err != nil {
-		log.Error("When extend volume in dock module:", err)
+		log.Error("when extend volume in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -166,7 +166,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 
 	connInfo, err := ds.Driver.InitializeConnection(opt)
 	if err != nil {
-		log.Error("Error occurred in dock module when initialize volume connection:", err)
+		log.Error("error occurred in dock module when initialize volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -197,7 +197,7 @@ func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.Delete
 	log.Info("Dock server receive delete volume attachment request, vr =", opt)
 
 	if err := ds.Driver.TerminateConnection(opt); err != nil {
-		log.Error("Error occurred in dock module when terminate volume connection:", err)
+		log.Error("error occurred in dock module when terminate volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -214,7 +214,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 
 	snp, err := ds.Driver.CreateSnapshot(opt)
 	if err != nil {
-		log.Error("Error occurred in dock module when create snapshot:", err)
+		log.Error("error occurred in dock module when create snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -230,7 +230,7 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
 	if err := ds.Driver.DeleteSnapshot(opt); err != nil {
-		log.Error("Error occurred in dock module when delete snapshot:", err)
+		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -241,7 +241,7 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts) (*pb.GenericResponse, error) {
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
-		log.Error("Error occurred in dock module when unmarshalling connection data!")
+		log.Error("error occurred in dock module when unmarshalling connection data!")
 		return pb.GenericResponseError(err), err
 	}
 
@@ -249,12 +249,12 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 
 	con := connector.NewConnector(opt.GetAccessProtocol())
 	if con == nil {
-		err := fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+		err := fmt.Errorf("can not find connector (%s)!", opt.GetAccessProtocol())
 		return pb.GenericResponseError(err), err
 	}
 	atc, err := con.Attach(connData)
 	if err != nil {
-		log.Error("Error occurred in dock module when attach volume:", err)
+		log.Error("error occurred in dock module when attach volume:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -265,7 +265,7 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts) (*pb.GenericResponse, error) {
 	var connData = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(opt.GetConnectionData()), &connData); err != nil {
-		log.Error("Error occurred in dock module when unmarshalling connection data!")
+		log.Error("error occurred in dock module when unmarshalling connection data!")
 		return pb.GenericResponseError(err), err
 	}
 
@@ -273,11 +273,11 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 
 	con := connector.NewConnector(opt.GetAccessProtocol())
 	if con == nil {
-		err := fmt.Errorf("Can not find connector (%s)!", opt.GetAccessProtocol())
+		err := fmt.Errorf("can not find connector (%s)!", opt.GetAccessProtocol())
 		return pb.GenericResponseError(err), err
 	}
 	if err := con.Detach(connData); err != nil {
-		log.Error("Error occurred in dock module when detach volume:", err)
+		log.Error("error occurred in dock module when detach volume:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
@@ -293,7 +293,7 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 	log.Info("Dock server receive create replication request, vr =", opt)
 	replica, err := driver.CreateReplication(opt)
 	if err != nil {
-		log.Error("Error occurred in dock module when create replication:", err)
+		log.Error("error occurred in dock module when create replication:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -312,7 +312,7 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 	log.Info("Dock server receive delete replication request, vr =", opt)
 
 	if err := driver.DeleteReplication(opt); err != nil {
-		log.Error("Error occurred in dock module when delete snapshot:", err)
+		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -327,7 +327,7 @@ func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableRepli
 	log.Info("Dock server receive enable replication request, vr =", opt)
 
 	if err := driver.EnableReplication(opt); err != nil {
-		log.Error("Error occurred in dock module when enable replication:", err)
+		log.Error("error occurred in dock module when enable replication:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -342,7 +342,7 @@ func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableRep
 	log.Info("Dock server receive disable replication request, vr =", opt)
 
 	if err := driver.DisableReplication(opt); err != nil {
-		log.Error("Error occurred in dock module when disable replication:", err)
+		log.Error("error occurred in dock module when disable replication:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -357,7 +357,7 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 	log.Info("Dock server receive failover replication request, vr =", opt)
 
 	if err := driver.FailoverReplication(opt); err != nil {
-		log.Error("Error occurred in dock module when failover replication:", err)
+		log.Error("error occurred in dock module when failover replication:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -375,7 +375,7 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 	vg, err := ds.Driver.CreateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
-			log.Error("When calling volume driver to create volume group:", err)
+			log.Error("when calling volume driver to create volume group:", err)
 			return pb.GenericResponseError(err), err
 		}
 	}
@@ -400,7 +400,7 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 	vg, err := ds.Driver.UpdateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
-			err = errors.New("Error occurred when updating group" + opt.GetId() + "," + err.Error())
+			err = errors.New("error occurred when updating group" + opt.GetId() + "," + err.Error())
 			return pb.GenericResponseError(err), err
 		}
 	}
@@ -447,10 +447,11 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 			Id:       volRef.Id,
 			Metadata: volRef.Metadata,
 		}); err != nil {
-			log.Error(fmt.Sprintf("Error occurred when delete volume %s from group.", volRef.Id))
+			log.Error(fmt.Sprintf("error occurred when delete volume %s from group.", volRef.Id))
 			db.UpdateVolumeStatus(ctx, db.C, volRef.Id, model.VolumeError)
 		} else {
-			// Delete the volume entry in DB after successfully deleting the volume on the storage.
+			// Delete the volume entry in DB after successfully deleting the
+			// volume on the storage.
 			db.C.DeleteVolume(ctx, volRef.Id)
 		}
 	}
