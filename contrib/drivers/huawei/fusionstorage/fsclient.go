@@ -431,7 +431,7 @@ func (c *Cli) request(url, method string, isGetVersion bool, reqParams interface
 	}
 
 	if respResult.RespCode != 0 {
-		return nil, fmt.Errorf(strconv.Itoa(respResult.GetErrorCode()))
+		return nil, fmt.Errorf(string(respContent))
 	}
 
 	if resp.Header != nil && len(resp.Header["X-Auth-Token"]) > 0 {
@@ -475,4 +475,34 @@ func (c *Cli) RunCmd(args ...string) ([]string, error) {
 	}
 
 	return nil, NewCliError(result)
+}
+
+func (c *Cli) extendVolume(name string, newSize int64) error {
+	url := "/volume/expand"
+	params := map[string]interface{}{"volName": name, "newVolSize": newSize}
+	_, err := c.request(url, "POST", false, params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Cli) createSnapshot(snapName, volName string) error {
+	url := "/snapshot/create"
+	params := map[string]interface{}{"volName": volName, "snapshotName": snapName}
+	_, err := c.request(url, "POST", false, params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Cli) deleteSnapshot(snapName string) error {
+	url := "/snapshot/delete"
+	params := map[string]interface{}{"snapshotName": snapName}
+	_, err := c.request(url, "POST", false, params)
+	if err != nil {
+		return err
+	}
+	return nil
 }

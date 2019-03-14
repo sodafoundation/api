@@ -337,3 +337,90 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 
 	return nil
 }
+
+func (d *Driver) PullVolume(volIdentifier string) (*VolumeSpec, error) {
+	// Not used , do nothing
+	return nil, nil
+}
+
+func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*VolumeSpec, error) {
+	err := d.cli.extendVolume(EncodeName(opt.GetId()), opt.GetSize()<<UnitGiShiftBit)
+	if err != nil {
+		log.Errorf("Extend volume %s (%s) failed: %v", opt.GetName(), opt.GetId(), err)
+		return nil, err
+	}
+	log.Infof("Extend volume %s (%s) success.", opt.GetName(), opt.GetId())
+	return &VolumeSpec{
+		BaseModel: &BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:             opt.GetName(),
+		Size:             opt.GetSize(),
+		Description:      opt.GetDescription(),
+		AvailabilityZone: opt.GetAvailabilityZone(),
+	}, nil
+}
+
+func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*VolumeSnapshotSpec, error) {
+	snapName := EncodeName(opt.GetId())
+	volName := EncodeName(opt.GetVolumeId())
+
+	if err := d.cli.createSnapshot(snapName, volName); err != nil {
+		log.Errorf("Create snapshot %s (%s) failed: %s", opt.GetName(), opt.GetId(), err)
+		return nil, err
+	}
+
+	log.Errorf("Create snapshot %s (%s) success.", opt.GetName(), opt.GetId())
+	return &VolumeSnapshotSpec{
+		BaseModel: &BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:        opt.GetName(),
+		Description: opt.GetDescription(),
+		VolumeId:    opt.GetVolumeId(),
+		Size:        opt.GetSize(),
+	}, nil
+}
+
+func (d *Driver) PullSnapshot(snapIdentifier string) (*VolumeSnapshotSpec, error) {
+	return nil, nil
+}
+
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+	err := d.cli.deleteSnapshot(EncodeName(opt.GetId()))
+	if err != nil {
+		log.Errorf("Delete volume snapshot (%s) failed: %v", opt.GetId(), err)
+		return err
+	}
+	log.Infof("Remove volume snapshot (%s) success", opt.GetId())
+	return nil
+}
+
+func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*ConnectionInfo, error) {
+	return nil, &NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
+}
+
+func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+	return &NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
+}
+
+func (d *Driver) CreateVolumeGroup(
+	opt *pb.CreateVolumeGroupOpts,
+	vg *VolumeGroupSpec) (*VolumeGroupSpec, error) {
+	return nil, &NotImplementError{S: "Method CreateVolumeGroup has not been implemented yet."}
+}
+
+func (d *Driver) UpdateVolumeGroup(
+	opt *pb.UpdateVolumeGroupOpts,
+	vg *VolumeGroupSpec,
+	addVolumesRef []*VolumeSpec,
+	removeVolumesRef []*VolumeSpec) (*VolumeGroupSpec, []*VolumeSpec, []*VolumeSpec, error) {
+	return nil, nil, nil, &NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+}
+
+func (d *Driver) DeleteVolumeGroup(
+	opt *pb.DeleteVolumeGroupOpts,
+	vg *VolumeGroupSpec,
+	volumes []*VolumeSpec) (*VolumeGroupSpec, []*VolumeSpec, error) {
+	return nil, nil, &NotImplementError{S: "Method DeleteVolumeGroup has not been implemented yet."}
+}
