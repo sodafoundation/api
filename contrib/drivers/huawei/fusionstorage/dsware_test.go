@@ -81,14 +81,14 @@ func TestSetup(t *testing.T) {
 		Pool: map[string]config.PoolProperties{
 			"0": {
 				StorageType:      "block",
-				AvailabilityZone: "nova-01",
+				AvailabilityZone: "default",
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
 						IsSpaceEfficient:   false,
 					},
 					IOConnectivity: model.IOConnectivityLoS{
-						AccessProtocol: "DSWARE",
+						AccessProtocol: "iscsi",
 						MaxIOPS:        7000000,
 						MaxBWS:         600,
 					},
@@ -100,14 +100,14 @@ func TestSetup(t *testing.T) {
 			},
 			"1": {
 				StorageType:      "block",
-				AvailabilityZone: "nova-01",
+				AvailabilityZone: "default",
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
 						IsSpaceEfficient:   false,
 					},
 					IOConnectivity: model.IOConnectivityLoS{
-						AccessProtocol: "DSWARE",
+						AccessProtocol: "iscsi",
 						MaxIOPS:        3000000,
 						MaxBWS:         300,
 					},
