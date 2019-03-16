@@ -29,6 +29,7 @@ import (
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/utils/exec"
+	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
 var CliErrorMap = map[string]string{
@@ -84,7 +85,7 @@ func NewCliErrorBase(msg, code string) *CliError {
 	return &CliError{Msg: msg, Code: code}
 }
 
-type Cli struct {
+type FsCli struct {
 	username string
 	password string
 	version  string
@@ -96,23 +97,41 @@ type Cli struct {
 	fsaIp        []string
 }
 
-func newRestCommon(username, password, url, fmIp string, fsaIP []string) (*Cli, error) {
-	if len(fmIp) == 0 || len(fsaIP) == 0 {
+func newRestCommon(conf *Config) (*FsCli, error) {
+	if len(conf.FmIp) == 0 || len(conf.FsaIp) == 0 {
 		return nil, fmt.Errorf("new cli failed, FM ip or FSA ip can not be set to empty")
 	}
+	var pwdCiphertext = conf.Password
 
-	return &Cli{
-		addess:       url,
-		username:     username,
-		password:     password,
+	if conf.EnableEncrypted {
+		// Decrypte the password
+		pwdTool := pwd.NewPwdEncrypter(conf.PwdEncrypter)
+		password, err := pwdTool.Decrypter(pwdCiphertext)
+		if err != nil {
+			return nil, err
+		}
+		pwdCiphertext = password
+	}
+
+	client := &FsCli{
+		addess:       conf.Url,
+		username:     conf.Username,
+		password:     pwdCiphertext,
 		rootExecuter: exec.NewRootExecuter(),
-		fmIp:         fmIp,
-		fsaIp:        fsaIP,
+		fmIp:         conf.FmIp,
+		fsaIp:        conf.FsaIp,
 		headers:      map[string]string{"Content-Type": "application/json;charset=UTF-8"},
-	}, nil
+	}
+
+	err := client.login()
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
-func (c *Cli) getVersion() error {
+func (c *FsCli) getVersion() error {
 	url := "rest/version"
 	c.headers["Referer"] = c.addess + BasicURI
 	content, err := c.request(url, "GET", true, nil)
@@ -131,7 +150,7 @@ func (c *Cli) getVersion() error {
 	return nil
 }
 
-func (c *Cli) login() error {
+func (c *FsCli) login() error {
 	c.getVersion()
 	url := "/sec/login"
 	data := map[string]string{"userName": c.username, "password": c.password}
@@ -143,7 +162,7 @@ func (c *Cli) login() error {
 	return nil
 }
 
-func (c *Cli) queryPoolInfo() (*poolResp, error) {
+func (c *FsCli) queryPoolInfo() (*poolResp, error) {
 	url := "/storagePool"
 	result, err := c.request(url, "GET", false, nil)
 	if err != nil {
@@ -157,7 +176,7 @@ func (c *Cli) queryPoolInfo() (*poolResp, error) {
 	return pools, nil
 }
 
-func (c *Cli) createVolume(volName, poolId string, volSize int64) error {
+func (c *FsCli) createVolume(volName, poolId string, volSize int64) error {
 	url := "/volume/create"
 	polID, _ := strconv.Atoi(poolId)
 	params := map[string]interface{}{"volName": volName, "volSize": volSize, "poolId": polID}
@@ -167,7 +186,7 @@ func (c *Cli) createVolume(volName, poolId string, volSize int64) error {
 	return nil
 }
 
-func (c *Cli) deleteVolume(volName string) error {
+func (c *FsCli) deleteVolume(volName string) error {
 	url := "/volume/delete"
 	params := map[string]interface{}{"volNames": []string{volName}}
 	_, err := c.request(url, "POST", false, params)
@@ -178,18 +197,17 @@ func (c *Cli) deleteVolume(volName string) error {
 	return nil
 }
 
-func (c *Cli) attachVolume(volName, manageIp string) error {
+func (c *FsCli) attachVolume(volName, manageIp string) error {
 	url := "/volume/attach"
 	params := map[string]interface{}{"volName": []string{volName}, "ipList": []string{manageIp}}
-	result, err := c.request(url, "POST", false, params)
+	_, err := c.request(url, "POST", false, params)
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(result))
 	return nil
 }
 
-func (c *Cli) createPort(initiator string) error {
+func (c *FsCli) createPort(initiator string) error {
 	url := "iscsi/createPort"
 	params := map[string]interface{}{"portName": initiator}
 	_, err := c.request(url, "POST", true, params)
@@ -199,7 +217,7 @@ func (c *Cli) createPort(initiator string) error {
 	return nil
 }
 
-func (c *Cli) queryPortInfo(initiator string) error {
+func (c *FsCli) queryPortInfo(initiator string) error {
 	url := "iscsi/queryPortInfo"
 	params := map[string]interface{}{"portName": initiator}
 	_, err := c.request(url, "POST", true, params)
@@ -210,7 +228,7 @@ func (c *Cli) queryPortInfo(initiator string) error {
 	return nil
 }
 
-func (c *Cli) queryHostInfo(hostName string) (bool, error) {
+func (c *FsCli) queryHostInfo(hostName string) (bool, error) {
 	url := "iscsi/queryAllHost"
 	result, err := c.request(url, "GET", true, nil)
 	if err != nil {
@@ -232,7 +250,7 @@ func (c *Cli) queryHostInfo(hostName string) (bool, error) {
 	return false, nil
 }
 
-func (c *Cli) createHost(hostInfo *pb.HostInfo) error {
+func (c *FsCli) createHost(hostInfo *pb.HostInfo) error {
 	url := "iscsi/createHost"
 	params := map[string]interface{}{"hostName": hostInfo.GetHost(), "ipAddress": hostInfo.GetIp()}
 	_, err := c.request(url, "POST", true, params)
@@ -242,7 +260,7 @@ func (c *Cli) createHost(hostInfo *pb.HostInfo) error {
 	return nil
 }
 
-func (c *Cli) addPortToHost(hostName, initiator string) error {
+func (c *FsCli) addPortToHost(hostName, initiator string) error {
 	url := "iscsi/addPortToHost"
 	params := map[string]interface{}{"hostName": hostName, "portNames": []string{initiator}}
 	_, err := c.request(url, "POST", true, params)
@@ -252,7 +270,7 @@ func (c *Cli) addPortToHost(hostName, initiator string) error {
 	return nil
 }
 
-func (c *Cli) queryHostByPort(initiator string) (*portHostMap, error) {
+func (c *FsCli) queryHostByPort(initiator string) (*portHostMap, error) {
 	url := "iscsi/queryHostByPort"
 	params := map[string]interface{}{"portName": []string{initiator}}
 	result, err := c.request(url, "POST", true, params)
@@ -269,7 +287,7 @@ func (c *Cli) queryHostByPort(initiator string) (*portHostMap, error) {
 	return portHostmap, nil
 }
 
-func (c *Cli) addLunsToHost(hostName, lunId string) error {
+func (c *FsCli) addLunsToHost(hostName, lunId string) error {
 	url := "iscsi/addLunsToHost"
 	params := map[string]interface{}{"hostName": hostName, "lunNames": []string{lunId}}
 	_, err := c.request(url, "POST", true, params)
@@ -279,7 +297,7 @@ func (c *Cli) addLunsToHost(hostName, lunId string) error {
 	return nil
 }
 
-func (c *Cli) queryHostLunInfo(hostName string) (*hostLunList, error) {
+func (c *FsCli) queryHostLunInfo(hostName string) (*hostLunList, error) {
 	url := "iscsi/queryHostLunInfo"
 	params := map[string]interface{}{"hostName": hostName}
 	result, err := c.request(url, "POST", true, params)
@@ -296,7 +314,7 @@ func (c *Cli) queryHostLunInfo(hostName string) (*hostLunList, error) {
 	return lunList, nil
 }
 
-func (c *Cli) queryIscsiPortal(initiator string) (string, error) {
+func (c *FsCli) queryIscsiPortal(initiator string) (string, error) {
 	args := []string{
 		"--op", "queryIscsiPortalInfo", "--portName", initiator,
 	}
@@ -313,7 +331,7 @@ func (c *Cli) queryIscsiPortal(initiator string) (string, error) {
 	return "", fmt.Errorf("The iscsi target portal is empty.")
 }
 
-func (c *Cli) queryHostFromVolume(lunId string) ([]host, error) {
+func (c *FsCli) queryHostFromVolume(lunId string) ([]host, error) {
 	url := "iscsi/queryHostFromVolume"
 	params := map[string]interface{}{"lunName": lunId}
 	out, err := c.request(url, "POST", true, params)
@@ -330,7 +348,7 @@ func (c *Cli) queryHostFromVolume(lunId string) ([]host, error) {
 	return hostlist.HostList, nil
 }
 
-func (c *Cli) deleteLunFromHost(hostName, lunId string) error {
+func (c *FsCli) deleteLunFromHost(hostName, lunId string) error {
 	url := "iscsi/deleteLunFromHost"
 	params := map[string]interface{}{"hostName": hostName, "lunNames": []string{lunId}}
 	_, err := c.request(url, "POST", true, params)
@@ -340,7 +358,7 @@ func (c *Cli) deleteLunFromHost(hostName, lunId string) error {
 	return nil
 }
 
-func (c *Cli) deletePortFromHost(hostName, initiator string) error {
+func (c *FsCli) deletePortFromHost(hostName, initiator string) error {
 	url := "iscsi/deletePortFromHost"
 	params := map[string]interface{}{"hostName": hostName, "portNames": []string{initiator}}
 	_, err := c.request(url, "POST", true, params)
@@ -350,7 +368,7 @@ func (c *Cli) deletePortFromHost(hostName, initiator string) error {
 	return nil
 }
 
-func (c *Cli) deleteHost(hostName string) error {
+func (c *FsCli) deleteHost(hostName string) error {
 	url := "iscsi/deleteHost"
 	params := map[string]interface{}{"hostName": hostName}
 	_, err := c.request(url, "POST", true, params)
@@ -360,7 +378,7 @@ func (c *Cli) deleteHost(hostName string) error {
 	return nil
 }
 
-func (c *Cli) deletePort(initiator string) error {
+func (c *FsCli) deletePort(initiator string) error {
 	url := "iscsi/deletePort"
 	params := map[string]interface{}{"portName": initiator}
 	_, err := c.request(url, "POST", true, params)
@@ -370,15 +388,13 @@ func (c *Cli) deletePort(initiator string) error {
 	return nil
 }
 
-func (c *Cli) request(url, method string, isGetVersion bool, reqParams interface{}) ([]byte, error) {
+func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interface{}) ([]byte, error) {
 	var callUrl string
 	if !isGetVersion {
 		callUrl = c.addess + BasicURI + c.version + url
 	} else {
 		callUrl = c.addess + BasicURI + url
 	}
-
-	fmt.Println(callUrl)
 	// No verify by SSL
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -417,7 +433,6 @@ func (c *Cli) request(url, method string, isGetVersion bool, reqParams interface
 		return nil, fmt.Errorf("Read from response body failed: %v, url is %s", err, callUrl)
 	}
 
-	fmt.Println(string(respContent))
 	if 400 <= resp.StatusCode && resp.StatusCode <= 599 {
 		pc, _, line, _ := runtime.Caller(1)
 		return nil, fmt.Errorf("return status code is: %s, return content is: %s, error function is: %s, error line is: %s, url is %s",
@@ -442,17 +457,17 @@ func (c *Cli) request(url, method string, isGetVersion bool, reqParams interface
 	return respContent, nil
 }
 
-func (c *Cli) StartServer() error {
+func (c *FsCli) StartServer() error {
 	_, err := c.rootExecuter.Run(CmdBin, "--op", "startServer")
 	if err != nil {
 		return err
 	}
 	time.Sleep(3 * time.Second)
-	fmt.Println("FSC CLI server start successfully")
+	log.Info("FSC Cli server start successfully")
 	return nil
 }
 
-func (c *Cli) RunCmd(args ...string) ([]string, error) {
+func (c *FsCli) RunCmd(args ...string) ([]string, error) {
 	var lines []string
 	var result string
 
@@ -477,7 +492,7 @@ func (c *Cli) RunCmd(args ...string) ([]string, error) {
 	return nil, NewCliError(result)
 }
 
-func (c *Cli) extendVolume(name string, newSize int64) error {
+func (c *FsCli) extendVolume(name string, newSize int64) error {
 	url := "/volume/expand"
 	params := map[string]interface{}{"volName": name, "newVolSize": newSize}
 	_, err := c.request(url, "POST", false, params)
@@ -487,7 +502,7 @@ func (c *Cli) extendVolume(name string, newSize int64) error {
 	return nil
 }
 
-func (c *Cli) createSnapshot(snapName, volName string) error {
+func (c *FsCli) createSnapshot(snapName, volName string) error {
 	url := "/snapshot/create"
 	params := map[string]interface{}{"volName": volName, "snapshotName": snapName}
 	_, err := c.request(url, "POST", false, params)
@@ -497,7 +512,7 @@ func (c *Cli) createSnapshot(snapName, volName string) error {
 	return nil
 }
 
-func (c *Cli) deleteSnapshot(snapName string) error {
+func (c *FsCli) deleteSnapshot(snapName string) error {
 	url := "/snapshot/delete"
 	params := map[string]interface{}{"snapshotName": snapName}
 	_, err := c.request(url, "POST", false, params)
