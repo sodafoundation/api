@@ -28,4 +28,5 @@ const (
 	VolumeNotExistErrorCode    = "32150005"
 	CmdBin                     = "fsc_cli"
 	MaxRetryNode               = 3
+	DefaultConfPath            = "/etc/opensds/driver/fusionstorage.yaml"
 )
