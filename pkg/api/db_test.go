@@ -49,7 +49,7 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
 
-	// Test case 2: The status of volume should always be available.
+	// Test case 2: The size of volume created should be greater than zero.
 	in.Size = int64(-2)
 	mockClient = new(dbtest.Client)
 	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)

@@ -1,7 +1,12 @@
 authOptions:
   username: "admin"
   password: "IaaS@PORTAL-CLOUD9!"
+  # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+  EnableEncrypted: false
+  # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+  PwdEncrypter: "aes"
   url: "https://8.46.195.74:28443"
+
   fmIp: 8.46.195.74
   fsaIp:
     - 8.46.195.71
@@ -11,13 +16,13 @@ authOptions:
 pool:
   0:
     storageType: block
-    availabilityZone: nova-01
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 7000000
         maxBWS: 600
       advanced:
@@ -25,13 +30,13 @@ pool:
         latency: 3ms
   1:
     storageType: block
-    availabilityZone: nova-01
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 3000000
         maxBWS: 300
       advanced:
