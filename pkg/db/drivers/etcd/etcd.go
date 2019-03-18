@@ -1190,7 +1190,7 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		result.Description = vol.Description
 	}
 	if vol.Metadata != nil {
-		result.Metadata = vol.Metadata
+		result.Metadata = utils.MergeStringMaps(result.Metadata, vol.Metadata)
 	}
 	if vol.PoolId != "" {
 		result.PoolId = vol.PoolId
@@ -1517,11 +1517,8 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		result.AccessProtocol = attachment.AccessProtocol
 	}
 	// Update metadata
-	if result.Metadata == nil {
-		result.Metadata = make(map[string]string)
-	}
-	for k, v := range attachment.Metadata {
-		result.Metadata[k] = v
+	if attachment.Metadata != nil {
+		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
 	}
 	// Update onnectionData
 	for k, v := range attachment.ConnectionData {
@@ -1781,7 +1778,7 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 		result.Name = snp.Name
 	}
 	if snp.Metadata != nil {
-		result.Metadata = snp.Metadata
+		result.Metadata = utils.MergeStringMaps(result.Metadata, snp.Metadata)
 	}
 	if snp.Size > 0 {
 		result.Size = snp.Size
@@ -2101,7 +2098,7 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 		r.SecondaryReplicationDriverData = input.SecondaryReplicationDriverData
 	}
 	if input.Metadata != nil {
-		r.Metadata = input.Metadata
+		r.Metadata = utils.MergeStringMaps(r.Metadata, input.Metadata)
 	}
 	if input.ReplicationStatus != "" {
 		r.ReplicationStatus = input.ReplicationStatus
