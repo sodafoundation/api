@@ -80,6 +80,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		Status:            model.VolumeCreating,
 		SnapshotId:        in.SnapshotId,
 		SnapshotFromCloud: in.SnapshotFromCloud,
+		Metadata:          in.Metadata,
 	}
 	result, err := db.C.CreateVolume(ctx, vol)
 	if err != nil {
