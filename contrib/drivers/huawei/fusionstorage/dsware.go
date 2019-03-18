@@ -22,8 +22,8 @@ import (
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	. "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -158,7 +158,7 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*ConnectionInfo, error) {
 	lunId := opt.GetMetadata()[LunId]
 	if lunId == "" {
 		msg := "Lun id is empty"
@@ -279,7 +279,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*Connection
 	return connInfo, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	lunId := opt.GetMetadata()[LunId]
 	if lunId == "" {
 		msg := "Lun id is empty."
@@ -416,30 +416,21 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*ConnectionInfo, error) {
-	return nil, &NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
+	return nil, &NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
+	return &NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet."}
 }
 
-func (d *Driver) CreateVolumeGroup(
-	opt *pb.CreateVolumeGroupOpts,
-	vg *VolumeGroupSpec) (*VolumeGroupSpec, error) {
-	return nil, &NotImplementError{S: "Method CreateVolumeGroup has not been implemented yet."}
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*VolumeGroupSpec, error) {
+	return nil, &NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(
-	opt *pb.UpdateVolumeGroupOpts,
-	vg *VolumeGroupSpec,
-	addVolumesRef []*VolumeSpec,
-	removeVolumesRef []*VolumeSpec) (*VolumeGroupSpec, []*VolumeSpec, []*VolumeSpec, error) {
-	return nil, nil, nil, &NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*VolumeGroupSpec, error) {
+	return nil, &NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(
-	opt *pb.DeleteVolumeGroupOpts,
-	vg *VolumeGroupSpec,
-	volumes []*VolumeSpec) (*VolumeGroupSpec, []*VolumeSpec, error) {
-	return nil, nil, &NotImplementError{S: "Method DeleteVolumeGroup has not been implemented yet."}
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+	return &NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

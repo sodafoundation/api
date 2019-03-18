@@ -17,7 +17,6 @@
 package e2e
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -39,43 +38,42 @@ var (
 func init() {
 	c, _ = client.NewClient(&client.Config{
 		Endpoint:    "http://localhost:50040",
-		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId),
+	})
 
-	fmt.Println("Start creating profile...")
-	var body = &model.ProfileSpec{
-		Name:        "default",
-		Description: "default policy",
+	prfs, _ := c.ListProfiles()
+	if len(prfs) == 0 {
+	        fmt.Println("Start creating profile...")
+		var body = &model.ProfileSpec{
+			Name:        "default",
+			Description: "default policy",
+		}
+                prf, err := c.CreateProfile(body)
+		if err != nil {
+			fmt.Printf("create profile failed: %v\n", err)
+			return
+		}
+		prfs = append(prfs, prf)
 	}
-	prf, err := c.CreateProfile(body)
-	if err != nil {
-		fmt.Printf("create profile failed: %v\n", err)
-		return
-	}
-	prfBody, _ := json.MarshalIndent(prf, "", "	")
-	fmt.Println("create profile success, got:", string(prfBody))
-	profileId = prf.Id
+	profileId = prfs[0].Id
 }
 
 func TestListDocks(t *testing.T) {
 	t.Log("Start listing docks...")
-	dcks, err := c.ListDocks()
-	if err != nil {
+	if _, err := c.ListDocks(); err != nil {
 		t.Error("list docks failed:", err)
 		return
 	}
-	dcksBody, _ := json.MarshalIndent(dcks, "", "	")
-	t.Log("list docks success, got:", string(dcksBody))
+	t.Log("list docks success!")
 }
 
 func TestListPools(t *testing.T) {
 	t.Log("Start listing pools...")
-	pols, err := c.ListPools()
-	if err != nil {
+	if _, err := c.ListPools(); err != nil {
 		t.Error("list pools failed:", err)
 		return
 	}
-	polsBody, _ := json.MarshalIndent(pols, "", "	")
-	t.Log("list pools success, got:", string(polsBody))
+	t.Log("list pools success!")
 }
 
 func TestCreateVolume(t *testing.T) {
@@ -90,10 +88,15 @@ func TestCreateVolume(t *testing.T) {
 		t.Error("create volume failed:", err)
 		return
 	}
-	volBody, _ := json.MarshalIndent(vol, "", "	")
-	t.Log("Create volume success, got:", string(volBody))
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
-	cleanVolumeIfFailedOrFinished(t, vol.Id)
+	// Check if the status of created volume is available.
+	vol, _ = c.GetVolume(vol.Id)
+	if vol.Status != model.VolumeAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, vol.Status)
+		return
+	}
+	t.Log("Create volume success!")
 }
 
 func TestGetVolume(t *testing.T) {
@@ -105,19 +108,17 @@ func TestGetVolume(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking volume...")
-	result, err := c.GetVolume(vol.Id)
+	vol, err = c.GetVolume(vol.Id)
 	if err != nil {
 		t.Error("Check volume failed:", err)
 		return
 	}
 	// Test the status of created volume.
-	if result.Status != "available" {
+	if vol.Status != model.VolumeAvailable {
 		t.Error("The status of volume is not available!")
 		return
 	}
-
-	volBody, _ := json.MarshalIndent(result, "", "	")
-	t.Log("Check volume success, got:", string(volBody))
+	t.Log("Check volume success!")
 }
 
 func TestListVolumes(t *testing.T) {
@@ -129,13 +130,11 @@ func TestListVolumes(t *testing.T) {
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
-	vols, err := c.ListVolumes()
-	if err != nil {
+	if _, err := c.ListVolumes(); err != nil {
 		t.Error("Check all volumes failed:", err)
 		return
 	}
-	volsBody, _ := json.MarshalIndent(vols, "", "	")
-	t.Log("Check all volumes success, got", string(volsBody))
+	t.Log("Check all volumes success!")
 }
 
 func TestUpdateVolume(t *testing.T) {
@@ -144,22 +143,25 @@ func TestUpdateVolume(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start updating volume...")
 	var body = &model.VolumeSpec{
 		Name:        "Update Volume Name",
 		Description: "Update Volume Description",
 	}
-
 	newVol, err := c.UpdateVolume(vol.Id, body)
 	if err != nil {
 		t.Error("update volume failed:", err)
 		return
 	}
-
-	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
-	cleanVolumeIfFailedOrFinished(t, newVol.Id)
-	t.Log("Update volume success, got:", string(newVolBody))
+	// Check if the status of updated volume is available.
+	newVol, _ = c.GetVolume(newVol.Id)
+	if newVol.Status != model.VolumeAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, newVol.Status)
+		return
+	}
+	t.Log("Update volume success!")
 }
 
 func TestExtendVolume(t *testing.T) {
@@ -168,6 +170,7 @@ func TestExtendVolume(t *testing.T) {
 		t.Error("Failed to run volume prepare function:", err)
 		return
 	}
+	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start extending volume...")
 	body := &model.ExtendVolumeSpec{
@@ -179,10 +182,13 @@ func TestExtendVolume(t *testing.T) {
 		t.Error("extend volume failed:", err)
 		return
 	}
-
-	newVolBody, _ := json.MarshalIndent(newVol, "", "	")
-	cleanVolumeIfFailedOrFinished(t, newVol.Id)
-	t.Log("Extend volume success, got:", string(newVolBody))
+	// Check if the status of extended volume is available.
+	newVol, _ = c.GetVolume(newVol.Id)
+	if newVol.Status != model.VolumeAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeAvailable, newVol.Status)
+		return
+	}
+	t.Log("Extend volume success!")
 }
 
 func TestDeleteVolume(t *testing.T) {
@@ -200,7 +206,6 @@ func TestDeleteVolume(t *testing.T) {
 	t.Log("Delete volume success!")
 }
 
-/*
 func TestCreateVolumeAttachment(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
@@ -226,8 +231,13 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Error("create volume attachment failed:", err)
 		return
 	}
-	atcBody, _ := json.MarshalIndent(atc, "", "	")
-	t.Log("create volume attachment success, got", string(atcBody))
+	// Check if the status of created volume attachment is available.
+	atc, _ = c.GetVolumeAttachment(atc.Id)
+	if atc.Status != model.VolumeAttachAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
+		return
+	}
+	t.Log("create volume attachment success!")
 
 	t.Log("Start cleaning volume attachment...")
 	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
@@ -246,19 +256,16 @@ func TestGetVolumeAttachment(t *testing.T) {
 	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking volume attachment...")
-	result, err := c.GetVolumeAttachment(atc.Id)
+	atc, err = c.GetVolumeAttachment(atc.Id)
 	if err != nil {
 		t.Error("Check volume attachment failed:", err)
 		return
 	}
-	// TODO Test the return value.
-	// if !reflect.DeepEqual(atc, result) {
-	// 	t.Errorf("Expected %+v, got %+v", atc, result)
-	// 	return
-	// }
-
-	atcBody, _ := json.MarshalIndent(result, "", "	")
-	t.Log("Check volume attachment success, got:", string(atcBody))
+	if atc.Status != model.VolumeAttachAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
+		return
+	}
+	t.Log("Check volume attachment success!")
 }
 
 func TestListVolumeAttachments(t *testing.T) {
@@ -270,13 +277,11 @@ func TestListVolumeAttachments(t *testing.T) {
 	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking all volume attachments...")
-	atcs, err := c.ListVolumeAttachments()
-	if err != nil {
+	if _, err := c.ListVolumeAttachments(); err != nil {
 		t.Error("Check all volume attachments failed:", err)
 		return
 	}
-	atcsBody, _ := json.MarshalIndent(atcs, "", "	")
-	t.Log("list volume attachments success, got:", string(atcsBody))
+	t.Log("list volume attachments success!")
 }
 
 func TestDeleteVolumeAttachment(t *testing.T) {
@@ -294,7 +299,6 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	}
 	t.Log("Delete volume attachment success!")
 }
-*/
 
 func TestCreateVolumeSnapshot(t *testing.T) {
 	vol, err := prepareVolume(t)
@@ -315,8 +319,12 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 		t.Error("create volume snapshot failed:", err)
 		return
 	}
-	snpBody, _ := json.MarshalIndent(snp, "", "	")
-	t.Log("create volume snapshot success, got:", string(snpBody))
+	// Check if the status of created volume snapshot is available.
+	snp, _ = c.GetVolumeSnapshot(snp.Id)
+	if snp.Status != model.VolumeSnapAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, snp.Status)
+	}
+	t.Log("create volume snapshot success!")
 
 	t.Log("Start cleaing volume snapshot...")
 	if err := c.DeleteVolumeSnapshot(snp.Id, nil); err != nil {
@@ -335,19 +343,17 @@ func TestGetVolumeSnapshot(t *testing.T) {
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking volume snapshot...")
-	result, err := c.GetVolumeSnapshot(snp.Id)
+	snp, err = c.GetVolumeSnapshot(snp.Id)
 	if err != nil {
 		t.Error("Check volume snapshot failed:", err)
 		return
 	}
 	// Test the status of created volume snapshot.
-	if result.Status != "available" {
+	if snp.Status != model.VolumeSnapAvailable {
 		t.Error("The status of volume snapshot is not available!")
 		return
 	}
-
-	snpBody, _ := json.MarshalIndent(result, "", "	")
-	t.Log("Check volume snapshot success, got:", string(snpBody))
+	t.Log("Check volume snapshot success!")
 }
 
 func TestListVolumeSnapshots(t *testing.T) {
@@ -359,13 +365,11 @@ func TestListVolumeSnapshots(t *testing.T) {
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
 
 	t.Log("Start checking all volume snapshots...")
-	snps, err := c.ListVolumeSnapshots()
-	if err != nil {
+	if _, err := c.ListVolumeSnapshots(); err != nil {
 		t.Error("list volume snapshots failed:", err)
 		return
 	}
-	snpsBody, _ := json.MarshalIndent(snps, "", "	")
-	t.Log("Check all volume snapshots success, got:", string(snpsBody))
+	t.Log("Check all volume snapshots success!")
 }
 
 func TestDeleteVolumeSnapshot(t *testing.T) {
@@ -397,15 +401,17 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		Name:        "Update Volume Snapshot Name",
 		Description: "Update Volume Snapshot Description",
 	}
-
 	newSnp, err := c.UpdateVolumeSnapshot(snp.Id, body)
 	if err != nil {
 		t.Error("update volume snapshot failed:", err)
 		return
 	}
-
-	newSnpBody, _ := json.MarshalIndent(newSnp, "", "	")
-	t.Log("Update volume snapshot success, got:", string(newSnpBody))
+	// Check if the status of updated volume snapshot is available.
+	newSnp, _ = c.GetVolumeSnapshot(newSnp.Id)
+	if newSnp.Status != model.VolumeSnapAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, newSnp.Status)
+	}
+	t.Log("Update volume snapshot success!")
 }
 
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
@@ -420,6 +426,10 @@ func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 		t.Error("prepare volume failed:", err)
 		return nil, err
 	}
+	if vol, _ = c.GetVolume(vol.Id); vol.Status != model.VolumeAvailable {
+		return nil, fmt.Errorf("The status of volume is not available!")
+	}
+
 	t.Log("End preparing volume...")
 	return vol, nil
 }
@@ -450,6 +460,13 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
 		return nil, err
 	}
+	atc, _ = c.GetVolumeAttachment(atc.Id)
+	if atc.Status != model.VolumeAttachAvailable {
+		// Run volume clean function if failed to prepare volume attachment.
+                cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
+		return nil, fmt.Errorf("The status of volume attachment is not available!")
+	}
+
 	t.Log("End preparing volume attachment...")
 	return atc, nil
 }
@@ -474,6 +491,12 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 		cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
 		return nil, err
 	}
+	if snp, _ = c.GetVolumeSnapshot(snp.Id); snp.Status != model.VolumeSnapAvailable {
+		// Run volume clean function if failed to prepare volume snapshot.
+                cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
+		return nil, fmt.Errorf("The status of volume snapshot is not available!")
+	}
+
 	t.Log("End preparing volume snapshot...")
 	return snp, nil
 }
@@ -549,13 +572,13 @@ func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 		t.Error("Failed to run volume prepare function: ", err)
 		return nil, err
 	}
-	t.Log("starting to prepare VolumeGroupSpec......")
 
+	t.Log("starting to prepare VolumeGroupSpec......")
 	var body = &model.VolumeGroupSpec{
 		Name:        "VGStest",
 		Description: "This is a test",
 		AddVolumes:  []string{vol.Id, vol1.Id},
-		Profiles:    []string{profileId, profileId},
+		Profiles:    []string{profileId},
 	}
 	vg, err := c.CreateVolumeGroup(body)
 	if err != nil {
@@ -564,6 +587,13 @@ func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 		cleanVolumeIfFailedOrFinished(t, vol1.Id)
 		return nil, err
 	}
+	vg, _ = c.GetVolumeGroup(vg.Id)
+	if vg.Status != model.VolumeGroupAvailable {
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		cleanVolumeIfFailedOrFinished(t, vol1.Id)
+		return nil, fmt.Errorf("The status of volume group is not available!")
+	}
+
 	t.Log("End preparing volume group...")
 	return vg, nil
 }
@@ -576,14 +606,14 @@ func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *mode
 	}
 	t.Log("End cleaning volume group...")
 
-	t.Log("Start cleaning volume...")
-	for i := range body.AddVolumes {
-		if err := c.DeleteVolume(body.AddVolumes[i], nil); err != nil {
-			t.Error("Clean volume failed: ", err)
-			return err
-		}
-	}
-	t.Log("End cleaning volume...")
+	//t.Log("Start cleaning volume...")
+	//for i := range body.AddVolumes {
+	//	if err := c.DeleteVolume(body.AddVolumes[i], nil); err != nil {
+	//		t.Error("Clean volume failed: ", err)
+	//		return err
+	//	}
+	//}
+	//t.Log("End cleaning volume...")
 	return nil
 }
 
@@ -593,30 +623,41 @@ func TestCreateVolumeGroup(t *testing.T) {
 		t.Error("Failed to run volume prepare function : ", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 	vol1, err := prepareVolume(t)
 	if err != nil {
 		t.Error("Failed to run volume prepare function : ", err)
 		return
 	}
-	defer cleanVolumeIfFailedOrFinished(t, vol1.Id)
+
 	t.Log("Start creating volume group...")
 	var body = &model.VolumeGroupSpec{
 		Name:        "testvolumegroup",
 		Description: "This is a volume group test",
 		AddVolumes:  []string{vol.Id, vol1.Id},
-		Profiles:    []string{profileId, profileId},
+		Profiles:    []string{profileId},
 	}
 	vg, err := c.CreateVolumeGroup(body)
 	if err != nil {
 		t.Error("create volume group failed : ", err)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		cleanVolumeIfFailedOrFinished(t, vol1.Id)
 		return
 	}
-	vgBody, _ := json.MarshalIndent(vg, "", " ")
-	t.Log("create volume group success, got: ", string(vgBody))
+	// Check if the status of created volume group is available.
+	vg, _ = c.GetVolumeGroup(vg.Id)
+	if vg.Status != model.VolumeGroupAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, vg.Status)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		return
+	}
+	t.Log("create volume group success!")
+
 	t.Log("Starting cleaning volume group...")
 	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
 		t.Error("Clean volume group failed : ", err)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
+		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		return
 	}
 	t.Log("End cleaning volume group...")
@@ -631,18 +672,18 @@ func TestGetVolumeGroup(t *testing.T) {
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
 
 	t.Log("Start checking volume group...")
-	result, err := c.GetVolumeGroup(vg.Id)
+	vg, err = c.GetVolumeGroup(vg.Id)
 	if err != nil {
 		t.Error("Check volume group failed:", err)
 		return
 	}
-	if result.Status != "available" {
-		t.Error("The status of volume group is not available!", result.Status)
-		//  return
+	if vg.Status != model.VolumeGroupAvailable {
+		t.Error("The status of volume group is not available!")
+		return
 	}
-	vgBody, _ := json.MarshalIndent(result, "", "   ")
-	t.Log("Check volume group success, got:", string(vgBody))
+	t.Log("Check volume group success!")
 }
+
 func TestListVolumeGroups(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
@@ -650,21 +691,22 @@ func TestListVolumeGroups(t *testing.T) {
 		return
 	}
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+
 	t.Log("Start checking all volume group...")
-	vgs, err := c.ListVolumeGroups()
-	if err != nil {
+	if _, err := c.ListVolumeGroups(); err != nil {
 		t.Error("list volume groups failed :", err)
 		return
 	}
-	vgsBody, _ := json.MarshalIndent(vgs, "", "   ")
-	t.Log("Check all volume groups success , got :", string(vgsBody))
+	t.Log("Check all volume groups success!")
 }
+
 func TestDeleteVolumeGroup(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
 		t.Error("Failed to run volume group prepare function: ", err)
 		return
 	}
+
 	t.Log("Start delete volume group...")
 	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
 		t.Error("delete volume group failed :", err)
@@ -672,10 +714,11 @@ func TestDeleteVolumeGroup(t *testing.T) {
 		return
 	}
 	t.Log("Delete volume group success")
-	for i := range vg.AddVolumes {
-		cleanVolumeIfFailedOrFinished(t, vg.AddVolumes[i])
-	}
+	//for i := range vg.AddVolumes {
+	//	cleanVolumeIfFailedOrFinished(t, vg.AddVolumes[i])
+	//}
 }
+
 func TestUpdateVolumeGroup(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
@@ -683,17 +726,22 @@ func TestUpdateVolumeGroup(t *testing.T) {
 		return
 	}
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
+
 	t.Log("Start updating volume group...")
 	var body = &model.VolumeGroupSpec{
 		Name:        "Update Volume Group Name",
 		Description: "Update Volume Group Description",
-		AddVolumes:  vg.AddVolumes,
+		AddVolumes:  []string{},
 	}
 	newVg, err := c.UpdateVolumeGroup(vg.Id, body)
 	if err != nil {
 		t.Error("Update volume group failed: ", err)
 		return
 	}
-	newVgBody, _ := json.MarshalIndent(newVg, "", "   ")
-	t.Log("Update volume group success ,got: ", string(newVgBody))
+	// Check if the status of created volume group is available.
+	newVg, _ = c.GetVolumeGroup(newVg.Id)
+	if newVg.Status != model.VolumeGroupAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.VolumeGroupAvailable, newVg.Status)
+	}
+	t.Log("Update volume group success!")
 }

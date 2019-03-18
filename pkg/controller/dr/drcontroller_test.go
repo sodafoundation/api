@@ -21,8 +21,8 @@ import (
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 	"github.com/stretchr/testify/mock"
@@ -47,11 +47,11 @@ func (fvc *fakeVolumeController) ExtendVolume(*pb.ExtendVolumeOpts) (*model.Volu
 	return &SampleVolumes[0], nil
 }
 
-func (fvc *fakeVolumeController) CreateVolumeAttachment(*pb.CreateAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
+func (fvc *fakeVolumeController) CreateVolumeAttachment(*pb.CreateVolumeAttachmentOpts) (*model.VolumeAttachmentSpec, error) {
 	return &SampleAttachments[0], nil
 }
 
-func (fvc *fakeVolumeController) DeleteVolumeAttachment(*pb.DeleteAttachmentOpts) error {
+func (fvc *fakeVolumeController) DeleteVolumeAttachment(*pb.DeleteVolumeAttachmentOpts) error {
 	return nil
 }
 
@@ -91,17 +91,19 @@ func (fvc *fakeVolumeController) DisableReplication(opt *pb.DisableReplicationOp
 func (fvc *fakeVolumeController) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
 	return nil
 }
+
 func (fvc *fakeVolumeController) CreateVolumeGroup(*pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	return nil, nil
 }
 
-func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) error {
-	return nil
+func (fvc *fakeVolumeController) UpdateVolumeGroup(*pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, nil
 }
 
 func (fvc *fakeVolumeController) DeleteVolumeGroup(*pb.DeleteVolumeGroupOpts) error {
 	return nil
 }
+
 func (fvc *fakeVolumeController) SetDock(dockInfo *model.DockSpec) { return }
 
 var (

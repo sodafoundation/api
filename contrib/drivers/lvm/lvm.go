@@ -27,8 +27,8 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
@@ -228,7 +228,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	}, nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	initiator := opt.HostInfo.GetInitiator()
 	if initiator == "" {
 		initiator = "ALL"
@@ -262,7 +262,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	}, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
 	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
@@ -547,14 +547,14 @@ func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpt
 
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
-	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
-	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

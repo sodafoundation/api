@@ -50,11 +50,8 @@ func main() {
 	// Set up database session.
 	db.Init(&CONF.Database)
 
-	// Initialize Controller object.
-	c.Brain = c.NewController()
-
 	// Construct controller module grpc server struct and run controller server process.
-	if err := c.NewCtlServer(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
+	if err := c.NewController(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
 		panic(err)
 	}
 }

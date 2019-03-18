@@ -18,28 +18,7 @@ This module implements the common data structure.
 
 package model
 
-import "github.com/opensds/opensds/pkg/dock/proto"
-
-//volume status
-const (
-	ReplicationDeleted        = "deleted"
-	ReplicationCreating       = "creating"
-	ReplicationDeleting       = "deleting"
-	ReplicationEnabling       = "enabling"
-	ReplicationDisabling      = "disabling"
-	ReplicationFailingOver    = "failing_over"
-	ReplicationFailingBack    = "failing_back"
-	ReplicationAvailable      = "available"
-	ReplicationError          = "error"
-	ReplicationErrorDeleting  = "error_deleting"
-	ReplicationErrorEnabling  = "error_enabling"
-	ReplicationErrorDisabling = "error_disabling"
-	ReplicationErrorFailover  = "error_failover"
-	ReplicationErrorFailback  = "error_failback"
-	ReplicationEnabled        = "enabled"
-	ReplicationDisabled       = "disabled"
-	ReplicationFailover       = "failed_over"
-)
+import "github.com/opensds/opensds/pkg/model/proto"
 
 const (
 	ReplicationModeSync         = "sync"

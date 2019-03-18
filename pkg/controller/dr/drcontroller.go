@@ -24,8 +24,8 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	. "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/satori/go.uuid"
 )
@@ -289,7 +289,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 		initiator = attacherDock.Metadata["WWPNS"]
 	}
 
-	var createAttachOpt = &pb.CreateAttachmentOpts{
+	var createAttachOpt = &pb.CreateVolumeAttachmentOpts{
 		Id:       attachmentId,
 		VolumeId: vol.Id,
 		HostInfo: &pb.HostInfo{
@@ -320,7 +320,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	rollback := false
 	defer func() {
 		if rollback {
-			opt := &pb.DeleteAttachmentOpts{
+			opt := &pb.DeleteVolumeAttachmentOpts{
 				Id:       atm.Id,
 				VolumeId: atm.VolumeId,
 				HostInfo: &pb.HostInfo{
@@ -392,7 +392,7 @@ func (p *PairOperator) doDetach(ctx *c.Context, attachmentId string, vol *Volume
 		return err
 	}
 
-	opt := &pb.DeleteAttachmentOpts{
+	opt := &pb.DeleteVolumeAttachmentOpts{
 		Id:       atm.Id,
 		VolumeId: atm.VolumeId,
 		HostInfo: &pb.HostInfo{

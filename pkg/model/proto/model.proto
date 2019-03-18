@@ -1,5 +1,5 @@
 // This source file has been modified by Huawei Technologies Co., Ltd.
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Copyright 2015, Google Inc.
 // All rights reserved.
@@ -35,6 +35,57 @@ syntax = "proto3";
 package proto;
 
 
+service Controller {
+    // Create a volume
+    rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
+    
+    // Delete a volume
+    rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
+    
+    // Extend a volume
+    rpc ExtendVolume (ExtendVolumeOpts) returns (GenericResponse){}
+    
+    // Create a volume snapshot
+    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts) 
+      returns (GenericResponse){}
+    
+    // Delete a volume snapshot
+    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts) 
+      returns (GenericResponse){}
+    
+    // Create a volume attachment
+    rpc CreateVolumeAttachment (CreateVolumeAttachmentOpts)
+      returns (GenericResponse){}
+    
+    // Delete a volume attachment
+    rpc DeleteVolumeAttachment (DeleteVolumeAttachmentOpts)
+      returns (GenericResponse){}
+
+    // Create a replication
+    rpc CreateReplication (CreateReplicationOpts) returns (GenericResponse){}
+
+    // Delete a replication
+    rpc DeleteReplication (DeleteReplicationOpts) returns (GenericResponse){}
+
+    // Enable a replication
+    rpc EnableReplication (EnableReplicationOpts) returns (GenericResponse){}
+
+    // Disable a replication
+    rpc DisableReplication (DisableReplicationOpts) returns (GenericResponse){}
+
+    // Failover a replication
+    rpc FailoverReplication (FailoverReplicationOpts) returns (GenericResponse){}
+
+    // Create a volume group
+    rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Update volume group
+    rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
+	
+    // Delete volume group
+    rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+}
+
 service ProvisionDock {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
@@ -54,10 +105,13 @@ service ProvisionDock {
       returns (GenericResponse){}
     
     // Create a volume attachment
-    rpc CreateAttachment (CreateAttachmentOpts) returns (GenericResponse){}
+    rpc CreateVolumeAttachment (CreateVolumeAttachmentOpts)
+      returns (GenericResponse){}
     
     // Delete a volume attachment
-    rpc DeleteAttachment (DeleteAttachmentOpts) returns (GenericResponse){}
+    rpc DeleteVolumeAttachment (DeleteVolumeAttachmentOpts)
+      returns (GenericResponse){}
+
     // Create a replication
     rpc CreateReplication (CreateReplicationOpts) returns (GenericResponse){}
 
@@ -72,6 +126,7 @@ service ProvisionDock {
 
     // Failover a replication
     rpc FailoverReplication (FailoverReplicationOpts) returns (GenericResponse){}
+
     // Create a volume group
     rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
 	
@@ -79,7 +134,8 @@ service ProvisionDock {
     rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
 	
     // Delete volume group
-    rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}}
+    rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+}
 
 // CreateVolumeOpts is a structure which indicates all required properties
 // for creating a volume.
@@ -123,12 +179,16 @@ message CreateVolumeOpts {
 message DeleteVolumeOpts {
     // The uuid of the volume, required.
     string id = 1;
+    // The service level that volume belongs to, required.
+    string profileId = 2;
+    // The uuid of the pool on which volume will be created, required.
+    string poolId = 3;
     // The metadata of the volume, optional.
-    map<string, string> metadata = 2;
+    map<string, string> metadata = 4;
     // The storage driver type.
-    string driverName = 3;
+    string driverName = 5;
     // The Context
-    string context = 4;
+    string context = 6;
 }
 
 // ExtendVolumeOpts is a structure which indicates all required properties
@@ -173,12 +233,14 @@ message CreateVolumeSnapshotOpts {
     string description = 4;
     // The uuid of the volume that snapshot belongs to, required.
     string volumeId = 5;
+    // The service level that volume belongs to, required.
+    string profileId = 6;
     // The metadata of the volume snapshot, optional.
-    map<string, string> metadata = 6;
+    map<string, string> metadata = 7;
     // The storage driver type.
-    string driverName = 7;
+    string driverName = 8;
     // The Context
-    string context = 8;
+    string context = 9;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
@@ -196,9 +258,9 @@ message DeleteVolumeSnapshotOpts {
     string context = 5;
 }
 
-// CreateAttachmentOpts is a structure which indicates all required
+// CreateVolumeAttachmentOpts is a structure which indicates all required
 // properties for creating a volume attachment.
-message CreateAttachmentOpts {
+message CreateVolumeAttachmentOpts {
     // The uuid of the volume attachment, optional.
     string id = 1;
     // The uuid of the volume, required.
@@ -219,9 +281,9 @@ message CreateAttachmentOpts {
     string AccessProtocol = 9;
 }
 
-// DeleteAttachmentOpts is a structure which indicates all required
+// DeleteVolumeAttachmentOpts is a structure which indicates all required
 // properties for deleting a volume attachment.
-message DeleteAttachmentOpts {
+message DeleteVolumeAttachmentOpts {
     // The uuid of the volume attachment, optional.
     string id = 1;
     // The uuid of the volume, required.
@@ -492,6 +554,10 @@ message FailoverReplicationOpts {
     map<string, string> metadata = 18;
     // Whether is primary replication
     bool  isPrimary = 19;
+    message FailoverRequest {
+        bool allowAttachedVolume = 1;
+        string secondaryBackendId = 2;
+    }
 }
 
 // CreateVolumeGroupOpts is a structure which indicates all required
@@ -526,17 +592,21 @@ message UpdateVolumeGroupOpts{
     repeated string addVolumes = 3;
     // The removeVolumes contains the volumes to be removed from the group.
     repeated string removeVolumes = 4;
+    // The pool belongs to the group.
+    string poolId =5;
     // The Context
-    string context = 5;
+    string context = 6;
 }
 
 message DeleteVolumeGroupOpts{
     // The uuid of the volume group, optional when deleting.
     string id = 1;
+    // The pool belongs to the group.
+    string poolId =2;
     // The driver of the volume group.
-    string driverName = 2;
+    string driverName = 3;
     // The Context
-    string context = 3;
+    string context = 4;
 }
 service AttachDock {
     // Attach a volume
@@ -591,3 +661,4 @@ message GenericResponse {
         Error error = 2;
     }
 }
+

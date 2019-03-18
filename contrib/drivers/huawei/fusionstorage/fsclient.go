@@ -27,7 +27,7 @@ import (
 	"time"
 
 	log "github.com/golang/glog"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/exec"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
