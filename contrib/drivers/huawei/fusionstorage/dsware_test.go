@@ -15,54 +15,19 @@
 package fusionstorage
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
-	c "github.com/opensds/opensds/pkg/utils/config"
-	e "github.com/opensds/opensds/pkg/utils/exec"
 )
 
-// for unit test
-var rootExecuter = e.NewRootExecuter()
-
-var startServer = `[2018-10-30 17:25:50] [INFO] [fsc_cli.start_dsware_api_daemon:59] INFO - Start FSCTool service successfully.
-`
-
-type FakeResp struct {
-	out string
-	err error
-}
-
-func NewFakeExecuter(respMap map[string]*FakeResp) e.Executer {
-	return &FakeExecuter{RespMap: respMap}
-}
-
-type FakeExecuter struct {
-	RespMap map[string]*FakeResp
-}
-
-func (f *FakeExecuter) Run(name string, args ...string) (string, error) {
-	v, ok := f.RespMap[args[1]]
-	if !ok {
-		fmt.Println(args)
-		return "", fmt.Errorf("can find specified op: %s", args[1])
-	}
-	return v.out, v.err
-}
-
 func TestSetup(t *testing.T) {
-	f := Driver{}
+	path := "./testdata/fusionstorage.yaml"
 
-	c.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath = "./testdata/fusionstorage.yaml"
-	respMap := map[string]*FakeResp{
-		"startServer": {startServer, nil},
-	}
-	rootExecuter = NewFakeExecuter(respMap)
-
-	f.Setup()
+	conf := &Config{}
+	Parse(conf, path)
 
 	expect := &Config{
 		AuthOptions: AuthOptions{
@@ -119,7 +84,7 @@ func TestSetup(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(expect, f.conf) {
-		t.Errorf("Test driver setup failed:\n expect:%v\n got:\t%v", expect, f.conf)
+	if !reflect.DeepEqual(expect, conf) {
+		t.Errorf("Test driver setup failed:\n expect:%v\n got:\t%v", expect, conf)
 	}
 }
