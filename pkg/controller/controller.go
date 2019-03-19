@@ -142,6 +142,14 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	if opt.PoolId == "" {
 		opt.PoolId = polInfo.Id
 		opt.PoolName = polInfo.Name
+	}else {
+		tmp, err := db.C.GetPool(ctx, opt.PoolId)
+		if err != nil {
+			log.Error("get pool by poolid failed")
+			return pb.GenericResponseError(err), err
+		}
+		opt.PoolName = tmp.Name
+		log.Info("opt find pool name by pool id in db:", opt.PoolName)
 	}
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)

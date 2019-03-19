@@ -23,6 +23,8 @@ set +o xtrace
 # Name of the lvm volume groups to use/create for iscsi volumes
 VOLUME_GROUP_NAME=${VOLUME_GROUP_NAME:-opensds-volumes}
 DEFAULT_VOLUME_GROUP_NAME=$VOLUME_GROUP_NAME-default
+#Name of lvm nvme volume group to use/create for nvme volumes
+NVME_VOLUME_GROUP_NAME=$VOLUME_GROUP_NAME-nvme
 # Backing file name is of the form $VOLUME_GROUP$BACKING_FILE_SUFFIX
 BACKING_FILE_SUFFIX=-backing-file
 # Default volume size
@@ -30,13 +32,33 @@ VOLUME_BACKING_FILE_SIZE=${VOLUME_BACKING_FILE_SIZE:-20G}
 LVM_DIR=$OPT_DIR/lvm
 DATA_DIR=$LVM_DIR
 mkdir -p $LVM_DIR
+# nvme device 
+LVM_DEVICE=/dev/nvme0n1
 
 osds::lvm::pkg_install(){
-    sudo apt-get install -y lvm2 tgt open-iscsi
+    sudo apt-get install -y lvm2 tgt open-iscsi ibverbs-utils
 }
 
 osds::lvm::pkg_uninstall(){
-    sudo apt-get purge -y lvm2 tgt open-iscsi
+    sudo apt-get purge -y lvm2 tgt open-iscsi ibvverbs-utils
+}
+
+osds::lvm::nvmeofpkginstall(){
+    # nvme-cli utility for nvmeof initiator
+    sudo wget https://github.com/linux-nvme/nvme-cli/archive/v1.7.tar.gz -O /opt/nvmecli-1.7.tar.gz
+    sudo tar -zxvf /opt/nvmecli-1.7.tar.gz -C /opt/
+    cd /opt/nvme-cli-1.7 && sudo make && sudo make install
+    # nvme kernel
+    sudo modprobe nvmet
+    sudo modprobe nvme-rdma
+    sudo modprobe nvmet-rdma
+}
+
+osds::lvm::nvmeofpkguninstall(){
+    sudo nvme disconnect-all
+    sudo modprobe -r nvme-rdma
+    sudo modprobe -r nvmet-rdma
+    sudo modprobe -r nvmet
 }
 
 osds::lvm::create_volume_group(){
@@ -54,6 +76,37 @@ osds::lvm::create_volume_group(){
         if ! sudo vgs $vg; then
             sudo vgcreate $vg $vg_dev
         fi
+    fi
+}
+
+osds::lvm::create_nvme_vg(){
+    local vg=$1
+    local size=$2
+    cap=$(parted $LVM_DEVICE unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}')
+    if [ cap > '$size' ];then
+        # Only create if the file doesn't already exists
+        # create volume group and prepare kernel module
+        sudo mkdir -p $DATA_DIR/$vg
+        sudo mount $LVM_DEVICE $DATA_DIR/$vg
+        local backing_file=$DATA_DIR/$vg/$vg$BACKING_FILE_SUFFIX
+        if ! sudo vgs $vg; then
+            # Only create if the file doesn't already exists
+            [[ -f $backing_file ]] || truncate -s $size $backing_file
+            local vg_dev
+            vg_dev=`sudo losetup -f --show $backing_file`
+
+            # Only create physical volume if it doesn't already exist
+            if ! sudo pvs $vg_dev; then
+                sudo pvcreate $vg_dev
+            fi
+
+            # Only create volume group if it doesn't already exist
+            if ! sudo vgs $vg; then
+                sudo vgcreate $vg $vg_dev
+            fi
+        fi    
+    else
+        echo "disk $LVM_DEVICE does not have enough space"
     fi
 }
 
@@ -86,6 +139,26 @@ driver_name = lvm
 config_path = /etc/opensds/driver/lvm.yaml
 
 OPENSDS_LVM_GLOBAL_CONFIG_DOC
+}
+
+osds::lvm::set_nvme_configuration(){
+cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
+
+  $NVME_VOLUME_GROUP_NAME:
+    diskType: NL-SAS
+    availabilityZone: default
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: nvmeof
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 20us
+OPENSDS_LVM_CONFIG_DOC
 }
 
 osds::lvm::remove_volumes() {
@@ -124,6 +197,20 @@ osds::lvm::clean_volume_group() {
     if [[ -z "$(sudo lvs --noheadings -o lv_name $vg 2>/dev/null)" ]]; then
         osds::lvm::clean_backing_file $DATA_DIR/$vg$BACKING_FILE_SUFFIX
     fi
+}
+
+osds::lvm::clean_nvme_volume_group(){
+    local nvmevg=$1
+    echo "nvme pool ${nvmevg}"
+    osds::lvm::remove_volumes $nvmevg
+    osds::lvm::remove_volume_group $nvmevg
+    # if there is no logical volume left, it's safe to attempt a cleanup
+    # of the backing file
+    if [[ -z "$(sudo lvs --noheadings -o lv_name $nvmevg 2>/dev/null)" ]]; then
+        osds::lvm::clean_backing_file $DATA_DIR/$nvmevg/$nvmevg$BACKING_FILE_SUFFIX
+    fi
+    sleep 3
+    sudo umount   $DATA_DIR/$nvmevg
 }
 
 
@@ -172,12 +259,32 @@ osds::lvm::install() {
     # Remove volumes that already exist.
     osds::lvm::remove_volumes $vg
     osds::lvm::set_configuration
+
+    # check nvmeof prerequisites
+    local nvmevg=$NVME_VOLUME_GROUP_NAME
+   if [[ -e "$LVM_DEVICE" ]]; then
+        phys_port_cnt=$(ibv_devinfo |grep -Eow hca_id |wc -l)
+        echo "The actual quantity of RDMA ports is $phys_port_cnt"
+        if [[ "$phys_port_cnt" < '1' ]]; then
+            echo "RDMA card not found"
+        else
+        osds::lvm::create_nvme_vg $nvmevg $size
+        osds::lvm::nvmeofpkginstall
+        # remove volumes that already exist
+        osds::lvm::remove_volumes $nvmevg
+        osds::lvm::set_nvme_configuration
+        fi
+    fi
     osds::lvm::set_lvm_filter
 }
 
 osds::lvm::cleanup(){
     osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
     osds::lvm::clean_lvm_filter
+    local nvmevg=$NVME_VOLUME_GROUP_NAME
+    if vgs $nvmevg ; then
+    	osds::lvm::clean_nvme_volume_group $nvmevg
+    fi
 }
 
 osds::lvm::uninstall(){
@@ -186,6 +293,7 @@ osds::lvm::uninstall(){
 
 osds::lvm::uninstall_purge(){
     echo osds::lvm::pkg_uninstall
+    echo osds::lvm::nvmeofpkguninstall
 }
 
 # Restore xtrace
