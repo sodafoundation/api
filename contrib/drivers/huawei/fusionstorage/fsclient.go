@@ -314,21 +314,21 @@ func (c *FsCli) queryHostLunInfo(hostName string) (*hostLunList, error) {
 	return lunList, nil
 }
 
-func (c *FsCli) queryIscsiPortal(initiator string) (string, error) {
+func (c *FsCli) queryIscsiPortal(initiator string) ([]string, error) {
 	args := []string{
 		"--op", "queryIscsiPortalInfo", "--portName", initiator,
 	}
 	out, err := c.RunCmd(args...)
 	if err != nil {
 		log.Errorf("Query iscsi portal failed: %v", err)
-		return "", err
+		return nil, err
 	}
 
 	if len(out) > 0 {
-		return out[0], nil
+		return out, nil
 	}
 
-	return "", fmt.Errorf("The iscsi target portal is empty.")
+	return nil, fmt.Errorf("The iscsi target portal is empty.")
 }
 
 func (c *FsCli) queryHostFromVolume(lunId string) ([]host, error) {

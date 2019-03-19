@@ -308,8 +308,8 @@ func (d *Driver) InitializeConnection(req *pb.CreateVolumeAttachmentOpts) (*mode
 	connData := map[string]interface{}{
 		"accessMode":       data["access_mode"],
 		"targetDiscovered": data["target_discovered"],
-		"targetIQN":        data["target_iqn"],
-		"targetPortal":     data["target_portal"],
+		"targetIQN":        []string{data["target_iqn"].(string)},
+		"targetPortal":     []string{data["target_portal"].(string)},
 		"discard":          false,
 		"targetLun":        data["target_lun"],
 	}
