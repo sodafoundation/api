@@ -310,8 +310,8 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 		DriverVolumeType: ISCSIProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
-			"targetIQN":        tgtIqn,
-			"targetPortal":     tgtIp + ":3260",
+			"targetIQN":        []string{tgtIqn},
+			"targetPortal":     []string{tgtIp + ":3260"},
 			"discard":          false,
 			"targetLun":        tgtLun,
 		},

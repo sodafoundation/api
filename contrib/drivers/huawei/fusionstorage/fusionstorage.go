@@ -257,7 +257,14 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 		return nil, err
 	}
 
-	iscsiTarget := strings.Split(targetPortalInfo, ",")
+	var targetIQN []string
+	var targetPortal []string
+
+	for _, v := range targetPortalInfo {
+		iscsiTarget := strings.Split(v, ",")
+		targetIQN = append(targetIQN, iscsiTarget[1])
+		targetPortal = append(targetPortal, iscsiTarget[0])
+	}
 
 	connInfo := &ConnectionInfo{
 		DriverVolumeType: ISCSIProtocol,
@@ -270,8 +277,8 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 			"connect_type":      FusionstorageIscsi,
 			"host":              hostName,
 			"initiator":         initiator,
-			"targetIQN":         []string{iscsiTarget[1]},
-			"targetPortal":      []string{iscsiTarget[0]},
+			"targetIQN":         targetIQN,
+			"targetPortal":      targetPortal,
 		},
 	}
 
