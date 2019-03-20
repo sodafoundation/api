@@ -51,7 +51,7 @@ func TestCreateVolume(t *testing.T) {
 }
 
 func TestGetVolume(t *testing.T) {
-	var prfID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
+	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected := &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
@@ -64,7 +64,7 @@ func TestGetVolume(t *testing.T) {
 		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
-	vol, err := fv.GetVolume(prfID)
+	vol, err := fv.GetVolume(volID)
 	if err != nil {
 		t.Error(err)
 		return
@@ -114,12 +114,12 @@ func TestDeleteVolume(t *testing.T) {
 
 func TestUpdateVolume(t *testing.T) {
 	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
-	vol := model.VolumeSpec{
+	vol := &model.VolumeSpec{
 		Name:        "sample-volume",
 		Description: "This is a sample volume for testing",
 	}
 
-	result, err := fv.UpdateVolume(volID, &vol)
+	result, err := fv.UpdateVolume(volID, vol)
 	if err != nil {
 		t.Error(err)
 		return
