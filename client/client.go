@@ -101,15 +101,20 @@ func (c *Client) Reset() *Client {
 }
 
 func processListParam(args []interface{}) (string, error) {
-	var filter map[string]string
-	var u string
 	var urlParam []string
+	var output string
 
-	if len(args) > 0 {
-		if len(args) > 1 {
-			return "", errors.New("only support one parameter that must be map[string]string")
-		}
-		filter = args[0].(map[string]string)
+	// If args is empty, just return the output immeadiately.
+	if len(args) == 0 {
+		return "", nil
+	}
+	// Add some limits for input args parameter.
+	if len(args) != 1 {
+		return "", errors.New("args should only support one parameter")
+	}
+	filter, ok := args[0].(map[string]string)
+	if !ok {
+		return "", errors.New("args element type should be map[string]string")
 	}
 
 	if filter != nil {
@@ -120,10 +125,9 @@ func processListParam(args []interface{}) (string, error) {
 			urlParam = append(urlParam, k+"="+v)
 		}
 	}
-
 	if len(urlParam) > 0 {
-		u = strings.Join(urlParam, "&")
+		output = strings.Join(urlParam, "&")
 	}
 
-	return u, nil
+	return output, nil
 }
