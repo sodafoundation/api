@@ -80,9 +80,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/docks':
+  '/v1beta/{tenantId}/docks':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Dock
@@ -100,9 +100,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/docks/{dockId}':
+  '/v1beta/{tenantId}/docks/{dockId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/dockId'
     get:
       tags:
@@ -121,9 +121,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/pools':
+  '/v1beta/{tenantId}/pools':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Pool
@@ -141,9 +141,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/availabilityZones':
+  '/v1beta/{tenantId}/availabilityZones':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Availability Zone
@@ -161,9 +161,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/pools/{poolId}':
+  '/v1beta/{tenantId}/pools/{poolId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/poolId'
     get:
       tags:
@@ -182,9 +182,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles':
+  '/v1beta/{tenantId}/profiles':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Profiles
@@ -292,9 +292,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}':
+  '/v1beta/{tenantId}/profiles/{profileId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
     get:
       tags:
@@ -377,9 +377,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}/customeProperties':
+  '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
     post:
       tags:
@@ -436,9 +436,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}/customProperties/{customKey}':
+  '/v1beta/{tenantId}/profiles/{profileId}/customProperties/{customKey}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
       - $ref: '#/parameters/customKey'
     delete:
@@ -456,9 +456,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes':
+  '/v1beta/{tenantId}/block/volumes':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block volumes
@@ -498,9 +498,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes/{volumeId}':
+  '/v1beta/{tenantId}/block/volumes/{volumeId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeId'
     get:
       tags:
@@ -563,9 +563,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes/{volumeId}/resize':
+  '/v1beta/{tenantId}/block/volumes/{volumeId}/resize':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeId'
     post:
       tags:
@@ -589,9 +589,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/attachments':
+  '/v1beta/{tenantId}/block/attachments':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       parameters:
         - uniqueItems: true
@@ -640,9 +640,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/attachments/{attachmentId}':
+  '/v1beta/{tenantId}/block/attachments/{attachmentId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/attachmentId'
     get:
       tags:
@@ -700,9 +700,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/snapshots':
+  '/v1beta/{tenantId}/block/snapshots':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       parameters:
         - uniqueItems: true
@@ -748,9 +748,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/snapshots/{snapshotId}':
+  '/v1beta/{tenantId}/block/snapshots/{snapshotId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/snapshotId'
     get:
       tags:
@@ -813,9 +813,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups':
+  '/v1beta/{tenantId}/block/volumeGroups':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block volume group
@@ -877,9 +877,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
+  '/v1beta/{tenantId}/block/volumeGroups/{volumeGroupId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeGroupId'
     get:
       tags:
@@ -969,9 +969,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications':
+  '/v1beta/{tenantId}/block/replications':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -1042,9 +1042,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}':
+  '/v1beta/{tenantId}/block/replications/{replicationId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/replicationId'
     get:
       tags:
@@ -1163,9 +1163,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/detail':
+  '/v1beta/{tenantId}/block/replications/detail':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -1209,9 +1209,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/enable':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/enable':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1235,9 +1235,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/disable':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/disable':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1261,9 +1261,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/failover':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/failover':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1633,14 +1633,14 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - availabilityZone
           - size
           - profileId
           - poolId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1704,14 +1704,14 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - hostInfo
           - connectionInfo
           - mountpoint
           - status
           - volumeId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1782,13 +1782,13 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - status
           - volumeId
           - profileId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1822,14 +1822,14 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - profiles
           - name
           - description
           - availabilityZone
           - status
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1866,7 +1866,7 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - primaryVolumeId
           - scondaryVolumeId
@@ -1875,7 +1875,7 @@ definitions:
           - replicationMode
           - profileId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1997,11 +1997,11 @@ parameters:
     description: API version string
     type: string
     pattern: 'v([1-9][0-9]*)((alpha)([1-9][0-9]*)|(beta)([1-9][0-9]*))?'
-  projectId:
-    name: projectId
+  tenantId:
+    name: tenantId
     in: path
     required: true
-    description: The project UUID in a multi-tenancy environment.
+    description: The tenant UUID in a multi-tenancy environment.
     type: string
   dockId:
     name: dockId
