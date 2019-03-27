@@ -31,7 +31,7 @@ _osdsctl() {
     '2 version')
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     '2 volume')
-          COMPREPLY=($(compgen -W 'attachment create delete list show snapshot update group' -- $cur)) ;;
+          COMPREPLY=($(compgen -W 'attachment create delete list show extend snapshot update group' -- $cur)) ;;
     '2 replication')
           COMPREPLY=($(compgen -W 'create delete list show update enable disable failover' -- $cur)) ;;
     '3 snapshot')

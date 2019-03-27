@@ -15,6 +15,7 @@
 package exec
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -26,11 +27,19 @@ type Executer interface {
 }
 
 func Run(name string, arg ...string) (string, error) {
-	log.V(5).Infof("Command: %s %s", name, strings.Join(arg, " "))
-	info, err := exec.Command(name, arg...).Output()
+	_, err := exec.LookPath(name)
 	if err != nil {
-		log.Errorf("Execute command failed, error: %v", err)
+		if err == exec.ErrNotFound {
+			return "", fmt.Errorf("%q executable not found in $PATH", name)
+		}
 		return "", err
+	}
+
+	log.V(5).Infof("Command: %s %s", name, strings.Join(arg, " "))
+	info, err := exec.Command(name, arg...).CombinedOutput()
+	if err != nil {
+		log.Errorf("Execute command failed\ninfo:\n%s\nerror: %v", info, err)
+		return string(info), err
 	}
 	log.V(5).Infof("Command Result:\n%s", string(info))
 	return string(info), nil

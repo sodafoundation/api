@@ -107,13 +107,11 @@ func request(urlStr string, method string, headers HeaderOption, input interface
 	// Set the request timeout a little bit longer upload snapshot to cloud temporarily.
 	req.SetTimeout(time.Minute*6, time.Minute*6)
 	// init body
-	log.Printf("%s %s\n", strings.ToUpper(method), urlStr)
 	if input != nil {
 		body, err := json.MarshalIndent(input, "", "  ")
 		if err != nil {
 			return err
 		}
-		log.Printf("Request body:\n%s\n", string(body))
 		req.Body(body)
 	}
 

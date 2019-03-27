@@ -16,21 +16,28 @@ package api
 
 import (
 	"encoding/json"
-	"net/http"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller"
+	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"golang.org/x/net/context"
 )
 
 func NewReplicationPortal() *ReplicationPortal {
-	return &ReplicationPortal{}
+	return &ReplicationPortal{
+		CtrClient: client.NewClient(),
+	}
 }
 
 type ReplicationPortal struct {
 	BasePortal
+
+	CtrClient client.Client
 }
 
 var whiteListSimple = []string{"Id", "Name", "ReplicationStatus"}
@@ -42,90 +49,60 @@ func (r *ReplicationPortal) CreateReplication() {
 	if !policy.Authorize(r.Ctx, "replication:create") {
 		return
 	}
-
+	ctx := c.GetContext(r.Ctx)
 	var replication = &model.ReplicationSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(replication); err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
-	// Body check
-	ctx := c.GetContext(r.Ctx)
-	_, err := db.C.GetVolume(ctx, replication.PrimaryVolumeId)
+	result, err := CreateReplicationDBEntry(ctx, replication)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"can't find the specified primary volume(%s)", replication.PrimaryVolumeId)
-		return
-	}
-	_, err = db.C.GetVolume(ctx, replication.SecondaryVolumeId)
-	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"can't find the specified secondary volume(%s)", replication.PrimaryVolumeId)
-		return
-	}
-
-	// check if specified volume has already been used in other replication.
-	v, err := db.C.GetReplicationByVolumeId(ctx, replication.PrimaryVolumeId)
-	if err != nil {
-		if _, ok := err.(*model.NotFoundError); !ok {
-			model.HttpError(r.Ctx, http.StatusBadRequest,
-				"get replication by volume id %s failed", replication.PrimaryVolumeId)
-			return
-		}
-	}
-	if v != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"specified primary volume(%s) has already been used in replication(%s) ",
-			replication.PrimaryVolumeId, v.Id)
-		return
-	}
-
-	// check if specified volume has already been used in other replication.
-	v, err = db.C.GetReplicationByVolumeId(ctx, replication.SecondaryVolumeId)
-	if err != nil {
-		if _, ok := err.(*model.NotFoundError); !ok {
-			model.HttpError(r.Ctx, http.StatusBadRequest,
-				"get replication by volume id %s failed", replication.SecondaryVolumeId)
-			return
-		}
-	}
-	if v != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"specified secondary volume(%s) has already been used in replication(%s) ",
-			replication.SecondaryVolumeId, v.Id)
-		return
-	}
-
-	replication.ReplicationStatus = model.ReplicationCreating
-	replication, err = db.C.CreateReplication(ctx, replication)
-	if err != nil {
-		model.HttpError(r.Ctx, http.StatusInternalServerError,
-			"create replication in db failed")
-		return
-	}
-	// Call global controller variable to handle create replication request.
-	result, err := controller.Brain.CreateReplication(ctx, replication)
-	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"create replication failed: %s", err.Error())
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
+			"create volume replication failed: %s", err.Error())
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"marshal replication created result failed: %s", err.Error())
 		return
 	}
-
 	r.Ctx.Output.SetStatus(StatusAccepted)
 	r.Ctx.Output.Body(body)
+
+	// NOTE:The real volume replication creation process.
+	// Volume replication creation request is sent to the Dock. Dock will update volume status to "available"
+	// after volume replication creation is completed.
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer r.CtrClient.Close()
+
+	opt := &pb.CreateReplicationOpts{
+		Id:                result.Id,
+		Name:              result.Name,
+		Description:       result.Description,
+		PrimaryVolumeId:   result.PrimaryVolumeId,
+		SecondaryVolumeId: result.SecondaryVolumeId,
+		AvailabilityZone:  result.AvailabilityZone,
+		ProfileId:         result.ProfileId,
+		Context:           ctx.ToJson(),
+	}
+	if _, err = r.CtrClient.CreateReplication(context.Background(), opt); err != nil {
+		log.Error("create volume replication failed in controller service:", err)
+		return
+	}
+
+	return
 }
 
 func (r *ReplicationPortal) ListReplications() {
@@ -136,14 +113,14 @@ func (r *ReplicationPortal) ListReplications() {
 	// Call db api module to handle list replications request.
 	params, err := r.GetParameters()
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"list replications failed: %s", err.Error())
 		return
 	}
 
 	result, err := db.C.ListReplicationWithFilter(c.GetContext(r.Ctx), params)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"list replications failed: %s", err.Error())
 		return
 	}
@@ -151,7 +128,7 @@ func (r *ReplicationPortal) ListReplications() {
 	// Marshal the result.
 	body, err := json.Marshal(r.outputFilter(result, whiteListSimple))
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"marshal replications listed result failed: %s", err.Error())
 		return
 	}
@@ -170,14 +147,14 @@ func (r *ReplicationPortal) ListReplicationsDetail() {
 	// Call db api module to handle list replications request.
 	params, err := r.GetParameters()
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"list replications detail failed: %s", err.Error())
 		return
 	}
 
 	result, err := db.C.ListReplicationWithFilter(c.GetContext(r.Ctx), params)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"list replications detail failed: %s", err.Error())
 		return
 	}
@@ -185,7 +162,7 @@ func (r *ReplicationPortal) ListReplicationsDetail() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"marshal replications detail listed result failed: %s", err.Error())
 		return
 	}
@@ -204,7 +181,7 @@ func (r *ReplicationPortal) GetReplication() {
 	// Call db api module to handle get volume request.
 	result, err := db.C.GetReplication(c.GetContext(r.Ctx), id)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorNotFound,
 			"get replication failed: %s", err.Error())
 		return
 	}
@@ -212,7 +189,7 @@ func (r *ReplicationPortal) GetReplication() {
 	// Marshal the result.
 	body, err := json.Marshal(r.outputFilter(result, whiteList))
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"marshal replication showed result failed: %s", err.Error())
 		return
 	}
@@ -231,7 +208,7 @@ func (r *ReplicationPortal) UpdateReplication() {
 
 	id := r.Ctx.Input.Param(":replicationId")
 	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(&mr); err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
@@ -239,7 +216,7 @@ func (r *ReplicationPortal) UpdateReplication() {
 	if mr.ProfileId != "" {
 		_, err := db.C.GetProfile(c.GetContext(r.Ctx), mr.ProfileId)
 		if err != nil {
-			model.HttpError(r.Ctx, http.StatusBadRequest,
+			model.HttpError(r.Ctx, model.ErrorNotFound,
 				"get profile failed: %s", err.Error())
 			return
 		}
@@ -248,7 +225,7 @@ func (r *ReplicationPortal) UpdateReplication() {
 
 	result, err := db.C.UpdateReplication(c.GetContext(r.Ctx), id, &mr)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"update replication failed: %s", err.Error())
 		return
 	}
@@ -256,7 +233,7 @@ func (r *ReplicationPortal) UpdateReplication() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusInternalServerError,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"marshal replication updated result failed: %s", err.Error())
 		return
 	}
@@ -269,121 +246,195 @@ func (r *ReplicationPortal) DeleteReplication() {
 	if !policy.Authorize(r.Ctx, "replication:delete") {
 		return
 	}
+	ctx := c.GetContext(r.Ctx)
 
 	id := r.Ctx.Input.Param(":replicationId")
-	rep, err := db.C.GetReplication(c.GetContext(r.Ctx), id)
+	rep, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorNotFound,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DeleteReplicationDBEntry(c.GetContext(r.Ctx), rep); err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest, err.Error())
+	if err := DeleteReplicationDBEntry(ctx, rep); err != nil {
+		model.HttpError(r.Ctx, model.ErrorBadRequest, err.Error())
 		return
 	}
-	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.DeleteReplication(c.GetContext(r.Ctx), rep)
+	r.Ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication deletion process.
+	// Volume replication deletion request is sent to the Dock. Dock will remove
+	// replicaiton record after volume replication creation is completed.
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer r.CtrClient.Close()
+
+	opt := &pb.DeleteReplicationOpts{
+		Id:                rep.Id,
+		PrimaryVolumeId:   rep.PrimaryVolumeId,
+		SecondaryVolumeId: rep.SecondaryVolumeId,
+		AvailabilityZone:  rep.AvailabilityZone,
+		ProfileId:         rep.ProfileId,
+		Metadata:          rep.Metadata,
+		Context:           ctx.ToJson(),
+	}
+	if _, err = r.CtrClient.DeleteReplication(context.Background(), opt); err != nil {
+		log.Error("delete volume replication failed in controller service:", err)
+		return
+	}
+
+	return
+}
+
+func (r *ReplicationPortal) EnableReplication() {
+	if !policy.Authorize(r.Ctx, "replication:enable") {
+		return
+	}
+	ctx := c.GetContext(r.Ctx)
+
+	id := r.Ctx.Input.Param(":replicationId")
+	rep, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(r.Ctx, http.StatusBadRequest,
-			"delete replication failed: %v", err.Error())
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
+			"get replication failed: %s", err.Error())
+		return
+	}
+
+	if err := EnableReplicationDBEntry(ctx, rep); err != nil {
+		model.HttpError(r.Ctx, model.ErrorBadRequest, err.Error())
 		return
 	}
 
 	r.Ctx.Output.SetStatus(StatusAccepted)
-}
 
-func (r *ReplicationPortal) EnableReplication() {
-	ctx := r.Ctx
-	if !policy.Authorize(ctx, "replication:enable") {
+	// NOTE:The real volume replication enable process.
+	// Volume replication enable request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication enable
+	// operation is completed.
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer r.CtrClient.Close()
+
+	opt := &pb.EnableReplicationOpts{
+		Id:                rep.Id,
+		PrimaryVolumeId:   rep.PrimaryVolumeId,
+		SecondaryVolumeId: rep.SecondaryVolumeId,
+		AvailabilityZone:  rep.AvailabilityZone,
+		ProfileId:         rep.ProfileId,
+		Metadata:          rep.Metadata,
+		Context:           ctx.ToJson(),
+	}
+	if _, err = r.CtrClient.EnableReplication(context.Background(), opt); err != nil {
+		log.Error("enable volume replication failed in controller service:", err)
 		return
 	}
 
-	id := ctx.Input.Param(":replicationId")
-	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"get replication failed: %s", err.Error())
-		return
-	}
-
-	if err := EnableReplicationDBEntry(c.GetContext(ctx), rep); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-	// Call global controller variable to handle delete replication request.
-	err = controller.Brain.EnableReplication(c.GetContext(ctx), rep)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"enable replication failed: %v", err.Error())
-		return
-	}
-
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }
 
 func (r *ReplicationPortal) DisableReplication() {
-	ctx := r.Ctx
-	if !policy.Authorize(ctx, "replication:disable") {
+	if !policy.Authorize(r.Ctx, "replication:disable") {
 		return
 	}
+	ctx := c.GetContext(r.Ctx)
 
-	id := ctx.Input.Param(":replicationId")
-	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
+	id := r.Ctx.Input.Param(":replicationId")
+	rep, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := DisableReplicationDBEntry(c.GetContext(ctx), rep); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+	if err := DisableReplicationDBEntry(ctx, rep); err != nil {
+		model.HttpError(r.Ctx, model.ErrorBadRequest, err.Error())
 		return
 	}
-	// Call global controller variable to handle delete r request.
-	err = controller.Brain.DisableReplication(c.GetContext(ctx), rep)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"enable replication failed: %v", err.Error())
+	r.Ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication disable process.
+	// Volume replication diable request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication disable
+	// operation is completed.
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer r.CtrClient.Close()
+
+	opt := &pb.DisableReplicationOpts{
+		Id:                rep.Id,
+		PrimaryVolumeId:   rep.PrimaryVolumeId,
+		SecondaryVolumeId: rep.SecondaryVolumeId,
+		AvailabilityZone:  rep.AvailabilityZone,
+		ProfileId:         rep.ProfileId,
+		Metadata:          rep.Metadata,
+		Context:           ctx.ToJson(),
+	}
+	if _, err = r.CtrClient.DisableReplication(context.Background(), opt); err != nil {
+		log.Error("disable volume replication failed in controller service:", err)
 		return
 	}
 
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }
 
 func (r *ReplicationPortal) FailoverReplication() {
-	ctx := r.Ctx
-	if !policy.Authorize(ctx, "replication:failover") {
+	if !policy.Authorize(r.Ctx, "replication:failover") {
 		return
 	}
+	ctx := c.GetContext(r.Ctx)
 
 	var failover = model.FailoverReplicationSpec{}
 	if err := json.NewDecoder(r.Ctx.Request.Body).Decode(&failover); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorBadRequest,
 			"parse replication request body failed: %s", err.Error())
 		return
 	}
 
-	id := ctx.Input.Param(":replicationId")
-	rep, err := db.C.GetReplication(c.GetContext(ctx), id)
+	id := r.Ctx.Input.Param(":replicationId")
+	rep, err := db.C.GetReplication(ctx, id)
 	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
+		model.HttpError(r.Ctx, model.ErrorNotFound,
 			"get replication failed: %s", err.Error())
 		return
 	}
 
-	if err := FailoverReplicationDBEntry(c.GetContext(ctx), rep, failover.SecondaryBackendId); err != nil {
-		model.HttpError(ctx, http.StatusBadRequest, err.Error())
+	if err := FailoverReplicationDBEntry(ctx, rep, failover.SecondaryBackendId); err != nil {
+		model.HttpError(r.Ctx, model.ErrorBadRequest, err.Error())
+		return
+	}
+	r.Ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real volume replication failover process.
+	// Volume replication failover request is sent to the Dock. Dock will set
+	// volume replication status to 'available' after volume replication failover
+	// operation is completed.
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer r.CtrClient.Close()
+
+	opt := &pb.FailoverReplicationOpts{
+		Id:                  rep.Id,
+		PrimaryVolumeId:     rep.PrimaryVolumeId,
+		SecondaryVolumeId:   rep.SecondaryVolumeId,
+		AvailabilityZone:    rep.AvailabilityZone,
+		ProfileId:           rep.ProfileId,
+		Metadata:            rep.Metadata,
+		AllowAttachedVolume: failover.AllowAttachedVolume,
+		SecondaryBackendId:  failover.SecondaryBackendId,
+		Context:             ctx.ToJson(),
+	}
+	if _, err = r.CtrClient.FailoverReplication(context.Background(), opt); err != nil {
+		log.Error("failover volume replication failed in controller service:", err)
 		return
 	}
 
-	// Call global controller variable to handle delete r request.
-	err = controller.Brain.FailoverReplication(c.GetContext(ctx), rep, &failover)
-	if err != nil {
-		model.HttpError(ctx, http.StatusBadRequest,
-			"failover replication failed: %v", err.Error())
-		return
-	}
-
-	ctx.Output.SetStatus(StatusAccepted)
+	return
 }

@@ -24,7 +24,7 @@ import (
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
@@ -59,21 +59,25 @@ type DoradoClient struct {
 
 func NewClient(opt *AuthOptions) (*DoradoClient, error) {
 	endpoints := strings.Split(opt.Endpoints, ",")
-	// Decrypte the password
-	pwdCiphertext := opt.Password
-	pwdTool := pwd.NewPwdTool(opt.PasswordTool)
-	pwd, err := pwdTool.Decrypter(pwdCiphertext)
-	if err != nil {
-		return nil, err
+	var pwdCiphertext = opt.Password
+
+	if opt.EnableEncrypted {
+		// Decrypte the password
+		pwdTool := pwd.NewPwdEncrypter(opt.PwdEncrypter)
+		password, err := pwdTool.Decrypter(pwdCiphertext)
+		if err != nil {
+			return nil, err
+		}
+		pwdCiphertext = password
 	}
 
 	c := &DoradoClient{
 		user:      opt.Username,
-		passwd:    pwd,
+		passwd:    pwdCiphertext,
 		endpoints: endpoints,
 		insecure:  opt.Insecure,
 	}
-	err = c.login()
+	err := c.login()
 	return c, err
 }
 

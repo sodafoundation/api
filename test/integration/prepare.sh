@@ -24,18 +24,17 @@ OPENSDS_CONF=/etc/opensds/opensds.conf
 # Config backend info.
 mkdir -p /etc/opensds
 cat > ${OPENSDS_CONF} << OPENSDS_GLOBAL_CONFIG_DOC
+[osdsapiserver]
+api_endpoint = 0.0.0.0:50040
+
 [osdslet]
-api_endpoint = localhost:50040
-graceful = True
-log_file = /var/log/opensds/osdslet.log
-socket_order = inc
+api_endpoint = 0.0.0.0:50049
 
 [osdsdock]
-api_endpoint = localhost:50050
-log_file = /var/log/opensds/osdsdock.log
+api_endpoint = 0.0.0.0:50050
 # Choose the type of dock resource, only support 'provisioner' and 'attacher'.
 dock_type = provisioner
-# Enabled backend types, such as sample, ceph, cinder, etc.
+# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = sample
 
 [sample]
@@ -57,3 +56,4 @@ osds::certificate::install
 cd ${OPENSDS_DIR}
 sudo ${OPENSDS_DIR}/build/out/bin/osdsdock -daemon
 sudo ${OPENSDS_DIR}/build/out/bin/osdslet -daemon
+sudo ${OPENSDS_DIR}/build/out/bin/osdsapiserver -daemon

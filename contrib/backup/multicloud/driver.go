@@ -40,13 +40,14 @@ func NewMultiCloud() (backup.BackupDriver, error) {
 }
 
 type AuthOptions struct {
-	Strategy     string `yaml:"Strategy"`
-	AuthUrl      string `yaml:"AuthUrl,omitempty"`
-	DomainName   string `yaml:"DomainName,omitempty"`
-	UserName     string `yaml:"UserName,omitempty"`
-	Password     string `yaml:"Password,omitempty"`
-	PasswordTool string `yaml:"PasswordTool,omitempty"`
-	TenantName   string `yaml:"TenantName,omitempty"`
+	Strategy        string `yaml:"Strategy"`
+	AuthUrl         string `yaml:"AuthUrl,omitempty"`
+	DomainName      string `yaml:"DomainName,omitempty"`
+	UserName        string `yaml:"UserName,omitempty"`
+	Password        string `yaml:"Password,omitempty"`
+	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
+	TenantName      string `yaml:"TenantName,omitempty"`
 }
 
 type MultiCloudConf struct {

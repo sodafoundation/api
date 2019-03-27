@@ -153,7 +153,7 @@ exec 1>&3
 # Force all output to stdout and logs now
 exec 1> >( tee -a "${LOGFILE}" ) 2>&1
 
-echo -e "\n"
+echo
 echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
 echo "------------------------------------------------------------------"
 echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"

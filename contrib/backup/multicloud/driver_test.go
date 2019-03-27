@@ -34,12 +34,14 @@ func TestLoadConf(t *testing.T) {
 		Endpoint:      "http://127.0.0.1:8088",
 		UploadTimeout: DefaultUploadTimeout,
 		AuthOptions: AuthOptions{
-			Strategy:   "keystone",
-			AuthUrl:    "http://127.0.0.1/identity",
-			DomainName: "Default",
-			UserName:   "admin",
-			Password:   "opensds@123",
-			TenantName: "admin",
+			Strategy:        "keystone",
+			AuthUrl:         "http://127.0.0.1/identity",
+			DomainName:      "Default",
+			UserName:        "admin",
+			Password:        "opensds@123",
+			TenantName:      "admin",
+			PwdEncrypter:    "aes",
+			EnableEncrypted: false,
 		},
 	}
 	fmt.Printf("%+v", conf)

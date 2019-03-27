@@ -55,7 +55,11 @@
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.7.5"
+  version = "1.17.0"
+
+[[constraint]]
+  name = "github.com/golang/protobuf"
+  branch = "master"
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"
@@ -64,6 +68,14 @@
 [[constraint]]
   branch = "master"
   name = "github.com/howeyc/gopass"
+
+[[constraint]]
+  name = "github.com/gophercloud/gophercloud"
+  revision = "754e57e7867bfa48062ff2a237caad538085700a"
+
+[[constraint]]
+  name = "github.com/ceph/go-ceph"
+  revision = "81e4191e131b21e282a9289621383237677d2437"
 
 [prune]
   go-tests = true

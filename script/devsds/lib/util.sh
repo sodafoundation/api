@@ -148,16 +148,12 @@ osds::util::get_default_host_ip() {
 }
 
 osds::util::is_service_enabled() {
-    local xtrace
-    xtrace=$(set +o | grep xtrace)
-    set +o xtrace
     local enabled=1
     local services=$@
     local service
     for service in ${services}; do
         [[ ,${OPENSDS_ENABLED_SERVICES}, =~ ,${service}, ]] && enabled=0
     done
-    $xtrace
     return $enabled
 }
 

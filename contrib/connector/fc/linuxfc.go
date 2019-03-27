@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,66 +19,60 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
+
+	"github.com/opensds/opensds/contrib/connector"
 )
 
-type linuxfc struct{}
-
-func (l *linuxfc) getSCSIWWN(devicePath string) (string, error) {
-	out, err := exec.Command("/lib/udev/scsi_id", "--page", "0x83", "--whitelisted", devicePath).CombinedOutput()
-	outString := string(out)
+func getSCSIWWN(devicePath string) (string, error) {
+	out, err := connector.ExecCmd("/lib/udev/scsi_id", "--page", "0x83", "--whitelisted", devicePath)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device wwn:%s, %v", outString, err)
-		log.Println(errMsg)
+		errMsg := fmt.Sprintf("Error occurred when get device wwn: %s, %v\n", out, err)
+		log.Printf(errMsg)
 		return "", errors.New(errMsg)
 	}
-	return strings.TrimSpace(outString), nil
+	return strings.TrimSpace(out), nil
 }
 
-func (l *linuxfc) getContentfromSymboliclink(symboliclink string) string {
-	out, _ := exec.Command("readlink", "-f", symboliclink).CombinedOutput()
-	return strings.TrimSuffix(string(out), "\n")
+func getContentfromSymboliclink(symboliclink string) string {
+	out, _ := connector.ExecCmd("readlink", "-f", symboliclink)
+	return strings.TrimSuffix(out, "\n")
 }
 
-func (l *linuxfc) rescanHosts(tgtWWN []string, hbas []map[string]string) error {
+func rescanHosts(tgtWWN []string, hbas []map[string]string) error {
 	for _, hba := range hbas {
 		cmd := fmt.Sprintf("echo \"- - -\" > /sys/class/scsi_host/%s/scan", hba["host_device"])
-		out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
-
-		outString := string(out)
+		out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 		if err != nil {
-			errMsg := fmt.Sprintf("Error occurred when rescan hosts:%s, %v", outString, err)
-			log.Println(errMsg)
+			errMsg := fmt.Sprintf("Error occurred when rescan hosts: %s, %v\n", out, err)
+			log.Printf(errMsg)
 			return errors.New(errMsg)
 		}
 	}
 	return nil
 }
 
-func (l *linuxfc) getFChbas() ([]map[string]string, error) {
-	if !l.fcSupport() {
-		errMsg := fmt.Sprintf("No Fibre Channel support detected.")
+func getFChbas() ([]map[string]string, error) {
+	if !fcSupport() {
+		errMsg := fmt.Sprintf("No Fibre Channel support detected.\n")
 		log.Printf(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	out, err := exec.Command("systool", "-c", "fc_host", "-v").CombinedOutput()
-	outString := string(out)
-
+	out, err := connector.ExecCmd("systool", "-c", "fc_host", "-v")
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get FC hbas info: systool is not installed, %s, %v", outString, err)
-		log.Println(errMsg)
-		return nil, errors.New(errMsg)
-	}
-
-	if outString == "" {
-		errMsg := fmt.Sprintf("No Fibre Channel support detected.")
+		errMsg := fmt.Sprintf("Error occurred when get FC hbas info: systool is not installed: %s, %v\n", out, err)
 		log.Printf(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	lines := strings.Split(outString, "\n")
+	if out == "" {
+		errMsg := fmt.Sprintf("No Fibre Channel support detected.\n")
+		log.Printf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	lines := strings.Split(out, "\n")
 	lines = lines[2:]
 	hba := make(map[string]string)
 	hbas := []map[string]string{}
@@ -96,10 +90,10 @@ func (l *linuxfc) getFChbas() ([]map[string]string, error) {
 			val := strings.Split(line, "=")
 			if len(val) == 2 {
 				key := strings.Replace(val[0], " ", "", -1)
-				key = l.trimDoubleQuotesInText(key)
+				key = trimDoubleQuotesInText(key)
 
 				val := strings.Replace(val[1], " ", "", -1)
-				val = l.trimDoubleQuotesInText(val)
+				val = trimDoubleQuotesInText(val)
 
 				hba[key] = val
 			}
@@ -109,44 +103,41 @@ func (l *linuxfc) getFChbas() ([]map[string]string, error) {
 	return hbas, nil
 }
 
-func (l *linuxfc) removeSCSIDevice(path string) error {
+func removeSCSIDevice(path string) error {
 	cmd := "echo 1 >" + path
-	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
-	outString := string(out)
+	out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when remove scsi device:%s, %v", outString, err)
-		log.Println(errMsg)
+		errMsg := fmt.Sprintf("Error occurred when remove scsi device: %s, %v\n", out, err)
+		log.Printf(errMsg)
 		return errors.New(errMsg)
 	}
 	return nil
 }
 
-func (l *linuxfc) flushDeviceIO(device string) error {
+func flushDeviceIO(device string) error {
 	cmd := "blockdev --flushbufs " + device
-	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
-	outString := string(out)
+	out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device info when detach volume:%s,%v", outString, err)
-		log.Println(errMsg)
+		errMsg := fmt.Sprintf("Error occurred when get device info when detach volume: %s, %v\n", out, err)
+		log.Printf(errMsg)
 		return errors.New(errMsg)
 	}
 	return nil
 }
 
-func (l *linuxfc) getDeviceInfo(devicePath string) (map[string]string, error) {
+func getDeviceInfo(devicePath string) (map[string]string, error) {
 	cmd := "sg_scan " + devicePath
-	out, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput()
-	outString := string(out)
+	out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error occurred when get device info:%s, %v", outString, err)
-		log.Println(errMsg)
+		errMsg := fmt.Sprintf("Error occurred when get device info: %s, %v\n", out, err)
+		log.Printf(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
 	devInfo := make(map[string]string)
 	devInfo["device"] = devicePath
 
-	line := strings.TrimSpace(outString)
+	line := strings.TrimSpace(out)
 
 	info := strings.Split(line, " ")
 
@@ -163,12 +154,12 @@ func (l *linuxfc) getDeviceInfo(devicePath string) (map[string]string, error) {
 	return devInfo, nil
 }
 
-func (l *linuxfc) fcSupport() bool {
-	var FC_HOST_SYSFC_PATH = "/sys/class/fc_host"
-	return l.pathExists(FC_HOST_SYSFC_PATH)
+func fcSupport() bool {
+	var FcHostSYSFcPATH = "/sys/class/fc_host"
+	return pathExists(FcHostSYSFcPATH)
 }
 
-func (l *linuxfc) pathExists(path string) bool {
+func pathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true
@@ -179,7 +170,7 @@ func (l *linuxfc) pathExists(path string) bool {
 	return false
 }
 
-func (l *linuxfc) trimDoubleQuotesInText(str string) string {
+func trimDoubleQuotesInText(str string) string {
 	if strings.HasPrefix(str, "\"") && strings.HasSuffix(str, "\"") {
 		return str[1 : len(str)-1]
 	}

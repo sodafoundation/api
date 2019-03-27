@@ -28,8 +28,6 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
-	"github.com/opensds/opensds/contrib/connector/fc"
-	"github.com/opensds/opensds/contrib/connector/iscsi"
 	"github.com/opensds/opensds/contrib/drivers"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -203,21 +201,33 @@ func (add *attachDockDiscoverer) Discover() error {
 		return err
 	}
 
-	iqns, err := iscsi.GetInitiator()
+	var localIqn string
+
+	localIqn, err = connector.NewConnector(connector.IscsiDriver).GetInitiatorInfo()
 	if err != nil {
 		log.Error("get initiator failed", err)
 		return err
 	}
-	var localIqn string
-	if len(iqns) > 0 {
-		localIqn = iqns[0]
-	}
 
 	bindIp := CONF.BindIp
 	if bindIp == "" {
-		bindIp = connector.GetHostIp()
+		bindIp = connector.GetHostIP()
 	}
-	wwpns, _ := fc.GetWWPNs()
+
+	fcInitiator, err := connector.NewConnector(connector.FcDriver).GetInitiatorInfo()
+	if err != nil {
+		log.Error("get initiator failed", err)
+		return err
+	}
+
+	var wwpns []string
+
+	for _, v := range strings.Split(fcInitiator, ",") {
+		if strings.Contains(v, "node_name") {
+			wwpns = append(wwpns, strings.Split(v, ":")[1])
+		}
+	}
+
 	segments := strings.Split(CONF.OsdsDock.ApiEndpoint, ":")
 	endpointIp := segments[len(segments)-2]
 	add.dck = &model.DockSpec{

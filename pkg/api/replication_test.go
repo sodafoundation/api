@@ -164,8 +164,8 @@ func TestListReplicationsWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 500 {
+		t.Errorf("Expected 500, actual %v", w.Code)
 	}
 }
 
@@ -223,8 +223,8 @@ func TestGetReplicationWithBadRequest(t *testing.T) {
 	})
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
+	if w.Code != 404 {
+		t.Errorf("Expected 404, actual %v", w.Code)
 	}
 }
 

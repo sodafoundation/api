@@ -23,11 +23,8 @@ set +o xtrace
 osds:opensds:configuration(){
 # Set global configuration.
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
-[osdslet]
+[osdsapiserver]
 api_endpoint = 0.0.0.0:50040
-graceful = True
-log_file = /var/log/opensds/osdslet.log
-socket_order = inc
 auth_strategy = $OPENSDS_AUTH_STRATEGY
 # If https is enabled, the default value of cert file
 # is /opt/opensds-security/opensds/opensds-cert.pem, 
@@ -35,12 +32,12 @@ auth_strategy = $OPENSDS_AUTH_STRATEGY
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
-# Encryption and decryption tool. Default value is aes.
-password_decrypt_tool = aes
+
+[osdslet]
+api_endpoint = $HOST_IP:50049
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050
-log_file = /var/log/opensds/osdsdock.log
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = $OPENSDS_BACKEND_LIST
 
@@ -56,11 +53,12 @@ osds::opensds::install(){
 # Run osdsdock and osdslet daemon in background.
 (
     cd ${OPENSDS_DIR}
-    sudo build/out/bin/osdslet --daemon --alsologtostderr
-    sudo build/out/bin/osdsdock --daemon --alsologtostderr
+    sudo build/out/bin/osdsapiserver --daemon
+    sudo build/out/bin/osdslet --daemon
+    sudo build/out/bin/osdsdock --daemon
 
-    osds::echo_summary "Waiting for osdslet to come up."
-    osds::util::wait_for_url localhost:50040 "osdslet" 0.25 80
+    osds::echo_summary "Waiting for osdsapiserver to come up."
+    osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.25 80
     if [ $OPENSDS_AUTH_STRATEGY == "keystone" ]; then
         local xtrace
         xtrace=$(set +o | grep xtrace)
@@ -68,27 +66,21 @@ osds::opensds::install(){
         source $DEV_STACK_DIR/openrc admin admin
         $xtrace
     fi
-    export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
-    export OPENSDS_ENDPOINT=http://localhost:50040
-    build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
+
     # Copy bash completion script to system.
     cp ${OPENSDS_DIR}/osdsctl/completion/osdsctl.bash_completion /etc/bash_completion.d/
 
+    export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
+    export OPENSDS_ENDPOINT=http://localhost:50040
+    build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy"}'
     if [ $? == 0 ]; then
-    osds::echo_summary devsds installed successfully !!
+        osds::echo_summary devsds installed successfully !!
     fi
 )
 }
 
 osds::opensds::cleanup() {
-    OSDSLET_PID=$(pgrep osdslet)
-    OSDSDOCK_PID=$(pgrep osdsdock)
-    if [ ! -z "$OSDSLET_PID" ]; then
-        kill $OSDSLET_PID
-    fi
-    if [ ! -z "$OSDSDOCK_PID" ]; then
-        kill $OSDSDOCK_PID
-    fi
+    sudo killall -9 osdsapiserver osdslet osdsdock &>/dev/null
 }
 
 osds::opensds::uninstall(){

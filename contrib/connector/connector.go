@@ -30,14 +30,19 @@ const (
 	Iqn         = "iqn"
 
 	RbdDriver = "rbd"
+
+	NvmeofDriver = "nvmeof"
+	Nqn          = "nqn"
 )
 
 // Connector implementation
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
 	Detach(map[string]interface{}) error
-	GetInitiatorInfo() (InitiatorInfo, error)
+	GetInitiatorInfo() (string, error)
 }
+
+var cnts = map[string]Connector{}
 
 // NewConnector implementation
 func NewConnector(cType string) Connector {
@@ -48,8 +53,6 @@ func NewConnector(cType string) Connector {
 	log.Printf("%s is not registered to connector", cType)
 	return nil
 }
-
-var cnts = map[string]Connector{}
 
 // RegisterConnector implementation
 func RegisterConnector(cType string, cnt Connector) error {

@@ -79,19 +79,23 @@ func NewClient(endpooint string, opt *AuthOptions, uploadTimeout int64) (*Client
 type ReqSettingCB func(req *httplib.BeegoHTTPRequest) error
 
 func (c *Client) getToken(opt *AuthOptions) (*tokens.CreateResult, error) {
-	// Decrypte the password
-	pwdCiphertext := opt.Password
-	pwdTool := pwd.NewPwdTool(opt.PasswordTool)
-	pwd, err := pwdTool.Decrypter(pwdCiphertext)
-	if err != nil {
-		return nil, err
+	var pwdCiphertext = opt.Password
+
+	if opt.EnableEncrypted {
+		// Decrypte the password
+		pwdTool := pwd.NewPwdEncrypter(opt.PwdEncrypter)
+		password, err := pwdTool.Decrypter(pwdCiphertext)
+		if err != nil {
+			return nil, err
+		}
+		pwdCiphertext = password
 	}
 
 	auth := gophercloud.AuthOptions{
 		IdentityEndpoint: opt.AuthUrl,
 		DomainName:       opt.DomainName,
 		Username:         opt.UserName,
-		Password:         pwd,
+		Password:         pwdCiphertext,
 		TenantName:       opt.TenantName,
 	}
 

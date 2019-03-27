@@ -77,6 +77,10 @@ project_domain_name = Default
 project_name = service
 user_domain_name = Default
 password = $STACK_PASSWORD
+# Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+enable_encrypted = False
+# Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+pwd_encrypter = aes
 username = $OPENSDS_SERVER_NAME
 auth_url = http://$KEYSTONE_IP/identity
 auth_type = password
@@ -155,7 +159,7 @@ osds::keystone::cleanup() {
 }
 
 osds::keystone::uninstall(){
-    if [ "true" != $USE_EXISTING_KEYSTONE] 
+    if [ "true" != $USE_EXISTING_KEYSTONE ] 
     then
         su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
     else

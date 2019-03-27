@@ -16,6 +16,7 @@ package iscsi
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,16 +30,16 @@ import (
 
 // IscsiConnectorInfo define
 type IscsiConnectorInfo struct {
-	AccessMode string `mapstructure:"accessMode"`
-	AuthUser   string `mapstructure:"authUserName"`
-	AuthPass   string `mapstructure:"authPassword"`
-	AuthMethod string `mapstructure:"authMethod"`
-	TgtDisco   bool   `mapstructure:"targetDiscovered"`
-	TgtIQN     string `mapstructure:"targetIqn"`
-	TgtPortal  string `mapstructure:"targetPortal"`
-	VolumeID   string `mapstructure:"volumeId"`
-	TgtLun     int    `mapstructure:"targetLun"`
-	Encrypted  bool   `mapstructure:"encrypted"`
+	AccessMode string   `mapstructure:"accessMode"`
+	AuthUser   string   `mapstructure:"authUserName"`
+	AuthPass   string   `mapstructure:"authPassword"`
+	AuthMethod string   `mapstructure:"authMethod"`
+	TgtDisco   bool     `mapstructure:"targetDiscovered"`
+	TgtIQN     []string `mapstructure:"targetIQN"`
+	TgtPortal  []string `mapstructure:"targetPortal"`
+	VolumeID   string   `mapstructure:"volumeId"`
+	TgtLun     int      `mapstructure:"targetLun"`
+	Encrypted  bool     `mapstructure:"encrypted"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,11 +100,11 @@ func waitForPathToExistInternal(devicePath *string, maxRetries int, deviceTransp
 }
 
 // GetInitiator returns all the ISCSI Initiator Name
-func GetInitiator() ([]string, error) {
+func getInitiator() ([]string, error) {
 	res, err := connector.ExecCmd("cat", "/etc/iscsi/initiatorname.iscsi")
 	iqns := []string{}
 	if err != nil {
-		log.Printf("Error encountered gathering initiator names: %v", err)
+		log.Printf("Error encountered gathering initiator names: %v\n", err)
 		return iqns, nil
 	}
 
@@ -114,76 +115,142 @@ func GetInitiator() ([]string, error) {
 		}
 	}
 
-	log.Printf("Found the following iqns: %s", iqns)
+	log.Printf("Found the following iqns: %s\n", iqns)
 	return iqns, nil
 }
 
+// Discovery ISCSI Target
+func discovery(portal string) error {
+	log.Printf("Discovery portal: %s\n", portal)
+	_, err := connector.ExecCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
+	if err != nil {
+		log.Printf("Error encountered in sendtargets: %v\n", err)
+		return err
+	}
+	return nil
+}
+
 // Login ISCSI Target
-func SetAuth(portal string, targetiqn string, name string, passwd string) error {
+func setAuth(portal string, targetiqn string, name string, passwd string) error {
 	// Set UserName
 	info, err := connector.ExecCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
 		"--op=update", "--name", "node.session.auth.username", "--value", name)
 	if err != nil {
-		log.Fatalf("Received error on set income username: %v, %v", err, info)
+		log.Printf("Received error on set income username: %v, %v\n", err, info)
 		return err
 	}
 	// Set Password
 	info, err = connector.ExecCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn,
 		"--op=update", "--name", "node.session.auth.password", "--value", passwd)
 	if err != nil {
-		log.Fatalf("Received error on set income password: %v, %v", err, info)
-		return err
-	}
-	return nil
-}
-
-// Discovery ISCSI Target
-func Discovery(portal string) error {
-	info, err := connector.ExecCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
-	if err != nil {
-		log.Println("Error encountered in sendtargets:", string(info), err)
+		log.Printf("Received error on set income password: %v, %v\n", err, info)
 		return err
 	}
 	return nil
 }
 
 // Login ISCSI Target
-func Login(portal string, targetiqn string) error {
+func login(portal string, targetiqn string) error {
+	log.Printf("Login portal: %s targetiqn: %s\n", portal, targetiqn)
+	// Do not login again if there is an active session.
+	cmd := "iscsiadm -m session |grep -w " + portal + "|grep -w " + targetiqn
+	_, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+	if err == nil {
+		log.Printf("there is an active session\n")
+		_, err := connector.ExecCmd("iscsiadm", "-m", "session", "-R")
+		if err == nil {
+			log.Printf("rescan iscsi session success.\n")
+		}
+		return nil
+	}
+
 	info, err := connector.ExecCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--login")
 	if err != nil {
-		log.Println("Received error on login attempt:", string(info), err)
+		log.Printf("Received error on login attempt: %v, %s\n", err, info)
 		return err
 	}
 	return nil
 }
 
 // Logout ISCSI Target
-func Logout(portal string, targetiqn string) error {
+func logout(portal string, targetiqn string) error {
+	log.Printf("Logout portal: %s targetiqn: %s\n", portal, targetiqn)
 	info, err := connector.ExecCmd("iscsiadm", "-m", "node", "-p", portal, "-T", targetiqn, "--logout")
 	if err != nil {
-		log.Println("Received error on logout attempt:", string(info), err)
+		log.Println("Received error on logout attempt", err, info)
 		return err
 	}
 	return nil
 }
 
 // Delete ISCSI Node
-func Delete(targetiqn string) error {
-	info, err := connector.ExecCmd("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
+func delete(targetiqn string) (err error) {
+	log.Printf("Delete targetiqn: %s\n", targetiqn)
+	_, err = connector.ExecCmd("iscsiadm", "-m", "node", "-o", "delete", "-T", targetiqn)
 	if err != nil {
-		log.Println("Received error on Delete attempt:", string(info), err)
+		log.Printf("Received error on Delete attempt: %v\n", err)
 		return err
 	}
 	return nil
 }
 
+// ParseIscsiConnectInfo decode
+func parseIscsiConnectInfo(connectInfo map[string]interface{}) (*IscsiConnectorInfo, int, error) {
+	var con IscsiConnectorInfo
+	mapstructure.Decode(connectInfo, &con)
+
+	fmt.Printf("iscsi target portal: %s, target iqn: %s, target lun: %d\n", con.TgtPortal, con.TgtIQN, con.TgtLun)
+	if len(con.TgtPortal) == 0 || len(con.TgtIQN) == 0 || con.TgtLun == 0 {
+		return nil, -1, errors.New("iscsi connection data invalid.")
+	}
+
+	var index int
+
+	log.Printf("TgtPortal:%v\n", con.TgtPortal)
+	for i, portal := range con.TgtPortal {
+		strs := strings.Split(portal, ":")
+		ip := strs[0]
+		cmd := "ping -c 2 " + ip
+		res, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+		log.Printf("ping result:%v\n", res)
+		if err != nil {
+			log.Printf("ping error:%v\n", res)
+			if i == len(con.TgtPortal)-1 {
+				return nil, -1, errors.New("no available iscsi portal.")
+			}
+			continue
+		}
+		index = i
+		break
+	}
+
+	return &con, index, nil
+}
+
 // Connect ISCSI Target
-func Connect(connMap map[string]interface{}) (string, error) {
-	conn := ParseIscsiConnectInfo(connMap)
-	portal := conn.TgtPortal
-	targetiqn := conn.TgtIQN
+func connect(connMap map[string]interface{}) (string, error) {
+	conn, index, err := parseIscsiConnectInfo(connMap)
+	if err != nil {
+		return "", err
+	}
+	log.Println("connmap info: ", connMap)
+	log.Println("conn info is: ", conn)
+	portal := conn.TgtPortal[index]
+	targetiqn := conn.TgtIQN[index]
 	targetlun := strconv.Itoa(conn.TgtLun)
 
+	cmd := "pgrep -f /sbin/iscsid"
+	_, err = connector.ExecCmd("/bin/bash", "-c", cmd)
+
+	if err != nil {
+		cmd = "/sbin/iscsid"
+		_, errExec := connector.ExecCmd("/bin/bash", "-c", cmd)
+		if errExec != nil {
+			return "", fmt.Errorf("Please stop the iscsi process outside the container first: %v", errExec)
+		}
+	}
+
+	log.Printf("Connect portal: %s targetiqn: %s targetlun: %s\n", portal, targetiqn, targetlun)
 	devicePath := strings.Join([]string{
 		"/dev/disk/by-path/ip",
 		portal,
@@ -192,100 +259,111 @@ func Connect(connMap map[string]interface{}) (string, error) {
 		"lun",
 		targetlun}, "-")
 
-	isexist := waitForPathToExist(&devicePath, 1, ISCSITranslateTCP)
-	if !isexist {
+	log.Println("devicepath is ", devicePath)
 
-		// Discovery
-		err := Discovery(portal)
-		if err != nil {
-			return "", err
-		}
-		// Set authentication messages,if is has.
-		if len(conn.AuthMethod) != 0 {
-			SetAuth(portal, targetiqn, conn.AuthUser, conn.AuthPass)
-		}
-		//Login
-		err = Login(portal, targetiqn)
-		if err != nil {
-			return "", err
-		}
-
-		isexist = waitForPathToExist(&devicePath, 10, ISCSITranslateTCP)
-		if !isexist {
-			return "", errors.New("Could not connect volume: Timeout after 10s")
-		}
-
+	// Discovery
+	err = discovery(portal)
+	if err != nil {
+		return "", err
 	}
+	if len(conn.AuthMethod) != 0 {
+		setAuth(portal, targetiqn, conn.AuthUser, conn.AuthPass)
+	}
+	//Login
+	err = login(portal, targetiqn)
+	if err != nil {
+		return "", err
+	}
+
+	isexist := waitForPathToExist(&devicePath, 10, ISCSITranslateTCP)
+
+	if !isexist {
+		return "", errors.New("Could not connect volume: Timeout after 10s")
+	}
+
 	return devicePath, nil
 }
 
-func sessionExists(portal string, tgtIqn string) bool {
-	info, err := connector.ExecCmd("iscsiadm", "-m", "session", "-s")
-	if err != nil {
-		log.Println("Warning: get session failed,", string(info))
-		return false
-	}
-	portal = strings.Replace(portal, ":", ",", -1)
-	for _, line := range strings.Split(string(info), "\n") {
-		if strings.Contains(line, tgtIqn) && strings.Contains(line, portal) {
-			return true
-		}
-	}
-	return false
-}
-
-func recordExists(portal string, tgtIqn string) bool {
-	_, err := connector.ExecCmd("iscsiadm", "-m", "node", "-o", "show",
-		"-T", tgtIqn, "-p", portal)
-	return err == nil
-}
-
 // Disconnect ISCSI Target
-func Disconnect(portal string, targetiqn string) error {
-	log.Printf("Disconnect portal: %s targetiqn: %s", portal, targetiqn)
-	if sessionExists(portal, targetiqn) {
-		if err := Logout(portal, targetiqn); err != nil {
+func disconnect(conn map[string]interface{}) error {
+	iscsiCon, index, err := parseIscsiConnectInfo(conn)
+	if err != nil {
+		return err
+	}
+	portal := iscsiCon.TgtPortal[index]
+	targetiqn := iscsiCon.TgtIQN[index]
+	cmd := "ls /dev/disk/by-path/ |grep -w " + portal + "|grep -w " + targetiqn + "|wc -l |awk '{if($1>1) print 1; else print 0}'"
+	logoutFlag, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+	if err != nil {
+		log.Printf("Disconnect iscsi target failed, %v\n", err)
+		return err
+	}
+
+	logoutFlag = strings.Replace(logoutFlag, "\n", "", -1)
+	if logoutFlag == "0" {
+		log.Printf("Disconnect portal: %s targetiqn: %s\n", portal, targetiqn)
+		// Logout
+		err = logout(portal, targetiqn)
+		if err != nil {
 			return err
 		}
-	}
 
-	if recordExists(portal, targetiqn) {
-		return Delete(targetiqn)
+		//Delete
+		err = delete(targetiqn)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
+	log.Println("logoutFlag: ", logoutFlag)
 	return nil
 }
 
-// ParseIscsiConnectInfo decode
-func ParseIscsiConnectInfo(connectInfo map[string]interface{}) *IscsiConnectorInfo {
-	var con IscsiConnectorInfo
-	mapstructure.Decode(connectInfo, &con)
-	return &con
+func getTgtPortalAndTgtIQN() (string, string, error) {
+	log.Println("GetTgtPortalAndTgtIQN")
+	var targetiqn, targetportal string
+	out, err := connector.ExecCmd("iscsiadm", "-m", "session")
+	if err != nil {
+		errGetPortalAndIQN := fmt.Errorf("Get targetportal And targetiqn failed: %v", err)
+		log.Println("Get targetportal And targetiqn failed: ", errGetPortalAndIQN)
+		return "", "", errGetPortalAndIQN
+	}
+
+	lines := strings.Split(string(out), "\n")
+
+	for _, line := range lines {
+		if strings.Contains(line, "tcp") {
+			lineSplit := strings.Split(line, " ")
+			targetportalTemp := lineSplit[2]
+			targetportal = strings.Split(targetportalTemp, ",")[0]
+			targetiqn = lineSplit[3]
+		}
+	}
+
+	if targetiqn != "" && targetportal != "" {
+		return targetiqn, targetportal, nil
+	}
+
+	msg := "targetportal And targetiqn not found"
+	log.Println(msg)
+	return "", "", errors.New(msg)
+
 }
 
-// getInitiatorInfo implementation
-func getInitiatorInfo() (connector.InitiatorInfo, error) {
-	var initiatorInfo connector.InitiatorInfo
-
-	initiators, err := GetInitiator()
+func getInitiatorInfo() (string, error) {
+	initiators, err := getInitiator()
 	if err != nil {
-		return initiatorInfo, err
+		return "", err
 	}
 
 	if len(initiators) == 0 {
-		return initiatorInfo, errors.New("The number of iqn is wrong")
+		return "", errors.New("No iqn found")
 	}
 
-	initiatorInfo.InitiatorData = make(map[string]interface{})
-	initiatorInfo.InitiatorData[connector.Iqn] = initiators[0]
-
-	hostName, err := connector.GetHostName()
-	if err != nil {
-		return initiatorInfo, err
+	if len(initiators) > 1 {
+		return "", errors.New("the number of iqn is wrong")
 	}
 
-	initiatorInfo.HostName = hostName
-	log.Printf("getInitiatorInfo success: protocol=%v, initiatorInfo=%v",
-		connector.IscsiDriver, initiatorInfo)
-
-	return initiatorInfo, nil
+	return initiators[0], nil
 }

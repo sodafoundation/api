@@ -53,6 +53,27 @@ const (
 	VolumeAttachError         = "error"
 )
 
+//volume replication status
+const (
+	ReplicationDeleted        = "deleted"
+	ReplicationCreating       = "creating"
+	ReplicationDeleting       = "deleting"
+	ReplicationEnabling       = "enabling"
+	ReplicationDisabling      = "disabling"
+	ReplicationFailingOver    = "failing_over"
+	ReplicationFailingBack    = "failing_back"
+	ReplicationAvailable      = "available"
+	ReplicationError          = "error"
+	ReplicationErrorDeleting  = "error_deleting"
+	ReplicationErrorEnabling  = "error_enabling"
+	ReplicationErrorDisabling = "error_disabling"
+	ReplicationErrorFailover  = "error_failover"
+	ReplicationErrorFailback  = "error_failback"
+	ReplicationEnabled        = "enabled"
+	ReplicationDisabled       = "disabled"
+	ReplicationFailover       = "failed_over"
+)
+
 // volume group status
 const (
 	VolumeGroupCreating      = "creating"

@@ -27,8 +27,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
 )

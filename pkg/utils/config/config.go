@@ -15,15 +15,18 @@
 package config
 
 import (
-	gflag "flag"
+	"flag"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-ini/ini"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 const (
@@ -225,9 +228,6 @@ func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) error {
 	for i := 0; i < t.NumField(); i++ {
 		field := v.Field(i)
 		section := t.Field(i).Tag.Get("conf")
-		if "FlagSet" == field.Type().Name() {
-			continue
-		}
 		if "" == section {
 			if err := parseSections(cfg, field.Type(), field); err != nil {
 				return err
@@ -262,11 +262,23 @@ func GetDefaultConfig() *Config {
 	return conf
 }
 
-func (c *Config) Load(confFile string) {
-	gflag.StringVar(&confFile, "config-file", confFile, "The configuration file of OpenSDS")
-	c.Flag.Parse()
-	initConf(confFile, CONF)
-	c.Flag.AssignValue()
+func GetConfigPath() string {
+	path := constants.OpensdsConfigPath
+	for i := 1; i < len(os.Args)-1; i++ {
+		if m, _ := regexp.MatchString(`^-{1,2}config-file$`, os.Args[i]); m {
+			if !strings.HasSuffix(os.Args[i+1], "-") {
+				path = os.Args[i+1]
+			}
+		}
+	}
+	return path
+}
+
+func (c *Config) Load() {
+	var dummyConfigPath string
+	// Flag 'config-file' is set here for usage show and parameter check, the config path will be parsed by GetConfigPath
+	flag.StringVar(&dummyConfigPath, "config-file", constants.OpensdsConfigPath, "OpenSDS config file path")
+	initConf(GetConfigPath(), CONF)
 }
 
 func GetBackendsMap() map[string]BackendProperties {

@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -45,35 +44,28 @@ func (p *ProfilePortal) CreateProfile() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(p.Ctx.Request.Body).Decode(&profile); err != nil {
-		reason := fmt.Sprintf("Parse profile request body failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("parse profile request body failed: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Call db api module to handle create profile request.
 	result, err := db.C.CreateProfile(c.GetContext(p.Ctx), &profile)
 	if err != nil {
-		reason := fmt.Sprintf("Create profile failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("create profile failed: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile created result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal profile created result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -84,34 +76,27 @@ func (p *ProfilePortal) ListProfiles() {
 
 	m, err := p.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List profiles failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("list profiles failed: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListProfilesWithFilter(c.GetContext(p.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List profiles failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("list profiles failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profiles listed result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal profiles listed result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -123,25 +108,20 @@ func (p *ProfilePortal) GetProfile() {
 
 	result, err := db.C.GetProfile(c.GetContext(p.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get profile failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("profile %s not found: %v", id, err)
+		p.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile got result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal profile got result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -155,34 +135,27 @@ func (p *ProfilePortal) UpdateProfile() {
 	id := p.Ctx.Input.Param(":profileId")
 
 	if err := json.NewDecoder(p.Ctx.Request.Body).Decode(&profile); err != nil {
-		reason := fmt.Sprintf("Parse profile request body failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("parse profile request body failed: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.UpdateProfile(c.GetContext(p.Ctx), id, &profile)
 	if err != nil {
-		reason := fmt.Sprintf("Update profiles failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("update profiles failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal profile updated result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal profile updated result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -194,22 +167,18 @@ func (p *ProfilePortal) DeleteProfile() {
 	ctx := c.GetContext(p.Ctx)
 	profile, err := db.C.GetProfile(ctx, id)
 	if err != nil {
-		reason := fmt.Sprintf("Get profile failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("profile %s not found: %v", id, err)
+		p.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
-	if err := db.C.DeleteProfile(ctx, profile.Id); err != nil {
-		reason := fmt.Sprintf("Delete profiles failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+	if err = db.C.DeleteProfile(ctx, profile.Id); err != nil {
+		errMsg := fmt.Sprintf("delete profiles failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
+	p.SuccessHandle(StatusOK, nil)
 	return
 }
 
@@ -221,34 +190,27 @@ func (p *ProfilePortal) AddCustomProperty() {
 	id := p.Ctx.Input.Param(":profileId")
 
 	if err := json.NewDecoder(p.Ctx.Request.Body).Decode(&custom); err != nil {
-		reason := fmt.Sprintf("Parse custom properties request body failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("parse custom properties request body failed: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.AddCustomProperty(c.GetContext(p.Ctx), id, custom)
 	if err != nil {
-		reason := fmt.Sprintf("Add custom property failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("add custom property failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal custom property added result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal custom property added result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -260,25 +222,20 @@ func (p *ProfilePortal) ListCustomProperties() {
 
 	result, err := db.C.ListCustomProperties(c.GetContext(p.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("List custom properties failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("list custom properties failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal custom properties listed result failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal custom properties listed result failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -290,13 +247,11 @@ func (p *ProfilePortal) RemoveCustomProperty() {
 	customKey := p.Ctx.Input.Param(":customKey")
 
 	if err := db.C.RemoveCustomProperty(c.GetContext(p.Ctx), id, customKey); err != nil {
-		reason := fmt.Sprintf("Remove custom property failed: %v", err)
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("remove custom property failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
+	p.SuccessHandle(StatusOK, nil)
 	return
 }

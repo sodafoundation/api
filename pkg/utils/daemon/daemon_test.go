@@ -15,6 +15,7 @@
 package daemon
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,8 +32,7 @@ const testFile = "test.txt"
 
 func TestDaemon(t *testing.T) {
 	var godaemon bool
-
-	SetDaemonFlag(&godaemon, false)
+	flag.BoolVar(&godaemon, "daemon", false, "Run app as a daemon with -daemon=true")
 
 	execCmdHandler = mockCmdHandler
 
