@@ -139,10 +139,10 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
-	if opt.PoolId == "" {
-		opt.PoolId = polInfo.Id
-		opt.PoolName = polInfo.Name
-	}
+	// whether specify a pool or not, opt's poolid and pool name should be 
+	// assigned by polInfo
+	opt.PoolId = polInfo.Id
+	opt.PoolName = polInfo.Name
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
