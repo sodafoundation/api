@@ -48,12 +48,12 @@ func TestProcessListParam(t *testing.T) {
 
 	// Test case 3: Test the output format if everything works well.
 	arg := map[string]string{"limit": "3", "offset": "4"}
-	expected := "limit=3&offset=4"
+	expectedA, expectedB := "limit=3&offset=4", "offset=4&limit=3"
 	params, err := processListParam([]interface{}{arg})
 	if err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(params, expected) {
-		t.Errorf("expected %v, got %v\n", expected, params)
+	if !reflect.DeepEqual(params, expectedA) && !reflect.DeepEqual(params, expectedB) {
+		t.Errorf("expected %v or %v, got %v\n", expectedA, expectedB, params)
 	}
 }
