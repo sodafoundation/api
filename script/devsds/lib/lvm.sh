@@ -141,7 +141,7 @@ name = lvm
 description = LVM Test
 driver_name = lvm
 config_path = /etc/opensds/driver/lvm.yaml
-multiattach = False
+multi_attach = False
 
 OPENSDS_LVM_GLOBAL_CONFIG_DOC
 }
