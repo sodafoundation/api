@@ -73,8 +73,8 @@ type Volume struct {
 	ReplicationStatus string `json:"replication_status"`
 	// ConsistencyGroupID is the consistency group ID.
 	ConsistencyGroupID string `json:"consistencygroup_id"`
-	// Multiattach denotes if the volume is multi-attach capable.
-	Multiattach bool `json:"multiattach"`
+	// MultiAttach denotes if the volume is multi-attach capable.
+	MultiAttach bool `json:"multi_attach"`
 }
 
 func (r *Volume) UnmarshalJSON(b []byte) error {

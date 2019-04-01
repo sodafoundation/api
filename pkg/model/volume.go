@@ -81,7 +81,9 @@ type VolumeSpec struct {
 	ReplicationDriverData map[string]string `json:"replicationDriverData,omitempty"`
 	// Attach status of the volume.
 	AttachStatus string
-	Multiattach  bool `json:"multiattach,omitempty"`
+
+	// Whether the volume can be attached more than once, default value is false.
+	MultiAttach bool `json:"multiAttach,omitempty"`
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.

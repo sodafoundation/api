@@ -158,7 +158,7 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAt
 	if vol.Status == model.VolumeAvailable {
 		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
 	} else if vol.Status == model.VolumeInUse {
-		if vol.Multiattach {
+		if vol.MultiAttach {
 			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
 		} else {
 			msg := "volume is already attached or volume multiattach must be true if attach more than once"

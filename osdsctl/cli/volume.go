@@ -152,7 +152,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		ProfileId:         profileId,
 		SnapshotId:        volSnap,
 		SnapshotFromCloud: snapshotFromCloud,
-		Multiattach:       multiattach,
+		MultiAttach:       multiattach,
 	}
 
 	resp, err := client.CreateVolume(vol)
@@ -161,7 +161,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -172,7 +172,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId", "Multiattach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId", "MultiAttach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -189,7 +189,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId", "Multiattach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId", "MultiAttach"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -216,7 +216,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -236,6 +236,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
 	PrintDict(resp, keys, FormatterList{})
 }

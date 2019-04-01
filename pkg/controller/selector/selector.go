@@ -82,7 +82,7 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 		if in.PoolId != "" {
 			filterRequest["id"] = in.PoolId
 		}
-		if in.Multiattach {
+		if in.MultiAttach {
 			filterRequest["multiattach"] = "<is> true"
 		}
 
