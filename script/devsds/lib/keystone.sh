@@ -67,12 +67,18 @@ chown stack:stack $DEV_STACK_LOCAL_CONF
 }
 
 osds::keystone::opensds_conf() {
+    AuthURL=http://$KEYSTONE_IP/identity
+    if [ "true" == $USE_CONTAINER_KEYSTONE ]
+    then
+        AuthURL=http://$KEYSTONE_IP:35357/v3
+    fi
+
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [keystone_authtoken]
 memcached_servers = $KEYSTONE_IP:11211
 signing_dir = /var/cache/opensds
 cafile = /opt/stack/data/ca-bundle.pem
-auth_uri = http://$KEYSTONE_IP/identity
+auth_uri = $AuthURL
 project_domain_name = Default
 project_name = service
 user_domain_name = Default
@@ -82,7 +88,7 @@ enable_encrypted = False
 # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
 pwd_encrypter = aes
 username = $OPENSDS_SERVER_NAME
-auth_url = http://$KEYSTONE_IP/identity
+auth_url = $AuthURL
 auth_type = password
 
 OPENSDS_GLOBAL_CONFIG_DOC
@@ -131,26 +137,34 @@ osds::keystone::download_code(){
 }
 
 osds::keystone::install(){
-    if [ "true" != $USE_EXISTING_KEYSTONE ] 
+    if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
         KEYSTONE_IP=$HOST_IP
-        osds::keystone::create_user
-        osds::keystone::download_code
         osds::keystone::opensds_conf
-
-        # If keystone is ready to start, there is no need continue next step.
-        if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
-            return
-        fi
-        osds::keystone::devstack_local_conf
-        cd ${DEV_STACK_DIR}
-        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
-        osds::keystone::create_user_and_endpoint
-        osds::keystone::delete_redundancy_data
+        docker pull opensdsio/opensds-authchecker:latest
+        docker run -d --name keystone --network host opensdsio/opensds-authchecker:latest
     else
-        osds::keystone::opensds_conf
-        cd ${DEV_STACK_DIR}
-        osds::keystone::create_user_and_endpoint
+        if [ "true" != $USE_EXISTING_KEYSTONE ] 
+        then
+            KEYSTONE_IP=$HOST_IP
+            osds::keystone::create_user
+            osds::keystone::download_code
+            osds::keystone::opensds_conf
+
+            # If keystone is ready to start, there is no need continue next step.
+            if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
+                return
+            fi
+            osds::keystone::devstack_local_conf
+            cd ${DEV_STACK_DIR}
+            su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
+            osds::keystone::create_user_and_endpoint
+            osds::keystone::delete_redundancy_data
+        else
+            osds::keystone::opensds_conf
+            cd ${DEV_STACK_DIR}
+            osds::keystone::create_user_and_endpoint
+        fi    
     fi
 }
 
@@ -159,11 +173,17 @@ osds::keystone::cleanup() {
 }
 
 osds::keystone::uninstall(){
-    if [ "true" != $USE_EXISTING_KEYSTONE ] 
+    if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
-        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+        docker ps -a|grep keystone|awk '{print $1 }'|xargs docker stop
+        docker ps -a|grep keystone|awk '{print $1 }'|xargs docker rm
     else
-        osds::keystone::delete_user
+        if [ "true" != $USE_EXISTING_KEYSTONE ] 
+        then
+            su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+        else
+            osds::keystone::delete_user
+        fi
     fi
 }
 
