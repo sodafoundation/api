@@ -401,7 +401,7 @@ func TestIsMultiattachFilter(t *testing.T) {
 	testCases := []FilterCaseSpec{
 		{
 			request: map[string]interface{}{
-				"multiattach": "<is> true",
+				"multiAttach": "<is> true",
 			},
 			expected: []*model.StoragePoolSpec{
 				&SamplePools[0],
@@ -409,7 +409,7 @@ func TestIsMultiattachFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"multiattach": "<is> false",
+				"multiAttach": "<is> false",
 			},
 			expected: []*model.StoragePoolSpec{
 				&SamplePools[1],
