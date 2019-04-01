@@ -86,7 +86,7 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters", "Multiattach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -101,6 +101,6 @@ func dockListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
+	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName", "Parameters", "Multiattach"}
 	PrintList(resp, keys, FormatterList{})
 }

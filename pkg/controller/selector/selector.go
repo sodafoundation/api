@@ -82,6 +82,10 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 		if in.PoolId != "" {
 			filterRequest["id"] = in.PoolId
 		}
+		if in.Multiattach {
+			filterRequest["multiattach"] = "<is> true"
+		}
+
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {

@@ -115,6 +115,7 @@ func (pdd *provisionDockDiscoverer) Init() error {
 			Name:        b.Name,
 			Description: b.Description,
 			DriverName:  b.DriverName,
+			Multiattach: b.Multiattach,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
 			NodeId:      host,
 			Type:        model.DockTypeProvioner,
@@ -153,6 +154,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			pol.DockId = dck.Id
 			pol.ReplicationType = replicationType
 			pol.ReplicationDriverName = replicationDriverName
+			pol.Multiattach = dck.Multiattach
 		}
 		pdd.pols = append(pdd.pols, pols...)
 	}

@@ -63,4 +63,8 @@ type DockSpec struct {
 	// attachment and backend attached storage resouce description are clear.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty"`
+
+	// Multiattach
+	// If true, this volume can attach to more than one instance. Default will be multiattach:False
+	Multiattach bool `json:"multiattach,omitempty"`
 }

@@ -70,11 +70,12 @@ var volumeExtendCommand = &cobra.Command{
 }
 
 var (
-	profileId string
-	volName   string
-	volDesp   string
-	volAz     string
-	volSnap   string
+	profileId   string
+	volName     string
+	volDesp     string
+	volAz       string
+	volSnap     string
+	multiattach bool
 )
 
 var (
@@ -116,6 +117,7 @@ func init() {
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
+	volumeCreateCommand.Flags().BoolVarP(&multiattach, "multiattach", "m", false, "attach more than once")
 	volumeCreateCommand.Flags().BoolVarP(&snapshotFromCloud, "snapshotFromCloud", "c", false, "download snapshot from cloud")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
@@ -150,6 +152,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		ProfileId:         profileId,
 		SnapshotId:        volSnap,
 		SnapshotFromCloud: snapshotFromCloud,
+		Multiattach:       multiattach,
 	}
 
 	resp, err := client.CreateVolume(vol)
@@ -158,7 +161,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -169,7 +172,7 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId", "Multiattach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -186,7 +189,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId", "Multiattach"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -213,7 +216,7 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -233,6 +236,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "Multiattach"}
 	PrintDict(resp, keys, FormatterList{})
 }
