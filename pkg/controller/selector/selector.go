@@ -137,6 +137,7 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 		return filterRequest
 	}(prf, in)
 
+	log.Infof("The filter request for pool is %v", fltRequest)
 	supportedPools, err := SelectSupportedPools(1, fltRequest, pools)
 	if err != nil {
 		log.Error("Filter supported pools failed: ", err)
