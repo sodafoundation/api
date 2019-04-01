@@ -237,6 +237,17 @@ var (
 			ProfileId:         "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
+
+	SampleVolumeGroups = []model.VolumeGroupSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f555",
+			},
+			Name:        "sample-group-01",
+			Description: "This is the first sample group for testing",
+			Status:      "available",
+		},
+	}
 )
 
 // The Byte*** variable here is designed for unit test in client package.
@@ -452,12 +463,12 @@ var (
 	}`
 
 	ByteVolumeGroups = `[
-	{
-		"id": "3769855c-a102-11e7-b772-17b880d2f555",
-		"name": "sample-group-01",
-		"description": "This is the first sample group for testing",
-		"status": "creating"
-	}
+		{
+			"id": "3769855c-a102-11e7-b772-17b880d2f555",
+			"name": "sample-group-01",
+			"description": "This is the first sample group for testing",
+			"status": "creating"
+		}
 	]`
 
 	ByteSnapshots = `[

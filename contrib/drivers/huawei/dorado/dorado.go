@@ -22,8 +22,9 @@ import (
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
@@ -82,7 +83,7 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 	}
 
 	log.Infof("Create Volume from snapshot, source_lun_id : %s , target_lun_id : %s", snapshot.Id, lun.Id)
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		getVolumeResult, getVolumeErr := d.client.GetVolume(lun.Id)
 		if nil == getVolumeErr {
 			if getVolumeResult.HealthStatus == StatusHealth && getVolumeResult.RunningStatus == StatusVolumeReady {
@@ -138,7 +139,7 @@ func (d *Driver) copyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error
 		return err
 	}
 
-	err = WaitForCondition(func() (bool, error) {
+	err = utils.WaitForCondition(func() (bool, error) {
 		deleteLunCopyErr := d.client.DeleteLunCopy(luncopyid)
 		if nil == deleteLunCopyErr {
 			return true, nil
@@ -254,7 +255,7 @@ func (d *Driver) getTargetInfo() (string, string, error) {
 	return "", "", errors.New(msg)
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.InitializeConnectionIscsi(opt)
 	}
@@ -264,7 +265,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.Conn
 	return nil, errors.New("No supported protocol for dorado driver.")
 }
 
-func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
@@ -309,8 +310,8 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 		DriverVolumeType: ISCSIProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
-			"targetIQN":        tgtIqn,
-			"targetPortal":     tgtIp + ":3260",
+			"targetIQN":        []string{tgtIqn},
+			"targetPortal":     []string{tgtIp + ":3260"},
 			"discard":          false,
 			"targetLun":        tgtLun,
 		},
@@ -318,7 +319,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateAttachmentOpts) (*model
 	return connInfo, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		return d.TerminateConnectionIscsi(opt)
 	}
@@ -328,7 +329,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
-func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) error {
 	lunId := opt.GetMetadata()[KLunId]
 	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
 	if err != nil {
@@ -437,7 +438,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	lunId := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
 	// Create host if not exist.
@@ -488,7 +489,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateAttachmentOpts) (*model.Co
 	return fcInfo, nil
 }
 
-func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
+func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
 	wwns := strings.Split(wwpns, ",")
 
 	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
@@ -569,7 +570,7 @@ func (d *Driver) isInStringArray(s string, source []string) bool {
 	return false
 }
 
-func (d *Driver) TerminateConnectionFC(opt *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnectionFC(opt *pb.DeleteVolumeAttachmentOpts) error {
 	// Detach lun
 	fcInfo, err := d.detachVolumeFC(opt)
 	if err != nil {
@@ -579,7 +580,7 @@ func (d *Driver) TerminateConnectionFC(opt *pb.DeleteAttachmentOpts) error {
 	return nil
 }
 
-func (d *Driver) detachVolumeFC(opt *pb.DeleteAttachmentOpts) (string, error) {
+func (d *Driver) detachVolumeFC(opt *pb.DeleteVolumeAttachmentOpts) (string, error) {
 	wwns := strings.Split(opt.GetHostInfo().GetInitiator(), ",")
 	lunId := opt.GetMetadata()[KLunId]
 
@@ -727,21 +728,21 @@ func (d *Driver) clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId st
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet."}
+	return nil, &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet."}
+	return &model.NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet."}
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup did not implement."}
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
-	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
-	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup did not implement."}
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

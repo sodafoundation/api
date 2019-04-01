@@ -29,8 +29,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/testutils/driver"
 )
 
@@ -50,9 +50,9 @@ type VolumeDriver interface {
 
 	ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
 
-	InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error)
+	InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error)
 
-	TerminateConnection(opt *pb.DeleteAttachmentOpts) error
+	TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error
 
 	CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error)
 
@@ -66,17 +66,17 @@ type VolumeDriver interface {
 
 	// NOTE Parameter vg means complete volume group information, because driver
 	// may use it to do something and return volume group status.
-	CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error)
+	CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error)
 
 	// NOTE Parameter addVolumesRef or removeVolumesRef means complete volume
 	// information that will be added or removed from group. Driver may use
 	// them to do some related operations and return their status.
-	UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error)
+	UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error)
 
 	// NOTE Parameter volumes means volumes deleted from group, driver may use
 	// their compelete information to do some related operations and return
 	// their status.
-	DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error)
+	DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error
 
 	ListPools() ([]*model.StoragePoolSpec, error)
 }

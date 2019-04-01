@@ -20,15 +20,9 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
-
-	"github.com/opensds/opensds/pkg/utils/config"
 )
 
 var execCmdHandler = execCmd
-
-func SetDaemonFlag(isDaemon *bool, defaultVal bool) {
-	config.CONF.Flag.BoolVar(isDaemon, "daemon", defaultVal, "run app as a daemon with -daemon=true")
-}
 
 func execCmd(name string, args ...string) {
 	cmd := exec.Command(name, args...)

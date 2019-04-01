@@ -1,34 +1,28 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 authOptions:
-  fmIp: 192.168.0.100
+  username: "admin"
+  password: "IaaS@PORTAL-CLOUD9!"
+  # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+  EnableEncrypted: false
+  # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+  PwdEncrypter: "aes"
+  url: "https://8.46.195.74:28443"
+
+  fmIp: 8.46.195.74
   fsaIp:
-    - 192.168.0.1
-    - 192.168.0.2
-    - 192.168.0.3
+    - 8.46.195.71
+    - 8.46.195.72
+    - 8.46.195.73
 
 pool:
   0:
     storageType: block
-    availabilityZone: nova-01
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 7000000
         maxBWS: 600
       advanced:
@@ -36,13 +30,13 @@ pool:
         latency: 3ms
   1:
     storageType: block
-    availabilityZone: nova-01
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 3000000
         maxBWS: 300
       advanced:

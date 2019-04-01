@@ -29,12 +29,19 @@ import (
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
-var u = client.NewClient(&client.Config{
-	Endpoint:    "http://localhost:50040",
-	AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+const (
+	nvmepool     = "opensds-volumes-nvme"
+	defaultgroup = "opensds-volumes-default"
+)
+
+var u *client.Client
 
 //init Create Profile
 func init() {
+	u, _ = client.NewClient(&client.Config{
+		Endpoint:    "http://localhost:50040",
+		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId)})
+
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
@@ -436,55 +443,23 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
+	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
+	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
 		t.Error("Failed to marshal connection data:", err)
 		return
 	}
-	output, err := execCmd("sudo", "./volume-connector",
-		"attach", string(conn))
+	accPro := getatt.AccessProtocol
+	output, err = execCmd("sudo", "./volume-connector",
+		"attach", string(conn), accPro)
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
 		return
 	}
 	t.Log(output)
 	t.Log("Volume attach success!")
-}
-
-//Test Case:Volume Detach
-func TestVolumeDetach(t *testing.T) {
-	attc, err := PrepareAttachment(t)
-	if err != nil {
-		t.Error("Prepare Attachment Fail!", err)
-		return
-	}
-	defer DeleteVolume(attc.VolumeId)
-	defer DeleteAttachment(attc.Id)
-
-	getatt, err := u.GetVolumeAttachment(attc.Id)
-	if err != nil || getatt.Status != "available" {
-		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
-		return
-	}
-
-	t.Log("Begin to Scan volume:")
-	t.Log("getatt.Metadata", getatt.ConnectionData)
-
-	//execute bin file
-	conn, err := json.Marshal(&getatt.ConnectionData)
-	if err != nil {
-		t.Error("Failed to marshal connection data:", err)
-		return
-	}
-	output, err := execCmd("sudo", "./volume-connector",
-		"detach", string(conn))
-	if err != nil {
-		t.Error("Failed to detach volume:", output, err)
-		return
-	}
-	t.Log(output)
-	t.Log("Volume Detach Success!")
 }
 
 //Test Case:Delete Attachment
@@ -510,6 +485,271 @@ func TestDeleteAttach(t *testing.T) {
 	}
 }
 
+//Test Case:Delete Attachment
+func TestVolumeDetach(t *testing.T) {
+	attc, err := PrepareAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
+		return
+	}
+
+	out, _ := execCmd("/bin/bash", "-c", "iscsiadm -m session")
+	fmt.Println("session is ", out)
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return
+	}
+
+	t.Log("Begin to Scan volume:")
+	t.Log("getatt.Accessprotocol", getatt.AccessProtocol)
+	t.Log("getatt.Metadata", getatt.ConnectionData)
+
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if err != nil {
+		t.Error("Failed to marshal connection data:", err)
+		return
+	}
+
+	// attach first, then detach
+	accPro := getatt.AccessProtocol
+	output, err := execCmd("sudo", "./volume-connector",
+		"attach", string(conn), accPro)
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
+		return
+	}
+
+	t.Log(output)
+
+	output, err = execCmd("sudo", "./volume-connector",
+		"detach", string(conn), accPro)
+	if err != nil {
+		t.Error("Failed to detach volume:", output, err)
+		return
+	}
+	t.Log(output)
+	t.Log("Volume Detach Success!")
+}
+
+//Test for nvmeof  connection 
+func TestNvmeofAttachIssues(t *testing.T) {
+	// pool list get nvme pool
+	pols, err := u.ListPools()
+	if err != nil {
+		t.Error("list pools failed:", err)
+		return
+	}
+	polId := ""
+	for _, p := range pols {
+		if p.Name == nvmepool {
+			polId = p.Id
+			t.Log("nvme pool id is: ", polId)
+			break
+		}
+	}
+	if polId == "" {
+		t.Log("no nvme pool ")
+		return
+	}
+	//PrepareNvmeVolume()
+	err = CreateNvmeofAttach(t)
+	if err != nil {
+		t.Error("create nvmeof attachment fail", err)
+		return
+	}
+	err = ListNvmeofAttachment(t)
+	if err != nil {
+		t.Error("list nvmeof attachment fail", err)
+		return
+	}
+	err = ShowNvmeofAttachDetail(t)
+	if err != nil {
+		t.Error("show nvmeof attachment fail", err)
+		return
+	}
+	err = NvmeofVolumeAttach(t)
+	if err != nil {
+		t.Error("connect nvmeof attachment fail", err)
+		return
+	}
+
+	err = DeleteNvmeofAttach(t)
+	if err != nil {
+		t.Error("delete nvmeof attachment fail", err)
+		return
+	}
+
+	t.Log("nvmeof attach issues success")
+}
+
+func CreateNvmeofAttach(t *testing.T) error {
+	vol, err := PrepareNvmeVolume()
+	if err != nil {
+		t.Error("Prepare nvme Volume  Fail", err)
+		return err
+	}
+	defer DeleteVolume(vol.Id)
+	var body = &model.VolumeAttachmentSpec{
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{},
+	}
+	attc, err := u.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("create nvmeof volume attachment failed:", err)
+		return err
+	}
+	defer DeleteAttachment(attc.Id)
+	attrs, _ := json.MarshalIndent(attc, "", "    ")
+	t.Log(string(attrs))
+	t.Log("Create nvmeof Volume Attachment Success")
+	return nil
+}
+
+func ListNvmeofAttachment(t *testing.T) error {
+	attc, err := PrepareNvmeofAttachment(t)
+	if err != nil {
+		t.Error("Prepare nvmeof Attachment Fail!", err)
+		return err
+	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+	atts, err := u.ListVolumeAttachments()
+	if err != nil {
+		t.Error("List nvmeof Attachment Error!", err)
+		return err
+	}
+	attli, _ := json.MarshalIndent(atts, "", "    ")
+	t.Log(string(attli))
+	t.Log("List nvmeof Attachment Success!")
+	return nil
+}
+
+func ShowNvmeofAttachDetail(t *testing.T) error {
+	attc, err := PrepareNvmeofAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
+		return err
+	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Error("Get Volume Attachment Detail Fail!", err)
+		return err
+	}
+	t.Log("Get Volume Attachment Detail Success")
+	return nil
+}
+
+func DeleteNvmeofAttach(t *testing.T) error {
+	attc, err := PrepareNvmeofAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail!", err)
+		return err
+	}
+	defer DeleteVolume(attc.VolumeId)
+	err = u.DeleteVolumeAttachment(attc.Id, nil)
+	if err != nil {
+		t.Error("Delete nvme Attachment Fail", err)
+		return err
+	}
+	_, err = u.GetVolumeAttachment(attc.Id)
+	t.Log("err:", err)
+	if strings.Contains(err.Error(), "can't find") {
+		t.Log("Delete attachment Success")
+		return nil
+	} else {
+		t.Error("Delete Attachment Fail!", err)
+		return err
+	}
+}
+
+//Test Case:Nvmeof Volume Attach
+func NvmeofVolumeAttach(t *testing.T) error {
+	attc, err := PrepareNvmeofAttachment(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail:", err)
+		return err
+	}
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return err
+	}
+
+	t.Log("Begin to Scan Volume:")
+	t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
+	t.Log("getatt.Metadata", getatt.ConnectionData)
+
+	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
+	t.Log(output)
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if err != nil {
+		t.Error("Failed to marshal connection data:", err)
+		return err
+	}
+	accPro := getatt.AccessProtocol
+	output, err = execCmd("sudo", "./volume-connector",
+		"attach", string(conn), accPro)
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
+		return err
+	}
+	t.Log(output)
+	t.Log("Nvmeof Volume attach yoyo success!")
+	// detach it
+	err = NvmeofVolumeDetach(t, attc)
+	if err != nil {
+		t.Error("detach failed")
+		return err
+	}
+	return nil
+}
+
+//Test Case:Delete Attachment
+func NvmeofVolumeDetach(t *testing.T, attc *model.VolumeAttachmentSpec) error {
+	defer DeleteVolume(attc.VolumeId)
+	defer DeleteAttachment(attc.Id)
+
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return err
+	}
+
+	t.Log("Begin to Scan volume:")
+	t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
+	t.Log("getatt.Metadata", getatt.ConnectionData)
+
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if err != nil {
+		t.Error("Failed to marshal connection data:", err)
+		return err
+	}
+	accPro := getatt.AccessProtocol
+	output, err := execCmd("sudo", "./volume-connector",
+		"detach", string(conn), accPro)
+	if err != nil {
+		t.Error("Failed to detach volume:", attc.VolumeId, output, err)
+		return err
+	}
+	t.Log(output)
+	t.Log("Volume Detach Success!")
+	return nil
+}
+
+// cmd
 func execCmd(name string, arg ...string) (string, error) {
 	fmt.Printf("Command: %s %s:\n", name, strings.Join(arg, " "))
 	info, err := exec.Command(name, arg...).CombinedOutput()
@@ -535,6 +775,28 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	}
 
 	t.Log("prepare Volume Attachment Success")
+	return attc, nil
+}
+
+// prepare nvmeof attachment
+func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
+	vol, err := PrepareNvmeVolume()
+	if err != nil {
+		t.Error("Prepare nvmeof  Volume Fail", err)
+		return nil, err
+	}
+
+	var body = &model.VolumeAttachmentSpec{
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{},
+	}
+	attc, err := u.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("prepare volume attachment failed:", err)
+		return nil, err
+	}
+
+	t.Log("prepare nvmeof Volume Attachment Success")
 	return attc, nil
 }
 
@@ -604,6 +866,38 @@ func PrepareVolume() (*model.VolumeSpec, error) {
 	}
 
 	fmt.Println("Prepare Volume Success")
+	return create, nil
+}
+
+//nvme volume is essential for nvmeof attachment ,so the volume should be created in nvme pool
+func PrepareNvmeVolume() (*model.VolumeSpec, error) {
+	// get poolid
+	pols, err := u.ListPools()
+	if err != nil {
+		return nil, err
+	}
+	polId := ""
+	for _, p := range pols {
+		if p.Name == nvmepool {
+			polId = p.Id
+			break
+		}
+	}
+	if polId == "" {
+		return nil, nil
+	}
+
+	//create volume in specified nvme pool
+	var volbody = &model.VolumeSpec{
+		Name:        "nvme flowTest",
+		Description: "This a test for nvme flow",
+		Size:        int64(1),
+		PoolId:      polId,
+	}
+	create, err := u.CreateVolume(volbody)
+	if err != nil {
+		return nil, err
+	}
 	return create, nil
 }
 

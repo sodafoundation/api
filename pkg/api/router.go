@@ -38,11 +38,14 @@ import (
 const (
 	AddressIdx = iota
 	PortIdx
+)
+
+const (
 	StatusOK       = http.StatusOK
 	StatusAccepted = http.StatusAccepted
 )
 
-func Run(osdsletCfg cfg.OsdsLet) {
+func Run(apiServerCfg cfg.OsdsApiServer) {
 
 	// add router for v1beta api
 	ns :=
@@ -51,32 +54,6 @@ func Run(osdsletCfg cfg.OsdsLet) {
 				// To judge whether the scheme is legal or not.
 				if ctx.Input.Scheme() != "http" && ctx.Input.Scheme() != "https" {
 					return false
-				}
-
-				if ctx.Input.Scheme() == "https" {
-					if osdsletCfg.BeegoHTTPSCertFile == "" || osdsletCfg.BeegoHTTPSKeyFile == "" {
-						fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
-						return false
-					}
-
-					// beego https config
-					beego.BConfig.Listen.EnableHTTP = false
-					beego.BConfig.Listen.EnableHTTPS = true
-					strs := strings.Split(osdsletCfg.ApiEndpoint, ":")
-					beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
-					beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
-					beego.BConfig.Listen.HTTPSCertFile = osdsletCfg.BeegoHTTPSCertFile
-					beego.BConfig.Listen.HTTPSKeyFile = osdsletCfg.BeegoHTTPSKeyFile
-					tlsConfig := &tls.Config{
-						MinVersion: tls.VersionTLS12,
-						CipherSuites: []uint16{
-							tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-							tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-							tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-						},
-					}
-
-					beego.BeeApp.Server.TLSConfig = tlsConfig
 				}
 
 				return true
@@ -108,19 +85,19 @@ func Run(osdsletCfg cfg.OsdsLet) {
 
 				// Volume is the logical description of a piece of storage, which can be directly used by users.
 				// All operations of volume can be used for both admin and users.
-				beego.NSRouter("/volumes", &VolumePortal{}, "post:CreateVolume;get:ListVolumes"),
-				beego.NSRouter("/volumes/:volumeId", &VolumePortal{}, "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
+				beego.NSRouter("/volumes", NewVolumePortal(), "post:CreateVolume;get:ListVolumes"),
+				beego.NSRouter("/volumes/:volumeId", NewVolumePortal(), "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
 				// Extend Volume
-				beego.NSRouter("/volumes/:volumeId/resize", &VolumePortal{}, "post:ExtendVolume"),
+				beego.NSRouter("/volumes/:volumeId/resize", NewVolumePortal(), "post:ExtendVolume"),
 
 				// Creates, shows, lists, unpdates and deletes attachment.
-				beego.NSRouter("/attachments", &VolumeAttachmentPortal{}, "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
-				beego.NSRouter("/attachments/:attachmentId", &VolumeAttachmentPortal{}, "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
+				beego.NSRouter("/attachments", NewVolumeAttachmentPortal(), "post:CreateVolumeAttachment;get:ListVolumeAttachments"),
+				beego.NSRouter("/attachments/:attachmentId", NewVolumeAttachmentPortal(), "get:GetVolumeAttachment;put:UpdateVolumeAttachment;delete:DeleteVolumeAttachment"),
 
 				// Snapshot is a point-in-time copy of the data that a volume contains.
 				// Creates, shows, lists, unpdates and deletes snapshot.
-				beego.NSRouter("/snapshots", &VolumeSnapshotPortal{}, "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
-				beego.NSRouter("/snapshots/:snapshotId", &VolumeSnapshotPortal{}, "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
+				beego.NSRouter("/snapshots", NewVolumeSnapshotPortal(), "post:CreateVolumeSnapshot;get:ListVolumeSnapshots"),
+				beego.NSRouter("/snapshots/:snapshotId", NewVolumeSnapshotPortal(), "get:GetVolumeSnapshot;put:UpdateVolumeSnapshot;delete:DeleteVolumeSnapshot"),
 
 				// Creates, shows, lists, unpdates and deletes replication.
 				beego.NSRouter("/replications", NewReplicationPortal(), "post:CreateReplication;get:ListReplications"),
@@ -130,8 +107,8 @@ func Run(osdsletCfg cfg.OsdsLet) {
 				beego.NSRouter("/replications/:replicationId/disable", NewReplicationPortal(), "post:DisableReplication"),
 				beego.NSRouter("/replications/:replicationId/failover", NewReplicationPortal(), "post:FailoverReplication"),
 				// Volume group contains a list of volumes that are used in the same application.
-				beego.NSRouter("/volumeGroups", &VolumeGroupPortal{}, "post:CreateVolumeGroup;get:ListVolumeGroups"),
-				beego.NSRouter("/volumeGroups/:groupId", &VolumeGroupPortal{}, "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
+				beego.NSRouter("/volumeGroups", NewVolumeGroupPortal(), "post:CreateVolumeGroup;get:ListVolumeGroups"),
+				beego.NSRouter("/volumeGroups/:groupId", NewVolumeGroupPortal(), "put:UpdateVolumeGroup;get:GetVolumeGroup;delete:DeleteVolumeGroup"),
 			),
 		)
 	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
@@ -144,6 +121,32 @@ func Run(osdsletCfg cfg.OsdsLet) {
 	beego.Router("/", &VersionPortal{}, "get:ListVersions")
 	beego.Router("/:apiVersion", &VersionPortal{}, "get:GetVersion")
 
+	if apiServerCfg.HTTPSEnabled {
+		if apiServerCfg.BeegoHTTPSCertFile == "" || apiServerCfg.BeegoHTTPSKeyFile == "" {
+			fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
+			return
+		}
+
+		// beego https config
+		beego.BConfig.Listen.EnableHTTP = false
+		beego.BConfig.Listen.EnableHTTPS = true
+		strs := strings.Split(apiServerCfg.ApiEndpoint, ":")
+		beego.BConfig.Listen.HTTPSAddr = strs[AddressIdx]
+		beego.BConfig.Listen.HTTPSPort, _ = strconv.Atoi(strs[PortIdx])
+		beego.BConfig.Listen.HTTPSCertFile = apiServerCfg.BeegoHTTPSCertFile
+		beego.BConfig.Listen.HTTPSKeyFile = apiServerCfg.BeegoHTTPSKeyFile
+		tlsConfig := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			},
+		}
+
+		beego.BeeApp.Server.TLSConfig = tlsConfig
+	}
+
 	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.EnableErrorsShow = false
@@ -151,5 +154,5 @@ func Run(osdsletCfg cfg.OsdsLet) {
 	beego.BConfig.WebConfig.AutoRender = false
 
 	// start service
-	beego.Run(osdsletCfg.ApiEndpoint)
+	beego.Run(apiServerCfg.ApiEndpoint)
 }

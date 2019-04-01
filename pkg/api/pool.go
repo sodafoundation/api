@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -40,24 +39,19 @@ func (p *PoolPortal) ListAvailabilityZones() {
 	}
 	azs, err := db.C.ListAvailabilityZones(c.GetContext(p.Ctx))
 	if err != nil {
-		reason := fmt.Sprintf("Get AvailabilityZones for pools failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("get AvailabilityZones for pools failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	body, err := json.Marshal(azs)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal AvailabilityZones failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal AvailabilityZones failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -68,34 +62,27 @@ func (p *PoolPortal) ListPools() {
 	// Call db api module to handle list pools request.
 	m, err := p.GetParameters()
 	if err != nil {
-		reason := fmt.Sprintf("List pools failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("list pool parameters failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
 	result, err := db.C.ListPoolsWithFilter(c.GetContext(p.Ctx), m)
 	if err != nil {
-		reason := fmt.Sprintf("List pools failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("list pools failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal pools failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal pools failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }
 
@@ -106,24 +93,19 @@ func (p *PoolPortal) GetPool() {
 	id := p.Ctx.Input.Param(":poolId")
 	result, err := db.C.GetPool(c.GetContext(p.Ctx), id)
 	if err != nil {
-		reason := fmt.Sprintf("Get pool failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorBadRequest)
-		p.Ctx.Output.Body(model.ErrorBadRequestStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("pool %s not found: %s", id, err.Error())
+		p.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal pool failed: %s", err.Error())
-		p.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		p.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal pool failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	p.Ctx.Output.SetStatus(StatusOK)
-	p.Ctx.Output.Body(body)
+	p.SuccessHandle(StatusOK, body)
 	return
 }

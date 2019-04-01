@@ -372,15 +372,15 @@ func (fc *FakeDbClient) UpdateReplication(ctx *c.Context, replicationId string, 
 
 // CreateVolumeGroup
 func (fc *FakeDbClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
@@ -399,16 +399,26 @@ func (fc *FakeDbClient) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string)
 	return nil, nil
 }
 
+func (fc *FakeDbClient) ListAttachmentsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	return nil, nil
+}
+
 func (fc *FakeDbClient) DeleteVolumeGroup(ctx *c.Context, volumeId string) error {
 	return nil
 }
 
 func (fc *FakeDbClient) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
-	return nil, nil
+	var vgs = []*model.VolumeGroupSpec{
+		&SampleVolumeGroups[0],
+	}
+	return vgs, nil
 }
 
 func (fc *FakeDbClient) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
-	return nil, nil
+	var vgs = []*model.VolumeGroupSpec{
+		&SampleVolumeGroups[0],
+	}
+	return vgs, nil
 }
 
 func (fc *FakeDbClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {

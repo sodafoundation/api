@@ -3,22 +3,21 @@ package dorado
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 )
 
 type AuthOptions struct {
-	Username     string `yaml:"username,omitempty"`
-	Password     string `yaml:"password,omitempty"`
-	PasswordTool string `yaml:"passwordtool,omitempty"`
-	Endpoints    string `yaml:"endpoints,omitempty"`
-	Insecure     bool   `yaml:"insecure,omitempty"`
+	Username        string `yaml:"username,omitempty"`
+	Password        string `yaml:"password,omitempty"`
+	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
+	Endpoints       string `yaml:"endpoints,omitempty"`
+	Insecure        bool   `yaml:"insecure,omitempty"`
 }
 
 type Replication struct {
@@ -72,25 +71,4 @@ func Sector2Gb(sec string) int64 {
 
 func Gb2Sector(gb int64) int64 {
 	return gb * UnitGi / 512
-}
-
-func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
-	endAt := time.Now().Add(timeout)
-	time.Sleep(time.Duration(interval))
-	for {
-		startTime := time.Now()
-		ok, err := f()
-		if err != nil {
-			return err
-		}
-		if ok {
-			return nil
-		}
-		if time.Now().After(endAt) {
-			break
-		}
-		elapsed := time.Now().Sub(startTime)
-		time.Sleep(interval - elapsed)
-	}
-	return fmt.Errorf("wait for condition timeout")
 }

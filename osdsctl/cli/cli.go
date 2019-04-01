@@ -82,6 +82,7 @@ func Run() error {
 		return fmt.Errorf("ERROR: You must provide the endpoint by setting " +
 			"the environment variable OPENSDS_ENDPOINT")
 	}
+
 	cfg := &c.Config{Endpoint: ep}
 
 	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
@@ -90,16 +91,27 @@ func Run() error {
 		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
 	}
 
+	var authOptions c.AuthOptions
+	var err error
+
 	switch authStrategy {
 	case c.Keystone:
-		cfg.AuthOptions = c.LoadKeystoneAuthOptionsFromEnv()
+		authOptions, err = c.LoadKeystoneAuthOptionsFromEnv()
+		if err != nil {
+			return err
+		}
 	case c.Noauth:
-		cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
+		authOptions = c.LoadNoAuthOptionsFromEnv()
 	default:
-		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
+		authOptions = c.NewNoauthOptions(constants.DefaultTenantId)
 	}
 
-	client = c.NewClient(cfg)
+	cfg.AuthOptions = authOptions
+
+	client, err = c.NewClient(cfg)
+	if client == nil || err != nil {
+		return fmt.Errorf("ERROR: osdsctl client is nil, %v", err)
+	}
 
 	return rootCommand.Execute()
 }

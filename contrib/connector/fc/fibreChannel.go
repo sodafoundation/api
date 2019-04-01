@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,49 +26,57 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 )
 
-type FCConnectorInfo struct {
-	TargetDiscovered   bool                `mapstructure:"targetDiscovered"`
-	TargetWwn          []string            `mapstructure:"target_wwn"`
-	TargetLun          int                 `mapstructure:"target_lun"`
-	VolumeID           string              `mapstructure:"volume_id"`
-	InitiatorTargetMap map[string][]string `mapstructure:"initiator_target_map"`
-	Description        string              `mapstructure:"description"`
-	HostName           string              `mapstructure:"host_name"`
-}
-
 var (
 	tries = 3
 )
 
-type fibreChannel struct {
-	helper *linuxfc
+// ConnectorInfo define
+type ConnectorInfo struct {
+	AccessMode string   `mapstructure:"accessMode"`
+	AuthUser   string   `mapstructure:"authUserName"`
+	AuthPass   string   `mapstructure:"authPassword"`
+	AuthMethod string   `mapstructure:"authMethod"`
+	TgtDisco   bool     `mapstructure:"targetDiscovered"`
+	TargetWWN  []string `mapstructure:"targetWWN"`
+	VolumeID   string   `mapstructure:"volumeId"`
+	TgtLun     string   `mapstructure:"targetLun"`
+	Encrypted  bool     `mapstructure:"encrypted"`
 }
 
-func (f *fibreChannel) parseIscsiConnectInfo(connInfo map[string]interface{}) *FCConnectorInfo {
-	var conn FCConnectorInfo
-	mapstructure.Decode(connInfo, &conn)
-	return &conn
+// ParseIscsiConnectInfo decode
+func parseFCConnectInfo(connectInfo map[string]interface{}) (*ConnectorInfo, error) {
+	var con ConnectorInfo
+	mapstructure.Decode(connectInfo, &con)
+
+	if len(con.TargetWWN) == 0 || con.TgtLun == "0" {
+		return nil, errors.New("fibrechannel connection data invalid.")
+	}
+
+	return &con, nil
 }
 
-func (f *fibreChannel) connectVolume(connInfo map[string]interface{}) (map[string]string, error) {
-	hbas, err := f.getFChbasInfo()
+func connectVolume(connMap map[string]interface{}) (map[string]string, error) {
+	conn, err := parseFCConnectInfo(connMap)
 	if err != nil {
 		return nil, err
 	}
-	conn := f.parseIscsiConnectInfo(connInfo)
-	volPaths := f.getVolumePaths(conn, hbas)
+	hbas, err := getFChbasInfo()
+	if err != nil {
+		return nil, err
+	}
+	volPaths := getVolumePaths(conn, hbas)
 	if len(volPaths) == 0 {
-		errMsg := fmt.Sprintf("No FC devices found.")
-		log.Println(errMsg)
+		errMsg := fmt.Sprintf("No FC devices found.\n")
+		log.Printf(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	devicePath, deviceName := f.volPathDiscovery(volPaths, tries, conn.TargetWwn, hbas)
+	devicePath, deviceName := volPathDiscovery(volPaths, tries, conn.TargetWWN, hbas)
 	if devicePath != "" && deviceName != "" {
-		log.Printf("Found Fibre Channel volume name, devicePath is %s, deviceName is %s", devicePath, deviceName)
+		log.Printf("Found Fibre Channel volume name, devicePath is %s, deviceName is %s\n", devicePath, deviceName)
 	}
 
-	deviceWWN, err := f.helper.getSCSIWWN(devicePath)
+	deviceWWN, err := getSCSIWWN(devicePath)
 	if err != nil {
 		return nil, err
 	}
@@ -76,21 +84,22 @@ func (f *fibreChannel) connectVolume(connInfo map[string]interface{}) (map[strin
 	return map[string]string{"scsi_wwn": deviceWWN, "path": devicePath}, nil
 }
 
-func (f *fibreChannel) getVolumePaths(conn *FCConnectorInfo, hbas []map[string]string) []string {
-
-	devices := f.getDevices(hbas, conn.TargetWwn)
-	hostPaths := f.getHostDevices(devices, strconv.Itoa(conn.TargetLun))
+func getVolumePaths(conn *ConnectorInfo, hbas []map[string]string) []string {
+	wwnports := conn.TargetWWN
+	devices := getDevices(hbas, wwnports)
+	lun := conn.TgtLun
+	hostPaths := getHostDevices(devices, lun)
 	return hostPaths
 }
 
-func (f *fibreChannel) volPathDiscovery(volPaths []string, tries int, tgtWWN []string, hbas []map[string]string) (string, string) {
+func volPathDiscovery(volPaths []string, tries int, tgtWWN []string, hbas []map[string]string) (string, string) {
 	for i := 0; i < tries; i++ {
 		for _, path := range volPaths {
-			if f.helper.pathExists(path) {
-				deviceName := f.helper.getContentfromSymboliclink(path)
+			if pathExists(path) {
+				deviceName := getContentfromSymboliclink(path)
 				return path, deviceName
 			}
-			f.helper.rescanHosts(tgtWWN, hbas)
+			rescanHosts(tgtWWN, hbas)
 		}
 
 		time.Sleep(2 * time.Second)
@@ -98,44 +107,47 @@ func (f *fibreChannel) volPathDiscovery(volPaths []string, tries int, tgtWWN []s
 	return "", ""
 }
 
-func (f *fibreChannel) getHostDevices(devices []map[string]string, lun string) []string {
+func getHostDevices(devices []map[string]string, lun string) []string {
 	var hostDevices []string
 	for _, device := range devices {
 		var hostDevice string
 		for pciNum, tgtWWN := range device {
-			hostDevice = fmt.Sprintf("/dev/disk/by-path/pci-%s-fc-%s-lun-%s", pciNum, tgtWWN, f.processLunId(lun))
+			hostDevice = fmt.Sprintf("/dev/disk/by-path/pci-%s-fc-%s-lun-%s", pciNum, tgtWWN, processLunID(lun))
 		}
 		hostDevices = append(hostDevices, hostDevice)
 	}
 	return hostDevices
 }
 
-func (f *fibreChannel) disconnectVolume(connInfo map[string]interface{}) error {
-	conn := f.parseIscsiConnectInfo(connInfo)
-	volPaths, err := f.getVolumePathsForDetach(conn)
+func disconnectVolume(connMap map[string]interface{}) error {
+	conn, err := parseFCConnectInfo(connMap)
+	if err != nil {
+		return err
+	}
+	volPaths, err := getVolumePathsForDetach(conn)
 	if err != nil {
 		return err
 	}
 
 	var devices []map[string]string
 	for _, path := range volPaths {
-		realPath := f.helper.getContentfromSymboliclink(path)
-		deviceInfo, _ := f.helper.getDeviceInfo(realPath)
+		realPath := getContentfromSymboliclink(path)
+		deviceInfo, _ := getDeviceInfo(realPath)
 		devices = append(devices, deviceInfo)
 	}
 
-	return f.removeDevices(devices)
+	return removeDevices(devices)
 }
 
-func (f *fibreChannel) removeDevices(devices []map[string]string) error {
+func removeDevices(devices []map[string]string) error {
 	for _, device := range devices {
 		path := fmt.Sprintf("/sys/block/%s/device/delete", strings.Replace(device["device"], "/dev/", "", -1))
-		if f.helper.pathExists(path) {
-			if err := f.helper.flushDeviceIO(device["device"]); err != nil {
+		if pathExists(path) {
+			if err := flushDeviceIO(device["device"]); err != nil {
 				return err
 			}
 
-			if err := f.helper.removeSCSIDevice(path); err != nil {
+			if err := removeSCSIDevice(path); err != nil {
 				return err
 			}
 		}
@@ -143,7 +155,7 @@ func (f *fibreChannel) removeDevices(devices []map[string]string) error {
 	return nil
 }
 
-func (f *fibreChannel) getPciNum(hba map[string]string) string {
+func getPciNum(hba map[string]string) string {
 	for k, v := range hba {
 		if k == "device_path" {
 			path := strings.Split(v, "/")
@@ -157,26 +169,26 @@ func (f *fibreChannel) getPciNum(hba map[string]string) string {
 	return ""
 }
 
-func (f *fibreChannel) getVolumePathsForDetach(conn *FCConnectorInfo) ([]string, error) {
+func getVolumePathsForDetach(conn *ConnectorInfo) ([]string, error) {
 	var volPaths []string
-	hbas, err := f.getFChbasInfo()
+	hbas, err := getFChbasInfo()
 	if err != nil {
 		return nil, err
 	}
 
-	devicePaths := f.getVolumePaths(conn, hbas)
+	devicePaths := getVolumePaths(conn, hbas)
 	for _, path := range devicePaths {
-		if f.helper.pathExists(path) {
+		if pathExists(path) {
 			volPaths = append(volPaths, path)
 		}
 	}
 	return volPaths, nil
 }
 
-func (f *fibreChannel) getDevices(hbas []map[string]string, wwnports []string) []map[string]string {
+func getDevices(hbas []map[string]string, wwnports []string) []map[string]string {
 	var device []map[string]string
 	for _, hba := range hbas {
-		pciNum := f.getPciNum(hba)
+		pciNum := getPciNum(hba)
 		if pciNum != "" {
 			for _, wwn := range wwnports {
 				tgtWWN := map[string]string{pciNum: "0x" + wwn}
@@ -187,17 +199,17 @@ func (f *fibreChannel) getDevices(hbas []map[string]string, wwnports []string) [
 	return device
 }
 
-func (f *fibreChannel) processLunId(lunId string) string {
-	lunIdInt, _ := strconv.Atoi(lunId)
-	if lunIdInt < 256 {
-		return lunId
+func processLunID(lunID string) string {
+	lunIDInt, _ := strconv.Atoi(lunID)
+	if lunIDInt < 256 {
+		return lunID
 	}
-	return fmt.Sprintf("0x%04x%04x00000000", lunIdInt&0xffff, lunIdInt>>16&0xffff)
+	return fmt.Sprintf("0x%04x%04x00000000", lunIDInt&0xffff, lunIDInt>>16&0xffff)
 }
 
-func (f *fibreChannel) getFChbasInfo() ([]map[string]string, error) {
+func getFChbasInfo() ([]map[string]string, error) {
 	// Get Fibre Channel WWNs and device paths from the system.
-	hbas, err := f.helper.getFChbas()
+	hbas, err := getFChbas()
 	if err != nil {
 		return nil, err
 	}
@@ -216,40 +228,22 @@ func (f *fibreChannel) getFChbasInfo() ([]map[string]string, error) {
 	return hbasInfos, nil
 }
 
-func (f *fibreChannel) getInitiatorInfo() (connector.InitiatorInfo, error) {
-	var initiatorInfo connector.InitiatorInfo
-
-	hbas, err := f.getFChbasInfo()
+func getInitiatorInfo() (string, error) {
+	hbas, err := getFChbasInfo()
 	if err != nil {
-		log.Printf("getFChbasInfo failed: %v", err.Error())
-		return initiatorInfo, err
+		return "", err
 	}
 
-	var wwpns []string
-	var wwnns []string
+	var initiatorInfo []string
 
 	for _, hba := range hbas {
 		if v, ok := hba[connector.PortName]; ok {
-			wwpns = append(wwpns, v)
+			initiatorInfo = append(initiatorInfo, "port_name:"+v)
 		}
-
 		if v, ok := hba[connector.NodeName]; ok {
-			wwnns = append(wwnns, v)
+			initiatorInfo = append(initiatorInfo, "node_name:"+v)
 		}
 	}
 
-	initiatorInfo.InitiatorData = make(map[string]interface{})
-	initiatorInfo.InitiatorData[connector.Wwpn] = wwpns
-	initiatorInfo.InitiatorData[connector.Wwnn] = wwnns
-
-	hostName, err := connector.GetHostName()
-	if err != nil {
-		return initiatorInfo, err
-	}
-
-	initiatorInfo.HostName = hostName
-	log.Printf("getFChbasInfo success: protocol=%v, initiatorInfo=%v",
-		connector.FcDriver, initiatorInfo)
-
-	return initiatorInfo, nil
+	return strings.Join(initiatorInfo, ","), nil
 }

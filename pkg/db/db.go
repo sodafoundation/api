@@ -165,6 +165,8 @@ type Client interface {
 
 	ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error)
 
+	ListAttachmentsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeAttachmentSpec, error)
+
 	ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeGroup(ctx *c.Context, vgId string) error
@@ -174,4 +176,29 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
+	vol, _ := client.GetVolume(ctx, volID)
+	return client.UpdateStatus(ctx, vol, status)
+}
+
+func UpdateVolumeAttachmentStatus(ctx *c.Context, client Client, atcID, status string) error {
+	atc, _ := client.GetVolumeAttachment(ctx, atcID)
+	return client.UpdateStatus(ctx, atc, status)
+}
+
+func UpdateVolumeSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetVolumeSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
+}
+
+func UpdateReplicationStatus(ctx *c.Context, client Client, replicaID, status string) error {
+	replica, _ := client.GetReplication(ctx, replicaID)
+	return client.UpdateStatus(ctx, replica, status)
+}
+
+func UpdateVolumeGroupStatus(ctx *c.Context, client Client, vgID, status string) error {
+	vg, _ := client.GetVolumeGroup(ctx, vgID)
+	return client.UpdateStatus(ctx, vg, status)
 }

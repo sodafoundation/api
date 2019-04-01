@@ -52,12 +52,12 @@ source /etc/profile
 
 # if not found, install it.
 if [[ -z "$(which go)" ]]; then
-    log "Golang is not exist, downloading..."
+    log "Golang is not installed, downloading..."
     wget https://storage.googleapis.com/golang/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -O $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz > /dev/null
     log "tar xzf $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -C /usr/local/"
     tar xzf $OPT_DIR/${MINIMUM_GO_VERSION}.linux-amd64.tar.gz -C /usr/local/
     echo 'export GOROOT=/usr/local/go' > $GOENV_PROFILE
-    echo 'export GOPATH=$HOME/gopath' >> $GOENV_PROFILE
+    echo 'export GOPATH=$HOME/go' >> $GOENV_PROFILE
     echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> $GOENV_PROFILE
     source $GOENV_PROFILE
 fi
@@ -70,7 +70,7 @@ if [[ "${MINIMUM_GO_VERSION}" != $(echo -e "${MINIMUM_GO_VERSION}\n${go_version[
     exit 2
 fi
 
-GOPATH=${GOPATH:-$HOME/gopath}
+GOPATH=${GOPATH:-$HOME/go}
 OPENSDS_ROOT=${GOPATH}/src/github.com/opensds
 OPENSDS_DIR=${GOPATH}/src/github.com/opensds/opensds
 mkdir -p ${OPENSDS_ROOT}

@@ -20,7 +20,8 @@ This module implements a entry into the OpenSDS REST service.
 package main
 
 import (
-	"github.com/opensds/opensds/pkg/api"
+	"flag"
+
 	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
@@ -29,15 +30,15 @@ import (
 )
 
 func init() {
-	def := GetDefaultConfig()
-	flag := &CONF.Flag
-	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", def.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
-	flag.StringVar(&CONF.Database.Endpoint, "db-endpoint", def.Database.Endpoint, "Connection endpoint of database service")
-	flag.StringVar(&CONF.Database.Driver, "db-driver", def.Database.Driver, "Driver name of database service")
-	flag.StringVar(&CONF.Database.Credential, "db-credential", def.Database.Credential, "Connection credential of database service")
-	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", def.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	daemon.SetDaemonFlag(&CONF.OsdsLet.Daemon, def.OsdsLet.Daemon)
-	CONF.Load("/etc/opensds/opensds.conf")
+	// Load global configuration from specified config file.
+	CONF.Load()
+
+	// Parse some configuration fields from command line. and it will override the value which is got from config file.
+	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
+	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
+	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.Parse()
+
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
 }
 
@@ -49,9 +50,8 @@ func main() {
 	// Set up database session.
 	db.Init(&CONF.Database)
 
-	// Initialize Controller object.
-	c.Brain = c.NewController()
-
-	// Start OpenSDS northbound REST service.
-	api.Run(CONF.OsdsLet)
+	// Construct controller module grpc server struct and run controller server process.
+	if err := c.NewController(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
+		panic(err)
+	}
 }

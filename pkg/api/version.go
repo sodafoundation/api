@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/astaxie/beego"
-	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 )
 
@@ -40,28 +38,25 @@ var KnownVersions = []map[string]string{
 
 // VersionPortal
 type VersionPortal struct {
-	beego.Controller
+	BasePortal
 }
 
 // ListVersions
-func (this *VersionPortal) ListVersions() {
+func (v *VersionPortal) ListVersions() {
 	body, err := json.Marshal(KnownVersions)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal versions failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal versions failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
 
 // GetVersion
-func (this *VersionPortal) GetVersion() {
-	apiVersion := this.Ctx.Input.Param(":apiVersion")
+func (v *VersionPortal) GetVersion() {
+	apiVersion := v.Ctx.Input.Param(":apiVersion")
 
 	// Find version by specified api version
 	var result map[string]string
@@ -72,24 +67,19 @@ func (this *VersionPortal) GetVersion() {
 		}
 	}
 	if result == nil {
-		reason := fmt.Sprintf("Can't find the version: %s", apiVersion)
-		this.Ctx.Output.SetStatus(model.ErrorNotFound)
-		this.Ctx.Output.Body(model.ErrorNotFoundStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("can't find the version: %s", apiVersion)
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal version failed: %s", err.Error())
-		this.Ctx.Output.SetStatus(model.ErrorInternalServer)
-		this.Ctx.Output.Body(model.ErrorInternalServerStatus(reason))
-		log.Error(reason)
+		errMsg := fmt.Sprintf("marshal version failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
-	this.Ctx.Output.SetStatus(StatusOK)
-	this.Ctx.Output.Body(body)
+	v.SuccessHandle(StatusOK, body)
 	return
 }
