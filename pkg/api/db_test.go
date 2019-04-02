@@ -271,32 +271,84 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 }
 
 func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
-	var m = map[string]string{"a": "a"}
-
 	var req = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{},
 		VolumeId:  "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		Metadata:  m,
 		Status:    "creating",
 	}
-	var vol = &model.VolumeSpec{
+
+	// Test case 1: Volume status should be available that attachment can be created.
+	var vol1 = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Status: "available",
+		Status: "error",
 	}
+
 	mockClient := new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol1, nil)
+	db.C = mockClient
+
+	_, err := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
+	expectedError := "only the status of volume is available, attachment can be created"
+	if expectedError != err.Error() {
+		t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+	}
+
+	// Test case 2: If volume status is in-use, the multi-attach should be true, attachment can be created.
+	var vol2 = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status:      "inUse",
+		MultiAttach: false,
+	}
+	mockClient = new(dbtest.Client)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol2, nil)
+	db.C = mockClient
+
+	_, err = CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
+	expectedError = "volume is already attached or volume multiattach must be true if attach more than once"
+	if expectedError != err.Error() {
+		t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+	}
+
+	// Test case 3: Volume status is in-use and multi-attach is true, attachment created successfully.
+	var vol3 = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status:      "inUse",
+		MultiAttach: true,
+	}
+	mockClient = new(dbtest.Client)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol3, nil)
+	mockClient.On("UpdateStatus", context.NewAdminContext(), vol3, "attaching").Return(nil)
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
 	db.C = mockClient
 
 	var expected = &SampleAttachments[0]
 
-	result, err := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
-
-	if err != nil {
-		t.Errorf("Failed to create volume attachment, err is %v\n", err)
+	result, _ := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
+
+	// Test case 4: Volume status is available, attachment created successfully.
+	var vol4 = &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status: "available",
+	}
+	mockClient = new(dbtest.Client)
+	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol4, nil)
+	mockClient.On("UpdateStatus", context.NewAdminContext(), vol4, "attaching").Return(nil)
+	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
+	db.C = mockClient
+
+	result, _ = CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
+
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v, got %v\n", expected, result)
 	}
