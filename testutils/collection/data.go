@@ -586,6 +586,7 @@ var (
 			"freeCapacity":     90,
 			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			"availabilityZone": "default",
+			"multiAttach": true,
 			"extras": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
