@@ -1,0 +1,103 @@
+# Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##################################################################################################
+# DB service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  labels:
+    app: db
+    service: db
+spec:
+  ports:
+  - port: 2379
+    name: http1
+  - port: 2380
+    name: http2
+  selector:
+    app: db
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-v1
+  labels:
+    app: db
+    version: db
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+        version: v1
+    spec:
+      containers:
+      - name: db
+        image: quay.io/coreos/etcd:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2379
+        - containerPort: 2380
+        volumeMounts:
+        - name: etcd-cert-dir
+          mountPath: /etc/ssl/certs
+      volumes:
+      - name: etcd-cert-dir
+        hostPath:
+          path: /usr/share/ca-certificates/
+          type: Directory
+---
+##################################################################################################
+# Authchecker service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: authchecker
+  labels:
+    app: authchecker
+    service: authchecker
+spec:
+  ports:
+  - port: 5000
+    name: http
+  selector:
+    app: authchecker
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: authchecker-v1
+  labels:
+    app: authchecker
+    version: authchecker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authchecker
+        version: v1
+    spec:
+      containers:
+      - name: etcd
+        image: opensdsio/authchecker:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+---
