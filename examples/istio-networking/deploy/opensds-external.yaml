@@ -25,9 +25,9 @@ metadata:
 spec:
   ports:
   - port: 2379
-    name: http1
+    name: grpc-db1
   - port: 2380
-    name: http2
+    name: grpc-db2
   selector:
     app: db
 ---
@@ -74,8 +74,8 @@ metadata:
     service: authchecker
 spec:
   ports:
-  - port: 5000
-    name: http
+  - port: 35357
+    name: http-authchecker
   selector:
     app: authchecker
 ---
@@ -95,9 +95,9 @@ spec:
         version: v1
     spec:
       containers:
-      - name: etcd
-        image: opensdsio/authchecker:latest
+      - name: authchecker
+        image: opensdsio/opensds-authchecker:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5000
+        - containerPort: 35357
 ---
