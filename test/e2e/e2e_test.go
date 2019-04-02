@@ -226,6 +226,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
+		AccessProtocol: "iscsi",
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -453,6 +454,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
+		AccessProtocol: "iscsi",
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -514,6 +516,7 @@ func cleanVolumeIfFailedOrFinished(t *testing.T, volID string) error {
 
 func cleanVolumeAndAttachmentIfFailedOrFinished(t *testing.T, volID, atcID string) error {
 	t.Log("Start cleaning volume attachment...")
+
 	if err := c.DeleteVolumeAttachment(atcID, nil); err != nil {
 		t.Error("Clean volume attachment failed:", err)
 		return err
