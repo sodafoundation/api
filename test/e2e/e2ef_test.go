@@ -19,7 +19,10 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"net"
+	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -32,6 +35,7 @@ import (
 const (
 	nvmepool     = "opensds-volumes-nvme"
 	defaultgroup = "opensds-volumes-default"
+	localIqn     = "iqn.2017-10.io.opensds:volume:00000001"
 )
 
 var u *client.Client
@@ -757,6 +761,22 @@ func execCmd(name string, arg ...string) (string, error) {
 	return string(info), err
 }
 
+// getHostIp return Host IP
+func getHostIp() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			return ipnet.IP.String()
+		}
+	}
+
+	return "127.0.0.1"
+}
+
 //prepare attachment
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
@@ -765,9 +785,16 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		return nil, err
 	}
 
+	host, _ := os.Hostname()
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId:       vol.Id,
-		HostInfo:       model.HostInfo{},
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{
+			Host:      host,
+			Platform:  runtime.GOARCH,
+			OsType:    runtime.GOOS,
+			Ip:        getHostIp(),
+			Initiator: localIqn,
+		},
 		AccessProtocol: "iscsi",
 	}
 	attc, err := u.CreateVolumeAttachment(body)
@@ -789,8 +816,9 @@ func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	}
 
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: "nvmeof",
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
