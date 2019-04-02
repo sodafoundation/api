@@ -75,7 +75,7 @@ var (
 	volDesp     string
 	volAz       string
 	volSnap     string
-	multiattach bool
+	multiAttach bool
 )
 
 var (
@@ -117,7 +117,7 @@ func init() {
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
-	volumeCreateCommand.Flags().BoolVarP(&multiattach, "multiattach", "m", false, "attach more than once")
+	volumeCreateCommand.Flags().BoolVarP(&multiAttach, "multiAttach", "m", false, "attach more than once")
 	volumeCreateCommand.Flags().BoolVarP(&snapshotFromCloud, "snapshotFromCloud", "c", false, "download snapshot from cloud")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
@@ -152,7 +152,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		ProfileId:         profileId,
 		SnapshotId:        volSnap,
 		SnapshotFromCloud: snapshotFromCloud,
-		MultiAttach:       multiattach,
+		MultiAttach:       multiAttach,
 	}
 
 	resp, err := client.CreateVolume(vol)
