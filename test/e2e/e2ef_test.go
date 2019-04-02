@@ -372,8 +372,9 @@ func TestCreateAttach(t *testing.T) {
 	}
 	defer DeleteVolume(vol.Id)
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: "iscsi",
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
@@ -536,7 +537,7 @@ func TestVolumeDetach(t *testing.T) {
 	t.Log("Volume Detach Success!")
 }
 
-//Test for nvmeof  connection 
+//Test for nvmeof  connection
 func TestNvmeofAttachIssues(t *testing.T) {
 	// pool list get nvme pool
 	pols, err := u.ListPools()
@@ -765,8 +766,9 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	}
 
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: "iscsi",
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {

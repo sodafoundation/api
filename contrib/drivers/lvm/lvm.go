@@ -270,6 +270,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
+	log.Infof("TerminateConnection: opt info is %v", opt)
 	accPro := opt.AccessProtocol
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
@@ -558,7 +559,7 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
 	accPro := opt.AccessProtocol
-	if accPro == nvmeofAccess{
+	if accPro == nvmeofAccess {
 		log.Infof("nvmet right now can not support snap volume serve as nvme target")
 		log.Infof("still create snapshot connection by iscsi")
 		accPro = iscsiAccess
