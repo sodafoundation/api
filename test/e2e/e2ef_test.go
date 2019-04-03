@@ -20,9 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -781,17 +779,11 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		return nil, err
 	}
 
-	host, _ := os.Hostname()
+	//host, _ := os.Hostname()
 
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        getHostIp(),
-			Initiator: localIqn,
-		},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
 		AccessProtocol: "iscsi",
 	}
 	attc, err := u.CreateVolumeAttachment(body)
