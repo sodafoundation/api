@@ -206,6 +206,45 @@ spec:
             type: Directory
 ---
 ##################################################################################################
+# Dashboard service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+    service: dashboard
+spec:
+  ports:
+  - port: 8088
+    name: http-dashboard
+  selector:
+    app: dashboard
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dashboard-v1beta
+  labels:
+    app: dashboard
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dashboard
+        version: v1beta
+    spec:
+      containers:
+      - name: dashboard
+        image: opensdsio/dashboard:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8088
+---
+##################################################################################################
 # DB service
 ##################################################################################################
 apiVersion: v1

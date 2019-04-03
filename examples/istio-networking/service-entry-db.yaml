@@ -19,14 +19,16 @@ metadata:
 spec:
   hosts:
     - localhost
+  addresses:
+    - 127.0.0.1/32
   location: MESH_EXTERNAL
   ports:
     - number: 2379
-      name: http1
-      protocol: HTTP
+      name: tcp-db1
+      protocol: TCP
     - number: 2380
-        name: http2
-        protocol: HTTP
+        name: tcp-db2
+        protocol: TCP
     resolution: DNS
 ---
 apiVersion: networking.istio.io/v1alpha3

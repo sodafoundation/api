@@ -22,7 +22,7 @@ spec:
   servers:
     - port:
         number: 50040
-        name: http
+        name: http-apiserver
         protocol: HTTP
       hosts:
         - "*"
