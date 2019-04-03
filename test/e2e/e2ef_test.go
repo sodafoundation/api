@@ -19,7 +19,6 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -783,7 +782,6 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	}
 
 	host, _ := os.Hostname()
-	iqn, _ := getInitiator()
 
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
