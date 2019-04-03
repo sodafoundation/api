@@ -774,26 +774,6 @@ func getHostIp() string {
 	return "127.0.0.1"
 }
 
-// GetInitiator returns all the ISCSI Initiator Name
-func getInitiator() ([]string, error) {
-	res, err := execCmd("cat", "/etc/iscsi/initiatorname.iscsi")
-	iqns := []string{}
-	if err != nil {
-		log.Printf("Error encountered gathering initiator names: %v\n", err)
-		return iqns, nil
-	}
-
-	lines := strings.Split(string(res), "\n")
-	for _, l := range lines {
-		if strings.Contains(l, "InitiatorName=") {
-			iqns = append(iqns, strings.Split(l, "=")[1])
-		}
-	}
-
-	log.Printf("Found the following iqns: %s\n", iqns)
-	return iqns, nil
-}
-
 //prepare attachment
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
@@ -812,7 +792,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
 			Ip:        getHostIp(),
-			Initiator: iqn[0],
+			Initiator: localIqn,
 		},
 		AccessProtocol: "iscsi",
 	}
