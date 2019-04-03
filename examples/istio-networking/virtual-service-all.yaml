@@ -18,11 +18,11 @@ metadata:
   name: apiserver
 spec:
   hosts:
-    - apiserver
+    - apiserver.opensds.svc.cluster.local
   http:
     - route:
         - destination:
-            host: apiserver
+            host: apiserver.opensds.svc.cluster.local
             subset: v1beta
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -31,11 +31,11 @@ metadata:
   name: controller
 spec:
   hosts:
-    - controller
+    - controller.opensds.svc.cluster.local
   http:
     - route:
         - destination:
-            host: controller
+            host: controller.opensds.svc.cluster.local
             subset: v1beta
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -44,10 +44,10 @@ metadata:
   name: dock
 spec:
   hosts:
-    - dock
+    - dock.opensds.svc.cluster.local
   http:
     - route:
         - destination:
-            host: dock
+            host: dock.opensds.svc.cluster.local
             subset: v1beta
 ---

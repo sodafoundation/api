@@ -39,7 +39,7 @@ spec:
   http:
     - route:
         - destination:
-            host: apiserver
+            host: apiserver.opensds.svc.cluster.local
             port:
               number: 50040
             subset: v1beta

@@ -17,7 +17,7 @@ kind: DestinationRule
 metadata:
   name: apiserver
 spec:
-  host: apiserver
+  host: apiserver.opensds.svc.cluster.local
   subsets:
     - name: v1beta
       labels:
@@ -28,7 +28,7 @@ kind: DestinationRule
 metadata:
   name: controller
 spec:
-  host: controller
+  host: controller.opensds.svc.cluster.local
   subsets:
     - name: v1beta
       labels:
@@ -39,7 +39,7 @@ kind: DestinationRule
 metadata:
   name: dock
 spec:
-  host: dock
+  host: dock.opensds.svc.cluster.local
   subsets:
     - name: v1beta
       labels:

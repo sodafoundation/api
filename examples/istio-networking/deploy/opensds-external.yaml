@@ -37,7 +37,7 @@ metadata:
   name: db-v1
   labels:
     app: db
-    version: db
+    version: v1
 spec:
   replicas: 1
   template:
@@ -50,10 +50,14 @@ spec:
       - name: db
         image: quay.io/coreos/etcd:latest
         imagePullPolicy: IfNotPresent
-        args: 
-        - "--advertise-client-urls=http://0.0.0.0:2379" 
-        - "--listen-client-urls=http://0.0.0.0:2379"
-        - "--listen-peer-urls=http://0.0.0.0:2380"
+        command: ["/bin/sh"]
+        args: ["-c", "/usr/local/bin/etcd \
+          --name s1 \
+          --listen-client-urls http://0.0.0.0:2379 \
+          --advertise-client-urls http://0.0.0.0:2379 \
+          --listen-peer-urls http://0.0.0.0:2380 \
+          --initial-advertise-peer-urls http://0.0.0.0:2380 \
+          --initial-cluster s1=http://0.0.0.0:2380"]
         ports:
         - containerPort: 2379
         - containerPort: 2380
@@ -89,7 +93,7 @@ metadata:
   name: authchecker-v1
   labels:
     app: authchecker
-    version: authchecker
+    version: v1
 spec:
   replicas: 1
   template:
