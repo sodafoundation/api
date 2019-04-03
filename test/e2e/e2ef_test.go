@@ -456,7 +456,7 @@ func TestVolumeAttach(t *testing.T) {
 		return
 	}
 	accPro := getatt.AccessProtocol
-	output, err = execCmd("sudo", "./volume-connector",
+	output, err := execCmd("sudo", "./volume-connector",
 		"attach", string(conn), accPro)
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
@@ -701,7 +701,7 @@ func NvmeofVolumeAttach(t *testing.T) error {
 		return err
 	}
 	accPro := getatt.AccessProtocol
-	output, err = execCmd("sudo", "./volume-connector",
+	output, err := execCmd("sudo", "./volume-connector",
 		"attach", string(conn), accPro)
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
