@@ -74,7 +74,7 @@ metadata:
 spec:
   ports:
   - port: 50049
-    name: grpc-controller
+    name: tcp-controller
   selector:
     app: controller
 ---
@@ -123,7 +123,7 @@ metadata:
 spec:
   ports:
   - port: 50050
-    name: grpc-dock
+    name: tcp-dock
   selector:
     app: dock
 ---
@@ -257,9 +257,9 @@ metadata:
 spec:
   ports:
   - port: 2379
-    name: grpc-db1
+    name: tcp-db1
   - port: 2380
-    name: grpc-db2
+    name: tcp-db2
   selector:
     app: db
 ---
@@ -282,6 +282,10 @@ spec:
       - name: db
         image: quay.io/coreos/etcd:latest
         imagePullPolicy: IfNotPresent
+        args: 
+        - "--advertise-client-urls=http://0.0.0.0:2379" 
+        - "--listen-client-urls=http://0.0.0.0:2379"
+        - "--listen-peer-urls=http://0.0.0.0:2380"
         ports:
         - containerPort: 2379
         - containerPort: 2380
