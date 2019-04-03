@@ -232,6 +232,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
+	log.Infof("lvm initialize connection information: %v", opt)
 	initiator := opt.HostInfo.GetInitiator()
 	if initiator == "" {
 		initiator = "ALL"
@@ -262,6 +263,8 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		log.Error("Failed to initialize connection of logic volume:", err)
 		return nil, err
 	}
+
+	log.Infof("lvm ConnectionData: %v", expt)
 
 	return &model.ConnectionInfo{
 		DriverVolumeType: accPro,

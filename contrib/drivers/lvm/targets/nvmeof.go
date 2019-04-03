@@ -39,20 +39,20 @@ type NvmeofTarget interface {
 }
 
 func NewNvmeofTarget(bip, tgtConfDir string) NvmeofTarget {
-	return &NvmeoftgtTarget{
+	t := &NvmeoftgtTarget{
 		TgtConfDir: tgtConfDir,
 		BindIp:     bip,
 	}
+
+	t.execCmd("modprobe", "nvmet")
+	t.execCmd("modprobe", "nvmet-rdma")
+
+	return t
 }
 
 type NvmeoftgtTarget struct {
 	BindIp     string
 	TgtConfDir string
-}
-
-func (t *NvmeoftgtTarget) init() {
-	t.execCmd("modprobe", "nvmet")
-	t.execCmd("modprobe", "nvmet-rdma")
 }
 
 func (t *NvmeoftgtTarget) getTgtConfPath(volId string) string {
@@ -204,7 +204,7 @@ func (t *NvmeoftgtTarget) GetNvmeofTarget(nqn string) int {
 }
 
 func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn string) error {
-	log.Info("removing target",nqn)
+	log.Info("removing target", nqn)
 	tgtConfPath := NvmetDir + "/subsystems/" + nqn
 	if exist, _ := utils.PathExists(tgtConfPath); !exist {
 		log.Warningf("Volume path %s does not exist, nothing to remove.", tgtConfPath)
@@ -223,7 +223,7 @@ func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn string) error {
 	// remove namespace
 	ns := t.Getnamespaceid(volId)
 	if ns == "" {
-		log.Errorf("can not find volume %s's namespace",volId)
+		log.Errorf("can not find volume %s's namespace", volId)
 		return errors.New("null namespace")
 	}
 	naspPath := NvmetDir + "/subsystems/" + nqn + "/namespaces/" + ns

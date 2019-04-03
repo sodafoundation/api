@@ -19,6 +19,7 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -448,8 +449,6 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
-	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
-	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
@@ -695,8 +694,6 @@ func NvmeofVolumeAttach(t *testing.T) error {
 	t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
-	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
-	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
@@ -777,6 +774,26 @@ func getHostIp() string {
 	return "127.0.0.1"
 }
 
+// GetInitiator returns all the ISCSI Initiator Name
+func getInitiator() ([]string, error) {
+	res, err := execCmd("cat", "/etc/iscsi/initiatorname.iscsi")
+	iqns := []string{}
+	if err != nil {
+		log.Printf("Error encountered gathering initiator names: %v\n", err)
+		return iqns, nil
+	}
+
+	lines := strings.Split(string(res), "\n")
+	for _, l := range lines {
+		if strings.Contains(l, "InitiatorName=") {
+			iqns = append(iqns, strings.Split(l, "=")[1])
+		}
+	}
+
+	log.Printf("Found the following iqns: %s\n", iqns)
+	return iqns, nil
+}
+
 //prepare attachment
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
@@ -786,6 +803,8 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	}
 
 	host, _ := os.Hostname()
+	iqn, _ := getInitiator()
+
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{
@@ -793,7 +812,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
 			Ip:        getHostIp(),
-			Initiator: localIqn,
+			Initiator: iqn[0],
 		},
 		AccessProtocol: "iscsi",
 	}

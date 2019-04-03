@@ -370,7 +370,11 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 		return pb.GenericResponseError(msg), err
 	}
 
-	db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachAvailable)
+	result.Status = model.VolumeAttachAvailable
+
+	log.Infof("Create volume attachment successfully, the info is %v", result)
+	// Save changes to db.
+	db.C.UpdateVolumeAttachment(ctx, opt.Id, result)
 
 	return pb.GenericResponseResult(result), nil
 }
