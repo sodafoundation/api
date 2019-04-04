@@ -42,7 +42,7 @@ func Init(db *Database) {
 		fmt.Printf("mysql is not implemented right now!")
 		return
 	case "etcd":
-		C = etcd.NewClient(strings.Split(db.Endpoint, ","))
+		C = etcd.NewClient(strings.Split(db.DnsEndpoint, ","))
 		return
 	case "fake":
 		C = fakedb.NewFakeDbClient()

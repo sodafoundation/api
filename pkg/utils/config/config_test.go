@@ -296,8 +296,8 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.Database.Credential != "opensds:password@127.0.0.1:3306/dbname" {
 		t.Error("Test Database.Credential error")
 	}
-	if CONF.Database.Endpoint != "localhost:2379,localhost:2380" {
-		t.Error("Test Database.Endpoint error")
+	if CONF.Database.DnsEndpoint != "localhost:2379,localhost:2380" {
+		t.Error("Test Database.DnsEndpoint error")
 	}
 	if CONF.Database.Driver != "etcd" {
 		t.Error("Test Database.Driver error")
