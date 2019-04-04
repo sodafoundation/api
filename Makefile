@@ -54,7 +54,7 @@ docker: build
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
-	script/CI/test
+	install/CI/test
 
 protoc:
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
