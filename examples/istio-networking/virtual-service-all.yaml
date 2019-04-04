@@ -16,6 +16,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: apiserver
+  namespace: opensds
 spec:
   hosts:
     - apiserver.opensds.svc.cluster.local
@@ -29,6 +30,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: controller
+  namespace: opensds
 spec:
   hosts:
     - controller.opensds.svc.cluster.local
@@ -42,6 +44,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: dock
+  namespace: opensds
 spec:
   hosts:
     - dock.opensds.svc.cluster.local

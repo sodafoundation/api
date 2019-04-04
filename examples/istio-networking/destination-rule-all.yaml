@@ -16,6 +16,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: apiserver
+  namespace: opensds
 spec:
   host: apiserver.opensds.svc.cluster.local
   subsets:
@@ -27,6 +28,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: controller
+  namespace: opensds
 spec:
   host: controller.opensds.svc.cluster.local
   subsets:
@@ -38,6 +40,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: dock
+  namespace: opensds
 spec:
   host: dock.opensds.svc.cluster.local
   subsets:

@@ -19,6 +19,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: db
+  namespace: opensds
   labels:
     app: db
     service: db
@@ -35,6 +36,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: db-v1
+  namespace: opensds
   labels:
     app: db
     version: v1
@@ -77,6 +79,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: authchecker
+  namespace: opensds
   labels:
     app: authchecker
     service: authchecker
@@ -91,6 +94,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: authchecker-v1
+  namespace: opensds
   labels:
     app: authchecker
     version: v1

@@ -16,6 +16,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: opensds-gateway
+  namespace: opensds
 spec:
   selector:
     istio: ingressgateway # use istio default controller
@@ -31,6 +32,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: opensds
+  namespace: opensds
 spec:
   hosts:
     - "*"
