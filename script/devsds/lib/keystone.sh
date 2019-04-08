@@ -160,6 +160,8 @@ osds::keystone::install(){
             su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
             osds::keystone::create_user_and_endpoint
             osds::keystone::delete_redundancy_data
+            # add opensds customize policy.json for keystone
+            cp $TOP_DIR/lib/keystone.policy.json /etc/keystone/policy.json
         else
             osds::keystone::opensds_conf
             cd ${DEV_STACK_DIR}
