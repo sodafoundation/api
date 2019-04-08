@@ -25,6 +25,7 @@ spec:
         - destination:
             host: apiserver.opensds.svc.cluster.local
             subset: v1beta
+          weight: 100
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -39,6 +40,7 @@ spec:
         - destination:
             host: controller.opensds.svc.cluster.local
             subset: v1beta
+          weight: 100
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -53,4 +55,5 @@ spec:
         - destination:
             host: dock.opensds.svc.cluster.local
             subset: v1beta
+          weight: 100
 ---
