@@ -22,7 +22,7 @@ spec:
     istio: ingressgateway # use istio default controller
   servers:
     - port:
-        number: 50040
+        number: 80
         name: http-apiserver
         protocol: HTTP
       hosts:
@@ -45,3 +45,4 @@ spec:
             port:
               number: 50040
             subset: v1beta
+          weight: 100
