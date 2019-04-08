@@ -161,7 +161,7 @@ osds::keystone::install(){
             osds::keystone::create_user_and_endpoint
             osds::keystone::delete_redundancy_data
             # add opensds customize policy.json for keystone
-            cp $TOP_DIR/script/devsds/lib/keystone.policy.json /etc/keystone/policy.json
+            cp $TOP_DIR/lib/keystone.policy.json /etc/keystone/policy.json
         else
             osds::keystone::opensds_conf
             cd ${DEV_STACK_DIR}
