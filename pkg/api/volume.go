@@ -61,6 +61,23 @@ func (v *VolumePortal) CreateVolume() {
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
+	// get profile
+	var prf *model.ProfileSpec
+	var err error
+	if volume.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		volume.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
+	}
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
@@ -91,6 +108,7 @@ func (v *VolumePortal) CreateVolume() {
 		Size:              result.Size,
 		AvailabilityZone:  result.AvailabilityZone,
 		ProfileId:         result.ProfileId,
+		Profile:           prf.ToJson(),
 		PoolId:            result.PoolId,
 		SnapshotId:        result.SnapshotId,
 		Metadata:          result.Metadata,
