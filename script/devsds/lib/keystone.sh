@@ -174,9 +174,9 @@ osds::keystone::cleanup() {
 osds::keystone::uninstall(){
     if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
-        docker network rm opensds-authchecker-network
         docker ps -a|grep keystone|awk '{print $1 }'|xargs docker stop
         docker ps -a|grep keystone|awk '{print $1 }'|xargs docker rm
+        docker network rm opensds-authchecker-network
     else
         if [ "true" != $USE_EXISTING_KEYSTONE ] 
         then
