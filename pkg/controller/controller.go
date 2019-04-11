@@ -176,13 +176,7 @@ func (c *Controller) DeleteVolume(contx context.Context, opt *pb.DeleteVolumeOpt
 	log.Info("Controller server receive delete volume request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	prf, err := db.C.GetProfile(ctx, opt.ProfileId)
-	if err != nil {
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
-		log.Error("when search profile in db:", err)
-		return pb.GenericResponseError(err), err
-	}
-
+	prf := model.NewProfileFromJson(opt.Profile)
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
@@ -211,6 +205,7 @@ func (c *Controller) DeleteVolume(contx context.Context, opt *pb.DeleteVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
+
 	if err = db.C.DeleteVolume(ctx, opt.GetId()); err != nil {
 		return pb.GenericResponseError(err), err
 	}
