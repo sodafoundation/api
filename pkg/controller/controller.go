@@ -89,25 +89,14 @@ func (c *Controller) Run() error {
 // CreateVolume implements pb.ControllerServer.CreateVolume
 func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
 	var err error
-	var prf *model.ProfileSpec
 	var snap *model.VolumeSnapshotSpec
 	var snapVol *model.VolumeSpec
 
 	log.Info("Controller server receive create volume request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	if opt.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(ctx)
-		opt.ProfileId = prf.Id
-	} else {
-		prf, err = db.C.GetProfile(ctx, opt.ProfileId)
-	}
-	if err != nil {
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
-		log.Error("get profile failed: ", err)
-		return pb.GenericResponseError(err), err
-	}
+	prf := model.NewProfileFromJson(opt.Profile)
+
 	if opt.SnapshotId != "" {
 		snap, err = db.C.GetVolumeSnapshot(ctx, opt.SnapshotId)
 		if err != nil {
@@ -139,7 +128,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
-	// whether specify a pool or not, opt's poolid and pool name should be 
+	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
 	opt.PoolName = polInfo.Name
