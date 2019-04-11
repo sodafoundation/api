@@ -102,11 +102,12 @@ func (v *VolumePortal) CreateVolume() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeOpts{
-		Id:                result.Id,
-		Name:              result.Name,
-		Description:       result.Description,
-		Size:              result.Size,
-		AvailabilityZone:  result.AvailabilityZone,
+		Id:               result.Id,
+		Name:             result.Name,
+		Description:      result.Description,
+		Size:             result.Size,
+		AvailabilityZone: result.AvailabilityZone,
+		// TODO: ProfileId will be removed later.
 		ProfileId:         result.ProfileId,
 		Profile:           prf.ToJson(),
 		PoolId:            result.PoolId,
