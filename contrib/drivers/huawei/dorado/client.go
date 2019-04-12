@@ -1440,3 +1440,17 @@ func (c *DoradoClient) checkFCInitiatorsExistInHost(hostId string) (bool, error)
 
 	return false, nil
 }
+
+func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, error) {
+	resp := &FCInitiatorsResp{}
+	url := fmt.Sprintf("/iscsi_initiator?range=[0-65535]&PARENTID=%s", hostId)
+	if err := c.request("GET", url, nil, resp); err != nil {
+		log.Errorf("Get FC initiators exist in host failed.")
+		return false, err
+	}
+	if len(resp.Data) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
