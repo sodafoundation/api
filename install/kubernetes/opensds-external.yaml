@@ -85,7 +85,7 @@ metadata:
     service: authchecker
 spec:
   ports:
-  - port: 35357
+  - port: 80
     name: http-authchecker
   selector:
     app: authchecker
@@ -108,8 +108,13 @@ spec:
     spec:
       containers:
       - name: authchecker
+        securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
         image: opensdsio/opensds-authchecker:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 35357
+        - containerPort: 80
 ---

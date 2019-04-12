@@ -225,6 +225,7 @@ metadata:
 spec:
   ports:
   - port: 8088
+    nodePort: 31975
     name: http-dashboard
   selector:
     app: dashboard
@@ -249,6 +250,13 @@ spec:
       containers:
       - name: dashboard
         image: opensdsio/dashboard:latest
+        env:
+        - name: OPENSDS_AUTH_URL
+          value: http://authchecker.opensds.svc.cluster.local/identity
+        - name: OPENSDS_HOTPOT_URL
+          value: http://apiserver.opensds.svc.cluster.local:50040
+        - name: OPENSDS_GELATO_URL
+          value: http://127.0.0.1:8089
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8088
@@ -326,7 +334,7 @@ metadata:
     service: authchecker
 spec:
   ports:
-  - port: 35357
+  - port: 80
     name: http-authchecker
   selector:
     app: authchecker
@@ -349,8 +357,13 @@ spec:
     spec:
       containers:
       - name: authchecker
+        securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
         image: opensdsio/opensds-authchecker:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 35357
+        - containerPort: 80
 ---
