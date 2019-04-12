@@ -267,6 +267,20 @@ func (v *VolumePortal) DeleteVolume() {
 		return
 	}
 
+	// If profileId or poolId of the volume doesn't exist, it would mean that
+	// the volume provisioning operation failed before the create method in
+	// storage driver was called, therefore the volume entry should be deleted
+	// from db directly.
+	if volume.ProfileId == "" || volume.PoolId == "" {
+		if err := db.C.DeleteVolume(ctx, volume.Id); err != nil {
+			errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
+			v.ErrorHandle(model.ErrorInternalServer, errMsg)
+			return
+		}
+		v.SuccessHandle(StatusAccepted, nil)
+		return
+	}
+
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = DeleteVolumeDBEntry(ctx, volume); err != nil {
@@ -274,6 +288,14 @@ func (v *VolumePortal) DeleteVolume() {
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+
 	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume deletion process.
@@ -291,6 +313,7 @@ func (v *VolumePortal) DeleteVolume() {
 		PoolId:    volume.PoolId,
 		Metadata:  volume.Metadata,
 		Context:   ctx.ToJson(),
+		Profile:   prf.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("delete volume failed in controller service:", err)

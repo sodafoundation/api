@@ -415,6 +415,21 @@ func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) er
 			return err
 		}
 	}
+
+	fcExist, err := d.client.checkFCInitiatorsExistInHost(hostId)
+	if err != nil {
+		return err
+	}
+	iscsiExist, err := d.client.checkIscsiInitiatorsExistInHost(hostId)
+	if err != nil {
+		return err
+	}
+	if fcExist || iscsiExist {
+		log.Warningf("host (%s) still contains initiator(s), ignore delete it. "+
+			"Delete volume attachment(%s)success.", hostId, opt.GetId())
+		return nil
+	}
+
 	if err := d.client.DeleteHost(hostId); err != nil {
 		return err
 	}
