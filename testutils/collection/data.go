@@ -133,6 +133,8 @@ var (
 		},
 	}
 
+	SampleAvailabilityZones = []string{"default"}
+
 	SampleVolumes = []model.VolumeSpec{
 		{
 			BaseModel: &model.BaseModel{
