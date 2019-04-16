@@ -7,6 +7,7 @@ FROM ubuntu:16.04
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
 COPY keystone.sh /keystone.sh
+COPY sources.list /etc/apt/sources.list
 COPY entrypoint.sh /entrypoint.sh
 
 # Install some packages before running command.

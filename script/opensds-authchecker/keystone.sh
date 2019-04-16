@@ -33,11 +33,9 @@ STACK_BRANCH=${STACK_BRANCH:-stable/queens}
 DEV_STACK_DIR=$STACK_HOME/devstack
 
 osds::keystone::create_user(){
-    if id ${STACK_USER_NAME} &> /dev/null; then
-        return
-    fi
     sudo useradd -s /bin/bash -d ${STACK_HOME} -m ${STACK_USER_NAME}
     echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/stack
+    sudo su - ${STACK_USER_NAME}
 }
 
 osds::keystone::devstack_local_conf(){
@@ -101,7 +99,7 @@ osds::keystone::delete_redundancy_data() {
 
 osds::keystone::download_code(){
     if [ ! -d ${DEV_STACK_DIR} ];then
-        git clone ${STACK_GIT_BASE}/openstack-dev/devstack.git -b ${STACK_BRANCH} ${DEV_STACK_DIR}
+        git clone ${STACK_GIT_BASE}/openstack-dev/devstack -b ${STACK_BRANCH} ${DEV_STACK_DIR}
         chown stack:stack -R ${DEV_STACK_DIR}
     fi
 
