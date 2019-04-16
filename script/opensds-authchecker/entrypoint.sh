@@ -14,8 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set environment path.
+. ~/.bashrc
+
 HOST_IP=`/sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}'`
-#source /opt/stack/devstack/openrc admin admin
+#. /opt/stack/devstack/openrc admin admin
 
 #openstack endpoint set 04198085606f489bbeb03e3de534774d  --url 'http://172.17.0.19/identity'
 sed -i "s,^admin_endpoint.*$,admin_endpoint = http://$HOST_IP/identity,g" /etc/keystone/keystone.conf

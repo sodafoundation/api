@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set environment path.
+. ~/.bashrc
+
 # Default host ip.
 HOST_IP=0.0.0.0
 # OpenSDS version configuration.
@@ -28,7 +31,6 @@ STACK_PASSWORD=${STACK_PASSWORD:-opensds@123}
 STACK_HOME=${STACK_HOME:-/opt/stack}
 STACK_BRANCH=${STACK_BRANCH:-stable/queens}
 DEV_STACK_DIR=$STACK_HOME/devstack
-
 
 osds::keystone::create_user(){
     if id ${STACK_USER_NAME} &> /dev/null; then
@@ -74,8 +76,6 @@ DEV_STACK_LOCAL_CONF_DOCK
 chown stack:stack $DEV_STACK_LOCAL_CONF
 }
 
-
-
 osds::keystone::create_user_and_endpoint(){
     . $DEV_STACK_DIR/openrc admin admin
     openstack user create --domain default --password $STACK_PASSWORD $OPENSDS_SERVER_NAME
@@ -119,4 +119,5 @@ osds::keystone::install(){
 	osds::keystone::delete_redundancy_data
 }
 
+mkdir -p /opt/stack/
 osds::keystone::install

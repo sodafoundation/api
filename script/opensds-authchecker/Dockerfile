@@ -10,12 +10,12 @@ COPY keystone.sh /keystone.sh
 COPY entrypoint.sh /entrypoint.sh
 
 # Install some packages before running command.
-RUN apt-get update && \
-    apt-get install -y sudo vim git telnet net-tools && \ 
-    mkdir -p /opt/stack/
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo git telnet net-tools iptables gnutls-bin && \
+    rm -rf /var/lib/apt/lists/*
 
 # Build keystone service.
 RUN sudo bash /keystone.sh
 
 # Define default command.
-ENTRYPOINT /entrypoint.sh 
+ENTRYPOINT ["/entrypoint.sh"]
