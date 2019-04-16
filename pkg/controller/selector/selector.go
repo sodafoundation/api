@@ -171,11 +171,7 @@ func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.S
 	for _, pool := range pools {
 		var poolIsFound = true
 		for _, profile := range profiles {
-			if !profile.CustomProperties.IsEmpty() {
-				filterRequest = profile.CustomProperties
-			} else {
-				filterRequest = make(map[string]interface{})
-			}
+			filterRequest = profile.CustomProperties.GetCapabilitiesProperties()
 			filterRequest["availabilityZone"] = in.AvailabilityZone
 
 			isAvailable, err := IsAvailablePool(filterRequest, pool)

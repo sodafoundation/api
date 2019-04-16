@@ -26,6 +26,13 @@ import (
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
+var assertTestResult = func(t *testing.T, got, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("expected %v, got %v\n", expected, got)
+	}
+}
+
 func TestCreateVolumeDBEntry(t *testing.T) {
 	var in = &model.VolumeSpec{
 		BaseModel:   &model.BaseModel{},
@@ -35,34 +42,29 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		Status:      model.VolumeCreating,
 	}
 
-	// Test case 1: Everything should work well.
-	mockClient := new(dbtest.Client)
-	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)
-	db.C = mockClient
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)
+		db.C = mockClient
 
-	var expected = &SampleVolumes[0]
-	result, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
-	if err != nil {
-		t.Errorf("Failed to create volume asynchronously, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-
-	// Test case 2: The size of volume created should be greater than zero.
-	in.Size = int64(-2)
-	mockClient = new(dbtest.Client)
-	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)
-	db.C = mockClient
-	_, err = CreateVolumeDBEntry(context.NewAdminContext(), in)
-	expectedError := fmt.Sprintf("invalid volume size: %d", in.Size)
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		var expected = &SampleVolumes[0]
+		result, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed to create volume asynchronously, err is %v\n", err)
 		}
-	}
+		assertTestResult(t, result, expected)
+	})
+
+	t.Run("The size of volume created should be greater than zero", func(t *testing.T) {
+		in.Size = int64(-2)
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)
+		db.C = mockClient
+
+		_, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("invalid volume size: %d", in.Size)
+		assertTestResult(t, err.Error(), expectedError)
+	})
 }
 
 func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
@@ -82,55 +84,43 @@ func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
 		Status: model.VolumeSnapAvailable,
 	}
 
-	// Test case 1: Everything should work well.
-	mockClient := new(dbtest.Client)
-	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
-	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
-	db.C = mockClient
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
+		mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
+		db.C = mockClient
 
-	var expected = &SampleVolumes[1]
-	result, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
-	if err != nil {
-		t.Errorf("Failed to create volume with snapshot, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
-
-	// Test case 2: The status of volume snapshot should always be available.
-	snap.Status = model.VolumeSnapError
-	mockClient = new(dbtest.Client)
-	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
-	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
-	db.C = mockClient
-
-	_, err = CreateVolumeDBEntry(context.NewAdminContext(), in)
-	expectedError := "only if the snapshot is available, the volume can be created"
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		var expected = &SampleVolumes[1]
+		result, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed to create volume with snapshot, err is %v\n", err)
 		}
-	}
+		assertTestResult(t, result, expected)
+	})
 
-	// Test case 3: Size of volume should always be equal to or bigger than
-	// size of the snapshot.
-	snap.Status, snap.Size = model.VolumeSnapAvailable, 10
-	mockClient = new(dbtest.Client)
-	mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
-	mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
-	db.C = mockClient
+	t.Run("The status of volume snapshot should always be available", func(t *testing.T) {
+		snap.Status = model.VolumeSnapError
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
+		mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
+		db.C = mockClient
 
-	_, err = CreateVolumeDBEntry(context.NewAdminContext(), in)
-	expectedError = "size of volume must be equal to or bigger than size of the snapshot"
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
+		_, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		expectedError := "only if the snapshot is available, the volume can be created"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Size of volume should always be equal to or bigger than size of the snapshot", func(t *testing.T) {
+		snap.Status, snap.Size = model.VolumeSnapAvailable, 10
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[1], nil)
+		mockClient.On("GetVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(snap, nil)
+		db.C = mockClient
+
+		_, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		expectedError := "size of volume must be equal to or bigger than size of the snapshot"
+		assertTestResult(t, err.Error(), expectedError)
+	})
 }
 
 func TestDeleteVolumeDBEntry(t *testing.T) {
@@ -151,62 +141,53 @@ func TestDeleteVolumeDBEntry(t *testing.T) {
 		PoolId:    "3762355c-a102-11e7-b772-17b880d2f537",
 	}
 
-	// Test case 1: Everything should work well.
-	mockClient := new(dbtest.Client)
-	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
-	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
-	mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
+		mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+		mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+		mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
 
-	err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
-	if err != nil {
-		t.Errorf("Failed to delete volume, err is %v\n", err)
-	}
-
-	// Test case 2: Volume to be deleted should not contain any snapshots.
-	var sampleSnapshots = []*model.VolumeSnapshotSpec{&SampleSnapshots[0]}
-	// Considering vol has been updated inisde DeleteVolumeDBEntry, so the status
-	// should be rolled back here.
-	vol.Status = model.VolumeAvailable
-	mockClient = new(dbtest.Client)
-	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
-	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(sampleSnapshots, nil)
-	mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
-
-	err = DeleteVolumeDBEntry(context.NewAdminContext(), vol)
-	expectedError := fmt.Sprintf("volume %s can not be deleted, because it still has snapshots", in.Id)
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
+		if err != nil {
+			t.Errorf("failed to delete volume, err is %v\n", err)
 		}
-	}
+	})
 
-	// Test case 3: Volume to be deleted should not be in-use.
-	var sampleAttachments = []*model.VolumeAttachmentSpec{&SampleAttachments[0]}
-	// Considering vol has been updated inisde DeleteVolumeDBEntry, so the status
-	// should be rolled back here.
-	vol.Status = model.VolumeAvailable
-	mockClient = new(dbtest.Client)
-	mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
-	mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
-	mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(sampleAttachments, nil)
-	mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
+	t.Run("Volume to be deleted should not contain any snapshots", func(t *testing.T) {
+		var sampleSnapshots = []*model.VolumeSnapshotSpec{&SampleSnapshots[0]}
+		// Considering vol has been updated inisde DeleteVolumeDBEntry, so the status
+		// should be rolled back here.
+		vol.Status = model.VolumeAvailable
+		mockClient := new(dbtest.Client)
+		mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
+		mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(sampleSnapshots, nil)
+		mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+		mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
 
-	err = DeleteVolumeDBEntry(context.NewAdminContext(), vol)
-	expectedError = fmt.Sprintf("volume %s can not be deleted, because it's in use", in.Id)
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
+		err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
+		expectedError := fmt.Sprintf("volume %s can not be deleted, because it still has snapshots", in.Id)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Volume to be deleted should not be in-use", func(t *testing.T) {
+		var sampleAttachments = []*model.VolumeAttachmentSpec{&SampleAttachments[0]}
+		// Considering vol has been updated inisde DeleteVolumeDBEntry, so the status
+		// should be rolled back here.
+		vol.Status = model.VolumeAvailable
+		mockClient := new(dbtest.Client)
+		mockClient.On("DeleteVolume", context.NewAdminContext(), vol.Id).Return(nil)
+		mockClient.On("ListSnapshotsByVolumeId", context.NewAdminContext(), vol.Id).Return(nil, nil)
+		mockClient.On("ListAttachmentsByVolumeId", context.NewAdminContext(), vol.Id).Return(sampleAttachments, nil)
+		mockClient.On("UpdateVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
+
+		err := DeleteVolumeDBEntry(context.NewAdminContext(), vol)
+		expectedError := fmt.Sprintf("volume %s can not be deleted, because it's in use", in.Id)
+		assertTestResult(t, err.Error(), expectedError)
+	})
 }
 
 func TestExtendVolumeDBEntry(t *testing.T) {
@@ -225,49 +206,43 @@ func TestExtendVolumeDBEntry(t *testing.T) {
 		Size:   2,
 	}
 
-	// Test case 1: Everything should work well.
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
-	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
-	_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 20})
-	if err != nil {
-		t.Errorf("Failed to extend volume: %v\n", err)
-	}
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
 
-	// Test case 2: The status of volume should always be available.
-	vol.Status = model.VolumeCreating
-	mockClient = new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
-	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
-	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 20})
-	expectedError := "the status of the volume to be extended must be available!"
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
+		_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 20})
+		if err != nil {
+			t.Errorf("failed to extend volume: %v\n", err)
 		}
-	}
+	})
 
-	// Test case 3: The extended size should always be larger than current size.
-	vol.Size, vol.Status = 20, model.VolumeAvailable
-	in.Size = 20
-	mockClient = new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
-	mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
-	db.C = mockClient
-	_, err = ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 2})
-	expectedError = "new size for extend must be greater than current size." +
-		"(current: 20 GB, extended: 2 GB)."
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
+	t.Run("The status of volume should always be available", func(t *testing.T) {
+		vol.Status = model.VolumeCreating
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
+
+		_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 20})
+		expectedError := "the status of the volume to be extended must be available!"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("The extended size should always be larger than current size", func(t *testing.T) {
+		vol.Size, vol.Status = 20, model.VolumeAvailable
+		in.Size = 20
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("ExtendVolume", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
+
+		_, err := ExtendVolumeDBEntry(context.NewAdminContext(), vol.Id, &model.ExtendVolumeSpec{NewSize: 2})
+		expectedError := "new size for extend must be greater than current size." +
+			"(current: 20 GB, extended: 2 GB)."
+		assertTestResult(t, err.Error(), expectedError)
+	})
 }
 
 func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
@@ -327,7 +302,11 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
 	db.C = mockClient
 
-	var expected = &SampleAttachments[0]
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
+		db.C = mockClient
 
 	result, _ := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
 	if !reflect.DeepEqual(result, expected) {
@@ -355,7 +334,6 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 }
 
 func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
-	var m = map[string]string{"a": "a"}
 	var vol = &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
@@ -370,23 +348,22 @@ func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 		Description: "This is the first sample snapshot for testing",
 		Size:        int64(1),
 		Status:      "creating",
-		Metadata:    m,
+		Metadata:    map[string]string{"a": "a"},
 	}
 
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
-	mockClient.On("CreateVolumeSnapshot", context.NewAdminContext(), req).Return(&SampleSnapshots[0], nil)
-	db.C = mockClient
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("CreateVolumeSnapshot", context.NewAdminContext(), req).Return(&SampleSnapshots[0], nil)
+		db.C = mockClient
 
-	var expected = &SampleSnapshots[0]
-	result, err := CreateVolumeSnapshotDBEntry(context.NewAdminContext(), req)
-
-	if err != nil {
-		t.Errorf("Failed to create volume snapshot, err is %v\n", err)
-	}
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v\n", expected, result)
-	}
+		var expected = &SampleSnapshots[0]
+		result, err := CreateVolumeSnapshotDBEntry(context.NewAdminContext(), req)
+		if err != nil {
+			t.Errorf("failed to create volume snapshot, err is %v\n", err)
+		}
+		assertTestResult(t, result, expected)
+	})
 }
 
 func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
@@ -398,14 +375,15 @@ func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 		Status:   "available",
 	}
 
-	mockClient := new(dbtest.Client)
-	mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", req).Return(nil, nil)
-	mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(nil, nil)
-	db.C = mockClient
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateVolumeSnapshot", context.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537", req).Return(nil, nil)
+		mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(nil, nil)
+		db.C = mockClient
 
-	err := DeleteVolumeSnapshotDBEntry(context.NewAdminContext(), req)
-
-	if err != nil {
-		t.Errorf("Failed to delete volume snapshot, err is %v\n", err)
-	}
+		err := DeleteVolumeSnapshotDBEntry(context.NewAdminContext(), req)
+		if err != nil {
+			t.Errorf("failed to delete volume snapshot, err is %v\n", err)
+		}
+	})
 }

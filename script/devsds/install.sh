@@ -161,9 +161,9 @@ echo "export OPENSDS_ENDPOINT=http://localhost:50040"
 if osds::util::is_service_enabled keystone; then
     if [ "true" == $USE_CONTAINER_KEYSTONE ] 
         then
-            echo "export OS_AUTH_URL=http://$HOST_IP:35357/v3"
+            echo "export OS_AUTH_URL=http://$KEYSTONE_IP/identity"
             echo "export OS_USERNAME=admin"
-            echo "export OS_PASSWORD=admin_token"
+            echo "export OS_PASSWORD=opensds@123"
             echo "export OS_TENANT_NAME=admin"
             echo "export OS_PROJECT_NAME=admin"
             echo "export OS_USER_DOMAIN_ID=default"

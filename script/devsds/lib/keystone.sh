@@ -67,18 +67,12 @@ chown stack:stack $DEV_STACK_LOCAL_CONF
 }
 
 osds::keystone::opensds_conf() {
-    AuthURL=http://$KEYSTONE_IP/identity
-    if [ "true" == $USE_CONTAINER_KEYSTONE ]
-    then
-        AuthURL=http://$KEYSTONE_IP:35357/v3
-    fi
-
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [keystone_authtoken]
 memcached_servers = $KEYSTONE_IP:11211
 signing_dir = /var/cache/opensds
 cafile = /opt/stack/data/ca-bundle.pem
-auth_uri = $AuthURL
+auth_uri = http://$KEYSTONE_IP/identity
 project_domain_name = Default
 project_name = service
 user_domain_name = Default
@@ -88,7 +82,7 @@ enable_encrypted = False
 # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
 pwd_encrypter = aes
 username = $OPENSDS_SERVER_NAME
-auth_url = $AuthURL
+auth_url = http://$KEYSTONE_IP/identity
 auth_type = password
 
 OPENSDS_GLOBAL_CONFIG_DOC
@@ -139,10 +133,13 @@ osds::keystone::download_code(){
 osds::keystone::install(){
     if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
-        KEYSTONE_IP=$HOST_IP
-        osds::keystone::opensds_conf
+        docker network create --subnet=173.18.0.0/16 opensds-authchecker-network
         docker pull opensdsio/opensds-authchecker:latest
-        docker run -d --name keystone --network host opensdsio/opensds-authchecker:latest
+        KEYSTONE_IP=173.18.0.2
+        docker run -d --privileged=true --net opensds-authchecker-network --ip $KEYSTONE_IP --name keystone opensdsio/opensds-authchecker:latest        
+        osds::keystone::opensds_conf
+        CONTAINER_ID=$(docker ps -a|grep keystone|awk '{print $1 }')
+        docker cp $TOP_DIR/lib/keystone.policy.json $CONTAINER_ID:/etc/keystone/policy.json
     else
         if [ "true" != $USE_EXISTING_KEYSTONE ] 
         then
@@ -179,6 +176,7 @@ osds::keystone::uninstall(){
     then
         docker ps -a|grep keystone|awk '{print $1 }'|xargs docker stop
         docker ps -a|grep keystone|awk '{print $1 }'|xargs docker rm
+        docker network rm opensds-authchecker-network
     else
         if [ "true" != $USE_EXISTING_KEYSTONE ] 
         then
