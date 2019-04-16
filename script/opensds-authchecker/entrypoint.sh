@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Set environment path.
-. ~/.bashrc
-
 HOST_IP=`/sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}'`
 #. /opt/stack/devstack/openrc admin admin
 

@@ -7,13 +7,12 @@ FROM ubuntu:16.04
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
 COPY keystone.sh /keystone.sh
-COPY sources.list /etc/apt/sources.list
 COPY entrypoint.sh /entrypoint.sh
 
 # Install some packages before running command.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    sudo git telnet net-tools iptables gnutls-bin && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    sudo git telnet net-tools iptables gnutls-bin ca-certificates && \
+    mkdir -p /opt/stack/
 
 # Build keystone service.
 RUN sudo bash /keystone.sh

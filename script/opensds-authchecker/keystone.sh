@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Set environment path.
-. ~/.bashrc
-
 # Default host ip.
 HOST_IP=0.0.0.0
 # OpenSDS version configuration.
@@ -33,9 +30,11 @@ STACK_BRANCH=${STACK_BRANCH:-stable/queens}
 DEV_STACK_DIR=$STACK_HOME/devstack
 
 osds::keystone::create_user(){
+    if id ${STACK_USER_NAME} &> /dev/null; then
+        return
+    fi
     sudo useradd -s /bin/bash -d ${STACK_HOME} -m ${STACK_USER_NAME}
     echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/stack
-    sudo su - ${STACK_USER_NAME}
 }
 
 osds::keystone::devstack_local_conf(){
@@ -44,27 +43,21 @@ cat > $DEV_STACK_LOCAL_CONF << DEV_STACK_LOCAL_CONF_DOCK
 [[local|localrc]]
 # use TryStack git mirror
 GIT_BASE=$STACK_GIT_BASE
-
 disable_service mysql
 enable_service postgresql
-
 # If the ``*_PASSWORD`` variables are not set here you will be prompted to enter
 # values for them by ``stack.sh``and they will be added to ``local.conf``.
 ADMIN_PASSWORD=$STACK_PASSWORD
 DATABASE_PASSWORD=$STACK_PASSWORD
 RABBIT_PASSWORD=$STACK_PASSWORD
 SERVICE_PASSWORD=$STACK_PASSWORD
-
 # Neither is set by default.
 HOST_IP=$HOST_IP
-
 # path of the destination log file.  A timestamp will be appended to the given name.
 LOGFILE=\$DEST/logs/stack.sh.log
-
 # Old log files are automatically removed after 7 days to keep things neat.  Change
 # the number of days by setting ``LOGDAYS``.
 LOGDAYS=2
-
 ENABLED_SERVICES=postgresql,key
 # Using stable/queens branches
 # ---------------------------------
@@ -117,5 +110,4 @@ osds::keystone::install(){
 	osds::keystone::delete_redundancy_data
 }
 
-mkdir -p /opt/stack/
 osds::keystone::install
