@@ -1529,6 +1529,15 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
 	log.V(8).Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
 
+	if attachment.ConnectionData != nil {
+		if result.ConnectionData == nil {
+			result.ConnectionData = make(map[string]interface{})
+		}
+
+		for k, v := range attachment.ConnectionData {
+			result.ConnectionData[k] = v
+		}
+	}
 	result.ConnectionData = attachment.ConnectionData
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
