@@ -122,6 +122,7 @@ pool:
   $DEFAULT_VOLUME_GROUP_NAME:
     diskType: NL-SAS
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin
@@ -141,7 +142,6 @@ name = lvm
 description = LVM Test
 driver_name = lvm
 config_path = /etc/opensds/driver/lvm.yaml
-multi_attach = False
 
 OPENSDS_LVM_GLOBAL_CONFIG_DOC
 }
@@ -152,6 +152,7 @@ cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
   $NVME_VOLUME_GROUP_NAME:
     diskType: NL-SAS
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin

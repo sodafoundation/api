@@ -441,6 +441,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			FreeCapacity:     p.Stats.MaxAvail >> sizeShiftBit,
 			StorageType:      d.conf.Pool[p.Name].StorageType,
 			AvailabilityZone: d.conf.Pool[p.Name].AvailabilityZone,
+			MultiAttach:      d.conf.Pool[p.Name].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ

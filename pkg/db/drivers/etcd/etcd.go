@@ -988,7 +988,7 @@ func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 // GetVolume
 func (c *Client) GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
 	vol, err := c.getVolume(ctx, volID)
-	if !IsAdminContext(ctx) || err == nil {
+	if !IsAdminContext(ctx) || err != nil {
 		return vol, err
 	}
 	vols, err := c.ListVolumes(ctx)
@@ -1207,6 +1207,10 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.ReplicationDriverData != nil {
 		result.ReplicationDriverData = vol.ReplicationDriverData
 	}
+	if vol.MultiAttach {
+		result.MultiAttach = true
+	}
+
 	result.GroupId = vol.GroupId
 
 	// Set update time
@@ -1522,8 +1526,8 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	}
 	// Update connectionData
 	// Debug
-	log.Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
-	log.Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
+	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
+	log.V(8).Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
 
 	result.ConnectionData = attachment.ConnectionData
 	// Set update time

@@ -429,6 +429,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      c.Pool[p.Name].StorageType,
 			Extras:           c.Pool[p.Name].Extras,
 			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
+			MultiAttach:      c.Pool[p.Name].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ

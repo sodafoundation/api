@@ -58,7 +58,6 @@ type BackendProperties struct {
 	DriverName         string `conf:"driver_name"`
 	ConfigPath         string `conf:"config_path"`
 	SupportReplication bool   `conf:"support_replication,false"`
-	MultiAttach        bool   `conf:"multi_attach,false"`
 }
 
 type Backends struct {

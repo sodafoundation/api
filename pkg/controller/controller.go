@@ -134,11 +134,22 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
+
+	log.Infof("controller create volume:  get volume from db %+v", vol)
+
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 	if err != nil {
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
+
+	// The default value of multi-attach is false, if it becomes true, then update into db
+	log.Infof("update volume %+v", vol)
+
+	if vol.MultiAttach {
+		db.C.UpdateVolume(ctx, vol)
+	}
+
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id

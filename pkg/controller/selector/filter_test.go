@@ -397,7 +397,7 @@ func TestAdvancedFilter(t *testing.T) {
 	}
 }
 
-func TestIsMultiattachFilter(t *testing.T) {
+func TestIsMultiAttachFilter(t *testing.T) {
 	testCases := []FilterCaseSpec{
 		{
 			request: map[string]interface{}{
