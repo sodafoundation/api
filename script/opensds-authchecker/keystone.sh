@@ -14,14 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-HOST_IP=173.18.0.2
-# OpenSDS configuration.
+# Default host ip.
+HOST_IP=0.0.0.0
+# OpenSDS version configuration.
 OPENSDS_VERSION=${OPENSDS_VERSION:-v1beta}
 # OpenSDS service name in keystone.
 OPENSDS_SERVER_NAME=${OPENSDS_SERVER_NAME:-opensds}
-# OpenSDS configuration.
-OPENSDS_VERSION=${OPENSDS_VERSION:-v1beta}
 
 # devstack keystone configuration
 STACK_GIT_BASE=${STACK_GIT_BASE:-https://git.openstack.org}
@@ -122,4 +120,3 @@ osds::keystone::install(){
 }
 
 osds::keystone::install
-
