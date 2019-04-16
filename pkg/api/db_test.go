@@ -302,11 +302,7 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
 	db.C = mockClient
 
-	t.Run("Everything should work well", func(t *testing.T) {
-		mockClient := new(dbtest.Client)
-		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
-		mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
-		db.C = mockClient
+	var expected = &SampleAttachments[0]
 
 	result, _ := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
 	if !reflect.DeepEqual(result, expected) {
@@ -326,6 +322,7 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), req).Return(&SampleAttachments[0], nil)
 	db.C = mockClient
 
+	expected = &SampleAttachments[0]
 	result, _ = CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
 
 	if !reflect.DeepEqual(result, expected) {

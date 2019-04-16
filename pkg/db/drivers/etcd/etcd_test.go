@@ -21,6 +21,7 @@ defined in api module.
 package etcd
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -40,7 +41,7 @@ func (*fakeClientCaller) Create(req *Request) *Response {
 
 func (*fakeClientCaller) Get(req *Request) *Response {
 	var resp []string
-
+	fmt.Println("zaizheli ")
 	if strings.Contains(req.Url, "docks") {
 		resp = append(resp, StringSliceDocks[0])
 	}

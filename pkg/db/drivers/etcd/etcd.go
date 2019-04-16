@@ -988,7 +988,7 @@ func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 // GetVolume
 func (c *Client) GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error) {
 	vol, err := c.getVolume(ctx, volID)
-	if !IsAdminContext(ctx) || err != nil {
+	if !IsAdminContext(ctx) || err == nil {
 		return vol, err
 	}
 	vols, err := c.ListVolumes(ctx)
