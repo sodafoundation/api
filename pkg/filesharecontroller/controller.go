@@ -21,10 +21,6 @@ package controller
 import (
 	_ "encoding/json"
 	"github.com/opensds/opensds/pkg/filesharecontroller/fileshare"
-	_ "github.com/opensds/opensds/pkg/model/fileshareproto"
-	//proto "github.com/opensds/opensds/sampleproto"
-
-	//"errors"
 	"fmt"
 
 	"net"
@@ -33,12 +29,9 @@ import (
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 
 	"github.com/opensds/opensds/pkg/filesharecontroller/selector"
-
-	//"github.com/opensds/opensds/pkg/filesharecontroller/filehshare"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/fileshareproto"
-	//"github.com/opensds/opensds/pkg/utils"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -135,14 +128,14 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 
 	result, err := c.fileshareController.CreateFileShare((*pb.CreateFileShareOpts)(opt))
 	if err != nil {
-		// Change the status of the volume to error when the creation faild
+		// Change the status of the file share to error when the creation faild
 		defer db.UpdateFileShareStatus(ctx, db.C, model.FileShareError)
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
-	// Update the volume data in database.
+	// Update the file share data in database.
 	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
 
 	
