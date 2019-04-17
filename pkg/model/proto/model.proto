@@ -84,6 +84,8 @@ service Controller {
 	
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+
+    rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
 }
 
 service ProvisionDock {
@@ -135,6 +137,8 @@ service ProvisionDock {
 	
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+
+    rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
 }
 
 // CreateVolumeOpts is a structure which indicates all required properties
@@ -660,5 +664,12 @@ message GenericResponse {
         Result result = 1;
         Error error = 2;
     }
+}
+
+message CollectMetricsOpts {
+    string instanceId = 1;
+    repeated string metricValues = 2;
+    string context = 3;
+    string driverName = 4;
 }
 

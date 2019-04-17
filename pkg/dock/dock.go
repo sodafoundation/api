@@ -19,6 +19,7 @@ This module implements the entry into operations of storageDock module.
 package dock
 
 import (
+	context2 "context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -49,7 +50,10 @@ type dockServer struct {
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
+
+	MetricDriver drivers.MetricDriver
 }
+
 
 // NewDockServer returns a dockServer instance.
 func NewDockServer(dockType, port string) *dockServer {
@@ -457,4 +461,21 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 	}
 
 	return nil
+}
+
+
+func (ds *dockServer) CollectMetrics(ctx context2.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in dock CollectMetrics methods")
+	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
+
+	defer drivers.Clean(ds.Driver)
+
+	log.Info("Dock server receive CollectMetrics request, vr =", opt)
+
+	if _,err := ds.MetricDriver.CollectMetrics(opt.MetricValues,opt.InstanceId); err != nil {
+		log.Error("error occurred in dock module when delete volume:", err)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
 }

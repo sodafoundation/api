@@ -19,9 +19,11 @@ This module implements a entry into the OpenSDS northbound service.
 package controller
 
 import (
+	context2 "context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/opensds/opensds/pkg/controller/metrics"
 	"net"
 
 	log "github.com/golang/glog"
@@ -48,9 +50,11 @@ const (
 
 func NewController(port string) *Controller {
 	volCtrl := volume.NewController()
+	metricsCtrl := metrics.NewController()
 	return &Controller{
 		selector:         selector.NewSelector(),
 		volumeController: volCtrl,
+		metricsController: metricsCtrl,
 		drController:     dr.NewController(volCtrl),
 		Port:             port,
 	}
@@ -59,11 +63,13 @@ func NewController(port string) *Controller {
 type Controller struct {
 	selector         selector.Selector
 	volumeController volume.Controller
+	metricsController metrics.Controller
 	drController     dr.Controller
 	policyController policy.Controller
 
 	Port string
 }
+
 
 // Run method would start the listen mechanism of controller module.
 func (c *Controller) Run() error {
@@ -848,4 +854,34 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 	}
 
 	return pb.GenericResponseResult(nil), nil
+}
+
+func (c *Controller) CollectMetrics(context context2.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in controller collect metrics methods")
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
+	if err != nil {
+		log.Error("get volume failed in CollectMetrics method: ", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Error("when search dock in db by pool id: ", err.Error())
+		return pb.GenericResponseError(err), err
+
+	}
+
+	c.metricsController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.metricsController.CollectMetrics(opt)
+	if err != nil {
+		log.Error("CollectMetrics failed: ", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
 }

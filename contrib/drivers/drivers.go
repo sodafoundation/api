@@ -129,3 +129,29 @@ func Clean(d VolumeDriver) VolumeDriver {
 
 	return d
 }
+
+
+
+type MetricDriver interface {
+	//Any initialization the volume driver does while starting.
+	Setup() error
+	//Any operation the volume driver does while stopping.
+	Unset() error
+
+	CollectMetrics(metricList []string,instanceID string) ([]*model.Metric, error)
+}
+
+// Init
+func InitMetricDriver(resourceType string) MetricDriver {
+	var d MetricDriver
+	switch resourceType {
+	case config.LVMDriverType:
+		d = &lvm.MetricDriver{}
+		break
+	default:
+		//d = &sample.Driver{}
+		break
+	}
+	d.Setup()
+	return d
+}
