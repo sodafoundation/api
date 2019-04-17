@@ -20,11 +20,10 @@ package context
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
-
 	"github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
+	"reflect"
 )
 
 func NewAdminContext() *Context {
@@ -112,6 +111,19 @@ type Context struct {
 	ServiceRoles             string   `policy:"true" json:"service_roles"`
 	Token                    string   `policy:"false" json:"token"`
 	Uri                      string   `policy:"false" json:"uri"`
+}
+
+
+func (ctx *Context) Done() <-chan struct{} {
+	panic("implement me")
+}
+
+func (ctx *Context) Err() error {
+	panic("implement me")
+}
+
+func (ctx *Context) Value(key interface{}) interface{} {
+	panic("implement me")
 }
 
 func (ctx *Context) ToPolicyValue() map[string]interface{} {

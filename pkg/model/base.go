@@ -54,6 +54,12 @@ type DataStorageLoS struct {
 	// IsSpaceEfficient indicates that the storage is compressed or deduplicated.
 	// The default value for this prperty is false.
 	IsSpaceEfficient bool `json:"isSpaceEfficient" yaml:"isSpaceEfficient,omitempty"`
+
+	CharacterCodeSet string `json:characterCodeSet",omitempty" yaml:"characterCodeSet,omitempty"`
+
+	MaxFileNameLengthBytes int64 `json:"maxFileNameLengthBytes,omitempty" yaml:"maxFileNameLengthBytes,omitempty"`
+
+	StorageAccessCapability string `json:"storageAccessCapability,omitempty" yaml:"storageAccessCapability,omitempty"`
 }
 
 func (ds DataStorageLoS) IsEmpty() bool {
