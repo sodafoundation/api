@@ -111,3 +111,5 @@ osds::keystone::install(){
 }
 
 osds::keystone::install
+# set entrypoint.sh as init command
+sed -i '14i\/entrypoint\.sh' /etc/rc.local

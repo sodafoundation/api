@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
@@ -15,12 +15,8 @@
 # limitations under the License.
 
 HOST_IP=`/sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}'`
-#. /opt/stack/devstack/openrc admin admin
 
-#openstack endpoint set 04198085606f489bbeb03e3de534774d  --url 'http://172.17.0.19/identity'
 sed -i "s,^admin_endpoint.*$,admin_endpoint = http://$HOST_IP/identity,g" /etc/keystone/keystone.conf
 sed -i "s,^public_endpoint.*$,public_endpoint = http://$HOST_IP/identity,g" /etc/keystone/keystone.conf
 
 systemctl restart devstack@keystone.service
-
-/sbin/init
