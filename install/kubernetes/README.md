@@ -11,8 +11,6 @@ Before you start, please make sure you have all stuffs below ready:
 - More than 30GB remaining disk.
 - Make sure have access to the Internet.
 
-Here is some guide
-
 ## Step by Step Installation
 ### Configuration
 Firstly, you need to configure some global files with command below:
@@ -32,6 +30,23 @@ beego_https_cert_file =
 beego_https_key_file =
 # Encryption and decryption tool. Default value is aes.
 password_decrypt_tool = aes
+
+[keystone_authtoken]
+memcached_servers = authchecker.opensds.svc.cluster.local:11211
+signing_dir = /var/cache/opensds
+cafile = /opt/stack/data/ca-bundle.pem
+auth_uri = http://authchecker.opensds.svc.cluster.local/identity
+project_domain_name = Default
+project_name = service
+user_domain_name = Default
+password = opensds@123
+# Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+enable_encrypted = False
+# Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+pwd_encrypter = aes
+username = opensds
+auth_url = http://authchecker.opensds.svc.cluster.local/identity
+auth_type = password
 
 [osdslet]
 api_endpoint = 0.0.0.0:50049
@@ -104,20 +119,20 @@ If everything works well, you will find some info like below:
 ```shell
 root@ubuntu:~# kubectl get po -n opensds
 NAME                                 READY   STATUS    RESTARTS   AGE
-apiserver-v1beta-5455ddb848-bzxjt    1/1     Running   0          117m
-authchecker-v1-7f6866b858-c5w49      1/1     Running   0          117m
-controller-v1beta-77c566d4d4-hhdvz   1/1     Running   0          117m
-dashboard-v1beta-6bdbc8d5d9-wdg28    1/1     Running   0          117m
-db-v1-5f859b7fd9-r55z7               1/1     Running   0          117m
-dock-v1beta-77ff5f5d55-c58bl         1/1     Running   0          117m
+apiserver-v1beta-5455ddb848-5q9qv    1/1     Running   0          20m
+authchecker-v1-5b75cff9-8kmbk        1/1     Running   0          20m
+controller-v1beta-77c566d4d4-zhwmj   1/1     Running   0          20m
+dashboard-v1beta-64f69fbb8b-9gsjm    1/1     Running   0          20m
+db-v1-5f859b7fd9-ht885               1/1     Running   0          20m
+dock-v1beta-77ff5f5d55-6wbqf         1/1     Running   0          20m
 root@ubuntu:~# kubectl get svc -n opensds
 NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)             AGE
-apiserver     ClusterIP   10.0.0.55    <none>        50040/TCP           117m
-authchecker   ClusterIP   10.0.0.165   <none>        35357/TCP           117m
-controller    ClusterIP   10.0.0.232   <none>        50049/TCP           117m
-dashboard     ClusterIP   10.0.0.67    <none>        8088/TCP            117m
-db            ClusterIP   10.0.0.37    <none>        2379/TCP,2380/TCP   117m
-dock          ClusterIP   10.0.0.111   <none>        50050/TCP           117m
+apiserver     ClusterIP   10.0.0.129   <none>        50040/TCP           21m
+authchecker   ClusterIP   10.0.0.151   <none>        80/TCP              21m
+controller    ClusterIP   10.0.0.217   <none>        50049/TCP           21m
+dashboard     NodePort    10.0.0.253   <none>        8088:31975/TCP      21m
+db            ClusterIP   10.0.0.225   <none>        2379/TCP,2380/TCP   21m
+dock          ClusterIP   10.0.0.144   <none>        50050/TCP           21m
 ```
 
 ## Test work
@@ -129,7 +144,13 @@ cp opensds-hotpot-v0.5.1-linux-amd64/bin/* /usr/local/bin
 chmod 755 /usr/local/bin/osdsctl
 
 export OPENSDS_ENDPOINT=http://{{ apiserver_cluster_ip }}:50040
-export OPENSDS_AUTH_STRATEGY=noauth
+export OPENSDS_AUTH_STRATEGY=keystone
+export OS_AUTH_URL=http://{{ authchecker_cluster_ip }}/identity
+export OS_USERNAME=admin
+export OS_PASSWORD=opensds@123
+export OS_TENANT_NAME=admin
+export OS_PROJECT_NAME=admin
+export OS_USER_DOMAIN_ID=default
 osdsctl pool list
 ```
 
