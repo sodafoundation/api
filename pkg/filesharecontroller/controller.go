@@ -145,19 +145,6 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	// Update the volume data in database.
 	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
 
-	/*
-	// Select the storage tag according to the lifecycle flag.
-	c.policyController = policy.NewController(prf)
-	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
-	c.policyController.SetDock(dockInfo)
-
-	var errChanPolicy = make(chan error, 1)
-	defer close(errChanPolicy)
-	filehsareBody, _ := json.Marshal(result)
-	go c.policyController.ExecuteAsyncPolicy(opt, string(fileshareBody), errChanPolicy)
-	if err := <-errChanPolicy; err != nil {
-		return pb.GenericResponseError(err), err
-	}
-	*/
+	
 	return pb.GenericResponseResult(result), nil
 }
