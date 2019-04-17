@@ -22,12 +22,9 @@ import (
 	_ "encoding/json"
 	"github.com/opensds/opensds/pkg/filesharecontroller/fileshare"
 	"fmt"
-
 	"net"
-
 	log "github.com/golang/glog"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
-
 	"github.com/opensds/opensds/pkg/filesharecontroller/selector"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
@@ -78,8 +75,6 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	fmt.Sprintf("router calls respective controller function here it is CreateFileShare")
 	var err error
 	var prf *model.ProfileSpec
-	//var snap *model.FileShareSnapshotSpec
-	//var snapVol *model.VolumeSpec
 
 	log.Info("Controller server receive create file share request, vr =", opt)
 
@@ -100,8 +95,6 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	// This file share structure is currently fetched from database, but eventually
 	// it will be removed after SelectSupportedPoolForFileShare method in selector
 	// is updated.
-	//db.C.GetVolume(ctx, opt.Id)
-	//fileshare, err := db.C.ListFileShare(ctx, opt.Id)
 	fileshare, err := db.C.GetFileShare(ctx, opt.Id)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, model.FileShareError)
