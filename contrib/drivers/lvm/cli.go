@@ -61,6 +61,19 @@ func (c *Cli) CreateVolume(name string, vg string, size int64) error {
 	return err
 }
 
+func (c *Cli) CreateFileShare(name string, vg string, size int64) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvcreate",
+		"-Z", "n",
+		"-n", name,
+		"-L", sizeStr(size),
+		vg,
+	}
+	_, err := c.execute(cmd...)
+	return err
+}
+
 func (c *Cli) Exists(name string) bool {
 	cmd := []string{
 		"env", "LC_ALL=C",
