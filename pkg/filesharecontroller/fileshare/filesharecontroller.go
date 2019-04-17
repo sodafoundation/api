@@ -70,13 +70,13 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	var vol = &model.FileShareSpec{}
-	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vol); err != nil {
+	var fileshare = &model.FileShareSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), fileshare); err != nil {
 		log.Error("create file share failed in file share controller:", err)
 		return nil, err
 	}
 
-	return vol, nil
+	return fileshare, nil
 
 }
 
