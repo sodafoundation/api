@@ -34,8 +34,6 @@ services:
     - /lib/modules:/lib/modules:ro
     depends_on:
     - osdsdb
-    ports:
-    - 3260:3260
     network_mode: "host"
     restart: on-failure
     command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsdock -logtostderr'
