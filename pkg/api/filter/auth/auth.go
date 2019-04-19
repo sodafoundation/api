@@ -27,8 +27,11 @@ type AuthBase interface {
 	Filter(ctx *context.Context)
 }
 
-type NoAuth struct {
+func NewNoAuth() AuthBase {
+	return &NoAuth{}
 }
+
+type NoAuth struct{}
 
 func (auth *NoAuth) Filter(httpCtx *context.Context) {
 	ctx := c.GetContext(httpCtx)
@@ -38,10 +41,6 @@ func (auth *NoAuth) Filter(httpCtx *context.Context) {
 		ctx.IsAdmin = true
 	}
 	httpCtx.Input.SetData("context", ctx)
-}
-
-func NewNoAuth() AuthBase {
-	return &NoAuth{}
 }
 
 func Factory() beego.FilterFunc {
