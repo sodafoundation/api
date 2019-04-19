@@ -19,41 +19,38 @@ import (
 	"testing"
 )
 
+var assertTestResult = func(t *testing.T, got, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("expected %v, got %v\n", expected, got)
+	}
+}
+
 func TestProcessListParam(t *testing.T) {
-	// Test case 1: The args should only support one parameter.
-	argA := map[string]string{"limit": "3"}
-	argB := map[string]string{"offset": "4"}
-	args := []interface{}{argA, argB}
-	_, err := processListParam(args)
-	expectedError := "args should only support one parameter"
-	if err == nil {
-		t.Errorf("expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
 
-	// Test case 2: The args type should only be map[string]string.
-	args = []interface{}{"limit=3&offset=4"}
-	_, err = processListParam(args)
-	expectedError = "args element type should be map[string]string"
-	if err == nil {
-		t.Errorf("expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
+	t.Run("The args should only support one parameter", func(t *testing.T) {
+		argA := map[string]string{"limit": "3"}
+		argB := map[string]string{"offset": "4"}
+		args := []interface{}{argA, argB}
+		_, err := processListParam(args)
+		expectedError := "args should only support one parameter"
+		assertTestResult(t, err.Error(), expectedError)
+	})
 
-	// Test case 3: Test the output format if everything works well.
-	arg := map[string]string{"limit": "3", "offset": "4"}
-	expected := "limit=3&offset=4"
-	params, err := processListParam([]interface{}{arg})
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(params, expected) {
-		t.Errorf("expected %v, got %v\n", expected, params)
-	}
+	t.Run("The args type should only be map[string]string", func(t *testing.T) {
+		args := []interface{}{"limit=3&offset=4"}
+		_, err := processListParam(args)
+		expectedError := "args element type should be map[string]string"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Test the output format if everything works well", func(t *testing.T) {
+		arg := map[string]string{"limit": "3", "offset": "4"}
+		expectedA, expectedB := "limit=3&offset=4", "offset=4&limit=3"
+		params, err := processListParam([]interface{}{arg})
+		assertTestResult(t, err, nil)
+		if !reflect.DeepEqual(params, expectedA) && !reflect.DeepEqual(params, expectedB) {
+			t.Errorf("expected %v or %v, got %v\n", expectedA, expectedB, params)
+		}
+	})
 }

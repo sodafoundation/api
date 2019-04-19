@@ -358,11 +358,11 @@ type FCTargWWPN struct {
 	TargPortWWN string `json:"TARGET_PORT_WWN"`
 }
 
-type ObjCount struct {
-	Data  data  `json:"data"`
+type ObjCountResp struct {
+	Data  Count `json:"data"`
 	Error Error `json:"error"`
 }
 
-type data struct {
-	Count int `json:"COUNT"`
+type Count struct {
+	Count string `json:"COUNT"`
 }

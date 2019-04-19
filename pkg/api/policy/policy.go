@@ -25,7 +25,6 @@ import (
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 )
@@ -205,7 +204,7 @@ func Authorize(httpCtx *bctx.Context, action string) bool {
 		log.Errorf("Authorize failed, %s", err)
 	}
 	if !ok {
-		model.HttpError(httpCtx, http.StatusForbidden, "Operation is not permitted")
+		context.HttpError(httpCtx, http.StatusForbidden, "operation is not permitted")
 	} else {
 		ctx.IsAdmin = utils.Contained("admin", ctx.Roles)
 	}
