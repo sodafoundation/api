@@ -43,8 +43,8 @@ func StartDispatcher() {
 			case work := <-MetricsQueue:
 				fmt.Println("Received send metrics request")
 				go func() {
-					for i,metricsSender := range listMetricSenders{
-						fmt.Println("Dispatching send metrics request to sender %d",i)
+					for _,metricsSender := range listMetricSenders{
+						//fmt.Println("Dispatching send metrics request to sender %d",i)
 						metricsSender.AssignMetricsToSend(work)
 					}
 

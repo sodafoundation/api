@@ -26,7 +26,7 @@ func (p *KafkaMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				fmt.Printf("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
+				//fmt.Printf("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
 
 				// do the actual sending work here
 				// make a writer that produces to topic-A, using the least-bytes distribution
@@ -69,7 +69,7 @@ func (p *KafkaMetricsSender) Start() {
 
 			case <-p.QuitChan:
 				// We have been asked to stop.
-				fmt.Println("GetMetricsSenderToKafka stopping\n")
+				//fmt.Println("GetMetricsSenderToKafka stopping\n")
 				return
 			}
 

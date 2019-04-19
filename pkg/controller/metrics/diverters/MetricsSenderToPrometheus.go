@@ -30,7 +30,7 @@ func (p *PrometheusMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				fmt.Printf("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
+				//fmt.Printf("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
 
 				// do the actual sending work here, by writing to the file of the node_exporter of prometheus
 				writeToFile(work)
@@ -42,7 +42,7 @@ func (p *PrometheusMetricsSender) Start() {
 
 			case <-p.QuitChan:
 				// We have been asked to stop.
-				fmt.Println("GetMetricsSenderToPrometheus stopping\n")
+				//fmt.Println("GetMetricsSenderToPrometheus stopping\n")
 				return
 			}
 
