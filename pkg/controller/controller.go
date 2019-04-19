@@ -19,6 +19,7 @@ This module implements a entry into the OpenSDS northbound service.
 package controller
 
 import (
+	context2 "context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ import (
 	log "github.com/golang/glog"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
+	"github.com/opensds/opensds/pkg/controller/metrics"
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -48,9 +50,11 @@ const (
 
 func NewController(port string) *Controller {
 	volCtrl := volume.NewController()
+	metricsCtrl := metrics.NewController()
 	return &Controller{
 		selector:         selector.NewSelector(),
 		volumeController: volCtrl,
+		metricsController: metricsCtrl,
 		drController:     dr.NewController(volCtrl),
 		Port:             port,
 	}
@@ -59,6 +63,7 @@ func NewController(port string) *Controller {
 type Controller struct {
 	selector         selector.Selector
 	volumeController volume.Controller
+	metricsController metrics.Controller
 	drController     dr.Controller
 	policyController policy.Controller
 
@@ -848,4 +853,29 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 	}
 
 	return pb.GenericResponseResult(nil), nil
+}
+func (c *Controller) GetMetrics(context context2.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in controller get metrics methods")
+
+	var result *[]model.MetricSpec
+	var err error
+
+	if opt.StartTime=="" && opt.EndTime==""{
+		// no start and end time specified, get the latest value of this metric
+		result, err = c.metricsController.GetLatestMetrics(opt)
+	} else if opt.StartTime==opt.EndTime{
+		// same start and end time specified, get the value of this metric at that timestamp
+		result, err = c.metricsController.GetInstantMetrics(opt)
+	} else {
+		// range of start and end time is specified
+		result, err = c.metricsController.GetRangeMetrics(opt)
+	}
+
+	if err != nil {
+		log.Error("GetMetrics failed: ", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), err
 }

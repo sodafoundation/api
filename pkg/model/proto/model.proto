@@ -84,6 +84,8 @@ service Controller {
 	
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+
+    rpc GetMetrics (GetMetricsOpts) returns (GenericResponse){}
 }
 
 service ProvisionDock {
@@ -660,5 +662,20 @@ message GenericResponse {
         Result result = 1;
         Error error = 2;
     }
+}
+
+message CollectMetricsOpts {
+    string instanceId = 1;
+    repeated string metricValues = 2;
+    string context = 3;
+    string driverName = 4;
+}
+
+message GetMetricsOpts {
+    string instanceId = 1;
+    string metricName = 2;
+    string startTime = 3;
+    string endTime = 4;
+    string context = 5;
 }
 
