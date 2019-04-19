@@ -131,26 +131,39 @@ osds::keystone::download_code(){
 }
 
 osds::keystone::install(){
-    if [ "true" != $USE_EXISTING_KEYSTONE ] 
+    if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
-        KEYSTONE_IP=$HOST_IP
-        osds::keystone::create_user
-        osds::keystone::download_code
+        docker network create --subnet=173.18.0.0/16 opensds-authchecker-network
+        docker pull opensdsio/opensds-authchecker:latest
+        KEYSTONE_IP=173.18.0.2
+        docker run -d --privileged=true --net opensds-authchecker-network --ip $KEYSTONE_IP --name keystone opensdsio/opensds-authchecker:latest        
         osds::keystone::opensds_conf
-
-        # If keystone is ready to start, there is no need continue next step.
-        if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
-            return
-        fi
-        osds::keystone::devstack_local_conf
-        cd ${DEV_STACK_DIR}
-        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
-        osds::keystone::create_user_and_endpoint
-        osds::keystone::delete_redundancy_data
+        CONTAINER_ID=$(docker ps -a|grep keystone|awk '{print $1 }')
+        docker cp $TOP_DIR/lib/keystone.policy.json $CONTAINER_ID:/etc/keystone/policy.json
     else
-        osds::keystone::opensds_conf
-        cd ${DEV_STACK_DIR}
-        osds::keystone::create_user_and_endpoint
+        if [ "true" != $USE_EXISTING_KEYSTONE ] 
+        then
+            KEYSTONE_IP=$HOST_IP
+            osds::keystone::create_user
+            osds::keystone::download_code
+            osds::keystone::opensds_conf
+
+            # If keystone is ready to start, there is no need continue next step.
+            if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 0.25 4; then
+                return
+            fi
+            osds::keystone::devstack_local_conf
+            cd ${DEV_STACK_DIR}
+            su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
+            osds::keystone::create_user_and_endpoint
+            osds::keystone::delete_redundancy_data
+            # add opensds customize policy.json for keystone
+            cp $TOP_DIR/lib/keystone.policy.json /etc/keystone/policy.json
+        else
+            osds::keystone::opensds_conf
+            cd ${DEV_STACK_DIR}
+            osds::keystone::create_user_and_endpoint
+        fi    
     fi
 }
 
@@ -159,11 +172,18 @@ osds::keystone::cleanup() {
 }
 
 osds::keystone::uninstall(){
-    if [ "true" != $USE_EXISTING_KEYSTONE ] 
+    if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
-        su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+        docker ps -a|grep keystone|awk '{print $1 }'|xargs docker stop
+        docker ps -a|grep keystone|awk '{print $1 }'|xargs docker rm
+        docker network rm opensds-authchecker-network
     else
-        osds::keystone::delete_user
+        if [ "true" != $USE_EXISTING_KEYSTONE ] 
+        then
+            su $STACK_USER_NAME -c ${DEV_STACK_DIR}/unstack.sh
+        else
+            osds::keystone::delete_user
+        fi
     fi
 }
 

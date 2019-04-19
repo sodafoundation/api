@@ -20,7 +20,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -28,6 +27,7 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
@@ -40,283 +40,188 @@ func init() {
 		"get:GetReplication;put:UpdateReplication;delete:DeleteReplication")
 }
 
-var (
-	fakeReplication = &model.ReplicationSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			CreatedAt: "2017-10-24T16:21:32",
-		},
-		Name:              "fake replication",
-		Description:       "fake replication",
-		AvailabilityZone:  "default",
-		PrimaryVolumeId:   "d3a109ff-3e51-4625-9054-32604c79fa90",
-		SecondaryVolumeId: "d3a109ff-3e51-4625-9054-32604c79fa92",
-		ReplicationMode:   "sync",
-		ReplicationPeriod: 0,
-		ReplicationStatus: model.ReplicationEnabled,
-	}
-	fakeReplications = []*model.ReplicationSpec{fakeReplication}
-)
-
 func TestListReplicationsDetail(t *testing.T) {
 
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(fakeReplications, nil)
-	db.C = mockClient
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		var sampleReplications = []*model.ReplicationSpec{&SampleReplications[0]}
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(sampleReplications, nil)
+		db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/block/replications/detail?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET", "/v1beta/block/replications/detail?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []*model.ReplicationSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, sampleReplications)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output []model.ReplicationSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	expectedJson := `[{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			"createdAt": "2017-10-24T16:21:32",
-			"name": "fake replication",
-			"description": "fake replication",
-			"availabilityZone": "default",
-			"PrimaryVolumeId":   "d3a109ff-3e51-4625-9054-32604c79fa90",
-			"SecondaryVolumeId": "d3a109ff-3e51-4625-9054-32604c79fa92",
-			"ReplicationMode": "sync",
-			"ReplicationPeriod": 0,
-			"ReplicationStatus": "enabled"
-		}]`
-
-	var expected []model.ReplicationSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
-
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
 }
 
 func TestListReplications(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(fakeReplications, nil)
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/block/replications?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output []model.ReplicationSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	expectedJson := `[{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			"name": "fake replication",
-			"ReplicationStatus": "enabled"
-		}]`
-
-	var expected []model.ReplicationSpec
+	var expectedJson = []byte(`[
+		{
+		    "id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"name": "sample-replication-01"
+		}
+	]`)
+	var expected []*model.ReplicationSpec
 	json.Unmarshal([]byte(expectedJson), &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		var sampleReplications = []*model.ReplicationSpec{&SampleReplications[0]}
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(sampleReplications, nil)
+		db.C = mockClient
 
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestListReplicationsWithBadRequest(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/block/replications?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET", "/v1beta/block/replications?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []*model.ReplicationSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, expected)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
-	}
+	t.Run("Should return 500 if list volume replications with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListReplicationWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/block/replications?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
 }
 
 func TestGetReplication(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetReplication", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(fakeReplication, nil)
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/block/replications/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output model.ReplicationSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	expectedJson := `{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			"createdAt": "2017-10-24T16:21:32",
-			"name": "fake replication",
-			"description": "fake replication",
-			"availabilityZone": "default",
-			"PrimaryVolumeId":   "d3a109ff-3e51-4625-9054-32604c79fa90",
-			"SecondaryVolumeId": "d3a109ff-3e51-4625-9054-32604c79fa92",
-			"ReplicationMode": "sync",
-			"ReplicationPeriod": 0,
-			"ReplicationStatus": "enabled"
-		}`
-
+	var expectedJson = []byte(`{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name": "sample-replication-01",
+			"description": "This is a sample replication for testing",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`)
 	var expected model.ReplicationSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
+	json.Unmarshal(expectedJson, &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(&SampleReplications[0], nil)
+		db.C = mockClient
 
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestGetReplicationWithBadRequest(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetReplication", c.NewAdminContext(), "f4a5e666-c669-4c64-a2a1-8f9ecd560c78").Return(nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/block/replications/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET", "/v1beta/block/replications/c299a978-4f3e-11e8-8a5c-977218a83359", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.ReplicationSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &expected)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 404 {
-		t.Errorf("Expected 404, actual %v", w.Code)
-	}
+	t.Run("Should return 404 if get volume replication with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetReplication", c.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/block/replications/c299a978-4f3e-11e8-8a5c-977218a83359", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
+	})
 }
 
 func TestUpdateReplication(t *testing.T) {
 	var jsonStr = []byte(`{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
+		    "id": "c299a978-4f3e-11e8-8a5c-977218a83359",
 			"name":"fake replication",
-			"description":"fake replication"}`)
-	r, _ := http.NewRequest("PUT",
-		"/v1beta/block/replications/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
-	w := httptest.NewRecorder()
-	r.Header.Set("Content-Type", "application/json")
-
-	var replication = model.ReplicationSpec{
-		BaseModel: &model.BaseModel{},
-	}
-	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
-	mockClient := new(dbtest.Client)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id, &replication).Return(fakeReplication, nil)
-	db.C = mockClient
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output model.ReplicationSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	expectedJson := `{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			"createdAt": "2017-10-24T16:21:32",
+			"description":"fake replication"
+	}`)
+	var expectedJson = []byte(`{
+			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "fake replication",
 			"description": "fake replication",
-			"availabilityZone": "default",
-			"PrimaryVolumeId":   "d3a109ff-3e51-4625-9054-32604c79fa90",
-			"SecondaryVolumeId": "d3a109ff-3e51-4625-9054-32604c79fa92",
-			"ReplicationMode": "sync",
-			"ReplicationPeriod": 0,
-			"ReplicationStatus": "enabled"
-		}`
-
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`)
 	var expected model.ReplicationSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
+	json.Unmarshal(expectedJson, &expected)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		replication := model.ReplicationSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id, &replication).Return(&expected, nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleReplications[0].ProfileId).Return(&SampleProfiles[0], nil)
+		db.C = mockClient
 
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestUpdateReplicationWithBadRequest(t *testing.T) {
-	var jsonStr = []byte(``)
-	r, _ := http.NewRequest("PUT",
-		"/v1beta/block/replications/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
-	w := httptest.NewRecorder()
-	r.Header.Set("Content-Type", "application/json")
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("PUT",
+			"/v1beta/block/replications/c299a978-4f3e-11e8-8a5c-977218a83359", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/json")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.ReplicationSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &expected)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
-	}
+	t.Run("Should return 500 if update volume replication with bad request", func(t *testing.T) {
+		replication := model.ReplicationSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id,
+			&replication).Return(nil, errors.New("db error"))
+		db.C = mockClient
 
-	jsonStr = []byte(`{
-		    "id": "f4a5e666-c669-4c64-a2a1-8f9ecd560c78",
-			"name":"fake replication",
-			"description":"fake replication"}`)
-	r, _ = http.NewRequest("PUT",
-		"/v1beta/block/replications/f4a5e666-c669-4c64-a2a1-8f9ecd560c78", bytes.NewBuffer(jsonStr))
-	w = httptest.NewRecorder()
-	r.Header.Set("Content-Type", "application/json")
-
-	var replication = model.ReplicationSpec{
-		BaseModel: &model.BaseModel{},
-	}
-	json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&replication)
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), replication.Id,
-		&replication).Return(nil, errors.New("db error"))
-	db.C = mockClient
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("PUT",
+			"/v1beta/block/replications/c299a978-4f3e-11e8-8a5c-977218a83359", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/json")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 400 {
-		t.Errorf("Expected 400, actual %v", w.Code)
-	}
 }
