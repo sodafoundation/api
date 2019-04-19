@@ -225,7 +225,7 @@ func (r *ReplicationPortal) UpdateReplication() {
 
 	result, err := db.C.UpdateReplication(c.GetContext(r.Ctx), id, &mr)
 	if err != nil {
-		model.HttpError(r.Ctx, model.ErrorBadRequest,
+		model.HttpError(r.Ctx, model.ErrorInternalServer,
 			"update replication failed: %s", err.Error())
 		return
 	}

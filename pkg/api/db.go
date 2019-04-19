@@ -84,18 +84,6 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 		return errors.New(errMsg)
 	}
 
-	// If profileId or poolId of the volume doesn't exist, it would mean that
-	// the volume provisioning operation failed before the create method in
-	// storage driver was called, therefore the volume entry should be deleted
-	// from db directly.
-	if in.ProfileId == "" || in.PoolId == "" {
-		if err := db.C.DeleteVolume(ctx, in.Id); err != nil {
-			log.Error("when delete volume in db:", err)
-			return err
-		}
-		return nil
-	}
-
 	snaps, err := db.C.ListSnapshotsByVolumeId(ctx, in.Id)
 	if err != nil {
 		return err

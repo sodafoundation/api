@@ -19,14 +19,13 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/astaxie/beego"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
@@ -37,200 +36,89 @@ func init() {
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
-var (
-	fakePool = &model.StoragePoolSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
-			CreatedAt: "2017-10-24T15:04:05",
-		},
-		Name:             "fakePool",
-		Description:      "fake pool for testing",
-		Status:           "available",
-		AvailabilityZone: "unknown",
-		TotalCapacity:    99999,
-		FreeCapacity:     6999,
-		DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
-		Extras: model.StoragePoolExtraSpec{
-			DataStorage: model.DataStorageLoS{
-				ProvisioningPolicy: "Thin",
-				IsSpaceEfficient:   true,
-			},
-			IOConnectivity: model.IOConnectivityLoS{
-				AccessProtocol: "rbd",
-				MaxIOPS:        1000,
-			},
-			Advanced: map[string]interface{}{
-				"diskType":   "SSD",
-				"throughput": float64(1000),
-			},
-		},
-	}
-	fakePools = []*model.StoragePoolSpec{fakePool}
-	fakeAZs   = []string{fakePool.AvailabilityZone}
-)
-
 func TestListAvailabilityZones(t *testing.T) {
-	mockClient := new(dbtest.Client)
-	mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(fakeAZs, nil)
-	db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(SampleAvailabilityZones, nil)
+		db.C = mockClient
 
-	expectedZones := "unknow"
-	if !strings.Contains(string(w.Body.Bytes()), expectedZones) {
-		t.Errorf("Expected %v, actual %v", expectedZones, w.Body.Bytes())
-	}
+		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []string
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, SampleAvailabilityZones)
+	})
 }
 
 func TestListPools(t *testing.T) {
 
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(fakePools, nil)
-	db.C = mockClient
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		var samplePools = []*model.StoragePoolSpec{&SamplePools[0], &SamplePools[1]}
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(samplePools, nil)
+		db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+		r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []*model.StoragePoolSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, samplePools)
+	})
 
-	var output []model.StoragePoolSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
+	t.Run("Should return 500 if list pools with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		db.C = mockClient
 
-	expectedJson := `[
-		{
-			"id": "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
-			"name": "fakePool",
-			"description": "fake pool for testing",
-			"createdAt": "2017-10-24T15:04:05",
-			"updatedAt": "",
-			"status": "available",
-			"availabilityZone": "unknown",
-			"totalCapacity": 99999,
-			"freeCapacity": 6999,
-			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
-			"extras": {
-				"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        1000
-				},
-				"advanced": {
-					"diskType":   "SSD",
-					"throughput": 1000
-				}
-			}	
-		}		
-	]`
-
-	var expected []model.StoragePoolSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
-
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestListPoolsWithBadRequest(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
-	}
+		r, _ := http.NewRequest("GET", "/v1beta/pools?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
 }
 
 func TestGetPool(t *testing.T) {
 
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(fakePool, nil)
-	db.C = mockClient
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(&SamplePools[0], nil)
+		db.C = mockClient
 
-	r, _ := http.NewRequest("GET", "/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+		r, _ := http.NewRequest("GET", "/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.StoragePoolSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &SamplePools[0])
+	})
 
-	var output model.StoragePoolSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
+	t.Run("Should return 404 if get docks with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(nil, errors.New("db error"))
+		db.C = mockClient
 
-	expectedJson := `
-		{
-			"id": "f4486139-78d5-462d-a7b9-fdaf6c797e1b",
-			"name": "fakePool",
-			"description": "fake pool for testing",
-			"createdAt": "2017-10-24T15:04:05",
-			"updatedAt": "",
-			"status": "available",
-			"availabilityZone": "unknown",
-			"totalCapacity": 99999,
-			"freeCapacity": 6999,
-			"dockId": "ccac4f33-e603-425a-8813-371bbe10566e",
-			"extras": {
-				"dataStorage": {
-					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
-				},
-				"ioConnectivity": {
-					"accessProtocol": "rbd",
-					"maxIOPS":        1000
-				},
-				"advanced": {
-					"diskType":   "SSD",
-					"throughput": 1000
-				}
-			}	
-		}`
-
-	var expected model.StoragePoolSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
-
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestGetPoolWithBadRequest(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetPool", c.NewAdminContext(), "f4486139-78d5-462d-a7b9-fdaf6c797e1b").Return(
-		nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET",
-		"/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 404 {
-		t.Errorf("Expected 404, actual %v", w.Code)
-	}
+		r, _ := http.NewRequest("GET",
+			"/v1beta/pools/f4486139-78d5-462d-a7b9-fdaf6c797e1b", nil)
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
+	})
 }

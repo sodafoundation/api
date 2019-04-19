@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -33,53 +32,51 @@ func init() {
 }
 
 func TestListVersions(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		r, _ := http.NewRequest("GET", "/", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		var output []map[string]string
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, KnownVersions)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output []map[string]string
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	if !reflect.DeepEqual(KnownVersions, output) {
-		t.Errorf("Expected %v, actual %v", KnownVersions, output)
-	}
 }
 
 func TestGetVersion(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v1beta", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		r, _ := http.NewRequest("GET", "/v1beta", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		var output map[string]string
+		json.Unmarshal(w.Body.Bytes(), &output)
+		var expected = map[string]string{
+			"name":        "v1beta",
+			"description": "v1beta version",
+			"status":      "CURRENT",
+			"updatedAt":   "2017-07-10T14:36:58.014Z",
+		}
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, expected)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output map[string]string
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	var expected = map[string]string{
-		"name":        "v1beta",
-		"description": "v1beta version",
-		"status":      "CURRENT",
-		"updatedAt":   "2017-07-10T14:36:58.014Z",
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestGetVersionWithInvalidAPIVersion(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/InvalidAPIVersion", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+	t.Run("Should return 404 if get version with invalid API version", func(t *testing.T) {
+		r, _ := http.NewRequest("GET", "/InvalidAPIVersion", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 404 {
-		t.Errorf("Expected 404, actual %v", w.Code)
-	}
 }

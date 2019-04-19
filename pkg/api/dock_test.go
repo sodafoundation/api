@@ -19,7 +19,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -27,6 +26,7 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
 )
 
@@ -37,163 +37,85 @@ func init() {
 }
 
 func TestListDocks(t *testing.T) {
-	var fakeDocks = []*model.DockSpec{
-		{
-			BaseModel: &model.BaseModel{
-				Id:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-				CreatedAt: "2017-10-11T11:28:58",
-			},
-			Name:        "cinder",
-			Description: "cinder backend service",
-			StorageType: "block",
-			Endpoint:    "localhost:50050",
-			Status:      "available",
-			DriverName:  "cinder",
-		},
-	}
 
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListDocksWithFilter", c.NewAdminContext(), m).Return(fakeDocks, nil)
-
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
-	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	var output []model.DockSpec
-
-	json.Unmarshal(w.Body.Bytes(), &output)
-
-	expectedJson := `[
-		{
-			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"name": "cinder",
-			"description": "cinder backend service",
-			"storageType": "block",
-			"status": "available",
-			"driverName": "cinder",
-			"endpoint": "localhost:50050",
-			"createdAt": "2017-10-11T11:28:58",
-			"updatedAt": ""
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		var sampleDocks = []*model.DockSpec{&SampleDocks[0]}
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
 		}
-	]`
+		mockClient.On("ListDocksWithFilter", c.NewAdminContext(), m).Return(sampleDocks, nil)
+		db.C = mockClient
 
-	var expected []model.DockSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
-
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestListDocksWithBadRequest(t *testing.T) {
-
-	mockClient := new(dbtest.Client)
-	m := map[string][]string{
-		"offset":  {"0"},
-		"limit":   {"1"},
-		"sortDir": {"asc"},
-		"sortKey": {"name"},
-	}
-	mockClient.On("ListDocksWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []*model.DockSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, sampleDocks)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	if w.Code != 500 {
-		t.Errorf("Expected 500, actual %v", w.Code)
-	}
+	t.Run("Should return 500 if list docks with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListDocksWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/docks?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
 }
 
 func TestGetDock(t *testing.T) {
 
-	var fakeDock = &model.DockSpec{
-		BaseModel: &model.BaseModel{
-			Id:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			CreatedAt: "2017-10-11T11:28:58",
-		},
-		Name:        "cinder",
-		Description: "cinder backend service",
-		StorageType: "block",
-		Endpoint:    "localhost:50050",
-		Status:      "available",
-		DriverName:  "cinder",
-	}
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+		db.C = mockClient
 
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(fakeDock, nil)
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET",
-		"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET",
+			"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.DockSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &SampleDocks[0])
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	var output model.DockSpec
-	json.Unmarshal(w.Body.Bytes(), &output)
+	t.Run("Should return 404 if get docks with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(
+			nil, errors.New("db error"))
+		db.C = mockClient
 
-	expectedJson := `
-		{
-			"id": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			"name": "cinder",
-			"description": "cinder backend service",
-			"storageType": "block",
-			"status": "available",
-			"driverName": "cinder",
-			"endpoint": "localhost:50050",
-			"createdAt": "2017-10-11T11:28:58",
-			"updatedAt": ""
-		}`
-
-	var expected model.DockSpec
-	json.Unmarshal([]byte(expectedJson), &expected)
-
-	if w.Code != 200 {
-		t.Errorf("Expected 200, actual %v", w.Code)
-	}
-
-	if !reflect.DeepEqual(expected, output) {
-		t.Errorf("Expected %v, actual %v", expected, output)
-	}
-}
-
-func TestGetDockWithBadRequestError(t *testing.T) {
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(
-		nil, errors.New("db error"))
-	db.C = mockClient
-
-	r, _ := http.NewRequest("GET",
-		"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
-	w := httptest.NewRecorder()
-	beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
-		httpCtx.Input.SetData("context", c.NewAdminContext())
+		r, _ := http.NewRequest("GET",
+			"/v1beta/docks/b7602e18-771e-11e7-8f38-dbd6d291f4e0", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
 	})
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-
-	if w.Code != 404 {
-		t.Errorf("Expected 404, actual %v", w.Code)
-	}
 }
