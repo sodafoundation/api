@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ This module implements a entry into the OpenSDS northbound service.
 
 */
 
-package api
+package controllers
 
 import (
 	"encoding/json"
@@ -25,6 +25,7 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
+	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/db"
@@ -81,7 +82,7 @@ func (v *VolumePortal) CreateVolume() {
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeDBEntry(ctx, &volume)
+	result, err := util.CreateVolumeDBEntry(ctx, &volume)
 	if err != nil {
 		errMsg := fmt.Sprintf("create volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -218,7 +219,7 @@ func (v *VolumePortal) ExtendVolume() {
 	id := v.Ctx.Input.Param(":volumeId")
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
-	result, err := ExtendVolumeDBEntry(ctx, id, &extendRequestBody)
+	result, err := util.ExtendVolumeDBEntry(ctx, id, &extendRequestBody)
 	if err != nil {
 		errMsg := fmt.Sprintf("extend volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -283,7 +284,7 @@ func (v *VolumePortal) DeleteVolume() {
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
-	if err = DeleteVolumeDBEntry(ctx, volume); err != nil {
+	if err = util.DeleteVolumeDBEntry(ctx, volume); err != nil {
 		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
@@ -353,7 +354,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// NOTE:It will create a volume attachment entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume attachment creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeAttachmentDBEntry(ctx, &attachment)
+	result, err := util.CreateVolumeAttachmentDBEntry(ctx, &attachment)
 	if err != nil {
 		errMsg := fmt.Sprintf("create volume attachment failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -549,7 +550,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// NOTE:It will create a volume snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume snapshot creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeSnapshotDBEntry(ctx, &snapshot)
+	result, err := util.CreateVolumeSnapshotDBEntry(ctx, &snapshot)
 	if err != nil {
 		errMsg := fmt.Sprintf("create volume snapshot failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -678,7 +679,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
 	// the database to "deleting" and return the result immediately.
-	err = DeleteVolumeSnapshotDBEntry(ctx, snapshot)
+	err = util.DeleteVolumeSnapshotDBEntry(ctx, snapshot)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete volume snapshot failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
