@@ -123,6 +123,9 @@ func request(urlStr string, method string, headers HeaderOption, input interface
 	}
 	// Get http response.
 	resp, err := req.Response()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return err
 	}
