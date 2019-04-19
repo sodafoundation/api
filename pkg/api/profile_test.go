@@ -15,6 +15,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -93,20 +94,39 @@ func TestCreateProfile(t *testing.T) {
 }
 
 func TestUpdateProfile(t *testing.T) {
-	var fakeBody = `{
+	var jsonStr = []byte(`{
+		"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 		"name": "silver",
 		"description": "silver policy"
-	}`
+	}`)
+	var expectedJson = []byte(`{
+		"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
+		"name": "silver",
+		"description": "silver policy",
+		"customProperties": {
+			"dataStorage": {
+				"provisioningPolicy": "Thin",
+				"isSpaceEfficient":   true
+			},
+			"ioConnectivity": {
+				"accessProtocol": "rbd",
+				"maxIOPS":        5000000,
+				"maxBWS":         500
+			}
+		}
+	}`)
+	var expected model.ProfileSpec
+	json.Unmarshal(expectedJson, &expected)
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		profile := model.ProfileSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&profile)
 		mockClient := new(dbtest.Client)
-		mockClient.On("UpdateProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017", &model.ProfileSpec{
-			BaseModel:   &model.BaseModel{},
-			Name:        "silver",
-			Description: "silver policy"}).Return(&SampleProfiles[1], nil)
+		mockClient.On("UpdateProfile", c.NewAdminContext(), profile.Id, &profile).
+			Return(&expected, nil)
 		db.C = mockClient
 
-		r, _ := http.NewRequest("PUT", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", strings.NewReader(fakeBody))
+		r, _ := http.NewRequest("PUT", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", bytes.NewBuffer(jsonStr))
 		w := httptest.NewRecorder()
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
@@ -115,7 +135,24 @@ func TestUpdateProfile(t *testing.T) {
 		var output model.ProfileSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
-		assertTestResult(t, &output, &SampleProfiles[1])
+		assertTestResult(t, &output, &expected)
+	})
+
+	t.Run("Should return 500 if update profile with bad request", func(t *testing.T) {
+		profile := model.ProfileSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&profile)
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateProfile", c.NewAdminContext(), profile.Id, &profile).
+			Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("PUT", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
 	})
 }
 
@@ -154,8 +191,7 @@ func TestListProfiles(t *testing.T) {
 			"sortDir": {"asc"},
 			"sortKey": {"name"},
 		}
-		mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(
-			nil, errors.New("db error"))
+		mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -172,8 +208,8 @@ func TestGetProfile(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
-			&SampleProfiles[1], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").
+			Return(&SampleProfiles[1], nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
