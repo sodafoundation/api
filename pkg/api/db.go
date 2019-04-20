@@ -33,6 +33,55 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.Size <= 0 {
+		errMsg := fmt.Sprintf("invalid fileshare size: %d", in.Size)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+	if in.UpdatedAt == "" {
+		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Description = in.Description
+
+	in.Name = in.Name
+	in.UserId = ctx.UserId
+	in.Status = model.FileShareCreating
+	// Store the fileshare meadata into database.
+	return db.C.CreateFileShare(ctx, in)
+}
+
+// DeleteFileShareDBEntry just modifies the state of the fileshare to be deleting in
+// the DB, the real deletion operation would be executed in another new thread.
+func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
+	validStatus := []string{model.FileShareAvailable, model.FileShareError,
+		model.FileShareErrorDeleting, model.FileShareCreating}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the fileshare with the status available, error, error_deleting, can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.Status = model.FileShareDeleting
+	_, err := db.C.UpdateFileShare(ctx, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()

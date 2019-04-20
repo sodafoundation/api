@@ -120,7 +120,7 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 		return nil, err
 	}
 	// Now, we just return the first supported pool which will be improved in
-	// the future.
+	// the future. // same i have to follow
 	return supportedPools[0], nil
 }
 

@@ -26,6 +26,26 @@ const (
 	VolumeExtending      = "extending"
 )
 
+
+// File Share status
+const (
+	FileShareCreating	= "creating"
+	FileShareDeleting	= "deleting"
+	FileShareAvailable	= "available"
+	FileShareError		= "error"
+	FileShareErrorDeleting = "errorDeleting"
+	FileShareInUse		= "inUSe"
+)
+
+// File Share Mount status
+const (
+	FileShareMountPointCreating      = "creating"
+	FileShareMountAvailable     = "available"
+	FileShareMountErrorDeleting = "errorDeleting"
+	FileShareMountError         = "error"
+)
+
+
 // volume attach status
 const (
 	VolumeAttacing       = "attaching"

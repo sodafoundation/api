@@ -49,6 +49,10 @@ type Controller struct {
 	Port string
 }
 
+func (c *Controller) UpdateFileShare(context2.Context, *pb.UpdateFileShareOpts) (*pb.GenericResponse, error) {
+	panic("implement me")
+}
+
 // Run method would start the listen mechanism of controller module.
 func (c *Controller) Run() error {
 	// New Grpc Server
@@ -134,3 +138,50 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	
 	return pb.GenericResponseResult(result), nil
 }
+
+// DeleteFileShare implements pb.ControllerServer.DeleteFileShare
+func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileShareOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete file share request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	prf, err := db.C.GetProfile(ctx, opt.ProfileId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		log.Error("when search profile in db:", err)
+		return pb.GenericResponseError(err), err
+	}
+
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
+	if err != nil {
+		log.Error("when search dock in db by pool id: ", err)
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	/*
+	var errChan = make(chan error, 1)
+	defer close(errChan)
+	go c.policyController.ExecuteAsyncPolicy(opt, "", errChan)
+
+	if err := <-errChan; err != nil {
+		log.Error("when execute async policy: ", err)
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	*/
+	if err = c.fileshareController.DeleteFileShare(opt); err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	if err = db.C.DeleteFileShare(ctx, opt.GetId()); err != nil {
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+

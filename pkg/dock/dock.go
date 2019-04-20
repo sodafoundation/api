@@ -22,11 +22,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	//"github.com/opensds/opensds/contrib/filesharedrivers"
+
 	"net"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
+
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
@@ -49,6 +52,7 @@ type dockServer struct {
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
+
 }
 
 // NewDockServer returns a dockServer instance.
@@ -66,6 +70,7 @@ func (ds *dockServer) Run() error {
 	s := grpc.NewServer()
 	// Register dock service.
 	pb.RegisterProvisionDockServer(s, ds)
+
 	pb.RegisterAttachDockServer(s, ds)
 
 	// Trigger the discovery and report loop so that the dock service would

@@ -65,6 +65,7 @@ type Backends struct {
 	Cinder              BackendProperties `conf:"cinder"`
 	Sample              BackendProperties `conf:"sample"`
 	LVM                 BackendProperties `conf:"lvm"`
+	NFSNative			BackendProperties `conf:"nfsnative"`
 	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
 	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
 }

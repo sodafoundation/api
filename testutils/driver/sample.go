@@ -42,6 +42,11 @@ func (*Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error)
 	return &SampleVolumes[0], nil
 }
 
+// CreateFileShare
+//func (*Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+//	return &SampleFileShares[0], nil
+//}
+
 // PullVolume
 func (*Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 	for _, volume := range SampleVolumes {

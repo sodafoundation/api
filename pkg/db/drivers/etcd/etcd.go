@@ -70,6 +70,223 @@ type Client struct {
 	clientInterface
 }
 
+
+var fileshare_sortKey string
+
+type FileShareSlice []*model.FileShareSpec
+
+func (fileshare FileShareSlice) Len() int { return len(fileshare) }
+
+func (fileshare FileShareSlice) Swap(i, j int) { fileshare[i], fileshare[j] = fileshare[j], fileshare[i] }
+
+func (fileshare FileShareSlice) Less(i, j int) bool {
+	switch fileshare_sortKey {
+
+	case "ID":
+		return fileshare[i].Id < fileshare[j].Id
+	case "NAME":
+		return fileshare[i].Name < fileshare[j].Name
+	case "STATUS":
+		return fileshare[i].Status < fileshare[j].Status
+	case "AVAILABILITYZONE":
+		return fileshare[i].AvailabilityZone < fileshare[j].AvailabilityZone
+	case "PROFILEID":
+		return fileshare[i].ProfileId < fileshare[j].ProfileId
+	case "TENANTID":
+		return fileshare[i].TenantId < fileshare[j].TenantId
+	case "SIZE":
+		return fileshare[i].Size < fileshare[j].Size
+	case "POOLID":
+		return fileshare[i].PoolId < fileshare[j].PoolId
+	case "DESCRIPTION":
+		return fileshare[i].Description < fileshare[j].Description
+	}
+	return false
+}
+
+func (c *Client) FindFileShareValue(k string, p *model.FileShareSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "AvailabilityZone":
+		return p.AvailabilityZone
+	case "Size":
+		return strconv.FormatInt(p.Size, 10)
+	case "Status":
+		return p.Status
+	case "PoolId":
+		return p.PoolId
+	case "ProfileId":
+		return p.ProfileId
+	}
+	return ""
+}
+
+func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	fmt.Println("inside the /driver/etct.go CreateFileShare(ctx")
+	//profiles, err := c.ListProfiles(ctx)
+	//if err != nil {
+	//	return nil, err
+	//} else if len(profiles) == 0 {
+	//	return nil, errors.New("No profile in db.")
+	//}
+
+	fshare.TenantId = ctx.TenantId
+	fshareBody, err := json.Marshal(fshare)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId, fshare.Id),
+		Content: string(fshareBody),
+	}
+	dbRes := c.Create(dbReq)
+	fmt.Println("inside the /driver/etct.go dbRes:= ",dbRes)
+	if dbRes.Status != "Success" {
+		log.Error("When create fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return fshare, nil
+}
+
+// GetFileShare
+func (c *Client) GetFileShare(ctx *c.Context, fileshareID string) (*model.FileShareSpec, error) {
+	fileshare, err := c.getFileShare(ctx, fileshareID)
+	if !IsAdminContext(ctx) || err == nil {
+		return fileshare, err
+	}
+	vols, err := c.ListFileShare(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range vols {
+		if v.Id == fileshareID {
+			return v, nil
+		}
+	}
+	return nil, fmt.Errorf("specified fileshare(%s) can't find", fileshareID)
+}
+
+func (c *Client) getFileShare(ctx *c.Context, fileshareID string) (*model.FileShareSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId, fileshareID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fileshare = &model.FileShareSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), fileshare); err != nil {
+		log.Error("When parsing file share in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return fileshare, nil
+}
+
+
+func (c *Client) SelectFileShares(m map[string][]string, fileshares []*model.FileShareSpec) []*model.FileShareSpec {
+	if !c.SelectOrNot(m) {
+		return fileshares
+	}
+
+	var vols = []*model.FileShareSpec{}
+	var flag bool
+	for _, vol := range fileshares {
+		flag = true
+		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
+			v := c.FindFileShareValue(key, vol)
+			if !strings.EqualFold(m[key][0], v) {
+				flag = false
+				break
+			}
+		}
+		if flag {
+			vols = append(vols, vol)
+		}
+	}
+	return vols
+
+}
+
+
+
+func (c *Client) SortFileShares(shares []*model.FileShareSpec, p *Parameter) []*model.FileShareSpec {
+	volume_sortKey = p.sortKey
+
+	if strings.EqualFold(p.sortDir, "dsc") {
+		sort.Sort(FileShareSlice(shares))
+
+	} else {
+		sort.Sort(sort.Reverse(FileShareSlice(shares)))
+	}
+	return shares
+}
+
+func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
+	fileshares, err := c.ListFileShare(ctx)
+	if err != nil {
+		log.Error("List fileshare failed: ", err)
+		return nil, err
+	}
+
+	vols := c.SelectFileShares(m, fileshares)
+
+	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS"})
+	return c.SortFileShares(vols, p), nil
+}
+
+// ListFileShare
+func (c *Client) ListFileShare(ctx *c.Context) ([]*model.FileShareSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId),
+	}
+
+	// Admin user should get all fileshares including the fileshares whose tenant is not admin.
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateFileShareURL(urls.Etcd, "")
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When list fileshares in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fileshares = []*model.FileShareSpec{}
+	if len(dbRes.Message) == 0 {
+		return fileshares, nil
+	}
+	for _, msg := range dbRes.Message {
+		var share = &model.FileShareSpec{}
+		if err := json.Unmarshal([]byte(msg), share); err != nil {
+			log.Error("When parsing fileshare in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		fileshares = append(fileshares, share)
+	}
+	return fileshares, nil
+}
+
+
 //Parameter
 type Parameter struct {
 	beginIdx, endIdx int
@@ -189,6 +406,7 @@ func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []str
 
 	return &Parameter{beginIdx, endIdx, sortDir, sortKey}
 }
+
 
 // CreateDock
 func (c *Client) CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error) {

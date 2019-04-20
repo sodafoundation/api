@@ -22,8 +22,8 @@ package fileshare
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/filesharedock/client"
 	"github.com/opensds/opensds/pkg/model"
@@ -37,6 +37,7 @@ import (
 type Controller interface {
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
 	SetDock(dockInfo *model.DockSpec)
+	DeleteFileShare(opt *pb.DeleteFileShareOpts) error
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -50,6 +51,7 @@ type controller struct {
 	client.Client
 	DockInfo *model.DockSpec
 }
+
 
 func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
@@ -80,6 +82,25 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 
 }
 
+func (c *controller) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("when connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.DeleteFileShare(context.Background(), opt)
+	if err != nil {
+		log.Error("delete file share failed in file share controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
+}
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {
 	c.DockInfo = dockInfo

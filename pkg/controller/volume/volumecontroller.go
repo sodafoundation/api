@@ -27,6 +27,7 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
+	//"github.com/opensds/opensds/pkg/controller"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"golang.org/x/net/context"
 )

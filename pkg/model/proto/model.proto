@@ -36,9 +36,10 @@ package proto;
 
 
 service Controller {
+	
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
-    
+   
     // Delete a volume
     rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
     
@@ -173,6 +174,7 @@ message CreateVolumeOpts {
     // Down load snapshot from cloud
     bool snapshotFromCloud = 16;
 }
+
 
 // DeleteVolumeOpts is a structure which indicates all required properties
 // for deleting a volume.
@@ -641,6 +643,8 @@ message DetachVolumeOpts {
     // The Context
     string context = 4;
 }
+
+
 
 // Generic response, it return:
 // 1. Return result with message when create/update resource successfully.

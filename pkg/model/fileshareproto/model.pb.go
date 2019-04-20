@@ -155,6 +155,225 @@ func (m *CreateFileShareOpts) GetContext() string {
 	return ""
 }
 
+// DeleteFileShareOpts is a structure which indicates all required properties
+// for deleting a fileshare.
+type DeleteFileShareOpts struct {
+	// The uuid of the fileshare, required.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The service level that fileshare belongs to, required.
+	ProfileId string `protobuf:"bytes,2,opt,name=profileId,proto3" json:"profileId,omitempty"`
+	// The uuid of the pool on which fileshare will be created, required.
+	PoolId string `protobuf:"bytes,3,opt,name=poolId,proto3" json:"poolId,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,5,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,6,opt,name=context,proto3" json:"context,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteFileShareOpts) Reset()         { *m = DeleteFileShareOpts{} }
+func (m *DeleteFileShareOpts) String() string { return proto.CompactTextString(m) }
+func (*DeleteFileShareOpts) ProtoMessage()    {}
+func (*DeleteFileShareOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{1}
+}
+
+func (m *DeleteFileShareOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteFileShareOpts.Unmarshal(m, b)
+}
+func (m *DeleteFileShareOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteFileShareOpts.Marshal(b, m, deterministic)
+}
+func (m *DeleteFileShareOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteFileShareOpts.Merge(m, src)
+}
+func (m *DeleteFileShareOpts) XXX_Size() int {
+	return xxx_messageInfo_DeleteFileShareOpts.Size(m)
+}
+func (m *DeleteFileShareOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteFileShareOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteFileShareOpts proto.InternalMessageInfo
+
+func (m *DeleteFileShareOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *DeleteFileShareOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+// UpdateFileShareOpts is a structure which indicates all required properties
+// for Updating a fileshare.
+type UpdateFileShareOpts struct {
+	// The uuid of the fileshare, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The name of the fileshare, required.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// The requested capacity of the fileshare, required.
+	Size int64 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	// The description of the fileshare, optional.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// The locality that fileshare belongs to, required.
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone,proto3" json:"availabilityZone,omitempty"`
+	// The service level that fileshare belongs to, required.
+	ProfileId string `protobuf:"bytes,7,opt,name=profileId,proto3" json:"profileId,omitempty"`
+	// The uuid of the pool on which fileshare will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId,proto3" json:"poolId,omitempty"`
+	// The name of the pool on which fileshare will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName,proto3" json:"poolName,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata map[string]string `protobuf:"bytes,10,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,11,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context              string   `protobuf:"bytes,12,opt,name=context,proto3" json:"context,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateFileShareOpts) Reset()         { *m = UpdateFileShareOpts{} }
+func (m *UpdateFileShareOpts) String() string { return proto.CompactTextString(m) }
+func (*UpdateFileShareOpts) ProtoMessage()    {}
+func (*UpdateFileShareOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{2}
+}
+
+func (m *UpdateFileShareOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateFileShareOpts.Unmarshal(m, b)
+}
+func (m *UpdateFileShareOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateFileShareOpts.Marshal(b, m, deterministic)
+}
+func (m *UpdateFileShareOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateFileShareOpts.Merge(m, src)
+}
+func (m *UpdateFileShareOpts) XXX_Size() int {
+	return xxx_messageInfo_UpdateFileShareOpts.Size(m)
+}
+func (m *UpdateFileShareOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateFileShareOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateFileShareOpts proto.InternalMessageInfo
+
+func (m *UpdateFileShareOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetSize() int64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *UpdateFileShareOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *UpdateFileShareOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *UpdateFileShareOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
 type HostInfo struct {
 	// The platform of the host, such as "x86_64"
 	Platform string `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform,omitempty"`
@@ -175,7 +394,7 @@ func (m *HostInfo) Reset()         { *m = HostInfo{} }
 func (m *HostInfo) String() string { return proto.CompactTextString(m) }
 func (*HostInfo) ProtoMessage()    {}
 func (*HostInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{1}
+	return fileDescriptor_4c16552f9fdb66d8, []int{3}
 }
 
 func (m *HostInfo) XXX_Unmarshal(b []byte) error {
@@ -242,7 +461,7 @@ func (m *FileShareData) Reset()         { *m = FileShareData{} }
 func (m *FileShareData) String() string { return proto.CompactTextString(m) }
 func (*FileShareData) ProtoMessage()    {}
 func (*FileShareData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{2}
+	return fileDescriptor_4c16552f9fdb66d8, []int{4}
 }
 
 func (m *FileShareData) XXX_Unmarshal(b []byte) error {
@@ -288,7 +507,7 @@ func (m *GenericResponse) Reset()         { *m = GenericResponse{} }
 func (m *GenericResponse) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse) ProtoMessage()    {}
 func (*GenericResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{3}
+	return fileDescriptor_4c16552f9fdb66d8, []int{5}
 }
 
 func (m *GenericResponse) XXX_Unmarshal(b []byte) error {
@@ -365,7 +584,7 @@ func (m *GenericResponse_Result) Reset()         { *m = GenericResponse_Result{}
 func (m *GenericResponse_Result) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse_Result) ProtoMessage()    {}
 func (*GenericResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{3, 0}
+	return fileDescriptor_4c16552f9fdb66d8, []int{5, 0}
 }
 
 func (m *GenericResponse_Result) XXX_Unmarshal(b []byte) error {
@@ -405,7 +624,7 @@ func (m *GenericResponse_Error) Reset()         { *m = GenericResponse_Error{} }
 func (m *GenericResponse_Error) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse_Error) ProtoMessage()    {}
 func (*GenericResponse_Error) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{3, 1}
+	return fileDescriptor_4c16552f9fdb66d8, []int{5, 1}
 }
 
 func (m *GenericResponse_Error) XXX_Unmarshal(b []byte) error {
@@ -443,6 +662,10 @@ func (m *GenericResponse_Error) GetDescription() string {
 func init() {
 	proto.RegisterType((*CreateFileShareOpts)(nil), "fileshareproto.CreateFileShareOpts")
 	proto.RegisterMapType((map[string]string)(nil), "fileshareproto.CreateFileShareOpts.MetadataEntry")
+	proto.RegisterType((*DeleteFileShareOpts)(nil), "fileshareproto.DeleteFileShareOpts")
+	proto.RegisterMapType((map[string]string)(nil), "fileshareproto.DeleteFileShareOpts.MetadataEntry")
+	proto.RegisterType((*UpdateFileShareOpts)(nil), "fileshareproto.UpdateFileShareOpts")
+	proto.RegisterMapType((map[string]string)(nil), "fileshareproto.UpdateFileShareOpts.MetadataEntry")
 	proto.RegisterType((*HostInfo)(nil), "fileshareproto.HostInfo")
 	proto.RegisterType((*FileShareData)(nil), "fileshareproto.FileShareData")
 	proto.RegisterMapType((map[string]string)(nil), "fileshareproto.FileShareData.DataEntry")
@@ -454,42 +677,47 @@ func init() {
 func init() { proto.RegisterFile("model.proto", fileDescriptor_4c16552f9fdb66d8) }
 
 var fileDescriptor_4c16552f9fdb66d8 = []byte{
-	// 550 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x93, 0xcf, 0x6b, 0x13, 0x41,
-	0x14, 0xc7, 0xb3, 0x9b, 0xdf, 0x6f, 0x6d, 0x5a, 0x46, 0x91, 0x65, 0x11, 0x0d, 0x11, 0x35, 0x78,
-	0x58, 0x30, 0x1e, 0x14, 0x4b, 0x41, 0x6c, 0x5a, 0x93, 0x43, 0x55, 0x56, 0x2f, 0x7a, 0x9b, 0x66,
-	0x5f, 0xda, 0x21, 0x93, 0x9d, 0x65, 0x66, 0x1a, 0x8c, 0x27, 0x2f, 0xfe, 0x45, 0xfe, 0x7f, 0x22,
-	0xf3, 0xb2, 0x59, 0x9b, 0x54, 0xa8, 0x08, 0xbd, 0xbd, 0xef, 0xfb, 0x39, 0xf3, 0x79, 0x33, 0x10,
-	0xcc, 0x55, 0x8a, 0x32, 0xce, 0xb5, 0xb2, 0x8a, 0x75, 0xa6, 0x42, 0xa2, 0x39, 0xe7, 0x1a, 0x49,
-	0xf7, 0x7e, 0x56, 0xe1, 0xf6, 0xa1, 0x46, 0x6e, 0xf1, 0x58, 0x48, 0xfc, 0xe8, 0x02, 0xef, 0x73,
-	0x6b, 0x58, 0x07, 0x7c, 0x91, 0x86, 0x5e, 0xd7, 0xeb, 0xb7, 0x13, 0x5f, 0xa4, 0x8c, 0x41, 0x2d,
-	0xe3, 0x73, 0x0c, 0x7d, 0xf2, 0x90, 0xed, 0x7c, 0x46, 0x7c, 0xc3, 0xb0, 0xda, 0xf5, 0xfa, 0xd5,
-	0x84, 0x6c, 0xd6, 0x85, 0x20, 0x45, 0x33, 0xd1, 0x22, 0xb7, 0x42, 0x65, 0x61, 0x8d, 0xd2, 0x2f,
-	0xbb, 0xd8, 0x53, 0xd8, 0xe3, 0x0b, 0x2e, 0x24, 0x3f, 0x15, 0x52, 0xd8, 0xe5, 0x17, 0x95, 0x61,
-	0xd8, 0xa0, 0xb4, 0x2b, 0x7e, 0x76, 0x0f, 0xda, 0xb9, 0x56, 0xee, 0xc8, 0xe3, 0x34, 0x6c, 0x52,
-	0xd2, 0x1f, 0x07, 0xbb, 0x0b, 0x8d, 0x5c, 0x29, 0x39, 0x4e, 0xc3, 0x16, 0x85, 0x0a, 0xc5, 0x22,
-	0x68, 0x39, 0xeb, 0x9d, 0x3b, 0x6f, 0x9b, 0x22, 0xa5, 0x66, 0x27, 0xd0, 0x9a, 0xa3, 0xe5, 0x29,
-	0xb7, 0x3c, 0x84, 0x6e, 0xb5, 0x1f, 0x0c, 0x9e, 0xc5, 0x9b, 0x48, 0xe2, 0xbf, 0xe0, 0x88, 0x4f,
-	0x8a, 0x9a, 0xa3, 0xcc, 0xea, 0x65, 0x52, 0xb6, 0x60, 0xf7, 0x01, 0x52, 0x2d, 0x16, 0xa8, 0x69,
-	0x58, 0x40, 0xc3, 0x2e, 0x79, 0x58, 0x08, 0xcd, 0x89, 0xca, 0x2c, 0x7e, 0xb5, 0xe1, 0x2d, 0x0a,
-	0xae, 0x65, 0xb4, 0x0f, 0x3b, 0x1b, 0x4d, 0xd9, 0x1e, 0x54, 0x67, 0xb8, 0x2c, 0x90, 0x3b, 0x93,
-	0xdd, 0x81, 0xfa, 0x82, 0xcb, 0x8b, 0x35, 0xf4, 0x95, 0x78, 0xe5, 0xbf, 0xf4, 0x7a, 0xdf, 0x3d,
-	0x68, 0x8d, 0x94, 0xb1, 0xe3, 0x6c, 0xaa, 0xe8, 0xba, 0x92, 0xdb, 0xa9, 0xd2, 0xf3, 0xa2, 0xba,
-	0xd4, 0x0e, 0x91, 0x32, 0x9f, 0x96, 0xf9, 0xba, 0x47, 0xa1, 0xdc, 0xea, 0xce, 0x95, 0xb1, 0xb4,
-	0xba, 0x76, 0x42, 0x36, 0xad, 0x3c, 0x2f, 0x36, 0xe6, 0x8b, 0xdc, 0xc1, 0x17, 0x99, 0xb0, 0x82,
-	0x5b, 0xa5, 0xc3, 0xfa, 0x0a, 0x7e, 0xe9, 0xe8, 0xfd, 0xf0, 0x60, 0xa7, 0x64, 0x34, 0x74, 0x2c,
-	0xf6, 0xa1, 0x46, 0x58, 0x3d, 0xc2, 0xfa, 0x64, 0x1b, 0xeb, 0x46, 0x72, 0x3c, 0x2c, 0x61, 0x52,
-	0x51, 0xf4, 0x02, 0xda, 0xc3, 0xff, 0x42, 0xf1, 0xcb, 0x83, 0xdd, 0xb7, 0x98, 0xa1, 0x16, 0x93,
-	0x04, 0x4d, 0xae, 0x32, 0x83, 0xec, 0x35, 0x34, 0x34, 0x9a, 0x0b, 0x69, 0xa9, 0x45, 0x30, 0x78,
-	0xbc, 0x7d, 0x96, 0xad, 0x82, 0x38, 0xa1, 0xec, 0x51, 0x25, 0x29, 0xea, 0xd8, 0x01, 0xd4, 0x51,
-	0x6b, 0xa5, 0x69, 0x5e, 0x30, 0x78, 0x74, 0x5d, 0x83, 0x23, 0x97, 0x3c, 0xaa, 0x24, 0xab, 0xaa,
-	0xa8, 0x07, 0x8d, 0x55, 0x4b, 0xf7, 0x00, 0xe6, 0x68, 0x0c, 0x3f, 0xc3, 0xe2, 0x3a, 0x6b, 0x19,
-	0x1d, 0x40, 0x9d, 0xaa, 0xdc, 0x2e, 0x26, 0x2a, 0x5d, 0xc7, 0xc9, 0xde, 0xfe, 0x46, 0xfe, 0x95,
-	0x6f, 0xf4, 0xa6, 0x09, 0x75, 0x8d, 0xb9, 0x5c, 0x0e, 0xce, 0x00, 0x0e, 0x55, 0x66, 0xb5, 0x92,
-	0x12, 0x35, 0xfb, 0x0c, 0xbb, 0x5b, 0xef, 0x97, 0x3d, 0xfc, 0x87, 0x07, 0x1e, 0x3d, 0xb8, 0xe6,
-	0x86, 0xbd, 0xca, 0x60, 0x06, 0x9d, 0xe3, 0x0f, 0x5a, 0x2d, 0x84, 0x11, 0x2a, 0x1b, 0xaa, 0xc9,
-	0xec, 0x06, 0x87, 0x9d, 0x36, 0x28, 0xf0, 0xfc, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0x93, 0x3a,
-	0x11, 0x5b, 0xbd, 0x04, 0x00, 0x00,
+	// 632 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x94, 0x4d, 0x6f, 0xd3, 0x4c,
+	0x10, 0xc7, 0x6b, 0xe7, 0xa5, 0xc9, 0xe4, 0xe9, 0x8b, 0xb6, 0x8f, 0x90, 0x65, 0x21, 0x88, 0x82,
+	0x80, 0x8a, 0x83, 0x25, 0xc2, 0x01, 0x44, 0x55, 0x09, 0xd1, 0xb4, 0xb4, 0x87, 0x02, 0x32, 0x70,
+	0x80, 0xdb, 0x36, 0x9e, 0xd2, 0x55, 0x37, 0x5e, 0x6b, 0x77, 0x1b, 0x11, 0x4e, 0x5c, 0xf8, 0x18,
+	0x1c, 0xfa, 0x19, 0xf8, 0x7e, 0x08, 0xed, 0xd4, 0x49, 0x1b, 0xc7, 0x90, 0x08, 0x71, 0xe0, 0xd0,
+	0xdb, 0xbc, 0xfe, 0xd7, 0xfe, 0xcd, 0xec, 0x42, 0x6b, 0xa0, 0x12, 0x94, 0x51, 0xa6, 0x95, 0x55,
+	0x6c, 0xf5, 0x58, 0x48, 0x34, 0x27, 0x5c, 0x23, 0xf9, 0x9d, 0xef, 0x15, 0xd8, 0xd8, 0xd1, 0xc8,
+	0x2d, 0xee, 0x09, 0x89, 0x6f, 0x5c, 0xe2, 0x55, 0x66, 0x0d, 0x5b, 0x05, 0x5f, 0x24, 0x81, 0xd7,
+	0xf6, 0x36, 0x9b, 0xb1, 0x2f, 0x12, 0xc6, 0xa0, 0x9a, 0xf2, 0x01, 0x06, 0x3e, 0x45, 0xc8, 0x76,
+	0x31, 0x23, 0x3e, 0x63, 0x50, 0x69, 0x7b, 0x9b, 0x95, 0x98, 0x6c, 0xd6, 0x86, 0x56, 0x82, 0xa6,
+	0xaf, 0x45, 0x66, 0x85, 0x4a, 0x83, 0x2a, 0x95, 0x5f, 0x0d, 0xb1, 0x07, 0xb0, 0xce, 0x87, 0x5c,
+	0x48, 0x7e, 0x24, 0xa4, 0xb0, 0xa3, 0x0f, 0x2a, 0xc5, 0xa0, 0x4e, 0x65, 0x33, 0x71, 0x76, 0x13,
+	0x9a, 0x99, 0x56, 0xee, 0x93, 0x0f, 0x92, 0x60, 0x99, 0x8a, 0x2e, 0x03, 0xec, 0x06, 0xd4, 0x33,
+	0xa5, 0xe4, 0x41, 0x12, 0x34, 0x28, 0x95, 0x7b, 0x2c, 0x84, 0x86, 0xb3, 0x5e, 0xba, 0xef, 0x6d,
+	0x52, 0x66, 0xe2, 0xb3, 0x43, 0x68, 0x0c, 0xd0, 0xf2, 0x84, 0x5b, 0x1e, 0x40, 0xbb, 0xb2, 0xd9,
+	0xea, 0x3e, 0x8c, 0xa6, 0x91, 0x44, 0x25, 0x38, 0xa2, 0xc3, 0xbc, 0x67, 0x37, 0xb5, 0x7a, 0x14,
+	0x4f, 0x24, 0xd8, 0x2d, 0x80, 0x44, 0x8b, 0x21, 0x6a, 0x3a, 0xac, 0x45, 0x87, 0x5d, 0x89, 0xb0,
+	0x00, 0x96, 0xfb, 0x2a, 0xb5, 0xf8, 0xc9, 0x06, 0xff, 0x51, 0x72, 0xec, 0x86, 0x5b, 0xb0, 0x32,
+	0x25, 0xca, 0xd6, 0xa1, 0x72, 0x8a, 0xa3, 0x1c, 0xb9, 0x33, 0xd9, 0xff, 0x50, 0x1b, 0x72, 0x79,
+	0x36, 0x86, 0x7e, 0xe1, 0x3c, 0xf5, 0x9f, 0x78, 0x9d, 0x73, 0x1f, 0x36, 0x7a, 0x28, 0x71, 0xde,
+	0xd4, 0xa6, 0xf8, 0xf9, 0xbf, 0xe6, 0x57, 0x99, 0xe2, 0x77, 0x95, 0x51, 0xb5, 0x9c, 0x51, 0xc9,
+	0xe1, 0x0b, 0x32, 0xaa, 0xfd, 0x8e, 0x51, 0xfd, 0x2f, 0x32, 0x72, 0x9b, 0xfd, 0x2e, 0x4b, 0xae,
+	0x37, 0xfb, 0x72, 0x6a, 0x25, 0x38, 0xfe, 0xb5, 0xcd, 0xfe, 0xe2, 0x41, 0x63, 0x5f, 0x19, 0x7b,
+	0x90, 0x1e, 0x2b, 0xfa, 0x5d, 0xc9, 0xed, 0xb1, 0xd2, 0x83, 0xbc, 0x7b, 0xe2, 0x3b, 0x44, 0xca,
+	0xbc, 0x1d, 0x65, 0x63, 0x8d, 0xdc, 0x73, 0xa3, 0x3b, 0x51, 0xc6, 0xe6, 0x2b, 0x4d, 0x36, 0x8d,
+	0x3c, 0xcb, 0x27, 0xe6, 0x8b, 0xcc, 0xc1, 0x17, 0xa9, 0xb0, 0x82, 0x5b, 0xa5, 0xf3, 0x85, 0xbc,
+	0x0c, 0x74, 0xbe, 0x7a, 0xb0, 0x32, 0x61, 0xd4, 0x73, 0x2c, 0xb6, 0xa0, 0x4a, 0x58, 0x3d, 0xc2,
+	0x7a, 0xbf, 0x88, 0x75, 0xaa, 0x38, 0xea, 0x4d, 0x60, 0x52, 0x53, 0xf8, 0x18, 0x9a, 0xbd, 0x3f,
+	0x42, 0xf1, 0xc3, 0x83, 0xb5, 0x17, 0x98, 0xa2, 0x16, 0xfd, 0x18, 0x4d, 0xa6, 0x52, 0x83, 0xec,
+	0x19, 0xd4, 0x35, 0x9a, 0x33, 0x69, 0x49, 0xa2, 0xd5, 0xbd, 0x57, 0xfc, 0x96, 0x42, 0x43, 0x14,
+	0x53, 0xf5, 0xfe, 0x52, 0x9c, 0xf7, 0xb1, 0x6d, 0xa8, 0xa1, 0xd6, 0x4a, 0xd3, 0x79, 0xad, 0xee,
+	0xdd, 0x79, 0x02, 0xbb, 0xae, 0x78, 0x7f, 0x29, 0xbe, 0xe8, 0x0a, 0x3b, 0x50, 0xbf, 0x90, 0x74,
+	0x0b, 0x30, 0x40, 0x63, 0xf8, 0x47, 0xcc, 0x7f, 0x67, 0xec, 0x86, 0xdb, 0x50, 0xa3, 0x2e, 0x37,
+	0x8b, 0xbe, 0x4a, 0xc6, 0x79, 0xb2, 0x8b, 0xd7, 0xc8, 0x9f, 0xb9, 0x46, 0xcf, 0x97, 0xa1, 0xa6,
+	0x31, 0x93, 0xa3, 0xee, 0x37, 0x1f, 0x60, 0x47, 0xa5, 0x56, 0x2b, 0x29, 0x51, 0xb3, 0xf7, 0xb0,
+	0x56, 0x78, 0x9a, 0xd9, 0x9d, 0x05, 0xde, 0xee, 0xf0, 0xf6, 0x9c, 0x5f, 0xec, 0x2c, 0x39, 0xe9,
+	0xc2, 0x8b, 0x36, 0x2b, 0x5d, 0xf2, 0xe4, 0x2d, 0x28, 0x5d, 0xb8, 0x76, 0xb3, 0xd2, 0x25, 0xf7,
+	0x72, 0x01, 0xe9, 0xee, 0xb9, 0x0f, 0xab, 0x7b, 0xaf, 0xb5, 0x1a, 0x0a, 0x23, 0x54, 0xda, 0x53,
+	0xfd, 0xd3, 0x6b, 0x46, 0x05, 0xe9, 0xa3, 0x3a, 0x25, 0x1e, 0xfd, 0x0c, 0x00, 0x00, 0xff, 0xff,
+	0x9a, 0xfb, 0xb1, 0x24, 0x05, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -506,6 +734,10 @@ const _ = grpc.SupportPackageIsVersion4
 type ControllerClient interface {
 	// Create a file share
 	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Update a file share
+	UpdateFileShare(ctx context.Context, in *UpdateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 }
 
 type controllerClient struct {
@@ -525,10 +757,32 @@ func (c *controllerClient) CreateFileShare(ctx context.Context, in *CreateFileSh
 	return out, nil
 }
 
+func (c *controllerClient) DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/fileshareproto.Controller/DeleteFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) UpdateFileShare(ctx context.Context, in *UpdateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/fileshareproto.Controller/UpdateFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 type ControllerServer interface {
 	// Create a file share
 	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
+	// Update a file share
+	UpdateFileShare(context.Context, *UpdateFileShareOpts) (*GenericResponse, error)
 }
 
 // UnimplementedControllerServer can be embedded to have forward compatible implementations.
@@ -537,6 +791,12 @@ type UnimplementedControllerServer struct {
 
 func (*UnimplementedControllerServer) CreateFileShare(ctx context.Context, req *CreateFileShareOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShare not implemented")
+}
+func (*UnimplementedControllerServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedControllerServer) UpdateFileShare(ctx context.Context, req *UpdateFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateFileShare not implemented")
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
@@ -561,6 +821,42 @@ func _Controller_CreateFileShare_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_DeleteFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).DeleteFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/fileshareproto.Controller/DeleteFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).DeleteFileShare(ctx, req.(*DeleteFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_UpdateFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).UpdateFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/fileshareproto.Controller/UpdateFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).UpdateFileShare(ctx, req.(*UpdateFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Controller_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "fileshareproto.Controller",
 	HandlerType: (*ControllerServer)(nil),
@@ -568,6 +864,14 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateFileShare",
 			Handler:    _Controller_CreateFileShare_Handler,
+		},
+		{
+			MethodName: "DeleteFileShare",
+			Handler:    _Controller_DeleteFileShare_Handler,
+		},
+		{
+			MethodName: "UpdateFileShare",
+			Handler:    _Controller_UpdateFileShare_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -580,6 +884,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 type FProvisionDockClient interface {
 	// Create a file share
 	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Update a file share
+	UpdateFileShare(ctx context.Context, in *UpdateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 }
 
 type fProvisionDockClient struct {
@@ -599,10 +907,32 @@ func (c *fProvisionDockClient) CreateFileShare(ctx context.Context, in *CreateFi
 	return out, nil
 }
 
+func (c *fProvisionDockClient) DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/fileshareproto.FProvisionDock/DeleteFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fProvisionDockClient) UpdateFileShare(ctx context.Context, in *UpdateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/fileshareproto.FProvisionDock/UpdateFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FProvisionDockServer is the server API for FProvisionDock service.
 type FProvisionDockServer interface {
 	// Create a file share
 	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
+	// Update a file share
+	UpdateFileShare(context.Context, *UpdateFileShareOpts) (*GenericResponse, error)
 }
 
 // UnimplementedFProvisionDockServer can be embedded to have forward compatible implementations.
@@ -611,6 +941,12 @@ type UnimplementedFProvisionDockServer struct {
 
 func (*UnimplementedFProvisionDockServer) CreateFileShare(ctx context.Context, req *CreateFileShareOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShare not implemented")
+}
+func (*UnimplementedFProvisionDockServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedFProvisionDockServer) UpdateFileShare(ctx context.Context, req *UpdateFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateFileShare not implemented")
 }
 
 func RegisterFProvisionDockServer(s *grpc.Server, srv FProvisionDockServer) {
@@ -635,6 +971,42 @@ func _FProvisionDock_CreateFileShare_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FProvisionDock_DeleteFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FProvisionDockServer).DeleteFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/fileshareproto.FProvisionDock/DeleteFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FProvisionDockServer).DeleteFileShare(ctx, req.(*DeleteFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FProvisionDock_UpdateFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FProvisionDockServer).UpdateFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/fileshareproto.FProvisionDock/UpdateFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FProvisionDockServer).UpdateFileShare(ctx, req.(*UpdateFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _FProvisionDock_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "fileshareproto.FProvisionDock",
 	HandlerType: (*FProvisionDockServer)(nil),
@@ -642,6 +1014,14 @@ var _FProvisionDock_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateFileShare",
 			Handler:    _FProvisionDock_CreateFileShare_Handler,
+		},
+		{
+			MethodName: "DeleteFileShare",
+			Handler:    _FProvisionDock_DeleteFileShare_Handler,
+		},
+		{
+			MethodName: "UpdateFileShare",
+			Handler:    _FProvisionDock_UpdateFileShare_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

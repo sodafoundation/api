@@ -1,0 +1,18 @@
+tgtBindIp: 192.168.56.105
+tgtConfDir: /etc/tgt/conf.d
+enableChapAuth: true
+pool:
+  vg001:
+    storageType: block
+    availabilityZone: default
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 5ms

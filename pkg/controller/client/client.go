@@ -30,6 +30,7 @@ type Client interface {
 	Connect(edp string) error
 
 	Close()
+
 }
 
 // client structure is one implementation of Client interface and will be

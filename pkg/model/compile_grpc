@@ -1,0 +1,1 @@
+root@shruthi-VirtualBox:~/go/src/github.com/opensds/opensds/pkg/model# protoc -I fileshareproto/ fileshareproto/model.proto --go_out=plugins=grpc:fileshareproto

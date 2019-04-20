@@ -81,7 +81,14 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 			beego.NSRouter("/:tenantId/pools/:poolId", &PoolPortal{}, "get:GetPool"),
 			beego.NSRouter("/:tenantId/availabilityZones", &PoolPortal{}, "get:ListAvailabilityZones"),
 
+			beego.NSNamespace("/:tenantId/file",
+				// FileShare is the logical description of a piece of storage, which can be directly used by users.
+				// All operations of file share can be used for both admin and users.
+				beego.NSRouter("/shares", NewFileSharePortal(), "post:CreateFileShare;get:ListFileShare"),
+			),
+
 			beego.NSNamespace("/:tenantId/block",
+
 
 				// Volume is the logical description of a piece of storage, which can be directly used by users.
 				// All operations of volume can be used for both admin and users.
@@ -89,6 +96,11 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 				beego.NSRouter("/volumes/:volumeId", NewVolumePortal(), "get:GetVolume;put:UpdateVolume;delete:DeleteVolume"),
 				// Extend Volume
 				beego.NSRouter("/volumes/:volumeId/resize", NewVolumePortal(), "post:ExtendVolume"),
+
+				// FileShare is the logical description of a piece of storage, which can be directly used by users.
+				// All operations of file share can be used for both admin and users.
+				//beego.NSRouter("/:tenantId/file", NewFileSharePortal(), "post:CreateFileShare;get:ListFileShare"),
+				//beego.NSRouter("/mounts", NewFileShareMountPortal(), "post:CreateFileShareMount;get:LisFileShareMounts"),
 
 				// Creates, shows, lists, unpdates and deletes attachment.
 				beego.NSRouter("/attachments", NewVolumeAttachmentPortal(), "post:CreateVolumeAttachment;get:ListVolumeAttachments"),

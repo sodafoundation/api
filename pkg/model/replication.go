@@ -80,6 +80,7 @@ type ReplicationSpec struct {
 	// metadata
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// volume data list
+//	VolumeDataList []*proto.VolumeData `json:"volumeDataList,omitempty"`
 	VolumeDataList []*proto.VolumeData `json:"volumeDataList,omitempty"`
 }
 

@@ -41,6 +41,10 @@ func GenerateVolumeURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("block/volumes", urlType, tenantId, in...)
 }
 
+func GenerateFileShareURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("file/shares", urlType, tenantId, in...)
+}
+
 // GenerateNewVolumeURL ...
 func GenerateNewVolumeURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("volumes", urlType, tenantId, in...)

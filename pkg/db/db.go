@@ -28,7 +28,6 @@ import (
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	fakedb "github.com/opensds/opensds/testutils/db"
 )
 
 // C is a global variable that controls database module.
@@ -44,9 +43,9 @@ func Init(db *Database) {
 	case "etcd":
 		C = etcd.NewClient(strings.Split(db.Endpoint, ","))
 		return
-	case "fake":
-		C = fakedb.NewFakeDbClient()
-		return
+	//case "fake":
+	//	C = fakedb.NewFakeDbClient()
+	//	return
 	default:
 		fmt.Printf("Can't find database driver %s!\n", db.Driver)
 	}
@@ -106,6 +105,8 @@ type Client interface {
 	CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error)
 
 	GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error)
+
+
 
 	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 
@@ -176,11 +177,31 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+
+	//File Share specific calls
+	CreateFileShare(ctx *c.Context, vol *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	ListFileShare(ctx *c.Context) ([]*model.FileShareSpec, error)
+
+	GetFileShare(ctx *c.Context, fileshareID string) (*model.FileShareSpec, error)
+
+	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
+
+	UpdateFileShare(ctx *c.Context, fileshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(context *c.Context, id string) error
+
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
 	vol, _ := client.GetVolume(ctx, volID)
 	return client.UpdateStatus(ctx, vol, status)
+}
+
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileshareID, status string) error {
+	fileshare, _ := client.ListFileShare(ctx, fileshareID)
+	return client.UpdateStatus(ctx, fileshare, status)
 }
 
 func UpdateVolumeAttachmentStatus(ctx *c.Context, client Client, atcID, status string) error {
