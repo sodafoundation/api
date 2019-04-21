@@ -21,7 +21,7 @@ mkdir -p /etc/opensds && sudo cat > /etc/opensds/opensds.conf <<OPENSDS_GLOABL_C
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
 dns_endpoint = apiserver.opensds.svc.cluster.local:50040
-auth_strategy = noauth
+auth_strategy = keystone
 # If https is enabled, the default value of cert file
 # is /opt/opensds-security/opensds/opensds-cert.pem,
 # and key file is /opt/opensds-security/opensds/opensds-key.pem
@@ -136,7 +136,9 @@ dock          ClusterIP   10.0.0.144   <none>        50050/TCP           21m
 ```
 
 ## Test work
-### Download cli tool.
+
+### OpenSDS CLI tool
+#### Download cli tool.
 ```
 wget https://github.com/opensds/opensds/releases/download/v0.5.1/opensds-hotpot-v0.5.1-linux-amd64.tar.gz 
 tar zxvf opensds-hotpot-v0.5.1-linux-amd64.tar.gz 
@@ -151,27 +153,40 @@ export OS_PASSWORD=opensds@123
 export OS_TENANT_NAME=admin
 export OS_PROJECT_NAME=admin
 export OS_USER_DOMAIN_ID=default
+
 osdsctl pool list
 ```
 
-### Create a default profile firstly.
+#### Create a default profile firstly.
 ```
 osdsctl profile create '{"name": "default", "description": "default policy"}'
 ```
 
-### Create a volume.
+#### Create a volume.
 ```
 osdsctl volume create 1 --name=test-001
 ```
 
-### List all volumes.
+#### List all volumes.
 ```
 osdsctl volume list
 ```
 
-### Delete the volume.
+#### Delete the volume.
 ```
 osdsctl volume delete <your_volume_id>
 ```
+
+### OpenSDS UI
+OpenSDS UI dashboard is available at `http://{your_host_ip}:31975`, please login the dashboard using the default admin credentials: `admin/opensds@123`. Create `tenant`, `user`, and `profiles` as admin. Multi-Cloud service is also supported by dashboard.
+
+Logout of the dashboard as admin and login the dashboard again as a non-admin user to manage storage resource:
+
+#### Volume Service
+* Create volume
+* Create snapshot
+* Expand volume size
+* Create volume from snapshot
+* Create volume group
 
 After this is done, just enjoy it!
