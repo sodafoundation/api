@@ -26,7 +26,7 @@ func (p *KafkaMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				log.Infof("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
+				log.Infof("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.Value)
 
 				// do the actual sending work here
 				// make a writer that produces to topic-A, using the least-bytes distribution

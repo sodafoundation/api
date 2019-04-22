@@ -30,7 +30,7 @@ func (p *PrometheusMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				log.Infof("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
+				log.Infof("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.Value)
 
 				// do the actual sending work here, by writing to the file of the node_exporter of prometheus
 				writeToFile(work)
