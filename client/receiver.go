@@ -155,17 +155,20 @@ func (*receiver) Recv(url string, method string, input interface{}, output inter
 	return request(url, method, nil, input, output)
 }
 
-func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
-	k := &KeystoneReciver{Auth: auth}
-	k.GetToken()
-	return k
+func NewKeystoneReceiver(auth *KeystoneAuthOptions) (Receiver, error) {
+	k := &KeystoneReceiver{Auth: auth}
+	if err := k.GetToken(); err != nil {
+		log.Printf("get token failed, %v", err)
+		return nil, err
+	}
+	return k, nil
 }
 
-type KeystoneReciver struct {
+type KeystoneReceiver struct {
 	Auth *KeystoneAuthOptions
 }
 
-func (k *KeystoneReciver) GetToken() error {
+func (k *KeystoneReceiver) GetToken() error {
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: k.Auth.IdentityEndpoint,
 		Username:         k.Auth.Username,
@@ -202,7 +205,7 @@ func (k *KeystoneReciver) GetToken() error {
 	return nil
 }
 
-func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
+func (k *KeystoneReceiver) Recv(url string, method string, body interface{}, output interface{}) error {
 	desc := fmt.Sprintf("%s %s", method, url)
 	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
 		if retryIdx > 0 {
