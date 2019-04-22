@@ -19,10 +19,12 @@ package context
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/astaxie/beego/context"
-	"github.com/golang/glog"
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 func NewAdminContext() *Context {
@@ -43,7 +45,7 @@ func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
 	if err != nil {
-		glog.Errorf("Unmarshal json to context failed, reason: %v", err)
+		log.Errorf("Unmarshal json to context failed, reason: %v", err)
 	}
 	return ctx
 }
@@ -60,7 +62,7 @@ func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Con
 
 	ctx := GetContext(httpCtx)
 	if param == nil || len(param) == 0 {
-		glog.Warning("Context parameter is empty, nothing to be updated")
+		log.Warning("Context parameter is empty, nothing to be updated")
 		return ctx, nil
 	}
 	ctxV := reflect.ValueOf(ctx).Elem()
@@ -70,7 +72,7 @@ func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Con
 		if field.Kind() == pv.Kind() && field.CanSet() {
 			field.Set(pv)
 		} else {
-			glog.Errorf("Invalid parameter %s : %v", key, val)
+			log.Errorf("Invalid parameter %s : %v", key, val)
 		}
 	}
 
@@ -140,7 +142,30 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 func (ctx *Context) ToJson() string {
 	b, err := json.Marshal(ctx)
 	if err != nil {
-		glog.Errorf("Context convert to json failed, reason: %v", err)
+		log.Errorf("context convert to json failed, reason: %v", err)
 	}
 	return string(b)
+}
+
+func HttpError(ctx *context.Context, code int, format string, a ...interface{}) error {
+	ctx.Output.SetStatus(code)
+	msg := fmt.Sprintf(format, a...)
+	ctx.Output.Body(errorStatus(code, msg))
+	errInfo := fmt.Errorf("code: %d, reason: %s", code, msg)
+	log.Error(errInfo)
+	return errInfo
+}
+
+func errorStatus(code int, message string) []byte {
+	errStatus := &model.ErrorSpec{
+		Code:    code,
+		Message: message,
+	}
+
+	// Mashal the error status.
+	body, err := json.Marshal(errStatus)
+	if err != nil {
+		return []byte("failed to mashal error response: " + err.Error())
+	}
+	return body
 }

@@ -27,7 +27,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
@@ -87,7 +86,7 @@ func (k *Keystone) SetUp() error {
 func (k *Keystone) setPolicyContext(ctx *bctx.Context, r tokens.GetResult) error {
 	roles, err := r.ExtractRoles()
 	if err != nil {
-		return model.HttpError(ctx, http.StatusUnauthorized, "extract roles failed,%v", err)
+		return context.HttpError(ctx, http.StatusUnauthorized, "extract roles failed,%v", err)
 	}
 
 	var roleNames []string
@@ -97,12 +96,12 @@ func (k *Keystone) setPolicyContext(ctx *bctx.Context, r tokens.GetResult) error
 
 	project, err := r.ExtractProject()
 	if err != nil {
-		return model.HttpError(ctx, http.StatusUnauthorized, "extract project failed,%v", err)
+		return context.HttpError(ctx, http.StatusUnauthorized, "extract project failed,%v", err)
 	}
 
 	user, err := r.ExtractUser()
 	if err != nil {
-		return model.HttpError(ctx, http.StatusUnauthorized, "extract user failed,%v", err)
+		return context.HttpError(ctx, http.StatusUnauthorized, "extract user failed,%v", err)
 	}
 
 	param := map[string]interface{}{
@@ -118,7 +117,7 @@ func (k *Keystone) setPolicyContext(ctx *bctx.Context, r tokens.GetResult) error
 
 func (k *Keystone) validateToken(ctx *bctx.Context, token string) error {
 	if token == "" {
-		return model.HttpError(ctx, http.StatusUnauthorized, "token not found in header")
+		return context.HttpError(ctx, http.StatusUnauthorized, "token not found in header")
 	}
 
 	var r tokens.GetResult
@@ -136,18 +135,18 @@ func (k *Keystone) validateToken(ctx *bctx.Context, token string) error {
 		return r.Err
 	})
 	if err != nil {
-		return model.HttpError(ctx, http.StatusUnauthorized, "get token failed,%v", r.Err)
+		return context.HttpError(ctx, http.StatusUnauthorized, "get token failed,%v", r.Err)
 	}
 
 	t, err := r.ExtractToken()
 	if err != nil {
-		return model.HttpError(ctx, http.StatusUnauthorized, "extract token failed,%v", err)
+		return context.HttpError(ctx, http.StatusUnauthorized, "extract token failed,%v", err)
 
 	}
 	log.V(8).Infof("token: %v", t)
 
 	if time.Now().After(t.ExpiresAt) {
-		return model.HttpError(ctx, http.StatusUnauthorized,
+		return context.HttpError(ctx, http.StatusUnauthorized,
 			"token has expired, expire time %v", t.ExpiresAt)
 	}
 	return k.setPolicyContext(ctx, r)

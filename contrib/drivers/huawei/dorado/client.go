@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
@@ -38,12 +39,20 @@ func (e *ArrayInnerError) Error() string {
 		e.Err.Code, e.Err.Description)
 }
 
-type HttpError struct {
-	code int
+type NotFoundError struct {
+	name string
 }
 
-func (e *HttpError) Error() string {
-	return fmt.Sprintf("Http error, error code:%v", e.code)
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("can not find %s", e.name)
+}
+
+func IsNotFoundError(err error) bool {
+	if err != nil {
+		_, ok := err.(*NotFoundError)
+		return ok
+	}
+	return false
 }
 
 type DoradoClient struct {
@@ -411,10 +420,9 @@ func (c *DoradoClient) GetHostIdByName(hostName string) (string, error) {
 		return hostsResp.Data[0].Id, nil
 	}
 
-	log.Infof("Get host failed by host name: %s, error code:%d, description:%s",
+	log.Errorf("Get host failed by host name: %s, error code:%d, description:%s",
 		hostName, hostsResp.Error.Code, hostsResp.Error.Description)
-	return "", fmt.Errorf("get host failed by host name: %s, error code:%d, description:%s",
-		hostName, hostsResp.Error.Code, hostsResp.Error.Description)
+	return "", &NotFoundError{name: hostName}
 }
 
 func (c *DoradoClient) AddInitiatorToHostWithCheck(hostId, initiatorName string) error {
@@ -571,7 +579,7 @@ func (c *DoradoClient) FindHostGroup(groupName string) (string, error) {
 
 	if len(hostGrpsResp.Data) == 0 {
 		log.Infof("No host group with name %s was found.", groupName)
-		return "", fmt.Errorf("No host group with name %s was found.", groupName)
+		return "", &NotFoundError{name: groupName}
 	}
 
 	return hostGrpsResp.Data[0].Id, nil
@@ -712,7 +720,7 @@ func (c *DoradoClient) FindLunGroup(groupName string) (string, error) {
 
 	if len(lunGrpsResp.Data) == 0 {
 		log.Infof("No lun group with name %s was found.", groupName)
-		return "", fmt.Errorf("No lun group with name %s was found.", groupName)
+		return "", &NotFoundError{name: groupName}
 	}
 
 	return lunGrpsResp.Data[0].Id, nil
@@ -736,7 +744,7 @@ func (c *DoradoClient) FindMappingView(name string) (string, error) {
 
 	if len(mvsResp.Data) == 0 {
 		log.Infof("No mapping view with name %s was found.", name)
-		return "", fmt.Errorf("No mapping view with name %s was found.", name)
+		return "", &NotFoundError{name: name}
 	}
 
 	return mvsResp.Data[0].Id, nil
@@ -1336,7 +1344,7 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 		cmdType = "snapshot"
 	}
 
-	resp := &ObjCount{}
+	resp := &ObjCountResp{}
 	url := fmt.Sprintf("/%s/count?TYPE=%s&ASSOCIATEOBJTYPE=256&ASSOCIATEOBJID=%s", cmdType, lunType, lunGroupId)
 	if err := c.request("GET", url, nil, resp); err != nil {
 		log.Errorf("Get Obj count from lungroup by type failed.")
@@ -1346,8 +1354,8 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 		log.Errorf("LUN group %s not exist.", lunGroupId)
 		return 0, nil
 	}
-
-	return resp.Data.Count, nil
+	count, _ := strconv.Atoi(resp.Data.Count)
+	return count, nil
 }
 
 var (
@@ -1370,14 +1378,15 @@ func (c *DoradoClient) getObjectCountFromLungroup(lunGrpId string) (int, error) 
 }
 
 func (c *DoradoClient) getHostGroupNumFromHost(hostId string) (int, error) {
-	resp := &ObjCount{}
+	resp := &ObjCountResp{}
 	url := fmt.Sprintf("/hostgroup/count?TYPE=14&ASSOCIATEOBJTYPE=21&ASSOCIATEOBJID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
 		log.Errorf("Get hostgroup num from host failed.")
 		return 0, err
 	}
 
-	return resp.Data.Count, nil
+	count, _ := strconv.Atoi(resp.Data.Count)
+	return count, nil
 }
 
 func (c *DoradoClient) removeFCFromHost(wwn string) error {
@@ -1421,6 +1430,20 @@ func (c *DoradoClient) getHostsInHostgroup(hostGrpId string) ([]Host, error) {
 func (c *DoradoClient) checkFCInitiatorsExistInHost(hostId string) (bool, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/fc_initiator?range=[0-65535]&PARENTID=%s", hostId)
+	if err := c.request("GET", url, nil, resp); err != nil {
+		log.Errorf("Get FC initiators exist in host failed.")
+		return false, err
+	}
+	if len(resp.Data) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, error) {
+	resp := &FCInitiatorsResp{}
+	url := fmt.Sprintf("/iscsi_initiator?range=[0-65535]&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
 		log.Errorf("Get FC initiators exist in host failed.")
 		return false, err

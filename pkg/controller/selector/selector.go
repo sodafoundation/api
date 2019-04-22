@@ -67,11 +67,7 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 	// Generate filter request according to the rules defined in profile.
 	fltRequest := func(prf *model.ProfileSpec, in *model.VolumeSpec) map[string]interface{} {
 		var filterRequest map[string]interface{}
-		if !prf.CustomProperties.IsEmpty() {
-			filterRequest = prf.CustomProperties
-		} else {
-			filterRequest = make(map[string]interface{})
-		}
+		filterRequest = prf.CustomProperties.GetCapabilitiesProperties()
 		// Insert some basic rules.
 		filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
 		if in.AvailabilityZone != "" {
@@ -162,11 +158,7 @@ func (s *selector) SelectSupportedPoolForVG(in *model.VolumeGroupSpec) (*model.S
 	for _, pool := range pools {
 		var poolIsFound = true
 		for _, profile := range profiles {
-			if !profile.CustomProperties.IsEmpty() {
-				filterRequest = profile.CustomProperties
-			} else {
-				filterRequest = make(map[string]interface{})
-			}
+			filterRequest = profile.CustomProperties.GetCapabilitiesProperties()
 			filterRequest["availabilityZone"] = in.AvailabilityZone
 
 			isAvailable, err := IsAvailablePool(filterRequest, pool)
