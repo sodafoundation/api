@@ -1,21 +1,21 @@
-package diverters
+package adapters
 
 import (
 	"context"
-	"fmt"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/segmentio/kafka-go"
 	"strconv"
 )
 
 type KafkaMetricsSender struct {
-	Queue chan model.MetricSpec
+	Queue    chan *model.MetricSpec
 	QuitChan chan bool
 }
 
-func (p *KafkaMetricsSender) GetMetricsSender() MetricsSenderIntf{
+func (p *KafkaMetricsSender) GetMetricsSender() MetricsSenderIntf {
 	sender := KafkaMetricsSender{}
-	sender.Queue = make(chan model.MetricSpec)
+	sender.Queue = make(chan *model.MetricSpec)
 	sender.QuitChan = make(chan bool)
 	return &sender
 }
@@ -26,46 +26,30 @@ func (p *KafkaMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				//fmt.Printf("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
+				log.Infof("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %s\n", work.InstanceID, work.Value)
 
 				// do the actual sending work here
 				// make a writer that produces to topic-A, using the least-bytes distribution
 				w := kafka.NewWriter(kafka.WriterConfig{
-					Brokers: []string{"localhost:9092"},
-					Topic:   "test",
+					Brokers:  []string{"localhost:9092"},
+					Topic:    "test",
 					Balancer: &kafka.LeastBytes{},
 				})
 
 				// get the string ready to be written
 				var finalString = ""
 				//for _,metric := range work.MetricValues{
-					finalString += work.Name + " " + strconv.FormatFloat(work.Value,'f', 2,64) + "\n"
+				finalString += work.Name + " " + strconv.FormatFloat(work.Value, 'f', 2, 64) + "\n"
 
-					w.WriteMessages(context.Background(),
-						kafka.Message{
-							Key:   []byte("Key-A"),
-							Value: []byte(finalString),
-						})
-				//}
-
-				/*w.WriteMessages(context.Background(),
+				w.WriteMessages(context.Background(),
 					kafka.Message{
 						Key:   []byte("Key-A"),
-						Value: []byte("Hello World!"),
-					},
-					kafka.Message{
-						Key:   []byte("Key-B"),
-						Value: []byte("One!"),
-					},
-					kafka.Message{
-						Key:   []byte("Key-C"),
-						Value: []byte("Two!"),
-					},
-				)*/
+						Value: []byte(finalString),
+					})
 
 				w.Close()
 
-				fmt.Println("GetMetricsSenderToKafka processed metrics")
+				log.Info("GetMetricsSenderToKafka processed metrics")
 
 			case <-p.QuitChan:
 				// We have been asked to stop.
@@ -82,8 +66,6 @@ func (p *KafkaMetricsSender) Stop() {
 	}()
 }
 
-func (p *KafkaMetricsSender) AssignMetricsToSend(request model.MetricSpec){
+func (p *KafkaMetricsSender) AssignMetricsToSend(request *model.MetricSpec) {
 	p.Queue <- request
 }
-
-

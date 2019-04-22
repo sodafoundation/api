@@ -1,14 +1,15 @@
-package diverters
+package adapters
 
 import (
 	"fmt"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 // A buffered channel that we can send work requests on.
-var MetricsQueue = make(chan model.MetricSpec, 100)
+var MetricsQueue = make(chan *model.MetricSpec, 100)
 
-func SendMetricToRegisteredSenders(metrics model.MetricSpec) {
+func SendMetricToRegisteredSenders(metrics *model.MetricSpec) {
 
 	// Push the work onto the queue.
 	MetricsQueue <- metrics
@@ -19,7 +20,7 @@ func SendMetricToRegisteredSenders(metrics model.MetricSpec) {
 
 func StartDispatcher() {
 
-	listMetricSenders := make([]MetricsSenderIntf,0)
+	listMetricSenders := make([]MetricsSenderIntf, 0)
 
 	// initialize Prometheus sender
 	senderStructProm := PrometheusMetricsSender{}
@@ -32,7 +33,7 @@ func StartDispatcher() {
 	listMetricSenders = append(listMetricSenders, promMetricSender, kafkaMetricsSender)
 
 	// start all senders
-	for _,metricSender := range listMetricSenders{
+	for _, metricSender := range listMetricSenders {
 		metricSender.Start()
 	}
 
@@ -41,9 +42,9 @@ func StartDispatcher() {
 		for {
 			select {
 			case work := <-MetricsQueue:
-				fmt.Println("Received send metrics request")
+				log.Info("Received send metrics request")
 				go func() {
-					for _,metricsSender := range listMetricSenders{
+					for _, metricsSender := range listMetricSenders {
 						//fmt.Println("Dispatching send metrics request to sender %d",i)
 						metricsSender.AssignMetricsToSend(work)
 					}
