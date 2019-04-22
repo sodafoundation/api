@@ -20,14 +20,9 @@ This module implements a entry into the OpenSDS northbound REST service.
 package routers
 
 import (
-	"fmt"
-
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
 	"github.com/opensds/opensds/pkg/api/controllers"
-	"github.com/opensds/opensds/pkg/api/filter/accesslog"
-	"github.com/opensds/opensds/pkg/api/filter/auth"
-	"github.com/opensds/opensds/pkg/api/filter/context"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
@@ -67,10 +62,6 @@ func init() {
 			beego.NSRouter("/:tenantId/pools/:poolId", &controllers.PoolPortal{}, "get:GetPool"),
 			beego.NSRouter("/:tenantId/availabilityZones", &controllers.PoolPortal{}, "get:ListAvailabilityZones"),
 		)
-	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
-	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
-	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
-	beego.InsertFilter("*", beego.BeforeExec, accesslog.Factory())
 	beego.AddNamespace(ns)
 
 	// add router for api version
