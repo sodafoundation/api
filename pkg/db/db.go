@@ -179,17 +179,29 @@ type Client interface {
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 
 	//File Share specific calls
-	CreateFileShare(ctx *c.Context, vol *model.FileShareSpec) (*model.FileShareSpec, error)
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
 
-	ListFileShare(ctx *c.Context) ([]*model.FileShareSpec, error)
-
-	GetFileShare(ctx *c.Context, fileshareID string) (*model.FileShareSpec, error)
+	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 
 	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
 
-	UpdateFileShare(ctx *c.Context, fileshare *model.FileShareSpec) (*model.FileShareSpec, error)
+	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
 
-	DeleteFileShare(context *c.Context, id string) error
+	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(ctx *c.Context, fshareID string) error
+
+	//CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	//GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
+
+	//ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	//ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
+
+	//UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	//DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error
 
 }
 
@@ -198,9 +210,8 @@ func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) err
 	return client.UpdateStatus(ctx, vol, status)
 }
 
-
 func UpdateFileShareStatus(ctx *c.Context, client Client, fileshareID, status string) error {
-	fileshare, _ := client.ListFileShare(ctx, fileshareID)
+	fileshare, _ := client.GetFileShare(ctx, fileshareID)
 	return client.UpdateStatus(ctx, fileshare, status)
 }
 

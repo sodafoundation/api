@@ -35,9 +35,14 @@ import (
 // Controller is an interface for exposing some operations of different file share
 // controllers.
 type Controller interface {
+
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
+
 	SetDock(dockInfo *model.DockSpec)
+
 	DeleteFileShare(opt *pb.DeleteFileShareOpts) error
+
+	UpdateFileShare(*pb.UpdateFileShareOpts) (*model.FileShareSpec, error)
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -100,6 +105,33 @@ func (c *controller) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	}
 
 	return nil
+}
+
+func (c *controller) UpdateFileShare(opt *pb.UpdateFileShareOpts) (*model.FileShareSpec, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("when connecting dock client:", err)
+		return nil, err
+	}
+
+	response, err := c.Client.UpdateFileShare(context.Background(), opt)
+	if err != nil {
+		log.Error("update file share group failed in file share controller:", err)
+		return nil, err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil, fmt.Errorf("failed to update file share group in file share controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	var fileshare = &model.FileShareSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), fileshare); err != nil {
+		log.Error("update file share group failed in file share controller:", err)
+		return nil, err
+	}
+
+	return fileshare, nil
 }
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {

@@ -81,10 +81,14 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 			beego.NSRouter("/:tenantId/pools/:poolId", &PoolPortal{}, "get:GetPool"),
 			beego.NSRouter("/:tenantId/availabilityZones", &PoolPortal{}, "get:ListAvailabilityZones"),
 
+			// Share is a part of files. At the same time multiple users can access the the same shares.
 			beego.NSNamespace("/:tenantId/file",
-				// FileShare is the logical description of a piece of storage, which can be directly used by users.
-				// All operations of file share can be used for both admin and users.
-				beego.NSRouter("/shares", NewFileSharePortal(), "post:CreateFileShare;get:ListFileShare"),
+				beego.NSRouter("/shares", NewFileSharePortal(), "post:CreateFileShare;get:ListFileShares"),
+				beego.NSRouter("/shares/:fileshareId", NewFileSharePortal(), "get:GetFileShare;put:UpdateFileShare;delete:DeleteFileShare"),
+				// Snapshot is a point-in-time copy of the data that a FileShare contains.
+				// Creates, shows, lists, unpdates and deletes snapshot.
+				//beego.NSRouter("/snapshots", NewFileShareSnapshotPortal(), "post:CreateFileShareSnapshot;get:ListFileShareSnapshots"),
+				//beego.NSRouter("/snapshots/:snapshotId", NewFileShareSnapshotPortal(), "get:GetFileShareSnapshot;put:UpdateFileShareSnapshot;delete:DeleteFileShareSnapshot"),
 			),
 
 			beego.NSNamespace("/:tenantId/block",

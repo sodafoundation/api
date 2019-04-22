@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	//"strings"
 	"time"
 
 	log "github.com/golang/glog"
@@ -57,7 +59,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 
 	in.Name = in.Name
 	in.UserId = ctx.UserId
-	in.Status = model.FileShareCreating
+	in.Status = model.FileShareAvailable
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShare(ctx, in)
 }
@@ -81,6 +83,59 @@ func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 	return nil
 }
 
+/*
+func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	fshare, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		log.Error("get fileshare failed in create fileshare snapshot method: ", err)
+		return nil, err
+	}
+	fmt.Println("fshare.Status = ", fshare.Status)
+	if fshare.Status != model.FileShareAvailable && fshare.Status != model.FileShareInUse {
+		var errMsg = "only the status of fileshare is available or in-use, the snapshot can be created"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Status = model.FileShareSnapCreating
+	return db.C.CreateFileShareSnapshot(ctx, in)
+}
+
+func DeleteFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotSpec) error {
+	validStatus := []string{model.FileShareSnapAvailable, model.FileShareSnapError,
+		model.FileShareSnapErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the fileshare snapshot with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If fileshare id is invalid, it would mean that fileshare snapshot creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		if err := db.C.DeleteFileShareSnapshot(ctx, in.Id); err != nil {
+			log.Error("when delete fileshare snapshot in db:", err)
+			return err
+		}
+		return nil
+	}
+
+	in.Status = model.FileShareSnapDeleting
+	_, err = db.C.UpdateFileShareSnapshot(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+*/
 
 func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
 	if in.Id == "" {
@@ -131,18 +186,6 @@ func DeleteVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) error {
 		errMsg := fmt.Sprintf("only the volume with the status available, error, error_deleting, error_extending can be deleted, the volume status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
-	}
-
-	// If profileId or poolId of the volume doesn't exist, it would mean that
-	// the volume provisioning operation failed before the create method in
-	// storage driver was called, therefore the volume entry should be deleted
-	// from db directly.
-	if in.ProfileId == "" || in.PoolId == "" {
-		if err := db.C.DeleteVolume(ctx, in.Id); err != nil {
-			log.Error("when delete volume in db:", err)
-			return err
-		}
-		return nil
 	}
 
 	snaps, err := db.C.ListSnapshotsByVolumeId(ctx, in.Id)
