@@ -208,6 +208,14 @@ func (fc *fakeClient) FailoverReplication(ctx context.Context, in *pb.FailoverRe
 	}, nil
 }
 
+func (fc *fakeClient) CollectMetrics(ctx context.Context, in *pb.CollectMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error){
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 func NewFakeController() Controller {
 	return &controller{
 		Client:   NewFakeClient(),
