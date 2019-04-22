@@ -25,10 +25,14 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	// Load the API routers
-	_ "github.com/opensds/opensds/pkg/api/routers"
+	"github.com/opensds/opensds/pkg/api/filter/accesslog"
+	"github.com/opensds/opensds/pkg/api/filter/auth"
+	"github.com/opensds/opensds/pkg/api/filter/context"
 	cfg "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
+
+	// Load the API routers
+	_ "github.com/opensds/opensds/pkg/api/routers"
 )
 
 const (
@@ -69,6 +73,11 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 	beego.BConfig.EnableErrorsShow = false
 	beego.BConfig.EnableErrorsRender = false
 	beego.BConfig.WebConfig.AutoRender = false
+	// insert some auth rules
+	pattern := fmt.Sprintf("/%s/*", constants.APIVersion)
+	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
+	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
+	beego.InsertFilter("*", beego.BeforeExec, accesslog.Factory())
 
 	// start service
 	beego.Run(apiServerCfg.ApiEndpoint)
