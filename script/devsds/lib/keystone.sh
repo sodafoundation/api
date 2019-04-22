@@ -106,7 +106,7 @@ osds::keystone::create_user_and_endpoint(){
 
 osds::keystone::delete_user(){
     . $DEV_STACK_DIR/openrc admin admin
-    openstack service delete opensds$OPENSDS_VERSION    
+    openstack service delete opensds$OPENSDS_VERSION
     openstack role remove service --project service --group service
     openstack group remove user service opensds
     openstack group delete service    
@@ -134,7 +134,7 @@ osds::keystone::install(){
     if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
         docker pull opensdsio/opensds-authchecker:latest
-        docker run -d --privileged=true --net=host --name=opensds-authchecker opensdsio/opensds-authchecker:latest        
+        docker run -d --privileged=true --net=host --name=opensds-authchecker opensdsio/opensds-authchecker:latest
         osds::keystone::opensds_conf
         docker cp $TOP_DIR/lib/keystone.policy.json opensds-authchecker:/etc/keystone/policy.json
     else
