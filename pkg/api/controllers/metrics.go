@@ -17,7 +17,7 @@ This module implements a entry into the OpenSDS northbound service.
 
 */
 
-package api
+package controllers
 
 import (
 	"encoding/json"
