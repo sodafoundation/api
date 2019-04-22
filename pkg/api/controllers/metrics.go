@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ type MetricsPortal struct {
 	CtrClient client.Client
 }
 
-
 func (m *MetricsPortal) GetMetrics() {
 	if !policy.Authorize(m.Ctx, "metrics:get") {
 		return
@@ -73,15 +72,15 @@ func (m *MetricsPortal) GetMetrics() {
 	defer m.CtrClient.Close()
 
 	opt := &pb.GetMetricsOpts{
-		InstanceId:   getMetricSpec.InstanceId,
+		InstanceId: getMetricSpec.InstanceId,
 		MetricName: getMetricSpec.MetricName,
-		StartTime: getMetricSpec.StartTime,
-		EndTime: getMetricSpec.EndTime,
-		Context:      ctx.ToJson(),
+		StartTime:  getMetricSpec.StartTime,
+		EndTime:    getMetricSpec.EndTime,
+		Context:    ctx.ToJson(),
 	}
-	res, err := m.CtrClient.GetMetrics(context.Background(), opt);
+	res, err := m.CtrClient.GetMetrics(context.Background(), opt)
 
-	if  err != nil {
+	if err != nil {
 		log.Error("collect metrics failed in controller service:", err)
 		return
 	}
@@ -90,5 +89,3 @@ func (m *MetricsPortal) GetMetrics() {
 
 	return
 }
-
-
