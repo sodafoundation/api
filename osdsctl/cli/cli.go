@@ -19,7 +19,6 @@ This module implements a entry into the OpenSDS CLI service.
 package cli
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -79,8 +78,8 @@ func Run() error {
 
 	ep, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
-		return fmt.Errorf("ERROR: You must provide the endpoint by setting " +
-			"the environment variable OPENSDS_ENDPOINT")
+		ep = constants.DefaultOpensdsEndpoint
+		Warnf("OPENSDS_ENDPOINT is not specified, use default(%s)\n", ep)
 	}
 
 	cfg := &c.Config{Endpoint: ep}
@@ -88,7 +87,7 @@ func Run() error {
 	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
-		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
+		Warnf("Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
 	}
 
 	var authOptions c.AuthOptions
@@ -110,7 +109,7 @@ func Run() error {
 
 	client, err = c.NewClient(cfg)
 	if client == nil || err != nil {
-		return fmt.Errorf("ERROR: osdsctl client is nil, %v", err)
+		return err
 	}
 
 	return rootCommand.Execute()
