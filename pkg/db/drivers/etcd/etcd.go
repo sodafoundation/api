@@ -402,10 +402,16 @@ func (c *Client) getFileShare(ctx *c.Context, fshareID string) (*model.FileShare
 }
 
 // UpdateFileShare ...
-func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
-	result, err := c.GetFileShare(ctx, fshare.Id)
-	fmt.Println("result = ",result)
+//func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec)(*model.FileShareSpec, error){
+func (c *Client) UpdateFileShare(ctx *c.Context, fshareId string)(*model.FileShareSpec, error){
+	result, err := c.GetFileShare(ctx, fshareId)
+	//fmt.Println("result = ",result)
 	if err != nil {
+		return nil, err
+	}
+
+	fshare, err := c.GetFileShare(ctx, fshareId)
+	if err != nil{
 		return nil, err
 	}
 	if fshare.Name != "" {

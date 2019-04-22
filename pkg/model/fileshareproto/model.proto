@@ -112,8 +112,6 @@ message UpdateFileShareOpts {
     // The name of the fileshare, required.
     string name = 2;
     // The requested capacity of the fileshare, required.
-    int64 size = 3;
-    // The description of the fileshare, optional.
     string description = 4;
     // The locality that fileshare belongs to, required.
     string availabilityZone = 6;

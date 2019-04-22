@@ -122,7 +122,8 @@ func (f *FileSharePortal) UpdateFileShare() {
 	}
 
 	fshare.Id = id
-	result, err := db.C.UpdateFileShare(c.GetContext(f.Ctx), &fshare)
+	ctx := c.GetContext(f.Ctx)
+	result, err := db.C.UpdateFileShare(ctx, id)
 	if err != nil {
 		errMsg := fmt.Sprintf("update fileshare failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorInternalServer, errMsg)

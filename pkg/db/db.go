@@ -187,7 +187,7 @@ type Client interface {
 
 	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
 
-	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+	UpdateFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
 
 	DeleteFileShare(ctx *c.Context, fshareID string) error
 
