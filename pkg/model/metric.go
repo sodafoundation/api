@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,127 +34,46 @@ type CollectMetricSpec struct {
 
 type Metric struct {
 
-
-
 	// Following are the labels associated with Metric, same as Prometheus labels
-
-
-
 	//Example: {device="dm-0",instance="121.244.95.60:12419",job="prometheus"}
-
-
-
 	// Instance ID -\> volumeID/NodeID
 
 	instanceID string
 
-
-
 	// instance name -\> volume name / node name etc.
-
 	instanceName string
 
-
-
 	// job -\> Prometheus/openSDS
-
 	job string
 
-
-
 	/*associator - Some metric would need specific fields to relate components.
-
 	  Use case could be to query volumes of a particular pool. Attaching the related
-
 	  components as labels would help us to form promQl query efficiently.
-
-
-
 	  Example: node_disk_read_bytes_total{instance="121.244.95.60"}
-
-
-
 	  Above query will respond with all disks associated with node 121.244.95.60
-
-
-
 	  Since associated components vary, we will keep a map in metric struct to denote
-
 	  the associated component type as key and component name as value
-
-
-
 	  Example: associator[pool]=pool1 */
-
-
-
 	associator map[string]string
 
-
-
 	// Following fields can be used to form a unique metric name
-
-
-
 	// source -\> Node/Dock
-
 	source string
 
-
-
 	// component -\> disk/logicalVolume/VG etc
-
 	component string
 
-
-
 	// name -\> metric name -\> readRequests/WriteRequests/Latency etc
-
 	name string
 
-
-
 	// unit -\> seconds/bytes/MBs etc
-
 	unit string
 
-
-
 	// is aggregated
-
-
-
 	isAggregated bool
-
-
-
-	// aggr_type-\> Can be used to determine Total/Sum/Avg etc
-
-
-
-	/*If isAggregated ='True' then type of aggregation can be set in this field
-
-	  ie:- if collector is aggregating some metrics and producing a new metric of
-
-	  higher level constructs, then this field can be set as 'Total' to indicate it is
-
-	  aggregated/derived from other metrics.*/
-
-
-
-	//aggr_type AGGR_TYPE
-
-
-
-	//timestamp
 
 	timestamp int64
 
-
-
 	//value
-
 	value float64
-
 }
-

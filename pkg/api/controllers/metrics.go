@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	c "github.com/opensds/opensds/pkg/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
+	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -72,9 +72,9 @@ func (m *MetricsPortal) CollectMetrics() {
 	defer m.CtrClient.Close()
 
 	opt := &pb.CollectMetricsOpts{
-		InstanceId: 	collMetricSpec.InstanceId,
-		MetricValues:   collMetricSpec.Metrics,
-		Context: 		ctx.ToJson(),
+		InstanceId:   collMetricSpec.InstanceId,
+		MetricValues: collMetricSpec.Metrics,
+		Context:      ctx.ToJson(),
 	}
 	if _, err := m.CtrClient.CollectMetrics(context.Background(), opt); err != nil {
 		log.Error("collect metrics failed in controller service:", err)
@@ -83,5 +83,3 @@ func (m *MetricsPortal) CollectMetrics() {
 
 	return
 }
-
-

@@ -103,7 +103,7 @@ func Init(resourceType string) VolumeDriver {
 		d = &sample.Driver{}
 		break
 	}
-	d.Setup()
+	_ = d.Setup()
 	return d
 }
 
@@ -124,13 +124,11 @@ func Clean(d VolumeDriver) VolumeDriver {
 	default:
 		break
 	}
-	d.Unset()
+	_ = d.Unset()
 	d = nil
 
 	return d
 }
-
-
 
 type MetricDriver interface {
 	//Any initialization the volume driver does while starting.
@@ -138,7 +136,7 @@ type MetricDriver interface {
 	//Any operation the volume driver does while stopping.
 	Unset() error
 
-	CollectMetrics(metricList []string,instanceID string) ([]*model.Metric, error)
+	CollectMetrics(metricList []string, instanceID string) ([]*model.Metric, error)
 }
 
 // Init
