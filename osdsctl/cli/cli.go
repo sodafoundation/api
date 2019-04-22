@@ -87,7 +87,7 @@ func Run() error {
 	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
-		Warnf("Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
+		Warnf("Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)\n")
 	}
 
 	var authOptions c.AuthOptions
