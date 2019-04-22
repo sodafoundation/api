@@ -133,6 +133,7 @@ osds::keystone::download_code(){
 osds::keystone::install(){
     if [ "true" == $USE_CONTAINER_KEYSTONE ] 
     then
+        KEYSTONE_IP=$HOST_IP
         docker pull opensdsio/opensds-authchecker:latest
         docker run -d --privileged=true --net=host --name=opensds-authchecker opensdsio/opensds-authchecker:latest
         osds::keystone::opensds_conf
