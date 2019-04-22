@@ -16,7 +16,7 @@
 This module implements API-related database operations.
 */
 
-package api
+package util
 
 import (
 	"errors"

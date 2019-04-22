@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package controllers
 
 import (
 	"encoding/json"
@@ -20,6 +20,7 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
+	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/db"
@@ -62,7 +63,7 @@ func (r *ReplicationPortal) CreateReplication() {
 		return
 	}
 
-	result, err := CreateReplicationDBEntry(ctx, replication)
+	result, err := util.CreateReplicationDBEntry(ctx, replication)
 	if err != nil {
 		errMsg := fmt.Sprintf("create volume replication failed: %s", err.Error())
 		r.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -253,7 +254,7 @@ func (r *ReplicationPortal) DeleteReplication() {
 		return
 	}
 
-	if err := DeleteReplicationDBEntry(ctx, rep); err != nil {
+	if err := util.DeleteReplicationDBEntry(ctx, rep); err != nil {
 		r.ErrorHandle(model.ErrorBadRequest, err.Error())
 		return
 	}
@@ -299,7 +300,7 @@ func (r *ReplicationPortal) EnableReplication() {
 		return
 	}
 
-	if err := EnableReplicationDBEntry(ctx, rep); err != nil {
+	if err := util.EnableReplicationDBEntry(ctx, rep); err != nil {
 		r.ErrorHandle(model.ErrorBadRequest, err.Error())
 		return
 	}
@@ -346,7 +347,7 @@ func (r *ReplicationPortal) DisableReplication() {
 		return
 	}
 
-	if err := DisableReplicationDBEntry(ctx, rep); err != nil {
+	if err := util.DisableReplicationDBEntry(ctx, rep); err != nil {
 		r.ErrorHandle(model.ErrorBadRequest, err.Error())
 		return
 	}
@@ -400,7 +401,7 @@ func (r *ReplicationPortal) FailoverReplication() {
 		return
 	}
 
-	if err := FailoverReplicationDBEntry(ctx, rep, failover.SecondaryBackendId); err != nil {
+	if err := util.FailoverReplicationDBEntry(ctx, rep, failover.SecondaryBackendId); err != nil {
 		r.ErrorHandle(model.ErrorBadRequest, err.Error())
 		return
 	}
