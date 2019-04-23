@@ -692,13 +692,6 @@ message GenericResponse {
     }
 }
 
-message CollectMetricsOpts {
-    string instanceId = 1;
-    repeated string metricValues = 2;
-    string context = 3;
-    string driverName = 4;
-}
-
 message GetMetricsOpts {
     string instanceId = 1;
     string metricName = 2;
