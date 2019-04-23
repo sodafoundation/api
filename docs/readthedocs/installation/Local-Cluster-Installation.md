@@ -4,7 +4,7 @@ Here is a tutorial guiding users and new contributors to get familiar with [Open
 
 If you are an end-user who are interested in this project, some links for installation and testing are as follows:
 - [OpenSDS Local Cluster Installation through Ansible On Ubuntu](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible) (Recommended)
-- [OpenSDS Local Cluster Instlalltion On Redhat](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-On-Redhat)
+- [OpenSDS Local Cluster Installation On Redhat](https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-On-Redhat)
 
 If you are a code developer and wish to contribute in this project, here are some links for quickly installing OpenSDS
 Hotpot project:

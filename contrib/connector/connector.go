@@ -30,6 +30,9 @@ const (
 	Iqn         = "iqn"
 
 	RbdDriver = "rbd"
+
+	NvmeofDriver = "nvmeof"
+	Nqn          = "nqn"
 )
 
 // Connector implementation

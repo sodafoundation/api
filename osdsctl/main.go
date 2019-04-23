@@ -20,7 +20,6 @@ This module implements a entry into the OpenSDS CLI service.
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -32,7 +31,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	if err := cli.Run(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		cli.Errorln(err)
 		os.Exit(1)
 	}
 }
