@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /*
-This module implements a entry into the OpenSDS volume controller service.
+This module implements a entry into the OpenSDS metrics controller service.
 
 */
 
@@ -21,22 +21,18 @@ package metrics
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	//"errors"
 	"fmt"
-
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 )
 
-// Controller is an interface for exposing some operations of different volume
-// controllers.
+// Controller is an interface for exposing some operations of metric controllers.
 type Controller interface {
-
-    GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
+	GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
 	GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
 	GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
@@ -73,13 +69,13 @@ type Data struct {
 	ResultType string   `json:"resultType"`
 	Result     []Result `json:"result"`
 }
-// latest+instant metrics structs end
 
+// latest+instant metrics structs end
 
 // latest+instant metrics structs begin
 type RangeMetricReponseFromPrometheus struct {
-	Status string `json:"status"`
-	Data   RangeData   `json:"data"`
+	Status string    `json:"status"`
+	Data   RangeData `json:"data"`
 }
 type RangeMetric struct {
 	Name     string `json:"__name__"`
@@ -88,15 +84,15 @@ type RangeMetric struct {
 	Job      string `json:"job"`
 }
 type RangeResult struct {
-	Metric RangeMetric        `json:"metric"`
-	Values  [][]interface{} `json:"values"`
+	Metric RangeMetric     `json:"metric"`
+	Values [][]interface{} `json:"values"`
 }
 type RangeData struct {
-	ResultType string   `json:"resultType"`
+	ResultType string        `json:"resultType"`
 	Result     []RangeResult `json:"result"`
 }
-// latest+instant metrics structs end
 
+// latest+instant metrics structs end
 
 func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
 
@@ -124,14 +120,14 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 			for j, v := range res.Value {
 				switch v.(type) {
 				case string:
-					metrics[i].MetricValues[j].Value,_ = strconv.ParseFloat(v.(string), 64)
+					metrics[i].MetricValues[j].Value, _ = strconv.ParseFloat(v.(string), 64)
 				case float64:
 					secs := int64(v.(float64))
 					metrics[i].MetricValues[j].Timestamp = secs
 				/*case []interface{}:
-					for i, u := range vv {
-						fmt.Println(i, u)
-					}*/
+				for i, u := range vv {
+					fmt.Println(i, u)
+				}*/
 				default:
 					fmt.Println(v, "is of a type I don't know how to handle")
 				}
@@ -143,8 +139,6 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 		fmt.Println("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
 		fmt.Println("metrics response json is ", string(bArr))
-
-
 
 		if err != nil {
 			fmt.Println(err)
@@ -180,14 +174,14 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 			for j, v := range res.Value {
 				switch v.(type) {
 				case string:
-					metrics[i].MetricValues[j].Value,_ = strconv.ParseFloat(v.(string), 64)
+					metrics[i].MetricValues[j].Value, _ = strconv.ParseFloat(v.(string), 64)
 				case float64:
 					secs := int64(v.(float64))
 					metrics[i].MetricValues[j].Timestamp = secs
 				/*case []interface{}:
-					for i, u := range vv {
-						fmt.Println(i, u)
-					}*/
+				for i, u := range vv {
+					fmt.Println(i, u)
+				}*/
 				default:
 					fmt.Println(v, "is of a type I don't know how to handle")
 				}
@@ -199,8 +193,6 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		fmt.Println("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
 		fmt.Println("metrics response json is ", string(bArr))
-
-
 
 		if err != nil {
 			fmt.Println(err)
@@ -233,7 +225,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 			metrics[i].InstanceID = res.Metric.Instance + res.Metric.Device
 			metrics[i].Name = res.Metric.Name
 			metrics[i].MetricValues = make([]model.Metric, len(res.Values))
-			for j:= 0;j<len(res.Values);j++ {
+			for j := 0; j < len(res.Values); j++ {
 				for _, v := range res.Values[j] {
 					switch v.(type) {
 					case string:
@@ -242,9 +234,9 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 						secs := int64(v.(float64))
 						metrics[i].MetricValues[j].Timestamp = secs
 					/*case []interface{}:
-						for i, u := range vv {
-							fmt.Println(i, u)
-						}*/
+					for i, u := range vv {
+						fmt.Println(i, u)
+					}*/
 					default:
 						fmt.Println(v, "is of a type I don't know how to handle")
 					}
@@ -257,8 +249,6 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 		fmt.Println("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
 		fmt.Println("metrics response json is ", string(bArr))
-
-
 
 		if err != nil {
 			fmt.Println(err)
