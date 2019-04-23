@@ -77,6 +77,10 @@
   name = "github.com/prometheus/client_golang"
   version = "0.9.2"
 
+[[constraint]]
+  name = "github.com/segmentio/kafka-go"
+  revision = "0b3aacc527812d4040e51211146a43545e82d670"
+
 [prune]
   go-tests = true
   non-go = true
