@@ -837,7 +837,7 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 
 	return pb.GenericResponseResult(nil), nil
 }
-func (c *Controller) GetMetrics(context context2.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
+func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
 	log.Info("in controller get metrics methods")
 
 	var result *[]model.MetricSpec
