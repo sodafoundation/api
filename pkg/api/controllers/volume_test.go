@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"bytes"
+	ctx "context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -31,7 +32,6 @@ import (
 	. "github.com/opensds/opensds/testutils/collection"
 	ctrtest "github.com/opensds/opensds/testutils/controller/testing"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	ctx "golang.org/x/net/context"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
