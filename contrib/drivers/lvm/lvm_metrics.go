@@ -22,12 +22,12 @@ import (
 )
 
 /*const (
-	// yaml file which contins the supported metric list
-	ConfFile  = "/etc/opensds/driver/metric-config.yaml"
-	)*/
+// yaml file which contins the supported metric list
+ConfFile  = "/etc/opensds/driver/metric-config.yaml"
+)*/
 // Todo: Move this Yaml config to a file
 
-	var data = `
+var data = `
 resources:
   - resource: volume
     metrics:
@@ -58,22 +58,19 @@ resources:
       - '%'
 `
 
-
-
-
 type Config struct {
 	Resource string
-	Metrics []string
-	Units []string
+	Metrics  []string
+	Units    []string
 }
 
 type Configs struct {
 	Cfgs []Config `resources`
 }
 type MetricDriver struct {
-
-	cli  *MetricCli
+	cli *MetricCli
 }
+
 func metricInMetrics(metric string, metriclist []string) bool {
 	for _, m := range metriclist {
 		if m == metric {
@@ -82,49 +79,50 @@ func metricInMetrics(metric string, metriclist []string) bool {
 	}
 	return false
 }
-func getCurrentUnixTimestamp()(int64){
-	now:=time.Now()
-	secs:=now.Unix()
+func getCurrentUnixTimestamp() int64 {
+	now := time.Now()
+	secs := now.Unix()
 	return secs
 }
-func getMetricToUnitMap()(map [string]string){
+func getMetricToUnitMap() map[string]string {
 	//construct metrics to value map
 	var configs Configs
 	//Read supported metric list from yaml config
 	//source, err := ioutil.ReadFile(ConfFile)
 	//Todo: Move this to read from file
-	source:=[]byte(data)
+	source := []byte(data)
 	/*if err != nil {
-		log.Errorf("Not able to read file  %s  %v", ConfFile, err)
-		}*/
+	log.Errorf("Not able to read file  %s  %v", ConfFile, err)
+	}*/
 
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
 		log.Fatalf("Unmarshal error: %v", error)
-		}
-	metric_to_unit_map:=make(map [string]string)
-	for _,resources:= range configs.Cfgs {
+	}
+	metric_to_unit_map := make(map[string]string)
+	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
-			//ToDo: Other Cases needs to be added
-			case "volume":
+		//ToDo: Other Cases needs to be added
+		case "volume":
 			for index, metricName := range resources.Metrics {
 
-			metric_to_unit_map[metricName] = resources.Units[index]
+				metric_to_unit_map[metricName] = resources.Units[index]
 
 			}
 		}
 	}
 	return metric_to_unit_map
 }
+
 // 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
 // 	metricList-> Posted metric list
 //	supportedMetrics -> list of supported metrics
-func (d *MetricDriver)ValidateMetricsSupportList(metricList []string,resourceType string)(supportedMetrics []string,err error) {
+func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceType string) (supportedMetrics []string, err error) {
 	var configs Configs
 	//Read supported metric list from yaml config
 	//source, err := ioutil.ReadFile(ConfFile)
 	//Todo: Move this to read from file
-	source:=[]byte(data)
+	source := []byte(data)
 	/*if err != nil {
 		log.Errorf("Not able to read file  %s%v", ConfFile, err)
 	}*/
@@ -134,55 +132,55 @@ func (d *MetricDriver)ValidateMetricsSupportList(metricList []string,resourceTyp
 		log.Fatalf("Unmarshal error: %v", error)
 	}
 
-
-	for _,resources:= range configs.Cfgs{
+	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
 		//ToDo: Other Cases needs to be added
 		case "volume":
-			for _,metricName:= range metricList{
-				if(metricInMetrics(metricName,resources.Metrics)){
-					supportedMetrics=append(supportedMetrics, metricName)
+			for _, metricName := range metricList {
+				if metricInMetrics(metricName, resources.Metrics) {
+					supportedMetrics = append(supportedMetrics, metricName)
 
-				}else{
+				} else {
 					log.Infof("metric:%s is not in the supported list", metricName)
 				}
 			}
 		}
 	}
-	return supportedMetrics,nil
+	return supportedMetrics, nil
 }
+
 //	CollectMetrics: Driver entry point to collect metrics. This will be invoked by the dock
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string,instanceID string) (metricArray []model.MetricSpec, err error) {
+func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (metricArray []model.MetricSpec, err error) {
 
 	// get MEtrics to unit map
-	metric_to_unit_map:=getMetricToUnitMap()
+	metric_to_unit_map := getMetricToUnitMap()
 	//validate metric support list
-	supportedMetrics,err:=lvm_driver.ValidateMetricsSupportList(metricsList,"volume")
-	if(supportedMetrics==nil) {
+	supportedMetrics, err := lvm_driver.ValidateMetricsSupportList(metricsList, "volume")
+	if supportedMetrics == nil {
 		log.Infof("No metrics found in the  supported metric list")
 	}
 	metricMap, err := lvm_driver.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []model.MetricSpec
-	for _,element := range metricsList {
-		val,_:=strconv.ParseFloat(metricMap[element],64)
+	for _, element := range metricsList {
+		val, _ := strconv.ParseFloat(metricMap[element], 64)
 		//Todo: See if association  is required here, resource discovery could fill this information
 		associatorMap := make(map[string]string)
 
 		metricValue := model.Metric{
-			Timestamp:getCurrentUnixTimestamp(),
-			Value:val,
+			Timestamp: getCurrentUnixTimestamp(),
+			Value:     val,
 		}
-		metricValues := make([]model.Metric,0)
+		metricValues := make([]model.Metric, 0)
 		metricValues = append(metricValues, metricValue)
 
 		metric := model.MetricSpec{
 			InstanceID: instanceID,
 
-			InstanceName:metricMap["InstanceName"],
+			InstanceName: metricMap["InstanceName"],
 
 			Job: "OpenSDS",
 
@@ -202,7 +200,7 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string,instanceID s
 		}
 		tempMetricArray = append(tempMetricArray, metric)
 	}
-	metricArray=tempMetricArray
+	metricArray = tempMetricArray
 	return
 }
 
@@ -212,17 +210,8 @@ func (d *MetricDriver) Setup() error {
 	if err != nil {
 		return err
 	}
-	d.cli=cli
+	d.cli = cli
 	return nil
 }
 
 func (*MetricDriver) Unset() error { return nil }
-
-
-
-
-
-
-
-
-

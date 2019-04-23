@@ -1,4 +1,3 @@
-
 // Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,11 +18,8 @@ import (
 	"testing"
 )
 
-
-
 func TestMetricDriverSetup(t *testing.T) {
 	var d = &MetricDriver{}
-
 
 	if err := d.Setup(); err != nil {
 		t.Errorf("Setup lvm metric  driver failed: %+v\n", err)
@@ -31,19 +27,14 @@ func TestMetricDriverSetup(t *testing.T) {
 
 }
 
-
-
 func TestCollectMetrics(t *testing.T) {
-	metricList:=[]string{"IOPS","ReadThroughput","WriteThroughput","ResponseTime"}
+	metricList := []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime"}
 	var metricDriver = &MetricDriver{}
 	metricDriver.Setup()
-	metricArray,err:=metricDriver.CollectMetrics(metricList,"sda")
+	metricArray, err := metricDriver.CollectMetrics(metricList, "sda")
 	if err != nil {
 		t.Errorf("CollectMetrics call to lvm driver failed: %+v\n", err)
 	}
 	fmt.Println(metricArray)
 
 }
-
-
-
