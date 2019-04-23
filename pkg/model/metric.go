@@ -19,16 +19,13 @@ This module implements the common data structure.
 
 package model
 
-// VolumeSpec is an block device created by storage service, it can be attached
-// to physical machine or virtual machine instance.
 type CollectMetricSpec struct {
 	*BaseModel
 
 	// the instance on which the metrics are to be collected
 	InstanceId string `json:"instanceId,omitempty"`
 
-	// The uuid of the user that the volume belongs to.
-	// +optional
+	// the list of metrics to be collected
 	Metrics []string `json:"metrics,omitempty"`
 }
 
@@ -38,8 +35,7 @@ type GetMetricSpec struct {
 	// the instance on which the metrics are to be collected
 	InstanceId string `json:"instanceId,omitempty"`
 
-	// The uuid of the user that the volume belongs to.
-	// +optional
+	// the name of the metric to retrieve
 	MetricName string `json:"metricName,omitempty"`
 
 	StartTime string `json:"startTime,omitempty"`
