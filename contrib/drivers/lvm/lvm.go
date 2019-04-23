@@ -42,6 +42,9 @@ const (
 	snapshotPrefix    = "_snapshot-"
 	blocksize         = 4096
 	sizeShiftBit      = 30
+	opensdsnvmepool   = "opensds-nvmegroup"
+	nvmeofAccess      = "nvmeof"
+	iscsiAccess       = "iscsi"
 )
 
 const (
@@ -249,7 +252,11 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 	if d.conf.EnableChapAuth {
 		chapAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
 	}
-	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+
+	// create target according to the pool's access protocol
+	accPro := opt.AccessProtocol
+	log.Info("accpro:", accPro)
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	expt, err := t.CreateExport(opt.GetVolumeId(), lvPath, hostIP, initiator, chapAuth)
 	if err != nil {
 		log.Error("Failed to initialize connection of logic volume:", err)
@@ -257,15 +264,16 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 	}
 
 	return &model.ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: accPro,
 		ConnectionData:   expt,
 	}, nil
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
-	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	accPro := opt.AccessProtocol
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
-		log.Error("Failed to initialize connection of logic volume:", err)
+		log.Error("failed to terminate connection of logic volume:", err)
 		return err
 	}
 	return nil
@@ -406,6 +414,11 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.V
 	metadata := map[string]string{KLvsPath: lvsPath}
 
 	if bucket, ok := opt.Metadata["bucket"]; ok {
+		//nvmet right now can not support snap volume serve as nvme target
+		if vg == opensdsnvmepool {
+			log.Infof("nvmet right now can not support snap volume serve as nvme target")
+			log.Infof("still store in nvme pool but initialize connection by iscsi protocol")
+		}
 		mountPoint, info, err := d.AttachSnapshot(opt.GetId(), lvsPath)
 		if err != nil {
 			d.cli.Delete(snapName, vg)
@@ -524,7 +537,13 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 		chapAuth = []string{utils.RandSeqWithAlnum(20), utils.RandSeqWithAlnum(16)}
 	}
 
-	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	accPro := opt.AccessProtocol
+	if accPro == nvmeofAccess {
+		log.Infof("nvmet right now can not support snap volume serve as nvme target")
+		log.Infof("still create snapshot connection by iscsi")
+		accPro = iscsiAccess
+	}
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	data, err := t.CreateExport(opt.GetSnapshotId(), lvsPath, hostIP, initiator, chapAuth)
 	if err != nil {
 		log.Error("Failed to initialize snapshot connection of logic volume:", err)
@@ -532,13 +551,20 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 	}
 
 	return &model.ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: accPro,
 		ConnectionData:   data,
 	}, nil
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir)
+	accPro := opt.AccessProtocol
+	if accPro == nvmeofAccess{
+		log.Infof("nvmet right now can not support snap volume serve as nvme target")
+		log.Infof("still create snapshot connection by iscsi")
+		accPro = iscsiAccess
+	}
+	log.Info("terminate snapshot conn")
+	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	if err := t.RemoveExport(opt.GetSnapshotId()); err != nil {
 		log.Error("Failed to terminate snapshot connection of logic volume:", err)
 		return err

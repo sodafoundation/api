@@ -18,9 +18,9 @@ import (
 )
 
 func main() {
-	c1 := client.NewClient(&client.Config{})
-	c2 := client.NewClient(&client.Config{
-		Endpoint: ":8080",
+	c1, _ := client.NewClient(&client.Config{})
+	c2, _ := client.NewClient(&client.Config{
+		Endpoint: ":50040",
 	})
 	
 	fmt.Printf("c1 is %v, c2 is %v\n", c1, c2)
@@ -36,32 +36,34 @@ in step 1 like this:
 ```go
 package main
 
-import(
+import (
 	"fmt"
-	
+
 	"github.com/opensds/opensds/client"
 	"github.com/opensds/opensds/pkg/model"
 )
 
 func main() {
-	c := client.NewClient(&client.Config{
-		Endpoint: ":8080",
+	c, _ := client.NewClient(&client.Config{
+		Endpoint:    ":50040",
+		AuthOptions: client.LoadNoAuthOptionsFromEnv(),
 	})
-	
+
 	vol, err := c.CreateVolume(&model.VolumeSpec{
-		Name: "test",
+		Name:        "test",
 		Description: "This is a volume for test",
+		Size:        int64(1),
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
-	
+
 	result, err := c.GetVolume(vol.Id)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("Volume created, get result:", result)
-	
+
 	if err = c.DeleteVolume(vol.Id, nil); err != nil {
 		fmt.Println(err)
 	}
