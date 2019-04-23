@@ -1,7 +1,6 @@
 package adapters
 
 import (
-	"fmt"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -13,7 +12,7 @@ func SendMetricToRegisteredSenders(metrics *model.MetricSpec) {
 
 	// Push the work onto the queue.
 	MetricsQueue <- metrics
-	fmt.Println("Send metrics request queued")
+	log.Info("Send metrics request queued")
 
 	return
 }
@@ -45,7 +44,6 @@ func StartDispatcher() {
 				log.Info("Received send metrics request")
 				go func() {
 					for _, metricsSender := range listMetricSenders {
-						//fmt.Println("Dispatching send metrics request to sender %d",i)
 						metricsSender.AssignMetricsToSend(work)
 					}
 
