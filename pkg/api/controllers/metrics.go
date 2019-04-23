@@ -60,11 +60,6 @@ func (m *MetricsPortal) GetMetrics() {
 		return
 	}
 
-	m.SuccessHandle(StatusOK, nil)
-
-	// NOTE:The real volume creation process.
-	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
-	// after volume creation is completed.
 	if err := m.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
