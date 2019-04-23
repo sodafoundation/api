@@ -176,6 +176,20 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+
+
+	//Fileshare interfaces
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
+
+	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
+
+	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
+
+	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(ctx *c.Context, fshareID string) error
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {

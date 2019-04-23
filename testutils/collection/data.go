@@ -251,6 +251,33 @@ var (
 			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
 	}
+
+	SampleFileShares = []model.FileShareSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:   "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			//SnapshotId:  "",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			ProfileId:   "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			//SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+		},
+	}
 )
 
 // The Byte*** variable here is designed for unit test in client package.
