@@ -15,7 +15,7 @@
 package controller
 
 import (
-	// "fmt"
+	"context"
 	"testing"
 
 	c "github.com/opensds/opensds/pkg/context"
@@ -26,7 +26,6 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	"golang.org/x/net/context"
 )
 
 type fakeSelector struct {
