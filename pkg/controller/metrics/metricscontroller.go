@@ -21,7 +21,7 @@ package metrics
 
 import (
 	"encoding/json"
-	"fmt"
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -100,15 +100,15 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName)
 	if err != nil {
-		fmt.Printf("The HTTP query request failed with error %s\n", err)
+		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
+		log.Info(string(data))
 
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		fmt.Println(err0)
+		log.Error(err0)
 
 		metrics := make([]model.MetricSpec, len(fv.Data.Result))
 
@@ -129,19 +129,19 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 					fmt.Println(i, u)
 				}*/
 				default:
-					fmt.Println(v, "is of a type I don't know how to handle")
+					log.Info(v, "is of a type I don't know how to handle")
 				}
 				/*metrics[i].CollectedAt = t
 				metrics[i].Value = v*/
 			}
 		}
 
-		fmt.Println("metrics struct is ", metrics)
+		log.Info("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
-		fmt.Println("metrics response json is ", string(bArr))
+		log.Info("metrics response json is ", string(bArr))
 
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 
 	}
@@ -154,15 +154,15 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName + "&time=" + opt.StartTime)
 	if err != nil {
-		fmt.Printf("The HTTP query request failed with error %s\n", err)
+		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
+		log.Info(string(data))
 
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		fmt.Println(err0)
+		log.Error(err0)
 
 		metrics := make([]model.MetricSpec, len(fv.Data.Result))
 
@@ -183,19 +183,19 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 					fmt.Println(i, u)
 				}*/
 				default:
-					fmt.Println(v, "is of a type I don't know how to handle")
+					log.Info(v, "is of a type I don't know how to handle")
 				}
 				/*metrics[i].CollectedAt = t
 				metrics[i].Value = v*/
 			}
 		}
 
-		fmt.Println("metrics struct is ", metrics)
+		log.Info("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
-		fmt.Println("metrics response json is ", string(bArr))
+		log.Info("metrics response json is ", string(bArr))
 
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 
 	}
@@ -208,15 +208,15 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query_range?query=" + opt.MetricName + "&start=" + opt.StartTime + "&end=" + opt.EndTime + "&step=30")
 	if err != nil {
-		fmt.Printf("The HTTP query request failed with error %s\n", err)
+		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(string(data))
+		log.Info(string(data))
 
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv RangeMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		fmt.Println(err0)
+		log.Error(err0)
 
 		metrics := make([]model.MetricSpec, len(fv.Data.Result))
 
@@ -238,7 +238,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 						fmt.Println(i, u)
 					}*/
 					default:
-						fmt.Println(v, "is of a type I don't know how to handle")
+						log.Info(v, "is of a type I don't know how to handle")
 					}
 					/*metrics[i].CollectedAt = t
 					metrics[i].Value = v*/
@@ -246,12 +246,12 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 			}
 		}
 
-		fmt.Println("metrics struct is ", metrics)
+		log.Info("metrics struct is ", metrics)
 		bArr, _ := json.Marshal(metrics)
-		fmt.Println("metrics response json is ", string(bArr))
+		log.Info("metrics response json is ", string(bArr))
 
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 		return &metrics, err
 
