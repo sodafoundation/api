@@ -70,7 +70,7 @@ func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 	}
 
 	in.Status = model.FileShareDeleting
-	_, err = db.C.UpdateFileShare(ctx, in)
+	_, err := db.C.UpdateFileShare(ctx, in)
 	if err != nil {
 		return err
 	}

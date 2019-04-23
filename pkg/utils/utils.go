@@ -219,11 +219,12 @@ func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) e
 	return fmt.Errorf("wait for condition timeout")
 }
 
+/*
 func GenerateFileShareURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("file/shares", urlType, tenantId, in...)
 }
 
 func GenerateFileShareSnapshotURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("file/snapshots", urlType, tenantId, in...)
-}
+}*/
 
