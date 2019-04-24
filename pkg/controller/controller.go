@@ -839,7 +839,7 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) CollectMetrics(context context2.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
 	log.Info("in controller collect metrics methods")
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())

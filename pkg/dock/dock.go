@@ -463,7 +463,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 }
 
 
-func (ds *dockServer) CollectMetrics(ctx context2.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
 	log.Info("in dock CollectMetrics methods")
 	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
 
