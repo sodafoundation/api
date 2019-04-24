@@ -9,9 +9,6 @@ endif
 export GOARCHAIUS_CONFIG_PATH=$(CURDIR)
 test:
 	find ${TEST_DIR} -name "*_test.go"|xargs -i dirname {}|uniq|xargs -i go test ${T} {}
-
-
-
 # verify
 .PHONY: verify
 verify:
@@ -25,13 +22,9 @@ unit_test:
 integration_test:
 	#ash test/integration/scripts/execute.sh
 	bash -x ./../test/integration/integrationtest.sh
-
-
 .PHONY: e2etest_build
 e2etest_build:
 	bash -x ./../test/e2e/e2etest.sh
-
-
 .PHONY: e2eflowtest_build
 e2eflowtest_build:
 	bash -x ./../test//e2e/e2eflowtest.sh

@@ -1,5 +1,4 @@
-
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,11 +33,6 @@ prebuild:
 
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
 
-
-
-
-
-
 osdsdock: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
@@ -61,8 +55,6 @@ docker: build
 
 test: build
 	script/CI/test
-
-
 ###### Added by Satya #####
 
 # make osds_core
@@ -91,8 +83,6 @@ osds_e2etest_build:
 .PHONY: osds_e2eflowtest_build
 osds_e2eflowtest_build:
 	cd osds && $(MAKE) e2eflowtest_build
-
-
 
 ###### End Added by Satya #####
 protoc:
