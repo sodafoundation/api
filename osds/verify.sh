@@ -1,5 +1,5 @@
 #/usr/bin/env bash
-# Copyright 2018 The KubeEdge Authors.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # get gometalinter(https://github.com/alecthomas/gometalinter)
-#curl -L https://git.io/vp6lP | sh
-#export PATH=${PATH}:${GOPATH}/bin:${GOPATH}/src/github.com/opensds/opensds/osds/bin
-#gometalinter --disable-all --enable=gofmt --enable=misspell --enable=golint --exclude=vendor --exclude=test ./...
-#if [ $? != 0 ]; then
-#        echo "Please fix the warnings!"
-#       echo "Run ./update-gofmt.sh if any warnin in gofmt"
-#      exit 1
-#else
-#        echo "Gofmt,misspell,golint checks have been passed"
-#fi
-# binary will be $(go env GOPATH)/bin/golangci-lint
+
 curl -L https://git.io/vp6lP | sh
 export PATH=${PATH}:${GOPATH}/bin:${GOPATH}/src/github.com/opensds/opensds/osds/bin
 
