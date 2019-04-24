@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 OpenSDS Authors All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /*
-This module implements a entry into the OpenSDS volume controller service.
+This module implements a entry into the OpenSDS metrics controller service.
 
 */
 
@@ -31,7 +31,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Controller is an interface for exposing some operations of different volume
+// Controller is an interface for exposing some operations of metrics
 // controllers.
 type Controller interface {
 	CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectMetricSpec, error)
@@ -58,20 +58,20 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectM
 
 	response, err := c.Client.CollectMetrics(context.Background(), opt)
 	if err != nil {
-		log.Error("create volume failed in volume controller:", err)
+		log.Error("collect metrics failed in metrics controller:", err)
 		return nil, err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
-			fmt.Errorf("failed to create volume in volume controller, code: %v, message: %v",
+			fmt.Errorf("failed to collect metrics in metrics controller, code: %v, message: %v",
 				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
 	var vol = &model.CollectMetricSpec{}
 	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), vol); err != nil {
-		log.Error("create volume failed in volume controller:", err)
+		log.Error("collect metrics failed in metrics controller:", err)
 		return nil, err
 	}
 
