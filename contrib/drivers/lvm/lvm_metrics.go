@@ -214,4 +214,4 @@ func (d *MetricDriver) Setup() error {
 	return nil
 }
 
-func (*MetricDriver) Unset() error { return nil }
+func (*MetricDriver) Teardown() error { return nil }
