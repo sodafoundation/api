@@ -21,6 +21,7 @@ profiles configured by admin.
 package executor
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -31,7 +32,6 @@ import (
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"golang.org/x/net/context"
 )
 
 type IntervalSnapshotExecutor struct {

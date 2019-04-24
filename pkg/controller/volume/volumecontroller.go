@@ -20,6 +20,7 @@ This module implements a entry into the OpenSDS volume controller service.
 package volume
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,7 +29,6 @@ import (
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"golang.org/x/net/context"
 )
 
 // Controller is an interface for exposing some operations of different volume

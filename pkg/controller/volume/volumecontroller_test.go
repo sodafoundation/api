@@ -15,6 +15,7 @@
 package volume
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -22,7 +23,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
