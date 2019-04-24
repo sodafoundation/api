@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -14,7 +14,6 @@
 package lvm
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -35,6 +34,6 @@ func TestCollectMetrics(t *testing.T) {
 	if err != nil {
 		t.Errorf("CollectMetrics call to lvm driver failed: %+v\n", err)
 	}
-	fmt.Println(metricArray)
+	t.Log(metricArray)
 
 }
