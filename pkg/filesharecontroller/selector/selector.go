@@ -94,18 +94,6 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 					filterRequest["extras.dataStorage.recoveryTimeObjective"] =
 						"<= " + strconv.Itoa(int(ds.RecoveryTimeObjective))
 				}
-				if ds.CharacterCodeSet != "" {
-					filterRequest["extras.dataStorage.characterCodeSet"] =
-						ds.CharacterCodeSet
-				}
-				if ds.MaxFileNameLengthBytes != 0 {
-					filterRequest["extras.dataStorage.maxFileNameLengthBytes"] =
-						"<= " + strconv.Itoa(int(ds.MaxFileNameLengthBytes))
-				}
-				if ds.StorageAccessCapability != "" {
-					filterRequest["extras.dataStorage.storageAccessCapability"] =
-						ds.StorageAccessCapability
-				}
 			}
 			if ic := pp.IOConnectivity; !ic.IsEmpty() {
 				if ic.AccessProtocol != "" {
