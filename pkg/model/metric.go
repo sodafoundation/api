@@ -55,19 +55,19 @@ type MetricSpec struct {
 
 	// Instance ID -\> volumeID/NodeID
 
-	InstanceID string `json:"InstanceID,omitempty"`
+	InstanceID string `json:"instanceID,omitempty"`
 
 
 
 	// instance name -\> volume name / node name etc.
 
-	InstanceName string `json:"InstanceName,omitempty"`
+	InstanceName string `json:"instanceName,omitempty"`
 
 
 
 	// job -\> Prometheus/openSDS
 
-	Job string `json:"Job,omitempty"`
+	Job string `json:"job,omitempty"`
 
 
 
@@ -97,7 +97,7 @@ type MetricSpec struct {
 
 
 
-	Associator map[string]string `json:"Associator,omitempty"`
+	Associator map[string]string `json:"associator,omitempty"`
 
 
 
@@ -107,25 +107,25 @@ type MetricSpec struct {
 
 	// source -\> Node/Dock
 
-	Source string `json:"Source,omitempty"`
+	Source string `json:"source,omitempty"`
 
 
 
 	// component -\> disk/logicalVolume/VG etc
 
-	Component string `json:"Component,omitempty"`
+	Component string `json:"component,omitempty"`
 
 
 
 	// name -\> metric name -\> readRequests/WriteRequests/Latency etc
 
-	Name string `json:"Name,omitempty"`
+	Name string `json:"name,omitempty"`
 
 
 
 	// unit -\> seconds/bytes/MBs etc
 
-	Unit string `json:"Unit,omitempty"`
+	Unit string `json:"unit,omitempty"`
 
 
 
@@ -133,7 +133,7 @@ type MetricSpec struct {
 
 
 
-	IsAggregated bool `json:"IsAggregated,omitempty"`
+	IsAggregated bool `json:"isAggregated,omitempty"`
 
 
 
