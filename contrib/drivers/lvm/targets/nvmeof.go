@@ -39,15 +39,10 @@ type NvmeofTarget interface {
 }
 
 func NewNvmeofTarget(bip, tgtConfDir string) NvmeofTarget {
-	t := &NvmeoftgtTarget{
+	return &NvmeoftgtTarget{
 		TgtConfDir: tgtConfDir,
 		BindIp:     bip,
 	}
-
-	t.execCmd("modprobe", "nvmet")
-	t.execCmd("modprobe", "nvmet-rdma")
-
-	return t
 }
 
 type NvmeoftgtTarget struct {
