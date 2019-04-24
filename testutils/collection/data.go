@@ -93,9 +93,6 @@ var (
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
 					IsSpaceEfficient:   true,
-					CharacterCodeSet:   "ASCII",
-					MaxFileNameLengthBytes:255,
-					StorageAccessCapability:"Write",
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",

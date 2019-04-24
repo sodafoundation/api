@@ -684,7 +684,6 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 	if prf.CreatedAt == "" {
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
-    fmt.Println("inside profile creation")
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err

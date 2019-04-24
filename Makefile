@@ -34,16 +34,16 @@ prebuild:
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
 
 osdsdock: prebuild
-	go build -gcflags='-N -l' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
 osdslet: prebuild
-	go build -gcflags='-N -l' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+	go build -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
 osdsapiserver: prebuild
-	go build -gcflags='-N -l' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+	go build -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
 osdsctl: prebuild
-	go build -gcflags='-N -l' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+	go build -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
