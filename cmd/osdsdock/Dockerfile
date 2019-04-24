@@ -1,7 +1,7 @@
 # Docker build usage:
 # 	docker build . -t opensdsio/opensds-dock:latest
 # Docker run usage:
-# 	docker run -d --privileged --net=host -v /etc/opensds:/etc/opensds opensdsio/opensds-dock:latest
+# 	docker run -d --privileged=true --net=host -v /etc/opensds:/etc/opensds opensdsio/opensds-dock:latest
 
 FROM ubuntu:16.04
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>

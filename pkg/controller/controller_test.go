@@ -15,7 +15,7 @@
 package controller
 
 import (
-	// "fmt"
+	"context"
 	"testing"
 
 	c "github.com/opensds/opensds/pkg/context"
@@ -26,7 +26,6 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	"golang.org/x/net/context"
 )
 
 type fakeSelector struct {
@@ -558,7 +557,7 @@ func TestCreateVolumeGroup(t *testing.T) {
 		Id:          "3769855c-a102-11e7-b772-17b880d2f555",
 		Name:        "sample-group-01",
 		Description: "This is the first sample group for testing",
-		AddVolumes: []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
+		AddVolumes:  []string{"bd5b12a8-a101-11e7-941e-d77981b584d8"},
 		Context:     c.NewAdminContext().ToJson(),
 	}
 	var vg = &SampleVolumeGroups[0]
@@ -567,9 +566,9 @@ func TestCreateVolumeGroup(t *testing.T) {
 	mockClient.On("GetVolumeGroup", c.NewAdminContext(), req.Id).Return(vg, nil)
 	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateVolume", c.NewAdminContext(), &model.VolumeSpec{
-                BaseModel: &model.BaseModel{Id: req.AddVolumes[0]},
-                GroupId:   req.Id,
-        }).Return(&SampleVolumes[0], nil)
+		BaseModel: &model.BaseModel{Id: req.AddVolumes[0]},
+		GroupId:   req.Id,
+	}).Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), vg, model.VolumeGroupAvailable).Return(nil)
 	db.C = mockClient
 
