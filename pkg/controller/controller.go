@@ -19,6 +19,7 @@ This module implements a entry into the OpenSDS northbound service.
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,7 +35,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 

@@ -249,6 +249,7 @@ var (
 			Name:        "sample-group-01",
 			Description: "This is the first sample group for testing",
 			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
 	}
 )
@@ -495,32 +496,32 @@ var (
 
 	ByteReplication = `{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
 	ByteReplications = `[
 		{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		},
 		{
 			"id": "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-02",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
 

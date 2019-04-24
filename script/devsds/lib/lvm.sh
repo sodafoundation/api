@@ -218,7 +218,8 @@ osds::lvm::clean_nvme_volume_group(){
     ## umount nvme disk and remove corresponding dir
     for i in {1..10}
     do
-	sudo umount $NVME_DIR/$nvmevg
+	# 'umount -l' can umount even if target is busy
+	sudo umount -l $NVME_DIR/$nvmevg
 	if [ $? -eq 0 ]; then
 		sudo rmdir $NVME_DIR/$nvmevg
 		sudo rmdir $NVME_DIR
