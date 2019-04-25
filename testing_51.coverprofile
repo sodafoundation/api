@@ -1,6 +1,0 @@
-mode: count
-github.com/opensds/opensds/contrib/drivers/utils/config/config.go:44.61,46.16 2 1
-github.com/opensds/opensds/contrib/drivers/utils/config/config.go:50.2,50.54 1 1
-github.com/opensds/opensds/contrib/drivers/utils/config/config.go:54.2,54.18 1 1
-github.com/opensds/opensds/contrib/drivers/utils/config/config.go:46.16,49.3 2 0
-github.com/opensds/opensds/contrib/drivers/utils/config/config.go:50.54,53.3 2 0

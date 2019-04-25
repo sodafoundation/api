@@ -22,11 +22,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 )
 
 //struct for lvm  collector that contains pointers
 //to prometheus descriptors for each metric we expose.
 type lvmCollector struct {
+	mu         sync.Mutex
 	//volume metrics
 	IOPS            *prometheus.Desc
 	ReadThroughput  *prometheus.Desc
@@ -86,6 +88,9 @@ func (collector *lvmCollector) Describe(ch chan<- *prometheus.Desc) {
 //Collect implements required collect function for all promehteus collectors
 func (collector *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 
+	collector.mu.Lock()
+	defer collector.mu.Unlock()
+
 	//Implement logic here to determine proper metric value to return to prometheus
 	//for each descriptor
 	metricList := []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime", "ServiceTime", "UtilizationPercentage"}
@@ -140,6 +145,6 @@ func main() {
 	//This section will start the HTTP server and expose
 	//any metrics on the /metrics endpoint.
 	http.Handle("/metrics", promhttp.Handler())
-	log.Info("lvm exporter veginning to serve on port :" + portNo)
+	log.Info("lvm exporter begining to serve on port :" + portNo)
 	log.Fatal(http.ListenAndServe(":"+portNo, nil))
 }
