@@ -153,7 +153,8 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (metricArray []model.MetricSpec, err error) {
+func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (*[]model.MetricSpec,  error) {
+
 
 	// get MEtrics to unit map
 	metric_to_unit_map := getMetricToUnitMap()
@@ -179,29 +180,23 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 
 		metric := model.MetricSpec{
 			InstanceID: instanceID,
-
 			InstanceName: metricMap["InstanceName"],
-
 			Job: "OpenSDS",
-
 			Associator: associatorMap,
-
 			Source: "Node",
 			//Todo Take Componet from Post call, as of now it is only for volume
 			Component: "Volume",
-
 			Name: element,
 			//Todo : Fill units according to metric type
 			Unit: metric_to_unit_map[element],
 			//Todo : Get this information dynamically ( hard coded now , as all are direct values
 			IsAggregated: false,
-
 			MetricValues: metricValues,
 		}
 		tempMetricArray = append(tempMetricArray, metric)
 	}
-	metricArray = tempMetricArray
-	return
+	metricArray := &tempMetricArray
+	return metricArray,err
 }
 
 func (d *MetricDriver) Setup() error {

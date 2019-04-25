@@ -27,7 +27,7 @@ func TestMetricDriverSetup(t *testing.T) {
 }
 
 func TestCollectMetrics(t *testing.T) {
-	metricList := []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime"}
+	metricList := []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime","ServiceTime"}
 	var metricDriver = &MetricDriver{}
 	metricDriver.Setup()
 	metricArray, err := metricDriver.CollectMetrics(metricList, "sda")
