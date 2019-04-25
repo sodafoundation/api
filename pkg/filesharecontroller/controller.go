@@ -153,7 +153,7 @@ func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileSh
 	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
 		log.Error("when search dock in db by pool id: ", err)
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 	//c.policyController.SetDock(dockInfo)
@@ -172,7 +172,7 @@ func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileSh
 	}*/
 
 	if err = c.fileshareController.DeleteFileShare(opt); err != nil {
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
 
