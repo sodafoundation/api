@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
+	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"golang.org/x/net/context"
 )
 
 func NewVolumeGroupPortal() *VolumeGroupPortal {
@@ -60,7 +61,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 	// NOTE:It will create a volume group entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume group process creation to complete
 	// and will return result immediately.
-	result, err := CreateVolumeGroupDBEntry(ctx, volumeGroup)
+	result, err := util.CreateVolumeGroupDBEntry(ctx, volumeGroup)
 	if err != nil {
 		errMsg := fmt.Sprintf("create volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -120,7 +121,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 
 	vg.Id = id
-	result, err := UpdateVolumeGroupDBEntry(ctx, vg)
+	result, err := util.UpdateVolumeGroupDBEntry(ctx, vg)
 	if err != nil {
 		errMsg := fmt.Sprintf("update volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -174,7 +175,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 		return
 	}
 
-	if err = DeleteVolumeGroupDBEntry(c.GetContext(v.Ctx), id); err != nil {
+	if err = util.DeleteVolumeGroupDBEntry(c.GetContext(v.Ctx), id); err != nil {
 		errMsg := fmt.Sprintf("delete volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return

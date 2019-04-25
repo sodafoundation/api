@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package controllers
 
 import (
 	"bytes"
+	ctx "context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -31,7 +32,6 @@ import (
 	. "github.com/opensds/opensds/testutils/collection"
 	ctrtest "github.com/opensds/opensds/testutils/controller/testing"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
-	ctx "golang.org/x/net/context"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
