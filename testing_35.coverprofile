@@ -1,0 +1,17 @@
+mode: count
+github.com/opensds/opensds/pkg/utils/urls/urls.go:28.73,30.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:32.73,34.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:36.76,38.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:40.75,42.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:45.78,47.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:49.79,51.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:53.77,55.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:57.80,59.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:61.80,63.2 1 0
+github.com/opensds/opensds/pkg/utils/urls/urls.go:65.86,67.20 1 5
+github.com/opensds/opensds/pkg/utils/urls/urls.go:74.2,75.21 2 4
+github.com/opensds/opensds/pkg/utils/urls/urls.go:80.2,82.33 2 4
+github.com/opensds/opensds/pkg/utils/urls/urls.go:67.20,71.3 3 1
+github.com/opensds/opensds/pkg/utils/urls/urls.go:75.21,77.3 1 2
+github.com/opensds/opensds/pkg/utils/urls/urls.go:77.8,79.3 1 2
+github.com/opensds/opensds/pkg/utils/urls/urls.go:85.30,87.2 1 6

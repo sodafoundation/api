@@ -1,0 +1,19 @@
+mode: count
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:28.20,30.2 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:36.56,37.20 1 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:41.2,44.16 3 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:50.2,52.56 3 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:56.2,59.44 3 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:37.20,39.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:44.16,46.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:52.56,54.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:62.52,64.16 2 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:68.2,69.16 2 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:75.2,75.37 1 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:79.2,87.32 5 1
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:64.16,66.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:69.16,71.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/aes.go:75.37,77.3 1 0
+github.com/opensds/opensds/pkg/utils/pwd/pwd.go:26.53,27.19 1 0
+github.com/opensds/opensds/pkg/utils/pwd/pwd.go:28.13,29.18 1 0
+github.com/opensds/opensds/pkg/utils/pwd/pwd.go:30.10,32.18 2 0
