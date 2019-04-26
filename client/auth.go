@@ -80,17 +80,10 @@ func (n *NoAuthOptions) GetTenantId() string {
 }
 
 func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
-	// pre-check
-	envs := []string{OsAuthUrl, OsUsername, OsPassword, OsTenantName, OsProjectName, OsUserDomainId}
-	for _, env := range envs {
-		if _, ok := os.LookupEnv(env); !ok {
-			return nil, fmt.Errorf("can not get keystone ENV: %s", env)
-		}
-	}
-
 	opt := NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
+
 	var pwdCiphertext = os.Getenv(OsPassword)
 	if os.Getenv(EnableEncrypted) == "T" {
 		// Decrypte the password

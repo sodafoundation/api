@@ -19,7 +19,6 @@ This module implements the entry into operations of storageDock module.
 package dock
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,6 +32,7 @@ import (
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	_ "github.com/opensds/opensds/contrib/connector/fc"

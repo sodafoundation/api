@@ -88,8 +88,7 @@ func profileAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-var profileFormatters = FormatterList{"ProvisioningProperties": JsonFormatter, "ReplicationProperties": JsonFormatter,
-	"SnapshotProperties": JsonFormatter, "DataProtectionProperties": JsonFormatter, "CustomProperties": JsonFormatter}
+var profileFormatters = FormatterList{"Extras": JsonFormatter}
 
 func profileCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
@@ -104,8 +103,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
-		"ReplicationProperties", "SnapshotProperties", "DataProtectionProperties", "CustomProperties"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, profileFormatters)
 }
 
@@ -115,8 +113,7 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
-		"ReplicationProperties", "SnapshotProperties", "DataProtectionProperties", "CustomProperties"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
 	PrintDict(resp, keys, profileFormatters)
 }
 
@@ -130,7 +127,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "StorageType"}
+	keys := KeyList{"Id", "Name", "Description"}
 	PrintList(resp, keys, FormatterList{})
 }
 

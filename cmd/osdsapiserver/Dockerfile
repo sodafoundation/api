@@ -8,5 +8,8 @@ MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
 COPY osdsapiserver /usr/bin
 
+# Install some packages before running command.
+RUN apt-get update
+
 # Define default command.
 CMD ["/usr/bin/osdsapiserver"]

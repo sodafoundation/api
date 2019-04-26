@@ -19,7 +19,6 @@ This module implements a entry into the OpenSDS northbound service.
 package controller
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,6 +34,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
@@ -89,14 +89,25 @@ func (c *Controller) Run() error {
 // CreateVolume implements pb.ControllerServer.CreateVolume
 func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
 	var err error
+	var prf *model.ProfileSpec
 	var snap *model.VolumeSnapshotSpec
 	var snapVol *model.VolumeSpec
 
 	log.Info("Controller server receive create volume request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	prf := model.NewProfileFromJson(opt.Profile)
-
+	if opt.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		opt.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, opt.ProfileId)
+	}
+	if err != nil {
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+		log.Error("get profile failed: ", err)
+		return pb.GenericResponseError(err), err
+	}
 	if opt.SnapshotId != "" {
 		snap, err = db.C.GetVolumeSnapshot(ctx, opt.SnapshotId)
 		if err != nil {
@@ -128,7 +139,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
-	// whether specify a pool or not, opt's poolid and pool name should be
+	// whether specify a pool or not, opt's poolid and pool name should be 
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
 	opt.PoolName = polInfo.Name
@@ -176,7 +187,13 @@ func (c *Controller) DeleteVolume(contx context.Context, opt *pb.DeleteVolumeOpt
 	log.Info("Controller server receive delete volume request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	prf := model.NewProfileFromJson(opt.Profile)
+	prf, err := db.C.GetProfile(ctx, opt.ProfileId)
+	if err != nil {
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		log.Error("when search profile in db:", err)
+		return pb.GenericResponseError(err), err
+	}
+
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
@@ -205,7 +222,6 @@ func (c *Controller) DeleteVolume(contx context.Context, opt *pb.DeleteVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
-
 	if err = db.C.DeleteVolume(ctx, opt.GetId()); err != nil {
 		return pb.GenericResponseError(err), err
 	}
