@@ -21,6 +21,7 @@ package model
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/golang/glog"
@@ -70,55 +71,6 @@ type ProfileSpec struct {
 	CustomProperties CustomPropertiesSpec `json:"customProperties,omitempty"`
 }
 
-type FileShareProfileSpec struct {
-	*BaseModel
-
-	// The name of the profile.
-	Name string `json:"name,omitempty"`
-
-	// The description of the profile.
-	// +optional
-	Description string `json:"description,omitempty"`
-
-	// The storage type of the profile.
-	// One of: block, file or object.
-	StorageType string `json:"storageType,omitempty"`
-
-	// ProvisioningProperties represents some suggested properties for performing
-	// provisioning policies.
-	// +optional
-	ProvisioningProperties ProvisioningPropertiesSpec `json:"provisioningProperties,omitempty"`
-
-	// SnapshotProperties represents some suggested properties for performing
-	// snapshot policies.
-	// +optional
-	SnapshotProperties SnapshotPropertiesSpec `json:"snapshotProperties,omitempty"`
-
-	// CustomProperties is a map of keys and JSON object that represents the
-	// customized properties of profile, such as requested capabilities
-	// including diskType, latency, deduplicaiton, compression and so forth.
-	// +optional
-	CustomProperties CustomPropertiesSpec `json:"customProperties,omitempty"`
-}
-func FSNewProfileFromJson(s string) *FileShareProfileSpec {
-	p := &FileShareProfileSpec{}
-	err := json.Unmarshal([]byte(s), p)
-	if err != nil {
-		glog.Errorf("Unmarshal json to ProfileSpec failed, %v", err)
-	}
-	return p
-}
-
-func (p *FileShareProfileSpec) ToJson() string {
-	b, err := json.Marshal(p)
-	if err != nil {
-		glog.Errorf("ProfileSpec convert to json failed, %v", err)
-	}
-	return string(b)
-}
-
-
-
 func NewProfileFromJson(s string) *ProfileSpec {
 	p := &ProfileSpec{}
 	err := json.Unmarshal([]byte(s), p)
@@ -143,11 +95,9 @@ type ProvisioningPropertiesSpec struct {
 	IOConnectivity IOConnectivityLoS `json:"ioConnectivity,omitempty"`
 }
 
-func (pps ProvisioningPropertiesSpec) IsEmpty() bool {
-	if (ProvisioningPropertiesSpec{}) == pps {
-		return true
-	}
-	return false
+func (pps ProvisioningPropertiesSpec) IsEmpty() bool{
+	r := reflect.DeepEqual(ProvisioningPropertiesSpec{}, pps)
+	return r
 }
 
 type ReplicationPropertiesSpec struct {

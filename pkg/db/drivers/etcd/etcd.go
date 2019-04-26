@@ -70,6 +70,7 @@ type Client struct {
 	clientInterface
 }
 
+
 //Parameter
 type Parameter struct {
 	beginIdx, endIdx int
@@ -676,16 +677,19 @@ func (c *Client) DeletePool(ctx *c.Context, polID string) error {
 	return nil
 }
 
+// Begining of block profile code
 // CreateProfile
 func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.ProfileSpec, error) {
 	if prf.Id == "" {
 		prf.Id = uuid.NewV4().String()
 	}
+
 	if prf.CreatedAt == "" {
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
 	prfBody, err := json.Marshal(prf)
+
 	if err != nil {
 		return nil, err
 	}
@@ -694,12 +698,12 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 		Url:     urls.GenerateProfileURL(urls.Etcd, "", prf.Id),
 		Content: string(prfBody),
 	}
+
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("When create profile in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
-
 	return prf, nil
 }
 
@@ -956,6 +960,7 @@ func (c *Client) RemoveCustomProperty(ctx *c.Context, prfID, customKey string) e
 	}
 	return nil
 }
+//End of block profile code
 
 // CreateVolume
 func (c *Client) CreateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.VolumeSpec, error) {

@@ -53,6 +53,7 @@ var (
 		},
 	}
 
+
 	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",

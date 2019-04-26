@@ -22,7 +22,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -47,6 +46,38 @@ func (p *ProfilePortal) CreateProfile() {
 		errMsg := fmt.Sprintf("parse profile request body failed: %v", err)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
+	}
+
+	//Validate StorageType is block or file
+	if (profile.StorageType != "block" && profile.StorageType != "file") {
+		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", profile.StorageType)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	if (profile.StorageType == "file"){
+		if pp := profile.ProvisioningProperties; !pp.IsEmpty(){
+			if ds := pp.DataStorage; !ds.IsEmpty() {
+				if (len(ds.StorageAccessCapability) == 0){
+					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",ds.StorageAccessCapability)
+					p.ErrorHandle(model.ErrorBadRequest, errMsg)
+					return
+				}
+				if(ds.MaxFileNameLengthBytes > 255 && ds.MaxFileNameLengthBytes >= 0){
+					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid MaxFileNameLengthBytes",ds.MaxFileNameLengthBytes)
+					p.ErrorHandle(model.ErrorBadRequest, errMsg)
+					return
+				}
+			}else{
+				errMsg := fmt.Sprintf("parse profile request body failed : Please provide DataStorage capabilities")
+				p.ErrorHandle(model.ErrorBadRequest, errMsg)
+				return
+			}
+		}else{
+			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")
+			p.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 	}
 
 	// Call db api module to handle create profile request.
