@@ -128,7 +128,6 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 			}
 		}
 
-		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
 		log.Infof("metrics response json is %s", string(bArr))
 
@@ -176,7 +175,6 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 			}
 		}
 
-		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
 		log.Infof("metrics response json is %s", string(bArr))
 
@@ -227,7 +225,6 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 			}
 		}
 
-		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
 		log.Infof("metrics response json is %s", string(bArr))
 
