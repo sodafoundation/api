@@ -66,6 +66,7 @@ func (v *AlertPortal) CreateAlert() {
 	body := strings.NewReader(string(b[:]))
 
 	// Alert manager will be co-located on the server, default port is 9093 for the POST API endpoint
+	// Raised issue https://github.com/opensds/opensds/issues/691 to make this configurable
 	req, err := http.NewRequest("POST", "http://localhost:9093/api/v1/alerts", body)
 	if err != nil {
 		// handle err
