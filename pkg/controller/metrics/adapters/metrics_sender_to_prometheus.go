@@ -1,3 +1,16 @@
+// Copyright (c) 2019 The OpenSDS Authors All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package adapters
 
 import (
@@ -41,8 +54,6 @@ func (p *PrometheusMetricsSender) Start() {
 				log.Info("GetMetricsSenderToPrometheus processed metrics")
 
 			case <-p.QuitChan:
-				// We have been asked to stop.
-				//fmt.Println("GetMetricsSenderToPrometheus stopping\n")
 				return
 			}
 
@@ -63,9 +74,9 @@ func writeToFile(metrics *model.MetricSpec) {
 
 	// get the string ready to be written
 	var finalString = ""
-	//for _,metric := range metrics.MetricValues{
+
 	finalString += metrics.Name + " " + strconv.FormatFloat(metrics.Value, 'f', 2, 64) + "\n"
-	//}
+
 	// make a new file with current timestamp
 	timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
 	f, err := os.Create(nodeExporterFolder + metrics.InstanceID + ".prom")
@@ -73,13 +84,13 @@ func writeToFile(metrics *model.MetricSpec) {
 		log.Error(err)
 		return
 	}
-	l, err := f.WriteString(finalString)
+	_, err = f.WriteString(finalString)
 	if err != nil {
 		log.Error(err)
 		f.Close()
 		return
 	}
-	log.Info(l, "metrics written successfully at time "+timeStamp)
+	log.Infof("metrics written successfully at time %s", timeStamp)
 	err = f.Close()
 	if err != nil {
 		log.Error(err)
@@ -100,7 +111,7 @@ func sendToPushGateway(metrics *model.MetricSpec) {
 		Collector(completionTime).
 		Grouping("l1", "v1").
 		Push(); err != nil {
-		log.Error("Could not push completion time to Pushgateway:", err)
+		log.Errorf("Could not push completion time to Pushgateway:%s", err)
 	}
-	log.Info("Completed push completion time to Pushgateway:")
+	log.Info("Completed push completion time to Pushgateway")
 }
