@@ -73,9 +73,6 @@ func NewFakeVolumePortal() *VolumePortal {
 	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
 		Context: c.NewAdminContext().ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
-	mockClient.On("GetMetrics", ctx.Background(), &pb.GetMetricsOpts{
-		Context: c.NewAdminContext().ToJson(),
-	}).Return(&pb.GenericResponse{}, nil)
 
 	return &VolumePortal{
 		CtrClient: mockClient,

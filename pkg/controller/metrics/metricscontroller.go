@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,10 +69,9 @@ type Data struct {
 	ResultType string   `json:"resultType"`
 	Result     []Result `json:"result"`
 }
-
 // latest+instant metrics structs end
 
-// latest+instant metrics structs begin
+// latest+range metrics structs begin
 type RangeMetricReponseFromPrometheus struct {
 	Status string    `json:"status"`
 	Data   RangeData `json:"data"`
@@ -91,8 +90,7 @@ type RangeData struct {
 	ResultType string        `json:"resultType"`
 	Result     []RangeResult `json:"result"`
 }
-
-// latest+instant metrics structs end
+// latest+range metrics structs end
 
 func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
 
@@ -124,21 +122,15 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 				case float64:
 					secs := int64(v.(float64))
 					metrics[i].MetricValues[j].Timestamp = secs
-				/*case []interface{}:
-				for i, u := range vv {
-					fmt.Println(i, u)
-				}*/
 				default:
 					log.Info(v, "is of a type I don't know how to handle")
 				}
-				/*metrics[i].CollectedAt = t
-				metrics[i].Value = v*/
 			}
 		}
 
-		log.Info("metrics struct is ", metrics)
+		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
-		log.Info("metrics response json is ", string(bArr))
+		log.Infof("metrics response json is %s", string(bArr))
 
 		if err != nil {
 			log.Error(err)
@@ -157,7 +149,7 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		log.Info(string(data))
+		log.Infof("response data is %s",string(data))
 
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus
@@ -178,21 +170,15 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 				case float64:
 					secs := int64(v.(float64))
 					metrics[i].MetricValues[j].Timestamp = secs
-				/*case []interface{}:
-				for i, u := range vv {
-					fmt.Println(i, u)
-				}*/
 				default:
 					log.Info(v, "is of a type I don't know how to handle")
 				}
-				/*metrics[i].CollectedAt = t
-				metrics[i].Value = v*/
 			}
 		}
 
-		log.Info("metrics struct is ", metrics)
+		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
-		log.Info("metrics response json is ", string(bArr))
+		log.Infof("metrics response json is %s", string(bArr))
 
 		if err != nil {
 			log.Error(err)
@@ -233,22 +219,17 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 					case float64:
 						secs := int64(v.(float64))
 						metrics[i].MetricValues[j].Timestamp = secs
-					/*case []interface{}:
-					for i, u := range vv {
-						fmt.Println(i, u)
-					}*/
 					default:
-						log.Info(v, "is of a type I don't know how to handle")
+						log.Infof("%s is of a type I don't know how to handle", v)
 					}
-					/*metrics[i].CollectedAt = t
-					metrics[i].Value = v*/
+
 				}
 			}
 		}
 
-		log.Info("metrics struct is ", metrics)
+		log.Infof("metrics struct is %s", metrics)
 		bArr, _ := json.Marshal(metrics)
-		log.Info("metrics response json is ", string(bArr))
+		log.Infof("metrics response json is %s", string(bArr))
 
 		if err != nil {
 			log.Error(err)

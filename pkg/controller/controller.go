@@ -855,7 +855,7 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 	}
 
 	if err != nil {
-		log.Error("get metrics failed: ", err.Error())
+		log.Errorf("get metrics failed: %s\n", err.Error())
 
 		return pb.GenericResponseError(err), err
 	}
