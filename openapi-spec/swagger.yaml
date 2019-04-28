@@ -1394,7 +1394,6 @@ definitions:
           - driverName
           - endpoint
           - nodeId
-          - multiAttach
         properties:
           type:
             type: string
@@ -1416,11 +1415,6 @@ definitions:
             enum:
               - available
               - unavailable
-          multiAttach:
-            type: boolean
-            enum:
-              - false
-              - true
           driverName:
             type: string
             enum:
@@ -1453,7 +1447,6 @@ definitions:
           - totalCapacity
           - freeCapacity
           - dockId
-          - multiAttach
         properties:
           name:
             type: string
