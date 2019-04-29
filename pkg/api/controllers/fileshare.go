@@ -153,6 +153,14 @@ func (f *FileSharePortal) DeleteFileShare() {
 		return
 	}
 
+        if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
+		errMsg := fmt.Sprintf("delete fileshare failed: %v", err.Error())
+		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+	f.SuccessHandle(StatusAccepted, nil)
+	return
+
 	// NOTE:It will update the the status of the fileshare waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = util.DeleteFileShareDBEntry(ctx, fshare); err != nil {
