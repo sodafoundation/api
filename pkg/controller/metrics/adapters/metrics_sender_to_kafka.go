@@ -39,7 +39,7 @@ func (p *KafkaMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				log.Infof("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.Value)
+				log.Infof("GetMetricsSenderToKafka received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.MetricValues[0].Value)
 
 				// do the actual sending work here
 				// make a writer that produces to topic-A, using the least-bytes distribution
@@ -52,7 +52,7 @@ func (p *KafkaMetricsSender) Start() {
 				// get the string ready to be written
 				var finalString = ""
 				//for _,metric := range work.MetricValues{
-				finalString += work.Name + " " + strconv.FormatFloat(work.Value, 'f', 2, 64) + "\n"
+				finalString += work.Name + " " + strconv.FormatFloat(work.MetricValues[0].Value, 'f', 2, 64) + "\n"
 
 				w.WriteMessages(context.Background(),
 					kafka.Message{

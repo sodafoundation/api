@@ -43,7 +43,7 @@ func (p *PrometheusMetricsSender) Start() {
 			select {
 			case work := <-p.Queue:
 				// Receive a work request.
-				log.Infof("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.Value)
+				log.Infof("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.MetricValues[0].Value)
 
 				// do the actual sending work here, by writing to the file of the node_exporter of prometheus
 				writeToFile(work)
@@ -75,7 +75,7 @@ func writeToFile(metrics *model.MetricSpec) {
 	// get the string ready to be written
 	var finalString = ""
 
-	finalString += metrics.Name + " " + strconv.FormatFloat(metrics.Value, 'f', 2, 64) + "\n"
+	finalString += metrics.Name + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
 
 	// make a new file with current timestamp
 	timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
@@ -105,7 +105,7 @@ func sendToPushGateway(metrics *model.MetricSpec) {
 		Help: "",
 	})
 	completionTime.SetToCurrentTime()
-	completionTime.Set(metrics.Value)
+	completionTime.Set(metrics.MetricValues[0].Value)
 
 	if err := push.New("http://localhost:9091", "push_gateway").
 		Collector(completionTime).
