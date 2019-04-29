@@ -153,7 +153,7 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (*[]model.MetricSpec,  error) {
+func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec,  error) {
 
 
 	// get MEtrics to unit map
@@ -165,7 +165,7 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 	}
 	metricMap, err := lvm_driver.cli.CollectMetrics(supportedMetrics, instanceID)
 
-	var tempMetricArray []model.MetricSpec
+	var tempMetricArray []*model.MetricSpec
 	for _, element := range metricsList {
 		val, _ := strconv.ParseFloat(metricMap[element], 64)
 		//Todo: See if association  is required here, resource discovery could fill this information
@@ -178,7 +178,7 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 		metricValues := make([]model.Metric, 0)
 		metricValues = append(metricValues, metricValue)
 
-		metric := model.MetricSpec{
+		metric := &model.MetricSpec{
 			InstanceID: instanceID,
 			InstanceName: metricMap["InstanceName"],
 			Job: "OpenSDS",
@@ -195,7 +195,7 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 		}
 		tempMetricArray = append(tempMetricArray, metric)
 	}
-	metricArray := &tempMetricArray
+	metricArray := tempMetricArray
 	return metricArray,err
 }
 

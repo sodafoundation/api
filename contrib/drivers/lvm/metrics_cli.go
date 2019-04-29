@@ -108,13 +108,13 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 	if is_sar_enabled(out) {
 		// sar command output mapping
 		metricMap := make(map[string]int)
-		metricMap["InstanceID"] = 2
-		metricMap["IOPS"] = 3
-		metricMap["ReadThroughput"] = 4
-		metricMap["WriteThroughput"] = 5
-		metricMap["ResponseTime"] = 8
-		metricMap["ServiceTime"] = 9
-		metricMap["UtilizationPercentage"] = 10
+		metricMap["InstanceID"] = 1
+		metricMap["IOPS"] = 2
+		metricMap["ReadThroughput"] = 3
+		metricMap["WriteThroughput"] = 4
+		metricMap["ResponseTime"] = 7
+		metricMap["ServiceTime"] = 8
+		metricMap["UtilizationPercentage"] = 9
 		//call parser
 		cli.parseCommandOutput(metricList, returnMap, instanceID, metricMap, out)
 	} else {
