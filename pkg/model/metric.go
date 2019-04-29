@@ -107,10 +107,10 @@ type MetricSpec struct {
 
 	//aggr_type AGGR_TYPE
 
-	MetricValues []Metric
+	MetricValues []Metric `json:"metricValues,omitempty"`
 }
 
 type Metric struct {
-	Timestamp int64
-	Value     float64
+	Timestamp int64   `json:"timestamp,omitempty"`
+	Value     float64 `json:"value,omitempty"`
 }
