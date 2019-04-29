@@ -69,6 +69,7 @@ type Data struct {
 	ResultType string   `json:"resultType"`
 	Result     []Result `json:"result"`
 }
+
 // latest+instant metrics structs end
 
 // latest+range metrics structs begin
@@ -90,6 +91,7 @@ type RangeData struct {
 	ResultType string        `json:"resultType"`
 	Result     []RangeResult `json:"result"`
 }
+
 // latest+range metrics structs end
 
 func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
@@ -148,7 +150,7 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		log.Infof("response data is %s",string(data))
+		log.Infof("response data is %s", string(data))
 
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus

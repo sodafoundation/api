@@ -51,20 +51,20 @@ func NewController(port string) *Controller {
 	volCtrl := volume.NewController()
 	metricsCtrl := metrics.NewController()
 	return &Controller{
-		selector:         selector.NewSelector(),
-		volumeController: volCtrl,
+		selector:          selector.NewSelector(),
+		volumeController:  volCtrl,
 		metricsController: metricsCtrl,
-		drController:     dr.NewController(volCtrl),
-		Port:             port,
+		drController:      dr.NewController(volCtrl),
+		Port:              port,
 	}
 }
 
 type Controller struct {
-	selector         selector.Selector
-	volumeController volume.Controller
+	selector          selector.Selector
+	volumeController  volume.Controller
 	metricsController metrics.Controller
-	drController     dr.Controller
-	policyController policy.Controller
+	drController      dr.Controller
+	policyController  policy.Controller
 
 	Port string
 }
@@ -843,10 +843,10 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 	var result *[]model.MetricSpec
 	var err error
 
-	if opt.StartTime=="" && opt.EndTime==""{
+	if opt.StartTime == "" && opt.EndTime == "" {
 		// no start and end time specified, get the latest value of this metric
 		result, err = c.metricsController.GetLatestMetrics(opt)
-	} else if opt.StartTime==opt.EndTime{
+	} else if opt.StartTime == opt.EndTime {
 		// same start and end time specified, get the value of this metric at that timestamp
 		result, err = c.metricsController.GetInstantMetrics(opt)
 	} else {
