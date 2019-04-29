@@ -23,9 +23,8 @@ import "time"
 
 type LabelSet map[string]string
 
-/*
-AlertSpec is a data structure that models the alert information
-*/
+// AlertSpec is a data structure that models the alert information
+
 type AlertSpec struct {
 
 	// generator URL
@@ -45,13 +44,13 @@ type PostableAlertSpec struct {
 	// annotations
 	Annotations LabelSet `json:"annotations,omitempty"`
 
-	// ends at
+	// end at
 	// Format: date-time
-	EndsAt time.Time `json:"endsAt,omitempty"`
+	EndAt time.Time `json:"endAt,omitempty"`
 
-	// starts at
+	// start at
 	// Format: date-time
-	StartsAt time.Time `json:"startsAt,omitempty"`
+	StartAt time.Time `json:"startAt,omitempty"`
 
-	AlertSpec
+	AlertSpec `json:"alert,omitempty"`
 }
