@@ -21,16 +21,25 @@ package model
 
 import (
 	"encoding/json"
-	"net/http"
+	"fmt"
+
+	"github.com/astaxie/beego/context"
+	log "github.com/golang/glog"
 )
 
 const (
-	ErrorBadRequest     = http.StatusBadRequest
-	ErrorUnauthorized   = http.StatusUnauthorized
-	ErrorForbidden      = http.StatusForbidden
-	ErrorNotFound       = http.StatusNotFound
-	ErrorInternalServer = http.StatusInternalServerError
-	ErrorNotImplemented = http.StatusNotImplemented
+	// ErrorBadRequest
+	ErrorBadRequest = 400
+	// ErrorUnauthorized
+	ErrorUnauthorized = 401
+	// ErrorForbidden
+	ErrorForbidden = 403
+	// ErrorNotFound
+	ErrorNotFound = 404
+	// ErrorInternalServer
+	ErrorInternalServer = 500
+	// ErrorNotImplemented
+	ErrorNotImplemented = 501
 )
 
 // ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
@@ -79,9 +88,18 @@ func errorStatus(code int, message string) []byte {
 	// Mashal the error status.
 	body, err := json.Marshal(errStatus)
 	if err != nil {
-		return []byte("failed to mashal error response: " + err.Error())
+		return []byte("Failed to mashal error response: " + err.Error())
 	}
 	return body
+}
+
+func HttpError(ctx *context.Context, code int, format string, a ...interface{}) error {
+	ctx.Output.SetStatus(code)
+	msg := fmt.Sprintf(format, a...)
+	ctx.Output.Body(errorStatus(code, msg))
+	errInfo := fmt.Sprintf("Code:%d, Reason:%s", code, msg)
+	log.Error(errInfo)
+	return fmt.Errorf(errInfo)
 }
 
 // Volume group error

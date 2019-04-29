@@ -58,24 +58,13 @@ osds::opensds::install(){
     sudo build/out/bin/osdsdock --daemon
 
     osds::echo_summary "Waiting for osdsapiserver to come up."
-    osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.5 80
+    osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.25 80
     if [ $OPENSDS_AUTH_STRATEGY == "keystone" ]; then
-        if [ "true" == $USE_CONTAINER_KEYSTONE ] 
-        then
-            KEYSTONE_IP=$HOST_IP
-            export OS_AUTH_URL=http://$KEYSTONE_IP/identity
-            export OS_USERNAME=admin
-            export OS_PASSWORD=opensds@123
-            export OS_TENANT_NAME=admin
-            export OS_PROJECT_NAME=admin
-            export OS_USER_DOMAIN_ID=default
-        else
-            local xtrace
-            xtrace=$(set +o | grep xtrace)
-            set +o xtrace
-            source $DEV_STACK_DIR/openrc admin admin
-            $xtrace
-        fi
+        local xtrace
+        xtrace=$(set +o | grep xtrace)
+        set +o xtrace
+        source $DEV_STACK_DIR/openrc admin admin
+        $xtrace
     fi
 
     # Copy bash completion script to system.

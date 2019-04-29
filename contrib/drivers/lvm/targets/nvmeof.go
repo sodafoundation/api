@@ -285,9 +285,7 @@ func (*NvmeoftgtTarget) WriteWithIo(name, content string) error {
 func (t *NvmeoftgtTarget) Getnamespaceid(volId string) string {
 	var buffer bytes.Buffer
 	for _, rune := range volId {
-		// nvme target namespace dir should not be like 00 or 0 ,
-		// so only digits range from 1 to 9 are accepted
-		if rune >= '1' && rune <= '9' {
+		if rune >= '0' && rune <= '9' {
 			buffer.WriteRune(rune)
 		}
 	}
