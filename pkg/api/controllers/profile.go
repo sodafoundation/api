@@ -49,7 +49,7 @@ func (p *ProfilePortal) CreateProfile() {
 	}
 
 	//Validate StorageType is block or file
-	if (profile.StorageType != "block" && profile.StorageType != "file") {
+	if (profile.StorageType != "block" && profile.StorageType != "file" && profile.StorageType != "") {
 		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", profile.StorageType)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
