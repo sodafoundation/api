@@ -80,7 +80,7 @@ func (x LoggingConfig_Level) String() string {
 	return proto.EnumName(LoggingConfig_Level_name, int32(x))
 }
 func (LoggingConfig_Level) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{0, 0}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{0, 0}
 }
 
 // The job state.
@@ -143,7 +143,7 @@ func (x JobStatus_State) String() string {
 	return proto.EnumName(JobStatus_State_name, int32(x))
 }
 func (JobStatus_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{9, 0}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{9, 0}
 }
 
 // The job substate.
@@ -187,7 +187,7 @@ func (x JobStatus_Substate) String() string {
 	return proto.EnumName(JobStatus_Substate_name, int32(x))
 }
 func (JobStatus_Substate) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{9, 1}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{9, 1}
 }
 
 // The application state, corresponding to
@@ -242,7 +242,7 @@ func (x YarnApplication_State) String() string {
 	return proto.EnumName(YarnApplication_State_name, int32(x))
 }
 func (YarnApplication_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{11, 0}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{11, 0}
 }
 
 // A matcher that specifies categories of job states.
@@ -273,7 +273,7 @@ func (x ListJobsRequest_JobStateMatcher) String() string {
 	return proto.EnumName(ListJobsRequest_JobStateMatcher_name, int32(x))
 }
 func (ListJobsRequest_JobStateMatcher) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{16, 0}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{16, 0}
 }
 
 // The runtime logging config of the job.
@@ -292,7 +292,7 @@ func (m *LoggingConfig) Reset()         { *m = LoggingConfig{} }
 func (m *LoggingConfig) String() string { return proto.CompactTextString(m) }
 func (*LoggingConfig) ProtoMessage()    {}
 func (*LoggingConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{0}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{0}
 }
 func (m *LoggingConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LoggingConfig.Unmarshal(m, b)
@@ -320,8 +320,10 @@ func (m *LoggingConfig) GetDriverLogLevels() map[string]LoggingConfig_Level {
 }
 
 // A Cloud Dataproc job for running
-// [Apache Hadoop MapReduce](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
-// jobs on [Apache Hadoop YARN](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/YARN.html).
+// [Apache Hadoop
+// MapReduce](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)
+// jobs on [Apache Hadoop
+// YARN](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/YARN.html).
 type HadoopJob struct {
 	// Required. Indicates the location of the driver's main class. Specify
 	// either the jar file that contains the main class or the main class name.
@@ -333,8 +335,8 @@ type HadoopJob struct {
 	//	*HadoopJob_MainClass
 	Driver isHadoopJob_Driver `protobuf_oneof:"driver"`
 	// Optional. The arguments to pass to the driver. Do not
-	// include arguments, such as `-libjars` or `-Dfoo=bar`, that can be set as job
-	// properties, since a collision may occur that causes an incorrect job
+	// include arguments, such as `-libjars` or `-Dfoo=bar`, that can be set as
+	// job properties, since a collision may occur that causes an incorrect job
 	// submission.
 	Args []string `protobuf:"bytes,3,rep,name=args,proto3" json:"args,omitempty"`
 	// Optional. Jar file URIs to add to the CLASSPATHs of the
@@ -364,7 +366,7 @@ func (m *HadoopJob) Reset()         { *m = HadoopJob{} }
 func (m *HadoopJob) String() string { return proto.CompactTextString(m) }
 func (*HadoopJob) ProtoMessage()    {}
 func (*HadoopJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{1}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{1}
 }
 func (m *HadoopJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_HadoopJob.Unmarshal(m, b)
@@ -535,7 +537,8 @@ type SparkJob struct {
 	// Required. The specification of the main method to call to drive the job.
 	// Specify either the jar file that contains the main class or the main class
 	// name. To pass both a main jar and a main class in that jar, add the jar to
-	// `CommonJob.jar_file_uris`, and then specify the main class name in `main_class`.
+	// `CommonJob.jar_file_uris`, and then specify the main class name in
+	// `main_class`.
 	//
 	// Types that are valid to be assigned to Driver:
 	//	*SparkJob_MainJarFileUri
@@ -571,7 +574,7 @@ func (m *SparkJob) Reset()         { *m = SparkJob{} }
 func (m *SparkJob) String() string { return proto.CompactTextString(m) }
 func (*SparkJob) ProtoMessage()    {}
 func (*SparkJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{2}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{2}
 }
 func (m *SparkJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SparkJob.Unmarshal(m, b)
@@ -737,7 +740,8 @@ func _SparkJob_OneofSizer(msg proto.Message) (n int) {
 }
 
 // A Cloud Dataproc job for running
-// [Apache PySpark](https://spark.apache.org/docs/0.9.0/python-programming-guide.html)
+// [Apache
+// PySpark](https://spark.apache.org/docs/0.9.0/python-programming-guide.html)
 // applications on YARN.
 type PySparkJob struct {
 	// Required. The HCFS URI of the main Python file to use as the driver. Must
@@ -775,7 +779,7 @@ func (m *PySparkJob) Reset()         { *m = PySparkJob{} }
 func (m *PySparkJob) String() string { return proto.CompactTextString(m) }
 func (*PySparkJob) ProtoMessage()    {}
 func (*PySparkJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{3}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{3}
 }
 func (m *PySparkJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PySparkJob.Unmarshal(m, b)
@@ -877,7 +881,7 @@ func (m *QueryList) Reset()         { *m = QueryList{} }
 func (m *QueryList) String() string { return proto.CompactTextString(m) }
 func (*QueryList) ProtoMessage()    {}
 func (*QueryList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{4}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{4}
 }
 func (m *QueryList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryList.Unmarshal(m, b)
@@ -915,8 +919,8 @@ type HiveJob struct {
 	//	*HiveJob_QueryList
 	Queries isHiveJob_Queries `protobuf_oneof:"queries"`
 	// Optional. Whether to continue executing queries if a query fails.
-	// The default value is `false`. Setting to `true` can be useful when executing
-	// independent parallel queries.
+	// The default value is `false`. Setting to `true` can be useful when
+	// executing independent parallel queries.
 	ContinueOnFailure bool `protobuf:"varint,3,opt,name=continue_on_failure,json=continueOnFailure,proto3" json:"continue_on_failure,omitempty"`
 	// Optional. Mapping of query variable names to values (equivalent to the
 	// Hive command: `SET name="value";`).
@@ -939,7 +943,7 @@ func (m *HiveJob) Reset()         { *m = HiveJob{} }
 func (m *HiveJob) String() string { return proto.CompactTextString(m) }
 func (*HiveJob) ProtoMessage()    {}
 func (*HiveJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{5}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{5}
 }
 func (m *HiveJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_HiveJob.Unmarshal(m, b)
@@ -1094,8 +1098,8 @@ func _HiveJob_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-// A Cloud Dataproc job for running [Apache Spark SQL](http://spark.apache.org/sql/)
-// queries.
+// A Cloud Dataproc job for running [Apache Spark
+// SQL](http://spark.apache.org/sql/) queries.
 type SparkSqlJob struct {
 	// Required. The sequence of Spark SQL queries to execute, specified as
 	// either an HCFS file URI or as a list of queries.
@@ -1124,7 +1128,7 @@ func (m *SparkSqlJob) Reset()         { *m = SparkSqlJob{} }
 func (m *SparkSqlJob) String() string { return proto.CompactTextString(m) }
 func (*SparkSqlJob) ProtoMessage()    {}
 func (*SparkSqlJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{6}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{6}
 }
 func (m *SparkSqlJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SparkSqlJob.Unmarshal(m, b)
@@ -1290,8 +1294,8 @@ type PigJob struct {
 	//	*PigJob_QueryList
 	Queries isPigJob_Queries `protobuf_oneof:"queries"`
 	// Optional. Whether to continue executing queries if a query fails.
-	// The default value is `false`. Setting to `true` can be useful when executing
-	// independent parallel queries.
+	// The default value is `false`. Setting to `true` can be useful when
+	// executing independent parallel queries.
 	ContinueOnFailure bool `protobuf:"varint,3,opt,name=continue_on_failure,json=continueOnFailure,proto3" json:"continue_on_failure,omitempty"`
 	// Optional. Mapping of query variable names to values (equivalent to the Pig
 	// command: `name=[value]`).
@@ -1315,7 +1319,7 @@ func (m *PigJob) Reset()         { *m = PigJob{} }
 func (m *PigJob) String() string { return proto.CompactTextString(m) }
 func (*PigJob) ProtoMessage()    {}
 func (*PigJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{7}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{7}
 }
 func (m *PigJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PigJob.Unmarshal(m, b)
@@ -1493,7 +1497,7 @@ func (m *JobPlacement) Reset()         { *m = JobPlacement{} }
 func (m *JobPlacement) String() string { return proto.CompactTextString(m) }
 func (*JobPlacement) ProtoMessage()    {}
 func (*JobPlacement) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{8}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{8}
 }
 func (m *JobPlacement) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobPlacement.Unmarshal(m, b)
@@ -1548,7 +1552,7 @@ func (m *JobStatus) Reset()         { *m = JobStatus{} }
 func (m *JobStatus) String() string { return proto.CompactTextString(m) }
 func (*JobStatus) ProtoMessage()    {}
 func (*JobStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{9}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{9}
 }
 func (m *JobStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobStatus.Unmarshal(m, b)
@@ -1616,7 +1620,7 @@ func (m *JobReference) Reset()         { *m = JobReference{} }
 func (m *JobReference) String() string { return proto.CompactTextString(m) }
 func (*JobReference) ProtoMessage()    {}
 func (*JobReference) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{10}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{10}
 }
 func (m *JobReference) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobReference.Unmarshal(m, b)
@@ -1676,7 +1680,7 @@ func (m *YarnApplication) Reset()         { *m = YarnApplication{} }
 func (m *YarnApplication) String() string { return proto.CompactTextString(m) }
 func (*YarnApplication) ProtoMessage()    {}
 func (*YarnApplication) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{11}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{11}
 }
 func (m *YarnApplication) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_YarnApplication.Unmarshal(m, b)
@@ -1752,8 +1756,8 @@ type Job struct {
 	StatusHistory []*JobStatus `protobuf:"bytes,13,rep,name=status_history,json=statusHistory,proto3" json:"status_history,omitempty"`
 	// Output only. The collection of YARN applications spun up by this job.
 	//
-	// **Beta** Feature: This report is available for testing purposes only. It may
-	// be changed before final release.
+	// **Beta** Feature: This report is available for testing purposes only. It
+	// may be changed before final release.
 	YarnApplications []*YarnApplication `protobuf:"bytes,9,rep,name=yarn_applications,json=yarnApplications,proto3" json:"yarn_applications,omitempty"`
 	// Output only. The email address of the user submitting the job. For jobs
 	// submitted on the cluster, the address is <code>username@hostname</code>.
@@ -1769,8 +1773,9 @@ type Job struct {
 	// Label **keys** must contain 1 to 63 characters, and must conform to
 	// [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt).
 	// Label **values** may be empty, but, if present, must contain 1 to 63
-	// characters, and must conform to [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt).
-	// No more than 32 labels can be associated with a job.
+	// characters, and must conform to [RFC
+	// 1035](https://www.ietf.org/rfc/rfc1035.txt). No more than 32 labels can be
+	// associated with a job.
 	Labels map[string]string `protobuf:"bytes,18,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Optional. Job scheduling configuration.
 	Scheduling *JobScheduling `protobuf:"bytes,20,opt,name=scheduling,proto3" json:"scheduling,omitempty"`
@@ -1787,7 +1792,7 @@ func (m *Job) Reset()         { *m = Job{} }
 func (m *Job) String() string { return proto.CompactTextString(m) }
 func (*Job) ProtoMessage()    {}
 func (*Job) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{12}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{12}
 }
 func (m *Job) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Job.Unmarshal(m, b)
@@ -2143,7 +2148,7 @@ func (m *JobScheduling) Reset()         { *m = JobScheduling{} }
 func (m *JobScheduling) String() string { return proto.CompactTextString(m) }
 func (*JobScheduling) ProtoMessage()    {}
 func (*JobScheduling) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{13}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{13}
 }
 func (m *JobScheduling) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobScheduling.Unmarshal(m, b)
@@ -2180,9 +2185,10 @@ type SubmitJobRequest struct {
 	// Required. The job resource.
 	Job *Job `protobuf:"bytes,2,opt,name=job,proto3" json:"job,omitempty"`
 	// Optional. A unique id used to identify the request. If the server
-	// receives two [SubmitJobRequest][google.cloud.dataproc.v1beta2.SubmitJobRequest] requests  with the same
-	// id, then the second request will be ignored and the
-	// first [Job][google.cloud.dataproc.v1beta2.Job] created and stored in the backend
+	// receives two
+	// [SubmitJobRequest][google.cloud.dataproc.v1beta2.SubmitJobRequest] requests
+	// with the same id, then the second request will be ignored and the first
+	// [Job][google.cloud.dataproc.v1beta2.Job] created and stored in the backend
 	// is returned.
 	//
 	// It is recommended to always set this value to a
@@ -2200,7 +2206,7 @@ func (m *SubmitJobRequest) Reset()         { *m = SubmitJobRequest{} }
 func (m *SubmitJobRequest) String() string { return proto.CompactTextString(m) }
 func (*SubmitJobRequest) ProtoMessage()    {}
 func (*SubmitJobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{14}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{14}
 }
 func (m *SubmitJobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SubmitJobRequest.Unmarshal(m, b)
@@ -2266,7 +2272,7 @@ func (m *GetJobRequest) Reset()         { *m = GetJobRequest{} }
 func (m *GetJobRequest) String() string { return proto.CompactTextString(m) }
 func (*GetJobRequest) ProtoMessage()    {}
 func (*GetJobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{15}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{15}
 }
 func (m *GetJobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJobRequest.Unmarshal(m, b)
@@ -2351,7 +2357,7 @@ func (m *ListJobsRequest) Reset()         { *m = ListJobsRequest{} }
 func (m *ListJobsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListJobsRequest) ProtoMessage()    {}
 func (*ListJobsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{16}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{16}
 }
 func (m *ListJobsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListJobsRequest.Unmarshal(m, b)
@@ -2447,7 +2453,7 @@ func (m *UpdateJobRequest) Reset()         { *m = UpdateJobRequest{} }
 func (m *UpdateJobRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateJobRequest) ProtoMessage()    {}
 func (*UpdateJobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{17}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{17}
 }
 func (m *UpdateJobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateJobRequest.Unmarshal(m, b)
@@ -2519,7 +2525,7 @@ func (m *ListJobsResponse) Reset()         { *m = ListJobsResponse{} }
 func (m *ListJobsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListJobsResponse) ProtoMessage()    {}
 func (*ListJobsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{18}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{18}
 }
 func (m *ListJobsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListJobsResponse.Unmarshal(m, b)
@@ -2571,7 +2577,7 @@ func (m *CancelJobRequest) Reset()         { *m = CancelJobRequest{} }
 func (m *CancelJobRequest) String() string { return proto.CompactTextString(m) }
 func (*CancelJobRequest) ProtoMessage()    {}
 func (*CancelJobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{19}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{19}
 }
 func (m *CancelJobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelJobRequest.Unmarshal(m, b)
@@ -2630,7 +2636,7 @@ func (m *DeleteJobRequest) Reset()         { *m = DeleteJobRequest{} }
 func (m *DeleteJobRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteJobRequest) ProtoMessage()    {}
 func (*DeleteJobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_jobs_424577be4146c9d4, []int{20}
+	return fileDescriptor_jobs_6da4544893ea0be7, []int{20}
 }
 func (m *DeleteJobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteJobRequest.Unmarshal(m, b)
@@ -2733,7 +2739,8 @@ type JobControllerClient interface {
 	UpdateJob(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*Job, error)
 	// Starts a job cancellation request. To access the job resource
 	// after cancellation, call
-	// [regions/{region}/jobs.list](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/list) or
+	// [regions/{region}/jobs.list](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/list)
+	// or
 	// [regions/{region}/jobs.get](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/get).
 	CancelJob(ctx context.Context, in *CancelJobRequest, opts ...grpc.CallOption) (*Job, error)
 	// Deletes the job from the project. If the job is active, the delete fails,
@@ -2815,7 +2822,8 @@ type JobControllerServer interface {
 	UpdateJob(context.Context, *UpdateJobRequest) (*Job, error)
 	// Starts a job cancellation request. To access the job resource
 	// after cancellation, call
-	// [regions/{region}/jobs.list](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/list) or
+	// [regions/{region}/jobs.list](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/list)
+	// or
 	// [regions/{region}/jobs.get](/dataproc/docs/reference/rest/v1beta2/projects.regions.jobs/get).
 	CancelJob(context.Context, *CancelJobRequest) (*Job, error)
 	// Deletes the job from the project. If the job is active, the delete fails,
@@ -2969,10 +2977,10 @@ var _JobController_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/dataproc/v1beta2/jobs.proto", fileDescriptor_jobs_424577be4146c9d4)
+	proto.RegisterFile("google/cloud/dataproc/v1beta2/jobs.proto", fileDescriptor_jobs_6da4544893ea0be7)
 }
 
-var fileDescriptor_jobs_424577be4146c9d4 = []byte{
+var fileDescriptor_jobs_6da4544893ea0be7 = []byte{
 	// 2341 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x5a, 0xcf, 0x73, 0xdb, 0xc6,
 	0xf5, 0x17, 0x7f, 0x13, 0x8f, 0xfa, 0x01, 0x6d, 0xec, 0x7c, 0xf9, 0xa5, 0x9b, 0x89, 0x82, 0x99,

@@ -56,7 +56,7 @@ func (x Database_State) String() string {
 	return proto.EnumName(Database_State_name, int32(x))
 }
 func (Database_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{0, 0}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{0, 0}
 }
 
 // A Cloud Spanner database.
@@ -78,7 +78,7 @@ func (m *Database) Reset()         { *m = Database{} }
 func (m *Database) String() string { return proto.CompactTextString(m) }
 func (*Database) ProtoMessage()    {}
 func (*Database) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{0}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{0}
 }
 func (m *Database) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Database.Unmarshal(m, b)
@@ -112,7 +112,8 @@ func (m *Database) GetState() Database_State {
 	return Database_STATE_UNSPECIFIED
 }
 
-// The request for [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases].
+// The request for
+// [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases].
 type ListDatabasesRequest struct {
 	// Required. The instance whose databases should be listed.
 	// Values are of the form `projects/<project>/instances/<instance>`.
@@ -121,8 +122,9 @@ type ListDatabasesRequest struct {
 	// defaults to the server's maximum allowed page size.
 	PageSize int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// If non-empty, `page_token` should contain a
-	// [next_page_token][google.spanner.admin.database.v1.ListDatabasesResponse.next_page_token] from a
-	// previous [ListDatabasesResponse][google.spanner.admin.database.v1.ListDatabasesResponse].
+	// [next_page_token][google.spanner.admin.database.v1.ListDatabasesResponse.next_page_token]
+	// from a previous
+	// [ListDatabasesResponse][google.spanner.admin.database.v1.ListDatabasesResponse].
 	PageToken            string   `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -133,7 +135,7 @@ func (m *ListDatabasesRequest) Reset()         { *m = ListDatabasesRequest{} }
 func (m *ListDatabasesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDatabasesRequest) ProtoMessage()    {}
 func (*ListDatabasesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{1}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{1}
 }
 func (m *ListDatabasesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDatabasesRequest.Unmarshal(m, b)
@@ -174,13 +176,14 @@ func (m *ListDatabasesRequest) GetPageToken() string {
 	return ""
 }
 
-// The response for [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases].
+// The response for
+// [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases].
 type ListDatabasesResponse struct {
 	// Databases that matched the request.
 	Databases []*Database `protobuf:"bytes,1,rep,name=databases,proto3" json:"databases,omitempty"`
 	// `next_page_token` can be sent in a subsequent
-	// [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases] call to fetch more
-	// of the matching databases.
+	// [ListDatabases][google.spanner.admin.database.v1.DatabaseAdmin.ListDatabases]
+	// call to fetch more of the matching databases.
 	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -191,7 +194,7 @@ func (m *ListDatabasesResponse) Reset()         { *m = ListDatabasesResponse{} }
 func (m *ListDatabasesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDatabasesResponse) ProtoMessage()    {}
 func (*ListDatabasesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{2}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{2}
 }
 func (m *ListDatabasesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDatabasesResponse.Unmarshal(m, b)
@@ -225,7 +228,8 @@ func (m *ListDatabasesResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request for [CreateDatabase][google.spanner.admin.database.v1.DatabaseAdmin.CreateDatabase].
+// The request for
+// [CreateDatabase][google.spanner.admin.database.v1.DatabaseAdmin.CreateDatabase].
 type CreateDatabaseRequest struct {
 	// Required. The name of the instance that will serve the new database.
 	// Values are of the form `projects/<project>/instances/<instance>`.
@@ -250,7 +254,7 @@ func (m *CreateDatabaseRequest) Reset()         { *m = CreateDatabaseRequest{} }
 func (m *CreateDatabaseRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateDatabaseRequest) ProtoMessage()    {}
 func (*CreateDatabaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{3}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{3}
 }
 func (m *CreateDatabaseRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDatabaseRequest.Unmarshal(m, b)
@@ -305,7 +309,7 @@ func (m *CreateDatabaseMetadata) Reset()         { *m = CreateDatabaseMetadata{}
 func (m *CreateDatabaseMetadata) String() string { return proto.CompactTextString(m) }
 func (*CreateDatabaseMetadata) ProtoMessage()    {}
 func (*CreateDatabaseMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{4}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{4}
 }
 func (m *CreateDatabaseMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDatabaseMetadata.Unmarshal(m, b)
@@ -332,7 +336,8 @@ func (m *CreateDatabaseMetadata) GetDatabase() string {
 	return ""
 }
 
-// The request for [GetDatabase][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabase].
+// The request for
+// [GetDatabase][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabase].
 type GetDatabaseRequest struct {
 	// Required. The name of the requested database. Values are of the form
 	// `projects/<project>/instances/<instance>/databases/<database>`.
@@ -346,7 +351,7 @@ func (m *GetDatabaseRequest) Reset()         { *m = GetDatabaseRequest{} }
 func (m *GetDatabaseRequest) String() string { return proto.CompactTextString(m) }
 func (*GetDatabaseRequest) ProtoMessage()    {}
 func (*GetDatabaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{5}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{5}
 }
 func (m *GetDatabaseRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDatabaseRequest.Unmarshal(m, b)
@@ -387,8 +392,8 @@ func (m *GetDatabaseRequest) GetName() string {
 // Each batch of statements is assigned a name which can be used with
 // the [Operations][google.longrunning.Operations] API to monitor
 // progress. See the
-// [operation_id][google.spanner.admin.database.v1.UpdateDatabaseDdlRequest.operation_id] field for more
-// details.
+// [operation_id][google.spanner.admin.database.v1.UpdateDatabaseDdlRequest.operation_id]
+// field for more details.
 type UpdateDatabaseDdlRequest struct {
 	// Required. The database to update.
 	Database string `protobuf:"bytes,1,opt,name=database,proto3" json:"database,omitempty"`
@@ -401,18 +406,20 @@ type UpdateDatabaseDdlRequest struct {
 	//
 	// Specifying an explicit operation ID simplifies determining
 	// whether the statements were executed in the event that the
-	// [UpdateDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.UpdateDatabaseDdl] call is replayed,
-	// or the return value is otherwise lost: the [database][google.spanner.admin.database.v1.UpdateDatabaseDdlRequest.database] and
-	// `operation_id` fields can be combined to form the
+	// [UpdateDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.UpdateDatabaseDdl]
+	// call is replayed, or the return value is otherwise lost: the
+	// [database][google.spanner.admin.database.v1.UpdateDatabaseDdlRequest.database]
+	// and `operation_id` fields can be combined to form the
 	// [name][google.longrunning.Operation.name] of the resulting
-	// [longrunning.Operation][google.longrunning.Operation]: `<database>/operations/<operation_id>`.
+	// [longrunning.Operation][google.longrunning.Operation]:
+	// `<database>/operations/<operation_id>`.
 	//
 	// `operation_id` should be unique within the database, and must be
 	// a valid identifier: `[a-z][a-z0-9_]*`. Note that
 	// automatically-generated operation IDs always begin with an
 	// underscore. If the named operation already exists,
-	// [UpdateDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.UpdateDatabaseDdl] returns
-	// `ALREADY_EXISTS`.
+	// [UpdateDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.UpdateDatabaseDdl]
+	// returns `ALREADY_EXISTS`.
 	OperationId          string   `protobuf:"bytes,3,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -423,7 +430,7 @@ func (m *UpdateDatabaseDdlRequest) Reset()         { *m = UpdateDatabaseDdlReque
 func (m *UpdateDatabaseDdlRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateDatabaseDdlRequest) ProtoMessage()    {}
 func (*UpdateDatabaseDdlRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{6}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{6}
 }
 func (m *UpdateDatabaseDdlRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDatabaseDdlRequest.Unmarshal(m, b)
@@ -485,7 +492,7 @@ func (m *UpdateDatabaseDdlMetadata) Reset()         { *m = UpdateDatabaseDdlMeta
 func (m *UpdateDatabaseDdlMetadata) String() string { return proto.CompactTextString(m) }
 func (*UpdateDatabaseDdlMetadata) ProtoMessage()    {}
 func (*UpdateDatabaseDdlMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{7}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{7}
 }
 func (m *UpdateDatabaseDdlMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDatabaseDdlMetadata.Unmarshal(m, b)
@@ -526,7 +533,8 @@ func (m *UpdateDatabaseDdlMetadata) GetCommitTimestamps() []*timestamp.Timestamp
 	return nil
 }
 
-// The request for [DropDatabase][google.spanner.admin.database.v1.DatabaseAdmin.DropDatabase].
+// The request for
+// [DropDatabase][google.spanner.admin.database.v1.DatabaseAdmin.DropDatabase].
 type DropDatabaseRequest struct {
 	// Required. The database to be dropped.
 	Database             string   `protobuf:"bytes,1,opt,name=database,proto3" json:"database,omitempty"`
@@ -539,7 +547,7 @@ func (m *DropDatabaseRequest) Reset()         { *m = DropDatabaseRequest{} }
 func (m *DropDatabaseRequest) String() string { return proto.CompactTextString(m) }
 func (*DropDatabaseRequest) ProtoMessage()    {}
 func (*DropDatabaseRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{8}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{8}
 }
 func (m *DropDatabaseRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DropDatabaseRequest.Unmarshal(m, b)
@@ -566,7 +574,8 @@ func (m *DropDatabaseRequest) GetDatabase() string {
 	return ""
 }
 
-// The request for [GetDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabaseDdl].
+// The request for
+// [GetDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabaseDdl].
 type GetDatabaseDdlRequest struct {
 	// Required. The database whose schema we wish to get.
 	Database             string   `protobuf:"bytes,1,opt,name=database,proto3" json:"database,omitempty"`
@@ -579,7 +588,7 @@ func (m *GetDatabaseDdlRequest) Reset()         { *m = GetDatabaseDdlRequest{} }
 func (m *GetDatabaseDdlRequest) String() string { return proto.CompactTextString(m) }
 func (*GetDatabaseDdlRequest) ProtoMessage()    {}
 func (*GetDatabaseDdlRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{9}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{9}
 }
 func (m *GetDatabaseDdlRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDatabaseDdlRequest.Unmarshal(m, b)
@@ -606,7 +615,8 @@ func (m *GetDatabaseDdlRequest) GetDatabase() string {
 	return ""
 }
 
-// The response for [GetDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabaseDdl].
+// The response for
+// [GetDatabaseDdl][google.spanner.admin.database.v1.DatabaseAdmin.GetDatabaseDdl].
 type GetDatabaseDdlResponse struct {
 	// A list of formatted DDL statements defining the schema of the database
 	// specified in the request.
@@ -620,7 +630,7 @@ func (m *GetDatabaseDdlResponse) Reset()         { *m = GetDatabaseDdlResponse{}
 func (m *GetDatabaseDdlResponse) String() string { return proto.CompactTextString(m) }
 func (*GetDatabaseDdlResponse) ProtoMessage()    {}
 func (*GetDatabaseDdlResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_database_admin_db75fb46f8a72a5d, []int{10}
+	return fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2, []int{10}
 }
 func (m *GetDatabaseDdlResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDatabaseDdlResponse.Unmarshal(m, b)
@@ -681,8 +691,8 @@ type DatabaseAdminClient interface {
 	// have a name of the format `<database_name>/operations/<operation_id>` and
 	// can be used to track preparation of the database. The
 	// [metadata][google.longrunning.Operation.metadata] field type is
-	// [CreateDatabaseMetadata][google.spanner.admin.database.v1.CreateDatabaseMetadata]. The
-	// [response][google.longrunning.Operation.response] field type is
+	// [CreateDatabaseMetadata][google.spanner.admin.database.v1.CreateDatabaseMetadata].
+	// The [response][google.longrunning.Operation.response] field type is
 	// [Database][google.spanner.admin.database.v1.Database], if successful.
 	CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 	// Gets the state of a Cloud Spanner database.
@@ -693,7 +703,8 @@ type DatabaseAdminClient interface {
 	// the format `<database_name>/operations/<operation_id>` and can be used to
 	// track execution of the schema change(s). The
 	// [metadata][google.longrunning.Operation.metadata] field type is
-	// [UpdateDatabaseDdlMetadata][google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata].  The operation has no response.
+	// [UpdateDatabaseDdlMetadata][google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata].
+	// The operation has no response.
 	UpdateDatabaseDdl(ctx context.Context, in *UpdateDatabaseDdlRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 	// Drops (aka deletes) a Cloud Spanner database.
 	DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -820,8 +831,8 @@ type DatabaseAdminServer interface {
 	// have a name of the format `<database_name>/operations/<operation_id>` and
 	// can be used to track preparation of the database. The
 	// [metadata][google.longrunning.Operation.metadata] field type is
-	// [CreateDatabaseMetadata][google.spanner.admin.database.v1.CreateDatabaseMetadata]. The
-	// [response][google.longrunning.Operation.response] field type is
+	// [CreateDatabaseMetadata][google.spanner.admin.database.v1.CreateDatabaseMetadata].
+	// The [response][google.longrunning.Operation.response] field type is
 	// [Database][google.spanner.admin.database.v1.Database], if successful.
 	CreateDatabase(context.Context, *CreateDatabaseRequest) (*longrunning.Operation, error)
 	// Gets the state of a Cloud Spanner database.
@@ -832,7 +843,8 @@ type DatabaseAdminServer interface {
 	// the format `<database_name>/operations/<operation_id>` and can be used to
 	// track execution of the schema change(s). The
 	// [metadata][google.longrunning.Operation.metadata] field type is
-	// [UpdateDatabaseDdlMetadata][google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata].  The operation has no response.
+	// [UpdateDatabaseDdlMetadata][google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata].
+	// The operation has no response.
 	UpdateDatabaseDdl(context.Context, *UpdateDatabaseDdlRequest) (*longrunning.Operation, error)
 	// Drops (aka deletes) a Cloud Spanner database.
 	DropDatabase(context.Context, *DropDatabaseRequest) (*empty.Empty, error)
@@ -1073,10 +1085,10 @@ var _DatabaseAdmin_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/spanner/admin/database/v1/spanner_database_admin.proto", fileDescriptor_spanner_database_admin_db75fb46f8a72a5d)
+	proto.RegisterFile("google/spanner/admin/database/v1/spanner_database_admin.proto", fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2)
 }
 
-var fileDescriptor_spanner_database_admin_db75fb46f8a72a5d = []byte{
+var fileDescriptor_spanner_database_admin_76a8e9b4127ff6b2 = []byte{
 	// 1033 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x96, 0xcf, 0x6f, 0x1b, 0x45,
 	0x14, 0xc7, 0x19, 0xa7, 0xa9, 0x92, 0x17, 0x27, 0x75, 0x06, 0x1c, 0xb9, 0x5b, 0x5a, 0xcc, 0x82,

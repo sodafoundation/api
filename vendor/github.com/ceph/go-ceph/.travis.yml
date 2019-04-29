@@ -1,7 +1,9 @@
-dist: trusty
 sudo: required
-
 language: go
+dist:     trusty
+
+services:
+  - docker
 
 branches:
   except:
@@ -9,18 +11,25 @@ branches:
 
 matrix:
   include:
-    - env: CEPH_RELEASE=jewel
-    - env: CEPH_RELEASE=kraken
+    - env: CEPH_VERSION=luminous
+    - env: CEPH_VERSION=mimic
 
-before_install:
-  - sudo apt-get update
-  - ci/before_install.sh
-  - bash ci/micro-osd.sh /tmp/micro-ceph
-  - export CEPH_CONF=/tmp/micro-ceph/ceph.conf
-  - ceph status
+before_install: |
+  if [[ "${CEPH_VERSION}" == "luminous" ]]; then
+    docker build --build-arg CEPH_REPO_URL=https://download.ceph.com/debian-luminous/ -t ceph-golang-ci .
+  elif [[ "${CEPH_VERSION}" == "mimic" ]]; then
+    docker build --build-arg CEPH_REPO_URL=https://download.ceph.com/debian-mimic/ -t ceph-golang-ci .
+  else
+    echo "unsupported ceph version"
+    exit 1
+  fi
 
+before_script:
+  - go get golang.org/x/lint/golint
+
+# cephfs (fuse) requires: --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined
 script:
-  - go get -t -v ./...
-  - go list ./...
-  - go test -v $(go list ./... | grep -v cephfs)
-  - go fmt ./...
+  - docker run --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined --rm -it -v ${PWD}:/go/src/github.com/ceph/go-ceph:z ceph-golang-ci
+# run golint and other style checks
+  - go get golang.org/x/lint/golint
+  - make check

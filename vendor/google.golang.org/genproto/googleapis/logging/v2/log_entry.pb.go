@@ -129,7 +129,7 @@ func (m *LogEntry) Reset()         { *m = LogEntry{} }
 func (m *LogEntry) String() string { return proto.CompactTextString(m) }
 func (*LogEntry) ProtoMessage()    {}
 func (*LogEntry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_log_entry_b08f6591d9b77388, []int{0}
+	return fileDescriptor_log_entry_b0004bedc6419a9f, []int{0}
 }
 func (m *LogEntry) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LogEntry.Unmarshal(m, b)
@@ -409,7 +409,7 @@ func (m *LogEntryOperation) Reset()         { *m = LogEntryOperation{} }
 func (m *LogEntryOperation) String() string { return proto.CompactTextString(m) }
 func (*LogEntryOperation) ProtoMessage()    {}
 func (*LogEntryOperation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_log_entry_b08f6591d9b77388, []int{1}
+	return fileDescriptor_log_entry_b0004bedc6419a9f, []int{1}
 }
 func (m *LogEntryOperation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LogEntryOperation.Unmarshal(m, b)
@@ -482,7 +482,7 @@ func (m *LogEntrySourceLocation) Reset()         { *m = LogEntrySourceLocation{}
 func (m *LogEntrySourceLocation) String() string { return proto.CompactTextString(m) }
 func (*LogEntrySourceLocation) ProtoMessage()    {}
 func (*LogEntrySourceLocation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_log_entry_b08f6591d9b77388, []int{2}
+	return fileDescriptor_log_entry_b0004bedc6419a9f, []int{2}
 }
 func (m *LogEntrySourceLocation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LogEntrySourceLocation.Unmarshal(m, b)
@@ -531,10 +531,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/logging/v2/log_entry.proto", fileDescriptor_log_entry_b08f6591d9b77388)
+	proto.RegisterFile("google/logging/v2/log_entry.proto", fileDescriptor_log_entry_b0004bedc6419a9f)
 }
 
-var fileDescriptor_log_entry_b08f6591d9b77388 = []byte{
+var fileDescriptor_log_entry_b0004bedc6419a9f = []byte{
 	// 772 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x55, 0xdd, 0x8e, 0xdb, 0x44,
 	0x14, 0xae, 0x93, 0xb2, 0x71, 0x26, 0xd9, 0x6d, 0x77, 0x54, 0x1a, 0x6f, 0x5a, 0x20, 0x6c, 0xf9,

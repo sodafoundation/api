@@ -46,7 +46,7 @@ func (m *WebDetection) Reset()         { *m = WebDetection{} }
 func (m *WebDetection) String() string { return proto.CompactTextString(m) }
 func (*WebDetection) ProtoMessage()    {}
 func (*WebDetection) Descriptor() ([]byte, []int) {
-	return fileDescriptor_web_detection_dedc4c65ef68a35a, []int{0}
+	return fileDescriptor_web_detection_0c8ffa3ff7324a9d, []int{0}
 }
 func (m *WebDetection) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WebDetection.Unmarshal(m, b)
@@ -126,7 +126,7 @@ func (m *WebDetection_WebEntity) Reset()         { *m = WebDetection_WebEntity{}
 func (m *WebDetection_WebEntity) String() string { return proto.CompactTextString(m) }
 func (*WebDetection_WebEntity) ProtoMessage()    {}
 func (*WebDetection_WebEntity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_web_detection_dedc4c65ef68a35a, []int{0, 0}
+	return fileDescriptor_web_detection_0c8ffa3ff7324a9d, []int{0, 0}
 }
 func (m *WebDetection_WebEntity) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WebDetection_WebEntity.Unmarshal(m, b)
@@ -182,7 +182,7 @@ func (m *WebDetection_WebImage) Reset()         { *m = WebDetection_WebImage{} }
 func (m *WebDetection_WebImage) String() string { return proto.CompactTextString(m) }
 func (*WebDetection_WebImage) ProtoMessage()    {}
 func (*WebDetection_WebImage) Descriptor() ([]byte, []int) {
-	return fileDescriptor_web_detection_dedc4c65ef68a35a, []int{0, 1}
+	return fileDescriptor_web_detection_0c8ffa3ff7324a9d, []int{0, 1}
 }
 func (m *WebDetection_WebImage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WebDetection_WebImage.Unmarshal(m, b)
@@ -241,7 +241,7 @@ func (m *WebDetection_WebPage) Reset()         { *m = WebDetection_WebPage{} }
 func (m *WebDetection_WebPage) String() string { return proto.CompactTextString(m) }
 func (*WebDetection_WebPage) ProtoMessage()    {}
 func (*WebDetection_WebPage) Descriptor() ([]byte, []int) {
-	return fileDescriptor_web_detection_dedc4c65ef68a35a, []int{0, 2}
+	return fileDescriptor_web_detection_0c8ffa3ff7324a9d, []int{0, 2}
 }
 func (m *WebDetection_WebPage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WebDetection_WebPage.Unmarshal(m, b)
@@ -313,7 +313,7 @@ func (m *WebDetection_WebLabel) Reset()         { *m = WebDetection_WebLabel{} }
 func (m *WebDetection_WebLabel) String() string { return proto.CompactTextString(m) }
 func (*WebDetection_WebLabel) ProtoMessage()    {}
 func (*WebDetection_WebLabel) Descriptor() ([]byte, []int) {
-	return fileDescriptor_web_detection_dedc4c65ef68a35a, []int{0, 3}
+	return fileDescriptor_web_detection_0c8ffa3ff7324a9d, []int{0, 3}
 }
 func (m *WebDetection_WebLabel) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WebDetection_WebLabel.Unmarshal(m, b)
@@ -356,10 +356,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/vision/v1/web_detection.proto", fileDescriptor_web_detection_dedc4c65ef68a35a)
+	proto.RegisterFile("google/cloud/vision/v1/web_detection.proto", fileDescriptor_web_detection_0c8ffa3ff7324a9d)
 }
 
-var fileDescriptor_web_detection_dedc4c65ef68a35a = []byte{
+var fileDescriptor_web_detection_0c8ffa3ff7324a9d = []byte{
 	// 512 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x94, 0x51, 0x6f, 0xd3, 0x30,
 	0x10, 0xc7, 0x95, 0xb6, 0x1b, 0xad, 0x5b, 0x04, 0xb3, 0x06, 0x8b, 0x02, 0x48, 0x15, 0xbc, 0x54,

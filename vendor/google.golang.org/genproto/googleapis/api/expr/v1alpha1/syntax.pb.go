@@ -36,7 +36,7 @@ func (m *ParsedExpr) Reset()         { *m = ParsedExpr{} }
 func (m *ParsedExpr) String() string { return proto.CompactTextString(m) }
 func (*ParsedExpr) ProtoMessage()    {}
 func (*ParsedExpr) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{0}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{0}
 }
 func (m *ParsedExpr) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParsedExpr.Unmarshal(m, b)
@@ -112,7 +112,7 @@ func (m *Expr) Reset()         { *m = Expr{} }
 func (m *Expr) String() string { return proto.CompactTextString(m) }
 func (*Expr) ProtoMessage()    {}
 func (*Expr) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1}
 }
 func (m *Expr) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr.Unmarshal(m, b)
@@ -427,7 +427,7 @@ func (m *Expr_Ident) Reset()         { *m = Expr_Ident{} }
 func (m *Expr_Ident) String() string { return proto.CompactTextString(m) }
 func (*Expr_Ident) ProtoMessage()    {}
 func (*Expr_Ident) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 0}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 0}
 }
 func (m *Expr_Ident) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_Ident.Unmarshal(m, b)
@@ -479,7 +479,7 @@ func (m *Expr_Select) Reset()         { *m = Expr_Select{} }
 func (m *Expr_Select) String() string { return proto.CompactTextString(m) }
 func (*Expr_Select) ProtoMessage()    {}
 func (*Expr_Select) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 1}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 1}
 }
 func (m *Expr_Select) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_Select.Unmarshal(m, b)
@@ -540,7 +540,7 @@ func (m *Expr_Call) Reset()         { *m = Expr_Call{} }
 func (m *Expr_Call) String() string { return proto.CompactTextString(m) }
 func (*Expr_Call) ProtoMessage()    {}
 func (*Expr_Call) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 2}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 2}
 }
 func (m *Expr_Call) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_Call.Unmarshal(m, b)
@@ -597,7 +597,7 @@ func (m *Expr_CreateList) Reset()         { *m = Expr_CreateList{} }
 func (m *Expr_CreateList) String() string { return proto.CompactTextString(m) }
 func (*Expr_CreateList) ProtoMessage()    {}
 func (*Expr_CreateList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 3}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 3}
 }
 func (m *Expr_CreateList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_CreateList.Unmarshal(m, b)
@@ -644,7 +644,7 @@ func (m *Expr_CreateStruct) Reset()         { *m = Expr_CreateStruct{} }
 func (m *Expr_CreateStruct) String() string { return proto.CompactTextString(m) }
 func (*Expr_CreateStruct) ProtoMessage()    {}
 func (*Expr_CreateStruct) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 4}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 4}
 }
 func (m *Expr_CreateStruct) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_CreateStruct.Unmarshal(m, b)
@@ -701,7 +701,7 @@ func (m *Expr_CreateStruct_Entry) Reset()         { *m = Expr_CreateStruct_Entry
 func (m *Expr_CreateStruct_Entry) String() string { return proto.CompactTextString(m) }
 func (*Expr_CreateStruct_Entry) ProtoMessage()    {}
 func (*Expr_CreateStruct_Entry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 4, 0}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 4, 0}
 }
 func (m *Expr_CreateStruct_Entry) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_CreateStruct_Entry.Unmarshal(m, b)
@@ -899,7 +899,7 @@ func (m *Expr_Comprehension) Reset()         { *m = Expr_Comprehension{} }
 func (m *Expr_Comprehension) String() string { return proto.CompactTextString(m) }
 func (*Expr_Comprehension) ProtoMessage()    {}
 func (*Expr_Comprehension) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{1, 5}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{1, 5}
 }
 func (m *Expr_Comprehension) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Expr_Comprehension.Unmarshal(m, b)
@@ -1005,7 +1005,7 @@ func (m *Constant) Reset()         { *m = Constant{} }
 func (m *Constant) String() string { return proto.CompactTextString(m) }
 func (*Constant) ProtoMessage()    {}
 func (*Constant) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{2}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{2}
 }
 func (m *Constant) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Constant.Unmarshal(m, b)
@@ -1359,7 +1359,7 @@ func (m *SourceInfo) Reset()         { *m = SourceInfo{} }
 func (m *SourceInfo) String() string { return proto.CompactTextString(m) }
 func (*SourceInfo) ProtoMessage()    {}
 func (*SourceInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{3}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{3}
 }
 func (m *SourceInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SourceInfo.Unmarshal(m, b)
@@ -1428,7 +1428,7 @@ func (m *SourcePosition) Reset()         { *m = SourcePosition{} }
 func (m *SourcePosition) String() string { return proto.CompactTextString(m) }
 func (*SourcePosition) ProtoMessage()    {}
 func (*SourcePosition) Descriptor() ([]byte, []int) {
-	return fileDescriptor_syntax_50d37e08f43ffeca, []int{4}
+	return fileDescriptor_syntax_c21dd3f8bb00852d, []int{4}
 }
 func (m *SourcePosition) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SourcePosition.Unmarshal(m, b)
@@ -1493,10 +1493,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/api/expr/v1alpha1/syntax.proto", fileDescriptor_syntax_50d37e08f43ffeca)
+	proto.RegisterFile("google/api/expr/v1alpha1/syntax.proto", fileDescriptor_syntax_c21dd3f8bb00852d)
 }
 
-var fileDescriptor_syntax_50d37e08f43ffeca = []byte{
+var fileDescriptor_syntax_c21dd3f8bb00852d = []byte{
 	// 1134 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0xcf, 0x6e, 0x1b, 0xb7,
 	0x13, 0xd6, 0xea, 0x9f, 0xb5, 0x23, 0x5b, 0xf9, 0xfd, 0x88, 0xa2, 0x50, 0x36, 0x69, 0xe2, 0x38,

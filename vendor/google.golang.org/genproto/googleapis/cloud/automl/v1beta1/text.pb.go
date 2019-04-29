@@ -33,7 +33,7 @@ func (m *TextClassificationDatasetMetadata) Reset()         { *m = TextClassific
 func (m *TextClassificationDatasetMetadata) String() string { return proto.CompactTextString(m) }
 func (*TextClassificationDatasetMetadata) ProtoMessage()    {}
 func (*TextClassificationDatasetMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_text_6aaf13d2f30170b9, []int{0}
+	return fileDescriptor_text_15092de8f39c6a71, []int{0}
 }
 func (m *TextClassificationDatasetMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TextClassificationDatasetMetadata.Unmarshal(m, b)
@@ -71,7 +71,7 @@ func (m *TextClassificationModelMetadata) Reset()         { *m = TextClassificat
 func (m *TextClassificationModelMetadata) String() string { return proto.CompactTextString(m) }
 func (*TextClassificationModelMetadata) ProtoMessage()    {}
 func (*TextClassificationModelMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_text_6aaf13d2f30170b9, []int{1}
+	return fileDescriptor_text_15092de8f39c6a71, []int{1}
 }
 func (m *TextClassificationModelMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TextClassificationModelMetadata.Unmarshal(m, b)
@@ -91,32 +91,179 @@ func (m *TextClassificationModelMetadata) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_TextClassificationModelMetadata proto.InternalMessageInfo
 
+// Dataset metadata that is specific to text extraction
+type TextExtractionDatasetMetadata struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TextExtractionDatasetMetadata) Reset()         { *m = TextExtractionDatasetMetadata{} }
+func (m *TextExtractionDatasetMetadata) String() string { return proto.CompactTextString(m) }
+func (*TextExtractionDatasetMetadata) ProtoMessage()    {}
+func (*TextExtractionDatasetMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_text_15092de8f39c6a71, []int{2}
+}
+func (m *TextExtractionDatasetMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TextExtractionDatasetMetadata.Unmarshal(m, b)
+}
+func (m *TextExtractionDatasetMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TextExtractionDatasetMetadata.Marshal(b, m, deterministic)
+}
+func (dst *TextExtractionDatasetMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TextExtractionDatasetMetadata.Merge(dst, src)
+}
+func (m *TextExtractionDatasetMetadata) XXX_Size() int {
+	return xxx_messageInfo_TextExtractionDatasetMetadata.Size(m)
+}
+func (m *TextExtractionDatasetMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_TextExtractionDatasetMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TextExtractionDatasetMetadata proto.InternalMessageInfo
+
+// Model metadata that is specific to text extraction.
+type TextExtractionModelMetadata struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TextExtractionModelMetadata) Reset()         { *m = TextExtractionModelMetadata{} }
+func (m *TextExtractionModelMetadata) String() string { return proto.CompactTextString(m) }
+func (*TextExtractionModelMetadata) ProtoMessage()    {}
+func (*TextExtractionModelMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_text_15092de8f39c6a71, []int{3}
+}
+func (m *TextExtractionModelMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TextExtractionModelMetadata.Unmarshal(m, b)
+}
+func (m *TextExtractionModelMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TextExtractionModelMetadata.Marshal(b, m, deterministic)
+}
+func (dst *TextExtractionModelMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TextExtractionModelMetadata.Merge(dst, src)
+}
+func (m *TextExtractionModelMetadata) XXX_Size() int {
+	return xxx_messageInfo_TextExtractionModelMetadata.Size(m)
+}
+func (m *TextExtractionModelMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_TextExtractionModelMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TextExtractionModelMetadata proto.InternalMessageInfo
+
+// Dataset metadata for text sentiment.
+type TextSentimentDatasetMetadata struct {
+	// Required.
+	// A sentiment is expressed as an integer ordinal, where higher value
+	// means a more positive sentiment. The range of sentiments that will be used
+	// is between 0 and sentiment_max (inclusive on both ends), and all the values
+	// in the range must be represented in the dataset before a model can be
+	// created.
+	// sentiment_max value must be between 1 and 10 (inclusive).
+	SentimentMax         int32    `protobuf:"varint,1,opt,name=sentiment_max,json=sentimentMax,proto3" json:"sentiment_max,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TextSentimentDatasetMetadata) Reset()         { *m = TextSentimentDatasetMetadata{} }
+func (m *TextSentimentDatasetMetadata) String() string { return proto.CompactTextString(m) }
+func (*TextSentimentDatasetMetadata) ProtoMessage()    {}
+func (*TextSentimentDatasetMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_text_15092de8f39c6a71, []int{4}
+}
+func (m *TextSentimentDatasetMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TextSentimentDatasetMetadata.Unmarshal(m, b)
+}
+func (m *TextSentimentDatasetMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TextSentimentDatasetMetadata.Marshal(b, m, deterministic)
+}
+func (dst *TextSentimentDatasetMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TextSentimentDatasetMetadata.Merge(dst, src)
+}
+func (m *TextSentimentDatasetMetadata) XXX_Size() int {
+	return xxx_messageInfo_TextSentimentDatasetMetadata.Size(m)
+}
+func (m *TextSentimentDatasetMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_TextSentimentDatasetMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TextSentimentDatasetMetadata proto.InternalMessageInfo
+
+func (m *TextSentimentDatasetMetadata) GetSentimentMax() int32 {
+	if m != nil {
+		return m.SentimentMax
+	}
+	return 0
+}
+
+// Model metadata that is specific to text classification.
+type TextSentimentModelMetadata struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TextSentimentModelMetadata) Reset()         { *m = TextSentimentModelMetadata{} }
+func (m *TextSentimentModelMetadata) String() string { return proto.CompactTextString(m) }
+func (*TextSentimentModelMetadata) ProtoMessage()    {}
+func (*TextSentimentModelMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_text_15092de8f39c6a71, []int{5}
+}
+func (m *TextSentimentModelMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TextSentimentModelMetadata.Unmarshal(m, b)
+}
+func (m *TextSentimentModelMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TextSentimentModelMetadata.Marshal(b, m, deterministic)
+}
+func (dst *TextSentimentModelMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TextSentimentModelMetadata.Merge(dst, src)
+}
+func (m *TextSentimentModelMetadata) XXX_Size() int {
+	return xxx_messageInfo_TextSentimentModelMetadata.Size(m)
+}
+func (m *TextSentimentModelMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_TextSentimentModelMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TextSentimentModelMetadata proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*TextClassificationDatasetMetadata)(nil), "google.cloud.automl.v1beta1.TextClassificationDatasetMetadata")
 	proto.RegisterType((*TextClassificationModelMetadata)(nil), "google.cloud.automl.v1beta1.TextClassificationModelMetadata")
+	proto.RegisterType((*TextExtractionDatasetMetadata)(nil), "google.cloud.automl.v1beta1.TextExtractionDatasetMetadata")
+	proto.RegisterType((*TextExtractionModelMetadata)(nil), "google.cloud.automl.v1beta1.TextExtractionModelMetadata")
+	proto.RegisterType((*TextSentimentDatasetMetadata)(nil), "google.cloud.automl.v1beta1.TextSentimentDatasetMetadata")
+	proto.RegisterType((*TextSentimentModelMetadata)(nil), "google.cloud.automl.v1beta1.TextSentimentModelMetadata")
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/automl/v1beta1/text.proto", fileDescriptor_text_6aaf13d2f30170b9)
+	proto.RegisterFile("google/cloud/automl/v1beta1/text.proto", fileDescriptor_text_15092de8f39c6a71)
 }
 
-var fileDescriptor_text_6aaf13d2f30170b9 = []byte{
-	// 265 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x90, 0x31, 0x4b, 0x03, 0x41,
-	0x10, 0x85, 0x39, 0x0b, 0xc1, 0x2b, 0x2c, 0xce, 0x46, 0x12, 0x21, 0x26, 0x85, 0x58, 0xed, 0x1a,
-	0x2d, 0xad, 0x92, 0x08, 0x56, 0x07, 0x41, 0x82, 0x85, 0x1c, 0xe8, 0xe4, 0x6e, 0x5c, 0x16, 0x36,
-	0x3b, 0x4b, 0x76, 0x4e, 0x92, 0x1f, 0x60, 0xed, 0xff, 0xf2, 0x57, 0xc9, 0xed, 0x9e, 0xc5, 0x91,
-	0x70, 0xe5, 0xee, 0x7c, 0xef, 0xcd, 0x7b, 0x93, 0xde, 0x28, 0x22, 0x65, 0x50, 0x96, 0x86, 0xea,
-	0x4a, 0x42, 0xcd, 0xb4, 0x31, 0xf2, 0x6b, 0xba, 0x46, 0x86, 0xa9, 0x64, 0xdc, 0xb1, 0x70, 0x5b,
-	0x62, 0xca, 0x86, 0x91, 0x13, 0x81, 0x13, 0x91, 0x13, 0x2d, 0x37, 0xb8, 0x6a, 0x4d, 0xc0, 0x69,
-	0x09, 0xd6, 0x12, 0x03, 0x6b, 0xb2, 0x3e, 0x4a, 0x07, 0x77, 0x7d, 0x2b, 0x4a, 0x03, 0xde, 0xeb,
-	0x4f, 0x5d, 0x06, 0x49, 0x54, 0x4c, 0xbe, 0x93, 0x74, 0xbc, 0xc2, 0x1d, 0x2f, 0x3a, 0xc3, 0x27,
-	0x60, 0xf0, 0xc8, 0x39, 0x32, 0x54, 0xc0, 0x90, 0x7d, 0xa4, 0x17, 0x5d, 0xf5, 0x3b, 0xef, 0x1d,
-	0x5e, 0x26, 0xd7, 0xc9, 0xed, 0xf9, 0xbd, 0x14, 0x3d, 0x81, 0x45, 0xd7, 0x78, 0xb5, 0x77, 0xf8,
-	0x92, 0x95, 0x07, 0x7f, 0x93, 0x71, 0x3a, 0x3a, 0x8c, 0x91, 0x53, 0x85, 0xe6, 0x3f, 0xc4, 0xfc,
-	0x27, 0x49, 0x47, 0x25, 0x6d, 0xfa, 0xb6, 0xcd, 0xcf, 0x1a, 0x93, 0x65, 0xd3, 0x6c, 0x99, 0xbc,
-	0xcd, 0x5a, 0x52, 0x91, 0x01, 0xab, 0x04, 0x6d, 0x95, 0x54, 0x68, 0x43, 0x6f, 0x19, 0x47, 0xe0,
-	0xb4, 0x3f, 0x7a, 0xac, 0xc7, 0xf8, 0xfc, 0x3d, 0x19, 0x3e, 0x07, 0xb0, 0x58, 0x34, 0x50, 0x31,
-	0xab, 0x99, 0x72, 0x53, 0xbc, 0x46, 0x68, 0x7d, 0x1a, 0xbc, 0x1e, 0xfe, 0x02, 0x00, 0x00, 0xff,
-	0xff, 0x24, 0xf6, 0x56, 0x97, 0xda, 0x01, 0x00, 0x00,
+var fileDescriptor_text_15092de8f39c6a71 = []byte{
+	// 322 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0x4f, 0x4b, 0x03, 0x31,
+	0x10, 0xc5, 0x59, 0x41, 0xc1, 0xa0, 0x1e, 0xea, 0x45, 0xfa, 0x87, 0xda, 0x15, 0xc4, 0x53, 0x62,
+	0xf5, 0xe8, 0xa9, 0xad, 0xe2, 0x69, 0xa1, 0xd4, 0xe2, 0x41, 0x0a, 0x75, 0xba, 0x1d, 0x97, 0x85,
+	0x6c, 0x66, 0xe9, 0x4e, 0x65, 0xfb, 0x01, 0x3c, 0xfb, 0xbd, 0xfc, 0x54, 0xb2, 0x49, 0x2b, 0xc4,
+	0x96, 0x1e, 0x93, 0xf7, 0x7b, 0x2f, 0x2f, 0x33, 0xe2, 0x3a, 0x21, 0x4a, 0x34, 0xaa, 0x58, 0xd3,
+	0x72, 0xae, 0x60, 0xc9, 0x94, 0x69, 0xf5, 0xd9, 0x9d, 0x21, 0x43, 0x57, 0x31, 0x96, 0x2c, 0xf3,
+	0x05, 0x31, 0xd5, 0x1a, 0x8e, 0x93, 0x96, 0x93, 0x8e, 0x93, 0x6b, 0xae, 0xde, 0x5c, 0x87, 0x40,
+	0x9e, 0x2a, 0x30, 0x86, 0x18, 0x38, 0x25, 0x53, 0x38, 0x6b, 0xfd, 0x76, 0xdf, 0x13, 0xb1, 0x86,
+	0xa2, 0x48, 0x3f, 0xd2, 0xd8, 0x5a, 0x9c, 0x23, 0xfc, 0x0a, 0x44, 0x67, 0x8c, 0x25, 0x0f, 0x3c,
+	0xf1, 0x11, 0x18, 0x0a, 0xe4, 0x08, 0x19, 0xe6, 0xc0, 0x50, 0x7b, 0x17, 0xe7, 0xbe, 0x7b, 0xca,
+	0xab, 0x1c, 0x2f, 0x82, 0xcb, 0xe0, 0xe6, 0xec, 0x4e, 0xc9, 0x3d, 0x85, 0xa5, 0x1f, 0x3c, 0x5e,
+	0xe5, 0x38, 0xaa, 0xc5, 0x5b, 0x77, 0x61, 0x47, 0xb4, 0xb7, 0x6b, 0x44, 0x34, 0x47, 0xbd, 0x29,
+	0x11, 0xb6, 0x45, 0xab, 0x42, 0x9e, 0x4a, 0x5e, 0x40, 0xbc, 0xa3, 0x65, 0xd8, 0x12, 0x0d, 0x1f,
+	0xf0, 0xfd, 0x03, 0xd1, 0xac, 0xe4, 0x17, 0x34, 0x9c, 0x66, 0x68, 0xf8, 0xff, 0x27, 0xaf, 0xc4,
+	0x69, 0xb1, 0xd1, 0xa6, 0x19, 0x94, 0xf6, 0x7b, 0x87, 0xa3, 0x93, 0xbf, 0xcb, 0x08, 0xca, 0xb0,
+	0x29, 0xea, 0x5e, 0x88, 0xf7, 0x44, 0xff, 0x3b, 0x10, 0xed, 0x98, 0xb2, 0x7d, 0x03, 0xe9, 0x1f,
+	0x57, 0xfe, 0x61, 0x35, 0xfc, 0x61, 0xf0, 0xd6, 0x5b, 0x93, 0x09, 0x69, 0x30, 0x89, 0xa4, 0x45,
+	0xa2, 0x12, 0x34, 0x76, 0x35, 0xca, 0x49, 0x90, 0xa7, 0xc5, 0xce, 0x7d, 0x3e, 0xb8, 0xe3, 0xcf,
+	0x41, 0xe3, 0xd9, 0x82, 0x93, 0x41, 0x05, 0x4d, 0x7a, 0x4b, 0xa6, 0x48, 0x4f, 0x5e, 0x1d, 0x34,
+	0x3b, 0xb2, 0x59, 0xf7, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x91, 0x55, 0x3e, 0x63, 0x7d, 0x02,
+	0x00, 0x00,
 }

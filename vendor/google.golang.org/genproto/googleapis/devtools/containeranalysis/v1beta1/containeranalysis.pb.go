@@ -51,7 +51,7 @@ func (m *ScanConfig) Reset()         { *m = ScanConfig{} }
 func (m *ScanConfig) String() string { return proto.CompactTextString(m) }
 func (*ScanConfig) ProtoMessage()    {}
 func (*ScanConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_containeranalysis_a170acd3c74dfdfb, []int{0}
+	return fileDescriptor_containeranalysis_e7bcdac093bac0a8, []int{0}
 }
 func (m *ScanConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ScanConfig.Unmarshal(m, b)
@@ -120,7 +120,7 @@ func (m *GetScanConfigRequest) Reset()         { *m = GetScanConfigRequest{} }
 func (m *GetScanConfigRequest) String() string { return proto.CompactTextString(m) }
 func (*GetScanConfigRequest) ProtoMessage()    {}
 func (*GetScanConfigRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_containeranalysis_a170acd3c74dfdfb, []int{1}
+	return fileDescriptor_containeranalysis_e7bcdac093bac0a8, []int{1}
 }
 func (m *GetScanConfigRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetScanConfigRequest.Unmarshal(m, b)
@@ -167,7 +167,7 @@ func (m *ListScanConfigsRequest) Reset()         { *m = ListScanConfigsRequest{}
 func (m *ListScanConfigsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListScanConfigsRequest) ProtoMessage()    {}
 func (*ListScanConfigsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_containeranalysis_a170acd3c74dfdfb, []int{2}
+	return fileDescriptor_containeranalysis_e7bcdac093bac0a8, []int{2}
 }
 func (m *ListScanConfigsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListScanConfigsRequest.Unmarshal(m, b)
@@ -232,7 +232,7 @@ func (m *ListScanConfigsResponse) Reset()         { *m = ListScanConfigsResponse
 func (m *ListScanConfigsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListScanConfigsResponse) ProtoMessage()    {}
 func (*ListScanConfigsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_containeranalysis_a170acd3c74dfdfb, []int{3}
+	return fileDescriptor_containeranalysis_e7bcdac093bac0a8, []int{3}
 }
 func (m *ListScanConfigsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListScanConfigsResponse.Unmarshal(m, b)
@@ -282,7 +282,7 @@ func (m *UpdateScanConfigRequest) Reset()         { *m = UpdateScanConfigRequest
 func (m *UpdateScanConfigRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateScanConfigRequest) ProtoMessage()    {}
 func (*UpdateScanConfigRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_containeranalysis_a170acd3c74dfdfb, []int{4}
+	return fileDescriptor_containeranalysis_e7bcdac093bac0a8, []int{4}
 }
 func (m *UpdateScanConfigRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateScanConfigRequest.Unmarshal(m, b)
@@ -614,10 +614,10 @@ var _ContainerAnalysisV1Beta1_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/containeranalysis.proto", fileDescriptor_containeranalysis_a170acd3c74dfdfb)
+	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/containeranalysis.proto", fileDescriptor_containeranalysis_e7bcdac093bac0a8)
 }
 
-var fileDescriptor_containeranalysis_a170acd3c74dfdfb = []byte{
+var fileDescriptor_containeranalysis_e7bcdac093bac0a8 = []byte{
 	// 766 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcd, 0x4e, 0x1b, 0x49,
 	0x10, 0x56, 0xf3, 0xb7, 0xd0, 0x06, 0xb1, 0x6a, 0xed, 0x82, 0x35, 0xfb, 0x67, 0x8d, 0x56, 0x2b,

@@ -18,21 +18,26 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// Represents a whole calendar date, e.g. date of birth. The time of day and
-// time zone are either specified elsewhere or are not significant. The date
-// is relative to the Proleptic Gregorian Calendar. The day may be 0 to
-// represent a year and month where the day is not significant, e.g. credit card
-// expiration date. The year may be 0 to represent a month and day independent
-// of year, e.g. anniversary date. Related types are [google.type.TimeOfDay][google.type.TimeOfDay]
-// and `google.protobuf.Timestamp`.
+// Represents a whole or partial calendar date, e.g. a birthday. The time of day
+// and time zone are either specified elsewhere or are not significant. The date
+// is relative to the Proleptic Gregorian Calendar. This can represent:
+//
+// * A full date, with non-zero year, month and day values
+// * A month and day value, with a zero year, e.g. an anniversary
+// * A year on its own, with zero month and day values
+// * A year and month value, with a zero day, e.g. a credit card expiration date
+//
+// Related types are [google.type.TimeOfDay][google.type.TimeOfDay] and `google.protobuf.Timestamp`.
 type Date struct {
 	// Year of date. Must be from 1 to 9999, or 0 if specifying a date without
 	// a year.
 	Year int32 `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
-	// Month of year. Must be from 1 to 12.
+	// Month of year. Must be from 1 to 12, or 0 if specifying a year without a
+	// month and day.
 	Month int32 `protobuf:"varint,2,opt,name=month,proto3" json:"month,omitempty"`
 	// Day of month. Must be from 1 to 31 and valid for the year and month, or 0
-	// if specifying a year/month where the day is not significant.
+	// if specifying a year by itself or a year and month where the day is not
+	// significant.
 	Day                  int32    `protobuf:"varint,3,opt,name=day,proto3" json:"day,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -43,7 +48,7 @@ func (m *Date) Reset()         { *m = Date{} }
 func (m *Date) String() string { return proto.CompactTextString(m) }
 func (*Date) ProtoMessage()    {}
 func (*Date) Descriptor() ([]byte, []int) {
-	return fileDescriptor_date_7d25862cee0f408d, []int{0}
+	return fileDescriptor_date_b06048f2ddf7def5, []int{0}
 }
 func (m *Date) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Date.Unmarshal(m, b)
@@ -88,9 +93,9 @@ func init() {
 	proto.RegisterType((*Date)(nil), "google.type.Date")
 }
 
-func init() { proto.RegisterFile("google/type/date.proto", fileDescriptor_date_7d25862cee0f408d) }
+func init() { proto.RegisterFile("google/type/date.proto", fileDescriptor_date_b06048f2ddf7def5) }
 
-var fileDescriptor_date_7d25862cee0f408d = []byte{
+var fileDescriptor_date_b06048f2ddf7def5 = []byte{
 	// 172 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x4b, 0xcf, 0xcf, 0x4f,
 	0xcf, 0x49, 0xd5, 0x2f, 0xa9, 0x2c, 0x48, 0xd5, 0x4f, 0x49, 0x2c, 0x49, 0xd5, 0x2b, 0x28, 0xca,

@@ -50,7 +50,7 @@ func (x Deployment_Platform) String() string {
 	return proto.EnumName(Deployment_Platform_name, int32(x))
 }
 func (Deployment_Platform) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_deployment_6b1a45811f125482, []int{2, 0}
+	return fileDescriptor_deployment_4f8deb633d747a34, []int{2, 0}
 }
 
 // An artifact that can be deployed in some runtime.
@@ -66,7 +66,7 @@ func (m *Deployable) Reset()         { *m = Deployable{} }
 func (m *Deployable) String() string { return proto.CompactTextString(m) }
 func (*Deployable) ProtoMessage()    {}
 func (*Deployable) Descriptor() ([]byte, []int) {
-	return fileDescriptor_deployment_6b1a45811f125482, []int{0}
+	return fileDescriptor_deployment_4f8deb633d747a34, []int{0}
 }
 func (m *Deployable) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Deployable.Unmarshal(m, b)
@@ -106,7 +106,7 @@ func (m *Details) Reset()         { *m = Details{} }
 func (m *Details) String() string { return proto.CompactTextString(m) }
 func (*Details) ProtoMessage()    {}
 func (*Details) Descriptor() ([]byte, []int) {
-	return fileDescriptor_deployment_6b1a45811f125482, []int{1}
+	return fileDescriptor_deployment_4f8deb633d747a34, []int{1}
 }
 func (m *Details) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Details.Unmarshal(m, b)
@@ -159,7 +159,7 @@ func (m *Deployment) Reset()         { *m = Deployment{} }
 func (m *Deployment) String() string { return proto.CompactTextString(m) }
 func (*Deployment) ProtoMessage()    {}
 func (*Deployment) Descriptor() ([]byte, []int) {
-	return fileDescriptor_deployment_6b1a45811f125482, []int{2}
+	return fileDescriptor_deployment_4f8deb633d747a34, []int{2}
 }
 func (m *Deployment) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Deployment.Unmarshal(m, b)
@@ -236,10 +236,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/deployment/deployment.proto", fileDescriptor_deployment_6b1a45811f125482)
+	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/deployment/deployment.proto", fileDescriptor_deployment_4f8deb633d747a34)
 }
 
-var fileDescriptor_deployment_6b1a45811f125482 = []byte{
+var fileDescriptor_deployment_4f8deb633d747a34 = []byte{
 	// 434 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x52, 0x4d, 0x6b, 0xdb, 0x40,
 	0x10, 0xad, 0xac, 0xd4, 0x1f, 0xe3, 0xb4, 0x98, 0xa5, 0x14, 0x61, 0x08, 0x75, 0x7d, 0x28, 0x3e,

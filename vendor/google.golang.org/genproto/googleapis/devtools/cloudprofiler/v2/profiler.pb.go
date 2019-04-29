@@ -82,7 +82,7 @@ func (x ProfileType) String() string {
 	return proto.EnumName(ProfileType_name, int32(x))
 }
 func (ProfileType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{0}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{0}
 }
 
 // CreateProfileRequest describes a profile resource online creation request.
@@ -105,7 +105,7 @@ func (m *CreateProfileRequest) Reset()         { *m = CreateProfileRequest{} }
 func (m *CreateProfileRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateProfileRequest) ProtoMessage()    {}
 func (*CreateProfileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{0}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{0}
 }
 func (m *CreateProfileRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateProfileRequest.Unmarshal(m, b)
@@ -162,7 +162,7 @@ func (m *CreateOfflineProfileRequest) Reset()         { *m = CreateOfflineProfil
 func (m *CreateOfflineProfileRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateOfflineProfileRequest) ProtoMessage()    {}
 func (*CreateOfflineProfileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{1}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{1}
 }
 func (m *CreateOfflineProfileRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateOfflineProfileRequest.Unmarshal(m, b)
@@ -214,7 +214,7 @@ func (m *UpdateProfileRequest) Reset()         { *m = UpdateProfileRequest{} }
 func (m *UpdateProfileRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateProfileRequest) ProtoMessage()    {}
 func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{2}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{2}
 }
 func (m *UpdateProfileRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateProfileRequest.Unmarshal(m, b)
@@ -281,7 +281,7 @@ func (m *Profile) Reset()         { *m = Profile{} }
 func (m *Profile) String() string { return proto.CompactTextString(m) }
 func (*Profile) ProtoMessage()    {}
 func (*Profile) Descriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{3}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{3}
 }
 func (m *Profile) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Profile.Unmarshal(m, b)
@@ -378,7 +378,7 @@ func (m *Deployment) Reset()         { *m = Deployment{} }
 func (m *Deployment) String() string { return proto.CompactTextString(m) }
 func (*Deployment) ProtoMessage()    {}
 func (*Deployment) Descriptor() ([]byte, []int) {
-	return fileDescriptor_profiler_24c6f5803c16363e, []int{4}
+	return fileDescriptor_profiler_7fa8c4ea33266c1c, []int{4}
 }
 func (m *Deployment) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Deployment.Unmarshal(m, b)
@@ -609,10 +609,10 @@ var _ProfilerService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/cloudprofiler/v2/profiler.proto", fileDescriptor_profiler_24c6f5803c16363e)
+	proto.RegisterFile("google/devtools/cloudprofiler/v2/profiler.proto", fileDescriptor_profiler_7fa8c4ea33266c1c)
 }
 
-var fileDescriptor_profiler_24c6f5803c16363e = []byte{
+var fileDescriptor_profiler_7fa8c4ea33266c1c = []byte{
 	// 786 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x5f, 0x6f, 0xda, 0x56,
 	0x14, 0xdf, 0xc5, 0x04, 0xc2, 0x71, 0xc8, 0xac, 0xab, 0x68, 0x62, 0x2c, 0xdb, 0x2c, 0x4f, 0x93,

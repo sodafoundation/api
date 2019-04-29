@@ -44,7 +44,7 @@ func (m *SetBreakpointRequest) Reset()         { *m = SetBreakpointRequest{} }
 func (m *SetBreakpointRequest) String() string { return proto.CompactTextString(m) }
 func (*SetBreakpointRequest) ProtoMessage()    {}
 func (*SetBreakpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{0}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{0}
 }
 func (m *SetBreakpointRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetBreakpointRequest.Unmarshal(m, b)
@@ -99,7 +99,7 @@ func (m *SetBreakpointResponse) Reset()         { *m = SetBreakpointResponse{} }
 func (m *SetBreakpointResponse) String() string { return proto.CompactTextString(m) }
 func (*SetBreakpointResponse) ProtoMessage()    {}
 func (*SetBreakpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{1}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{1}
 }
 func (m *SetBreakpointResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetBreakpointResponse.Unmarshal(m, b)
@@ -144,7 +144,7 @@ func (m *GetBreakpointRequest) Reset()         { *m = GetBreakpointRequest{} }
 func (m *GetBreakpointRequest) String() string { return proto.CompactTextString(m) }
 func (*GetBreakpointRequest) ProtoMessage()    {}
 func (*GetBreakpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{2}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{2}
 }
 func (m *GetBreakpointRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBreakpointRequest.Unmarshal(m, b)
@@ -199,7 +199,7 @@ func (m *GetBreakpointResponse) Reset()         { *m = GetBreakpointResponse{} }
 func (m *GetBreakpointResponse) String() string { return proto.CompactTextString(m) }
 func (*GetBreakpointResponse) ProtoMessage()    {}
 func (*GetBreakpointResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{3}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{3}
 }
 func (m *GetBreakpointResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBreakpointResponse.Unmarshal(m, b)
@@ -244,7 +244,7 @@ func (m *DeleteBreakpointRequest) Reset()         { *m = DeleteBreakpointRequest
 func (m *DeleteBreakpointRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteBreakpointRequest) ProtoMessage()    {}
 func (*DeleteBreakpointRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{4}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{4}
 }
 func (m *DeleteBreakpointRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteBreakpointRequest.Unmarshal(m, b)
@@ -318,7 +318,7 @@ func (m *ListBreakpointsRequest) Reset()         { *m = ListBreakpointsRequest{}
 func (m *ListBreakpointsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListBreakpointsRequest) ProtoMessage()    {}
 func (*ListBreakpointsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{5}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{5}
 }
 func (m *ListBreakpointsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListBreakpointsRequest.Unmarshal(m, b)
@@ -406,7 +406,7 @@ func (m *ListBreakpointsRequest_BreakpointActionValue) String() string {
 }
 func (*ListBreakpointsRequest_BreakpointActionValue) ProtoMessage() {}
 func (*ListBreakpointsRequest_BreakpointActionValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{5, 0}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{5, 0}
 }
 func (m *ListBreakpointsRequest_BreakpointActionValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListBreakpointsRequest_BreakpointActionValue.Unmarshal(m, b)
@@ -452,7 +452,7 @@ func (m *ListBreakpointsResponse) Reset()         { *m = ListBreakpointsResponse
 func (m *ListBreakpointsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListBreakpointsResponse) ProtoMessage()    {}
 func (*ListBreakpointsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{6}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{6}
 }
 func (m *ListBreakpointsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListBreakpointsResponse.Unmarshal(m, b)
@@ -505,7 +505,7 @@ func (m *ListDebuggeesRequest) Reset()         { *m = ListDebuggeesRequest{} }
 func (m *ListDebuggeesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDebuggeesRequest) ProtoMessage()    {}
 func (*ListDebuggeesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{7}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{7}
 }
 func (m *ListDebuggeesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDebuggeesRequest.Unmarshal(m, b)
@@ -562,7 +562,7 @@ func (m *ListDebuggeesResponse) Reset()         { *m = ListDebuggeesResponse{} }
 func (m *ListDebuggeesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDebuggeesResponse) ProtoMessage()    {}
 func (*ListDebuggeesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_debugger_725d1da6e9a285fc, []int{8}
+	return fileDescriptor_debugger_35b9f3da22d21309, []int{8}
 }
 func (m *ListDebuggeesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListDebuggeesResponse.Unmarshal(m, b)
@@ -817,10 +817,10 @@ var _Debugger2_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/clouddebugger/v2/debugger.proto", fileDescriptor_debugger_725d1da6e9a285fc)
+	proto.RegisterFile("google/devtools/clouddebugger/v2/debugger.proto", fileDescriptor_debugger_35b9f3da22d21309)
 }
 
-var fileDescriptor_debugger_725d1da6e9a285fc = []byte{
+var fileDescriptor_debugger_35b9f3da22d21309 = []byte{
 	// 802 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x56, 0xdd, 0x6e, 0xdb, 0x36,
 	0x14, 0x06, 0x9d, 0xe5, 0xc7, 0xc7, 0x71, 0x92, 0x11, 0xf9, 0x11, 0xbc, 0x3f, 0x43, 0xfb, 0xcb,

@@ -22,10 +22,10 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 func init() {
-	proto.RegisterFile("google/cloud/talent/v4beta1/batch.proto", fileDescriptor_batch_e40bc7b5c76520cb)
+	proto.RegisterFile("google/cloud/talent/v4beta1/batch.proto", fileDescriptor_batch_3477087f082a2886)
 }
 
-var fileDescriptor_batch_e40bc7b5c76520cb = []byte{
+var fileDescriptor_batch_3477087f082a2886 = []byte{
 	// 200 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0xcf, 0xb1, 0x6a, 0xc3, 0x30,
 	0x10, 0x06, 0x60, 0xda, 0x42, 0x07, 0x8f, 0x5d, 0x0a, 0x6e, 0xc1, 0x53, 0xe9, 0xa6, 0xa3, 0xb4,

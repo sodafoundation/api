@@ -1,26 +1,33 @@
-FROM golang:1.7.1
-MAINTAINER Abhishek Lekshmanan "abhishek.lekshmanan@gmail.com"
+FROM ubuntu:xenial
 
-ENV CEPH_VERSION jewel
+RUN apt-get update && apt-get install -y \
+  apt-transport-https \
+  git \
+  software-properties-common \
+  uuid-runtime \
+  wget
 
-RUN echo deb http://download.ceph.com/debian-$CEPH_VERSION/ jessie main | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list
+ARG CEPH_REPO_URL=https://download.ceph.com/debian-luminous/
+RUN wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
+RUN apt-add-repository "deb ${CEPH_REPO_URL} xenial main"
 
-# Running wget with no certificate checks, alternatively ssl-cert package should be installed
-RUN wget --no-check-certificate -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | apt-key add - \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ceph \
-        ceph-mds \
-        librados-dev \
-        librbd-dev \
-        libcephfs-dev \
-        uuid-runtime \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+RUN add-apt-repository ppa:gophers/archive
 
+RUN apt-get update && apt-get install -y \
+  ceph \
+  libcephfs-dev \
+  librados-dev \
+  librbd-dev \
+  golang-1.10-go
+
+# add user account to test permissions
+RUN groupadd -g 1010 bob
+RUN useradd -u 1010 -g bob -M bob
+
+ENV GOPATH /go
+WORKDIR /go/src/github.com/ceph/go-ceph
 VOLUME /go/src/github.com/ceph/go-ceph
 
-COPY ./ci/entrypoint.sh /tmp/entrypoint.sh
-
-ENTRYPOINT ["/tmp/entrypoint.sh", "/tmp/micro-ceph"]
-
+COPY micro-osd.sh /
+COPY entrypoint.sh /
+ENTRYPOINT /entrypoint.sh

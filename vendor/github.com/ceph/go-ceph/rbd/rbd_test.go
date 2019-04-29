@@ -9,7 +9,12 @@ import (
 	"os/exec"
 	"sort"
 	"testing"
+	"time"
 )
+
+//Rdb feature
+var RbdFeatureLayering = uint64(1 << 0)
+var RbdFeatureStripingV2 = uint64(1 << 1)
 
 func GetUUID() string {
 	out, _ := exec.Command("uuidgen").Output()
@@ -21,6 +26,43 @@ func TestVersion(t *testing.T) {
 	assert.False(t, major < 0 || major > 1000, "invalid major")
 	assert.False(t, minor < 0 || minor > 1000, "invalid minor")
 	assert.False(t, patch < 0 || patch > 1000, "invalid patch")
+}
+
+func TestCreateImage(t *testing.T) {
+	conn, _ := rados.NewConn()
+	conn.ReadDefaultConfigFile()
+	conn.Connect()
+
+	poolname := GetUUID()
+	err := conn.MakePool(poolname)
+	assert.NoError(t, err)
+
+	ioctx, err := conn.OpenIOContext(poolname)
+	assert.NoError(t, err)
+
+	name := GetUUID()
+	image, err := rbd.Create(ioctx, name, 1<<22, 22)
+	assert.NoError(t, err)
+	err = image.Remove()
+	assert.NoError(t, err)
+
+	name = GetUUID()
+	image, err = rbd.Create(ioctx, name, 1<<22, 22,
+		RbdFeatureLayering|RbdFeatureStripingV2)
+	assert.NoError(t, err)
+	err = image.Remove()
+	assert.NoError(t, err)
+
+	name = GetUUID()
+	image, err = rbd.Create(ioctx, name, 1<<22, 22,
+		RbdFeatureLayering|RbdFeatureStripingV2, 4096, 2)
+	assert.NoError(t, err)
+	err = image.Remove()
+	assert.NoError(t, err)
+
+	ioctx.Destroy()
+	conn.DeletePool(poolname)
+	conn.Shutdown()
 }
 
 func TestGetImageNames(t *testing.T) {
@@ -270,6 +312,48 @@ func TestNotFound(t *testing.T) {
 
 	img.Remove()
 	assert.Equal(t, err, rbd.RbdErrorNotFound)
+
+	ioctx.Destroy()
+	conn.DeletePool(poolname)
+	conn.Shutdown()
+}
+
+func TestTrashImage(t *testing.T) {
+	conn, _ := rados.NewConn()
+	conn.ReadDefaultConfigFile()
+	conn.Connect()
+
+	poolname := GetUUID()
+	err := conn.MakePool(poolname)
+	assert.NoError(t, err)
+
+	ioctx, err := conn.OpenIOContext(poolname)
+	assert.NoError(t, err)
+
+	name := GetUUID()
+	image, err := rbd.Create(ioctx, name, 1<<22, 22)
+	assert.NoError(t, err)
+
+	err = image.Trash(time.Hour)
+	assert.NoError(t, err)
+
+	trashList, err := rbd.GetTrashList(ioctx)
+	assert.NoError(t, err)
+	assert.Equal(t, len(trashList), 1, "trashList length equal")
+
+	err = rbd.TrashRestore(ioctx, trashList[0].Id, name+"_restored")
+	assert.NoError(t, err)
+
+	image2 := rbd.GetImage(ioctx, name+"_restored")
+	err = image2.Trash(time.Hour)
+	assert.NoError(t, err)
+
+	trashList, err = rbd.GetTrashList(ioctx)
+	assert.NoError(t, err)
+	assert.Equal(t, len(trashList), 1, "trashList length equal")
+
+	err = rbd.TrashRemove(ioctx, trashList[0].Id, true)
+	assert.NoError(t, err)
 
 	ioctx.Destroy()
 	conn.DeletePool(poolname)

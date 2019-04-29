@@ -67,7 +67,7 @@ func (x ClusterStatus_State) String() string {
 	return proto.EnumName(ClusterStatus_State_name, int32(x))
 }
 func (ClusterStatus_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{10, 0}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{10, 0}
 }
 
 // The cluster substate.
@@ -104,7 +104,7 @@ func (x ClusterStatus_Substate) String() string {
 	return proto.EnumName(ClusterStatus_Substate_name, int32(x))
 }
 func (ClusterStatus_Substate) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{10, 1}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{10, 1}
 }
 
 // Describes the identifying information, config, and status of
@@ -122,8 +122,9 @@ type Cluster struct {
 	// Label **keys** must contain 1 to 63 characters, and must conform to
 	// [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt).
 	// Label **values** may be empty, but, if present, must contain 1 to 63
-	// characters, and must conform to [RFC 1035](https://www.ietf.org/rfc/rfc1035.txt).
-	// No more than 32 labels can be associated with a cluster.
+	// characters, and must conform to [RFC
+	// 1035](https://www.ietf.org/rfc/rfc1035.txt). No more than 32 labels can be
+	// associated with a cluster.
 	Labels map[string]string `protobuf:"bytes,8,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Output only. Cluster status.
 	Status *ClusterStatus `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
@@ -134,8 +135,8 @@ type Cluster struct {
 	ClusterUuid string `protobuf:"bytes,6,opt,name=cluster_uuid,json=clusterUuid,proto3" json:"cluster_uuid,omitempty"`
 	// Output only. Contains cluster daemon metrics such as HDFS and YARN stats.
 	//
-	// **Beta Feature**: This report is available for testing purposes only. It may
-	// be changed before final release.
+	// **Beta Feature**: This report is available for testing purposes only. It
+	// may be changed before final release.
 	Metrics              *ClusterMetrics `protobuf:"bytes,9,opt,name=metrics,proto3" json:"metrics,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
@@ -146,7 +147,7 @@ func (m *Cluster) Reset()         { *m = Cluster{} }
 func (m *Cluster) String() string { return proto.CompactTextString(m) }
 func (*Cluster) ProtoMessage()    {}
 func (*Cluster) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{0}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{0}
 }
 func (m *Cluster) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Cluster.Unmarshal(m, b)
@@ -250,9 +251,11 @@ type ClusterConfig struct {
 	// Optional. Commands to execute on each node after config is
 	// completed. By default, executables are run on master and all worker nodes.
 	// You can test a node's <code>role</code> metadata to run an executable on
-	// a master or worker node, as shown below using `curl` (you can also use `wget`):
+	// a master or worker node, as shown below using `curl` (you can also use
+	// `wget`):
 	//
-	//     ROLE=$(curl -H Metadata-Flavor:Google http://metadata/computeMetadata/v1beta2/instance/attributes/dataproc-role)
+	//     ROLE=$(curl -H Metadata-Flavor:Google
+	//     http://metadata/computeMetadata/v1beta2/instance/attributes/dataproc-role)
 	//     if [[ "${ROLE}" == 'Master' ]]; then
 	//       ... master specific actions ...
 	//     else
@@ -270,7 +273,7 @@ func (m *ClusterConfig) Reset()         { *m = ClusterConfig{} }
 func (m *ClusterConfig) String() string { return proto.CompactTextString(m) }
 func (*ClusterConfig) ProtoMessage()    {}
 func (*ClusterConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{1}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{1}
 }
 func (m *ClusterConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClusterConfig.Unmarshal(m, b)
@@ -367,7 +370,7 @@ func (m *EncryptionConfig) Reset()         { *m = EncryptionConfig{} }
 func (m *EncryptionConfig) String() string { return proto.CompactTextString(m) }
 func (*EncryptionConfig) ProtoMessage()    {}
 func (*EncryptionConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{2}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{2}
 }
 func (m *EncryptionConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EncryptionConfig.Unmarshal(m, b)
@@ -431,11 +434,11 @@ type GceClusterConfig struct {
 	// * `sub0`
 	SubnetworkUri string `protobuf:"bytes,6,opt,name=subnetwork_uri,json=subnetworkUri,proto3" json:"subnetwork_uri,omitempty"`
 	// Optional. If true, all instances in the cluster will only have internal IP
-	// addresses. By default, clusters are not restricted to internal IP addresses,
-	// and will have ephemeral external IP addresses assigned to each instance.
-	// This `internal_ip_only` restriction can only be enabled for subnetwork
-	// enabled networks, and all off-cluster dependencies must be configured to be
-	// accessible without external IP addresses.
+	// addresses. By default, clusters are not restricted to internal IP
+	// addresses, and will have ephemeral external IP addresses assigned to each
+	// instance. This `internal_ip_only` restriction can only be enabled for
+	// subnetwork enabled networks, and all off-cluster dependencies must be
+	// configured to be accessible without external IP addresses.
 	InternalIpOnly bool `protobuf:"varint,7,opt,name=internal_ip_only,json=internalIpOnly,proto3" json:"internal_ip_only,omitempty"`
 	// Optional. The service account of the instances. Defaults to the default
 	// Compute Engine service account. Custom service accounts need
@@ -444,7 +447,8 @@ type GceClusterConfig struct {
 	// * roles/logging.logWriter
 	// * roles/storage.objectAdmin
 	//
-	// (see https://cloud.google.com/compute/docs/access/service-accounts#custom_service_accounts
+	// (see
+	// https://cloud.google.com/compute/docs/access/service-accounts#custom_service_accounts
 	// for more information).
 	// Example: `[account_id]@[project_id].iam.gserviceaccount.com`
 	ServiceAccount string `protobuf:"bytes,8,opt,name=service_account,json=serviceAccount,proto3" json:"service_account,omitempty"`
@@ -467,7 +471,8 @@ type GceClusterConfig struct {
 	// [Tagging instances](/compute/docs/label-or-tag-resources#tags)).
 	Tags []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
 	// The Compute Engine metadata entries to add to all instances (see
-	// [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
+	// [Project and instance
+	// metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
 	Metadata             map[string]string `protobuf:"bytes,5,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -478,7 +483,7 @@ func (m *GceClusterConfig) Reset()         { *m = GceClusterConfig{} }
 func (m *GceClusterConfig) String() string { return proto.CompactTextString(m) }
 func (*GceClusterConfig) ProtoMessage()    {}
 func (*GceClusterConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{3}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{3}
 }
 func (m *GceClusterConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GceClusterConfig.Unmarshal(m, b)
@@ -576,13 +581,15 @@ type InstanceGroupConfig struct {
 	// * `n1-standard-2`
 	//
 	// **Auto Zone Exception**: If you are using the Cloud Dataproc
-	// [Auto Zone Placement](/dataproc/docs/concepts/configuring-clusters/auto-zone#using_auto_zone_placement)
+	// [Auto Zone
+	// Placement](/dataproc/docs/concepts/configuring-clusters/auto-zone#using_auto_zone_placement)
 	// feature, you must use the short name of the machine type
 	// resource, for example, `n1-standard-2`.
 	MachineTypeUri string `protobuf:"bytes,4,opt,name=machine_type_uri,json=machineTypeUri,proto3" json:"machine_type_uri,omitempty"`
 	// Optional. Disk option config settings.
 	DiskConfig *DiskConfig `protobuf:"bytes,5,opt,name=disk_config,json=diskConfig,proto3" json:"disk_config,omitempty"`
-	// Optional. Specifies that this instance group contains preemptible instances.
+	// Optional. Specifies that this instance group contains preemptible
+	// instances.
 	IsPreemptible bool `protobuf:"varint,6,opt,name=is_preemptible,json=isPreemptible,proto3" json:"is_preemptible,omitempty"`
 	// Output only. The config for Compute Engine Instance Group
 	// Manager that manages this group.
@@ -607,7 +614,7 @@ func (m *InstanceGroupConfig) Reset()         { *m = InstanceGroupConfig{} }
 func (m *InstanceGroupConfig) String() string { return proto.CompactTextString(m) }
 func (*InstanceGroupConfig) ProtoMessage()    {}
 func (*InstanceGroupConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{4}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{4}
 }
 func (m *InstanceGroupConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InstanceGroupConfig.Unmarshal(m, b)
@@ -706,7 +713,7 @@ func (m *ManagedGroupConfig) Reset()         { *m = ManagedGroupConfig{} }
 func (m *ManagedGroupConfig) String() string { return proto.CompactTextString(m) }
 func (*ManagedGroupConfig) ProtoMessage()    {}
 func (*ManagedGroupConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{5}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{5}
 }
 func (m *ManagedGroupConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ManagedGroupConfig.Unmarshal(m, b)
@@ -753,7 +760,8 @@ type AcceleratorConfig struct {
 	// * `nvidia-tesla-k80`
 	//
 	// **Auto Zone Exception**: If you are using the Cloud Dataproc
-	// [Auto Zone Placement](/dataproc/docs/concepts/configuring-clusters/auto-zone#using_auto_zone_placement)
+	// [Auto Zone
+	// Placement](/dataproc/docs/concepts/configuring-clusters/auto-zone#using_auto_zone_placement)
 	// feature, you must use the short name of the accelerator type
 	// resource, for example, `nvidia-tesla-k80`.
 	AcceleratorTypeUri string `protobuf:"bytes,1,opt,name=accelerator_type_uri,json=acceleratorTypeUri,proto3" json:"accelerator_type_uri,omitempty"`
@@ -768,7 +776,7 @@ func (m *AcceleratorConfig) Reset()         { *m = AcceleratorConfig{} }
 func (m *AcceleratorConfig) String() string { return proto.CompactTextString(m) }
 func (*AcceleratorConfig) ProtoMessage()    {}
 func (*AcceleratorConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{6}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{6}
 }
 func (m *AcceleratorConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AcceleratorConfig.Unmarshal(m, b)
@@ -826,7 +834,7 @@ func (m *DiskConfig) Reset()         { *m = DiskConfig{} }
 func (m *DiskConfig) String() string { return proto.CompactTextString(m) }
 func (*DiskConfig) ProtoMessage()    {}
 func (*DiskConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{7}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{7}
 }
 func (m *DiskConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DiskConfig.Unmarshal(m, b)
@@ -892,7 +900,7 @@ func (m *LifecycleConfig) Reset()         { *m = LifecycleConfig{} }
 func (m *LifecycleConfig) String() string { return proto.CompactTextString(m) }
 func (*LifecycleConfig) ProtoMessage()    {}
 func (*LifecycleConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{8}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{8}
 }
 func (m *LifecycleConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LifecycleConfig.Unmarshal(m, b)
@@ -1049,7 +1057,7 @@ func (m *NodeInitializationAction) Reset()         { *m = NodeInitializationActi
 func (m *NodeInitializationAction) String() string { return proto.CompactTextString(m) }
 func (*NodeInitializationAction) ProtoMessage()    {}
 func (*NodeInitializationAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{9}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{9}
 }
 func (m *NodeInitializationAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NodeInitializationAction.Unmarshal(m, b)
@@ -1103,7 +1111,7 @@ func (m *ClusterStatus) Reset()         { *m = ClusterStatus{} }
 func (m *ClusterStatus) String() string { return proto.CompactTextString(m) }
 func (*ClusterStatus) ProtoMessage()    {}
 func (*ClusterStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{10}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{10}
 }
 func (m *ClusterStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClusterStatus.Unmarshal(m, b)
@@ -1153,10 +1161,12 @@ func (m *ClusterStatus) GetSubstate() ClusterStatus_Substate {
 
 // Specifies the selection and config of software inside the cluster.
 type SoftwareConfig struct {
-	// Optional. The version of software inside the cluster. It must be one of the supported
-	// [Cloud Dataproc Versions](/dataproc/docs/concepts/versioning/dataproc-versions#supported_cloud_dataproc_versions),
+	// Optional. The version of software inside the cluster. It must be one of the
+	// supported [Cloud Dataproc
+	// Versions](/dataproc/docs/concepts/versioning/dataproc-versions#supported_cloud_dataproc_versions),
 	// such as "1.2" (including a subminor version, such as "1.2.29"), or the
-	// ["preview" version](/dataproc/docs/concepts/versioning/dataproc-versions#other_versions).
+	// ["preview"
+	// version](/dataproc/docs/concepts/versioning/dataproc-versions#other_versions).
 	// If unspecified, it defaults to the latest version.
 	ImageVersion string `protobuf:"bytes,1,opt,name=image_version,json=imageVersion,proto3" json:"image_version,omitempty"`
 	// Optional. The properties to set on daemon config files.
@@ -1187,7 +1197,7 @@ func (m *SoftwareConfig) Reset()         { *m = SoftwareConfig{} }
 func (m *SoftwareConfig) String() string { return proto.CompactTextString(m) }
 func (*SoftwareConfig) ProtoMessage()    {}
 func (*SoftwareConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{11}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{11}
 }
 func (m *SoftwareConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SoftwareConfig.Unmarshal(m, b)
@@ -1239,7 +1249,7 @@ func (m *ClusterMetrics) Reset()         { *m = ClusterMetrics{} }
 func (m *ClusterMetrics) String() string { return proto.CompactTextString(m) }
 func (*ClusterMetrics) ProtoMessage()    {}
 func (*ClusterMetrics) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{12}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{12}
 }
 func (m *ClusterMetrics) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClusterMetrics.Unmarshal(m, b)
@@ -1283,10 +1293,11 @@ type CreateClusterRequest struct {
 	// Required. The cluster to create.
 	Cluster *Cluster `protobuf:"bytes,2,opt,name=cluster,proto3" json:"cluster,omitempty"`
 	// Optional. A unique id used to identify the request. If the server
-	// receives two [CreateClusterRequest][google.cloud.dataproc.v1beta2.CreateClusterRequest] requests  with the same
-	// id, then the second request will be ignored and the
-	// first [google.longrunning.Operation][google.longrunning.Operation] created and stored in the backend
-	// is returned.
+	// receives two
+	// [CreateClusterRequest][google.cloud.dataproc.v1beta2.CreateClusterRequest]
+	// requests  with the same id, then the second request will be ignored and the
+	// first [google.longrunning.Operation][google.longrunning.Operation] created
+	// and stored in the backend is returned.
 	//
 	// It is recommended to always set this value to a
 	// [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
@@ -1303,7 +1314,7 @@ func (m *CreateClusterRequest) Reset()         { *m = CreateClusterRequest{} }
 func (m *CreateClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateClusterRequest) ProtoMessage()    {}
 func (*CreateClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{13}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{13}
 }
 func (m *CreateClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateClusterRequest.Unmarshal(m, b)
@@ -1385,9 +1396,10 @@ type UpdateClusterRequest struct {
 	//       }
 	//     }
 	//
-	// Similarly, to change the number of preemptible workers in a cluster to 5, the
-	// `update_mask` parameter would be `config.secondary_worker_config.num_instances`,
-	// and the `PATCH` request body would be set as follows:
+	// Similarly, to change the number of preemptible workers in a cluster to 5,
+	// the `update_mask` parameter would be
+	// `config.secondary_worker_config.num_instances`, and the `PATCH` request
+	// body would be set as follows:
 	//
 	//     {
 	//       "config":{
@@ -1406,27 +1418,33 @@ type UpdateClusterRequest struct {
 	// <td>labels</td><td>Updates labels</td>
 	// </tr>
 	// <tr>
-	// <td>config.worker_config.num_instances</td><td>Resize primary worker group</td>
+	// <td>config.worker_config.num_instances</td><td>Resize primary worker
+	// group</td>
 	// </tr>
 	// <tr>
-	// <td>config.secondary_worker_config.num_instances</td><td>Resize secondary worker group</td>
+	// <td>config.secondary_worker_config.num_instances</td><td>Resize secondary
+	// worker group</td>
 	// </tr>
 	// <tr>
-	// <td>config.lifecycle_config.auto_delete_ttl</td><td>Reset MAX TTL duration</td>
+	// <td>config.lifecycle_config.auto_delete_ttl</td><td>Reset MAX TTL
+	// duration</td>
 	// </tr>
 	// <tr>
-	// <td>config.lifecycle_config.auto_delete_time</td><td>Update MAX TTL deletion timestamp</td>
+	// <td>config.lifecycle_config.auto_delete_time</td><td>Update MAX TTL
+	// deletion timestamp</td>
 	// </tr>
 	// <tr>
-	// <td>config.lifecycle_config.idle_delete_ttl</td><td>Update Idle TTL duration</td>
+	// <td>config.lifecycle_config.idle_delete_ttl</td><td>Update Idle TTL
+	// duration</td>
 	// </tr>
 	// </table>
 	UpdateMask *field_mask.FieldMask `protobuf:"bytes,4,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	// Optional. A unique id used to identify the request. If the server
-	// receives two [UpdateClusterRequest][google.cloud.dataproc.v1beta2.UpdateClusterRequest] requests  with the same
-	// id, then the second request will be ignored and the
-	// first [google.longrunning.Operation][google.longrunning.Operation] created and stored in the
-	// backend is returned.
+	// receives two
+	// [UpdateClusterRequest][google.cloud.dataproc.v1beta2.UpdateClusterRequest]
+	// requests  with the same id, then the second request will be ignored and the
+	// first [google.longrunning.Operation][google.longrunning.Operation] created
+	// and stored in the backend is returned.
 	//
 	// It is recommended to always set this value to a
 	// [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
@@ -1443,7 +1461,7 @@ func (m *UpdateClusterRequest) Reset()         { *m = UpdateClusterRequest{} }
 func (m *UpdateClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateClusterRequest) ProtoMessage()    {}
 func (*UpdateClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{14}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{14}
 }
 func (m *UpdateClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClusterRequest.Unmarshal(m, b)
@@ -1525,10 +1543,11 @@ type DeleteClusterRequest struct {
 	// (with error NOT_FOUND) if cluster with specified UUID does not exist.
 	ClusterUuid string `protobuf:"bytes,4,opt,name=cluster_uuid,json=clusterUuid,proto3" json:"cluster_uuid,omitempty"`
 	// Optional. A unique id used to identify the request. If the server
-	// receives two [DeleteClusterRequest][google.cloud.dataproc.v1beta2.DeleteClusterRequest] requests  with the same
-	// id, then the second request will be ignored and the
-	// first [google.longrunning.Operation][google.longrunning.Operation] created and stored in the
-	// backend is returned.
+	// receives two
+	// [DeleteClusterRequest][google.cloud.dataproc.v1beta2.DeleteClusterRequest]
+	// requests  with the same id, then the second request will be ignored and the
+	// first [google.longrunning.Operation][google.longrunning.Operation] created
+	// and stored in the backend is returned.
 	//
 	// It is recommended to always set this value to a
 	// [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
@@ -1545,7 +1564,7 @@ func (m *DeleteClusterRequest) Reset()         { *m = DeleteClusterRequest{} }
 func (m *DeleteClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteClusterRequest) ProtoMessage()    {}
 func (*DeleteClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{15}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{15}
 }
 func (m *DeleteClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteClusterRequest.Unmarshal(m, b)
@@ -1618,7 +1637,7 @@ func (m *GetClusterRequest) Reset()         { *m = GetClusterRequest{} }
 func (m *GetClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*GetClusterRequest) ProtoMessage()    {}
 func (*GetClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{16}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{16}
 }
 func (m *GetClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetClusterRequest.Unmarshal(m, b)
@@ -1699,7 +1718,7 @@ func (m *ListClustersRequest) Reset()         { *m = ListClustersRequest{} }
 func (m *ListClustersRequest) String() string { return proto.CompactTextString(m) }
 func (*ListClustersRequest) ProtoMessage()    {}
 func (*ListClustersRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{17}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{17}
 }
 func (m *ListClustersRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClustersRequest.Unmarshal(m, b)
@@ -1771,7 +1790,7 @@ func (m *ListClustersResponse) Reset()         { *m = ListClustersResponse{} }
 func (m *ListClustersResponse) String() string { return proto.CompactTextString(m) }
 func (*ListClustersResponse) ProtoMessage()    {}
 func (*ListClustersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{18}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{18}
 }
 func (m *ListClustersResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListClustersResponse.Unmarshal(m, b)
@@ -1823,7 +1842,7 @@ func (m *DiagnoseClusterRequest) Reset()         { *m = DiagnoseClusterRequest{}
 func (m *DiagnoseClusterRequest) String() string { return proto.CompactTextString(m) }
 func (*DiagnoseClusterRequest) ProtoMessage()    {}
 func (*DiagnoseClusterRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{19}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{19}
 }
 func (m *DiagnoseClusterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DiagnoseClusterRequest.Unmarshal(m, b)
@@ -1879,7 +1898,7 @@ func (m *DiagnoseClusterResults) Reset()         { *m = DiagnoseClusterResults{}
 func (m *DiagnoseClusterResults) String() string { return proto.CompactTextString(m) }
 func (*DiagnoseClusterResults) ProtoMessage()    {}
 func (*DiagnoseClusterResults) Descriptor() ([]byte, []int) {
-	return fileDescriptor_clusters_3ab6c9781418a8a1, []int{20}
+	return fileDescriptor_clusters_4285e37bff34cb9e, []int{20}
 }
 func (m *DiagnoseClusterResults) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DiagnoseClusterResults.Unmarshal(m, b)
@@ -2191,10 +2210,10 @@ var _ClusterController_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/dataproc/v1beta2/clusters.proto", fileDescriptor_clusters_3ab6c9781418a8a1)
+	proto.RegisterFile("google/cloud/dataproc/v1beta2/clusters.proto", fileDescriptor_clusters_4285e37bff34cb9e)
 }
 
-var fileDescriptor_clusters_3ab6c9781418a8a1 = []byte{
+var fileDescriptor_clusters_4285e37bff34cb9e = []byte{
 	// 2227 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x59, 0x4b, 0x73, 0x1b, 0xc7,
 	0x11, 0xd6, 0x12, 0x7c, 0x80, 0x0d, 0xe2, 0xc1, 0x31, 0xcd, 0xc0, 0x74, 0x14, 0xcb, 0xeb, 0xc4,
@@ -2207,9 +2226,9 @@ var fileDescriptor_clusters_3ab6c9781418a8a1 = []byte{
 	0x1c, 0x47, 0x71, 0xe8, 0x34, 0x1f, 0xbf, 0xdf, 0x23, 0x1c, 0x6f, 0x34, 0x1d, 0x2f, 0x61, 0x9c,
 	0xc4, 0xac, 0x11, 0xc5, 0x21, 0x0f, 0xd1, 0x45, 0xa5, 0xdd, 0x90, 0xda, 0x8d, 0x54, 0xbb, 0xa1,
 	0xb5, 0xd7, 0xbe, 0xab, 0xc1, 0x70, 0x44, 0x9b, 0x38, 0x08, 0x42, 0x8e, 0x39, 0x0d, 0x03, 0x6d,
-	0xbc, 0xf6, 0xee, 0x8b, 0x5d, 0xb1, 0x47, 0x38, 0x26, 0xae, 0xd6, 0x6d, 0xbc, 0x58, 0x37, 0x8c,
-	0x48, 0x9c, 0xc3, 0x7e, 0x4b, 0xeb, 0x7b, 0x61, 0x30, 0x88, 0x93, 0x20, 0xa0, 0xc1, 0xe0, 0xb8,
-	0xd2, 0xf7, 0xb4, 0x92, 0xfc, 0xea, 0x25, 0xfd, 0xa6, 0x9b, 0x28, 0x05, 0x3d, 0x7e, 0x69, 0x72,
+	0xbc, 0xd6, 0x78, 0xb1, 0xab, 0x30, 0x22, 0x71, 0x4e, 0xff, 0xdd, 0x17, 0xeb, 0xb3, 0x47, 0x38,
+	0x26, 0xae, 0xd6, 0x7d, 0x4b, 0xeb, 0x7a, 0x61, 0x30, 0x88, 0x93, 0x20, 0xa0, 0xc1, 0xe0, 0x38,
+	0xe0, 0xf7, 0xb4, 0x92, 0xfc, 0xea, 0x25, 0xfd, 0xa6, 0x9b, 0x28, 0x05, 0x3d, 0x7e, 0x69, 0x72,
 	0xbc, 0x4f, 0x89, 0xe7, 0xda, 0x3e, 0x66, 0x47, 0x5a, 0xe3, 0x8d, 0x49, 0x0d, 0x4e, 0x7d, 0xc2,
 	0x38, 0xf6, 0x23, 0xa5, 0x60, 0xfe, 0x69, 0x16, 0x16, 0xb6, 0x54, 0xcc, 0xd0, 0x45, 0x80, 0x28,
 	0x0e, 0x3f, 0x25, 0x0e, 0xb7, 0xa9, 0x5b, 0x37, 0x2e, 0x19, 0xeb, 0x8b, 0xd6, 0xa2, 0x96, 0xec,
@@ -2321,7 +2340,7 @@ var fileDescriptor_clusters_3ab6c9781418a8a1 = []byte{
 	0xc6, 0x74, 0xe3, 0xbf, 0x45, 0x58, 0x1e, 0x5f, 0x2a, 0x79, 0x1c, 0x7a, 0x1e, 0x89, 0xd1, 0x57,
 	0x06, 0x94, 0x73, 0xf5, 0x12, 0x5d, 0x99, 0x16, 0xae, 0x13, 0xaa, 0xeb, 0xda, 0xc5, 0xd4, 0x28,
 	0xf3, 0x32, 0xdc, 0xb8, 0x9b, 0xbe, 0x0c, 0x9b, 0x7b, 0x5f, 0x7c, 0xf3, 0xaf, 0x3f, 0xce, 0x6c,
-	0x99, 0x1f, 0x8d, 0x9e, 0x96, 0x75, 0x2c, 0x58, 0xf3, 0xe9, 0x38, 0x4e, 0xcf, 0x9a, 0x2a, 0x0c,
+	0x99, 0x1f, 0x8d, 0x9e, 0x95, 0x75, 0x2c, 0x58, 0xf3, 0xe9, 0x38, 0x4e, 0xcf, 0x9a, 0x2a, 0x0c,
 	0xac, 0xf9, 0x54, 0xfd, 0x78, 0x36, 0x7a, 0x18, 0xbf, 0x3a, 0x2a, 0x3d, 0x7f, 0x37, 0xa0, 0x9c,
 	0xab, 0x97, 0x53, 0x09, 0x9f, 0x54, 0x5d, 0xa7, 0x11, 0xfe, 0x85, 0x24, 0x6c, 0x6d, 0xec, 0x9c,
 	0x97, 0x70, 0xf3, 0x69, 0x76, 0x21, 0x9f, 0x8d, 0xf9, 0xff, 0xc5, 0x80, 0x72, 0xae, 0xfe, 0x4c,
@@ -2333,7 +2352,7 @@ var fileDescriptor_clusters_3ab6c9781418a8a1 = []byte{
 	0x69, 0x09, 0xf3, 0x2b, 0xc9, 0xb5, 0x6b, 0x1e, 0xbe, 0xac, 0x84, 0x77, 0x35, 0x8d, 0xab, 0xc6,
 	0xbb, 0x37, 0x9f, 0xc2, 0x9b, 0x4e, 0xe8, 0xbf, 0x98, 0xf7, 0xcd, 0xf4, 0x22, 0xc6, 0x0e, 0xc5,
 	0xf9, 0x7e, 0x68, 0xfc, 0xb2, 0xa5, 0xf5, 0x07, 0xa1, 0x87, 0x83, 0x41, 0x23, 0x8c, 0x07, 0xcd,
-	0x01, 0x09, 0xe4, 0xe9, 0xdf, 0x54, 0x43, 0x38, 0xa2, 0xec, 0x39, 0xff, 0xbb, 0xba, 0x96, 0x0a,
-	0x7a, 0xf3, 0xd2, 0xe2, 0xca, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xcc, 0x83, 0x4a, 0x0c, 0x83,
+	0x01, 0x09, 0xe4, 0xe9, 0xdf, 0x54, 0x43, 0x38, 0xa2, 0xec, 0x39, 0xff, 0xb7, 0xba, 0x96, 0x0a,
+	0x7a, 0xf3, 0xd2, 0xe2, 0xca, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x71, 0x37, 0xfc, 0x0f, 0x83,
 	0x1b, 0x00, 0x00,
 }

@@ -80,7 +80,7 @@ func (m *AuditLog) Reset()         { *m = AuditLog{} }
 func (m *AuditLog) String() string { return proto.CompactTextString(m) }
 func (*AuditLog) ProtoMessage()    {}
 func (*AuditLog) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_log_394f9970a41d2fd2, []int{0}
+	return fileDescriptor_audit_log_56e4635c8bf670b8, []int{0}
 }
 func (m *AuditLog) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuditLog.Unmarshal(m, b)
@@ -190,7 +190,7 @@ func (m *AuthenticationInfo) Reset()         { *m = AuthenticationInfo{} }
 func (m *AuthenticationInfo) String() string { return proto.CompactTextString(m) }
 func (*AuthenticationInfo) ProtoMessage()    {}
 func (*AuthenticationInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_log_394f9970a41d2fd2, []int{1}
+	return fileDescriptor_audit_log_56e4635c8bf670b8, []int{1}
 }
 func (m *AuthenticationInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthenticationInfo.Unmarshal(m, b)
@@ -237,7 +237,7 @@ func (m *AuthorizationInfo) Reset()         { *m = AuthorizationInfo{} }
 func (m *AuthorizationInfo) String() string { return proto.CompactTextString(m) }
 func (*AuthorizationInfo) ProtoMessage()    {}
 func (*AuthorizationInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_log_394f9970a41d2fd2, []int{2}
+	return fileDescriptor_audit_log_56e4635c8bf670b8, []int{2}
 }
 func (m *AuthorizationInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthorizationInfo.Unmarshal(m, b)
@@ -290,7 +290,8 @@ type RequestMetadata struct {
 	//     The request was made by the Google API client for Python.
 	// +   `Cloud SDK Command Line Tool apitools-client/1.0 gcloud/0.9.62`:
 	//     The request was made by the Google Cloud SDK CLI (gcloud).
-	// +   `AppEngine-Google; (+http://code.google.com/appengine; appid: s~my-project`:
+	// +   `AppEngine-Google; (+http://code.google.com/appengine; appid:
+	// s~my-project`:
 	//     The request was made from the `my-project` App Engine app.
 	CallerSuppliedUserAgent string   `protobuf:"bytes,2,opt,name=caller_supplied_user_agent,json=callerSuppliedUserAgent,proto3" json:"caller_supplied_user_agent,omitempty"`
 	XXX_NoUnkeyedLiteral    struct{} `json:"-"`
@@ -302,7 +303,7 @@ func (m *RequestMetadata) Reset()         { *m = RequestMetadata{} }
 func (m *RequestMetadata) String() string { return proto.CompactTextString(m) }
 func (*RequestMetadata) ProtoMessage()    {}
 func (*RequestMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_log_394f9970a41d2fd2, []int{3}
+	return fileDescriptor_audit_log_56e4635c8bf670b8, []int{3}
 }
 func (m *RequestMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestMetadata.Unmarshal(m, b)
@@ -344,10 +345,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/audit/audit_log.proto", fileDescriptor_audit_log_394f9970a41d2fd2)
+	proto.RegisterFile("google/cloud/audit/audit_log.proto", fileDescriptor_audit_log_56e4635c8bf670b8)
 }
 
-var fileDescriptor_audit_log_394f9970a41d2fd2 = []byte{
+var fileDescriptor_audit_log_56e4635c8bf670b8 = []byte{
 	// 576 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x94, 0x5f, 0x6f, 0xd3, 0x30,
 	0x14, 0xc5, 0x55, 0x36, 0x6d, 0xad, 0xbb, 0xd1, 0xd6, 0x20, 0x1a, 0xca, 0x04, 0xa5, 0x13, 0x50,

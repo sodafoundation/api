@@ -69,7 +69,7 @@ func (x Type_PrimitiveType) String() string {
 	return proto.EnumName(Type_PrimitiveType_name, int32(x))
 }
 func (Type_PrimitiveType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 0}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 0}
 }
 
 // Well-known protobuf types treated with first-class support in CEL.
@@ -107,7 +107,7 @@ func (x Type_WellKnownType) String() string {
 	return proto.EnumName(Type_WellKnownType_name, int32(x))
 }
 func (Type_WellKnownType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 1}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 1}
 }
 
 // A CEL expression which has been successfully type checked.
@@ -149,7 +149,7 @@ func (m *CheckedExpr) Reset()         { *m = CheckedExpr{} }
 func (m *CheckedExpr) String() string { return proto.CompactTextString(m) }
 func (*CheckedExpr) ProtoMessage()    {}
 func (*CheckedExpr) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{0}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{0}
 }
 func (m *CheckedExpr) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckedExpr.Unmarshal(m, b)
@@ -225,7 +225,7 @@ func (m *Type) Reset()         { *m = Type{} }
 func (m *Type) String() string { return proto.CompactTextString(m) }
 func (*Type) ProtoMessage()    {}
 func (*Type) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1}
 }
 func (m *Type) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Type.Unmarshal(m, b)
@@ -693,7 +693,7 @@ func (m *Type_ListType) Reset()         { *m = Type_ListType{} }
 func (m *Type_ListType) String() string { return proto.CompactTextString(m) }
 func (*Type_ListType) ProtoMessage()    {}
 func (*Type_ListType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 0}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 0}
 }
 func (m *Type_ListType) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Type_ListType.Unmarshal(m, b)
@@ -735,7 +735,7 @@ func (m *Type_MapType) Reset()         { *m = Type_MapType{} }
 func (m *Type_MapType) String() string { return proto.CompactTextString(m) }
 func (*Type_MapType) ProtoMessage()    {}
 func (*Type_MapType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 1}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 1}
 }
 func (m *Type_MapType) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Type_MapType.Unmarshal(m, b)
@@ -784,7 +784,7 @@ func (m *Type_FunctionType) Reset()         { *m = Type_FunctionType{} }
 func (m *Type_FunctionType) String() string { return proto.CompactTextString(m) }
 func (*Type_FunctionType) ProtoMessage()    {}
 func (*Type_FunctionType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 2}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 2}
 }
 func (m *Type_FunctionType) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Type_FunctionType.Unmarshal(m, b)
@@ -833,7 +833,7 @@ func (m *Type_AbstractType) Reset()         { *m = Type_AbstractType{} }
 func (m *Type_AbstractType) String() string { return proto.CompactTextString(m) }
 func (*Type_AbstractType) ProtoMessage()    {}
 func (*Type_AbstractType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{1, 3}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{1, 3}
 }
 func (m *Type_AbstractType) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Type_AbstractType.Unmarshal(m, b)
@@ -898,7 +898,7 @@ func (m *Decl) Reset()         { *m = Decl{} }
 func (m *Decl) String() string { return proto.CompactTextString(m) }
 func (*Decl) ProtoMessage()    {}
 func (*Decl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{2}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{2}
 }
 func (m *Decl) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Decl.Unmarshal(m, b)
@@ -1059,7 +1059,7 @@ func (m *Decl_IdentDecl) Reset()         { *m = Decl_IdentDecl{} }
 func (m *Decl_IdentDecl) String() string { return proto.CompactTextString(m) }
 func (*Decl_IdentDecl) ProtoMessage()    {}
 func (*Decl_IdentDecl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{2, 0}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{2, 0}
 }
 func (m *Decl_IdentDecl) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Decl_IdentDecl.Unmarshal(m, b)
@@ -1118,7 +1118,7 @@ func (m *Decl_FunctionDecl) Reset()         { *m = Decl_FunctionDecl{} }
 func (m *Decl_FunctionDecl) String() string { return proto.CompactTextString(m) }
 func (*Decl_FunctionDecl) ProtoMessage()    {}
 func (*Decl_FunctionDecl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{2, 1}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{2, 1}
 }
 func (m *Decl_FunctionDecl) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Decl_FunctionDecl.Unmarshal(m, b)
@@ -1200,7 +1200,7 @@ func (m *Decl_FunctionDecl_Overload) Reset()         { *m = Decl_FunctionDecl_Ov
 func (m *Decl_FunctionDecl_Overload) String() string { return proto.CompactTextString(m) }
 func (*Decl_FunctionDecl_Overload) ProtoMessage()    {}
 func (*Decl_FunctionDecl_Overload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{2, 1, 0}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{2, 1, 0}
 }
 func (m *Decl_FunctionDecl_Overload) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Decl_FunctionDecl_Overload.Unmarshal(m, b)
@@ -1288,7 +1288,7 @@ func (m *Reference) Reset()         { *m = Reference{} }
 func (m *Reference) String() string { return proto.CompactTextString(m) }
 func (*Reference) ProtoMessage()    {}
 func (*Reference) Descriptor() ([]byte, []int) {
-	return fileDescriptor_checked_3a5069ea4af1659c, []int{3}
+	return fileDescriptor_checked_2fc1f80fa2b6cdfd, []int{3}
 }
 func (m *Reference) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Reference.Unmarshal(m, b)
@@ -1348,10 +1348,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/api/expr/v1alpha1/checked.proto", fileDescriptor_checked_3a5069ea4af1659c)
+	proto.RegisterFile("google/api/expr/v1alpha1/checked.proto", fileDescriptor_checked_2fc1f80fa2b6cdfd)
 }
 
-var fileDescriptor_checked_3a5069ea4af1659c = []byte{
+var fileDescriptor_checked_2fc1f80fa2b6cdfd = []byte{
 	// 1144 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0x5f, 0x6f, 0xdb, 0xb6,
 	0x17, 0x8d, 0x6c, 0xd9, 0x96, 0xae, 0x9c, 0xfe, 0xfc, 0x23, 0x86, 0x41, 0x50, 0x8b, 0x36, 0x70,

@@ -77,7 +77,7 @@ func (m *Occurrence) Reset()         { *m = Occurrence{} }
 func (m *Occurrence) String() string { return proto.CompactTextString(m) }
 func (*Occurrence) ProtoMessage()    {}
 func (*Occurrence) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{0}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{0}
 }
 func (m *Occurrence) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Occurrence.Unmarshal(m, b)
@@ -436,7 +436,7 @@ func (m *Resource) Reset()         { *m = Resource{} }
 func (m *Resource) String() string { return proto.CompactTextString(m) }
 func (*Resource) ProtoMessage()    {}
 func (*Resource) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{1}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{1}
 }
 func (m *Resource) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Resource.Unmarshal(m, b)
@@ -521,7 +521,7 @@ func (m *Note) Reset()         { *m = Note{} }
 func (m *Note) String() string { return proto.CompactTextString(m) }
 func (*Note) ProtoMessage()    {}
 func (*Note) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{2}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{2}
 }
 func (m *Note) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Note.Unmarshal(m, b)
@@ -889,7 +889,7 @@ func (m *GetOccurrenceRequest) Reset()         { *m = GetOccurrenceRequest{} }
 func (m *GetOccurrenceRequest) String() string { return proto.CompactTextString(m) }
 func (*GetOccurrenceRequest) ProtoMessage()    {}
 func (*GetOccurrenceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{3}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{3}
 }
 func (m *GetOccurrenceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetOccurrenceRequest.Unmarshal(m, b)
@@ -936,7 +936,7 @@ func (m *ListOccurrencesRequest) Reset()         { *m = ListOccurrencesRequest{}
 func (m *ListOccurrencesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListOccurrencesRequest) ProtoMessage()    {}
 func (*ListOccurrencesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{4}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{4}
 }
 func (m *ListOccurrencesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListOccurrencesRequest.Unmarshal(m, b)
@@ -1001,7 +1001,7 @@ func (m *ListOccurrencesResponse) Reset()         { *m = ListOccurrencesResponse
 func (m *ListOccurrencesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListOccurrencesResponse) ProtoMessage()    {}
 func (*ListOccurrencesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{5}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{5}
 }
 func (m *ListOccurrencesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListOccurrencesResponse.Unmarshal(m, b)
@@ -1049,7 +1049,7 @@ func (m *DeleteOccurrenceRequest) Reset()         { *m = DeleteOccurrenceRequest
 func (m *DeleteOccurrenceRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteOccurrenceRequest) ProtoMessage()    {}
 func (*DeleteOccurrenceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{6}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{6}
 }
 func (m *DeleteOccurrenceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteOccurrenceRequest.Unmarshal(m, b)
@@ -1092,7 +1092,7 @@ func (m *CreateOccurrenceRequest) Reset()         { *m = CreateOccurrenceRequest
 func (m *CreateOccurrenceRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateOccurrenceRequest) ProtoMessage()    {}
 func (*CreateOccurrenceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{7}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{7}
 }
 func (m *CreateOccurrenceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateOccurrenceRequest.Unmarshal(m, b)
@@ -1144,7 +1144,7 @@ func (m *UpdateOccurrenceRequest) Reset()         { *m = UpdateOccurrenceRequest
 func (m *UpdateOccurrenceRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateOccurrenceRequest) ProtoMessage()    {}
 func (*UpdateOccurrenceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{8}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{8}
 }
 func (m *UpdateOccurrenceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateOccurrenceRequest.Unmarshal(m, b)
@@ -1199,7 +1199,7 @@ func (m *GetNoteRequest) Reset()         { *m = GetNoteRequest{} }
 func (m *GetNoteRequest) String() string { return proto.CompactTextString(m) }
 func (*GetNoteRequest) ProtoMessage()    {}
 func (*GetNoteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{9}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{9}
 }
 func (m *GetNoteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetNoteRequest.Unmarshal(m, b)
@@ -1240,7 +1240,7 @@ func (m *GetOccurrenceNoteRequest) Reset()         { *m = GetOccurrenceNoteReque
 func (m *GetOccurrenceNoteRequest) String() string { return proto.CompactTextString(m) }
 func (*GetOccurrenceNoteRequest) ProtoMessage()    {}
 func (*GetOccurrenceNoteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{10}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{10}
 }
 func (m *GetOccurrenceNoteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetOccurrenceNoteRequest.Unmarshal(m, b)
@@ -1287,7 +1287,7 @@ func (m *ListNotesRequest) Reset()         { *m = ListNotesRequest{} }
 func (m *ListNotesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListNotesRequest) ProtoMessage()    {}
 func (*ListNotesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{11}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{11}
 }
 func (m *ListNotesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListNotesRequest.Unmarshal(m, b)
@@ -1352,7 +1352,7 @@ func (m *ListNotesResponse) Reset()         { *m = ListNotesResponse{} }
 func (m *ListNotesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListNotesResponse) ProtoMessage()    {}
 func (*ListNotesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{12}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{12}
 }
 func (m *ListNotesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListNotesResponse.Unmarshal(m, b)
@@ -1400,7 +1400,7 @@ func (m *DeleteNoteRequest) Reset()         { *m = DeleteNoteRequest{} }
 func (m *DeleteNoteRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteNoteRequest) ProtoMessage()    {}
 func (*DeleteNoteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{13}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{13}
 }
 func (m *DeleteNoteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteNoteRequest.Unmarshal(m, b)
@@ -1445,7 +1445,7 @@ func (m *CreateNoteRequest) Reset()         { *m = CreateNoteRequest{} }
 func (m *CreateNoteRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateNoteRequest) ProtoMessage()    {}
 func (*CreateNoteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{14}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{14}
 }
 func (m *CreateNoteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateNoteRequest.Unmarshal(m, b)
@@ -1504,7 +1504,7 @@ func (m *UpdateNoteRequest) Reset()         { *m = UpdateNoteRequest{} }
 func (m *UpdateNoteRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateNoteRequest) ProtoMessage()    {}
 func (*UpdateNoteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{15}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{15}
 }
 func (m *UpdateNoteRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateNoteRequest.Unmarshal(m, b)
@@ -1565,7 +1565,7 @@ func (m *ListNoteOccurrencesRequest) Reset()         { *m = ListNoteOccurrencesR
 func (m *ListNoteOccurrencesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListNoteOccurrencesRequest) ProtoMessage()    {}
 func (*ListNoteOccurrencesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{16}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{16}
 }
 func (m *ListNoteOccurrencesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListNoteOccurrencesRequest.Unmarshal(m, b)
@@ -1628,7 +1628,7 @@ func (m *ListNoteOccurrencesResponse) Reset()         { *m = ListNoteOccurrences
 func (m *ListNoteOccurrencesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListNoteOccurrencesResponse) ProtoMessage()    {}
 func (*ListNoteOccurrencesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{17}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{17}
 }
 func (m *ListNoteOccurrencesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListNoteOccurrencesResponse.Unmarshal(m, b)
@@ -1678,7 +1678,7 @@ func (m *BatchCreateNotesRequest) Reset()         { *m = BatchCreateNotesRequest
 func (m *BatchCreateNotesRequest) String() string { return proto.CompactTextString(m) }
 func (*BatchCreateNotesRequest) ProtoMessage()    {}
 func (*BatchCreateNotesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{18}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{18}
 }
 func (m *BatchCreateNotesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchCreateNotesRequest.Unmarshal(m, b)
@@ -1725,7 +1725,7 @@ func (m *BatchCreateNotesResponse) Reset()         { *m = BatchCreateNotesRespon
 func (m *BatchCreateNotesResponse) String() string { return proto.CompactTextString(m) }
 func (*BatchCreateNotesResponse) ProtoMessage()    {}
 func (*BatchCreateNotesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{19}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{19}
 }
 func (m *BatchCreateNotesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchCreateNotesResponse.Unmarshal(m, b)
@@ -1768,7 +1768,7 @@ func (m *BatchCreateOccurrencesRequest) Reset()         { *m = BatchCreateOccurr
 func (m *BatchCreateOccurrencesRequest) String() string { return proto.CompactTextString(m) }
 func (*BatchCreateOccurrencesRequest) ProtoMessage()    {}
 func (*BatchCreateOccurrencesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{20}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{20}
 }
 func (m *BatchCreateOccurrencesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchCreateOccurrencesRequest.Unmarshal(m, b)
@@ -1815,7 +1815,7 @@ func (m *BatchCreateOccurrencesResponse) Reset()         { *m = BatchCreateOccur
 func (m *BatchCreateOccurrencesResponse) String() string { return proto.CompactTextString(m) }
 func (*BatchCreateOccurrencesResponse) ProtoMessage()    {}
 func (*BatchCreateOccurrencesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{21}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{21}
 }
 func (m *BatchCreateOccurrencesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchCreateOccurrencesResponse.Unmarshal(m, b)
@@ -1860,7 +1860,7 @@ func (m *GetVulnerabilityOccurrencesSummaryRequest) Reset() {
 func (m *GetVulnerabilityOccurrencesSummaryRequest) String() string { return proto.CompactTextString(m) }
 func (*GetVulnerabilityOccurrencesSummaryRequest) ProtoMessage()    {}
 func (*GetVulnerabilityOccurrencesSummaryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{22}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{22}
 }
 func (m *GetVulnerabilityOccurrencesSummaryRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetVulnerabilityOccurrencesSummaryRequest.Unmarshal(m, b)
@@ -1908,7 +1908,7 @@ func (m *VulnerabilityOccurrencesSummary) Reset()         { *m = VulnerabilityOc
 func (m *VulnerabilityOccurrencesSummary) String() string { return proto.CompactTextString(m) }
 func (*VulnerabilityOccurrencesSummary) ProtoMessage()    {}
 func (*VulnerabilityOccurrencesSummary) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{23}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{23}
 }
 func (m *VulnerabilityOccurrencesSummary) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VulnerabilityOccurrencesSummary.Unmarshal(m, b)
@@ -1959,7 +1959,7 @@ func (m *VulnerabilityOccurrencesSummary_FixableTotalByDigest) String() string {
 }
 func (*VulnerabilityOccurrencesSummary_FixableTotalByDigest) ProtoMessage() {}
 func (*VulnerabilityOccurrencesSummary_FixableTotalByDigest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_grafeas_a4e3069f0b5ff953, []int{23, 0}
+	return fileDescriptor_grafeas_9e6a98cb789573bd, []int{23, 0}
 }
 func (m *VulnerabilityOccurrencesSummary_FixableTotalByDigest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VulnerabilityOccurrencesSummary_FixableTotalByDigest.Unmarshal(m, b)
@@ -2611,10 +2611,10 @@ var _GrafeasV1Beta1_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/grafeas/grafeas.proto", fileDescriptor_grafeas_a4e3069f0b5ff953)
+	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/grafeas/grafeas.proto", fileDescriptor_grafeas_9e6a98cb789573bd)
 }
 
-var fileDescriptor_grafeas_a4e3069f0b5ff953 = []byte{
+var fileDescriptor_grafeas_9e6a98cb789573bd = []byte{
 	// 1920 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xcd, 0x6f, 0x1b, 0xc7,
 	0x15, 0xf7, 0x52, 0x9f, 0x7c, 0xd4, 0x07, 0x35, 0x75, 0xac, 0x2d, 0x9d, 0xc4, 0xec, 0xc6, 0x75,

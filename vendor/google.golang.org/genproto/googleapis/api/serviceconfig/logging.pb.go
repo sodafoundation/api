@@ -68,7 +68,7 @@ func (m *Logging) Reset()         { *m = Logging{} }
 func (m *Logging) String() string { return proto.CompactTextString(m) }
 func (*Logging) ProtoMessage()    {}
 func (*Logging) Descriptor() ([]byte, []int) {
-	return fileDescriptor_logging_d4ad8a3d4a3a3050, []int{0}
+	return fileDescriptor_logging_75c6d16b6d5e00f3, []int{0}
 }
 func (m *Logging) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Logging.Unmarshal(m, b)
@@ -106,12 +106,13 @@ func (m *Logging) GetConsumerDestinations() []*Logging_LoggingDestination {
 // or the consumer project).
 type Logging_LoggingDestination struct {
 	// The monitored resource type. The type must be defined in the
-	// [Service.monitored_resources][google.api.Service.monitored_resources] section.
+	// [Service.monitored_resources][google.api.Service.monitored_resources]
+	// section.
 	MonitoredResource string `protobuf:"bytes,3,opt,name=monitored_resource,json=monitoredResource,proto3" json:"monitored_resource,omitempty"`
 	// Names of the logs to be sent to this destination. Each name must
-	// be defined in the [Service.logs][google.api.Service.logs] section. If the log name is
-	// not a domain scoped name, it will be automatically prefixed with
-	// the service name followed by "/".
+	// be defined in the [Service.logs][google.api.Service.logs] section. If the
+	// log name is not a domain scoped name, it will be automatically prefixed
+	// with the service name followed by "/".
 	Logs                 []string `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -122,7 +123,7 @@ func (m *Logging_LoggingDestination) Reset()         { *m = Logging_LoggingDesti
 func (m *Logging_LoggingDestination) String() string { return proto.CompactTextString(m) }
 func (*Logging_LoggingDestination) ProtoMessage()    {}
 func (*Logging_LoggingDestination) Descriptor() ([]byte, []int) {
-	return fileDescriptor_logging_d4ad8a3d4a3a3050, []int{0, 0}
+	return fileDescriptor_logging_75c6d16b6d5e00f3, []int{0, 0}
 }
 func (m *Logging_LoggingDestination) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Logging_LoggingDestination.Unmarshal(m, b)
@@ -161,9 +162,9 @@ func init() {
 	proto.RegisterType((*Logging_LoggingDestination)(nil), "google.api.Logging.LoggingDestination")
 }
 
-func init() { proto.RegisterFile("google/api/logging.proto", fileDescriptor_logging_d4ad8a3d4a3a3050) }
+func init() { proto.RegisterFile("google/api/logging.proto", fileDescriptor_logging_75c6d16b6d5e00f3) }
 
-var fileDescriptor_logging_d4ad8a3d4a3a3050 = []byte{
+var fileDescriptor_logging_75c6d16b6d5e00f3 = []byte{
 	// 270 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x90, 0x4f, 0x4b, 0xc4, 0x30,
 	0x10, 0xc5, 0x69, 0x77, 0x51, 0x36, 0x8a, 0x60, 0x50, 0x28, 0x8b, 0x87, 0xc5, 0x83, 0xec, 0xc5,

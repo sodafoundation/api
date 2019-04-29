@@ -32,7 +32,7 @@ func (m *AvroSchema) Reset()         { *m = AvroSchema{} }
 func (m *AvroSchema) String() string { return proto.CompactTextString(m) }
 func (*AvroSchema) ProtoMessage()    {}
 func (*AvroSchema) Descriptor() ([]byte, []int) {
-	return fileDescriptor_avro_b3df5fb2ad3a17ec, []int{0}
+	return fileDescriptor_avro_7569793a2af4c5e9, []int{0}
 }
 func (m *AvroSchema) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AvroSchema.Unmarshal(m, b)
@@ -74,7 +74,7 @@ func (m *AvroRows) Reset()         { *m = AvroRows{} }
 func (m *AvroRows) String() string { return proto.CompactTextString(m) }
 func (*AvroRows) ProtoMessage()    {}
 func (*AvroRows) Descriptor() ([]byte, []int) {
-	return fileDescriptor_avro_b3df5fb2ad3a17ec, []int{1}
+	return fileDescriptor_avro_7569793a2af4c5e9, []int{1}
 }
 func (m *AvroRows) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AvroRows.Unmarshal(m, b)
@@ -114,10 +114,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/bigquery/storage/v1beta1/avro.proto", fileDescriptor_avro_b3df5fb2ad3a17ec)
+	proto.RegisterFile("google/cloud/bigquery/storage/v1beta1/avro.proto", fileDescriptor_avro_7569793a2af4c5e9)
 }
 
-var fileDescriptor_avro_b3df5fb2ad3a17ec = []byte{
+var fileDescriptor_avro_7569793a2af4c5e9 = []byte{
 	// 242 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0xd0, 0xcf, 0x4b, 0xc3, 0x30,
 	0x14, 0x07, 0x70, 0xaa, 0x30, 0xd6, 0xe0, 0xa9, 0xc8, 0x18, 0x78, 0x19, 0x43, 0x61, 0x5e, 0x12,

@@ -51,7 +51,7 @@ func (x SupportAccount_State) String() string {
 	return proto.EnumName(SupportAccount_State_name, int32(x))
 }
 func (SupportAccount_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{0, 0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{0, 0}
 }
 
 // Pricing model applicable to this support account.
@@ -82,7 +82,7 @@ func (x SupportAccount_PricingModel) String() string {
 	return proto.EnumName(SupportAccount_PricingModel_name, int32(x))
 }
 func (SupportAccount_PricingModel) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{0, 1}
+	return fileDescriptor_common_5756cc04782c04d8, []int{0, 1}
 }
 
 // The case priority with P0 being the most urgent and P4 the least.
@@ -127,7 +127,7 @@ func (x Case_Priority) String() string {
 	return proto.EnumName(Case_Priority_name, int32(x))
 }
 func (Case_Priority) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{1, 0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{1, 0}
 }
 
 // The state of a case.
@@ -181,7 +181,7 @@ func (x Case_State) String() string {
 	return proto.EnumName(Case_State_name, int32(x))
 }
 func (Case_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{1, 1}
+	return fileDescriptor_common_5756cc04782c04d8, []int{1, 1}
 }
 
 // The status of a customer issue.
@@ -223,7 +223,7 @@ func (x CustomerIssue_IssueState) String() string {
 	return proto.EnumName(CustomerIssue_IssueState_name, int32(x))
 }
 func (CustomerIssue_IssueState) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{2, 0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{2, 0}
 }
 
 // A role which determines the support resources and features a user might
@@ -262,7 +262,7 @@ func (x SupportRole_Role) String() string {
 	return proto.EnumName(SupportRole_Role_name, int32(x))
 }
 func (SupportRole_Role) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{3, 0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{3, 0}
 }
 
 // A Google Cloud Platform account that identifies support eligibility for a
@@ -301,7 +301,7 @@ func (m *SupportAccount) Reset()         { *m = SupportAccount{} }
 func (m *SupportAccount) String() string { return proto.CompactTextString(m) }
 func (*SupportAccount) ProtoMessage()    {}
 func (*SupportAccount) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{0}
 }
 func (m *SupportAccount) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SupportAccount.Unmarshal(m, b)
@@ -432,7 +432,7 @@ func (m *Case) Reset()         { *m = Case{} }
 func (m *Case) String() string { return proto.CompactTextString(m) }
 func (*Case) ProtoMessage()    {}
 func (*Case) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{1}
+	return fileDescriptor_common_5756cc04782c04d8, []int{1}
 }
 func (m *Case) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Case.Unmarshal(m, b)
@@ -585,7 +585,7 @@ func (m *CustomerIssue) Reset()         { *m = CustomerIssue{} }
 func (m *CustomerIssue) String() string { return proto.CompactTextString(m) }
 func (*CustomerIssue) ProtoMessage()    {}
 func (*CustomerIssue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{2}
+	return fileDescriptor_common_5756cc04782c04d8, []int{2}
 }
 func (m *CustomerIssue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CustomerIssue.Unmarshal(m, b)
@@ -656,7 +656,7 @@ func (m *SupportRole) Reset()         { *m = SupportRole{} }
 func (m *SupportRole) String() string { return proto.CompactTextString(m) }
 func (*SupportRole) ProtoMessage()    {}
 func (*SupportRole) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{3}
+	return fileDescriptor_common_5756cc04782c04d8, []int{3}
 }
 func (m *SupportRole) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SupportRole.Unmarshal(m, b)
@@ -713,7 +713,7 @@ func (m *Comment) Reset()         { *m = Comment{} }
 func (m *Comment) String() string { return proto.CompactTextString(m) }
 func (*Comment) ProtoMessage()    {}
 func (*Comment) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{4}
+	return fileDescriptor_common_5756cc04782c04d8, []int{4}
 }
 func (m *Comment) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Comment.Unmarshal(m, b)
@@ -777,7 +777,7 @@ func (m *IssueTaxonomy) Reset()         { *m = IssueTaxonomy{} }
 func (m *IssueTaxonomy) String() string { return proto.CompactTextString(m) }
 func (*IssueTaxonomy) ProtoMessage()    {}
 func (*IssueTaxonomy) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{5}
+	return fileDescriptor_common_5756cc04782c04d8, []int{5}
 }
 func (m *IssueTaxonomy) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IssueTaxonomy.Unmarshal(m, b)
@@ -830,7 +830,7 @@ func (m *IssueTaxonomy_Component) Reset()         { *m = IssueTaxonomy_Component
 func (m *IssueTaxonomy_Component) String() string { return proto.CompactTextString(m) }
 func (*IssueTaxonomy_Component) ProtoMessage()    {}
 func (*IssueTaxonomy_Component) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{5, 0}
+	return fileDescriptor_common_5756cc04782c04d8, []int{5, 0}
 }
 func (m *IssueTaxonomy_Component) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IssueTaxonomy_Component.Unmarshal(m, b)
@@ -894,7 +894,7 @@ func (m *IssueTaxonomy_Category) Reset()         { *m = IssueTaxonomy_Category{}
 func (m *IssueTaxonomy_Category) String() string { return proto.CompactTextString(m) }
 func (*IssueTaxonomy_Category) ProtoMessage()    {}
 func (*IssueTaxonomy_Category) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_f17357843abc5917, []int{5, 1}
+	return fileDescriptor_common_5756cc04782c04d8, []int{5, 1}
 }
 func (m *IssueTaxonomy_Category) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IssueTaxonomy_Category.Unmarshal(m, b)
@@ -948,10 +948,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/support/common.proto", fileDescriptor_common_f17357843abc5917)
+	proto.RegisterFile("google/cloud/support/common.proto", fileDescriptor_common_5756cc04782c04d8)
 }
 
-var fileDescriptor_common_f17357843abc5917 = []byte{
+var fileDescriptor_common_5756cc04782c04d8 = []byte{
 	// 1336 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x57, 0x61, 0x6e, 0xdb, 0xc6,
 	0x12, 0x0e, 0x29, 0xc9, 0x92, 0x46, 0x96, 0xbd, 0x59, 0x38, 0x79, 0x8c, 0x92, 0xbc, 0x38, 0x7a,

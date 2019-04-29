@@ -20,7 +20,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// Metadata for the given [google.cloud.location.Location][google.cloud.location.Location].
+// Metadata for the given
+// [google.cloud.location.Location][google.cloud.location.Location].
 type LocationMetadata struct {
 	// App Engine Standard Environment is available in the given location.
 	//
@@ -39,7 +40,7 @@ func (m *LocationMetadata) Reset()         { *m = LocationMetadata{} }
 func (m *LocationMetadata) String() string { return proto.CompactTextString(m) }
 func (*LocationMetadata) ProtoMessage()    {}
 func (*LocationMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_location_22ad68e45e4328c7, []int{0}
+	return fileDescriptor_location_912f97d845a50ade, []int{0}
 }
 func (m *LocationMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LocationMetadata.Unmarshal(m, b)
@@ -78,10 +79,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/appengine/v1/location.proto", fileDescriptor_location_22ad68e45e4328c7)
+	proto.RegisterFile("google/appengine/v1/location.proto", fileDescriptor_location_912f97d845a50ade)
 }
 
-var fileDescriptor_location_22ad68e45e4328c7 = []byte{
+var fileDescriptor_location_912f97d845a50ade = []byte{
 	// 236 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x90, 0x41, 0x4b, 0xc3, 0x40,
 	0x10, 0x85, 0x89, 0x88, 0x48, 0x40, 0x90, 0x7a, 0xb0, 0x94, 0x22, 0xd2, 0x93, 0xa7, 0x5d, 0x8a,

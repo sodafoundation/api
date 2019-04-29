@@ -61,7 +61,7 @@ func (x Change_State) String() string {
 	return proto.EnumName(Change_State_name, int32(x))
 }
 func (Change_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_watch_40ce6762a23e7042, []int{2, 0}
+	return fileDescriptor_watch_49d401f698d4e743, []int{2, 0}
 }
 
 // The message used by the client to register interest in an entity.
@@ -130,7 +130,7 @@ func (m *Request) Reset()         { *m = Request{} }
 func (m *Request) String() string { return proto.CompactTextString(m) }
 func (*Request) ProtoMessage()    {}
 func (*Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_watch_40ce6762a23e7042, []int{0}
+	return fileDescriptor_watch_49d401f698d4e743, []int{0}
 }
 func (m *Request) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Request.Unmarshal(m, b)
@@ -177,7 +177,7 @@ func (m *ChangeBatch) Reset()         { *m = ChangeBatch{} }
 func (m *ChangeBatch) String() string { return proto.CompactTextString(m) }
 func (*ChangeBatch) ProtoMessage()    {}
 func (*ChangeBatch) Descriptor() ([]byte, []int) {
-	return fileDescriptor_watch_40ce6762a23e7042, []int{1}
+	return fileDescriptor_watch_49d401f698d4e743, []int{1}
 }
 func (m *ChangeBatch) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ChangeBatch.Unmarshal(m, b)
@@ -213,14 +213,14 @@ type Change struct {
 	// The state of the `element`.
 	State Change_State `protobuf:"varint,2,opt,name=state,proto3,enum=google.watcher.v1.Change_State" json:"state,omitempty"`
 	// The actual change data. This field is present only when `state() == EXISTS`
-	// or `state() == ERROR`. Please see [google.protobuf.Any][google.protobuf.Any] about how to use
-	// the Any type.
+	// or `state() == ERROR`. Please see
+	// [google.protobuf.Any][google.protobuf.Any] about how to use the Any type.
 	Data *any.Any `protobuf:"bytes,6,opt,name=data,proto3" json:"data,omitempty"`
 	// If present, provides a compact representation of all the messages that have
 	// been received by the caller for the given entity, e.g., it could be a
 	// sequence number or a multi-part timestamp/version vector. This marker can
-	// be provided in the Request message, allowing the caller to resume the stream
-	// watching at a specific point without fetching the initial state.
+	// be provided in the Request message, allowing the caller to resume the
+	// stream watching at a specific point without fetching the initial state.
 	ResumeMarker []byte `protobuf:"bytes,4,opt,name=resume_marker,json=resumeMarker,proto3" json:"resume_marker,omitempty"`
 	// If true, this Change is followed by more Changes that are in the same group
 	// as this Change.
@@ -234,7 +234,7 @@ func (m *Change) Reset()         { *m = Change{} }
 func (m *Change) String() string { return proto.CompactTextString(m) }
 func (*Change) ProtoMessage()    {}
 func (*Change) Descriptor() ([]byte, []int) {
-	return fileDescriptor_watch_40ce6762a23e7042, []int{2}
+	return fileDescriptor_watch_49d401f698d4e743, []int{2}
 }
 func (m *Change) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Change.Unmarshal(m, b)
@@ -398,10 +398,10 @@ var _Watcher_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/watcher/v1/watch.proto", fileDescriptor_watch_40ce6762a23e7042)
+	proto.RegisterFile("google/watcher/v1/watch.proto", fileDescriptor_watch_49d401f698d4e743)
 }
 
-var fileDescriptor_watch_40ce6762a23e7042 = []byte{
+var fileDescriptor_watch_49d401f698d4e743 = []byte{
 	// 449 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x52, 0xdd, 0x6e, 0xd3, 0x30,
 	0x14, 0xc6, 0xdd, 0x92, 0xd2, 0xd3, 0x31, 0x75, 0x16, 0x43, 0x69, 0x19, 0x10, 0x85, 0x9b, 0x5c,

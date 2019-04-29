@@ -53,7 +53,7 @@ func (x ContentType) String() string {
 	return proto.EnumName(ContentType_name, int32(x))
 }
 func (ContentType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{0}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{0}
 }
 
 // Export asset request.
@@ -90,7 +90,7 @@ func (m *ExportAssetsRequest) Reset()         { *m = ExportAssetsRequest{} }
 func (m *ExportAssetsRequest) String() string { return proto.CompactTextString(m) }
 func (*ExportAssetsRequest) ProtoMessage()    {}
 func (*ExportAssetsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{0}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{0}
 }
 func (m *ExportAssetsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExportAssetsRequest.Unmarshal(m, b)
@@ -146,8 +146,10 @@ func (m *ExportAssetsRequest) GetOutputConfig() *OutputConfig {
 }
 
 // The export asset response. This message is returned by the
-// [google.longrunning.Operations.GetOperation][google.longrunning.Operations.GetOperation] method in the returned
-// [google.longrunning.Operation.response][google.longrunning.Operation.response] field.
+// [google.longrunning.Operations.GetOperation][google.longrunning.Operations.GetOperation]
+// method in the returned
+// [google.longrunning.Operation.response][google.longrunning.Operation.response]
+// field.
 type ExportAssetsResponse struct {
 	// Time the snapshot was taken.
 	ReadTime *timestamp.Timestamp `protobuf:"bytes,1,opt,name=read_time,json=readTime,proto3" json:"read_time,omitempty"`
@@ -163,7 +165,7 @@ func (m *ExportAssetsResponse) Reset()         { *m = ExportAssetsResponse{} }
 func (m *ExportAssetsResponse) String() string { return proto.CompactTextString(m) }
 func (*ExportAssetsResponse) ProtoMessage()    {}
 func (*ExportAssetsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{1}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{1}
 }
 func (m *ExportAssetsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExportAssetsResponse.Unmarshal(m, b)
@@ -205,7 +207,8 @@ type BatchGetAssetsHistoryRequest struct {
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// A list of the full names of the assets. For example:
 	// `//compute.googleapis.com/projects/my_project_123/zones/zone1/instances/instance1`.
-	// See [Resource Names](https://cloud.google.com/apis/design/resource_names#full_resource_name)
+	// See [Resource
+	// Names](https://cloud.google.com/apis/design/resource_names#full_resource_name)
 	// for more info.
 	//
 	// The request becomes a no-op if the asset name list is empty, and the max
@@ -229,7 +232,7 @@ func (m *BatchGetAssetsHistoryRequest) Reset()         { *m = BatchGetAssetsHist
 func (m *BatchGetAssetsHistoryRequest) String() string { return proto.CompactTextString(m) }
 func (*BatchGetAssetsHistoryRequest) ProtoMessage()    {}
 func (*BatchGetAssetsHistoryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{2}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{2}
 }
 func (m *BatchGetAssetsHistoryRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchGetAssetsHistoryRequest.Unmarshal(m, b)
@@ -290,7 +293,7 @@ func (m *BatchGetAssetsHistoryResponse) Reset()         { *m = BatchGetAssetsHis
 func (m *BatchGetAssetsHistoryResponse) String() string { return proto.CompactTextString(m) }
 func (*BatchGetAssetsHistoryResponse) ProtoMessage()    {}
 func (*BatchGetAssetsHistoryResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{3}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{3}
 }
 func (m *BatchGetAssetsHistoryResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchGetAssetsHistoryResponse.Unmarshal(m, b)
@@ -333,7 +336,7 @@ func (m *OutputConfig) Reset()         { *m = OutputConfig{} }
 func (m *OutputConfig) String() string { return proto.CompactTextString(m) }
 func (*OutputConfig) ProtoMessage()    {}
 func (*OutputConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{4}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{4}
 }
 func (m *OutputConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OutputConfig.Unmarshal(m, b)
@@ -448,7 +451,7 @@ func (m *GcsDestination) Reset()         { *m = GcsDestination{} }
 func (m *GcsDestination) String() string { return proto.CompactTextString(m) }
 func (*GcsDestination) ProtoMessage()    {}
 func (*GcsDestination) Descriptor() ([]byte, []int) {
-	return fileDescriptor_asset_service_15957aff40009ad0, []int{5}
+	return fileDescriptor_asset_service_5bac528f06a2f360, []int{5}
 }
 func (m *GcsDestination) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GcsDestination.Unmarshal(m, b)
@@ -567,8 +570,9 @@ const _ = grpc.SupportPackageIsVersion4
 type AssetServiceClient interface {
 	// Exports assets with time and resource types to a given Cloud Storage
 	// location. The output format is newline-delimited JSON.
-	// This API implements the [google.longrunning.Operation][google.longrunning.Operation] API allowing you
-	// to keep track of the export.
+	// This API implements the
+	// [google.longrunning.Operation][google.longrunning.Operation] API allowing
+	// you to keep track of the export.
 	ExportAssets(ctx context.Context, in *ExportAssetsRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 	// Batch gets the update history of assets that overlap a time window.
 	// For RESOURCE content, this API outputs history with asset in both
@@ -608,8 +612,9 @@ func (c *assetServiceClient) BatchGetAssetsHistory(ctx context.Context, in *Batc
 type AssetServiceServer interface {
 	// Exports assets with time and resource types to a given Cloud Storage
 	// location. The output format is newline-delimited JSON.
-	// This API implements the [google.longrunning.Operation][google.longrunning.Operation] API allowing you
-	// to keep track of the export.
+	// This API implements the
+	// [google.longrunning.Operation][google.longrunning.Operation] API allowing
+	// you to keep track of the export.
 	ExportAssets(context.Context, *ExportAssetsRequest) (*longrunning.Operation, error)
 	// Batch gets the update history of assets that overlap a time window.
 	// For RESOURCE content, this API outputs history with asset in both
@@ -677,10 +682,10 @@ var _AssetService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/asset/v1beta1/asset_service.proto", fileDescriptor_asset_service_15957aff40009ad0)
+	proto.RegisterFile("google/cloud/asset/v1beta1/asset_service.proto", fileDescriptor_asset_service_5bac528f06a2f360)
 }
 
-var fileDescriptor_asset_service_15957aff40009ad0 = []byte{
+var fileDescriptor_asset_service_5bac528f06a2f360 = []byte{
 	// 793 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x55, 0xcd, 0x6e, 0xd3, 0x4a,
 	0x14, 0xae, 0x9d, 0xde, 0xaa, 0x9d, 0xa4, 0xb9, 0xb9, 0x73, 0x7f, 0x64, 0x45, 0xed, 0x6d, 0x64,

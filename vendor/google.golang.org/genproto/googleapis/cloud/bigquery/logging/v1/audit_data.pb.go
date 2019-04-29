@@ -63,7 +63,7 @@ func (m *AuditData) Reset()         { *m = AuditData{} }
 func (m *AuditData) String() string { return proto.CompactTextString(m) }
 func (*AuditData) ProtoMessage()    {}
 func (*AuditData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{0}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{0}
 }
 func (m *AuditData) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuditData.Unmarshal(m, b)
@@ -717,7 +717,7 @@ func (m *TableInsertRequest) Reset()         { *m = TableInsertRequest{} }
 func (m *TableInsertRequest) String() string { return proto.CompactTextString(m) }
 func (*TableInsertRequest) ProtoMessage()    {}
 func (*TableInsertRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{1}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{1}
 }
 func (m *TableInsertRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableInsertRequest.Unmarshal(m, b)
@@ -757,7 +757,7 @@ func (m *TableUpdateRequest) Reset()         { *m = TableUpdateRequest{} }
 func (m *TableUpdateRequest) String() string { return proto.CompactTextString(m) }
 func (*TableUpdateRequest) ProtoMessage()    {}
 func (*TableUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{2}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{2}
 }
 func (m *TableUpdateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableUpdateRequest.Unmarshal(m, b)
@@ -797,7 +797,7 @@ func (m *TableInsertResponse) Reset()         { *m = TableInsertResponse{} }
 func (m *TableInsertResponse) String() string { return proto.CompactTextString(m) }
 func (*TableInsertResponse) ProtoMessage()    {}
 func (*TableInsertResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{3}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{3}
 }
 func (m *TableInsertResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableInsertResponse.Unmarshal(m, b)
@@ -837,7 +837,7 @@ func (m *TableUpdateResponse) Reset()         { *m = TableUpdateResponse{} }
 func (m *TableUpdateResponse) String() string { return proto.CompactTextString(m) }
 func (*TableUpdateResponse) ProtoMessage()    {}
 func (*TableUpdateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{4}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{4}
 }
 func (m *TableUpdateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableUpdateResponse.Unmarshal(m, b)
@@ -877,7 +877,7 @@ func (m *DatasetListRequest) Reset()         { *m = DatasetListRequest{} }
 func (m *DatasetListRequest) String() string { return proto.CompactTextString(m) }
 func (*DatasetListRequest) ProtoMessage()    {}
 func (*DatasetListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{5}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{5}
 }
 func (m *DatasetListRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetListRequest.Unmarshal(m, b)
@@ -917,7 +917,7 @@ func (m *DatasetInsertRequest) Reset()         { *m = DatasetInsertRequest{} }
 func (m *DatasetInsertRequest) String() string { return proto.CompactTextString(m) }
 func (*DatasetInsertRequest) ProtoMessage()    {}
 func (*DatasetInsertRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{6}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{6}
 }
 func (m *DatasetInsertRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetInsertRequest.Unmarshal(m, b)
@@ -957,7 +957,7 @@ func (m *DatasetInsertResponse) Reset()         { *m = DatasetInsertResponse{} }
 func (m *DatasetInsertResponse) String() string { return proto.CompactTextString(m) }
 func (*DatasetInsertResponse) ProtoMessage()    {}
 func (*DatasetInsertResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{7}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{7}
 }
 func (m *DatasetInsertResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetInsertResponse.Unmarshal(m, b)
@@ -997,7 +997,7 @@ func (m *DatasetUpdateRequest) Reset()         { *m = DatasetUpdateRequest{} }
 func (m *DatasetUpdateRequest) String() string { return proto.CompactTextString(m) }
 func (*DatasetUpdateRequest) ProtoMessage()    {}
 func (*DatasetUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{8}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{8}
 }
 func (m *DatasetUpdateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetUpdateRequest.Unmarshal(m, b)
@@ -1037,7 +1037,7 @@ func (m *DatasetUpdateResponse) Reset()         { *m = DatasetUpdateResponse{} }
 func (m *DatasetUpdateResponse) String() string { return proto.CompactTextString(m) }
 func (*DatasetUpdateResponse) ProtoMessage()    {}
 func (*DatasetUpdateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{9}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{9}
 }
 func (m *DatasetUpdateResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetUpdateResponse.Unmarshal(m, b)
@@ -1077,7 +1077,7 @@ func (m *JobInsertRequest) Reset()         { *m = JobInsertRequest{} }
 func (m *JobInsertRequest) String() string { return proto.CompactTextString(m) }
 func (*JobInsertRequest) ProtoMessage()    {}
 func (*JobInsertRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{10}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{10}
 }
 func (m *JobInsertRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobInsertRequest.Unmarshal(m, b)
@@ -1117,7 +1117,7 @@ func (m *JobInsertResponse) Reset()         { *m = JobInsertResponse{} }
 func (m *JobInsertResponse) String() string { return proto.CompactTextString(m) }
 func (*JobInsertResponse) ProtoMessage()    {}
 func (*JobInsertResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{11}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{11}
 }
 func (m *JobInsertResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobInsertResponse.Unmarshal(m, b)
@@ -1165,7 +1165,7 @@ func (m *JobQueryRequest) Reset()         { *m = JobQueryRequest{} }
 func (m *JobQueryRequest) String() string { return proto.CompactTextString(m) }
 func (*JobQueryRequest) ProtoMessage()    {}
 func (*JobQueryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{12}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{12}
 }
 func (m *JobQueryRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobQueryRequest.Unmarshal(m, b)
@@ -1235,7 +1235,7 @@ func (m *JobQueryResponse) Reset()         { *m = JobQueryResponse{} }
 func (m *JobQueryResponse) String() string { return proto.CompactTextString(m) }
 func (*JobQueryResponse) ProtoMessage()    {}
 func (*JobQueryResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{13}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{13}
 }
 func (m *JobQueryResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobQueryResponse.Unmarshal(m, b)
@@ -1284,7 +1284,7 @@ func (m *JobGetQueryResultsRequest) Reset()         { *m = JobGetQueryResultsReq
 func (m *JobGetQueryResultsRequest) String() string { return proto.CompactTextString(m) }
 func (*JobGetQueryResultsRequest) ProtoMessage()    {}
 func (*JobGetQueryResultsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{14}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{14}
 }
 func (m *JobGetQueryResultsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobGetQueryResultsRequest.Unmarshal(m, b)
@@ -1335,7 +1335,7 @@ func (m *JobGetQueryResultsResponse) Reset()         { *m = JobGetQueryResultsRe
 func (m *JobGetQueryResultsResponse) String() string { return proto.CompactTextString(m) }
 func (*JobGetQueryResultsResponse) ProtoMessage()    {}
 func (*JobGetQueryResultsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{15}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{15}
 }
 func (m *JobGetQueryResultsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobGetQueryResultsResponse.Unmarshal(m, b)
@@ -1383,7 +1383,7 @@ func (m *JobQueryDoneResponse) Reset()         { *m = JobQueryDoneResponse{} }
 func (m *JobQueryDoneResponse) String() string { return proto.CompactTextString(m) }
 func (*JobQueryDoneResponse) ProtoMessage()    {}
 func (*JobQueryDoneResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{16}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{16}
 }
 func (m *JobQueryDoneResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobQueryDoneResponse.Unmarshal(m, b)
@@ -1425,7 +1425,7 @@ func (m *JobCompletedEvent) Reset()         { *m = JobCompletedEvent{} }
 func (m *JobCompletedEvent) String() string { return proto.CompactTextString(m) }
 func (*JobCompletedEvent) ProtoMessage()    {}
 func (*JobCompletedEvent) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{17}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{17}
 }
 func (m *JobCompletedEvent) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobCompletedEvent.Unmarshal(m, b)
@@ -1474,7 +1474,7 @@ func (m *TableDataListRequest) Reset()         { *m = TableDataListRequest{} }
 func (m *TableDataListRequest) String() string { return proto.CompactTextString(m) }
 func (*TableDataListRequest) ProtoMessage()    {}
 func (*TableDataListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{18}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{18}
 }
 func (m *TableDataListRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableDataListRequest.Unmarshal(m, b)
@@ -1541,7 +1541,7 @@ func (m *Table) Reset()         { *m = Table{} }
 func (m *Table) String() string { return proto.CompactTextString(m) }
 func (*Table) ProtoMessage()    {}
 func (*Table) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{19}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{19}
 }
 func (m *Table) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Table.Unmarshal(m, b)
@@ -1626,7 +1626,7 @@ func (m *TableInfo) Reset()         { *m = TableInfo{} }
 func (m *TableInfo) String() string { return proto.CompactTextString(m) }
 func (*TableInfo) ProtoMessage()    {}
 func (*TableInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{20}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{20}
 }
 func (m *TableInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableInfo.Unmarshal(m, b)
@@ -1673,7 +1673,7 @@ func (m *TableViewDefinition) Reset()         { *m = TableViewDefinition{} }
 func (m *TableViewDefinition) String() string { return proto.CompactTextString(m) }
 func (*TableViewDefinition) ProtoMessage()    {}
 func (*TableViewDefinition) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{21}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{21}
 }
 func (m *TableViewDefinition) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableViewDefinition.Unmarshal(m, b)
@@ -1728,7 +1728,7 @@ func (m *Dataset) Reset()         { *m = Dataset{} }
 func (m *Dataset) String() string { return proto.CompactTextString(m) }
 func (*Dataset) ProtoMessage()    {}
 func (*Dataset) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{22}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{22}
 }
 func (m *Dataset) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Dataset.Unmarshal(m, b)
@@ -1806,7 +1806,7 @@ func (m *DatasetInfo) Reset()         { *m = DatasetInfo{} }
 func (m *DatasetInfo) String() string { return proto.CompactTextString(m) }
 func (*DatasetInfo) ProtoMessage()    {}
 func (*DatasetInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{23}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{23}
 }
 func (m *DatasetInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetInfo.Unmarshal(m, b)
@@ -1853,7 +1853,7 @@ func (m *BigQueryAcl) Reset()         { *m = BigQueryAcl{} }
 func (m *BigQueryAcl) String() string { return proto.CompactTextString(m) }
 func (*BigQueryAcl) ProtoMessage()    {}
 func (*BigQueryAcl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{24}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{24}
 }
 func (m *BigQueryAcl) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BigQueryAcl.Unmarshal(m, b)
@@ -1904,7 +1904,7 @@ func (m *BigQueryAcl_Entry) Reset()         { *m = BigQueryAcl_Entry{} }
 func (m *BigQueryAcl_Entry) String() string { return proto.CompactTextString(m) }
 func (*BigQueryAcl_Entry) ProtoMessage()    {}
 func (*BigQueryAcl_Entry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{24, 0}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{24, 0}
 }
 func (m *BigQueryAcl_Entry) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BigQueryAcl_Entry.Unmarshal(m, b)
@@ -1985,7 +1985,7 @@ func (m *Job) Reset()         { *m = Job{} }
 func (m *Job) String() string { return proto.CompactTextString(m) }
 func (*Job) ProtoMessage()    {}
 func (*Job) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{25}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{25}
 }
 func (m *Job) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Job.Unmarshal(m, b)
@@ -2056,7 +2056,7 @@ func (m *JobConfiguration) Reset()         { *m = JobConfiguration{} }
 func (m *JobConfiguration) String() string { return proto.CompactTextString(m) }
 func (*JobConfiguration) ProtoMessage()    {}
 func (*JobConfiguration) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{26}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{26}
 }
 func (m *JobConfiguration) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobConfiguration.Unmarshal(m, b)
@@ -2284,7 +2284,7 @@ func (m *JobConfiguration_Query) Reset()         { *m = JobConfiguration_Query{}
 func (m *JobConfiguration_Query) String() string { return proto.CompactTextString(m) }
 func (*JobConfiguration_Query) ProtoMessage()    {}
 func (*JobConfiguration_Query) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{26, 0}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{26, 0}
 }
 func (m *JobConfiguration_Query) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobConfiguration_Query.Unmarshal(m, b)
@@ -2371,7 +2371,7 @@ func (m *JobConfiguration_Load) Reset()         { *m = JobConfiguration_Load{} }
 func (m *JobConfiguration_Load) String() string { return proto.CompactTextString(m) }
 func (*JobConfiguration_Load) ProtoMessage()    {}
 func (*JobConfiguration_Load) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{26, 1}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{26, 1}
 }
 func (m *JobConfiguration_Load) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobConfiguration_Load.Unmarshal(m, b)
@@ -2442,7 +2442,7 @@ func (m *JobConfiguration_Extract) Reset()         { *m = JobConfiguration_Extra
 func (m *JobConfiguration_Extract) String() string { return proto.CompactTextString(m) }
 func (*JobConfiguration_Extract) ProtoMessage()    {}
 func (*JobConfiguration_Extract) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{26, 2}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{26, 2}
 }
 func (m *JobConfiguration_Extract) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobConfiguration_Extract.Unmarshal(m, b)
@@ -2497,7 +2497,7 @@ func (m *JobConfiguration_TableCopy) Reset()         { *m = JobConfiguration_Tab
 func (m *JobConfiguration_TableCopy) String() string { return proto.CompactTextString(m) }
 func (*JobConfiguration_TableCopy) ProtoMessage()    {}
 func (*JobConfiguration_TableCopy) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{26, 3}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{26, 3}
 }
 func (m *JobConfiguration_TableCopy) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobConfiguration_TableCopy.Unmarshal(m, b)
@@ -2560,7 +2560,7 @@ func (m *TableDefinition) Reset()         { *m = TableDefinition{} }
 func (m *TableDefinition) String() string { return proto.CompactTextString(m) }
 func (*TableDefinition) ProtoMessage()    {}
 func (*TableDefinition) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{27}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{27}
 }
 func (m *TableDefinition) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableDefinition.Unmarshal(m, b)
@@ -2609,7 +2609,7 @@ func (m *JobStatus) Reset()         { *m = JobStatus{} }
 func (m *JobStatus) String() string { return proto.CompactTextString(m) }
 func (*JobStatus) ProtoMessage()    {}
 func (*JobStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{28}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{28}
 }
 func (m *JobStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobStatus.Unmarshal(m, b)
@@ -2666,7 +2666,7 @@ func (m *JobStatistics) Reset()         { *m = JobStatistics{} }
 func (m *JobStatistics) String() string { return proto.CompactTextString(m) }
 func (*JobStatistics) ProtoMessage()    {}
 func (*JobStatistics) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{29}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{29}
 }
 func (m *JobStatistics) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobStatistics.Unmarshal(m, b)
@@ -2743,7 +2743,7 @@ func (m *DatasetName) Reset()         { *m = DatasetName{} }
 func (m *DatasetName) String() string { return proto.CompactTextString(m) }
 func (*DatasetName) ProtoMessage()    {}
 func (*DatasetName) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{30}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{30}
 }
 func (m *DatasetName) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DatasetName.Unmarshal(m, b)
@@ -2794,7 +2794,7 @@ func (m *TableName) Reset()         { *m = TableName{} }
 func (m *TableName) String() string { return proto.CompactTextString(m) }
 func (*TableName) ProtoMessage()    {}
 func (*TableName) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{31}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{31}
 }
 func (m *TableName) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableName.Unmarshal(m, b)
@@ -2850,7 +2850,7 @@ func (m *JobName) Reset()         { *m = JobName{} }
 func (m *JobName) String() string { return proto.CompactTextString(m) }
 func (*JobName) ProtoMessage()    {}
 func (*JobName) Descriptor() ([]byte, []int) {
-	return fileDescriptor_audit_data_c8c983cfffeff6d8, []int{32}
+	return fileDescriptor_audit_data_eac9a4c7657c5709, []int{32}
 }
 func (m *JobName) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JobName.Unmarshal(m, b)
@@ -2926,10 +2926,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/bigquery/logging/v1/audit_data.proto", fileDescriptor_audit_data_c8c983cfffeff6d8)
+	proto.RegisterFile("google/cloud/bigquery/logging/v1/audit_data.proto", fileDescriptor_audit_data_eac9a4c7657c5709)
 }
 
-var fileDescriptor_audit_data_c8c983cfffeff6d8 = []byte{
+var fileDescriptor_audit_data_eac9a4c7657c5709 = []byte{
 	// 2036 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x59, 0x4f, 0x73, 0x1b, 0x49,
 	0x15, 0x8f, 0x2c, 0xc9, 0x92, 0x9e, 0xec, 0xd8, 0xee, 0xd8, 0x9b, 0x58, 0x90, 0xdd, 0x30, 0x40,

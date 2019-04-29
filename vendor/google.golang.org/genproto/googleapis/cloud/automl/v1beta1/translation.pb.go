@@ -34,7 +34,7 @@ func (m *TranslationDatasetMetadata) Reset()         { *m = TranslationDatasetMe
 func (m *TranslationDatasetMetadata) String() string { return proto.CompactTextString(m) }
 func (*TranslationDatasetMetadata) ProtoMessage()    {}
 func (*TranslationDatasetMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_translation_43aab93b197764ff, []int{0}
+	return fileDescriptor_translation_43ca322b62704cb3, []int{0}
 }
 func (m *TranslationDatasetMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TranslationDatasetMetadata.Unmarshal(m, b)
@@ -83,7 +83,7 @@ func (m *TranslationEvaluationMetrics) Reset()         { *m = TranslationEvaluat
 func (m *TranslationEvaluationMetrics) String() string { return proto.CompactTextString(m) }
 func (*TranslationEvaluationMetrics) ProtoMessage()    {}
 func (*TranslationEvaluationMetrics) Descriptor() ([]byte, []int) {
-	return fileDescriptor_translation_43aab93b197764ff, []int{1}
+	return fileDescriptor_translation_43ca322b62704cb3, []int{1}
 }
 func (m *TranslationEvaluationMetrics) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TranslationEvaluationMetrics.Unmarshal(m, b)
@@ -139,7 +139,7 @@ func (m *TranslationModelMetadata) Reset()         { *m = TranslationModelMetada
 func (m *TranslationModelMetadata) String() string { return proto.CompactTextString(m) }
 func (*TranslationModelMetadata) ProtoMessage()    {}
 func (*TranslationModelMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_translation_43aab93b197764ff, []int{2}
+	return fileDescriptor_translation_43ca322b62704cb3, []int{2}
 }
 func (m *TranslationModelMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TranslationModelMetadata.Unmarshal(m, b)
@@ -193,7 +193,7 @@ func (m *TranslationAnnotation) Reset()         { *m = TranslationAnnotation{} }
 func (m *TranslationAnnotation) String() string { return proto.CompactTextString(m) }
 func (*TranslationAnnotation) ProtoMessage()    {}
 func (*TranslationAnnotation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_translation_43aab93b197764ff, []int{3}
+	return fileDescriptor_translation_43ca322b62704cb3, []int{3}
 }
 func (m *TranslationAnnotation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TranslationAnnotation.Unmarshal(m, b)
@@ -228,10 +228,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/automl/v1beta1/translation.proto", fileDescriptor_translation_43aab93b197764ff)
+	proto.RegisterFile("google/cloud/automl/v1beta1/translation.proto", fileDescriptor_translation_43ca322b62704cb3)
 }
 
-var fileDescriptor_translation_43aab93b197764ff = []byte{
+var fileDescriptor_translation_43ca322b62704cb3 = []byte{
 	// 398 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0x4f, 0xcb, 0xd3, 0x40,
 	0x10, 0xc6, 0x49, 0x04, 0xa1, 0x2b, 0xa2, 0x06, 0x85, 0x97, 0xbe, 0x15, 0xa5, 0x07, 0xe9, 0x41,

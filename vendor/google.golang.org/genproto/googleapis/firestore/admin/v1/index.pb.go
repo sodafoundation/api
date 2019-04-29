@@ -45,7 +45,7 @@ func (x Index_QueryScope) String() string {
 	return proto.EnumName(Index_QueryScope_name, int32(x))
 }
 func (Index_QueryScope) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0, 0}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0, 0}
 }
 
 // The state of an index. During index creation, an index will be in the
@@ -94,7 +94,7 @@ func (x Index_State) String() string {
 	return proto.EnumName(Index_State_name, int32(x))
 }
 func (Index_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0, 1}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0, 1}
 }
 
 // The supported orderings.
@@ -124,7 +124,7 @@ func (x Index_IndexField_Order) String() string {
 	return proto.EnumName(Index_IndexField_Order_name, int32(x))
 }
 func (Index_IndexField_Order) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0, 0, 0}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0, 0, 0}
 }
 
 // The supported array value configurations.
@@ -150,7 +150,7 @@ func (x Index_IndexField_ArrayConfig) String() string {
 	return proto.EnumName(Index_IndexField_ArrayConfig_name, int32(x))
 }
 func (Index_IndexField_ArrayConfig) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0, 0, 1}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0, 0, 1}
 }
 
 // Cloud Firestore indexes enable simple and complex queries against
@@ -194,7 +194,7 @@ func (m *Index) Reset()         { *m = Index{} }
 func (m *Index) String() string { return proto.CompactTextString(m) }
 func (*Index) ProtoMessage()    {}
 func (*Index) Descriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0}
 }
 func (m *Index) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Index.Unmarshal(m, b)
@@ -265,7 +265,7 @@ func (m *Index_IndexField) Reset()         { *m = Index_IndexField{} }
 func (m *Index_IndexField) String() string { return proto.CompactTextString(m) }
 func (*Index_IndexField) ProtoMessage()    {}
 func (*Index_IndexField) Descriptor() ([]byte, []int) {
-	return fileDescriptor_index_ed7772aaf3db632e, []int{0, 0}
+	return fileDescriptor_index_fbb0c9a5fe3b28a1, []int{0, 0}
 }
 func (m *Index_IndexField) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Index_IndexField.Unmarshal(m, b)
@@ -403,10 +403,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/firestore/admin/v1/index.proto", fileDescriptor_index_ed7772aaf3db632e)
+	proto.RegisterFile("google/firestore/admin/v1/index.proto", fileDescriptor_index_fbb0c9a5fe3b28a1)
 }
 
-var fileDescriptor_index_ed7772aaf3db632e = []byte{
+var fileDescriptor_index_fbb0c9a5fe3b28a1 = []byte{
 	// 554 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0xdf, 0x6a, 0xdb, 0x30,
 	0x14, 0xc6, 0x6b, 0xa7, 0x2e, 0xcb, 0x49, 0x56, 0x3c, 0xc1, 0x98, 0xd7, 0xb5, 0xac, 0x04, 0x36,

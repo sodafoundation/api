@@ -61,7 +61,8 @@ type BigtableClusterServiceClient interface {
 	//  * New tables can be created in the cluster.
 	//  * The cluster's allocated resource levels will be readable via the API.
 	// The embedded operation's "metadata" field type is
-	// [CreateClusterMetadata][google.bigtable.admin.cluster.v1.CreateClusterMetadata] The embedded operation's "response" field type is
+	// [CreateClusterMetadata][google.bigtable.admin.cluster.v1.CreateClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*Cluster, error)
 	// Updates a cluster, and begins allocating or releasing resources as
@@ -85,7 +86,8 @@ type BigtableClusterServiceClient interface {
 	//  * All newly-reserved resources will be available for serving the cluster's
 	//    tables.
 	//  * The cluster's new resource levels will be readable via the API.
-	// [UpdateClusterMetadata][google.bigtable.admin.cluster.v1.UpdateClusterMetadata] The embedded operation's "response" field type is
+	// [UpdateClusterMetadata][google.bigtable.admin.cluster.v1.UpdateClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	UpdateCluster(ctx context.Context, in *Cluster, opts ...grpc.CallOption) (*Cluster, error)
 	// Marks a cluster and all of its tables for permanent deletion in 7 days.
@@ -112,7 +114,8 @@ type BigtableClusterServiceClient interface {
 	// Upon completion of the returned operation:
 	//  * Billing for the cluster's resources will resume.
 	//  * All tables within the cluster will be available.
-	// [UndeleteClusterMetadata][google.bigtable.admin.cluster.v1.UndeleteClusterMetadata] The embedded operation's "response" field type is
+	// [UndeleteClusterMetadata][google.bigtable.admin.cluster.v1.UndeleteClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	UndeleteCluster(ctx context.Context, in *UndeleteClusterRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 }
@@ -213,7 +216,8 @@ type BigtableClusterServiceServer interface {
 	//  * New tables can be created in the cluster.
 	//  * The cluster's allocated resource levels will be readable via the API.
 	// The embedded operation's "metadata" field type is
-	// [CreateClusterMetadata][google.bigtable.admin.cluster.v1.CreateClusterMetadata] The embedded operation's "response" field type is
+	// [CreateClusterMetadata][google.bigtable.admin.cluster.v1.CreateClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	CreateCluster(context.Context, *CreateClusterRequest) (*Cluster, error)
 	// Updates a cluster, and begins allocating or releasing resources as
@@ -237,7 +241,8 @@ type BigtableClusterServiceServer interface {
 	//  * All newly-reserved resources will be available for serving the cluster's
 	//    tables.
 	//  * The cluster's new resource levels will be readable via the API.
-	// [UpdateClusterMetadata][google.bigtable.admin.cluster.v1.UpdateClusterMetadata] The embedded operation's "response" field type is
+	// [UpdateClusterMetadata][google.bigtable.admin.cluster.v1.UpdateClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	UpdateCluster(context.Context, *Cluster) (*Cluster, error)
 	// Marks a cluster and all of its tables for permanent deletion in 7 days.
@@ -264,7 +269,8 @@ type BigtableClusterServiceServer interface {
 	// Upon completion of the returned operation:
 	//  * Billing for the cluster's resources will resume.
 	//  * All tables within the cluster will be available.
-	// [UndeleteClusterMetadata][google.bigtable.admin.cluster.v1.UndeleteClusterMetadata] The embedded operation's "response" field type is
+	// [UndeleteClusterMetadata][google.bigtable.admin.cluster.v1.UndeleteClusterMetadata]
+	// The embedded operation's "response" field type is
 	// [Cluster][google.bigtable.admin.cluster.v1.Cluster], if successful.
 	UndeleteCluster(context.Context, *UndeleteClusterRequest) (*longrunning.Operation, error)
 }
@@ -437,10 +443,10 @@ var _BigtableClusterService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/bigtable/admin/cluster/v1/bigtable_cluster_service.proto", fileDescriptor_bigtable_cluster_service_eb6b3340e63f14bc)
+	proto.RegisterFile("google/bigtable/admin/cluster/v1/bigtable_cluster_service.proto", fileDescriptor_bigtable_cluster_service_c3791e4713dc5747)
 }
 
-var fileDescriptor_bigtable_cluster_service_eb6b3340e63f14bc = []byte{
+var fileDescriptor_bigtable_cluster_service_c3791e4713dc5747 = []byte{
 	// 515 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x4f, 0x6b, 0x14, 0x31,
 	0x18, 0xc6, 0x89, 0x07, 0xa1, 0xc1, 0x45, 0xc8, 0xa1, 0x87, 0x6d, 0x0b, 0x32, 0x15, 0xb1, 0x23,

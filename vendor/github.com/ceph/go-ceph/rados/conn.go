@@ -7,6 +7,7 @@ import "C"
 
 import "unsafe"
 import "bytes"
+import "fmt"
 
 // ClusterStat represents Ceph cluster statistics.
 type ClusterStat struct {
@@ -18,7 +19,8 @@ type ClusterStat struct {
 
 // Conn is a connection handle to a Ceph cluster.
 type Conn struct {
-	cluster C.rados_t
+	cluster   C.rados_t
+	connected bool
 }
 
 // PingMonitor sends a ping to a monitor and returns the reply.
@@ -44,15 +46,18 @@ func (c *Conn) PingMonitor(id string) (string, error) {
 // if any.
 func (c *Conn) Connect() error {
 	ret := C.rados_connect(c.cluster)
-	if ret == 0 {
-		return nil
-	} else {
+	if ret != 0 {
 		return RadosError(int(ret))
 	}
+	c.connected = true
+	return nil
 }
 
 // Shutdown disconnects from the cluster.
 func (c *Conn) Shutdown() {
+	if err := c.ensure_connected(); err != nil {
+		return
+	}
 	C.rados_shutdown(c.cluster)
 }
 
@@ -162,9 +167,20 @@ func (c *Conn) WaitForLatestOSDMap() error {
 	}
 }
 
+func (c *Conn) ensure_connected() error {
+	if c.connected {
+		return nil
+	} else {
+		return RadosError(1)
+	}
+}
+
 // GetClusterStat returns statistics about the cluster associated with the
 // connection.
 func (c *Conn) GetClusterStats() (stat ClusterStat, err error) {
+	if err := c.ensure_connected(); err != nil {
+		return ClusterStat{}, err
+	}
 	c_stat := C.struct_rados_cluster_stat_t{}
 	ret := C.rados_cluster_stat(c.cluster, &c_stat)
 	if ret < 0 {
@@ -250,6 +266,10 @@ func (c *Conn) MakePool(name string) error {
 
 // DeletePool deletes a pool and all the data inside the pool.
 func (c *Conn) DeletePool(name string) error {
+	if err := c.ensure_connected(); err != nil {
+		fmt.Println("NOT CONNECTED WHOOPS")
+		return err
+	}
 	c_name := C.CString(name)
 	defer C.free(unsafe.Pointer(c_name))
 	ret := int(C.rados_pool_delete(c.cluster, c_name))

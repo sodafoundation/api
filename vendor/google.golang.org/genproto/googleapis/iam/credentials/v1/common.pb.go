@@ -54,7 +54,7 @@ func (m *GenerateAccessTokenRequest) Reset()         { *m = GenerateAccessTokenR
 func (m *GenerateAccessTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*GenerateAccessTokenRequest) ProtoMessage()    {}
 func (*GenerateAccessTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{0}
+	return fileDescriptor_common_52b2377d03e9576f, []int{0}
 }
 func (m *GenerateAccessTokenRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateAccessTokenRequest.Unmarshal(m, b)
@@ -117,7 +117,7 @@ func (m *GenerateAccessTokenResponse) Reset()         { *m = GenerateAccessToken
 func (m *GenerateAccessTokenResponse) String() string { return proto.CompactTextString(m) }
 func (*GenerateAccessTokenResponse) ProtoMessage()    {}
 func (*GenerateAccessTokenResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{1}
+	return fileDescriptor_common_52b2377d03e9576f, []int{1}
 }
 func (m *GenerateAccessTokenResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateAccessTokenResponse.Unmarshal(m, b)
@@ -177,7 +177,7 @@ func (m *SignBlobRequest) Reset()         { *m = SignBlobRequest{} }
 func (m *SignBlobRequest) String() string { return proto.CompactTextString(m) }
 func (*SignBlobRequest) ProtoMessage()    {}
 func (*SignBlobRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{2}
+	return fileDescriptor_common_52b2377d03e9576f, []int{2}
 }
 func (m *SignBlobRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SignBlobRequest.Unmarshal(m, b)
@@ -232,7 +232,7 @@ func (m *SignBlobResponse) Reset()         { *m = SignBlobResponse{} }
 func (m *SignBlobResponse) String() string { return proto.CompactTextString(m) }
 func (*SignBlobResponse) ProtoMessage()    {}
 func (*SignBlobResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{3}
+	return fileDescriptor_common_52b2377d03e9576f, []int{3}
 }
 func (m *SignBlobResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SignBlobResponse.Unmarshal(m, b)
@@ -292,7 +292,7 @@ func (m *SignJwtRequest) Reset()         { *m = SignJwtRequest{} }
 func (m *SignJwtRequest) String() string { return proto.CompactTextString(m) }
 func (*SignJwtRequest) ProtoMessage()    {}
 func (*SignJwtRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{4}
+	return fileDescriptor_common_52b2377d03e9576f, []int{4}
 }
 func (m *SignJwtRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SignJwtRequest.Unmarshal(m, b)
@@ -347,7 +347,7 @@ func (m *SignJwtResponse) Reset()         { *m = SignJwtResponse{} }
 func (m *SignJwtResponse) String() string { return proto.CompactTextString(m) }
 func (*SignJwtResponse) ProtoMessage()    {}
 func (*SignJwtResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{5}
+	return fileDescriptor_common_52b2377d03e9576f, []int{5}
 }
 func (m *SignJwtResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SignJwtResponse.Unmarshal(m, b)
@@ -411,7 +411,7 @@ func (m *GenerateIdTokenRequest) Reset()         { *m = GenerateIdTokenRequest{}
 func (m *GenerateIdTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*GenerateIdTokenRequest) ProtoMessage()    {}
 func (*GenerateIdTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{6}
+	return fileDescriptor_common_52b2377d03e9576f, []int{6}
 }
 func (m *GenerateIdTokenRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateIdTokenRequest.Unmarshal(m, b)
@@ -471,7 +471,7 @@ func (m *GenerateIdTokenResponse) Reset()         { *m = GenerateIdTokenResponse
 func (m *GenerateIdTokenResponse) String() string { return proto.CompactTextString(m) }
 func (*GenerateIdTokenResponse) ProtoMessage()    {}
 func (*GenerateIdTokenResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{7}
+	return fileDescriptor_common_52b2377d03e9576f, []int{7}
 }
 func (m *GenerateIdTokenResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateIdTokenResponse.Unmarshal(m, b)
@@ -565,7 +565,7 @@ func (m *GenerateIdentityBindingAccessTokenRequest) Reset() {
 func (m *GenerateIdentityBindingAccessTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*GenerateIdentityBindingAccessTokenRequest) ProtoMessage()    {}
 func (*GenerateIdentityBindingAccessTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{8}
+	return fileDescriptor_common_52b2377d03e9576f, []int{8}
 }
 func (m *GenerateIdentityBindingAccessTokenRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateIdentityBindingAccessTokenRequest.Unmarshal(m, b)
@@ -625,7 +625,7 @@ func (m *GenerateIdentityBindingAccessTokenResponse) String() string {
 }
 func (*GenerateIdentityBindingAccessTokenResponse) ProtoMessage() {}
 func (*GenerateIdentityBindingAccessTokenResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_common_7e5e13abca9c147a, []int{9}
+	return fileDescriptor_common_52b2377d03e9576f, []int{9}
 }
 func (m *GenerateIdentityBindingAccessTokenResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GenerateIdentityBindingAccessTokenResponse.Unmarshal(m, b)
@@ -673,10 +673,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/iam/credentials/v1/common.proto", fileDescriptor_common_7e5e13abca9c147a)
+	proto.RegisterFile("google/iam/credentials/v1/common.proto", fileDescriptor_common_52b2377d03e9576f)
 }
 
-var fileDescriptor_common_7e5e13abca9c147a = []byte{
+var fileDescriptor_common_52b2377d03e9576f = []byte{
 	// 563 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x54, 0xcd, 0x6e, 0xd3, 0x40,
 	0x10, 0x96, 0x93, 0xa6, 0x8d, 0x27, 0x01, 0x2a, 0xab, 0x80, 0x13, 0x7e, 0x1a, 0x5c, 0x09, 0x05,

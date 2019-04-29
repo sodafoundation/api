@@ -49,7 +49,7 @@ func (m *Authentication) Reset()         { *m = Authentication{} }
 func (m *Authentication) String() string { return proto.CompactTextString(m) }
 func (*Authentication) ProtoMessage()    {}
 func (*Authentication) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_88c4f5ae0863ae9c, []int{0}
+	return fileDescriptor_auth_9846d22c4b7e834a, []int{0}
 }
 func (m *Authentication) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Authentication.Unmarshal(m, b)
@@ -95,7 +95,8 @@ func (m *Authentication) GetProviders() []*AuthProvider {
 type AuthenticationRule struct {
 	// Selects the methods to which this rule applies.
 	//
-	// Refer to [selector][google.api.DocumentationRule.selector] for syntax details.
+	// Refer to [selector][google.api.DocumentationRule.selector] for syntax
+	// details.
 	Selector string `protobuf:"bytes,1,opt,name=selector,proto3" json:"selector,omitempty"`
 	// The requirements for OAuth credentials.
 	Oauth *OAuthRequirements `protobuf:"bytes,2,opt,name=oauth,proto3" json:"oauth,omitempty"`
@@ -112,7 +113,7 @@ func (m *AuthenticationRule) Reset()         { *m = AuthenticationRule{} }
 func (m *AuthenticationRule) String() string { return proto.CompactTextString(m) }
 func (*AuthenticationRule) ProtoMessage()    {}
 func (*AuthenticationRule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_88c4f5ae0863ae9c, []int{1}
+	return fileDescriptor_auth_9846d22c4b7e834a, []int{1}
 }
 func (m *AuthenticationRule) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthenticationRule.Unmarshal(m, b)
@@ -161,7 +162,8 @@ func (m *AuthenticationRule) GetRequirements() []*AuthRequirement {
 }
 
 // Configuration for an anthentication provider, including support for
-// [JSON Web Token (JWT)](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32).
+// [JSON Web Token
+// (JWT)](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32).
 type AuthProvider struct {
 	// The unique identifier of the auth provider. It will be referred to by
 	// `AuthRequirement.provider_id`.
@@ -176,12 +178,15 @@ type AuthProvider struct {
 	// Example: 1234567-compute@developer.gserviceaccount.com
 	Issuer string `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	// URL of the provider's public key set to validate signature of the JWT. See
-	// [OpenID Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
+	// [OpenID
+	// Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
 	// Optional if the key set document:
 	//  - can be retrieved from
-	//    [OpenID Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html
-	//    of the issuer.
-	//  - can be inferred from the email domain of the issuer (e.g. a Google service account).
+	//    [OpenID
+	//    Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html of
+	//    the issuer.
+	//  - can be inferred from the email domain of the issuer (e.g. a Google
+	//  service account).
 	//
 	// Example: https://www.googleapis.com/oauth2/v1/certs
 	JwksUri string `protobuf:"bytes,3,opt,name=jwks_uri,json=jwksUri,proto3" json:"jwks_uri,omitempty"`
@@ -199,7 +204,7 @@ type AuthProvider struct {
 	//     audiences: bookstore_android.apps.googleusercontent.com,
 	//                bookstore_web.apps.googleusercontent.com
 	Audiences string `protobuf:"bytes,4,opt,name=audiences,proto3" json:"audiences,omitempty"`
-	// Redirect URL if JWT token is required but no present or is expired.
+	// Redirect URL if JWT token is required but not present or is expired.
 	// Implement authorizationUrl of securityDefinitions in OpenAPI spec.
 	AuthorizationUrl     string   `protobuf:"bytes,5,opt,name=authorization_url,json=authorizationUrl,proto3" json:"authorization_url,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -211,7 +216,7 @@ func (m *AuthProvider) Reset()         { *m = AuthProvider{} }
 func (m *AuthProvider) String() string { return proto.CompactTextString(m) }
 func (*AuthProvider) ProtoMessage()    {}
 func (*AuthProvider) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_88c4f5ae0863ae9c, []int{2}
+	return fileDescriptor_auth_9846d22c4b7e834a, []int{2}
 }
 func (m *AuthProvider) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthProvider.Unmarshal(m, b)
@@ -302,7 +307,7 @@ func (m *OAuthRequirements) Reset()         { *m = OAuthRequirements{} }
 func (m *OAuthRequirements) String() string { return proto.CompactTextString(m) }
 func (*OAuthRequirements) ProtoMessage()    {}
 func (*OAuthRequirements) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_88c4f5ae0863ae9c, []int{3}
+	return fileDescriptor_auth_9846d22c4b7e834a, []int{3}
 }
 func (m *OAuthRequirements) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OAuthRequirements.Unmarshal(m, b)
@@ -330,7 +335,8 @@ func (m *OAuthRequirements) GetCanonicalScopes() string {
 }
 
 // User-defined authentication requirements, including support for
-// [JSON Web Token (JWT)](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32).
+// [JSON Web Token
+// (JWT)](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32).
 type AuthRequirement struct {
 	// [id][google.api.AuthProvider.id] from authentication provider.
 	//
@@ -364,7 +370,7 @@ func (m *AuthRequirement) Reset()         { *m = AuthRequirement{} }
 func (m *AuthRequirement) String() string { return proto.CompactTextString(m) }
 func (*AuthRequirement) ProtoMessage()    {}
 func (*AuthRequirement) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_88c4f5ae0863ae9c, []int{4}
+	return fileDescriptor_auth_9846d22c4b7e834a, []int{4}
 }
 func (m *AuthRequirement) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AuthRequirement.Unmarshal(m, b)
@@ -406,9 +412,9 @@ func init() {
 	proto.RegisterType((*AuthRequirement)(nil), "google.api.AuthRequirement")
 }
 
-func init() { proto.RegisterFile("google/api/auth.proto", fileDescriptor_auth_88c4f5ae0863ae9c) }
+func init() { proto.RegisterFile("google/api/auth.proto", fileDescriptor_auth_9846d22c4b7e834a) }
 
-var fileDescriptor_auth_88c4f5ae0863ae9c = []byte{
+var fileDescriptor_auth_9846d22c4b7e834a = []byte{
 	// 465 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x64, 0x52, 0x5f, 0x6b, 0x13, 0x4f,
 	0x14, 0x65, 0x93, 0xa6, 0xcd, 0xde, 0x94, 0xb4, 0x1d, 0xf8, 0x95, 0xfd, 0xd5, 0xaa, 0x21, 0x4f,

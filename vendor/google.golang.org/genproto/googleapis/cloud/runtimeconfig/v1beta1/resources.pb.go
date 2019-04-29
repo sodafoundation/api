@@ -51,7 +51,7 @@ func (x VariableState) String() string {
 	return proto.EnumName(VariableState_name, int32(x))
 }
 func (VariableState) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{0}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{0}
 }
 
 // A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig
@@ -81,7 +81,7 @@ func (m *RuntimeConfig) Reset()         { *m = RuntimeConfig{} }
 func (m *RuntimeConfig) String() string { return proto.CompactTextString(m) }
 func (*RuntimeConfig) ProtoMessage()    {}
 func (*RuntimeConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{0}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{0}
 }
 func (m *RuntimeConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RuntimeConfig.Unmarshal(m, b)
@@ -148,9 +148,9 @@ type Variable struct {
 	Contents isVariable_Contents `protobuf_oneof:"contents"`
 	// [Output Only] The time of the last variable update.
 	UpdateTime *timestamp.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	// [Ouput only] The current state of the variable. The variable state indicates
-	// the outcome of the `variables().watch` call and is visible through the
-	// `get` and `list` calls.
+	// [Ouput only] The current state of the variable. The variable state
+	// indicates the outcome of the `variables().watch` call and is visible
+	// through the `get` and `list` calls.
 	State                VariableState `protobuf:"varint,4,opt,name=state,proto3,enum=google.cloud.runtimeconfig.v1beta1.VariableState" json:"state,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
@@ -161,7 +161,7 @@ func (m *Variable) Reset()         { *m = Variable{} }
 func (m *Variable) String() string { return proto.CompactTextString(m) }
 func (*Variable) ProtoMessage()    {}
 func (*Variable) Descriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{1}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{1}
 }
 func (m *Variable) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Variable.Unmarshal(m, b)
@@ -322,7 +322,7 @@ func (m *EndCondition) Reset()         { *m = EndCondition{} }
 func (m *EndCondition) String() string { return proto.CompactTextString(m) }
 func (*EndCondition) ProtoMessage()    {}
 func (*EndCondition) Descriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{2}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{2}
 }
 func (m *EndCondition) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EndCondition.Unmarshal(m, b)
@@ -450,7 +450,7 @@ func (m *EndCondition_Cardinality) Reset()         { *m = EndCondition_Cardinali
 func (m *EndCondition_Cardinality) String() string { return proto.CompactTextString(m) }
 func (*EndCondition_Cardinality) ProtoMessage()    {}
 func (*EndCondition_Cardinality) Descriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{2, 0}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{2, 0}
 }
 func (m *EndCondition_Cardinality) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EndCondition_Cardinality.Unmarshal(m, b)
@@ -484,10 +484,10 @@ func (m *EndCondition_Cardinality) GetNumber() int32 {
 	return 0
 }
 
-// A Waiter resource waits for some end condition within a RuntimeConfig resource
-// to be met before it returns. For example, assume you have a distributed
-// system where each node writes to a Variable resource indidicating the node's
-// readiness as part of the startup process.
+// A Waiter resource waits for some end condition within a RuntimeConfig
+// resource to be met before it returns. For example, assume you have a
+// distributed system where each node writes to a Variable resource indidicating
+// the node's readiness as part of the startup process.
 //
 // You then configure a Waiter resource with the success condition set to wait
 // until some number of nodes have checked in. Afterwards, your application
@@ -497,7 +497,8 @@ func (m *EndCondition_Cardinality) GetNumber() int32 {
 // Once created, a Waiter resource is immutable.
 //
 // To learn more about using waiters, read the
-// [Creating a Waiter](/deployment-manager/runtime-configurator/creating-a-waiter)
+// [Creating a
+// Waiter](/deployment-manager/runtime-configurator/creating-a-waiter)
 // documentation.
 type Waiter struct {
 	// The name of the Waiter resource, in the format:
@@ -523,9 +524,9 @@ type Waiter struct {
 	// no failure condition is set, the only failure scenario will be a timeout.
 	Failure *EndCondition `protobuf:"bytes,3,opt,name=failure,proto3" json:"failure,omitempty"`
 	// [Required] The success condition. If this condition is met, `done` will be
-	// set to `true` and the `error` value will remain unset. The failure condition
-	// takes precedence over the success condition. If both conditions are met, a
-	// failure will be indicated.
+	// set to `true` and the `error` value will remain unset. The failure
+	// condition takes precedence over the success condition. If both conditions
+	// are met, a failure will be indicated.
 	Success *EndCondition `protobuf:"bytes,4,opt,name=success,proto3" json:"success,omitempty"`
 	// [Output Only] The instant at which this Waiter resource was created. Adding
 	// the value of `timeout` to this instant yields the timeout deadline for the
@@ -549,7 +550,7 @@ func (m *Waiter) Reset()         { *m = Waiter{} }
 func (m *Waiter) String() string { return proto.CompactTextString(m) }
 func (*Waiter) ProtoMessage()    {}
 func (*Waiter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_resources_a4c042e63b7976fe, []int{3}
+	return fileDescriptor_resources_e4570a3249a2bec3, []int{3}
 }
 func (m *Waiter) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Waiter.Unmarshal(m, b)
@@ -628,10 +629,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/runtimeconfig/v1beta1/resources.proto", fileDescriptor_resources_a4c042e63b7976fe)
+	proto.RegisterFile("google/cloud/runtimeconfig/v1beta1/resources.proto", fileDescriptor_resources_e4570a3249a2bec3)
 }
 
-var fileDescriptor_resources_a4c042e63b7976fe = []byte{
+var fileDescriptor_resources_e4570a3249a2bec3 = []byte{
 	// 628 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0xdd, 0x6e, 0xd3, 0x30,
 	0x14, 0xc7, 0x9b, 0xd2, 0x8f, 0xed, 0x64, 0x43, 0x93, 0x85, 0x46, 0xa8, 0xd0, 0xa8, 0x7a, 0x81,

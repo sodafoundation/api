@@ -40,7 +40,8 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 //
 // Foreign partition IDs (in which the project ID does
 // not match the context project ID ) are discouraged.
-// Reads and writes of foreign partition IDs may fail if the project is not in an active state.
+// Reads and writes of foreign partition IDs may fail if the project is not in
+// an active state.
 type PartitionId struct {
 	// The ID of the project to which the entities belong.
 	ProjectId string `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
@@ -55,7 +56,7 @@ func (m *PartitionId) Reset()         { *m = PartitionId{} }
 func (m *PartitionId) String() string { return proto.CompactTextString(m) }
 func (*PartitionId) ProtoMessage()    {}
 func (*PartitionId) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{0}
+	return fileDescriptor_entity_096a297364b049a5, []int{0}
 }
 func (m *PartitionId) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PartitionId.Unmarshal(m, b)
@@ -124,7 +125,7 @@ func (m *Key) Reset()         { *m = Key{} }
 func (m *Key) String() string { return proto.CompactTextString(m) }
 func (*Key) ProtoMessage()    {}
 func (*Key) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{1}
+	return fileDescriptor_entity_096a297364b049a5, []int{1}
 }
 func (m *Key) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Key.Unmarshal(m, b)
@@ -183,7 +184,7 @@ func (m *Key_PathElement) Reset()         { *m = Key_PathElement{} }
 func (m *Key_PathElement) String() string { return proto.CompactTextString(m) }
 func (*Key_PathElement) ProtoMessage()    {}
 func (*Key_PathElement) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{1, 0}
+	return fileDescriptor_entity_096a297364b049a5, []int{1, 0}
 }
 func (m *Key_PathElement) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Key_PathElement.Unmarshal(m, b)
@@ -327,7 +328,7 @@ func (m *ArrayValue) Reset()         { *m = ArrayValue{} }
 func (m *ArrayValue) String() string { return proto.CompactTextString(m) }
 func (*ArrayValue) ProtoMessage()    {}
 func (*ArrayValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{2}
+	return fileDescriptor_entity_096a297364b049a5, []int{2}
 }
 func (m *ArrayValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ArrayValue.Unmarshal(m, b)
@@ -386,7 +387,7 @@ func (m *Value) Reset()         { *m = Value{} }
 func (m *Value) String() string { return proto.CompactTextString(m) }
 func (*Value) ProtoMessage()    {}
 func (*Value) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{3}
+	return fileDescriptor_entity_096a297364b049a5, []int{3}
 }
 func (m *Value) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Value.Unmarshal(m, b)
@@ -824,7 +825,7 @@ func (m *Entity) Reset()         { *m = Entity{} }
 func (m *Entity) String() string { return proto.CompactTextString(m) }
 func (*Entity) ProtoMessage()    {}
 func (*Entity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_entity_45da7198f13d942c, []int{4}
+	return fileDescriptor_entity_096a297364b049a5, []int{4}
 }
 func (m *Entity) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Entity.Unmarshal(m, b)
@@ -869,10 +870,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/datastore/v1/entity.proto", fileDescriptor_entity_45da7198f13d942c)
+	proto.RegisterFile("google/datastore/v1/entity.proto", fileDescriptor_entity_096a297364b049a5)
 }
 
-var fileDescriptor_entity_45da7198f13d942c = []byte{
+var fileDescriptor_entity_096a297364b049a5 = []byte{
 	// 780 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x94, 0xff, 0x6e, 0xdc, 0x44,
 	0x10, 0xc7, 0xed, 0xbb, 0x5c, 0x1a, 0x8f, 0xdd, 0xa4, 0x6c, 0x2a, 0x61, 0x02, 0x28, 0x26, 0x80,

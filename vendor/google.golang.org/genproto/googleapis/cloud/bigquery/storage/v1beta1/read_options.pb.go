@@ -26,11 +26,14 @@ type TableReadOptions struct {
 	// unrelated to the order of fields in selected_fields.
 	SelectedFields []string `protobuf:"bytes,1,rep,name=selected_fields,json=selectedFields,proto3" json:"selected_fields,omitempty"`
 	// Optional. SQL text filtering statement, similar to a WHERE clause in
-	// a query. Currently, we support combinations of predicates that are
-	// a comparison between a column and a constant value in SQL statement.
-	// Aggregates are not supported.
+	// a query. Currently, only a single predicate that is a comparison between
+	// a column and a constant value is supported. Aggregates are not supported.
 	//
-	// Example: "a > DATE '2014-9-27' AND (b > 5 and C LIKE 'date')"
+	// Examples: "int_field > 5"
+	//           "date_field = CAST('2014-9-27' as DATE)"
+	//           "nullable_field is not NULL"
+	//           "st_equals(geo_field, st_geofromtext("POINT(2, 2)"))"
+	//           "numeric_field BETWEEN 1.0 AND 5.0"
 	RowRestriction       string   `protobuf:"bytes,2,opt,name=row_restriction,json=rowRestriction,proto3" json:"row_restriction,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -41,7 +44,7 @@ func (m *TableReadOptions) Reset()         { *m = TableReadOptions{} }
 func (m *TableReadOptions) String() string { return proto.CompactTextString(m) }
 func (*TableReadOptions) ProtoMessage()    {}
 func (*TableReadOptions) Descriptor() ([]byte, []int) {
-	return fileDescriptor_read_options_c761a73b2fdbaa50, []int{0}
+	return fileDescriptor_read_options_182154d9d5771d09, []int{0}
 }
 func (m *TableReadOptions) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TableReadOptions.Unmarshal(m, b)
@@ -80,10 +83,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/bigquery/storage/v1beta1/read_options.proto", fileDescriptor_read_options_c761a73b2fdbaa50)
+	proto.RegisterFile("google/cloud/bigquery/storage/v1beta1/read_options.proto", fileDescriptor_read_options_182154d9d5771d09)
 }
 
-var fileDescriptor_read_options_c761a73b2fdbaa50 = []byte{
+var fileDescriptor_read_options_182154d9d5771d09 = []byte{
 	// 213 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0xd0, 0x3f, 0x4b, 0xc6, 0x30,
 	0x10, 0x06, 0x70, 0x5e, 0x05, 0xc1, 0x0c, 0x2a, 0x9d, 0x3a, 0x16, 0x41, 0xd4, 0x25, 0xa1, 0xb8,

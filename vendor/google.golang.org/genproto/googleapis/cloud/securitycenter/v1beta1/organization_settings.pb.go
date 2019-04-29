@@ -56,7 +56,7 @@ func (x OrganizationSettings_AssetDiscoveryConfig_InclusionMode) String() string
 	return proto.EnumName(OrganizationSettings_AssetDiscoveryConfig_InclusionMode_name, int32(x))
 }
 func (OrganizationSettings_AssetDiscoveryConfig_InclusionMode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_organization_settings_bf56fb21ea96e5a6, []int{0, 0, 0}
+	return fileDescriptor_organization_settings_edead7791c0f318e, []int{0, 0, 0}
 }
 
 // User specified settings that are attached to the Cloud Security Command
@@ -83,7 +83,7 @@ func (m *OrganizationSettings) Reset()         { *m = OrganizationSettings{} }
 func (m *OrganizationSettings) String() string { return proto.CompactTextString(m) }
 func (*OrganizationSettings) ProtoMessage()    {}
 func (*OrganizationSettings) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_settings_bf56fb21ea96e5a6, []int{0}
+	return fileDescriptor_organization_settings_edead7791c0f318e, []int{0}
 }
 func (m *OrganizationSettings) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OrganizationSettings.Unmarshal(m, b)
@@ -141,7 +141,7 @@ func (m *OrganizationSettings_AssetDiscoveryConfig) Reset() {
 func (m *OrganizationSettings_AssetDiscoveryConfig) String() string { return proto.CompactTextString(m) }
 func (*OrganizationSettings_AssetDiscoveryConfig) ProtoMessage()    {}
 func (*OrganizationSettings_AssetDiscoveryConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_settings_bf56fb21ea96e5a6, []int{0, 0}
+	return fileDescriptor_organization_settings_edead7791c0f318e, []int{0, 0}
 }
 func (m *OrganizationSettings_AssetDiscoveryConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OrganizationSettings_AssetDiscoveryConfig.Unmarshal(m, b)
@@ -182,10 +182,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/securitycenter/v1beta1/organization_settings.proto", fileDescriptor_organization_settings_bf56fb21ea96e5a6)
+	proto.RegisterFile("google/cloud/securitycenter/v1beta1/organization_settings.proto", fileDescriptor_organization_settings_edead7791c0f318e)
 }
 
-var fileDescriptor_organization_settings_bf56fb21ea96e5a6 = []byte{
+var fileDescriptor_organization_settings_edead7791c0f318e = []byte{
 	// 399 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0xc1, 0x6b, 0x14, 0x31,
 	0x14, 0xc6, 0xcd, 0xae, 0xa8, 0xcd, 0xda, 0xb2, 0x84, 0xa1, 0x0c, 0x8b, 0xe8, 0x50, 0x0f, 0xce,

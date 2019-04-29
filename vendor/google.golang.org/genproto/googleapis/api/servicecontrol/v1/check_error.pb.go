@@ -112,7 +112,7 @@ func (x CheckError_Code) String() string {
 	return proto.EnumName(CheckError_Code_name, int32(x))
 }
 func (CheckError_Code) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_check_error_13686b1a5f512ccf, []int{0, 0}
+	return fileDescriptor_check_error_2ee8d2b0b593f635, []int{0, 0}
 }
 
 // Defines the errors to be returned in
@@ -131,7 +131,7 @@ func (m *CheckError) Reset()         { *m = CheckError{} }
 func (m *CheckError) String() string { return proto.CompactTextString(m) }
 func (*CheckError) ProtoMessage()    {}
 func (*CheckError) Descriptor() ([]byte, []int) {
-	return fileDescriptor_check_error_13686b1a5f512ccf, []int{0}
+	return fileDescriptor_check_error_2ee8d2b0b593f635, []int{0}
 }
 func (m *CheckError) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckError.Unmarshal(m, b)
@@ -171,10 +171,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/api/servicecontrol/v1/check_error.proto", fileDescriptor_check_error_13686b1a5f512ccf)
+	proto.RegisterFile("google/api/servicecontrol/v1/check_error.proto", fileDescriptor_check_error_2ee8d2b0b593f635)
 }
 
-var fileDescriptor_check_error_13686b1a5f512ccf = []byte{
+var fileDescriptor_check_error_2ee8d2b0b593f635 = []byte{
 	// 493 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x92, 0x4f, 0x6f, 0xd3, 0x30,
 	0x18, 0xc6, 0x49, 0x29, 0x83, 0x59, 0x82, 0x05, 0xc3, 0xaa, 0x51, 0x55, 0xa2, 0xec, 0xb4, 0x0b,

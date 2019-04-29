@@ -73,7 +73,7 @@ func (x InboundServiceType) String() string {
 	return proto.EnumName(InboundServiceType_name, int32(x))
 }
 func (InboundServiceType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{0}
+	return fileDescriptor_version_8e5786bd40ede622, []int{0}
 }
 
 // Run states of a version.
@@ -106,7 +106,7 @@ func (x ServingStatus) String() string {
 	return proto.EnumName(ServingStatus_name, int32(x))
 }
 func (ServingStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{1}
+	return fileDescriptor_version_8e5786bd40ede622, []int{1}
 }
 
 // A Version resource is a specific set of source code and configuration files
@@ -191,7 +191,8 @@ type Version struct {
 	// Only returned in `GET` requests if `view=FULL` is set.
 	Libraries []*Library `protobuf:"bytes,102,rep,name=libraries,proto3" json:"libraries,omitempty"`
 	// Serving configuration for
-	// [Google Cloud Endpoints](https://cloud.google.com/appengine/docs/python/endpoints/).
+	// [Google Cloud
+	// Endpoints](https://cloud.google.com/appengine/docs/python/endpoints/).
 	//
 	// Only returned in `GET` requests if `view=FULL` is set.
 	ApiConfig *ApiConfigHandler `protobuf:"bytes,103,opt,name=api_config,json=apiConfig,proto3" json:"api_config,omitempty"`
@@ -235,7 +236,7 @@ func (m *Version) Reset()         { *m = Version{} }
 func (m *Version) String() string { return proto.CompactTextString(m) }
 func (*Version) ProtoMessage()    {}
 func (*Version) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{0}
+	return fileDescriptor_version_8e5786bd40ede622, []int{0}
 }
 func (m *Version) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Version.Unmarshal(m, b)
@@ -619,7 +620,7 @@ func (m *AutomaticScaling) Reset()         { *m = AutomaticScaling{} }
 func (m *AutomaticScaling) String() string { return proto.CompactTextString(m) }
 func (*AutomaticScaling) ProtoMessage()    {}
 func (*AutomaticScaling) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{1}
+	return fileDescriptor_version_8e5786bd40ede622, []int{1}
 }
 func (m *AutomaticScaling) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AutomaticScaling.Unmarshal(m, b)
@@ -742,7 +743,7 @@ func (m *BasicScaling) Reset()         { *m = BasicScaling{} }
 func (m *BasicScaling) String() string { return proto.CompactTextString(m) }
 func (*BasicScaling) ProtoMessage()    {}
 func (*BasicScaling) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{2}
+	return fileDescriptor_version_8e5786bd40ede622, []int{2}
 }
 func (m *BasicScaling) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BasicScaling.Unmarshal(m, b)
@@ -781,7 +782,8 @@ func (m *BasicScaling) GetMaxInstances() int32 {
 type ManualScaling struct {
 	// Number of instances to assign to the service at the start. This number
 	// can later be altered by using the
-	// [Modules API](https://cloud.google.com/appengine/docs/python/modules/functions)
+	// [Modules
+	// API](https://cloud.google.com/appengine/docs/python/modules/functions)
 	// `set_num_instances()` function.
 	Instances            int32    `protobuf:"varint,1,opt,name=instances,proto3" json:"instances,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -793,7 +795,7 @@ func (m *ManualScaling) Reset()         { *m = ManualScaling{} }
 func (m *ManualScaling) String() string { return proto.CompactTextString(m) }
 func (*ManualScaling) ProtoMessage()    {}
 func (*ManualScaling) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{3}
+	return fileDescriptor_version_8e5786bd40ede622, []int{3}
 }
 func (m *ManualScaling) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ManualScaling.Unmarshal(m, b)
@@ -836,7 +838,7 @@ func (m *CpuUtilization) Reset()         { *m = CpuUtilization{} }
 func (m *CpuUtilization) String() string { return proto.CompactTextString(m) }
 func (*CpuUtilization) ProtoMessage()    {}
 func (*CpuUtilization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{4}
+	return fileDescriptor_version_8e5786bd40ede622, []int{4}
 }
 func (m *CpuUtilization) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CpuUtilization.Unmarshal(m, b)
@@ -885,7 +887,7 @@ func (m *RequestUtilization) Reset()         { *m = RequestUtilization{} }
 func (m *RequestUtilization) String() string { return proto.CompactTextString(m) }
 func (*RequestUtilization) ProtoMessage()    {}
 func (*RequestUtilization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{5}
+	return fileDescriptor_version_8e5786bd40ede622, []int{5}
 }
 func (m *RequestUtilization) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestUtilization.Unmarshal(m, b)
@@ -938,7 +940,7 @@ func (m *DiskUtilization) Reset()         { *m = DiskUtilization{} }
 func (m *DiskUtilization) String() string { return proto.CompactTextString(m) }
 func (*DiskUtilization) ProtoMessage()    {}
 func (*DiskUtilization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{6}
+	return fileDescriptor_version_8e5786bd40ede622, []int{6}
 }
 func (m *DiskUtilization) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DiskUtilization.Unmarshal(m, b)
@@ -1005,7 +1007,7 @@ func (m *NetworkUtilization) Reset()         { *m = NetworkUtilization{} }
 func (m *NetworkUtilization) String() string { return proto.CompactTextString(m) }
 func (*NetworkUtilization) ProtoMessage()    {}
 func (*NetworkUtilization) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{7}
+	return fileDescriptor_version_8e5786bd40ede622, []int{7}
 }
 func (m *NetworkUtilization) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetworkUtilization.Unmarshal(m, b)
@@ -1074,7 +1076,7 @@ func (m *Network) Reset()         { *m = Network{} }
 func (m *Network) String() string { return proto.CompactTextString(m) }
 func (*Network) ProtoMessage()    {}
 func (*Network) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{8}
+	return fileDescriptor_version_8e5786bd40ede622, []int{8}
 }
 func (m *Network) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Network.Unmarshal(m, b)
@@ -1132,7 +1134,7 @@ func (m *Resources) Reset()         { *m = Resources{} }
 func (m *Resources) String() string { return proto.CompactTextString(m) }
 func (*Resources) ProtoMessage()    {}
 func (*Resources) Descriptor() ([]byte, []int) {
-	return fileDescriptor_version_8b240e3827c1f1f0, []int{9}
+	return fileDescriptor_version_8e5786bd40ede622, []int{9}
 }
 func (m *Resources) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Resources.Unmarshal(m, b)
@@ -1191,10 +1193,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/appengine/v1/version.proto", fileDescriptor_version_8b240e3827c1f1f0)
+	proto.RegisterFile("google/appengine/v1/version.proto", fileDescriptor_version_8e5786bd40ede622)
 }
 
-var fileDescriptor_version_8b240e3827c1f1f0 = []byte{
+var fileDescriptor_version_8e5786bd40ede622 = []byte{
 	// 1767 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x58, 0x5d, 0x73, 0xdb, 0xc6,
 	0x15, 0x0d, 0x29, 0x4b, 0x14, 0x2f, 0x3f, 0x04, 0xad, 0xd3, 0x08, 0x96, 0x64, 0x89, 0x66, 0x92,

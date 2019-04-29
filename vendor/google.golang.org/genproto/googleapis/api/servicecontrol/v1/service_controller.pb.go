@@ -51,7 +51,7 @@ func (m *CheckRequest) Reset()         { *m = CheckRequest{} }
 func (m *CheckRequest) String() string { return proto.CompactTextString(m) }
 func (*CheckRequest) ProtoMessage()    {}
 func (*CheckRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{0}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{0}
 }
 func (m *CheckRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckRequest.Unmarshal(m, b)
@@ -94,8 +94,9 @@ func (m *CheckRequest) GetServiceConfigId() string {
 
 // Response message for the Check method.
 type CheckResponse struct {
-	// The same operation_id value used in the [CheckRequest][google.api.servicecontrol.v1.CheckRequest].
-	// Used for logging and diagnostics purposes.
+	// The same operation_id value used in the
+	// [CheckRequest][google.api.servicecontrol.v1.CheckRequest]. Used for logging
+	// and diagnostics purposes.
 	OperationId string `protobuf:"bytes,1,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
 	// Indicate the decision of the check.
 	//
@@ -116,7 +117,7 @@ func (m *CheckResponse) Reset()         { *m = CheckResponse{} }
 func (m *CheckResponse) String() string { return proto.CompactTextString(m) }
 func (*CheckResponse) ProtoMessage()    {}
 func (*CheckResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{1}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{1}
 }
 func (m *CheckResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckResponse.Unmarshal(m, b)
@@ -176,7 +177,7 @@ func (m *CheckResponse_CheckInfo) Reset()         { *m = CheckResponse_CheckInfo
 func (m *CheckResponse_CheckInfo) String() string { return proto.CompactTextString(m) }
 func (*CheckResponse_CheckInfo) ProtoMessage()    {}
 func (*CheckResponse_CheckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{1, 0}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{1, 0}
 }
 func (m *CheckResponse_CheckInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckResponse_CheckInfo.Unmarshal(m, b)
@@ -217,7 +218,7 @@ func (m *CheckResponse_ConsumerInfo) Reset()         { *m = CheckResponse_Consum
 func (m *CheckResponse_ConsumerInfo) String() string { return proto.CompactTextString(m) }
 func (*CheckResponse_ConsumerInfo) ProtoMessage()    {}
 func (*CheckResponse_ConsumerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{1, 1}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{1, 1}
 }
 func (m *CheckResponse_ConsumerInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckResponse_ConsumerInfo.Unmarshal(m, b)
@@ -261,8 +262,9 @@ type ReportRequest struct {
 	// of the report.
 	//
 	// If multiple operations are in a single request, the total request size
-	// should be no larger than 1MB. See [ReportResponse.report_errors][google.api.servicecontrol.v1.ReportResponse.report_errors] for
-	// partial failure behavior.
+	// should be no larger than 1MB. See
+	// [ReportResponse.report_errors][google.api.servicecontrol.v1.ReportResponse.report_errors]
+	// for partial failure behavior.
 	Operations []*Operation `protobuf:"bytes,2,rep,name=operations,proto3" json:"operations,omitempty"`
 	// Specifies which version of service config should be used to process the
 	// request.
@@ -279,7 +281,7 @@ func (m *ReportRequest) Reset()         { *m = ReportRequest{} }
 func (m *ReportRequest) String() string { return proto.CompactTextString(m) }
 func (*ReportRequest) ProtoMessage()    {}
 func (*ReportRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{2}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{2}
 }
 func (m *ReportRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportRequest.Unmarshal(m, b)
@@ -348,7 +350,7 @@ func (m *ReportResponse) Reset()         { *m = ReportResponse{} }
 func (m *ReportResponse) String() string { return proto.CompactTextString(m) }
 func (*ReportResponse) ProtoMessage()    {}
 func (*ReportResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{3}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{3}
 }
 func (m *ReportResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportResponse.Unmarshal(m, b)
@@ -382,11 +384,15 @@ func (m *ReportResponse) GetServiceConfigId() string {
 	return ""
 }
 
-// Represents the processing error of one [Operation][google.api.servicecontrol.v1.Operation] in the request.
+// Represents the processing error of one
+// [Operation][google.api.servicecontrol.v1.Operation] in the request.
 type ReportResponse_ReportError struct {
-	// The [Operation.operation_id][google.api.servicecontrol.v1.Operation.operation_id] value from the request.
+	// The
+	// [Operation.operation_id][google.api.servicecontrol.v1.Operation.operation_id]
+	// value from the request.
 	OperationId string `protobuf:"bytes,1,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
-	// Details of the error when processing the [Operation][google.api.servicecontrol.v1.Operation].
+	// Details of the error when processing the
+	// [Operation][google.api.servicecontrol.v1.Operation].
 	Status               *status.Status `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
@@ -397,7 +403,7 @@ func (m *ReportResponse_ReportError) Reset()         { *m = ReportResponse_Repor
 func (m *ReportResponse_ReportError) String() string { return proto.CompactTextString(m) }
 func (*ReportResponse_ReportError) ProtoMessage()    {}
 func (*ReportResponse_ReportError) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_controller_3b2da1557482bc9c, []int{3, 0}
+	return fileDescriptor_service_controller_63b84d9abfbd86ce, []int{3, 0}
 }
 func (m *ReportResponse_ReportError) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportResponse_ReportError.Unmarshal(m, b)
@@ -461,7 +467,8 @@ type ServiceControllerClient interface {
 	// 60 seconds. In case of server errors, the client can rely on the cached
 	// results for longer time.
 	//
-	// NOTE: the [CheckRequest][google.api.servicecontrol.v1.CheckRequest] has the size limit of 64KB.
+	// NOTE: the [CheckRequest][google.api.servicecontrol.v1.CheckRequest] has the
+	// size limit of 64KB.
 	//
 	// This method requires the `servicemanagement.services.check` permission
 	// on the specified service. For more information, see
@@ -476,7 +483,8 @@ type ServiceControllerClient interface {
 	// the aggregation time window to avoid data loss risk more than 0.01%
 	// for business and compliance reasons.
 	//
-	// NOTE: the [ReportRequest][google.api.servicecontrol.v1.ReportRequest] has the size limit of 1MB.
+	// NOTE: the [ReportRequest][google.api.servicecontrol.v1.ReportRequest] has
+	// the size limit of 1MB.
 	//
 	// This method requires the `servicemanagement.services.report` permission
 	// on the specified service. For more information, see
@@ -520,7 +528,8 @@ type ServiceControllerServer interface {
 	// 60 seconds. In case of server errors, the client can rely on the cached
 	// results for longer time.
 	//
-	// NOTE: the [CheckRequest][google.api.servicecontrol.v1.CheckRequest] has the size limit of 64KB.
+	// NOTE: the [CheckRequest][google.api.servicecontrol.v1.CheckRequest] has the
+	// size limit of 64KB.
 	//
 	// This method requires the `servicemanagement.services.check` permission
 	// on the specified service. For more information, see
@@ -535,7 +544,8 @@ type ServiceControllerServer interface {
 	// the aggregation time window to avoid data loss risk more than 0.01%
 	// for business and compliance reasons.
 	//
-	// NOTE: the [ReportRequest][google.api.servicecontrol.v1.ReportRequest] has the size limit of 1MB.
+	// NOTE: the [ReportRequest][google.api.servicecontrol.v1.ReportRequest] has
+	// the size limit of 1MB.
 	//
 	// This method requires the `servicemanagement.services.report` permission
 	// on the specified service. For more information, see
@@ -601,10 +611,10 @@ var _ServiceController_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/api/servicecontrol/v1/service_controller.proto", fileDescriptor_service_controller_3b2da1557482bc9c)
+	proto.RegisterFile("google/api/servicecontrol/v1/service_controller.proto", fileDescriptor_service_controller_63b84d9abfbd86ce)
 }
 
-var fileDescriptor_service_controller_3b2da1557482bc9c = []byte{
+var fileDescriptor_service_controller_63b84d9abfbd86ce = []byte{
 	// 619 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0xc1, 0x6e, 0xd3, 0x4c,
 	0x10, 0xd6, 0x3a, 0x6d, 0xa4, 0x4c, 0x9c, 0xfe, 0xea, 0x1e, 0x7e, 0x22, 0xab, 0x87, 0xd4, 0x12,

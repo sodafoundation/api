@@ -22,8 +22,20 @@ git clone . $GENPROTO_HOME
 cd $GENPROTO_HOME
 
 try3() { eval "$*" || eval "$*" || eval "$*"; }
-try3 go get -v -t ./...
 
+download_deps() {
+    if [[ `go version` == *"go1.11"* ]] || [[ `go version` == *"go1.12"* ]]; then
+        export GO111MODULE=on
+        # All packages, including +build tools, are fetched.
+        try3 go mod download
+    else
+        # Because we don't provide -tags tools, the +build tools
+        # dependencies aren't fetched.
+        try3 go get -v -t ./...
+    fi
+}
+
+download_deps
 ./internal/kokoro/vet.sh
 ./internal/kokoro/check_incompat_changes.sh
 

@@ -44,7 +44,7 @@ func (m *RequestSyncDevicesRequest) Reset()         { *m = RequestSyncDevicesReq
 func (m *RequestSyncDevicesRequest) String() string { return proto.CompactTextString(m) }
 func (*RequestSyncDevicesRequest) ProtoMessage()    {}
 func (*RequestSyncDevicesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{0}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{0}
 }
 func (m *RequestSyncDevicesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestSyncDevicesRequest.Unmarshal(m, b)
@@ -90,7 +90,7 @@ func (m *RequestSyncDevicesResponse) Reset()         { *m = RequestSyncDevicesRe
 func (m *RequestSyncDevicesResponse) String() string { return proto.CompactTextString(m) }
 func (*RequestSyncDevicesResponse) ProtoMessage()    {}
 func (*RequestSyncDevicesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{1}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{1}
 }
 func (m *RequestSyncDevicesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestSyncDevicesResponse.Unmarshal(m, b)
@@ -185,7 +185,7 @@ func (m *ReportStateAndNotificationRequest) Reset()         { *m = ReportStateAn
 func (m *ReportStateAndNotificationRequest) String() string { return proto.CompactTextString(m) }
 func (*ReportStateAndNotificationRequest) ProtoMessage()    {}
 func (*ReportStateAndNotificationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{2}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{2}
 }
 func (m *ReportStateAndNotificationRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportStateAndNotificationRequest.Unmarshal(m, b)
@@ -253,7 +253,7 @@ func (m *ReportStateAndNotificationResponse) Reset()         { *m = ReportStateA
 func (m *ReportStateAndNotificationResponse) String() string { return proto.CompactTextString(m) }
 func (*ReportStateAndNotificationResponse) ProtoMessage()    {}
 func (*ReportStateAndNotificationResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{3}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{3}
 }
 func (m *ReportStateAndNotificationResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportStateAndNotificationResponse.Unmarshal(m, b)
@@ -293,7 +293,7 @@ func (m *StateAndNotificationPayload) Reset()         { *m = StateAndNotificatio
 func (m *StateAndNotificationPayload) String() string { return proto.CompactTextString(m) }
 func (*StateAndNotificationPayload) ProtoMessage()    {}
 func (*StateAndNotificationPayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{4}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{4}
 }
 func (m *StateAndNotificationPayload) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StateAndNotificationPayload.Unmarshal(m, b)
@@ -335,7 +335,7 @@ func (m *ReportStateAndNotificationDevice) Reset()         { *m = ReportStateAnd
 func (m *ReportStateAndNotificationDevice) String() string { return proto.CompactTextString(m) }
 func (*ReportStateAndNotificationDevice) ProtoMessage()    {}
 func (*ReportStateAndNotificationDevice) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{5}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{5}
 }
 func (m *ReportStateAndNotificationDevice) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReportStateAndNotificationDevice.Unmarshal(m, b)
@@ -384,7 +384,7 @@ func (m *DeleteAgentUserRequest) Reset()         { *m = DeleteAgentUserRequest{}
 func (m *DeleteAgentUserRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteAgentUserRequest) ProtoMessage()    {}
 func (*DeleteAgentUserRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{6}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{6}
 }
 func (m *DeleteAgentUserRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteAgentUserRequest.Unmarshal(m, b)
@@ -440,7 +440,7 @@ func (m *QueryRequest) Reset()         { *m = QueryRequest{} }
 func (m *QueryRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryRequest) ProtoMessage()    {}
 func (*QueryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{7}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{7}
 }
 func (m *QueryRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryRequest.Unmarshal(m, b)
@@ -494,7 +494,7 @@ func (m *QueryRequestInput) Reset()         { *m = QueryRequestInput{} }
 func (m *QueryRequestInput) String() string { return proto.CompactTextString(m) }
 func (*QueryRequestInput) ProtoMessage()    {}
 func (*QueryRequestInput) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{8}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{8}
 }
 func (m *QueryRequestInput) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryRequestInput.Unmarshal(m, b)
@@ -534,7 +534,7 @@ func (m *QueryRequestPayload) Reset()         { *m = QueryRequestPayload{} }
 func (m *QueryRequestPayload) String() string { return proto.CompactTextString(m) }
 func (*QueryRequestPayload) ProtoMessage()    {}
 func (*QueryRequestPayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{9}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{9}
 }
 func (m *QueryRequestPayload) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryRequestPayload.Unmarshal(m, b)
@@ -574,7 +574,7 @@ func (m *AgentDeviceId) Reset()         { *m = AgentDeviceId{} }
 func (m *AgentDeviceId) String() string { return proto.CompactTextString(m) }
 func (*AgentDeviceId) ProtoMessage()    {}
 func (*AgentDeviceId) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{10}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{10}
 }
 func (m *AgentDeviceId) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AgentDeviceId.Unmarshal(m, b)
@@ -618,7 +618,7 @@ func (m *QueryResponse) Reset()         { *m = QueryResponse{} }
 func (m *QueryResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryResponse) ProtoMessage()    {}
 func (*QueryResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{11}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{11}
 }
 func (m *QueryResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryResponse.Unmarshal(m, b)
@@ -666,7 +666,7 @@ func (m *QueryResponsePayload) Reset()         { *m = QueryResponsePayload{} }
 func (m *QueryResponsePayload) String() string { return proto.CompactTextString(m) }
 func (*QueryResponsePayload) ProtoMessage()    {}
 func (*QueryResponsePayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{12}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{12}
 }
 func (m *QueryResponsePayload) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryResponsePayload.Unmarshal(m, b)
@@ -711,7 +711,7 @@ func (m *SyncRequest) Reset()         { *m = SyncRequest{} }
 func (m *SyncRequest) String() string { return proto.CompactTextString(m) }
 func (*SyncRequest) ProtoMessage()    {}
 func (*SyncRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{13}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{13}
 }
 func (m *SyncRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SyncRequest.Unmarshal(m, b)
@@ -794,7 +794,7 @@ func (m *SyncResponse) Reset()         { *m = SyncResponse{} }
 func (m *SyncResponse) String() string { return proto.CompactTextString(m) }
 func (*SyncResponse) ProtoMessage()    {}
 func (*SyncResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{14}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{14}
 }
 func (m *SyncResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SyncResponse.Unmarshal(m, b)
@@ -843,7 +843,7 @@ func (m *SyncResponsePayload) Reset()         { *m = SyncResponsePayload{} }
 func (m *SyncResponsePayload) String() string { return proto.CompactTextString(m) }
 func (*SyncResponsePayload) ProtoMessage()    {}
 func (*SyncResponsePayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_homegraph_a63234dfcc84278e, []int{15}
+	return fileDescriptor_homegraph_b6eae4d48cf76516, []int{15}
 }
 func (m *SyncResponsePayload) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SyncResponsePayload.Unmarshal(m, b)
@@ -914,9 +914,10 @@ type HomeGraphApiServiceClient interface {
 	//
 	//
 	// Third-party user's identity is passed in as agent_user_id.
-	// (see [RequestSyncDevicesRequest][google.home.graph.v1.RequestSyncDevicesRequest]) and forwarded back to the agent.
-	// Agent is identified by the API key or JWT signed by the partner's service
-	// account.
+	// (see
+	// [RequestSyncDevicesRequest][google.home.graph.v1.RequestSyncDevicesRequest])
+	// and forwarded back to the agent. Agent is identified by the API key or JWT
+	// signed by the partner's service account.
 	RequestSyncDevices(ctx context.Context, in *RequestSyncDevicesRequest, opts ...grpc.CallOption) (*RequestSyncDevicesResponse, error)
 	// Reports device state and optionally sends device notifications. Called by
 	// an agent when the device state of a third-party changes or the agent wants
@@ -1022,9 +1023,10 @@ type HomeGraphApiServiceServer interface {
 	//
 	//
 	// Third-party user's identity is passed in as agent_user_id.
-	// (see [RequestSyncDevicesRequest][google.home.graph.v1.RequestSyncDevicesRequest]) and forwarded back to the agent.
-	// Agent is identified by the API key or JWT signed by the partner's service
-	// account.
+	// (see
+	// [RequestSyncDevicesRequest][google.home.graph.v1.RequestSyncDevicesRequest])
+	// and forwarded back to the agent. Agent is identified by the API key or JWT
+	// signed by the partner's service account.
 	RequestSyncDevices(context.Context, *RequestSyncDevicesRequest) (*RequestSyncDevicesResponse, error)
 	// Reports device state and optionally sends device notifications. Called by
 	// an agent when the device state of a third-party changes or the agent wants
@@ -1194,10 +1196,10 @@ var _HomeGraphApiService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/home/graph/v1/homegraph.proto", fileDescriptor_homegraph_a63234dfcc84278e)
+	proto.RegisterFile("google/home/graph/v1/homegraph.proto", fileDescriptor_homegraph_b6eae4d48cf76516)
 }
 
-var fileDescriptor_homegraph_a63234dfcc84278e = []byte{
+var fileDescriptor_homegraph_b6eae4d48cf76516 = []byte{
 	// 879 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x4f, 0x8f, 0xdb, 0x44,
 	0x14, 0x97, 0x93, 0x66, 0xb7, 0x7d, 0xd9, 0xd0, 0x76, 0x76, 0xd9, 0xba, 0xd9, 0x20, 0x92, 0x59,

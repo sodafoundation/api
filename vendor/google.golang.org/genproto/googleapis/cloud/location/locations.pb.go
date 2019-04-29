@@ -25,7 +25,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// The request message for [Locations.ListLocations][google.cloud.location.Locations.ListLocations].
+// The request message for
+// [Locations.ListLocations][google.cloud.location.Locations.ListLocations].
 type ListLocationsRequest struct {
 	// The resource that owns the locations collection, if applicable.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -44,7 +45,7 @@ func (m *ListLocationsRequest) Reset()         { *m = ListLocationsRequest{} }
 func (m *ListLocationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListLocationsRequest) ProtoMessage()    {}
 func (*ListLocationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_locations_7a7af132c8d24683, []int{0}
+	return fileDescriptor_locations_9c99ccd80b3cade7, []int{0}
 }
 func (m *ListLocationsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListLocationsRequest.Unmarshal(m, b)
@@ -92,7 +93,8 @@ func (m *ListLocationsRequest) GetPageToken() string {
 	return ""
 }
 
-// The response message for [Locations.ListLocations][google.cloud.location.Locations.ListLocations].
+// The response message for
+// [Locations.ListLocations][google.cloud.location.Locations.ListLocations].
 type ListLocationsResponse struct {
 	// A list of locations that matches the specified filter in the request.
 	Locations []*Location `protobuf:"bytes,1,rep,name=locations,proto3" json:"locations,omitempty"`
@@ -107,7 +109,7 @@ func (m *ListLocationsResponse) Reset()         { *m = ListLocationsResponse{} }
 func (m *ListLocationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListLocationsResponse) ProtoMessage()    {}
 func (*ListLocationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_locations_7a7af132c8d24683, []int{1}
+	return fileDescriptor_locations_9c99ccd80b3cade7, []int{1}
 }
 func (m *ListLocationsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListLocationsResponse.Unmarshal(m, b)
@@ -141,7 +143,8 @@ func (m *ListLocationsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request message for [Locations.GetLocation][google.cloud.location.Locations.GetLocation].
+// The request message for
+// [Locations.GetLocation][google.cloud.location.Locations.GetLocation].
 type GetLocationRequest struct {
 	// Resource name for the location.
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -154,7 +157,7 @@ func (m *GetLocationRequest) Reset()         { *m = GetLocationRequest{} }
 func (m *GetLocationRequest) String() string { return proto.CompactTextString(m) }
 func (*GetLocationRequest) ProtoMessage()    {}
 func (*GetLocationRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_locations_7a7af132c8d24683, []int{2}
+	return fileDescriptor_locations_9c99ccd80b3cade7, []int{2}
 }
 func (m *GetLocationRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetLocationRequest.Unmarshal(m, b)
@@ -207,7 +210,7 @@ func (m *Location) Reset()         { *m = Location{} }
 func (m *Location) String() string { return proto.CompactTextString(m) }
 func (*Location) ProtoMessage()    {}
 func (*Location) Descriptor() ([]byte, []int) {
-	return fileDescriptor_locations_7a7af132c8d24683, []int{3}
+	return fileDescriptor_locations_9c99ccd80b3cade7, []int{3}
 }
 func (m *Location) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Location.Unmarshal(m, b)
@@ -380,10 +383,10 @@ var _Locations_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/location/locations.proto", fileDescriptor_locations_7a7af132c8d24683)
+	proto.RegisterFile("google/cloud/location/locations.proto", fileDescriptor_locations_9c99ccd80b3cade7)
 }
 
-var fileDescriptor_locations_7a7af132c8d24683 = []byte{
+var fileDescriptor_locations_9c99ccd80b3cade7 = []byte{
 	// 527 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x54, 0xcd, 0x6e, 0xd3, 0x40,
 	0x10, 0xd6, 0x3a, 0x4d, 0x94, 0x8c, 0x29, 0xa0, 0x55, 0x8a, 0xdc, 0x00, 0x4a, 0x62, 0x04, 0xa4,

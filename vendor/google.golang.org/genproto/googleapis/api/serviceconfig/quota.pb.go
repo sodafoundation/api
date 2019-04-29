@@ -40,6 +40,7 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 //        values:
 //          STANDARD: 10000
 //
+//
 //      # The metric rules bind all methods to the read_calls metric,
 //      # except for the UpdateBook and DeleteBook methods. These two methods
 //      # are mapped to the write_calls metric, with the UpdateBook method
@@ -67,16 +68,11 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 //        display_name: Write requests
 //        metric_kind: DELTA
 //        value_type: INT64
-//
 type Quota struct {
 	// List of `QuotaLimit` definitions for the service.
-	//
-	// Used by metric-based quotas only.
 	Limits []*QuotaLimit `protobuf:"bytes,3,rep,name=limits,proto3" json:"limits,omitempty"`
 	// List of `MetricRule` definitions, each one mapping a selected method to one
 	// or more metrics.
-	//
-	// Used by metric-based quotas only.
 	MetricRules          []*MetricRule `protobuf:"bytes,4,rep,name=metric_rules,json=metricRules,proto3" json:"metric_rules,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
@@ -87,7 +83,7 @@ func (m *Quota) Reset()         { *m = Quota{} }
 func (m *Quota) String() string { return proto.CompactTextString(m) }
 func (*Quota) ProtoMessage()    {}
 func (*Quota) Descriptor() ([]byte, []int) {
-	return fileDescriptor_quota_8acf07194df27b7e, []int{0}
+	return fileDescriptor_quota_259822e146c2c2dd, []int{0}
 }
 func (m *Quota) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Quota.Unmarshal(m, b)
@@ -122,14 +118,12 @@ func (m *Quota) GetMetricRules() []*MetricRule {
 }
 
 // Bind API methods to metrics. Binding a method to a metric causes that
-// metric's configured quota, billing, and monitoring behaviors to apply to the
-// method call.
-//
-// Used by metric-based quotas only.
+// metric's configured quota behaviors to apply to the method call.
 type MetricRule struct {
 	// Selects the methods to which this rule applies.
 	//
-	// Refer to [selector][google.api.DocumentationRule.selector] for syntax details.
+	// Refer to [selector][google.api.DocumentationRule.selector] for syntax
+	// details.
 	Selector string `protobuf:"bytes,1,opt,name=selector,proto3" json:"selector,omitempty"`
 	// Metrics to update when the selected methods are called, and the associated
 	// cost applied to each metric.
@@ -147,7 +141,7 @@ func (m *MetricRule) Reset()         { *m = MetricRule{} }
 func (m *MetricRule) String() string { return proto.CompactTextString(m) }
 func (*MetricRule) ProtoMessage()    {}
 func (*MetricRule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_quota_8acf07194df27b7e, []int{1}
+	return fileDescriptor_quota_259822e146c2c2dd, []int{1}
 }
 func (m *MetricRule) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MetricRule.Unmarshal(m, b)
@@ -185,24 +179,12 @@ func (m *MetricRule) GetMetricCosts() map[string]int64 {
 // for a limit type. There can be at most one limit for a duration and limit
 // type combination defined within a `QuotaGroup`.
 type QuotaLimit struct {
-	// Name of the quota limit. The name is used to refer to the limit when
-	// overriding the default limit on per-consumer basis.
+	// Name of the quota limit.
 	//
-	// For group-based quota limits, the name must be unique within the quota
-	// group. If a name is not provided, it will be generated from the limit_by
-	// and duration fields.
-	//
-	// For metric-based quota limits, the name must be provided, and it must be
-	// unique within the service. The name can only include alphanumeric
-	// characters as well as '-'.
+	// The name must be provided, and it must be unique within the service. The
+	// name can only include alphanumeric characters as well as '-'.
 	//
 	// The maximum length of the limit name is 64 characters.
-	//
-	// The name of a limit is used as a unique identifier for this limit.
-	// Therefore, once a limit has been put into use, its name should be
-	// immutable. You can use the display_name field to provide a user-friendly
-	// name for the limit. The display name can be evolved over time without
-	// affecting the identity of the limit.
 	Name string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
 	// Optional. User-visible, extended description for this quota limit.
 	// Should be used only when more context is needed to understand this limit
@@ -248,73 +230,20 @@ type QuotaLimit struct {
 	// The name of the metric this quota limit applies to. The quota limits with
 	// the same metric will be checked together during runtime. The metric must be
 	// defined within the service config.
-	//
-	// Used by metric-based quotas only.
 	Metric string `protobuf:"bytes,8,opt,name=metric,proto3" json:"metric,omitempty"`
 	// Specify the unit of the quota limit. It uses the same syntax as
 	// [Metric.unit][]. The supported unit kinds are determined by the quota
 	// backend system.
 	//
-	// The [Google Service Control](https://cloud.google.com/service-control)
-	// supports the following unit components:
-	// * One of the time intevals:
-	//   * "/min"  for quota every minute.
-	//   * "/d"  for quota every 24 hours, starting 00:00 US Pacific Time.
-	//   * Otherwise the quota won't be reset by time, such as storage limit.
-	// * One and only one of the granted containers:
-	//   * "/{organization}" quota for an organization.
-	//   * "/{project}" quota for a project.
-	//   * "/{folder}" quota for a folder.
-	//   * "/{resource}" quota for a universal resource.
-	// * Zero or more quota segmentation dimension. Not all combos are valid.
-	//   * "/{region}" quota for every region. Not to be used with time intervals.
-	//   * Otherwise the resources granted on the target is not segmented.
-	//   * "/{zone}" quota for every zone. Not to be used with time intervals.
-	//   * Otherwise the resources granted on the target is not segmented.
-	//   * "/{resource}" quota for a resource associated with a project or org.
-	//
 	// Here are some examples:
 	// * "1/min/{project}" for quota per minute per project.
-	// * "1/min/{user}" for quota per minute per user.
-	// * "1/min/{organization}" for quota per minute per organization.
 	//
 	// Note: the order of unit components is insignificant.
 	// The "1" at the beginning is required to follow the metric unit syntax.
-	//
-	// Used by metric-based quotas only.
 	Unit string `protobuf:"bytes,9,opt,name=unit,proto3" json:"unit,omitempty"`
-	// Tiered limit values. Also allows for regional or zone overrides for these
-	// values if "/{region}" or "/{zone}" is specified in the unit field.
-	//
-	// Currently supported tiers from low to high:
-	// VERY_LOW, LOW, STANDARD, HIGH, VERY_HIGH
-	//
-	// To apply different limit values for users according to their tiers, specify
-	// the values for the tiers you want to differentiate. For example:
-	// {LOW:100, STANDARD:500, HIGH:1000, VERY_HIGH:5000}
-	//
-	// The limit value for each tier is optional except for the tier STANDARD.
-	// The limit value for an unspecified tier falls to the value of its next
-	// tier towards tier STANDARD. For the above example, the limit value for tier
-	// STANDARD is 500.
-	//
-	// To apply the same limit value for all users, just specify limit value for
-	// tier STANDARD. For example: {STANDARD:500}.
-	//
-	// To apply a regional overide for a tier, add a map entry with key
-	// "<TIER>/<region>", where <region> is a region name. Similarly, for a zone
-	// override, add a map entry with key "<TIER>/{zone}".
-	// Further, a wildcard can be used at the end of a zone name in order to
-	// specify zone level overrides. For example:
-	// LOW: 10, STANDARD: 50, HIGH: 100,
-	// LOW/us-central1: 20, STANDARD/us-central1: 60, HIGH/us-central1: 200,
-	// LOW/us-central1-*: 10, STANDARD/us-central1-*: 20, HIGH/us-central1-*: 80
-	//
-	// The regional overrides tier set for each region must be the same as
-	// the tier set for default limit values. Same rule applies for zone overrides
-	// tier as well.
-	//
-	// Used by metric-based quotas only.
+	// Tiered limit values. You must specify this as a key:value pair, with an
+	// integer value that is the maximum number of requests allowed for the
+	// specified unit. Currently only STANDARD is supported.
 	Values map[string]int64 `protobuf:"bytes,10,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
 	// User-visible display name for this limit.
 	// Optional. If not set, the UI will provide a default display name based on
@@ -330,7 +259,7 @@ func (m *QuotaLimit) Reset()         { *m = QuotaLimit{} }
 func (m *QuotaLimit) String() string { return proto.CompactTextString(m) }
 func (*QuotaLimit) ProtoMessage()    {}
 func (*QuotaLimit) Descriptor() ([]byte, []int) {
-	return fileDescriptor_quota_8acf07194df27b7e, []int{2}
+	return fileDescriptor_quota_259822e146c2c2dd, []int{2}
 }
 func (m *QuotaLimit) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuotaLimit.Unmarshal(m, b)
@@ -428,9 +357,9 @@ func init() {
 	proto.RegisterMapType((map[string]int64)(nil), "google.api.QuotaLimit.ValuesEntry")
 }
 
-func init() { proto.RegisterFile("google/api/quota.proto", fileDescriptor_quota_8acf07194df27b7e) }
+func init() { proto.RegisterFile("google/api/quota.proto", fileDescriptor_quota_259822e146c2c2dd) }
 
-var fileDescriptor_quota_8acf07194df27b7e = []byte{
+var fileDescriptor_quota_259822e146c2c2dd = []byte{
 	// 466 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0xc1, 0x8e, 0xd3, 0x30,
 	0x10, 0x55, 0x9a, 0xb6, 0xb4, 0xd3, 0x82, 0x56, 0x16, 0xaa, 0xac, 0xc2, 0xa1, 0x94, 0x03, 0x3d,

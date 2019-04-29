@@ -48,7 +48,7 @@ func (x Discovered_ContinuousAnalysis) String() string {
 	return proto.EnumName(Discovered_ContinuousAnalysis_name, int32(x))
 }
 func (Discovered_ContinuousAnalysis) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_discovery_35b141f4cbe7efdb, []int{2, 0}
+	return fileDescriptor_discovery_0953645f1955a3d3, []int{2, 0}
 }
 
 // Analysis status for a resource. Currently for initial analysis only (not
@@ -92,7 +92,7 @@ func (x Discovered_AnalysisStatus) String() string {
 	return proto.EnumName(Discovered_AnalysisStatus_name, int32(x))
 }
 func (Discovered_AnalysisStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_discovery_35b141f4cbe7efdb, []int{2, 1}
+	return fileDescriptor_discovery_0953645f1955a3d3, []int{2, 1}
 }
 
 // A note that indicates a type of analysis a provider would perform. This note
@@ -110,7 +110,7 @@ func (m *Discovery) Reset()         { *m = Discovery{} }
 func (m *Discovery) String() string { return proto.CompactTextString(m) }
 func (*Discovery) ProtoMessage()    {}
 func (*Discovery) Descriptor() ([]byte, []int) {
-	return fileDescriptor_discovery_35b141f4cbe7efdb, []int{0}
+	return fileDescriptor_discovery_0953645f1955a3d3, []int{0}
 }
 func (m *Discovery) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Discovery.Unmarshal(m, b)
@@ -150,7 +150,7 @@ func (m *Details) Reset()         { *m = Details{} }
 func (m *Details) String() string { return proto.CompactTextString(m) }
 func (*Details) ProtoMessage()    {}
 func (*Details) Descriptor() ([]byte, []int) {
-	return fileDescriptor_discovery_35b141f4cbe7efdb, []int{1}
+	return fileDescriptor_discovery_0953645f1955a3d3, []int{1}
 }
 func (m *Details) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Details.Unmarshal(m, b)
@@ -198,7 +198,7 @@ func (m *Discovered) Reset()         { *m = Discovered{} }
 func (m *Discovered) String() string { return proto.CompactTextString(m) }
 func (*Discovered) ProtoMessage()    {}
 func (*Discovered) Descriptor() ([]byte, []int) {
-	return fileDescriptor_discovery_35b141f4cbe7efdb, []int{2}
+	return fileDescriptor_discovery_0953645f1955a3d3, []int{2}
 }
 func (m *Discovered) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Discovered.Unmarshal(m, b)
@@ -255,10 +255,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/discovery/discovery.proto", fileDescriptor_discovery_35b141f4cbe7efdb)
+	proto.RegisterFile("google/devtools/containeranalysis/v1beta1/discovery/discovery.proto", fileDescriptor_discovery_0953645f1955a3d3)
 }
 
-var fileDescriptor_discovery_35b141f4cbe7efdb = []byte{
+var fileDescriptor_discovery_0953645f1955a3d3 = []byte{
 	// 541 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xdf, 0x6a, 0xdb, 0x4c,
 	0x10, 0xc5, 0x3f, 0x39, 0xf9, 0x92, 0x76, 0x92, 0x3a, 0x62, 0x9d, 0x52, 0xc7, 0x2d, 0xb8, 0xb8,

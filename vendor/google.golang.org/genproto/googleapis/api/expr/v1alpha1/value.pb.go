@@ -50,7 +50,7 @@ func (m *Value) Reset()         { *m = Value{} }
 func (m *Value) String() string { return proto.CompactTextString(m) }
 func (*Value) ProtoMessage()    {}
 func (*Value) Descriptor() ([]byte, []int) {
-	return fileDescriptor_value_7b9ec7742431771a, []int{0}
+	return fileDescriptor_value_fb447fd6cf9e742a, []int{0}
 }
 func (m *Value) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Value.Unmarshal(m, b)
@@ -483,7 +483,7 @@ func (m *EnumValue) Reset()         { *m = EnumValue{} }
 func (m *EnumValue) String() string { return proto.CompactTextString(m) }
 func (*EnumValue) ProtoMessage()    {}
 func (*EnumValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_value_7b9ec7742431771a, []int{1}
+	return fileDescriptor_value_fb447fd6cf9e742a, []int{1}
 }
 func (m *EnumValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EnumValue.Unmarshal(m, b)
@@ -533,7 +533,7 @@ func (m *ListValue) Reset()         { *m = ListValue{} }
 func (m *ListValue) String() string { return proto.CompactTextString(m) }
 func (*ListValue) ProtoMessage()    {}
 func (*ListValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_value_7b9ec7742431771a, []int{2}
+	return fileDescriptor_value_fb447fd6cf9e742a, []int{2}
 }
 func (m *ListValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListValue.Unmarshal(m, b)
@@ -579,7 +579,7 @@ func (m *MapValue) Reset()         { *m = MapValue{} }
 func (m *MapValue) String() string { return proto.CompactTextString(m) }
 func (*MapValue) ProtoMessage()    {}
 func (*MapValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_value_7b9ec7742431771a, []int{3}
+	return fileDescriptor_value_fb447fd6cf9e742a, []int{3}
 }
 func (m *MapValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MapValue.Unmarshal(m, b)
@@ -624,7 +624,7 @@ func (m *MapValue_Entry) Reset()         { *m = MapValue_Entry{} }
 func (m *MapValue_Entry) String() string { return proto.CompactTextString(m) }
 func (*MapValue_Entry) ProtoMessage()    {}
 func (*MapValue_Entry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_value_7b9ec7742431771a, []int{3, 0}
+	return fileDescriptor_value_fb447fd6cf9e742a, []int{3, 0}
 }
 func (m *MapValue_Entry) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MapValue_Entry.Unmarshal(m, b)
@@ -667,10 +667,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/api/expr/v1alpha1/value.proto", fileDescriptor_value_7b9ec7742431771a)
+	proto.RegisterFile("google/api/expr/v1alpha1/value.proto", fileDescriptor_value_fb447fd6cf9e742a)
 }
 
-var fileDescriptor_value_7b9ec7742431771a = []byte{
+var fileDescriptor_value_fb447fd6cf9e742a = []byte{
 	// 518 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x94, 0xcb, 0x6e, 0xd4, 0x30,
 	0x14, 0x86, 0x6b, 0xe6, 0xd2, 0xc9, 0x99, 0x11, 0x48, 0x56, 0x17, 0xc3, 0xa8, 0x52, 0x43, 0xca,

@@ -108,7 +108,7 @@ func (m *Documentation) Reset()         { *m = Documentation{} }
 func (m *Documentation) String() string { return proto.CompactTextString(m) }
 func (*Documentation) ProtoMessage()    {}
 func (*Documentation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_documentation_ed988d5b3c756a43, []int{0}
+	return fileDescriptor_documentation_3d6f0d592b1e580f, []int{0}
 }
 func (m *Documentation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Documentation.Unmarshal(m, b)
@@ -174,8 +174,8 @@ type DocumentationRule struct {
 	Selector string `protobuf:"bytes,1,opt,name=selector,proto3" json:"selector,omitempty"`
 	// Description of the selected API(s).
 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// Deprecation description of the selected element(s). It can be provided if an
-	// element is marked as `deprecated`.
+	// Deprecation description of the selected element(s). It can be provided if
+	// an element is marked as `deprecated`.
 	DeprecationDescription string   `protobuf:"bytes,3,opt,name=deprecation_description,json=deprecationDescription,proto3" json:"deprecation_description,omitempty"`
 	XXX_NoUnkeyedLiteral   struct{} `json:"-"`
 	XXX_unrecognized       []byte   `json:"-"`
@@ -186,7 +186,7 @@ func (m *DocumentationRule) Reset()         { *m = DocumentationRule{} }
 func (m *DocumentationRule) String() string { return proto.CompactTextString(m) }
 func (*DocumentationRule) ProtoMessage()    {}
 func (*DocumentationRule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_documentation_ed988d5b3c756a43, []int{1}
+	return fileDescriptor_documentation_3d6f0d592b1e580f, []int{1}
 }
 func (m *DocumentationRule) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DocumentationRule.Unmarshal(m, b)
@@ -245,8 +245,8 @@ type Page struct {
 	// You can reference `Java` page using Markdown reference link syntax:
 	// `[Java][Tutorial.Java]`.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The Markdown content of the page. You can use <code>&#40;== include {path} ==&#41;</code>
-	// to include content from a Markdown file.
+	// The Markdown content of the page. You can use <code>&#40;== include {path}
+	// ==&#41;</code> to include content from a Markdown file.
 	Content string `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
 	// Subpages of this page. The order of subpages specified here will be
 	// honored in the generated docset.
@@ -260,7 +260,7 @@ func (m *Page) Reset()         { *m = Page{} }
 func (m *Page) String() string { return proto.CompactTextString(m) }
 func (*Page) ProtoMessage()    {}
 func (*Page) Descriptor() ([]byte, []int) {
-	return fileDescriptor_documentation_ed988d5b3c756a43, []int{2}
+	return fileDescriptor_documentation_3d6f0d592b1e580f, []int{2}
 }
 func (m *Page) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Page.Unmarshal(m, b)
@@ -308,10 +308,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/api/documentation.proto", fileDescriptor_documentation_ed988d5b3c756a43)
+	proto.RegisterFile("google/api/documentation.proto", fileDescriptor_documentation_3d6f0d592b1e580f)
 }
 
-var fileDescriptor_documentation_ed988d5b3c756a43 = []byte{
+var fileDescriptor_documentation_3d6f0d592b1e580f = []byte{
 	// 356 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0xc1, 0x6a, 0xe3, 0x30,
 	0x14, 0x45, 0x71, 0xec, 0xcc, 0x64, 0x5e, 0x98, 0x61, 0x46, 0x0c, 0x19, 0x33, 0xd0, 0x12, 0xb2,

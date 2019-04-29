@@ -37,77 +37,165 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type StreetViewPublishServiceClient interface {
-	// Creates an upload session to start uploading photo data. The upload URL of
-	// the returned `UploadRef` is used to upload the data for the photo.
+	// Creates an upload session to start uploading photo bytes. The method uses
+	// the upload URL of the returned
+	// [UploadRef][google.streetview.publish.v1.UploadRef] to upload the bytes for
+	// the [Photo][google.streetview.publish.v1.Photo].
 	//
-	// After the upload is complete, the `UploadRef` is used with
-	// `StreetViewPublishService:CreatePhoto()` to create the `Photo` object
-	// entry.
+	// In addition to the photo requirements shown in
+	// https://support.google.com/maps/answer/7012050?hl=en&ref_topic=6275604,
+	// the photo must meet the following requirements:
+	//
+	// * Photo Sphere XMP metadata must be included in the photo medadata. See
+	// https://developers.google.com/streetview/spherical-metadata for the
+	// required fields.
+	// * The pixel size of the photo must meet the size requirements listed in
+	// https://support.google.com/maps/answer/7012050?hl=en&ref_topic=6275604, and
+	// the photo must be a full 360 horizontally.
+	//
+	// After the upload completes, the method uses
+	// [UploadRef][google.streetview.publish.v1.UploadRef] with
+	// [CreatePhoto][google.streetview.publish.v1.StreetViewPublishService.CreatePhoto]
+	// to create the [Photo][google.streetview.publish.v1.Photo] object entry.
 	StartUpload(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*UploadRef, error)
 	// After the client finishes uploading the photo with the returned
-	// `UploadRef`, `photo.create` publishes the uploaded photo to Street View on
-	// Google Maps.
+	// [UploadRef][google.streetview.publish.v1.UploadRef],
+	// [CreatePhoto][google.streetview.publish.v1.StreetViewPublishService.CreatePhoto]
+	// publishes the uploaded [Photo][google.streetview.publish.v1.Photo] to
+	// Street View on Google Maps.
+	//
+	// Currently, the only way to set heading, pitch, and roll in CreatePhoto is
+	// through the [Photo Sphere XMP
+	// metadata](https://developers.google.com/streetview/spherical-metadata) in
+	// the photo bytes. CreatePhoto ignores the `pose.heading`, `pose.pitch`,
+	// `pose.roll`, `pose.altitude`, and `pose.level` fields in Pose.
 	//
 	// This method returns the following error codes:
 	//
-	// * `INVALID_ARGUMENT` if the request is malformed.
-	// * `NOT_FOUND` if the upload reference does not exist.
+	// * [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT] if
+	// the request is malformed or if the uploaded photo is not a 360 photo.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the upload
+	// reference does not exist.
+	// * [google.rpc.Code.RESOURCE_EXHAUSTED][google.rpc.Code.RESOURCE_EXHAUSTED]
+	// if the account has reached the storage limit.
 	CreatePhoto(ctx context.Context, in *CreatePhotoRequest, opts ...grpc.CallOption) (*Photo, error)
-	// Gets the metadata of the specified `Photo`.
+	// Gets the metadata of the specified
+	// [Photo][google.streetview.publish.v1.Photo].
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `NOT_FOUND` if the requested photo does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested
+	// [Photo][google.streetview.publish.v1.Photo].
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the requested
+	// [Photo][google.streetview.publish.v1.Photo] does not exist.
+	// * [google.rpc.Code.UNAVAILABLE][google.rpc.Code.UNAVAILABLE] if the
+	// requested [Photo][google.streetview.publish.v1.Photo] is still being
+	// indexed.
 	GetPhoto(ctx context.Context, in *GetPhotoRequest, opts ...grpc.CallOption) (*Photo, error)
-	// Gets the metadata of the specified `Photo` batch.
+	// Gets the metadata of the specified
+	// [Photo][google.streetview.publish.v1.Photo] batch.
 	//
-	// Note that if `photos.batchGet` fails, either critical fields are
-	// missing or there was an authentication error.
-	// Even if `photos.batchGet` succeeds, there may have been failures
-	// for single photos in the batch. These failures will be specified in
-	// `BatchGetPhotosResponse.results.status`.
-	// See `photo.get` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchGetPhotos][google.streetview.publish.v1.StreetViewPublishService.BatchGetPhotos]
+	// fails, either critical fields are missing or there is an authentication
+	// error. Even if
+	// [BatchGetPhotos][google.streetview.publish.v1.StreetViewPublishService.BatchGetPhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchGetPhotosResponse.results][google.streetview.publish.v1.BatchGetPhotosResponse.results].
+	// See
+	// [GetPhoto][google.streetview.publish.v1.StreetViewPublishService.GetPhoto]
+	// for specific failures that can occur per photo.
 	BatchGetPhotos(ctx context.Context, in *BatchGetPhotosRequest, opts ...grpc.CallOption) (*BatchGetPhotosResponse, error)
-	// Lists all the photos that belong to the user.
+	// Lists all the [Photos][google.streetview.publish.v1.Photo] that belong to
+	// the user.
+	//
+	// <aside class="note"><b>Note:</b> Recently created photos that are still
+	// being indexed are not returned in the response.</aside>
 	ListPhotos(ctx context.Context, in *ListPhotosRequest, opts ...grpc.CallOption) (*ListPhotosResponse, error)
-	// Updates the metadata of a photo, such as pose, place association, etc.
-	// Changing the pixels of a photo is not supported.
+	// Updates the metadata of a [Photo][google.streetview.publish.v1.Photo], such
+	// as pose, place association, connections, etc. Changing the pixels of a
+	// photo is not supported.
+	//
+	// Only the fields specified in the
+	// [updateMask][google.streetview.publish.v1.UpdatePhotoRequest.update_mask]
+	// field are used. If `updateMask` is not present, the update applies to all
+	// fields.
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `INVALID_ARGUMENT` if the request is malformed.
-	// * `NOT_FOUND` if the photo ID does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested photo.
+	// * [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT] if
+	// the request is malformed.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the requested
+	// photo does not exist.
+	// * [google.rpc.Code.UNAVAILABLE][google.rpc.Code.UNAVAILABLE] if the
+	// requested [Photo][google.streetview.publish.v1.Photo] is still being
+	// indexed.
 	UpdatePhoto(ctx context.Context, in *UpdatePhotoRequest, opts ...grpc.CallOption) (*Photo, error)
-	// Updates the metadata of photos, such as pose, place association, etc.
-	// Changing the pixels of a photo is not supported.
+	// Updates the metadata of [Photos][google.streetview.publish.v1.Photo], such
+	// as pose, place association, connections, etc. Changing the pixels of photos
+	// is not supported.
 	//
-	// Note that if `photos.batchUpdate` fails, either critical fields
-	// are missing or there was an authentication error.
-	// Even if `photos.batchUpdate` succeeds, there may have been
-	// failures for single photos in the batch. These failures will be specified
-	// in `BatchUpdatePhotosResponse.results.status`.
-	// See `UpdatePhoto` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchUpdatePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchUpdatePhotos]
+	// fails, either critical fields are missing or there is an authentication
+	// error. Even if
+	// [BatchUpdatePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchUpdatePhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchUpdatePhotosResponse.results][google.streetview.publish.v1.BatchUpdatePhotosResponse.results].
+	// See
+	// [UpdatePhoto][google.streetview.publish.v1.StreetViewPublishService.UpdatePhoto]
+	// for specific failures that can occur per photo.
+	//
+	// Only the fields specified in
+	// [updateMask][google.streetview.publish.v1.UpdatePhotoRequest.update_mask]
+	// field are used. If `updateMask` is not present, the update applies to all
+	// fields.
+	//
+	// The number of
+	// [UpdatePhotoRequest][google.streetview.publish.v1.UpdatePhotoRequest]
+	// messages in a
+	// [BatchUpdatePhotosRequest][google.streetview.publish.v1.BatchUpdatePhotosRequest]
+	// must not exceed 20.
+	//
+	// <aside class="note"><b>Note:</b> To update
+	// [Pose.altitude][google.streetview.publish.v1.Pose.altitude],
+	// [Pose.latLngPair][google.streetview.publish.v1.Pose.lat_lng_pair] has to be
+	// filled as well. Otherwise, the request will fail.</aside>
 	BatchUpdatePhotos(ctx context.Context, in *BatchUpdatePhotosRequest, opts ...grpc.CallOption) (*BatchUpdatePhotosResponse, error)
-	// Deletes a photo and its metadata.
+	// Deletes a [Photo][google.streetview.publish.v1.Photo] and its metadata.
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `NOT_FOUND` if the photo ID does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested photo.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the photo ID
+	// does not exist.
 	DeletePhoto(ctx context.Context, in *DeletePhotoRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	// Deletes a list of photos and their metadata.
+	// Deletes a list of [Photos][google.streetview.publish.v1.Photo] and their
+	// metadata.
 	//
-	// Note that if `photos.batchDelete` fails, either critical fields
-	// are missing or there was an authentication error.
-	// Even if `photos.batchDelete` succeeds, there may have been
-	// failures for single photos in the batch. These failures will be specified
-	// in `BatchDeletePhotosResponse.status`.
-	// See `photo.update` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchDeletePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchDeletePhotos]
+	// fails, either critical fields are missing or there was an authentication
+	// error. Even if
+	// [BatchDeletePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchDeletePhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchDeletePhotosResponse.results][google.streetview.publish.v1.BatchDeletePhotosResponse.status].
+	// See
+	// [DeletePhoto][google.streetview.publish.v1.StreetViewPublishService.DeletePhoto]
+	// for specific failures that can occur per photo.
 	BatchDeletePhotos(ctx context.Context, in *BatchDeletePhotosRequest, opts ...grpc.CallOption) (*BatchDeletePhotosResponse, error)
 }
 
@@ -202,77 +290,165 @@ func (c *streetViewPublishServiceClient) BatchDeletePhotos(ctx context.Context, 
 
 // StreetViewPublishServiceServer is the server API for StreetViewPublishService service.
 type StreetViewPublishServiceServer interface {
-	// Creates an upload session to start uploading photo data. The upload URL of
-	// the returned `UploadRef` is used to upload the data for the photo.
+	// Creates an upload session to start uploading photo bytes. The method uses
+	// the upload URL of the returned
+	// [UploadRef][google.streetview.publish.v1.UploadRef] to upload the bytes for
+	// the [Photo][google.streetview.publish.v1.Photo].
 	//
-	// After the upload is complete, the `UploadRef` is used with
-	// `StreetViewPublishService:CreatePhoto()` to create the `Photo` object
-	// entry.
+	// In addition to the photo requirements shown in
+	// https://support.google.com/maps/answer/7012050?hl=en&ref_topic=6275604,
+	// the photo must meet the following requirements:
+	//
+	// * Photo Sphere XMP metadata must be included in the photo medadata. See
+	// https://developers.google.com/streetview/spherical-metadata for the
+	// required fields.
+	// * The pixel size of the photo must meet the size requirements listed in
+	// https://support.google.com/maps/answer/7012050?hl=en&ref_topic=6275604, and
+	// the photo must be a full 360 horizontally.
+	//
+	// After the upload completes, the method uses
+	// [UploadRef][google.streetview.publish.v1.UploadRef] with
+	// [CreatePhoto][google.streetview.publish.v1.StreetViewPublishService.CreatePhoto]
+	// to create the [Photo][google.streetview.publish.v1.Photo] object entry.
 	StartUpload(context.Context, *empty.Empty) (*UploadRef, error)
 	// After the client finishes uploading the photo with the returned
-	// `UploadRef`, `photo.create` publishes the uploaded photo to Street View on
-	// Google Maps.
+	// [UploadRef][google.streetview.publish.v1.UploadRef],
+	// [CreatePhoto][google.streetview.publish.v1.StreetViewPublishService.CreatePhoto]
+	// publishes the uploaded [Photo][google.streetview.publish.v1.Photo] to
+	// Street View on Google Maps.
+	//
+	// Currently, the only way to set heading, pitch, and roll in CreatePhoto is
+	// through the [Photo Sphere XMP
+	// metadata](https://developers.google.com/streetview/spherical-metadata) in
+	// the photo bytes. CreatePhoto ignores the `pose.heading`, `pose.pitch`,
+	// `pose.roll`, `pose.altitude`, and `pose.level` fields in Pose.
 	//
 	// This method returns the following error codes:
 	//
-	// * `INVALID_ARGUMENT` if the request is malformed.
-	// * `NOT_FOUND` if the upload reference does not exist.
+	// * [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT] if
+	// the request is malformed or if the uploaded photo is not a 360 photo.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the upload
+	// reference does not exist.
+	// * [google.rpc.Code.RESOURCE_EXHAUSTED][google.rpc.Code.RESOURCE_EXHAUSTED]
+	// if the account has reached the storage limit.
 	CreatePhoto(context.Context, *CreatePhotoRequest) (*Photo, error)
-	// Gets the metadata of the specified `Photo`.
+	// Gets the metadata of the specified
+	// [Photo][google.streetview.publish.v1.Photo].
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `NOT_FOUND` if the requested photo does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested
+	// [Photo][google.streetview.publish.v1.Photo].
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the requested
+	// [Photo][google.streetview.publish.v1.Photo] does not exist.
+	// * [google.rpc.Code.UNAVAILABLE][google.rpc.Code.UNAVAILABLE] if the
+	// requested [Photo][google.streetview.publish.v1.Photo] is still being
+	// indexed.
 	GetPhoto(context.Context, *GetPhotoRequest) (*Photo, error)
-	// Gets the metadata of the specified `Photo` batch.
+	// Gets the metadata of the specified
+	// [Photo][google.streetview.publish.v1.Photo] batch.
 	//
-	// Note that if `photos.batchGet` fails, either critical fields are
-	// missing or there was an authentication error.
-	// Even if `photos.batchGet` succeeds, there may have been failures
-	// for single photos in the batch. These failures will be specified in
-	// `BatchGetPhotosResponse.results.status`.
-	// See `photo.get` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchGetPhotos][google.streetview.publish.v1.StreetViewPublishService.BatchGetPhotos]
+	// fails, either critical fields are missing or there is an authentication
+	// error. Even if
+	// [BatchGetPhotos][google.streetview.publish.v1.StreetViewPublishService.BatchGetPhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchGetPhotosResponse.results][google.streetview.publish.v1.BatchGetPhotosResponse.results].
+	// See
+	// [GetPhoto][google.streetview.publish.v1.StreetViewPublishService.GetPhoto]
+	// for specific failures that can occur per photo.
 	BatchGetPhotos(context.Context, *BatchGetPhotosRequest) (*BatchGetPhotosResponse, error)
-	// Lists all the photos that belong to the user.
+	// Lists all the [Photos][google.streetview.publish.v1.Photo] that belong to
+	// the user.
+	//
+	// <aside class="note"><b>Note:</b> Recently created photos that are still
+	// being indexed are not returned in the response.</aside>
 	ListPhotos(context.Context, *ListPhotosRequest) (*ListPhotosResponse, error)
-	// Updates the metadata of a photo, such as pose, place association, etc.
-	// Changing the pixels of a photo is not supported.
+	// Updates the metadata of a [Photo][google.streetview.publish.v1.Photo], such
+	// as pose, place association, connections, etc. Changing the pixels of a
+	// photo is not supported.
+	//
+	// Only the fields specified in the
+	// [updateMask][google.streetview.publish.v1.UpdatePhotoRequest.update_mask]
+	// field are used. If `updateMask` is not present, the update applies to all
+	// fields.
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `INVALID_ARGUMENT` if the request is malformed.
-	// * `NOT_FOUND` if the photo ID does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested photo.
+	// * [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT] if
+	// the request is malformed.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the requested
+	// photo does not exist.
+	// * [google.rpc.Code.UNAVAILABLE][google.rpc.Code.UNAVAILABLE] if the
+	// requested [Photo][google.streetview.publish.v1.Photo] is still being
+	// indexed.
 	UpdatePhoto(context.Context, *UpdatePhotoRequest) (*Photo, error)
-	// Updates the metadata of photos, such as pose, place association, etc.
-	// Changing the pixels of a photo is not supported.
+	// Updates the metadata of [Photos][google.streetview.publish.v1.Photo], such
+	// as pose, place association, connections, etc. Changing the pixels of photos
+	// is not supported.
 	//
-	// Note that if `photos.batchUpdate` fails, either critical fields
-	// are missing or there was an authentication error.
-	// Even if `photos.batchUpdate` succeeds, there may have been
-	// failures for single photos in the batch. These failures will be specified
-	// in `BatchUpdatePhotosResponse.results.status`.
-	// See `UpdatePhoto` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchUpdatePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchUpdatePhotos]
+	// fails, either critical fields are missing or there is an authentication
+	// error. Even if
+	// [BatchUpdatePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchUpdatePhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchUpdatePhotosResponse.results][google.streetview.publish.v1.BatchUpdatePhotosResponse.results].
+	// See
+	// [UpdatePhoto][google.streetview.publish.v1.StreetViewPublishService.UpdatePhoto]
+	// for specific failures that can occur per photo.
+	//
+	// Only the fields specified in
+	// [updateMask][google.streetview.publish.v1.UpdatePhotoRequest.update_mask]
+	// field are used. If `updateMask` is not present, the update applies to all
+	// fields.
+	//
+	// The number of
+	// [UpdatePhotoRequest][google.streetview.publish.v1.UpdatePhotoRequest]
+	// messages in a
+	// [BatchUpdatePhotosRequest][google.streetview.publish.v1.BatchUpdatePhotosRequest]
+	// must not exceed 20.
+	//
+	// <aside class="note"><b>Note:</b> To update
+	// [Pose.altitude][google.streetview.publish.v1.Pose.altitude],
+	// [Pose.latLngPair][google.streetview.publish.v1.Pose.lat_lng_pair] has to be
+	// filled as well. Otherwise, the request will fail.</aside>
 	BatchUpdatePhotos(context.Context, *BatchUpdatePhotosRequest) (*BatchUpdatePhotosResponse, error)
-	// Deletes a photo and its metadata.
+	// Deletes a [Photo][google.streetview.publish.v1.Photo] and its metadata.
 	//
 	// This method returns the following error codes:
 	//
-	// * `PERMISSION_DENIED` if the requesting user did not create the requested
-	// photo.
-	// * `NOT_FOUND` if the photo ID does not exist.
+	// * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED] if
+	// the requesting user did not create the requested photo.
+	// * [google.rpc.Code.NOT_FOUND][google.rpc.Code.NOT_FOUND] if the photo ID
+	// does not exist.
 	DeletePhoto(context.Context, *DeletePhotoRequest) (*empty.Empty, error)
-	// Deletes a list of photos and their metadata.
+	// Deletes a list of [Photos][google.streetview.publish.v1.Photo] and their
+	// metadata.
 	//
-	// Note that if `photos.batchDelete` fails, either critical fields
-	// are missing or there was an authentication error.
-	// Even if `photos.batchDelete` succeeds, there may have been
-	// failures for single photos in the batch. These failures will be specified
-	// in `BatchDeletePhotosResponse.status`.
-	// See `photo.update` for specific failures that will occur per photo.
+	// Note that if
+	// [BatchDeletePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchDeletePhotos]
+	// fails, either critical fields are missing or there was an authentication
+	// error. Even if
+	// [BatchDeletePhotos][google.streetview.publish.v1.StreetViewPublishService.BatchDeletePhotos]
+	// succeeds, individual photos in the batch may have failures.
+	// These failures are specified in each
+	// [PhotoResponse.status][google.streetview.publish.v1.PhotoResponse.status]
+	// in
+	// [BatchDeletePhotosResponse.results][google.streetview.publish.v1.BatchDeletePhotosResponse.status].
+	// See
+	// [DeletePhoto][google.streetview.publish.v1.StreetViewPublishService.DeletePhoto]
+	// for specific failures that can occur per photo.
 	BatchDeletePhotos(context.Context, *BatchDeletePhotosRequest) (*BatchDeletePhotosResponse, error)
 }
 
@@ -488,10 +664,10 @@ var _StreetViewPublishService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/streetview/publish/v1/streetview_publish.proto", fileDescriptor_streetview_publish_6fe4a239917591dc)
+	proto.RegisterFile("google/streetview/publish/v1/streetview_publish.proto", fileDescriptor_streetview_publish_211fc8b089536e0b)
 }
 
-var fileDescriptor_streetview_publish_6fe4a239917591dc = []byte{
+var fileDescriptor_streetview_publish_211fc8b089536e0b = []byte{
 	// 533 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0x4f, 0x6f, 0xd3, 0x30,
 	0x18, 0xc6, 0x15, 0x24, 0x10, 0xb8, 0x08, 0x69, 0x86, 0x55, 0x53, 0x3a, 0x24, 0x08, 0x12, 0xa0,

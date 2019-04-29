@@ -59,7 +59,7 @@ func (x Instance_State) String() string {
 	return proto.EnumName(Instance_State_name, int32(x))
 }
 func (Instance_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{1, 0}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{1, 0}
 }
 
 // A possible configuration for a Cloud Spanner instance. Configurations
@@ -80,7 +80,7 @@ func (m *InstanceConfig) Reset()         { *m = InstanceConfig{} }
 func (m *InstanceConfig) String() string { return proto.CompactTextString(m) }
 func (*InstanceConfig) ProtoMessage()    {}
 func (*InstanceConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{0}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{0}
 }
 func (m *InstanceConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InstanceConfig.Unmarshal(m, b)
@@ -132,14 +132,15 @@ type Instance struct {
 	// Required. The number of nodes allocated to this instance. This may be zero
 	// in API responses for instances that are not yet in state `READY`.
 	//
-	// See [the documentation](https://cloud.google.com/spanner/docs/instances#node_count)
+	// See [the
+	// documentation](https://cloud.google.com/spanner/docs/instances#node_count)
 	// for more information about nodes.
 	NodeCount int32 `protobuf:"varint,5,opt,name=node_count,json=nodeCount,proto3" json:"node_count,omitempty"`
 	// Output only. The current instance state. For
-	// [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance], the state must be
-	// either omitted or set to `CREATING`. For
-	// [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance], the state must be
-	// either omitted or set to `READY`.
+	// [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance],
+	// the state must be either omitted or set to `CREATING`. For
+	// [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance],
+	// the state must be either omitted or set to `READY`.
 	State Instance_State `protobuf:"varint,6,opt,name=state,proto3,enum=google.spanner.admin.instance.v1.Instance_State" json:"state,omitempty"`
 	// Cloud Labels are a flexible and lightweight mechanism for organizing cloud
 	// resources into groups that reflect a customer's organizational needs and
@@ -172,7 +173,7 @@ func (m *Instance) Reset()         { *m = Instance{} }
 func (m *Instance) String() string { return proto.CompactTextString(m) }
 func (*Instance) ProtoMessage()    {}
 func (*Instance) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{1}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{1}
 }
 func (m *Instance) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Instance.Unmarshal(m, b)
@@ -234,7 +235,8 @@ func (m *Instance) GetLabels() map[string]string {
 	return nil
 }
 
-// The request for [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs].
+// The request for
+// [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs].
 type ListInstanceConfigsRequest struct {
 	// Required. The name of the project for which a list of supported instance
 	// configurations is requested. Values are of the form
@@ -245,7 +247,8 @@ type ListInstanceConfigsRequest struct {
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// If non-empty, `page_token` should contain a
 	// [next_page_token][google.spanner.admin.instance.v1.ListInstanceConfigsResponse.next_page_token]
-	// from a previous [ListInstanceConfigsResponse][google.spanner.admin.instance.v1.ListInstanceConfigsResponse].
+	// from a previous
+	// [ListInstanceConfigsResponse][google.spanner.admin.instance.v1.ListInstanceConfigsResponse].
 	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -256,7 +259,7 @@ func (m *ListInstanceConfigsRequest) Reset()         { *m = ListInstanceConfigsR
 func (m *ListInstanceConfigsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListInstanceConfigsRequest) ProtoMessage()    {}
 func (*ListInstanceConfigsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{2}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{2}
 }
 func (m *ListInstanceConfigsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListInstanceConfigsRequest.Unmarshal(m, b)
@@ -297,13 +300,14 @@ func (m *ListInstanceConfigsRequest) GetPageToken() string {
 	return ""
 }
 
-// The response for [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs].
+// The response for
+// [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs].
 type ListInstanceConfigsResponse struct {
 	// The list of requested instance configurations.
 	InstanceConfigs []*InstanceConfig `protobuf:"bytes,1,rep,name=instance_configs,json=instanceConfigs,proto3" json:"instance_configs,omitempty"`
 	// `next_page_token` can be sent in a subsequent
-	// [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs] call to
-	// fetch more of the matching instance configurations.
+	// [ListInstanceConfigs][google.spanner.admin.instance.v1.InstanceAdmin.ListInstanceConfigs]
+	// call to fetch more of the matching instance configurations.
 	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -314,7 +318,7 @@ func (m *ListInstanceConfigsResponse) Reset()         { *m = ListInstanceConfigs
 func (m *ListInstanceConfigsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListInstanceConfigsResponse) ProtoMessage()    {}
 func (*ListInstanceConfigsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{3}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{3}
 }
 func (m *ListInstanceConfigsResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListInstanceConfigsResponse.Unmarshal(m, b)
@@ -363,7 +367,7 @@ func (m *GetInstanceConfigRequest) Reset()         { *m = GetInstanceConfigReque
 func (m *GetInstanceConfigRequest) String() string { return proto.CompactTextString(m) }
 func (*GetInstanceConfigRequest) ProtoMessage()    {}
 func (*GetInstanceConfigRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{4}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{4}
 }
 func (m *GetInstanceConfigRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetInstanceConfigRequest.Unmarshal(m, b)
@@ -390,7 +394,8 @@ func (m *GetInstanceConfigRequest) GetName() string {
 	return ""
 }
 
-// The request for [GetInstance][google.spanner.admin.instance.v1.InstanceAdmin.GetInstance].
+// The request for
+// [GetInstance][google.spanner.admin.instance.v1.InstanceAdmin.GetInstance].
 type GetInstanceRequest struct {
 	// Required. The name of the requested instance. Values are of the form
 	// `projects/<project>/instances/<instance>`.
@@ -404,7 +409,7 @@ func (m *GetInstanceRequest) Reset()         { *m = GetInstanceRequest{} }
 func (m *GetInstanceRequest) String() string { return proto.CompactTextString(m) }
 func (*GetInstanceRequest) ProtoMessage()    {}
 func (*GetInstanceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{5}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{5}
 }
 func (m *GetInstanceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetInstanceRequest.Unmarshal(m, b)
@@ -431,7 +436,8 @@ func (m *GetInstanceRequest) GetName() string {
 	return ""
 }
 
-// The request for [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance].
+// The request for
+// [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance].
 type CreateInstanceRequest struct {
 	// Required. The name of the project in which to create the instance. Values
 	// are of the form `projects/<project>`.
@@ -452,7 +458,7 @@ func (m *CreateInstanceRequest) Reset()         { *m = CreateInstanceRequest{} }
 func (m *CreateInstanceRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateInstanceRequest) ProtoMessage()    {}
 func (*CreateInstanceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{6}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{6}
 }
 func (m *CreateInstanceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateInstanceRequest.Unmarshal(m, b)
@@ -493,7 +499,8 @@ func (m *CreateInstanceRequest) GetInstance() *Instance {
 	return nil
 }
 
-// The request for [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances].
+// The request for
+// [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances].
 type ListInstancesRequest struct {
 	// Required. The name of the project for which a list of instances is
 	// requested. Values are of the form `projects/<project>`.
@@ -502,8 +509,9 @@ type ListInstancesRequest struct {
 	// to the server's maximum allowed page size.
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// If non-empty, `page_token` should contain a
-	// [next_page_token][google.spanner.admin.instance.v1.ListInstancesResponse.next_page_token] from a
-	// previous [ListInstancesResponse][google.spanner.admin.instance.v1.ListInstancesResponse].
+	// [next_page_token][google.spanner.admin.instance.v1.ListInstancesResponse.next_page_token]
+	// from a previous
+	// [ListInstancesResponse][google.spanner.admin.instance.v1.ListInstancesResponse].
 	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// An expression for filtering the results of the request. Filter rules are
 	// case insensitive. The fields eligible for filtering are:
@@ -534,7 +542,7 @@ func (m *ListInstancesRequest) Reset()         { *m = ListInstancesRequest{} }
 func (m *ListInstancesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListInstancesRequest) ProtoMessage()    {}
 func (*ListInstancesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{7}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{7}
 }
 func (m *ListInstancesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListInstancesRequest.Unmarshal(m, b)
@@ -582,13 +590,14 @@ func (m *ListInstancesRequest) GetFilter() string {
 	return ""
 }
 
-// The response for [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances].
+// The response for
+// [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances].
 type ListInstancesResponse struct {
 	// The list of requested instances.
 	Instances []*Instance `protobuf:"bytes,1,rep,name=instances,proto3" json:"instances,omitempty"`
 	// `next_page_token` can be sent in a subsequent
-	// [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances] call to fetch more
-	// of the matching instances.
+	// [ListInstances][google.spanner.admin.instance.v1.InstanceAdmin.ListInstances]
+	// call to fetch more of the matching instances.
 	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -599,7 +608,7 @@ func (m *ListInstancesResponse) Reset()         { *m = ListInstancesResponse{} }
 func (m *ListInstancesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListInstancesResponse) ProtoMessage()    {}
 func (*ListInstancesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{8}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{8}
 }
 func (m *ListInstancesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListInstancesResponse.Unmarshal(m, b)
@@ -633,15 +642,20 @@ func (m *ListInstancesResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request for [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance].
+// The request for
+// [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance].
 type UpdateInstanceRequest struct {
 	// Required. The instance to update, which must always include the instance
-	// name.  Otherwise, only fields mentioned in [][google.spanner.admin.instance.v1.UpdateInstanceRequest.field_mask] need be included.
+	// name.  Otherwise, only fields mentioned in
+	// [][google.spanner.admin.instance.v1.UpdateInstanceRequest.field_mask] need
+	// be included.
 	Instance *Instance `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
-	// Required. A mask specifying which fields in [][google.spanner.admin.instance.v1.UpdateInstanceRequest.instance] should be updated.
-	// The field mask must always be specified; this prevents any future fields in
-	// [][google.spanner.admin.instance.v1.Instance] from being erased accidentally by clients that do not know
-	// about them.
+	// Required. A mask specifying which fields in
+	// [][google.spanner.admin.instance.v1.UpdateInstanceRequest.instance] should
+	// be updated. The field mask must always be specified; this prevents any
+	// future fields in
+	// [][google.spanner.admin.instance.v1.Instance] from being erased
+	// accidentally by clients that do not know about them.
 	FieldMask            *field_mask.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
@@ -652,7 +666,7 @@ func (m *UpdateInstanceRequest) Reset()         { *m = UpdateInstanceRequest{} }
 func (m *UpdateInstanceRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateInstanceRequest) ProtoMessage()    {}
 func (*UpdateInstanceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{9}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{9}
 }
 func (m *UpdateInstanceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateInstanceRequest.Unmarshal(m, b)
@@ -686,7 +700,8 @@ func (m *UpdateInstanceRequest) GetFieldMask() *field_mask.FieldMask {
 	return nil
 }
 
-// The request for [DeleteInstance][google.spanner.admin.instance.v1.InstanceAdmin.DeleteInstance].
+// The request for
+// [DeleteInstance][google.spanner.admin.instance.v1.InstanceAdmin.DeleteInstance].
 type DeleteInstanceRequest struct {
 	// Required. The name of the instance to be deleted. Values are of the form
 	// `projects/<project>/instances/<instance>`
@@ -700,7 +715,7 @@ func (m *DeleteInstanceRequest) Reset()         { *m = DeleteInstanceRequest{} }
 func (m *DeleteInstanceRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteInstanceRequest) ProtoMessage()    {}
 func (*DeleteInstanceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{10}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{10}
 }
 func (m *DeleteInstanceRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteInstanceRequest.Unmarshal(m, b)
@@ -733,8 +748,8 @@ type CreateInstanceMetadata struct {
 	// The instance being created.
 	Instance *Instance `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
 	// The time at which the
-	// [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance] request was
-	// received.
+	// [CreateInstance][google.spanner.admin.instance.v1.InstanceAdmin.CreateInstance]
+	// request was received.
 	StartTime *timestamp.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	// The time at which this operation was cancelled. If set, this operation is
 	// in the process of undoing itself (which is guaranteed to succeed) and
@@ -751,7 +766,7 @@ func (m *CreateInstanceMetadata) Reset()         { *m = CreateInstanceMetadata{}
 func (m *CreateInstanceMetadata) String() string { return proto.CompactTextString(m) }
 func (*CreateInstanceMetadata) ProtoMessage()    {}
 func (*CreateInstanceMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{11}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{11}
 }
 func (m *CreateInstanceMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateInstanceMetadata.Unmarshal(m, b)
@@ -804,7 +819,8 @@ func (m *CreateInstanceMetadata) GetEndTime() *timestamp.Timestamp {
 type UpdateInstanceMetadata struct {
 	// The desired end state of the update.
 	Instance *Instance `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
-	// The time at which [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance]
+	// The time at which
+	// [UpdateInstance][google.spanner.admin.instance.v1.InstanceAdmin.UpdateInstance]
 	// request was received.
 	StartTime *timestamp.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	// The time at which this operation was cancelled. If set, this operation is
@@ -822,7 +838,7 @@ func (m *UpdateInstanceMetadata) Reset()         { *m = UpdateInstanceMetadata{}
 func (m *UpdateInstanceMetadata) String() string { return proto.CompactTextString(m) }
 func (*UpdateInstanceMetadata) ProtoMessage()    {}
 func (*UpdateInstanceMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5, []int{12}
+	return fileDescriptor_spanner_instance_admin_082da7d6d2f9b838, []int{12}
 }
 func (m *UpdateInstanceMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateInstanceMetadata.Unmarshal(m, b)
@@ -957,9 +973,9 @@ type InstanceAdminClient interface {
 	// Until completion of the returned operation:
 	//
 	//   * Cancelling the operation sets its metadata's
-	//     [cancel_time][google.spanner.admin.instance.v1.UpdateInstanceMetadata.cancel_time], and begins
-	//     restoring resources to their pre-request values. The operation
-	//     is guaranteed to succeed at undoing all resource changes,
+	//     [cancel_time][google.spanner.admin.instance.v1.UpdateInstanceMetadata.cancel_time],
+	//     and begins restoring resources to their pre-request values. The
+	//     operation is guaranteed to succeed at undoing all resource changes,
 	//     after which point it terminates with a `CANCELLED` status.
 	//   * All other attempts to modify the instance are rejected.
 	//   * Reading the instance via the API continues to give the pre-request
@@ -1174,9 +1190,9 @@ type InstanceAdminServer interface {
 	// Until completion of the returned operation:
 	//
 	//   * Cancelling the operation sets its metadata's
-	//     [cancel_time][google.spanner.admin.instance.v1.UpdateInstanceMetadata.cancel_time], and begins
-	//     restoring resources to their pre-request values. The operation
-	//     is guaranteed to succeed at undoing all resource changes,
+	//     [cancel_time][google.spanner.admin.instance.v1.UpdateInstanceMetadata.cancel_time],
+	//     and begins restoring resources to their pre-request values. The
+	//     operation is guaranteed to succeed at undoing all resource changes,
 	//     after which point it terminates with a `CANCELLED` status.
 	//   * All other attempts to modify the instance are rejected.
 	//   * Reading the instance via the API continues to give the pre-request
@@ -1468,10 +1484,10 @@ var _InstanceAdmin_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/spanner/admin/instance/v1/spanner_instance_admin.proto", fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5)
+	proto.RegisterFile("google/spanner/admin/instance/v1/spanner_instance_admin.proto", fileDescriptor_spanner_instance_admin_082da7d6d2f9b838)
 }
 
-var fileDescriptor_spanner_instance_admin_f41fd7f1c9ba0ed5 = []byte{
+var fileDescriptor_spanner_instance_admin_082da7d6d2f9b838 = []byte{
 	// 1210 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x57, 0x4f, 0x6f, 0x1b, 0x45,
 	0x14, 0x67, 0x92, 0x3a, 0x8d, 0x9f, 0xd3, 0x34, 0x1d, 0x9a, 0xca, 0xb8, 0x94, 0xa6, 0x5b, 0x54,

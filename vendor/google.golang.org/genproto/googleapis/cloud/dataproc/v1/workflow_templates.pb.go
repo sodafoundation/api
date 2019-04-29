@@ -58,7 +58,7 @@ func (x WorkflowMetadata_State) String() string {
 	return proto.EnumName(WorkflowMetadata_State_name, int32(x))
 }
 func (WorkflowMetadata_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{9, 0}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{9, 0}
 }
 
 // The workflow node state.
@@ -101,7 +101,7 @@ func (x WorkflowNode_NodeState) String() string {
 	return proto.EnumName(WorkflowNode_NodeState_name, int32(x))
 }
 func (WorkflowNode_NodeState) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{12, 0}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{12, 0}
 }
 
 // A Cloud Dataproc workflow template resource.
@@ -160,7 +160,7 @@ func (m *WorkflowTemplate) Reset()         { *m = WorkflowTemplate{} }
 func (m *WorkflowTemplate) String() string { return proto.CompactTextString(m) }
 func (*WorkflowTemplate) ProtoMessage()    {}
 func (*WorkflowTemplate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{0}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{0}
 }
 func (m *WorkflowTemplate) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WorkflowTemplate.Unmarshal(m, b)
@@ -263,7 +263,7 @@ func (m *WorkflowTemplatePlacement) Reset()         { *m = WorkflowTemplatePlace
 func (m *WorkflowTemplatePlacement) String() string { return proto.CompactTextString(m) }
 func (*WorkflowTemplatePlacement) ProtoMessage()    {}
 func (*WorkflowTemplatePlacement) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{1}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{1}
 }
 func (m *WorkflowTemplatePlacement) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WorkflowTemplatePlacement.Unmarshal(m, b)
@@ -425,7 +425,7 @@ func (m *ManagedCluster) Reset()         { *m = ManagedCluster{} }
 func (m *ManagedCluster) String() string { return proto.CompactTextString(m) }
 func (*ManagedCluster) ProtoMessage()    {}
 func (*ManagedCluster) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{2}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{2}
 }
 func (m *ManagedCluster) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ManagedCluster.Unmarshal(m, b)
@@ -486,7 +486,7 @@ func (m *ClusterSelector) Reset()         { *m = ClusterSelector{} }
 func (m *ClusterSelector) String() string { return proto.CompactTextString(m) }
 func (*ClusterSelector) ProtoMessage()    {}
 func (*ClusterSelector) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{3}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{3}
 }
 func (m *ClusterSelector) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClusterSelector.Unmarshal(m, b)
@@ -527,8 +527,8 @@ type OrderedJob struct {
 	//
 	// The step id is used as prefix for job id, as job
 	// `goog-dataproc-workflow-step-id` label, and in
-	// [prerequisiteStepIds][google.cloud.dataproc.v1.OrderedJob.prerequisite_step_ids] field from other
-	// steps.
+	// [prerequisiteStepIds][google.cloud.dataproc.v1.OrderedJob.prerequisite_step_ids]
+	// field from other steps.
 	//
 	// The id must contain only letters (a-z, A-Z), numbers (0-9),
 	// underscores (_), and hyphens (-). Cannot begin or end with underscore
@@ -569,7 +569,7 @@ func (m *OrderedJob) Reset()         { *m = OrderedJob{} }
 func (m *OrderedJob) String() string { return proto.CompactTextString(m) }
 func (*OrderedJob) ProtoMessage()    {}
 func (*OrderedJob) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{4}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{4}
 }
 func (m *OrderedJob) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OrderedJob.Unmarshal(m, b)
@@ -878,10 +878,10 @@ type TemplateParameter struct {
 	// A field is allowed to appear in at most one parameter's list of field
 	// paths.
 	//
-	// A field path is similar in syntax to a [google.protobuf.FieldMask][google.protobuf.FieldMask].
-	// For example, a field path that references the zone field of a workflow
-	// template's cluster selector would be specified as
-	// `placement.clusterSelector.zone`.
+	// A field path is similar in syntax to a
+	// [google.protobuf.FieldMask][google.protobuf.FieldMask]. For example, a
+	// field path that references the zone field of a workflow template's cluster
+	// selector would be specified as `placement.clusterSelector.zone`.
 	//
 	// Also, field paths can reference fields using the following syntax:
 	//
@@ -933,7 +933,7 @@ func (m *TemplateParameter) Reset()         { *m = TemplateParameter{} }
 func (m *TemplateParameter) String() string { return proto.CompactTextString(m) }
 func (*TemplateParameter) ProtoMessage()    {}
 func (*TemplateParameter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{5}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{5}
 }
 func (m *TemplateParameter) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TemplateParameter.Unmarshal(m, b)
@@ -998,7 +998,7 @@ func (m *ParameterValidation) Reset()         { *m = ParameterValidation{} }
 func (m *ParameterValidation) String() string { return proto.CompactTextString(m) }
 func (*ParameterValidation) ProtoMessage()    {}
 func (*ParameterValidation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{6}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{6}
 }
 func (m *ParameterValidation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParameterValidation.Unmarshal(m, b)
@@ -1144,7 +1144,7 @@ func (m *RegexValidation) Reset()         { *m = RegexValidation{} }
 func (m *RegexValidation) String() string { return proto.CompactTextString(m) }
 func (*RegexValidation) ProtoMessage()    {}
 func (*RegexValidation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{7}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{7}
 }
 func (m *RegexValidation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RegexValidation.Unmarshal(m, b)
@@ -1184,7 +1184,7 @@ func (m *ValueValidation) Reset()         { *m = ValueValidation{} }
 func (m *ValueValidation) String() string { return proto.CompactTextString(m) }
 func (*ValueValidation) ProtoMessage()    {}
 func (*ValueValidation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{8}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{8}
 }
 func (m *ValueValidation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ValueValidation.Unmarshal(m, b)
@@ -1245,7 +1245,7 @@ func (m *WorkflowMetadata) Reset()         { *m = WorkflowMetadata{} }
 func (m *WorkflowMetadata) String() string { return proto.CompactTextString(m) }
 func (*WorkflowMetadata) ProtoMessage()    {}
 func (*WorkflowMetadata) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{9}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{9}
 }
 func (m *WorkflowMetadata) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WorkflowMetadata.Unmarshal(m, b)
@@ -1359,7 +1359,7 @@ func (m *ClusterOperation) Reset()         { *m = ClusterOperation{} }
 func (m *ClusterOperation) String() string { return proto.CompactTextString(m) }
 func (*ClusterOperation) ProtoMessage()    {}
 func (*ClusterOperation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{10}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{10}
 }
 func (m *ClusterOperation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClusterOperation.Unmarshal(m, b)
@@ -1413,7 +1413,7 @@ func (m *WorkflowGraph) Reset()         { *m = WorkflowGraph{} }
 func (m *WorkflowGraph) String() string { return proto.CompactTextString(m) }
 func (*WorkflowGraph) ProtoMessage()    {}
 func (*WorkflowGraph) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{11}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{11}
 }
 func (m *WorkflowGraph) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WorkflowGraph.Unmarshal(m, b)
@@ -1461,7 +1461,7 @@ func (m *WorkflowNode) Reset()         { *m = WorkflowNode{} }
 func (m *WorkflowNode) String() string { return proto.CompactTextString(m) }
 func (*WorkflowNode) ProtoMessage()    {}
 func (*WorkflowNode) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{12}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{12}
 }
 func (m *WorkflowNode) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WorkflowNode.Unmarshal(m, b)
@@ -1533,7 +1533,7 @@ func (m *CreateWorkflowTemplateRequest) Reset()         { *m = CreateWorkflowTem
 func (m *CreateWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateWorkflowTemplateRequest) ProtoMessage()    {}
 func (*CreateWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{13}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{13}
 }
 func (m *CreateWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateWorkflowTemplateRequest.Unmarshal(m, b)
@@ -1587,7 +1587,7 @@ func (m *GetWorkflowTemplateRequest) Reset()         { *m = GetWorkflowTemplateR
 func (m *GetWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*GetWorkflowTemplateRequest) ProtoMessage()    {}
 func (*GetWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{14}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{14}
 }
 func (m *GetWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWorkflowTemplateRequest.Unmarshal(m, b)
@@ -1656,7 +1656,7 @@ func (m *InstantiateWorkflowTemplateRequest) Reset()         { *m = InstantiateW
 func (m *InstantiateWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*InstantiateWorkflowTemplateRequest) ProtoMessage()    {}
 func (*InstantiateWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{15}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{15}
 }
 func (m *InstantiateWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InstantiateWorkflowTemplateRequest.Unmarshal(m, b)
@@ -1733,7 +1733,7 @@ func (m *InstantiateInlineWorkflowTemplateRequest) Reset() {
 func (m *InstantiateInlineWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*InstantiateInlineWorkflowTemplateRequest) ProtoMessage()    {}
 func (*InstantiateInlineWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{16}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{16}
 }
 func (m *InstantiateInlineWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InstantiateInlineWorkflowTemplateRequest.Unmarshal(m, b)
@@ -1789,7 +1789,7 @@ func (m *UpdateWorkflowTemplateRequest) Reset()         { *m = UpdateWorkflowTem
 func (m *UpdateWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateWorkflowTemplateRequest) ProtoMessage()    {}
 func (*UpdateWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{17}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{17}
 }
 func (m *UpdateWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateWorkflowTemplateRequest.Unmarshal(m, b)
@@ -1836,7 +1836,7 @@ func (m *ListWorkflowTemplatesRequest) Reset()         { *m = ListWorkflowTempla
 func (m *ListWorkflowTemplatesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListWorkflowTemplatesRequest) ProtoMessage()    {}
 func (*ListWorkflowTemplatesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{18}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{18}
 }
 func (m *ListWorkflowTemplatesRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListWorkflowTemplatesRequest.Unmarshal(m, b)
@@ -1894,7 +1894,7 @@ func (m *ListWorkflowTemplatesResponse) Reset()         { *m = ListWorkflowTempl
 func (m *ListWorkflowTemplatesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListWorkflowTemplatesResponse) ProtoMessage()    {}
 func (*ListWorkflowTemplatesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{19}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{19}
 }
 func (m *ListWorkflowTemplatesResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ListWorkflowTemplatesResponse.Unmarshal(m, b)
@@ -1949,7 +1949,7 @@ func (m *DeleteWorkflowTemplateRequest) Reset()         { *m = DeleteWorkflowTem
 func (m *DeleteWorkflowTemplateRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteWorkflowTemplateRequest) ProtoMessage()    {}
 func (*DeleteWorkflowTemplateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_workflow_templates_3c3a2a92d4690177, []int{20}
+	return fileDescriptor_workflow_templates_59ea55b2e6560827, []int{20}
 }
 func (m *DeleteWorkflowTemplateRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteWorkflowTemplateRequest.Unmarshal(m, b)
@@ -2056,7 +2056,8 @@ type WorkflowTemplateServiceClient interface {
 	// Instantiates a template and begins execution.
 	//
 	// This method is equivalent to executing the sequence
-	// [CreateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.CreateWorkflowTemplate], [InstantiateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.InstantiateWorkflowTemplate],
+	// [CreateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.CreateWorkflowTemplate],
+	// [InstantiateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.InstantiateWorkflowTemplate],
 	// [DeleteWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.DeleteWorkflowTemplate].
 	//
 	// The returned Operation can be used to track execution of
@@ -2187,7 +2188,8 @@ type WorkflowTemplateServiceServer interface {
 	// Instantiates a template and begins execution.
 	//
 	// This method is equivalent to executing the sequence
-	// [CreateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.CreateWorkflowTemplate], [InstantiateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.InstantiateWorkflowTemplate],
+	// [CreateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.CreateWorkflowTemplate],
+	// [InstantiateWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.InstantiateWorkflowTemplate],
 	// [DeleteWorkflowTemplate][google.cloud.dataproc.v1.WorkflowTemplateService.DeleteWorkflowTemplate].
 	//
 	// The returned Operation can be used to track execution of
@@ -2384,10 +2386,10 @@ var _WorkflowTemplateService_serviceDesc = grpc.ServiceDesc{
 }
 
 func init() {
-	proto.RegisterFile("google/cloud/dataproc/v1/workflow_templates.proto", fileDescriptor_workflow_templates_3c3a2a92d4690177)
+	proto.RegisterFile("google/cloud/dataproc/v1/workflow_templates.proto", fileDescriptor_workflow_templates_59ea55b2e6560827)
 }
 
-var fileDescriptor_workflow_templates_3c3a2a92d4690177 = []byte{
+var fileDescriptor_workflow_templates_59ea55b2e6560827 = []byte{
 	// 2000 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xcd, 0x6f, 0xdb, 0xc8,
 	0x15, 0x37, 0x65, 0x4b, 0x96, 0x9e, 0x62, 0x5b, 0x3b, 0x69, 0xbc, 0xaa, 0x12, 0xa3, 0x0e, 0xb7,

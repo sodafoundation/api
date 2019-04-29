@@ -40,7 +40,8 @@ type HttpRequest struct {
 	// including the response headers and the response body.
 	ResponseSize int64 `protobuf:"varint,5,opt,name=response_size,json=responseSize,proto3" json:"response_size,omitempty"`
 	// The user agent sent by the client. Example:
-	// `"Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; Q312461; .NET CLR 1.0.3705)"`.
+	// `"Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; Q312461; .NET
+	// CLR 1.0.3705)"`.
 	UserAgent string `protobuf:"bytes,6,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
 	// The IP address (IPv4 or IPv6) of the client that issued the HTTP
 	// request. Examples: `"192.168.1.1"`, `"FE80::0202:B3FF:FE1E:8329"`.
@@ -49,7 +50,8 @@ type HttpRequest struct {
 	// sent to.
 	ServerIp string `protobuf:"bytes,13,opt,name=server_ip,json=serverIp,proto3" json:"server_ip,omitempty"`
 	// The referer URL of the request, as defined in
-	// [HTTP/1.1 Header Field Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
+	// [HTTP/1.1 Header Field
+	// Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
 	Referer string `protobuf:"bytes,8,opt,name=referer,proto3" json:"referer,omitempty"`
 	// The request processing latency on the server, from the time the request was
 	// received until the response was sent.
@@ -77,7 +79,7 @@ func (m *HttpRequest) Reset()         { *m = HttpRequest{} }
 func (m *HttpRequest) String() string { return proto.CompactTextString(m) }
 func (*HttpRequest) ProtoMessage()    {}
 func (*HttpRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_http_request_33a66c45032c6856, []int{0}
+	return fileDescriptor_http_request_8d63df88461f411e, []int{0}
 }
 func (m *HttpRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_HttpRequest.Unmarshal(m, b)
@@ -207,10 +209,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("google/logging/type/http_request.proto", fileDescriptor_http_request_33a66c45032c6856)
+	proto.RegisterFile("google/logging/type/http_request.proto", fileDescriptor_http_request_8d63df88461f411e)
 }
 
-var fileDescriptor_http_request_33a66c45032c6856 = []byte{
+var fileDescriptor_http_request_8d63df88461f411e = []byte{
 	// 511 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x92, 0x5b, 0x6b, 0x14, 0x31,
 	0x18, 0x86, 0x99, 0x1e, 0xf6, 0x90, 0x3d, 0x58, 0x22, 0x68, 0xba, 0x6a, 0x5d, 0x2b, 0xca, 0x5c,
