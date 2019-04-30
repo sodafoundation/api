@@ -74,22 +74,22 @@ func newLvmCollector() *lvmCollector {
 
 //Describe function.
 //It essentially writes all descriptors to the prometheus desc channel.
-func (collector *lvmCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c *lvmCollector) Describe(ch chan<- *prometheus.Desc) {
 
 	//Update this section with the each metric you create for a given collector
-	ch <- collector.IOPS
-	ch <- collector.ReadThroughput
-	ch <- collector.WriteThroughput
-	ch <- collector.ResponseTime
-	ch <- collector.ServiceTime
-	ch <- collector.Utilization
+	ch <- c.IOPS
+	ch <- c.ReadThroughput
+	ch <- c.WriteThroughput
+	ch <- c.ResponseTime
+	ch <- c.ServiceTime
+	ch <- c.Utilization
 }
 
 //Collect implements required collect function for all promehteus collectors
-func (collector *lvmCollector) Collect(ch chan<- prometheus.Metric) {
+func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 
-	collector.mu.Lock()
-	defer collector.mu.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	//Implement logic here to determine proper metric value to return to prometheus
 	//for each descriptor
@@ -106,18 +106,18 @@ func (collector *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 			//unitLabel := "Unit:"+metric.Unit
 			switch metric.Name {
 			case "IOPS":
-				ch <- prometheus.MustNewConstMetric(collector.IOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.IOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 			case "ReadThroughput":
-				ch <- prometheus.MustNewConstMetric(collector.ReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.ReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 			case "WriteThroughput":
-				ch <- prometheus.MustNewConstMetric(collector.WriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.WriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 			case "ResponseTime":
-				ch <- prometheus.MustNewConstMetric(collector.ResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.ResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 			case "ServiceTime":
-				ch <- prometheus.MustNewConstMetric(collector.ServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.ServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 
 			case "UtilizationPercentage":
-				ch <- prometheus.MustNewConstMetric(collector.Utilization, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
+				ch <- prometheus.MustNewConstMetric(c.Utilization, prometheus.GaugeValue, metric.MetricValues[0].Value, instanceLabel)
 
 			}
 		}
@@ -128,11 +128,13 @@ func validateCliArg(arg1 string) string {
 	num, err := strconv.Atoi(arg1)
 	if (err != nil) || (num > 65535) {
 
-		fmt.Println("Please enter a valid port number")
+		fmt.Println("please enter a valid port number")
 		os.Exit(1)
 	}
 	return arg1
 }
+// main function for lvm exporter
+// lvm exporter is a independent process which user can start if required
 func main() {
 
 	portNo := validateCliArg(os.Args[1])
