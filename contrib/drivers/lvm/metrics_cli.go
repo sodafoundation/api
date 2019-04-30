@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	sarNotEnabledOut = "Please check if data collecting is enabled"
-	cmdNotFound      = "No such file or directory"
+	sarNotEnabledOut = "please check if data collecting is enabled"
+	cmdNotFound      = "no such file or directory"
 )
 
 type MetricCli struct {
@@ -43,7 +43,7 @@ func (c *MetricCli) execute(cmd ...string) (string, error) {
 	return c.RootExecuter.Run(cmd[0], cmd[1:]...)
 }
 
-func is_sar_enabled(out string) bool {
+func isSarEnabled(out string) bool {
 
 	if strings.Contains(string(out), sarNotEnabledOut) || strings.Contains(string(out), cmdNotFound) {
 
@@ -53,11 +53,11 @@ func is_sar_enabled(out string) bool {
 	return true
 }
 
-//	Function to parse sar and iostat command output
-//	metricList -> metrics to be collected
-//	instanceID -> VolumeID/Disk Id
-//	metricMap	-> metric to command output column mapping
-//	out 		-> command output
+// Function to parse sar and iostat command output
+// metricList -> metrics to be collected
+// instanceID -> VolumeID/Disk Id
+// metricMap	-> metric to command output column mapping
+// out 		-> command output
 // returnMap	-> metric to value map to be returned
 func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]string, instanceID string, metricMap map[string]int, out string) {
 
@@ -86,10 +86,10 @@ func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string
 	}
 }
 
-//	CollectMetrics function is call the cli for metrics collection. This will be invoked  by lvm metric driver
-//	metricList	-> metrics to be collected
-//	instanceID	-> for which instance to be collected
-//	returnMap	-> metrics to value map
+// CollectMetrics function is to call the cli for metrics collection. This will be invoked  by lvm metric driver
+// metricList	-> metrics to be collected
+// instanceID	-> for which instance to be collected
+// returnMap	-> metrics to value map
 func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (map[string]string, error) {
 
 	returnMap := make(map[string]string)
@@ -105,7 +105,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 	}
 	//check whether sar collection is enabled ?
 	//If not use iostat command
-	if is_sar_enabled(out) {
+	if isSarEnabled(out) {
 		// sar command output mapping
 		metricMap := make(map[string]int)
 		metricMap["InstanceID"] = 1

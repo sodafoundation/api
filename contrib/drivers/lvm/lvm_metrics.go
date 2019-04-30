@@ -85,6 +85,7 @@ func getCurrentUnixTimestamp() int64 {
 	return secs
 }
 func getMetricToUnitMap() map[string]string {
+
 	//construct metrics to value map
 	var configs Configs
 	//Read supported metric list from yaml config
@@ -99,19 +100,19 @@ func getMetricToUnitMap() map[string]string {
 	if error != nil {
 		log.Fatalf("Unmarshal error: %v", error)
 	}
-	metric_to_unit_map := make(map[string]string)
+	metricToUnitMap := make(map[string]string)
 	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
 		//ToDo: Other Cases needs to be added
 		case "volume":
 			for index, metricName := range resources.Metrics {
 
-				metric_to_unit_map[metricName] = resources.Units[index]
+				metricToUnitMap[metricName] = resources.Units[index]
 
 			}
 		}
 	}
-	return metric_to_unit_map
+	return metricToUnitMap
 }
 
 // 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
@@ -119,6 +120,7 @@ func getMetricToUnitMap() map[string]string {
 //	supportedMetrics -> list of supported metrics
 func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceType string) (supportedMetrics []string, err error) {
 	var configs Configs
+
 	//Read supported metric list from yaml config
 	//source, err := ioutil.ReadFile(ConfFile)
 	//Todo: Move this to read from file
@@ -153,17 +155,16 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec,  error) {
+func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec, error) {
 
-
-	// get MEtrics to unit map
-	metric_to_unit_map := getMetricToUnitMap()
+	// get Metrics to unit map
+	metricToUnitMap := getMetricToUnitMap()
 	//validate metric support list
-	supportedMetrics, err := lvm_driver.ValidateMetricsSupportList(metricsList, "volume")
+	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "volume")
 	if supportedMetrics == nil {
 		log.Infof("No metrics found in the  supported metric list")
 	}
-	metricMap, err := lvm_driver.cli.CollectMetrics(supportedMetrics, instanceID)
+	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []*model.MetricSpec
 	for _, element := range metricsList {
@@ -179,16 +180,16 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 		metricValues = append(metricValues, metricValue)
 
 		metric := &model.MetricSpec{
-			InstanceID: instanceID,
+			InstanceID:   instanceID,
 			InstanceName: metricMap["InstanceName"],
-			Job: "OpenSDS",
-			Associator: associatorMap,
-			Source: "Node",
+			Job:          "OpenSDS",
+			Associator:   associatorMap,
+			Source:       "Node",
 			//Todo Take Componet from Post call, as of now it is only for volume
 			Component: "Volume",
-			Name: element,
+			Name:      element,
 			//Todo : Fill units according to metric type
-			Unit: metric_to_unit_map[element],
+			Unit: metricToUnitMap[element],
 			//Todo : Get this information dynamically ( hard coded now , as all are direct values
 			IsAggregated: false,
 			MetricValues: metricValues,
@@ -196,7 +197,7 @@ func (lvm_driver *MetricDriver) CollectMetrics(metricsList []string, instanceID 
 		tempMetricArray = append(tempMetricArray, metric)
 	}
 	metricArray := tempMetricArray
-	return metricArray,err
+	return metricArray, err
 }
 
 func (d *MetricDriver) Setup() error {
