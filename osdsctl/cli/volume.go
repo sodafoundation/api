@@ -109,7 +109,7 @@ func init() {
 	volumeListCommand.Flags().StringVarP(&volProfileId, "profileId", "", "", "list volume by profile id")
 	volumeListCommand.Flags().StringVarP(&volGroupId, "groupId", "", "", "list volume by volume group id")
 
-	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the name of profile configured by admin")
+	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the id of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of created volume")

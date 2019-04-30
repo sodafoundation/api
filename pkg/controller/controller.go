@@ -253,13 +253,7 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 	}
 	opt.PoolId = pool.Id
 	opt.PoolName = pool.Name
-
-	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
-	if err != nil {
-		log.Error("when search profile in db:", err)
-		rollBack = true
-		return pb.GenericResponseError(err), err
-	}
+	prf := model.NewProfileFromJson(opt.Profile)
 
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
