@@ -1,4 +1,4 @@
-# Copyright (c) 2019 OpenSDS Authors. All Rights Reserved.
+## Copyright 2019 OpenSDS Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ docker: build
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build osds_verify osds_unit_test osds_integration_test osds_e2eflowtest_build osds_e2etest_build
-	
+
 # make osds_core
 .PHONY: osds_core
 osds_core:
