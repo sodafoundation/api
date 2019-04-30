@@ -48,6 +48,7 @@ func init() {
 	var body = &model.ProfileSpec{
 		Name:        "default",
 		Description: "default policy",
+		StorageType: "block",
 	}
 	cprf, err := u.CreateProfile(body)
 	if err != nil {
@@ -921,6 +922,7 @@ func PrepareProfile() (*model.ProfileSpec, error) {
 	var body = &model.ProfileSpec{
 		Name:        "policy",
 		Description: "test policy",
+		StorageType: "block",
 	}
 	cprf, err := u.CreateProfile(body)
 	if err != nil {
