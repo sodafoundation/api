@@ -172,11 +172,11 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 		//Todo: See if association  is required here, resource discovery could fill this information
 		associatorMap := make(map[string]string)
 
-		metricValue := model.Metric{
+		metricValue := &model.Metric{
 			Timestamp: getCurrentUnixTimestamp(),
 			Value:     val,
 		}
-		metricValues := make([]model.Metric, 0)
+		metricValues := make([]*model.Metric, 0)
 		metricValues = append(metricValues, metricValue)
 
 		metric := &model.MetricSpec{
