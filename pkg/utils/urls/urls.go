@@ -25,6 +25,14 @@ const (
 	Client        // Client == 1
 )
 
+func GenerateFileShareURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("file/shares", urlType, tenantId, in...)
+}
+
+func GenerateFileShareSnapshotURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("file/snapshots", urlType, tenantId, in...)
+}
+
 func GenerateDockURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("docks", urlType, tenantId, in...)
 }

@@ -15,13 +15,13 @@
 package etcd
 
 import (
+	"context"
 	"sync"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/utils"
-	"golang.org/x/net/context"
 )
 
 var (

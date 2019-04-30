@@ -133,6 +133,55 @@ var (
 		},
 	}
 
+	SampleAvailabilityZones = []string{"default"}
+
+        SampleFileShares = []model.FileShareSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:   "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:  "",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			ProfileId:   "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+		},
+	}
+	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			},
+			Name:         "sample-snapshot-01",
+			Description:  "This is the first sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			},
+			Name:         "sample-snapshot-02",
+			Description:  "This is the second sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+	}
+
 	SampleVolumes = []model.VolumeSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -246,6 +295,7 @@ var (
 			Name:        "sample-group-01",
 			Description: "This is the first sample group for testing",
 			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
 	}
 )
@@ -492,32 +542,32 @@ var (
 
 	ByteReplication = `{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
 	ByteReplications = `[
 		{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		},
 		{
 			"id": "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-02",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
 
