@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,18 +26,24 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsapiserver osdsctl
+build:osdsdock osdslet osdsfiledock osdsfilelet osdsapiserver osdsctl
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
 
-.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
+.PHONY: osdsdock osdslet osdsfilelet osdsfiledock osdsapiserver osdsctl docker test protoc
 
 osdsdock: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
 osdslet: prebuild
 	go build -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+
+osdsfdock: prebuild
+	go build -o $(BUILD_DIR)/bin/osdsfiledock github.com/opensds/opensds/cmd/osdsfiledock
+
+osdsflet: prebuild
+	go build -o $(BUILD_DIR)/bin/osdsfilelet github.com/opensds/opensds/cmd/osdsfilelet
 
 osdsapiserver: prebuild
 	go build -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
@@ -48,9 +54,13 @@ osdsctl: prebuild
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
+	cp $(BUILD_DIR)/bin/osdsfiledock ./cmd/osdsfiledock
+	cp $(BUILD_DIR)/bin/osdsfilelet ./cmd/osdsfilelet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
 	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
 	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
+	docker build cmd/osdsfiledock -t opensdsio/opensds-filedock:latest
+	docker build cmd/osdsfilelet -t opensdsio/opensds-filecontroller:latest
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
@@ -58,9 +68,10 @@ test: build
 
 protoc:
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
+	cd pkg/model/fileshareproto && protoc --go_out=plugins=grpc:. model.proto
 
 clean:
-	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
+	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock ./cmd/osdslet/osdsfilelet ./cmd/osdsdock/osdsfiledock
 
 version:
 	@echo ${VERSION}

@@ -1,0 +1,19 @@
+tgtBindIp: 100.64.40.130
+tgtConfDir: /etc/tgt/conf.d
+enableChapAuth: true
+pool:
+  opensds-files-default:
+    storageType: file
+    availabilityZone: default
+    multiAttach: true
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 5ms

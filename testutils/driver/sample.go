@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package sample
 
 import (
 	"errors"
+	"github.com/opensds/opensds/pkg/model/fileshareproto"
 
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -30,6 +31,14 @@ import (
 
 // Driver
 type Driver struct{}
+
+func (d *Driver) DeleteFileShare(opt *fileshareproto.DeleteFileShareOpts) (*model.FileShareSpec, error) {
+	return nil, nil
+}
+
+func (d *Driver) CreateFileShare(opt *fileshareproto.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
 
 // Setup
 func (*Driver) Setup() error { return nil }

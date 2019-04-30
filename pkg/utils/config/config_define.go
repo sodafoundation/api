@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,12 @@ type OsdsLet struct {
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 }
 
+type OsdsfileLet struct {
+	ApiEndpoint       string        `conf:"api_endpoint,localhost:50061"`
+	Daemon            bool          `conf:"daemon,false"`
+	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+}
+
 type OsdsDock struct {
 	ApiEndpoint                string        `conf:"api_endpoint,localhost:50050"`
 	DockType                   string        `conf:"dock_type,provisioner"`
@@ -44,6 +50,20 @@ type OsdsDock struct {
 	HostBasedReplicationDriver string        `conf:"host_based_replication_driver,drbd"`
 	LogFlushFrequency          time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 	Backends
+}
+
+type FileShareBackends struct {
+	NFSNative BackendProperties `conf:"nfsnative"`
+}
+
+type OsdsfileDock struct {
+	ApiEndpoint                string        `conf:"api_endpoint,localhost:50051"`
+	DockType                   string        `conf:"dock_type,provisioner"`
+	FileShareEnabledBackends   []string      `conf:"enabled_backends,lvm"`
+	Daemon                     bool          `conf:"daemon,false"`
+	HostBasedReplicationDriver string        `conf:"host_based_replication_driver,drbd"`
+	LogFlushFrequency          time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	FileShareBackends
 }
 
 type Database struct {
@@ -91,7 +111,9 @@ type Config struct {
 	Default           `conf:"default"`
 	OsdsApiServer     `conf:"osdsapiserver"`
 	OsdsLet           `conf:"osdslet"`
+	OsdsfileLet       `conf:"osdsflet"`
 	OsdsDock          `conf:"osdsdock"`
+	OsdsfileDock      `conf:"osdsfdock"`
 	Database          `conf:"database"`
 	KeystoneAuthToken `conf:"keystone_authtoken"`
 }

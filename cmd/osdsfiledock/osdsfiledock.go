@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ package main
 
 import (
 	"flag"
-
-	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
+	"github.com/opensds/opensds/pkg/filesharedock"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
@@ -35,24 +33,26 @@ func init() {
 	CONF.Load()
 
 	// Parse some configuration fields from command line. and it will override the value which is got from config file.
-	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
-	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
-	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.StringVar(&CONF.OsdsfileDock.ApiEndpoint, "api-endpoint", CONF.OsdsfileDock.ApiEndpoint, "Listen endpoint of dock service")
+	flag.StringVar(&CONF.OsdsfileDock.DockType, "dock-type", CONF.OsdsfileDock.DockType, "Type of dock service")
+	flag.BoolVar(&CONF.OsdsfileDock.Daemon, "daemon", CONF.OsdsfileDock.Daemon, "Run app as a daemon with -daemon=true")
+	flag.DurationVar(&CONF.OsdsfileDock.LogFlushFrequency, "log-flush-frequency", CONF.OsdsfileDock.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	flag.Parse()
 
-	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)
+	daemon.CheckAndRunDaemon(CONF.OsdsfileDock.Daemon)
 }
 
 func main() {
-	// Open OpenSDS orchestrator service log file.
-	logs.InitLogs(CONF.OsdsLet.LogFlushFrequency)
+	// Open OpenSDS dock service log file.
+	logs.InitLogs(CONF.OsdsfileDock.LogFlushFrequency)
 	defer logs.FlushLogs()
 
 	// Set up database session.
 	db.Init(&CONF.Database)
 
-	// Construct controller module grpc server struct and run controller server process.
-	if err := c.NewController(constants.OpensdsCtrBindEndpoint).Run(); err != nil {
+	// Construct dock module grpc server struct and run dock server process.
+	ds := filesharedock.NewDockServer(CONF.OsdsfileDock.DockType, CONF.OsdsfileDock.ApiEndpoint)
+	if err := ds.Run(); err != nil {
 		panic(err)
 	}
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,10 +36,20 @@ beego_https_key_file =
 [osdslet]
 api_endpoint = $HOST_IP:50049
 
+[osdsfilelet]
+api_endpoint = $HOST_IP:50061
+
 [osdsdock]
 api_endpoint = $HOST_IP:50050
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = $OPENSDS_BACKEND_LIST
+
+[osdsfiledock]
+api_endpoint = $HOST_IP:50051
+# Choose the type of dock resource, only support 'provisioner'.
+dock_type = provisioner
+# Specify which backends should be enabled, sample,nfsnative and so on.
+enabled_backends = sample
 
 [database]
 endpoint = $HOST_IP:$ETCD_PORT,$HOST_IP:$ETCD_PEER_PORT
@@ -50,12 +60,14 @@ OPENSDS_GLOBAL_CONFIG_DOC
 
 osds::opensds::install(){
     osds:opensds:configuration
-# Run osdsdock and osdslet daemon in background.
+# Run osdsdock, osdsfiledock, osdsfilelet and osdslet daemon in background.
 (
     cd ${OPENSDS_DIR}
     sudo build/out/bin/osdsapiserver --daemon
-    sudo build/out/bin/osdslet --daemon
     sudo build/out/bin/osdsdock --daemon
+    sudo build/out/bin/osdslet --daemon
+    sudo build/out/bin/osdsfilelet --daemon
+    sudo build/out/bin/osdsfiledock --daemon
 
     osds::echo_summary "Waiting for osdsapiserver to come up."
     osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.5 80
@@ -91,7 +103,7 @@ osds::opensds::install(){
 }
 
 osds::opensds::cleanup() {
-    sudo killall -9 osdsapiserver osdslet osdsdock &>/dev/null
+    sudo killall -9 osdsapiserver osdslet osdsdock osdsfilelet osdsfiledock &>/dev/null
 }
 
 osds::opensds::uninstall(){

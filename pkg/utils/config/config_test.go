@@ -366,4 +366,12 @@ func TestOpensdsConfig(t *testing.T) {
 	if _, ok := bm["lvm"]; !ok {
 		t.Error("Test bm[\"lvm\"].Name error")
 	}
+	bm1 := GetFileShareBackendsMap()
+
+	if bm1["sample"].Name != "sample" {
+		t.Error("Test bm[\"sample\"].Name error")
+	}
+	if _, ok := bm1["nfsnative"]; !ok {
+		t.Error("Test bm[\"nfsnative\"].Name error")
+	}
 }

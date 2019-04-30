@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-This module implements the common data structure.
-
-*/
 package model
-
-// FileShareSpec is a schema for fileshare API. Fileshare will be created on some backend
-// and can be shared among multiple users.
 
 type FileShareSpec struct {
 	*BaseModel
+
 	// The uuid of the project that the fileshare belongs to.
 	TenantId string `json:"tenantId,omitempty"`
 
@@ -32,9 +26,6 @@ type FileShareSpec struct {
 
 	// The name of the fileshare.
 	Name string `json:"name,omitempty"`
-
-	// The protocol of the fileshare. e.g NFS, SMB etc.
-	Protocols []string `json:"protocols,omitempty"`
 
 	// The description of the fileshare.
 	// +optional
@@ -63,6 +54,11 @@ type FileShareSpec struct {
 
 	// ExportLocations of the fileshare.
 	ExportLocations []string `json:"exportLocations,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // FileShareSnapshotSpec is a description of fileshare snapshot resource.

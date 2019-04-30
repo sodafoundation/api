@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,10 +53,13 @@ type DataStorageLoS struct {
 	// ProvisioningPolicy only supports "Fixed" and "Thin".
 	ProvisioningPolicy string `json:"provisioningPolicy,omitempty" yaml:"provisioningPolicy,omitempty"`
 
+	// CharacterCodeSet support for now only utf-8
 	CharacterCodeSet string `json:"characterCodeSet,omitempty" yaml:"characterCodeSet,omitempty"`
 
+	// MaxFileNameLengthBytes is the max file name length of file share path
 	MaxFileNameLengthBytes int64 `json:"maxFileNameLengthBytes,omitempty" yaml:"maxFileNameLengthBytes,omitempty"`
 
+	// StorageAccessCapability supports for only Read, Write, Execute
 	StorageAccessCapability []string `json:"storageAccessCapability,omitempty" yaml:"storageAccessCapability,omitempty"`
 
 	// IsSpaceEfficient indicates that the storage is compressed or deduplicated.
@@ -66,6 +69,11 @@ type DataStorageLoS struct {
 
 func (ds DataStorageLoS) IsEmpty() bool {
 	r := reflect.DeepEqual(DataStorageLoS{}, ds)
+	return r
+}
+
+func (ds DataStorageLoS) IsEmptyStorageAccessCapability() bool {
+	r := reflect.DeepEqual([]string{}, ds.StorageAccessCapability)
 	return r
 }
 

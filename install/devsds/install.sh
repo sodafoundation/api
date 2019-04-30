@@ -26,7 +26,7 @@ Flags:
 To self-define install configuration, you can edit local.conf, here is config item blow:
     OPENSDS_AUTH_STRATEGY: Authentication strategy, value can be keystone, noauth.
     OPENSDS_BACKEND_LIST: Storage backend list, separated by a comma, support lvm right now.
-    HOST_IP: It is used to service ip binding, including osdslet, osdsdock, etcd, keystone etc.
+    HOST_IP: It is used to service ip binding, including osdslet, osdsfilelet, osdsfiledock, osdsdock, etcd, keystone etc.
 OSDS_HELP_INFO_DOC
 }
 

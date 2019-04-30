@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 OpenSDS Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -200,6 +200,11 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetVolume(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {

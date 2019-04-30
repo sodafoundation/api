@@ -293,3 +293,16 @@ func GetBackendsMap() map[string]BackendProperties {
 	}
 	return backendsMap
 }
+
+func GetFileShareBackendsMap() map[string]BackendProperties {
+	backendsMap := map[string]BackendProperties{}
+	v := reflect.ValueOf(CONF.FileShareBackends)
+	t := reflect.TypeOf(CONF.FileShareBackends)
+
+	for i := 0; i < t.NumField(); i++ {
+		feild := v.Field(i)
+		name := t.Field(i).Tag.Get("conf")
+		backendsMap[name] = feild.Interface().(BackendProperties)
+	}
+	return backendsMap
+}

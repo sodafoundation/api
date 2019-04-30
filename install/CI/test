@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ go test -v github.com/opensds/opensds/contrib/... -cover
 split_line "Start integration test"
 sudo $OPENSDS_DIR/test/integration/prepare.sh
 go test -v github.com/opensds/opensds/test/integration/... -tags integration
-sudo killall -9 osdsapiserver osdslet osdsdock
+sudo killall -9 osdsapiserver osdslet osdsdock osdsfilelet osdsfiledock
 sudo rm /etc/opensds/opensds.conf -rf
 
 # Start lvm e2e test

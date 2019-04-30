@@ -38,6 +38,33 @@ services:
     network_mode: "host"
     restart: on-failure
     command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsdock -logtostderr'
+  osdsfilelet:
+    image: 'opensdsio/opensds-filecontroller:latest'
+    tty: true
+    network_mode: "host"
+    volumes:
+      - /etc/opensds:/etc/opensds
+    depends_on:
+      - osdsdb
+    restart: on-failure
+    command: /bin/bash -c '/usr/bin/osdsfilelet -logtostderr'
+  osdsfiledock:
+      image: 'opensdsio/opensds-filedock:latest'
+      tty: true
+      privileged: true
+      volumes:
+        - /etc/opensds:/etc/opensds
+        - /etc/ceph:/etc/ceph
+        - /etc/tgt:/etc/tgt:shared
+        - /run/:/run/:shared
+        - /dev/:/dev/
+        - /etc/localtime:/etc/localtime:ro
+        - /lib/modules:/lib/modules:ro
+      depends_on:
+        - osdsdb
+      network_mode: "host"
+      restart: on-failure
+      command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsfiledock -logtostderr'
   osdsdb:
     image: 'quay.io/coreos/etcd:latest'
     tty: true

@@ -21,9 +21,12 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller/client"
+	"github.com/opensds/opensds/pkg/filesharecontroller/client"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/fileshareproto"
+	. "github.com/opensds/opensds/pkg/utils/config"
+	"golang.org/x/net/context"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -39,6 +42,7 @@ type FileSharePortal struct {
 }
 
 func (f *FileSharePortal) CreateFileShare() {
+	ctx := c.GetContext(f.Ctx)
 	var fileshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -50,6 +54,26 @@ func (f *FileSharePortal) CreateFileShare() {
 		log.Error(reason)
 		return
 	}
+
+	// Get profile
+	var prf *model.ProfileSpec
+	var err error
+	if fileshare.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		fileshare.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	}
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	// NOTE:It will create a file share entry into the database and initialize its status
+	// as "creating". It will not wait for the real file share creation to complete
+	// and will return result immediately.
 	result, err := util.CreateFileShareDBEntry(c.GetContext(f.Ctx), &fileshare)
 	if err != nil {
 		reason := fmt.Sprintf("Create fileshare failed: %s", err.Error())
@@ -65,8 +89,36 @@ func (f *FileSharePortal) CreateFileShare() {
 		log.Error(reason)
 		return
 	}
-
 	f.SuccessHandle(StatusAccepted, body)
+
+	// NOTE:The real file share creation process.
+	// FileShare creation request is sent to the Dock. Dock will update file share status to "available"
+	// after file share creation is completed.
+	if err := f.CtrClient.Connect(CONF.OsdsfileLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+
+	defer f.CtrClient.Close()
+
+	opt := &pb.CreateFileShareOpts{
+		Id:               result.Id,
+		Name:             result.Name,
+		Description:      result.Description,
+		Size:             result.Size,
+		AvailabilityZone: result.AvailabilityZone,
+		// TODO: ProfileId will be removed later.
+		ProfileId: result.ProfileId,
+		Profile:   prf.ToJson(),
+		PoolId:    result.PoolId,
+		Metadata:  result.Metadata,
+		Context:   ctx.ToJson(),
+	}
+	if _, err = f.CtrClient.CreateFileShare(context.Background(), opt); err != nil {
+		log.Error("create file share failed in controller service:", err)
+		return
+	}
+
 	return
 }
 
@@ -93,7 +145,7 @@ func (f *FileSharePortal) ListFileShares() {
 func (f *FileSharePortal) GetFileShare() {
 	id := f.Ctx.Input.Param(":fileshareId")
 
-	// Call db api module to handle get fileshare request.
+	// Call db api module to handle get file share request.
 	result, err := db.C.GetFileShare(c.GetContext(f.Ctx), id)
 	if err != nil {
 		errMsg := fmt.Sprintf("fileshare %s not found: %s", id, err.Error())
@@ -146,30 +198,63 @@ func (f *FileSharePortal) DeleteFileShare() {
 
 	var err error
 	id := f.Ctx.Input.Param(":fileshareId")
-	fshare, err := db.C.GetFileShare(ctx, id)
+	fileshare, err := db.C.GetFileShare(ctx, id)
 	if err != nil {
 		errMsg := fmt.Sprintf("fileshare %s not found: %s", id, err.Error())
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
-        if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
-		errMsg := fmt.Sprintf("delete fileshare failed: %v", err.Error())
-		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+	// If profileId or poolId of the file share doesn't exist, it would mean that
+	// the file share provisioning operation failed before the create method in
+	// storage driver was called, therefore the file share entry should be deleted
+	// from db directly.
+	if fileshare.ProfileId == "" || fileshare.PoolId == "" {
+		if err := db.C.DeleteFileShare(ctx, fileshare.Id); err != nil {
+			errMsg := fmt.Sprintf("delete file share failed: %v", err.Error())
+			f.ErrorHandle(model.ErrorInternalServer, errMsg)
+			return
+		}
+		f.SuccessHandle(StatusAccepted, nil)
 		return
 	}
-	f.SuccessHandle(StatusAccepted, nil)
-	return
 
-	// NOTE:It will update the the status of the fileshare waiting for deletion in
+	// NOTE:It will update the the status of the file share waiting for deletion in
 	// the database to "deleting" and return the result immediately.
-	if err = util.DeleteFileShareDBEntry(ctx, fshare); err != nil {
+	if err = util.DeleteFileShareDBEntry(ctx, fileshare); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete file share failed: %v", err.Error())
+		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
 
 	f.SuccessHandle(StatusAccepted, nil)
+
+	// NOTE:The real file share deletion process.
+	// File Share deletion request is sent to the Dock. Dock will delete file share from driver
+	// and database or update file share status to "errorDeleting" if deletion from driver failed.
+	if err := f.CtrClient.Connect(CONF.OsdsfileLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer f.CtrClient.Close()
+	opt := &pb.DeleteFileShareOpts{
+		Id:        fileshare.Id,
+		ProfileId: fileshare.ProfileId,
+		PoolId:    fileshare.PoolId,
+		Metadata:  fileshare.Metadata,
+		Context:   ctx.ToJson(),
+		Profile:   prf.ToJson(),
+	}
+	if _, err = f.CtrClient.DeleteFileShare(context.Background(), opt); err != nil {
+		log.Error("delete fileshare failed in controller service:", err)
+		return
+	}
 
 	return
 }
@@ -302,5 +387,5 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 	}
 	f.Ctx.Output.SetStatus(StatusAccepted)
 	return
-}
 
+}
