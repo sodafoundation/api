@@ -21,10 +21,6 @@ import (
 	"time"
 )
 
-/*const (
-// yaml file which contins the supported metric list
-ConfFile  = "/etc/opensds/driver/metric-config.yaml"
-)*/
 // Todo: Move this Yaml config to a file
 
 var data = `
@@ -89,12 +85,8 @@ func getMetricToUnitMap() map[string]string {
 	//construct metrics to value map
 	var configs Configs
 	//Read supported metric list from yaml config
-	//source, err := ioutil.ReadFile(ConfFile)
 	//Todo: Move this to read from file
 	source := []byte(data)
-	/*if err != nil {
-	log.Errorf("Not able to read file  %s  %v", ConfFile, err)
-	}*/
 
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
@@ -122,13 +114,8 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 	var configs Configs
 
 	//Read supported metric list from yaml config
-	//source, err := ioutil.ReadFile(ConfFile)
 	//Todo: Move this to read from file
 	source := []byte(data)
-	/*if err != nil {
-		log.Errorf("Not able to read file  %s%v", ConfFile, err)
-	}*/
-
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
 		log.Fatalf("Unmarshal error: %v", error)

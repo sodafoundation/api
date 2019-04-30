@@ -135,7 +135,6 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 		metricMap["IOPS"] = 1
 		metricMap["ReadThroughput"] = 2
 		metricMap["WriteThroughput"] = 3
-
 		cli.parseCommandOutput(metricList, returnMap, instanceID, metricMap, out)
 
 	}
