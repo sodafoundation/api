@@ -54,8 +54,7 @@ docker: build
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build osds_verify osds_unit_test osds_integration_test osds_e2eflowtest_build osds_e2etest_build
-	script/CI/test
-
+	
 # make osds_core
 .PHONY: osds_core
 osds_core:
