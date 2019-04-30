@@ -172,6 +172,9 @@ message CreateVolumeOpts {
     int64 snapshotSize = 15;
     // Down load snapshot from cloud
     bool snapshotFromCloud = 16;
+    // The Serialized profile
+    string profile = 17;
+
 }
 
 // DeleteVolumeOpts is a structure which indicates all required properties
@@ -189,6 +192,8 @@ message DeleteVolumeOpts {
     string driverName = 5;
     // The Context
     string context = 6;
+    // The Serialized profile
+    string profile = 7;
 }
 
 // ExtendVolumeOpts is a structure which indicates all required properties
@@ -218,6 +223,8 @@ message ExtendVolumeOpts {
     string driverName = 11;
     // The Context
     string context = 12;
+    // The Serialized profile
+    string profile = 13;
 }
 
 // CreateVolumeSnapshotOpts is a structure which indicates all required
@@ -241,6 +248,8 @@ message CreateVolumeSnapshotOpts {
     string driverName = 8;
     // The Context
     string context = 9;
+    // The Serialized profile
+    string profile = 10;
 }
 
 // DeleteVolumeSnapshotOpts is a structure which indicates all required
@@ -441,6 +450,8 @@ message DeleteReplicationOpts {
     map<string, string> metadata = 16;
     // Whether is primary replication
     bool  isPrimary = 17;
+    // The Serialized profile
+    string profile = 18;
 }
 
 
@@ -478,6 +489,8 @@ message EnableReplicationOpts {
     map<string, string> metadata = 16;
     // Whether is primary replication
     bool  isPrimary = 17;
+    // The Serialized profile
+    string profile = 18;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -514,6 +527,8 @@ message DisableReplicationOpts {
     map<string, string> metadata = 16;
     // Whether is primary replication
     bool  isPrimary = 17;
+    // The Serialized profile
+    string profile = 18;
 }
 
 // Delete ReplicationOpts is a structure which indicates all required properties
@@ -558,6 +573,8 @@ message FailoverReplicationOpts {
         bool allowAttachedVolume = 1;
         string secondaryBackendId = 2;
     }
+       // The Serialized profile
+    string profile = 20;
 }
 
 // CreateVolumeGroupOpts is a structure which indicates all required

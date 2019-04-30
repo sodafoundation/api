@@ -53,6 +53,25 @@ const (
 	VolumeAttachError         = "error"
 )
 
+// Fileshare status
+const (
+	FileShareCreating       = "creating"
+	FileShareAvailable      = "available"
+	FileShareInUse          = "in-Use"
+	FileShareDeleting       = "deleting"
+	FileShareError          = "error"
+	FileShareErrorDeleting  = "errorDeleting"
+)
+
+// fileshare snapshot status
+const (
+	FileShareSnapCreating      = "creating"
+	FileShareSnapAvailable     = "available"
+	FileShareSnapDeleting      = "deleting"
+	FileShareSnapError         = "error"
+	FileShareSnapErrorDeleting = "errorDeleting"
+)
+
 //volume replication status
 const (
 	ReplicationDeleted        = "deleted"

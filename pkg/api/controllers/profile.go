@@ -49,7 +49,7 @@ func (p *ProfilePortal) CreateProfile() {
 	}
 
 	//Validate StorageType is block or file
-	if (profile.StorageType != "block" && profile.StorageType != "file" && profile.StorageType != "") {
+	if (profile.StorageType != "block" && profile.StorageType != "file") {
 		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", profile.StorageType)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
@@ -58,20 +58,27 @@ func (p *ProfilePortal) CreateProfile() {
 	if (profile.StorageType == "file"){
 		if pp := profile.ProvisioningProperties; !pp.IsEmpty(){
 			if ds := pp.DataStorage; !ds.IsEmpty() {
-				if (len(ds.StorageAccessCapability) == 0){
-					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",ds.StorageAccessCapability)
+				if (len(ds.StorageAccessCapability) == 0) {
+					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability", ds.StorageAccessCapability)
 					p.ErrorHandle(model.ErrorBadRequest, errMsg)
 					return
 				}
-				if(ds.MaxFileNameLengthBytes > 255 && ds.MaxFileNameLengthBytes >= 0){
+				/*if(ds.MaxFileNameLengthBytes > 255 && ds.MaxFileNameLengthBytes >= 0){
 					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid MaxFileNameLengthBytes",ds.MaxFileNameLengthBytes)
 					p.ErrorHandle(model.ErrorBadRequest, errMsg)
 					return
-				}
+				} */
 			}else{
 				errMsg := fmt.Sprintf("parse profile request body failed : Please provide DataStorage capabilities")
 				p.ErrorHandle(model.ErrorBadRequest, errMsg)
 				return
+			}
+		    if ic := pp.IOConnectivity; !ic.IsEmpty() {
+				if ic.AccessProtocol != "" {
+					errMsg := fmt.Sprintf("parse profile request body failed : Please provide AccessProtocol capabilities")
+					p.ErrorHandle(model.ErrorBadRequest, errMsg)
+				    return
+			    }
 			}
 		}else{
 			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")

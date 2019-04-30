@@ -29,6 +29,11 @@ func GenerateDockURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("docks", urlType, tenantId, in...)
 }
 
+func GenerateFileShareURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("file/shares", urlType, tenantId, in...)
+}
+
+
 func GeneratePoolURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("pools", urlType, tenantId, in...)
 }

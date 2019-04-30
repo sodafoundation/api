@@ -24,6 +24,32 @@ import (
 )
 
 var (
+	SampleFileShares = []model.FileShareSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+			//SnapshotId:  "",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+			//:SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+	}
 	SampleProfiles = []model.ProfileSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -43,6 +69,9 @@ var (
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
 					"isSpaceEfficient":   true,
+					"CharacterCodeSet":	"UTF-8",
+					"MaxFileNameLengthBytes": 255,
+					//"StorageAccessCapability": ["Read","Write","Execute"]
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
