@@ -546,6 +546,24 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+	
+	// get profile
+	var prf *model.ProfileSpec
+	var err error
+	
+	if "" == snapshot.ProfileId   {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		snapshot.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
+	}
+	
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	// NOTE:It will create a volume snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume snapshot creation to complete
@@ -578,6 +596,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		Size:        result.Size,
 		Metadata:    result.Metadata,
 		Context:     ctx.ToJson(),
+		Profile:     prf.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("create volume snapthot failed in controller service:", err)

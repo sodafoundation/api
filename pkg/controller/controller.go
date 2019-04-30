@@ -397,18 +397,10 @@ func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateV
 	if opt.Metadata == nil {
 		opt.Metadata = map[string]string{}
 	}
-	// Get snapshot profile
-	if opt.ProfileId != "" {
-		profile, err := db.C.GetProfile(ctx, opt.ProfileId)
-		if err != nil {
-			log.Error("when get profile resource: ", err)
-			db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
-			return pb.GenericResponseError(err), err
-		}
 
-		if profile.SnapshotProperties.Topology.Bucket != "" {
-			opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
-		}
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
 	}
 
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
