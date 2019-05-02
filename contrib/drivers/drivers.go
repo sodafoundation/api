@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -127,5 +127,30 @@ func Clean(d VolumeDriver) VolumeDriver {
 	d.Unset()
 	d = nil
 
+	return d
+}
+
+type MetricDriver interface {
+	//Any initialization the metric driver does while starting.
+	Setup() error
+	//Any operation the metric driver does while stopping.
+	Teardown() error
+
+	CollectMetrics(metricList []string, instanceID string) ([]*model.MetricSpec, error)
+	ValidateMetricsSupportList(metricList []string, resourceType string) ([]string, error)
+}
+
+// Init
+func InitMetricDriver(resourceType string) MetricDriver {
+	var d MetricDriver
+	switch resourceType {
+	case config.LVMDriverType:
+		d = &lvm.MetricDriver{}
+		break
+	default:
+		//d = &sample.Driver{}
+		break
+	}
+	d.Setup()
 	return d
 }

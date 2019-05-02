@@ -116,7 +116,7 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 		for i, res := range fv.Data.Result {
 			metrics[i].InstanceID = res.Metric.Instance + res.Metric.Device
 			metrics[i].Name = res.Metric.Name
-			metrics[i].MetricValues = make([]model.Metric, len(res.Value))
+			metrics[i].MetricValues = make([]*model.Metric, len(res.Value))
 			for j, v := range res.Value {
 				switch v.(type) {
 				case string:
@@ -163,7 +163,7 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		for i, res := range fv.Data.Result {
 			metrics[i].InstanceID = res.Metric.Instance + res.Metric.Device
 			metrics[i].Name = res.Metric.Name
-			metrics[i].MetricValues = make([]model.Metric, len(res.Value))
+			metrics[i].MetricValues = make([]*model.Metric, len(res.Value))
 			for j, v := range res.Value {
 				switch v.(type) {
 				case string:
@@ -210,7 +210,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 		for i, res := range fv.Data.Result {
 			metrics[i].InstanceID = res.Metric.Instance + res.Metric.Device
 			metrics[i].Name = res.Metric.Name
-			metrics[i].MetricValues = make([]model.Metric, len(res.Values))
+			metrics[i].MetricValues = make([]*model.Metric, len(res.Values))
 			for j := 0; j < len(res.Values); j++ {
 				for _, v := range res.Values[j] {
 					switch v.(type) {
