@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 
 	log "github.com/golang/glog"
 
@@ -40,6 +41,10 @@ var ALERTMGR_CONF_HOME string
 var ALERTMGR_URL string
 var ALERTMGR_CONF_FILE string
 
+var GRAFANA_CONF_HOME string
+var GRAFANA_RESTART_CMD string
+var GRAFANA_CONF_FILE string
+
 var RELOAD_PATH string
 var BACKUP_EXTENSION string
 
@@ -56,6 +61,10 @@ func init() {
 	ALERTMGR_CONF_HOME = "/root/alertmanager-0.16.2.linux-amd64/"
 	ALERTMGR_URL = "http://localhost:9093"
 	ALERTMGR_CONF_FILE = "alertmanager.yml"
+
+	GRAFANA_CONF_HOME = "/etc/grafana/"
+	GRAFANA_RESTART_CMD = "grafana-server"
+	GRAFANA_CONF_FILE = "grafana.ini"
 }
 
 func NewFileOpsPortal() *FileOpsPortal {
@@ -78,16 +87,30 @@ func (this *FileOpsPortal) UploadConfFile() {
 	switch confType {
 	case "prometheus":
 		{
-			DoUpload(this, PROMETHEUS_CONF_HOME, PROMETHEUS_URL, RELOAD_PATH)
+			DoUpload(this, PROMETHEUS_CONF_HOME, PROMETHEUS_URL, RELOAD_PATH, true)
 		}
 	case "alertmanager":
 		{
-			DoUpload(this, ALERTMGR_CONF_HOME, ALERTMGR_URL, RELOAD_PATH)
+			DoUpload(this, ALERTMGR_CONF_HOME, ALERTMGR_URL, RELOAD_PATH, true)
+		}
+	case "grafana":
+		{
+			// for grafana, there is no reload endpoint to call
+			DoUpload(this, GRAFANA_CONF_HOME, "", "", false)
+			// to reload the configuration, run the reload command for grafana
+			cmd := exec.Command("systemctl", "restart", GRAFANA_RESTART_CMD)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+			if err != nil {
+				log.Fatalf("restart grafana failed with %s\n", err)
+			}
+			return
 		}
 	}
 }
 
-func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath string) {
+func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath string, toCallReloadEndpoint bool) {
 
 	// get the uploaded file
 	f, h, _ := this.GetFile("conf_file")
@@ -124,19 +147,23 @@ func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath strin
 	if fSaveErr != nil {
 		log.Errorf("error saving file %s", path)
 	} else {
-		reloadResp, reloadErr := http.Post(url+reloadPath, "application/json", nil)
-		if reloadErr != nil {
-			log.Errorf("Error on reload of configuration %s", reloadErr)
-			this.ErrorHandle(model.ErrorInternalServer, reloadErr.Error())
+		if toCallReloadEndpoint == true {
+			reloadResp, reloadErr := http.Post(url+reloadPath, "application/json", nil)
+			if reloadErr != nil {
+				log.Errorf("Error on reload of configuration %s", reloadErr)
+				this.ErrorHandle(model.ErrorInternalServer, reloadErr.Error())
+				return
+			}
+			respBody, readBodyErr := ioutil.ReadAll(reloadResp.Body)
+			if readBodyErr != nil {
+				log.Errorf("Error on reload of configuration %s", reloadErr)
+				this.ErrorHandle(model.ErrorInternalServer, readBodyErr.Error())
+				return
+			}
+			this.SuccessHandle(StatusOK, respBody)
 			return
 		}
-		respBody, readBodyErr := ioutil.ReadAll(reloadResp.Body)
-		if readBodyErr != nil {
-			log.Errorf("Error on reload of configuration %s", reloadErr)
-			this.ErrorHandle(model.ErrorInternalServer, readBodyErr.Error())
-			return
-		}
-		this.SuccessHandle(StatusOK, respBody)
+		this.SuccessHandle(StatusOK, nil)
 		return
 	}
 }
@@ -154,6 +181,10 @@ func (this *FileOpsPortal) DownloadConfFile() {
 	case "alertmanager":
 		{
 			DoDownload(this, ALERTMGR_CONF_HOME, ALERTMGR_CONF_FILE)
+		}
+	case "grafana":
+		{
+			DoDownload(this, GRAFANA_CONF_HOME, GRAFANA_CONF_FILE)
 		}
 	}
 }
