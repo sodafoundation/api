@@ -107,7 +107,7 @@ type MetricSpec struct {
 
 	//aggr_type AGGR_TYPE
 
-	MetricValues []Metric `json:"metricValues,omitempty"`
+	MetricValues []*Metric `json:"metricValues,omitempty"`
 }
 
 type Metric struct {
