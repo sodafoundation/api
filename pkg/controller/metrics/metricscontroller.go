@@ -224,9 +224,6 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
 		for i, res := range fv.Data.Result {
-			//metrics[i].InstanceID = res.Metric.Instance + res.Metric.Device
-			//metrics[i].Name = res.Metric.Name
-			//metrics[i].MetricValues = make([]*model.Metric, len(res.Values))
 			metrics[i].InstanceID = res.Metric.Instance
 			metrics[i].Name = res.Metric.Name
 			metrics[i].InstanceName = res.Metric.Device
