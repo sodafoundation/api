@@ -158,7 +158,7 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 		val, _ := strconv.ParseFloat(metricMap[element], 64)
 		//Todo: See if association  is required here, resource discovery could fill this information
 		associatorMap := make(map[string]string)
-
+		associatorMap["device"] =metricMap["InstanceName"]
 		metricValue := &model.Metric{
 			Timestamp: getCurrentUnixTimestamp(),
 			Value:     val,
@@ -170,15 +170,14 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 			InstanceID:   instanceID,
 			InstanceName: metricMap["InstanceName"],
 			Job:          "OpenSDS",
-			Associator:   associatorMap,
-			Source:       "Node",
+			Labels:       associatorMap,
 			//Todo Take Componet from Post call, as of now it is only for volume
 			Component: "Volume",
 			Name:      element,
 			//Todo : Fill units according to metric type
 			Unit: metricToUnitMap[element],
 			//Todo : Get this information dynamically ( hard coded now , as all are direct values
-			IsAggregated: false,
+			Aggr_type:    "",
 			MetricValues: metricValues,
 		}
 		tempMetricArray = append(tempMetricArray, metric)
