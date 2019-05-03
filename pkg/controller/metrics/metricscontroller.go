@@ -121,13 +121,9 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 				switch v.(type) {
 				case string:
 					metricValue.Value, err = strconv.ParseFloat(v.(string), 64)
-
-					//metricValues = append(metricValues, metricValue)
-					//metrics[i].MetricValues[j].Value, _ = strconv.ParseFloat(v.(string), 64)
 				case float64:
 					secs := int64(v.(float64))
 					metricValue.Timestamp = secs
-					//metrics[i].MetricValues[j].Timestamp = secs
 				default:
 					log.Info(v, "is of a type I don't know how to handle")
 				}
@@ -176,13 +172,9 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 				switch v.(type) {
 				case string:
 					metricValue.Value, err = strconv.ParseFloat(v.(string), 64)
-
-					//metricValues = append(metricValues, metricValue)
-					//metrics[i].MetricValues[j].Value, _ = strconv.ParseFloat(v.(string), 64)
 				case float64:
 					secs := int64(v.(float64))
 					metricValue.Timestamp = secs
-					//metrics[i].MetricValues[j].Timestamp = secs
 				default:
 					log.Info(v, "is of a type I don't know how to handle")
 				}
