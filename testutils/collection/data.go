@@ -135,7 +135,7 @@ var (
 
 	SampleAvailabilityZones = []string{"default"}
 
-        SampleFileShares = []model.FileShareSpec{
+	SampleFileShares = []model.FileShareSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
@@ -249,6 +249,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -259,6 +260,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
 
@@ -502,7 +504,8 @@ var (
 		"description": "This is the first sample snapshot for testing",
 		"size": 1,
 		"status": "available",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
 	ByteVolumeGroup = `{
@@ -690,7 +693,8 @@ var (
 			"description": "This is the first sample snapshot for testing",
 			"size":        1,
 			"status":      "available",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
+			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 		`{
 			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
@@ -698,7 +702,8 @@ var (
 			"description": "This is the second sample snapshot for testing",
 			"size":        1,
 			"status":      "available",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
+			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 	}
 

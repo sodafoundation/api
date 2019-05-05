@@ -253,13 +253,7 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 	}
 	opt.PoolId = pool.Id
 	opt.PoolName = pool.Name
-
-	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
-	if err != nil {
-		log.Error("when search profile in db:", err)
-		rollBack = true
-		return pb.GenericResponseError(err), err
-	}
+	prf := model.NewProfileFromJson(opt.Profile)
 
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
@@ -397,18 +391,10 @@ func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateV
 	if opt.Metadata == nil {
 		opt.Metadata = map[string]string{}
 	}
-	// Get snapshot profile
-	if opt.ProfileId != "" {
-		profile, err := db.C.GetProfile(ctx, opt.ProfileId)
-		if err != nil {
-			log.Error("when get profile resource: ", err)
-			db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
-			return pb.GenericResponseError(err), err
-		}
 
-		if profile.SnapshotProperties.Topology.Bucket != "" {
-			opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
-		}
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
 	}
 
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
@@ -451,7 +437,12 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
+
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+	prf := model.NewProfileFromJson(opt.Profile)
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
+	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
