@@ -8,8 +8,6 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -3295,59 +3293,6 @@ type ControllerServer interface {
 	GetMetrics(context.Context, *GetMetricsOpts) (*GenericResponse, error)
 }
 
-// UnimplementedControllerServer can be embedded to have forward compatible implementations.
-type UnimplementedControllerServer struct {
-}
-
-func (*UnimplementedControllerServer) CreateVolume(ctx context.Context, req *CreateVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
-}
-func (*UnimplementedControllerServer) DeleteVolume(ctx context.Context, req *DeleteVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
-}
-func (*UnimplementedControllerServer) ExtendVolume(ctx context.Context, req *ExtendVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExtendVolume not implemented")
-}
-func (*UnimplementedControllerServer) CreateVolumeSnapshot(ctx context.Context, req *CreateVolumeSnapshotOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeSnapshot not implemented")
-}
-func (*UnimplementedControllerServer) DeleteVolumeSnapshot(ctx context.Context, req *DeleteVolumeSnapshotOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeSnapshot not implemented")
-}
-func (*UnimplementedControllerServer) CreateVolumeAttachment(ctx context.Context, req *CreateVolumeAttachmentOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeAttachment not implemented")
-}
-func (*UnimplementedControllerServer) DeleteVolumeAttachment(ctx context.Context, req *DeleteVolumeAttachmentOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeAttachment not implemented")
-}
-func (*UnimplementedControllerServer) CreateReplication(ctx context.Context, req *CreateReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateReplication not implemented")
-}
-func (*UnimplementedControllerServer) DeleteReplication(ctx context.Context, req *DeleteReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteReplication not implemented")
-}
-func (*UnimplementedControllerServer) EnableReplication(ctx context.Context, req *EnableReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EnableReplication not implemented")
-}
-func (*UnimplementedControllerServer) DisableReplication(ctx context.Context, req *DisableReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DisableReplication not implemented")
-}
-func (*UnimplementedControllerServer) FailoverReplication(ctx context.Context, req *FailoverReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FailoverReplication not implemented")
-}
-func (*UnimplementedControllerServer) CreateVolumeGroup(ctx context.Context, req *CreateVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeGroup not implemented")
-}
-func (*UnimplementedControllerServer) UpdateVolumeGroup(ctx context.Context, req *UpdateVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolumeGroup not implemented")
-}
-func (*UnimplementedControllerServer) DeleteVolumeGroup(ctx context.Context, req *DeleteVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeGroup not implemented")
-}
-func (*UnimplementedControllerServer) GetMetrics(ctx context.Context, req *GetMetricsOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMetrics not implemented")
-}
-
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
 	s.RegisterService(&_Controller_serviceDesc, srv)
 }
@@ -3926,56 +3871,6 @@ type ProvisionDockServer interface {
 	DeleteVolumeGroup(context.Context, *DeleteVolumeGroupOpts) (*GenericResponse, error)
 }
 
-// UnimplementedProvisionDockServer can be embedded to have forward compatible implementations.
-type UnimplementedProvisionDockServer struct {
-}
-
-func (*UnimplementedProvisionDockServer) CreateVolume(ctx context.Context, req *CreateVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
-}
-func (*UnimplementedProvisionDockServer) DeleteVolume(ctx context.Context, req *DeleteVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
-}
-func (*UnimplementedProvisionDockServer) ExtendVolume(ctx context.Context, req *ExtendVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExtendVolume not implemented")
-}
-func (*UnimplementedProvisionDockServer) CreateVolumeSnapshot(ctx context.Context, req *CreateVolumeSnapshotOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeSnapshot not implemented")
-}
-func (*UnimplementedProvisionDockServer) DeleteVolumeSnapshot(ctx context.Context, req *DeleteVolumeSnapshotOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeSnapshot not implemented")
-}
-func (*UnimplementedProvisionDockServer) CreateVolumeAttachment(ctx context.Context, req *CreateVolumeAttachmentOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeAttachment not implemented")
-}
-func (*UnimplementedProvisionDockServer) DeleteVolumeAttachment(ctx context.Context, req *DeleteVolumeAttachmentOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeAttachment not implemented")
-}
-func (*UnimplementedProvisionDockServer) CreateReplication(ctx context.Context, req *CreateReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateReplication not implemented")
-}
-func (*UnimplementedProvisionDockServer) DeleteReplication(ctx context.Context, req *DeleteReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteReplication not implemented")
-}
-func (*UnimplementedProvisionDockServer) EnableReplication(ctx context.Context, req *EnableReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EnableReplication not implemented")
-}
-func (*UnimplementedProvisionDockServer) DisableReplication(ctx context.Context, req *DisableReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DisableReplication not implemented")
-}
-func (*UnimplementedProvisionDockServer) FailoverReplication(ctx context.Context, req *FailoverReplicationOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FailoverReplication not implemented")
-}
-func (*UnimplementedProvisionDockServer) CreateVolumeGroup(ctx context.Context, req *CreateVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeGroup not implemented")
-}
-func (*UnimplementedProvisionDockServer) UpdateVolumeGroup(ctx context.Context, req *UpdateVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolumeGroup not implemented")
-}
-func (*UnimplementedProvisionDockServer) DeleteVolumeGroup(ctx context.Context, req *DeleteVolumeGroupOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeGroup not implemented")
-}
-
 func RegisterProvisionDockServer(s *grpc.Server, srv ProvisionDockServer) {
 	s.RegisterService(&_ProvisionDock_serviceDesc, srv)
 }
@@ -4361,17 +4256,6 @@ type AttachDockServer interface {
 	AttachVolume(context.Context, *AttachVolumeOpts) (*GenericResponse, error)
 	// Detach a volume
 	DetachVolume(context.Context, *DetachVolumeOpts) (*GenericResponse, error)
-}
-
-// UnimplementedAttachDockServer can be embedded to have forward compatible implementations.
-type UnimplementedAttachDockServer struct {
-}
-
-func (*UnimplementedAttachDockServer) AttachVolume(ctx context.Context, req *AttachVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AttachVolume not implemented")
-}
-func (*UnimplementedAttachDockServer) DetachVolume(ctx context.Context, req *DetachVolumeOpts) (*GenericResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DetachVolume not implemented")
 }
 
 func RegisterAttachDockServer(s *grpc.Server, srv AttachDockServer) {
