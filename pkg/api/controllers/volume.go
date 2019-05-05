@@ -720,6 +720,15 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		return
 	}
 
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+
+	v.SuccessHandle(StatusAccepted, nil)
+
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
 	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
@@ -734,12 +743,12 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		VolumeId: snapshot.VolumeId,
 		Metadata: snapshot.Metadata,
 		Context:  ctx.ToJson(),
+		Profile:   prf.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete volume snapthot failed in controller service:", err)
 		return
 	}
 
-	v.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }

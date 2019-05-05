@@ -437,7 +437,12 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
+
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+	prf := model.NewProfileFromJson(opt.Profile)
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
+	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
