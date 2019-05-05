@@ -14,9 +14,34 @@
 
 /*
 This module implements the common data structure.
+
 */
 
 package model
+
+type CollectMetricSpec struct {
+	*BaseModel
+
+	// the instance on which the metrics are to be collected
+	InstanceId string `json:"instanceId,omitempty"`
+
+	// the list of metrics to be collected
+	Metrics []string `json:"metrics,omitempty"`
+}
+
+type GetMetricSpec struct {
+	*BaseModel
+
+	// the instance on which the metrics are to be collected
+	InstanceId string `json:"instanceId,omitempty"`
+
+	// the name of the metric to retrieve
+	MetricName string `json:"metricName,omitempty"`
+
+	StartTime string `json:"startTime,omitempty"`
+
+	EndTime string `json:"endTime,omitempty"`
+}
 
 type MetricSpec struct {
 	// Following are the labels associated with Metric, same as Prometheus labels
@@ -36,7 +61,9 @@ type MetricSpec struct {
 	Job string `json:"job,omitempty"`
 
 	/*associator - Some metric would need specific fields to relate components.
+
 	  Use case could be to query volumes of a particular pool. Attaching the related
+
 	  components as labels would help us to form promQl query efficiently.
 	  Example: node_disk_read_bytes_total{instance="121.244.95.60"}
 	  Above query will respond with all disks associated with node 121.244.95.60
@@ -68,11 +95,22 @@ type MetricSpec struct {
 
 	IsAggregated bool `json:"isAggregated,omitempty"`
 
-	//timestamp
+	// aggr_type-\> Can be used to determine Total/Sum/Avg etc
 
-	Timestamp int64 `json:"timestamp,omitempty"`
+	/*If isAggregated ='True' then type of aggregation can be set in this field
 
-	//value
+	  ie:- if collector is aggregating some metrics and producing a new metric of
 
-	Value float64 `json:"value,omitempty"`
+	  higher level constructs, then this field can be set as 'Total' to indicate it is
+
+	  aggregated/derived from other metrics.*/
+
+	//aggr_type AGGR_TYPE
+
+	MetricValues []*Metric `json:"metricValues,omitempty"`
+}
+
+type Metric struct {
+	Timestamp int64   `json:"timestamp,omitempty"`
+	Value     float64 `json:"value,omitempty"`
 }
