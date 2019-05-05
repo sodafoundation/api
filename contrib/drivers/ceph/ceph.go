@@ -23,6 +23,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os/exec"
+	"strings"
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
@@ -44,6 +46,12 @@ const (
 const (
 	KPoolName  = "CephPoolName"
 	KImageName = "CephImageName"
+)
+
+const (
+	poolType = iota
+	poolTypeSize
+	poolCrushRuleset
 )
 
 type CephConfig struct {
@@ -410,6 +418,50 @@ type DfInfo struct {
 	Pools []PoolStats `json:"pools,omitempty"`
 }
 
+func execCmd(cmd string) (string, error) {
+	ret, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		log.Error(err.Error())
+		return "", err
+	}
+	return string(ret[:len(ret)-1]), nil
+}
+
+func (d *Driver) getPoolsAttr() (map[string][]string, error) {
+	cmd := "ceph osd pool ls detail -c " + d.conf.ConfigFile + "| grep \"^pool\"| awk '{print $3, $4, $6, $10}'"
+	output, err := execCmd(cmd)
+	if err != nil {
+		log.Error("[Error]:", err)
+		return nil, err
+	}
+	lines := strings.Split(output, "\n")
+	var poolDetail = make(map[string][]string)
+	for i := range lines {
+		if lines[i] == "" {
+			continue
+		}
+		str := strings.Fields(lines[i])
+		key := strings.Replace(str[0], "'", "", -1)
+		val := str[1:]
+		poolDetail[key] = val
+	}
+	return poolDetail, nil
+}
+
+func (d *Driver) buildPoolExtras(line []string, extras model.StoragePoolExtraSpec) model.StoragePoolExtraSpec {
+	extras.Advanced = make(map[string]interface{})
+	extras.Advanced["redundancyType"] = line[poolType]
+	if extras.Advanced["redundancyType"] == "replicated" {
+		extras.Advanced["replicateSize"] = line[poolTypeSize]
+	} else {
+		extras.Advanced["erasureSize"] = line[poolTypeSize]
+	}
+	extras.Advanced["crushRuleset"] = line[poolCrushRuleset]
+
+	return extras
+}
+
+
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	mgr := NewSrcMgr(d.conf)
 	defer mgr.destroy()
@@ -431,7 +483,13 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		if _, ok := d.conf.Pool[p.Name]; !ok {
 			continue
 		}
+		pa, err := d.getPoolsAttr()
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 
+		extras := d.buildPoolExtras(pa[p.Name], d.conf.Pool[p.Name].Extras)
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, p.Name).String(),
@@ -440,6 +498,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			TotalCapacity:    (p.Stats.BytesUsed + p.Stats.MaxAvail) >> sizeShiftBit,
 			FreeCapacity:     p.Stats.MaxAvail >> sizeShiftBit,
 			StorageType:      d.conf.Pool[p.Name].StorageType,
+			Extras:           extras,
 			AvailabilityZone: d.conf.Pool[p.Name].AvailabilityZone,
 		}
 		if pol.AvailabilityZone == "" {
