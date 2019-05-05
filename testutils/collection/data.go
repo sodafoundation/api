@@ -135,7 +135,7 @@ var (
 
 	SampleAvailabilityZones = []string{"default"}
 
-        SampleFileShares = []model.FileShareSpec{
+	SampleFileShares = []model.FileShareSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
@@ -249,6 +249,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -259,6 +260,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
 

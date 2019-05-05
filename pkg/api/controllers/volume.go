@@ -296,19 +296,19 @@ func (v *VolumePortal) DeleteVolume() {
 		v.SuccessHandle(StatusAccepted, nil)
 		return
 	}
+	
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = util.DeleteVolumeDBEntry(ctx, volume); err != nil {
 		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
-
-	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
-		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
@@ -710,6 +710,13 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
+	
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
 	// the database to "deleting" and return the result immediately.
@@ -717,13 +724,6 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	if err != nil {
 		errMsg := fmt.Sprintf("delete volume snapshot failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
-
-	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
-		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
