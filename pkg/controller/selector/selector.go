@@ -67,18 +67,13 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 	// Generate filter request according to the rules defined in profile.
 	fltRequest := func(prf *model.ProfileSpec, vol *model.VolumeSpec) map[string]interface{} {
 		var filterRequest map[string]interface{}
+		filterRequest = prf.CustomProperties.GetCapabilitiesProperties()
 
-		if !prf.CustomProperties.IsEmpty() {
-			filterRequest = prf.CustomProperties
-
-			if v, ok := filterRequest["multiAttach"]; ok && v == "<is> true" {
-				log.Info("change volume multiAttach flag to be true.")
-				vol.MultiAttach = true
-			}
-
-		} else {
-			filterRequest = make(map[string]interface{})
+		if v, ok := filterRequest["multiAttach"]; ok && v == "<is> true" {
+			log.Info("change volume multiAttach flag to be true.")
+			vol.MultiAttach = true
 		}
+
 		// Insert some basic rules.
 		filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(vol.Size))
 		if vol.AvailabilityZone != "" {

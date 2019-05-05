@@ -128,7 +128,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		return pb.GenericResponseError(err), err
 	}
 
-	log.Infof("controller create volume:  get volume from db %+v", vol)
+	log.V(8).Infof("controller create volume:  get volume from db %+v", vol)
 
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 	if err != nil {
@@ -137,7 +137,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	}
 
 	// The default value of multi-attach is false, if it becomes true, then update into db
-	log.Infof("update volume %+v", vol)
+	log.V(8).Infof("update volume %+v", vol)
 
 	if vol.MultiAttach {
 		db.C.UpdateVolume(ctx, vol)
@@ -371,7 +371,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 
 	result.Status = model.VolumeAttachAvailable
 
-	log.Infof("Create volume attachment successfully, the info is %v", result)
+	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
 	// Save changes to db.
 	db.C.UpdateVolumeAttachment(ctx, opt.Id, result)
 
