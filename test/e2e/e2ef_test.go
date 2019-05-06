@@ -30,8 +30,11 @@ import (
 )
 
 const (
-	nvmepool     = "opensds-volumes-nvme"
-	defaultgroup = "opensds-volumes-default"
+	nvmepool       = "opensds-volumes-nvme"
+	defaultgroup   = "opensds-volumes-default"
+	localIqn       = "iqn.2017-10.io.opensds:volume:00000001"
+	nvmeofProtocol = "nvmeof"
+	iscsiProtocol  = "iscsi"
 )
 
 var u *client.Client
@@ -372,8 +375,9 @@ func TestCreateAttach(t *testing.T) {
 	}
 	defer DeleteVolume(vol.Id)
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: iscsiProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
@@ -443,8 +447,6 @@ func TestVolumeAttach(t *testing.T) {
 	t.Log("Begin to Scan Volume:")
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
-	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
-	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
@@ -452,7 +454,7 @@ func TestVolumeAttach(t *testing.T) {
 		return
 	}
 	accPro := getatt.AccessProtocol
-	output, err = execCmd("sudo", "./volume-connector",
+	output, err := execCmd("sudo", "./volume-connector",
 		"attach", string(conn), accPro)
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
@@ -536,7 +538,7 @@ func TestVolumeDetach(t *testing.T) {
 	t.Log("Volume Detach Success!")
 }
 
-//Test for nvmeof  connection 
+//Test for nvmeof  connection
 func TestNvmeofAttachIssues(t *testing.T) {
 	// pool list get nvme pool
 	pols, err := u.ListPools()
@@ -690,8 +692,6 @@ func NvmeofVolumeAttach(t *testing.T) error {
 	t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
 	t.Log("getatt.Metadata", getatt.ConnectionData)
 
-	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
-	t.Log(output)
 	//execute bin file
 	conn, err := json.Marshal(&getatt.ConnectionData)
 	if err != nil {
@@ -699,7 +699,7 @@ func NvmeofVolumeAttach(t *testing.T) error {
 		return err
 	}
 	accPro := getatt.AccessProtocol
-	output, err = execCmd("sudo", "./volume-connector",
+	output, err := execCmd("sudo", "./volume-connector",
 		"attach", string(conn), accPro)
 	if err != nil {
 		t.Error("Failed to attach volume:", output, err)
@@ -764,9 +764,12 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 		return nil, err
 	}
 
+	//host, _ := os.Hostname()
+
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: iscsiProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
@@ -787,8 +790,9 @@ func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	}
 
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
+		AccessProtocol: nvmeofProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {

@@ -271,6 +271,8 @@ message DeleteVolumeSnapshotOpts {
     string driverName = 4;
     // The Context
     string context = 5;
+    // The Serialized profile
+    string profile = 6;
 }
 
 // CreateVolumeAttachmentOpts is a structure which indicates all required

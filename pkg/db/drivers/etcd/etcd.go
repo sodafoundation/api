@@ -38,7 +38,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
-        "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 const (
@@ -1744,7 +1744,12 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.ReplicationDriverData != nil {
 		result.ReplicationDriverData = vol.ReplicationDriverData
 	}
-	result.GroupId = vol.GroupId
+	if vol.MultiAttach {
+		result.MultiAttach = vol.MultiAttach
+	}
+	if vol.GroupId != "" {
+		result.GroupId = vol.GroupId
+	}
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -2057,9 +2062,19 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
 	}
-	// Update onnectionData
-	for k, v := range attachment.ConnectionData {
-		result.ConnectionData[k] = v
+	// Update connectionData
+	// Debug
+	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
+	log.V(8).Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
+
+	if attachment.ConnectionData != nil {
+		if result.ConnectionData == nil {
+			result.ConnectionData = make(map[string]interface{})
+		}
+
+		for k, v := range attachment.ConnectionData {
+			result.ConnectionData[k] = v
+		}
 	}
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)

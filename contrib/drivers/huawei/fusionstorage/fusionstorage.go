@@ -147,6 +147,7 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 			StorageType:      c.Pool[poolId].StorageType,
 			Extras:           c.Pool[poolId].Extras,
 			AvailabilityZone: c.Pool[poolId].AvailabilityZone,
+			MultiAttach:      c.Pool[poolId].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = DefaultAZ

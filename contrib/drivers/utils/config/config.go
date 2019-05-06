@@ -39,6 +39,9 @@ type PoolProperties struct {
 	// of the pool, such as supported capabilities.
 	// +optional
 	Extras model.StoragePoolExtraSpec `yaml:"extras,omitempty"`
+
+	// The volumes belong to the pool can be attached more than once.
+	MultiAttach bool `yaml:"multiAttach,omitempty"`
 }
 
 func Parse(conf interface{}, p string) (interface{}, error) {

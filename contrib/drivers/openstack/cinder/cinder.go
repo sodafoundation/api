@@ -463,6 +463,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      d.conf.Pool[page.Name].StorageType,
 			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
 			Extras:           d.conf.Pool[page.Name].Extras,
+			MultiAttach:      d.conf.Pool[page.Name].MultiAttach,
 		}
 		pols = append(pols, pol)
 	}
