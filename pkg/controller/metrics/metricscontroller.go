@@ -32,9 +32,9 @@ import (
 
 // Controller is an interface for exposing some operations of metric controllers.
 type Controller interface {
-	GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
-	GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
-	GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error)
+	GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
+	GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
+	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
 }
 
@@ -94,7 +94,7 @@ type RangeData struct {
 
 // latest+range metrics structs end
 
-func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
+func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName)
@@ -102,18 +102,17 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 		log.Infof("The HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		log.Info(string(data))
+		log.Infof("response data is %s", string(data))
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		log.Error(err0)
-		metrics := make([]model.MetricSpec, len(fv.Data.Result))
-
+		if err0 != nil {
+			log.Infof("unmarshell operation failed ", err0)
+		}
+		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
-		for i, res := range fv.Data.Result {
-			metrics[i].InstanceID = res.Metric.InstanceID
-			metrics[i].Name = res.Metric.Name
-			metrics[i].InstanceName = res.Metric.Device
+		for _, res := range fv.Data.Result {
+
 			metricValues := make([]*model.Metric, 0)
 			metricValue := &model.Metric{}
 			for _, v := range res.Value {
@@ -130,7 +129,12 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 
 			}
 			metricValues = append(metricValues, metricValue)
-			metrics[i].MetricValues = metricValues
+			metric := &model.MetricSpec{}
+			metric.InstanceID = res.Metric.InstanceID
+			metric.Name = res.Metric.Name
+			metric.InstanceName = res.Metric.Device
+			metric.MetricValues = metricValues
+			metrics = append(metrics, metric)
 		}
 
 		bArr, _ := json.Marshal(metrics)
@@ -139,13 +143,14 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSp
 		if err != nil {
 			log.Error(err)
 		}
-		return &metrics, err
+		return metrics, err
 
 	}
+	//no response
 	return nil, err
 }
 
-func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
+func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName + "&time=" + opt.StartTime)
@@ -157,14 +162,13 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		log.Error(err0)
-		metrics := make([]model.MetricSpec, len(fv.Data.Result))
-
+		if err0 != nil {
+			log.Infof("unmarshell operation failed ", err0)
+		}
+		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
-		for i, res := range fv.Data.Result {
-			metrics[i].InstanceID = res.Metric.InstanceID
-			metrics[i].Name = res.Metric.Name
-			metrics[i].InstanceName = res.Metric.Device
+		for _, res := range fv.Data.Result {
+
 			metricValues := make([]*model.Metric, 0)
 			metricValue := &model.Metric{}
 			for _, v := range res.Value {
@@ -181,7 +185,12 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 
 			}
 			metricValues = append(metricValues, metricValue)
-			metrics[i].MetricValues = metricValues
+			metric := &model.MetricSpec{}
+			metric.InstanceID = res.Metric.InstanceID
+			metric.Name = res.Metric.Name
+			metric.InstanceName = res.Metric.Device
+			metric.MetricValues = metricValues
+			metrics = append(metrics, metric)
 		}
 
 		bArr, _ := json.Marshal(metrics)
@@ -190,13 +199,14 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricS
 		if err != nil {
 			log.Error(err)
 		}
-		return &metrics, err
+		return metrics, err
 
 	}
+	//no response
 	return nil, err
 }
 
-func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpec, error) {
+func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	//var metrics []model.MetricSpec
 	// make a call to Prometheus, convert the response to our format, return
@@ -210,15 +220,13 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 		// unmarshal the JSON response into a struct (generated using the JSON, using this https://mholt.github.io/json-to-go/
 		var fv RangeMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
-		log.Error(err0)
-
-		metrics := make([]model.MetricSpec, len(fv.Data.Result))
-
+		if err0 != nil {
+			log.Infof("unmarshell operation failed ", err0)
+		}
+		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
-		for i, res := range fv.Data.Result {
-			metrics[i].InstanceID = res.Metric.Instance
-			metrics[i].Name = res.Metric.Name
-			metrics[i].InstanceName = res.Metric.Device
+		for _, res := range fv.Data.Result {
+
 			metricValues := make([]*model.Metric, 0)
 			metricValue := &model.Metric{}
 			for j := 0; j < len(res.Values); j++ {
@@ -235,7 +243,12 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 
 				}
 				metricValues = append(metricValues, metricValue)
-				metrics[i].MetricValues = metricValues
+				metric := &model.MetricSpec{}
+				metric.InstanceID = res.Metric.Instance
+				metric.Name = res.Metric.Name
+				metric.InstanceName = res.Metric.Device
+				metric.MetricValues = metricValues
+				metrics = append(metrics, metric)
 			}
 		}
 
@@ -245,10 +258,11 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) (*[]model.MetricSpe
 		if err != nil {
 			log.Error(err)
 		}
-		return &metrics, err
+		return metrics, err
 
 	}
-	return nil, nil
+	//no response
+	return nil, err
 }
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {

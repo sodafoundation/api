@@ -61,7 +61,6 @@ func init() {
 			beego.NSRouter("/:tenantId/pools", &controllers.PoolPortal{}, "get:ListPools"),
 			beego.NSRouter("/:tenantId/pools/:poolId", &controllers.PoolPortal{}, "get:GetPool"),
 			beego.NSRouter("/:tenantId/availabilityZones", &controllers.PoolPortal{}, "get:ListAvailabilityZones"),
-			beego.NSRouter("/:tenantId/metrics", controllers.NewMetricsPortal(), "get:GetMetrics"),
 		)
 	beego.AddNamespace(ns)
 
