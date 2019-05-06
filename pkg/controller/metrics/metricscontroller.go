@@ -107,7 +107,7 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSp
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
 		if err0 != nil {
-			log.Infof("unmarshell operation failed ", err0)
+			log.Infof("unmarshell operation failed %s\n", err0)
 		}
 		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
@@ -163,7 +163,7 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricS
 		var fv InstantMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
 		if err0 != nil {
-			log.Infof("unmarshell operation failed ", err0)
+			log.Infof("unmarshell operation failed %s\n", err0)
 		}
 		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
@@ -221,7 +221,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 		var fv RangeMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
 		if err0 != nil {
-			log.Infof("unmarshell operation failed ", err0)
+			log.Infof("unmarshell operation failed %s\n", err0)
 		}
 		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
