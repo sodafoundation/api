@@ -15,19 +15,21 @@ package main
 
 import (
 	"fmt"
-	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/lvm"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
 	"sync"
+
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/lvm"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"gopkg.in/yaml.v2"
 )
 
 const DefaultConfigFile = "resources.yaml"
+
 //struct for lvm  collector that contains pointers
 //to prometheus descriptors for each metric we expose.
 type lvmCollector struct {
