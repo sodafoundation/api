@@ -29,10 +29,13 @@ import (
 )
 
 var (
-	c *client.Client
-
-	localIqn  = "iqn.2017-10.io.opensds:volume:00000001"
+	c         *client.Client
 	profileId string
+)
+
+const (
+	iscsiProtocol = "iscsi"
+	localIqn      = "iqn.2017-10.io.opensds:volume:00000001"
 )
 
 func init() {

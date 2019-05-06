@@ -34,8 +34,8 @@ const (
 	nvmepool       = "opensds-volumes-nvme"
 	defaultgroup   = "opensds-volumes-default"
 	localIqn       = "iqn.2017-10.io.opensds:volume:00000001"
-	iscsiProtocol  = "iscsi"
 	nvmeofProtocol = "nvmeof"
+	iscsiProtocol  = "iscsi"
 )
 
 var u *client.Client
