@@ -219,6 +219,20 @@ func (v *VolumePortal) ExtendVolume() {
 	}
 
 	id := v.Ctx.Input.Param(":volumeId")
+	volume, err := db.C.GetVolume(ctx, id)
+	if err != nil {
+		errMsg := fmt.Sprintf("volume %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("extend volume failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
 	result, err := util.ExtendVolumeDBEntry(ctx, id, &extendRequestBody)
@@ -246,6 +260,7 @@ func (v *VolumePortal) ExtendVolume() {
 		Size:     extendRequestBody.NewSize,
 		Metadata: result.Metadata,
 		Context:  ctx.ToJson(),
+		Profile:  prf.ToJson(),
 	}
 	if _, err = v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
 		log.Error("extend volume failed in controller service:", err)
@@ -283,19 +298,19 @@ func (v *VolumePortal) DeleteVolume() {
 		v.SuccessHandle(StatusAccepted, nil)
 		return
 	}
+	
+	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	if err = util.DeleteVolumeDBEntry(ctx, volume); err != nil {
 		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
-
-	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
-		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
@@ -549,6 +564,24 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
+	// get profile
+	var prf *model.ProfileSpec
+	var err error
+
+	if "" == snapshot.ProfileId {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		snapshot.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
+	}
+
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	// NOTE:It will create a volume snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume snapshot creation to complete
 	// and will return result immediately.
@@ -580,6 +613,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		Size:        result.Size,
 		Metadata:    result.Metadata,
 		Context:     ctx.ToJson(),
+		Profile:     prf.ToJson(),
 	}
 	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("create volume snapthot failed in controller service:", err)
@@ -678,6 +712,13 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
+	
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
 	// the database to "deleting" and return the result immediately.
@@ -687,6 +728,8 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
+	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
@@ -702,12 +745,12 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		VolumeId: snapshot.VolumeId,
 		Metadata: snapshot.Metadata,
 		Context:  ctx.ToJson(),
+		Profile:   prf.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete volume snapthot failed in controller service:", err)
 		return
 	}
 
-	v.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }
