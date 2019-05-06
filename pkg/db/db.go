@@ -42,7 +42,7 @@ func Init(db *Database) {
 		fmt.Printf("mysql is not implemented right now!")
 		return
 	case "etcd":
-		C = etcd.NewClient(strings.Split(db.DnsEndpoint, ","))
+		C = etcd.NewClient(strings.Split(db.Endpoint, ","))
 		return
 	case "fake":
 		C = fakedb.NewFakeDbClient()
@@ -55,7 +55,7 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
-        CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
 
 	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 

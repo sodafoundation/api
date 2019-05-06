@@ -81,7 +81,7 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 	// Volume group creation request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	if err = v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -140,7 +140,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	// Volume group update request is sent to the Dock. Dock will set
 	// volume group status to 'available' after volume group creation operation
 	// is completed.
-	if err = v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -186,7 +186,7 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 	// NOTE:The real volume group deletion process.
 	// Volume group deletion request is sent to the Dock. Dock will remove
 	// volume group record after volume group deletion operation is completed.
-	if err = v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}

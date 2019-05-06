@@ -98,7 +98,7 @@ func (v *VolumePortal) CreateVolume() {
 	// NOTE:The real volume creation process.
 	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume creation is completed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -249,7 +249,7 @@ func (v *VolumePortal) ExtendVolume() {
 	// NOTE:The real volume extension process.
 	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
 	// after volume extension is completed.
-	if err = v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -319,7 +319,7 @@ func (v *VolumePortal) DeleteVolume() {
 	// NOTE:The real volume deletion process.
 	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
 	// and database or update volume status to "errorDeleting" if deletion from driver faild.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -385,7 +385,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// NOTE:The real volume attachment creation process.
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
 	// after volume attachment creation is completed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -509,7 +509,7 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	// NOTE:The real volume attachment deletion process.
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -599,7 +599,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
 	// after volume snapshot creation complete.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -734,7 +734,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
 	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}

@@ -82,7 +82,7 @@ func (r *ReplicationPortal) CreateReplication() {
 	// NOTE:The real volume replication creation process.
 	// Volume replication creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume replication creation is completed.
-	if err = r.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -263,7 +263,7 @@ func (r *ReplicationPortal) DeleteReplication() {
 	// NOTE:The real volume replication deletion process.
 	// Volume replication deletion request is sent to the Dock. Dock will remove
 	// replicaiton record after volume replication creation is completed.
-	if err = r.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -310,7 +310,7 @@ func (r *ReplicationPortal) EnableReplication() {
 	// Volume replication enable request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication enable
 	// operation is completed.
-	if err = r.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -357,7 +357,7 @@ func (r *ReplicationPortal) DisableReplication() {
 	// Volume replication diable request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication disable
 	// operation is completed.
-	if err = r.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -411,7 +411,7 @@ func (r *ReplicationPortal) FailoverReplication() {
 	// Volume replication failover request is sent to the Dock. Dock will set
 	// volume replication status to 'available' after volume replication failover
 	// operation is completed.
-	if err = r.CtrClient.Connect(CONF.OsdsLet.DnsEndpoint); err != nil {
+	if err = r.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}

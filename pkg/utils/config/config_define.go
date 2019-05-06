@@ -20,7 +20,6 @@ type Default struct{}
 
 type OsdsApiServer struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
-	DnsEndpoint        string        `conf:"dns_endpoint,localhost:50040"`
 	AuthStrategy       string        `conf:"auth_strategy,noauth"`
 	Daemon             bool          `conf:"daemon,false"`
 	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
@@ -32,14 +31,12 @@ type OsdsApiServer struct {
 
 type OsdsLet struct {
 	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
-	DnsEndpoint       string        `conf:"dns_endpoint,localhost:50049"`
 	Daemon            bool          `conf:"daemon,false"`
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 }
 
 type OsdsDock struct {
 	ApiEndpoint                string        `conf:"api_endpoint,localhost:50050"`
-	DnsEndpoint                string        `conf:"dns_endpoint,localhost:50050"`
 	DockType                   string        `conf:"dock_type,provisioner"`
 	EnabledBackends            []string      `conf:"enabled_backends,lvm"`
 	Daemon                     bool          `conf:"daemon,false"`
@@ -50,9 +47,9 @@ type OsdsDock struct {
 }
 
 type Database struct {
-	Credential  string `conf:"credential,username:password@tcp(ip:port)/dbname"`
-	Driver      string `conf:"driver,etcd"`
-	DnsEndpoint string `conf:"dns_endpoint,localhost:2379,localhost:2380"`
+	Credential string `conf:"credential,username:password@tcp(ip:port)/dbname"`
+	Driver     string `conf:"driver,etcd"`
+	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
 }
 
 type BackendProperties struct {

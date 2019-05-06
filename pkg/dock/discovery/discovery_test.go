@@ -33,7 +33,7 @@ const (
 
 func init() {
 	CONF.OsdsDock = OsdsDock{
-		DnsEndpoint:     "localhost:50050",
+		ApiEndpoint:     "localhost:50050",
 		EnabledBackends: []string{"sample"},
 		Backends: Backends{
 			Sample: BackendProperties{

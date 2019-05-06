@@ -115,7 +115,7 @@ func (pdd *provisionDockDiscoverer) Init() error {
 			Name:        b.Name,
 			Description: b.Description,
 			DriverName:  b.DriverName,
-			Endpoint:    CONF.OsdsDock.DnsEndpoint,
+			Endpoint:    CONF.OsdsDock.ApiEndpoint,
 			NodeId:      host,
 			Type:        model.DockTypeProvioner,
 			Metadata:    map[string]string{"HostReplicationDriver": CONF.OsdsDock.HostBasedReplicationDriver},
@@ -227,13 +227,13 @@ func (add *attachDockDiscoverer) Discover() error {
 		}
 	}
 
-	segments := strings.Split(CONF.OsdsDock.DnsEndpoint, ":")
+	segments := strings.Split(CONF.OsdsDock.ApiEndpoint, ":")
 	endpointIp := segments[len(segments)-2]
 	add.dck = &model.DockSpec{
 		BaseModel: &model.BaseModel{
 			Id: uuid.NewV5(uuid.NamespaceOID, host+":"+endpointIp).String(),
 		},
-		Endpoint: CONF.OsdsDock.DnsEndpoint,
+		Endpoint: CONF.OsdsDock.ApiEndpoint,
 		NodeId:   host,
 		Type:     model.DockTypeAttacher,
 		Metadata: map[string]string{

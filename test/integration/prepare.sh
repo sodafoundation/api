@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,15 +26,12 @@ mkdir -p /etc/opensds
 cat > ${OPENSDS_CONF} << OPENSDS_GLOBAL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
-dns_endpoint = localhost:50040
 
 [osdslet]
-api_endpoint = 0.0.0.0:50049
-dns_endpoint = localhost:50049
+api_endpoint = localhost:50049
 
 [osdsdock]
-api_endpoint = 0.0.0.0:50050
-dns_endpoint = localhost:50050
+api_endpoint = localhost:50050
 # Choose the type of dock resource, only support 'provisioner' and 'attacher'.
 dock_type = provisioner
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.

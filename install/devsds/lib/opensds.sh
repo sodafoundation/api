@@ -25,7 +25,6 @@ osds:opensds:configuration(){
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
-dns_endpoint = $HOST_IP:50040
 auth_strategy = $OPENSDS_AUTH_STRATEGY
 # If https is enabled, the default value of cert file
 # is /opt/opensds-security/opensds/opensds-cert.pem, 
@@ -36,16 +35,14 @@ beego_https_key_file =
 
 [osdslet]
 api_endpoint = $HOST_IP:50049
-dns_endpoint = $HOST_IP:50049
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050
-dns_endpoint = $HOST_IP:50050
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
 enabled_backends = $OPENSDS_BACKEND_LIST
 
 [database]
-dns_endpoint = $HOST_IP:$ETCD_PORT,$HOST_IP:$ETCD_PEER_PORT
+endpoint = $HOST_IP:$ETCD_PORT,$HOST_IP:$ETCD_PEER_PORT
 driver = etcd
 
 OPENSDS_GLOBAL_CONFIG_DOC

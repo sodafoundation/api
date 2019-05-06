@@ -20,7 +20,6 @@ export BackendType="sample" # 'sample' is the default option, currently also sup
 mkdir -p /etc/opensds && sudo cat > /etc/opensds/opensds.conf <<OPENSDS_GLOABL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
-dns_endpoint = apiserver.opensds.svc.cluster.local:50040
 auth_strategy = keystone
 # If https is enabled, the default value of cert file
 # is /opt/opensds-security/opensds/opensds-cert.pem,
@@ -49,12 +48,10 @@ auth_url = http://authchecker.opensds.svc.cluster.local/identity
 auth_type = password
 
 [osdslet]
-api_endpoint = 0.0.0.0:50049
-dns_endpoint = controller.opensds.svc.cluster.local:50049
+api_endpoint = controller.opensds.svc.cluster.local:50049
 
 [osdsdock]
-api_endpoint = 0.0.0.0:50050
-dns_endpoint = dock.opensds.svc.cluster.local:50050
+api_endpoint = dock.opensds.svc.cluster.local:50050
 # Choose the type of dock resource, only support 'provisioner' and 'attacher'.
 dock_type = provisioner
 # Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
@@ -73,7 +70,7 @@ config_path = /etc/opensds/driver/lvm.yaml
 host_based_replication_driver = DRBD
 
 [database]
-dns_endpoint = db.opensds.svc.cluster.local:2379,db.opensds.svc.cluster.local:2380
+endpoint = db.opensds.svc.cluster.local:2379,db.opensds.svc.cluster.local:2380
 driver = etcd
 OPENSDS_GLOABL_CONFIG_DOC
 ```
