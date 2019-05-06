@@ -226,7 +226,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
-		AccessProtocol: "iscsi",
+		AccessProtocol: iscsiProtocol,
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -454,7 +454,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
-		AccessProtocol: "iscsi",
+		AccessProtocol: iscsiProtocol,
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {

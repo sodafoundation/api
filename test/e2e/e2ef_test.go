@@ -757,22 +757,6 @@ func execCmd(name string, arg ...string) (string, error) {
 	return string(info), err
 }
 
-// getHostIp return Host IP
-func getHostIp() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "127.0.0.1"
-	}
-
-	for _, address := range addrs {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			return ipnet.IP.String()
-		}
-	}
-
-	return "127.0.0.1"
-}
-
 //prepare attachment
 func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := PrepareVolume()
