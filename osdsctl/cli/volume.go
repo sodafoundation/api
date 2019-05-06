@@ -135,6 +135,8 @@ func volumeAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
+var volFormatters = FormatterList{"Metadata": JsonFormatter}
+
 func volumeCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	size, err := strconv.Atoi(args[0])
@@ -158,8 +160,8 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
-	PrintDict(resp, keys, FormatterList{})
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
+	PrintDict(resp, keys, volFormatters)
 }
 
 func volumeShowAction(cmd *cobra.Command, args []string) {
@@ -169,8 +171,8 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId"}
-	PrintDict(resp, keys, FormatterList{})
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId", "MultiAttach"}
+	PrintDict(resp, keys, volFormatters)
 }
 
 func volumeListAction(cmd *cobra.Command, args []string) {
@@ -187,7 +189,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId"}
-	PrintList(resp, keys, FormatterList{})
+	PrintList(resp, keys, volFormatters)
 }
 
 func volumeDeleteAction(cmd *cobra.Command, args []string) {
@@ -213,8 +215,8 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
-	PrintDict(resp, keys, FormatterList{})
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
+	PrintDict(resp, keys, volFormatters)
 }
 
 func volumeExtendAction(cmd *cobra.Command, args []string) {
@@ -233,6 +235,6 @@ func volumeExtendAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId"}
-	PrintDict(resp, keys, FormatterList{})
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
+	PrintDict(resp, keys, volFormatters)
 }

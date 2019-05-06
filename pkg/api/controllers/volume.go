@@ -89,6 +89,8 @@ func (v *VolumePortal) CreateVolume() {
 		return
 	}
 
+	log.V(8).Infof("create volume DB entry success %+v", result)
+
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	v.SuccessHandle(StatusAccepted, body)

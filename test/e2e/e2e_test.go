@@ -29,10 +29,13 @@ import (
 )
 
 var (
-	c *client.Client
-
-	localIqn  = "iqn.2017-10.io.opensds:volume:00000001"
+	c         *client.Client
 	profileId string
+)
+
+const (
+	iscsiProtocol = "iscsi"
+	localIqn      = "iqn.2017-10.io.opensds:volume:00000001"
 )
 
 func init() {
@@ -43,12 +46,12 @@ func init() {
 
 	prfs, _ := c.ListProfiles()
 	if len(prfs) == 0 {
-	        fmt.Println("Start creating profile...")
+		fmt.Println("Start creating profile...")
 		var body = &model.ProfileSpec{
 			Name:        "default",
 			Description: "default policy",
 		}
-                prf, err := c.CreateProfile(body)
+		prf, err := c.CreateProfile(body)
 		if err != nil {
 			fmt.Printf("create profile failed: %v\n", err)
 			return
@@ -88,6 +91,7 @@ func TestCreateVolume(t *testing.T) {
 		t.Error("create volume failed:", err)
 		return
 	}
+
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	// Check if the status of created volume is available.
@@ -225,6 +229,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
+		AccessProtocol: iscsiProtocol,
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -452,6 +457,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 			Ip:        getHostIp(),
 			Initiator: localIqn,
 		},
+		AccessProtocol: iscsiProtocol,
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -463,7 +469,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	atc, _ = c.GetVolumeAttachment(atc.Id)
 	if atc.Status != model.VolumeAttachAvailable {
 		// Run volume clean function if failed to prepare volume attachment.
-                cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
+		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
 		return nil, fmt.Errorf("The status of volume attachment is not available!")
 	}
 
@@ -493,7 +499,7 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 	}
 	if snp, _ = c.GetVolumeSnapshot(snp.Id); snp.Status != model.VolumeSnapAvailable {
 		// Run volume clean function if failed to prepare volume snapshot.
-                cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
+		cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
 		return nil, fmt.Errorf("The status of volume snapshot is not available!")
 	}
 
@@ -513,6 +519,7 @@ func cleanVolumeIfFailedOrFinished(t *testing.T, volID string) error {
 
 func cleanVolumeAndAttachmentIfFailedOrFinished(t *testing.T, volID, atcID string) error {
 	t.Log("Start cleaning volume attachment...")
+
 	if err := c.DeleteVolumeAttachment(atcID, nil); err != nil {
 		t.Error("Clean volume attachment failed:", err)
 		return err
