@@ -32,39 +32,39 @@ import (
 )
 
 // prometheus constants
-var PROMETHEUS_CONF_HOME string
-var PROMETHEUS_URL string
-var PROMETHEUS_CONF_FILE string
+var PrometheusConfHome string
+var PrometheusUrl string
+var PrometheusConfFile string
 
 // alert manager constants
-var ALERTMGR_CONF_HOME string
-var ALERTMGR_URL string
-var ALERTMGR_CONF_FILE string
+var AlertmgrConfHome string
+var AlertmgrUrl string
+var AlertmgrConfFile string
 
-var GRAFANA_CONF_HOME string
-var GRAFANA_RESTART_CMD string
-var GRAFANA_CONF_FILE string
+var GrafanaConfHome string
+var GrafanaRestartCmd string
+var GrafanaConfFile string
 
-var RELOAD_PATH string
-var BACKUP_EXTENSION string
+var ReloadPath string
+var BackupExtension string
 
 func init() {
 
 	// TODO Prakash read these from conf and save to these variables
-	RELOAD_PATH = "/-/reload"
-	BACKUP_EXTENSION = ".bak"
+	ReloadPath = "/-/reload"
+	BackupExtension = ".bak"
 
-	PROMETHEUS_CONF_HOME = "/etc/prometheus/"
-	PROMETHEUS_URL = "http://localhost:9090"
-	PROMETHEUS_CONF_FILE = "prometheus.yml"
+	PrometheusConfHome = "/etc/prometheus/"
+	PrometheusUrl = "http://localhost:9090"
+	PrometheusConfFile = "prometheus.yml"
 
-	ALERTMGR_CONF_HOME = "/root/alertmanager-0.16.2.linux-amd64/"
-	ALERTMGR_URL = "http://localhost:9093"
-	ALERTMGR_CONF_FILE = "alertmanager.yml"
+	AlertmgrConfHome = "/root/alertmanager-0.16.2.linux-amd64/"
+	AlertmgrUrl = "http://localhost:9093"
+	AlertmgrConfFile = "alertmanager.yml"
 
-	GRAFANA_CONF_HOME = "/etc/grafana/"
-	GRAFANA_RESTART_CMD = "grafana-server"
-	GRAFANA_CONF_FILE = "grafana.ini"
+	GrafanaConfHome = "/etc/grafana/"
+	GrafanaRestartCmd = "grafana-server"
+	GrafanaConfFile = "grafana.ini"
 }
 
 func NewFileOpsPortal() *FileOpsPortal {
@@ -79,41 +79,36 @@ type FileOpsPortal struct {
 	CtrClient client.Client
 }
 
-func (this *FileOpsPortal) UploadConfFile() {
+func (f *FileOpsPortal) UploadConfFile() {
 
-	m, _ := this.GetParameters()
+	m, _ := f.GetParameters()
 	confType := m["conftype"][0]
 
 	switch confType {
 	case "prometheus":
-		{
-			DoUpload(this, PROMETHEUS_CONF_HOME, PROMETHEUS_URL, RELOAD_PATH, true)
-		}
+		DoUpload(f, PrometheusConfHome, PrometheusUrl, ReloadPath, true)
 	case "alertmanager":
-		{
-			DoUpload(this, ALERTMGR_CONF_HOME, ALERTMGR_URL, RELOAD_PATH, true)
-		}
+		DoUpload(f, AlertmgrConfHome, AlertmgrUrl, ReloadPath, true)
 	case "grafana":
-		{
-			// for grafana, there is no reload endpoint to call
-			DoUpload(this, GRAFANA_CONF_HOME, "", "", false)
-			// to reload the configuration, run the reload command for grafana
-			cmd := exec.Command("systemctl", "restart", GRAFANA_RESTART_CMD)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err := cmd.Run()
-			if err != nil {
-				log.Fatalf("restart grafana failed with %s\n", err)
-			}
-			return
+		// for grafana, there is no reload endpoint to call
+		DoUpload(f, GrafanaConfHome, "", "", false)
+		// to reload the configuration, run the reload command for grafana
+		cmd := exec.Command("systemctl", "restart", GrafanaRestartCmd)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			log.Fatalf("restart grafana failed with %s\n", err)
 		}
+		return
+
 	}
 }
 
-func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath string, toCallReloadEndpoint bool) {
+func DoUpload(fileOpsPortal *FileOpsPortal, confHome string, url string, reloadPath string, toCallReloadEndpoint bool) {
 
 	// get the uploaded file
-	f, h, _ := this.GetFile("conf_file")
+	f, h, _ := fileOpsPortal.GetFile("conf_file")
 
 	// get the path to save the configuration
 	path := confHome + h.Filename
@@ -122,7 +117,7 @@ func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath strin
 	fCloseErr := f.Close()
 	if fCloseErr != nil {
 		log.Errorf("error closing uploaded file %s", h.Filename)
-		this.ErrorHandle(model.ErrorInternalServer, fCloseErr.Error())
+		fileOpsPortal.ErrorHandle(model.ErrorInternalServer, fCloseErr.Error())
 		return
 	}
 
@@ -130,20 +125,20 @@ func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath strin
 	_, currErr := os.Stat(path)
 
 	// make backup path
-	backupPath := path + BACKUP_EXTENSION
+	backupPath := path + BackupExtension
 
 	if currErr == nil {
 		// current configuration exists, back it up
 		fRenameErr := os.Rename(path, backupPath)
 		if fRenameErr != nil {
 			log.Errorf("error renaming file %s to %s", path, backupPath)
-			this.ErrorHandle(model.ErrorInternalServer, fRenameErr.Error())
+			fileOpsPortal.ErrorHandle(model.ErrorInternalServer, fRenameErr.Error())
 			return
 		}
 	}
 
 	// save file to disk
-	fSaveErr := this.SaveToFile("conf_file", path)
+	fSaveErr := fileOpsPortal.SaveToFile("conf_file", path)
 	if fSaveErr != nil {
 		log.Errorf("error saving file %s", path)
 	} else {
@@ -151,54 +146,48 @@ func DoUpload(this *FileOpsPortal, confHome string, url string, reloadPath strin
 			reloadResp, reloadErr := http.Post(url+reloadPath, "application/json", nil)
 			if reloadErr != nil {
 				log.Errorf("Error on reload of configuration %s", reloadErr)
-				this.ErrorHandle(model.ErrorInternalServer, reloadErr.Error())
+				fileOpsPortal.ErrorHandle(model.ErrorInternalServer, reloadErr.Error())
 				return
 			}
 			respBody, readBodyErr := ioutil.ReadAll(reloadResp.Body)
 			if readBodyErr != nil {
 				log.Errorf("Error on reload of configuration %s", reloadErr)
-				this.ErrorHandle(model.ErrorInternalServer, readBodyErr.Error())
+				fileOpsPortal.ErrorHandle(model.ErrorInternalServer, readBodyErr.Error())
 				return
 			}
-			this.SuccessHandle(StatusOK, respBody)
+			fileOpsPortal.SuccessHandle(StatusOK, respBody)
 			return
 		}
-		this.SuccessHandle(StatusOK, nil)
+		fileOpsPortal.SuccessHandle(StatusOK, nil)
 		return
 	}
 }
 
-func (this *FileOpsPortal) DownloadConfFile() {
+func (f *FileOpsPortal) DownloadConfFile() {
 
-	m, _ := this.GetParameters()
+	m, _ := f.GetParameters()
 	confType := m["conftype"][0]
 
 	switch confType {
 	case "prometheus":
-		{
-			DoDownload(this, PROMETHEUS_CONF_HOME, PROMETHEUS_CONF_FILE)
-		}
+		DoDownload(f, PrometheusConfHome, PrometheusConfFile)
 	case "alertmanager":
-		{
-			DoDownload(this, ALERTMGR_CONF_HOME, ALERTMGR_CONF_FILE)
-		}
+		DoDownload(f, AlertmgrConfHome, AlertmgrConfFile)
 	case "grafana":
-		{
-			DoDownload(this, GRAFANA_CONF_HOME, GRAFANA_CONF_FILE)
-		}
+		DoDownload(f, GrafanaConfHome, GrafanaConfFile)
 	}
 }
 
-func DoDownload(this *FileOpsPortal, confHome string, confFile string) {
+func DoDownload(fileOpsPortal *FileOpsPortal, confHome string, confFile string) {
 	// get the path to the configuration file
 	path := confHome + confFile
 	// check, if file exists
 	_, currErr := os.Stat(path)
 	if currErr != nil && os.IsNotExist(currErr) {
 		log.Errorf("file %s not found", path)
-		this.ErrorHandle(model.ErrorNotFound, currErr.Error())
+		fileOpsPortal.ErrorHandle(model.ErrorNotFound, currErr.Error())
 		return
 	}
 	// file exists, download it
-	this.Ctx.Output.Download(path, path)
+	fileOpsPortal.Ctx.Output.Download(path, path)
 }

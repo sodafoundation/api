@@ -27,8 +27,8 @@ func init() {
 		beego.NewNamespace("/"+constants.APIVersion,
 
 			// All operations of file can be used for both admin and users.
-			beego.NSRouter("/uploadconf", controllers.NewFileOpsPortal(), "post:UploadConfFile"),
-			beego.NSRouter("/downloadconf", controllers.NewFileOpsPortal(), "get:DownloadConfFile"),
+			beego.NSRouter("/metrics/uploadconf", controllers.NewFileOpsPortal(), "post:UploadConfFile"),
+			beego.NSRouter("/metrics/downloadconf", controllers.NewFileOpsPortal(), "get:DownloadConfFile"),
 		)
 	beego.AddNamespace(filens)
 }
