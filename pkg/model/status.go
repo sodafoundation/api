@@ -47,7 +47,7 @@ const (
 
 // volume attach status
 const (
-	VolumeAttacing       = "attaching"
+	VolumeAttaching      = "attaching"
 	VolumeAttached       = "attached"
 	VolumeDetached       = "detached"
 	VolumeReserved       = "reserved"

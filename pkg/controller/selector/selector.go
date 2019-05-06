@@ -44,15 +44,15 @@ func NewSelector() Selector {
 }
 
 // SelectSupportedPoolForVolume
-func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.StoragePoolSpec, error) {
+func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.StoragePoolSpec, error) {
 	var prf *model.ProfileSpec
 	var err error
 
-	if in.ProfileId == "" {
+	if vol.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(c.NewAdminContext())
 	} else {
-		prf, err = db.C.GetProfile(c.NewAdminContext(), in.ProfileId)
+		prf, err = db.C.GetProfile(c.NewAdminContext(), vol.ProfileId)
 	}
 	if err != nil {
 		log.Error("Get profile failed: ", err)
@@ -65,19 +65,26 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 	}
 
 	// Generate filter request according to the rules defined in profile.
-	fltRequest := func(prf *model.ProfileSpec, in *model.VolumeSpec) map[string]interface{} {
+	fltRequest := func(prf *model.ProfileSpec, vol *model.VolumeSpec) map[string]interface{} {
 		var filterRequest map[string]interface{}
 		filterRequest = prf.CustomProperties.GetCapabilitiesProperties()
+
+		if v, ok := filterRequest["multiAttach"]; ok && v == "<is> true" {
+			log.Info("change volume multiAttach flag to be true.")
+			vol.MultiAttach = true
+		}
+
 		// Insert some basic rules.
-		filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(in.Size))
-		if in.AvailabilityZone != "" {
-			filterRequest["availabilityZone"] = in.AvailabilityZone
+		filterRequest["freeCapacity"] = ">= " + strconv.Itoa(int(vol.Size))
+		if vol.AvailabilityZone != "" {
+			filterRequest["availabilityZone"] = vol.AvailabilityZone
 		} else {
 			filterRequest["availabilityZone"] = "default"
 		}
-		if in.PoolId != "" {
-			filterRequest["id"] = in.PoolId
+		if vol.PoolId != "" {
+			filterRequest["id"] = vol.PoolId
 		}
+
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
@@ -127,8 +134,9 @@ func (s *selector) SelectSupportedPoolForVolume(in *model.VolumeSpec) (*model.St
 			}
 		}
 		return filterRequest
-	}(prf, in)
+	}(prf, vol)
 
+	log.Infof("The filter request for pool is %v", fltRequest)
 	supportedPools, err := SelectSupportedPools(1, fltRequest, pools)
 	if err != nil {
 		log.Error("Filter supported pools failed: ", err)

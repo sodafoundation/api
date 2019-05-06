@@ -19,6 +19,7 @@ pool:
   StoragePool001:
     storageType: block
     availabilityZone: dorado1
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin

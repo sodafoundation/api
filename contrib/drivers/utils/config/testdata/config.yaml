@@ -3,6 +3,7 @@ pool:
   rbd:
     storageType: block
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin
