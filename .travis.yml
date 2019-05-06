@@ -46,8 +46,8 @@ install:
   - make all
 
 script:
-  - ./script/CI/coverage
-  - ./script/CI/test
+  - ./install/CI/coverage
+  - ./install/CI/test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
