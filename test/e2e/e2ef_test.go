@@ -19,7 +19,6 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"os/exec"
 	"strings"
 	"testing"
