@@ -84,6 +84,8 @@ service Controller {
 	
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+
+    rpc GetMetrics (GetMetricsOpts) returns (GenericResponse){}
 }
 
 service ProvisionDock {
@@ -269,6 +271,8 @@ message DeleteVolumeSnapshotOpts {
     string driverName = 4;
     // The Context
     string context = 5;
+    // The Serialized profile
+    string profile = 6;
 }
 
 // CreateVolumeAttachmentOpts is a structure which indicates all required
@@ -688,5 +692,13 @@ message GenericResponse {
         Result result = 1;
         Error error = 2;
     }
+}
+
+message GetMetricsOpts {
+    string instanceId = 1;
+    string metricName = 2;
+    string startTime = 3;
+    string endTime = 4;
+    string context = 5;
 }
 

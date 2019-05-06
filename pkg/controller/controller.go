@@ -28,6 +28,7 @@ import (
 	log "github.com/golang/glog"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
+	"github.com/opensds/opensds/pkg/controller/metrics"
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
@@ -48,19 +49,22 @@ const (
 
 func NewController(port string) *Controller {
 	volCtrl := volume.NewController()
+	metricsCtrl := metrics.NewController()
 	return &Controller{
-		selector:         selector.NewSelector(),
-		volumeController: volCtrl,
-		drController:     dr.NewController(volCtrl),
-		Port:             port,
+		selector:          selector.NewSelector(),
+		volumeController:  volCtrl,
+		metricsController: metricsCtrl,
+		drController:      dr.NewController(volCtrl),
+		Port:              port,
 	}
 }
 
 type Controller struct {
-	selector         selector.Selector
-	volumeController volume.Controller
-	drController     dr.Controller
-	policyController policy.Controller
+	selector          selector.Selector
+	volumeController  volume.Controller
+	metricsController metrics.Controller
+	drController      dr.Controller
+	policyController  policy.Controller
 
 	Port string
 }
@@ -123,11 +127,22 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
+
+	log.V(8).Infof("controller create volume:  get volume from db %+v", vol)
+
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 	if err != nil {
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		return pb.GenericResponseError(err), err
 	}
+
+	// The default value of multi-attach is false, if it becomes true, then update into db
+	log.V(8).Infof("update volume %+v", vol)
+
+	if vol.MultiAttach {
+		db.C.UpdateVolume(ctx, vol)
+	}
+
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -249,13 +264,7 @@ func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpt
 	}
 	opt.PoolId = pool.Id
 	opt.PoolName = pool.Name
-
-	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
-	if err != nil {
-		log.Error("when search profile in db:", err)
-		rollBack = true
-		return pb.GenericResponseError(err), err
-	}
+	prf := model.NewProfileFromJson(opt.Profile)
 
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
@@ -305,30 +314,33 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
-		log.Error("get volume failed in create volume attachment method: ", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
+
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 
 	pol, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
-		log.Error("get pool failed in create volume attachment method: ", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("get pool failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
+
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
 		protocol = "iscsi"
 	}
+
 	opt.AccessProtocol = protocol
 
 	dockInfo, err := db.C.GetDock(ctx, pol.DockId)
 	if err != nil {
-		log.Error("when search supported dock resource:", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("when search supported dock resource: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
@@ -336,12 +348,26 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	result, err := c.volumeController.CreateVolumeAttachment(opt)
 	if err != nil {
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		return pb.GenericResponseError(err), err
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+		msg := fmt.Sprintf("create volume attachment failed: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 
 	result.AccessProtocol = protocol
-	db.C.UpdateStatus(ctx, result, model.VolumeAttachAvailable)
-	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
+	if vol.Status == model.VolumeAttaching {
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
+	} else {
+		msg := fmt.Sprintf("wrong volume status when volume attachment creation completed")
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
+	}
+
+	result.Status = model.VolumeAttachAvailable
+
+	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
+	// Save changes to db.
+	db.C.UpdateVolumeAttachment(ctx, opt.Id, result)
 
 	return pb.GenericResponseResult(result), nil
 }
@@ -354,29 +380,33 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
-		log.Error("get volume failed in delete volume attachment method: ", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("get volume failed in delete volume attachment method: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
-		log.Error("when search supported dock resource: ", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("when search supported dock resource: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
+
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
 	if err = c.volumeController.DeleteVolumeAttachment(opt); err != nil {
+		msg := fmt.Sprintf("delete volume attachment failed: %v", err)
+		log.Error(msg)
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
-		return pb.GenericResponseError(err), err
+		return pb.GenericResponseError(msg), err
 	}
+
 	if err = db.C.DeleteVolumeAttachment(ctx, opt.Id); err != nil {
-		log.Error("error occurred in dock module when delete volume attachment in db: ", err)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
-		return pb.GenericResponseError(err), err
+		msg := fmt.Sprintf("error occurred in dock module when delete volume attachment in db: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 
 	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
@@ -393,18 +423,10 @@ func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateV
 	if opt.Metadata == nil {
 		opt.Metadata = map[string]string{}
 	}
-	// Get snapshot profile
-	if opt.ProfileId != "" {
-		profile, err := db.C.GetProfile(ctx, opt.ProfileId)
-		if err != nil {
-			log.Error("when get profile resource: ", err)
-			db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
-			return pb.GenericResponseError(err), err
-		}
 
-		if profile.SnapshotProperties.Topology.Bucket != "" {
-			opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
-		}
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
 	}
 
 	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
@@ -447,7 +469,12 @@ func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteV
 		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
 		return pb.GenericResponseError(err), err
 	}
+
 	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+	prf := model.NewProfileFromJson(opt.Profile)
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
+	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
@@ -832,4 +859,29 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 	}
 
 	return pb.GenericResponseResult(nil), nil
+}
+func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in controller get metrics methods")
+
+	var result *[]model.MetricSpec
+	var err error
+
+	if opt.StartTime == "" && opt.EndTime == "" {
+		// no start and end time specified, get the latest value of this metric
+		result, err = c.metricsController.GetLatestMetrics(opt)
+	} else if opt.StartTime == opt.EndTime {
+		// same start and end time specified, get the value of this metric at that timestamp
+		result, err = c.metricsController.GetInstantMetrics(opt)
+	} else {
+		// range of start and end time is specified
+		result, err = c.metricsController.GetRangeMetrics(opt)
+	}
+
+	if err != nil {
+		log.Errorf("get metrics failed: %s\n", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), err
 }

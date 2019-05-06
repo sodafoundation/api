@@ -47,6 +47,7 @@ func TestSetup(t *testing.T) {
 			"0": {
 				StorageType:      "block",
 				AvailabilityZone: "default",
+				MultiAttach:      true,
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
@@ -66,6 +67,7 @@ func TestSetup(t *testing.T) {
 			"1": {
 				StorageType:      "block",
 				AvailabilityZone: "default",
+				MultiAttach:      true,
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",

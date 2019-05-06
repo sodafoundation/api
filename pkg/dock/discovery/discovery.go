@@ -129,7 +129,6 @@ func (pdd *provisionDockDiscoverer) Init() error {
 func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info
 	pdd.pols = pdd.pols[:0]
-
 	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
 		pols, err := drivers.Init(dck.DriverName).ListPools()

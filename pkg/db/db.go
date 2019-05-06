@@ -55,6 +55,30 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
+        CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
+
+	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
+
+	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
+
+	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(ctx *c.Context, fshareID string) error
+
+	CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
+
+	UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error
+
 	CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error)
 
 	GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error)
