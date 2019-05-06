@@ -1460,9 +1460,6 @@ definitions:
             type: string
           multiAttach:
             type: boolean
-            enum:
-              - false
-              - true
           status:
             type: string
             enum:
@@ -1651,9 +1648,6 @@ definitions:
             type: string
           multiAttach:
             type: boolean
-            enum:
-              - false
-              - true
           description:
             type: string
           size:

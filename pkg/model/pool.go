@@ -57,7 +57,7 @@ type StoragePoolSpec struct {
 
 	// MultiAttach
 	// If true, this volume can attach to more than one instance. Default will be multiattach:False
-	MultiAttach bool `json:"multiAttach,omitempty"`
+	MultiAttach bool `json:"multiAttach"`
 
 	// The storage type of the storage pool.
 	// One of: "block", "file" or "object".
