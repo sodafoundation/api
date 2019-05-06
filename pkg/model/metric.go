@@ -71,13 +71,9 @@ type MetricSpec struct {
 	  the associated component type as key and component name as value
 	  Example: associator[pool]=pool1 */
 
-	Labels map[string]string `json:"associator,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 
 	// Following fields can be used to form a unique metric name
-
-	// source -\> Node/Dock
-
-	//Source string `json:"source,omitempty"`
 
 	// component -\> disk/logicalVolume/VG etc
 
@@ -92,7 +88,7 @@ type MetricSpec struct {
 	Unit string `json:"unit,omitempty"`
 
 	// Can be used to determine Total/Avg etc
-	Aggr_type string `json:"unit,omitempty"`
+	Aggr_type string `json:"aggr_type,omitempty"`
 
 	/*If isAggregated ='True' then type of aggregation can be set in this field
 
