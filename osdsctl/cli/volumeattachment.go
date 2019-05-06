@@ -114,7 +114,7 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId", "AttachMode"}
+		"Mountpoint", "Status", "VolumeId", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
@@ -125,7 +125,7 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId", "AccessProtocol", "AttachMode"}
+		"Mountpoint", "Status", "VolumeId", "AccessProtocol", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
@@ -168,6 +168,6 @@ func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId", "AttachMode"}
+		"Mountpoint", "Status", "VolumeId", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }

@@ -38,7 +38,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
-        "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 const (
@@ -1745,10 +1745,11 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		result.ReplicationDriverData = vol.ReplicationDriverData
 	}
 	if vol.MultiAttach {
-		result.MultiAttach = true
+		result.MultiAttach = vol.MultiAttach
 	}
-
-	result.GroupId = vol.GroupId
+	if vol.GroupId != "" {
+		result.GroupId = vol.GroupId
+	}
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -2075,7 +2076,6 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 			result.ConnectionData[k] = v
 		}
 	}
-	result.ConnectionData = attachment.ConnectionData
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 

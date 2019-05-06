@@ -50,6 +50,11 @@ type NvmeoftgtTarget struct {
 	TgtConfDir string
 }
 
+func (t *NvmeoftgtTarget) init() {
+	t.execCmd("modprobe", "nvmet")
+	t.execCmd("modprobe", "nvmet-rdma")
+}
+
 func (t *NvmeoftgtTarget) getTgtConfPath(volId string) string {
 	return NvmetDir + "/" + opensdsNvmeofPrefix + volId
 }

@@ -34,6 +34,7 @@ const (
 	nvmepool     = "opensds-volumes-nvme"
 	defaultgroup = "opensds-volumes-default"
 	localIqn     = "iqn.2017-10.io.opensds:volume:00000001"
+	iscsi        = "iscsi"
 )
 
 var u *client.Client
@@ -376,7 +377,7 @@ func TestCreateAttach(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId:       vol.Id,
 		HostInfo:       model.HostInfo{},
-		AccessProtocol: "iscsi",
+		AccessProtocol: iscsi,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
@@ -784,7 +785,7 @@ func PrepareAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId:       vol.Id,
 		HostInfo:       model.HostInfo{},
-		AccessProtocol: "iscsi",
+		AccessProtocol: iscsi,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {
