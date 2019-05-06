@@ -99,7 +99,7 @@ func volumeAttachmentAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionInfo": JsonFormatter}
+var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionInfo": JsonFormatter, "Metadata": JsonFormatter}
 
 func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
