@@ -146,7 +146,6 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSp
 		return metrics, err
 
 	}
-	//no response
 	return nil, err
 }
 
@@ -202,13 +201,11 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricS
 		return metrics, err
 
 	}
-	//no response
 	return nil, err
 }
 
 func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
-	//var metrics []model.MetricSpec
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query_range?query=" + opt.MetricName + "&start=" + opt.StartTime + "&end=" + opt.EndTime + "&step=30")
 	if err != nil {
@@ -261,7 +258,6 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 		return metrics, err
 
 	}
-	//no response
 	return nil, err
 }
 
