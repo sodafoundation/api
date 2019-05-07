@@ -21,6 +21,7 @@ package model
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/golang/glog"
@@ -95,10 +96,8 @@ type ProvisioningPropertiesSpec struct {
 }
 
 func (pps ProvisioningPropertiesSpec) IsEmpty() bool {
-	if (ProvisioningPropertiesSpec{}) == pps {
-		return true
-	}
-	return false
+	r := reflect.DeepEqual(ProvisioningPropertiesSpec{}, pps)
+	return r
 }
 
 type ReplicationPropertiesSpec struct {

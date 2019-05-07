@@ -48,6 +48,7 @@ func TestCreateProfile(t *testing.T) {
 	var fakeBody = `{
 		"name": "default",
 		"description": "default policy",
+		"storageType": "block",
 		"customProperties": {
 			"dataStorage": {
 				"provisioningPolicy": "Thin",
@@ -67,6 +68,7 @@ func TestCreateProfile(t *testing.T) {
 			BaseModel:   &model.BaseModel{},
 			Name:        "default",
 			Description: "default policy",
+			StorageType: "block",
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
@@ -360,6 +362,7 @@ func TestRemoveCustomProperty(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
 		assertTestResult(t, w.Code, 200)
 	})
 }
