@@ -1,4 +1,4 @@
-// Copyright (c) 2019 OpenSDS Authors All Rights Reserved.
+// Copyright (c) 2019 OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ func init() {
 
 	// add router for metric api
 	metricns :=
-		beego.NewNamespace("/"+constants.APIVersion,
+		beego.NewNamespace("/"+constants.APIVersion+":tenantId/metrics",
 
 			// All operations of metrics can be used for both admin and users.
-			beego.NSRouter("/:tenantId/metrics", controllers.NewMetricsPortal(), "get:GetMetrics"),
+			beego.NSRouter("/", controllers.NewMetricsPortal(), "get:GetMetrics"),
 		)
 	beego.AddNamespace(metricns)
 }
