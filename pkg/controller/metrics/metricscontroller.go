@@ -100,7 +100,7 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSp
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName)
 	if err != nil {
-		log.Errorf("The HTTP query request failed with error %s\n", err)
+		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 		log.Infof("response data is %s", string(data))
@@ -155,7 +155,7 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricS
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName + "&time=" + opt.StartTime)
 	if err != nil {
-		log.Errorf("The HTTP query request failed with error %s\n", err)
+		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 		log.Infof("response data is %s", string(data))
@@ -210,7 +210,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 	// make a call to Prometheus, convert the response to our format, return
 	response, err := http.Get("http://localhost:9090/api/v1/query_range?query=" + opt.MetricName + "&start=" + opt.StartTime + "&end=" + opt.EndTime + "&step=30")
 	if err != nil {
-		log.Errorf("The HTTP query request failed with error %s\n", err)
+		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 		log.Info(string(data))
@@ -219,7 +219,7 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 		var fv RangeMetricReponseFromPrometheus
 		err0 := json.Unmarshal(data, &fv)
 		if err0 != nil {
-			log.Infof("unmarshell operation failed %s\n", err0)
+			log.Errorf("unmarshell operation failed %s\n", err0)
 		}
 		var metrics []*model.MetricSpec
 		// now convert to our repsonse struct, so we can marshal it and send out the JSON
