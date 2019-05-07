@@ -31,6 +31,7 @@ var (
 			},
 			Name:             "default",
 			Description:      "default policy",
+			StorageType:      "block",
 			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
@@ -39,6 +40,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
+			StorageType: "block",
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
@@ -112,6 +114,7 @@ var (
 			},
 			Name:             "sample-pool-02",
 			Description:      "This is the second sample storage pool for testing",
+			StorageType:      "block",
 			TotalCapacity:    int64(200),
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
@@ -310,14 +313,16 @@ var (
 	ByteProfile = `{
 		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 		"name": "default",
-		"description": "default policy"
+		"description": "default policy",
+		"storageType": "block"
 	}`
 
 	ByteProfiles = `[
 		{
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name": "default",
-			"description": "default policy"
+			"description": "default policy",
+			"storageType": "block"
 		},
 		{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
@@ -599,12 +604,14 @@ var (
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name":        "default",
 			"description": "default policy",
+			"storageType": "block",
 			"customProperties": {}
 		}`,
 		`{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name":        "silver",
 			"description": "silver policy",
+			"storageType": "block",
 			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
