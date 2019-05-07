@@ -34,6 +34,7 @@ func TestParse(t *testing.T) {
 			"rbd": {
 				StorageType:      "block",
 				AvailabilityZone: "default",
+				MultiAttach:      true,
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",

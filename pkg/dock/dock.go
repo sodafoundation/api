@@ -185,6 +185,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
+	log.V(8).Infof("CreateVolumeAttachment result: %v", atc)
 	return pb.GenericResponseResult(atc), nil
 }
 
