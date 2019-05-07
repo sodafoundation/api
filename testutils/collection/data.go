@@ -588,6 +588,75 @@ var (
 			"updatedAt": "2017-07-10T14:36:58.014Z"
 		}
 	]`
+
+	ByteFileShare = `{
+			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-fileshare",
+			"description": "This is a sample fileshare for testing",
+			"size": 1,
+			"status": "available",
+			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca"
+		}`
+
+	ByteFileShares = `[
+		{
+			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-fileshare",
+			"description": "This is a sample fileshare for testing",
+			"size": 1,
+			"status": "available",
+			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca"
+		},
+		{
+			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-fileshare",
+			"description": "This is a sample fileshare for testing",
+			"size": 1,
+			"status": "available",
+			"poolId": "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			"profileId": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"snapshotId": "a5965ebe-dg2c-434t-b28e-f373746a71ca"
+		}
+	]`
+
+	ByteFileShareSnapshot = `{
+			"id": "3769855c-a102-11e7-b772-17b880d2f537",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-snapshot-01",
+			"description": "This is the first sample snapshot for testing",
+			"snapshotSize": 1,
+			"status": "available"
+		}`
+
+	ByteFileShareSnapshots = `[
+		{
+			"id": "3769855c-a102-11e7-b772-17b880d2f537",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-snapshot-01",
+			"description": "This is the first sample snapshot for testing",
+			"snapshotSize": 1,
+			"status": "available"
+		},
+		{
+			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-snapshot-02",
+			"description": "This is the second sample snapshot for testing",
+			"snapshotSize": 1,
+			"status": "available"
+		}
+	]`
 )
 
 // The StringSlice*** variable here is designed for unit test in etcd package.

@@ -41,6 +41,7 @@ type Client struct {
 	*VolumeMgr
 	*VersionMgr
 	*ReplicationMgr
+	*FileShareMgr
 
 	cfg *Config
 }
@@ -96,6 +97,7 @@ func NewClient(c *Config) (*Client, error) {
 		VolumeMgr:      NewVolumeMgr(r, c.Endpoint, t),
 		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
 		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
+		FileShareMgr:   NewFileShareMgr(r, c.Endpoint, t),
 	}, nil
 }
 
