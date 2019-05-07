@@ -1,4 +1,4 @@
-// Copyright (c) 2019 OpenSDS Authors All Rights Reserved.
+// Copyright (c) 2019 OpenSDS Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@ func init() {
 		beego.NewNamespace("/"+constants.APIVersion,
 
 			// All operations of file can be used for both admin and users.
-			beego.NSRouter("/metrics/uploadconf", controllers.NewFileOpsPortal(), "post:UploadConfFile"),
-			beego.NSRouter("/metrics/downloadconf", controllers.NewFileOpsPortal(), "get:DownloadConfFile"),
+			beego.NSRouter("/metrics/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
+			beego.NSRouter("/metrics/downloadconf", controllers.NewMetricsPortal(), "get:DownloadConfFile"),
 		)
 	beego.AddNamespace(filens)
 }
-
