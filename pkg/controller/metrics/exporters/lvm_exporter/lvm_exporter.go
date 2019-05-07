@@ -30,8 +30,8 @@ import (
 
 const DefaultConfigFile = "resources.yaml"
 
-//struct for lvm  collector that contains pointers
-//to prometheus descriptors for each metric we expose.
+// struct for lvm  collector that contains pointers
+// to prometheus descriptors for each metric we expose.
 type lvmCollector struct {
 	mu sync.Mutex
 	//volume metrics
@@ -50,9 +50,8 @@ type lvmCollector struct {
 	DiskUtilization     *prometheus.Desc
 }
 
-/* rr */
-//constructor for lvm collector that
-//initializes every descriptor and returns a pointer to the collector
+// constructor for lvm collector that
+// initializes every descriptor and returns a pointer to the collector
 func newLvmCollector() *lvmCollector {
 	var labelKeys = []string{"device"}
 
@@ -109,8 +108,8 @@ func newLvmCollector() *lvmCollector {
 
 }
 
-//Describe function.
-//It essentially writes all descriptors to the prometheus desc channel.
+// Describe function.
+// It essentially writes all descriptors to the prometheus desc channel.
 func (c *lvmCollector) Describe(ch chan<- *prometheus.Desc) {
 
 	//Update this section with the each metric you create for a given collector
@@ -137,7 +136,7 @@ type Configs struct {
 	Cfgs []*Config `resources`
 }
 
-//Collect implements required collect function for all promehteus collectors
+// Collect implements required collect function for all promehteus collectors
 func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 
 	c.mu.Lock()
@@ -156,7 +155,6 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 		log.Fatalf("error: %v", err)
 	}
 
-	//volumeList := []string{"sda", "loop0"}
 	metricDriver := lvm.MetricDriver{}
 	metricDriver.Setup()
 	for _, resource := range config.Cfgs {
@@ -190,7 +188,6 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 				metricArray, _ := metricDriver.CollectMetrics(metricList, volume)
 				for _, metric := range metricArray {
 					lableVals := []string{metric.Labels["device"]}
-					//unitLabel := "Unit:"+metric.Unit
 					switch metric.Name {
 					case "IOPS":
 						ch <- prometheus.MustNewConstMetric(c.DiskIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)

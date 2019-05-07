@@ -88,7 +88,7 @@ type MetricSpec struct {
 	Unit string `json:"unit,omitempty"`
 
 	// Can be used to determine Total/Avg etc
-	Aggr_type string `json:"aggr_type,omitempty"`
+	AggrType string `json:"aggrType,omitempty"`
 
 	/*If isAggregated ='True' then type of aggregation can be set in this field
 
