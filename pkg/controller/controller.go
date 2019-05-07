@@ -863,7 +863,7 @@ func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolu
 func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
 	log.Info("in controller get metrics methods")
 
-	var result *[]model.MetricSpec
+	var result []*model.MetricSpec
 	var err error
 
 	if opt.StartTime == "" && opt.EndTime == "" {
