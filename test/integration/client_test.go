@@ -38,6 +38,7 @@ func TestClientCreateProfile(t *testing.T) {
 	var body = &model.ProfileSpec{
 		Name:        "silver",
 		Description: "silver policy",
+		StorageType: "block",
 		CustomProperties: model.CustomPropertiesSpec{
 			"diskType": "SAS",
 		},

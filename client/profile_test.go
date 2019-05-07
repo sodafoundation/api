@@ -32,6 +32,7 @@ func TestCreateProfile(t *testing.T) {
 		},
 		Name:        "default",
 		Description: "default policy",
+		StorageType: "block",
 	}
 
 	prf, err := fpr.CreateProfile(&model.ProfileSpec{})
@@ -54,6 +55,7 @@ func TestGetProfile(t *testing.T) {
 		},
 		Name:        "default",
 		Description: "default policy",
+		StorageType: "block",
 	}
 
 	prf, err := fpr.GetProfile(prfID)
@@ -76,6 +78,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "default",
 			Description: "default policy",
+			StorageType: "block",
 		},
 		{
 			BaseModel: &model.BaseModel{
