@@ -16,8 +16,9 @@ env:
   # - TARGET=arm
   # - TARGET=386
   # - TARGET=ppc64le
-  global:
-  - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
+
+services:
+  - docker
 
 before_install:
   - sudo apt-get update
