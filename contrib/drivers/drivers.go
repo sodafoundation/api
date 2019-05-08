@@ -31,7 +31,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"github.com/opensds/opensds/testutils/driver"
+	sample "github.com/opensds/opensds/testutils/driver"
 )
 
 // VolumeDriver is an interface for exposing some operations of different volume

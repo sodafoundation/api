@@ -15,10 +15,11 @@ package adapters
 
 import (
 	"context"
+	"strconv"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/segmentio/kafka-go"
-	"strconv"
 )
 
 type KafkaMetricsSender struct {
