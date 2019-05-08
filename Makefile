@@ -59,6 +59,9 @@ test: build
 protoc:
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
 
+goimports:
+	goimports -w $(shell go list -f {{.Dir}} ./... |grep -v /vendor/)
+
 clean:
 	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock
 

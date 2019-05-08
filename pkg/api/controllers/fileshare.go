@@ -153,7 +153,7 @@ func (f *FileSharePortal) DeleteFileShare() {
 		return
 	}
 
-        if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
+	if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
@@ -303,4 +303,3 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 	f.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }
-

@@ -36,7 +36,7 @@ func TestContains(t *testing.T) {
 	var permissions = []string{"Read", "Write", "Execute"}
 	var testkey = "Read"
 	if !Contains(permissions, testkey) {
-			t.Errorf("%v is not contains in %v\n", testkey, permissions)
+		t.Errorf("%v is not contains in %v\n", testkey, permissions)
 	}
 }
 
