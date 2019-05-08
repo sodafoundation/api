@@ -85,3 +85,45 @@ func (m *MetricsPortal) GetMetrics() {
 
 	return
 }
+
+func (m *MetricsPortal) CollectMetrics() {
+	if !policy.Authorize(m.Ctx, "metrics:collect") {
+		return
+	}
+	ctx := c.GetContext(m.Ctx)
+	var collMetricSpec = model.CollectMetricSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	// Unmarshal the request body
+	if err := json.NewDecoder(m.Ctx.Request.Body).Decode(&collMetricSpec); err != nil {
+		errMsg := fmt.Sprintf("parse collect metric request body failed: %s", err.Error())
+		m.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	// connect to the dock to collect metrics from the driver
+	if err := m.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Errorf("error when connecting controller client: %s", err.Error())
+		return
+	}
+	defer m.CtrClient.Close()
+
+	opt := &pb.CollectMetricsOpts{
+		InstanceId:  collMetricSpec.InstanceId,
+		MetricNames: collMetricSpec.Metrics,
+		Context:     ctx.ToJson(),
+	}
+
+	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)
+
+	if err != nil {
+		log.Errorf("collect metrics failed in controller service: %s", err.Error())
+		return
+	}
+
+	body, _ := json.Marshal(res)
+	m.SuccessHandle(StatusOK, body)
+
+	return
+}

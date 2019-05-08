@@ -49,6 +49,8 @@ type dockServer struct {
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
+	// Metrics driver to collect metrics
+	MetricDriver drivers.MetricDriver
 }
 
 // NewDockServer returns a dockServer instance.
@@ -458,4 +460,23 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 	}
 
 	return nil
+}
+
+// Collect the specified metrics from the metric driver
+func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in dock CollectMetrics methods")
+	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
+
+	defer drivers.Clean(ds.Driver)
+
+	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
+
+	result, err := ds.MetricDriver.CollectMetrics(opt.MetricNames, opt.InstanceId)
+
+	if err != nil {
+		log.Errorf("error occurred in dock module for collect metrics:%s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
 }

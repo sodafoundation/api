@@ -885,3 +885,34 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 
 	return pb.GenericResponseResult(result), err
 }
+
+func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in controller collect metrics methods")
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
+
+	if err != nil {
+		log.Errorf("get volume failed in CollectMetrics method: %s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Errorf("error when search dock in db by pool id: %s", err.Error())
+		return pb.GenericResponseError(err), err
+
+	}
+
+	c.metricsController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.metricsController.CollectMetrics(opt)
+	if err != nil {
+		log.Errorf("collectMetrics failed: %s", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
+}

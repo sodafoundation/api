@@ -20,7 +20,9 @@ This module implements a entry into the OpenSDS metrics controller service.
 package metrics
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -36,6 +38,7 @@ type Controller interface {
 	GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
+	CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectMetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
 }
 
@@ -264,4 +267,33 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {
 	c.DockInfo = dockInfo
+}
+
+func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectMetricSpec, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Errorf("error when connecting dock client:%s", err.Error())
+		return nil, err
+	}
+
+	response, err := c.Client.CollectMetrics(context.Background(), opt)
+	if err != nil {
+		log.Errorf("collect metrics failed in metrics controller:%s", err.Error())
+		return nil, err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to collect metrics in metrics controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	var res = &model.CollectMetricSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), res); err != nil {
+		log.Errorf("collect metrics failed in metrics controller:%s", err.Error())
+		return nil, err
+	}
+
+	return res, nil
+
 }
