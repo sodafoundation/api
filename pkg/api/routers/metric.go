@@ -22,22 +22,16 @@ import (
 
 func init() {
 
-	// add router for file ops api
-	filens :=
-		beego.NewNamespace("/"+constants.APIVersion,
-
-			// All operations of file can be used for both admin and users.
-			beego.NSRouter("/metrics/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
-			beego.NSRouter("/metrics/downloadconf", controllers.NewMetricsPortal(), "get:DownloadConfFile"),
-		)
-	beego.AddNamespace(filens)
-	
 	// add router for metric api
 	metricns :=
 		beego.NewNamespace("/"+constants.APIVersion+":tenantId/metrics",
 
 			// All operations of metrics can be used for both admin and users.
 			beego.NSRouter("/", controllers.NewMetricsPortal(), "get:GetMetrics"),
+
+			// All operations of file can be used for both admin and users.
+			beego.NSRouter("/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
+			beego.NSRouter("/downloadconf", controllers.NewMetricsPortal(), "get:DownloadConfFile"),
 		)
 	beego.AddNamespace(metricns)
 }
