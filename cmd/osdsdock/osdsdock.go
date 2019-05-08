@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
@@ -52,7 +53,7 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Construct dock module grpc server struct and run dock server process.
-	ds := dock.NewDockServer(CONF.OsdsDock.DockType, CONF.OsdsDock.ApiEndpoint)
+	ds := dock.NewDockServer(CONF.OsdsDock.DockType, constants.OpensdsDockBindEndpoint)
 	if err := ds.Run(); err != nil {
 		panic(err)
 	}

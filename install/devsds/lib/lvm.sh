@@ -122,6 +122,7 @@ pool:
   $DEFAULT_VOLUME_GROUP_NAME:
     diskType: NL-SAS
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin
@@ -151,6 +152,7 @@ cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
   $NVME_VOLUME_GROUP_NAME:
     diskType: NL-SAS
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin

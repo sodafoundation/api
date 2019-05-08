@@ -14,13 +14,14 @@
 package adapters
 
 import (
+	"os"
+	"strconv"
+	"time"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
-	"os"
-	"strconv"
-	"time"
 )
 
 var nodeExporterFolder = "/root/prom_nodeexporter_folder/"

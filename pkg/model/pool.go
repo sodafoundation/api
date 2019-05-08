@@ -55,6 +55,10 @@ type StoragePoolSpec struct {
 	// Default unit of FreeCapacity is GB.
 	FreeCapacity int64 `json:"freeCapacity,omitempty"`
 
+	// MultiAttach
+	// If true, this volume can attach to more than one instance. Default will be multiattach:False
+	MultiAttach bool `json:"multiAttach"`
+
 	// The storage type of the storage pool.
 	// One of: "block", "file" or "object".
 	StorageType string `json:"storageType,omitempty"`

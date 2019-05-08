@@ -85,7 +85,7 @@ func poolShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "DockId",
-		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "Extras"}
+		"AvailabilityZone", "TotalCapacity", "FreeCapacity", "StorageType", "MultiAttach", "Extras"}
 	PrintDict(pols, keys, FormatterList{"Extras": JsonFormatter})
 }
 
