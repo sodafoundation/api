@@ -26,7 +26,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Driver struct {
@@ -510,6 +510,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      c.Pool[p.Name].StorageType,
 			Extras:           c.Pool[p.Name].Extras,
 			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
+			MultiAttach:      c.Pool[p.Name].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ

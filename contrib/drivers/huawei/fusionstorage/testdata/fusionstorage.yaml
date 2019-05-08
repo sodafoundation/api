@@ -17,6 +17,7 @@ pool:
   0:
     storageType: block
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin
@@ -31,6 +32,7 @@ pool:
   1:
     storageType: block
     availabilityZone: default
+    multiAttach: true
     extras:
       dataStorage:
         provisioningPolicy: Thin
