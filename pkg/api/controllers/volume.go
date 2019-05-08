@@ -298,7 +298,7 @@ func (v *VolumePortal) DeleteVolume() {
 		v.SuccessHandle(StatusAccepted, nil)
 		return
 	}
-	
+
 	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
@@ -712,7 +712,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-	
+
 	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
@@ -745,7 +745,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		VolumeId: snapshot.VolumeId,
 		Metadata: snapshot.Metadata,
 		Context:  ctx.ToJson(),
-		Profile:   prf.ToJson(),
+		Profile:  prf.ToJson(),
 	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete volume snapthot failed in controller service:", err)

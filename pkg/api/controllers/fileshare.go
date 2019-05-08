@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ func (f *FileSharePortal) DeleteFileShare() {
 		return
 	}
 
-        if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
+	if err := db.C.DeleteFileShare(ctx, fshare.Id); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
@@ -303,4 +303,3 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 	f.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }
-
