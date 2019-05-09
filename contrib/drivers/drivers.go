@@ -19,7 +19,7 @@ plugin, just modify Init() and Clean() method.
 
 */
 
-package drivers
+package main
 
 import (
 	_ "github.com/opensds/opensds/contrib/backup/multicloud"
@@ -146,6 +146,9 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	switch resourceType {
 	case config.LVMDriverType:
 		d = &lvm.MetricDriver{}
+		break
+	case config.CephDriverType:
+		d = &ceph.MetricDriver{}
 		break
 	default:
 		//d = &sample.Driver{}
