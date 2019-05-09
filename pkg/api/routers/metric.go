@@ -29,6 +29,7 @@ func init() {
 
 			// All operations of metrics can be used for both admin and users.
 			beego.NSRouter("/", controllers.NewMetricsPortal(), "get:GetMetrics"),
+			beego.NSRouter("/", controllers.NewMetricsPortal(), "post:CollectMetrics"),
 
 			// All operations of file can be used for both admin and users.
 			beego.NSRouter("/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
