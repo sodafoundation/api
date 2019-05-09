@@ -31,7 +31,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -232,6 +232,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
+	log.V(8).Infof("lvm initialize connection information: %v", opt)
 	initiator := opt.HostInfo.GetInitiator()
 	if initiator == "" {
 		initiator = "ALL"
@@ -263,6 +264,8 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		return nil, err
 	}
 
+	log.V(8).Infof("lvm ConnectionData: %v", expt)
+
 	return &model.ConnectionInfo{
 		DriverVolumeType: accPro,
 		ConnectionData:   expt,
@@ -270,6 +273,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
+	log.V(8).Infof("TerminateConnection: opt info is %v", opt)
 	accPro := opt.AccessProtocol
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
@@ -313,7 +317,7 @@ func (d *Driver) AttachSnapshot(snapshotId string, lvsPath string) (string, *mod
 	if err != nil {
 		return "", nil, err
 	}
-	log.Infof("Attach snapshot success, MountPoint:%s", mountPoint)
+	log.V(8).Infof("Attach snapshot success, MountPoint:%s", mountPoint)
 	return mountPoint, info, nil
 }
 
@@ -506,6 +510,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      d.conf.Pool[vg.Name].StorageType,
 			Extras:           d.conf.Pool[vg.Name].Extras,
 			AvailabilityZone: d.conf.Pool[vg.Name].AvailabilityZone,
+			MultiAttach:      d.conf.Pool[vg.Name].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = "default"
@@ -558,7 +563,7 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
 	accPro := opt.AccessProtocol
-	if accPro == nvmeofAccess{
+	if accPro == nvmeofAccess {
 		log.Infof("nvmet right now can not support snap volume serve as nvme target")
 		log.Infof("still create snapshot connection by iscsi")
 		accPro = iscsiAccess

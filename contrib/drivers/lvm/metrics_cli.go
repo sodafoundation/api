@@ -14,10 +14,11 @@
 package lvm
 
 import (
-	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/utils/exec"
 	"regexp"
 	"strings"
+
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
 const (

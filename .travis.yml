@@ -16,8 +16,9 @@ env:
   # - TARGET=arm
   # - TARGET=386
   # - TARGET=ppc64le
-  global:
-  - secure: "IhEskTMEAsBNYTQCpDSlvDxIJK5cu1r2V"
+
+services:
+  - docker
 
 before_install:
   - sudo apt-get update
@@ -46,8 +47,8 @@ install:
   - make all
 
 script:
-  - ./script/CI/coverage
-  - ./script/CI/test
+  - ./install/CI/coverage
+  - ./install/CI/test
 
 after_success:
   - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out

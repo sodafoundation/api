@@ -109,6 +109,8 @@ func volumeSnapshotAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
+var volSnapshotFormatters = FormatterList{"Metadata": JsonFormatter}
+
 func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	snp := &model.VolumeSnapshotSpec{
@@ -122,8 +124,9 @@ func volumeSnapshotCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "Size", "Status",
+		"ProfileId", "VolumeId", "Metadata"}
+	PrintDict(resp, keys, volSnapshotFormatters)
 }
 
 func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
@@ -132,8 +135,9 @@ func volumeSnapshotShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status",
+		"ProfileId", "VolumeId", "Metadata"}
+	PrintDict(resp, keys, volSnapshotFormatters)
 }
 
 func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
@@ -148,8 +152,8 @@ func volumeSnapshotListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "VolumeId"}
-	PrintList(resp, keys, FormatterList{})
+	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "VolumeId"}
+	PrintList(resp, keys, volSnapshotFormatters)
 }
 
 func volumeSnapshotDeleteAction(cmd *cobra.Command, args []string) {
@@ -172,6 +176,7 @@ func volumeSnapshotUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size", "Status", "VolumeId"}
-	PrintDict(resp, keys, FormatterList{})
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "Size", "Status",
+		"ProfileId", "VolumeId", "Metadata"}
+	PrintDict(resp, keys, volSnapshotFormatters)
 }

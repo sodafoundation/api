@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,11 +27,15 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 type ProfilePortal struct {
 	BasePortal
 }
+
+var StorageAccessCapabilities = []string{constants.Read, constants.Write, constants.Execute}
 
 func (p *ProfilePortal) CreateProfile() {
 	if !policy.Authorize(p.Ctx, "profile:create") {
@@ -47,6 +51,41 @@ func (p *ProfilePortal) CreateProfile() {
 		errMsg := fmt.Sprintf("parse profile request body failed: %v", err)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
+	}
+
+	// Validate StorageType is block or file
+	if profile.StorageType != constants.Block && profile.StorageType != constants.File {
+		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", profile.StorageType)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	capabilityflag := true
+	if profile.StorageType == constants.File {
+		if pp := profile.ProvisioningProperties; !pp.IsEmpty() {
+			if ds := pp.DataStorage; !ds.IsEmpty() {
+				if len(ds.StorageAccessCapability) == 0 {
+					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability", ds.StorageAccessCapability)
+					p.ErrorHandle(model.ErrorBadRequest, errMsg)
+					return
+				} else {
+					for _, x := range ds.StorageAccessCapability {
+						capabilityflag = utils.Contains(StorageAccessCapabilities, x)
+						if capabilityflag == false {
+							errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability", ds.StorageAccessCapability)
+							p.ErrorHandle(model.ErrorBadRequest, errMsg)
+							return
+						}
+					}
+				}
+
+			}
+		} else {
+			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")
+			p.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+
 	}
 
 	// Call db api module to handle create profile request.
@@ -126,6 +165,7 @@ func (p *ProfilePortal) GetProfile() {
 }
 
 func (p *ProfilePortal) UpdateProfile() {
+
 	if !policy.Authorize(p.Ctx, "profile:update") {
 		return
 	}
@@ -160,6 +200,7 @@ func (p *ProfilePortal) UpdateProfile() {
 }
 
 func (p *ProfilePortal) DeleteProfile() {
+
 	if !policy.Authorize(p.Ctx, "profile:delete") {
 		return
 	}
@@ -183,6 +224,7 @@ func (p *ProfilePortal) DeleteProfile() {
 }
 
 func (p *ProfilePortal) AddCustomProperty() {
+
 	if !policy.Authorize(p.Ctx, "profile:add_custom_property") {
 		return
 	}
@@ -215,6 +257,7 @@ func (p *ProfilePortal) AddCustomProperty() {
 }
 
 func (p *ProfilePortal) ListCustomProperties() {
+
 	if !policy.Authorize(p.Ctx, "profile:list_custom_properties") {
 		return
 	}
@@ -240,6 +283,7 @@ func (p *ProfilePortal) ListCustomProperties() {
 }
 
 func (p *ProfilePortal) RemoveCustomProperty() {
+
 	if !policy.Authorize(p.Ctx, "profile:remove_custom_property") {
 		return
 	}
@@ -247,11 +291,10 @@ func (p *ProfilePortal) RemoveCustomProperty() {
 	customKey := p.Ctx.Input.Param(":customKey")
 
 	if err := db.C.RemoveCustomProperty(c.GetContext(p.Ctx), id, customKey); err != nil {
-		errMsg := fmt.Sprintf("remove custom property failed: %v", err)
-		p.ErrorHandle(model.ErrorInternalServer, errMsg)
+		fmt.Sprintf("remove custom property failed: %v", err)
+		p.SuccessHandle(StatusOK, nil)
 		return
 	}
-
 	p.SuccessHandle(StatusOK, nil)
 	return
 }
