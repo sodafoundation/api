@@ -26,7 +26,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Driver struct {
@@ -262,7 +262,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 	if opt.GetAccessProtocol() == FCProtocol {
 		return d.InitializeConnectionFC(opt)
 	}
-	return nil, errors.New("No supported protocol for dorado driver.")
+	return nil, fmt.Errorf("not supported protocol type: %s", opt.GetAccessProtocol())
 }
 
 func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
@@ -326,33 +326,114 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	if opt.GetAccessProtocol() == FCProtocol {
 		return d.TerminateConnectionFC(opt)
 	}
-	return nil
+	return fmt.Errorf("not supported protocal type: %s", opt.GetAccessProtocol())
 }
 
 func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) error {
-	lunId := opt.GetMetadata()[KLunId]
 	hostId, err := d.client.GetHostIdByName(opt.GetHostInfo().GetHost())
+	if err != nil {
+		// host id has been delete already, ignore the host not found error
+		if IsNotFoundError(err) {
+			log.Warningf("host(%s) has been removed already, ignore it. "+
+				"Delete volume attachment(%s)success.", hostId, opt.GetId())
+			return nil
+		}
+		return err
+	}
+	// the name format of there objects blow is: xxxPrefix + hostId
+	// the empty xxId means that the specified object has been removed already.
+	lunGrpId, err := d.client.FindLunGroup(LunGroupPrefix + hostId)
+	if err != nil && !IsNotFoundError(err) {
+		return err
+	}
+	hostGrpId, err := d.client.FindHostGroup(HostGroupPrefix + hostId)
+	if err != nil && !IsNotFoundError(err) {
+		return err
+	}
+	viewId, err := d.client.FindMappingView(MappingViewPrefix + hostId)
+	if err != nil && !IsNotFoundError(err) {
+		return err
+	}
+
+	lunId := opt.GetMetadata()[KLunId]
+	if lunGrpId != "" {
+		if d.client.IsLunGroupContainLun(lunGrpId, lunId) {
+			if err := d.client.RemoveLunFromLunGroup(lunGrpId, lunId); err != nil {
+				return err
+			}
+		}
+
+		//  if lun group still contains other lun(s), ignore the all the operations blow,
+		// and goes back with success status.
+		var leftObjectCount = 0
+		if leftObjectCount, err = d.client.getObjectCountFromLungroup(lunGrpId); err != nil {
+			return err
+		}
+		if leftObjectCount > 0 {
+			log.Infof("Lun group(%s) still contains %d lun(s). "+
+				"Delete volume attachment(%s)success.", lunGrpId, leftObjectCount, opt.GetId())
+			return nil
+		}
+	}
+
+	if viewId != "" {
+		if d.client.IsMappingViewContainLunGroup(viewId, lunGrpId) {
+			if err := d.client.RemoveLunGroupFromMappingView(viewId, lunGrpId); err != nil {
+				return err
+			}
+		}
+		if d.client.IsMappingViewContainHostGroup(viewId, hostGrpId) {
+			if err := d.client.RemoveHostGroupFromMappingView(viewId, hostGrpId); err != nil {
+				return err
+			}
+		}
+		if err := d.client.DeleteMappingView(viewId); err != nil {
+			return err
+		}
+	}
+
+	if lunGrpId != "" {
+		if err := d.client.DeleteLunGroup(lunGrpId); err != nil {
+			return err
+		}
+	}
+
+	if hostGrpId != "" {
+		if d.client.IsHostGroupContainHost(hostGrpId, hostId) {
+			if err := d.client.RemoveHostFromHostGroup(hostGrpId, hostId); err != nil {
+				return err
+			}
+		}
+		if err := d.client.DeleteHostGroup(hostGrpId); err != nil {
+			return err
+		}
+	}
+
+	initiatorName := opt.GetHostInfo().GetInitiator()
+	if d.client.IsHostContainInitiator(hostId, initiatorName) {
+		if err := d.client.RemoveIscsiFromHost(initiatorName); err != nil {
+			return err
+		}
+	}
+
+	fcExist, err := d.client.checkFCInitiatorsExistInHost(hostId)
 	if err != nil {
 		return err
 	}
-	lunGrpId, _ := d.client.FindLunGroup(LunGroupPrefix + hostId)
-	hostGrpId, _ := d.client.FindHostGroup(HostGroupPrefix + hostId)
-	viewId, _ := d.client.FindMappingView(MappingViewPrefix + hostId)
-	if viewId != "" {
-		d.client.RemoveLunGroupFromMappingView(viewId, lunGrpId)
-		d.client.RemoveHostGroupFromMappingView(viewId, hostGrpId)
-		d.client.DeleteMappingView(viewId)
+	iscsiExist, err := d.client.checkIscsiInitiatorsExistInHost(hostId)
+	if err != nil {
+		return err
 	}
-	if hostGrpId != "" {
-		d.client.RemoveHostFromHostGroup(hostGrpId, hostId)
-		d.client.DeleteHostGroup(hostGrpId)
+	if fcExist || iscsiExist {
+		log.Warningf("host (%s) still contains initiator(s), ignore delete it. "+
+			"Delete volume attachment(%s)success.", hostId, opt.GetId())
+		return nil
 	}
-	if lunGrpId != "" {
-		d.client.RemoveLunFromLunGroup(lunGrpId, lunId)
-		d.client.DeleteLunGroup(lunGrpId)
+
+	if err := d.client.DeleteHost(hostId); err != nil {
+		return err
 	}
-	d.client.RemoveIscsiFromHost(opt.GetHostInfo().GetInitiator())
-	d.client.DeleteHost(hostId)
+	log.Infof("Delete volume attachment(%s)success.", opt.GetId())
 	return nil
 }
 
@@ -429,6 +510,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      c.Pool[p.Name].StorageType,
 			Extras:           c.Pool[p.Name].Extras,
 			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
+			MultiAttach:      c.Pool[p.Name].MultiAttach,
 		}
 		if pol.AvailabilityZone == "" {
 			pol.AvailabilityZone = defaultAZ

@@ -31,6 +31,7 @@ var (
 			},
 			Name:             "default",
 			Description:      "default policy",
+			StorageType:      "block",
 			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
@@ -39,6 +40,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
+			StorageType: "block",
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
@@ -89,6 +91,7 @@ var (
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			AvailabilityZone: "default",
+			MultiAttach:      true,
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
@@ -111,6 +114,7 @@ var (
 			},
 			Name:             "sample-pool-02",
 			Description:      "This is the second sample storage pool for testing",
+			StorageType:      "block",
 			TotalCapacity:    int64(200),
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
@@ -130,6 +134,55 @@ var (
 					"latency":  "500ms",
 				},
 			},
+		},
+	}
+
+	SampleAvailabilityZones = []string{"default"}
+
+	SampleFileShares = []model.FileShareSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:   "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:  "",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Name:        "sample-fileshare",
+			Description: "This is a sample fileshare for testing",
+			Size:        int64(1),
+			Status:      "available",
+			PoolId:      "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			ProfileId:   "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+		},
+	}
+	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			},
+			Name:         "sample-snapshot-01",
+			Description:  "This is the first sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			},
+			Name:         "sample-snapshot-02",
+			Description:  "This is the second sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
 		},
 	}
 
@@ -200,6 +253,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -210,6 +264,7 @@ var (
 			Size:        int64(1),
 			Status:      "available",
 			VolumeId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
 
@@ -246,6 +301,7 @@ var (
 			Name:        "sample-group-01",
 			Description: "This is the first sample group for testing",
 			Status:      "available",
+			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
 	}
 )
@@ -257,14 +313,16 @@ var (
 	ByteProfile = `{
 		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 		"name": "default",
-		"description": "default policy"
+		"description": "default policy",
+		"storageType": "block"
 	}`
 
 	ByteProfiles = `[
 		{
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name": "default",
-			"description": "default policy"
+			"description": "default policy",
+			"storageType": "block"
 		},
 		{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
@@ -452,7 +510,8 @@ var (
 		"description": "This is the first sample snapshot for testing",
 		"size": 1,
 		"status": "available",
-		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8"
+		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
 	ByteVolumeGroup = `{
@@ -492,32 +551,32 @@ var (
 
 	ByteReplication = `{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
 	ByteReplications = `[
 		{
 			"id": "c299a978-4f3e-11e8-8a5c-977218a83359",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-01",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		},
 		{
 			"id": "73bfdd58-4f3f-11e8-91c0-d39a05f391ee",
-			"PrimaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"SecondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"primaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"secondaryVolumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			"name": "sample-replication-02",
-			"Description": "This is a sample replication for testing",
-			"PoolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			"ProfileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+			"description": "This is a sample replication for testing",
+			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
 
@@ -545,12 +604,14 @@ var (
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name":        "default",
 			"description": "default policy",
+			"storageType": "block",
 			"customProperties": {}
 		}`,
 		`{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name":        "silver",
 			"description": "silver policy",
+			"storageType": "block",
 			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
@@ -585,6 +646,7 @@ var (
 			"freeCapacity":     90,
 			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
 			"availabilityZone": "default",
+			"multiAttach": true,
 			"extras": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
@@ -640,7 +702,8 @@ var (
 			"description": "This is the first sample snapshot for testing",
 			"size":        1,
 			"status":      "available",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
+			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 		`{
 			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
@@ -648,7 +711,8 @@ var (
 			"description": "This is the second sample snapshot for testing",
 			"size":        1,
 			"status":      "available",
-			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8"
+			"volumeId":    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}`,
 	}
 

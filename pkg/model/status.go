@@ -14,6 +14,25 @@
 
 package model
 
+// Fileshare status
+const (
+	FileShareCreating      = "creating"
+	FileShareAvailable     = "available"
+	FileShareInUse         = "in_Use"
+	FileShareDeleting      = "deleting"
+	FileShareError         = "error"
+	FileShareErrorDeleting = "errorDeleting"
+)
+
+// fileshare snapshot status
+const (
+	FileShareSnapCreating      = "creating"
+	FileShareSnapAvailable     = "available"
+	FileShareSnapDeleting      = "deleting"
+	FileShareSnapError         = "error"
+	FileShareSnapErrorDeleting = "errorDeleting"
+)
+
 // volume status
 const (
 	VolumeCreating       = "creating"
@@ -28,7 +47,7 @@ const (
 
 // volume attach status
 const (
-	VolumeAttacing       = "attaching"
+	VolumeAttaching      = "attaching"
 	VolumeAttached       = "attached"
 	VolumeDetached       = "detached"
 	VolumeReserved       = "reserved"

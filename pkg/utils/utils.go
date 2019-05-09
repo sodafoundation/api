@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,15 @@ import (
 
 	log "github.com/golang/glog"
 )
+
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
 
 //remove redundant elements
 func RvRepElement(arr []string) []string {

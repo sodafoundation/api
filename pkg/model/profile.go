@@ -21,6 +21,10 @@ package model
 
 import (
 	"encoding/json"
+	"reflect"
+	"strings"
+
+	"github.com/golang/glog"
 )
 
 // An OpenSDS profile is identified by a unique name and ID. With additional
@@ -67,6 +71,23 @@ type ProfileSpec struct {
 	CustomProperties CustomPropertiesSpec `json:"customProperties,omitempty"`
 }
 
+func NewProfileFromJson(s string) *ProfileSpec {
+	p := &ProfileSpec{}
+	err := json.Unmarshal([]byte(s), p)
+	if err != nil {
+		glog.Errorf("Unmarshal json to ProfileSpec failed, %v", err)
+	}
+	return p
+}
+
+func (p *ProfileSpec) ToJson() string {
+	b, err := json.Marshal(p)
+	if err != nil {
+		glog.Errorf("ProfileSpec convert to json failed, %v", err)
+	}
+	return string(b)
+}
+
 type ProvisioningPropertiesSpec struct {
 	// DataStorage represents some suggested data storage capabilities.
 	DataStorage DataStorageLoS `json:"dataStorage,omitempty"`
@@ -75,10 +96,8 @@ type ProvisioningPropertiesSpec struct {
 }
 
 func (pps ProvisioningPropertiesSpec) IsEmpty() bool {
-	if (ProvisioningPropertiesSpec{}) == pps {
-		return true
-	}
-	return false
+	r := reflect.DeepEqual(ProvisioningPropertiesSpec{}, pps)
+	return r
 }
 
 type ReplicationPropertiesSpec struct {
@@ -179,4 +198,18 @@ func (cps CustomPropertiesSpec) IsEmpty() bool {
 func (cps CustomPropertiesSpec) Encode() []byte {
 	parmBody, _ := json.Marshal(&cps)
 	return parmBody
+}
+
+func (cps CustomPropertiesSpec) GetCapabilitiesProperties() map[string]interface{} {
+	caps := make(map[string]interface{})
+	if cps.IsEmpty() {
+		return caps
+	}
+	for k, v := range cps {
+		words := strings.Split(k, ":")
+		if len(words) > 1 && words[0] == "capabilities" {
+			caps[words[1]] = v
+		}
+	}
+	return caps
 }

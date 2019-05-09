@@ -396,3 +396,33 @@ func TestAdvancedFilter(t *testing.T) {
 		}
 	}
 }
+
+func TestIsMultiAttachFilter(t *testing.T) {
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"multiAttach": "<is> true",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"multiAttach": "<is> false",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[1],
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected[0], result[0])
+		}
+	}
+}

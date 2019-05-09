@@ -19,6 +19,7 @@ This module implements the entry into operations of storageDock module.
 package dock
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,7 +33,6 @@ import (
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	_ "github.com/opensds/opensds/contrib/connector/fc"
@@ -185,6 +185,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
+	log.V(8).Infof("CreateVolumeAttachment result: %v", atc)
 	return pb.GenericResponseResult(atc), nil
 }
 
