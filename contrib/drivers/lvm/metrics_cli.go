@@ -64,7 +64,7 @@ func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string
 
 	tableRows := strings.Split(string(out), "\n")
 
-	// TODO Prakash, re-visit the below logic when we add disk metrics support
+	// TODO(Prakash):re-visit the below logic when we add disk metrics support
 	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
 	instanceID = strings.ReplaceAll(instanceID, "-", "--")
 
