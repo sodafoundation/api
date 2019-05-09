@@ -30,6 +30,20 @@ func NewFakeDbClient() *FakeDbClient {
 	return &FakeDbClient{}
 }
 
+// CreateFileShareAcl
+func (fc *FakeDbClient) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	return fshare, nil
+}
+
+// ListFileShareAcl
+func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
 // CreateFileShare
 func (fc *FakeDbClient) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	return fshare, nil
@@ -41,6 +55,12 @@ func (fc *FakeDbClient) GetFileShare(ctx *c.Context, fshareID string) (*model.Fi
 	return &fshare, nil
 }
 
+// GetFileShareAcl
+func (fc *FakeDbClient) GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
+	acl := SampleFileSharesAcl[0]
+	return &acl, nil
+}
+
 // ListFileShares
 func (fc *FakeDbClient) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	var fshares []*model.FileShareSpec
@@ -50,6 +70,17 @@ func (fc *FakeDbClient) ListFileSharesWithFilter(ctx *c.Context, m map[string][]
 	}
 	return fshares, nil
 }
+
+// ListFileShares
+func (fc *FakeDbClient) ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
 func (fc *FakeDbClient) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) {
 	var fshares []*model.FileShareSpec
 
@@ -66,6 +97,11 @@ func (fc *FakeDbClient) UpdateFileShare(ctx *c.Context, fshare *model.FileShareS
 
 // DeleteFileShare
 func (fc *FakeDbClient) DeleteFileShare(ctx *c.Context, fshareID string) error {
+	return nil
+}
+
+// DeleteFileShareAcl
+func (fc *FakeDbClient) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
 	return nil
 }
 

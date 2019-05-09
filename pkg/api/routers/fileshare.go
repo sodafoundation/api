@@ -32,6 +32,9 @@ func init() {
 			// Creates, shows, lists, unpdates and deletes snapshot.
 			beego.NSRouter("/snapshots", controllers.NewFileShareSnapshotPortal(), "post:CreateFileShareSnapshot;get:ListFileShareSnapshots"),
 			beego.NSRouter("/snapshots/:snapshotId", controllers.NewFileShareSnapshotPortal(), "get:GetFileShareSnapshot;put:UpdateFileShareSnapshot;delete:DeleteFileShareSnapshot"),
+      // Access is to set acl's for fileshare
+			beego.NSRouter("/acls", controllers.NewFileSharePortal(), "post:CreateFileShareAcl;get:ListFileSharesAcl"),
+			beego.NSRouter("/acls/:aclId", controllers.NewFileSharePortal(), "get:GetFileShareAcl;delete:DeleteFileShareAcl"),
 		)
 	beego.AddNamespace(filens)
 }

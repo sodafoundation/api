@@ -165,6 +165,22 @@ var (
 			SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
 		},
 	}
+
+	SampleFileSharesAcl = []model.FileShareAclSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Description: "This is a sample fileshare for testing",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Description: "This is a sample fileshare for testing",
+		},
+	}
+
 	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
 		{
 			BaseModel: &model.BaseModel{

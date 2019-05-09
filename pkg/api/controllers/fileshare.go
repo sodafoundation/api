@@ -37,7 +37,59 @@ type FileSharePortal struct {
 
 	CtrClient client.Client
 }
+// Function to store Acl's related entry into databse
+func (f *FileSharePortal) CreateFileShareAcl() {
+	var fileshareacl = model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	// Unmarshal the request body
+	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshareacl); err != nil {
+		reason := fmt.Sprintf("Parse fileshare access rules request body failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
+	if err != nil {
+		reason := fmt.Sprintf("Create access rules for fileshare failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	// Marshal the result.
+	body, err := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal fileshare access rules created result failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
 
+	f.SuccessHandle(StatusAccepted, body)
+	return
+}
+
+func (f *FileSharePortal) ListFileSharesAcl() {
+	m, err := f.GetParameters()
+	if err != nil {
+		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+	result, err := db.C.ListFileSharesAclWithFilter(c.GetContext(f.Ctx), m)
+	if err != nil {
+		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+	// Marshal the result.
+	body, _ := json.Marshal(result)
+	f.SuccessHandle(StatusOK, body)
+
+	return
+}
+
+// Function to store filesahre related entry into databse
 func (f *FileSharePortal) CreateFileShare() {
 	var fileshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
@@ -85,6 +137,30 @@ func (f *FileSharePortal) ListFileShares() {
 	}
 	// Marshal the result.
 	body, _ := json.Marshal(result)
+	f.SuccessHandle(StatusOK, body)
+
+	return
+}
+
+func (f *FileSharePortal) GetFileShareAcl() {
+	id := f.Ctx.Input.Param(":aclId")
+
+	// Call db api module to handle get fileshare request.
+	result, err := db.C.GetFileShareAcl(c.GetContext(f.Ctx), id)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare acl %s not found: %s", id, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
+	// Marshal the result.
+	body, _ := json.Marshal(result)
+	if err != nil {
+		reason := fmt.Sprintf("Marshal fileshare acl list result failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
 	f.SuccessHandle(StatusOK, body)
 
 	return
@@ -138,6 +214,27 @@ func (f *FileSharePortal) UpdateFileShare() {
 	body, _ := json.Marshal(result)
 	f.SuccessHandle(StatusOK, body)
 
+	return
+}
+
+func (f *FileSharePortal) DeleteFileShareAcl() {
+	ctx := c.GetContext(f.Ctx)
+
+	var err error
+	id := f.Ctx.Input.Param(":aclId")
+	acl, err := db.C.GetFileShareAcl(ctx, id)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare acl %s not found: %s", id, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
+	if err := db.C.DeleteFileShareAcl(ctx, acl.Id); err != nil {
+		errMsg := fmt.Sprintf("delete fileshare acl failed: %v", err.Error())
+		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+	f.SuccessHandle(StatusAccepted, nil)
 	return
 }
 
