@@ -137,9 +137,9 @@ dock          ClusterIP   10.0.0.144   <none>        50050/TCP           21m
 ### OpenSDS CLI tool
 #### Download cli tool.
 ```
-wget https://github.com/opensds/opensds/releases/download/v0.5.1/opensds-hotpot-v0.5.1-linux-amd64.tar.gz 
-tar zxvf opensds-hotpot-v0.5.1-linux-amd64.tar.gz 
-cp opensds-hotpot-v0.5.1-linux-amd64/bin/* /usr/local/bin
+wget https://github.com/opensds/opensds/releases/download/v0.5.2/opensds-hotpot-v0.5.2-linux-amd64.tar.gz 
+tar zxvf opensds-hotpot-v0.5.2-linux-amd64.tar.gz
+cp opensds-hotpot-v0.5.2-linux-amd64/bin/* /usr/local/bin
 chmod 755 /usr/local/bin/osdsctl
 
 export OPENSDS_ENDPOINT=http://{{ apiserver_cluster_ip }}:50040
@@ -156,7 +156,7 @@ osdsctl pool list
 
 #### Create a default profile firstly.
 ```
-osdsctl profile create '{"name": "default", "description": "default policy"}'
+osdsctl profile create '{"name": "default", "description": "default policy", "storageType": "block"}'
 ```
 
 #### Create a volume.
