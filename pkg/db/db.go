@@ -202,6 +202,11 @@ type Client interface {
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 }
 
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetVolume(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
+}
+
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
 	vol, _ := client.GetVolume(ctx, volID)
 	return client.UpdateStatus(ctx, vol, status)

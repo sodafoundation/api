@@ -291,8 +291,8 @@ func (p *ProfilePortal) RemoveCustomProperty() {
 	customKey := p.Ctx.Input.Param(":customKey")
 
 	if err := db.C.RemoveCustomProperty(c.GetContext(p.Ctx), id, customKey); err != nil {
-		fmt.Sprintf("remove custom property failed: %v", err)
-		p.SuccessHandle(StatusOK, nil)
+		errMsg := fmt.Sprintf("remove custom property failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 	p.SuccessHandle(StatusOK, nil)
