@@ -20,9 +20,8 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"os"
-
 	"encoding/json"
+	"os"
 	"strings"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -198,7 +197,7 @@ func replicationCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone",
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "AvailabilityZone",
 		"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
 		"ReplicationStatus", "ReplicationMode", "ReplicationPeriod", "ProfileId"}
 	PrintDict(resp, keys, replicationFormatters)
@@ -228,8 +227,8 @@ func replicationListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "AvailabilityZone",
-		"PrimaryVolumeId", "SecondaryVolumeId", "ReplicationStatus", "ReplicationMode"}
+	keys := KeyList{"Id", "Name", "Description", "PrimaryVolumeId", "SecondaryVolumeId",
+		"ReplicationStatus", "ReplicationMode"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -244,7 +243,7 @@ func replicationUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "AvailabilityZone",
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "AvailabilityZone",
 		"PrimaryVolumeId", "SecondaryVolumeId", "PrimaryReplicationDriverData", "SecondaryReplicationDriverData",
 		"ReplicationStatus", "ReplicationMode", "ReplicationPeriod", "ProfileId"}
 	PrintDict(resp, keys, replicationFormatters)
