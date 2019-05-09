@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/exec"
 	"github.com/opensds/opensds/pkg/utils/pwd"
@@ -136,13 +135,13 @@ func (c *FsCli) getVersion() error {
 	c.headers["Referer"] = c.addess + BasicURI
 	content, err := c.request(url, "GET", true, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to get version, %v", err)
+		return fmt.Errorf("failed to get version, %v", err)
 	}
 
-	var v version
+	var v Version
 	err = json.Unmarshal(content, &v)
 	if err != nil {
-		return fmt.Errorf("Failed to unmarshal the result, %v", err)
+		return fmt.Errorf("failed to unmarshal the result, %v", err)
 	}
 
 	c.version = v.CurrentVersion
@@ -162,14 +161,14 @@ func (c *FsCli) login() error {
 	return nil
 }
 
-func (c *FsCli) queryPoolInfo() (*poolResp, error) {
+func (c *FsCli) queryPoolInfo() (*PoolResp, error) {
 	url := "/storagePool"
 	result, err := c.request(url, "GET", false, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var pools *poolResp
+	var pools *PoolResp
 	if err := json.Unmarshal(result, &pools); err != nil {
 		return nil, err
 	}
@@ -180,6 +179,8 @@ func (c *FsCli) createVolume(volName, poolId string, volSize int64) error {
 	url := "/volume/create"
 	polID, _ := strconv.Atoi(poolId)
 	params := map[string]interface{}{"volName": volName, "volSize": volSize, "poolId": polID}
+	fmt.Println(params)
+
 	if _, err := c.request(url, "POST", false, params); err != nil {
 		return err
 	}
@@ -235,7 +236,7 @@ func (c *FsCli) queryHostInfo(hostName string) (bool, error) {
 		return false, err
 	}
 
-	var hostlist *hostList
+	var hostlist *HostList
 
 	if err := json.Unmarshal(result, &hostlist); err != nil {
 		return false, err
@@ -270,7 +271,7 @@ func (c *FsCli) addPortToHost(hostName, initiator string) error {
 	return nil
 }
 
-func (c *FsCli) queryHostByPort(initiator string) (*portHostMap, error) {
+func (c *FsCli) queryHostByPort(initiator string) (*PortHostMap, error) {
 	url := "iscsi/queryHostByPort"
 	params := map[string]interface{}{"portName": []string{initiator}}
 	result, err := c.request(url, "POST", true, params)
@@ -278,7 +279,7 @@ func (c *FsCli) queryHostByPort(initiator string) (*portHostMap, error) {
 		return nil, err
 	}
 
-	var portHostmap *portHostMap
+	var portHostmap *PortHostMap
 
 	if err := json.Unmarshal(result, &portHostmap); err != nil {
 		return nil, err
@@ -297,7 +298,7 @@ func (c *FsCli) addLunsToHost(hostName, lunId string) error {
 	return nil
 }
 
-func (c *FsCli) queryHostLunInfo(hostName string) (*hostLunList, error) {
+func (c *FsCli) queryHostLunInfo(hostName string) (*HostLunList, error) {
 	url := "iscsi/queryHostLunInfo"
 	params := map[string]interface{}{"hostName": hostName}
 	result, err := c.request(url, "POST", true, params)
@@ -305,7 +306,7 @@ func (c *FsCli) queryHostLunInfo(hostName string) (*hostLunList, error) {
 		return nil, err
 	}
 
-	var lunList *hostLunList
+	var lunList *HostLunList
 
 	if err := json.Unmarshal(result, &lunList); err != nil {
 		return nil, err
@@ -314,24 +315,56 @@ func (c *FsCli) queryHostLunInfo(hostName string) (*hostLunList, error) {
 	return lunList, nil
 }
 
-func (c *FsCli) queryIscsiPortal(initiator string) ([]string, error) {
+func (c *FsCli) queryIscsiPortalVersion6(initiator string) ([]string, error) {
 	args := []string{
 		"--op", "queryIscsiPortalInfo", "--portName", initiator,
 	}
 	out, err := c.RunCmd(args...)
 	if err != nil {
-		log.Errorf("Query iscsi portal failed: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("query iscsi portal failed: %v", err)
 	}
 
 	if len(out) > 0 {
 		return out, nil
 	}
 
-	return nil, fmt.Errorf("The iscsi target portal is empty.")
+	return nil, fmt.Errorf("the iscsi target portal is empty.")
 }
 
-func (c *FsCli) queryHostFromVolume(lunId string) ([]host, error) {
+func (c *FsCli) getDeviceVersion() (*DeviceVersion, error) {
+	url := "/version"
+	result, err := c.request(url, "Get", false, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var version *DeviceVersion
+
+	if err := json.Unmarshal(result, &version); err != nil {
+		return nil, err
+	}
+
+	return version, nil
+}
+
+func (c *FsCli) queryIscsiPortalVersion8() (*IscsiPortal, error) {
+	url := "cluster/dswareclient/queryIscsiPortal"
+	params := map[string]interface{}{}
+	result, err := c.request(url, "Post", true, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var iscsiPortals *IscsiPortal
+
+	if err := json.Unmarshal(result, &iscsiPortals); err != nil {
+		return nil, err
+	}
+
+	return iscsiPortals, nil
+}
+
+func (c *FsCli) queryHostFromVolume(lunId string) ([]Host, error) {
 	url := "iscsi/queryHostFromVolume"
 	params := map[string]interface{}{"lunName": lunId}
 	out, err := c.request(url, "POST", true, params)
@@ -339,7 +372,7 @@ func (c *FsCli) queryHostFromVolume(lunId string) ([]host, error) {
 		return nil, err
 	}
 
-	var hostlist *hostList
+	var hostlist *HostList
 
 	if err := json.Unmarshal(out, &hostlist); err != nil {
 		return nil, err
@@ -395,6 +428,7 @@ func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interfa
 	} else {
 		callUrl = c.addess + BasicURI + url
 	}
+	fmt.Println(callUrl)
 	// No verify by SSL
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -407,13 +441,13 @@ func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interfa
 	if reqParams != nil {
 		body, err = json.Marshal(reqParams)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to marshal the request parameters, url is %s, error is %v", callUrl, err)
+			return nil, fmt.Errorf("failed to marshal the request parameters, url is %s, error is %v", callUrl, err)
 		}
 	}
 
 	req, err := http.NewRequest(strings.ToUpper(method), callUrl, bytes.NewBuffer(body))
 	if err != nil {
-		return nil, fmt.Errorf("Failed to initiate the request, url is %s, error is %v", callUrl, err)
+		return nil, fmt.Errorf("failed to initiate the request, url is %s, error is %v", callUrl, err)
 	}
 
 	// initiate the header
@@ -424,13 +458,13 @@ func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interfa
 	// do the request
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Process request failed: %v, url is %s", err, callUrl)
+		return nil, fmt.Errorf("process request failed: %v, url is %s", err, callUrl)
 	}
 	defer resp.Body.Close()
 
 	respContent, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Read from response body failed: %v, url is %s", err, callUrl)
+		return nil, fmt.Errorf("read from response body failed: %v, url is %s", err, callUrl)
 	}
 
 	if 400 <= resp.StatusCode && resp.StatusCode <= 599 {
@@ -440,7 +474,7 @@ func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interfa
 	}
 
 	// Check the error code in the returned content
-	var respResult *responseResult
+	var respResult *ResponseResult
 	if err := json.Unmarshal(respContent, &respResult); err != nil {
 		return nil, err
 	}
@@ -449,9 +483,8 @@ func (c *FsCli) request(url, method string, isGetVersion bool, reqParams interfa
 		return nil, fmt.Errorf(string(respContent))
 	}
 
-	if resp.Header != nil && len(resp.Header["X-Auth-Token"]) > 0 {
-		token := resp.Header["X-Auth-Token"][0]
-		c.headers["x-auth-token"] = token
+	if c.headers["x-auth-token"] == "" && resp.Header != nil && len(resp.Header["X-Auth-Token"]) > 0 {
+		c.headers["x-auth-token"] = resp.Header["X-Auth-Token"][0]
 	}
 
 	return respContent, nil
@@ -463,7 +496,6 @@ func (c *FsCli) StartServer() error {
 		return err
 	}
 	time.Sleep(3 * time.Second)
-	log.Info("FSC Cli server start successfully")
 	return nil
 }
 
