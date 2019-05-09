@@ -28,6 +28,7 @@ import (
 	"strconv"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/controller/metrics/adapters"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -38,12 +39,16 @@ type Controller interface {
 	GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
-	CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectMetricSpec, error)
+	CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
 }
 
 // NewController method creates a controller structure and expose its pointer.
 func NewController() Controller {
+
+	// start the metrics dispatcher
+	adapters.StartDispatcher()
+
 	return &controller{
 		Client: client.NewClient(),
 	}
@@ -269,7 +274,7 @@ func (c *controller) SetDock(dockInfo *model.DockSpec) {
 	c.DockInfo = dockInfo
 }
 
-func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectMetricSpec, error) {
+func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Errorf("error when connecting dock client:%s", err.Error())
 		return nil, err
@@ -288,10 +293,16 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) (*model.CollectM
 				errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	var res = &model.CollectMetricSpec{}
-	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), res); err != nil {
+	res := make([]*model.MetricSpec, 0)
+
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), &res); err != nil {
 		log.Errorf("collect metrics failed in metrics controller:%s", err.Error())
 		return nil, err
+	}
+
+	// send the metrics to the registered adapters
+	for _, metricSpecPtr := range res {
+		adapters.SendMetricToRegisteredSenders(metricSpecPtr)
 	}
 
 	return res, nil

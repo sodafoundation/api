@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -467,7 +467,7 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	log.Info("in dock CollectMetrics methods")
 	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
 
-	defer drivers.Clean(ds.Driver)
+	defer drivers.CleanMetricDriver(ds.MetricDriver)
 
 	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
 
