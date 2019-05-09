@@ -30,6 +30,7 @@ var fp = map[string]PoolProperties{
 	"vg001": {
 		StorageType:      "block",
 		AvailabilityZone: "default",
+		MultiAttach:      true,
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage: model.DataStorageLoS{
 				ProvisioningPolicy: "Thin",
@@ -317,6 +318,7 @@ func TestListPools(t *testing.T) {
 			FreeCapacity:     int64(18),
 			AvailabilityZone: "default",
 			StorageType:      "block",
+			MultiAttach:      true,
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",

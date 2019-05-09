@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,4 +40,20 @@ const (
 	// OpensdsConfigPath indicates the absolute path of opensds global
 	// configuration file.
 	OpensdsConfigPath = "/etc/opensds/opensds.conf"
+
+	// OpensdsCtrBindEndpoint indicates the bind endpoint which the opensds
+	// controller grpc server would listen to.
+	OpensdsCtrBindEndpoint = "0.0.0.0:50049"
+	// OpensdsDockBindEndpoint indicates the bind endpoint which the opensds
+	// dock grpc server would listen to.
+	OpensdsDockBindEndpoint = "0.0.0.0:50050"
+
+	//Storage type for profile
+	Block = "block"
+	File  = "file"
+
+	//StorageAccessCApability enum constants for profile
+	Read    = "Read"
+	Write   = "Write"
+	Execute = "Execute"
 )
