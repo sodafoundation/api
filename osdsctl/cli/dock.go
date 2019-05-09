@@ -80,7 +80,7 @@ func dockAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-var dockFormatters = FormatterList{"Parameters": JsonFormatter}
+var dockFormatters = FormatterList{"Metadata": JsonFormatter}
 
 func dockShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
@@ -88,7 +88,8 @@ func dockShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName", "Parameters"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Endpoint", "DriverName",
+		"Metadata"}
 	PrintDict(resp, keys, dockFormatters)
 }
 
