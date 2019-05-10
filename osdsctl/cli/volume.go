@@ -159,8 +159,8 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "Size", "AvailabilityZone",
+		"Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
 	PrintDict(resp, keys, volFormatters)
 }
 
@@ -171,7 +171,8 @@ func volumeShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId", "MultiAttach"}
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "SnapshotId",
+		"MultiAttach"}
 	PrintDict(resp, keys, volFormatters)
 }
 
@@ -187,8 +188,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "GroupId"}
+	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "GroupId"}
 	PrintList(resp, keys, volFormatters)
 }
 
@@ -214,8 +214,8 @@ func volumeUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "Size", "AvailabilityZone",
+		"Status", "PoolId", "ProfileId", "Metadata", "GroupId", "MultiAttach"}
 	PrintDict(resp, keys, volFormatters)
 }
 
