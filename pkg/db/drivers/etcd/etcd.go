@@ -279,13 +279,6 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 }
 
 func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
-	//profiles, err := c.ListProfiles(ctx)
-	//if err != nil {
-	//	return nil, err
-	//} else if len(profiles) == 0 {
-	//	return nil, errors.New("No profile in db.")
-	//}
-
 	fshare.TenantId = ctx.TenantId
 	fshareBody, err := json.Marshal(fshare)
 	if err != nil {
