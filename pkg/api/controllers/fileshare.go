@@ -44,14 +44,14 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	}
 	// Unmarshal the request body
 	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshareacl); err != nil {
-		reason := fmt.Sprintf("Parse fileshare access rules request body failed: %s", err.Error())
+		reason := fmt.Sprintf("parse fileshare access rules request body failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
 	}
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
 	if err != nil {
-		reason := fmt.Sprintf("Create access rules for fileshare failed: %s", err.Error())
+		reason := fmt.Sprintf("create access rules for fileshare failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
@@ -59,7 +59,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal fileshare access rules created result failed: %s", err.Error())
+		reason := fmt.Sprintf("marshal fileshare access rules created result failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
@@ -97,14 +97,14 @@ func (f *FileSharePortal) CreateFileShare() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshare); err != nil {
-		reason := fmt.Sprintf("Parse fileshare request body failed: %s", err.Error())
+		reason := fmt.Sprintf("parse fileshare request body failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
 	}
 	result, err := util.CreateFileShareDBEntry(c.GetContext(f.Ctx), &fileshare)
 	if err != nil {
-		reason := fmt.Sprintf("Create fileshare failed: %s", err.Error())
+		reason := fmt.Sprintf("create fileshare failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
@@ -112,7 +112,7 @@ func (f *FileSharePortal) CreateFileShare() {
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal fileshare created result failed: %s", err.Error())
+		reason := fmt.Sprintf("marshal fileshare created result failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
@@ -156,7 +156,7 @@ func (f *FileSharePortal) GetFileShareAcl() {
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal fileshare acl list result failed: %s", err.Error())
+		reason := fmt.Sprintf("marshal fileshare acl list result failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
@@ -180,7 +180,7 @@ func (f *FileSharePortal) GetFileShare() {
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	if err != nil {
-		reason := fmt.Sprintf("Marshal fileshare list result failed: %s", err.Error())
+		reason := fmt.Sprintf("marshal fileshare list result failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
