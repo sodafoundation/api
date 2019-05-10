@@ -14,7 +14,6 @@
 package ceph
 
 import (
-	"fmt"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"gopkg.in/yaml.v2"
@@ -76,33 +75,6 @@ func getCurrentUnixTimestamp() int64 {
 	return secs
 }
 
-func getMetricToUnitMap() map[string]string {
-
-	// Construct metrics to value map
-	var configs Configs
-	// Read supported metric list from yaml config
-	// TODO: Move this to read from file
-	source := []byte(data)
-
-	error := yaml.Unmarshal(source, &configs)
-	if error != nil {
-		log.Fatalf("Unmarshal error: %v", error)
-	}
-	metricToUnitMap := make(map[string]string)
-	for _, resources := range configs.Cfgs {
-		switch resources.Resource {
-		// TODO: Other Cases needs to be added
-		case "pool":
-			for index, metricName := range resources.Metrics {
-
-				metricToUnitMap[metricName] = resources.Units[index]
-
-			}
-		}
-	}
-	return metricToUnitMap
-}
-
 // 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
 // 	metricList-> Posted metric list
 //	supportedMetrics -> list of supported metrics
@@ -140,8 +112,6 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricArray	-> the array of metrics to be returned
 func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec, error) {
 
-	// get Metrics to unit map
-	metricToUnitMap := getMetricToUnitMap()
 	//validate metric support list
 	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "pool")
 	if supportedMetrics == nil {
@@ -150,37 +120,38 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []*model.MetricSpec
-	for label_val, _ := range metricMap {
-		for _, element := range supportedMetrics {
-			val, _ := strconv.ParseFloat(metricMap[label_val][element], 64)
-			// TODO: See if association  is required here, resource discovery could fill this information
-			associatorMap := make(map[string]string)
-			associatorMap["cluster"] = "ceph"
-			associatorMap["pool"] = label_val
-			metricValue := &model.Metric{
-				Timestamp: getCurrentUnixTimestamp(),
-				Value:     val,
-			}
-			metricValues := make([]*model.Metric, 0)
-			metricValues = append(metricValues, metricValue)
+	total_metrics_count := len(supportedMetrics) * len(metricMap)
 
-			metric := &model.MetricSpec{
-				InstanceID:   instanceID,
-				InstanceName: "",
-				Job:          "OpenSDS",
-				Labels:       associatorMap,
-				// TODO Take Componet from Post call, as of now it is only for volume
-				Component: "Pool",
-				Name:      fmt.Sprintf("%s_%s", associatorMap["cluster"], element),
-				// TODO : Fill units according to metric type
-				Unit: metricToUnitMap[element],
-				// TODO : Get this information dynamically ( hard coded now , as all are direct values
-				AggrType:     "",
-				MetricValues: metricValues,
-			}
-			tempMetricArray = append(tempMetricArray, metric)
+	for i := 0; i < total_metrics_count; i++ {
+		val, _ := strconv.ParseFloat(metricMap[i].Value, 64)
+		//Todo: See if association  is required here, resource discovery could fill this information
+		associatorMap := make(map[string]string)
+		associatorMap["cluster"] = metricMap[i].Const_Label
+		//TODO: "pool" mention here will be resourceType
+		associatorMap["pool"] = metricMap[i].Var_Label
+		metricValue := &model.Metric{
+			Timestamp: getCurrentUnixTimestamp(),
+			Value:     val,
 		}
+		metricValues := make([]*model.Metric, 0)
+		metricValues = append(metricValues, metricValue)
+
+		metric := &model.MetricSpec{
+			InstanceID:   instanceID,
+			InstanceName: "",
+			Job:          "OpenSDS",
+			Labels:       associatorMap,
+			//Todo Take Componet from Post call, as of now it is only for pool
+			Component: "pool",
+			Name:      metricMap[i].Name,
+			//Todo : Fill units according to metric type
+			Unit:         metricMap[i].Unit,
+			AggrType:     metricMap[i].AggrType,
+			MetricValues: metricValues,
+		}
+		tempMetricArray = append(tempMetricArray, metric)
 	}
+
 	metricArray := tempMetricArray
 	return metricArray, err
 }

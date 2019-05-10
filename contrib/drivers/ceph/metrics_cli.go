@@ -22,7 +22,15 @@ import (
 type MetricCli struct {
 }
 
-//
+type CephMetricStats struct {
+	Name        string
+	Value       string
+	Unit        string
+	Const_Label string
+	AggrType    string
+	Var_Label   string
+}
+
 type cephPoolStats struct {
 	Pools []struct {
 		Name  string `json:"name"`
@@ -41,9 +49,9 @@ type cephPoolStats struct {
 	} `json:"pools"`
 }
 
-func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (map[string]map[string]string, error) {
+func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]CephMetricStats, error) {
 
-	returnMap := make(map[string]map[string]string)
+	returnMap := []CephMetricStats{}
 	var err error
 	conn, err := rados.NewConn()
 	if err != nil {
@@ -81,35 +89,89 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 		// return
 	}
 
-	// fmt.Printf("Command Output: %v",st)
 	for _, pool := range pool_stats.Pools {
-		miniarray := make(map[string]string)
-		// miniarray[]=
-		// UsedBytes tracks the amount of bytes currently allocated for the pool
-		miniarray["pool_used_bytes"] = pool.Stats.BytesUsed.String()
-		// RawUsedBytes tracks the amount of raw bytes currently used for the pool.
-		miniarray["pool_raw_used_bytes"] = pool.Stats.RawBytesUsed.String()
-		// MaxAvail tracks the amount of bytes currently free for the pool
-		miniarray["pool_available_bytes"] = pool.Stats.MaxAvail.String()
-		// Objects shows the no. of RADOS objects created within the pool.
-		miniarray["pool_objects_total"] = pool.Stats.Objects.String()
-		// DirtyObjects shows the no. of RADOS dirty objects in a cache-tier pool,
-		// this doesn't make sense in a regular pool, see:
-		// http://lists.ceph.com/pipermail/ceph-users-ceph.com/2015-April/000557.html
-		miniarray["pool_dirty_objects_total"] = pool.Stats.DirtyObjects.String()
-		// ReadIO tracks the read IO calls made for the images within each pool.
-		miniarray["pool_read_total"] = pool.Stats.ReadIO.String()
-		// Readbytes tracks the read throughput made for the images within each pool.
-		miniarray["pool_read_bytes_total"] = pool.Stats.ReadBytes.String()
-		// WriteIO tracks the write IO calls made for the images within each pool.
-		miniarray["pool_write_total"] = pool.Stats.WriteIO.String()
-		// WriteBytes tracks the write throughput made for the images within each pool.
-		miniarray["pool_write_bytes_total"] = pool.Stats.WriteBytes.String()
-		// For Pool Label, we have used pool name
-		returnMap[pool.Name] = miniarray
+
+		for _, element := range metricList {
+			switch element {
+			case "pool_used_bytes":
+				returnMap = append(returnMap, CephMetricStats{
+					"used",
+					pool.Stats.BytesUsed.String(),
+					"bytes", "ceph",
+					"",
+					pool.Name})
+
+			case "pool_raw_used_bytes":
+				returnMap = append(returnMap, CephMetricStats{
+					"raw_used",
+					pool.Stats.BytesUsed.String(),
+					"bytes", "ceph",
+					"",
+					pool.Name})
+
+			case "pool_available_bytes":
+				returnMap = append(returnMap, CephMetricStats{
+					"available",
+					pool.Stats.BytesUsed.String(),
+					"bytes",
+					"ceph",
+					"",
+					pool.Name})
+
+			case "pool_objects_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"objects",
+					pool.Stats.BytesUsed.String(),
+					"",
+					"ceph",
+					"",
+					pool.Name})
+
+			case "pool_dirty_objects_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"dirty_objects",
+					pool.Stats.BytesUsed.String(),
+					"",
+					"ceph",
+					"total",
+					pool.Name})
+
+			case "pool_read_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"read", pool.Stats.BytesUsed.String(),
+					"",
+					"ceph",
+					"total",
+					pool.Name})
+
+			case "pool_read_bytes_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"read",
+					pool.Stats.BytesUsed.String(),
+					"bytes",
+					"ceph",
+					"total",
+					pool.Name})
+
+			case "pool_write_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"write",
+					pool.Stats.BytesUsed.String(),
+					"", "ceph",
+					"",
+					pool.Name})
+
+			case "pool_write_bytes_total":
+				returnMap = append(returnMap, CephMetricStats{
+					"write_bytes",
+					pool.Stats.BytesUsed.String(),
+					"bytes",
+					"ceph",
+					"total",
+					pool.Name})
+			}
+		}
 	}
-
 	conn.Shutdown()
-
 	return returnMap, nil
 }
