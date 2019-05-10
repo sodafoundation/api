@@ -53,7 +53,7 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	in.AccessCapability = in.AccessCapability
 	_, err := db.C.GetFileShare(ctx, in.FileShareId)
 	if err != nil {
-		log.Error("FileshareID is not valid: ", err)
+		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
 	in.FileShareId = in.FileShareId
