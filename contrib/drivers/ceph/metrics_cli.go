@@ -23,7 +23,7 @@ type MetricCli struct {
 }
 
 //
-type cephClusterStats struct {
+type cephPoolStats struct {
 	Pools []struct {
 		Name  string `json:"name"`
 		ID    int    `json:"id"`
@@ -74,15 +74,15 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 	buf, _, err := conn.MonCommand(cmd)
 	if err != nil {
 	}
-	st := &cephClusterStats{}
-	if err := json.Unmarshal(buf, st); err != nil {
+	pool_stats := &cephPoolStats{}
+	if err := json.Unmarshal(buf, pool_stats); err != nil {
 
 		log.Fatalf("Unmarshal error: %v", err)
 		// return
 	}
 
 	// fmt.Printf("Command Output: %v",st)
-	for _, pool := range st.Pools {
+	for _, pool := range pool_stats.Pools {
 		miniarray := make(map[string]string)
 		// miniarray[]=
 		// UsedBytes tracks the amount of bytes currently allocated for the pool
