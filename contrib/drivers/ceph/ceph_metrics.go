@@ -15,16 +15,14 @@ package ceph
 
 import (
 	"fmt"
-	"strconv"
-	"time"
-
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"gopkg.in/yaml.v2"
+	"strconv"
+	"time"
 )
 
-// Todo: Move this Yaml config to a file
-
+// TODO: Move this Yaml config to a file
 var data = `
 resources:
   - resource: pool
@@ -45,9 +43,9 @@ resources:
       - ""
       - ""
       - ""
-      - bytes/sec
+      - bytes
       - ""
-      - bytes/sec
+      - bytes
 `
 
 type Config struct {
@@ -60,6 +58,7 @@ type Configs struct {
 	Cfgs []Config `resources`
 }
 type MetricDriver struct {
+	cli *MetricCli
 }
 
 func metricInMetrics(metric string, metriclist []string) bool {
@@ -70,17 +69,19 @@ func metricInMetrics(metric string, metriclist []string) bool {
 	}
 	return false
 }
+
 func getCurrentUnixTimestamp() int64 {
 	now := time.Now()
 	secs := now.Unix()
 	return secs
 }
+
 func getMetricToUnitMap() map[string]string {
 
-	//construct metrics to value map
+	// Construct metrics to value map
 	var configs Configs
-	//Read supported metric list from yaml config
-	//Todo: Move this to read from file
+	// Read supported metric list from yaml config
+	// TODO: Move this to read from file
 	source := []byte(data)
 
 	error := yaml.Unmarshal(source, &configs)
@@ -90,7 +91,7 @@ func getMetricToUnitMap() map[string]string {
 	metricToUnitMap := make(map[string]string)
 	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
-		//ToDo: Other Cases needs to be added
+		// TODO: Other Cases needs to be added
 		case "pool":
 			for index, metricName := range resources.Metrics {
 
@@ -108,8 +109,8 @@ func getMetricToUnitMap() map[string]string {
 func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceType string) (supportedMetrics []string, err error) {
 	var configs Configs
 
-	//Read supported metric list from yaml config
-	//Todo: Move this to read from file
+	// Read supported metric list from yaml config
+	// TODO: Move this to read from file
 	source := []byte(data)
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
@@ -118,7 +119,7 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 
 	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
-		//ToDo: Other Cases needs to be added
+		// TODO: Other Cases needs to be added
 		case "pool":
 			for _, metricName := range metricList {
 				if metricInMetrics(metricName, resources.Metrics) {
@@ -146,13 +147,13 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 	if supportedMetrics == nil {
 		log.Infof("No metrics found in the  supported metric list")
 	}
-	metricMap, err := CollectMetrics(supportedMetrics, instanceID)
+	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []*model.MetricSpec
 	for label_val, _ := range metricMap {
 		for _, element := range supportedMetrics {
 			val, _ := strconv.ParseFloat(metricMap[label_val][element], 64)
-			//Todo: See if association  is required here, resource discovery could fill this information
+			// TODO: See if association  is required here, resource discovery could fill this information
 			associatorMap := make(map[string]string)
 			associatorMap["cluster"] = "ceph"
 			associatorMap["pool"] = label_val
@@ -168,12 +169,12 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 				InstanceName: "",
 				Job:          "OpenSDS",
 				Labels:       associatorMap,
-				//Todo Take Componet from Post call, as of now it is only for volume
+				// TODO Take Componet from Post call, as of now it is only for volume
 				Component: "Pool",
 				Name:      fmt.Sprintf("%s_%s", associatorMap["cluster"], element),
-				//Todo : Fill units according to metric type
+				// TODO : Fill units according to metric type
 				Unit: metricToUnitMap[element],
-				//Todo : Get this information dynamically ( hard coded now , as all are direct values
+				// TODO : Get this information dynamically ( hard coded now , as all are direct values
 				AggrType:     "",
 				MetricValues: metricValues,
 			}

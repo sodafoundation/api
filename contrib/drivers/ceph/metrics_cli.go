@@ -15,9 +15,12 @@ package ceph
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ceph/go-ceph/rados"
+	log "github.com/golang/glog"
 )
+
+type MetricCli struct {
+}
 
 //
 type cephClusterStats struct {
@@ -38,23 +41,23 @@ type cephClusterStats struct {
 	} `json:"pools"`
 }
 
-func CollectMetrics(metricList []string, instanceID string) (map[string]map[string]string, error) {
+func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (map[string]map[string]string, error) {
 
 	returnMap := make(map[string]map[string]string)
 	var err error
 	conn, err := rados.NewConn()
 	if err != nil {
-		fmt.Println(err)
+		log.Error("when connecting to rados:", err)
 	}
 
 	err = conn.ReadDefaultConfigFile()
 	if err != nil {
-		fmt.Println(err)
+		log.Error("file ReadDefaultConfigFile can't read", err)
 	}
 
 	err = conn.Connect()
 	if err != nil {
-		fmt.Println(err)
+		log.Error("when connecting to ceph cluster:", err)
 	}
 
 	cmd, err := json.Marshal(map[string]interface{}{
@@ -65,7 +68,7 @@ func CollectMetrics(metricList []string, instanceID string) (map[string]map[stri
 	if err != nil {
 		// panic! because ideally in no world this hard-coded input
 		// should fail.
-		panic(err)
+		log.Errorf("cmd failed with %s\n", err)
 	}
 
 	buf, _, err := conn.MonCommand(cmd)
@@ -73,14 +76,15 @@ func CollectMetrics(metricList []string, instanceID string) (map[string]map[stri
 	}
 	st := &cephClusterStats{}
 	if err := json.Unmarshal(buf, st); err != nil {
-		fmt.Printf("error")
-		//return
+
+		log.Fatalf("Unmarshal error: %v", err)
+		// return
 	}
 
-	//fmt.Printf("Command Output: %v",st)
+	// fmt.Printf("Command Output: %v",st)
 	for _, pool := range st.Pools {
 		miniarray := make(map[string]string)
-		//miniarray[]=
+		// miniarray[]=
 		// UsedBytes tracks the amount of bytes currently allocated for the pool
 		miniarray["pool_used_bytes"] = pool.Stats.BytesUsed.String()
 		// RawUsedBytes tracks the amount of raw bytes currently used for the pool.
@@ -101,7 +105,7 @@ func CollectMetrics(metricList []string, instanceID string) (map[string]map[stri
 		miniarray["pool_write_total"] = pool.Stats.WriteIO.String()
 		// WriteBytes tracks the write throughput made for the images within each pool.
 		miniarray["pool_write_bytes_total"] = pool.Stats.WriteBytes.String()
-		//For Pool Label, we have used pool name
+		// For Pool Label, we have used pool name
 		returnMap[pool.Name] = miniarray
 	}
 
