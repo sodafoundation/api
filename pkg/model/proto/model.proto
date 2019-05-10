@@ -38,25 +38,25 @@ package proto;
 service Controller {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
-    
+
     // Delete a volume
     rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
-    
+
     // Extend a volume
     rpc ExtendVolume (ExtendVolumeOpts) returns (GenericResponse){}
-    
+
     // Create a volume snapshot
-    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts) 
+    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts)
       returns (GenericResponse){}
-    
+
     // Delete a volume snapshot
-    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts) 
+    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts)
       returns (GenericResponse){}
-    
+
     // Create a volume attachment
     rpc CreateVolumeAttachment (CreateVolumeAttachmentOpts)
       returns (GenericResponse){}
-    
+
     // Delete a volume attachment
     rpc DeleteVolumeAttachment (DeleteVolumeAttachmentOpts)
       returns (GenericResponse){}
@@ -78,10 +78,10 @@ service Controller {
 
     // Create a volume group
     rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
-	
+
     // Update volume group
     rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
-	
+
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
 
@@ -91,25 +91,25 @@ service Controller {
 service ProvisionDock {
     // Create a volume
     rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
-    
+
     // Delete a volume
     rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
-    
+
     // Extend a volume
     rpc ExtendVolume (ExtendVolumeOpts) returns (GenericResponse){}
-    
+
     // Create a volume snapshot
-    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts) 
+    rpc CreateVolumeSnapshot (CreateVolumeSnapshotOpts)
       returns (GenericResponse){}
-    
+
     // Delete a volume snapshot
-    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts) 
+    rpc DeleteVolumeSnapshot (DeleteVolumeSnapshotOpts)
       returns (GenericResponse){}
-    
+
     // Create a volume attachment
     rpc CreateVolumeAttachment (CreateVolumeAttachmentOpts)
       returns (GenericResponse){}
-    
+
     // Delete a volume attachment
     rpc DeleteVolumeAttachment (DeleteVolumeAttachmentOpts)
       returns (GenericResponse){}
@@ -131,12 +131,32 @@ service ProvisionDock {
 
     // Create a volume group
     rpc CreateVolumeGroup (CreateVolumeGroupOpts) returns (GenericResponse){}
-	
+
     // Update volume group
     rpc UpdateVolumeGroup (UpdateVolumeGroupOpts) returns (GenericResponse){}
-	
+
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+}
+
+service FileShareController {
+
+    // Create a file share
+    rpc CreateFileShare (CreateFileShareOpts) returns (GenericResponse){}
+
+    // Delete a file share
+    rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
+
+}
+
+service FileShareDock {
+
+    // Create a file share
+    rpc CreateFileShare (CreateFileShareOpts) returns (GenericResponse){}
+
+    // Delete a file share
+    rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
+
 }
 
 // CreateVolumeOpts is a structure which indicates all required properties
@@ -160,7 +180,7 @@ message CreateVolumeOpts {
     // The uuid of the pool on which volume will be created, required.
     string poolId = 8;
     // The name of the pool on which volume will be created, required.
-    string poolName = 9;    
+    string poolName = 9;
     // The metadata of the volume, optional.
     map<string, string> metadata = 10;
     // The storage driver type.
@@ -221,7 +241,7 @@ message ExtendVolumeOpts {
     // The uuid of the pool on which volume will be created, required.
     string poolId = 8;
     // The name of the pool on which volume will be created, required.
-    string poolName = 9;    
+    string poolName = 9;
     // The metadata of the volume, optional.
     map<string, string> metadata = 10;
     // The storage driver type.
@@ -271,6 +291,8 @@ message DeleteVolumeSnapshotOpts {
     string driverName = 4;
     // The Context
     string context = 5;
+    // The Serialized profile
+    string profile = 6;
 }
 
 // CreateVolumeAttachmentOpts is a structure which indicates all required
@@ -641,7 +663,7 @@ message DeleteVolumeGroupOpts{
 service AttachDock {
     // Attach a volume
     rpc AttachVolume (AttachVolumeOpts) returns (GenericResponse){}
-    
+
     // Detach a volume
     rpc DetachVolume (DetachVolumeOpts) returns (GenericResponse){}
 }
@@ -672,6 +694,49 @@ message DetachVolumeOpts {
     string context = 4;
 }
 
+// CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
+message CreateFileShareOpts {
+    // The uuid of the file share, optional when creating.
+    string id = 1;
+    // The name of the file share, required.
+    string name = 2;
+    // The requested capacity of the file share, required.
+    int64 size = 3;
+    // The description of the file share, optional.
+    string description = 4;
+    // The locality that file share belongs to, required.
+    string availabilityZone = 6;
+    // The uuid of the pool on which file share will be created, required.
+    string poolId = 8;
+    // The name of the pool on which file share will be created, required.
+    string poolName = 9;
+    // The metadata of the file share, optional.
+    map<string, string> metadata = 10;
+    // The storage driver type.
+    string driverName = 11;
+    // The Context
+    string context = 12;
+    // The Serialized profile
+    string profile = 13;
+}
+
+// DeleteFileShareOpts is a structure which indicates all required properties
+// for deleting a file share.
+message DeleteFileShareOpts {
+    // The uuid of the fileshare, required.
+    string id = 1;
+    // The uuid of the pool on which fileshare will be created, required.
+    string poolId = 3;
+    // The metadata of the fileshare, optional.
+    map<string, string> metadata = 4;
+    // The storage driver type.
+    string driverName = 5;
+    // The Context
+    string context = 6;
+    // The Serialized profile
+    string profile = 7;
+}
+
 // Generic response, it return:
 // 1. Return result with message when create/update resource successfully.
 // 2. Return result without message when delete resource successfully.
@@ -680,12 +745,12 @@ message GenericResponse {
     message Result {
         string message = 1;
     }
-    
+
     message Error {
         string code = 1;
         string description = 2;
     }
-    
+
     oneof reply {
         Result result = 1;
         Error error = 2;
@@ -699,4 +764,3 @@ message GetMetricsOpts {
     string endTime = 4;
     string context = 5;
 }
-

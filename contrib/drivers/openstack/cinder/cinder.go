@@ -38,7 +38,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/pwd"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -463,6 +463,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      d.conf.Pool[page.Name].StorageType,
 			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
 			Extras:           d.conf.Pool[page.Name].Extras,
+			MultiAttach:      d.conf.Pool[page.Name].MultiAttach,
 		}
 		pols = append(pols, pol)
 	}

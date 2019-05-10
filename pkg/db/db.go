@@ -55,7 +55,7 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
-        CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
 
 	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 
@@ -200,6 +200,11 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetVolume(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {

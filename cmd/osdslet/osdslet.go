@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
 )
@@ -51,7 +52,7 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Construct controller module grpc server struct and run controller server process.
-	if err := c.NewController(CONF.OsdsLet.ApiEndpoint).Run(); err != nil {
+	if err := c.NewController(constants.OpensdsCtrBindEndpoint).Run(); err != nil {
 		panic(err)
 	}
 }

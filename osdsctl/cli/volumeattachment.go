@@ -99,7 +99,8 @@ func volumeAttachmentAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionInfo": JsonFormatter}
+var attachmentFormatters = FormatterList{"HostInfo": JsonFormatter, "ConnectionInfo": JsonFormatter,
+	"Metadata": JsonFormatter}
 
 func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
@@ -113,8 +114,8 @@ func volumeAttachmentCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
+	keys := KeyList{"Id", "CreatedAt", "HostInfo", "ConnectionInfo", "Mountpoint",
+		"Status", "VolumeId", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
@@ -125,7 +126,7 @@ func volumeAttachmentShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId", "AccessProtocol"}
+		"Mountpoint", "Status", "VolumeId", "AccessProtocol", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
 
@@ -141,7 +142,7 @@ func volumeAttachmentListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "TenantId", "UserId", "Mountpoint", "Status", "VolumeId", "AccessProtocol"}
+	keys := KeyList{"Id", "Mountpoint", "Status", "VolumeId", "AccessProtocol"}
 	PrintList(resp, keys, attachmentFormatters)
 }
 
@@ -167,7 +168,7 @@ func volumeAttachmentUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "UserId", "HostInfo", "ConnectionInfo",
-		"Mountpoint", "Status", "VolumeId"}
+	keys := KeyList{"Id", "UpdatedAt", "HostInfo", "ConnectionInfo", "Mountpoint",
+		"Status", "VolumeId", "AttachMode", "Metadata"}
 	PrintDict(resp, keys, attachmentFormatters)
 }
