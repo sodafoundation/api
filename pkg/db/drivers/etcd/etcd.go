@@ -271,7 +271,7 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When create fileshare access rules in db:", dbRes.Error)
+		log.Error("when create fileshare access rules in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -298,7 +298,7 @@ func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When create fileshare in db:", dbRes.Error)
+		log.Error("when create fileshare in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -347,7 +347,7 @@ func (c *Client) SortFileShares(shares []*model.FileShareSpec, p *Parameter) []*
 func (c *Client) ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
 	fileshares, err := c.ListFileSharesAcl(ctx)
 	if err != nil {
-		log.Error("List fileshare failed: ", err)
+		log.Error("list fileshare failed: ", err)
 		return nil, err
 	}
 	return fileshares, nil
@@ -365,7 +365,7 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When list fileshares in db:", dbRes.Error)
+		log.Error("when list fileshares in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -376,7 +376,7 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 	for _, msg := range dbRes.Message {
 		var share = &model.FileShareAclSpec{}
 		if err := json.Unmarshal([]byte(msg), share); err != nil {
-			log.Error("When parsing fileshare in db:", dbRes.Error)
+			log.Error("when parsing fileshare in db:", dbRes.Error)
 			return nil, errors.New(dbRes.Error)
 		}
 		fileshares = append(fileshares, share)
@@ -387,7 +387,7 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	fileshares, err := c.ListFileShares(ctx)
 	if err != nil {
-		log.Error("List fileshare failed: ", err)
+		log.Error("list fileshare failed: ", err)
 		return nil, err
 	}
 
@@ -409,7 +409,7 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When list fileshares in db:", dbRes.Error)
+		log.Error("when list fileshares in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -420,7 +420,7 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 	for _, msg := range dbRes.Message {
 		var share = &model.FileShareSpec{}
 		if err := json.Unmarshal([]byte(msg), share); err != nil {
-			log.Error("When parsing fileshare in db:", dbRes.Error)
+			log.Error("when parsing fileshare in db:", dbRes.Error)
 			return nil, errors.New(dbRes.Error)
 		}
 		fileshares = append(fileshares, share)
@@ -452,13 +452,13 @@ func (c *Client) getFileShareAcl(ctx *c.Context, aclID string) (*model.FileShare
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When get fileshare acl in db:", dbRes.Error)
+		log.Error("when get fileshare acl in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
 	var acl = &model.FileShareAclSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), acl); err != nil {
-		log.Error("When parsing fileshare acl in db:", dbRes.Error)
+		log.Error("when parsing fileshare acl in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return acl, nil
@@ -488,13 +488,13 @@ func (c *Client) getFileShare(ctx *c.Context, fshareID string) (*model.FileShare
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When get fileshare in db:", dbRes.Error)
+		log.Error("when get fileshare in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
 	var fshare = &model.FileShareSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), fshare); err != nil {
-		log.Error("When parsing fileshare in db:", dbRes.Error)
+		log.Error("when parsing fileshare in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return fshare, nil
@@ -533,7 +533,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When update fileshare in db:", dbRes.Error)
+		log.Error("when update fileshare in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return result, nil
@@ -557,7 +557,7 @@ func (c *Client) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
 
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When delete fileshare in db:", dbRes.Error)
+		log.Error("when delete fileshare in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -582,7 +582,7 @@ func (c *Client) DeleteFileShare(ctx *c.Context, fileshareID string) error {
 
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When delete fileshare in db:", dbRes.Error)
+		log.Error("when delete fileshare in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -602,7 +602,7 @@ func (c *Client) CreateFileShareSnapshot(ctx *c.Context, snp *model.FileShareSna
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When create fileshare snapshot in db:", dbRes.Error)
+		log.Error("when create fileshare snapshot in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -633,13 +633,13 @@ func (c *Client) getFileShareSnapshot(ctx *c.Context, snpID string) (*model.File
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When get fileshare attachment in db:", dbRes.Error)
+		log.Error("when get fileshare attachment in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
 	var fs = &model.FileShareSnapshotSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), fs); err != nil {
-		log.Error("When parsing fileshare snapshot in db:", dbRes.Error)
+		log.Error("when parsing fileshare snapshot in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return fs, nil
@@ -655,7 +655,7 @@ func (c *Client) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnaps
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When list fileshare snapshots in db:", dbRes.Error)
+		log.Error("when list fileshare snapshots in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -771,7 +771,7 @@ func (c *Client) SortFileShareSnapshots(snapshots []*model.FileShareSnapshotSpec
 func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
 	fileshareSnapshots, err := c.ListFileShareSnapshots(ctx)
 	if err != nil {
-		log.Error("List fileshareSnapshots failed: ", err)
+		log.Error("list fileshareSnapshots failed: ", err)
 		return nil, err
 	}
 
@@ -816,7 +816,7 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When update fileshare snapshot in db:", dbRes.Error)
+		log.Error("when update fileshare snapshot in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return result, nil
@@ -840,7 +840,7 @@ func (c *Client) DeleteFileShareSnapshot(ctx *c.Context, snpID string) error {
 
 	dbRes := c.Delete(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When delete fileshare snapshot in db:", dbRes.Error)
+		log.Error("when delete fileshare snapshot in db:", dbRes.Error)
 		return errors.New(dbRes.Error)
 	}
 	return nil
@@ -869,7 +869,7 @@ func (c *Client) CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpe
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When create dock in db:", dbRes.Error)
+		log.Error("when create dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -883,13 +883,13 @@ func (c *Client) GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error) 
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When get dock in db:", dbRes.Error)
+		log.Error("when get dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
 	var dck = &model.DockSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), dck); err != nil {
-		log.Error("When parsing dock in db:", dbRes.Error)
+		log.Error("when parsing dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return dck, nil
