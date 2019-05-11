@@ -85,6 +85,11 @@ type FileShareSpec struct {
 
 	// ExportLocations of the fileshare.
 	ExportLocations []string `json:"exportLocations,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // FileShareSnapshotSpec is a description of fileshare snapshot resource.
