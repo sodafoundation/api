@@ -28,7 +28,7 @@ func init() {
 		beego.NewNamespace("/"+constants.APIVersion+"/:tenantId/metrics",
 
 			// All operations of metrics can be used for both admin and users.
-			beego.NSRouter("/", controllers.NewMetricsPortal(), "post:CollectMetrics, get:GetMetrics"),
+			beego.NSRouter("/", controllers.NewMetricsPortal(), "post:CollectMetrics;get:GetMetrics"),
 
 			// All operations of file can be used for both admin and users.
 			beego.NSRouter("/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
