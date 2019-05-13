@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,9 @@ type dockServer struct {
 	// Driver represents the specified backend resource. This field is used
 	// for initializing the specified volume driver.
 	Driver drivers.VolumeDriver
+	// Metrics driver to collect metrics
+	MetricDriver drivers.MetricDriver
+	
 	// FileShareDriver represents the specified backend resource. This field is used
 	// for initializing the specified file share driver.
 	FileShareDriver filesharedrivers.FileShareDriver
@@ -463,6 +466,25 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 	}
 
 	return nil
+}
+
+// Collect the specified metrics from the metric driver
+func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.V(5).Info("in dock CollectMetrics methods")
+	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
+
+	defer drivers.CleanMetricDriver(ds.MetricDriver)
+
+	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
+
+	result, err := ds.MetricDriver.CollectMetrics(opt.MetricNames, opt.InstanceId)
+
+	if err != nil {
+		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
 }
 
 // CreateFileShare implements pb.DockServer.CreateFileShare
