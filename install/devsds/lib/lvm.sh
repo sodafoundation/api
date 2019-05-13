@@ -123,6 +123,7 @@ pool:
     diskType: NL-SAS
     availabilityZone: default
     multiAttach: true
+    storageType: block
     extras:
       dataStorage:
         provisioningPolicy: Thin

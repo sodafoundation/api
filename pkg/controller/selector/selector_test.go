@@ -80,6 +80,7 @@ var (
 			},
 			Name:        "default",
 			Description: "default policy",
+			StorageType: "block",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -87,6 +88,7 @@ var (
 			},
 			Name:        "profile-01",
 			Description: "silver policy",
+			StorageType: "block",
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
@@ -118,6 +120,7 @@ var (
 			},
 			Name:        "profile-02",
 			Description: "silver policy",
+			StorageType: "block",
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
@@ -158,6 +161,7 @@ var (
 			Description:      "fake pool for testing",
 			Status:           "available",
 			AvailabilityZone: "az1",
+			StorageType:      "block",
 			TotalCapacity:    99999,
 			FreeCapacity:     5000,
 			DockId:           "ccac4f33-e603-425a-8813-371bbe10566e",
@@ -187,6 +191,7 @@ var (
 			Name:             "fakePool",
 			Description:      "fake pool for testing",
 			Status:           "available",
+			StorageType:      "block",
 			AvailabilityZone: "az1",
 			TotalCapacity:    99999,
 			FreeCapacity:     6999,

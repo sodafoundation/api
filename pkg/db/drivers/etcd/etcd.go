@@ -1382,7 +1382,23 @@ func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
 	}
 
 	for _, profile := range profiles {
-		if profile.Name == "default" {
+		if profile.Name == "default" && profile.StorageType == "block"{
+			return profile, nil
+		}
+	}
+	return nil, errors.New("No default profile in db.")
+}
+
+// GetDefaultProfileFileShare
+func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
+	profiles, err := c.ListProfiles(ctx)
+	if err != nil {
+		log.Error("Get default profile failed in db: ", err)
+		return nil, err
+	}
+
+	for _, profile := range profiles {
+		if profile.Name == "default" && profile.StorageType == "file" {
 			return profile, nil
 		}
 	}
