@@ -55,17 +55,27 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
+	CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
+
+	ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error)
+
 	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
 
 	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 
 	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
 
+	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
+
 	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
+
+	GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error)
 
 	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
 
 	DeleteFileShare(ctx *c.Context, fshareID string) error
+
+	DeleteFileShareAcl(ctx *c.Context, aclID string) error
 
 	CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
 
@@ -200,6 +210,11 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetVolume(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
