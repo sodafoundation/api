@@ -22,6 +22,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
@@ -54,25 +55,27 @@ func (p *ProfilePortal) CreateProfile() {
 	}
 
 	// Validate StorageType is block or file
-	if profile.StorageType != constants.Block && profile.StorageType != constants.File {
-		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", profile.StorageType)
-		p.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
-
-	capabilityflag := true
-	if profile.StorageType == constants.File {
-		if pp := profile.ProvisioningProperties; !pp.IsEmpty() {
+	stype := strings.ToLower(profile.StorageType)
+	switch stype {
+	case constants.Block:
+		break
+	case constants.File:
+		if pp := profile.ProvisioningProperties; pp.IsEmpty() {
+			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")
+			p.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		} else {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
 				if len(ds.StorageAccessCapability) == 0 {
-					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability", ds.StorageAccessCapability)
+					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",
+						ds.StorageAccessCapability)
 					p.ErrorHandle(model.ErrorBadRequest, errMsg)
 					return
 				} else {
 					for _, x := range ds.StorageAccessCapability {
-						capabilityflag = utils.Contains(StorageAccessCapabilities, x)
-						if capabilityflag == false {
-							errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability", ds.StorageAccessCapability)
+						if !utils.Contains(StorageAccessCapabilities, x) {
+							errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",
+								ds.StorageAccessCapability)
 							p.ErrorHandle(model.ErrorBadRequest, errMsg)
 							return
 						}
@@ -80,12 +83,12 @@ func (p *ProfilePortal) CreateProfile() {
 				}
 
 			}
-		} else {
-			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")
-			p.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
 		}
-
+		break
+	default:
+		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", stype)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
 	}
 
 	// Call db api module to handle create profile request.
@@ -291,10 +294,11 @@ func (p *ProfilePortal) RemoveCustomProperty() {
 	customKey := p.Ctx.Input.Param(":customKey")
 
 	if err := db.C.RemoveCustomProperty(c.GetContext(p.Ctx), id, customKey); err != nil {
-		fmt.Sprintf("remove custom property failed: %v", err)
-		p.SuccessHandle(StatusOK, nil)
+		errMsg := fmt.Sprintf("remove custom property failed: %v", err)
+		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
+
 	p.SuccessHandle(StatusOK, nil)
 	return
 }
