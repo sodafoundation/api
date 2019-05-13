@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -120,4 +120,12 @@ func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.Volume
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
+}
+
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareSpec, error) {
+	return nil, nil
+}
+
+func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
 }

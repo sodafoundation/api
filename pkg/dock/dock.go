@@ -28,6 +28,7 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
+	"github.com/opensds/opensds/contrib/drivers/filesharedrivers"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
@@ -51,6 +52,10 @@ type dockServer struct {
 	Driver drivers.VolumeDriver
 	// Metrics driver to collect metrics
 	MetricDriver drivers.MetricDriver
+	
+	// FileShareDriver represents the specified backend resource. This field is used
+	// for initializing the specified file share driver.
+	FileShareDriver filesharedrivers.FileShareDriver
 }
 
 // NewDockServer returns a dockServer instance.
@@ -69,6 +74,7 @@ func (ds *dockServer) Run() error {
 	// Register dock service.
 	pb.RegisterProvisionDockServer(s, ds)
 	pb.RegisterAttachDockServer(s, ds)
+	pb.RegisterFileShareDockServer(s, ds)
 
 	// Trigger the discovery and report loop so that the dock service would
 	// update the capabilities from backends automatically.
@@ -479,4 +485,39 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	}
 
 	return pb.GenericResponseResult(result), nil
+}
+
+// CreateFileShare implements pb.DockServer.CreateFileShare
+func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileShareOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive create file share request, vr =", opt)
+
+	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
+	if err != nil {
+		log.Error("when create file share in dock module:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(fileshare), nil
+}
+
+// DeleteFileShare implements pb.DockServer.DeleteFileShare
+func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileShareOpts) (*pb.GenericResponse, error) {
+
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive delete file share request, vr =", opt)
+
+	if _, err := ds.FileShareDriver.DeleteFileShare(opt); err != nil {
+		log.Error("error occurred in dock module when delete file share:", err)
+		return pb.GenericResponseError(err), err
+	}
+
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(nil), nil
 }

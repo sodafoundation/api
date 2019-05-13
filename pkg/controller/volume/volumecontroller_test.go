@@ -346,3 +346,12 @@ func TestDisableReplication(t *testing.T) {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
 }
+
+func (fc *fakeClient) CreateFileShare(ctx context.Context, in *pb.CreateFileShareOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+// DeleteFileShare provides a mock function with given fields: ctx, in, opts
+func (fc *fakeClient) DeleteFileShare(ctx context.Context, in *pb.DeleteFileShareOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
