@@ -127,7 +127,7 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 
 		metric := &model.MetricSpec{
 			InstanceID:   instanceID,
-			InstanceName: "opensds_ceph_metrics",
+			InstanceName: instanceID,
 			Job:          "ceph",
 			Labels:       associatorMap,
 			//Todo Take Componet from Post call, as of now it is only for pool ( will use "resourceType" instead
