@@ -464,7 +464,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 
 // Collect the specified metrics from the metric driver
 func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
-	log.Info("in dock CollectMetrics methods")
+	log.V(5).Info("in dock CollectMetrics methods")
 	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
 
 	defer drivers.CleanMetricDriver(ds.MetricDriver)
@@ -474,7 +474,7 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	result, err := ds.MetricDriver.CollectMetrics(opt.MetricNames, opt.InstanceId)
 
 	if err != nil {
-		log.Errorf("error occurred in dock module for collect metrics:%s", err.Error())
+		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 

@@ -887,19 +887,19 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 }
 
 func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
-	log.Info("in controller collect metrics methods")
+	log.V(5).Info("in controller collect metrics methods")
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
 
 	if err != nil {
-		log.Errorf("get volume failed in CollectMetrics method: %s", err.Error())
+		log.Errorf("get volume by id %s failed in CollectMetrics method: %s", opt.InstanceId, err.Error())
 		return pb.GenericResponseError(err), err
 	}
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
-		log.Errorf("error when search dock in db by pool id: %s", err.Error())
+		log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
 		return pb.GenericResponseError(err), err
 
 	}

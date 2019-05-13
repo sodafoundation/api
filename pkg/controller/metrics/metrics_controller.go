@@ -276,13 +276,13 @@ func (c *controller) SetDock(dockInfo *model.DockSpec) {
 
 func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error) {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
-		log.Errorf("error when connecting dock client:%s", err.Error())
+		log.Errorf("error when connecting dock client: %s", err.Error())
 		return nil, err
 	}
 
 	response, err := c.Client.CollectMetrics(context.Background(), opt)
 	if err != nil {
-		log.Errorf("collect metrics failed in metrics controller:%s", err.Error())
+		log.Errorf("collect metrics failed in metrics controller: %s", err.Error())
 		return nil, err
 	}
 	defer c.Client.Close()
