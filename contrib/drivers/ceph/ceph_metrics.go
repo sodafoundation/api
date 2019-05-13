@@ -35,16 +35,6 @@ resources:
       - pool_read_bytes_total
       - pool_write_total
       - pool_write_bytes_total
-    units:
-      - bytes
-      - bytes
-      - bytes
-      - ""
-      - ""
-      - ""
-      - bytes
-      - ""
-      - bytes
 `
 
 type Config struct {
@@ -86,7 +76,7 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 	source := []byte(data)
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
-		log.Fatalf("Unmarshal error: %v", error)
+		log.Fatalf("unmarshal error: %v", error)
 	}
 
 	for _, resources := range configs.Cfgs {
@@ -115,14 +105,13 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 	//validate metric support list
 	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "pool")
 	if supportedMetrics == nil {
-		log.Infof("No metrics found in the  supported metric list")
+		log.Infof("no metrics found in the  supported metric list")
 	}
 	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []*model.MetricSpec
-	total_metrics_count := len(supportedMetrics) * len(metricMap)
 
-	for i := 0; i < total_metrics_count; i++ {
+	for i := 0; i < len(metricMap); i++ {
 		val, _ := strconv.ParseFloat(metricMap[i].Value, 64)
 		//Todo: See if association  is required here, resource discovery could fill this information
 		associatorMap := make(map[string]string)
@@ -138,27 +127,33 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 
 		metric := &model.MetricSpec{
 			InstanceID:   instanceID,
-			InstanceName: "",
-			Job:          "OpenSDS",
+			InstanceName: "opensds_ceph_metrics",
+			Job:          "ceph",
 			Labels:       associatorMap,
-			//Todo Take Componet from Post call, as of now it is only for pool
-			Component: "pool",
-			Name:      metricMap[i].Name,
-			//Todo : Fill units according to metric type
+			//Todo Take Componet from Post call, as of now it is only for pool ( will use "resourceType" instead
+			// Pass "resourceType" as 3rd parameter which will be used as Componet's field
+			Component:    "pool",
+			Name:         metricMap[i].Name,
 			Unit:         metricMap[i].Unit,
 			AggrType:     metricMap[i].AggrType,
 			MetricValues: metricValues,
 		}
 		tempMetricArray = append(tempMetricArray, metric)
 	}
-
 	metricArray := tempMetricArray
 	return metricArray, err
 }
 
 func (d *MetricDriver) Setup() error {
-
+	cli, err := NewMetricCli()
+	if err != nil {
+		return err
+	}
+	d.cli = cli
 	return nil
 }
 
-func (*MetricDriver) Teardown() error { return nil }
+func (d *MetricDriver) Teardown() error {
+	d.cli.conn.Shutdown()
+	return nil
+}

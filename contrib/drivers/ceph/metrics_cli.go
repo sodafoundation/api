@@ -20,6 +20,32 @@ import (
 )
 
 type MetricCli struct {
+	conn *rados.Conn
+}
+
+func NewMetricCli() (*MetricCli, error) {
+
+	conn, err := rados.NewConn()
+	if err != nil {
+		log.Error("when connecting to rados:", err)
+		return nil, err
+	}
+
+	err = conn.ReadDefaultConfigFile()
+	if err != nil {
+		log.Error("file ReadDefaultConfigFile can't read", err)
+		return nil, err
+	}
+
+	err = conn.Connect()
+	if err != nil {
+		log.Error("when connecting to ceph cluster:", err)
+		return nil, err
+	}
+
+	return &MetricCli{
+		conn,
+	}, nil
 }
 
 type CephMetricStats struct {
@@ -50,43 +76,23 @@ type cephPoolStats struct {
 }
 
 func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]CephMetricStats, error) {
-
 	returnMap := []CephMetricStats{}
-	var err error
-	conn, err := rados.NewConn()
-	if err != nil {
-		log.Error("when connecting to rados:", err)
-	}
-
-	err = conn.ReadDefaultConfigFile()
-	if err != nil {
-		log.Error("file ReadDefaultConfigFile can't read", err)
-	}
-
-	err = conn.Connect()
-	if err != nil {
-		log.Error("when connecting to ceph cluster:", err)
-	}
-
 	cmd, err := json.Marshal(map[string]interface{}{
 		"prefix": "df",
 		"detail": "detail",
 		"format": "json",
 	})
 	if err != nil {
-		// panic! because ideally in no world this hard-coded input
-		// should fail.
 		log.Errorf("cmd failed with %s\n", err)
 	}
 
-	buf, _, err := conn.MonCommand(cmd)
+	buf, _, err := cli.conn.MonCommand(cmd)
 	if err != nil {
 	}
+
 	pool_stats := &cephPoolStats{}
 	if err := json.Unmarshal(buf, pool_stats); err != nil {
-
-		log.Fatalf("Unmarshal error: %v", err)
-		// return
+		log.Errorf("unmarshal error: %v", err)
 	}
 
 	for _, pool := range pool_stats.Pools {
@@ -104,7 +110,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_raw_used_bytes":
 				returnMap = append(returnMap, CephMetricStats{
 					"raw_used",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.RawBytesUsed.String(),
 					"bytes", "ceph",
 					"",
 					pool.Name})
@@ -112,7 +118,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_available_bytes":
 				returnMap = append(returnMap, CephMetricStats{
 					"available",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.MaxAvail.String(),
 					"bytes",
 					"ceph",
 					"",
@@ -121,7 +127,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_objects_total":
 				returnMap = append(returnMap, CephMetricStats{
 					"objects",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.Objects.String(),
 					"",
 					"ceph",
 					"",
@@ -130,7 +136,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_dirty_objects_total":
 				returnMap = append(returnMap, CephMetricStats{
 					"dirty_objects",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.DirtyObjects.String(),
 					"",
 					"ceph",
 					"total",
@@ -138,7 +144,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 
 			case "pool_read_total":
 				returnMap = append(returnMap, CephMetricStats{
-					"read", pool.Stats.BytesUsed.String(),
+					"read", pool.Stats.ReadIO.String(),
 					"",
 					"ceph",
 					"total",
@@ -147,7 +153,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_read_bytes_total":
 				returnMap = append(returnMap, CephMetricStats{
 					"read",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.ReadBytes.String(),
 					"bytes",
 					"ceph",
 					"total",
@@ -156,15 +162,15 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			case "pool_write_total":
 				returnMap = append(returnMap, CephMetricStats{
 					"write",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.WriteIO.String(),
 					"", "ceph",
-					"",
+					"total",
 					pool.Name})
 
 			case "pool_write_bytes_total":
 				returnMap = append(returnMap, CephMetricStats{
 					"write_bytes",
-					pool.Stats.BytesUsed.String(),
+					pool.Stats.WriteBytes.String(),
 					"bytes",
 					"ceph",
 					"total",
@@ -172,6 +178,5 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 			}
 		}
 	}
-	conn.Shutdown()
 	return returnMap, nil
 }
