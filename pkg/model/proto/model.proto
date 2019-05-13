@@ -724,7 +724,7 @@ message CreateFileShareOpts {
     // The Context
     string context = 12;
     // The Serialized profile
-    string ProfileId = 13;
+    string profile = 13;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
@@ -741,7 +741,7 @@ message DeleteFileShareOpts {
     // The Context
     string context = 6;
     // The Serialized profile
-    string ProfileId = 7;
+    string profile = 7;
 }
 
 // Generic response, it return:

@@ -160,7 +160,7 @@ func (f *FileSharePortal) CreateFileShare() {
 		Description:      result.Description,
 		Size:             result.Size,
 		AvailabilityZone: result.AvailabilityZone,
-		ProfileId:        prf.ToJson(),
+		Profile:          prf.ToJson(),
 		PoolId:           result.PoolId,
 		Metadata:         result.Metadata,
 		Context:          ctx.ToJson(),
@@ -340,11 +340,11 @@ func (f *FileSharePortal) DeleteFileShare() {
 	}
 	defer f.CtrClient.Close()
 	opt := &pb.DeleteFileShareOpts{
-		Id:        fileshare.Id,
-		PoolId:    fileshare.PoolId,
-		Metadata:  fileshare.Metadata,
-		Context:   ctx.ToJson(),
-		ProfileId: prf.ToJson(),
+		Id:       fileshare.Id,
+		PoolId:   fileshare.PoolId,
+		Metadata: fileshare.Metadata,
+		Context:  ctx.ToJson(),
+		Profile:  prf.ToJson(),
 	}
 	if _, err = f.CtrClient.DeleteFileShare(context.Background(), opt); err != nil {
 		log.Error("delete fileshare failed in controller service:", err)

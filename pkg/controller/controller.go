@@ -874,12 +874,12 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	log.Info("Controller server receive create file share request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	if opt.ProfileId == "" {
+	if opt.Profile == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
-		opt.ProfileId = prf.Id
+		opt.Profile = prf.Id
 	} else {
-		prf, err = db.C.GetProfile(ctx, opt.ProfileId)
+		prf, err = db.C.GetProfile(ctx, opt.Profile)
 	}
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
@@ -921,7 +921,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
-	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
+	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfile()
 
 	// Update the file share data in database.
 	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
