@@ -81,6 +81,29 @@ func (_m *Client) CreateFileShare(ctx *context.Context, fshare *model.FileShareS
 	return r0, r1
 }
 
+// CreateFileShareAcl provides a mock function with given fields: ctx, fshare
+func (_m *Client) CreateFileShareAcl(ctx *context.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx, fshare)
+
+	var r0 *model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.FileShareAclSpec) *model.FileShareAclSpec); ok {
+		r0 = rf(ctx, fshare)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.FileShareAclSpec) error); ok {
+		r1 = rf(ctx, fshare)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateFileShareSnapshot provides a mock function with given fields: ctx, vs
 func (_m *Client) CreateFileShareSnapshot(ctx *context.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
 	ret := _m.Called(ctx, vs)
@@ -286,6 +309,20 @@ func (_m *Client) DeleteFileShare(ctx *context.Context, fshareID string) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
 		r0 = rf(ctx, fshareID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteFileShareAcl provides a mock function with given fields: ctx, aclID
+func (_m *Client) DeleteFileShareAcl(ctx *context.Context, aclID string) error {
+	ret := _m.Called(ctx, aclID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
+		r0 = rf(ctx, aclID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -513,6 +550,29 @@ func (_m *Client) GetFileShare(ctx *context.Context, fshareID string) (*model.Fi
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
 		r1 = rf(ctx, fshareID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetFileShareAcl provides a mock function with given fields: ctx, aclID
+func (_m *Client) GetFileShareAcl(ctx *context.Context, aclID string) (*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx, aclID)
+
+	var r0 *model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.FileShareAclSpec); ok {
+		r0 = rf(ctx, aclID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, aclID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -904,6 +964,52 @@ func (_m *Client) ListFileShares(ctx *context.Context) ([]*model.FileShareSpec, 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
 		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListFileSharesAcl provides a mock function with given fields: ctx
+func (_m *Client) ListFileSharesAcl(ctx *context.Context) ([]*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []*model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.FileShareAclSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListFileSharesAclWithFilter provides a mock function with given fields: ctx, m
+func (_m *Client) ListFileSharesAclWithFilter(ctx *context.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx, m)
+
+	var r0 []*model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.FileShareAclSpec); ok {
+		r0 = rf(ctx, m)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
+		r1 = rf(ctx, m)
 	} else {
 		r1 = ret.Error(1)
 	}

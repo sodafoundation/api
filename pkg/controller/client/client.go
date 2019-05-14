@@ -17,6 +17,7 @@ package client
 import (
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+
 	"google.golang.org/grpc"
 )
 
@@ -26,6 +27,7 @@ import (
 // can easily open and close gRPC connection.
 type Client interface {
 	pb.ControllerClient
+	pb.FileShareControllerClient
 
 	Connect(edp string) error
 
@@ -37,6 +39,7 @@ type Client interface {
 // in the long run.
 type client struct {
 	pb.ControllerClient
+	pb.FileShareControllerClient
 	*grpc.ClientConn
 }
 
@@ -51,6 +54,7 @@ func (c *client) Connect(edp string) error {
 	}
 	// Create controller client via the connection.
 	c.ControllerClient = pb.NewControllerClient(conn)
+	c.FileShareControllerClient = pb.NewFileShareControllerClient(conn)
 	c.ClientConn = conn
 
 	return nil
