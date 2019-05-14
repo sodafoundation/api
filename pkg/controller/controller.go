@@ -1014,3 +1014,19 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 
 	return pb.GenericResponseResult(result), nil
 }
+
+func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller get urls method")
+
+	var result *map[string]string
+	var err error
+
+	result, err = c.metricsController.GetUrls()
+
+	if err != nil {
+		log.Errorf("get urls failed: %s\n", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), err
+}
