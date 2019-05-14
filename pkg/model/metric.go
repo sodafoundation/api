@@ -107,3 +107,8 @@ type Metric struct {
 }
 
 type NoParam struct{}
+
+type UrlSpec struct {
+	Name string `json:"name,omitempty"`
+	Url  string `json:"url,omitempty"`
+}
