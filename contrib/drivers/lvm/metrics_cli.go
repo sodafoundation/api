@@ -63,6 +63,11 @@ func isSarEnabled(out string) bool {
 func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]string, instanceID string, metricMap map[string]int, out string) {
 
 	tableRows := strings.Split(string(out), "\n")
+
+	// TODO(Prakash):re-visit the below logic when we add disk metrics support
+	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
+	instanceID = strings.Replace(instanceID, "-", "--", -1)
+
 	for _, row := range tableRows {
 
 		if strings.Contains(row, instanceID) {
