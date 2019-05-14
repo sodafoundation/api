@@ -130,6 +130,20 @@ func Clean(d VolumeDriver) VolumeDriver {
 	return d
 }
 
+func CleanMetricDriver(d MetricDriver) MetricDriver {
+	// Execute different clean operations according to the MetricDriver type.
+	switch d.(type) {
+	case *lvm.MetricDriver:
+		break
+	default:
+		break
+	}
+	_ = d.Teardown()
+	d = nil
+
+	return d
+}
+
 type MetricDriver interface {
 	//Any initialization the metric driver does while starting.
 	Setup() error
