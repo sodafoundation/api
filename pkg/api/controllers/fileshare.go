@@ -40,6 +40,7 @@ type FileSharePortal struct {
 
 	CtrClient client.Client
 }
+
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
 	var fileshareacl = model.FileShareAclSpec{
@@ -159,10 +160,10 @@ func (f *FileSharePortal) CreateFileShare() {
 		Description:      result.Description,
 		Size:             result.Size,
 		AvailabilityZone: result.AvailabilityZone,
-		Profile:   prf.ToJson(),
-		PoolId:    result.PoolId,
-		Metadata:  result.Metadata,
-		Context:   ctx.ToJson(),
+		Profile:          prf.ToJson(),
+		PoolId:           result.PoolId,
+		Metadata:         result.Metadata,
+		Context:          ctx.ToJson(),
 	}
 	if _, err = f.CtrClient.CreateFileShare(context.Background(), opt); err != nil {
 		log.Error("create file share failed in controller service:", err)
@@ -339,11 +340,11 @@ func (f *FileSharePortal) DeleteFileShare() {
 	}
 	defer f.CtrClient.Close()
 	opt := &pb.DeleteFileShareOpts{
-		Id:        fileshare.Id,
-		PoolId:    fileshare.PoolId,
-		Metadata:  fileshare.Metadata,
-		Context:   ctx.ToJson(),
-		Profile:   prf.ToJson(),
+		Id:       fileshare.Id,
+		PoolId:   fileshare.PoolId,
+		Metadata: fileshare.Metadata,
+		Context:  ctx.ToJson(),
+		Profile:  prf.ToJson(),
 	}
 	if _, err = f.CtrClient.DeleteFileShare(context.Background(), opt); err != nil {
 		log.Error("delete fileshare failed in controller service:", err)

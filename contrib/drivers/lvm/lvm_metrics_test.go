@@ -102,7 +102,7 @@ func TestCollectMetrics(t *testing.T) {
 		expctdMetricValues := make([]*model.Metric, 0)
 		expctdMetricValues = append(expctdMetricValues, expctdmetricValue)
 		metric := &model.MetricSpec{
-			InstanceID:   "b902e771--8e02--4099--b601--a6b3881f8",
+			InstanceID:   "b902e771-8e02-4099-b601-a6b3881f8",
 			InstanceName: "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8",
 			Job:          "OpenSDS",
 			Labels:       expctdLabels,
@@ -115,7 +115,7 @@ func TestCollectMetrics(t *testing.T) {
 		tempMetricArray = append(tempMetricArray, metric)
 	}
 	expectedMetrics := tempMetricArray
-	retunMetrics, err := md.CollectMetrics(expctdMetricList, "b902e771--8e02--4099--b601--a6b3881f8")
+	retunMetrics, err := md.CollectMetrics(expctdMetricList, "b902e771-8e02-4099-b601-a6b3881f8")
 	if err != nil {
 		t.Error("failed to collect stats:", err)
 	}
