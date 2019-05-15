@@ -17,21 +17,23 @@ package connector
 import (
 	"fmt"
 	"log"
+
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 )
 
 const (
-	FcDriver = "fibre_channel"
+	FcDriver = config.FCProtocol
 	PortName = "port_name"
 	NodeName = "node_name"
 	Wwpn     = "wwpn"
 	Wwnn     = "wwnn"
 
-	IscsiDriver = "iscsi"
+	IscsiDriver = config.ISCSIProtocol
 	Iqn         = "iqn"
 
-	RbdDriver = "rbd"
+	RbdDriver = config.RBDProtocol
 
-	NvmeofDriver = "nvmeof"
+	NvmeofDriver = config.NVMEOFProtocol
 	Nqn          = "nqn"
 )
 
