@@ -307,7 +307,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 		return nil, err
 	}
 	connInfo := &model.ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
 			"targetIQN":        []string{tgtIqn},
@@ -557,7 +557,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	}
 
 	fcInfo := &model.ConnectionInfo{
-		DriverVolumeType: FCProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered":     true,
 			"target_wwn":           tgtPortWWNs,
