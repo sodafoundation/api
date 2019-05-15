@@ -18,12 +18,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego/httplib"
-	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"math"
 	"net/http"
 	"strings"
+
+	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 )
@@ -274,7 +275,7 @@ func (c *NimbleClient) CreateVolume(poolId string, opt *pb.CreateVolumeOpts) (*V
 		return nil, err
 	}
 
-	/* Parse options from Profile---------------------------------------------- */
+	// Parse options from Profile----------------------------------------------
 	profileOpt := &model.ProfileSpec{}
 	reqOptions := CreateVolumeReqData{}
 	if err := json.Unmarshal([]byte(opt.GetProfile()), profileOpt); err != nil {
@@ -289,15 +290,14 @@ func (c *NimbleClient) CreateVolume(poolId string, opt *pb.CreateVolumeOpts) (*V
 	if err := json.Unmarshal(options, &reqOptions); err != nil {
 		return nil, err
 	}
-	/* ------------------------------------------------------------------------- */
+	// -------------------------------------------------------------------------
 
-	//	reqOptions.Name = EncodeName(opt.GetId())
 	reqOptions.Name = opt.GetId()
 	reqOptions.PoolId = poolId
 	reqOptions.Size = opt.GetSize() * int64(math.Pow(1024, 1))
 	reqOptions.Description = TruncateDescription(opt.GetDescription())
 
-	/* Create volume from snapshot */
+	// Create volume from snapshot
 	if opt.GetSnapshotId() != "" {
 		log.Infof("%v: try to create volume from snapshot...", DriverName)
 		log.Infof("%v: snap id: %v", DriverName, opt.GetSnapshotId())
@@ -351,7 +351,7 @@ func (c *NimbleClient) GetStorageVolumeId(poolId string, volName string) (string
 func (c *NimbleClient) GetStorageSnapshotId(poolId string, baseSnapName string) (string, error) {
 	storageSnapshotId := ""
 
-	/* Get all volume names */
+	// Get all volume names
 	volResp, err := c.ListVolume(poolId)
 	if err != nil {
 		return storageSnapshotId, err
@@ -422,24 +422,24 @@ func (c *NimbleClient) ExtendVolume(poolId string, opt *pb.ExtendVolumeOpts) (*V
 		return nil, err
 	}
 
-	// Parse options from Profile---------------------------------------------- 
+	// Parse options from Profile----------------------------------------------
 	reqOptions := ExtendVolumeReqData{}
-	
-		profileOpt := &model.ProfileSpec{}
-		if err := json.Unmarshal([]byte(opt.GetProfile()), profileOpt); err != nil {
-			return nil, err
-		}
 
-		options, err := json.Marshal(profileOpt.CustomProperties)
-		if err != nil {
-			return nil, err
-		}
+	profileOpt := &model.ProfileSpec{}
+	if err := json.Unmarshal([]byte(opt.GetProfile()), profileOpt); err != nil {
+		return nil, err
+	}
 
-		if err := json.Unmarshal(options, &reqOptions); err != nil {
-			return nil, err
-		}
-	
-	// ------------------------------------------------------------------------- 
+	options, err := json.Marshal(profileOpt.CustomProperties)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(options, &reqOptions); err != nil {
+		return nil, err
+	}
+
+	// -------------------------------------------------------------------------
 	reqOptions.Size = opt.GetSize() * int64(math.Pow(1024, 1))
 	reqBody := &ExtendVolumeReqBody{Data: reqOptions}
 	respBody := &ExtendVolumeRespBody{}
@@ -453,25 +453,24 @@ func (c *NimbleClient) CreateSnapshot(poolId string, opt *pb.CreateVolumeSnapsho
 		return nil, err
 	}
 
-	// Parse options from Profile---------------------------------------------- 
+	// Parse options from Profile----------------------------------------------
 	reqOptions := CreateSnapshotReqData{}
 
-		profileOpt := &model.ProfileSpec{}
-		if err := json.Unmarshal([]byte(opt.GetProfile()), profileOpt); err != nil {
-			return nil, err
-		}
+	profileOpt := &model.ProfileSpec{}
+	if err := json.Unmarshal([]byte(opt.GetProfile()), profileOpt); err != nil {
+		return nil, err
+	}
 
-		options, err := json.Marshal(profileOpt.CustomProperties)
-		if err != nil {
-			return nil, err
-		}
+	options, err := json.Marshal(profileOpt.CustomProperties)
+	if err != nil {
+		return nil, err
+	}
 
-		if err := json.Unmarshal(options, &reqOptions); err != nil {
-			return nil, err
-		}
-	// ------------------------------------------------------------------------- 
+	if err := json.Unmarshal(options, &reqOptions); err != nil {
+		return nil, err
+	}
+	// -------------------------------------------------------------------------
 
-	//	reqOptions.Name = EncodeName(opt.GetId())
 	reqOptions.Name = opt.GetId()
 	reqOptions.VolId = opt.GetMetadata()["LunId"]
 	reqOptions.Description = TruncateDescription(opt.GetDescription())
@@ -493,7 +492,7 @@ func (c *NimbleClient) DeleteSnapshot(poolId string, opt *pb.DeleteVolumeSnapsho
 }
 
 func (c *NimbleClient) ListInitiator(poolId string, initiatorResp *AllInitiatorRespBody) error {
-	/* Get endpoint and token for spwcific pool */
+	// Get endpoint and token for spwcific pool
 	ep, token, err := c.GetTokenByPoolId(poolId)
 	if err != nil {
 		return err
@@ -504,7 +503,7 @@ func (c *NimbleClient) ListInitiator(poolId string, initiatorResp *AllInitiatorR
 }
 
 func (c *NimbleClient) GetStorageInitiatorGrpId(poolId string, initiatorIqn string) (string, error) {
-	/* List all registered initiators */
+	// List all registered initiators
 	respBody := &AllInitiatorRespBody{}
 	err := c.ListInitiator(poolId, respBody)
 	if err != nil {
@@ -520,7 +519,7 @@ func (c *NimbleClient) GetStorageInitiatorGrpId(poolId string, initiatorIqn stri
 }
 
 func (c *NimbleClient) RegisterInitiatorIntoDefaultGrp(poolId string, opt *pb.CreateVolumeAttachmentOpts, initiatorGrpId string) (*InitiatorRespData, error) {
-	/* Get endpoint and token for spwcific pool */
+	// Get endpoint and token for spwcific pool
 	ep, token, err := c.GetTokenByPoolId(poolId)
 	if err != nil {
 		return nil, err
@@ -578,7 +577,7 @@ func (c *NimbleClient) GetDefaultInitiatorGrpId(poolId string, opt *pb.CreateVol
 }
 
 func (c *NimbleClient) ListInitiatorGrp(poolId string, initiatorGrpResp *AllInitiatorGrpRespBody) error {
-	/* Get endpoint and token for spwcific pool */
+	// Get endpoint and token for spwcific pool
 	ep, token, err := c.GetTokenByPoolId(poolId)
 	if err != nil {
 		return err
@@ -594,14 +593,14 @@ func (c *NimbleClient) CreateInitiatorDefaultGrp(poolId string, opt *pb.CreateVo
 		return nil, err
 	}
 	reqOptions := CreateInitiatorGrpReqData{}
-	/* For iSCSI initiator */
+	// For iSCSI initiator
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		reqOptions.Name = IscsiInitiatorDefaultGrpName
 		reqOptions.AccessProtocol = "iscsi"
 		reqOptions.Description = "OpenSDS default iSCSI group"
 		reqOptions.TargetSubnets = append(reqOptions.TargetSubnets, map[string]string{"label": "management"})
 	}
-	/* For FC initiator */
+	// For FC initiator
 	if opt.GetAccessProtocol() == FCProtocol {
 		reqOptions.Name = FcInitiatorDefaultGrpName
 		reqOptions.AccessProtocol = "fc"
@@ -636,7 +635,7 @@ func (c *NimbleClient) AttachVolume(poolId string, volName string, initiatorGrpI
 }
 
 func (c *NimbleClient) DetachVolume(poolId string, storageAceessId string) error {
-	// detach request does not give us response body
+	// Detach request does not give us response body
 	ep, token, err := c.GetTokenByPoolId(poolId)
 	if err != nil {
 		return err

@@ -16,13 +16,14 @@ package nimble
 
 import (
 	"fmt"
+	"math"
+
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
-	"math"
 )
 
 const (
@@ -108,9 +109,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
 	log.Infof("%v: trying Extend volume...", DriverName)
-	//	lunId := opt.GetMetadata()["LunId"]
 	poolId := opt.GetMetadata()["PoolId"]
-	//	err := d.client.ExtendVolume(opt.GetSize()*int64(math.Pow(1024, 1)), lunId, poolId)
 	_, err := d.client.ExtendVolume(poolId, opt)
 	if err != nil {
 		log.Errorf("%v: extend Volume Failed:", DriverName)
@@ -175,8 +174,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	c := d.conf
 
 	for _, pool := range sp {
-		for grpName, _ := range c.Pool{
-			if grpName == pool.Name && c.Pool[grpName].AvailabilityZone == pool.ArrayList[0].ArrayName{
+		for grpName, _ := range c.Pool {
+			if grpName == pool.Name && c.Pool[grpName].AvailabilityZone == pool.ArrayList[0].ArrayName {
 
 				pol := &model.StoragePoolSpec{
 					BaseModel: &model.BaseModel{
@@ -188,8 +187,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 					TotalCapacity:    pool.TotalCapacity / int64(math.Pow(1024, 3)), //Format to GiB
 					FreeCapacity:     pool.FreeCapacity / int64(math.Pow(1024, 3)),  //Format to GiB
 					StorageType:      "block",
-					AvailabilityZone: pool.ArrayList[0].ArrayName+"/"+pool.Name,
-					Extras: c.Pool[grpName].Extras,
+					AvailabilityZone: pool.ArrayList[0].ArrayName + "/" + pool.Name,
+					Extras:           c.Pool[grpName].Extras,
 				}
 				pols = append(pols, pol)
 				break
@@ -198,7 +197,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 
 	// Error if there is NO valid storage grp
-	if len(pols) == 0{
+	if len(pols) == 0 {
 		return nil, fmt.Errorf("%v: there are no valid storage pool. Pls check driver config.\n", DriverName)
 	}
 
@@ -298,12 +297,11 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 	return nil, fmt.Errorf("%v: Only support FC or iSCSI.\n", DriverName)
 }
 
-
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	poolId := opt.GetMetadata()["PoolId"]
 	err := d.client.DetachVolume(poolId, opt.GetMetadata()[opt.GetId()])
 	if err != nil {
-			return err
+		return err
 	}
 
 	// Delete attach OSDS ID <-> storage attach ID from meta data
@@ -316,7 +314,6 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 func (d *Driver) CopyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error {
 	return &model.NotImplementError{S: "method initializeSnapshotConnection has not been implemented yet."}
 }
-
 
 func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	// Not used, do nothing

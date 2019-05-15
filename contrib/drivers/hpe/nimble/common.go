@@ -17,9 +17,10 @@ package nimble
 import (
 	"crypto/md5"
 	"encoding/hex"
-	log "github.com/golang/glog"
 	"strconv"
 	"strings"
+
+	log "github.com/golang/glog"
 )
 
 const UnitGi = 1024 * 1024 * 1024
