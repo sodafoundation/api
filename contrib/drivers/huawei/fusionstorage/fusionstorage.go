@@ -268,7 +268,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 	}
 
 	connInfo := &ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"target_discovered": true,
 			"volume_id":         opt.GetVolumeId(),
