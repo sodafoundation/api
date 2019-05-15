@@ -1,0 +1,32 @@
+authOptions:
+  endpoints: https://172.16.0.250:5392/v1
+  username: admin
+  password: admin
+  insecure: true
+
+
+pool:
+  test01:
+    storageType: block
+    availabilityZone: vnimble01
+    extras:
+#      dataStorage:
+#        provisioningPolicy: Thin
+#        isSpaceEfficient: false
+      ioConnectivity:
+#        accessProtocol: iscsi
+        accessProtocol: fibre_channel
+#        maxIOPS: 7000000
+#        maxBWS: 600
+#      advanced:
+#        diskType: SSD
+#        latency: 3ms
+  default:
+    storageType: block
+    availabilityZone: vnimble01
+    extras:
+#      dataStorage:
+#        provisioningPolicy: Thin
+#        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
