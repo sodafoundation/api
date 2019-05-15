@@ -1,21 +1,21 @@
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Copyright 2019 The OpenSDS Authors.
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package nimble
 
 import (
-	//	"github.com/astaxie/beego/log"
 	"fmt"
-	//"reflect"
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -52,7 +52,7 @@ func (d *Driver) Setup() (err error) {
 
 	d.client, err = NewClient(&d.conf.AuthOptions)
 	if err != nil {
-		log.Errorf("%v: Get new client failed.\n%v", DriverName, err)
+		log.Errorf("%v: get new client failed.\n%v", DriverName, err)
 		return err
 	}
 
@@ -64,7 +64,7 @@ func (d *Driver) Unset() error {
 }
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	log.Infof("%v: Try to create volume...", DriverName)
+	log.Infof("%v: try to create volume...", DriverName)
 
 	poolId, err := d.client.GetPoolIdByName(opt.GetPoolName())
 	if err != nil {
@@ -72,10 +72,10 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	}
 	lun, err := d.client.CreateVolume(poolId, opt)
 	if err != nil {
-		log.Errorf("%v: Create Volume Failed: %v", DriverName, err)
+		log.Errorf("%v: create Volume Failed: %v", DriverName, err)
 		return nil, err
 	}
-	log.Infof("%v:Create volume success.", DriverName)
+	log.Infof("%v: create volume success.", DriverName)
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -99,25 +99,25 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	//	err := d.client.DeleteVolume(poolId, lunId)
 	err := d.client.DeleteVolume(poolId, opt)
 	if err != nil {
-		log.Errorf("%v: Delete volume failed, volume id =%s , Error:%s", DriverName, opt.GetId(), err)
+		log.Errorf("%v: delete volume failed, volume id =%s , Error:%s", DriverName, opt.GetId(), err)
 		return err
 	}
-	log.Infof("%v: Remove volume success", DriverName)
+	log.Infof("%v: remove volume success", DriverName)
 	return nil
 }
 
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	log.Infof("%v: Trying Extend volume...", DriverName)
+	log.Infof("%v: trying Extend volume...", DriverName)
 	//	lunId := opt.GetMetadata()["LunId"]
 	poolId := opt.GetMetadata()["PoolId"]
 	//	err := d.client.ExtendVolume(opt.GetSize()*int64(math.Pow(1024, 1)), lunId, poolId)
 	_, err := d.client.ExtendVolume(poolId, opt)
 	if err != nil {
-		log.Errorf("%v: Extend Volume Failed:", DriverName)
+		log.Errorf("%v: extend Volume Failed:", DriverName)
 		return nil, err
 	}
 
-	log.Infof("%v: Extend volume success.", DriverName)
+	log.Infof("%v: extend volume success.", DriverName)
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -130,14 +130,14 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
-	log.Infof("%v: Trying create snapshot...", DriverName)
+	log.Infof("%v: trying create snapshot...", DriverName)
 	poolId := opt.GetMetadata()["PoolId"]
 	snap, err := d.client.CreateSnapshot(poolId, opt)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Infof("%v:Create snapshot success.", DriverName)
+	log.Infof("%v: create snapshot success.", DriverName)
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -153,19 +153,19 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	log.Infof("%v: Trying delete snapshot...", DriverName)
+	log.Infof("%v: trying delete snapshot...", DriverName)
 	poolId := opt.GetMetadata()["PoolId"]
 	err := d.client.DeleteSnapshot(poolId, opt)
 	if err != nil {
-		log.Errorf("%v: Delete volume snapshot failed, volume snapshot id = %s , error: %v", DriverName, opt.GetId(), err)
+		log.Errorf("%v: delete volume snapshot failed, volume snapshot id = %s , error: %v", DriverName, opt.GetId(), err)
 		return err
 	}
-	log.Infof("%v: Remove volume snapshot success, volume snapshot id =", DriverName, opt.GetId())
+	log.Infof("%v: remove volume snapshot success, volume snapshot id =", DriverName, opt.GetId())
 	return nil
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	log.Infof("%v: ListPools ...", DriverName)
+	log.Infof("%v: listPools ...", DriverName)
 	var pols []*model.StoragePoolSpec
 	sp, err := d.client.ListStoragePools()
 	if err != nil {
@@ -199,7 +199,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 	// Error if there is NO valid storage grp
 	if len(pols) == 0{
-		return nil, fmt.Errorf("%v: There are no valid storage pool. Pls check driver config.\n", DriverName)
+		return nil, fmt.Errorf("%v: there are no valid storage pool. Pls check driver config.\n", DriverName)
 	}
 
 	return pols, nil
@@ -208,12 +208,12 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	if opt.GetAccessProtocol() == ISCSIProtocol || opt.GetAccessProtocol() == FCProtocol {
-		log.Infof("%v: Trying initialize connection...", DriverName)
+		log.Infof("%v: trying initialize connection...", DriverName)
 
 		poolId := opt.GetMetadata()["PoolId"]
 		initiatorName := opt.GetHostInfo().Initiator
 		if initiatorName == "" || opt.GetHostInfo().Ip == "" {
-			return nil, fmt.Errorf("%v: Pls set initiator IQN or WWPN and IP address.\n", DriverName)
+			return nil, fmt.Errorf("%v: pls set initiator IQN or WWPN and IP address.\n", DriverName)
 		}
 
 		storageInitiatorGrpId, err := d.client.GetStorageInitiatorGrpId(poolId, initiatorName)
@@ -223,7 +223,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 
 		// If specified initiator is nothing, register new initiator into default group.
 		if storageInitiatorGrpId == "" {
-			log.Infof("%v: Trying to get default initiator group ID.", DriverName)
+			log.Infof("%v: trying to get default initiator group ID.", DriverName)
 			storageInitiatorGrpId, err = d.client.GetDefaultInitiatorGrpId(poolId, opt)
 			if err != nil {
 				return nil, err
@@ -231,7 +231,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 
 			// Create default initiator group
 			if storageInitiatorGrpId == "" {
-				log.Infof("%v: Trying to create default initiator group..", DriverName)
+				log.Infof("%v: trying to create default initiator group..", DriverName)
 				respBody, err := d.client.CreateInitiatorDefaultGrp(poolId, opt)
 				if err != nil {
 					return nil, err
@@ -240,7 +240,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 			}
 
 			// Register new initiator
-			log.Infof("%v: Trying to register initiator into default group..", DriverName)
+			log.Infof("%v: trying to register initiator into default group..", DriverName)
 			_, err := d.client.RegisterInitiatorIntoDefaultGrp(poolId, opt, storageInitiatorGrpId)
 			if err != nil {
 				return nil, err
@@ -264,7 +264,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 			return nil, err
 		}
 		if opt.GetAccessProtocol() == ISCSIProtocol {
-			log.Infof("%v:Attach volume for iSCSI success.", DriverName)
+			log.Infof("%v: attach volume for iSCSI success.", DriverName)
 
 			return &model.ConnectionInfo{
 				DriverVolumeType: ISCSIProtocol,
@@ -278,7 +278,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 			}, nil
 		}
 		if opt.GetAccessProtocol() == FCProtocol {
-			log.Infof("%v:Attach volume for FC success.", DriverName)
+			log.Infof("%v: attach volume for FC success.", DriverName)
 			return &model.ConnectionInfo{
 				DriverVolumeType: FCProtocol,
 				ConnectionData: map[string]interface{}{
@@ -309,12 +309,12 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	// Delete attach OSDS ID <-> storage attach ID from meta data
 	// TODO: Im not sure this way is correct. Should review.
 	delete(opt.Metadata, opt.GetId())
-	log.Infof("%v:Detach volume success.", DriverName)
+	log.Infof("%v: detach volume success.", DriverName)
 	return nil
 }
 
 func (d *Driver) CopyVolume(opt *pb.CreateVolumeOpts, srcid, tgtid string) error {
-	return &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
+	return &model.NotImplementError{S: "method initializeSnapshotConnection has not been implemented yet."}
 }
 
 
@@ -329,21 +329,21 @@ func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
 
 // The interfaces blow are optional, so implement it or not depends on you.
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
+	return nil, &model.NotImplementError{S: "method initializeSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet."}
+	return &model.NotImplementError{S: "method terminateSnapshotConnection has not been implemented yet."}
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method createVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method updateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
-	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
+	return &model.NotImplementError{"method deleteVolumeGroup has not been implemented yet"}
 }

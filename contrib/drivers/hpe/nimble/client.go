@@ -1,3 +1,17 @@
+// Copyright 2019 The OpenSDS Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package nimble
 
 import (
@@ -9,14 +23,12 @@ import (
 	"math"
 	"net/http"
 	"strings"
-	//	"github.com/astaxie/beego/logs"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 )
 
 const (
-	//  ApiVersion = "v1"
 	requestRetryTimes            = 1
 	FcInitiatorDefaultGrpName    = "OsdsFcGrp"
 	IscsiInitiatorDefaultGrpName = "OsdsIscsiGrp"
@@ -49,7 +61,7 @@ func (e *ArrayInnerErrorBody) Error() string {
 }
 
 func (e *ArrayInnerErrorResp) Error() string {
-	return fmt.Sprintf("Code:%v Severity:%v Text:%v", e.Code, e.Severity, e.Text)
+	return fmt.Sprintf("code:%v severity:%v text:%v", e.Code, e.Severity, e.Text)
 }
 
 // *******************************************************
@@ -94,19 +106,19 @@ func (c *NimbleClient) login() error {
 		url := ep + tokenUrlPath
 		auth := &AuthRespBody{}
 		token := ""
-		log.Infof("%v: Trying login to %v", DriverName, ep)
+		log.Infof("%v: trying login to %v", DriverName, ep)
 		b, _, err := c.doRequest("POST", url, reqBody, token)
 
 		// Basic HTTP Request Error
 		if err != nil {
-			log.Errorf("%v: Login failed.", DriverName)
+			log.Errorf("%v: login failed.", DriverName)
 			c.endpoints = unset(c.endpoints, ep) // Delete invalid endpoint from client
 			errs = append(errs, err)
 			continue
 		}
 		json.Unmarshal(b, auth)
 		tokens = append(tokens, auth.Data.SessionToken)
-		log.Infof("%v: Got token from %v", DriverName, url)
+		log.Infof("%v: got token from %v", DriverName, url)
 	}
 
 	c.tokens = tokens // Insert valid tokes into client
@@ -135,20 +147,20 @@ func (c *NimbleClient) doRequest(method, url string, in interface{}, token strin
 
 	resp, err := req.Response()
 	if err != nil {
-		log.Errorf("%v: Do http request failed, method: %s url: %s error: %v", DriverName, method, url, err)
+		log.Errorf("%v: http request failed, method: %s url: %s error: %v", DriverName, method, url, err)
 		return nil, nil, err
 	}
 
 	b, err := req.Bytes()
 	if err != nil {
-		log.Errorf("%v: Get byte[] from response failed, method: %s url: %s error: %v", DriverName, method, url, err)
+		log.Errorf("%v: get byte[] from response failed, method: %s url: %s error: %v", DriverName, method, url, err)
 		return nil, nil, err
 	}
 
 	inErr := &ArrayInnerErrorBody{}
 	json.Unmarshal(b, inErr)
 	if len(inErr.Errs) != 0 {
-		log.Errorf("%v: Get error Infof from response failed, method: %s url: %s error: %v", DriverName, method, url, inErr)
+		log.Errorf("%v: get error Infof from response failed, method: %s url: %s error: %v", DriverName, method, url, inErr)
 		return nil, nil, inErr
 	}
 
@@ -162,8 +174,8 @@ func (c *NimbleClient) ListStoragePools() ([]StoragePoolRespData, error) {
 	var errs []error
 
 	if len(c.endpoints) == 0 {
-		log.Errorf("%v: There are no valid endpoints.", DriverName)
-		return nil, fmt.Errorf("%v: Cannot get storage pools\n", DriverName)
+		log.Errorf("%v: there are no valid endpoints.", DriverName)
+		return nil, fmt.Errorf("%v: cannot get storage pools\n", DriverName)
 	}
 	for i, ep := range c.endpoints {
 		err = c.request("GET", ep+poolDetailUrlPath, nil, resp, c.tokens[i])
@@ -193,22 +205,22 @@ func (c *NimbleClient) request(method, url string, in, out interface{}, token st
 		b, _, errReq = c.doRequest(method, url, in, token)
 		if errReq == nil {
 			json.Unmarshal(b, out)
-			log.Infof("%v: Got response from %v.", DriverName, url)
+			log.Infof("%v: got response from %v.", DriverName, url)
 			break
 		} else {
 
-			log.Errorf("%v: URL:%s %s BODY:%+v", DriverName, method, url, in)
+			log.Errorf("%v: url:%s %s body:%+v", DriverName, method, url, in)
 
 			// Token expired handling
 			if inErr, ok := errReq.(*ArrayInnerErrorBody); ok {
 				for j := range inErr.Errs {
 					if inErr.Errs[j].Code == ErrorUnauthorizedToServer {
-						log.Errorf("%v: Auth failure, trying re-login....", DriverName)
+						log.Errorf("%v: auth failure, trying re-login....", DriverName)
 						if errLogin := c.login(); errLogin == nil {
-							log.Infof("%v: Relogin success!!", DriverName)
+							log.Infof("%v: relogin success!!", DriverName)
 							break
 						} else {
-							log.Errorf("%v: Relogin failed.", DriverName)
+							log.Errorf("%v: relogin failed.", DriverName)
 						}
 					}
 				}
@@ -216,7 +228,7 @@ func (c *NimbleClient) request(method, url string, in, out interface{}, token st
 		}
 
 		if i == requestRetryTimes-1 {
-			log.Errorf("%v: Finally, could not get response from %v.", DriverName, url)
+			log.Errorf("%v: finally, could not get response from %v.", DriverName, url)
 			errs = append(errs, errReq)
 		}
 	}
@@ -287,14 +299,14 @@ func (c *NimbleClient) CreateVolume(poolId string, opt *pb.CreateVolumeOpts) (*V
 
 	/* Create volume from snapshot */
 	if opt.GetSnapshotId() != "" {
-		log.Infof("%v: Try to create volume from snapshot...", DriverName)
-		log.Infof("%v: SnapID: %v", DriverName, opt.GetSnapshotId())
+		log.Infof("%v: try to create volume from snapshot...", DriverName)
+		log.Infof("%v: snap id: %v", DriverName, opt.GetSnapshotId())
 		storageSnapshotId, err := c.GetStorageSnapshotId(poolId, opt.GetSnapshotId())
 		if err != nil {
 			return nil, err
 		}
 		if storageSnapshotId == "" {
-			err = fmt.Errorf("%v: There is no such snapshot name on storage => %v\n", DriverName, opt.GetSnapshotId())
+			err = fmt.Errorf("%v: there is no such snapshot name on storage => %v\n", DriverName, opt.GetSnapshotId())
 			return nil, err
 		}
 
@@ -333,7 +345,7 @@ func (c *NimbleClient) GetStorageVolumeId(poolId string, volName string) (string
 			return storageVolumeId, nil
 		}
 	}
-	return storageVolumeId, fmt.Errorf("%v: Couldnot get storage volume ID of %v\n", DriverName, volName)
+	return storageVolumeId, fmt.Errorf("%v: could not get storage volume ID of %v\n", DriverName, volName)
 }
 
 func (c *NimbleClient) GetStorageSnapshotId(poolId string, baseSnapName string) (string, error) {
@@ -545,7 +557,7 @@ func (c *NimbleClient) GetDefaultInitiatorGrpId(poolId string, opt *pb.CreateVol
 
 	// For iSCSI
 	if opt.GetAccessProtocol() == ISCSIProtocol {
-		log.Infof("%v: Trying to get default iSCSI initiator group ID: %v.", DriverName, IscsiInitiatorDefaultGrpName)
+		log.Infof("%v: trying to get default iscsi initiator group ID: %v.", DriverName, IscsiInitiatorDefaultGrpName)
 		for _, data := range respBody.Data {
 			if data.Name == IscsiInitiatorDefaultGrpName {
 				return data.Id, nil
@@ -555,7 +567,7 @@ func (c *NimbleClient) GetDefaultInitiatorGrpId(poolId string, opt *pb.CreateVol
 
 	// For FC
 	if opt.GetAccessProtocol() == FCProtocol {
-		log.Infof("%v: Trying to get default FC initiator group ID: %v.", DriverName, FcInitiatorDefaultGrpName)
+		log.Infof("%v: trying to get default fc initiator group ID: %v.", DriverName, FcInitiatorDefaultGrpName)
 		for _, data := range respBody.Data {
 			if data.Name == FcInitiatorDefaultGrpName {
 				return data.Id, nil
@@ -646,5 +658,5 @@ func (c *NimbleClient) GetTargetVolumeInfo(poolId string, volName string) (strin
 		}
 	}
 
-	return "", "", fmt.Errorf("%v: Couldnot get volume target.\n", DriverName)
+	return "", "", fmt.Errorf("%v: couldnot get volume target.\n", DriverName)
 }
