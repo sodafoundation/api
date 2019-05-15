@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 swagger: '2.0'
 info:
-  version: "v1beta"
+  version: v1beta
   title: OpenSDS Controller API
   description: OpenSDS Controller API to manage mutliple backend storages.
   termsOfService: 'https://www.linuxfoundation.org/terms'
@@ -25,7 +25,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: opensds
+host: localhost:50040
 schemes:
   - https
   - http
@@ -1609,7 +1609,7 @@ definitions:
       dataProtection:
         $ref: '#/definitions/DataProtectionLoS'
       consistencyEnalbed:
-        type: boolean	
+        type: boolean
   CustomPropertiesSpec:
     description: >-
       CustomPropertiesSpec is a map of keys and JSON object that represents the
@@ -2083,3 +2083,13 @@ responses:
     description: An unexpected error occured.
     schema:
       $ref: '#/definitions/ErrorSpec'
+
+securityDefinitions:
+  basicAuth:
+    type: basic
+security:
+  - basicAuth: []
+
+externalDocs:
+  description: The offical OpenSDS Controller API specification
+  url: 'https://github.com/opensds/opensds'
