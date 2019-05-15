@@ -238,9 +238,10 @@ func connect(connMap map[string]interface{}) (string, error) {
 	portal := conn.TgtPortal[index]
 
 	var targetiqn string
+	var targetiqnIdx = 1
 	if len(conn.TgtIQN) == 0 {
 		content, _ := discovery(portal)
-		targetiqn = strings.Split(content, " ")[1]
+		targetiqn = strings.Split(content, " ")[targetiqnIdx]
 	} else {
 		targetiqn = conn.TgtIQN[index]
 	}

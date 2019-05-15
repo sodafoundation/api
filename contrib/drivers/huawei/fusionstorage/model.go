@@ -19,8 +19,8 @@ import (
 )
 
 type Driver struct {
-	cli  *FsCli
-	conf *Config
+	Client *FsClient
+	Conf   *Config
 }
 
 type AuthOptions struct {
@@ -31,6 +31,7 @@ type AuthOptions struct {
 	FsaIp           []string `yaml:"fsaIp,flow"`
 	PwdEncrypter    string   `yaml:"PwdEncrypter,omitempty"`
 	EnableEncrypted bool     `yaml:"EnableEncrypted,omitempty"`
+	Version         string   `json:"version"`
 }
 
 type Config struct {

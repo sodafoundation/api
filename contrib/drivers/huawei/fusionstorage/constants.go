@@ -26,4 +26,6 @@ const (
 	VolumeAlreadyInHostErrorCode       = "157001"
 	CmdBin                             = "fsc_cli"
 	DefaultConfPath                    = "/etc/opensds/driver/fusionstorage.yaml"
+	ClientVersion6_3                   = "6.3"
+	ClientVersion8_0                   = "8.0"
 )

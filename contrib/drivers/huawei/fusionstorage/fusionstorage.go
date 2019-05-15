@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -26,15 +25,16 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	. "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
 
 func (d *Driver) Setup() error {
 	conf := &Config{}
 
-	d.conf = conf
+	d.Conf = conf
 
-	path := "./testdata/fusionstorage.yaml"
+	path := config.CONF.OsdsDock.Backends.HuaweiFusionStorage.ConfigPath
 	if path == "" {
 		path = DefaultConfPath
 	}
@@ -48,14 +48,14 @@ func (d *Driver) Setup() error {
 		return errors.New(msg)
 	}
 
-	d.cli = client
+	d.Client = client
 
 	log.Info("get new client success")
 	return nil
 }
 
 func (d *Driver) Unset() error {
-	return nil
+	return d.Client.logout()
 }
 
 func EncodeName(id string) string {
@@ -64,7 +64,7 @@ func EncodeName(id string) string {
 
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*VolumeSpec, error) {
 	name := EncodeName(opt.GetId())
-	err := d.cli.createVolume(name, opt.GetPoolName(), opt.GetSize()<<UnitGiShiftBit)
+	err := d.Client.createVolume(name, opt.GetPoolName(), opt.GetSize()<<UnitGiShiftBit)
 	if err != nil {
 		msg := fmt.Sprintf("create volume %s (%s) failed: %s", opt.GetName(), opt.GetId(), err)
 		log.Error(msg)
@@ -88,7 +88,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*VolumeSpec, error) {
 
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	name := EncodeName(opt.GetId())
-	err := d.cli.deleteVolume(name)
+	err := d.Client.deleteVolume(name)
 	if err != nil {
 		msg := fmt.Sprintf("delete volume (%s) failed: %v", opt.GetId(), err)
 		log.Error(msg)
@@ -100,21 +100,21 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 
 func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 	var pols []*StoragePoolSpec
-	pools, err := d.cli.queryPoolInfo()
+	pools, err := d.Client.queryPoolInfo()
 	if err != nil {
 		msg := fmt.Sprintf("list pools failed: %v", err)
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
 
-	c := d.conf
+	c := d.Conf
 	for _, p := range pools.Pools {
 		poolId := strconv.Itoa(p.PoolId)
 		if _, ok := c.Pool[poolId]; !ok {
 			continue
 		}
 		host, _ := os.Hostname()
-		name := fmt.Sprintf("%s:%s:%s", host, d.conf.Url, poolId)
+		name := fmt.Sprintf("%s:%s:%s", host, d.Conf.Url, poolId)
 		pol := &StoragePoolSpec{
 			BaseModel: &BaseModel{
 				// Make sure uuid is unique
@@ -151,71 +151,31 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 	hostName := hostInfo.GetHost()
 
 	if initiator == "" || hostName == "" {
-		msg := "host name or initiator is empty."
+		msg := "host name or initiator cannot be empty"
 		log.Error(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// Create port if not exist.
-	err := d.cli.queryPortInfo(initiator)
-	if err != nil {
-		if strings.Contains(err.Error(), InitiatorNotExistErrorCodeVersion6) || strings.Contains(err.Error(), InitiatorNotExistErrorCodeVersion8) {
-			err := d.cli.createPort(initiator)
-			if err != nil {
-				msg := fmt.Sprintf("create port failed: %v", err)
-				log.Error(msg)
-				return nil, errors.New(msg)
-			}
-		} else {
-			msg := fmt.Sprintf("query port info failed: %v", err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
+	if err := d.CreatePortIfNotExist(initiator); err != nil {
+		log.Error(err.Error())
+		return nil, err
 	}
 
 	// Create host if not exist.
-	isFind, err := d.cli.queryHostInfo(hostName)
-	if err != nil {
-		msg := fmt.Sprintf("query host info failed: %v", err)
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	if !isFind {
-		err = d.cli.createHost(hostInfo)
-		if err != nil {
-			msg := fmt.Sprintf("create host failed: %v", err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
+	if err := d.CreateHostIfNotExist(hostInfo); err != nil {
+		log.Error(err.Error())
+		return nil, err
 	}
 
 	// Add port to host if port not add to the host
-	hostPortMap, err := d.cli.queryHostByPort(initiator)
-	if err != nil {
-		msg := fmt.Sprintf("query host by port failed: %v", err)
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	h, ok := hostPortMap.PortHostMap[initiator]
-	if ok && h[0] != hostName {
-		msg := fmt.Sprintf("initiator is already added to another host, host name =%s", h[0])
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	if !ok {
-		err = d.cli.addPortToHost(hostName, initiator)
-		if err != nil {
-			msg := fmt.Sprintf("add port to host failed: %v", err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
+	if err := d.AddPortToHost(initiator, hostName); err != nil {
+		log.Error(err.Error())
+		return nil, err
 	}
 
 	// Map volume to host
-	err = d.cli.addLunsToHost(hostName, lunId)
+	err := d.Client.addLunsToHost(hostName, lunId)
 	if err != nil && !strings.Contains(err.Error(), VolumeAlreadyInHostErrorCode) {
 		msg := fmt.Sprintf("add luns to host failed: %v", err)
 		log.Error(msg)
@@ -223,18 +183,10 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 	}
 
 	// Get target lun id
-	hostLunList, err := d.cli.queryHostLunInfo(hostName)
+	targetLunId, err := d.GetTgtLunID(hostName, lunId)
 	if err != nil {
-		msg := fmt.Sprintf("query host lun info failed: %v", err)
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	var targetLunId int
-	for _, v := range hostLunList.LunList {
-		if v.Name == lunId {
-			targetLunId = v.Id
-		}
+		log.Error(err.Error())
+		return nil, err
 	}
 
 	targetIQN, targetPortal, err := d.GetTargetPortal(initiator)
@@ -245,7 +197,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 	}
 
 	connInfo := &ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"target_discovered": true,
 			"volume_id":         opt.GetVolumeId(),
@@ -264,36 +216,88 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 	return connInfo, nil
 }
 
-func (d *Driver) GetTargetPortal(initiator string) ([]string, []string, error) {
-	version, err := d.cli.getDeviceVersion()
+func (d *Driver) GetTgtLunID(hostName, sourceLunID string) (int, error) {
+	hostLunList, err := d.Client.queryHostLunInfo(hostName)
 	if err != nil {
-		msg := fmt.Sprintf("get device version failed %v", err)
-		log.Error(msg)
-		return nil, nil, errors.New(msg)
+		return -1, fmt.Errorf("query host lun info failed: %v", err)
 	}
 
-	regVersion6, _ := regexp.Compile("^V100R006C")
-	regVersion8, _ := regexp.Compile("^8")
-
-	if regVersion6.MatchString(version.Version) {
-		return d.GeTgtPortalAndIQNVersion6(initiator)
+	var targetLunId int
+	for _, v := range hostLunList.LunList {
+		if v.Name == sourceLunID {
+			targetLunId = v.Id
+		}
 	}
 
-	if regVersion8.MatchString(version.Version) {
-		return d.GeTgtPortalAndIQNVersion8()
+	return targetLunId, nil
+}
+
+func (d *Driver) AddPortToHost(initiator, hostName string) error {
+	hostPortMap, err := d.Client.queryHostByPort(initiator)
+	if err != nil {
+		return fmt.Errorf("query host by port failed: %v", err)
+	}
+
+	h, ok := hostPortMap.PortHostMap[initiator]
+	if ok && h[0] != hostName {
+		return fmt.Errorf("initiator is already added to another host, host name =%s", h[0])
+	}
+
+	if !ok {
+		err = d.Client.addPortToHost(hostName, initiator)
+		if err != nil {
+			return fmt.Errorf("add port to host failed: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (d *Driver) CreateHostIfNotExist(hostInfo *pb.HostInfo) error {
+	isFind, err := d.Client.queryHostInfo(hostInfo.GetHost())
+	if err != nil {
+		return fmt.Errorf("query host info failed: %v", err)
+	}
+
+	if !isFind {
+		err = d.Client.createHost(hostInfo)
+		if err != nil {
+			return fmt.Errorf("create host failed: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (d *Driver) CreatePortIfNotExist(initiator string) error {
+	err := d.Client.queryPortInfo(initiator)
+	if err != nil {
+		if strings.Contains(err.Error(), InitiatorNotExistErrorCodeVersion6) ||
+			strings.Contains(err.Error(), InitiatorNotExistErrorCodeVersion8) {
+			err := d.Client.createPort(initiator)
+			if err != nil {
+				return fmt.Errorf("create port failed: %v", err)
+			}
+		} else {
+			return fmt.Errorf("query port info failed: %v", err)
+		}
+	}
+	return nil
+}
+
+func (d *Driver) GetTargetPortal(initiator string) ([]string, []string, error) {
+	if d.Conf.Version == ClientVersion6_3 {
+		return d.GeTgtPortalAndIQNVersion6_3(initiator)
+	}
+	if d.Conf.Version == ClientVersion8_0 {
+		return d.GeTgtPortalAndIQNVersion8_0()
 	}
 
 	return nil, nil, errors.New("cannot find any target portal and iqn")
 }
 
-func (d *Driver) GeTgtPortalAndIQNVersion6(initiator string) ([]string, []string, error) {
-	err := d.cli.StartServer()
-	if err != nil {
-		msg := fmt.Sprintf("get new client failed, %v", err)
-		log.Errorf(msg)
-		return nil, nil, errors.New(msg)
-	}
-	targetPortalInfo, err := d.cli.queryIscsiPortalVersion6(initiator)
+func (d *Driver) GeTgtPortalAndIQNVersion6_3(initiator string) ([]string, []string, error) {
+	targetPortalInfo, err := d.Client.queryIscsiPortalVersion6(initiator)
 	if err != nil {
 		msg := fmt.Sprintf("query iscsi portal failed: %v", err)
 		log.Error(msg)
@@ -312,8 +316,8 @@ func (d *Driver) GeTgtPortalAndIQNVersion6(initiator string) ([]string, []string
 	return targetIQN, targetPortal, nil
 }
 
-func (d *Driver) GeTgtPortalAndIQNVersion8() ([]string, []string, error) {
-	targetPortalInfo, err := d.cli.queryIscsiPortalVersion8()
+func (d *Driver) GeTgtPortalAndIQNVersion8_0() ([]string, []string, error) {
+	targetPortalInfo, err := d.Client.queryIscsiPortalVersion8()
 	if err != nil {
 		msg := fmt.Sprintf("query iscsi portal failed: %v", err)
 		log.Error(msg)
@@ -357,21 +361,43 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	}
 
 	// Make sure that host is exist.
-	hostIsFind, err := d.cli.queryHostInfo(hostName)
-	if err != nil {
-		msg := fmt.Sprintf("query host failed, host name =%s, error: %v", hostName, err)
-		log.Error(msg)
-		return errors.New(msg)
-	}
-
-	if !hostIsFind {
-		msg := fmt.Sprintf("host can not be found, host name =%s", hostName)
-		log.Error(msg)
-		return errors.New(msg)
+	if err := d.CheckHostIsExist(hostName); err != nil {
+		return err
 	}
 
 	// Check whether the volume attach to the host
-	hostLunList, err := d.cli.queryHostLunInfo(hostName)
+	if err := d.CheckVolAttachToHost(hostName, lunId); err != nil {
+		return err
+	}
+
+	// Remove lun from host
+	err := d.Client.deleteLunFromHost(hostName, lunId)
+	if err != nil {
+		msg := fmt.Sprintf("delete lun from host failed, %v", err)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	// Remove initiator and host if there is no lun belong to the host
+	hostLunList, err := d.Client.queryHostLunInfo(hostName)
+	if err != nil {
+		msg := fmt.Sprintf("query host lun info failed, %v", err)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	if len(hostLunList.LunList) == 0 {
+		d.Client.deletePortFromHost(hostName, initiator)
+		d.Client.deleteHost(hostName)
+		d.Client.deletePort(initiator)
+	}
+
+	log.Info("terminate Connection success.")
+	return nil
+}
+
+func (d *Driver) CheckVolAttachToHost(hostName, lunId string) error {
+	hostLunList, err := d.Client.queryHostLunInfo(hostName)
 	if err != nil {
 		msg := fmt.Sprintf("query host lun info failed, %v", err)
 		log.Error(msg)
@@ -392,29 +418,22 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 		return errors.New(msg)
 	}
 
-	// Remove lun from host
-	err = d.cli.deleteLunFromHost(hostName, lunId)
+	return nil
+}
+
+func (d *Driver) CheckHostIsExist(hostName string) error {
+	hostIsFind, err := d.Client.queryHostInfo(hostName)
 	if err != nil {
-		msg := fmt.Sprintf("delete lun from host failed, %v", err)
+		msg := fmt.Sprintf("query host failed, host name %s, error: %v", hostName, err)
 		log.Error(msg)
 		return errors.New(msg)
 	}
 
-	// Remove initiator and host if there is no lun belong to the host
-	hostLunList, err = d.cli.queryHostLunInfo(hostName)
-	if err != nil {
-		msg := fmt.Sprintf("query host lun info failed, %v", err)
+	if !hostIsFind {
+		msg := fmt.Sprintf("host can not be found, host name =%s", hostName)
 		log.Error(msg)
 		return errors.New(msg)
 	}
-
-	if len(hostLunList.LunList) == 0 {
-		d.cli.deletePortFromHost(hostName, initiator)
-		d.cli.deleteHost(hostName)
-		d.cli.deletePort(initiator)
-	}
-
-	log.Info("terminate Connection success.")
 	return nil
 }
 
@@ -424,7 +443,7 @@ func (d *Driver) PullVolume(volIdentifier string) (*VolumeSpec, error) {
 }
 
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*VolumeSpec, error) {
-	err := d.cli.extendVolume(EncodeName(opt.GetId()), opt.GetSize()<<UnitGiShiftBit)
+	err := d.Client.extendVolume(EncodeName(opt.GetId()), opt.GetSize()<<UnitGiShiftBit)
 	if err != nil {
 		msg := fmt.Sprintf("extend volume %s (%s) failed: %v", opt.GetName(), opt.GetId(), err)
 		log.Error(msg)
@@ -446,7 +465,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*VolumeSnapsh
 	snapName := EncodeName(opt.GetId())
 	volName := EncodeName(opt.GetVolumeId())
 
-	if err := d.cli.createSnapshot(snapName, volName); err != nil {
+	if err := d.Client.createSnapshot(snapName, volName); err != nil {
 		msg := fmt.Sprintf("create snapshot %s (%s) failed: %s", opt.GetName(), opt.GetId(), err)
 		log.Error(msg)
 		return nil, errors.New(msg)
@@ -469,7 +488,7 @@ func (d *Driver) PullSnapshot(snapIdentifier string) (*VolumeSnapshotSpec, error
 }
 
 func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	err := d.cli.deleteSnapshot(EncodeName(opt.GetId()))
+	err := d.Client.deleteSnapshot(EncodeName(opt.GetId()))
 	if err != nil {
 		msg := fmt.Sprintf("delete volume snapshot (%s) failed: %v", opt.GetId(), err)
 		log.Error(msg)
