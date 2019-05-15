@@ -422,10 +422,6 @@ func (c *NimbleClient) ExtendVolume(poolId string, opt *pb.ExtendVolumeOpts) (*V
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("---------debug----------")
-		fmt.Printf("profileOptoins: %+v\n\n", opt.GetProfile() )
-		fmt.Printf("Optoins: %+v\n\n", reqOptions)
-		fmt.Println("------------------------")
 
 		if err := json.Unmarshal(options, &reqOptions); err != nil {
 			return nil, err
@@ -457,9 +453,6 @@ func (c *NimbleClient) CreateSnapshot(poolId string, opt *pb.CreateVolumeSnapsho
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("---------debug----------")
-		fmt.Printf("Optoins: %+v", reqOptions)
-		fmt.Println("------------------------")
 
 		if err := json.Unmarshal(options, &reqOptions); err != nil {
 			return nil, err
