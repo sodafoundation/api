@@ -22,6 +22,7 @@ package metrics
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -41,6 +42,7 @@ type Controller interface {
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
+	GetUrls() (*map[string]string, error)
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -306,5 +308,18 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 	}
 
 	return res, nil
+
+}
+
+func (c *controller) GetUrls() (*map[string]string, error) {
+
+	res := map[string]string{}
+	flagGrafanaUrl := flag.Lookup("grafana-url")
+	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
+
+	res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
+	res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+
+	return &res, nil
 
 }
