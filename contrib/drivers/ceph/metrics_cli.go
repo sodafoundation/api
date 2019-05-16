@@ -169,7 +169,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 
 			case "pool_write_bytes_total":
 				returnMap = append(returnMap, CephMetricStats{
-					"write_bytes",
+					"write",
 					pool.Stats.WriteBytes.String(),
 					"bytes",
 					"ceph",
