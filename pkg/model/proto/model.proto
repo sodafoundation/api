@@ -85,7 +85,14 @@ service Controller {
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
 
+    // Get metrics from Prometheus
     rpc GetMetrics (GetMetricsOpts) returns (GenericResponse){}
+
+    // Collect metrics from metrics driver
+    rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
+
+    // Get 3rd party re-direct URLs for telemetry
+    rpc GetUrls (NoParams) returns (GenericResponse){}
 }
 
 service ProvisionDock {
@@ -137,6 +144,9 @@ service ProvisionDock {
 
     // Delete volume group
     rpc DeleteVolumeGroup (DeleteVolumeGroupOpts) returns (GenericResponse){}
+
+    // Collect metrics from metrics driver
+    rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
 }
 
 service FileShareController {
@@ -757,10 +767,30 @@ message GenericResponse {
     }
 }
 
+// GetMetricsOpts is used to pass specifics to get metric values
 message GetMetricsOpts {
+    // instance ID of the resource to collect metrics for
     string instanceId = 1;
+    // the metric to be collected
     string metricName = 2;
+    // the start of the time range to collect metrics
     string startTime = 3;
+    // the end of the time range to collect metrics
     string endTime = 4;
+    // context
     string context = 5;
 }
+
+// CollectMetricsOpts is used to pass specifics to collect metric values
+message CollectMetricsOpts {
+    // instance ID of the resource to collect metrics for
+    string instanceId = 1;
+    // the metrics to be collected
+    repeated string metricNames = 2;
+    // context
+    string context = 3;
+    // metrics driver
+    string driverName = 4;
+}
+
+message NoParams {}

@@ -26,6 +26,7 @@ import (
 	"net"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/fileshare"
@@ -336,7 +337,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
-		protocol = "iscsi"
+		protocol = config.ISCSIProtocol
 	}
 
 	opt.AccessProtocol = protocol
@@ -404,7 +405,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	if err = c.volumeController.DeleteVolumeAttachment(opt); err != nil {
 		msg := fmt.Sprintf("delete volume attachment failed: %v", err)
 		log.Error(msg)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
+		db.C.DeleteVolumeAttachment(ctx, opt.Id)
 		return pb.GenericResponseError(msg), err
 	}
 
@@ -874,12 +875,12 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	log.Info("Controller server receive create file share request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	if opt.ProfileId == "" {
+	if opt.Profile == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
-		opt.ProfileId = prf.Id
+		opt.Profile = prf.Id
 	} else {
-		prf, err = db.C.GetProfile(ctx, opt.ProfileId)
+		prf, err = db.C.GetProfile(ctx, opt.Profile)
 	}
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
@@ -921,7 +922,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
-	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
+	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfile()
 
 	// Update the file share data in database.
 	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
@@ -982,4 +983,63 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 	}
 
 	return pb.GenericResponseResult(result), err
+}
+
+func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller collect metrics methods")
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
+
+	if err != nil {
+		log.Errorf("get volume by id %s failed in CollectMetrics method: %s", opt.InstanceId, err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
+		return pb.GenericResponseError(err), err
+
+	}
+
+	c.metricsController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.metricsController.CollectMetrics(opt)
+	if err != nil {
+		log.Errorf("collectMetrics failed: %s", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
+}
+
+func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller get urls method")
+
+	var result *map[string]string
+	var err error
+
+	result, err = c.metricsController.GetUrls()
+
+	// make return array
+	arrUrls := make([]model.UrlSpec, 0)
+
+	for k, v := range *result {
+		// make each url spec
+		urlSpec := model.UrlSpec{}
+		urlSpec.Name = k
+		urlSpec.Url = v
+		// add to the array
+		arrUrls = append(arrUrls, urlSpec)
+	}
+
+	if err != nil {
+		log.Errorf("get urls failed: %s\n", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(arrUrls), err
 }

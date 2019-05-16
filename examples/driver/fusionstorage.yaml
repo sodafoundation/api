@@ -28,7 +28,7 @@ pool:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 7000000
         maxBWS: 600
       advanced:
@@ -42,7 +42,7 @@ pool:
         provisioningPolicy: Thin
         isSpaceEfficient: false
       ioConnectivity:
-        accessProtocol: DSWARE
+        accessProtocol: iscsi
         maxIOPS: 3000000
         maxBWS: 300
       advanced:

@@ -20,12 +20,16 @@ This module implements a entry into the OpenSDS metrics controller service.
 package metrics
 
 import (
+	"context"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/controller/metrics/adapters"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -36,11 +40,17 @@ type Controller interface {
 	GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
+	CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
+	GetUrls() (*map[string]string, error)
 }
 
 // NewController method creates a controller structure and expose its pointer.
 func NewController() Controller {
+
+	// start the metrics dispatcher
+	adapters.StartDispatcher()
+
 	return &controller{
 		Client: client.NewClient(),
 	}
@@ -264,4 +274,52 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {
 	c.DockInfo = dockInfo
+}
+
+func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Errorf("error when connecting dock client: %s", err.Error())
+		return nil, err
+	}
+
+	response, err := c.Client.CollectMetrics(context.Background(), opt)
+	if err != nil {
+		log.Errorf("collect metrics failed in metrics controller: %s", err.Error())
+		return nil, err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to collect metrics in metrics controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	res := make([]*model.MetricSpec, 0)
+
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), &res); err != nil {
+		log.Errorf("collect metrics failed in metrics controller:%s", err.Error())
+		return nil, err
+	}
+
+	// send the metrics to the registered adapters
+	for _, metricSpecPtr := range res {
+		adapters.SendMetricToRegisteredSenders(metricSpecPtr)
+	}
+
+	return res, nil
+
+}
+
+func (c *controller) GetUrls() (*map[string]string, error) {
+
+	res := map[string]string{}
+	flagGrafanaUrl := flag.Lookup("grafana-url")
+	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
+
+	res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
+	res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+
+	return &res, nil
+
 }
