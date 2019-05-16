@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 OpenSDS Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BASE_DIR := $(shell pwd)
 BUILD_DIR := $(BASE_DIR)/build/out
 DIST_DIR := $(BASE_DIR)/build/dist
 VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
@@ -53,8 +52,35 @@ docker: build
 	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
-test: build
-	install/CI/test
+
+test: build osds_unit_test osds_integration_test osds_e2eflowtest_build osds_e2etest_build
+
+# make osds_core
+.PHONY: osds_core
+osds_core:
+	cd osds && $(MAKE)
+
+# unit tests
+.PHONY: osds_unit_test
+osds_unit_test:
+	cd osds && $(MAKE) test
+
+# verify
+.PHONY: osds_verify
+osds_verify:
+	cd osds && $(MAKE) verify
+
+.PHONY: osds_integration_test
+osds_integration_test:
+	cd osds && $(MAKE) integration_test
+
+.PHONY: osds_e2etest_build
+osds_e2etest_build:
+	cd osds && $(MAKE) e2etest_build
+
+.PHONY: osds_e2eflowtest_build
+osds_e2eflowtest_build:
+	cd osds && $(MAKE) e2eflowtest_build
 
 protoc:
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
