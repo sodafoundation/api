@@ -90,6 +90,9 @@ service Controller {
 
     // Collect metrics from metrics driver
     rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
+
+    // Get 3rd party re-direct URLs for telemetry
+    rpc GetUrls (NoParams) returns (GenericResponse){}
 }
 
 service ProvisionDock {
@@ -790,3 +793,4 @@ message CollectMetricsOpts {
     string driverName = 4;
 }
 
+message NoParams {}
