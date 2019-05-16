@@ -405,7 +405,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	if err = c.volumeController.DeleteVolumeAttachment(opt); err != nil {
 		msg := fmt.Sprintf("delete volume attachment failed: %v", err)
 		log.Error(msg)
-		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachErrorDeleting)
+		db.C.DeleteVolumeAttachment(ctx, opt.Id)
 		return pb.GenericResponseError(msg), err
 	}
 

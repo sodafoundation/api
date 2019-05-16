@@ -28,4 +28,5 @@ const (
 	DefaultConfPath                    = "/etc/opensds/driver/fusionstorage.yaml"
 	ClientVersion6_3                   = "6.3"
 	ClientVersion8_0                   = "8.0"
+	MaxRetry                           = 3
 )

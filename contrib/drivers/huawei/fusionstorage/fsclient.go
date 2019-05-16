@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -134,7 +135,17 @@ func newRestCommon(conf *Config) (*FsClient, error) {
 		headers:  map[string]string{"Content-Type": "application/json;charset=UTF-8"},
 	}
 
-	err := client.login()
+	var err error
+	for i := 1; i <= MaxRetry; i++ {
+		log.Printf("try to login the client %d time", i)
+		err = client.login()
+		if err != nil {
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -162,6 +173,7 @@ func (c *FsClient) getVersion() error {
 }
 
 func (c *FsClient) login() error {
+	c.getVersion()
 	url := "/sec/login"
 	data := map[string]string{"userName": c.username, "password": c.password}
 	_, err := c.request(url, "POST", false, data)
