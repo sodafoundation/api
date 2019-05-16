@@ -60,14 +60,9 @@ func isSarEnabled(out string) bool {
 // metricMap	-> metric to command output column mapping
 // out 		-> command output
 // returnMap	-> metric to value map to be returned
-func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]string, instanceID string, metricMap map[string]int, out string) {
+func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]string, labelMap map[string]string, instanceID string, metricMap map[string]int, out string) {
 
 	tableRows := strings.Split(string(out), "\n")
-
-	// TODO(Prakash):re-visit the below logic when we add disk metrics support
-	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
-	instanceID = strings.Replace(instanceID, "-", "--", -1)
-
 	for _, row := range tableRows {
 
 		if strings.Contains(row, instanceID) {
@@ -85,7 +80,7 @@ func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string
 				val := columns[metricMap[metric]]
 				returnMap[metric] = val
 				returnMap["InstanceName"] = columns[metricMap["InstanceID"]]
-
+				labelMap["device"] = columns[metricMap["InstanceID"]]
 			}
 		}
 
@@ -96,9 +91,10 @@ func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string
 // metricList	-> metrics to be collected
 // instanceID	-> for which instance to be collected
 // returnMap	-> metrics to value map
-func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (map[string]string, error) {
+func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /*returnMAp*/ map[string]string /*labelMap*/, map[string]string, error) {
 
 	returnMap := make(map[string]string)
+	labelMap := make(map[string]string)
 	var err error
 
 	cmd := []string{"env", "LC_ALL=C", "sar", "-dp", "1", "1"}
@@ -115,14 +111,14 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 		// sar command output mapping
 		metricMap := make(map[string]int)
 		metricMap["InstanceID"] = 1
-		metricMap["IOPS"] = 2
-		metricMap["ReadThroughput"] = 3
-		metricMap["WriteThroughput"] = 4
-		metricMap["ResponseTime"] = 7
-		metricMap["ServiceTime"] = 8
-		metricMap["UtilizationPercentage"] = 9
+		metricMap["iops"] = 2
+		metricMap["readThroughput"] = 3
+		metricMap["writeThroughput"] = 4
+		metricMap["responseTime"] = 7
+		metricMap["serviceTime"] = 8
+		metricMap["utilizationprcnt"] = 9
 		//call parser
-		cli.parseCommandOutput(metricList, returnMap, instanceID, metricMap, out)
+		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
 	} else {
 		cmd := []string{"env", "LC_ALL=C", "iostat", "-N"}
 
@@ -130,19 +126,19 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) (ma
 
 		if strings.Contains(string(out), cmdNotFound) {
 
-			log.Errorf("iostat is not vaoilable: cmd.Run() failed with %s\n", err)
+			log.Errorf("iostat is not available: cmd.Run() failed with %s\n", err)
 			err = nil
 		} else if err != nil {
 			log.Errorf("cmd.Run() failed with %s\n", err)
-			return nil, err
+			return nil, nil, err
 		}
 		metricMap := make(map[string]int)
 		// iostat command output mapping
-		metricMap["IOPS"] = 1
-		metricMap["ReadThroughput"] = 2
-		metricMap["WriteThroughput"] = 3
-		cli.parseCommandOutput(metricList, returnMap, instanceID, metricMap, out)
+		metricMap["iops"] = 1
+		metricMap["readThroughput"] = 2
+		metricMap["writeThroughput"] = 3
+		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
 
 	}
-	return returnMap, err
+	return returnMap, labelMap, err
 }
