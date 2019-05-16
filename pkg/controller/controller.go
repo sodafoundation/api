@@ -1015,3 +1015,31 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 
 	return pb.GenericResponseResult(result), nil
 }
+
+func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller get urls method")
+
+	var result *map[string]string
+	var err error
+
+	result, err = c.metricsController.GetUrls()
+
+	// make return array
+	arrUrls := make([]model.UrlSpec, 0)
+
+	for k, v := range *result {
+		// make each url spec
+		urlSpec := model.UrlSpec{}
+		urlSpec.Name = k
+		urlSpec.Url = v
+		// add to the array
+		arrUrls = append(arrUrls, urlSpec)
+	}
+
+	if err != nil {
+		log.Errorf("get urls failed: %s\n", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(arrUrls), err
+}
