@@ -280,3 +280,27 @@ func (m *MetricsPortal) CollectMetrics() {
 
 	return
 }
+
+func (m *MetricsPortal) GetUrls() {
+	if !policy.Authorize(m.Ctx, "metrics:urls") {
+		return
+	}
+
+	if err := m.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer m.CtrClient.Close()
+
+	opt := &pb.NoParams{}
+	res, err := m.CtrClient.GetUrls(context.Background(), opt)
+
+	if err != nil {
+		log.Error("get urls failed in controller service:", err)
+		return
+	}
+
+	m.SuccessHandle(StatusOK, []byte(res.GetResult().GetMessage()))
+
+	return
+}

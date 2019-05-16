@@ -26,6 +26,7 @@ import (
 	"net"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/fileshare"
@@ -336,7 +337,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
-		protocol = "iscsi"
+		protocol = config.ISCSIProtocol
 	}
 
 	opt.AccessProtocol = protocol
@@ -1013,4 +1014,32 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	}
 
 	return pb.GenericResponseResult(result), nil
+}
+
+func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller get urls method")
+
+	var result *map[string]string
+	var err error
+
+	result, err = c.metricsController.GetUrls()
+
+	// make return array
+	arrUrls := make([]model.UrlSpec, 0)
+
+	for k, v := range *result {
+		// make each url spec
+		urlSpec := model.UrlSpec{}
+		urlSpec.Name = k
+		urlSpec.Url = v
+		// add to the array
+		arrUrls = append(arrUrls, urlSpec)
+	}
+
+	if err != nil {
+		log.Errorf("get urls failed: %s\n", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(arrUrls), err
 }
