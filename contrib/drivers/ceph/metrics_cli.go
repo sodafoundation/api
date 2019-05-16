@@ -130,7 +130,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 					pool.Stats.Objects.String(),
 					"",
 					"ceph",
-					"",
+					"total",
 					pool.Name})
 
 			case "pool_dirty_objects_total":
