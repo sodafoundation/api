@@ -159,7 +159,7 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		log.Errorf("%v: delete volume snapshot failed, volume snapshot id = %s , error: %v", DriverName, opt.GetId(), err)
 		return err
 	}
-	log.Infof("%v: remove volume snapshot success, volume snapshot id =", DriverName, opt.GetId())
+	log.Infof("%v: remove volume snapshot success, volume snapshot id=%v", DriverName, opt.GetId())
 	return nil
 }
 
