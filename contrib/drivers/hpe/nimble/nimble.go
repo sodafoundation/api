@@ -97,7 +97,6 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	log.Infof("%v: Trying delete volume ...", DriverName)
 	poolId := opt.GetMetadata()["PoolId"]
-	//	err := d.client.DeleteVolume(poolId, lunId)
 	err := d.client.DeleteVolume(poolId, opt)
 	if err != nil {
 		log.Errorf("%v: delete volume failed, volume id =%s , Error:%s", DriverName, opt.GetId(), err)
@@ -179,7 +178,6 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 				pol := &model.StoragePoolSpec{
 					BaseModel: &model.BaseModel{
-						//				Id: pool.Id,
 						Id: uuid.NewV5(uuid.NamespaceOID, pool.Id).String(),
 					},
 					Name:             pool.Name,
@@ -284,7 +282,6 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 					"targetDiscovered": true,
 					"target_wwn":       []string{tgtIqnWwn},
 					"volume_id":        opt.GetVolumeId(),
-					//        "initiator_target_map": initTargMap,
 					"description": "hpe",
 					"host_name":   opt.GetHostInfo().Host,
 					"targetLun":   attachRespBody.Lun,
