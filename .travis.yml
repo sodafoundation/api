@@ -45,7 +45,8 @@ install:
   - go get github.com/wadey/gocovmerge
   # Build OpenSDS Controller source code
   - make all
-
+  # Build that runs test cases
+  - make test
 script:
   - ./install/CI/coverage
   - ./install/CI/test

@@ -31,6 +31,6 @@ split_line(){
 split_line "Start integration test"
 sudo $OPENSDS_DIR/test/integration/prepare.sh
 go test -v github.com/opensds/opensds/test/integration/... -tags integration
-sudo killall -9 osdslet osdsdock
+sudo killall -9 osdsapiserver osdslet osdsdock
 sudo rm /etc/opensds/opensds.conf -rf
 
