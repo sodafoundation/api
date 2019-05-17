@@ -131,7 +131,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 					pool.Stats.Objects.String(),
 					"",
 					"ceph",
-					"",
+					"total",
 					pool.Name})
 
 			case "pool_dirty_objects_total":
@@ -170,7 +170,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ([]
 
 			case "pool_write_bytes_total":
 				returnMap = append(returnMap, CephMetricStats{
-					"write_bytes",
+					"write",
 					pool.Stats.WriteBytes.String(),
 					"bytes",
 					"ceph",

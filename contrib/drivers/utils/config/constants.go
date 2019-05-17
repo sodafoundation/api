@@ -38,8 +38,8 @@ const (
 // drivers which can be supported by now. Please NOTICE that currently these
 // constants can NOT be used by all methods except InitializeConnection().
 const (
-	ISCSIProtocol = "iscsi"
-	DSWARE        = "DSWARE"
-	RBDProtocol   = "rbd"
-	FCProtocol    = "fibre_channel"
+	ISCSIProtocol  = "iscsi"
+	RBDProtocol    = "rbd"
+	FCProtocol     = "fibre_channel"
+	NVMEOFProtocol = "nvmeof"
 )

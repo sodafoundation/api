@@ -33,6 +33,8 @@ func init() {
 			// All operations of file can be used for both admin and users.
 			beego.NSRouter("/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
 			beego.NSRouter("/downloadconf", controllers.NewMetricsPortal(), "get:DownloadConfFile"),
+
+			beego.NSRouter("/urls", controllers.NewMetricsPortal(), "get:GetUrls"),
 		)
 	beego.AddNamespace(metricns)
 }

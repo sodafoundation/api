@@ -33,6 +33,8 @@ type OsdsLet struct {
 	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
 	Daemon            bool          `conf:"daemon,false"`
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	GrafanaUrl        string        `conf:"grafana_url,http://localhost:3000"`
+	AlertMgrUrl       string        `conf:"alertmgr_url,http://localhost:9093"`
 }
 
 type OsdsDock struct {
@@ -67,7 +69,7 @@ type Backends struct {
 	LVM                 BackendProperties `conf:"lvm"`
 	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
 	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
-	NFS           BackendProperties `conf:"nfs"`
+	NFS                 BackendProperties `conf:"nfs"`
 }
 
 type KeystoneAuthToken struct {
