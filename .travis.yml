@@ -43,10 +43,15 @@ matrix:
 install:
   - go get github.com/mattn/goveralls
   - go get github.com/wadey/gocovmerge
-  # Build OpenSDS Controller source code
-  - make all
-  # Build that runs test cases
-  - make test
+  
+jobs:
+  include:
+    - stage: "Build Jobs"                # naming the build stage
+      script: make all
+      name: "builds osdsdock osdsdock osdsapiserver osdsctl"            # names the first Tests stage job 
+    - script: make test
+      name: "runs all test cases unittest, integration , e2e"            # names the second Tests stage job
+
 script:
   - ./install/CI/coverage
   - ./install/CI/test
