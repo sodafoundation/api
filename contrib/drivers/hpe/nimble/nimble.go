@@ -97,7 +97,7 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	poolId := opt.GetMetadata()["PoolId"]
 	err := d.client.DeleteVolume(poolId, opt)
 	if err != nil {
-		log.Errorf("%v: delete volume failed, volume id =%s , Error:%s", DriverName, opt.GetId(), err)
+		log.Errorf("%v: delete volume failed, volume id =%s , error:%s", DriverName, opt.GetId(), err)
 		return err
 	}
 	log.Infof("%v: remove volume success", DriverName)

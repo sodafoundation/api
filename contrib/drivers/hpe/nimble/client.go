@@ -405,7 +405,6 @@ func (c *NimbleClient) OfflineVolume(id string, poolId string) error {
 
 	reqOptions := OfflineVolumeReqData{
 		Online: false,
-		Force:  true,
 	}
 
 	reqBody := &OfflineVolumeReqBody{Data: reqOptions}
