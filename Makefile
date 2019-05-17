@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+BASE_DIR := $(shell pwd)
 BUILD_DIR := $(BASE_DIR)/build/out
 DIST_DIR := $(BASE_DIR)/build/dist
 VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
