@@ -14,11 +14,12 @@
 package ceph
 
 import (
+	"strconv"
+	"time"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
 	"gopkg.in/yaml.v2"
-	"strconv"
-	"time"
 )
 
 // TODO: Move this Yaml config to a file
