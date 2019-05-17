@@ -16,8 +16,6 @@ package nimble
 
 import (
 	"fmt"
-	"math"
-
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -82,7 +80,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 			Id: opt.GetId(),
 		},
 		Name:             opt.GetName(),
-		Size:             lun.Size / int64(math.Pow(1024, 3)),
+		Size:             Byte2Gib(lun.Size),
 		Description:      lun.Description,
 		AvailabilityZone: opt.GetAvailabilityZone(),
 		Metadata: map[string]string{
@@ -182,8 +180,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 					},
 					Name:             pool.Name,
 					Description:      pool.Description,
-					TotalCapacity:    pool.TotalCapacity / int64(math.Pow(1024, 3)), //Format to GiB
-					FreeCapacity:     pool.FreeCapacity / int64(math.Pow(1024, 3)),  //Format to GiB
+					TotalCapacity:    Byte2Gib(pool.TotalCapacity),
+					FreeCapacity:     Byte2Gib(pool.FreeCapacity),
 					StorageType:      "block",
 					AvailabilityZone: pool.ArrayList[0].ArrayName + "/" + pool.Name,
 					Extras:           c.Pool[grpName].Extras,

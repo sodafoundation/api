@@ -18,10 +18,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"strings"
-
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -294,7 +292,7 @@ func (c *NimbleClient) CreateVolume(poolId string, opt *pb.CreateVolumeOpts) (*V
 
 	reqOptions.Name = opt.GetId()
 	reqOptions.PoolId = poolId
-	reqOptions.Size = opt.GetSize() * int64(math.Pow(1024, 1))
+	reqOptions.Size = Gib2Mebi(opt.GetSize())
 	reqOptions.Description = TruncateDescription(opt.GetDescription())
 
 	// Create volume from snapshot
@@ -440,7 +438,7 @@ func (c *NimbleClient) ExtendVolume(poolId string, opt *pb.ExtendVolumeOpts) (*V
 	}
 
 	// -------------------------------------------------------------------------
-	reqOptions.Size = opt.GetSize() * int64(math.Pow(1024, 1))
+	reqOptions.Size = Gib2Mebi(opt.GetSize())
 	reqBody := &ExtendVolumeReqBody{Data: reqOptions}
 	respBody := &ExtendVolumeRespBody{}
 	err = c.request("PUT", ep+volumeUrlPath+"/"+lunId, reqBody, respBody, token)

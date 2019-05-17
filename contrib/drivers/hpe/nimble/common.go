@@ -17,13 +17,11 @@ package nimble
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"strconv"
 	"strings"
-
-	log "github.com/golang/glog"
 )
 
 const UnitGi = 1024 * 1024 * 1024
+const UnitMebi = 1024
 
 func EncodeName(id string) string {
 	h := md5.New()
@@ -41,11 +39,10 @@ func TruncateDescription(desc string) string {
 	return desc
 }
 
-func Sector2Gb(sec string) int64 {
-	size, err := strconv.ParseInt(sec, 10, 64)
-	if err != nil {
-		log.Error("convert capacity from string to number failed, error:", err)
-		return 0
-	}
-	return size * 512 / UnitGi
+func Byte2Gib(byteSize int64) int64 {
+	return byteSize / UnitGi
+}
+
+func Gib2Mebi(gigabyte int64) int64 {
+	return gigabyte * UnitMebi
 }
