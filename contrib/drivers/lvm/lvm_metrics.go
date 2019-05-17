@@ -29,11 +29,11 @@ resources:
   - resource: volume
     metrics:
       - iops
-      - readThroughput
-      - writeThroughput
-      - responseTime
-      - serviceTime
-      - utilizationprcnt
+      - read_throughput
+      - write_throughput
+      - response_time
+      - service_time
+      - utilization_prcnt
     units:
       - tps
       - kbs
@@ -44,11 +44,11 @@ resources:
   - resource: disk
     metrics:
       - iops
-      - readThroughput
-      - writeThroughput
-      - responseTime
-      - serviceTime
-      - utilizationprcnt
+      - read_throughput
+      - write_throughput
+      - response_time
+      - service_time
+      - utilization_prcnt
     units:
       - tps
       - kbs
@@ -125,15 +125,17 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 	}
 
 	for _, resources := range configs.Cfgs {
-		switch resources.Resource {
-		//ToDo: Other Cases needs to be added
-		case "volume", "disk":
-			for _, metricName := range metricList {
-				if metricInMetrics(metricName, resources.Metrics) {
-					supportedMetrics = append(supportedMetrics, metricName)
+		if resources.Resource == resourceType {
+			switch resourceType {
+			//ToDo: Other Cases needs to be added
+			case "volume", "disk":
+				for _, metricName := range metricList {
+					if metricInMetrics(metricName, resources.Metrics) {
+						supportedMetrics = append(supportedMetrics, metricName)
 
-				} else {
-					log.Infof("metric:%s is not in the supported list", metricName)
+					} else {
+						log.Infof("metric:%s is not in the supported list", metricName)
+					}
 				}
 			}
 		}

@@ -112,11 +112,11 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /
 		metricMap := make(map[string]int)
 		metricMap["InstanceID"] = 1
 		metricMap["iops"] = 2
-		metricMap["readThroughput"] = 3
-		metricMap["writeThroughput"] = 4
-		metricMap["responseTime"] = 7
-		metricMap["serviceTime"] = 8
-		metricMap["utilizationprcnt"] = 9
+		metricMap["read_throughput"] = 3
+		metricMap["write_throughput"] = 4
+		metricMap["response_time"] = 7
+		metricMap["service_time"] = 8
+		metricMap["utilization_prcnt"] = 9
 		//call parser
 		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
 	} else {
@@ -135,8 +135,8 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /
 		metricMap := make(map[string]int)
 		// iostat command output mapping
 		metricMap["iops"] = 1
-		metricMap["readThroughput"] = 2
-		metricMap["writeThroughput"] = 3
+		metricMap["read_throughput"] = 2
+		metricMap["write_throughput"] = 3
 		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
 
 	}
