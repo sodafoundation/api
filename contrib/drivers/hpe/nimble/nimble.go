@@ -16,6 +16,7 @@ package nimble
 
 import (
 	"fmt"
+
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -280,9 +281,9 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 					"targetDiscovered": true,
 					"target_wwn":       []string{tgtIqnWwn},
 					"volume_id":        opt.GetVolumeId(),
-					"description": "hpe",
-					"host_name":   opt.GetHostInfo().Host,
-					"targetLun":   attachRespBody.Lun,
+					"description":      "hpe",
+					"host_name":        opt.GetHostInfo().Host,
+					"targetLun":        attachRespBody.Lun,
 				},
 			}, nil
 		}
