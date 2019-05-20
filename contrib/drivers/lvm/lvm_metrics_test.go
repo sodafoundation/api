@@ -151,3 +151,9 @@ func printMetricSpec(m []*model.MetricSpec) {
 	}
 
 }
+func TestCollectMetrics1(t *testing.T) {
+	var md = &MetricDriver{}
+	md.Setup()
+	md.CollectMetrics(expctdMetricList, "b902e771--8e02--4099--b601--a6b3881f8")
+
+}

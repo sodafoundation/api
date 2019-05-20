@@ -60,46 +60,49 @@ func isSarEnabled(out string) bool {
 // metricMap	-> metric to command output column mapping
 // out 		-> command output
 // returnMap	-> metric to value map to be returned
-func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]string, labelMap map[string]string, instanceID string, metricMap map[string]int, out string) {
+func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map [string] map[string]string, labelMap map [string] map[string]string,  metricMap map[string]int, out string) {
 
 	tableRows := strings.Split(string(out), "\n")
 
-	// TODO(Prakash):re-visit the below logic when we add disk metrics support
-	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
-	instanceID = strings.Replace(instanceID, "-", "--", -1)
 
-	for _, row := range tableRows {
 
-		if strings.Contains(row, instanceID) {
+	for _, row := range tableRows[3:] {
+
+		if row != "" {
 			tokens := regexp.MustCompile(" ")
 			cols := tokens.Split(row, -1)
 			// remove all empty space
-			var columns = make([]string, 0, 0)
+			var columns= make([]string, 0, 0)
 			for _, v := range cols {
 				if v != "" {
 					columns = append(columns, v)
 				}
 			}
 			// map the values
+			aVolMap := make(map[string]string)
+			aLabMap := make(map[string]string)
 			for _, metric := range metricList {
 				val := columns[metricMap[metric]]
-				returnMap[metric] = val
-				returnMap["InstanceName"] = columns[metricMap["InstanceID"]]
-				labelMap["device"] = columns[metricMap["InstanceID"]]
+				aVolMap[metric] = val
+				aVolMap["InstanceName"] = columns[metricMap["InstanceID"]]
+				aLabMap["device"] = columns[metricMap["InstanceID"]]
 			}
+			returnMap[columns[1]] = aVolMap
+			labelMap[columns[1]] = aLabMap
 		}
+	}
 
 	}
-}
+
 
 // CollectMetrics function is to call the cli for metrics collection. This will be invoked  by lvm metric driver
 // metricList	-> metrics to be collected
 // instanceID	-> for which instance to be collected
 // returnMap	-> metrics to value map
-func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /*returnMAp*/ map[string]string /*labelMap*/, map[string]string, error) {
+func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map [string] map[string]string/*labelMap*/, map [string] map[string]string, error) {
 
-	returnMap := make(map[string]string)
-	labelMap := make(map[string]string)
+	returnMap := make(map [string] map[string]string)
+	labelMap := make(map [string] map[string]string)
 	var err error
 
 	cmd := []string{"env", "LC_ALL=C", "sar", "-dp", "1", "1"}
@@ -123,7 +126,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /
 		metricMap["service_time"] = 8
 		metricMap["utilization_prcnt"] = 9
 		//call parser
-		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
+		cli.parseCommandOutput(metricList,returnMap, labelMap,  metricMap, out)
 	} else {
 		cmd := []string{"env", "LC_ALL=C", "iostat", "-N"}
 
@@ -142,8 +145,53 @@ func (cli *MetricCli) CollectMetrics(metricList []string, instanceID string) ( /
 		metricMap["iops"] = 1
 		metricMap["read_throughput"] = 2
 		metricMap["write_throughput"] = 3
-		cli.parseCommandOutput(metricList, returnMap, labelMap, instanceID, metricMap, out)
+		cli.parseCommandOutput(metricList, returnMap, labelMap,  metricMap, out)
 
 	}
 	return returnMap, labelMap, err
+}
+
+func (c *MetricCli) DiscoverVolumes() ([]string, error) {
+	cmd := []string{"env", "LC_ALL=C", "lvs"}
+	out, err := c.execute(cmd...)
+	tableRows := strings.Split(string(out), "\n")
+	var volumes []string
+	for _, row := range tableRows[1:] {
+		if row != "" {
+			tokens := regexp.MustCompile(" ")
+			cols := tokens.Split(row, -1)
+			var columns= make([]string, 0, 0)
+			for _, v := range cols {
+				if v != "" {
+					columns = append(columns, v)
+				}
+			}
+			volumes = append(volumes, columns[0])
+
+		}
+	}
+	//fmt.Println(out,err)
+	return volumes, err
+}
+func (c *MetricCli) DiscoverDisks() ([]string, error) {
+	cmd := []string{"env", "LC_ALL=C", "pvs"}
+	out, err := c.execute(cmd...)
+	tableRows := strings.Split(string(out), "\n")
+	var volumes []string
+	for _, row := range tableRows[1:] {
+		if row != "" {
+			tokens := regexp.MustCompile(" ")
+			cols := tokens.Split(row, -1)
+			var columns= make([]string, 0, 0)
+			for _, v := range cols {
+				if v != "" {
+					columns = append(columns, v)
+				}
+			}
+			volumes = append(volumes, columns[0])
+
+		}
+	}
+	//fmt.Println(out,err)
+	return volumes, err
 }
