@@ -1,6 +1,6 @@
 /bin
 build/
 *.log
-.DS_Store
+.*DS_Store
 *.retry
 .idea/
