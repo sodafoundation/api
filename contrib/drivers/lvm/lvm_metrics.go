@@ -28,32 +28,34 @@ var data = `
 resources:
   - resource: volume
     metrics:
-      - IOPS
-      - ReadThroughput
-      - WriteThroughput
-      - ResponseTime
-      - ServiceTime
-      - UtilizationPercentage
+      - iops
+      - read_throughput
+      - write_throughput
+      - response_time
+      - service_time
+      - utilization_prcnt
     units:
       - tps
-      - KB/s
-      - KB/s
+      - kbs
+      - kbs
       - ms
       - ms
       - '%'
-  - resource: pool
+  - resource: disk
     metrics:
-      - ReadRequests
-      - WriteRequests
-      - ReponseTime
+      - iops
+      - read_throughput
+      - write_throughput
+      - response_time
+      - service_time
+      - utilization_prcnt
     units:
       - tps
-      - KB/s
-      - KB/s
+      - kbs
+      - kbs
       - ms
       - ms
-      - '%'
-`
+      - '%'`
 
 type Config struct {
 	Resource string
@@ -91,13 +93,13 @@ func getMetricToUnitMap() map[string]string {
 
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
-		log.Fatalf("Unmarshal error: %v", error)
+		log.Fatalf("unmarshal error: %v", error)
 	}
 	metricToUnitMap := make(map[string]string)
 	for _, resources := range configs.Cfgs {
 		switch resources.Resource {
 		//ToDo: Other Cases needs to be added
-		case "volume":
+		case "volume", "disk":
 			for index, metricName := range resources.Metrics {
 
 				metricToUnitMap[metricName] = resources.Units[index]
@@ -119,19 +121,21 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 	source := []byte(data)
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
-		log.Fatalf("Unmarshal error: %v", error)
+		log.Fatalf("unmarshal error: %v", error)
 	}
 
 	for _, resources := range configs.Cfgs {
-		switch resources.Resource {
-		//ToDo: Other Cases needs to be added
-		case "volume":
-			for _, metricName := range metricList {
-				if metricInMetrics(metricName, resources.Metrics) {
-					supportedMetrics = append(supportedMetrics, metricName)
+		if resources.Resource == resourceType {
+			switch resourceType {
+			//ToDo: Other Cases needs to be added
+			case "volume", "disk":
+				for _, metricName := range metricList {
+					if metricInMetrics(metricName, resources.Metrics) {
+						supportedMetrics = append(supportedMetrics, metricName)
 
-				} else {
-					log.Infof("metric:%s is not in the supported list", metricName)
+					} else {
+						log.Infof("metric:%s is not in the supported list", metricName)
+					}
 				}
 			}
 		}
@@ -150,16 +154,13 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 	//validate metric support list
 	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "volume")
 	if supportedMetrics == nil {
-		log.Infof("No metrics found in the  supported metric list")
+		log.Infof("no metrics found in the  supported metric list")
 	}
-	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
+	metricMap, labelMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
 
 	var tempMetricArray []*model.MetricSpec
 	for _, element := range metricsList {
 		val, _ := strconv.ParseFloat(metricMap[element], 64)
-		//Todo: See if association  is required here, resource discovery could fill this information
-		associatorMap := make(map[string]string)
-		associatorMap["device"] = metricMap["InstanceName"]
 		metricValue := &model.Metric{
 			Timestamp: getCurrentUnixTimestamp(),
 			Value:     val,
@@ -170,10 +171,10 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 		metric := &model.MetricSpec{
 			InstanceID:   instanceID,
 			InstanceName: metricMap["InstanceName"],
-			Job:          "OpenSDS",
-			Labels:       associatorMap,
+			Job:          "lvm",
+			Labels:       labelMap,
 			//Todo Take Componet from Post call, as of now it is only for volume
-			Component: "Volume",
+			Component: "volume",
 			Name:      element,
 			//Todo : Fill units according to metric type
 			Unit: metricToUnitMap[element],
