@@ -43,24 +43,23 @@ func init() {
 
 func (*RBD) Attach(conn map[string]interface{}) (string, error) {
 	if _, ok := conn["name"]; !ok {
-		return "", os.ErrInvalid
+		return "", fmt.Errorf("cann't get name in connection")
 	}
-
 	name := conn["name"].(string)
 	fields := strings.Split(name, "/")
 	if len(fields) != 2 {
-		return "", os.ErrInvalid
+		return "", fmt.Errorf("invalid connection name %s", name)
 	}
 
-	if _, ok := conn["hosts"].([]interface{}); !ok {
-		return "", os.ErrInvalid
+	hosts, ok := conn["hosts"].([]string)
+	if !ok {
+		return "", fmt.Errorf("invalid connection hosts %s", conn["hosts"])
 	}
-	hosts := conn["hosts"].([]interface{})
 
-	if _, ok := conn["ports"].([]interface{}); !ok {
-		return "", os.ErrInvalid
+	ports, ok := conn["ports"].([]string)
+	if !ok {
+		return "", fmt.Errorf("invalid connection ports %s", conn["hosts"])
 	}
-	ports := conn["ports"].([]interface{})
 
 	poolName, imageName := fields[0], fields[1]
 	device, err := mapDevice(poolName, imageName, hosts, ports)
@@ -103,7 +102,7 @@ func (*RBD) GetInitiatorInfo() (string, error) {
 	return hostName, nil
 }
 
-func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, error) {
+func mapDevice(poolName, imageName string, hosts, ports []string) (string, error) {
 	devName, err := findDevice(poolName, imageName, 1)
 	if err == nil {
 		return devName, nil

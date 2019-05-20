@@ -23,6 +23,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/opensds/opensds/contrib/backup"
+	"github.com/opensds/opensds/contrib/connector"
+	"github.com/opensds/opensds/pkg/utils"
+	"os"
+	"runtime"
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
@@ -154,72 +159,97 @@ func (d *Driver) Setup() error {
 
 func (d *Driver) Unset() error { return nil }
 
-func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	poolName := opt.GetPoolName()
-	srcSnapName := EncodeName(opt.GetSnapshotId())
-	srcImgName := opt.GetMetadata()[KImageName]
-	destImgName := EncodeName(opt.GetId())
-
-	mgr := NewSrcMgr(d.conf)
-	defer mgr.destroy()
-
-	ioctx, err := mgr.GetIoctx(poolName)
-	if err != nil {
-		return nil, err
+func (d *Driver) doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName string, mgr *SrcMgr) error {
+	if mgr == nil {
+		mgr = NewSrcMgr(d.conf)
+		defer mgr.destroy()
 	}
 
 	img, err := mgr.GetImage(poolName, srcImgName, srcSnapName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	snap := img.GetSnapshot(srcSnapName)
 	if ok, _ := snap.IsProtected(); !ok {
 		if err := snap.Protect(); err != nil {
-			log.Errorf("protect failed, %v", err)
-			return nil, err
+			log.Errorf("protect snapshot failed, %v", err)
+			return err
 		}
 		defer snap.Unprotect()
+	}
+
+	ioctx, err := mgr.GetIoctx(poolName)
+	if err != nil {
+		return err
 	}
 
 	_, err = img.Clone(srcSnapName, ioctx, destImgName, rbd.RbdFeatureLayering, 20)
 	if err != nil {
 		log.Errorf("create volume (%s) from snapshot (%s) failed, %v",
-			opt.GetId(), opt.GetSnapshotId(), err)
-		return nil, err
+			srcImgName, srcSnapName, err)
+		return err
 	}
 	log.Infof("create volume (%s) from snapshot (%s) success",
-		opt.GetId(), opt.GetSnapshotId())
-	return &model.VolumeSpec{
-		BaseModel: &model.BaseModel{
-			Id: opt.GetId(),
-		},
-		Name:             opt.GetName(),
-		Size:             opt.GetSize(),
-		Description:      opt.GetDescription(),
-		AvailabilityZone: opt.GetAvailabilityZone(),
-		Metadata: map[string]string{
-			KPoolName: opt.GetPoolName(),
-		},
-	}, nil
+		srcImgName, srcSnapName)
+	return nil
 }
 
-func (d *Driver) createVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) error {
+	poolName := opt.GetPoolName()
+	srcSnapName := EncodeName(opt.GetSnapshotId())
+	srcImgName := opt.GetMetadata()[KImageName]
+	destImgName := EncodeName(opt.GetId())
+	return d.doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName, nil)
+}
+
+func (d *Driver) createVolume(opt *pb.CreateVolumeOpts) error {
 	mgr := NewSrcMgr(d.conf)
 	defer mgr.destroy()
 
 	ioctx, err := mgr.GetIoctx(opt.GetPoolName())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	name := EncodeName(opt.GetId())
 	_, err = rbd.Create(ioctx, name, uint64(opt.GetSize())<<sizeShiftBit, 20)
 	if err != nil {
 		log.Errorf("Create rbd image (%s) failed, (%v)", name, err)
-		return nil, err
+		return err
 	}
 
 	log.Infof("Create volume %s (%s) success.", opt.GetName(), opt.GetId())
+	return nil
+}
+
+func (d *Driver) createVolumeFromCloud(opt *pb.CreateVolumeOpts) error {
+
+	if err := d.createVolume(opt); err != nil {
+		log.Errorf("create image failed, %s", err)
+		return err
+	}
+	if err := d.downloadSnapshotFromCloud(opt); err != nil {
+		log.Errorf("create image failed, %s", err)
+		// roll back
+		d.deleteVolume(opt.GetPoolName(), opt.GetId(), nil)
+		return err
+	}
+	return nil
+}
+
+func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+	var err error
+	// create a volume from snapshot
+	if opt.GetSnapshotId() != "" {
+		if opt.SnapshotFromCloud {
+			err = d.createVolumeFromCloud(opt)
+		} else {
+			err = d.createVolumeFromSnapshot(opt)
+		}
+	} else {
+		err = d.createVolume(opt)
+	}
+
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -228,18 +258,9 @@ func (d *Driver) createVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Size:             opt.GetSize(),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
-		Metadata: map[string]string{
-			KPoolName: opt.GetPoolName(),
-		},
-	}, nil
-}
+		Metadata:         map[string]string{KPoolName: opt.GetPoolName()},
+	}, err
 
-func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	// create a volume from snapshot
-	if opt.GetSnapshotId() != "" {
-		return d.createVolumeFromSnapshot(opt)
-	}
-	return d.createVolume(opt)
 }
 
 // ExtendVolume ...
@@ -274,24 +295,30 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 	return nil, nil
 }
 
-func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
-	mgr := NewSrcMgr(d.conf)
-	defer mgr.destroy()
+func (d *Driver) deleteVolume(poolName, volumeId string, mgr *SrcMgr) error {
+	if mgr == nil {
+		mgr = NewSrcMgr(d.conf)
+		defer mgr.destroy()
+	}
 
-	log.Info(opt.GetMetadata()[KPoolName], EncodeName(opt.GetId()))
-	ioctx, err := mgr.GetIoctx(opt.GetMetadata()[KPoolName])
+	log.Info(poolName, EncodeName(volumeId))
+	ioctx, err := mgr.GetIoctx(poolName)
 	if err != nil {
 		return err
 	}
 
-	err = rbd.GetImage(ioctx, EncodeName(opt.GetId())).Remove()
+	err = rbd.GetImage(ioctx, EncodeName(volumeId)).Remove()
 	if err != nil && err != rbd.RbdErrorNotFound {
-		log.Errorf("Remove volume(%s) filed, %v", opt.GetId(), err)
+		log.Errorf("Remove volume(%s) filed, %v", volumeId, err)
 		return err
 	}
 
-	log.Infof("Remove volume (%s) success", opt.GetId())
+	log.Infof("Remove volume (%s) success", volumeId)
 	return nil
+}
+
+func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+	return d.deleteVolume(opt.GetMetadata()[KPoolName], opt.GetId(), nil)
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
@@ -317,6 +344,167 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error { return nil }
 
+func (d *Driver) uploadSnapshotToCloud(opt *pb.CreateVolumeSnapshotOpts, bucket string, mgr *SrcMgr) (map[string]string, error) {
+
+	poolName := opt.GetMetadata()[KPoolName]
+	srcSnapName := EncodeName(opt.GetId())
+	srcImgName := EncodeName(opt.GetVolumeId())
+	tmpImgId := uuid.NewV4().String() + "-tmp"
+	destImgName := EncodeName(tmpImgId)
+	if err := d.doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName, mgr); err != nil {
+		return nil, err
+	}
+	defer d.deleteVolume(poolName, tmpImgId, mgr)
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Errorf("get host name filed, %v", err)
+	}
+
+	createOpt := &pb.CreateVolumeAttachmentOpts{
+		VolumeId: tmpImgId,
+		Metadata: opt.GetMetadata(),
+		HostInfo: &pb.HostInfo{
+			Platform:  runtime.GOARCH,
+			OsType:    runtime.GOOS,
+			Host:      hostname,
+			Initiator: "",
+		},
+	}
+
+	info, err := d.InitializeConnection(createOpt)
+	if err != nil {
+		return nil, err
+	}
+	defer d.TerminateConnection(&pb.DeleteVolumeAttachmentOpts{})
+
+	log.Errorf("%v", info)
+	conn := connector.NewConnector(info.DriverVolumeType)
+	mountPoint, err := conn.Attach(info.ConnectionData)
+	if err != nil {
+		log.Errorf("attach image failed, %v", err)
+		return nil, err
+	}
+	defer conn.Detach(info.ConnectionData)
+
+	bk, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver, err: %v", err)
+		return nil, err
+	}
+
+	if err := bk.SetUp(); err != nil {
+		log.Errorf("backup driver setup failed:%v", err)
+		return nil, err
+	}
+	defer bk.CleanUp()
+
+	file, err := os.Open(mountPoint)
+	if err != nil {
+		log.Errorf("open lvm snapshot file, err: %v", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	b := &backup.BackupSpec{
+		Id:       uuid.NewV4().String(),
+		Metadata: map[string]string{"bucket": bucket},
+	}
+	if err := bk.Backup(b, file); err != nil {
+		log.Errorf("upload snapshot to multi-cloud failed, err: %v", err)
+		return nil, err
+	}
+
+	return map[string]string{"backupId": b.Id, "bucket": bucket}, nil
+}
+
+func (d *Driver) downloadSnapshotFromCloud(opt *pb.CreateVolumeOpts) error {
+	data := opt.GetMetadata()
+	backupId, ok := data["backupId"]
+	if !ok {
+		return errors.New("can't find backupId in metadata")
+	}
+	bucket, ok := data["bucket"]
+	if !ok {
+		return errors.New("can't find bucket name in metadata")
+	}
+
+	createOpt := &pb.CreateVolumeAttachmentOpts{
+		VolumeId: opt.GetId(),
+		Metadata: opt.GetMetadata(),
+		HostInfo: &pb.HostInfo{
+			Platform:  runtime.GOARCH,
+			OsType:    runtime.GOOS,
+			Initiator: "",
+		},
+	}
+
+	info, err := d.InitializeConnection(createOpt)
+	if err != nil {
+		return err
+	}
+	defer d.TerminateSnapshotConnection(&pb.DeleteSnapshotAttachmentOpts{})
+
+	conn := connector.NewConnector(info.DriverVolumeType)
+	mountPoint, err := conn.Attach(info.ConnectionData)
+	if err != nil {
+		return err
+	}
+	defer conn.Detach(info.ConnectionData)
+
+	file, err := os.OpenFile(mountPoint, os.O_RDWR, 0666)
+	if err != nil {
+		log.Errorf("open lvm snapshot file, err: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	bk, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver, err: %v", err)
+		return err
+	}
+	if err := bk.SetUp(); err != nil {
+		return err
+	}
+	defer bk.CleanUp()
+
+	b := &backup.BackupSpec{
+		Metadata: map[string]string{"bucket": bucket},
+	}
+	if err := bk.Restore(b, backupId, file); err != nil {
+		log.Errorf("upload snapshot to multi-cloud failed, err: %v", err)
+		return err
+	}
+	log.Infof("download snapshot(%s) from cloud bucket (%s) success", opt.SnapshotId, bucket)
+	return nil
+}
+
+func (d *Driver) deleteUploadedSnapshot(backupId string, bucket string) error {
+	bk, err := backup.NewBackup("multi-cloud")
+	if err != nil {
+		log.Errorf("get backup driver failed, err: %v", err)
+		return err
+	}
+
+	if err := bk.SetUp(); err != nil {
+		log.Errorf("backup driver setup failed:%v", err)
+		return err
+	}
+	defer bk.CleanUp()
+
+	b := &backup.BackupSpec{
+		Id:       backupId,
+		Metadata: map[string]string{"bucket": bucket},
+	}
+
+	if err := bk.Delete(b); err != nil {
+		log.Errorf("delete backup snapshot  failed, err: %v", err)
+		return err
+	}
+	return nil
+}
+
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
 	mgr := NewSrcMgr(d.conf)
 	defer mgr.destroy()
@@ -332,9 +520,26 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		return nil, err
 	}
 
+	var metadata = map[string]string{
+		KPoolName:  poolName,
+		KImageName: EncodeName(opt.GetVolumeId()),
+	}
+
+	// upload to cloud
+	profile := model.NewProfileFromJson(opt.GetProfile())
+	bucket := profile.SnapshotProperties.Topology.Bucket
+	if len(bucket) != 0 {
+		updateMetadata, err := d.uploadSnapshotToCloud(opt, bucket, mgr)
+		if err != nil {
+			// rollback
+			//d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), mgr)
+			return nil, err
+		}
+		metadata = utils.MergeStringMaps(metadata, updateMetadata)
+	}
+
 	log.Infof("Create snapshot (name:%s, id:%s, volID:%s) success",
 		opt.GetName(), opt.GetId(), opt.GetVolumeId())
-
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -343,10 +548,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		Description: opt.GetDescription(),
 		VolumeId:    opt.GetVolumeId(),
 		Size:        opt.GetSize(),
-		Metadata: map[string]string{
-			KPoolName:  poolName,
-			KImageName: EncodeName(opt.GetVolumeId()),
-		},
+		Metadata:    metadata,
 	}, nil
 
 }
@@ -355,21 +557,22 @@ func (d *Driver) PullSnapshot(snapID string) (*model.VolumeSnapshotSpec, error) 
 	return nil, fmt.Errorf("Ceph PullSnapshot has not implemented yet.")
 }
 
-func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
-	mgr := NewSrcMgr(d.conf)
-	defer mgr.destroy()
+func (d *Driver) deleteSnapshot(poolName, volumeId, snapshotId string, mgr *SrcMgr) error {
+	if mgr == nil {
+		mgr = NewSrcMgr(d.conf)
+		defer mgr.destroy()
+	}
 
-	poolName := opt.GetMetadata()[KPoolName]
-	img, err := mgr.GetImage(poolName, EncodeName(opt.GetVolumeId()), EncodeName(opt.GetId()))
+	img, err := mgr.GetImage(poolName, volumeId, snapshotId)
 	if err == rbd.RbdErrorNotFound {
-		log.Warningf("Specified snapshot (%s) does not exist, ignore it", opt.GetId())
+		log.Warningf("Specified snapshot (%s) does not exist, ignore it", snapshotId)
 		return nil
 	}
 	if err != nil {
 		return err
 	}
 
-	snap := img.GetSnapshot(EncodeName(opt.GetId()))
+	snap := img.GetSnapshot(EncodeName(snapshotId))
 	if ok, _ := snap.IsProtected(); ok {
 		if err := snap.Unprotect(); err != nil {
 			log.Errorf("unprotect failed, %v", err)
@@ -383,8 +586,19 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		return err
 	}
 
-	log.Infof("Delete snapshot (%s) success", opt.GetId())
+	log.Infof("Delete snapshot (%s) success", snapshotId)
 	return nil
+}
+
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+	if bucket, ok := opt.Metadata["bucket"]; ok {
+		log.Info("remove snapshot in cloud :", bucket)
+		if err := d.deleteUploadedSnapshot(opt.Metadata["backupId"], bucket); err != nil {
+			return err
+		}
+	}
+	poolName := opt.GetMetadata()[KPoolName]
+	return d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), nil)
 }
 
 type TotalStats struct {
