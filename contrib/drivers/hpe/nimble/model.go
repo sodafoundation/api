@@ -61,8 +61,18 @@ type StoragePoolRespData struct {
 }
 
 type ArrayList struct {
-	ArrayId   string `json:"array_list"`
-	ArrayName string `json:"array_name"`
+	Id                       string `json:"id"`
+	ArrayId                  string `json:"array_id"`
+	Name                     string `json:"name"`
+	ArrayName                string `json:"array_name"`
+	Usage                    int64  `json:"usage"`
+	UsageValid               bool   `json:"usage_valid"`
+	Migrate                  string `json:"migrate"`
+	EvacUsage                int64  `json:"evac_usage"`
+	EvacTime                 int64  `json:"evac_time"`
+	SnapUsageCompressedBytes int64  `json:"snap_usage_compressed_bytes"`
+	UsableCapacity           int64  `json:"usable_capacity"`
+	VolUsageCompressedBytes  int64  `json:"vol_usage_compressed_bytes"`
 }
 
 type AuthOptions struct {
