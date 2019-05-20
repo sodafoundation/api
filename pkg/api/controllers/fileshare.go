@@ -113,15 +113,20 @@ func (f *FileSharePortal) CreateFileShare() {
 	var err error
 	if fileshare.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(ctx)
+		prf, err = db.C.GetDefaultProfileFileShare(ctx)
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 		fileshare.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
-	}
-	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		f.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 	}
 
 	// NOTE: It will create a file share entry into the database and initialize its status
@@ -322,6 +327,7 @@ func (f *FileSharePortal) DeleteFileShare() {
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
 	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete file share failed: %v", err.Error())

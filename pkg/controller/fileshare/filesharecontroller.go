@@ -56,12 +56,16 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 		return nil, err
 	}
 
+	log.V(5).Infof("dock create fleshare:  connected to dock endpoint : %+v", c.DockInfo.Endpoint)
+
 	response, err := c.Client.CreateFileShare(context.Background(), (opt))
 	if err != nil {
 		log.Error("create file share failed in file share controller:", err)
 		return nil, err
 	}
 	defer c.Client.Close()
+
+	log.V(5).Infof("dock create fleshare:  Sent to driver : %+v", c.DockInfo.DriverName)
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
