@@ -88,7 +88,11 @@ func NewClient(opt *AuthOptions) (*NimbleClient, error) {
 		insecure:  opt.Insecure,
 	}
 	err := c.login()
-	return c, err
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 func (c *NimbleClient) login() error {
