@@ -29,6 +29,11 @@ STACK_HOME=${STACK_HOME:-/opt/stack}
 STACK_BRANCH=${STACK_BRANCH:-stable/queens}
 DEV_STACK_DIR=$STACK_HOME/devstack
 
+# Multi-Cloud service name in keystone
+MULTICLOUD_SERVER_NAME=${MULTICLOUD_SERVER_NAME:-multicloud}
+# Multi-cloud 
+MULTICLOUD_VERSION=${MULTICLOUD_VERSION:-v1}
+
 osds::keystone::create_user(){
     if id ${STACK_USER_NAME} &> /dev/null; then
         return
@@ -69,6 +74,8 @@ chown stack:stack $DEV_STACK_LOCAL_CONF
 
 osds::keystone::create_user_and_endpoint(){
     . $DEV_STACK_DIR/openrc admin admin
+    
+    # for_hotpot
     openstack user create --domain default --password $STACK_PASSWORD $OPENSDS_SERVER_NAME
     openstack role add --project service --user opensds admin
     openstack group create service
@@ -79,6 +86,15 @@ osds::keystone::create_user_and_endpoint(){
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION public http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION internal http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
     openstack endpoint create --region RegionOne opensds$OPENSDS_VERSION admin http://$HOST_IP:50040/$OPENSDS_VERSION/%\(tenant_id\)s
+    
+    # for_gelato
+    openstack user create --domain default --password "$STACK_PASSWORD" "$MULTICLOUD_SERVER_NAME"
+    openstack role add --project service --user "$MULTICLOUD_SERVER_NAME" admin
+    openstack group add user service "$MULTICLOUD_SERVER_NAME"
+    openstack service create --name "multicloud$MULTICLOUD_VERSION" --description "Multi-cloud Block Storage" "multicloud$MULTICLOUD_VERSION"
+    openstack endpoint create --region RegionOne "multicloud$MULTICLOUD_VERSION" public "http://$HOST_IP:8089/$MULTICLOUD_VERSION/%(tenant_id)s"
+    openstack endpoint create --region RegionOne "multicloud$MULTICLOUD_VERSION" internal "http://$HOST_IP:8089/$MULTICLOUD_VERSION/%(tenant_id)s"
+    openstack endpoint create --region RegionOne "multicloud$MULTICLOUD_VERSION" admin "http://$HOST_IP:8089/$MULTICLOUD_VERSION/%(tenant_id)s"
 }
 
 osds::keystone::delete_redundancy_data() {
