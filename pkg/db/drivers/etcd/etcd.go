@@ -508,6 +508,9 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	result.ExportLocations = fshare.ExportLocations
+	result.Status = fshare.Status
+	result.Metadata = fshare.Metadata
 
 	body, err := json.Marshal(result)
 	if err != nil {
@@ -555,7 +558,6 @@ func (c *Client) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
 	}
 	return nil
 }
-
 
 // DeleteFileShare
 func (c *Client) DeleteFileShare(ctx *c.Context, fileshareID string) error {
@@ -1382,7 +1384,7 @@ func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
 	}
 
 	for _, profile := range profiles {
-		if profile.Name == "default" && profile.StorageType == "block"{
+		if profile.Name == "default" && profile.StorageType == "block" {
 			return profile, nil
 		}
 	}

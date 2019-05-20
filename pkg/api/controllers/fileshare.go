@@ -167,6 +167,7 @@ func (f *FileSharePortal) CreateFileShare() {
 		AvailabilityZone: result.AvailabilityZone,
 		Profile:          prf.ToJson(),
 		PoolId:           result.PoolId,
+		ExportLocations:  result.ExportLocations,
 		Metadata:         result.Metadata,
 		Context:          ctx.ToJson(),
 	}
