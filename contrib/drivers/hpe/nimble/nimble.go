@@ -209,10 +209,10 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		poolId := opt.GetMetadata()["PoolId"]
 		initiatorName := opt.GetHostInfo().Initiator
 		if initiatorName == "" || opt.GetHostInfo().Ip == "" {
-			if opt.GetAccessProtocol() == ISCSIProtocol{
+			if opt.GetAccessProtocol() == ISCSIProtocol {
 				return nil, fmt.Errorf("%v: pls set initiator IQN and IP address for %v protocol.\n", DriverName, opt.GetAccessProtocol())
 			}
-			if opt.GetAccessProtocol() == FCProtocol{
+			if opt.GetAccessProtocol() == FCProtocol {
 				return nil, fmt.Errorf("%v: pls set initiator WWPN for %v protocol.\n", DriverName, opt.GetAccessProtocol())
 			}
 		}

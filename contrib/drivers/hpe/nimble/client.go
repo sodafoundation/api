@@ -80,11 +80,11 @@ func unset(strings []string, search string) []string {
 }
 
 func NewClient(opt *AuthOptions) (*NimbleClient, error) {
-	endpoints := strings.Split(opt.Endpoints, ",")
+	edp := strings.Split(opt.Endpoints, ",")
 	c := &NimbleClient{
 		user:      opt.Username,
 		passwd:    opt.Password,
-		endpoints: endpoints,
+		endpoints: edp,
 		insecure:  opt.Insecure,
 	}
 	err := c.login()
@@ -100,9 +100,9 @@ func (c *NimbleClient) login() error {
 	}
 	var tokens []string
 	var errs []error
-	endpoints := c.endpoints
+	edp := c.endpoints
 
-	for _, ep := range endpoints {
+	for _, ep := range edp {
 		url := ep + tokenUrlPath
 		auth := &AuthRespBody{}
 		token := ""
