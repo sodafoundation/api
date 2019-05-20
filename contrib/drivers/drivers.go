@@ -167,6 +167,9 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	case config.LVMDriverType:
 		d = &lvm.MetricDriver{}
 		break
+	case config.CephDriverType:
+		d = &ceph.MetricDriver{}
+		break
 	default:
 		//d = &sample.Driver{}
 		break

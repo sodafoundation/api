@@ -495,6 +495,8 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 
 	log.Info("Dock server receive create file share request, vr =", opt)
 
+	log.V(5).Infof("Dock server create fleshare:  sent to Driver %+v", opt.GetDriverName())
+
 	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
 	if err != nil {
 		log.Error("when create file share in dock module:", err)
