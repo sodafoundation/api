@@ -1,25 +1,16 @@
-//    Copyright 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
 //    http://www.apache.org/licenses/LICENSE-2.0
-//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package nfs
 
@@ -55,8 +46,6 @@ const (
 	KFileshareID   = "nfsFileshareID"
 )
 
-// NFSDriver
-type NFSDriver struct{}
 type NFSConfig struct {
 	TgtBindIp      string                    `yaml:"tgtBindIp"`
 	TgtConfDir     string                    `yaml:"tgtConfDir"`
@@ -103,7 +92,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 	var lvPath = path.Join("/dev", vg, name)
 
 	if err := d.cli.CreateDirectory(dirName); err != nil {
-		log.Error("Failed to create a directory:", err)
+		log.Error("failed to create a directory:", err)
 		return nil, err
 	}
 
@@ -115,20 +104,20 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		// using return value as the error flag
 		if fshare == nil {
 			if err := d.cli.Delete(name, vg); err != nil {
-				log.Error("Failed to remove volume fileshare:", err)
+				log.Error("failed to remove volume fileshare:", err)
 			}
 		}
 	}()
 
 	// Crete fileshare on this path
 	if err := d.cli.CreateFileShare(lvPath); err != nil {
-		log.Error("Failed to create filesystem logic volume:", err)
+		log.Error("failed to create filesystem logic volume:", err)
 		return nil, err
 	}
 
 	// mount the volume to directory
 	if err := d.cli.Mount(lvPath, dirName); err != nil {
-		log.Error("Failed to mount a directory:", err)
+		log.Error("failed to mount a directory:", err)
 		return nil, err
 	}
 	// get export location of fileshare
@@ -136,7 +125,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 	location = []string{d.cli.GetExportLocation(name, server)}
 	fmt.Println("locations :", location)
 	if len(location) == 0 {
-		log.Error("Failed to get Export location:", err)
+		log.Error("failed to get exportlocation:", err)
 		return nil, err
 	}
 
@@ -201,12 +190,12 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.Fil
 
 	// unmount the volume to directory
 	if err := d.cli.UnMount(dirName); err != nil {
-		log.Error("Failed to mount a directory:", err)
+		log.Error("failed to mount a directory:", err)
 		return fshare, err
 	}
 	// dlete the actual fileshare from device
 	if err := d.cli.Delete(fname, lvPath); err != nil {
-		log.Error("Failed to remove logic volume:", err)
+		log.Error("failed to remove logic volume:", err)
 		return fshare, err
 	}
 

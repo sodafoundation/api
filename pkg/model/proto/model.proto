@@ -728,6 +728,8 @@ message CreateFileShareOpts {
     string context = 12;
     // The Serialized profile
     string profile = 13;
+    // The ExportLocations
+    repeated string exportlocations = 14;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
@@ -745,6 +747,10 @@ message DeleteFileShareOpts {
     string context = 6;
     // The Serialized profile
     string profile = 7;
+    // The name of fileShare
+    string name = 8;
+    // The name of pool
+    string poolname = 9;
 }
 
 // Generic response, it return:

@@ -1,16 +1,16 @@
-//    Copyright 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
 //    http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package nfs
 
@@ -50,14 +50,13 @@ func sizeStr(size int64) string {
 func (c *Cli) GetExportLocation(share_name, ip string) string {
 	server := net.ParseIP(ip)
 	if server == nil {
-		glog.Errorf("This is not a valid ip:")
+		glog.Errorf("this is not a valid ip:")
 		return ""
 	}
 
 	var exportLocation string
 	sharePath := path.Join("var/", share_name)
 	exportLocation = fmt.Sprintf("%s:/%s", server, strings.Replace(sharePath, "-", "_", -1))
-	fmt.Println("export_location=:", exportLocation)
 	return exportLocation
 }
 
@@ -152,7 +151,7 @@ func (c *Cli) LvIsActivate(name, vg string) bool {
 	}
 	out, err := c.execute(cmd...)
 	if err != nil {
-		glog.Error("Failed to display logic volume:", err)
+		glog.Error("failed to display logic volume:", err)
 		return false
 	}
 	out = strings.TrimSpace(out)
@@ -172,7 +171,7 @@ func (c *Cli) Delete(name, lvpath string) error {
 	}
 
 	if out, err := c.execute(cmd...); err != nil {
-		glog.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
+		glog.Infof("error reported running lvremove: CMD: %s, RESPONSE: %s",
 			strings.Join(cmd, " "), out)
 		// run_udevadm_settle
 		c.execute("udevadm", "settle")
@@ -192,7 +191,7 @@ func (c *Cli) Delete(name, lvpath string) error {
 		if _, err := c.execute(cmd...); err != nil {
 			return err
 		}
-		glog.Infof("Successfully deleted volume: %s after udev settle.", name)
+		glog.Infof("successfully deleted volume: %s after udev settle.", name)
 	}
 	return nil
 }
