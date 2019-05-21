@@ -6,11 +6,12 @@ package proto
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2670,7 +2671,9 @@ type CreateFileShareOpts struct {
 	// The Context
 	Context string `protobuf:"bytes,12,opt,name=context,proto3" json:"context,omitempty"`
 	// The Serialized profile
-	Profile              string   `protobuf:"bytes,13,opt,name=profile,proto3" json:"profile,omitempty"`
+	Profile string `protobuf:"bytes,13,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The ExportLocations for nfs FileShare
+	ExportLocations      []string `protobuf:"bytes,14,opt,name=ExportLocations,proto3" json:"ExportLocations,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2783,16 +2786,23 @@ func (m *CreateFileShareOpts) GetProfile() string {
 type DeleteFileShareOpts struct {
 	// The uuid of the fileshare, required.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The service level that fileshare belongs to, required.
+	// This item will be replace by profile
+	ProfileId string `protobuf:"bytes,2,opt,name=profileId,proto3" json:"profileId,omitempty"`
 	// The uuid of the pool on which fileshare will be created, required.
 	PoolId string `protobuf:"bytes,3,opt,name=poolId,proto3" json:"poolId,omitempty"`
+	// The name of the file share, required.
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	// The name of the pool on which file share will be created, required.
+	PoolName string `protobuf:"bytes,5,opt,name=poolName,proto3" json:"poolName,omitempty"`
 	// The metadata of the fileshare, optional.
-	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Metadata map[string]string `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// The storage driver type.
-	DriverName string `protobuf:"bytes,5,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	DriverName string `protobuf:"bytes,7,opt,name=driverName,proto3" json:"driverName,omitempty"`
 	// The Context
-	Context string `protobuf:"bytes,6,opt,name=context,proto3" json:"context,omitempty"`
+	Context string `protobuf:"bytes,8,opt,name=context,proto3" json:"context,omitempty"`
 	// The Serialized profile
-	Profile              string   `protobuf:"bytes,7,opt,name=profile,proto3" json:"profile,omitempty"`
+	Profile              string   `protobuf:"bytes,9,opt,name=profile,proto3" json:"profile,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2823,9 +2833,30 @@ func (m *DeleteFileShareOpts) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DeleteFileShareOpts proto.InternalMessageInfo
 
+func (m *DeleteFileShareOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
 func (m *DeleteFileShareOpts) GetId() string {
 	if m != nil {
 		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetProfileId() string {
+	if m != nil {
+		return m.ProfileId
 	}
 	return ""
 }
@@ -2839,8 +2870,11 @@ func (m *DeleteFileShareOpts) GetPoolId() string {
 
 func (m *DeleteFileShareOpts) GetMetadata() map[string]string {
 	if m != nil {
+		fmt.Println("in GetMetadata true")
+		fmt.Println("m.Metadata==:", m.Metadata)
 		return m.Metadata
 	}
+	fmt.Println("in GetMetadata False")
 	return nil
 }
 
