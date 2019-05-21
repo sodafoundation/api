@@ -157,6 +157,12 @@ service FileShareController {
     // Delete a file share
     rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
 
+    // Create a file share snapshot
+    rpc CreateFileShareSnapshot (CreateFileShareSnapshotOpts) returns (GenericResponse){}
+
+    //Delete a file share snapshot
+    rpc DeleteFileShareSnapshot (DeleteFileShareSnapshotOpts) returns (GenericResponse){}
+
 }
 
 service FileShareDock {
@@ -166,6 +172,12 @@ service FileShareDock {
 
     // Delete a file share
     rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
+
+    // Create a file share snapshot
+    rpc CreateFileShareSnapshot (CreateFileShareSnapshotOpts) returns (GenericResponse){}
+
+    //Delete a file share snapshot
+    rpc DeleteFileShareSnapshot (DeleteFileShareSnapshotOpts) returns (GenericResponse){}
 
 }
 
@@ -751,6 +763,44 @@ message DeleteFileShareOpts {
     string name = 8;
     // The name of pool
     string poolname = 9;
+}
+
+// CreateFileShareSnapshotOpts is a structure which indicates all required
+// properties for creating a file share snapshot.
+message CreateFileShareSnapshotOpts {
+    // The uuid of the file share snapshot, optional.
+    string id = 1;
+    // The name of the file share snapshot, required.
+    string name = 2;
+    // The size of the file share that snapshot belongs to, required.
+    int64 size = 3;
+    // The description of the file share snapshot, optional.
+    string description = 4;
+    // The uuid of the file share that snapshot belongs to, required.
+    string fileshareId = 5;
+    // The storage driver type.
+    string driverName = 6;
+    // The Context
+    string context = 7;
+    // The Serialized profile
+    string profile = 8;
+    // The metadata of the fileshare, optional.
+    map<string, string> metadata = 9;
+}
+
+// DeleteFileShareSnapshotOpts is a structure which indicates all required
+// properties for deleting a file share snapshot.
+message DeleteFileShareSnapshotOpts {
+    // The uuid of the file share snapshot, required.
+    string id = 1;
+    // The uuid of the file share that snapshot belongs to, required.
+    string fileshareId = 2;
+    // The storage driver type.
+    string driverName = 3;
+    // The Context
+    string context = 4;
+    // The Serialized profile
+    string profile = 5;
 }
 
 // Generic response, it return:
