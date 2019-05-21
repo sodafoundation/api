@@ -101,9 +101,11 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec, error) {
+func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 
 	//validate metric support list
+	metricsList := []string{ "pool_used_bytes","pool_raw_used_bytes","pool_available_bytes","pool_objects_total","pool_dirty_objects_total","pool_read_total","pool_read_bytes_total","pool_write_total","pool_write_bytes_total"}
+	instanceID :="pool1"
 	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "pool")
 	if supportedMetrics == nil {
 		log.Infof("no metrics found in the  supported metric list")

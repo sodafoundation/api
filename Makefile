@@ -40,10 +40,10 @@ osdslet: prebuild
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
 osdsapiserver: prebuild
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+	go build -ldflags '-w -s' -gcflags "all=-N -l" -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
 osdsctl: prebuild
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+	go build -ldflags '-w -s' -gcflags "all=-N -l" -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
 metricexporter: prebuild
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/pkg/controller/metrics/exporters/lvm_exporter

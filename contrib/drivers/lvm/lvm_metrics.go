@@ -115,7 +115,7 @@ func getMetricToUnitMap() map[string]string {
 // 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
 // 	metricList-> Posted metric list
 //	supportedMetrics -> list of supported metrics
-func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceType string) (supportedMetrics []string, err error) {
+func (d *MetricDriver) getMetricList(resourceType string) (supportedMetrics []string, err error) {
 	var configs Configs
 
 	//Read supported metric list from yaml config
@@ -131,17 +131,15 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 			switch resourceType {
 			//ToDo: Other Cases needs to be added
 			case "volume", "disk":
-				for _, metricName := range metricList {
-					if metricInMetrics(metricName, resources.Metrics) {
-						supportedMetrics = append(supportedMetrics, metricName)
 
-					} else {
-						log.Infof("metric:%s is not in the supported list", metricName)
+					for _,m := range resources.Metrics {
+						supportedMetrics = append(supportedMetrics, m)
+
 					}
 				}
 			}
 		}
-	}
+
 	return supportedMetrics, nil
 }
 
@@ -149,20 +147,20 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 //	metricsList-> posted metric list
 //	instanceID -> posted instanceID
 //	metricArray	-> the array of metrics to be returned
-func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) ([]*model.MetricSpec, error) {
+func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 
 	// get Metrics to unit map
 	metricToUnitMap := getMetricToUnitMap()
 	//validate metric support list
-	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "volume")
+	supportedMetrics, err := d.getMetricList( "volume")
 	if supportedMetrics == nil {
 		log.Infof("no metrics found in the  supported metric list")
 	}
 	volumeList, err := d.cli.DiscoverVolumes()
-	fmt.Print(volumeList)
+
 	DiskList, err := d.cli.DiscoverDisks()
-	fmt.Print(DiskList)
-	metricMap, labelMap, err := d.cli.CollectMetrics(metricsList)
+
+	metricMap, labelMap, err := d.cli.CollectMetrics(supportedMetrics)
 
 	var tempMetricArray []*model.MetricSpec
 	// fill volume metrics
@@ -171,7 +169,7 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 		thismetricMAp := metricMap[convrtedVolID]
 		thisLabelMap := labelMap[convrtedVolID]
 		fmt.Println(thismetricMAp)
-		for _, element := range metricsList {
+		for _, element := range supportedMetrics {
 			val, _ := strconv.ParseFloat(thismetricMAp[element], 64)
 			metricValue := &model.Metric{
 				Timestamp: getCurrentUnixTimestamp(),
@@ -203,7 +201,7 @@ func (d *MetricDriver) CollectMetrics(metricsList []string, instanceID string) (
 		thismetricMAp := metricMap[convrtedVolID]
 		thisLabelMap := labelMap[convrtedVolID]
 		fmt.Println(thismetricMAp)
-		for _, element := range metricsList {
+		for _, element := range supportedMetrics {
 			val, _ := strconv.ParseFloat(thismetricMAp[element], 64)
 			metricValue := &model.Metric{
 				Timestamp: getCurrentUnixTimestamp(),

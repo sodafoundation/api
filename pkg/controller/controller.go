@@ -989,16 +989,22 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	log.V(5).Info("in controller collect metrics methods")
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
-
+	dockSpec, err := db.C.ListDocks(ctx)
+	for _,d:= range dockSpec{
+		if d.DriverName=="lvm"{
+			fmt.Println("lvm match is found")
+		}
+	}
+	fmt.Print("Dock Spec",dockSpec[0])
 	if err != nil {
 		log.Errorf("get volume by id %s failed in CollectMetrics method: %s", opt.InstanceId, err.Error())
 		return pb.GenericResponseError(err), err
 	}
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	dockInfo, err := db.C.GetDock(ctx,dockSpec[0].BaseModel.Id)
+	fmt.Println("Dock Info:",dockInfo)
 	if err != nil {
-		log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
+		//log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
 		return pb.GenericResponseError(err), err
 
 	}
@@ -1007,6 +1013,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.metricsController.CollectMetrics(opt)
+	fmt.Println("Collected metrics",result)
 	if err != nil {
 		log.Errorf("collectMetrics failed: %s", err.Error())
 
