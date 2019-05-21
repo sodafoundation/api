@@ -181,3 +181,58 @@ func TestUpdateFileShareSnapshot(t *testing.T) {
 		return
 	}
 }
+
+func TestCreateFileShareAcl(t *testing.T) {
+	fileShareAcl, err := fakeShareMgr.CreateFileShareAcl(&model.FileShareAclSpec{})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(fileShareAcl, &SampleFileSharesAcl[0]) {
+		t.Errorf("Expected %+v, got %+v", &SampleFileSharesAcl[0], fileShareAcl)
+		return
+	}
+}
+
+func TestDeleteFileShareAcl(t *testing.T) {
+	var ShareAclID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+	err := fakeShareMgr.DeleteFileShareAcl(ShareAclID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestGetFileShareAcl(t *testing.T) {
+	var ShareAclID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+	expected := &SampleFileSharesAcl[0]
+
+	shareAcl, err := fakeShareMgr.GetFileShareAcl(ShareAclID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(shareAcl, expected) {
+		t.Errorf("Expected %v, got %v", expected, shareAcl)
+		return
+	}
+}
+
+func TestListFileShareAcl(t *testing.T) {
+	var expected []*model.FileShareAclSpec
+	expected = append(expected, &SampleFileSharesAcl[0])
+	expected = append(expected, &SampleFileSharesAcl[1])
+	sharesAcl, err := fakeShareMgr.ListFileSharesAcl(map[string]string{"limit": "3", "offset": "4"})
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(sharesAcl, expected) {
+		t.Errorf("Expected %v, got %v", expected, sharesAcl)
+		return
+	}
+}

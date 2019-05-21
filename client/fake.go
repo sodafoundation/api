@@ -396,6 +396,10 @@ func (*fakeFileShareReceiver) Recv(
 			if err := json.Unmarshal([]byte(ByteFileShareSnapshot), out); err != nil {
 				return err
 			}
+		case *model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileSharesAcl), out); err != nil {
+				return err
+			}
 		default:
 			return errors.New("output format not supported")
 		}
@@ -415,6 +419,14 @@ func (*fakeFileShareReceiver) Recv(
 			}
 		case *[]*model.FileShareSnapshotSpec:
 			if err := json.Unmarshal([]byte(ByteFileShareSnapshots), out); err != nil {
+				return err
+			}
+		case *model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileSharesAcl), out); err != nil {
+				return err
+			}
+		case *[]*model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileSharesAcls), out); err != nil {
 				return err
 			}
 		default:

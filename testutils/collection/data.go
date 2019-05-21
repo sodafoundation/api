@@ -682,6 +682,34 @@ var (
 			"status": "available"
 		}
 	]`
+
+	ByteFileSharesAcl = `{
+		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		"createdAt": "",
+		"updatedAt": "",
+		"AccessCapability": null,
+		"AccessTo": null,
+		"description": "This is a sample Acl for testing"
+	}`
+
+	ByteFileSharesAcls = `[
+		{
+			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			"createdAt": "",
+			"updatedAt": "",
+			"AccessCapability": null,
+			"AccessTo": null,
+			"description": "This is a sample Acl for testing"
+		},
+		{
+			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"createdAt": "",
+			"updatedAt": "",
+			"AccessCapability": null,
+			"AccessTo": null,
+			"description": "This is a sample Acl for testing"
+		}
+	]`
 )
 
 // The StringSlice*** variable here is designed for unit test in etcd package.

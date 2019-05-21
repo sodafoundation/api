@@ -31,6 +31,11 @@ type FileShareBuilder *model.FileShareSpec
 // could be discussed if it's better to define an interface.
 type FileShareSnapshotBuilder *model.FileShareSnapshotSpec
 
+// FileShareAclBuilder contains request body of handling a fileshare acl request.
+// Currently it's assigned as the pointer of FileShareAclSpec struct, but it
+// could be discussed if it's better to define an interface.
+type FileShareAclBuilder *model.FileShareAclSpec
+
 // NewFileShareMgr implementation
 func NewFileShareMgr(r Receiver, edp string, tenantID string) *FileShareMgr {
 	return &FileShareMgr{
@@ -193,4 +198,64 @@ func (v *FileShareMgr) UpdateFileShareSnapshot(volID string, body FileShareSnaps
 	}
 
 	return &res, nil
+}
+
+// CreateFileShareAcl implementation
+func (v *FileShareMgr) CreateFileShareAcl(body FileShareAclBuilder) (*model.FileShareAclSpec, error) {
+	var res model.FileShareAclSpec
+
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID)}, "/")
+
+	if err := v.Recv(url, "POST", body, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+// DeleteFileShareAcl implementation
+func (v *FileShareMgr) DeleteFileShareAcl(volID string) error {
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, volID)}, "/")
+
+	return v.Recv(url, "DELETE", nil, nil)
+}
+
+// GetFileShareAcl implementation
+func (v *FileShareMgr) GetFileShareAcl(volID string) (*model.FileShareAclSpec, error) {
+	var res model.FileShareAclSpec
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, volID)}, "/")
+
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+// ListFileSharesAcl implementation
+func (v *FileShareMgr) ListFileSharesAcl(args ...interface{}) ([]*model.FileShareAclSpec, error) {
+	url := strings.Join([]string{
+		v.Endpoint,
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID)}, "/")
+
+	param, err := processListParam(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if param != "" {
+		url += "?" + param
+	}
+
+	var res []*model.FileShareAclSpec
+	if err := v.Recv(url, "GET", nil, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }

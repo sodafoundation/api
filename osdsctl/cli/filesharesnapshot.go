@@ -102,7 +102,7 @@ func init() {
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortKey, "sortKey", "", "id",
 		"the sort key of all requested data. supports id(default), name, description, protocols, shareSize, snapshotSize, status, userid, tenantid, fileshareId")
-	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapID, "id", "", "", "list share snapshot by id")
+	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapID, "id", "", "", "list fileshare snapshot by id")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapName, "name", "", "", "list fileshare snapshot by name")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapDesp, "description", "", "", "list fileshare snapshot by description")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareProtocols, "protocols", "", "", "list fileshare snapshot by protocols")

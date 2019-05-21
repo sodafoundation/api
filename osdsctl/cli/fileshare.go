@@ -96,6 +96,7 @@ func init() {
 	fileShareCommand.AddCommand(fileShareListCommand)
 	fileShareCommand.AddCommand(fileShareUpdateCommand)
 	fileShareCommand.AddCommand(fileShareSnapshotCommand)
+	fileShareCommand.AddCommand(fileShareAclCommand)
 
 	fileShareCreateCommand.Flags().StringVarP(&shareName, "name", "n", "", "the name of the fileshare")
 	fileShareCreateCommand.Flags().StringVarP(&shareDescription, "description", "d", "", "the description of the fileshare")
