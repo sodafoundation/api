@@ -31,7 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -440,7 +440,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			TotalCapacity:    (p.Stats.BytesUsed + p.Stats.MaxAvail) >> sizeShiftBit,
 			FreeCapacity:     p.Stats.MaxAvail >> sizeShiftBit,
 			StorageType:      d.conf.Pool[p.Name].StorageType,
-			Extras:	          d.conf.Pool[p.Name].Extras,
+			Extras:           d.conf.Pool[p.Name].Extras,
 			AvailabilityZone: d.conf.Pool[p.Name].AvailabilityZone,
 			MultiAttach:      d.conf.Pool[p.Name].MultiAttach,
 		}

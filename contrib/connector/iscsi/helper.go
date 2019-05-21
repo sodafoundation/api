@@ -120,14 +120,14 @@ func getInitiator() ([]string, error) {
 }
 
 // Discovery ISCSI Target
-func discovery(portal string) error {
+func discovery(portal string) (string, error) {
 	log.Printf("Discovery portal: %s\n", portal)
-	_, err := connector.ExecCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
+	result, err := connector.ExecCmd("iscsiadm", "-m", "discovery", "-t", "sendtargets", "-p", portal)
 	if err != nil {
 		log.Printf("Error encountered in sendtargets: %v\n", err)
-		return err
+		return "", err
 	}
-	return nil
+	return strings.Replace(result, "\n", "", -1), nil
 }
 
 // Login ISCSI Target
@@ -200,7 +200,7 @@ func parseIscsiConnectInfo(connectInfo map[string]interface{}) (*IscsiConnectorI
 	mapstructure.Decode(connectInfo, &con)
 
 	fmt.Printf("iscsi target portal: %s, target iqn: %s, target lun: %d\n", con.TgtPortal, con.TgtIQN, con.TgtLun)
-	if len(con.TgtPortal) == 0 || len(con.TgtIQN) == 0 || con.TgtLun == 0 {
+	if len(con.TgtPortal) == 0 || con.TgtLun == 0 {
 		return nil, -1, errors.New("iscsi connection data invalid.")
 	}
 
@@ -214,7 +214,7 @@ func parseIscsiConnectInfo(connectInfo map[string]interface{}) (*IscsiConnectorI
 		res, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 		log.Printf("ping result:%v\n", res)
 		if err != nil {
-			log.Printf("ping error:%v\n", res)
+			log.Printf("ping error:%v\n", err)
 			if i == len(con.TgtPortal)-1 {
 				return nil, -1, errors.New("no available iscsi portal.")
 			}
@@ -236,7 +236,16 @@ func connect(connMap map[string]interface{}) (string, error) {
 	log.Println("connmap info: ", connMap)
 	log.Println("conn info is: ", conn)
 	portal := conn.TgtPortal[index]
-	targetiqn := conn.TgtIQN[index]
+
+	var targetiqn string
+	var targetiqnIdx = 1
+	if len(conn.TgtIQN) == 0 {
+		content, _ := discovery(portal)
+		targetiqn = strings.Split(content, " ")[targetiqnIdx]
+	} else {
+		targetiqn = conn.TgtIQN[index]
+	}
+
 	targetlun := strconv.Itoa(conn.TgtLun)
 
 	cmd := "pgrep -f /sbin/iscsid"
@@ -262,7 +271,7 @@ func connect(connMap map[string]interface{}) (string, error) {
 	log.Println("devicepath is ", devicePath)
 
 	// Discovery
-	err = discovery(portal)
+	_, err = discovery(portal)
 	if err != nil {
 		return "", err
 	}
@@ -291,7 +300,15 @@ func disconnect(conn map[string]interface{}) error {
 		return err
 	}
 	portal := iscsiCon.TgtPortal[index]
-	targetiqn := iscsiCon.TgtIQN[index]
+
+	var targetiqn string
+	if len(iscsiCon.TgtIQN) == 0 {
+		content, _ := discovery(portal)
+		targetiqn = strings.Split(content, " ")[1]
+	} else {
+		targetiqn = iscsiCon.TgtIQN[index]
+	}
+
 	cmd := "ls /dev/disk/by-path/ |grep -w " + portal + "|grep -w " + targetiqn + "|wc -l |awk '{if($1>1) print 1; else print 0}'"
 	logoutFlag, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 	if err != nil {

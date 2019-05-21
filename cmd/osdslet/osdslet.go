@@ -25,9 +25,9 @@ import (
 	c "github.com/opensds/opensds/pkg/controller"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
 	"github.com/opensds/opensds/pkg/utils/logs"
-	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func init() {
@@ -38,6 +38,8 @@ func init() {
 	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
 	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
+	flag.StringVar(&CONF.OsdsLet.GrafanaUrl, "grafana-url", CONF.OsdsLet.GrafanaUrl, "Grafana listen endpoint")
+	flag.StringVar(&CONF.OsdsLet.AlertMgrUrl, "alertmgr-url", CONF.OsdsLet.AlertMgrUrl, "Alert manager listen endpoint")
 	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)

@@ -31,6 +31,7 @@ var (
 			},
 			Name:             "default",
 			Description:      "default policy",
+			StorageType:      "block",
 			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
@@ -39,6 +40,7 @@ var (
 			},
 			Name:        "silver",
 			Description: "silver policy",
+			StorageType: "block",
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
@@ -85,6 +87,7 @@ var (
 			},
 			Name:             "sample-pool-01",
 			Description:      "This is the first sample storage pool for testing",
+			StorageType: 	  "block",
 			TotalCapacity:    int64(100),
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -112,6 +115,7 @@ var (
 			},
 			Name:             "sample-pool-02",
 			Description:      "This is the second sample storage pool for testing",
+			StorageType:      "block",
 			TotalCapacity:    int64(200),
 			FreeCapacity:     int64(170),
 			AvailabilityZone: "default",
@@ -162,6 +166,22 @@ var (
 			SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
 		},
 	}
+
+	SampleFileSharesAcl = []model.FileShareAclSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Description: "This is a sample Acl for testing",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Description: "This is a sample Acl for testing",
+		},
+	}
+
 	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -310,14 +330,16 @@ var (
 	ByteProfile = `{
 		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 		"name": "default",
-		"description": "default policy"
+		"description": "default policy",
+		"storageType": "block"
 	}`
 
 	ByteProfiles = `[
 		{
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name": "default",
-			"description": "default policy"
+			"description": "default policy",
+			"storageType": "block"
 		},
 		{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
@@ -371,6 +393,7 @@ var (
 		"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		"name": "sample-pool-01",
 		"description": "This is the first sample storage pool for testing",
+		"storageType": "block",
 		"totalCapacity": 100,
 		"freeCapacity": 90,
 		"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -395,6 +418,7 @@ var (
 			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"name": "sample-pool-01",
 			"description": "This is the first sample storage pool for testing",
+			"storageType": "block",
 			"totalCapacity": 100,
 			"freeCapacity": 90,
 			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -418,6 +442,7 @@ var (
 			"id": "a594b8ac-a103-11e7-985f-d723bcf01b5f",
 			"name": "sample-pool-02",
 			"description": "This is the second sample storage pool for testing",
+			"storageType": "block",
 			"totalCapacity": 200,
 			"freeCapacity": 170,
 			"dockId": "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -668,12 +693,14 @@ var (
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name":        "default",
 			"description": "default policy",
+			"storageType": "block",
 			"customProperties": {}
 		}`,
 		`{
 			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 			"name":        "silver",
 			"description": "silver policy",
+			"storageType": "block",
 			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
@@ -704,6 +731,7 @@ var (
 			"id": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"name":             "sample-pool-01",
 			"description":      "This is the first sample storage pool for testing",
+			"storageType":		"block",
 			"totalCapacity":    100,
 			"freeCapacity":     90,
 			"dockId":           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",

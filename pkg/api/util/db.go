@@ -30,9 +30,38 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
+//function to store filesahreAcl metadata into database
+func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+	if in.UpdatedAt == "" {
+		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Description = in.Description
+
+	in.Type = in.Type
+	in.AccessTo = in.AccessTo
+	in.AccessCapability = in.AccessCapability
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		log.Error("file shareid is not valid: ", err)
+		return nil, err
+	}
+	in.FileShareId = in.FileShareId
+	// Store the fileshare meadata into database.
+	return db.C.CreateFileShareAcl(ctx, in)
+}
+
+// Function to store metadeta of fileshare into database
 func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
@@ -57,7 +86,8 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 
 	in.Name = in.Name
 	in.UserId = ctx.UserId
-	in.Status = model.FileShareAvailable
+	in.Status = model.FileShareCreating
+	in.ExportLocations = in.ExportLocations
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShare(ctx, in)
 }

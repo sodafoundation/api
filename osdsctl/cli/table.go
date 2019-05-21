@@ -43,7 +43,7 @@ func JsonFormatter(v interface{}) string {
 	enc := json.NewEncoder(buf)
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", strings.Repeat(" ", 2))
-        enc.Encode(v)
+	enc.Encode(v)
 	return buf.String()
 }
 

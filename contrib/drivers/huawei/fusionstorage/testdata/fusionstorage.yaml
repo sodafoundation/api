@@ -6,6 +6,8 @@ authOptions:
   # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
   PwdEncrypter: "aes"
   url: "https://8.46.195.74:28443"
+  # Currently only supports versions 6.3 and 8.0
+  version: 6.3
 
   fmIp: 8.46.195.74
   fsaIp:

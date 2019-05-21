@@ -358,10 +358,10 @@ spec:
       containers:
       - name: authchecker
         securityContext:
-            privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
         image: opensdsio/opensds-authchecker:latest
         imagePullPolicy: IfNotPresent
         ports:

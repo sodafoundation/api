@@ -47,4 +47,13 @@ const (
 	// OpensdsDockBindEndpoint indicates the bind endpoint which the opensds
 	// dock grpc server would listen to.
 	OpensdsDockBindEndpoint = "0.0.0.0:50050"
+
+	//Storage type for profile
+	Block = "block"
+	File  = "file"
+
+	//StorageAccessCApability enum constants for profile
+	Read    = "Read"
+	Write   = "Write"
+	Execute = "Execute"
 )

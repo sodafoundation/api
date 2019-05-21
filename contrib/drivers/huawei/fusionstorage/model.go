@@ -14,73 +14,95 @@
 
 package fusionstorage
 
-type requesData struct {
+import (
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
+)
+
+type Driver struct {
+	Client *FsClient
+	Conf   *Config
+}
+
+type AuthOptions struct {
+	Username        string   `yaml:"username"`
+	Password        string   `yaml:"password"`
+	Url             string   `yaml:"url"`
+	FmIp            string   `yaml:"fmIp,omitempty"`
+	FsaIp           []string `yaml:"fsaIp,flow"`
+	PwdEncrypter    string   `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool     `yaml:"EnableEncrypted,omitempty"`
+	Version         string   `json:"version"`
+}
+
+type Config struct {
+	AuthOptions `yaml:"authOptions"`
+	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+}
+
+type RequesData struct {
 	Timeout int         `json:"timeout"`
 	Data    interface{} `json:"data`
 }
 
-type responseResult struct {
+type ResponseResult struct {
 	RespCode int      `json:"result"`
-	Details  []detail `json:"detail"`
+	Details  []Detail `json:"detail"`
 }
 
-type detail struct {
+type Detail struct {
 	Description string `json:"description,omitempty"`
 	ErrorCode   int    `json:"errorCode,omitempty"`
 }
 
-func (r *responseResult) GetDescription() string {
-	for _, v := range r.Details {
-		if v.Description != "" {
-			return v.Description
-		}
-	}
-
-	return ""
-}
-
-func (r *responseResult) GetErrorCode() int {
-	for _, v := range r.Details {
-		if v.ErrorCode != 0 {
-			return v.ErrorCode
-		}
-	}
-
-	return 0
-}
-
-type version struct {
+type Version struct {
 	CurrentVersion string `json:"currentVersion"`
 }
 
-type poolResp struct {
-	Pools []pool `json:"storagePools"`
+type PoolResp struct {
+	Pools []Pool `json:"storagePools"`
 }
 
-type pool struct {
+type Pool struct {
 	PoolId        int   `json:"poolId"`
 	TotalCapacity int64 `json:"totalCapacity"`
 	AllocCapacity int64 `json:"allocatedCapacity"`
 	UsedCapacity  int64 `json:"usedCapacity"`
 }
 
-type hostList struct {
-	HostList []host `json:"hostList"`
+type HostList struct {
+	HostList []Host `json:"hostList"`
 }
 
-type host struct {
+type Host struct {
 	HostName string `json:"hostName"`
 }
 
-type portHostMap struct {
+type PortHostMap struct {
 	PortHostMap map[string][]string `json:"portHostMap"`
 }
 
-type hostLunList struct {
-	LunList []lunList `json:"hostLunList"`
+type HostLunList struct {
+	LunList []LunList `json:"hostLunList"`
 }
 
-type lunList struct {
+type LunList struct {
 	Id   int    `json:"lunId"`
 	Name string `json:"lunName"`
+}
+
+type IscsiPortal struct {
+	NodeResultList []NodeResult `json:"nodeResultList"`
+}
+
+type NodeResult struct {
+	PortalList []Portal `json:"iscsiPortalList"`
+}
+
+type Portal struct {
+	IscsiPortal string `json:"iscsiPortal"`
+	Status      string `json:"iscsiStatus"`
+}
+
+type DeviceVersion struct {
+	Version string `json:"version"`
 }

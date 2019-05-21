@@ -24,6 +24,7 @@ package drivers
 import (
 	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/hpe/nimble"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
@@ -31,7 +32,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"github.com/opensds/opensds/testutils/driver"
+	sample "github.com/opensds/opensds/testutils/driver"
 )
 
 // VolumeDriver is an interface for exposing some operations of different volume
@@ -99,6 +100,9 @@ func Init(resourceType string) VolumeDriver {
 		break
 	case config.HuaweiFusionStorageDriverType:
 		d = &fusionstorage.Driver{}
+	case config.HpeNimbleDriverType:
+		d = &nimble.Driver{}
+		break
 	default:
 		d = &sample.Driver{}
 		break
@@ -121,10 +125,26 @@ func Clean(d VolumeDriver) VolumeDriver {
 		break
 	case *fusionstorage.Driver:
 		break
+	case *nimble.Driver:
+		break
 	default:
 		break
 	}
 	d.Unset()
+	d = nil
+
+	return d
+}
+
+func CleanMetricDriver(d MetricDriver) MetricDriver {
+	// Execute different clean operations according to the MetricDriver type.
+	switch d.(type) {
+	case *lvm.MetricDriver:
+		break
+	default:
+		break
+	}
+	_ = d.Teardown()
 	d = nil
 
 	return d
@@ -146,6 +166,9 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	switch resourceType {
 	case config.LVMDriverType:
 		d = &lvm.MetricDriver{}
+		break
+	case config.CephDriverType:
+		d = &ceph.MetricDriver{}
 		break
 	default:
 		//d = &sample.Driver{}
