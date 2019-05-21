@@ -21,8 +21,6 @@ plugin, just modify Init() and Clean() method.
 package filesharedrivers
 
 import (
-	"fmt"
-
 	nfs "github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -45,7 +43,6 @@ type FileShareDriver interface {
 
 // Init
 func Init(resourceType string) FileShareDriver {
-	fmt.Println("resourceType ...", resourceType)
 	var f FileShareDriver
 	switch resourceType {
 	case config.NFSDriverType:
