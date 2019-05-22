@@ -495,6 +495,8 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 
 	log.Info("Dock server receive create file share request, vr =", opt)
 
+	log.V(5).Infof("Dock server create fleshare:  sent to Driver %+v", opt.GetDriverName())
+
 	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
 	if err != nil {
 		log.Error("when create file share in dock module:", err)
@@ -518,6 +520,38 @@ func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileSha
 		return pb.GenericResponseError(err), err
 	}
 
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(nil), nil
+}
+
+// CreateFileShareSnapshot implements pb.DockServer.CreateFileShareSnapshot
+func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.CreateFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive create file share snapshot request, vr =", opt)
+
+	snp, err := ds.FileShareDriver.CreateFileShareSnapshot(opt)
+	if err != nil {
+		log.Error("error occurred in dock module when create snapshot:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(snp), nil
+}
+
+func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive delete file share snapshot request, vr =", opt)
+
+	if _, err := ds.FileShareDriver.DeleteFileShareSnapshot(opt); err != nil {
+		log.Error("error occurred in dock module when delete snapshot:", err)
+		return pb.GenericResponseError(err), err
+	}
 	// TODO: maybe need to update status in DB.
 	return pb.GenericResponseResult(nil), nil
 }
