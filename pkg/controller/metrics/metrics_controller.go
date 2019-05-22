@@ -302,8 +302,10 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 		return nil, err
 	}
 
+	log.Infoln("send the metrics to the registered adapters")
 	// send the metrics to the registered adapters
 	for _, metricSpecPtr := range res {
+		logMetricSpec(metricSpecPtr)
 		adapters.SendMetricToRegisteredSenders(metricSpecPtr)
 	}
 
@@ -322,4 +324,23 @@ func (c *controller) GetUrls() (*map[string]string, error) {
 
 	return &res, nil
 
+}
+
+func logMetricSpec(spec *model.MetricSpec) {
+	log.Infoln("Name - " + spec.Name)
+	log.Infoln("Labels - ")
+	for k, v := range spec.Labels {
+		log.Infof("\t %s=%s \n", k, v)
+	}
+	log.Infof("\nAggrType - %s", spec.AggrType)
+	log.Infof("\nComponent - %s", spec.Component)
+	log.Infof("\nInstanceName - %s", spec.InstanceName)
+	log.Infof("\nJob - %s", spec.Job)
+	log.Infof("\nUnit - %s", spec.Unit)
+	log.Infof("\nInstanceID - %s", spec.InstanceID)
+	log.Infof("\nMetricValues - ")
+	for _, ms := range spec.MetricValues {
+		log.Infof("\n\t value = %v", ms.Value)
+		log.Infof("\n\t ts = %v", ms.Timestamp)
+	}
 }
