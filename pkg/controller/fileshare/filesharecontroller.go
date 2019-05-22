@@ -34,8 +34,15 @@ import (
 // controllers.
 type Controller interface {
 	SetDock(dockInfo *model.DockSpec)
+
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
+
 	DeleteFileShare(opt *pb.DeleteFileShareOpts) error
+
+	CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
+
+	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error
+
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -56,12 +63,16 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 		return nil, err
 	}
 
+	log.V(5).Infof("dock create fleshare:  connected to dock endpoint : %+v", c.DockInfo.Endpoint)
+
 	response, err := c.Client.CreateFileShare(context.Background(), (opt))
 	if err != nil {
 		log.Error("create file share failed in file share controller:", err)
 		return nil, err
 	}
 	defer c.Client.Close()
+
+	log.V(5).Infof("dock create fleshare:  Sent to driver : %+v", c.DockInfo.DriverName)
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -101,4 +112,52 @@ func (c *controller) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 
 func (c *controller) SetDock(dockInfo *model.DockSpec) {
 	c.DockInfo = dockInfo
+}
+
+func (c *controller) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("when connecting dock client:", err)
+		return nil, err
+	}
+
+	response, err := c.Client.CreateFileShareSnapshot(context.Background(), opt)
+	if err != nil {
+		log.Error("create file share snapshot failed in file share controller:", err)
+		return nil, err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return nil,
+			fmt.Errorf("failed to create file share snapshot in file share controller, code: %v, message: %v",
+				errorMsg.GetCode(), errorMsg.GetDescription())
+	}
+
+	var snp = &model.FileShareSnapshotSpec{}
+	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), snp); err != nil {
+		log.Error("create file share snapshot failed in file share controller:", err)
+		return nil, err
+	}
+
+	return snp, nil
+}
+
+func (c *controller) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
+	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
+		log.Error("when connecting dock client:", err)
+		return err
+	}
+
+	response, err := c.Client.DeleteFileShareSnapshot(context.Background(), opt)
+	if err != nil {
+		log.Error("delete file share snapshot failed in file share controller:", err)
+		return err
+	}
+	defer c.Client.Close()
+
+	if errorMsg := response.GetError(); errorMsg != nil {
+		return errors.New(errorMsg.GetDescription())
+	}
+
+	return nil
 }

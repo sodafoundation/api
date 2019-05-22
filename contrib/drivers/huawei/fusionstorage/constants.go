@@ -15,18 +15,18 @@
 package fusionstorage
 
 const (
-	BasicURI                   = "/dsware/service/"
-	CallTimeout                = 50
-	LoginSocketTimeout         = 32
-	UnitGiShiftBit             = 10
-	DefaultAZ                  = "default"
-	NamePrefix                 = "opensds"
-	LunId                      = "lunId"
-	ConnectorType              = "connectorType"
-	FusionstorageIscsi         = "fusionstorage_iscsi"
-	InitiatorNotExistErrorCode = "32155103"
-	VolumeNotExistErrorCode    = "32150005"
-	CmdBin                     = "fsc_cli"
-	MaxRetryNode               = 3
-	DefaultConfPath            = "/etc/opensds/driver/fusionstorage.yaml"
+	BasicURI                           = "/dsware/service/"
+	UnitGiShiftBit                     = 10
+	DefaultAZ                          = "default"
+	NamePrefix                         = "opensds"
+	LunId                              = "lunId"
+	FusionstorageIscsi                 = "fusionstorage_iscsi"
+	InitiatorNotExistErrorCodeVersion6 = "32155103"
+	InitiatorNotExistErrorCodeVersion8 = "155103"
+	VolumeAlreadyInHostErrorCode       = "157001"
+	CmdBin                             = "fsc_cli"
+	DefaultConfPath                    = "/etc/opensds/driver/fusionstorage.yaml"
+	ClientVersion6_3                   = "6.3"
+	ClientVersion8_0                   = "8.0"
+	MaxRetry                           = 3
 )

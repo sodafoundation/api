@@ -24,6 +24,7 @@ package drivers
 import (
 	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/hpe/nimble"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
@@ -99,6 +100,9 @@ func Init(resourceType string) VolumeDriver {
 		break
 	case config.HuaweiFusionStorageDriverType:
 		d = &fusionstorage.Driver{}
+	case config.HpeNimbleDriverType:
+		d = &nimble.Driver{}
+		break
 	default:
 		d = &sample.Driver{}
 		break
@@ -120,6 +124,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *dorado.Driver:
 		break
 	case *fusionstorage.Driver:
+		break
+	case *nimble.Driver:
 		break
 	default:
 		break
@@ -160,6 +166,9 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	switch resourceType {
 	case config.LVMDriverType:
 		d = &lvm.MetricDriver{}
+		break
+	case config.CephDriverType:
+		d = &ceph.MetricDriver{}
 		break
 	default:
 		//d = &sample.Driver{}

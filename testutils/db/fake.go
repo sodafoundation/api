@@ -282,6 +282,17 @@ func (fc *FakeDbClient) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, e
 	return nil, errors.New("Can't find default profile resource!")
 }
 
+// GetDefaultProfileFileShare
+func (fc *FakeDbClient) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
+	for _, profile := range SampleProfiles {
+		if profile.Name == "default" && profile.StorageType == "file" {
+			return &profile, nil
+		}
+	}
+
+	return nil, errors.New("Can't find default profile resource!")
+}
+
 // ListProfiles
 func (fc *FakeDbClient) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	var prfs []*model.ProfileSpec

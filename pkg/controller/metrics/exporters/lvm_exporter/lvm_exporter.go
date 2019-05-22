@@ -28,7 +28,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const DefaultConfigFile = "resources.yaml"
+const DefaultConfigFile = "/etc/opensds/metrics/lvm.yaml"
+const DefaultPort = "8080"
 
 // struct for lvm  collector that contains pointers
 // to prometheus descriptors for each metric we expose.
@@ -60,19 +61,19 @@ func newLvmCollector() *lvmCollector {
 			"Shows IOPS",
 			labelKeys, nil,
 		),
-		VolumeReadThroughput: prometheus.NewDesc("lvm_volume_readThroughput_kbs",
+		VolumeReadThroughput: prometheus.NewDesc("lvm_volume_read_throughput_kbs",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		VolumeWriteThroughput: prometheus.NewDesc("lvm_volume_writeThroughput_kbs",
+		VolumeWriteThroughput: prometheus.NewDesc("lvm_volume_write_throughput_kbs",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		VolumeResponseTime: prometheus.NewDesc("lvm_volume_responseTime_ms",
+		VolumeResponseTime: prometheus.NewDesc("lvm_volume_response_time_ms",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		VolumeServiceTime: prometheus.NewDesc("lvm_volume_serviceTime_ms",
+		VolumeServiceTime: prometheus.NewDesc("lvm_volume_service_time_ms",
 			"Shows ServiceTime",
 			labelKeys, nil,
 		),
@@ -84,19 +85,19 @@ func newLvmCollector() *lvmCollector {
 			"Shows IOPS",
 			labelKeys, nil,
 		),
-		DiskReadThroughput: prometheus.NewDesc("lvm_disk_readThroughput_kbs",
+		DiskReadThroughput: prometheus.NewDesc("lvm_disk_read_hroughput_kbs",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		DiskWriteThroughput: prometheus.NewDesc("lvm_disk_writeThroughput_kbs",
+		DiskWriteThroughput: prometheus.NewDesc("lvm_disk_write_throughput_kbs",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		DiskResponseTime: prometheus.NewDesc("lvm_disk_responseTime_ms",
+		DiskResponseTime: prometheus.NewDesc("lvm_disk_response_time_ms",
 			"Shows ReadThroughput",
 			labelKeys, nil,
 		),
-		DiskServiceTime: prometheus.NewDesc("lvm_disk_serviceTime_ms",
+		DiskServiceTime: prometheus.NewDesc("lvm_disk_service_time_ms",
 			"Shows ServiceTime",
 			labelKeys, nil,
 		),
@@ -144,7 +145,7 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 
 	//Implement logic here to determine proper metric value to return to prometheus
 	//for each descriptor
-	metricList := []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime", "ServiceTime", "UtilizationPercentage"}
+	metricList := []string{"iops", "read_throughput", "write_throughput", "response_time", "service_time", "utilization_prcnt"}
 	source, err := ioutil.ReadFile(DefaultConfigFile)
 	if err != nil {
 		log.Fatal("file "+DefaultConfigFile+"can't read", err)
@@ -165,18 +166,18 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 				for _, metric := range metricArray {
 					lableVals := []string{metric.InstanceName}
 					switch metric.Name {
-					case "IOPS":
+					case "iops":
 						ch <- prometheus.MustNewConstMetric(c.VolumeIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ReadThroughput":
+					case "read_throughput":
 						ch <- prometheus.MustNewConstMetric(c.VolumeReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "WriteThroughput":
+					case "write_throughput":
 						ch <- prometheus.MustNewConstMetric(c.VolumeWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ResponseTime":
+					case "response_time":
 						ch <- prometheus.MustNewConstMetric(c.VolumeResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ServiceTime":
+					case "service_time":
 						ch <- prometheus.MustNewConstMetric(c.VolumeServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
-					case "UtilizationPercentage":
+					case "utilization_prcnt":
 						ch <- prometheus.MustNewConstMetric(c.VolumeUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
 					}
@@ -189,17 +190,17 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 				for _, metric := range metricArray {
 					lableVals := []string{metric.Labels["device"]}
 					switch metric.Name {
-					case "IOPS":
+					case "iops":
 						ch <- prometheus.MustNewConstMetric(c.DiskIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ReadThroughput":
+					case "read_throughput":
 						ch <- prometheus.MustNewConstMetric(c.DiskReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "WriteThroughput":
+					case "write_throughput":
 						ch <- prometheus.MustNewConstMetric(c.DiskWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ResponseTime":
+					case "response_time":
 						ch <- prometheus.MustNewConstMetric(c.DiskResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "ServiceTime":
+					case "service_time":
 						ch <- prometheus.MustNewConstMetric(c.DiskServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "UtilizationPercentage":
+					case "utilization_prcnt":
 						ch <- prometheus.MustNewConstMetric(c.DiskUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
 					}
@@ -224,7 +225,12 @@ func validateCliArg(arg1 string) string {
 // lvm exporter is a independent process which user can start if required
 func main() {
 
-	portNo := validateCliArg(os.Args[1])
+	var portNo string
+	if len(os.Args) > 1 {
+		portNo = validateCliArg(os.Args[1])
+	} else {
+		portNo = DefaultPort
+	}
 
 	//Create a new instance of the lvmcollector and
 	//register it with the prometheus client.
