@@ -148,10 +148,19 @@ osds::backendlist_check $OPENSDS_BACKEND_LIST
 # Install service which is enabled.
 osds::util::serice_operation install
 
+# Fin
+# ===
+
 set +o xtrace
-exec 1>&3
-# Force all output to stdout and logs now
-exec 1> >( tee -a "${LOGFILE}" ) 2>&1
+
+if [[ -n "$LOGFILE" ]]; then
+    exec 1>&3
+    # Force all output to stdout and logs now
+    exec 1> >( tee -a "${LOGFILE}" ) 2>&1
+else
+    # Force all output to stdout now
+    exec 1>&3
+fi
 
 echo
 echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
@@ -180,4 +189,5 @@ exec 1>&3
 exec 2>&3
 exec 3>&-
 exec 6>&-
+
 echo

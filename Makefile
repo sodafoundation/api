@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsapiserver osdsctl
+build:osdsdock osdslet osdsapiserver osdsctl metricexporter
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -34,17 +34,19 @@ prebuild:
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
 
 osdsdock: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
 osdslet: prebuild
-	go build -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
 osdsapiserver: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
 osdsctl: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
+metricexporter: prebuild
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/pkg/controller/metrics/exporters/lvm_exporter
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
@@ -54,10 +56,13 @@ docker: build
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
-	script/CI/test
+	install/CI/test
 
 protoc:
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
+
+goimports:
+	goimports -w $(shell go list -f {{.Dir}} ./... |grep -v /vendor/)
 
 clean:
 	rm -rf $(BUILD_DIR) ./cmd/osdsapiserver/osdsapiserver ./cmd/osdslet/osdslet ./cmd/osdsdock/osdsdock

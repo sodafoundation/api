@@ -30,9 +30,38 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
+//function to store filesahreAcl metadata into database
+func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+	if in.UpdatedAt == "" {
+		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Description = in.Description
+
+	in.Type = in.Type
+	in.AccessTo = in.AccessTo
+	in.AccessCapability = in.AccessCapability
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		log.Error("file shareid is not valid: ", err)
+		return nil, err
+	}
+	in.FileShareId = in.FileShareId
+	// Store the fileshare meadata into database.
+	return db.C.CreateFileShareAcl(ctx, in)
+}
+
+// Function to store metadeta of fileshare into database
 func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
@@ -57,7 +86,8 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 
 	in.Name = in.Name
 	in.UserId = ctx.UserId
-	in.Status = model.FileShareAvailable
+	in.Status = model.FileShareCreating
+	in.ExportLocations = in.ExportLocations
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShare(ctx, in)
 }
@@ -235,33 +265,45 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	return db.C.ExtendVolume(ctx, volume)
 }
 
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
+func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
 	if err != nil {
-		log.Error("get volume failed in create volume attachment method: ", err)
-		return nil, err
+		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
 	}
-	if vol.Status != model.VolumeAvailable {
+
+	if vol.Status == model.VolumeAvailable {
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
+	} else if vol.Status == model.VolumeInUse {
+		if vol.MultiAttach {
+			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
+		} else {
+			msg := "volume is already attached or volume multiattach must be true if attach more than once"
+			log.Error(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
 		errMsg := "only the status of volume is available, attachment can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if in.Id == "" {
-		in.Id = uuid.NewV4().String()
-	}
-	if in.CreatedAt == "" {
-		in.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
-	if len(in.AdditionalProperties) == 0 {
-		in.AdditionalProperties = map[string]interface{}{"attachment": "attachment"}
-	}
-	if len(in.ConnectionData) == 0 {
-		in.ConnectionData = map[string]interface{}{"attachment": "attachment"}
+
+	if volAttachment.Id == "" {
+		volAttachment.Id = uuid.NewV4().String()
 	}
 
-	in.Status = model.VolumeAttachCreating
-	in.Metadata = utils.MergeStringMaps(in.Metadata, vol.Metadata)
-	return db.C.CreateVolumeAttachment(ctx, in)
+	if volAttachment.CreatedAt == "" {
+		volAttachment.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	if volAttachment.AttachMode != "ro" && volAttachment.AttachMode != "rw" {
+		volAttachment.AttachMode = "rw"
+	}
+
+	volAttachment.Status = model.VolumeAttachCreating
+	volAttachment.Metadata = utils.MergeStringMaps(volAttachment.Metadata, vol.Metadata)
+	return db.C.CreateVolumeAttachment(ctx, volAttachment)
 }
 
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {

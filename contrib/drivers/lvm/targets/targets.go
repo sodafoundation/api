@@ -14,11 +14,11 @@
 
 package targets
 
+import "github.com/opensds/opensds/contrib/drivers/utils/config"
+
 const (
 	iscsiTgtPrefix  = "iqn.2017-10.io.opensds:"
 	nvmeofTgtPrefix = "nqn.2019-01.com.opensds:nvme:"
-	iscsiAccess     = "iscsi"
-	nvmeofAccess    = "nvmeof"
 )
 
 // Target is an interface for exposing some operations of different targets,
@@ -31,12 +31,12 @@ type Target interface {
 
 // NewTarget method creates a new target based on its type.
 func NewTarget(bip string, tgtConfDir string, access string) Target {
-	switch  access{
-	case iscsiAccess:
+	switch access {
+	case config.ISCSIProtocol:
 		return &iscsiTarget{
 			ISCSITarget: NewISCSITarget(bip, tgtConfDir),
 		}
-	case  nvmeofAccess :
+	case config.NVMEOFProtocol:
 		return &nvmeofTarget{
 			NvmeofTarget: NewNvmeofTarget(bip, tgtConfDir),
 		}
@@ -87,8 +87,8 @@ func (t *nvmeofTarget) CreateExport(volId, path, hostIp, initiator string, chapA
 	conn := map[string]interface{}{
 		"targetDiscovered": true,
 		"targetNQN":        tgtNqn,
-		"targetIP":     t.NvmeofTarget.(*NvmeoftgtTarget).BindIp ,
-		"targetPort":	"4420",
+		"targetIP":         t.NvmeofTarget.(*NvmeoftgtTarget).BindIp,
+		"targetPort":       "4420",
 		"discard":          false,
 	}
 	if len(chapAuth) == 2 {

@@ -104,7 +104,7 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
 		"ReplicationProperties", "SnapshotProperties", "DataProtectionProperties", "CustomProperties"}
 	PrintDict(resp, keys, profileFormatters)
 }

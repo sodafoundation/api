@@ -185,6 +185,8 @@ func (c *controller) CreateVolumeAttachment(opt *pb.CreateVolumeAttachmentOpts) 
 		return nil, err
 	}
 
+	log.Infof("Volume controller: volume attachment creation successfully, %v", atc)
+
 	return atc, nil
 }
 

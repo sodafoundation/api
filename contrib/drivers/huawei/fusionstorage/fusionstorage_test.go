@@ -42,11 +42,13 @@ func TestSetup(t *testing.T) {
 				"8.46.195.72",
 				"8.46.195.73",
 			},
+			Version: "6.3",
 		},
 		Pool: map[string]config.PoolProperties{
 			"0": {
 				StorageType:      "block",
 				AvailabilityZone: "default",
+				MultiAttach:      true,
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
@@ -66,6 +68,7 @@ func TestSetup(t *testing.T) {
 			"1": {
 				StorageType:      "block",
 				AvailabilityZone: "default",
+				MultiAttach:      true,
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",

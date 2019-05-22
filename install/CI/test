@@ -26,6 +26,12 @@ split_line(){
     echo "================================================================================================"
 }
 
+# Start the openapi-spec validation.
+split_line "Start openapi-spec validation"
+wget https://github.com/go-swagger/go-swagger/releases/download/v0.19.0/swagger_linux_amd64
+chmod +x ./swagger_linux_amd64 && ./swagger_linux_amd64 validate --stop-on-error openapi-spec/swagger.yaml
+rm ./swagger_linux_amd64
+
 # Start unit test.
 split_line "Start unit test"
 go test -v github.com/opensds/opensds/osdsctl/... -cover
@@ -42,7 +48,7 @@ sudo rm /etc/opensds/opensds.conf -rf
 
 # Start lvm e2e test
 split_line "Start lvm e2e test"
-sudo $OPENSDS_DIR/script/devsds/install.sh
+sudo $OPENSDS_DIR/install/devsds/install.sh
 ps -ef|grep osds
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
@@ -50,4 +56,4 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 split_line "Start lvm e2e flow test"
 go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/ 
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
-sudo $OPENSDS_DIR/script/devsds/uninstall.sh
+sudo $OPENSDS_DIR/install/devsds/uninstall.sh

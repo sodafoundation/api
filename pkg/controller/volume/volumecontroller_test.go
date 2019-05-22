@@ -208,6 +208,14 @@ func (fc *fakeClient) FailoverReplication(ctx context.Context, in *pb.FailoverRe
 	}, nil
 }
 
+func (fc *fakeClient) CollectMetrics(ctx context.Context, in *pb.CollectMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{},
+		},
+	}, nil
+}
+
 func NewFakeController() Controller {
 	return &controller{
 		Client:   NewFakeClient(),
@@ -337,4 +345,21 @@ func TestDisableReplication(t *testing.T) {
 	if result != nil {
 		t.Errorf("Expected %v, got %v\n", nil, result)
 	}
+}
+
+func (fc *fakeClient) CreateFileShare(ctx context.Context, in *pb.CreateFileShareOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+// DeleteFileShare provides a mock function with given fields: ctx, in, opts
+func (fc *fakeClient) DeleteFileShare(ctx context.Context, in *pb.DeleteFileShareOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakeClient) CreateFileShareSnapshot(ctx context.Context, in *pb.CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakeClient) DeleteFileShareSnapshot(ctx context.Context, in *pb.DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
 }
