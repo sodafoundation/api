@@ -139,13 +139,17 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
 		if utils.Contains(filesharedrivers, dck.DriverName) {
-			pols, err = fd.Init(dck.DriverName).ListPools()
+			d := fd.Init(dck.DriverName)
+			defer fd.Clean(d)
+			pols, err = d.ListPools()
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 				pol.DockId = dck.Id
 			}
 		} else {
-			pols, err = drivers.Init(dck.DriverName).ListPools()
+			d := drivers.Init(dck.DriverName)
+			defer drivers.Clean(d)
+			pols, err = d.ListPools()
 
 			replicationDriverName := dck.Metadata["HostReplicationDriver"]
 			replicationType := model.ReplicationTypeHost
