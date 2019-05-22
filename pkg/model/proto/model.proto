@@ -741,7 +741,7 @@ message CreateFileShareOpts {
     // The Serialized profile
     string profile = 13;
     // The ExportLocations
-    repeated string exportlocations = 14;
+    repeated string exportLocations = 14;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
