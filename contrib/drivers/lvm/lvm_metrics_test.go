@@ -195,9 +195,3 @@ func printMetricSpec(m []*model.MetricSpec) {
 	}
 
 }
-func TestCollectMetrics1(t *testing.T) {
-	var md = &MetricDriver{}
-	md.Setup()
-	md.CollectMetrics()
-
-}
