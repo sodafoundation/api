@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/telemetry/pkg/model"
+	"github.com/opensds/opensds/pkg/model"
 
 	"github.com/opensds/opensds/pkg/controller/client"
 )
