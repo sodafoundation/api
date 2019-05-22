@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsapiserver osdsctl
+build:osdsdock osdslet osdsapiserver osdsctl metricexporter
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -45,6 +45,8 @@ osdsapiserver: prebuild
 osdsctl: prebuild
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
+metricexporter: prebuild
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/pkg/controller/metrics/exporters/lvm_exporter
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet

@@ -22,8 +22,8 @@ import (
 	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
-var metricMap map[string]float64 = map[string]float64{"IOPS": 3.16, "ReadThroughput": 4.17, "WriteThroughput": 134.74, "ResponseTime": 2.67, "ServiceTime": 4.00, "UtilizationPercentage": 1.26}
-var metricToUnitMap map[string]string = map[string]string{"IOPS": "tps", "ReadThroughput": "KB/s", "WriteThroughput": "KB/s", "ResponseTime": "ms", "ServiceTime": "ms", "UtilizationPercentage": "%"}
+var metricMap map[string]float64 = map[string]float64{"iops": 3.16, "read_throughput": 4.17, "write_throughput": 134.74, "response_time": 2.67, "service_time": 4.00, "utilization_prcnt": 1.26}
+var metricToUnitMap map[string]string = map[string]string{"iops": "tps", "read_throughput": "kbs", "write_throughput": "kbs", "response_time": "ms", "service_time": "ms", "utilization_prcnt": "%"}
 var respMap map[string]*MetricFakeResp = map[string]*MetricFakeResp{
 	"sar": {`05:26:43  IST       DEV       tps     rkB/s     wkB/s   areq-sz    aqu-sz     await     svctm     %util
 			05:26:44      loop0      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
@@ -39,7 +39,7 @@ var respMap map[string]*MetricFakeResp = map[string]*MetricFakeResp{
 			05:26:44      loop9      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
 			05:26:44      loop10      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00`, nil},
 }
-var expctdMetricList []string = []string{"IOPS", "ReadThroughput", "WriteThroughput", "ResponseTime", "ServiceTime", "UtilizationPercentage"}
+var expctdMetricList []string = []string{"iops", "read_throughput", "write_throughput", "response_time", "service_time", "utilization_prcnt"}
 
 func TestMetricDriverSetup(t *testing.T) {
 	var d = &MetricDriver{}
@@ -104,9 +104,9 @@ func TestCollectMetrics(t *testing.T) {
 		metric := &model.MetricSpec{
 			InstanceID:   "b902e771-8e02-4099-b601-a6b3881f8",
 			InstanceName: "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8",
-			Job:          "OpenSDS",
+			Job:          "lvm",
 			Labels:       expctdLabels,
-			Component:    "Volume",
+			Component:    "volume",
 			Name:         element,
 			Unit:         metricToUnitMap[element],
 			AggrType:     "",
@@ -144,9 +144,9 @@ func TestCollectMetrics(t *testing.T) {
 
 func printMetricSpec(m []*model.MetricSpec) {
 	for _, p := range m {
-		fmt.Errorf("%+v\n", p)
+		fmt.Printf("%+v\n", p)
 		for _, v := range p.MetricValues {
-			fmt.Errorf("%+v\n", v)
+			fmt.Printf("%+v\n", v)
 		}
 	}
 
