@@ -56,23 +56,18 @@ func isSarEnabled(out string) bool {
 
 // Function to parse sar and iostat command output
 // metricList -> metrics to be collected
-// instanceID -> VolumeID/Disk Id
 // metricMap	-> metric to command output column mapping
 // out 		-> command output
 // returnMap	-> metric to value map to be returned
-func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map [string] map[string]string, labelMap map [string] map[string]string,  metricMap map[string]int, out string) {
+func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map[string]map[string]string, labelMap map[string]map[string]string, metricMap map[string]int, out string) {
 
 	tableRows := strings.Split(string(out), "\n")
-
-
-
 	for _, row := range tableRows[3:] {
-
 		if row != "" {
 			tokens := regexp.MustCompile(" ")
 			cols := tokens.Split(row, -1)
 			// remove all empty space
-			var columns= make([]string, 0, 0)
+			var columns = make([]string, 0, 0)
 			for _, v := range cols {
 				if v != "" {
 					columns = append(columns, v)
@@ -92,21 +87,18 @@ func (c *MetricCli) parseCommandOutput(metricList []string, returnMap map [strin
 		}
 	}
 
-	}
-
+}
 
 // CollectMetrics function is to call the cli for metrics collection. This will be invoked  by lvm metric driver
 // metricList	-> metrics to be collected
-// instanceID	-> for which instance to be collected
 // returnMap	-> metrics to value map
-func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map [string] map[string]string/*labelMap*/, map [string] map[string]string, error) {
+func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map[string]map[string]string /*labelMap*/, map[string]map[string]string, error) {
 
-	returnMap := make(map [string] map[string]string)
-	labelMap := make(map [string] map[string]string)
+	returnMap := make(map[string]map[string]string)
+	labelMap := make(map[string]map[string]string)
 	var err error
 
 	cmd := []string{"env", "LC_ALL=C", "sar", "-dp", "1", "1"}
-
 	out, err := cli.execute(cmd...)
 	if err != nil {
 		log.Errorf("cmd.Run() failed with %s\n", err)
@@ -126,14 +118,11 @@ func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map [s
 		metricMap["service_time"] = 8
 		metricMap["utilization_prcnt"] = 9
 		//call parser
-		cli.parseCommandOutput(metricList,returnMap, labelMap,  metricMap, out)
+		cli.parseCommandOutput(metricList, returnMap, labelMap, metricMap, out)
 	} else {
 		cmd := []string{"env", "LC_ALL=C", "iostat", "-N"}
-
 		out, err := cli.execute(cmd...)
-
 		if strings.Contains(string(out), cmdNotFound) {
-
 			log.Errorf("iostat is not available: cmd.Run() failed with %s\n", err)
 			err = nil
 		} else if err != nil {
@@ -145,12 +134,13 @@ func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map [s
 		metricMap["iops"] = 1
 		metricMap["read_throughput"] = 2
 		metricMap["write_throughput"] = 3
-		cli.parseCommandOutput(metricList, returnMap, labelMap,  metricMap, out)
+		cli.parseCommandOutput(metricList, returnMap, labelMap, metricMap, out)
 
 	}
 	return returnMap, labelMap, err
 }
 
+// Discover LVM volumes
 func (c *MetricCli) DiscoverVolumes() ([]string, error) {
 	cmd := []string{"env", "LC_ALL=C", "lvs"}
 	out, err := c.execute(cmd...)
@@ -160,7 +150,7 @@ func (c *MetricCli) DiscoverVolumes() ([]string, error) {
 		if row != "" {
 			tokens := regexp.MustCompile(" ")
 			cols := tokens.Split(row, -1)
-			var columns= make([]string, 0, 0)
+			var columns = make([]string, 0, 0)
 			for _, v := range cols {
 				if v != "" {
 					columns = append(columns, v)
@@ -170,9 +160,10 @@ func (c *MetricCli) DiscoverVolumes() ([]string, error) {
 
 		}
 	}
-	//fmt.Println(out,err)
 	return volumes, err
 }
+
+// Discover LVM Disks
 func (c *MetricCli) DiscoverDisks() ([]string, error) {
 	cmd := []string{"env", "LC_ALL=C", "pvs"}
 	out, err := c.execute(cmd...)
@@ -182,7 +173,7 @@ func (c *MetricCli) DiscoverDisks() ([]string, error) {
 		if row != "" {
 			tokens := regexp.MustCompile(" ")
 			cols := tokens.Split(row, -1)
-			var columns= make([]string, 0, 0)
+			var columns = make([]string, 0, 0)
 			for _, v := range cols {
 				if v != "" {
 					columns = append(columns, v)
@@ -192,6 +183,5 @@ func (c *MetricCli) DiscoverDisks() ([]string, error) {
 
 		}
 	}
-	//fmt.Println(out,err)
 	return volumes, err
 }
