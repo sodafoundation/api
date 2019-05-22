@@ -129,3 +129,13 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareS
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
 	return &SampleFileShares[0], nil
 }
+
+// CreateFileShareSnapshot
+func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+// DeleteFileShareSnapshot
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return nil, nil
+}
