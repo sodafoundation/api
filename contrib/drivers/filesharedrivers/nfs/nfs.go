@@ -23,6 +23,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
+	data "github.com/opensds/opensds/testutils/collection"
 	"github.com/satori/go.uuid"
 )
 
@@ -200,4 +201,14 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.Fil
 	}
 
 	return fshare, nil
+}
+
+// CreateFileShareSnapshot
+func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return &data.SampleFileShareSnapshots[0], nil
+}
+
+// DeleteFileShareSnapshot
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return nil, nil
 }
