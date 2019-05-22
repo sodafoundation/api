@@ -104,6 +104,7 @@ func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceT
 func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 
 	//validate metric support list
+	// Todo: Remove this two lines when Ceph driver implements modified driver interface
 	metricsList := []string{ "pool_used_bytes","pool_raw_used_bytes","pool_available_bytes","pool_objects_total","pool_dirty_objects_total","pool_read_total","pool_read_bytes_total","pool_write_total","pool_write_bytes_total"}
 	instanceID :="pool1"
 	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "pool")

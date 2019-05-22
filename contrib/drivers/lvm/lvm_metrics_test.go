@@ -86,10 +86,10 @@ func NewMetricFakeExecuter(respMap map[string]*MetricFakeResp) exec.Executer {
 	return &MetricFakeExecuter{RespMap: respMap}
 }
 
-func TestgetMetricList(t *testing.T) {
+func TestGetMetricList(t *testing.T) {
 	var md = &MetricDriver{}
 	md.Setup()
-	returnedMetricList, err := md.getMetricList( "volume")
+	returnedMetricList, err := md.GetMetricList( "volume")
 	if err != nil {
 		t.Error("failed to validate metric list:", err)
 	}
@@ -132,7 +132,7 @@ func TestCollectMetrics(t *testing.T) {
 		}
 	}
 	for _, disk := range expctedDiskList {
-		convrtedVolID := formatDisk(disk)
+		convrtedVolID := formatDiskName(disk)
 		thismetricMAp := expctedMetricMap[convrtedVolID]
 		thisLabelMap := expctedLabelMap[convrtedVolID]
 		fmt.Println(thismetricMAp)
@@ -168,12 +168,6 @@ func TestCollectMetrics(t *testing.T) {
 	var b bool = true
 	for i, m := range expectedMetrics {
 		b = b && reflect.DeepEqual(m.InstanceName, retunMetrics[i].InstanceName)
-		if !b {
-			fmt.Printf(" b is falseexpected metric spec at %d",i)
-			printMetricSpec(expectedMetrics)
-			fmt.Printf(" b is false returned metric spec")
-			printMetricSpec(retunMetrics)
-		}
 		b = b && reflect.DeepEqual(m.InstanceID, retunMetrics[i].InstanceID)
 		b = b && reflect.DeepEqual(m.Job, retunMetrics[i].Job)
 		b = b && reflect.DeepEqual(m.Labels, retunMetrics[i].Labels)

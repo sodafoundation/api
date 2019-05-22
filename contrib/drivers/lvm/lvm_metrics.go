@@ -14,7 +14,6 @@
 package lvm
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -24,8 +23,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Todo: Move this Yaml config to a file
-
+// Supported metrics
 var data = `
 resources:
   - resource: volume
@@ -72,14 +70,6 @@ type MetricDriver struct {
 	cli *MetricCli
 }
 
-func metricInMetrics(metric string, metriclist []string) bool {
-	for _, m := range metriclist {
-		if m == metric {
-			return true
-		}
-	}
-	return false
-}
 func getCurrentUnixTimestamp() int64 {
 	now := time.Now()
 	secs := now.Unix()
@@ -112,14 +102,12 @@ func getMetricToUnitMap() map[string]string {
 	return metricToUnitMap
 }
 
-// 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
-// 	metricList-> Posted metric list
+// 	getMetricList:- is  to get the list of supported metrics for given resource type
 //	supportedMetrics -> list of supported metrics
-func (d *MetricDriver) getMetricList(resourceType string) (supportedMetrics []string, err error) {
+func (d *MetricDriver) GetMetricList(resourceType string) (supportedMetrics []string, err error) {
 	var configs Configs
 
 	//Read supported metric list from yaml config
-	//Todo: Move this to read from file
 	source := []byte(data)
 	error := yaml.Unmarshal(source, &configs)
 	if error != nil {
@@ -129,66 +117,59 @@ func (d *MetricDriver) getMetricList(resourceType string) (supportedMetrics []st
 	for _, resources := range configs.Cfgs {
 		if resources.Resource == resourceType {
 			switch resourceType {
-			//ToDo: Other Cases needs to be added
 			case "volume", "disk":
+				for _, m := range resources.Metrics {
+					supportedMetrics = append(supportedMetrics, m)
 
-					for _,m := range resources.Metrics {
-						supportedMetrics = append(supportedMetrics, m)
-
-					}
 				}
 			}
 		}
+	}
 
 	return supportedMetrics, nil
 }
 
 //	CollectMetrics: Driver entry point to collect metrics. This will be invoked by the dock
-//	metricsList-> posted metric list
-//	instanceID -> posted instanceID
-//	metricArray	-> the array of metrics to be returned
+//	[]*model.MetricSpec	-> the array of metrics to be returned
 func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 
 	// get Metrics to unit map
 	metricToUnitMap := getMetricToUnitMap()
 	//validate metric support list
-	supportedMetrics, err := d.getMetricList( "volume")
+	supportedMetrics, err := d.GetMetricList("volume")
 	if supportedMetrics == nil {
 		log.Infof("no metrics found in the  supported metric list")
 	}
+	// discover lvm volumes
 	volumeList, err := d.cli.DiscoverVolumes()
-
+	// discover lvm physical volumes
 	DiskList, err := d.cli.DiscoverDisks()
-
 	metricMap, labelMap, err := d.cli.CollectMetrics(supportedMetrics)
-
+	if err != nil {
+		log.Errorf("collect metrics returned error, err: %v", err)
+	}
 	var tempMetricArray []*model.MetricSpec
 	// fill volume metrics
 	for _, volume := range volumeList {
 		convrtedVolID := convert(volume)
-		thismetricMAp := metricMap[convrtedVolID]
-		thisLabelMap := labelMap[convrtedVolID]
-		fmt.Println(thismetricMAp)
+		aMetricMap := metricMap[convrtedVolID]
+		aLabelMap := labelMap[convrtedVolID]
 		for _, element := range supportedMetrics {
-			val, _ := strconv.ParseFloat(thismetricMAp[element], 64)
+			val, _ := strconv.ParseFloat(aMetricMap[element], 64)
 			metricValue := &model.Metric{
 				Timestamp: getCurrentUnixTimestamp(),
 				Value:     val,
 			}
 			metricValues := make([]*model.Metric, 0)
 			metricValues = append(metricValues, metricValue)
-
 			metric := &model.MetricSpec{
 				InstanceID:   volume,
-				InstanceName: thismetricMAp["InstanceName"],
+				InstanceName: aMetricMap["InstanceName"],
 				Job:          "lvm",
-				Labels:       thisLabelMap,
-				//Todo Take Componet from Post call, as of now it is only for volume
-				Component: "volume",
-				Name:      element,
-				//Todo : Fill units according to metric type
-				Unit: metricToUnitMap[element],
-				//Todo : Get this information dynamically ( hard coded now , as all are direct values
+				Labels:       aLabelMap,
+				Component:    "volume",
+				Name:         element,
+				Unit:         metricToUnitMap[element],
 				AggrType:     "",
 				MetricValues: metricValues,
 			}
@@ -197,30 +178,25 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	}
 	// fill disk  metrics
 	for _, disk := range DiskList {
-		convrtedVolID := formatDisk(disk)
-		thismetricMAp := metricMap[convrtedVolID]
-		thisLabelMap := labelMap[convrtedVolID]
-		fmt.Println(thismetricMAp)
+		convrtedVolID := formatDiskName(disk)
+		aMetricMap := metricMap[convrtedVolID]
+		aLabelMap := labelMap[convrtedVolID]
 		for _, element := range supportedMetrics {
-			val, _ := strconv.ParseFloat(thismetricMAp[element], 64)
+			val, _ := strconv.ParseFloat(aMetricMap[element], 64)
 			metricValue := &model.Metric{
 				Timestamp: getCurrentUnixTimestamp(),
 				Value:     val,
 			}
 			metricValues := make([]*model.Metric, 0)
 			metricValues = append(metricValues, metricValue)
-
 			metric := &model.MetricSpec{
 				InstanceID:   disk,
-				InstanceName: thismetricMAp["InstanceName"],
+				InstanceName: aMetricMap["InstanceName"],
 				Job:          "lvm",
-				Labels:       thisLabelMap,
-				//Todo Take Componet from Post call, as of now it is only for volume
-				Component: "disk",
-				Name:      element,
-				//Todo : Fill units according to metric type
-				Unit: metricToUnitMap[element],
-				//Todo : Get this information dynamically ( hard coded now , as all are direct values
+				Labels:       aLabelMap,
+				Component:    "disk",
+				Name:         element,
+				Unit:         metricToUnitMap[element],
 				AggrType:     "",
 				MetricValues: metricValues,
 			}
@@ -230,18 +206,15 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	metricArray := tempMetricArray
 	return metricArray, err
 }
-func convert(instanceID string) string{
-	// TODO(Prakash):re-visit the below logic when we add disk metrics support
-	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
+func convert(instanceID string) string {
+	// systat utilities (sar/iostat) returnes  volume with -- instead of -, so we need to modify volume name to map lvs output
 	instanceID = strings.Replace(instanceID, "-", "--", -1)
 	//add opensds--volumes--default-- to the start of volume
-
-	instanceID = "opensds--volumes--default-"+instanceID
+	instanceID = "opensds--volumes--default-" + instanceID
 	return instanceID
 }
-func formatDisk(instanceID string) string{
-	// TODO(Prakash):re-visit the below logic when we add disk metrics support
-	// LVM stores the created volume with -- instead of -, so we need to adjust the input instance ID
+func formatDiskName(instanceID string) string {
+	// systat(sar/iostat) returns only disk name. We need to add /dev/ to match with pvs output
 	instanceID = strings.Replace(instanceID, "/dev/", "", -1)
 	//add opensds--volumes--default-- to the start of volume
 

@@ -149,9 +149,9 @@ type MetricDriver interface {
 	Setup() error
 	//Any operation the metric driver does while stopping.
 	Teardown() error
-
+	// Collect metrics for all supported resources
 	CollectMetrics() ([]*model.MetricSpec, error)
-	//ValidateMetricsSupportList(metricList []string, resourceType string) ([]string, error)
+
 }
 
 // Init

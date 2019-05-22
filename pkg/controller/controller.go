@@ -990,37 +990,31 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	dockSpec, err := db.C.ListDocks(ctx)
-	for _,d:= range dockSpec{
-		if d.DriverName=="lvm"{
-			fmt.Println("lvm match is found")
+	if err != nil {
+		log.Errorf("list dock  failed in CollectMetrics method: %s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	for i, d := range dockSpec {
+		if d.DriverName == opt.DriverName {
+			log.Infof("driver found driver: %s", d.DriverName)
+			dockInfo, err := db.C.GetDock(ctx, dockSpec[i].BaseModel.Id)
+			if err != nil {
+				//log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
+				return pb.GenericResponseError(err), err
+
+			}
+			c.metricsController.SetDock(dockInfo)
+			result, err := c.metricsController.CollectMetrics(opt)
+			if err != nil {
+				log.Errorf("collectMetrics failed: %s", err.Error())
+
+				return pb.GenericResponseError(err), err
+			}
+
+			return pb.GenericResponseResult(result), nil
 		}
 	}
-	fmt.Print("Dock Spec",dockSpec[0])
-	if err != nil {
-		log.Errorf("get volume by id %s failed in CollectMetrics method: %s", opt.InstanceId, err.Error())
-		return pb.GenericResponseError(err), err
-	}
-
-	dockInfo, err := db.C.GetDock(ctx,dockSpec[0].BaseModel.Id)
-	fmt.Println("Dock Info:",dockInfo)
-	if err != nil {
-		//log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
-		return pb.GenericResponseError(err), err
-
-	}
-
-	c.metricsController.SetDock(dockInfo)
-	opt.DriverName = dockInfo.DriverName
-
-	result, err := c.metricsController.CollectMetrics(opt)
-	fmt.Println("Collected metrics",result)
-	if err != nil {
-		log.Errorf("collectMetrics failed: %s", err.Error())
-
-		return pb.GenericResponseError(err), err
-	}
-
-	return pb.GenericResponseResult(result), nil
+	return nil, nil
 }
 
 func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
