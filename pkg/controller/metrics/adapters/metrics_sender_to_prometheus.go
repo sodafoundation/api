@@ -25,7 +25,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-var nodeExporterFolder = "/root/prom_nodeexporter_folder/"
+var nodeExporterFolder = CONF.OsdsLet.NodeExporterWatchFolder
 
 type PrometheusMetricsSender struct {
 	Queue    chan *model.MetricSpec
@@ -79,7 +79,19 @@ func writeToFile(metrics *model.MetricSpec) {
 	// get the string ready to be written
 	var finalString = ""
 
-	finalString += metrics.Name + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
+	// form the label string
+	labelStr := "{"
+	for labelName, labelValue := range metrics.Labels {
+		labelStr = labelStr + labelName + "=" + `"` + labelValue + `"`
+		labelStr = labelStr + ","
+	}
+	// replace the last , with } to complete the set of labels
+	labelStr = labelStr[:len(labelStr)-1] + "}"
+
+	// form the full metric name
+	metricName := metrics.Job + "_" + metrics.Component + "_" + metrics.Name + "_" + metrics.Unit + "_" + metrics.AggrType
+
+	finalString += metricName + labelStr + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
 
 	// make a new file with current timestamp
 	timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
@@ -117,19 +129,24 @@ func writeToFile(metrics *model.MetricSpec) {
 func sendToPushGateway(metrics *model.MetricSpec) {
 
 	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
-		Name:        metrics.Name,
-		Help:        "",
-		ConstLabels: metrics.Labels,
+		Name: metrics.Name,
+		Help: "",
 	})
-	gauge.Set(metrics.MetricValues[0].Value)
 	gauge.SetToCurrentTime()
+	gauge.Set(metrics.MetricValues[0].Value)
 
-	if err := push.New("http://localhost:9091", "push_gateway").
-		Collector(gauge).
-		Push(); err != nil {
+	pusher := push.New(CONF.OsdsLet.PushGatewayUrl, "push_gateway").
+		Collector(gauge)
+	for lKey, lValue := range metrics.Labels {
+		pusher = pusher.Grouping(lKey, lValue)
+	}
+	// add the metric name here, to differentiate between various metrics
+	pusher = pusher.Grouping("metricname", metrics.Name)
+
+	if err := pusher.Push(); err != nil {
 		log.Errorf("error when pushing gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway:%s", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value, err)
 
 	}
-	log.Infof("Completed push gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value)
+	log.Infof("completed push gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value)
 
 }
