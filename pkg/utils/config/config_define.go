@@ -27,14 +27,7 @@ type OsdsApiServer struct {
 	HTTPSEnabled       bool          `conf:"https_enabled,false"`
 	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
 	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
-}
 
-type OsdsLet struct {
-	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
-	Daemon            bool          `conf:"daemon,false"`
-	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
-	// how to push metrics to Prometheus ? options are PushGateway or NodeExporter
-	PrometheusPushMechanism string `conf:"prometheus_push_mechanism,NodeExporter"`
 	// prometheus related
 	PrometheusConfHome string `conf:"prometheus_conf_home,/etc/prometheus/"`
 	PrometheusUrl      string `conf:"prometheus_url,http://localhost:9090"`
@@ -50,6 +43,14 @@ type OsdsLet struct {
 	GrafanaUrl        string `conf:"grafana_url,http://localhost:3000"`
 	// prometheus and alert manager configuration reload url
 	ConfReloadUrl string `conf:"conf_reload_url,/-/reload"`
+}
+
+type OsdsLet struct {
+	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
+	Daemon            bool          `conf:"daemon,false"`
+	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	// how to push metrics to Prometheus ? options are PushGateway or NodeExporter
+	PrometheusPushMechanism string `conf:"prometheus_push_mechanism,NodeExporter"`
 }
 
 type OsdsDock struct {

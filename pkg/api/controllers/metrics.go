@@ -56,20 +56,20 @@ var BackupExtension string
 
 func init() {
 
-	ReloadPath = CONF.OsdsLet.ConfReloadUrl
+	ReloadPath = CONF.OsdsApiServer.ConfReloadUrl
 	BackupExtension = ".bak"
 
-	PrometheusConfHome = CONF.OsdsLet.PrometheusConfHome
-	PrometheusUrl = CONF.OsdsLet.PrometheusUrl
-	PrometheusConfFile = CONF.OsdsLet.PrometheusConfFile
+	PrometheusConfHome = CONF.OsdsApiServer.PrometheusConfHome
+	PrometheusUrl = CONF.OsdsApiServer.PrometheusUrl
+	PrometheusConfFile = CONF.OsdsApiServer.PrometheusConfFile
 
-	AlertmgrConfHome = CONF.OsdsLet.AlertmgrConfHome
-	AlertmgrUrl = CONF.OsdsLet.AlertMgrUrl
-	AlertmgrConfFile = CONF.OsdsLet.AlertmgrConfFile
+	AlertmgrConfHome = CONF.OsdsApiServer.AlertmgrConfHome
+	AlertmgrUrl = CONF.OsdsApiServer.AlertMgrUrl
+	AlertmgrConfFile = CONF.OsdsApiServer.AlertmgrConfFile
 
-	GrafanaConfHome = CONF.OsdsLet.GrafanaConfHome
-	GrafanaRestartCmd = CONF.OsdsLet.GrafanaRestartCmd
-	GrafanaConfFile = CONF.OsdsLet.GrafanaConfFile
+	GrafanaConfHome = CONF.OsdsApiServer.GrafanaConfHome
+	GrafanaRestartCmd = CONF.OsdsApiServer.GrafanaRestartCmd
+	GrafanaConfFile = CONF.OsdsApiServer.GrafanaConfFile
 }
 
 func NewMetricsPortal() *MetricsPortal {

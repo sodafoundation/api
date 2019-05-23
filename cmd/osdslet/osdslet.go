@@ -38,22 +38,8 @@ func init() {
 	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
 	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	// prometheus related
+
 	flag.StringVar(&CONF.OsdsLet.PrometheusPushMechanism, "prometheus-push-mechanism", CONF.OsdsLet.PrometheusPushMechanism, "Prometheus push mechanism")
-	flag.StringVar(&CONF.OsdsLet.PrometheusConfHome, "prometheus-conf-home", CONF.OsdsLet.PrometheusConfHome, "Prometheus conf. path")
-	flag.StringVar(&CONF.OsdsLet.PrometheusUrl, "prometheus-url", CONF.OsdsLet.PrometheusUrl, "Prometheus URL")
-	flag.StringVar(&CONF.OsdsLet.PrometheusConfFile, "prometheus-conf-file", CONF.OsdsLet.PrometheusConfFile, "Prometheus conf. file")
-	// alert manager related
-	flag.StringVar(&CONF.OsdsLet.AlertmgrConfHome, "alertmgr-conf-home", CONF.OsdsLet.AlertmgrConfHome, "Alert manager conf. home")
-	flag.StringVar(&CONF.OsdsLet.AlertMgrUrl, "alertmgr-url", CONF.OsdsLet.AlertMgrUrl, "Alert manager listen endpoint")
-	flag.StringVar(&CONF.OsdsLet.AlertmgrConfFile, "alertmgr-conf-file", CONF.OsdsLet.AlertmgrConfFile, "Alert manager conf. file")
-	// grafana related
-	flag.StringVar(&CONF.OsdsLet.GrafanaConfHome, "grafana-conf-home", CONF.OsdsLet.GrafanaConfHome, "Grafana conf. home")
-	flag.StringVar(&CONF.OsdsLet.GrafanaRestartCmd, "grafana-restart-cmd", CONF.OsdsLet.GrafanaRestartCmd, "Grafana restart command")
-	flag.StringVar(&CONF.OsdsLet.GrafanaConfFile, "grafana-conf-file", CONF.OsdsLet.GrafanaConfFile, "Grafana conf file")
-	flag.StringVar(&CONF.OsdsLet.GrafanaUrl, "grafana-url", CONF.OsdsLet.GrafanaUrl, "Grafana listen endpoint")
-	// prometheus and alert manager configuration reload url
-	flag.StringVar(&CONF.OsdsLet.ConfReloadUrl, "conf-reload-url", CONF.OsdsLet.ConfReloadUrl, "Prometheus and Alert manager conf. reload URL")
 
 	flag.Parse()
 
