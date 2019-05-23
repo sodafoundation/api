@@ -889,7 +889,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  get fileshare from db %+v", fileshare)
+	log.V(5).Infof("controller create fileshare:  get fileshare from db %+v", fileshare)
 
 	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
 	if err != nil {
@@ -897,7 +897,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  selected poolInfo %+v", polInfo)
+	log.V(5).Infof("controller create fileshare:  selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
