@@ -44,15 +44,14 @@ volume-b902e771-8e02-4099-b601-a6b3881f8 opensds-volumes-default -wi-a----- 1.00
 volume-d96cc42b-b285-474e-aa98-c61e66df7461 opensds-volumes-default -wi-a----- 1.00g`, nil},
 	"pvs": {`PV          VG                      Fmt  Attr PSize   PFree  
 /dev/loop10 opensds-volumes-default lvm2 a--  <20.00g <18.00g`, nil},
-
 }
 var expctdMetricList []string = []string{"iops", "read_throughput", "write_throughput", "response_time", "service_time", "utilization_prcnt"}
-var expctedVolList []string = []string{"volume-b902e771-8e02-4099-b601-a6b3881f8","volume-d96cc42b-b285-474e-aa98-c61e66df7461"}
+var expctedVolList []string = []string{"volume-b902e771-8e02-4099-b601-a6b3881f8", "volume-d96cc42b-b285-474e-aa98-c61e66df7461"}
 var expctedDiskList []string = []string{"/dev/loop10"}
-var expctedLabelMap map [string] map[string]string= map [string] map[string]string{"loop10":map[string]string{"device":"loop10" },"opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461":map[string]string{"device":"opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461"},"opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8":map[string]string{"device":"opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8" } }
-var expctedMetricMap map [string] map[string]string= map [string] map[string]string{"loop10":map[string]string{"InstanceName":"loop10", "iops":"8.77","read_throughput":"12.22","response_time":"0.01","service_time":"0.01" ,"write_throughput":"32.56","utilization_prcnt":"12.21"},
-	"opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461":map[string]string{"InstanceName":"opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461", "iops":"6.26","read_throughput":"8.27","response_time":"4.67","service_time":"8.00" ,"write_throughput":"268.74","utilization_prcnt":"2.46"},
-	"opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8":map[string]string{"InstanceName":"opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8", "iops":"3.16","read_throughput":"4.17","response_time":"2.67","service_time":"4.00" ,"write_throughput":"134.74","utilization_prcnt":"1.26"}}
+var expctedLabelMap map[string]map[string]string = map[string]map[string]string{"loop10": map[string]string{"device": "loop10"}, "opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461": map[string]string{"device": "opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461"}, "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8": map[string]string{"device": "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8"}}
+var expctedMetricMap map[string]map[string]string = map[string]map[string]string{"loop10": map[string]string{"InstanceName": "loop10", "iops": "8.77", "read_throughput": "12.22", "response_time": "0.01", "service_time": "0.01", "write_throughput": "32.56", "utilization_prcnt": "12.21"},
+	"opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461":   map[string]string{"InstanceName": "opensds--volumes--default-volume-d96cc42b-b285-474e-aa98-c61e66df7461", "iops": "6.26", "read_throughput": "8.27", "response_time": "4.67", "service_time": "8.00", "write_throughput": "268.74", "utilization_prcnt": "2.46"},
+	"opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8": map[string]string{"InstanceName": "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8", "iops": "3.16", "read_throughput": "4.17", "response_time": "2.67", "service_time": "4.00", "write_throughput": "134.74", "utilization_prcnt": "1.26"}}
 
 func TestMetricDriverSetup(t *testing.T) {
 	var d = &MetricDriver{}
@@ -89,7 +88,7 @@ func NewMetricFakeExecuter(respMap map[string]*MetricFakeResp) exec.Executer {
 func TestGetMetricList(t *testing.T) {
 	var md = &MetricDriver{}
 	md.Setup()
-	returnedMetricList, err := md.GetMetricList( "volume")
+	returnedMetricList, err := md.GetMetricList("volume")
 	if err != nil {
 		t.Error("failed to validate metric list:", err)
 	}
@@ -104,12 +103,12 @@ func TestCollectMetrics(t *testing.T) {
 	md.cli.RootExecuter = NewMetricFakeExecuter(respMap)
 	md.cli.BaseExecuter = NewMetricFakeExecuter(respMap)
 	var tempMetricArray []*model.MetricSpec
-	for _,volume := range expctedVolList {
+	for _, volume := range expctedVolList {
 		convrtedVolID := convert(volume)
 		thismetricMAp := expctedMetricMap[convrtedVolID]
 		thisLabelMap := expctedLabelMap[convrtedVolID]
 		for _, element := range expctdMetricList {
-			val,_ := strconv.ParseFloat(thismetricMAp[element],64)
+			val, _ := strconv.ParseFloat(thismetricMAp[element], 64)
 
 			expctdmetricValue := &model.Metric{
 				Timestamp: 123456,
@@ -149,9 +148,9 @@ func TestCollectMetrics(t *testing.T) {
 				InstanceName: thismetricMAp["InstanceName"],
 				Job:          "lvm",
 				Labels:       thisLabelMap,
-				Component: "disk",
-				Name:      element,
-				Unit: metricToUnitMap[element],
+				Component:    "disk",
+				Name:         element,
+				Unit:         metricToUnitMap[element],
 				AggrType:     "",
 				MetricValues: expctdMetricValues,
 			}

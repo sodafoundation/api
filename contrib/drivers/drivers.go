@@ -157,7 +157,6 @@ type MetricDriver interface {
 	Teardown() error
 	// Collect metrics for all supported resources
 	CollectMetrics() ([]*model.MetricSpec, error)
-
 }
 
 // Init
