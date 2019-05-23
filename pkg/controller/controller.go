@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
@@ -164,7 +165,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-    log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
+	log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
 
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
@@ -955,6 +956,47 @@ func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileSh
 	}
 
 	return pb.GenericResponseResult(nil), err
+}
+
+// CreateFileShare implements pb.ControllerServer.CreateFileShare
+func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
+	var err error
+	log.Info("controller server receive create file share request, vr =", opt)
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	// This file share structure is currently fetched from database, but eventually
+	// it will be removed after SelectSupportedPoolForFileShare method in selector
+	// is updated.
+	fileshareacl, err := db.C.GetFileShareAcl(ctx, opt.Id)
+	fileshare, err := db.C.GetFileShare(ctx, fileshareacl.FileShareId)
+
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
+	if err != nil {
+		// Change the status of the file share acl to error when the creation faild
+		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when create file share:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
 }
 
 // CreateFileShareSnapshot implements pb.ControllerServer.CreateFileShareSnapshot
