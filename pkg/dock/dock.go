@@ -52,7 +52,7 @@ type dockServer struct {
 	Driver drivers.VolumeDriver
 	// Metrics driver to collect metrics
 	MetricDriver drivers.MetricDriver
-	
+
 	// FileShareDriver represents the specified backend resource. This field is used
 	// for initializing the specified file share driver.
 	FileShareDriver filesharedrivers.FileShareDriver

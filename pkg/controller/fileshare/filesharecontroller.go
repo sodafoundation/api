@@ -42,7 +42,6 @@ type Controller interface {
 	CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
 
 	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error
-
 }
 
 // NewController method creates a controller structure and expose its pointer.

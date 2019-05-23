@@ -264,7 +264,7 @@ func (m *MetricsPortal) CollectMetrics() {
 
 	opt := &pb.CollectMetricsOpts{
 		DriverName: collMetricSpec.DriverType,
-		Context:     ctx.ToJson(),
+		Context:    ctx.ToJson(),
 	}
 
 	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)

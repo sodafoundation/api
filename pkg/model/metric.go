@@ -24,7 +24,6 @@ type CollectMetricSpec struct {
 
 	// the storage type(driver type) on which the metrics are to be collected
 	DriverType string `json:"driverType,omitempty"`
-
 }
 
 type GetMetricSpec struct {

@@ -24,7 +24,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	data "github.com/opensds/opensds/testutils/collection"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (

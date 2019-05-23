@@ -420,7 +420,6 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 	body, _ := json.Marshal(result)
 	f.SuccessHandle(StatusAccepted, body)
 
-
 	// NOTE:The real file share snapshot creation process.
 	// FileShare snapshot creation request is sent to the Dock. Dock will update file share snapshot status to "available"
 	// after file share snapshot creation complete.
@@ -553,10 +552,10 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareSnapshotOpts{
-		Id:       snapshot.Id,
+		Id:          snapshot.Id,
 		FileshareId: snapshot.FileShareId,
-		Context:  ctx.ToJson(),
-		Profile:  prf.ToJson(),
+		Context:     ctx.ToJson(),
+		Profile:     prf.ToJson(),
 	}
 	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete file share snapshot failed in controller service:", err)

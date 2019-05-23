@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
@@ -164,7 +165,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-    log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
+	log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
 
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
