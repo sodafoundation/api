@@ -52,7 +52,7 @@ type dockServer struct {
 	Driver drivers.VolumeDriver
 	// Metrics driver to collect metrics
 	MetricDriver drivers.MetricDriver
-	
+
 	// FileShareDriver represents the specified backend resource. This field is used
 	// for initializing the specified file share driver.
 	FileShareDriver filesharedrivers.FileShareDriver
@@ -485,6 +485,23 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	}
 
 	return pb.GenericResponseResult(result), nil
+}
+
+// CreateFileShareAcl implements pb.DockServer.CreateFileShare
+func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("dock server receive create file share acl request, vr =", opt)
+
+	fileshare, err := ds.FileShareDriver.CreateFileShareAcl(opt)
+	if err != nil {
+		log.Error("when create file share in dock module:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(fileshare), nil
 }
 
 // CreateFileShare implements pb.DockServer.CreateFileShare

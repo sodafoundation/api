@@ -80,6 +80,11 @@ func (d *Driver) Setup() error {
 
 func (*Driver) Unset() error { return nil }
 
+func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
+	// need to implement
+	return fshare, nil
+}
+
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.FileShareSpec, err error) {
 	//get the server ip for configuration
 	var server = d.conf.TgtBindIp

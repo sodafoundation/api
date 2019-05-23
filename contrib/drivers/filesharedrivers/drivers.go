@@ -36,6 +36,8 @@ type FileShareDriver interface {
 
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
 
+	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
+
 	ListPools() ([]*model.StoragePoolSpec, error)
 
 	DeleteFileShare(opts *pb.DeleteFileShareOpts) (*model.FileShareSpec, error)
