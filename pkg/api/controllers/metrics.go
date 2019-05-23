@@ -56,21 +56,20 @@ var BackupExtension string
 
 func init() {
 
-	// TODO Prakash read these from conf and save to these variables
-	ReloadPath = "/-/reload"
+	ReloadPath = CONF.OsdsApiServer.ConfReloadUrl
 	BackupExtension = ".bak"
 
-	PrometheusConfHome = "/etc/prometheus/"
-	PrometheusUrl = "http://localhost:9090"
-	PrometheusConfFile = "prometheus.yml"
+	PrometheusConfHome = CONF.OsdsApiServer.PrometheusConfHome
+	PrometheusUrl = CONF.OsdsApiServer.PrometheusUrl
+	PrometheusConfFile = CONF.OsdsApiServer.PrometheusConfFile
 
-	AlertmgrConfHome = "/root/alertmanager-0.16.2.linux-amd64/"
-	AlertmgrUrl = "http://localhost:9093"
-	AlertmgrConfFile = "alertmanager.yml"
+	AlertmgrConfHome = CONF.OsdsApiServer.AlertmgrConfHome
+	AlertmgrUrl = CONF.OsdsApiServer.AlertMgrUrl
+	AlertmgrConfFile = CONF.OsdsApiServer.AlertmgrConfFile
 
-	GrafanaConfHome = "/etc/grafana/"
-	GrafanaRestartCmd = "grafana-server"
-	GrafanaConfFile = "grafana.ini"
+	GrafanaConfHome = CONF.OsdsApiServer.GrafanaConfHome
+	GrafanaRestartCmd = CONF.OsdsApiServer.GrafanaRestartCmd
+	GrafanaConfFile = CONF.OsdsApiServer.GrafanaConfFile
 }
 
 func NewMetricsPortal() *MetricsPortal {
