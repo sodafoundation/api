@@ -40,6 +40,8 @@ func init() {
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
 
 	flag.StringVar(&CONF.OsdsLet.PrometheusPushMechanism, "prometheus-push-mechanism", CONF.OsdsLet.PrometheusPushMechanism, "Prometheus push mechanism")
+	flag.StringVar(&CONF.OsdsLet.PushGatewayUrl, "prometheus-push-gateway-url", CONF.OsdsLet.PushGatewayUrl, "Prometheus push gateway URL")
+	flag.StringVar(&CONF.OsdsLet.NodeExporterWatchFolder, "node-exporter-watch-folder", CONF.OsdsLet.NodeExporterWatchFolder, "Node exporter watch folder")
 
 	flag.Parse()
 
