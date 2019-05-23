@@ -51,6 +51,8 @@ type OsdsLet struct {
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 	// how to push metrics to Prometheus ? options are PushGateway or NodeExporter
 	PrometheusPushMechanism string `conf:"prometheus_push_mechanism,NodeExporter"`
+	PushGatewayUrl          string `conf:"prometheus_push_gateway_url,http://localhost:9091"`
+	NodeExporterWatchFolder string `conf:"node_exporter_watch_folder,/root/prom_nodeexporter_folder/"`
 }
 
 type OsdsDock struct {
