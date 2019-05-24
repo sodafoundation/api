@@ -157,6 +157,15 @@ service FileShareController {
     // Delete a file share
     rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
 
+    // Create a file share snapshot
+    rpc CreateFileShareSnapshot (CreateFileShareSnapshotOpts) returns (GenericResponse){}
+
+    //Delete a file share snapshot
+    rpc DeleteFileShareSnapshot (DeleteFileShareSnapshotOpts) returns (GenericResponse){}
+
+    // Create a file share Acl
+    rpc CreateFileShareAcl (CreateFileShareAclOpts) returns (GenericResponse){}
+
 }
 
 service FileShareDock {
@@ -166,6 +175,15 @@ service FileShareDock {
 
     // Delete a file share
     rpc DeleteFileShare (DeleteFileShareOpts) returns (GenericResponse){}
+
+    // Create a file share snapshot
+    rpc CreateFileShareSnapshot (CreateFileShareSnapshotOpts) returns (GenericResponse){}
+
+    //Delete a file share snapshot
+    rpc DeleteFileShareSnapshot (DeleteFileShareSnapshotOpts) returns (GenericResponse){}
+
+    // Create a file share Acl
+    rpc CreateFileShareAcl (CreateFileShareAclOpts) returns (GenericResponse){}
 
 }
 
@@ -704,6 +722,28 @@ message DetachVolumeOpts {
     string context = 4;
 }
 
+// CreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+message CreateFileShareAclOpts {
+    // The uuid of the file share, optional when creating.
+    string id = 1;
+    // The fileshareId
+    string fileshareId = 2;
+    // The description
+    string description = 3;
+    // The type of access. Ex: IP based.
+    string type = 4
+    // The accessCapability for fileshare.
+    repeated string accessCapability = 5
+    // accessTo of the fileshare.
+    repeated string accessTo = 6
+    // The Serialized profile
+    string profile = 7;
+    // The driverName
+    string driverName = 8;
+    // The Context
+    string context = 9;
+}
+
 // CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
 message CreateFileShareOpts {
     // The uuid of the file share, optional when creating.
@@ -728,6 +768,8 @@ message CreateFileShareOpts {
     string context = 12;
     // The Serialized profile
     string profile = 13;
+    // The ExportLocations
+    repeated string exportLocations = 14;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
@@ -745,6 +787,48 @@ message DeleteFileShareOpts {
     string context = 6;
     // The Serialized profile
     string profile = 7;
+    // The name of fileShare
+    string name = 8;
+    // The name of pool
+    string poolname = 9;
+}
+
+// CreateFileShareSnapshotOpts is a structure which indicates all required
+// properties for creating a file share snapshot.
+message CreateFileShareSnapshotOpts {
+    // The uuid of the file share snapshot, optional.
+    string id = 1;
+    // The name of the file share snapshot, required.
+    string name = 2;
+    // The size of the file share that snapshot belongs to, required.
+    int64 size = 3;
+    // The description of the file share snapshot, optional.
+    string description = 4;
+    // The uuid of the file share that snapshot belongs to, required.
+    string fileshareId = 5;
+    // The storage driver type.
+    string driverName = 6;
+    // The Context
+    string context = 7;
+    // The Serialized profile
+    string profile = 8;
+    // The metadata of the fileshare, optional.
+    map<string, string> metadata = 9;
+}
+
+// DeleteFileShareSnapshotOpts is a structure which indicates all required
+// properties for deleting a file share snapshot.
+message DeleteFileShareSnapshotOpts {
+    // The uuid of the file share snapshot, required.
+    string id = 1;
+    // The uuid of the file share that snapshot belongs to, required.
+    string fileshareId = 2;
+    // The storage driver type.
+    string driverName = 3;
+    // The Context
+    string context = 4;
+    // The Serialized profile
+    string profile = 5;
 }
 
 // Generic response, it return:

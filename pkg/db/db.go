@@ -123,6 +123,8 @@ type Client interface {
 
 	GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error)
 
+	GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error)
+
 	ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 
 	ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error)
@@ -213,8 +215,13 @@ type Client interface {
 }
 
 func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
-	file, _ := client.GetVolume(ctx, fileID)
+	file, _ := client.GetFileShare(ctx, fileID)
 	return client.UpdateStatus(ctx, file, status)
+}
+
+func UpdateFileShareSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetFileShareSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {

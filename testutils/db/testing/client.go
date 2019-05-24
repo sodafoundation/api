@@ -12,6 +12,28 @@ type Client struct {
 	mock.Mock
 }
 
+func (_m *Client) GetDefaultProfileFileShare(ctx *context.Context) (*model.ProfileSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *model.ProfileSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) *model.ProfileSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AddCustomProperty provides a mock function with given fields: ctx, prfID, custom
 func (_m *Client) AddCustomProperty(ctx *context.Context, prfID string, custom model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error) {
 	ret := _m.Called(ctx, prfID, custom)
