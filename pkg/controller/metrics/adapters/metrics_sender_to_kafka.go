@@ -15,10 +15,11 @@ package adapters
 
 import (
 	"context"
-	"strconv"
+	"encoding/json"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -45,23 +46,27 @@ func (p *KafkaMetricsSender) Start() {
 				// do the actual sending work here
 				// make a writer that produces to topic-A, using the least-bytes distribution
 				w := kafka.NewWriter(kafka.WriterConfig{
-					Brokers:  []string{"localhost:9092"},
-					Topic:    "test",
+					Brokers:  []string{CONF.OsdsLet.KafkaEndpoint},
+					Topic:    CONF.OsdsLet.KafkaTopic,
 					Balancer: &kafka.LeastBytes{},
 				})
 
-				// get the string ready to be written
-				var finalString = ""
-				//for _,metric := range work.MetricValues{
-				finalString += work.Name + " " + strconv.FormatFloat(work.MetricValues[0].Value, 'f', 2, 64) + "\n"
-
-				w.WriteMessages(context.Background(),
+				// send the whole struct as JSON onto the KAFKA topic
+				byteArr, err := json.Marshal(*work)
+				if err != nil {
+					log.Errorf("error marshaling metrics to json, for kafka topic")
+					return
+				}
+				finalString := string(byteArr)
+				sendErr := w.WriteMessages(context.Background(),
 					kafka.Message{
-						Key:   []byte("Key-A"),
+						Key:   []byte("metricspec"),
 						Value: []byte(finalString),
 					})
-
-				w.Close()
+				if sendErr != nil {
+					log.Errorf("error sending metrics to kafka topic")
+				}
+				_ = w.Close()
 
 				log.Info("GetMetricsSenderToKafka processed metrics")
 

@@ -130,6 +130,10 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 	return &SampleFileShares[0], nil
 }
 
+func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	return &SampleFileSharesAcl[0], nil
+}
+
 // CreateFileShareSnapshot
 func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
 	return &SampleFileShareSnapshots[0], nil
