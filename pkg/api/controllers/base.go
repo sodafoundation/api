@@ -91,12 +91,14 @@ func (b *BasePortal) ErrorHandle(errType int, errMsg string) {
 	}
 
 	b.Ctx.Output.SetStatus(errType)
+	b.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
 	b.Ctx.Output.Body(errBody)
 	log.Error(errMsg)
 }
 
 func (b *BasePortal) SuccessHandle(status int, body []byte) {
 	b.Ctx.Output.SetStatus(status)
+	b.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
 	if body != nil {
 		b.Ctx.Output.Body(body)
 	}
