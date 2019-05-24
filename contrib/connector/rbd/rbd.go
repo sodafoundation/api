@@ -43,27 +43,24 @@ func init() {
 
 func (*RBD) Attach(conn map[string]interface{}) (string, error) {
 	if _, ok := conn["name"]; !ok {
-		return "", os.ErrInvalid
+		return "", fmt.Errorf("cann't get name in connection")
 	}
 
-	name := conn["name"].(string)
-	fields := strings.Split(name, "/")
-	if len(fields) != 2 {
-		return "", os.ErrInvalid
+	name, ok := conn["name"].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid connection name %v", conn["name"])
+	}
+	hosts, ok := conn["hosts"].([]string)
+	if !ok {
+		return "", fmt.Errorf("invalid connection hosts %v", conn["hosts"])
 	}
 
-	if _, ok := conn["hosts"].([]interface{}); !ok {
-		return "", os.ErrInvalid
+	ports, ok := conn["ports"].([]string)
+	if !ok {
+		return "", fmt.Errorf("invalid connection ports %v", conn["hosts"])
 	}
-	hosts := conn["hosts"].([]interface{})
 
-	if _, ok := conn["ports"].([]interface{}); !ok {
-		return "", os.ErrInvalid
-	}
-	ports := conn["ports"].([]interface{})
-
-	poolName, imageName := fields[0], fields[1]
-	device, err := mapDevice(poolName, imageName, hosts, ports)
+	device, err := mapDevice(name, hosts, ports)
 	if err != nil {
 		return "", err
 	}
@@ -75,15 +72,11 @@ func (*RBD) Detach(conn map[string]interface{}) error {
 	if _, ok := conn["name"]; !ok {
 		return os.ErrInvalid
 	}
-
-	name := conn["name"].(string)
-	fields := strings.Split(name, "/")
-	if len(fields) != 2 {
-		return os.ErrInvalid
+	name, ok := conn["name"].(string)
+	if !ok {
+		return fmt.Errorf("invalid connection name %v", conn["name"])
 	}
-
-	poolName, imageName := fields[0], fields[1]
-	device, err := findDevice(poolName, imageName, 1)
+	device, err := findDevice(name, 1)
 	if err != nil {
 		return err
 	}
@@ -103,8 +96,23 @@ func (*RBD) GetInitiatorInfo() (string, error) {
 	return hostName, nil
 }
 
-func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, error) {
-	devName, err := findDevice(poolName, imageName, 1)
+func parseName(name string) (poolName, imageName, snapName string, err error) {
+	fields := strings.Split(name, "/")
+	if len(fields) != 2 {
+		err = fmt.Errorf("invalid connection name %s", name)
+		return
+	}
+	poolName, imageName, snapName = fields[0], fields[1], "-"
+
+	imgAndSnap := strings.Split(fields[1], "@")
+	if len(imgAndSnap) == 2 {
+		imageName, snapName = imgAndSnap[0], imgAndSnap[1]
+	}
+	return
+}
+
+func mapDevice(name string, hosts, ports []string) (string, error) {
+	devName, err := findDevice(name, 1)
 	if err == nil {
 		return devName, nil
 	}
@@ -113,13 +121,13 @@ func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, 
 	exec.Command("modprobe", "rbd").CombinedOutput()
 
 	for i := 0; i < len(hosts); i++ {
-		_, err = exec.Command("rbd", "map", imageName, "--pool", poolName).CombinedOutput()
+		_, err = exec.Command("rbd", "map", name).CombinedOutput()
 		if err == nil {
 			break
 		}
 	}
 
-	devName, err = findDevice(poolName, imageName, 10)
+	devName, err = findDevice(name, 10)
 	if err != nil {
 		return "", err
 	}
@@ -127,9 +135,14 @@ func mapDevice(poolName, imageName string, hosts, ports []interface{}) (string, 
 	return devName, nil
 }
 
-func findDevice(poolName, imageName string, retries int) (string, error) {
+func findDevice(name string, retries int) (string, error) {
+	poolName, imageName, snapName, err := parseName(name)
+	if err != nil {
+		return "", err
+	}
+
 	for i := 0; i < retries; i++ {
-		if name, err := findDeviceTree(poolName, imageName); err == nil {
+		if name, err := findDeviceTree(poolName, imageName, snapName); err == nil {
 			if _, err := os.Stat(rbdDev + name); err != nil {
 				return "", err
 			}
@@ -143,7 +156,7 @@ func findDevice(poolName, imageName string, retries int) (string, error) {
 	return "", os.ErrNotExist
 }
 
-func findDeviceTree(poolName, imageName string) (string, error) {
+func findDeviceTree(poolName, imageName, snapName string) (string, error) {
 	fi, err := ioutil.ReadDir(rbdDevicePath)
 	if err != nil && err != os.ErrNotExist {
 		return "", err
@@ -157,17 +170,26 @@ func findDeviceTree(poolName, imageName string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		if strings.TrimSpace(string(content)) != imageName {
+			continue
+		}
 
-		if strings.TrimSpace(string(content)) == imageName {
-			poolPath := filepath.Join(rbdDevicePath, f.Name(), "pool")
-			content, err := ioutil.ReadFile(poolPath)
-			if err != nil {
-				return "", err
-			}
+		poolPath := filepath.Join(rbdDevicePath, f.Name(), "pool")
+		content, err = ioutil.ReadFile(poolPath)
+		if err != nil {
+			return "", err
+		}
+		if strings.TrimSpace(string(content)) != poolName {
+			continue
+		}
 
-			if strings.TrimSpace(string(content)) == poolName {
-				return f.Name(), err
-			}
+		snapPath := filepath.Join(rbdDevicePath, f.Name(), "current_snap")
+		content, err = ioutil.ReadFile(snapPath)
+		if err != nil {
+			return "", err
+		}
+		if strings.TrimSpace(string(content)) == snapName {
+			return f.Name(), nil
 		}
 	}
 
