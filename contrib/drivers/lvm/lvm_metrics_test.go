@@ -178,9 +178,9 @@ func TestCollectMetrics(t *testing.T) {
 		}
 	}
 	if !b {
-		fmt.Printf("expected metric spec")
+		t.Log("expected metric spec")
 		printMetricSpec(expectedMetrics)
-		fmt.Printf("returned metric spec")
+		t.Log("returned metric spec")
 		printMetricSpec(retunMetrics)
 	}
 }

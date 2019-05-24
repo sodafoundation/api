@@ -1077,7 +1077,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 			log.Infof("driver found driver: %s", d.DriverName)
 			dockInfo, err := db.C.GetDock(ctx, dockSpec[i].BaseModel.Id)
 			if err != nil {
-				//log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
+				log.Errorf("error %s when search dock in db by dock id: %s", err.Error(), dockSpec[i].BaseModel.Id)
 				return pb.GenericResponseError(err), err
 
 			}

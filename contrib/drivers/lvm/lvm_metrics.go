@@ -216,8 +216,6 @@ func convert(instanceID string) string {
 func formatDiskName(instanceID string) string {
 	// systat(sar/iostat) returns only disk name. We need to add /dev/ to match with pvs output
 	instanceID = strings.Replace(instanceID, "/dev/", "", -1)
-	//add opensds--volumes--default-- to the start of volume
-
 	return instanceID
 }
 func (d *MetricDriver) Setup() error {
