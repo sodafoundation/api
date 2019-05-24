@@ -23,18 +23,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/opensds/opensds/contrib/backup"
-	"github.com/opensds/opensds/contrib/connector"
-	"github.com/opensds/opensds/pkg/utils"
 	"os"
 	"runtime"
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/backup"
+	"github.com/opensds/opensds/contrib/connector"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -111,7 +111,8 @@ func (s *SrcMgr) GetIoctx(poolName string) (*rados.IOContext, error) {
 	return s.ioctx, err
 }
 
-func (s *SrcMgr) GetImage(poolName string, imgName string, args ...interface{}) (*rbd.Image, error) {
+// this function only used for open origin image rather than clone image or copy image
+func (s *SrcMgr) GetOriginImage(poolName string, imgName string, args ...interface{}) (*rbd.Image, error) {
 	if s.img != nil {
 		return s.img, nil
 	}
@@ -159,13 +160,16 @@ func (d *Driver) Setup() error {
 
 func (d *Driver) Unset() error { return nil }
 
-func (d *Driver) doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName string, mgr *SrcMgr) error {
-	if mgr == nil {
-		mgr = NewSrcMgr(d.conf)
-		defer mgr.destroy()
-	}
+func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) error {
+	mgr := NewSrcMgr(d.conf)
+	defer mgr.destroy()
 
-	img, err := mgr.GetImage(poolName, srcImgName, srcSnapName)
+	poolName := opt.GetPoolName()
+	srcSnapName := EncodeName(opt.GetSnapshotId())
+	srcImgName := opt.GetMetadata()[KImageName]
+	destImgName := EncodeName(opt.GetId())
+
+	img, err := mgr.GetOriginImage(poolName, srcImgName, srcSnapName)
 	if err != nil {
 		return err
 	}
@@ -183,23 +187,25 @@ func (d *Driver) doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, d
 		return err
 	}
 
-	_, err = img.Clone(srcSnapName, ioctx, destImgName, rbd.RbdFeatureLayering, 20)
+	destImg, err := img.Clone(srcSnapName, ioctx, destImgName, rbd.RbdFeatureLayering, 20)
 	if err != nil {
-		log.Errorf("create volume (%s) from snapshot (%s) failed, %v",
-			srcImgName, srcSnapName, err)
+		log.Errorf("snapshot clone failed:%v", err)
 		return err
 	}
-	log.Infof("create volume (%s) from snapshot (%s) success",
-		srcImgName, srcSnapName)
-	return nil
-}
 
-func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) error {
-	poolName := opt.GetPoolName()
-	srcSnapName := EncodeName(opt.GetSnapshotId())
-	srcImgName := opt.GetMetadata()[KImageName]
-	destImgName := EncodeName(opt.GetId())
-	return d.doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName, nil)
+	// flatten dest image
+	if err := destImg.Open(); err != nil {
+		log.Error("new image open failed:", err)
+		return err
+	}
+	defer destImg.Close()
+	if err := destImg.Flatten(); err != nil {
+		log.Errorf("new image flatten failed, %v", err)
+		return err
+	}
+
+	log.Infof("create volume (%s) from snapshot (%s) success", srcImgName, srcSnapName)
+	return nil
 }
 
 func (d *Driver) createVolume(opt *pb.CreateVolumeOpts) error {
@@ -268,7 +274,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	mgr := NewSrcMgr(d.conf)
 	defer mgr.destroy()
 
-	img, err := mgr.GetImage(opt.GetPoolName(), EncodeName(opt.GetId()))
+	img, err := mgr.GetOriginImage(opt.GetPoolName(), EncodeName(opt.GetId()))
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +338,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		DriverVolumeType: RBDProtocol,
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
-			"name":         poolName + "/" + opensdsPrefix + opt.GetVolumeId(),
+			"name":         poolName + "/" + EncodeName(opt.GetVolumeId()),
 			"cluster_name": "ceph",
 			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    opt.GetVolumeId(),
@@ -346,24 +352,13 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 
 func (d *Driver) uploadSnapshotToCloud(opt *pb.CreateVolumeSnapshotOpts, bucket string, mgr *SrcMgr) (map[string]string, error) {
 
-	poolName := opt.GetMetadata()[KPoolName]
-	srcSnapName := EncodeName(opt.GetId())
-	srcImgName := EncodeName(opt.GetVolumeId())
-	tmpImgId := uuid.NewV4().String() + "-tmp"
-	destImgName := EncodeName(tmpImgId)
-	if err := d.doCreateVolumeFromSnapshot(poolName, srcImgName, srcSnapName, destImgName, mgr); err != nil {
-		return nil, err
-	}
-	defer d.deleteVolume(poolName, tmpImgId, mgr)
-
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Errorf("get host name filed, %v", err)
 	}
-
-	createOpt := &pb.CreateVolumeAttachmentOpts{
-		VolumeId: tmpImgId,
-		Metadata: opt.GetMetadata(),
+	createOpt := &pb.CreateSnapshotAttachmentOpts{
+		SnapshotId: opt.GetId(),
+		Metadata:   opt.GetMetadata(),
 		HostInfo: &pb.HostInfo{
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
@@ -372,7 +367,8 @@ func (d *Driver) uploadSnapshotToCloud(opt *pb.CreateVolumeSnapshotOpts, bucket 
 		},
 	}
 
-	info, err := d.InitializeConnection(createOpt)
+	createOpt.Metadata[KImageName] = EncodeName(opt.GetVolumeId())
+	info, err := d.InitializeSnapshotConnection(createOpt)
 	if err != nil {
 		return nil, err
 	}
@@ -510,7 +506,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 	defer mgr.destroy()
 
 	poolName := opt.GetMetadata()[KPoolName]
-	img, err := mgr.GetImage(poolName, EncodeName(opt.GetVolumeId()))
+	img, err := mgr.GetOriginImage(poolName, EncodeName(opt.GetVolumeId()))
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +528,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		updateMetadata, err := d.uploadSnapshotToCloud(opt, bucket, mgr)
 		if err != nil {
 			// rollback
-			//d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), mgr)
+			d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), mgr)
 			return nil, err
 		}
 		metadata = utils.MergeStringMaps(metadata, updateMetadata)
@@ -563,9 +559,10 @@ func (d *Driver) deleteSnapshot(poolName, volumeId, snapshotId string, mgr *SrcM
 		defer mgr.destroy()
 	}
 
-	img, err := mgr.GetImage(poolName, volumeId, snapshotId)
+	img, err := mgr.GetOriginImage(poolName, EncodeName(volumeId), EncodeName(snapshotId))
 	if err == rbd.RbdErrorNotFound {
-		log.Warningf("Specified snapshot (%s) does not exist, ignore it", snapshotId)
+		log.Warningf("Specified snapshot (pool:%s,volume:%s,snapshot:%s) does not exist, ignore it",
+			poolName, volumeId, snapshotId)
 		return nil
 	}
 	if err != nil {
@@ -586,7 +583,6 @@ func (d *Driver) deleteSnapshot(poolName, volumeId, snapshotId string, mgr *SrcM
 		return err
 	}
 
-	log.Infof("Delete snapshot (%s) success", snapshotId)
 	return nil
 }
 
@@ -597,8 +593,15 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 			return err
 		}
 	}
+
 	poolName := opt.GetMetadata()[KPoolName]
-	return d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), nil)
+	if err := d.deleteSnapshot(poolName, opt.GetVolumeId(), opt.GetId(), nil); err != nil {
+		log.Infof("Delete snapshot (%s) failed", opt.GetId())
+		return err
+	}
+
+	log.Infof("Delete snapshot (%s) success", opt.GetId())
+	return nil
 }
 
 type TotalStats struct {
@@ -669,15 +672,23 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
 	poolName, ok := opt.GetMetadata()[KPoolName]
 	if !ok {
-		err := errors.New("Failed to find poolName in snapshot metadata!")
+		err := errors.New("Failed to find poolName in snapshot attachment metadata!")
 		log.Error(err)
 		return nil, err
 	}
+
+	imgName, ok := opt.GetMetadata()[KImageName]
+	if !ok {
+		err := errors.New("Failed to find imageName in snapshot attachment metadata!")
+		log.Error(err)
+		return nil, err
+	}
+
 	return &model.ConnectionInfo{
 		DriverVolumeType: RBDProtocol,
 		ConnectionData: map[string]interface{}{
 			"secret_type":  "ceph",
-			"name":         poolName + "/" + opensdsPrefix + opt.GetSnapshotId(),
+			"name":         fmt.Sprintf("%s/%s@%s", poolName, imgName, EncodeName(opt.GetSnapshotId())),
 			"cluster_name": "ceph",
 			"hosts":        []string{opt.GetHostInfo().Host},
 			"volume_id":    opt.GetSnapshotId(),
