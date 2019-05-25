@@ -87,7 +87,7 @@ var (
 			},
 			Name:             "sample-pool-01",
 			Description:      "This is the first sample storage pool for testing",
-			StorageType: 	  "block",
+			StorageType:      "block",
 			TotalCapacity:    int64(100),
 			FreeCapacity:     int64(90),
 			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",

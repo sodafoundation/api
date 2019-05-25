@@ -30,12 +30,12 @@ import (
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
 	fd "github.com/opensds/opensds/contrib/drivers/filesharedrivers"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
 

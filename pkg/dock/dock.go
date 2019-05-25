@@ -477,7 +477,7 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 
 	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
 
-	result, err := ds.MetricDriver.CollectMetrics(opt.MetricNames, opt.InstanceId)
+	result, err := ds.MetricDriver.CollectMetrics()
 
 	if err != nil {
 		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())

@@ -268,9 +268,8 @@ func (m *MetricsPortal) CollectMetrics() {
 	defer m.CtrClient.Close()
 
 	opt := &pb.CollectMetricsOpts{
-		InstanceId:  collMetricSpec.InstanceId,
-		MetricNames: collMetricSpec.Metrics,
-		Context:     ctx.ToJson(),
+		DriverName: collMetricSpec.DriverType,
+		Context:    ctx.ToJson(),
 	}
 
 	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)
