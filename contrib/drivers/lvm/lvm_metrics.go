@@ -142,8 +142,14 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	}
 	// discover lvm volumes
 	volumeList, err := d.cli.DiscoverVolumes()
+	if err != nil {
+		log.Errorf("discover volume function returned error, err: %v", err)
+	}
 	// discover lvm physical volumes
 	DiskList, err := d.cli.DiscoverDisks()
+	if err != nil {
+		log.Errorf("discover disk returned error, err: %v", err)
+	}
 	metricMap, labelMap, err := d.cli.CollectMetrics(supportedMetrics)
 	if err != nil {
 		log.Errorf("collect metrics returned error, err: %v", err)
