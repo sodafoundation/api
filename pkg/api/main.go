@@ -47,7 +47,6 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 			fmt.Println("If https is enabled in hotpot, please ensure key file and cert file of the hotpot are not empty.")
 			return
 		}
-
 		// beego https config
 		beego.BConfig.Listen.EnableHTTP = false
 		beego.BConfig.Listen.EnableHTTPS = true
@@ -68,7 +67,7 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 		beego.BeeApp.Server.TLSConfig = tlsConfig
 	}
 
-	beego.BConfig.Listen.ServerTimeOut = constants.BeegoServerTimeOut
+	beego.BConfig.Listen.ServerTimeOut = apiServerCfg.BeegoServerTimeOut
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.EnableErrorsShow = false
 	beego.BConfig.EnableErrorsRender = false
