@@ -53,11 +53,26 @@ func (c *Cli) GetExportLocation(share_name, ip string) string {
 		glog.Errorf("this is not a valid ip:")
 		return ""
 	}
-
 	var exportLocation string
 	sharePath := path.Join("var/", share_name)
 	exportLocation = fmt.Sprintf("%s:/%s", server, strings.Replace(sharePath, "-", "_", -1))
 	return exportLocation
+}
+
+func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
+	var accesstoAndMount string
+	sharePath := path.Join("var/", fname)
+	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"exportfs",
+		"-o",
+		accesscapability,
+		accesstoAndMount,
+	}
+	_, err := c.execute(cmd...)
+
+	return err
 }
 
 func (c *Cli) UnMount(dirName string) error {
@@ -85,6 +100,17 @@ func (c *Cli) CreateDirectory(dirName string) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"mkdir",
+		dirName,
+	}
+	_, err := c.execute(cmd...)
+	return err
+}
+
+func (c *Cli) SetPermission(dirName string) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"chmod",
+		"777",
 		dirName,
 	}
 	_, err := c.execute(cmd...)

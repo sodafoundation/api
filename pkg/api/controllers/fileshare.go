@@ -44,17 +44,18 @@ type FileSharePortal struct {
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
 	ctx := c.GetContext(f.Ctx)
-	var fileshareacl = &model.FileShareAclSpec{
+	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
 	// Unmarshal the request body
-	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(fileshareacl); err != nil {
+	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshareacl); err != nil {
 		reason := fmt.Sprintf("parse fileshare access rules request body failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
 		return
 	}
-	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), fileshareacl)
+	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
+
 	if err != nil {
 		reason := fmt.Sprintf("create access rules for fileshare failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
@@ -81,13 +82,14 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
-		Id:               result.Id,
+		FileShareId:      result.FileShareId,
 		Description:      result.Description,
 		Type:             result.Type,
 		AccessCapability: result.AccessCapability,
 		AccessTo:         result.AccessTo,
 		Context:          ctx.ToJson(),
 	}
+
 	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
 		log.Error("create file share acl failed in controller service:", err)
 		return
@@ -193,6 +195,7 @@ func (f *FileSharePortal) CreateFileShare() {
 		Metadata:         result.Metadata,
 		Context:          ctx.ToJson(),
 	}
+
 	if _, err = f.CtrClient.CreateFileShare(context.Background(), opt); err != nil {
 		log.Error("create file share failed in controller service:", err)
 		return

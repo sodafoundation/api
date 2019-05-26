@@ -742,6 +742,8 @@ message CreateFileShareAclOpts {
     string driverName = 8;
     // The Context
     string context = 9;
+    // The Name
+    string Name = 10;
 }
 
 // CreateFileShareOpts is a structure which indicates all required properties for creating a file share.

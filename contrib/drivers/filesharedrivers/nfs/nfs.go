@@ -15,7 +15,6 @@
 package nfs
 
 import (
-	"fmt"
 	"path"
 
 	log "github.com/golang/glog"
@@ -45,6 +44,8 @@ const (
 	KLvsPath       = "lvsPath"
 	KFileshareName = "nfsFileshareName"
 	KFileshareID   = "nfsFileshareID"
+	AccessLevelRo  = "ro"
+	AccessLevelRw  = "rw"
 )
 
 type NFSConfig struct {
@@ -81,7 +82,28 @@ func (d *Driver) Setup() error {
 func (*Driver) Unset() error { return nil }
 
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
-	// need to implement
+	var access string
+	var accessTo []string
+	var accessCapability []string
+	// Get accessto list
+	accessTo = opt.GetAccessTo()
+	// get accessCapability list
+	accessCapability = opt.GetAccessCapability()
+	// get fileshare name
+	fname := opt.GetName()
+
+	for _, value := range accessCapability {
+		if value == "w" {
+			access = AccessLevelRw
+			break
+		} else {
+			access = AccessLevelRo
+		}
+	}
+
+	for _, server := range accessTo {
+		err = d.cli.CreateAccess(server, access, fname)
+	}
 	return fshare, nil
 }
 
@@ -126,10 +148,16 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		log.Error("failed to mount a directory:", err)
 		return nil, err
 	}
+
+	// Set permission to directory
+	if err := d.cli.SetPermission(dirName); err != nil {
+		log.Error("failed to set permission:", err)
+		return nil, err
+	}
+
 	// get export location of fileshare
 	var location []string
 	location = []string{d.cli.GetExportLocation(name, server)}
-	fmt.Println("locations :", location)
 	if len(location) == 0 {
 		log.Error("failed to get exportlocation:", err)
 		return nil, err

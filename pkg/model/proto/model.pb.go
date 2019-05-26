@@ -2668,6 +2668,12 @@ type CreateFileShareAclOpts struct {
 	DriverName string `protobuf:"bytes,8,opt,name=driverName,proto3" json:"driverName,omitempty"`
 	// The Context
 	Context string `protobuf:"bytes,9,opt,name=context,proto3" json:"context,omitempty"`
+	// The name of the file share, required.
+	Name string `protobuf:"bytes,10,opt,name=name,proto3" json:"name,omitempty"`
+
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *CreateFileShareAclOpts) Reset()         { *m = CreateFileShareAclOpts{} }
@@ -2719,6 +2725,13 @@ func (m *CreateFileShareAclOpts) GetAccessTo() []string {
 func (m *CreateFileShareAclOpts) GetContext() string {
 	if m != nil {
 		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetName() string {
+	if m != nil {
+		return m.Name
 	}
 	return ""
 }
@@ -2945,11 +2958,8 @@ func (m *DeleteFileShareOpts) GetPoolId() string {
 
 func (m *DeleteFileShareOpts) GetMetadata() map[string]string {
 	if m != nil {
-		fmt.Println("in GetMetadata true")
-		fmt.Println("m.Metadata==:", m.Metadata)
 		return m.Metadata
 	}
-	fmt.Println("in GetMetadata False")
 	return nil
 }
 
@@ -5131,7 +5141,6 @@ func (c *fileShareControllerClient) CreateFileShare(ctx context.Context, in *Cre
 
 func (c *fileShareControllerClient) CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
-	fmt.Println("....in line no 5121")
 	err := c.cc.Invoke(ctx, "/proto.FileShareController/CreateFileShareAcl", in, out, opts...)
 	if err != nil {
 		return nil, err
