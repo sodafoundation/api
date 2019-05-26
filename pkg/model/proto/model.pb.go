@@ -3110,7 +3110,10 @@ type DeleteFileShareSnapshotOpts struct {
 	// The Context
 	Context string `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
 	// The Serialized profile
-	Profile              string   `protobuf:"bytes,5,opt,name=profile,proto3" json:"profile,omitempty"`
+	Profile string `protobuf:"bytes,5,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata map[string]string `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3174,6 +3177,13 @@ func (m *DeleteFileShareSnapshotOpts) GetProfile() string {
 		return m.Profile
 	}
 	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
 }
 
 // Generic response, it return:

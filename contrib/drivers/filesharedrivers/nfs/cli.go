@@ -261,3 +261,53 @@ func (c *Cli) ListVgs() (*[]VolumeGroup, error) {
 	}
 	return &vgs, nil
 }
+
+func (c *Cli) CreateLvSnapshot(name, sourceLvName, vg string, size int64) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvcreate",
+		"-n", name,
+		"-L", sizeStr(size),
+		"-p", "r",
+		"-s", path.Join("/dev", vg, sourceLvName),
+	}
+	fmt.Println("cmd==:", cmd)
+	if _, err := c.execute(cmd...); err != nil {
+		return err
+	}
+	return nil
+}
+
+// delete volume or snapshot
+func (c *Cli) DeleteFileShareSnapshots(name, vg string) error {
+	// LV removal seems to be a race with other writers so we enable retry deactivation
+	lvmConfig := "activation { retry_deactivation = 1} "
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvremove",
+		"--config", lvmConfig,
+		"-f",
+		path.Join(vg, name),
+	}
+
+	if out, err := c.execute(cmd...); err != nil {
+		glog.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
+			strings.Join(cmd, " "), out)
+		// run_udevadm_settle
+		c.execute("udevadm", "settle")
+
+		lvmConfig += "devices { ignore_suspended_devices = 1}"
+		cmd := []string{
+			"env", "LC_ALL=C",
+			"lvremove",
+			"--config", lvmConfig,
+			"-f",
+			path.Join(vg, name),
+		}
+		if _, err := c.execute(cmd...); err != nil {
+			return err
+		}
+		glog.Infof("Successfully deleted fileshare snapshot: %s after udev settle.", name)
+	}
+	return nil
+}
