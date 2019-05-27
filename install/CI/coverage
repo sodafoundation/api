@@ -17,7 +17,7 @@
 set -e
 
 MODEL_PACKAGE=github.com/opensds/opensds/pkg/model
-PROTOBUF_PACKAGE=github.com/opensds/opensds/pkg/dock/proto
+PROTOBUF_PACKAGE=github.com/opensds/opensds/pkg/model/proto
 
 n=1
 for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/... ./contrib/...); do

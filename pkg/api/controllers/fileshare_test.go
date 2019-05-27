@@ -123,7 +123,7 @@ func TestListFileShares(t *testing.T) {
 			"sortDir": {"asc"},
 			"sortKey": {"name"},
 		}
-		mockClient.On("ListFileShareWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		mockClient.On("ListFileSharesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/file/shares?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -225,7 +225,6 @@ func TestUpdateFileShare(t *testing.T) {
 		assertTestResult(t, w.Code, 500)
 	})
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //                         Tests for fileshare snapshot                          //
