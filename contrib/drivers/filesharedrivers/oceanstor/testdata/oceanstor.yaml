@@ -1,22 +1,21 @@
 authOptions:
-  username: "du_jun"
+  username: "mingyanzhen"
   password: "Admin@123"
   # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
   EnableEncrypted: false
   # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
   PwdEncrypter: "aes"
-  uri: "https://8.46.193.108:8088/deviceManager/rest"
+  uri: "https://8.46.191.56:8088/deviceManager/rest"
 
 pool:
-  opensds_pool:
-    storageType: block
-    availabilityZone: dorado1
+  opensds_file:
+    storageType: file
+    availabilityZone: fileshare
     extras:
       dataStorage:
-        provisioningPolicy: Thin
-        isSpaceEfficient: true
+        storageAccessCapability: ["Read","Write","Execute"]          
       ioConnectivity:
-        accessProtocol: iscsi
+        accessProtocol: NFS
         maxIOPS: 1000
       advanced:
         diskType: SSD

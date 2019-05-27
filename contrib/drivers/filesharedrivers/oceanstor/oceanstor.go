@@ -1,259 +1,254 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package oceanstor
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
+	"regexp"
 	"strconv"
-	"strings"
+	"sync"
 	"time"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	model "github.com/opensds/opensds/pkg/model"
-	pb "github.com/opensds/opensds/pkg/model/fileshareproto"
-	//	"github.com/opensds/opensds/pkg/utils/config"
+	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/satori/go.uuid"
 )
 
-type Driver struct {
-	conf   *Config
-	client *Cli
-}
-
-type AuthOptions struct {
-	Username        string `yaml:"username"`
-	Password        string `yaml:"password"`
-	Uri             string `yaml:"uri"`
-	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
-	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
-}
-
-type Config struct {
-	AuthOptions `yaml:"authOptions"`
-	Pool        map[string]PoolProperties `yaml:"pool,flow"`
-}
-
-const (
-	KFileshareName = "OceanFileshareName"
-	KFileshareID   = "OceanFileshareID"
-)
+var once sync.Once
 
 func (d *Driver) Setup() error {
-	if d.client != nil {
-		return nil
-	}
-	conf := &Config{}
+	var err error
 
-	d.conf = conf
+	once.Do(func() {
+		d.IniConf()
+		cli, err := newRestCommon(d.Config)
+		if err == nil {
+			d.Client = cli
+			log.Info("get oceanstor client successfully")
+		}
+	})
 
-	path := ""
-	if path == "" {
-		path = "./testdata/oceanstor.yaml"
-	}
-
-	Parse(conf, path)
-
-	cli, err := newRestCommon(conf)
 	if err != nil {
-		log.Errorf("Get new client failed, %v", err)
-		return err
+		msg := fmt.Sprintf("get new client failed: %v", err)
+		log.Error(msg)
+		return errors.New(msg)
 	}
 
-	d.client = cli
-
-	log.Info("Get new client success")
 	return nil
+}
+
+func (d *Driver) IniConf() {
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanstor.ConfigPath
+	if path == "" {
+		path = DefaultConfPath
+	}
+
+	conf := &Config{}
+	d.Config = conf
+	Parse(conf, path)
 }
 
 func (d *Driver) Unset() error {
+
+	if err := d.logout(); err != nil {
+		msg := fmt.Sprintf("logout failed: %v", err)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
 	return nil
 }
-
-func EncodeName(id string) string {
-	return NamePrefix + "-" + id
-}
-
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
-	// need tenantID, shareProto parameters
-	var fs FileSystemData
-
-	fsName := defaultFileSystem
-
-	// Parameter check
+	fsName := opt.GetName()
+	size := opt.GetSize()
+	prf := opt.GetProfile()
 	poolID := opt.GetPoolName()
-	tenantID := ""
 	shareProto := ""
 
-	if poolID == "" {
-		msg := "pool id cannot be empty"
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	if shareProto != CIFS && shareProto != NFS {
-		return nil, errors.New(shareProto + " protocol is not supported, support is NFS and CIFS")
-	}
-
-	// create filesystem if not exist
-	fsList, err := d.client.getFileSystemByName(fsName)
+	err := d.parameterCheck(poolID, prf, size, &fsName, &shareProto)
 	if err != nil {
-		msg := fmt.Sprintf("get filesystem %s by name failed, %v", fsName, err)
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	// create file system
+	fs, err := d.createFileSystemIfNotExist(fsName, poolID, size)
+	if err != nil {
+		msg := fmt.Sprintf("create file system failed: %v", err)
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
 
-	if len(fsList.Data) == 0 {
-		fsObj, err := d.client.createFileSystem(fsName, poolID, tenantID)
-		if err != nil {
-			//NOTE
-			//d.client.deleteFileSystem(name)
-			msg := fmt.Sprintf("create file system %s failed, %v", fsName, err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-
-		err = d.checkFsStatus(fsObj)
-		if err != nil {
-			return nil, err
-		}
-
-		fs = fsObj.FileSystemData
-		log.Infof("filesystem %s creation success", fsName)
-	} else {
-		fs = fsList.Data[0]
-		log.Infof("filesystem %s already exist", fsName)
+	shareDriver := NewProtocol(shareProto, d.Client)
+	// create file share if not exist
+	shareID, err := d.createShareIfNotExist(fsName, fs.ID, shareDriver)
+	if err != nil {
+		return nil, err
 	}
 
-	var NFSShare *NFSShareData
-	var CIFSShare *CIFSShareData
-	var shareID, shareName string
-	// create file share based on protocol
-	if shareProto == NFS {
-		// create nfs share if not exist
-		NFSShare, err = d.client.getNFSShare(fsName)
-		if err != nil {
-			msg := fmt.Sprintf("get nfs share /%s/ failed, %v", fsName, err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-		fmt.Println(NFSShare, err)
-		if NFSShare == nil {
-			NFSShare, err = d.client.createNFSShare(fsName, fs.ID)
-			if err != nil {
-				//d.client.deleteShare()
-				msg := fmt.Sprintf("create nfs share /%s/ failed, %v", fsName, err)
-				log.Error(msg)
-				return nil, errors.New(msg)
-			}
-			log.Infof("nfs share /%s/ creation success", fsName)
-		} else {
-			log.Infof("nfs share /%s/ already exist", fsName)
-		}
-		shareID = NFSShare.ID
-		shareName = NFSShare.Name
+	// get location
+	location, err := d.getShareLocation(fsName, shareDriver)
+	if err != nil {
+		msg := fmt.Sprintf("get share location failed: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
 	}
 
-	if shareProto == CIFS {
-		// create cifs share if not exist
-		CIFSShare, err = d.client.getCIFSShare(fsName)
-		if err != nil {
-			msg := fmt.Sprintf("get cifs share /%s/ failed, %v", fsName, err)
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-
-		if CIFSShare == nil {
-			CIFSShare, err = d.client.createCIFSShare(fsName, fs.ID)
-			if err != nil {
-				//d.client.deleteShare()
-				msg := fmt.Sprintf("create cifs share /%s/ failed, %v", fsName, err)
-				log.Error(msg)
-				return nil, errors.New(msg)
-			}
-
-			log.Infof("cifs share /%s/ creation success", fsName)
-		} else {
-			log.Infof("cifs share /%s/ already exist", fsName)
-		}
-		shareID = CIFSShare.ID
-		shareName = CIFSShare.Name
-	}
-
-	u, _ := url.Parse(d.conf.Uri)
-	ip := strings.Split(u.Host, ":")[0]
-	location := d.getLocationPath(fsName, shareProto, ip)
-
-	return &model.FileShareSpec{
+	share := &model.FileShareSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
 		Name:             opt.GetName(),
-		Size:             opt.GetSize(),
+		Protocols:        []string{shareProto},
 		Description:      opt.GetDescription(),
+		Size:             size,
 		AvailabilityZone: opt.GetAvailabilityZone(),
-		TenantId:         "123",
 		PoolId:           poolID,
-		ExportLocations:  []string{location},
-		Metadata: map[string]string{
-			KFileshareName: shareName,
-			KFileshareID:   shareID,
-		},
-	}, nil
+		ExportLocations:  location,
+		Metadata:         map[string]string{FileShareName: fsName, FileShareID: shareID},
+	}
+	return share, nil
 }
 
-func (d *Driver) getLocationPath(sharePath, shareProto, ip string) string {
-	var location string
-	if shareProto == NFS {
-		if isIPv6(ip) {
-			location = fmt.Sprintf("[%s]:/%s", ip, strings.Replace(sharePath, "-", "_", -1))
-		} else {
-			location = fmt.Sprintf("%s:/%s", ip, strings.Replace(sharePath, "-", "_", -1))
+func (d *Driver) parameterCheck(poolID, prf string, size int64, fsName, shareProto *string) error {
+	// Parameter check
+	if poolID == "" {
+		msg := "pool id cannot be empty"
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	if *fsName == "" {
+		log.Infof("use default file system name %s", defaultFileSystem)
+		*fsName = defaultFileSystem
+	}
+
+	proto, err := d.GetProtoFromProfile(prf)
+	if err != nil {
+		return err
+	}
+
+	if !checkProtocol(proto) {
+		return fmt.Errorf("%s protocol is not supported, support is NFS and CIFS", proto)
+	}
+
+	*shareProto = proto
+
+	if size == 0 {
+		return errors.New("size must be greater than 0")
+	}
+
+	return nil
+}
+
+func (d *Driver) createShareIfNotExist(fsName, fsID string, shareDriver Protocol) (string, error) {
+	sharePath := getSharePath(fsName)
+	share, err := shareDriver.getShare(fsName)
+	if err != nil {
+		return "", fmt.Errorf("get share %s failed: %v", sharePath, err)
+	}
+
+	if share != nil {
+		log.Infof("share %s already exist", sharePath)
+		return "", nil
+	}
+
+	share, err = shareDriver.createShare(fsName, fsID)
+	if err != nil {
+		shareDriver.deleteShare(fsName)
+		return "", fmt.Errorf("create share %s failed: %v", sharePath, err)
+	}
+
+	log.Infof("create share %s successfully", sharePath)
+	return shareDriver.getShareID(share), nil
+}
+
+func (d *Driver) getShareLocation(fsName string, shareDriver Protocol) ([]string, error) {
+	logicalPortList, err := d.getAllLogicalPort()
+	if err != nil {
+		return nil, err
+	}
+
+	location, err := d.getLocationPath(fsName, logicalPortList, shareDriver)
+	if err != nil {
+		return nil, err
+	}
+
+	return location, nil
+}
+
+// createFileSystemIfNotExist
+func (d *Driver) createFileSystemIfNotExist(fsName, poolID string, size int64) (*FileSystemData, error) {
+	fsList, err := d.getFileSystemByName(fsName)
+	if err != nil {
+		return nil, fmt.Errorf("get filesystem %s by name failed: %v", fsName, err)
+	}
+
+	if len(fsList) == 0 {
+		fs, err := d.createFileSystem(fsName, poolID, size)
+		if err != nil {
+			errDelete := d.deleteFileSystem(fsName, poolID)
+			fmt.Println("deleteFileSystem", errDelete)
+			return nil, fmt.Errorf("create file system %s failed, %v", fsName, err)
 		}
-	}
-	if shareProto == CIFS {
-		location = fmt.Sprintf("\\\\%s\\%s", ip, strings.Replace(sharePath, "-", "_", -1))
+
+		err = d.checkFsStatus(fs, poolID)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Infof("create filesystem %s successfully", fsName)
+		return fs, nil
 	}
 
-	return location
+	log.Infof("filesystem %s already exist", fsName)
+	return &fsList[0], nil
 }
 
-func isIPv6(str string) bool {
-	ip := net.ParseIP(str)
-	return ip != nil && strings.Contains(str, ":")
+func (d *Driver) getLocationPath(sharePath string, logicalPortList []LogicalPortData, shareDriver Protocol) ([]string, error) {
+	if len(logicalPortList) == 0 {
+		return nil, errors.New("cannot find file share server end logical ip")
+	}
+
+	var location []string
+
+	for _, port := range logicalPortList {
+		location = append(location, shareDriver.getLocation(sharePath, port.IpAddr))
+	}
+
+	return location, nil
 }
 
-func (d *Driver) checkFsStatus(fs *FileSystem) error {
+func (d *Driver) checkFsStatus(fs *FileSystemData, poolID string) error {
 	ticker := time.NewTicker(3 * time.Second)
 	timeout := time.After(1 * time.Minute)
-	var fsStable *FileSystem
+	var fsStable *FileSystemData
 	var err error
 	for {
 		select {
 		case <-ticker.C:
-			fsStable, err = d.client.getFileSystem(fs.ID)
+			fsStable, err = d.getFileSystem(fs.ID)
 			if err != nil {
-				//NOTE
-				//d.client.deleteFileSystem(name)
-				msg := fmt.Sprintf("check file system status failed, %v", err)
-				log.Error(msg)
-				return errors.New(msg)
+				d.deleteFileSystem(fs.Name, poolID)
+				return fmt.Errorf("check file system status failed: %v", err)
 			}
 
 			if fsStable.HealthStatus == StatusFSHealth && fsStable.RunningStatus == StatusFSRunning {
@@ -261,38 +256,39 @@ func (d *Driver) checkFsStatus(fs *FileSystem) error {
 			}
 
 		case <-timeout:
-			//NOTE
-			//d.client.deleteFileSystem(name)
-			msg := fmt.Sprintf("timeout occured waiting for checking file system status %s or invalid status health:%s, running:%s", fsStable.ID, fsStable.HealthStatus, fsStable.RunningStatus)
-			log.Errorf(msg)
-			return errors.New(msg)
+			d.deleteFileSystem(fs.Name, poolID)
+			return fmt.Errorf("timeout occured waiting for checking file system status %s or invalid status health:%s, running:%s", fsStable.ID, fsStable.HealthStatus, fsStable.RunningStatus)
 		}
 	}
 }
 
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	var pols []*model.StoragePoolSpec
-	sp, err := d.client.ListStoragePools()
+	sp, err := d.ListStoragePools()
 	if err != nil {
-		msg := fmt.Sprintf("list pools from storage failed, %v", err)
+		msg := fmt.Sprintf("list pools from storage failed: %v", err)
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
 
-	c := d.conf
+	c := d.Config
 	for _, p := range sp {
 		if _, ok := c.Pool[p.Name]; !ok {
 			continue
 		}
 		host, _ := os.Hostname()
-		name := fmt.Sprintf("%s:%s:%s", host, d.conf.Uri, p.Id)
+		name := fmt.Sprintf("%s:%s:%s", host, d.Uri, p.Id)
+
+		userTotalCapacity, _ := strconv.ParseInt(p.UserTotalCapacity, 10, 64)
+		userFreeCapacity, _ := strconv.ParseInt(p.UserFreeCapacity, 10, 64)
+
 		pol := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
 			Name:             p.Id,
-			TotalCapacity:    Sector2Gb(p.UserTotalCapacity),
-			FreeCapacity:     Sector2Gb(p.UserFreeCapacity),
+			TotalCapacity:    Sector2Gb(userTotalCapacity),
+			FreeCapacity:     Sector2Gb(userFreeCapacity),
 			StorageType:      c.Pool[p.Name].StorageType,
 			Extras:           c.Pool[p.Name].Extras,
 			AvailabilityZone: c.Pool[p.Name].AvailabilityZone,
@@ -314,139 +310,268 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pols, nil
 }
 
-func Sector2Gb(sec string) int64 {
-	size, err := strconv.ParseInt(sec, 10, 64)
+func (d *Driver) getFSInfo(fsName string) (*FileSystemData, error) {
+	fsList, err := d.getFileSystemByName(fsName)
 	if err != nil {
-		log.Error("Convert capacity from string to number failed, error:", err)
-		return 0
+		return nil, fmt.Errorf("get filesystem %s by name failed: %v", fsName, err)
 	}
-	return size * 512 / UnitGi
+
+	if len(fsList) == 0 {
+		return nil, fmt.Errorf("filesystem %s does not exist", fsName)
+	}
+
+	return &fsList[0], nil
 }
 
-func (d *Driver) DeleteShare(shareID, shareProto, fsID string) error {
-
-	if shareProto == NFS {
-		err := d.client.deleteNFSShare(shareID)
-		if err != nil {
-			msg := fmt.Sprintf("delete nfs share %s failed, %v", shareID, err)
-			log.Error(msg)
-			return errors.New(msg)
-		}
-
-		log.Infof("delete nfs share %s successfully", shareID)
+func (d *Driver) GetProtoFromProfile(prf string) (string, error) {
+	if prf == "" {
+		msg := "profile cannot be empty"
+		return "", errors.New(msg)
 	}
 
-	if shareProto == CIFS {
-		err := d.client.deleteCIFSShare(shareID)
-		if err != nil {
-			msg := fmt.Sprintf("delete cifs share %s failed, %v", shareID, err)
-			log.Error(msg)
-			return errors.New(msg)
-		}
-
-		log.Infof("delete cifs share %s successfully", shareID)
-	}
-
-	err := d.client.deleteFS(fsID)
+	log.V(5).Infof("file share profile is %s", prf)
+	profile := &model.ProfileSpec{}
+	err := json.Unmarshal([]byte(prf), profile)
 	if err != nil {
-		msg := fmt.Sprintf("delete filesystem %s failed, %v", fsID, err)
+		msg := fmt.Sprintf("unmarshal profile failed: %v", err)
+		return "", errors.New(msg)
+	}
+
+	shareProto := profile.ProvisioningProperties.IOConnectivity.AccessProtocol
+	if shareProto == "" {
+		msg := "file share protocol cannot be empty"
+		return "", errors.New(msg)
+	}
+
+	return shareProto, nil
+}
+
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareSpec, error) {
+	shareProto, err := d.GetProtoFromProfile(opt.GetProfile())
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	meta := opt.GetMetadata()
+	if meta == nil || (meta != nil && meta[FileShareName] == "" && meta[FileShareID] == "") {
+		msg := "cannot get file share name and id"
 		log.Error(msg)
-		return errors.New(msg)
+		return nil, errors.New(msg)
 	}
 
-	log.Infof("delete filesystem %s successfully", fsID)
-	return nil
-}
+	fsName := meta[FileShareName]
+	shareID := meta[FileShareID]
 
-func (d *Driver) ListAllShares(shareID, shareProto, fsID string) error {
-	return nil
-}
+	shareDriver := NewProtocol(shareProto, d.Client)
 
-func (d *Driver) CreateSnapshotFromShare(snapID, shareProto, shareID string) error {
-	var fsID string
-
-	if shareProto == NFS {
-		nfsShare, _ := d.client.getNFSShareByID(shareID, shareProto)
-		if nfsShare == nil || nfsShare.FSID == "" {
-			msg := "can not create snapshot due to FS not exist"
-			log.Error(msg)
-			return errors.New(msg)
-		}
-		fsID = nfsShare.FSID
-	}
-
-	if shareProto == CIFS {
-		cifsShare, _ := d.client.getCIFSShareByID(shareID, shareProto)
-		if cifsShare == nil || cifsShare.FSID == "" {
-			msg := "can not create snapshot due to FS not exist"
-			log.Error(msg)
-			return errors.New(msg)
-		}
-		fsID = cifsShare.FSID
-	}
-
-	snapName := "share_snapshot_" + snapID
-
-	fsSnapshot, err := d.client.createSnapshot(fsID, snapName)
-	if err != nil {
-		msg := fmt.Sprintf("create filesystem snapshot failed, %v", err)
+	sharePath := getSharePath(fsName)
+	if err := shareDriver.deleteShare(shareID); err != nil {
+		msg := fmt.Sprintf("delete file share %s failed: %v", sharePath, err)
 		log.Error(msg)
-		return errors.New(msg)
+		return nil, errors.New(msg)
 	}
 
-	fmt.Printf("ss %+v\n", fsSnapshot)
-	return nil
-}
+	log.Infof("delete share %s successfully", sharePath)
 
-func (d *Driver) ListAllSnapshots() error {
-	fsList, err := d.client.getAllFilesystem()
+	err = d.DeleteFileSystem(fsName)
 	if err != nil {
-		msg := fmt.Sprintf("list filesystem failed, %v", err)
+		msg := fmt.Sprintf("delete filesystem %s failed: %v", fsName, err)
 		log.Error(msg)
-		return errors.New(msg)
+		return nil, errors.New(msg)
 	}
 
-	var fsSnapshotList []*FSSnapshotData
+	log.Infof("delete file system %s successfully", fsName)
 
-	for _, v := range fsList.Data {
-		fsSnapshots, err := d.client.listSnapshots(v.ID)
-		if err != nil {
-			msg := fmt.Sprintf("list filesystem snapshots failed, %v", err)
-			log.Error(msg)
-			return errors.New(msg)
-		}
+	return nil, nil
+}
 
-		for _, snap := range fsSnapshots.Data {
-			fsSnapshotList = append(fsSnapshotList, &snap)
-		}
+func (d *Driver) DeleteFileSystem(fsName string) error {
+	fs, err := d.getFSInfo(fsName)
+	if err != nil {
+		return err
 	}
 
-	for _, v := range fsSnapshotList {
-		fmt.Printf("dddd %+v\n", v)
+	err = d.deleteFS(fs.ID)
+	if err != nil {
+		return err
 	}
 
+	log.Infof("delete filesystem %s successfully", fs.ID)
 	return nil
 }
 
-func (d *Driver) DeleteFSSnapshot(snapID string) error {
-	err := d.client.deleteFSSnapshot(snapID)
+func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	snapID := opt.GetId()
+	if snapID == "" {
+		msg := "snapshot id cannot be empty"
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	meta := opt.GetMetadata()
+
+	if meta == nil || (meta != nil && meta[FileShareName] == "" && meta[FileShareID] == "") {
+		msg := "cannot get file share name and id"
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	fsName := meta[FileShareName]
+
+	fs, err := d.getFSInfo(fsName)
+	if err != nil {
+		msg := fmt.Sprintf("get file system %s failed: %v", fsName, err)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	snapName := EncodeName(snapID)
+
+	fsSnapshot, err := d.createSnapshot(fs.ID, snapName)
+	if err != nil {
+		msg := fmt.Sprintf("create filesystem snapshot failed: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	return &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:     opt.GetName(),
+		Metadata: map[string]string{FileShareSnapshotID: fsSnapshot.ID},
+	}, nil
+}
+
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	//TODO real snapshot id is needed
+	snapID, err := d.getSnapshotID(opt.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.deleteFSSnapshot(snapID)
 	if err != nil {
 		msg := fmt.Sprintf("delete filesystem snapshot %s failed, %v", snapID, err)
 		log.Error(msg)
-		return errors.New(msg)
+		return nil, errors.New(msg)
+	}
+
+	log.Infof("delete file share snapshot %s successfully", snapID)
+
+	return nil, nil
+}
+
+func (d *Driver) getSnapshotID(snapID string) (string, error) {
+	snapName := EncodeName(snapID)
+
+	//TODO change listsnapshots
+	snaps, err := d.listSnapshots()
+	if err != nil {
+		msg := fmt.Sprintf("list file share snapshots failed: %v", err)
+		log.Error(msg)
+		return "", errors.New(msg)
+	}
+
+	for _, snap := range snaps {
+		if snap.Name == snapName {
+			return snap.ID, nil
+		}
+	}
+
+	return "", fmt.Errorf("cannot find snapshot %s", snapID)
+}
+
+// AllowAccess allow access to the share
+func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	accessLevels := opt.GetAccessCapability()
+	accessToShares := opt.GetAccessTo()
+
+	if len(accessLevels) == 0 || len(accessToShares) == 0 {
+		msg := "access level and access to cannot be empty"
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	// Take only the first value
+	accessLevel := accessLevels[0]
+	accessTo := accessToShares[0]
+
+	//shareProto, shareName is needed
+	if !checkAccessLevel(accessLevel) {
+		return fmt.Errorf("access level %s is unsupported", accessLevel)
+	}
+
+	pattern := "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"
+	matchIp, _ := regexp.MatchString(pattern, accessTo)
+	if !matchIp {
+		return nil, fmt.Errorf("ip %s is invalid", accessTo)
+	}
+
+	if shareProto == NFSProto {
+		if accessLevel == AccessLevelRW {
+			accessLevel = AccessNFSRw
+		} else {
+			accessLevel = AccessNFSRo
+		}
+	}
+
+	if shareProto == CIFSProto {
+		if accessLevel == AccessLevelRW {
+			accessLevel = AccessCIFSFullControl
+		} else {
+			accessLevel = AccessCIFSRo
+		}
+	}
+
+	share, err := d.getFileShare(shareProto, shareName)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	if share == nil {
+		return nil, fmt.Errorf("share %s is not exist", getSharePath(shareName))
+	}
+
+	shareID := d.getShareID(shareProto, share)
+
+	err = d.createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel)
+	if err != nil {
+		msg := fmt.Sprintf("allow access %s to %s failed %v", accessTo, shareName, err)
+		log.Error(msg)
+		return nil, errors.New(msg)
 	}
 
 	return nil
 }
 
-func (d *Driver) ShowFSSnapshot(snapID string) error {
-	snap, err := d.client.showFSSnapshot(snapID)
+func (d *Driver) createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel string) error {
+	// Check if access already exists
+	accessID, err := d.getAccessFromShare(shareID, accessTo, shareProto)
 	if err != nil {
-		msg := fmt.Sprintf("show filesystem snapshot %s failed, %v", snapID, err)
-		log.Error(msg)
-		return errors.New(msg)
+		return err
 	}
 
-	fmt.Printf("ShowFSSnapshot %+v\n", snap)
+	if accessID == "" {
+		return d.allowAccessToShare(shareID, accessTo, shareProto, accessLevel)
+	}
+
+	return nil
+}
+
+func (d *Driver) allowAccessToShare(shareID, accessTo, shareProto, accessLevel string) error {
+	switch shareProto {
+	case NFS:
+		if _, err := d.allowNFSAccess(shareID, accessTo, accessLevel); err != nil {
+			return err
+		}
+	case CIFS:
+		if _, err := d.allowCIFSAccess(shareID, accessTo, accessLevel); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

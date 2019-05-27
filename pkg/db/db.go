@@ -55,6 +55,40 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
+	CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
+
+	ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error)
+
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
+
+	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
+
+	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
+
+	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
+
+	GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error)
+
+	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(ctx *c.Context, fshareID string) error
+
+	DeleteFileShareAcl(ctx *c.Context, aclID string) error
+
+	CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
+
+	UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error
+
 	CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error)
 
 	GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error)
@@ -88,6 +122,8 @@ type Client interface {
 	GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, error)
 
 	GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error)
+
+	GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error)
 
 	ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 
@@ -176,6 +212,16 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetFileShare(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
+}
+
+func UpdateFileShareSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetFileShareSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
 }
 
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {

@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 //    Licensed under the Apache License, Version 2.0 (the "License"); you may
 //    not use this file except in compliance with the License. You may obtain
@@ -28,16 +28,17 @@ const (
 	HuaweiDoradoDriverType        = "huawei_dorado"
 	HuaweiFusionStorageDriverType = "huawei_fusionstorage"
 	HuaweiOceanFileDriverType     = "huawei_oceanstor"
-
-	DRBDDriverType = "drbd"
+	HpeNimbleDriverType           = "hpe_nimble"
+	DRBDDriverType                = "drbd"
+	NFSDriverType                 = "nfsnative"
 )
 
 // These constants below represent the access protocol type of all storage
 // drivers which can be supported by now. Please NOTICE that currently these
 // constants can NOT be used by all methods except InitializeConnection().
 const (
-	ISCSIProtocol = "iscsi"
-	DSWARE        = "DSWARE"
-	RBDProtocol   = "rbd"
-	FCProtocol    = "fibre_channel"
+	ISCSIProtocol  = "iscsi"
+	RBDProtocol    = "rbd"
+	FCProtocol     = "fibre_channel"
+	NVMEOFProtocol = "nvmeof"
 )

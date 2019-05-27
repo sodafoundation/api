@@ -30,8 +30,138 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
+
+//function to store filesahreAcl metadata into database
+func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+	if in.UpdatedAt == "" {
+		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Description = in.Description
+
+	in.Type = in.Type
+	in.AccessTo = in.AccessTo
+	in.AccessCapability = in.AccessCapability
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		log.Error("file shareid is not valid: ", err)
+		return nil, err
+	}
+	in.FileShareId = in.FileShareId
+	// Store the fileshare meadata into database.
+	return db.C.CreateFileShareAcl(ctx, in)
+}
+
+// Function to store metadeta of fileshare into database
+func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.Size <= 0 {
+		errMsg := fmt.Sprintf("invalid fileshare size: %d", in.Size)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if in.AvailabilityZone == "" {
+		log.Warning("Use default availability zone when user doesn't specify availabilityZone.")
+		in.AvailabilityZone = "default"
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+	if in.UpdatedAt == "" {
+		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Description = in.Description
+
+	in.Name = in.Name
+	in.UserId = ctx.UserId
+	in.Status = model.FileShareCreating
+	in.ExportLocations = in.ExportLocations
+	// Store the fileshare meadata into database.
+	return db.C.CreateFileShare(ctx, in)
+}
+
+// DeleteFileShareDBEntry just modifies the state of the fileshare to be deleting in
+// the DB, the real deletion operation would be executed in another new thread.
+func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
+	validStatus := []string{model.FileShareAvailable, model.FileShareError,
+		model.FileShareErrorDeleting, model.FileShareCreating}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the fileshare with the status available, error, error_deleting, can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	in.Status = model.FileShareDeleting
+	_, err := db.C.UpdateFileShare(ctx, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// To create entry in database
+func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	fshare, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		log.Error("get fileshare failed in create fileshare snapshot method: ", err)
+		return nil, err
+	}
+	if fshare.Status != model.FileShareAvailable && fshare.Status != model.FileShareInUse {
+		var errMsg = "only the status of fileshare is available or in-use, the snapshot can be created"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	if in.Id == "" {
+		in.Id = uuid.NewV4().String()
+	}
+	if in.CreatedAt == "" {
+		in.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	in.Status = model.FileShareSnapCreating
+	return db.C.CreateFileShareSnapshot(ctx, in)
+}
+
+func DeleteFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotSpec) error {
+	validStatus := []string{model.FileShareSnapAvailable, model.FileShareSnapError,
+		model.FileShareSnapErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the fileshare snapshot with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If fileshare id is invalid, it would mean that fileshare snapshot creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
+		if err := db.C.DeleteFileShareSnapshot(ctx, in.Id); err != nil {
+			log.Error("when delete fileshare snapshot in db:", err)
+			return err
+		}
+		return nil
+	}
+
+	in.Status = model.FileShareSnapDeleting
+	_, err = db.C.UpdateFileShareSnapshot(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpec, error) {
 	if in.Id == "" {
@@ -135,33 +265,45 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	return db.C.ExtendVolume(ctx, volume)
 }
 
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
+func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
 	if err != nil {
-		log.Error("get volume failed in create volume attachment method: ", err)
-		return nil, err
+		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
 	}
-	if vol.Status != model.VolumeAvailable {
+
+	if vol.Status == model.VolumeAvailable {
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
+	} else if vol.Status == model.VolumeInUse {
+		if vol.MultiAttach {
+			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
+		} else {
+			msg := "volume is already attached or volume multiattach must be true if attach more than once"
+			log.Error(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
 		errMsg := "only the status of volume is available, attachment can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if in.Id == "" {
-		in.Id = uuid.NewV4().String()
-	}
-	if in.CreatedAt == "" {
-		in.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
-	if len(in.AdditionalProperties) == 0 {
-		in.AdditionalProperties = map[string]interface{}{"attachment": "attachment"}
-	}
-	if len(in.ConnectionData) == 0 {
-		in.ConnectionData = map[string]interface{}{"attachment": "attachment"}
+
+	if volAttachment.Id == "" {
+		volAttachment.Id = uuid.NewV4().String()
 	}
 
-	in.Status = model.VolumeAttachCreating
-	in.Metadata = utils.MergeStringMaps(in.Metadata, vol.Metadata)
-	return db.C.CreateVolumeAttachment(ctx, in)
+	if volAttachment.CreatedAt == "" {
+		volAttachment.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	if volAttachment.AttachMode != "ro" && volAttachment.AttachMode != "rw" {
+		volAttachment.AttachMode = "rw"
+	}
+
+	volAttachment.Status = model.VolumeAttachCreating
+	volAttachment.Metadata = utils.MergeStringMaps(volAttachment.Metadata, vol.Metadata)
+	return db.C.CreateVolumeAttachment(ctx, volAttachment)
 }
 
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {

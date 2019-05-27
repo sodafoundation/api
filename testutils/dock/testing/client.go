@@ -47,6 +47,36 @@ func (_m *Client) Close() {
 	_m.Called()
 }
 
+// CollectMetrics provides a mock function with given fields: ctx, in, opts
+func (_m *Client) CollectMetrics(ctx context.Context, in *proto.CollectMetricsOpts, opts ...grpc.CallOption) (*proto.GenericResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *proto.GenericResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *proto.CollectMetricsOpts, ...grpc.CallOption) *proto.GenericResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.GenericResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *proto.CollectMetricsOpts, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Connect provides a mock function with given fields: edp
 func (_m *Client) Connect(edp string) error {
 	ret := _m.Called(edp)
@@ -59,6 +89,66 @@ func (_m *Client) Connect(edp string) error {
 	}
 
 	return r0
+}
+
+// CreateFileShareAcl provides a mock function with given fields: ctx, in, opts
+func (_m *Client) CreateFileShareAcl(ctx context.Context, in *proto.CreateFileShareAclOpts, opts ...grpc.CallOption) (*proto.GenericResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *proto.GenericResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *proto.CreateFileShareAclOpts, ...grpc.CallOption) *proto.GenericResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.GenericResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *proto.CreateFileShareAclOpts, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateFileShare provides a mock function with given fields: ctx, in, opts
+func (_m *Client) CreateFileShare(ctx context.Context, in *proto.CreateFileShareOpts, opts ...grpc.CallOption) (*proto.GenericResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *proto.GenericResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *proto.CreateFileShareOpts, ...grpc.CallOption) *proto.GenericResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.GenericResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *proto.CreateFileShareOpts, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // CreateReplication provides a mock function with given fields: ctx, in, opts
@@ -203,6 +293,36 @@ func (_m *Client) CreateVolumeSnapshot(ctx context.Context, in *proto.CreateVolu
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *proto.CreateVolumeSnapshotOpts, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteFileShare provides a mock function with given fields: ctx, in, opts
+func (_m *Client) DeleteFileShare(ctx context.Context, in *proto.DeleteFileShareOpts, opts ...grpc.CallOption) (*proto.GenericResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *proto.GenericResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *proto.DeleteFileShareOpts, ...grpc.CallOption) *proto.GenericResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.GenericResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *proto.DeleteFileShareOpts, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

@@ -133,7 +133,7 @@ func Discovery(connMap map[string]interface{}) error {
 	targetport := conn.TgtPort
 	info, err := connector.ExecCmd("nvme", "discover", "-t", "rdma", "-a", targetip, "-s", targetport)
 	if err != nil {
-		log.Printf("Error encountered in send targets:%v, %v\n",err,info)
+		log.Printf("Error encountered in send targets:%v, %v\n", err, info)
 		return err
 	}
 	return nil
@@ -147,7 +147,7 @@ func Connect(connMap map[string]interface{}) (string, error) {
 	targetPortal := conn.TgtPortal
 	port := conn.TgtPort
 	nvmeTransportType := "rdma"
-	log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal,  port)
+	log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal, port)
 
 	_, err := connector.ExecCmd("nvme", "connect", "-t",
 		nvmeTransportType, "-n", connNqn, "-a", targetPortal, "-s", port)

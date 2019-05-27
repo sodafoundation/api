@@ -37,6 +37,21 @@ func init() {
 	flag.StringVar(&CONF.OsdsApiServer.ApiEndpoint, "api-endpoint", CONF.OsdsApiServer.ApiEndpoint, "Listen endpoint of api-server service")
 	flag.DurationVar(&CONF.OsdsApiServer.LogFlushFrequency, "log-flush-frequency", CONF.OsdsApiServer.LogFlushFrequency, "Maximum number of seconds between log flushes")
 	flag.BoolVar(&CONF.OsdsApiServer.Daemon, "daemon", CONF.OsdsApiServer.Daemon, "Run app as a daemon with -daemon=true")
+	// prometheus related
+	flag.StringVar(&CONF.OsdsApiServer.PrometheusConfHome, "prometheus-conf-home", CONF.OsdsApiServer.PrometheusConfHome, "Prometheus conf. path")
+	flag.StringVar(&CONF.OsdsApiServer.PrometheusUrl, "prometheus-url", CONF.OsdsApiServer.PrometheusUrl, "Prometheus URL")
+	flag.StringVar(&CONF.OsdsApiServer.PrometheusConfFile, "prometheus-conf-file", CONF.OsdsApiServer.PrometheusConfFile, "Prometheus conf. file")
+	// alert manager related
+	flag.StringVar(&CONF.OsdsApiServer.AlertmgrConfHome, "alertmgr-conf-home", CONF.OsdsApiServer.AlertmgrConfHome, "Alert manager conf. home")
+	flag.StringVar(&CONF.OsdsApiServer.AlertMgrUrl, "alertmgr-url", CONF.OsdsApiServer.AlertMgrUrl, "Alert manager listen endpoint")
+	flag.StringVar(&CONF.OsdsApiServer.AlertmgrConfFile, "alertmgr-conf-file", CONF.OsdsApiServer.AlertmgrConfFile, "Alert manager conf. file")
+	// grafana related
+	flag.StringVar(&CONF.OsdsApiServer.GrafanaConfHome, "grafana-conf-home", CONF.OsdsApiServer.GrafanaConfHome, "Grafana conf. home")
+	flag.StringVar(&CONF.OsdsApiServer.GrafanaRestartCmd, "grafana-restart-cmd", CONF.OsdsApiServer.GrafanaRestartCmd, "Grafana restart command")
+	flag.StringVar(&CONF.OsdsApiServer.GrafanaConfFile, "grafana-conf-file", CONF.OsdsApiServer.GrafanaConfFile, "Grafana conf file")
+	flag.StringVar(&CONF.OsdsApiServer.GrafanaUrl, "grafana-url", CONF.OsdsApiServer.GrafanaUrl, "Grafana listen endpoint")
+	// prometheus and alert manager configuration reload url
+	flag.StringVar(&CONF.OsdsApiServer.ConfReloadUrl, "conf-reload-url", CONF.OsdsApiServer.ConfReloadUrl, "Prometheus and Alert manager conf. reload URL")
 	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsApiServer.Daemon)

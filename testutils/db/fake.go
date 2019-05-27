@@ -30,6 +30,120 @@ func NewFakeDbClient() *FakeDbClient {
 	return &FakeDbClient{}
 }
 
+// CreateFileShareAcl
+func (fc *FakeDbClient) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	return fshare, nil
+}
+
+// ListFileShareAcl
+func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
+// CreateFileShare
+func (fc *FakeDbClient) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	return fshare, nil
+}
+
+// GetFileShare
+func (fc *FakeDbClient) GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error) {
+	fshare := SampleFileShares[0]
+	return &fshare, nil
+}
+
+// GetFileShareAcl
+func (fc *FakeDbClient) GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
+	acl := SampleFileSharesAcl[0]
+	return &acl, nil
+}
+
+// ListFileShares
+func (fc *FakeDbClient) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
+	var fshares []*model.FileShareSpec
+
+	for i := range SampleFileShares {
+		fshares = append(fshares, &SampleFileShares[i])
+	}
+	return fshares, nil
+}
+
+// ListFileShares
+func (fc *FakeDbClient) ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
+func (fc *FakeDbClient) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) {
+	var fshares []*model.FileShareSpec
+
+	for i := range SampleFileShares {
+		fshares = append(fshares, &SampleFileShares[i])
+	}
+	return fshares, nil
+}
+
+// UpdateFileShare
+func (fc *FakeDbClient) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
+
+// DeleteFileShare
+func (fc *FakeDbClient) DeleteFileShare(ctx *c.Context, fshareID string) error {
+	return nil
+}
+
+// DeleteFileShareAcl
+func (fc *FakeDbClient) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
+	return nil
+}
+
+// CreateSnapshot
+func (fc *FakeDbClient) CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	return vs, nil
+}
+
+// GetFileShareSnapshot
+func (fc *FakeDbClient) GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error) {
+	snap := SampleFileShareSnapshots[0]
+	return &snap, nil
+}
+
+// ListFileShareSnapshots
+func (fc *FakeDbClient) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+func (fc *FakeDbClient) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+// UpdateFileShareSnapshot
+func (fc *FakeDbClient) UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+// DeleteFileShareSnapshot
+func (fc *FakeDbClient) DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error {
+	return nil
+}
+
 // CreateDock
 func (fc *FakeDbClient) CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error) {
 	return &SampleDocks[0], nil
@@ -161,6 +275,17 @@ func (fc *FakeDbClient) GetProfile(ctx *c.Context, prfID string) (*model.Profile
 func (fc *FakeDbClient) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
 	for _, profile := range SampleProfiles {
 		if profile.Name == "default" {
+			return &profile, nil
+		}
+	}
+
+	return nil, errors.New("Can't find default profile resource!")
+}
+
+// GetDefaultProfileFileShare
+func (fc *FakeDbClient) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
+	for _, profile := range SampleProfiles {
+		if profile.Name == "default" && profile.StorageType == "file" {
 			return &profile, nil
 		}
 	}

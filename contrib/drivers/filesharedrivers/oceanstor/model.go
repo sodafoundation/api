@@ -1,18 +1,50 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package oceanstor
+
+import (
+	. "github.com/opensds/opensds/contrib/drivers/utils/config"
+)
+
+type Client struct {
+	username   string
+	password   string
+	urlPrefix  string
+	deviceId   string
+	iBaseToken string
+	cookie     string
+	header     map[string]string
+}
+
+type Driver struct {
+	*Config
+	*Client
+}
+
+type AuthOptions struct {
+	Username        string `yaml:"username"`
+	Password        string `yaml:"password"`
+	Uri             string `yaml:"uri"`
+	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
+}
+
+type Config struct {
+	AuthOptions `yaml:"authOptions"`
+	Pool        map[string]PoolProperties `yaml:"pool,flow"`
+}
 
 type Error struct {
 	Code        int    `json:"code"`
@@ -23,12 +55,7 @@ type DeleteError struct {
 	Error `json:"error"`
 }
 
-type GenericResult struct {
-	Data  interface{} `json:"data"`
-	Error Error       `json:"error"`
-}
-
-type Auth struct {
+type AuthData struct {
 	AccountState  int    `json:"accountstate"`
 	DeviceId      string `json:"deviceid"`
 	IBaseToken    string `json:"iBaseToken"`
@@ -42,9 +69,9 @@ type Auth struct {
 	UserScope     string `json:"userscope"`
 }
 
-type AuthResp struct {
-	Data  Auth  `json:"data"`
-	Error Error `json:"error"`
+type Auth struct {
+	Data  AuthData `json:"data"`
+	Error `json:"error"`
 }
 
 type StoragePool struct {
@@ -55,19 +82,19 @@ type StoragePool struct {
 	UserTotalCapacity string `json:"USERTOTALCAPACITY"`
 }
 
-type StoragePoolsResp struct {
+type StoragePoolList struct {
 	Data  []StoragePool `json:"data"`
-	Error Error         `json:"error"`
+	Error `json:"error"`
 }
 
 type FileSystem struct {
-	FileSystemData `json:"data"`
-	Error          Error `json:"error"`
+	Data  FileSystemData `json:"data"`
+	Error `json:"error"`
 }
 
 type FileSystemList struct {
 	Data  []FileSystemData `json:"data"`
-	Error Error            `json:"error"`
+	Error `json:"error"`
 }
 
 type FileSystemData struct {
@@ -81,8 +108,8 @@ type FileSystemData struct {
 }
 
 type NFSShare struct {
-	NFSShareData `json:"data"`
-	Error        `json:"error"`
+	Data  NFSShareData `json:"data"`
+	Error `json:"error"`
 }
 
 type NFSShareData struct {
@@ -96,8 +123,8 @@ type NFSShareData struct {
 }
 
 type CIFSShare struct {
-	CIFSShareData `json:"data"`
-	Error         `json:"error"`
+	Data  CIFSShareData `json:"data"`
+	Error `json:"error"`
 }
 
 type CIFSShareData struct {
@@ -126,6 +153,7 @@ type CIFSShareList struct {
 	Error `json:"error"`
 }
 
+// FSSnapshot file system snapshot ...
 type FSSnapshotData struct {
 	Type            int    `json:"TYPE"`
 	ID              string `json:"ID"`
@@ -139,11 +167,58 @@ type FSSnapshotData struct {
 }
 
 type FSSnapshot struct {
-	FSSnapshotData `json:"data"`
-	Error          `json:"error"`
+	Data  FSSnapshotData `json:"data"`
+	Error `json:"error"`
 }
 
 type FSSnapshotList struct {
 	Data  []FSSnapshotData `json:"data"`
 	Error `json:"error"`
+}
+
+// LogicalPortList logical portal ...
+type LogicalPortList struct {
+	Data  []LogicalPortData `json:"data"`
+	Error `json:"error"`
+}
+
+type LogicalPortData struct {
+	ID     string `json:"ID"`
+	IpAddr string `json:"IPV4ADDR"`
+}
+
+type ShareAuthClientData struct {
+	ID        string `json:"ID"`
+	Name      string `json:"NAME"`
+	accessVal string `json:"ACCESSVAL"`
+}
+
+type ShareAuthClientList struct {
+	Data  []ShareAuthClientData `json:"data"`
+	Error `json:"error"`
+}
+
+type NFSShareClient struct {
+	Error `json:"error"`
+}
+
+type CIFSShareClient struct {
+	Data  CIFSShareClientData `json:"data"`
+	Error `json:"error"`
+}
+
+type CIFSShareClientData struct {
+	DomainType string `json:"DOMAINTYPE"`
+	ID         string `json:"ID"`
+	Name       string `json:"NAME"`
+	Permission string `json:"PERMISSION"`
+}
+
+type shareAuthClientCount struct {
+	Data  Count `json:"data"`
+	Error `json:"error"`
+}
+
+type Count struct {
+	Counter string `json:"COUNT"`
 }
