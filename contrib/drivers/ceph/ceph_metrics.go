@@ -17,12 +17,10 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
-	"gopkg.in/yaml.v2"
 )
 
-// TODO: Move this Yaml config to a file
+// Supported metrics
 var data = `
 resources:
   - resource: pool
@@ -36,28 +34,101 @@ resources:
       - pool_read_bytes_total
       - pool_write_total
       - pool_write_bytes_total
+  - resource: cluster
+    metrics:
+      - cluster_capacity_bytes
+      - cluster_used_bytes
+      - cluster_available_bytes
+      - cluster_objects
+  - resource: osd
+    metrics:
+      - osd_perf_commit_latency
+      - osd_perf_apply_latency
+      - osd_crush_weight
+      - osd_depth
+      - osd_reweight
+      - osd_bytes
+      - osd_used_bytes
+      - osd_avail_bytes
+      - osd_utilization
+      - osd_variance
+      - osd_pgs
+      - osd_total_bytes
+      - osd_total_used_bytes
+      - osd_total_avail_bytes
+      - osd_average_utilization
+  - resource: health
+    metrics:
+      - health_status
+      - total_pgs
+      - active_pgs
+      - scrubbing_pgs
+      - deep_scrubbing_pgs
+      - recovering_pgs
+      - recovery_wait_pgs
+      - backfilling_pgs
+      - forced_recovery_pgs
+      - forced_backfill_pgs
+      - down_pgs
+      - slow_requests          
+      - degraded_pgs
+      - stuck_degraded_pgs
+      - unclean_pgs
+      - stuck_unclean_pgs
+      - undersized_pgs
+      - stuck_undersized_pgs
+      - stale_pgs
+      - stuck_stale_pgs
+      - peering_pgs
+      - degraded_objects
+      - misplaced_objects
+      - osdmap_flag_full
+      - osdmap_flag_pauserd
+      - osdmap_flag_pausewr
+      - osdmap_flag_noup
+      - osdmap_flag_nodown
+      - osdmap_flag_noin
+      - osdmap_flag_noout
+      - osdmap_flag_nobackfill
+      - osdmap_flag_norecover
+      - osdmap_flag_norebalance
+      - osdmap_flag_noscrub
+      - osdmap_flag_nodeep_scrub
+      - osdmap_flag_notieragent
+      - osds_down
+      - osds_up
+      - osds_in
+      - osds
+      - pgs_remapped
+      - recovery_io_bytes
+      - recovery_io_keys
+      - recovery_io_objects
+      - client_io_read_bytes
+      - client_io_write_bytes
+      - client_io_ops
+      - client_io_read_ops
+      - client_io_write_ops
+      - cache_flush_io_bytes
+      - cache_evict_io_bytes
+      - cache_promote_io_ops
+  - resource: monitor
+    metrics:
+      - name
+      - kb_total
+      - kb_used
+      - kb_avail
+      - avail_percent
+      - bytes_total
+      - bytes_sst
+      - bytes_log
+      - bytes_misc
+      - skew
+      - latency
+      - quorum
 `
 
-type Config struct {
-	Resource string
-	Metrics  []string
-	Units    []string
-}
-
-type Configs struct {
-	Cfgs []Config `resources`
-}
 type MetricDriver struct {
 	cli *MetricCli
-}
-
-func metricInMetrics(metric string, metriclist []string) bool {
-	for _, m := range metriclist {
-		if m == metric {
-			return true
-		}
-	}
-	return false
 }
 
 func getCurrentUnixTimestamp() int64 {
@@ -66,77 +137,33 @@ func getCurrentUnixTimestamp() int64 {
 	return secs
 }
 
-// 	ValidateMetricsSupportList:- is  to check whether the posted metric list is in the uspport list of this driver
-// 	metricList-> Posted metric list
-//	supportedMetrics -> list of supported metrics
-func (d *MetricDriver) ValidateMetricsSupportList(metricList []string, resourceType string) (supportedMetrics []string, err error) {
-	var configs Configs
-
-	// Read supported metric list from yaml config
-	// TODO: Move this to read from file
-	source := []byte(data)
-	error := yaml.Unmarshal(source, &configs)
-	if error != nil {
-		log.Fatalf("unmarshal error: %v", error)
-	}
-
-	for _, resources := range configs.Cfgs {
-		switch resources.Resource {
-		// TODO: Other Cases needs to be added
-		case "pool":
-			for _, metricName := range metricList {
-				if metricInMetrics(metricName, resources.Metrics) {
-					supportedMetrics = append(supportedMetrics, metricName)
-
-				} else {
-					log.Infof("metric:%s is not in the supported list", metricName)
-				}
-			}
-		}
-	}
-	return supportedMetrics, nil
-}
-
-//	CollectMetrics: Driver entry point to collect metrics. This will be invoked by the dock
-//	metricsList-> posted metric list
-//	instanceID -> posted instanceID
-//	metricArray	-> the array of metrics to be returned
 func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 
-	//validate metric support list
-	// Todo: Remove this two lines when Ceph driver implements modified driver interface
-	metricsList := []string{"pool_used_bytes", "pool_raw_used_bytes", "pool_available_bytes", "pool_objects_total", "pool_dirty_objects_total", "pool_read_total", "pool_read_bytes_total", "pool_write_total", "pool_write_bytes_total"}
-	instanceID := "pool1"
-	supportedMetrics, err := d.ValidateMetricsSupportList(metricsList, "pool")
-	if supportedMetrics == nil {
-		log.Infof("no metrics found in the  supported metric list")
-	}
-	metricMap, err := d.cli.CollectMetrics(supportedMetrics, instanceID)
-
+	metricMap, instance, err := d.cli.CollectMetrics()
 	var tempMetricArray []*model.MetricSpec
-
 	for i := 0; i < len(metricMap); i++ {
 		val, _ := strconv.ParseFloat(metricMap[i].Value, 64)
-		//Todo: See if association  is required here, resource discovery could fill this information
 		associatorMap := make(map[string]string)
-		associatorMap["cluster"] = metricMap[i].Const_Label
-		//TODO: "pool" mention here will be resourceType
-		associatorMap["pool"] = metricMap[i].Var_Label
+		for k := range metricMap[i].Const_Label {
+			associatorMap[k] = metricMap[i].Const_Label[k]
+		}
+		if metricMap[i].Var_Label != nil {
+			for k := range metricMap[i].Var_Label {
+				associatorMap[k] = metricMap[i].Var_Label[k]
+			}
+		}
 		metricValue := &model.Metric{
-			Timestamp: getCurrentUnixTimestamp(),
 			Value:     val,
+			Timestamp: getCurrentUnixTimestamp(),
 		}
 		metricValues := make([]*model.Metric, 0)
 		metricValues = append(metricValues, metricValue)
-
 		metric := &model.MetricSpec{
-			InstanceID:   instanceID,
-			InstanceName: instanceID,
+			InstanceID:   instance[0],
+			InstanceName: instance[1],
 			Job:          "ceph",
 			Labels:       associatorMap,
-			//Todo Take Componet from Post call, as of now it is only for pool ( will use "resourceType" instead
-			// Pass "resourceType" as 3rd parameter which will be used as Componet's field
-			Component:    "pool",
+			Component:    metricMap[i].Component,
 			Name:         metricMap[i].Name,
 			Unit:         metricMap[i].Unit,
 			AggrType:     metricMap[i].AggrType,
