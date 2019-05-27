@@ -86,7 +86,8 @@ var (
 
 	sharekeys = KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
 		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Protocols",
-		"TenantId", "UserId", "SnapshotId", "ExportLocations"}
+		"TenantId", "UserId", "SnapshotId", "ExportLocations", "Metadata"}
+	shareFormatters = FormatterList{"Metadata": JsonFormatter}	
 )
 
 func init() {
@@ -165,7 +166,7 @@ func fileShareCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, FormatterList{})
+	PrintDict(resp, sharekeys, shareFormatters)
 }
 
 func fileShareDeleteAction(cmd *cobra.Command, args []string) {
@@ -183,7 +184,7 @@ func fileShareShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, FormatterList{})
+	PrintDict(resp, sharekeys, shareFormatters)
 }
 
 func fileShareListAction(cmd *cobra.Command, args []string) {
@@ -200,7 +201,7 @@ func fileShareListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintList(resp, sharekeys, FormatterList{})
+	PrintList(resp, sharekeys, shareFormatters)
 }
 
 func fileShareUpdateAction(cmd *cobra.Command, args []string) {
@@ -215,5 +216,5 @@ func fileShareUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, FormatterList{})
+	PrintDict(resp, sharekeys, shareFormatters)
 }
