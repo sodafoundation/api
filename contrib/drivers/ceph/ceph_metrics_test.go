@@ -22,13 +22,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-func TestMetricDriverSetup(t *testing.T) {
-	var d = &MetricDriver{}
-	if err := d.Setup(); err != nil {
-		t.Errorf("Setup ceph metric  driver failed: %+v\n", err)
-	}
-}
-
 var pool_Label map[string]string = map[string]string{"cluster": "ceph", "pool": "rbd"}
 var osd_label map[string]string = map[string]string{"cluster": "ceph", "osd": "osd.0"}
 var cluster_label map[string]string = map[string]string{"cluster": "ceph"}
@@ -128,7 +121,7 @@ func (n *MetricFakeconn) Shutdown() {}
 
 func TestCollectMetrics(t *testing.T) {
 	var md = &MetricDriver{}
-	md.Setup()
+	md.cli=&MetricCli{nil}
 	md.cli.conn = NewMetricFakeconn(fakeResp)
 
 	var tempMetricArray []*model.MetricSpec
