@@ -251,7 +251,7 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 
 	vg, sourceLvName := fields[2], fields[3]
 	if err := d.cli.CreateLvSnapshot(snapName, sourceLvName, vg, opt.GetSize()); err != nil {
-		log.Error("Failed to create logic volume snapshot:", err)
+		log.Error("failed to create logic volume snapshot:", err)
 		return nil, err
 	}
 
@@ -286,7 +286,7 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*
 	}
 
 	if err := d.cli.DeleteFileShareSnapshots(snapName, vg); err != nil {
-		log.Error("Failed to remove logic volume:", err)
+		log.Error("failed to remove logic volume:", err)
 		return nil, err
 	}
 	return nil, nil
