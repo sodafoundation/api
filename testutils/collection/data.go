@@ -136,6 +136,34 @@ var (
 				},
 			},
 		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+			},
+			Name:             "opensds-files-default",
+			Description:      "This is the first file sample storage pool for testing",
+			StorageType:      "file",
+			TotalCapacity:    int64(200),
+			FreeCapacity:     int64(170),
+			AvailabilityZone: "default",
+			DockId:           "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			Extras: model.StoragePoolExtraSpec{
+				DataStorage: model.DataStorageLoS{
+					ProvisioningPolicy:      "Thin",
+					IsSpaceEfficient:        false,
+					StorageAccessCapability: []string{"Read", "Write", "Execute"},
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "nfs",
+					MaxIOPS:        7000000,
+					MaxBWS:         600,
+				},
+				Advanced: map[string]interface{}{
+					"diskType": "SSD",
+					"latency":  "5ms",
+				},
+			},
+		},
 	}
 
 	SampleAvailabilityZones = []string{"default"}
@@ -145,25 +173,29 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			},
-			Name:        "sample-fileshare",
-			Description: "This is a sample fileshare for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			ProfileId:   "b3585ebe-c42c-120g-b28e-f373746a71ca",
-			SnapshotId:  "",
+			Name:             "sample-fileshare-01",
+			Description:      "This is first sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:        "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:       "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.100"},
 		},
 		{
 			BaseModel: &model.BaseModel{
 				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
 			},
-			Name:        "sample-fileshare",
-			Description: "This is a sample fileshare for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
-			ProfileId:   "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			SnapshotId:  "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			Name:             "sample-fileshare-2",
+			Description:      "This is second sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			ProfileId:        "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			SnapshotId:       "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.101"},
 		},
 	}
 

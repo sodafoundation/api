@@ -15,15 +15,15 @@
 package nfs
 
 import (
-	"fmt"
+	"errors"
 	"path"
+	"strings"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
-	data "github.com/opensds/opensds/testutils/collection"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -45,6 +45,8 @@ const (
 	KLvsPath       = "lvsPath"
 	KFileshareName = "nfsFileshareName"
 	KFileshareID   = "nfsFileshareID"
+	AccessLevelRo  = "ro"
+	AccessLevelRw  = "rw"
 )
 
 type NFSConfig struct {
@@ -81,7 +83,28 @@ func (d *Driver) Setup() error {
 func (*Driver) Unset() error { return nil }
 
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
-	// need to implement
+	var access string
+	var accessTo []string
+	var accessCapability []string
+	// Get accessto list
+	accessTo = opt.GetAccessTo()
+	// get accessCapability list
+	accessCapability = opt.GetAccessCapability()
+	// get fileshare name
+	fname := opt.GetName()
+
+	for _, value := range accessCapability {
+		if value == "w" {
+			access = AccessLevelRw
+			break
+		} else {
+			access = AccessLevelRo
+		}
+	}
+
+	for _, server := range accessTo {
+		err = d.cli.CreateAccess(server, access, fname)
+	}
 	return fshare, nil
 }
 
@@ -126,10 +149,16 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		log.Error("failed to mount a directory:", err)
 		return nil, err
 	}
+
+	// Set permission to directory
+	if err := d.cli.SetPermission(dirName); err != nil {
+		log.Error("failed to set permission:", err)
+		return nil, err
+	}
+
 	// get export location of fileshare
 	var location []string
 	location = []string{d.cli.GetExportLocation(name, server)}
-	fmt.Println("locations :", location)
 	if len(location) == 0 {
 		log.Error("failed to get exportlocation:", err)
 		return nil, err
@@ -210,10 +239,55 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.Fil
 
 // CreateFileShareSnapshot
 func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
-	return &data.SampleFileShareSnapshots[0], nil
+	lvPath, ok := opt.GetMetadata()[KLvPath]
+	if !ok {
+		err := errors.New("can't find 'lvPath' in snapshot metadata")
+		log.Error(err)
+		return nil, err
+	}
+	snapName := opt.GetName()
+
+	fields := strings.Split(lvPath, "/")
+
+	vg, sourceLvName := fields[2], fields[3]
+	if err := d.cli.CreateLvSnapshot(snapName, sourceLvName, vg, opt.GetSize()); err != nil {
+		log.Error("failed to create logic volume snapshot:", err)
+		return nil, err
+	}
+
+	return &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:         opt.GetName(),
+		SnapshotSize: opt.GetSize(),
+		Description:  opt.GetDescription(),
+		Metadata: map[string]string{
+			KFileshareName: snapName,
+			KFileshareID:   opt.GetId(),
+			KLvPath:        lvPath,
+		},
+	}, nil
 }
 
 // DeleteFileShareSnapshot
 func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	lvsPath, ok := opt.GetMetadata()[KLvPath]
+	if !ok {
+		err := errors.New("can't find 'lvsPath' in snapshot metadata, ingnore it!")
+		log.Error(err)
+		return nil, nil
+	}
+	fields := strings.Split(lvsPath, "/")
+	vg, snapName := fields[2], fields[3]
+	if !d.cli.Exists(snapName) {
+		log.Warningf("Snapshot(%s) does not exist, nothing to remove", snapName)
+		return nil, nil
+	}
+
+	if err := d.cli.DeleteFileShareSnapshots(snapName, vg); err != nil {
+		log.Error("failed to remove logic volume:", err)
+		return nil, err
+	}
 	return nil, nil
 }
