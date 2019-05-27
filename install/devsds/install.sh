@@ -50,7 +50,7 @@ osds::backendlist_check(){
     local backendlist=$1
     for backend in $(echo $backendlist | tr "," " ");do
         case $backend in
-        lvm|ceph)
+        lvm|ceph|nfs)
         ;;
         *)
         echo "Error: backends must be one of lvm,ceph" >&2
@@ -168,7 +168,7 @@ echo "------------------------------------------------------------------"
 echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"
 echo "export OPENSDS_ENDPOINT=http://localhost:50040"
 if osds::util::is_service_enabled keystone; then
-    if [ "true" == $USE_CONTAINER_KEYSTONE ] 
+    if [ "true" == $USE_CONTAINER_KEYSTONE ]
         then
             echo "export OS_AUTH_URL=http://$KEYSTONE_IP/identity"
             echo "export OS_USERNAME=admin"

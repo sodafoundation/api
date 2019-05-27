@@ -32,7 +32,7 @@ const (
 )
 
 const (
-	NFSDriverType = "nfsnative"
+	NFSDriverType = "nfs"
 )
 
 // These constants below represent the access protocol type of all storage

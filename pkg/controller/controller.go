@@ -889,15 +889,16 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  get fileshare from db %+v", fileshare)
+	log.V(5).Infof("controller create fileshare:  get fileshare from db %+v", fileshare)
 
 	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  selected poolInfo %+v", polInfo)
+	log.V(5).Infof("controller create fileshare:  selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -961,14 +962,10 @@ func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileSh
 // CreateFileShare implements pb.ControllerServer.CreateFileShare
 func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
 	var err error
-	log.Info("controller server receive create file share request, vr =", opt)
+	log.Info("controller server receive create file share acl request, vr =", opt)
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	// This file share structure is currently fetched from database, but eventually
-	// it will be removed after SelectSupportedPoolForFileShare method in selector
-	// is updated.
-	fileshareacl, err := db.C.GetFileShareAcl(ctx, opt.Id)
-	fileshare, err := db.C.GetFileShare(ctx, fileshareacl.FileShareId)
 
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileShareId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
@@ -987,6 +984,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	}
 	c.fileshareController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
+	opt.Name = fileshare.Name
 
 	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
 	if err != nil {
