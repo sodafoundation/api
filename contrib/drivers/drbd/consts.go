@@ -34,7 +34,7 @@ const (
 	maxPeers = 7
 
 	resDir          = "/etc/drbd.d"
-	defaultConfPath = "/etc/opensds/drbd.yaml"
+	defaultConfPath = "/etc/opensds/driver/drbd.yaml"
 )
 
 type drbdConf struct {
