@@ -42,6 +42,8 @@ func init() {
 	flag.StringVar(&CONF.OsdsLet.PrometheusPushMechanism, "prometheus-push-mechanism", CONF.OsdsLet.PrometheusPushMechanism, "Prometheus push mechanism")
 	flag.StringVar(&CONF.OsdsLet.PushGatewayUrl, "prometheus-push-gateway-url", CONF.OsdsLet.PushGatewayUrl, "Prometheus push gateway URL")
 	flag.StringVar(&CONF.OsdsLet.NodeExporterWatchFolder, "node-exporter-watch-folder", CONF.OsdsLet.NodeExporterWatchFolder, "Node exporter watch folder")
+	flag.StringVar(&CONF.OsdsLet.KafkaEndpoint, "kafka-endpoint", CONF.OsdsLet.KafkaEndpoint, "Kafka endpoint")
+	flag.StringVar(&CONF.OsdsLet.KafkaTopic, "kafka-topic", CONF.OsdsLet.KafkaTopic, "Kafka topic")
 
 	flag.Parse()
 

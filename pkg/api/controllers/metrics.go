@@ -127,6 +127,9 @@ func (m *MetricsPortal) GetMetrics() {
 
 func (m *MetricsPortal) UploadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:uploadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -211,6 +214,9 @@ func DoUpload(metricsPortal *MetricsPortal, confHome string, url string, reloadP
 
 func (m *MetricsPortal) DownloadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:downloadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -262,9 +268,8 @@ func (m *MetricsPortal) CollectMetrics() {
 	defer m.CtrClient.Close()
 
 	opt := &pb.CollectMetricsOpts{
-		InstanceId:  collMetricSpec.InstanceId,
-		MetricNames: collMetricSpec.Metrics,
-		Context:     ctx.ToJson(),
+		DriverName: collMetricSpec.DriverType,
+		Context:    ctx.ToJson(),
 	}
 
 	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)
