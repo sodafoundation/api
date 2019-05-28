@@ -15,7 +15,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,10 +24,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gopkg.in/yaml.v2"
 )
 
-const DefaultConfigFile = "/etc/opensds/metrics/lvm.yaml"
 const DefaultPort = "8080"
 
 // struct for lvm  collector that contains pointers
@@ -143,74 +140,31 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	//Implement logic here to determine proper metric value to return to prometheus
-	//for each descriptor
-	metricList := []string{"iops", "read_throughput", "write_throughput", "response_time", "service_time", "utilization_prcnt"}
-	source, err := ioutil.ReadFile(DefaultConfigFile)
-	if err != nil {
-		log.Fatal("file "+DefaultConfigFile+"can't read", err)
-	}
-	var config Configs
-	err1 := yaml.Unmarshal(source, &config)
-	if err1 != nil {
-		log.Fatalf("error: %v", err)
-	}
-
 	metricDriver := lvm.MetricDriver{}
 	metricDriver.Setup()
-	for _, resource := range config.Cfgs {
-		switch resource.Type {
-		case "volume":
-			for _, volume := range resource.Devices {
-				metricArray, _ := metricDriver.CollectMetrics(metricList, volume)
-				for _, metric := range metricArray {
-					lableVals := []string{metric.InstanceName}
-					switch metric.Name {
-					case "iops":
-						ch <- prometheus.MustNewConstMetric(c.VolumeIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "read_throughput":
-						ch <- prometheus.MustNewConstMetric(c.VolumeReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "write_throughput":
-						ch <- prometheus.MustNewConstMetric(c.VolumeWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "response_time":
-						ch <- prometheus.MustNewConstMetric(c.VolumeResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "service_time":
-						ch <- prometheus.MustNewConstMetric(c.VolumeServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
-					case "utilization_prcnt":
-						ch <- prometheus.MustNewConstMetric(c.VolumeUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+	metricArray, _ := metricDriver.CollectMetrics()
+	for _, metric := range metricArray {
+		lableVals := []string{metric.InstanceName}
+		switch metric.Name {
+		case "iops":
+			ch <- prometheus.MustNewConstMetric(c.VolumeIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+		case "read_throughput":
+			ch <- prometheus.MustNewConstMetric(c.VolumeReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+		case "write_throughput":
+			ch <- prometheus.MustNewConstMetric(c.VolumeWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+		case "response_time":
+			ch <- prometheus.MustNewConstMetric(c.VolumeResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+		case "service_time":
+			ch <- prometheus.MustNewConstMetric(c.VolumeServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
-					}
-				}
-			}
+		case "utilization_prcnt":
+			ch <- prometheus.MustNewConstMetric(c.VolumeUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
-		case "disk":
-			for _, volume := range resource.Devices {
-				metricArray, _ := metricDriver.CollectMetrics(metricList, volume)
-				for _, metric := range metricArray {
-					lableVals := []string{metric.Labels["device"]}
-					switch metric.Name {
-					case "iops":
-						ch <- prometheus.MustNewConstMetric(c.DiskIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "read_throughput":
-						ch <- prometheus.MustNewConstMetric(c.DiskReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "write_throughput":
-						ch <- prometheus.MustNewConstMetric(c.DiskWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "response_time":
-						ch <- prometheus.MustNewConstMetric(c.DiskResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "service_time":
-						ch <- prometheus.MustNewConstMetric(c.DiskServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-					case "utilization_prcnt":
-						ch <- prometheus.MustNewConstMetric(c.DiskUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-
-					}
-				}
-			}
 		}
-
 	}
-
 }
+
 func validateCliArg(arg1 string) string {
 	num, err := strconv.Atoi(arg1)
 	if (err != nil) || (num > 65535) {

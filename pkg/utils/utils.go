@@ -136,6 +136,25 @@ func StructToMap(structObj interface{}) (map[string]interface{}, error) {
 	return result, nil
 }
 
+func CompareArray(key string, value interface{}, reqValue interface{}) (bool, error) {
+	aInterface := value.([]interface{})
+	astring := make([]string, len(aInterface))
+	for i, v := range aInterface {
+		astring[i] = v.(string)
+	}
+	switch reflect.TypeOf(reqValue).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(reqValue)
+		for i := 0; i < s.Len(); i++ {
+			val := s.Index(i).String()
+			if !Contains(astring, val) {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
+}
+
 // Epsilon ...
 const Epsilon float64 = 0.00000001
 
@@ -189,6 +208,10 @@ func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) 
 		}
 
 		return false, errors.New("the type of " + key + " must be string")
+
+	case []interface{}:
+		return CompareArray(key, value, reqValue)
+
 	default:
 		return false, errors.New("the type of " + key + " must be bool or float64 or string")
 	}

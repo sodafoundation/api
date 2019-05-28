@@ -27,11 +27,12 @@ const (
 	LVMDriverType                 = "lvm"
 	HuaweiDoradoDriverType        = "huawei_dorado"
 	HuaweiFusionStorageDriverType = "huawei_fusionstorage"
+	HpeNimbleDriverType           = "hpe_nimble"
 	DRBDDriverType                = "drbd"
 )
 
 const (
-	NFSDriverType = "nfsnative"
+	NFSDriverType = "nfs"
 )
 
 // These constants below represent the access protocol type of all storage

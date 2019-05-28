@@ -48,7 +48,6 @@ func NewSelector() Selector {
 func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.StoragePoolSpec, error) {
 	var prf *model.ProfileSpec
 	var err error
-
 	if vol.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(c.NewAdminContext())
@@ -85,7 +84,7 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 		if vol.PoolId != "" {
 			filterRequest["id"] = vol.PoolId
 		}
-
+		filterRequest["storageType"] = prf.StorageType
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
@@ -194,14 +193,19 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 
 	if in.ProfileId == "" {
 		log.Warning("use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(c.NewAdminContext())
+		prf, err = db.C.GetDefaultProfileFileShare(c.NewAdminContext())
+		if err != nil {
+			log.Error("get profile failed: ", err)
+			return nil, err
+		}
 	} else {
 		prf, err = db.C.GetProfile(c.NewAdminContext(), in.ProfileId)
+		if err != nil {
+			log.Error("get profile failed: ", err)
+			return nil, err
+		}
 	}
-	if err != nil {
-		log.Error("get profile failed: ", err)
-		return nil, err
-	}
+
 	pools, err := db.C.ListPools(c.NewAdminContext())
 	if err != nil {
 		log.Error("when list pools in resources SelectSupportedPool: ", err)
@@ -226,6 +230,9 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 		if in.PoolId != "" {
 			filterRequest["id"] = in.PoolId
 		}
+
+		filterRequest["storageType"] = prf.StorageType
+
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {

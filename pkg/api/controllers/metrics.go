@@ -56,21 +56,20 @@ var BackupExtension string
 
 func init() {
 
-	// TODO Prakash read these from conf and save to these variables
-	ReloadPath = "/-/reload"
+	ReloadPath = CONF.OsdsApiServer.ConfReloadUrl
 	BackupExtension = ".bak"
 
-	PrometheusConfHome = "/etc/prometheus/"
-	PrometheusUrl = "http://localhost:9090"
-	PrometheusConfFile = "prometheus.yml"
+	PrometheusConfHome = CONF.OsdsApiServer.PrometheusConfHome
+	PrometheusUrl = CONF.OsdsApiServer.PrometheusUrl
+	PrometheusConfFile = CONF.OsdsApiServer.PrometheusConfFile
 
-	AlertmgrConfHome = "/root/alertmanager-0.16.2.linux-amd64/"
-	AlertmgrUrl = "http://localhost:9093"
-	AlertmgrConfFile = "alertmanager.yml"
+	AlertmgrConfHome = CONF.OsdsApiServer.AlertmgrConfHome
+	AlertmgrUrl = CONF.OsdsApiServer.AlertMgrUrl
+	AlertmgrConfFile = CONF.OsdsApiServer.AlertmgrConfFile
 
-	GrafanaConfHome = "/etc/grafana/"
-	GrafanaRestartCmd = "grafana-server"
-	GrafanaConfFile = "grafana.ini"
+	GrafanaConfHome = CONF.OsdsApiServer.GrafanaConfHome
+	GrafanaRestartCmd = CONF.OsdsApiServer.GrafanaRestartCmd
+	GrafanaConfFile = CONF.OsdsApiServer.GrafanaConfFile
 }
 
 func NewMetricsPortal() *MetricsPortal {
@@ -128,6 +127,9 @@ func (m *MetricsPortal) GetMetrics() {
 
 func (m *MetricsPortal) UploadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:uploadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -212,6 +214,9 @@ func DoUpload(metricsPortal *MetricsPortal, confHome string, url string, reloadP
 
 func (m *MetricsPortal) DownloadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:downloadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -263,9 +268,8 @@ func (m *MetricsPortal) CollectMetrics() {
 	defer m.CtrClient.Close()
 
 	opt := &pb.CollectMetricsOpts{
-		InstanceId:  collMetricSpec.InstanceId,
-		MetricNames: collMetricSpec.Metrics,
-		Context:     ctx.ToJson(),
+		DriverName: collMetricSpec.DriverType,
+		Context:    ctx.ToJson(),
 	}
 
 	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)
