@@ -172,7 +172,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		Size:             opt.GetSize(),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
-		PoolId:           vg,
+		PoolId:           opt.GetPoolId(),
 		ExportLocations:  location,
 		Metadata: map[string]string{
 			KFileshareName: name,

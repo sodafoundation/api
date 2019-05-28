@@ -511,6 +511,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	result.ExportLocations = fshare.ExportLocations
 	result.Status = fshare.Status
 	result.Metadata = fshare.Metadata
+	result.PoolId = fshare.PoolId
 
 	body, err := json.Marshal(result)
 	if err != nil {
