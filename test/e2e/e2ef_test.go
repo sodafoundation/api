@@ -34,7 +34,6 @@ const (
 	nvmepool       = "opensds-volumes-nvme"
 	defaultgroup   = "opensds-volumes-default"
 	localIqn       = "iqn.2017-10.io.opensds:volume:00000001"
-	localHostIp    = "127.0.0.1"
 	nvmeofProtocol = "nvmeof"
 	iscsiProtocol  = "iscsi"
 )
@@ -192,7 +191,7 @@ func TestVolumeAttachmentOperationFlow(t *testing.T) {
 			Host:      host,
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
-			Ip:        localHostIp,
+			Ip:        "127.0.0.1",
 			Initiator: localIqn,
 		},
 		AccessProtocol: iscsiProtocol,
@@ -503,16 +502,9 @@ func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, 
 	}
 
 	t.Log("Start preparing volume attachment...")
-	host, _ := os.Hostname()
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        localHostIp,
-			Initiator: localIqn,
-		},
+		VolumeId:       vol.Id,
+		HostInfo:       model.HostInfo{},
 		AccessProtocol: iscsiProtocol,
 	})
 	if err != nil {
