@@ -19,7 +19,6 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -35,6 +34,7 @@ const (
 	nvmepool       = "opensds-volumes-nvme"
 	defaultgroup   = "opensds-volumes-default"
 	localIqn       = "iqn.2017-10.io.opensds:volume:00000001"
+	localHostIp    = "127.0.0.1"
 	nvmeofProtocol = "nvmeof"
 	iscsiProtocol  = "iscsi"
 )
@@ -192,7 +192,7 @@ func TestVolumeAttachmentOperationFlow(t *testing.T) {
 			Host:      host,
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
-			Ip:        getHostIpForTest(),
+			Ip:        localHostIp,
 			Initiator: localIqn,
 		},
 		AccessProtocol: iscsiProtocol,
@@ -510,7 +510,7 @@ func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, 
 			Host:      host,
 			Platform:  runtime.GOARCH,
 			OsType:    runtime.GOOS,
-			Ip:        getHostIpForTest(),
+			Ip:        localHostIp,
 			Initiator: localIqn,
 		},
 		AccessProtocol: iscsiProtocol,
@@ -587,63 +587,28 @@ func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	return attc, nil
 }
 
-func cleanVolumeForTest(t *testing.T, volID string) error {
+func cleanVolumeForTest(t *testing.T, volID string) {
 	t.Log("Start cleaning volume...")
-	if err := u.DeleteVolume(volID, nil); err != nil {
-		t.Error("clean volume failed:", err)
-		return err
-	}
+	u.DeleteVolume(volID, nil)
 	t.Log("End cleaning volume...")
-	return nil
 }
 
-func cleanVolumeAndAttachmentForTest(t *testing.T, volID, atcID string) error {
+func cleanVolumeAndAttachmentForTest(t *testing.T, volID, atcID string) {
 	t.Log("Start cleaning volume attachment...")
-
-	if err := u.DeleteVolumeAttachment(atcID, nil); err != nil {
-		t.Error("clean volume attachment failed:", err)
-		return err
-	}
+	u.DeleteVolumeAttachment(atcID, nil)
 	t.Log("End cleaning volume attachment...")
 
 	t.Log("Start cleaning volume...")
-	if err := u.DeleteVolume(volID, nil); err != nil {
-		t.Error("clean volume failed:", err)
-		return err
-	}
+	u.DeleteVolume(volID, nil)
 	t.Log("End cleaning volume...")
-	return nil
 }
 
-func cleanVolumeAndSnapshotForTest(t *testing.T, volID, snpID string) error {
+func cleanVolumeAndSnapshotForTest(t *testing.T, volID, snpID string) {
 	t.Log("Start cleaing volume snapshot...")
-	if err := u.DeleteVolumeSnapshot(snpID, nil); err != nil {
-		t.Error("clean volume snapshot failed:", err)
-		return err
-	}
+	u.DeleteVolumeSnapshot(snpID, nil)
 	t.Log("End cleaning volume snapshot...")
 
 	t.Log("Start cleaning volume...")
-	if err := u.DeleteVolume(volID, nil); err != nil {
-		t.Error("clean volume failed:", err)
-		return err
-	}
+	u.DeleteVolume(volID, nil)
 	t.Log("End cleaning volume...")
-	return nil
-}
-
-// getHostIpForTest return Host IP
-func getHostIpForTest() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "127.0.0.1"
-	}
-
-	for _, address := range addrs {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			return ipnet.IP.String()
-		}
-	}
-
-	return "127.0.0.1"
 }
