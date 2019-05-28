@@ -168,10 +168,10 @@ const (
 
 // performance key ids
 const (
-	PerfIOPS             = "22" // tps
-	PerfReadThroughput   = "23" // mbs
-	PerfWriteThroughput  = "26" // mbs
-	PerfResponseTime     = "20" // ms
-	PerfServiceTime      = "29" // excluding queue time(ms)
-	PerfUtilizationPrcnt = "18" // usage ratioPerf
+	PerfIOPS             = "22"  // tps
+	PerfReadThroughput   = "23"  // mbs
+	PerfWriteThroughput  = "26"  // mbs
+	PerfResponseTime     = "370" // ms
+	PerfServiceTime      = "29"  // excluding queue time(ms)
+	PerfUtilizationPrcnt = "18"  // usage ratioPerf
 )

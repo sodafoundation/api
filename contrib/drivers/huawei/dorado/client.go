@@ -1438,3 +1438,34 @@ func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, err
 
 	return false, nil
 }
+
+func (c *DoradoClient) ListControllers() ([]SimpleStruct, error) {
+	resp := &SimpleResp{}
+	err := c.request("GET", "/controller", nil, resp)
+	return resp.Data, err
+}
+
+func (c *DoradoClient) GetPerformance(uuid string, dataIdList []string) (map[string]string, error) {
+	perf := &PerformancesResp{}
+	url := fmt.Sprintf("/performace_statistic/cur_statistic_data/"+
+		"?CMO_STATISTIC_UUID=%s&CMO_STATISTIC_DATA_ID_LIST=%s", uuid, strings.Join(dataIdList, ","))
+	if err := c.request("GET", url, nil, perf); err != nil {
+		return nil, err
+	}
+	if len(perf.Data) == 0 {
+		return nil, fmt.Errorf("got empty performance data")
+	}
+
+	dataList := strings.Split(perf.Data[0].DataList, ",")
+	idList := strings.Split(perf.Data[0].DataIdList, ",")
+	if len(dataList) != len(idList) {
+		return nil, fmt.Errorf("wrong response data, data id list length does not equal to data length")
+	}
+
+	perfMap := map[string]string{}
+	for i, id := range idList {
+		perfMap[id] = dataList[i]
+	}
+
+	return perfMap, nil
+}
