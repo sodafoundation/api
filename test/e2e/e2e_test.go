@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ const (
 
 func init() {
 	c, _ = client.NewClient(&client.Config{
-		Endpoint:    "http://localhost:50040",
+		Endpoint:    constants.DefaultOpensdsEndpoint,
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId),
 	})
 
@@ -50,6 +50,7 @@ func init() {
 		var body = &model.ProfileSpec{
 			Name:        "default",
 			Description: "default policy",
+			StorageType: "block",
 		}
 		prf, err := c.CreateProfile(body)
 		if err != nil {
@@ -63,20 +64,30 @@ func init() {
 
 func TestListDocks(t *testing.T) {
 	t.Log("Start listing docks...")
-	if _, err := c.ListDocks(); err != nil {
+	dcks, err := c.ListDocks()
+	if err != nil {
 		t.Error("list docks failed:", err)
 		return
 	}
-	t.Log("list docks success!")
+	if len(dcks) == 0 {
+		t.Error("dock resource is empty!")
+		return
+	}
+	t.Log("List docks success!")
 }
 
 func TestListPools(t *testing.T) {
 	t.Log("Start listing pools...")
-	if _, err := c.ListPools(); err != nil {
+	pols, err := c.ListPools()
+	if err != nil {
 		t.Error("list pools failed:", err)
 		return
 	}
-	t.Log("list pools success!")
+	if len(pols) == 0 {
+		t.Error("pool resource is empty!")
+		return
+	}
+	t.Log("List pools success!")
 }
 
 func TestCreateVolume(t *testing.T) {
@@ -106,7 +117,7 @@ func TestCreateVolume(t *testing.T) {
 func TestGetVolume(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
@@ -114,12 +125,12 @@ func TestGetVolume(t *testing.T) {
 	t.Log("Start checking volume...")
 	vol, err = c.GetVolume(vol.Id)
 	if err != nil {
-		t.Error("Check volume failed:", err)
+		t.Error("check volume failed:", err)
 		return
 	}
 	// Test the status of created volume.
 	if vol.Status != model.VolumeAvailable {
-		t.Error("The status of volume is not available!")
+		t.Error("the status of volume is not available!")
 		return
 	}
 	t.Log("Check volume success!")
@@ -128,14 +139,14 @@ func TestGetVolume(t *testing.T) {
 func TestListVolumes(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start checking all volumes...")
 	if _, err := c.ListVolumes(); err != nil {
-		t.Error("Check all volumes failed:", err)
+		t.Error("check all volumes failed:", err)
 		return
 	}
 	t.Log("Check all volumes success!")
@@ -144,7 +155,7 @@ func TestListVolumes(t *testing.T) {
 func TestUpdateVolume(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
@@ -171,7 +182,7 @@ func TestUpdateVolume(t *testing.T) {
 func TestExtendVolume(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
@@ -198,7 +209,7 @@ func TestExtendVolume(t *testing.T) {
 func TestDeleteVolume(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 
@@ -213,7 +224,7 @@ func TestDeleteVolume(t *testing.T) {
 func TestCreateVolumeAttachment(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
@@ -246,7 +257,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 	t.Log("Start cleaning volume attachment...")
 	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
-		t.Error("Clean volume attachment failed:", err)
+		t.Error("clean volume attachment failed:", err)
 		return
 	}
 	t.Log("End cleaning volume attachment...")
@@ -255,7 +266,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 func TestGetVolumeAttachment(t *testing.T) {
 	atc, err := prepareVolumeAttachment(t)
 	if err != nil {
-		t.Error("Failed to run volume attachment prepare function:", err)
+		t.Error("failed to run volume attachment prepare function:", err)
 		return
 	}
 	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
@@ -263,7 +274,7 @@ func TestGetVolumeAttachment(t *testing.T) {
 	t.Log("Start checking volume attachment...")
 	atc, err = c.GetVolumeAttachment(atc.Id)
 	if err != nil {
-		t.Error("Check volume attachment failed:", err)
+		t.Error("check volume attachment failed:", err)
 		return
 	}
 	if atc.Status != model.VolumeAttachAvailable {
@@ -276,14 +287,14 @@ func TestGetVolumeAttachment(t *testing.T) {
 func TestListVolumeAttachments(t *testing.T) {
 	atc, err := prepareVolumeAttachment(t)
 	if err != nil {
-		t.Error("Failed to run volume attachment prepare function:", err)
+		t.Error("failed to run volume attachment prepare function:", err)
 		return
 	}
 	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
 
 	t.Log("Start checking all volume attachments...")
 	if _, err := c.ListVolumeAttachments(); err != nil {
-		t.Error("Check all volume attachments failed:", err)
+		t.Error("check all volume attachments failed:", err)
 		return
 	}
 	t.Log("list volume attachments success!")
@@ -292,7 +303,7 @@ func TestListVolumeAttachments(t *testing.T) {
 func TestDeleteVolumeAttachment(t *testing.T) {
 	atc, err := prepareVolumeAttachment(t)
 	if err != nil {
-		t.Error("Failed to run volume attachment prepare function:", err)
+		t.Error("failed to run volume attachment prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
@@ -308,7 +319,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 func TestCreateVolumeSnapshot(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
@@ -329,11 +340,11 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 	if snp.Status != model.VolumeSnapAvailable {
 		t.Errorf("status expected is %s, got %s\n", model.VolumeSnapAvailable, snp.Status)
 	}
-	t.Log("create volume snapshot success!")
+	t.Log("Create volume snapshot success!")
 
 	t.Log("Start cleaing volume snapshot...")
 	if err := c.DeleteVolumeSnapshot(snp.Id, nil); err != nil {
-		t.Error("Clean volume snapshot failed:", err)
+		t.Error("clean volume snapshot failed:", err)
 		return
 	}
 	t.Log("End cleaing volume snapshot...")
@@ -342,7 +353,7 @@ func TestCreateVolumeSnapshot(t *testing.T) {
 func TestGetVolumeSnapshot(t *testing.T) {
 	snp, err := prepareVolumeSnapshot(t)
 	if err != nil {
-		t.Error("Failed to run volume snapshot prepare function:", err)
+		t.Error("failed to run volume snapshot prepare function:", err)
 		return
 	}
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
@@ -350,12 +361,12 @@ func TestGetVolumeSnapshot(t *testing.T) {
 	t.Log("Start checking volume snapshot...")
 	snp, err = c.GetVolumeSnapshot(snp.Id)
 	if err != nil {
-		t.Error("Check volume snapshot failed:", err)
+		t.Error("check volume snapshot failed:", err)
 		return
 	}
 	// Test the status of created volume snapshot.
 	if snp.Status != model.VolumeSnapAvailable {
-		t.Error("The status of volume snapshot is not available!")
+		t.Error("the status of volume snapshot is not available!")
 		return
 	}
 	t.Log("Check volume snapshot success!")
@@ -364,7 +375,7 @@ func TestGetVolumeSnapshot(t *testing.T) {
 func TestListVolumeSnapshots(t *testing.T) {
 	snp, err := prepareVolumeSnapshot(t)
 	if err != nil {
-		t.Error("Failed to run volume snapshot prepare function:", err)
+		t.Error("failed to run volume snapshot prepare function:", err)
 		return
 	}
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
@@ -380,7 +391,7 @@ func TestListVolumeSnapshots(t *testing.T) {
 func TestDeleteVolumeSnapshot(t *testing.T) {
 	snp, err := prepareVolumeSnapshot(t)
 	if err != nil {
-		t.Error("Failed to run volume snapshot prepare function:", err)
+		t.Error("failed to run volume snapshot prepare function:", err)
 		return
 	}
 	defer cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
@@ -396,7 +407,7 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 func TestUpdateVolumeSnapshot(t *testing.T) {
 	snp, err := prepareVolumeSnapshot(t)
 	if err != nil {
-		t.Error("Failed to run volume snapshot prepare function:", err)
+		t.Error("failed to run volume snapshot prepare function:", err)
 		return
 	}
 	defer cleanVolumeAndSnapshotIfFailedOrFinished(t, snp.VolumeId, snp.Id)
@@ -432,7 +443,7 @@ func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 		return nil, err
 	}
 	if vol, _ = c.GetVolume(vol.Id); vol.Status != model.VolumeAvailable {
-		return nil, fmt.Errorf("The status of volume is not available!")
+		return nil, fmt.Errorf("the status of volume is not available!")
 	}
 
 	t.Log("End preparing volume...")
@@ -442,7 +453,7 @@ func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return nil, err
 	}
 
@@ -470,7 +481,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 	if atc.Status != model.VolumeAttachAvailable {
 		// Run volume clean function if failed to prepare volume attachment.
 		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
-		return nil, fmt.Errorf("The status of volume attachment is not available!")
+		return nil, fmt.Errorf("the status of volume attachment is not available!")
 	}
 
 	t.Log("End preparing volume attachment...")
@@ -480,7 +491,7 @@ func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function:", err)
+		t.Error("failed to run volume prepare function:", err)
 		return nil, err
 	}
 
@@ -500,7 +511,7 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 	if snp, _ = c.GetVolumeSnapshot(snp.Id); snp.Status != model.VolumeSnapAvailable {
 		// Run volume clean function if failed to prepare volume snapshot.
 		cleanVolumeIfFailedOrFinished(t, snp.VolumeId)
-		return nil, fmt.Errorf("The status of volume snapshot is not available!")
+		return nil, fmt.Errorf("the status of volume snapshot is not available!")
 	}
 
 	t.Log("End preparing volume snapshot...")
@@ -510,7 +521,7 @@ func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
 func cleanVolumeIfFailedOrFinished(t *testing.T, volID string) error {
 	t.Log("Start cleaning volume...")
 	if err := c.DeleteVolume(volID, nil); err != nil {
-		t.Error("Clean volume failed:", err)
+		t.Error("clean volume failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume...")
@@ -521,14 +532,14 @@ func cleanVolumeAndAttachmentIfFailedOrFinished(t *testing.T, volID, atcID strin
 	t.Log("Start cleaning volume attachment...")
 
 	if err := c.DeleteVolumeAttachment(atcID, nil); err != nil {
-		t.Error("Clean volume attachment failed:", err)
+		t.Error("clean volume attachment failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume attachment...")
 
 	t.Log("Start cleaning volume...")
 	if err := c.DeleteVolume(volID, nil); err != nil {
-		t.Error("Clean volume failed:", err)
+		t.Error("clean volume failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume...")
@@ -538,14 +549,14 @@ func cleanVolumeAndAttachmentIfFailedOrFinished(t *testing.T, volID, atcID strin
 func cleanVolumeAndSnapshotIfFailedOrFinished(t *testing.T, volID, snpID string) error {
 	t.Log("Start cleaing volume snapshot...")
 	if err := c.DeleteVolumeSnapshot(snpID, nil); err != nil {
-		t.Error("Clean volume snapshot failed:", err)
+		t.Error("clean volume snapshot failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume snapshot...")
 
 	t.Log("Start cleaning volume...")
 	if err := c.DeleteVolume(volID, nil); err != nil {
-		t.Error("Clean volume failed:", err)
+		t.Error("clean volume failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume...")
@@ -571,12 +582,12 @@ func getHostIp() string {
 func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function: ", err)
+		t.Error("failed to run volume prepare function: ", err)
 		return nil, err
 	}
 	vol1, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function: ", err)
+		t.Error("failed to run volume prepare function: ", err)
 		return nil, err
 	}
 
@@ -598,7 +609,7 @@ func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 	if vg.Status != model.VolumeGroupAvailable {
 		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		cleanVolumeIfFailedOrFinished(t, vol1.Id)
-		return nil, fmt.Errorf("The status of volume group is not available!")
+		return nil, fmt.Errorf("the status of volume group is not available!")
 	}
 
 	t.Log("End preparing volume group...")
@@ -608,7 +619,7 @@ func prepareVolumeGroup(t *testing.T) (*model.VolumeGroupSpec, error) {
 func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *model.VolumeGroupSpec) error {
 	t.Log("Start cleaning volume group...")
 	if err := c.DeleteVolumeGroup(vgId, body); err != nil {
-		t.Error("Clean volume group failed:", err)
+		t.Error("clean volume group failed:", err)
 		return err
 	}
 	t.Log("End cleaning volume group...")
@@ -627,12 +638,12 @@ func cleanVolumeAndGroupIfFailedOrFinished(t *testing.T, vgId string, body *mode
 func TestCreateVolumeGroup(t *testing.T) {
 	vol, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function : ", err)
+		t.Error("failed to run volume prepare function : ", err)
 		return
 	}
 	vol1, err := prepareVolume(t)
 	if err != nil {
-		t.Error("Failed to run volume prepare function : ", err)
+		t.Error("failed to run volume prepare function : ", err)
 		return
 	}
 
@@ -658,11 +669,11 @@ func TestCreateVolumeGroup(t *testing.T) {
 		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		return
 	}
-	t.Log("create volume group success!")
+	t.Log("Create volume group success!")
 
 	t.Log("Starting cleaning volume group...")
 	if err := c.DeleteVolumeGroup(vg.Id, vg); err != nil {
-		t.Error("Clean volume group failed : ", err)
+		t.Error("clean volume group failed : ", err)
 		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		cleanVolumeIfFailedOrFinished(t, vol.Id)
 		return
@@ -681,11 +692,11 @@ func TestGetVolumeGroup(t *testing.T) {
 	t.Log("Start checking volume group...")
 	vg, err = c.GetVolumeGroup(vg.Id)
 	if err != nil {
-		t.Error("Check volume group failed:", err)
+		t.Error("check volume group failed:", err)
 		return
 	}
 	if vg.Status != model.VolumeGroupAvailable {
-		t.Error("The status of volume group is not available!")
+		t.Error("the status of volume group is not available!")
 		return
 	}
 	t.Log("Check volume group success!")
@@ -694,7 +705,7 @@ func TestGetVolumeGroup(t *testing.T) {
 func TestListVolumeGroups(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
-		t.Error("Failed to run volume group prepare function :", err)
+		t.Error("failed to run volume group prepare function :", err)
 		return
 	}
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
@@ -710,7 +721,7 @@ func TestListVolumeGroups(t *testing.T) {
 func TestDeleteVolumeGroup(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
-		t.Error("Failed to run volume group prepare function: ", err)
+		t.Error("failed to run volume group prepare function: ", err)
 		return
 	}
 
@@ -729,7 +740,7 @@ func TestDeleteVolumeGroup(t *testing.T) {
 func TestUpdateVolumeGroup(t *testing.T) {
 	vg, err := prepareVolumeGroup(t)
 	if err != nil {
-		t.Error("Failed to run volume group prepare function: ", err)
+		t.Error("failed to run volume group prepare function: ", err)
 		return
 	}
 	defer cleanVolumeAndGroupIfFailedOrFinished(t, vg.Id, vg)
@@ -742,7 +753,7 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	}
 	newVg, err := c.UpdateVolumeGroup(vg.Id, body)
 	if err != nil {
-		t.Error("Update volume group failed: ", err)
+		t.Error("update volume group failed: ", err)
 		return
 	}
 	// Check if the status of created volume group is available.
