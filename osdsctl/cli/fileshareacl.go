@@ -70,9 +70,6 @@ var (
 	shareAclAccessCapability string
 	shareAclAccessTo         string
 	shareAclDesp             string
-
-	shareAclKeys = KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "FileShareId",
-		"Type", "AccessCapability", "AccessTo", "Description"}
 )
 
 func init() {
@@ -137,7 +134,9 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, shareAclKeys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "TenantId", "FileShareId",
+		"Type", "AccessCapability", "AccessTo", "Description"}
+	PrintDict(resp, keys, FormatterList{})
 }
 
 func fileShareAclDeleteAction(cmd *cobra.Command, args []string) {
@@ -156,7 +155,9 @@ func fileShareAclShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, shareAclKeys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "FileShareId",
+		"Type", "AccessCapability", "AccessTo", "Description"}
+	PrintDict(resp, keys, FormatterList{})
 }
 
 func fileSharesAclListAction(cmd *cobra.Command, args []string) {
@@ -173,5 +174,7 @@ func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintList(resp, shareAclKeys, FormatterList{})
+	keys := KeyList{"Id", "TenantId", "FileShareId",
+		"Type", "AccessCapability", "AccessTo", "Description"}
+	PrintList(resp, keys, FormatterList{})
 }

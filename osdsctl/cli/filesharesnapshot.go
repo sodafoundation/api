@@ -82,9 +82,6 @@ var (
 	shareSnapSize     string
 	shareSnapTenantID string
 	fileshareID       string
-
-	shareSnapKeys = KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description",
-		"ShareSize", "Status", "FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
 )
 
 func init() {
@@ -135,7 +132,9 @@ func fileShareSnapshotCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, shareSnapKeys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "ShareSize",
+		"Status", "FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
+	PrintDict(resp, keys, FormatterList{})
 }
 
 func fileShareSnapshotShowAction(cmd *cobra.Command, args []string) {
@@ -145,7 +144,9 @@ func fileShareSnapshotShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, shareSnapKeys, FormatterList{})
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description",
+		"ShareSize", "Status", "FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
+	PrintDict(resp, keys, FormatterList{})
 }
 
 func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
@@ -162,7 +163,9 @@ func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintList(resp, shareSnapKeys, FormatterList{})
+	keys := KeyList{"Id", "Name", "Description", "ShareSize", "Status",
+		"FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
+	PrintList(resp, keys, FormatterList{})
 }
 
 func fileShareSnapshotDeleteAction(cmd *cobra.Command, args []string) {
@@ -186,5 +189,7 @@ func fileShareSnapshotUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, shareSnapKeys, FormatterList{})
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "ShareSize",
+		"Status", "FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
+	PrintDict(resp, keys, FormatterList{})
 }

@@ -84,10 +84,7 @@ var (
 	shareSortDir string
 	shareSortKey string
 
-	sharekeys = KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
-		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Protocols",
-		"TenantId", "UserId", "SnapshotId", "ExportLocations", "Metadata"}
-	shareFormatters = FormatterList{"Metadata": JsonFormatter}	
+	shareFormatters = FormatterList{"Metadata": JsonFormatter}
 )
 
 func init() {
@@ -166,7 +163,10 @@ func fileShareCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, shareFormatters)
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "Size",
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Protocols",
+		"TenantId", "UserId", "SnapshotId", "ExportLocations", "Metadata"}
+	PrintDict(resp, keys, shareFormatters)
 }
 
 func fileShareDeleteAction(cmd *cobra.Command, args []string) {
@@ -184,7 +184,10 @@ func fileShareShowAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, shareFormatters)
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Size",
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Protocols",
+		"TenantId", "UserId", "SnapshotId", "ExportLocations", "Metadata"}
+	PrintDict(resp, keys, shareFormatters)
 }
 
 func fileShareListAction(cmd *cobra.Command, args []string) {
@@ -201,7 +204,8 @@ func fileShareListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintList(resp, sharekeys, shareFormatters)
+	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "Protocols", "ExportLocations"}
+	PrintList(resp, keys, shareFormatters)
 }
 
 func fileShareUpdateAction(cmd *cobra.Command, args []string) {
@@ -216,5 +220,8 @@ func fileShareUpdateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	PrintDict(resp, sharekeys, shareFormatters)
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "Size",
+		"AvailabilityZone", "Status", "PoolId", "ProfileId", "Protocols",
+		"TenantId", "UserId", "SnapshotId", "ExportLocations", "Metadata"}
+	PrintDict(resp, keys, shareFormatters)
 }
