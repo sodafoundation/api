@@ -2670,6 +2670,8 @@ type CreateFileShareAclOpts struct {
 	Context string `protobuf:"bytes,9,opt,name=context,proto3" json:"context,omitempty"`
 	// The name of the file share, required.
 	Name string `protobuf:"bytes,10,opt,name=name,proto3" json:"name,omitempty"`
+	// The metadata of the file share, optional.
+	Metadata map[string]string `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -2734,6 +2736,110 @@ func (m *CreateFileShareAclOpts) GetName() string {
 		return m.Name
 	}
 	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
+type DeleteFileShareAclOpts struct {
+	// The uuid of the file share, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The uuid of the file share that snapshot belongs to, required.
+	FileShareId string `protobuf:"bytes,2,opt,name=fileshareId,proto3" json:"fileshareId,omitempty"`
+	// The description of the file share, optional.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// The type of access. Ex: IP based.
+	Type string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	// The accessCapability for fileshare.
+	AccessCapability []string `protobuf:"bytes,5,opt,name=accessCapability,proto3" json:"accesscapability,omitempty"`
+	// accessTo of the fileshare.
+	AccessTo []string `protobuf:"bytes,6,opt,name=accessTo,proto3" json:"accessto,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,7,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,8,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,9,opt,name=context,proto3" json:"context,omitempty"`
+	// The name of the file share, required.
+	Name string `protobuf:"bytes,10,opt,name=name,proto3" json:"name,omitempty"`
+	// The metadata of the file share, optional.
+	Metadata map[string]string `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteFileShareAclOpts) Reset()         { *m = DeleteFileShareAclOpts{} }
+func (m *DeleteFileShareAclOpts) String() string { return proto.CompactTextString(m) }
+func (*DeleteFileShareAclOpts) ProtoMessage()    {}
+func (*DeleteFileShareAclOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{21}
+}
+
+func (m *DeleteFileShareAclOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteFileShareAclOpts.Unmarshal(m, b)
+}
+func (m *DeleteFileShareAclOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteFileShareAclOpts.Marshal(b, m, deterministic)
+}
+func (m *DeleteFileShareAclOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteFileShareAclOpts.Merge(m, src)
+}
+func (m *DeleteFileShareAclOpts) XXX_Size() int {
+	return xxx_messageInfo_CreateFileShareAclOpts.Size(m)
+}
+func (m *DeleteFileShareAclOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteFileShareAclOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteFileShareAclOpts proto.InternalMessageInfo
+
+func (m *DeleteFileShareAclOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetAccessCapability() []string {
+	if m != nil {
+		return m.AccessCapability
+	}
+	return nil
+}
+
+func (m *DeleteFileShareAclOpts) GetAccessTo() []string {
+	if m != nil {
+		return m.AccessTo
+	}
+	return nil
+}
+
+func (m *DeleteFileShareAclOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
 }
 
 // CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
@@ -3591,6 +3697,8 @@ func init() {
 	proto.RegisterMapType((map[string]string)(nil), "proto.CreateFileShareSnapshotOpts.MetadataEntry")
 	proto.RegisterType((*CreateFileShareAclOpts)(nil), "proto.CreateFileShareAclOpts")
 	proto.RegisterMapType((map[string]string)(nil), "proto.CreateFileShareAclOpts.MetadataEntry")
+	proto.RegisterType((*DeleteFileShareAclOpts)(nil), "proto.DeleteFileShareAclOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.DeleteFileShareAclOpts.MetadataEntry")
 	proto.RegisterType((*DeleteFileShareSnapshotOpts)(nil), "proto.DeleteFileShareSnapshotOpts")
 	proto.RegisterType((*GenericResponse)(nil), "proto.GenericResponse")
 	proto.RegisterType((*GenericResponse_Result)(nil), "proto.GenericResponse.Result")
@@ -5122,8 +5230,10 @@ var _ProvisionDock_serviceDesc = grpc.ServiceDesc{
 type FileShareControllerClient interface {
 	// Create a file share
 	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
-	// Create a file share
+	// Create a file share acl
 	CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// delete a file share acl
+	DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete a file share
 	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Create a file share snapshot
@@ -5167,6 +5277,15 @@ func (c *fileShareControllerClient) DeleteFileShare(ctx context.Context, in *Del
 	return out, nil
 }
 
+func (c *fileShareControllerClient) DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/DeleteFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fileShareControllerClient) CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, "/proto.FileShareController/CreateFileShareSnapshot", in, out, opts...)
@@ -5191,6 +5310,8 @@ type FileShareControllerServer interface {
 	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
 	// Create a file share Acl
 	CreateFileShareAcl(context.Context, *CreateFileShareAclOpts) (*GenericResponse, error)
+	// Delete a file share Acl
+	DeleteFileShareAcl(context.Context, *DeleteFileShareAclOpts) (*GenericResponse, error)
 	// Delete a file share
 	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
 	// Create a file share snapshot
@@ -5211,6 +5332,9 @@ func (*UnimplementedFileShareControllerServer) CreateFileShareAcl(ctx context.Co
 }
 func (*UnimplementedFileShareControllerServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedFileShareControllerServer) DeleteFileShareAcl(ctx context.Context, req *CreateFileShareAclOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareAcl not implemented")
 }
 func (*UnimplementedFileShareControllerServer) CreateFileShareSnapshot(ctx context.Context, req *CreateFileShareSnapshotOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareSnapshot not implemented")
@@ -5277,6 +5401,24 @@ func _FileShareController_DeleteFileShare_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileShareController_DeleteFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).DeleteFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/DeleteFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).DeleteFileShareAcl(ctx, req.(*DeleteFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FileShareController_CreateFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFileShareSnapshotOpts)
 	if err := dec(in); err != nil {
@@ -5330,6 +5472,10 @@ var _FileShareController_serviceDesc = grpc.ServiceDesc{
 			Handler:    _FileShareController_DeleteFileShare_Handler,
 		},
 		{
+			MethodName: "DeleteFileShareAcl",
+			Handler:    _FileShareController_DeleteFileShareAcl_Handler,
+		},
+		{
 			MethodName: "CreateFileShareSnapshot",
 			Handler:    _FileShareController_CreateFileShareSnapshot_Handler,
 		},
@@ -5350,6 +5496,8 @@ type FileShareDockClient interface {
 	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Create a file share acl
 	CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share acl
+	DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete a file share
 	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Create a file share snapshot
@@ -5393,6 +5541,15 @@ func (c *fileShareDockClient) DeleteFileShare(ctx context.Context, in *DeleteFil
 	return out, nil
 }
 
+func (c *fileShareDockClient) DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/DeleteFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fileShareDockClient) CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, "/proto.FileShareDock/CreateFileShareSnapshot", in, out, opts...)
@@ -5417,6 +5574,8 @@ type FileShareDockServer interface {
 	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
 	// Create a file share
 	CreateFileShareAcl(context.Context, *CreateFileShareAclOpts) (*GenericResponse, error)
+	// Delete a file share acl
+	DeleteFileShareAcl(context.Context, *DeleteFileShareAclOpts) (*GenericResponse, error)
 	// Delete a file share
 	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
 	// Create a file share snapshot
@@ -5437,6 +5596,9 @@ func (*UnimplementedFileShareDockServer) CreateFileShareAcl(ctx context.Context,
 }
 func (*UnimplementedFileShareDockServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedFileShareDockServer) DeleteFileShareAcl(ctx context.Context, req *CreateFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareAcl not implemented")
 }
 func (*UnimplementedFileShareDockServer) CreateFileShareSnapshot(ctx context.Context, req *CreateFileShareSnapshotOpts) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareSnapshot not implemented")
@@ -5503,6 +5665,24 @@ func _FileShareDock_DeleteFileShare_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileShareDock_DeleteFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).DeleteFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/DeleteFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).DeleteFileShareAcl(ctx, req.(*DeleteFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FileShareDock_CreateFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateFileShareSnapshotOpts)
 	if err := dec(in); err != nil {
@@ -5554,6 +5734,10 @@ var _FileShareDock_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFileShare",
 			Handler:    _FileShareDock_DeleteFileShare_Handler,
+		},
+		{
+			MethodName: "DeleteFileShareAcl",
+			Handler:    _FileShareDock_DeleteFileShareAcl_Handler,
 		},
 		{
 			MethodName: "CreateFileShareSnapshot",

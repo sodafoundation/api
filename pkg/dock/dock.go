@@ -504,6 +504,23 @@ func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFile
 	return pb.GenericResponseResult(fileshare), nil
 }
 
+// DeleteFileShareAcl implements pb.DockServer.DeleteFileShare
+func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("dock server receive delete file share acl request, vr =", opt)
+
+	fileshare, err := ds.FileShareDriver.DeleteFileShareAcl(opt)
+	if err != nil {
+		log.Error("when create file share in dock module:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(fileshare), nil
+}
+
 // CreateFileShare implements pb.DockServer.CreateFileShare
 func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileShareOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.

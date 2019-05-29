@@ -93,7 +93,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 	// get accessCapability list
 	accessCapability = opt.GetAccessCapability()
 	// get fileshare name
-	fname := opt.GetName()
+	fname := opt.GetMetadata()[KFileshareName]
 
 	for _, value := range accessCapability {
 		if value == "w" {
@@ -106,6 +106,19 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 
 	for _, server := range accessTo {
 		err = d.cli.CreateAccess(server, access, fname)
+	}
+	return fshare, nil
+}
+
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
+	var accessTo []string
+	// Get accessto list
+	accessTo = opt.GetAccessTo()
+	// get fileshare name
+	fname := opt.GetMetadata()[KFileshareName]
+
+	for _, server := range accessTo {
+		err = d.cli.DeleteAccess(server, fname)
 	}
 	return fshare, nil
 }
