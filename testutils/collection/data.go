@@ -646,16 +646,21 @@ var (
 		}
 	]`
 
-	ByteFileShare = `{
+	ByteFileShare = `	{
 			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			"createdAt": "",
 			"updatedAt": "",
-			"name": "sample-fileshare",
-			"description": "This is a sample fileshare for testing",
+			"name": "sample-fileshare-01",
+			"description": "This is first sample fileshare for testing",
 			"size": 1,
+			"availabilityZone": "default",
 			"status": "available",
 			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca"
+			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			"exportLocations": [
+				"192.168.100.100"
+			]
 		}`
 
 	ByteFileShares = `[
@@ -663,24 +668,33 @@ var (
 			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			"createdAt": "",
 			"updatedAt": "",
-			"name": "sample-fileshare",
-			"description": "This is a sample fileshare for testing",
+			"name": "sample-fileshare-01",
+			"description": "This is first sample fileshare for testing",
 			"size": 1,
+			"availabilityZone": "default",
 			"status": "available",
 			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca"
+			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			"exportLocations": [
+				"192.168.100.100"
+			]
 		},
 		{
 			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
 			"createdAt": "",
 			"updatedAt": "",
-			"name": "sample-fileshare",
-			"description": "This is a sample fileshare for testing",
+			"name": "sample-fileshare-2",
+			"description": "This is second sample fileshare for testing",
 			"size": 1,
+			"availabilityZone": "default",
 			"status": "available",
 			"poolId": "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
 			"profileId": "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			"snapshotId": "a5965ebe-dg2c-434t-b28e-f373746a71ca"
+			"snapshotId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			"exportLocations": [
+				"192.168.100.101"
+			]
 		}
 	]`
 

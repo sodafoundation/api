@@ -174,7 +174,7 @@ func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	keys := KeyList{"Id", "TenantId", "FileShareId",
+	keys := KeyList{"Id", "FileShareId",
 		"Type", "AccessCapability", "AccessTo", "Description"}
 	PrintList(resp, keys, FormatterList{})
 }

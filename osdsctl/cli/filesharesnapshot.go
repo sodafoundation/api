@@ -163,8 +163,8 @@ func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	keys := KeyList{"Id", "Name", "Description", "ShareSize", "Status",
-		"FileShareId", "Protocols", "snapshotSize", "TenantId", "UserId"}
+	keys := KeyList{"Id", "Name", "Description", "Status",
+		"FileShareId", "Protocols"}
 	PrintList(resp, keys, FormatterList{})
 }
 
