@@ -22,11 +22,8 @@ package model
 type CollectMetricSpec struct {
 	*BaseModel
 
-	// the instance on which the metrics are to be collected
-	InstanceId string `json:"instanceId,omitempty"`
-
-	// the list of metrics to be collected
-	Metrics []string `json:"metrics,omitempty"`
+	// the storage type(driver type) on which the metrics are to be collected
+	DriverType string `json:"driverType,omitempty"`
 }
 
 type GetMetricSpec struct {

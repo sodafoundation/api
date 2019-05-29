@@ -43,6 +43,7 @@ type FileSharePortal struct {
 
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
+	ctx := c.GetContext(f.Ctx)
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -54,6 +55,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		return
 	}
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
+
 	if err != nil {
 		reason := fmt.Sprintf("create access rules for fileshare failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
@@ -70,6 +72,28 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	}
 
 	f.SuccessHandle(StatusAccepted, body)
+
+	// FileShare acl access creation request is sent to dock and drivers
+	if err := f.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+
+	defer f.CtrClient.Close()
+
+	opt := &pb.CreateFileShareAclOpts{
+		FileShareId:      result.FileShareId,
+		Description:      result.Description,
+		Type:             result.Type,
+		AccessCapability: result.AccessCapability,
+		AccessTo:         result.AccessTo,
+		Context:          ctx.ToJson(),
+	}
+
+	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
+		log.Error("create file share acl failed in controller service:", err)
+		return
+	}
 	return
 }
 
@@ -167,9 +191,11 @@ func (f *FileSharePortal) CreateFileShare() {
 		AvailabilityZone: result.AvailabilityZone,
 		Profile:          prf.ToJson(),
 		PoolId:           result.PoolId,
+		ExportLocations:  result.ExportLocations,
 		Metadata:         result.Metadata,
 		Context:          ctx.ToJson(),
 	}
+
 	if _, err = f.CtrClient.CreateFileShare(context.Background(), opt); err != nil {
 		log.Error("create file share failed in controller service:", err)
 		return
@@ -384,6 +410,27 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		return
 	}
 
+	// Get profile
+	var prf *model.ProfileSpec
+	var err error
+	if snapshot.ProfileId == "" {
+		log.Warning("Use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfileFileShare(ctx)
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+		snapshot.ProfileId = prf.Id
+	} else {
+		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+	}
+
 	// NOTE:It will create a fileshare snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real fileshare snapshot creation to complete
 	// and will return result immediately.
@@ -397,6 +444,30 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	f.SuccessHandle(StatusAccepted, body)
+
+	// NOTE:The real file share snapshot creation process.
+	// FileShare snapshot creation request is sent to the Dock. Dock will update file share snapshot status to "available"
+	// after file share snapshot creation complete.
+	if err := f.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer f.CtrClient.Close()
+
+	opt := &pb.CreateFileShareSnapshotOpts{
+		Id:          result.Id,
+		Name:        result.Name,
+		Description: result.Description,
+		FileshareId: result.FileShareId,
+		Size:        result.ShareSize,
+		Context:     ctx.ToJson(),
+		Metadata:    result.Metadata,
+		Profile:     prf.ToJson(),
+	}
+	if _, err = f.CtrClient.CreateFileShareSnapshot(context.Background(), opt); err != nil {
+		log.Error("create file share snapthot failed in controller service:", err)
+		return
+	}
 
 	return
 }
@@ -478,6 +549,13 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		return
 	}
 
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	// NOTE: It will update the the status of the file share snapshot waiting for deletion in
 	// the database to "deleting" and return the result immediately.
 	err = util.DeleteFileShareSnapshotDBEntry(ctx, snapshot)
@@ -486,7 +564,29 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
 	f.Ctx.Output.SetStatus(StatusAccepted)
+
+	// NOTE:The real file share snapshot deletion process.
+	// FileShare snapshot deletion request is sent to the Dock. Dock will delete file share snapshot from driver and
+	// database or update its status to "errorDeleting" if file share snapshot deletion from driver failed.
+	if err := f.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer f.CtrClient.Close()
+
+	opt := &pb.DeleteFileShareSnapshotOpts{
+		Id:          snapshot.Id,
+		FileshareId: snapshot.FileShareId,
+		Context:     ctx.ToJson(),
+		Profile:     prf.ToJson(),
+	}
+	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
+		log.Error("delete file share snapshot failed in controller service:", err)
+		return
+	}
+
 	return
 
 }

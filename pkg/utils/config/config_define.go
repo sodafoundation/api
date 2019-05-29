@@ -27,14 +27,35 @@ type OsdsApiServer struct {
 	HTTPSEnabled       bool          `conf:"https_enabled,false"`
 	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
 	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
+	BeegoServerTimeOut int64         `conf:"beego_server_time_out,120"`
+
+	// prometheus related
+	PrometheusConfHome string `conf:"prometheus_conf_home,/etc/prometheus/"`
+	PrometheusUrl      string `conf:"prometheus_url,http://localhost:9090"`
+	PrometheusConfFile string `conf:"prometheus_conf_file,prometheus.yml"`
+	// alert manager related
+	AlertmgrConfHome string `conf:"alertmgr_conf_home,/root/alertmanager-0.16.2.linux-amd64/"`
+	AlertMgrUrl      string `conf:"alertmgr_url,http://localhost:9093"`
+	AlertmgrConfFile string `conf:"alertmgr_conf_file,alertmanager.yml"`
+	// grafana related
+	GrafanaConfHome   string `conf:"grafana_conf_home,/etc/grafana/"`
+	GrafanaRestartCmd string `conf:"grafana_restart_cmd,grafana-server"`
+	GrafanaConfFile   string `conf:"grafana_conf_file,grafana.ini"`
+	GrafanaUrl        string `conf:"grafana_url,http://localhost:3000"`
+	// prometheus and alert manager configuration reload url
+	ConfReloadUrl string `conf:"conf_reload_url,/-/reload"`
 }
 
 type OsdsLet struct {
 	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
 	Daemon            bool          `conf:"daemon,false"`
 	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
-	GrafanaUrl        string        `conf:"grafana_url,http://localhost:3000"`
-	AlertMgrUrl       string        `conf:"alertmgr_url,http://localhost:9093"`
+	// how to push metrics to Prometheus ? options are PushGateway or NodeExporter
+	PrometheusPushMechanism string `conf:"prometheus_push_mechanism,NodeExporter"`
+	PushGatewayUrl          string `conf:"prometheus_push_gateway_url,http://localhost:9091"`
+	NodeExporterWatchFolder string `conf:"node_exporter_watch_folder,/root/prom_nodeexporter_folder/"`
+	KafkaEndpoint           string `conf:"kafka_endpoint,localhost:9092"`
+	KafkaTopic              string `conf:"kafka_topic,metrics"`
 }
 
 type OsdsDock struct {

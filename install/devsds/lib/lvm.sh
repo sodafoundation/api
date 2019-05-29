@@ -22,7 +22,10 @@ set +o xtrace
 # --------
 # Name of the lvm volume groups to use/create for iscsi volumes
 VOLUME_GROUP_NAME=${VOLUME_GROUP_NAME:-opensds-volumes}
+FILE_GROUP_NAME=${FILE_GROUP_NAME:-opensds-files}
+FILE_VOLUME_GROUP_NAME=${VOLUME_GROUP_NAME:-opensds-files}
 DEFAULT_VOLUME_GROUP_NAME=$VOLUME_GROUP_NAME-default
+FILE_DEFAULT_VOLUME_GROUP_NAME=$FILE_GROUP_NAME-default
 
 # Name of lvm nvme volume group to use/create for nvme volumes
 NVME_VOLUME_GROUP_NAME=$VOLUME_GROUP_NAME-nvme
@@ -34,9 +37,14 @@ LVM_DIR=$OPT_DIR/lvm
 DATA_DIR=$LVM_DIR
 mkdir -p $LVM_DIR
 
+FILE_LVM_DIR=$OPT_DIR/nfs
+FILE_DATA_DIR=$FILE_LVM_DIR
+mkdir -p $FILE_LVM_DIR
+
+
 # nvme dir
 NVME_DIR=/opt/opensdsNvme
-# nvme device 
+# nvme device
 LVM_DEVICE=/dev/nvme0n1
 
 osds::lvm::pkg_install(){
@@ -83,6 +91,24 @@ osds::lvm::create_volume_group(){
     fi
 }
 
+osds::lvm::create_volume_group_for_file(){
+    local fvg="opensds-files-default"
+    local size=$2
+
+    local backing_file=$FILE_DATA_DIR/$fvg$BACKING_FILE_SUFFIX
+    if ! sudo vgs $fvg; then
+        # Only create if the file doesn't already exists
+        [[ -f $backing_file ]] || truncate -s $size $backing_file
+        local vg_dev
+        vg_dev=`sudo losetup -f --show $backing_file`
+
+        # Only create volume group if it doesn't already exist
+        if ! sudo vgs $fvg; then
+            sudo vgcreate $fvg $vg_dev
+        fi
+    fi
+}
+
 osds::lvm::create_nvme_vg(){
     local vg=$1
     local size=$2
@@ -108,7 +134,7 @@ osds::lvm::create_nvme_vg(){
             if ! sudo vgs $vg; then
                 sudo vgcreate $vg $vg_dev
             fi
-        fi    
+        fi
     else
         echo "disk $LVM_DEVICE does not have enough space"
     fi
@@ -147,6 +173,40 @@ config_path = /etc/opensds/driver/lvm.yaml
 OPENSDS_LVM_GLOBAL_CONFIG_DOC
 }
 
+osds::lvm::set_configuration_for_file(){
+cat > $OPENSDS_DRIVER_CONFIG_DIR/nfs.yaml << OPENSDS_FILE_CONFIG_DOC
+tgtBindIp: $HOST_IP
+tgtConfDir: /etc/tgt/conf.d
+pool:
+  $FILE_DEFAULT_VOLUME_GROUP_NAME:
+    diskType: NL-SAS
+    availabilityZone: default
+    multiAttach: true
+    storageType: file
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+        StorageAccessCapability: ['Read', 'Write', 'Execute']
+      ioConnectivity:
+        accessProtocol: nfs
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 5ms
+OPENSDS_FILE_CONFIG_DOC
+
+cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_FILE_GLOBAL_CONFIG_DOC
+[nfs]
+name = nfs
+description = NFS LVM TEST
+driver_name = nfs
+config_path = /etc/opensds/driver/nfs.yaml
+
+OPENSDS_FILE_GLOBAL_CONFIG_DOC
+}
+
 osds::lvm::set_nvme_configuration(){
 cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
 
@@ -181,6 +241,11 @@ osds::lvm::remove_volume_group() {
     # Remove the volume group
     sudo vgremove -f $vg
 }
+osds::lvm::remove_volume_group_for_file() {
+    local fvg="opensds-files-default"
+    # Remove the volume group
+    sudo vgremove -f $fvg
+}
 
 osds::lvm::clean_backing_file() {
     local backing_file=$1
@@ -195,10 +260,21 @@ osds::lvm::clean_backing_file() {
     fi
 }
 
+osds::lvm::clean_volume_group_for_file() {
+    local fvg="opensds-files-default"
+    osds::lvm::remove_volume_group_for_file $fvg
+    # if there is no logical volume left, it's safe to attempt a cleanup
+    # of the backing file
+    if [[ -z "$(sudo lvs --noheadings -o lv_name $fvg 2>/dev/null)" ]]; then
+        osds::lvm::clean_backing_file $FILE_DATA_DIR/$fvg$BACKING_FILE_SUFFIX
+    fi
+}
+
 osds::lvm::clean_volume_group() {
     local vg=$1
     osds::lvm::remove_volumes $vg
     osds::lvm::remove_volume_group $vg
+    osds::lvm::remove_volume_group_for_file $fvg
     # if there is no logical volume left, it's safe to attempt a cleanup
     # of the backing file
     if [[ -z "$(sudo lvs --noheadings -o lv_name $vg 2>/dev/null)" ]]; then
@@ -268,10 +344,12 @@ osds::lvm::set_lvm_filter() {
 
 osds::lvm::install() {
     local vg=$DEFAULT_VOLUME_GROUP_NAME
+    local fvg=$FILE_DEFAULT_VOLUME_GROUP_NAME
     local size=$VOLUME_BACKING_FILE_SIZE
 
     # Install lvm relative packages.
     osds::lvm::pkg_install
+    osds::lvm::create_volume_group_for_file $fvg $size
     osds::lvm::create_volume_group $vg $size
 
     # Remove iscsi targets
@@ -279,6 +357,7 @@ osds::lvm::install() {
     # Remove volumes that already exist.
     osds::lvm::remove_volumes $vg
     osds::lvm::set_configuration
+    osds::lvm::set_configuration_for_file
 
     # Check nvmeof prerequisites
     local nvmevg=$NVME_VOLUME_GROUP_NAME
@@ -300,6 +379,7 @@ osds::lvm::install() {
 
 osds::lvm::cleanup(){
     osds::lvm::clean_volume_group $DEFAULT_VOLUME_GROUP_NAME
+    osds::lvm::clean_volume_group_for_file $FILE_DEFAULT_VOLUME_GROUP_NAME
     osds::lvm::clean_lvm_filter
     local nvmevg=$NVME_VOLUME_GROUP_NAME
     if vgs $nvmevg ; then

@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
@@ -164,7 +165,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-    log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
+	log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
 
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
@@ -888,15 +889,16 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  get fileshare from db %+v", fileshare)
+	log.V(5).Infof("controller create fileshare:  get fileshare from db %+v", fileshare)
 
 	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fleshare:  selected poolInfo %+v", polInfo)
+	log.V(5).Infof("controller create fileshare:  selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -957,6 +959,123 @@ func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileSh
 	return pb.GenericResponseResult(nil), err
 }
 
+// CreateFileShare implements pb.ControllerServer.CreateFileShare
+func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
+	var err error
+	log.Info("controller server receive create file share acl request, vr =", opt)
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileShareId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+	opt.Name = fileshare.Name
+
+	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
+	if err != nil {
+		// Change the status of the file share acl to error when the creation faild
+		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when create file share:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
+}
+
+// CreateFileShareSnapshot implements pb.ControllerServer.CreateFileShareSnapshot
+func (c *Controller) CreateFileShareSnapshot(contx context.Context, opt *pb.CreateFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive create file share snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	if opt.Metadata == nil {
+		opt.Metadata = map[string]string{}
+	}
+
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
+	}
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		log.Error("get file share failed in create file share snapshot method: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	opt.Size = fileshare.Size
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, fileshare.Metadata)
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.fileshareController.CreateFileShareSnapshot(opt)
+	if err != nil {
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+
+	db.C.UpdateStatus(ctx, result, model.FileShareSnapAvailable)
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteFileshareSnapshot implements pb.ControllerServer.DeleteFileshareSnapshot
+func (c *Controller) DeleteFileShareSnapshot(contx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete file share snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		log.Error("get file share failed in delete file share snapshot method: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	if err = c.fileshareController.DeleteFileShareSnapshot(opt); err != nil {
+		log.Error("error occurred in controller module when delete file share snapshot: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	if err = db.C.DeleteFileShareSnapshot(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete file share snapshot in db: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+
 func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
 	log.Info("in controller get metrics methods")
 
@@ -987,31 +1106,32 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	log.V(5).Info("in controller collect metrics methods")
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.InstanceId)
-
+	dockSpec, err := db.C.ListDocks(ctx)
 	if err != nil {
-		log.Errorf("get volume by id %s failed in CollectMetrics method: %s", opt.InstanceId, err.Error())
+		log.Errorf("list dock  failed in CollectMetrics method: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
+	for i, d := range dockSpec {
+		if d.DriverName == opt.DriverName {
+			log.Infof("driver found driver: %s", d.DriverName)
+			dockInfo, err := db.C.GetDock(ctx, dockSpec[i].BaseModel.Id)
+			if err != nil {
+				log.Errorf("error %s when search dock in db by dock id: %s", err.Error(), dockSpec[i].BaseModel.Id)
+				return pb.GenericResponseError(err), err
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Errorf("error %s when search dock in db by pool id: %s", err.Error(), vol.PoolId)
-		return pb.GenericResponseError(err), err
+			}
+			c.metricsController.SetDock(dockInfo)
+			result, err := c.metricsController.CollectMetrics(opt)
+			if err != nil {
+				log.Errorf("collectMetrics failed: %s", err.Error())
 
+				return pb.GenericResponseError(err), err
+			}
+
+			return pb.GenericResponseResult(result), nil
+		}
 	}
-
-	c.metricsController.SetDock(dockInfo)
-	opt.DriverName = dockInfo.DriverName
-
-	result, err := c.metricsController.CollectMetrics(opt)
-	if err != nil {
-		log.Errorf("collectMetrics failed: %s", err.Error())
-
-		return pb.GenericResponseError(err), err
-	}
-
-	return pb.GenericResponseResult(result), nil
+	return nil, nil
 }
 
 func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {

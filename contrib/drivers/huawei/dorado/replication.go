@@ -196,8 +196,8 @@ func (r *ReplicaPairMgr) CheckRemoteAvailable() bool {
 		return false
 	}
 	d := r.TryGetRemoteDevByWwn(wwn)
-	if d != nil && d.ArrayType == ReplicationArrayType &&
-		d.HealthStatus == NormalHealthStatus && d.RunningStatus == LinkUpRunningStatus {
+	if d != nil && d.ArrayType == ArrayTypeReplication &&
+		d.HealthStatus == HealthStatusNormal && d.RunningStatus == RunningStatusLinkUp {
 		return true
 	}
 	return false
@@ -355,9 +355,9 @@ func (r *ReplicaCommonDriver) Sync(replicaId string, waitComplete bool) error {
 		return err
 	}
 	expectStatus := []string{
-		ReplicaRunningStatusNormal,
-		ReplicaRunningStatusSync,
-		ReplicaRunningStatusInitialSync,
+		RunningStatusNormal,
+		RunningStatusSync,
+		RunningStatusInitialSync,
 	}
 	if replicaPair.ReplicationMode == ReplicaSyncMode && r.op.isRunningStatus(expectStatus, replicaPair) {
 		return nil
@@ -374,9 +374,9 @@ func (r *ReplicaCommonDriver) Sync(replicaId string, waitComplete bool) error {
 
 func (r *ReplicaCommonDriver) Split(replicaId string) error {
 	runningStatus := []string{
-		ReplicaRunningStatusSplit,
-		ReplicaRunningStatusInvalid,
-		ReplicaRunningStatusErrupted,
+		RunningStatusSplit,
+		RunningStatusInvalid,
+		RunningStatusInterrupted,
 	}
 	replicaPair, err := r.op.GetReplicationInfo(replicaId)
 	if err != nil {
@@ -445,8 +445,8 @@ func (r *ReplicaCommonDriver) Failover(replicaId string) error {
 		return fmt.Errorf(msg)
 	}
 	syncStatus := []string{
-		ReplicaRunningStatusSync,
-		ReplicaRunningStatusInitialSync,
+		RunningStatusSync,
+		RunningStatusInitialSync,
 	}
 	if r.op.isRunningStatus(syncStatus, replicaPair) {
 		if err := r.WaitReplicaReady(replicaId); err != nil {
@@ -464,12 +464,12 @@ func (r *ReplicaCommonDriver) Failover(replicaId string) error {
 func (r *ReplicaCommonDriver) WaitReplicaReady(replicaId string) error {
 	log.Info("Wait synchronize complete.")
 	runningNormal := []string{
-		ReplicaRunningStatusNormal,
-		ReplicaRunningStatusSynced,
+		RunningStatusNormal,
+		RunningStatusSynced,
 	}
 	runningSync := []string{
-		ReplicaRunningStatusSync,
-		ReplicaRunningStatusInitialSync,
+		RunningStatusSync,
+		RunningStatusInitialSync,
 	}
 	healthNormal := []string{
 		ReplicaHealthStatusNormal,
@@ -545,7 +545,7 @@ func (p *PairOperation) Create(localLunId, rmtLunId, rmtDevId, rmtDevName,
 	replicationMode, speed, period string) (*ReplicationPair, error) {
 	params := map[string]interface{}{
 		"LOCALRESID":       localLunId,
-		"LOCALRESTYPE":     "11",
+		"LOCALRESTYPE":     ObjectTypeLun,
 		"REMOTEDEVICEID":   rmtDevId,
 		"REMOTEDEVICENAME": rmtDevName,
 		"REMOTERESID":      rmtLunId,

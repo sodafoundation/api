@@ -38,8 +38,13 @@ func init() {
 	flag.StringVar(&CONF.OsdsLet.ApiEndpoint, "api-endpoint", CONF.OsdsLet.ApiEndpoint, "Listen endpoint of controller service")
 	flag.BoolVar(&CONF.OsdsLet.Daemon, "daemon", CONF.OsdsLet.Daemon, "Run app as a daemon with -daemon=true")
 	flag.DurationVar(&CONF.OsdsLet.LogFlushFrequency, "log-flush-frequency", CONF.OsdsLet.LogFlushFrequency, "Maximum number of seconds between log flushes")
-	flag.StringVar(&CONF.OsdsLet.GrafanaUrl, "grafana-url", CONF.OsdsLet.GrafanaUrl, "Grafana listen endpoint")
-	flag.StringVar(&CONF.OsdsLet.AlertMgrUrl, "alertmgr-url", CONF.OsdsLet.AlertMgrUrl, "Alert manager listen endpoint")
+
+	flag.StringVar(&CONF.OsdsLet.PrometheusPushMechanism, "prometheus-push-mechanism", CONF.OsdsLet.PrometheusPushMechanism, "Prometheus push mechanism")
+	flag.StringVar(&CONF.OsdsLet.PushGatewayUrl, "prometheus-push-gateway-url", CONF.OsdsLet.PushGatewayUrl, "Prometheus push gateway URL")
+	flag.StringVar(&CONF.OsdsLet.NodeExporterWatchFolder, "node-exporter-watch-folder", CONF.OsdsLet.NodeExporterWatchFolder, "Node exporter watch folder")
+	flag.StringVar(&CONF.OsdsLet.KafkaEndpoint, "kafka-endpoint", CONF.OsdsLet.KafkaEndpoint, "Kafka endpoint")
+	flag.StringVar(&CONF.OsdsLet.KafkaTopic, "kafka-topic", CONF.OsdsLet.KafkaTopic, "Kafka topic")
+
 	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)

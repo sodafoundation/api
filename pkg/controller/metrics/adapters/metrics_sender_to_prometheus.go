@@ -20,11 +20,12 @@ import (
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
+	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-var nodeExporterFolder = "/root/prom_nodeexporter_folder/"
+var nodeExporterFolder = CONF.OsdsLet.NodeExporterWatchFolder
 
 type PrometheusMetricsSender struct {
 	Queue    chan *model.MetricSpec
@@ -46,13 +47,15 @@ func (p *PrometheusMetricsSender) Start() {
 				// Receive a work request.
 				log.Infof("GetMetricsSenderToPrometheus received metrics for instance %s\n and metrics %f\n", work.InstanceID, work.MetricValues[0].Value)
 
-				// do the actual sending work here, by writing to the file of the node_exporter of prometheus
-				writeToFile(work)
-
-				// alternatively, we could also push the metrics to the push gateway of prometheus
-				sendToPushGateway(work)
-
-				log.Info("GetMetricsSenderToPrometheus processed metrics")
+				if CONF.OsdsLet.PrometheusPushMechanism == "NodeExporter" {
+					// do the actual sending work here, by writing to the file of the node_exporter of prometheus
+					writeToFile(work)
+					log.Info("GetMetricsSenderToPrometheus processed metrics write to node exporter")
+				} else if CONF.OsdsLet.PrometheusPushMechanism == "PushGateway" {
+					// alternatively, we could also push the metrics to the push gateway of prometheus
+					sendToPushGateway(work)
+					log.Info("GetMetricsSenderToPrometheus processed metrics send to push gateway")
+				}
 
 			case <-p.QuitChan:
 				return
@@ -76,11 +79,29 @@ func writeToFile(metrics *model.MetricSpec) {
 	// get the string ready to be written
 	var finalString = ""
 
-	finalString += metrics.Name + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
+	// form the label string
+	labelStr := "{"
+	for labelName, labelValue := range metrics.Labels {
+		labelStr = labelStr + labelName + "=" + `"` + labelValue + `"`
+		labelStr = labelStr + ","
+	}
+	// replace the last , with } to complete the set of labels
+	labelStr = labelStr[:len(labelStr)-1] + "}"
+
+	// form the full metric name
+	metricName := metrics.Job + "_" + metrics.Component + "_" + metrics.Name + "_" + metrics.Unit + "_" + metrics.AggrType
+
+	finalString += metricName + labelStr + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
 
 	// make a new file with current timestamp
 	timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
-	f, err := os.Create(nodeExporterFolder + metrics.InstanceID + ".prom")
+	// form the temp file name
+	tempFName := nodeExporterFolder + metrics.Name + ".prom.temp"
+	// form the actual file name
+	fName := nodeExporterFolder + metrics.Name + ".prom"
+
+	// write to the temp file
+	f, err := os.Create(tempFName)
 	if err != nil {
 		log.Error(err)
 		return
@@ -92,27 +113,40 @@ func writeToFile(metrics *model.MetricSpec) {
 		return
 	}
 	log.Infof("metrics written successfully at time %s", timeStamp)
+	log.Infoln(finalString)
 	err = f.Close()
 	if err != nil {
 		log.Error(err)
 		return
 	}
+	// this is done so that the exporter never sees an incomplete file
+	renameErr := os.Rename(tempFName, fName)
+	if renameErr != nil {
+		log.Errorf("error %s renaming metrics file %s to %s", renameErr.Error(), tempFName, fName)
+	}
 }
 
 func sendToPushGateway(metrics *model.MetricSpec) {
 
-	completionTime := prometheus.NewGauge(prometheus.GaugeOpts{
+	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: metrics.Name,
 		Help: "",
 	})
-	completionTime.SetToCurrentTime()
-	completionTime.Set(metrics.MetricValues[0].Value)
+	gauge.SetToCurrentTime()
+	gauge.Set(metrics.MetricValues[0].Value)
 
-	if err := push.New("http://localhost:9091", "push_gateway").
-		Collector(completionTime).
-		Grouping("l1", "v1").
-		Push(); err != nil {
-		log.Errorf("Could not push completion time to Pushgateway:%s", err)
+	pusher := push.New(CONF.OsdsLet.PushGatewayUrl, "push_gateway").
+		Collector(gauge)
+	for lKey, lValue := range metrics.Labels {
+		pusher = pusher.Grouping(lKey, lValue)
 	}
-	log.Info("Completed push completion time to Pushgateway")
+	// add the metric name here, to differentiate between various metrics
+	pusher = pusher.Grouping("metricname", metrics.Name)
+
+	if err := pusher.Push(); err != nil {
+		log.Errorf("error when pushing gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway:%s", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value, err)
+
+	}
+	log.Infof("completed push gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value)
+
 }

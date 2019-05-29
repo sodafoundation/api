@@ -31,10 +31,10 @@ type FileShareAclSpec struct {
 	Type string `json:"type,omitempty"`
 
 	// The accessCapability for fileshare.
-	AccessCapability []string `json:accessCapability",omitempty"`
+	AccessCapability []string `json:"accessCapability,omitempty"`
 
 	// accessTo of the fileshare.
-	AccessTo []string `json:accessTo",omitempty"`
+	AccessTo []string `json:"accessTo,omitempty"`
 
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`
@@ -109,9 +109,6 @@ type FileShareSnapshotSpec struct {
 	// The name of the fileshare snapshot.
 	Name string `json:"name,omitempty"`
 
-	// The protocol of the fileshare. e.g NFS, SMB etc.
-	Protocols []string `json:"protocols,omitempty"`
-
 	// The description of the fileshare snapshot.
 	// +optional
 	Description string `json:"description,omitempty"`
@@ -126,4 +123,12 @@ type FileShareSnapshotSpec struct {
 	// The status of the fileshare snapshot.
 	// One of: "available", "error", etc.
 	Status string `json:"status,omitempty"`
+
+	// The uuid of the profile which the fileshare belongs to.
+	ProfileId string `json:"profileId,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }

@@ -52,7 +52,7 @@ type dockServer struct {
 	Driver drivers.VolumeDriver
 	// Metrics driver to collect metrics
 	MetricDriver drivers.MetricDriver
-	
+
 	// FileShareDriver represents the specified backend resource. This field is used
 	// for initializing the specified file share driver.
 	FileShareDriver filesharedrivers.FileShareDriver
@@ -477,7 +477,7 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 
 	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
 
-	result, err := ds.MetricDriver.CollectMetrics(opt.MetricNames, opt.InstanceId)
+	result, err := ds.MetricDriver.CollectMetrics()
 
 	if err != nil {
 		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())
@@ -485,6 +485,23 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	}
 
 	return pb.GenericResponseResult(result), nil
+}
+
+// CreateFileShareAcl implements pb.DockServer.CreateFileShare
+func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("dock server receive create file share acl request, vr =", opt)
+
+	fileshare, err := ds.FileShareDriver.CreateFileShareAcl(opt)
+	if err != nil {
+		log.Error("when create file share in dock module:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(fileshare), nil
 }
 
 // CreateFileShare implements pb.DockServer.CreateFileShare
@@ -520,6 +537,38 @@ func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileSha
 		return pb.GenericResponseError(err), err
 	}
 
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(nil), nil
+}
+
+// CreateFileShareSnapshot implements pb.DockServer.CreateFileShareSnapshot
+func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.CreateFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive create file share snapshot request, vr =", opt)
+
+	snp, err := ds.FileShareDriver.CreateFileShareSnapshot(opt)
+	if err != nil {
+		log.Error("error occurred in dock module when create snapshot:", err)
+		return pb.GenericResponseError(err), err
+	}
+	// TODO: maybe need to update status in DB.
+	return pb.GenericResponseResult(snp), nil
+}
+
+func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+	// Get the storage drivers and do some initializations.
+	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
+	defer filesharedrivers.Clean(ds.FileShareDriver)
+
+	log.Info("Dock server receive delete file share snapshot request, vr =", opt)
+
+	if _, err := ds.FileShareDriver.DeleteFileShareSnapshot(opt); err != nil {
+		log.Error("error occurred in dock module when delete snapshot:", err)
+		return pb.GenericResponseError(err), err
+	}
 	// TODO: maybe need to update status in DB.
 	return pb.GenericResponseResult(nil), nil
 }
