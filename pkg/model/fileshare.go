@@ -38,6 +38,9 @@ type FileShareAclSpec struct {
 
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`
+
+	// The uuid of the profile which the fileshare belongs to.
+	ProfileId string `json:"profileId,omitempty"`
 }
 
 // FileShareSpec is a schema for fileshare API. Fileshare will be created on some backend

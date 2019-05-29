@@ -1019,8 +1019,6 @@ func (c *Controller) CreateFileShareSnapshot(contx context.Context, opt *pb.Crea
 		return pb.GenericResponseError(err), err
 	}
 	opt.Size = fileshare.Size
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, fileshare.Metadata)
-
 	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
 		log.Error("when search supported dock resource: ", err)

@@ -831,6 +831,8 @@ message DeleteFileShareSnapshotOpts {
     string context = 4;
     // The Serialized profile
     string profile = 5;
+    // The metadata of the fileshare, optional.
+    map<string, string> metadata = 9;
 }
 
 // Generic response, it return:

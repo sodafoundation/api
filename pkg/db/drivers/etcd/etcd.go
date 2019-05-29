@@ -795,6 +795,8 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
+	result.Metadata = snp.Metadata
+
 	atcBody, err := json.Marshal(result)
 	if err != nil {
 		return nil, err
@@ -809,7 +811,6 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 		Url:        urls.GenerateFileShareSnapshotURL(urls.Etcd, result.TenantId, snpID),
 		NewContent: string(atcBody),
 	}
-
 	dbRes := c.Update(dbReq)
 	if dbRes.Status != "Success" {
 		log.Error("when update fileshare snapshot in db:", dbRes.Error)
@@ -2925,6 +2926,14 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 		fileshare := in.(*model.FileShareSpec)
 		fileshare.Status = status
 		if _, errUpdate := c.UpdateFileShare(ctx, fileshare); errUpdate != nil {
+			log.Error("when update fileshare status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.FileShareSnapshotSpec:
+		fsnap := in.(*model.FileShareSnapshotSpec)
+		fsnap.Status = status
+		if _, errUpdate := c.UpdateFileShareSnapshot(ctx, fsnap.Id, fsnap); errUpdate != nil {
 			log.Error("when update fileshare status in db:", errUpdate.Error())
 			return errUpdate
 		}

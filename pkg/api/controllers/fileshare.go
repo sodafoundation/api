@@ -44,6 +44,8 @@ type FileSharePortal struct {
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
 	ctx := c.GetContext(f.Ctx)
+	// Get profile
+	var prf *model.ProfileSpec
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -88,6 +90,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		AccessCapability: result.AccessCapability,
 		AccessTo:         result.AccessTo,
 		Context:          ctx.ToJson(),
+		Profile:          prf.ToJson(),
 	}
 
 	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
@@ -581,6 +584,7 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		FileshareId: snapshot.FileShareId,
 		Context:     ctx.ToJson(),
 		Profile:     prf.ToJson(),
+		Metadata:    snapshot.Metadata,
 	}
 	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete file share snapshot failed in controller service:", err)

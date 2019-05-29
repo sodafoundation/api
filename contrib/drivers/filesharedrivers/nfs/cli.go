@@ -106,6 +106,16 @@ func (c *Cli) CreateDirectory(dirName string) error {
 	return err
 }
 
+func (c *Cli) DeleteDirectory(dirName string) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"rm", "-rf",
+		dirName,
+	}
+	_, err := c.execute(cmd...)
+	return err
+}
+
 func (c *Cli) SetPermission(dirName string) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
