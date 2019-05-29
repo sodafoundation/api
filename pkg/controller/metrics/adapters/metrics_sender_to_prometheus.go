@@ -88,17 +88,16 @@ func writeToFile(metrics *model.MetricSpec) {
 	// replace the last , with } to complete the set of labels
 	labelStr = labelStr[:len(labelStr)-1] + "}"
 
-	// form the full metric name
-	metricName := metrics.Job + "_" + metrics.Component + "_" + metrics.Name + "_" + metrics.Unit + "_" + metrics.AggrType
+	metricName := getMetricName(metrics)
 
 	finalString += metricName + labelStr + " " + strconv.FormatFloat(metrics.MetricValues[0].Value, 'f', 2, 64) + "\n"
 
 	// make a new file with current timestamp
 	timeStamp := strconv.FormatInt(time.Now().Unix(), 10)
 	// form the temp file name
-	tempFName := nodeExporterFolder + metrics.Name + ".prom.temp"
+	tempFName := nodeExporterFolder + metricName + ".prom.temp"
 	// form the actual file name
-	fName := nodeExporterFolder + metrics.Name + ".prom"
+	fName := nodeExporterFolder + metricName + ".prom"
 
 	// write to the temp file
 	f, err := os.Create(tempFName)
@@ -126,10 +125,22 @@ func writeToFile(metrics *model.MetricSpec) {
 	}
 }
 
+func getMetricName(metrics *model.MetricSpec) string {
+	// form the full metric name
+	metricName := metrics.Job + "_" + metrics.Component + "_" + metrics.Name + "_" + metrics.Unit
+	// is this an aggregated metric ? add the aggregation type
+	if metrics.AggrType != "" {
+		metricName = metricName + "_" + metrics.AggrType
+	}
+	return metricName
+}
+
 func sendToPushGateway(metrics *model.MetricSpec) {
 
+	metricName := getMetricName(metrics)
+
 	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: metrics.Name,
+		Name: metricName,
 		Help: "",
 	})
 	gauge.SetToCurrentTime()
@@ -141,12 +152,12 @@ func sendToPushGateway(metrics *model.MetricSpec) {
 		pusher = pusher.Grouping(lKey, lValue)
 	}
 	// add the metric name here, to differentiate between various metrics
-	pusher = pusher.Grouping("metricname", metrics.Name)
+	pusher = pusher.Grouping("metricname", metricName)
 
 	if err := pusher.Push(); err != nil {
-		log.Errorf("error when pushing gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway:%s", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value, err)
+		log.Errorf("error when pushing gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway:%s", metricName, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value, err)
 
 	}
-	log.Infof("completed push gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway", metrics.Name, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value)
+	log.Infof("completed push gauge for metric name=%s;timestamp=%v:value=%v to Pushgateway", metricName, metrics.MetricValues[0].Timestamp, metrics.MetricValues[0].Value)
 
 }
