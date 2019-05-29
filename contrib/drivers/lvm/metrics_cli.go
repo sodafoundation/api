@@ -24,6 +24,8 @@ import (
 const (
 	sarNotEnabledOut = "Please check if data collecting is enabled"
 	cmdNotFound      = "No such file or directory"
+	sarNotFound      = "Command 'sar' not found"
+	iostatNotFound   = "Command 'iostat' not found"
 )
 
 type MetricCli struct {
@@ -46,7 +48,7 @@ func (c *MetricCli) execute(cmd ...string) (string, error) {
 
 func isSarEnabled(out string) bool {
 
-	if strings.Contains(string(out), sarNotEnabledOut) || strings.Contains(string(out), cmdNotFound) {
+	if strings.Contains(string(out), sarNotEnabledOut) || strings.Contains(string(out), cmdNotFound) || strings.Contains(string(out), sarNotFound) {
 
 		return false
 	}
@@ -122,9 +124,9 @@ func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map[st
 	} else {
 		cmd := []string{"env", "LC_ALL=C", "iostat", "-N"}
 		out, err := cli.execute(cmd...)
-		if strings.Contains(string(out), cmdNotFound) {
+		if strings.Contains(string(out), cmdNotFound) || strings.Contains(string(out), iostatNotFound) {
 			log.Errorf("iostat is not available: cmd.Run() failed with %s\n", err)
-			err = nil
+			return nil, nil, err
 		} else if err != nil {
 			log.Errorf("cmd.Run() failed with %s\n", err)
 			return nil, nil, err
