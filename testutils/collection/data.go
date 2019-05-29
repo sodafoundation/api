@@ -646,7 +646,7 @@ var (
 		}
 	]`
 
-	ByteFileShare = `	{
+	ByteFileShare = `{
 			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			"createdAt": "",
 			"updatedAt": "",
