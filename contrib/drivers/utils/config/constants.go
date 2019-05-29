@@ -33,6 +33,10 @@ const (
 	NFSDriverType                 = "nfsnative"
 )
 
+const (
+	NFSDriverType = "nfs"
+)
+
 // These constants below represent the access protocol type of all storage
 // drivers which can be supported by now. Please NOTICE that currently these
 // constants can NOT be used by all methods except InitializeConnection().

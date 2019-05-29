@@ -2930,6 +2930,14 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 			return errUpdate
 		}
 
+	case *model.FileShareSpec:
+		fileshare := in.(*model.FileShareSpec)
+		fileshare.Status = status
+		if _, errUpdate := c.UpdateFileShare(ctx, fileshare); errUpdate != nil {
+			log.Error("when update fileshare status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
 	case *model.VolumeGroupSpec:
 		vg := in.(*model.VolumeGroupSpec)
 		vg.Status = status

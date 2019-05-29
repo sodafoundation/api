@@ -31,10 +31,10 @@ type FileShareAclSpec struct {
 	Type string `json:"type,omitempty"`
 
 	// The accessCapability for fileshare.
-	AccessCapability []string `json:accessCapability",omitempty"`
+	AccessCapability []string `json:"accessCapability,omitempty"`
 
 	// accessTo of the fileshare.
-	AccessTo []string `json:accessTo",omitempty"`
+	AccessTo []string `json:"accessTo,omitempty"`
 
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`

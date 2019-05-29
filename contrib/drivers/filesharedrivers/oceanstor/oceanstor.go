@@ -445,6 +445,7 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 }
 
 func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	//opt.GetContext()
 	//TODO real snapshot id is needed
 	snapID, err := d.getSnapshotID(opt.GetId())
 	if err != nil {
@@ -487,7 +488,8 @@ func (d *Driver) getSnapshotID(snapID string) (string, error) {
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
 	accessLevels := opt.GetAccessCapability()
 	accessToShares := opt.GetAccessTo()
-
+	fsName := opt.GetName()
+	profile := opt.Profile
 	if len(accessLevels) == 0 || len(accessToShares) == 0 {
 		msg := "access level and access to cannot be empty"
 		log.Error(msg)

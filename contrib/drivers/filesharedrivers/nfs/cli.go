@@ -53,11 +53,26 @@ func (c *Cli) GetExportLocation(share_name, ip string) string {
 		glog.Errorf("this is not a valid ip:")
 		return ""
 	}
-
 	var exportLocation string
 	sharePath := path.Join("var/", share_name)
 	exportLocation = fmt.Sprintf("%s:/%s", server, strings.Replace(sharePath, "-", "_", -1))
 	return exportLocation
+}
+
+func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
+	var accesstoAndMount string
+	sharePath := path.Join("var/", fname)
+	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"exportfs",
+		"-o",
+		accesscapability,
+		accesstoAndMount,
+	}
+	_, err := c.execute(cmd...)
+
+	return err
 }
 
 func (c *Cli) UnMount(dirName string) error {
@@ -85,6 +100,17 @@ func (c *Cli) CreateDirectory(dirName string) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"mkdir",
+		dirName,
+	}
+	_, err := c.execute(cmd...)
+	return err
+}
+
+func (c *Cli) SetPermission(dirName string) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"chmod",
+		"777",
 		dirName,
 	}
 	_, err := c.execute(cmd...)
@@ -234,4 +260,54 @@ func (c *Cli) ListVgs() (*[]VolumeGroup, error) {
 		vgs = append(vgs, vg)
 	}
 	return &vgs, nil
+}
+
+func (c *Cli) CreateLvSnapshot(name, sourceLvName, vg string, size int64) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvcreate",
+		"-n", name,
+		"-L", sizeStr(size),
+		"-p", "r",
+		"-s", path.Join("/dev", vg, sourceLvName),
+	}
+	fmt.Println("cmd==:", cmd)
+	if _, err := c.execute(cmd...); err != nil {
+		return err
+	}
+	return nil
+}
+
+// delete volume or snapshot
+func (c *Cli) DeleteFileShareSnapshots(name, vg string) error {
+	// LV removal seems to be a race with other writers so we enable retry deactivation
+	lvmConfig := "activation { retry_deactivation = 1} "
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvremove",
+		"--config", lvmConfig,
+		"-f",
+		path.Join(vg, name),
+	}
+
+	if out, err := c.execute(cmd...); err != nil {
+		glog.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
+			strings.Join(cmd, " "), out)
+		// run_udevadm_settle
+		c.execute("udevadm", "settle")
+
+		lvmConfig += "devices { ignore_suspended_devices = 1}"
+		cmd := []string{
+			"env", "LC_ALL=C",
+			"lvremove",
+			"--config", lvmConfig,
+			"-f",
+			path.Join(vg, name),
+		}
+		if _, err := c.execute(cmd...); err != nil {
+			return err
+		}
+		glog.Infof("Successfully deleted fileshare snapshot: %s after udev settle.", name)
+	}
+	return nil
 }

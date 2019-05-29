@@ -27,7 +27,7 @@ cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 api_endpoint = 0.0.0.0:50040
 auth_strategy = $OPENSDS_AUTH_STRATEGY
 # If https is enabled, the default value of cert file
-# is /opt/opensds-security/opensds/opensds-cert.pem, 
+# is /opt/opensds-security/opensds/opensds-cert.pem,
 # and key file is /opt/opensds-security/opensds/opensds-key.pem
 https_enabled = False
 beego_https_cert_file =
@@ -38,7 +38,7 @@ api_endpoint = $HOST_IP:50049
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050
-# Specify which backends should be enabled, sample,ceph,cinder,lvm and so on.
+# Specify which backends should be enabled, sample,ceph,cinder,lvm,nfs and so on.
 enabled_backends = $OPENSDS_BACKEND_LIST
 
 [database]
@@ -60,7 +60,7 @@ osds::opensds::install(){
     osds::echo_summary "Waiting for osdsapiserver to come up."
     osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.5 80
     if [ $OPENSDS_AUTH_STRATEGY == "keystone" ]; then
-        if [ "true" == $USE_CONTAINER_KEYSTONE ] 
+        if [ "true" == $USE_CONTAINER_KEYSTONE ]
         then
             KEYSTONE_IP=$HOST_IP
             export OS_AUTH_URL=http://$KEYSTONE_IP/identity
