@@ -280,6 +280,248 @@ func TestDeleteProfile(t *testing.T) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//               Tests for file share profile                                 //
+////////////////////////////////////////////////////////////////////////////////
+
+func TestFileShareCreateProfile(t *testing.T) {
+	var fakeBody = `{
+                "name": "silver",
+                "description": "silver policy",
+                "storageType": "file",
+                "provisioningProperties":{
+                        "dataStorage":{
+                                "storageAccessCapability": ["Read","Write","Execute"],
+                                "provisioningPolicy": "Thin",
+                                "isSpaceEfficient": true
+                        },
+                        "ioConnectivity": {
+                                "accessProtocol": "NFS",
+                                "maxIOPS": 5000000,
+                                "maxBWS": 500
+                        }
+                }
+        }`
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateProfile", c.NewAdminContext(), &model.ProfileSpec{
+			BaseModel:   &model.BaseModel{},
+			Name:        "silver",
+			Description: "silver policy",
+			StorageType: "file",
+			ProvisioningProperties: model.ProvisioningPropertiesSpec{
+				DataStorage: model.DataStorageLoS{
+					StorageAccessCapability: []string{"Read", "Write", "Execute"},
+					ProvisioningPolicy:      "Thin",
+					IsSpaceEfficient:        true,
+				},
+				IOConnectivity: model.IOConnectivityLoS{
+					AccessProtocol: "NFS",
+					MaxIOPS:        5000000,
+					MaxBWS:         500,
+				},
+			}}).Return(&SampleFileShareProfiles[1], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/profiles", strings.NewReader(fakeBody))
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.ProfileSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &SampleFileShareProfiles[1])
+	})
+}
+func TestFileShareUpdateProfile(t *testing.T) {
+	var jsonStr = []byte(`{
+                "id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
+                "name": "silver",
+                "description": "silver policy"
+        }`)
+	var expectedJson = []byte(`{
+                "id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
+                "name": "silver",
+                "description": "silver policy",
+                "storageType": "file",
+                "provisioningProperties":{
+                        "dataStorage":{
+                                "storageAccessCapability": ["Read","Write","Execute"],
+                                "provisioningPolicy": "Thin",
+                                "isSpaceEfficient": true
+                        },
+                        "ioConnectivity": {
+                                "accessProtocol": "NFS",
+                                "maxIOPS":        5000000,
+                                "maxBWS":         500
+                        }
+                }
+        }`)
+	var expected model.ProfileSpec
+	json.Unmarshal(expectedJson, &expected)
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		profile := model.ProfileSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&profile)
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateProfile", c.NewAdminContext(), profile.Id, &profile).
+			Return(&expected, nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("PUT", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.ProfileSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &expected)
+	})
+
+	t.Run("Should return 500 if update profile with bad request", func(t *testing.T) {
+		profile := model.ProfileSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&profile)
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateProfile", c.NewAdminContext(), profile.Id, &profile).
+			Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("PUT", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
+
+func TestListFileShareProfiles(t *testing.T) {
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		var sampleProfiles = []*model.ProfileSpec{&SampleFileShareProfiles[1]}
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(
+			sampleProfiles, nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output []*model.ProfileSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, output, sampleProfiles)
+	})
+
+	t.Run("Should return 500 if list profiles with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		m := map[string][]string{
+			"offset":  {"0"},
+			"limit":   {"1"},
+			"sortDir": {"asc"},
+			"sortKey": {"name"},
+		}
+		mockClient.On("ListProfilesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/profiles?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
+
+func TestGetFileShareProfile(t *testing.T) {
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").
+			Return(&SampleFileShareProfiles[1], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.ProfileSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 200)
+		assertTestResult(t, &output, &SampleFileShareProfiles[1])
+	})
+
+	t.Run("Should return 404 if get profile with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET",
+			"/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
+	})
+}
+
+func TestDeleteFileShareProfile(t *testing.T) {
+
+	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			&SampleFileShareProfiles[1], nil)
+		mockClient.On("DeleteProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE",
+			"/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 200)
+	})
+
+	t.Run("Should return 404 if delete profile with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			nil, errors.New("Invalid resource uuid"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE",
+			"/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //               Tests for profile custom properties spec                     //
 ////////////////////////////////////////////////////////////////////////////////
 
