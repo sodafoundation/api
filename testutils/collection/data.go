@@ -55,6 +55,37 @@ var (
 		},
 	}
 
+	SampleFileShareProfiles = []model.ProfileSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+			},
+			Name:             "default",
+			Description:      "default policy",
+			StorageType:      "file",
+			CustomProperties: model.CustomPropertiesSpec{},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			},
+			Name:        "silver",
+			Description: "silver policy",
+			StorageType: "file",
+			CustomProperties: model.CustomPropertiesSpec{
+				"dataStorage": map[string]interface{}{
+					"provisioningPolicy": "Thin",
+					"isSpaceEfficient":   true,
+				},
+				"ioConnectivity": map[string]interface{}{
+					"accessProtocol": "NFS",
+					"maxIOPS":        float64(5000000),
+					"maxBWS":         float64(500),
+				},
+			},
+		},
+	}
+
 	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
