@@ -1,19 +1,21 @@
 // Copyright (c) 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package dorado
 
 import (
+	"github.com/satori/go.uuid"
 	"strconv"
 	"time"
 
@@ -24,55 +26,48 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+/*
+Naming Map:
+metrics             --> OceanStor
+iops                --> Throughput(IOPS)(IO/s)
+bandwidth           --> Bandwidth(MB/s) / Block Bandwidth(MB/s)
+latency             --> Average I/O Latency(us)
+service_time        --> Service Time(Excluding Queue Time)(ms)
+cache_hit_ratio     --> % Hit
+cpu_usage           --> CPU Usage(%)
+*/
 // Todo: Move this Yaml config to a file
-
+// Todo: Add resources for "volume", "disk" and "port".
 var data = `
 resources:
-  - resource: volume
-    metrics:
-      - iops
-      - read_throughput
-      - write_throughput
-      - response_time
-      - service_time
-      - utilization_prcnt
-    units:
-      - tps
-      - kbs
-      - kbs
-      - ms
-      - ms
-      - '%'
   - resource: pool
     metrics:
       - iops
-      - read_throughput
-      - write_throughput
-      - response_time
+      - bandwidth
+      - latency
       - service_time
       - utilization_prcnt
     units:
       - tps
-      - kbs
-      - kbs
+      - mbs
+      - microsecond
       - ms
-      - ms
-      - '%'
+      - prcnt
   - resource: controller
     metrics:
       - iops
-      - read_throughput
-      - write_throughput
-      - response_time
+      - bandwidth
+      - latency
       - service_time
-      - utilization_prcnt
+      - cache_hit_ratio
+      - cpu_usage
     units:
       - tps
-      - kbs
-      - kbs
+      - mbs
+      - microsecond
       - ms
-      - ms
-      - '%'`
+      - prcnt
+      - prcnt`
 
 type Config struct {
 	Resource string
@@ -93,8 +88,7 @@ func getCurrentUnixTimestamp() int64 {
 	secs := now.Unix()
 	return secs
 }
-func getMetricToUnitMap() map[string]string {
-
+func getMetricToUnitMap(resourceType string) map[string]string {
 	//construct metrics to value map
 	var configs Configs
 	//Read supported metric list from yaml config
@@ -107,13 +101,9 @@ func getMetricToUnitMap() map[string]string {
 	}
 	metricToUnitMap := make(map[string]string)
 	for _, resources := range configs.Cfgs {
-		switch resources.Resource {
-		//ToDo: Other Cases needs to be added
-		case "volume", "pool", "controller":
+		if resources.Resource == resourceType {
 			for index, metricName := range resources.Metrics {
-
 				metricToUnitMap[metricName] = resources.Units[index]
-
 			}
 		}
 	}
@@ -134,29 +124,53 @@ func (d *MetricDriver) GetMetricList(resourceType string) (supportedMetrics []st
 
 	for _, resources := range configs.Cfgs {
 		if resources.Resource == resourceType {
-			switch resourceType {
-			case "volume", "pool", "controller":
-				for _, m := range resources.Metrics {
-					supportedMetrics = append(supportedMetrics, m)
-
-				}
+			for _, m := range resources.Metrics {
+				supportedMetrics = append(supportedMetrics, m)
 			}
+			break
 		}
 	}
 
 	return supportedMetrics, nil
 }
 
-//	CollectMetrics: Driver entry point to collect metrics. This will be invoked by the dock
-//	[]*model.MetricSpec	-> the array of metrics to be returned
-func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
+func (d *MetricDriver) CollectPerformanceMetrics(resId string, metricList []string) (map[string]float64, error) {
+	name2id := map[string]string{
+		KMetricIOPS:               PerfIOPS,
+		KMetricBandwidth:          PerfBandwidth,
+		KMetricLatency:            PerfLatency,
+		KMetricServiceTime:        PerfServiceTime,
+		KMetricUtilizationPercent: PerfUtilizationPercent,
+		KMetricCacheHitRatio:      PerfCacheHitRatio,
+		KMetricCpuUsage:           PerfCpuUsage,
+	}
 
+	var idList = make([]string, len(metricList))
+	for i, name := range metricList {
+		idList[i] = name2id[name]
+	}
+
+	perfMap, err := d.client.GetPerformance(resId, idList)
+	if err != nil {
+		log.Errorf("get performance data failed: %s", err)
+		return nil, err
+	}
+
+	var metricMap = make(map[string]float64)
+	for _, name := range metricList {
+		v, _ := strconv.ParseFloat(perfMap[name2id[name]], 64)
+		metricMap[name] = v
+	}
+	return metricMap, nil
+}
+
+func (d *MetricDriver) CollectControllerMetrics() ([]*model.MetricSpec, error) {
 	// get Metrics to unit map
-	metricToUnitMap := getMetricToUnitMap()
+	metricToUnitMap := getMetricToUnitMap(MetricResourceTypeController)
 	//validate metric support list
-	supportedMetrics, err := d.GetMetricList("volume")
+	supportedMetrics, err := d.GetMetricList(MetricResourceTypeController)
 	if supportedMetrics == nil {
-		log.Infof("no metrics found in the  supported metric list")
+		log.Infof("no metrics found in the supported metric list")
 	}
 	controllers, err := d.client.ListControllers()
 	if err != nil {
@@ -168,27 +182,16 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	for _, controller := range controllers {
 		// TODO: the controller id need to be optional
 		uuid := ObjectTypeController + ":" + controller.Id
-		dataIdList := []string{PerfIOPS, PerfReadThroughput, PerfWriteThroughput,
-			PerfResponseTime, PerfServiceTime, PerfUtilizationPrcnt}
-		metricMap, err := d.client.GetPerformance(uuid, dataIdList)
+		metricMap, err := d.CollectPerformanceMetrics(uuid, supportedMetrics)
 		if err != nil {
 			log.Errorf("get performance data failed: %s", err)
 			return nil, err
 		}
 
-		name2id := map[string]string{
-			"iops":              PerfIOPS,
-			"read_throughput":   PerfReadThroughput,
-			"write_throughput":  PerfWriteThroughput,
-			"response_time":     PerfResponseTime,
-			"service_time":      PerfServiceTime,
-			"utilization_prcnt": PerfUtilizationPrcnt,
-		}
 		for _, element := range supportedMetrics {
-			val, _ := strconv.ParseFloat(metricMap[name2id[element]], 64)
 			metricValue := &model.Metric{
 				Timestamp: getCurrentUnixTimestamp(),
-				Value:     val,
+				Value:     metricMap[element],
 			}
 			metricValues := make([]*model.Metric, 0)
 			metricValues = append(metricValues, metricValue)
@@ -196,8 +199,8 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 				InstanceID:   uuid,
 				InstanceName: uuid,
 				Job:          "HuaweiOceanStor",
-				Labels:       map[string]string{},
-				Component:    "controller",
+				Labels:       map[string]string{"device": MetricResourceTypeController},
+				Component:    MetricResourceTypeController,
 				Name:         element,
 				Unit:         metricToUnitMap[element],
 				AggrType:     "",
@@ -206,8 +209,84 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 			tempMetricArray = append(tempMetricArray, metric)
 		}
 	}
-	metricArray := tempMetricArray
-	return metricArray, err
+	return tempMetricArray, nil
+}
+
+func (d *MetricDriver) CollectPoolMetrics() ([]*model.MetricSpec, error) {
+	// get Metrics to unit map
+	metricToUnitMap := getMetricToUnitMap(MetricResourceTypePool)
+	//validate metric support list
+	supportedMetrics, err := d.GetMetricList(MetricResourceTypePool)
+	if supportedMetrics == nil {
+		log.Infof("no metrics found in the supported metric list")
+	}
+
+	poolAll, err := d.client.ListStoragePools()
+	if err != nil {
+		log.Errorf("get controller failed: %s", err)
+		return nil, err
+	}
+	// Filter unsupported pools
+	var pools []StoragePool
+	for _, p := range poolAll {
+		if _, ok := d.conf.Pool[p.Name]; !ok {
+			continue
+		}
+		pools = append(pools, p)
+	}
+
+	var tempMetricArray []*model.MetricSpec
+	for _, pool := range pools {
+		// TODO: the controller id need to be optional
+		resId := ObjectTypePool + ":" + pool.Id
+		metricMap, err := d.CollectPerformanceMetrics(resId, supportedMetrics)
+		if err != nil {
+			log.Errorf("get performance data failed: %s", err)
+			return nil, err
+		}
+		poolId := uuid.NewV5(uuid.NamespaceOID, pool.Name).String()
+		for _, element := range supportedMetrics {
+			metricValue := &model.Metric{
+				Timestamp: getCurrentUnixTimestamp(),
+				Value:     metricMap[element],
+			}
+			metricValues := make([]*model.Metric, 0)
+			metricValues = append(metricValues, metricValue)
+			metric := &model.MetricSpec{
+				InstanceID:   poolId,
+				InstanceName: pool.Name,
+				Job:          "HuaweiOceanStor",
+				Labels:       map[string]string{"device": MetricResourceTypePool},
+				Component:    MetricResourceTypePool,
+				Name:         element,
+				Unit:         metricToUnitMap[element],
+				AggrType:     "",
+				MetricValues: metricValues,
+			}
+			tempMetricArray = append(tempMetricArray, metric)
+		}
+	}
+	return tempMetricArray, nil
+}
+
+//	CollectMetrics: Driver entry point to collect metrics. This will be invoked by the dock
+//	[]*model.MetricSpec	-> the array of metrics to be returned
+func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
+	var metricFunList = []func() ([]*model.MetricSpec, error){
+		d.CollectControllerMetrics, d.CollectPoolMetrics,
+	}
+
+	var metricAll []*model.MetricSpec
+	for _, f := range metricFunList {
+		metric, err := f()
+		if err != nil {
+			log.Errorf("get metric failed, %v", err)
+			return nil, err
+		}
+		metricAll = append(metricAll, metric...)
+	}
+
+	return metricAll, nil
 }
 
 func (d *MetricDriver) Setup() (err error) {

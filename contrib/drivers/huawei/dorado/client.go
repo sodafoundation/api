@@ -135,12 +135,13 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 	var b []byte
 	var err error
 	for i := 0; i < 2; i++ {
+		// For debugging
+		log.V(5).Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		b, _, err = c.doRequest(method, c.urlPrefix+url, in)
 		if err == nil {
 			break
-		} else {
-			log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		}
+		log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		if inErr, ok := err.(*ArrayInnerError); ok {
 			errCode := inErr.Err.Code
 			if errCode == ErrorConnectToServer || errCode == ErrorUnauthorizedToServer {
@@ -157,6 +158,8 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 	}
 
 	if out != nil {
+		// This will print tones of info, so set to level 8
+		log.V(8).Infof("Response Body: %s", string(b))
 		json.Unmarshal(b, out)
 	}
 	return nil
@@ -1445,10 +1448,10 @@ func (c *DoradoClient) ListControllers() ([]SimpleStruct, error) {
 	return resp.Data, err
 }
 
-func (c *DoradoClient) GetPerformance(uuid string, dataIdList []string) (map[string]string, error) {
+func (c *DoradoClient) GetPerformance(resId string, dataIdList []string) (map[string]string, error) {
 	perf := &PerformancesResp{}
 	url := fmt.Sprintf("/performace_statistic/cur_statistic_data/"+
-		"?CMO_STATISTIC_UUID=%s&CMO_STATISTIC_DATA_ID_LIST=%s", uuid, strings.Join(dataIdList, ","))
+		"?CMO_STATISTIC_UUID=%s&CMO_STATISTIC_DATA_ID_LIST=%s", resId, strings.Join(dataIdList, ","))
 	if err := c.request("GET", url, nil, perf); err != nil {
 		return nil, err
 	}
