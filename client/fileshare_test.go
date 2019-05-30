@@ -36,7 +36,7 @@ func TestCreateFileShare(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(share, expected) {
-		t.Errorf("Expected %+v, got %+v", expected, share)
+		t.Errorf("expected %+v, got %+v", expected, share)
 		return
 	}
 }
@@ -52,7 +52,7 @@ func TestGetFileShare(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(share, expected) {
-		t.Errorf("Expected %v, got %v", expected, share)
+		t.Errorf("expected %v, got %v", expected, share)
 		return
 	}
 }
@@ -69,7 +69,7 @@ func TestListFileShares(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(shares, expected) {
-		t.Errorf("Expected %v, got %v", expected, shares)
+		t.Errorf("expected %v, got %v", expected, shares)
 		return
 	}
 }
@@ -99,7 +99,7 @@ func TestUpdateFileShare(t *testing.T) {
 	expected := &SampleFileShares[0]
 
 	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v", expected, result)
+		t.Errorf("expected %v, got %v", expected, result)
 		return
 	}
 }
@@ -114,7 +114,7 @@ func TestCreateFileShareSnapshot(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(shareSnapshot, expected) {
-		t.Errorf("Expected %+v, got %+v", expected, shareSnapshot)
+		t.Errorf("expected %+v, got %+v", expected, shareSnapshot)
 		return
 	}
 }
@@ -130,7 +130,7 @@ func TestGetFileShareSnapshot(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(shareSnapshot, expected) {
-		t.Errorf("Expected %v, got %v", expected, shareSnapshot)
+		t.Errorf("expected %v, got %v", expected, shareSnapshot)
 		return
 	}
 }
@@ -147,7 +147,7 @@ func TestListFileShareSnapshots(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(shareSnapshots, expected) {
-		t.Errorf("Expected %v, got %v", expected, shareSnapshots)
+		t.Errorf("expected %v, got %v", expected, shareSnapshots)
 		return
 	}
 }
@@ -177,7 +177,7 @@ func TestUpdateFileShareSnapshot(t *testing.T) {
 	expected := &SampleFileShareSnapshots[0]
 
 	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v", expected, result)
+		t.Errorf("expected %v, got %v", expected, result)
 		return
 	}
 }
@@ -190,7 +190,7 @@ func TestCreateFileShareAcl(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(fileShareAcl, &SampleFileSharesAcl[0]) {
-		t.Errorf("Expected %+v, got %+v", &SampleFileSharesAcl[0], fileShareAcl)
+		t.Errorf("expected %+v, got %+v", &SampleFileSharesAcl[0], fileShareAcl)
 		return
 	}
 }
@@ -215,7 +215,7 @@ func TestGetFileShareAcl(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(shareAcl, expected) {
-		t.Errorf("Expected %v, got %v", expected, shareAcl)
+		t.Errorf("expected %v, got %v", expected, shareAcl)
 		return
 	}
 }
@@ -232,7 +232,7 @@ func TestListFileShareAcl(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(sharesAcl, expected) {
-		t.Errorf("Expected %v, got %v", expected, sharesAcl)
+		t.Errorf("expected %v, got %v", expected, sharesAcl)
 		return
 	}
 }

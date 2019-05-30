@@ -68,20 +68,20 @@ func (v *FileShareMgr) CreateFileShare(body FileShareBuilder) (*model.FileShareS
 }
 
 // DeleteFileShare implementation
-func (v *FileShareMgr) DeleteFileShare(volID string) error {
+func (v *FileShareMgr) DeleteFileShare(ID string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareURL(urls.Client, v.TenantID, ID)}, "/")
 
 	return v.Recv(url, "DELETE", nil, nil)
 }
 
 // GetFileShare implementation
-func (v *FileShareMgr) GetFileShare(volID string) (*model.FileShareSpec, error) {
+func (v *FileShareMgr) GetFileShare(ID string) (*model.FileShareSpec, error) {
 	var res model.FileShareSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareURL(urls.Client, v.TenantID, ID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -113,11 +113,11 @@ func (v *FileShareMgr) ListFileShares(args ...interface{}) ([]*model.FileShareSp
 }
 
 // UpdateFileShare implementation
-func (v *FileShareMgr) UpdateFileShare(volID string, body FileShareBuilder) (*model.FileShareSpec, error) {
+func (v *FileShareMgr) UpdateFileShare(ID string, body FileShareBuilder) (*model.FileShareSpec, error) {
 	var res model.FileShareSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareURL(urls.Client, v.TenantID, ID)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -142,20 +142,20 @@ func (v *FileShareMgr) CreateFileShareSnapshot(body FileShareSnapshotBuilder) (*
 }
 
 // DeleteFileShareSnapshot implementation
-func (v *FileShareMgr) DeleteFileShareSnapshot(volID string) error {
+func (v *FileShareMgr) DeleteFileShareSnapshot(ID string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, ID)}, "/")
 
 	return v.Recv(url, "DELETE", nil, nil)
 }
 
 // GetFileShareSnapshot implementation
-func (v *FileShareMgr) GetFileShareSnapshot(volID string) (*model.FileShareSnapshotSpec, error) {
+func (v *FileShareMgr) GetFileShareSnapshot(ID string) (*model.FileShareSnapshotSpec, error) {
 	var res model.FileShareSnapshotSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, ID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
@@ -187,11 +187,11 @@ func (v *FileShareMgr) ListFileShareSnapshots(args ...interface{}) ([]*model.Fil
 }
 
 // UpdateFileShareSnapshot implementation
-func (v *FileShareMgr) UpdateFileShareSnapshot(volID string, body FileShareSnapshotBuilder) (*model.FileShareSnapshotSpec, error) {
+func (v *FileShareMgr) UpdateFileShareSnapshot(ID string, body FileShareSnapshotBuilder) (*model.FileShareSnapshotSpec, error) {
 	var res model.FileShareSnapshotSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareSnapshotURL(urls.Client, v.TenantID, ID)}, "/")
 
 	if err := v.Recv(url, "PUT", body, &res); err != nil {
 		return nil, err
@@ -216,20 +216,20 @@ func (v *FileShareMgr) CreateFileShareAcl(body FileShareAclBuilder) (*model.File
 }
 
 // DeleteFileShareAcl implementation
-func (v *FileShareMgr) DeleteFileShareAcl(volID string) error {
+func (v *FileShareMgr) DeleteFileShareAcl(ID string) error {
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, ID)}, "/")
 
 	return v.Recv(url, "DELETE", nil, nil)
 }
 
 // GetFileShareAcl implementation
-func (v *FileShareMgr) GetFileShareAcl(volID string) (*model.FileShareAclSpec, error) {
+func (v *FileShareMgr) GetFileShareAcl(ID string) (*model.FileShareAclSpec, error) {
 	var res model.FileShareAclSpec
 	url := strings.Join([]string{
 		v.Endpoint,
-		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, volID)}, "/")
+		urls.GenerateFileShareAclURL(urls.Client, v.TenantID, ID)}, "/")
 
 	if err := v.Recv(url, "GET", nil, &res); err != nil {
 		return nil, err
