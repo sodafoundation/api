@@ -181,8 +181,8 @@ func (d *MetricDriver) CollectControllerMetrics() ([]*model.MetricSpec, error) {
 	var tempMetricArray []*model.MetricSpec
 	for _, controller := range controllers {
 		// TODO: the controller id need to be optional
-		uuid := ObjectTypeController + ":" + controller.Id
-		metricMap, err := d.CollectPerformanceMetrics(uuid, supportedMetrics)
+		resId := ObjectTypeController + ":" + controller.Id
+		metricMap, err := d.CollectPerformanceMetrics(resId, supportedMetrics)
 		if err != nil {
 			log.Errorf("get performance data failed: %s", err)
 			return nil, err
@@ -196,10 +196,10 @@ func (d *MetricDriver) CollectControllerMetrics() ([]*model.MetricSpec, error) {
 			metricValues := make([]*model.Metric, 0)
 			metricValues = append(metricValues, metricValue)
 			metric := &model.MetricSpec{
-				InstanceID:   uuid,
-				InstanceName: uuid,
+				InstanceID:   resId,
+				InstanceName: resId,
 				Job:          "HuaweiOceanStor",
-				Labels:       map[string]string{"device": MetricResourceTypeController},
+				Labels:       map[string]string{"controller": resId},
 				Component:    MetricResourceTypeController,
 				Name:         element,
 				Unit:         metricToUnitMap[element],
@@ -256,7 +256,7 @@ func (d *MetricDriver) CollectPoolMetrics() ([]*model.MetricSpec, error) {
 				InstanceID:   poolId,
 				InstanceName: pool.Name,
 				Job:          "HuaweiOceanStor",
-				Labels:       map[string]string{"device": MetricResourceTypePool},
+				Labels:       map[string]string{"pool": poolId},
 				Component:    MetricResourceTypePool,
 				Name:         element,
 				Unit:         metricToUnitMap[element],
@@ -280,7 +280,7 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	for _, f := range metricFunList {
 		metric, err := f()
 		if err != nil {
-			log.Errorf("get metric failed, %v", err)
+			log.Errorf("get metric failed: %v", err)
 			return nil, err
 		}
 		metricAll = append(metricAll, metric...)

@@ -45,13 +45,13 @@ const (
 	NVMEOFProtocol = "nvmeof"
 )
 
-// Telemetry metrics object type
+// Telemetry metric resource type
 const (
 	MetricResourceTypeController = "controller"
 	MetricResourceTypePool       = "pool"
+	MetricResourceTypeFilesystem = "filesystem"
 	MetricResourceTypeDisk       = "disk"
 	MetricResourceTypeVolume     = "volume"
-	MetricResourceTypeFilesystem = "filesystem"
 )
 
 const (
