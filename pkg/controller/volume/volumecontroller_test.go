@@ -355,6 +355,10 @@ func (fc *fakeClient) CreateFileShareAcl(ctx context.Context, in *pb.CreateFileS
 	return nil, nil
 }
 
+func (fc *fakeClient) DeleteFileShareAcl(ctx context.Context, in *pb.DeleteFileShareAclOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
 // DeleteFileShare provides a mock function with given fields: ctx, in, opts
 func (fc *fakeClient) DeleteFileShare(ctx context.Context, in *pb.DeleteFileShareOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return nil, nil

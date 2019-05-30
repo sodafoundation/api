@@ -470,7 +470,7 @@ func (d *Driver) getSnapshotID(snapID string) (string, error) {
 	//TODO change listsnapshots
 	snaps, err := d.listSnapshots()
 	if err != nil {
-		msg := fmt.Sprintf("list file share snapshots failed: %v", err)
+		msg := fmt.Sprintf("list share snapshots failed: %v", err)
 		log.Error(msg)
 		return "", errors.New(msg)
 	}

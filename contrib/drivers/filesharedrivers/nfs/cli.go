@@ -75,6 +75,21 @@ func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
 	return err
 }
 
+func (c *Cli) DeleteAccess(accessto, fname string) error {
+	var accesstoAndMount string
+	sharePath := path.Join("var/", fname)
+	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"exportfs",
+		"-u",
+		accesstoAndMount,
+	}
+	_, err := c.execute(cmd...)
+
+	return err
+}
+
 func (c *Cli) UnMount(dirName string) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
@@ -100,6 +115,16 @@ func (c *Cli) CreateDirectory(dirName string) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"mkdir",
+		dirName,
+	}
+	_, err := c.execute(cmd...)
+	return err
+}
+
+func (c *Cli) DeleteDirectory(dirName string) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"rm", "-rf",
 		dirName,
 	}
 	_, err := c.execute(cmd...)

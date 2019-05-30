@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,6 +57,10 @@ func NewFakeClient(config *Config) *Client {
 			},
 			VersionMgr: &VersionMgr{
 				Receiver: NewFakeVersionReceiver(),
+				Endpoint: config.Endpoint,
+			},
+			FileShareMgr: &FileShareMgr{
+				Receiver: NewFakeFileShareReceiver(),
 				Endpoint: config.Endpoint,
 			},
 		}
@@ -360,6 +364,74 @@ func (*fakeVersionReceiver) Recv(
 			return errors.New("output format not supported")
 		}
 		break
+	case "DELETE":
+		break
+	default:
+		return errors.New("inputed method format not supported")
+	}
+
+	return nil
+}
+
+func NewFakeFileShareReceiver() Receiver {
+	return &fakeFileShareReceiver{}
+}
+
+type fakeFileShareReceiver struct{}
+
+func (*fakeFileShareReceiver) Recv(
+	string,
+	method string,
+	in interface{},
+	out interface{},
+) error {
+	switch strings.ToUpper(method) {
+	case "POST", "PUT":
+		switch out.(type) {
+		case *model.FileShareSpec:
+			if err := json.Unmarshal([]byte(ByteFileShare), out); err != nil {
+				return err
+			}
+		case *model.FileShareSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteFileShareSnapshot), out); err != nil {
+				return err
+			}
+		case *model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileShareAcl), out); err != nil {
+				return err
+			}
+		default:
+			return errors.New("output format not supported")
+		}
+	case "GET":
+		switch out.(type) {
+		case *model.FileShareSpec:
+			if err := json.Unmarshal([]byte(ByteFileShare), out); err != nil {
+				return err
+			}
+		case *[]*model.FileShareSpec:
+			if err := json.Unmarshal([]byte(ByteFileShares), out); err != nil {
+				return err
+			}
+		case *model.FileShareSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteFileShareSnapshot), out); err != nil {
+				return err
+			}
+		case *[]*model.FileShareSnapshotSpec:
+			if err := json.Unmarshal([]byte(ByteFileShareSnapshots), out); err != nil {
+				return err
+			}
+		case *model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileShareAcl), out); err != nil {
+				return err
+			}
+		case *[]*model.FileShareAclSpec:
+			if err := json.Unmarshal([]byte(ByteFileSharesAcls), out); err != nil {
+				return err
+			}
+		default:
+			return errors.New("output format not supported")
+		}
 	case "DELETE":
 		break
 	default:

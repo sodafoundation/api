@@ -38,6 +38,14 @@ type FileShareAclSpec struct {
 
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`
+
+	// The uuid of the profile which the fileshare belongs to.
+	ProfileId string `json:"profileId,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // FileShareSpec is a schema for fileshare API. Fileshare will be created on some backend
