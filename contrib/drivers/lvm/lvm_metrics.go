@@ -33,14 +33,14 @@ resources:
       - write_throughput
       - response_time
       - service_time
-      - utilization_prcnt
+      - utilization
     units:
       - tps
       - kbs
       - kbs
       - ms
       - ms
-      - '%'
+      - prcnt
   - resource: disk
     metrics:
       - iops
@@ -48,14 +48,14 @@ resources:
       - write_throughput
       - response_time
       - service_time
-      - utilization_prcnt
+      - utilization
     units:
       - tps
       - kbs
       - kbs
       - ms
       - ms
-      - '%'`
+      - prcnt`
 
 type Config struct {
 	Resource string
