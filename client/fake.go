@@ -397,7 +397,7 @@ func (*fakeFileShareReceiver) Recv(
 				return err
 			}
 		case *model.FileShareAclSpec:
-			if err := json.Unmarshal([]byte(ByteFileSharesAcl), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteFileShareAcl), out); err != nil {
 				return err
 			}
 		default:
@@ -422,7 +422,7 @@ func (*fakeFileShareReceiver) Recv(
 				return err
 			}
 		case *model.FileShareAclSpec:
-			if err := json.Unmarshal([]byte(ByteFileSharesAcl), out); err != nil {
+			if err := json.Unmarshal([]byte(ByteFileShareAcl), out); err != nil {
 				return err
 			}
 		case *[]*model.FileShareAclSpec:

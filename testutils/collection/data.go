@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -382,9 +382,9 @@ var (
 			},
 			Name:        "sample-snapshot-01",
 			Description: "This is the first sample snapshot for testing",
-			ShareSize:        int64(1),
+			ShareSize:   int64(1),
 			Status:      "available",
-			FileShareId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		{
@@ -393,9 +393,9 @@ var (
 			},
 			Name:        "sample-snapshot-02",
 			Description: "This is the second sample snapshot for testing",
-			ShareSize:        int64(1),
+			ShareSize:   int64(1),
 			Status:      "available",
-			FileShareId:    "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
@@ -589,6 +589,41 @@ var (
 		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
+	ByteFileShares = `[
+		{
+			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-fileshare-01",
+			"description": "This is first sample fileshare for testing",
+			"size": 1,
+			"availabilityZone": "default",
+			"status": "available",
+			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			"exportLocations": [
+				"192.168.100.100"
+			]
+		},
+		{
+			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-fileshare-2",
+			"description": "This is second sample fileshare for testing",
+			"size": 1,
+			"availabilityZone": "default",
+			"status": "available",
+			"poolId": "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			"profileId": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"snapshotId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			"exportLocations": [
+				"192.168.100.101"
+			]
+		}
+	]`
+
 	ByteFileShareSnapshot = `{
 		"id": "3769855c-a102-11e7-b772-17b880d2f537",
 		"name": "sample-snapshot-01",
@@ -599,10 +634,46 @@ var (
 		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 	}`
 
+	ByteFileShareSnapshots = `[
+		{
+			"id": "3769855c-a102-11e7-b772-17b880d2f537",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-snapshot-01",
+			"description": "This is the first sample snapshot for testing",
+			"snapshotSize": 1,
+			"status": "available"
+		},
+		{
+			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			"createdAt": "",
+			"updatedAt": "",
+			"name": "sample-snapshot-02",
+			"description": "This is the second sample snapshot for testing",
+			"snapshotSize": 1,
+			"status": "available"
+		}
+	]`
+
 	ByteFileShareAcl = `{
 		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-		"description": "This is a sample Acl for testing",	
+		"description": "This is a sample Acl for testing"	
     }`
+
+	ByteFileSharesAcls = `[
+		{
+			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			"createdAt": "",
+			"updatedAt": "",
+			"description": "This is a sample Acl for testing"
+		},
+		{
+			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			"createdAt": "",
+			"updatedAt": "",
+			"description": "This is a sample Acl for testing"
+		}
+	]`
 
 	ByteVolume = `{
 		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
@@ -751,117 +822,6 @@ var (
 			"name": "v1beta",
 			"status": "CURRENT",
 			"updatedAt": "2017-07-10T14:36:58.014Z"
-		}
-	]`
-
-	ByteFileShare = `{
-			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-fileshare-01",
-			"description": "This is first sample fileshare for testing",
-			"size": 1,
-			"availabilityZone": "default",
-			"status": "available",
-			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
-			"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
-			"exportLocations": [
-				"192.168.100.100"
-			]
-		}`
-
-	ByteFileShares = `[
-		{
-			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-fileshare-01",
-			"description": "This is first sample fileshare for testing",
-			"size": 1,
-			"availabilityZone": "default",
-			"status": "available",
-			"poolId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
-			"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
-			"exportLocations": [
-				"192.168.100.100"
-			]
-		},
-		{
-			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-fileshare-2",
-			"description": "This is second sample fileshare for testing",
-			"size": 1,
-			"availabilityZone": "default",
-			"status": "available",
-			"poolId": "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
-			"profileId": "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			"snapshotId": "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			"exportLocations": [
-				"192.168.100.101"
-			]
-		}
-	]`
-
-	ByteFileShareSnapshot = `{
-			"id": "3769855c-a102-11e7-b772-17b880d2f537",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-snapshot-01",
-			"description": "This is the first sample snapshot for testing",
-			"snapshotSize": 1,
-			"status": "available"
-		}`
-
-	ByteFileShareSnapshots = `[
-		{
-			"id": "3769855c-a102-11e7-b772-17b880d2f537",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-snapshot-01",
-			"description": "This is the first sample snapshot for testing",
-			"snapshotSize": 1,
-			"status": "available"
-		},
-		{
-			"id": "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
-			"createdAt": "",
-			"updatedAt": "",
-			"name": "sample-snapshot-02",
-			"description": "This is the second sample snapshot for testing",
-			"snapshotSize": 1,
-			"status": "available"
-		}
-	]`
-
-	ByteFileSharesAcl = `{
-		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-		"createdAt": "",
-		"updatedAt": "",
-		"AccessCapability": null,
-		"AccessTo": null,
-		"description": "This is a sample Acl for testing"
-	}`
-
-	ByteFileSharesAcls = `[
-		{
-			"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-			"createdAt": "",
-			"updatedAt": "",
-			"AccessCapability": null,
-			"AccessTo": null,
-			"description": "This is a sample Acl for testing"
-		},
-		{
-			"id": "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			"createdAt": "",
-			"updatedAt": "",
-			"AccessCapability": null,
-			"AccessTo": null,
-			"description": "This is a sample Acl for testing"
 		}
 	]`
 )

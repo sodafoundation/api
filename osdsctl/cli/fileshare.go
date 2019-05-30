@@ -102,7 +102,7 @@ func init() {
 	fileShareCreateCommand.Flags().StringVarP(&shareSnapshotID, "snapshotId", "s", "", "the uuid of the snapshot which the fileshare is created")
 	fileShareCreateCommand.Flags().StringVarP(&shareProfileID, "profileId", "p", "", "the uuid of the profile which the fileshare belongs to")
 	fileShareCreateCommand.Flags().StringVarP(&shareExportLocations, "exportLocations", "e", "", "exportLocations of the fileshare")
-	fileShareCreateCommand.Flags().StringVarP(&shareUserID, "userId", "u", "", "exportLocations of the fileshare")
+	fileShareCreateCommand.Flags().StringVarP(&shareUserID, "userId", "u", "", "the uuid of the user that the fileshare belongs to")
 
 	fileShareListCommand.Flags().StringVarP(&shareLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareListCommand.Flags().StringVarP(&shareOffset, "offset", "", "0", "all requested data offsets")

@@ -27,7 +27,17 @@ var fakeShareMgr = &FileShareMgr{
 }
 
 func TestCreateFileShare(t *testing.T) {
-	expected := &SampleFileShares[0]
+	expected := &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-fileshare",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
 
 	share, err := fakeShareMgr.CreateFileShare(&model.FileShareSpec{})
 	if err != nil {
@@ -43,7 +53,17 @@ func TestCreateFileShare(t *testing.T) {
 
 func TestGetFileShare(t *testing.T) {
 	var shareID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
-	expected := &SampleFileShares[0]
+	expected := &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-fileshare",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
 
 	share, err := fakeShareMgr.GetFileShare(shareID)
 	if err != nil {
@@ -58,9 +78,40 @@ func TestGetFileShare(t *testing.T) {
 }
 
 func TestListFileShares(t *testing.T) {
+	sampleFileShares := []model.FileShareSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Name:             "sample-fileshare-01",
+			Description:      "This is first sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:        "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:       "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.100"},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Name:             "sample-fileshare-2",
+			Description:      "This is second sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
+			ProfileId:        "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			SnapshotId:       "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.101"},
+		},
+	}
+
 	var expected []*model.FileShareSpec
-	expected = append(expected, &SampleFileShares[0])
-	expected = append(expected, &SampleFileShares[1])
+	expected = append(expected, &sampleFileShares[0])
+	expected = append(expected, &sampleFileShares[1])
 	shares, err := fakeShareMgr.ListFileShares(map[string]string{"limit": "3", "offset": "4"})
 
 	if err != nil {
@@ -96,7 +147,17 @@ func TestUpdateFileShare(t *testing.T) {
 		return
 	}
 
-	expected := &SampleFileShares[0]
+	expected := &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Name:        "sample-fileshare",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		Status:      "available",
+		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
 
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("expected %v, got %v", expected, result)
@@ -105,7 +166,17 @@ func TestUpdateFileShare(t *testing.T) {
 }
 
 func TestCreateFileShareSnapshot(t *testing.T) {
-	expected := &SampleFileShareSnapshots[0]
+	expected := &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Status:      "available",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ShareSize:   1,
+	}
 
 	shareSnapshot, err := fakeShareMgr.CreateFileShareSnapshot(&model.FileShareSnapshotSpec{})
 	if err != nil {
@@ -121,7 +192,17 @@ func TestCreateFileShareSnapshot(t *testing.T) {
 
 func TestGetFileShareSnapshot(t *testing.T) {
 	var shareID = "3769855c-a102-11e7-b772-17b880d2f537"
-	expected := &SampleFileShareSnapshots[0]
+	expected := &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Status:      "available",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ShareSize:   1,
+	}
 
 	shareSnapshot, err := fakeShareMgr.GetFileShareSnapshot(shareID)
 	if err != nil {
@@ -136,6 +217,26 @@ func TestGetFileShareSnapshot(t *testing.T) {
 }
 
 func TestListFileShareSnapshots(t *testing.T) {
+	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			},
+			Name:         "sample-snapshot-01",
+			Description:  "This is the first sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
+			},
+			Name:         "sample-snapshot-02",
+			Description:  "This is the second sample snapshot for testing",
+			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+	}
 	var expected []*model.FileShareSnapshotSpec
 	expected = append(expected, &SampleFileShareSnapshots[0])
 	expected = append(expected, &SampleFileShareSnapshots[1])
@@ -174,7 +275,17 @@ func TestUpdateFileShareSnapshot(t *testing.T) {
 		return
 	}
 
-	expected := &SampleFileShareSnapshots[0]
+	expected := &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Status:      "available",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ShareSize:   1,
+	}
 
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("expected %v, got %v", expected, result)
@@ -206,7 +317,12 @@ func TestDeleteFileShareAcl(t *testing.T) {
 
 func TestGetFileShareAcl(t *testing.T) {
 	var ShareAclID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
-	expected := &SampleFileSharesAcl[0]
+	expected := &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		},
+		Description: "This is a sample Acl for testing",
+	}
 
 	shareAcl, err := fakeShareMgr.GetFileShareAcl(ShareAclID)
 	if err != nil {
@@ -221,6 +337,21 @@ func TestGetFileShareAcl(t *testing.T) {
 }
 
 func TestListFileShareAcl(t *testing.T) {
+	SampleFileSharesAcl = []model.FileShareAclSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Description: "This is a sample Acl for testing",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+			},
+			Description: "This is a sample Acl for testing",
+		},
+	}
+
 	var expected []*model.FileShareAclSpec
 	expected = append(expected, &SampleFileSharesAcl[0])
 	expected = append(expected, &SampleFileSharesAcl[1])
