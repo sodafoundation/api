@@ -169,6 +169,9 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	case config.CephDriverType:
 		d = &ceph.MetricDriver{}
 		break
+	case config.HuaweiDoradoDriverType:
+		d = &dorado.MetricDriver{}
+		break
 	default:
 		//d = &sample.Driver{}
 		break

@@ -44,3 +44,22 @@ const (
 	FCProtocol     = "fibre_channel"
 	NVMEOFProtocol = "nvmeof"
 )
+
+// Telemetry metric resource type
+const (
+	MetricResourceTypeController = "controller"
+	MetricResourceTypePool       = "pool"
+	MetricResourceTypeFilesystem = "filesystem"
+	MetricResourceTypeDisk       = "disk"
+	MetricResourceTypeVolume     = "volume"
+)
+
+const (
+	KMetricIOPS               = "iops"
+	KMetricBandwidth          = "bandwidth"
+	KMetricLatency            = "latency"
+	KMetricServiceTime        = "service_time"
+	KMetricUtilizationPercent = "utilization_prcnt"
+	KMetricCacheHitRatio      = "cache_hit_ratio"
+	KMetricCpuUsage           = "cpu_usage"
+)
