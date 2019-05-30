@@ -166,6 +166,9 @@ service FileShareController {
     // Create a file share Acl
     rpc CreateFileShareAcl (CreateFileShareAclOpts) returns (GenericResponse){}
 
+    // Delete a file share Acl
+    rpc DeleteFileShareAcl (DeleteFileShareAclOpts) returns (GenericResponse){}
+
 }
 
 service FileShareDock {
@@ -184,6 +187,9 @@ service FileShareDock {
 
     // Create a file share Acl
     rpc CreateFileShareAcl (CreateFileShareAclOpts) returns (GenericResponse){}
+
+    // Delete a file share Acl
+    rpc DeleteFileShareAcl (DeleteFileShareAclOpts) returns (GenericResponse){}
 
 }
 
@@ -723,6 +729,32 @@ message DetachVolumeOpts {
 }
 
 // CreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+message DeleteFileShareAclOpts {
+    // The uuid of the file share, optional when creating.
+    string id = 1;
+    // The fileshareId
+    string fileshareId = 2;
+    // The description
+    string description = 3;
+    // The type of access. Ex: IP based.
+    string type = 4
+    // The accessCapability for fileshare.
+    repeated string accessCapability = 5
+    // accessTo of the fileshare.
+    repeated string accessTo = 6
+    // The Serialized profile
+    string profile = 7;
+    // The driverName
+    string driverName = 8;
+    // The Context
+    string context = 9;
+    // The Name
+    string Name = 10;
+    // The metadata of the file share, optional.
+    map<string, string> metadata = 11;
+}
+
+// CreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
 message CreateFileShareAclOpts {
     // The uuid of the file share, optional when creating.
     string id = 1;
@@ -744,6 +776,8 @@ message CreateFileShareAclOpts {
     string context = 9;
     // The Name
     string Name = 10;
+    // The metadata of the file share, optional.
+    map<string, string> metadata = 11;
 }
 
 // CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
@@ -831,6 +865,8 @@ message DeleteFileShareSnapshotOpts {
     string context = 4;
     // The Serialized profile
     string profile = 5;
+    // The metadata of the fileshare, optional.
+    map<string, string> metadata = 6;
 }
 
 // Generic response, it return:

@@ -44,6 +44,8 @@ type FileSharePortal struct {
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
 	ctx := c.GetContext(f.Ctx)
+	// Get profile
+	var prf *model.ProfileSpec
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -55,11 +57,23 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		return
 	}
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
-
 	if err != nil {
-		reason := fmt.Sprintf("create access rules for fileshare failed: %s", err.Error())
+		reason := fmt.Sprintf("createFileshareAcldbentry failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
+		return
+	}
+	fileshare, err := db.C.GetFileShare(ctx, result.FileShareId)
+	if err != nil {
+		reason := fmt.Sprintf("getFileshare failed in createfileshare acl: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	// Marshal the result.
@@ -70,7 +84,6 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
-
 	f.SuccessHandle(StatusAccepted, body)
 
 	// FileShare acl access creation request is sent to dock and drivers
@@ -87,7 +100,9 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		Type:             result.Type,
 		AccessCapability: result.AccessCapability,
 		AccessTo:         result.AccessTo,
+		Metadata:         fileshare.Metadata,
 		Context:          ctx.ToJson(),
+		Profile:          prf.ToJson(),
 	}
 
 	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
@@ -300,6 +315,9 @@ func (f *FileSharePortal) UpdateFileShare() {
 }
 
 func (f *FileSharePortal) DeleteFileShareAcl() {
+	// Get profile
+	var prf *model.ProfileSpec
+
 	ctx := c.GetContext(f.Ctx)
 
 	var err error
@@ -311,12 +329,48 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		return
 	}
 
+	fileshare, err := db.C.GetFileShare(ctx, acl.FileShareId)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare for the acl %s not found: %s", id, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
+	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	if err := db.C.DeleteFileShareAcl(ctx, acl.Id); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare acl failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 	f.SuccessHandle(StatusAccepted, nil)
+	// NOTE: The real file share deletion process.
+	// File Share deletion request is sent to the Dock. Dock will delete file share from driver
+	// and database or update file share status to "errorDeleting" if deletion from driver failed.
+	if err := f.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer f.CtrClient.Close()
+	opt := &pb.DeleteFileShareAclOpts{
+		FileShareId:      acl.FileShareId,
+		Description:      acl.Description,
+		Type:             acl.Type,
+		AccessCapability: acl.AccessCapability,
+		AccessTo:         acl.AccessTo,
+		Metadata:         fileshare.Metadata,
+		Context:          ctx.ToJson(),
+		Profile:          prf.ToJson(),
+	}
+	if _, err = f.CtrClient.DeleteFileShareAcl(context.Background(), opt); err != nil {
+		log.Error("delete fileshare failed in controller service:", err)
+		return
+	}
 	return
 }
 
@@ -581,6 +635,7 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		FileshareId: snapshot.FileShareId,
 		Context:     ctx.ToJson(),
 		Profile:     prf.ToJson(),
+		Metadata:    snapshot.Metadata,
 	}
 	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete file share snapshot failed in controller service:", err)

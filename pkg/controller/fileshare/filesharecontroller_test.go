@@ -71,6 +71,17 @@ func (fc *fakefileshareClient) DeleteFileShare(ctx context.Context, in *pb.Delet
 	}, nil
 }
 
+// DeleteFileShareAcl provides a mock function with given fields: ctx, in, opts
+func (fc *fakefileshareClient) DeleteFileShareAcl(ctx context.Context, in *pb.DeleteFileShareAclOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return &pb.GenericResponse{
+		Reply: &pb.GenericResponse_Result_{
+			Result: &pb.GenericResponse_Result{
+				Message: ByteFileShareAcl,
+			},
+		},
+	}, nil
+}
+
 func (fc *fakefileshareClient) CreateFileShareSnapshot(ctx context.Context, in *pb.CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return &pb.GenericResponse{
 		Reply: &pb.GenericResponse_Result_{

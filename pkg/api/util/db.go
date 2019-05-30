@@ -132,6 +132,7 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 	}
 
 	in.Status = model.FileShareSnapCreating
+	in.Metadata = fshare.Metadata
 	return db.C.CreateFileShareSnapshot(ctx, in)
 }
 
