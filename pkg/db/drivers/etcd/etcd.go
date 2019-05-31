@@ -23,14 +23,12 @@ package etcd
 import (
 	"encoding/json"
 	"errors"
-	"time"
-
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
-
-	"reflect"
+	"time"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
