@@ -187,7 +187,10 @@ pool:
       dataStorage:
         provisioningPolicy: Thin
         isSpaceEfficient: false
-        StorageAccessCapability: ['Read', 'Write', 'Execute']
+        storageAccessCapability:
+         - Read
+         - Write
+         - Execute
       ioConnectivity:
         accessProtocol: nfs
         maxIOPS: 7000000
