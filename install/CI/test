@@ -54,6 +54,6 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
 # Start lvm e2e flow test
 split_line "Start lvm e2e flow test"
-go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/ 
+go build -ldflags '-w -s' -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
 sudo $OPENSDS_DIR/install/devsds/uninstall.sh
