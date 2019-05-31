@@ -55,7 +55,7 @@ func Init(resourceType string) FileShareDriver {
 	var f FileShareDriver
 	switch resourceType {
 	case config.NFSDriverType:
-		f = &nfs.NFSDriver{}
+		f = &nfs.Driver{}
 		break
 	case config.HuaweiOceanFileDriverType:
 		f = &oceanstor.Driver{}

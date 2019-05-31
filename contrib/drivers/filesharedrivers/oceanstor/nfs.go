@@ -103,7 +103,7 @@ func (c *NFS) getShareByID(shareID string) (interface{}, error) {
 	return &nfsShare.Data, nil
 }
 
-func (c *NFS) allowNFSAccess(shareID, accessTo, accessLevel string) (*NFSShareClient, error) {
+func (c *NFS) allowAccess(shareID, accessTo, accessLevel string) (interface{}, error) {
 	url := "/NFS_SHARE_AUTH_CLIENT"
 	data := map[string]string{
 		"TYPE":       "16409",
@@ -132,4 +132,11 @@ func (c *NFS) allowNFSAccess(shareID, accessTo, accessLevel string) (*NFSShareCl
 func (c *NFS) getLocation(sharePath, ipAddr string) string {
 	path := strings.Replace(sharePath, "-", "_", -1)
 	return fmt.Sprintf("%s:/%s", ipAddr, path)
+}
+
+func (c *NFS) getAccessLevel(accessLevel string) string {
+	if accessLevel == AccessLevelRW {
+		return AccessNFSRw
+	}
+	return AccessNFSRo
 }

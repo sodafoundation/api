@@ -36,4 +36,9 @@ const (
 	FileShareID           = "shareId"
 	NamePrefix            = "opensds"
 	FileShareSnapshotID   = "fileshareSnapId"
+	AccessTypeUser        = "user"
+	AccessTypeIp          = "ip"
+	AccessLevelRead       = "read"
+	AccessLevelWrite      = "write"
+	AccessLevelExecute    = "execute"
 )

@@ -993,7 +993,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
 	if err != nil {
 		// Change the status of the file share acl to error when the creation faild
-		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		defer db.UpdateFileShareStatus(ctx, db.C, fileshare.Id, model.FileShareError)
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}

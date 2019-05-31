@@ -124,28 +124,65 @@ func (c *CIFS) deleteShare(shareID string) error {
 	return nil
 }
 
-func (c *CIFS) allowCIFSAccess(share_id, access_to, access_level string) (*CIFSShareClientData, error) {
-	url := "/CIFS_SHARE_AUTH_CLIENT"
-	data := map[string]string{
-		"NAME":       access_to,
-		"PARENTID":   share_id,
-		"PERMISSION": access_level,
-	}
-	resp, err := c.request(url, "Post", data)
-	if err != nil {
-		return nil, err
+func (c *CIFS) allowAccess(shareID, accessTo, accessLevel string) (interface{}, error) {
+
+	domainType := map[string]string{"local": "2", "ad": "0"}
+
+	sendRest := func(accessTo, domain string) (*CIFSShareClientData, error) {
+		url := "/CIFS_SHARE_AUTH_CLIENT"
+		data := map[string]string{
+			"NAME":       accessTo,
+			"PARENTID":   shareID,
+			"PERMISSION": accessLevel,
+			"DOMAINTYPE": domain,
+		}
+
+		resp, err := c.request(url, "Post", data)
+		if err != nil {
+			return nil, err
+		}
+
+		var cifsClient CIFSShareClient
+		if err := handleReponse(resp, &cifsClient); err != nil {
+			return nil, err
+		}
+
+		return &cifsClient.Data, nil
 	}
 
-	var cifsClient CIFSShareClient
-	if err := handleReponse(resp, &cifsClient); err != nil {
-		return nil, err
+	var data *CIFSShareClientData
+	var errRest error
+
+	if !strings.Contains(accessTo, "\\\\") {
+		// First, try to add user access
+		if data, errRest = sendRest(accessTo, domainType["local"]); errRest != nil {
+			// Second, if add user access failed, try to add group access.
+			if data, errRest = sendRest("@"+accessTo, domainType["local"]); errRest != nil {
+				return nil, errRest
+			}
+		}
+
+	} else {
+		// If add domain user access failed, try to add domain group access.
+		if data, errRest = sendRest(accessTo, domainType["ad"]); errRest != nil {
+			if data, errRest = sendRest("@"+accessTo, domainType["ad"]); errRest != nil {
+				return nil, errRest
+			}
+		}
 	}
 
-	return &cifsClient.Data, nil
+	return data, nil
 }
 
 // getLocation
 func (c *CIFS) getLocation(sharePath, ipAddr string) string {
 	path := strings.Replace(sharePath, "-", "_", -1)
 	return fmt.Sprintf("\\\\%s\\%s", ipAddr, path)
+}
+
+func (c *CIFS) getAccessLevel(accessLevel string) string {
+	if accessLevel == AccessLevelRW {
+		return AccessCIFSFullControl
+	}
+	return AccessCIFSRo
 }

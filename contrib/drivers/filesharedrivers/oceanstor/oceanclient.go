@@ -27,8 +27,6 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	//pb "github.com/opensds/opensds/pkg/model/proto"
-	//"github.com/opensds/opensds/pkg/utils/exec"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
@@ -126,6 +124,8 @@ type Protocol interface {
 	deleteShare(shareID string) error
 	getShareByID(shareID string) (interface{}, error)
 	getLocation(sharePath, ipAddr string) string
+	allowAccess(shareID, accessTo, accessLevel string) (interface{}, error)
+	getAccessLevel(accessLevel string) string
 }
 
 func NewProtocol(proto string, c *Client) Protocol {
@@ -417,6 +417,26 @@ func (c *Client) getShareClientType(shareProto string) (string, error) {
 	}
 
 	return "", fmt.Errorf("invalid NAS protocol supplied: %s", shareProto)
+}
+
+func (c *Client) removeAccessFromShare(accessID, shareProto string) error {
+	shareClientType, err := c.getShareClientType(shareProto)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("/%s/%s", shareClientType, accessID)
+	resp, err := c.request(url, "DELETE", nil)
+	if err != nil {
+		return err
+	}
+
+	var errDelete DeleteError
+	if err := handleReponse(resp, &errDelete); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) logout() error {

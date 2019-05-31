@@ -58,12 +58,12 @@ func findSpecifiedStruct(specifiedStructName string, input interface{}) (interfa
 		return nil, errors.New("specified struct name cannot be empty")
 	}
 
-	var list []interface{}
+	var list []reflect.Value
 
-	list = append(list, input)
+	list = append(list, reflect.ValueOf(input))
 
 	for len(list) > 0 {
-		value := reflect.ValueOf(list[0])
+		value := list[0]
 		list = append(list[:0], list[1:]...)
 		if value.Kind() == reflect.Ptr {
 			value = value.Elem()
@@ -74,7 +74,7 @@ func findSpecifiedStruct(specifiedStructName string, input interface{}) (interfa
 			}
 
 			for i := 0; i < value.NumField(); i++ {
-				list = append(list, value.Field(i).Interface())
+				list = append(list, value.Field(i))
 			}
 		}
 	}
@@ -97,21 +97,21 @@ func getSharePath(shareName string) string {
 	return sharePath
 }
 
-//func getShareUrlType(shareProto string) (string, error) {
-//	switch shareProto {
-//	case NFS:
-//		return "NFSHARE", nil
-//	case CIFS:
-//		return "CIFSHARE", nil
-//	}
-
-//	return "", errors.New(shareProto + " protocol is not supported")
-//}
-
 func checkAccessLevel(accessLevel string) bool {
 	accessLevels := []string{AccessLevelRW, AccessLevelRO}
 	for _, v := range accessLevels {
 		if v == accessLevel {
+			return true
+		}
+	}
+
+	return false
+}
+
+func checkAccessType(accessType string) bool {
+	accessTypes := []string{AccessTypeUser, AccessTypeIp}
+	for _, v := range accessTypes {
+		if v == accessType {
 			return true
 		}
 	}

@@ -19,9 +19,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
-	"sync"
+	"strings"
 	"time"
 
 	log "github.com/golang/glog"
@@ -32,25 +31,23 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-var once sync.Once
-
 func (d *Driver) Setup() error {
+	if d.Client != nil {
+		return nil
+	}
+
 	var err error
 
-	once.Do(func() {
-		d.IniConf()
-		cli, err := newRestCommon(d.Config)
-		if err == nil {
-			d.Client = cli
-			log.Info("get oceanstor client successfully")
-		}
-	})
-
+	d.IniConf()
+	cli, err := newRestCommon(d.Config)
 	if err != nil {
 		msg := fmt.Sprintf("get new client failed: %v", err)
 		log.Error(msg)
 		return errors.New(msg)
 	}
+
+	d.Client = cli
+	log.Info("get oceanstor client successfully")
 
 	return nil
 }
@@ -426,6 +423,12 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		return nil, errors.New(msg)
 	}
 
+	if fs == nil {
+		msg := fmt.Sprintf("%s does not exist", fsName)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
 	snapName := EncodeName(snapID)
 
 	fsSnapshot, err := d.createSnapshot(fs.ID, snapName)
@@ -435,24 +438,30 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		return nil, errors.New(msg)
 	}
 
+	snapSize, _ := strconv.ParseInt(fsSnapshot.Capacity, 10, 64)
+
 	return &model.FileShareSnapshotSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
-		Name:     opt.GetName(),
-		Metadata: map[string]string{FileShareSnapshotID: fsSnapshot.ID},
+		Name:         snapName,
+		Description:  opt.GetDescription(),
+		SnapshotSize: snapSize,
+		Metadata:     map[string]string{FileShareSnapshotID: fsSnapshot.ID},
 	}, nil
 }
 
 func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
-	//opt.GetContext()
-	//TODO real snapshot id is needed
-	snapID, err := d.getSnapshotID(opt.GetId())
-	if err != nil {
-		return nil, err
+	meta := opt.GetMetadata()
+	if meta == nil || (meta != nil && meta[FileShareSnapshotID] == "") {
+		msg := "cannot get file share snapshot id"
+		log.Error(msg)
+		return nil, errors.New(msg)
 	}
 
-	err = d.deleteFSSnapshot(snapID)
+	snapID := meta[FileShareSnapshotID]
+
+	err := d.deleteFSSnapshot(snapID)
 	if err != nil {
 		msg := fmt.Sprintf("delete filesystem snapshot %s failed, %v", snapID, err)
 		log.Error(msg)
@@ -464,116 +473,230 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*
 	return nil, nil
 }
 
-func (d *Driver) getSnapshotID(snapID string) (string, error) {
-	snapName := EncodeName(snapID)
-
-	//TODO change listsnapshots
-	snaps, err := d.listSnapshots()
-	if err != nil {
-		msg := fmt.Sprintf("list share snapshots failed: %v", err)
-		log.Error(msg)
-		return "", errors.New(msg)
+func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (string, error) {
+	if accessLevels == nil || (accessLevels != nil && len(accessLevels) == 0) {
+		return "", errors.New("access level cannot be empty")
 	}
 
-	for _, snap := range snaps {
-		if snap.Name == snapName {
-			return snap.ID, nil
+	if len(accessLevels) == 1 && strings.ToLower(accessLevels[0]) != AccessLevelRead {
+		return "", errors.New("only read only and read write access level are supported")
+	}
+
+	var accessLevel string
+	// make sure accessLevel is ro or rw
+	for _, level := range accessLevels {
+		if strings.ToLower(level) == AccessLevelExecute {
+			return "", errors.New("only read only and read write access level are supported, execute is not supported")
+		}
+		if strings.ToLower(level) == AccessLevelRead && !strings.Contains(accessLevel, "r") {
+			accessLevel += "r"
 		}
 	}
 
-	return "", fmt.Errorf("cannot find snapshot %s", snapID)
+	for _, level := range accessLevels {
+		if strings.ToLower(level) == AccessLevelWrite {
+			accessLevel += "w"
+			break
+		}
+	}
+
+	if accessLevel == "r" {
+		accessLevel += "o"
+	}
+
+	shareDriver := NewProtocol(shareProto, d.Client)
+	return shareDriver.getAccessLevel(accessLevel), nil
+}
+
+func (d *Driver) CreateFileShareAclParamCheck(opt *pb.CreateFileShareAclOpts) (string, string, string, string, error) {
+	log.V(5).Infof("create file share access client parameters %#v", opt)
+	meta := opt.GetMetadata()
+
+	if meta == nil || (meta != nil && meta[FileShareName] == "" && meta[FileShareID] == "") {
+		msg := "cannot get file share name and id"
+		log.Error(msg)
+		return "", "", "", "", errors.New(msg)
+	}
+
+	fsName := meta[FileShareName]
+	if fsName == "" {
+		return "", "", "", "", errors.New("fileshare name cannot be empty")
+	}
+
+	shareProto, err := d.GetProtoFromProfile(opt.Profile)
+	if err != nil {
+		return "", "", "", "", err
+	}
+
+	if !checkProtocol(shareProto) {
+		return "", "", "", "", fmt.Errorf("%s protocol is not supported, support is NFS and CIFS", shareProto)
+	}
+
+	accessLevels := opt.GetAccessCapability()
+
+	accessLevel, err := d.getAccessLevel(accessLevels, shareProto)
+	if err != nil {
+		return "", "", "", "", err
+	}
+
+	accessType := opt.Type
+	if !checkAccessType(accessType) {
+		return "", "", "", "", fmt.Errorf("only access type %s and %s are supported", AccessTypeUser, AccessTypeIp)
+	}
+	if shareProto == CIFSProto && accessType != AccessTypeUser {
+		return "", "", "", "", errors.New("only USER access type is allowed for CIFS shares")
+	}
+
+	accessToShares := opt.GetAccessTo()
+	if accessToShares == nil || len(accessToShares) == 0 {
+		return "", "", "", "", errors.New("access client cannot be empty")
+	}
+
+	accessTo := accessToShares[0]
+
+	if shareProto == NFSProto && accessType == AccessTypeUser {
+		accessTo += "@"
+	}
+
+	return fsName, shareProto, accessLevel, accessTo, nil
 }
 
 // AllowAccess allow access to the share
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
-	accessLevels := opt.GetAccessCapability()
-	accessToShares := opt.GetAccessTo()
-	fsName := opt.GetName()
-	profile := opt.Profile
-	if len(accessLevels) == 0 || len(accessToShares) == 0 {
-		msg := "access level and access to cannot be empty"
+	shareName, shareProto, accessLevel, accessTo, err := d.CreateFileShareAclParamCheck(opt)
+	if err != nil {
+		msg := fmt.Sprintf("create fileshare access client failed: %v", err)
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
 
-	// Take only the first value
-	accessLevel := accessLevels[0]
-	accessTo := accessToShares[0]
+	shareDriver := NewProtocol(shareProto, d.Client)
 
-	//shareProto, shareName is needed
-	if !checkAccessLevel(accessLevel) {
-		return fmt.Errorf("access level %s is unsupported", accessLevel)
-	}
-
-	pattern := "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"
-	matchIp, _ := regexp.MatchString(pattern, accessTo)
-	if !matchIp {
-		return nil, fmt.Errorf("ip %s is invalid", accessTo)
-	}
-
-	if shareProto == NFSProto {
-		if accessLevel == AccessLevelRW {
-			accessLevel = AccessNFSRw
-		} else {
-			accessLevel = AccessNFSRo
-		}
-	}
-
-	if shareProto == CIFSProto {
-		if accessLevel == AccessLevelRW {
-			accessLevel = AccessCIFSFullControl
-		} else {
-			accessLevel = AccessCIFSRo
-		}
-	}
-
-	share, err := d.getFileShare(shareProto, shareName)
+	share, err := shareDriver.getShare(shareName)
 	if err != nil {
 		log.Error(err.Error())
-		return err
+		return nil, err
 	}
 
 	if share == nil {
-		return nil, fmt.Errorf("share %s is not exist", getSharePath(shareName))
+		return nil, fmt.Errorf("share %s does not exist", shareName)
 	}
 
-	shareID := d.getShareID(shareProto, share)
+	shareID := shareDriver.getShareID(share)
 
-	err = d.createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel)
+	err = d.createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel, shareDriver)
 	if err != nil {
 		msg := fmt.Sprintf("allow access %s to %s failed %v", accessTo, shareName, err)
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
 
-	return nil
+	shareAccess := &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.Id,
+		},
+		AccessTo: []string{accessTo},
+		Metadata: map[string]string{FileShareName: shareName},
+	}
+
+	return shareAccess, nil
 }
 
-func (d *Driver) createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel string) error {
+func (d *Driver) createAccessIfNotExist(shareID, accessTo, shareProto, accessLevel string, shareDriver Protocol) error {
 	// Check if access already exists
 	accessID, err := d.getAccessFromShare(shareID, accessTo, shareProto)
 	if err != nil {
 		return err
 	}
 
-	if accessID == "" {
-		return d.allowAccessToShare(shareID, accessTo, shareProto, accessLevel)
+	if accessID != "" {
+		log.Infof("fileshare access %s already exists", accessID)
+		return nil
 	}
+
+	if _, err := shareDriver.allowAccess(shareID, accessTo, accessLevel); err != nil {
+		return err
+	}
+
+	log.Infof("create fileshare access successfully")
 
 	return nil
 }
 
-func (d *Driver) allowAccessToShare(shareID, accessTo, shareProto, accessLevel string) error {
-	switch shareProto {
-	case NFS:
-		if _, err := d.allowNFSAccess(shareID, accessTo, accessLevel); err != nil {
-			return err
-		}
-	case CIFS:
-		if _, err := d.allowCIFSAccess(shareID, accessTo, accessLevel); err != nil {
-			return err
-		}
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	shareName, shareProto, accessTo, err := d.DeleteFileShareAclParamCheck(opt)
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
 	}
 
-	return nil
+	shareDriver := NewProtocol(shareProto, d.Client)
+
+	share, err := shareDriver.getShare(shareName)
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	if share == nil {
+		msg := fmt.Sprintf("share %s does not exist", shareName)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	shareID := shareDriver.getShareID(share)
+
+	accessID, err := d.getAccessFromShare(shareID, accessTo, shareProto)
+	if err != nil {
+		msg := fmt.Sprintf("get access from share failed: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	if accessID == "" {
+		msg := fmt.Sprintf("can not get access id from share %s", shareName)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	if err := d.removeAccessFromShare(accessID, shareProto); err != nil {
+		msg := fmt.Sprintf("remove access from share failed: %v", err)
+		log.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	return nil, nil
+}
+
+func (d *Driver) DeleteFileShareAclParamCheck(opt *pb.DeleteFileShareAclOpts) (string, string, string, error) {
+	meta := opt.GetMetadata()
+	if meta == nil || (meta != nil && meta[FileShareName] == "") {
+		return "", "", "", errors.New("fileshare name cannot be empty when deleting file share access client")
+	}
+
+	fsName := meta[FileShareName]
+
+	shareProto, err := d.GetProtoFromProfile(opt.Profile)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	if !checkProtocol(shareProto) {
+		return "", "", "", fmt.Errorf("%s protocol is not supported, support is NFS and CIFS", shareProto)
+	}
+
+	accessType := opt.Type
+	if !checkAccessType(accessType) {
+		return "", "", "", fmt.Errorf("only access type %s and %s are supported", AccessTypeUser, AccessTypeIp)
+	}
+	if shareProto == CIFSProto && accessType != AccessTypeUser {
+		return "", "", "", fmt.Errorf("only USER access type is allowed for CIFS shares")
+	}
+
+	accessTo := opt.GetAccessTo()
+	if accessTo == nil || (accessTo != nil && len(accessTo) == 0) {
+		return "", "", "", errors.New("cannot find access client")
+	}
+
+	return fsName, shareProto, accessTo[0], nil
 }

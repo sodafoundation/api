@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/opensds/opensds/pkg/api/policy"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/util"
@@ -43,6 +44,9 @@ type FileSharePortal struct {
 
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	// Get profile
 	var prf *model.ProfileSpec
@@ -113,6 +117,9 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 }
 
 func (f *FileSharePortal) ListFileSharesAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
@@ -132,8 +139,11 @@ func (f *FileSharePortal) ListFileSharesAcl() {
 	return
 }
 
-// Function to store filesahre related entry into databse
+// Function to store fileshare related entry into databse
 func (f *FileSharePortal) CreateFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	var fileshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
@@ -220,6 +230,9 @@ func (f *FileSharePortal) CreateFileShare() {
 }
 
 func (f *FileSharePortal) ListFileShares() {
+	if !policy.Authorize(f.Ctx, "fileshare:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
@@ -240,6 +253,9 @@ func (f *FileSharePortal) ListFileShares() {
 }
 
 func (f *FileSharePortal) GetFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":aclId")
 
 	// Call db api module to handle get fileshare request.
@@ -264,6 +280,9 @@ func (f *FileSharePortal) GetFileShareAcl() {
 }
 
 func (f *FileSharePortal) GetFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":fileshareId")
 
 	// Call db api module to handle get file share request.
@@ -288,6 +307,9 @@ func (f *FileSharePortal) GetFileShare() {
 }
 
 func (f *FileSharePortal) UpdateFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:update") {
+		return
+	}
 	var fshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -315,6 +337,9 @@ func (f *FileSharePortal) UpdateFileShare() {
 }
 
 func (f *FileSharePortal) DeleteFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:delete") {
+		return
+	}
 	// Get profile
 	var prf *model.ProfileSpec
 
@@ -375,6 +400,9 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 }
 
 func (f *FileSharePortal) DeleteFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:delete") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 
 	var err error
@@ -453,6 +481,9 @@ type FileShareSnapshotPortal struct {
 }
 
 func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	var snapshot = model.FileShareSnapshotSpec{
 		BaseModel: &model.BaseModel{},
@@ -527,6 +558,9 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) ListFileShareSnapshots() {
+	if !policy.Authorize(f.Ctx, "snapshot:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshare snapshots failed: %s", err.Error())
@@ -548,6 +582,9 @@ func (f *FileShareSnapshotPortal) ListFileShareSnapshots() {
 }
 
 func (f *FileShareSnapshotPortal) GetFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":snapshotId")
 
 	result, err := db.C.GetFileShareSnapshot(c.GetContext(f.Ctx), id)
@@ -565,6 +602,9 @@ func (f *FileShareSnapshotPortal) GetFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) UpdateFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:update") {
+		return
+	}
 	var snapshot = model.FileShareSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -593,6 +633,9 @@ func (f *FileShareSnapshotPortal) UpdateFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:delete") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	id := f.Ctx.Input.Param(":snapshotId")
 
