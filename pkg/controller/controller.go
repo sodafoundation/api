@@ -965,7 +965,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	log.Info("controller server receive create file share acl request, vr =", opt)
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 
-	fileshare, err := db.C.GetFileShare(ctx, opt.FileShareId)
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
@@ -1003,7 +1003,7 @@ func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFil
 	log.Info("controller server receive create file share acl request, vr =", opt)
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 
-	fileshare, err := db.C.GetFileShare(ctx, opt.FileShareId)
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
