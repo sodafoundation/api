@@ -137,7 +137,7 @@ func (c *CIFS) allowAccess(shareID, accessTo, accessLevel string) (interface{}, 
 			"DOMAINTYPE": domain,
 		}
 
-		resp, err := c.request(url, "Post", data)
+		resp, err := c.request(url, "POST", data)
 		if err != nil {
 			return nil, err
 		}

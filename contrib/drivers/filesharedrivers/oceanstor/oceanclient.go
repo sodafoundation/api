@@ -225,29 +225,6 @@ func (c *Client) getFileSystemByName(name string) ([]FileSystemData, error) {
 	return fsList.Data, nil
 }
 
-func (c *Client) deleteFileSystem(name, poolID string) error {
-	data := map[string]interface{}{
-		"PARENTID":   poolID,
-		"NAME":       name,
-		"PARENTTYPE": 216,
-		"ALLOCTYPE":  1,
-	}
-
-	url := "/filesystem"
-	resp, err := c.request(url, "POST", data)
-	if err != nil {
-		return err
-	}
-
-	var fileSystem FileSystem
-
-	if err := handleReponse(resp, &fileSystem); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (c *Client) ListStoragePools() ([]StoragePool, error) {
 	resp, err := c.request("/storagepool", "GET", nil)
 	if err != nil {
@@ -331,7 +308,7 @@ func (c *Client) showFSSnapshot(snapID string) (*FSSnapshotData, error) {
 
 func (c *Client) getAllFilesystem() ([]FileSystemData, error) {
 	url := "/filesystem"
-	resp, err := c.request(url, "Get", nil)
+	resp, err := c.request(url, "GET", nil)
 	if err != nil {
 		return nil, err
 	}

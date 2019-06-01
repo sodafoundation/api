@@ -728,7 +728,7 @@ message DetachVolumeOpts {
     string context = 4;
 }
 
-// CreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+// DeleteFileShareAclOpts is a structure which indicates all required properties for creating a file share.
 message DeleteFileShareAclOpts {
     // The uuid of the file share, optional when creating.
     string id = 1;
@@ -737,11 +737,11 @@ message DeleteFileShareAclOpts {
     // The description
     string description = 3;
     // The type of access. Ex: IP based.
-    string type = 4
+    string type = 4;
     // The accessCapability for fileshare.
-    repeated string accessCapability = 5
+    repeated string accessCapability = 5;
     // accessTo of the fileshare.
-    repeated string accessTo = 6
+    string accessTo = 6;
     // The Serialized profile
     string profile = 7;
     // The driverName
@@ -763,11 +763,11 @@ message CreateFileShareAclOpts {
     // The description
     string description = 3;
     // The type of access. Ex: IP based.
-    string type = 4
+    string type = 4;
     // The accessCapability for fileshare.
-    repeated string accessCapability = 5
+    repeated string accessCapability = 5;
     // accessTo of the fileshare.
-    repeated string accessTo = 6
+    string accessTo = 6;
     // The Serialized profile
     string profile = 7;
     // The driverName

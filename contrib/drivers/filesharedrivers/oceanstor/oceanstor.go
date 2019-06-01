@@ -38,7 +38,7 @@ func (d *Driver) Setup() error {
 
 	var err error
 
-	d.IniConf()
+	d.InitConf()
 	cli, err := newRestCommon(d.Config)
 	if err != nil {
 		msg := fmt.Sprintf("get new client failed: %v", err)
@@ -52,7 +52,7 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-func (d *Driver) IniConf() {
+func (d *Driver) InitConf() {
 	path := config.CONF.OsdsDock.Backends.HuaweiOceanstor.ConfigPath
 	if path == "" {
 		path = DefaultConfPath
@@ -73,6 +73,7 @@ func (d *Driver) Unset() error {
 
 	return nil
 }
+
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
 	fsName := opt.GetName()
 	size := opt.GetSize()
@@ -202,8 +203,7 @@ func (d *Driver) createFileSystemIfNotExist(fsName, poolID string, size int64) (
 	if len(fsList) == 0 {
 		fs, err := d.createFileSystem(fsName, poolID, size)
 		if err != nil {
-			errDelete := d.deleteFileSystem(fsName, poolID)
-			fmt.Println("deleteFileSystem", errDelete)
+			d.DeleteFileSystem(fsName)
 			return nil, fmt.Errorf("create file system %s failed, %v", fsName, err)
 		}
 
@@ -244,7 +244,7 @@ func (d *Driver) checkFsStatus(fs *FileSystemData, poolID string) error {
 		case <-ticker.C:
 			fsStable, err = d.getFileSystem(fs.ID)
 			if err != nil {
-				d.deleteFileSystem(fs.Name, poolID)
+				d.DeleteFileSystem(fs.Name)
 				return fmt.Errorf("check file system status failed: %v", err)
 			}
 
@@ -253,7 +253,7 @@ func (d *Driver) checkFsStatus(fs *FileSystemData, poolID string) error {
 			}
 
 		case <-timeout:
-			d.deleteFileSystem(fs.Name, poolID)
+			d.DeleteFileSystem(fs.Name)
 			return fmt.Errorf("timeout occured waiting for checking file system status %s or invalid status health:%s, running:%s", fsStable.ID, fsStable.HealthStatus, fsStable.RunningStatus)
 		}
 	}
@@ -547,12 +547,10 @@ func (d *Driver) CreateFileShareAclParamCheck(opt *pb.CreateFileShareAclOpts) (s
 		return "", "", "", "", errors.New("only USER access type is allowed for CIFS shares")
 	}
 
-	accessToShares := opt.GetAccessTo()
-	if accessToShares == nil || len(accessToShares) == 0 {
+	accessTo := opt.GetAccessTo()
+	if accessTo == "" {
 		return "", "", "", "", errors.New("access client cannot be empty")
 	}
-
-	accessTo := accessToShares[0]
 
 	if shareProto == NFSProto && accessType == AccessTypeUser {
 		accessTo += "@"
@@ -595,7 +593,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.File
 		BaseModel: &model.BaseModel{
 			Id: opt.Id,
 		},
-		AccessTo: []string{accessTo},
+		AccessTo: accessTo,
 		Metadata: map[string]string{FileShareName: shareName},
 	}
 
@@ -694,9 +692,9 @@ func (d *Driver) DeleteFileShareAclParamCheck(opt *pb.DeleteFileShareAclOpts) (s
 	}
 
 	accessTo := opt.GetAccessTo()
-	if accessTo == nil || (accessTo != nil && len(accessTo) == 0) {
+	if accessTo == "" {
 		return "", "", "", errors.New("cannot find access client")
 	}
 
-	return fsName, shareProto, accessTo[0], nil
+	return fsName, shareProto, accessTo, nil
 }

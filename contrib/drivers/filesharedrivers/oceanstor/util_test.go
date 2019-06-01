@@ -190,3 +190,68 @@ func TestCheckProtocol(t *testing.T) {
 		assertTestResult(t, result, false)
 	})
 }
+
+func TestGetSharePath(t *testing.T) {
+	t.Run("get share path", func(t *testing.T) {
+		result := getSharePath("fileshare")
+		assertTestResult(t, result, "/fileshare/")
+	})
+}
+
+func TestCheckAccessLevel(t *testing.T) {
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessLevel("rr")
+		assertTestResult(t, result, false)
+	})
+
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessLevel("rw")
+		assertTestResult(t, result, true)
+	})
+
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessLevel("ro")
+		assertTestResult(t, result, true)
+	})
+}
+
+func TestCheckAccessType(t *testing.T) {
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessType("block")
+		assertTestResult(t, result, false)
+	})
+
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessType("ip")
+		assertTestResult(t, result, true)
+	})
+
+	t.Run("check access level", func(t *testing.T) {
+		result := checkAccessType("user")
+		assertTestResult(t, result, true)
+	})
+}
+
+func TestTryTimes(t *testing.T) {
+	t.Run("test try times", func(t *testing.T) {
+		f := func() error {
+			return nil
+		}
+		result := tryTimes(f)
+		assertTestResult(t, result, nil)
+	})
+}
+
+func TestSector2Gb(t *testing.T) {
+	t.Run("test sector to Gb", func(t *testing.T) {
+		result := Sector2Gb(12582912)
+		assertTestResult(t, result, int64(6))
+	})
+}
+
+func TestGb2Sector(t *testing.T) {
+	t.Run("test Gb to sector", func(t *testing.T) {
+		result := Gb2Sector(6)
+		assertTestResult(t, result, int64(12582912))
+	})
+}
