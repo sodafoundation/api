@@ -27,6 +27,7 @@ const (
 	LVMDriverType                 = "lvm"
 	HuaweiDoradoDriverType        = "huawei_dorado"
 	HuaweiFusionStorageDriverType = "huawei_fusionstorage"
+	HuaweiOceanFileDriverType     = "huawei_oceanstor"
 	HpeNimbleDriverType           = "hpe_nimble"
 	DRBDDriverType                = "drbd"
 )

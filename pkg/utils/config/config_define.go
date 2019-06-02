@@ -90,6 +90,7 @@ type Backends struct {
 	LVM                 BackendProperties `conf:"lvm"`
 	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
 	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
+	HuaweiOceanstor     BackendProperties `conf:"huawei_oceanstor"`
 	HpeNimble           BackendProperties `conf:"hpe_nimble"`
 	NFS                 BackendProperties `conf:"nfs"`
 }

@@ -925,7 +925,11 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	result.PoolId, result.ProfileId = opt.GetPoolId(), prf.Id
 
 	// Update the file share data in database.
-	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
+	// Update the file share data in database.
+	log.V(5).Infof("file share creation result is %v", result)
+	if err := db.C.UpdateStatus(ctx, result, model.FileShareAvailable); err != nil {
+		return nil, err
+	}
 
 	return pb.GenericResponseResult(result), nil
 }
@@ -989,7 +993,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
 	if err != nil {
 		// Change the status of the file share acl to error when the creation faild
-		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		defer db.UpdateFileShareStatus(ctx, db.C, fileshare.Id, model.FileShareError)
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
