@@ -99,7 +99,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
-		FileShareId:      result.FileShareId,
+		FileshareId:      result.FileShareId,
 		Description:      result.Description,
 		Type:             result.Type,
 		AccessCapability: result.AccessCapability,
@@ -383,7 +383,7 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 	}
 	defer f.CtrClient.Close()
 	opt := &pb.DeleteFileShareAclOpts{
-		FileShareId:      acl.FileShareId,
+		FileshareId:      acl.FileShareId,
 		Description:      acl.Description,
 		Type:             acl.Type,
 		AccessCapability: acl.AccessCapability,

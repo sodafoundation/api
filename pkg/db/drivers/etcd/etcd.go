@@ -503,13 +503,23 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	if fshare.Description != "" {
 		result.Description = fshare.Description
 	}
+	if fshare.ExportLocations != nil {
+		result.ExportLocations = fshare.ExportLocations
+	}
+	if fshare.Protocols != nil {
+		result.Protocols = fshare.Protocols
+	}
+	if fshare.Metadata != nil {
+		result.Metadata = fshare.Metadata
+	}
+
+	result.Status = fshare.Status
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
-	result.ExportLocations = fshare.ExportLocations
-	result.Status = fshare.Status
-	result.Metadata = fshare.Metadata
 	result.PoolId = fshare.PoolId
+
+	log.V(5).Infof("update file share object %+v into db", result)
 
 	body, err := json.Marshal(result)
 	if err != nil {

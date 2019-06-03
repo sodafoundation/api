@@ -113,7 +113,7 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var accessTo []string
+	var accessTo string
 	if "" != shareAclAccessTo {
 		err := json.Unmarshal([]byte(shareAclAccessTo), &accessTo)
 		if err != nil {

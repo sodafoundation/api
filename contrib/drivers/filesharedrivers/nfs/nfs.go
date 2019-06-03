@@ -23,6 +23,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -47,8 +48,6 @@ const (
 	KFileshareID       = "nfsFileshareID"
 	KFileshareSnapName = "snapshotName"
 	KFileshareSnapID   = "snapshotID"
-	AccessLevelRo      = "ro"
-	AccessLevelRw      = "rw"
 )
 
 type NFSConfig struct {
@@ -86,40 +85,39 @@ func (*Driver) Unset() error { return nil }
 
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
 	var access string
-	var accessTo []string
 	var accessCapability []string
 	// Get accessto list
-	accessTo = opt.GetAccessTo()
+	accessTo := opt.GetAccessTo()
 	// get accessCapability list
 	accessCapability = opt.GetAccessCapability()
 	// get fileshare name
-	fname := opt.GetMetadata()[KFileshareName]
+	fname := opt.Name
+
+	permissions := []string{"read", "write"}
 
 	for _, value := range accessCapability {
-		if value == "w" {
-			access = AccessLevelRw
-			break
+		value = strings.ToLower(value)
+		if utils.Contains(permissions, value) {
+			access += value[:1]
 		} else {
-			access = AccessLevelRo
+			log.Error("invalid permission:", value)
+			return nil, nil
 		}
 	}
 
-	for _, server := range accessTo {
-		err = d.cli.CreateAccess(server, access, fname)
-	}
+	err = d.cli.CreateAccess(accessTo, access, fname)
 	return fshare, nil
 }
 
 func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
-	var accessTo []string
+	var accessTo string
 	// Get accessto list
 	accessTo = opt.GetAccessTo()
 	// get fileshare name
-	fname := opt.GetMetadata()[KFileshareName]
+	fname := opt.Name
 
-	for _, server := range accessTo {
-		err = d.cli.DeleteAccess(server, fname)
-	}
+	err = d.cli.DeleteAccess(accessTo, fname)
+
 	return fshare, nil
 }
 
