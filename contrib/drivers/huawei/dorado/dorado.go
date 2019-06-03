@@ -307,7 +307,7 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 		return nil, err
 	}
 	connInfo := &model.ConnectionInfo{
-		DriverVolumeType: ISCSIProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
 			"targetIQN":        []string{tgtIqn},
@@ -342,15 +342,15 @@ func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) er
 	}
 	// the name format of there objects blow is: xxxPrefix + hostId
 	// the empty xxId means that the specified object has been removed already.
-	lunGrpId, err := d.client.FindLunGroup(LunGroupPrefix + hostId)
+	lunGrpId, err := d.client.FindLunGroup(PrefixLunGroup + hostId)
 	if err != nil && !IsNotFoundError(err) {
 		return err
 	}
-	hostGrpId, err := d.client.FindHostGroup(HostGroupPrefix + hostId)
+	hostGrpId, err := d.client.FindHostGroup(PrefixHostGroup + hostId)
 	if err != nil && !IsNotFoundError(err) {
 		return err
 	}
-	viewId, err := d.client.FindMappingView(MappingViewPrefix + hostId)
+	viewId, err := d.client.FindMappingView(PrefixMappingView + hostId)
 	if err != nil && !IsNotFoundError(err) {
 		return err
 	}
@@ -557,7 +557,7 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	}
 
 	fcInfo := &model.ConnectionInfo{
-		DriverVolumeType: FCProtocol,
+		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered":     true,
 			"target_wwn":           tgtPortWWNs,
@@ -737,15 +737,15 @@ func (d *Driver) getMappedInfo(hostName string) (string, string, string, string,
 		return "", "", "", "", err
 	}
 
-	lunGrpId, err := d.client.FindLunGroup(LunGroupPrefix + hostId)
+	lunGrpId, err := d.client.FindLunGroup(PrefixLunGroup + hostId)
 	if err != nil {
 		return "", "", "", "", err
 	}
-	hostGrpId, err := d.client.FindHostGroup(HostGroupPrefix + hostId)
+	hostGrpId, err := d.client.FindHostGroup(PrefixHostGroup + hostId)
 	if err != nil {
 		return "", "", "", "", err
 	}
-	viewId, err := d.client.FindMappingView(MappingViewPrefix + hostId)
+	viewId, err := d.client.FindMappingView(PrefixMappingView + hostId)
 	if err != nil {
 		return "", "", "", "", err
 	}

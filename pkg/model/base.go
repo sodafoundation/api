@@ -64,6 +64,11 @@ type DataStorageLoS struct {
 	IsSpaceEfficient bool `json:"isSpaceEfficient" yaml:"isSpaceEfficient,omitempty"`
 }
 
+func (ds DataStorageLoS) IsEmptyStorageAccessCapability() bool {
+	r := reflect.DeepEqual([]string{}, ds.StorageAccessCapability)
+	return r
+}
+
 func (ds DataStorageLoS) IsEmpty() bool {
 	r := reflect.DeepEqual(DataStorageLoS{}, ds)
 	return r

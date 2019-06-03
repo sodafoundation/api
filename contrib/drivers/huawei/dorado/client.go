@@ -26,6 +26,7 @@ import (
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
@@ -134,12 +135,13 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 	var b []byte
 	var err error
 	for i := 0; i < 2; i++ {
+		// For debugging
+		log.V(5).Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		b, _, err = c.doRequest(method, c.urlPrefix+url, in)
 		if err == nil {
 			break
-		} else {
-			log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		}
+		log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		if inErr, ok := err.(*ArrayInnerError); ok {
 			errCode := inErr.Err.Code
 			if errCode == ErrorConnectToServer || errCode == ErrorUnauthorizedToServer {
@@ -156,6 +158,8 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 	}
 
 	if out != nil {
+		// This will print tones of info, so set to level 8
+		log.V(8).Infof("Response Body: %s", string(b))
 		json.Unmarshal(b, out)
 	}
 	return nil
@@ -215,7 +219,7 @@ func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId
 		"NAME":        name,
 		"CAPACITY":    Gb2Sector(size),
 		"DESCRIPTION": desc,
-		"ALLOCTYPE":   1,
+		"ALLOCTYPE":   ThinLunType,
 		"PARENTID":    poolId,
 		"WRITEPOLICY": 1,
 	}
@@ -226,19 +230,12 @@ func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId
 
 func (c *DoradoClient) CreateLunCopy(name, srcid, tgtid, copyspeed string) (string, error) {
 	url := "/luncopy"
-	islegal := false
-	for _, x := range LunCopySpeedTypes {
-		if x == copyspeed {
-			islegal = true
-			break
-		}
-	}
-	if !islegal {
+	if !utils.Contains(LunCopySpeedTypes, copyspeed) {
 		log.Warningf("The copy speed %s is invalid, using Medium Speed instead", copyspeed)
 		copyspeed = LunCopySpeedMedium
 	}
 	data := map[string]interface{}{
-		"TYPE":        219,
+		"TYPE":        ObjectTypeLunCopy,
 		"NAME":        name,
 		"DESCRIPTION": name,
 		"COPYSPEED":   copyspeed,
@@ -266,7 +263,7 @@ func (c *DoradoClient) GetLunInfo(id string) (*Lun, error) {
 func (c *DoradoClient) StartLunCopy(luncopyid string) error {
 	url := "/LUNCOPY/start"
 	data := map[string]interface{}{
-		"TYPE": 219,
+		"TYPE": ObjectTypeLunCopy,
 		"ID":   luncopyid,
 	}
 	err := c.request("PUT", url, data, nil)
@@ -327,7 +324,7 @@ func (c *DoradoClient) CheckLunExist(id, wwn string) bool {
 
 func (c *DoradoClient) CreateSnapshot(lunId, name, desc string) (*Snapshot, error) {
 	data := map[string]interface{}{
-		"PARENTTYPE":  11,
+		"PARENTTYPE":  ObjectTypeLun,
 		"PARENTID":    lunId,
 		"NAME":        name,
 		"DESCRIPTION": desc,
@@ -525,7 +522,7 @@ func (c *DoradoClient) AddInitiatorToHost(hostId, initiatorName string) error {
 
 func (c *DoradoClient) AddHostToHostGroup(hostId string) (string, error) {
 
-	hostGrpName := HostGroupPrefix + hostId
+	hostGrpName := PrefixHostGroup + hostId
 	hostGrpId, err := c.CreateHostGroupWithCheck(hostGrpName)
 	if err != nil {
 		log.Errorf("Create host group witch check failed, host group id: %s, error: %v", hostGrpId, err)
@@ -630,7 +627,7 @@ func (c *DoradoClient) AssociateHostToHostGroup(hostGrpId, hostId string) error 
 
 	reqBody := map[string]interface{}{
 		"ID":               hostGrpId,
-		"ASSOCIATEOBJTYPE": "21",
+		"ASSOCIATEOBJTYPE": ObjectTypeHost,
 		"ASSOCIATEOBJID":   hostId,
 	}
 	resp := &GenericResult{}
@@ -654,7 +651,7 @@ func (c *DoradoClient) DoMapping(lunId, hostGrpId, hostId string) error {
 
 	var err error
 	// Find or create lun group and add lun into lun group.
-	lunGrpName := LunGroupPrefix + hostId
+	lunGrpName := PrefixLunGroup + hostId
 	lunGrpId, _ := c.FindLunGroup(lunGrpName)
 	if lunGrpId == "" {
 		lunGrpId, err = c.CreateLunGroup(lunGrpName)
@@ -671,7 +668,7 @@ func (c *DoradoClient) DoMapping(lunId, hostGrpId, hostId string) error {
 	}
 
 	// Find or create mapping view
-	mappingViewName := MappingViewPrefix + hostId
+	mappingViewName := PrefixMappingView + hostId
 	mappingViewId, _ := c.FindMappingView(mappingViewName)
 	if mappingViewId == "" {
 		mappingViewId, err = c.CreateMappingView(mappingViewName)
@@ -819,7 +816,7 @@ func (c *DoradoClient) AssociateLunToLunGroup(lunGrpId, lunId string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":               lunGrpId,
-		"ASSOCIATEOBJTYPE": "11",
+		"ASSOCIATEOBJTYPE": ObjectTypeLun,
 		"ASSOCIATEOBJID":   lunId,
 	}
 	resp := &GenericResult{}
@@ -861,7 +858,7 @@ func (c *DoradoClient) AssocateHostGroupToMappingView(viewId, groupId string) er
 
 	reqBody := map[string]interface{}{
 		"ID":               viewId,
-		"ASSOCIATEOBJTYPE": "14",
+		"ASSOCIATEOBJTYPE": ObjectTypeHostGroup,
 		"ASSOCIATEOBJID":   groupId,
 	}
 	resp := &GenericResult{}
@@ -902,7 +899,7 @@ func (c *DoradoClient) AssocateLunGroupToMappingView(viewId, groupId string) err
 
 	reqBody := map[string]interface{}{
 		"ID":               viewId,
-		"ASSOCIATEOBJTYPE": "256",
+		"ASSOCIATEOBJTYPE": ObjectTypeLunGroup,
 		"ASSOCIATEOBJID":   groupId,
 	}
 	resp := &GenericResult{}
@@ -985,9 +982,9 @@ func (c *DoradoClient) RemoveLunGroupFromMappingView(viewId, lunGrpId string) er
 	}
 	url := "/mappingview/REMOVE_ASSOCIATE"
 	data := map[string]interface{}{
-		"ASSOCIATEOBJTYPE": "256",
+		"ASSOCIATEOBJTYPE": ObjectTypeLunGroup,
 		"ASSOCIATEOBJID":   lunGrpId,
-		"TYPE":             "245",
+		"TYPE":             ObjectTypeMappingView,
 		"ID":               viewId}
 	if err := c.request("PUT", url, data, nil); err != nil {
 		log.Errorf("Remove lun group %s from mapping view %s failed", lunGrpId, viewId)
@@ -1004,9 +1001,9 @@ func (c *DoradoClient) RemoveHostGroupFromMappingView(viewId, hostGrpId string) 
 	}
 	url := "/mappingview/REMOVE_ASSOCIATE"
 	data := map[string]interface{}{
-		"ASSOCIATEOBJTYPE": "14",
+		"ASSOCIATEOBJTYPE": ObjectTypeHostGroup,
 		"ASSOCIATEOBJID":   hostGrpId,
-		"TYPE":             "245",
+		"TYPE":             ObjectTypeMappingView,
 		"ID":               viewId}
 	if err := c.request("PUT", url, data, nil); err != nil {
 		log.Errorf("Remove host group %s from mapping view %s failed", hostGrpId, viewId)
@@ -1031,8 +1028,7 @@ func (c *DoradoClient) RemoveHostFromHostGroup(hostGrpId, hostId string) error {
 func (c *DoradoClient) RemoveIscsiFromHost(initiator string) error {
 
 	url := "/iscsi_initiator/remove_iscsi_from_host"
-	data := map[string]interface{}{"TYPE": "222",
-		"ID": initiator}
+	data := map[string]interface{}{"TYPE": ObjectTypeIscsiInitiator, "ID": initiator}
 	if err := c.request("PUT", url, data, nil); err != nil {
 		log.Errorf("Remove initiator %s failed", initiator)
 		return err
@@ -1094,7 +1090,7 @@ func (c *DoradoClient) GetPair(id string) (*ReplicationPair, error) {
 }
 
 func (c *DoradoClient) SwitchPair(id string) error {
-	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/switch", data, nil)
 	if err != nil {
 		log.Errorf("Switch pair failed, %v", err)
@@ -1103,7 +1099,7 @@ func (c *DoradoClient) SwitchPair(id string) error {
 }
 
 func (c *DoradoClient) SplitPair(id string) error {
-	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/split", data, nil)
 	if err != nil {
 		log.Errorf("Split pair failed, %v", err)
@@ -1112,7 +1108,7 @@ func (c *DoradoClient) SplitPair(id string) error {
 }
 
 func (c *DoradoClient) SyncPair(id string) error {
-	data := map[string]interface{}{"ID": id, "TYPE": "263"}
+	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/sync", data, nil)
 	if err != nil {
 		log.Errorf("Sync pair failed, %v", err)
@@ -1139,8 +1135,6 @@ func (c *DoradoClient) CheckPairExist(id string) bool {
 	return err == nil
 }
 
-const FC_INIT_ONLINE = "27"
-
 func (c *DoradoClient) GetHostOnlineFCInitiators(hostId string) ([]string, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/fc_initiator?PARENTTYPE=21&PARENTID=%s", hostId)
@@ -1152,7 +1146,7 @@ func (c *DoradoClient) GetHostOnlineFCInitiators(hostId string) ([]string, error
 	var initiators []string
 	if len(resp.Data) > 0 {
 		for _, item := range resp.Data {
-			if item.ParentId != "" && item.ParentId == hostId && item.RunningStatus == FC_INIT_ONLINE {
+			if item.ParentId != "" && item.ParentId == hostId && item.RunningStatus == RunningStatusOnline {
 				initiators = append(initiators, item.Id)
 			}
 		}
@@ -1172,7 +1166,7 @@ func (c *DoradoClient) GetOnlineFreeWWNs() ([]string, error) {
 	var wwns []string
 	if len(resp.Data) > 0 {
 		for _, item := range resp.Data {
-			if item.RunningStatus == FC_INIT_ONLINE {
+			if item.RunningStatus == RunningStatusOnline {
 				wwns = append(wwns, item.Id)
 			}
 		}
@@ -1192,7 +1186,7 @@ func (c *DoradoClient) GetOnlineFCInitiatorOnArray() ([]string, error) {
 
 	var fcInitiators []string
 	for _, item := range resp.Data {
-		if item.RunningStatus == FC_INIT_ONLINE {
+		if item.RunningStatus == RunningStatusOnline {
 			fcInitiators = append(fcInitiators, item.Id)
 		}
 	}
@@ -1263,9 +1257,9 @@ func (c *DoradoClient) RemoveHost(hostId string) error {
 func (c *DoradoClient) AddFCPortTohost(hostId string, wwn string) error {
 	url := fmt.Sprintf("/fc_initiator/%s", wwn)
 	data := map[string]interface{}{
-		"TYPE":       "223",
+		"TYPE":       ObjectTypeFcInitiator,
 		"ID":         wwn,
-		"PARENTTYPE": "21",
+		"PARENTTYPE": ObjectTypeHost,
 		"PARENTID":   hostId,
 	}
 
@@ -1338,7 +1332,7 @@ func (c *DoradoClient) getFCTargetWWPNs(wwn string) ([]string, error) {
 func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string) (int, error) {
 	// Get obj count associated to the lungroup.
 	var cmdType string
-	if lunType == LunType {
+	if lunType == ObjectTypeLun {
 		cmdType = "lun"
 	} else {
 		cmdType = "snapshot"
@@ -1350,7 +1344,7 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 		log.Errorf("Get Obj count from lungroup by type failed.")
 		return 0, err
 	}
-	if resp.Error.Code == ObjectUnavailable {
+	if resp.Error.Code == ErrorObjectUnavailable {
 		log.Errorf("LUN group %s not exist.", lunGroupId)
 		return 0, nil
 	}
@@ -1358,19 +1352,12 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 	return count, nil
 }
 
-var (
-	LunType           = "11"
-	SnapshotType      = "27"
-	ObjectUnavailable = 1077948996
-	HostGroupNotExist = 1077937500
-)
-
 func (c *DoradoClient) getObjectCountFromLungroup(lunGrpId string) (int, error) {
-	lunCount, err := c.getObjCountFromLungroupByType(lunGrpId, LunType)
+	lunCount, err := c.getObjCountFromLungroupByType(lunGrpId, ObjectTypeLun)
 	if err != nil {
 		return 0, nil
 	}
-	snapshotCount, err := c.getObjCountFromLungroupByType(lunGrpId, SnapshotType)
+	snapshotCount, err := c.getObjCountFromLungroupByType(lunGrpId, ObjectTypeSnapshot)
 	if err != nil {
 		return 0, nil
 	}
@@ -1391,7 +1378,7 @@ func (c *DoradoClient) getHostGroupNumFromHost(hostId string) (int, error) {
 
 func (c *DoradoClient) removeFCFromHost(wwn string) error {
 	data := map[string]interface{}{
-		"TYPE": "223",
+		"TYPE": ObjectTypeFcInitiator,
 		"ID":   wwn,
 	}
 
@@ -1419,7 +1406,7 @@ func (c *DoradoClient) getHostsInHostgroup(hostGrpId string) ([]Host, error) {
 	}
 
 	var tempHosts = []Host{}
-	if resp.Error.Code == HostGroupNotExist {
+	if resp.Error.Code == ErrorHostGroupNotExist {
 		log.Errorf("Host group %s not exist", hostGrpId)
 		return tempHosts, nil
 	}
@@ -1453,4 +1440,35 @@ func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, err
 	}
 
 	return false, nil
+}
+
+func (c *DoradoClient) ListControllers() ([]SimpleStruct, error) {
+	resp := &SimpleResp{}
+	err := c.request("GET", "/controller", nil, resp)
+	return resp.Data, err
+}
+
+func (c *DoradoClient) GetPerformance(resId string, dataIdList []string) (map[string]string, error) {
+	perf := &PerformancesResp{}
+	url := fmt.Sprintf("/performace_statistic/cur_statistic_data/"+
+		"?CMO_STATISTIC_UUID=%s&CMO_STATISTIC_DATA_ID_LIST=%s", resId, strings.Join(dataIdList, ","))
+	if err := c.request("GET", url, nil, perf); err != nil {
+		return nil, err
+	}
+	if len(perf.Data) == 0 {
+		return nil, fmt.Errorf("got empty performance data")
+	}
+
+	dataList := strings.Split(perf.Data[0].DataList, ",")
+	idList := strings.Split(perf.Data[0].DataIdList, ",")
+	if len(dataList) != len(idList) {
+		return nil, fmt.Errorf("wrong response data, data id list length does not equal to data length")
+	}
+
+	perfMap := map[string]string{}
+	for i, id := range idList {
+		perfMap[id] = dataList[i]
+	}
+
+	return perfMap, nil
 }

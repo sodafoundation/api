@@ -22,11 +22,8 @@ package model
 type CollectMetricSpec struct {
 	*BaseModel
 
-	// the instance on which the metrics are to be collected
-	InstanceId string `json:"instanceId,omitempty"`
-
-	// the list of metrics to be collected
-	Metrics []string `json:"metrics,omitempty"`
+	// the storage type(driver type) on which the metrics are to be collected
+	DriverType string `json:"driverType,omitempty"`
 }
 
 type GetMetricSpec struct {
@@ -44,58 +41,38 @@ type GetMetricSpec struct {
 }
 
 type MetricSpec struct {
-	// Following are the labels associated with Metric, same as Prometheus labels
-
-	//Example: {device="dm-0",instance="121.244.95.60:12419",job="prometheus"}
+	/* Following are the fields used to form name and labels associated with a Metric, same as Prometheus guage name and labels
+	Example: node_disk_read_bytes_total{device="dm-0",instance="121.244.95.60:12419",job="prometheus"}
+	guage name can be formed by appending Job_Component_Name_Unit_AggrType */
 
 	// Instance ID -\> volumeID/NodeID
-
 	InstanceID string `json:"instanceID,omitempty"`
 
 	// instance name -\> volume name / node name etc.
-
 	InstanceName string `json:"instanceName,omitempty"`
 
 	// job -\> Prometheus/openSDS
-
 	Job string `json:"job,omitempty"`
 
-	/*associator - Some metric would need specific fields to relate components.
-
-	  Use case could be to query volumes of a particular pool. Attaching the related
-
-	  components as labels would help us to form promQl query efficiently.
-	  Example: node_disk_read_bytes_total{instance="121.244.95.60"}
-	  Above query will respond with all disks associated with node 121.244.95.60
-	  Since associated components vary, we will keep a map in metric struct to denote
-	  the associated component type as key and component name as value
-	  Example: associator[pool]=pool1 */
-
+	/*Labels - There can be multiple componets/properties  associated with a metric , these are catured using this map
+	  Example: Labels[pool]="pool1";Labels[device]="dm-0" */
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Following fields can be used to form a unique metric name
-
 	// component -\> disk/logicalVolume/VG etc
-
 	Component string `json:"component,omitempty"`
 
 	// name -\> metric name -\> readRequests/WriteRequests/Latency etc
-
 	Name string `json:"name,omitempty"`
 
 	// unit -\> seconds/bytes/MBs etc
-
 	Unit string `json:"unit,omitempty"`
 
 	// Can be used to determine Total/Avg etc
 	AggrType string `json:"aggrType,omitempty"`
 
 	/*If isAggregated ='True' then type of aggregation can be set in this field
-
 	  ie:- if collector is aggregating some metrics and producing a new metric of
-
 	  higher level constructs, then this field can be set as 'Total' to indicate it is
-
 	  aggregated/derived from other metrics.*/
 
 	MetricValues []*Metric `json:"metricValues,omitempty"`
@@ -104,4 +81,11 @@ type MetricSpec struct {
 type Metric struct {
 	Timestamp int64   `json:"timestamp,omitempty"`
 	Value     float64 `json:"value,omitempty"`
+}
+
+type NoParam struct{}
+
+type UrlSpec struct {
+	Name string `json:"name,omitempty"`
+	Url  string `json:"url,omitempty"`
 }

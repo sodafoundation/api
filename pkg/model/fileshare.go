@@ -18,6 +18,36 @@ This module implements the common data structure.
 */
 package model
 
+type FileShareAclSpec struct {
+	*BaseModel
+
+	// The uuid of the project that the fileshare belongs to.
+	TenantId string `json:"tenantId,omitempty"`
+
+	// The uuid of the fileshare.
+	FileShareId string `json:"fileshareId,omitempty"`
+
+	// The type of access. Ex: IP based.
+	Type string `json:"type,omitempty"`
+
+	// The accessCapability for fileshare.
+	AccessCapability []string `json:"accessCapability,omitempty"`
+
+	// accessTo of the fileshare.
+	AccessTo string `json:"accessTo,omitempty"`
+
+	// The description of the fileshare acl.
+	Description string `json:"description,omitempty"`
+
+	// The uuid of the profile which the fileshare belongs to.
+	ProfileId string `json:"profileId,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
+}
+
 // FileShareSpec is a schema for fileshare API. Fileshare will be created on some backend
 // and can be shared among multiple users.
 
@@ -63,6 +93,11 @@ type FileShareSpec struct {
 
 	// ExportLocations of the fileshare.
 	ExportLocations []string `json:"exportLocations,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // FileShareSnapshotSpec is a description of fileshare snapshot resource.
@@ -82,9 +117,6 @@ type FileShareSnapshotSpec struct {
 	// The name of the fileshare snapshot.
 	Name string `json:"name,omitempty"`
 
-	// The protocol of the fileshare. e.g NFS, SMB etc.
-	Protocols []string `json:"protocols,omitempty"`
-
 	// The description of the fileshare snapshot.
 	// +optional
 	Description string `json:"description,omitempty"`
@@ -99,4 +131,12 @@ type FileShareSnapshotSpec struct {
 	// The status of the fileshare snapshot.
 	// One of: "available", "error", etc.
 	Status string `json:"status,omitempty"`
+
+	// The uuid of the profile which the fileshare belongs to.
+	ProfileId string `json:"profileId,omitempty"`
+
+	// Metadata should be kept until the scemantics between opensds fileshare
+	// and backend storage resouce description are clear.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty"`
 }

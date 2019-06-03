@@ -1,0 +1,20 @@
+authOptions:
+  endpoints: https://172.16.0.250:5392/v1
+  username: admin
+  password: admin
+  insecure: true
+
+
+pool:
+  test01:
+    storageType: block
+    availabilityZone: vnimble01
+    extras:
+      ioConnectivity:
+        accessProtocol: fibre_channel
+  default:
+    storageType: block
+    availabilityZone: vnimble01
+    extras:
+      ioConnectivity:
+        accessProtocol: iscsi

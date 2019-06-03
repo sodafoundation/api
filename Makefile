@@ -20,30 +20,35 @@ VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
 		 --always --dirty --abbrev=8)
 BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
 
+PROTOC_VERSION ?= 3.8.0
+
 all: build
 
 ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsapiserver osdsctl
+build: prebuild osdsdock osdslet osdsapiserver osdsctl metricexporter
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
 
-.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
+.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
 
-osdsdock: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+osdsdock:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
-osdslet: prebuild
-	go build -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+osdslet:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
-osdsapiserver: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+osdsapiserver:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
-osdsctl: prebuild
-	go build -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+osdsctl:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+
+metricexporter:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/contrib/exporters/lvm_exporter
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
@@ -56,7 +61,17 @@ docker: build
 test: build
 	install/CI/test
 
-protoc:
+protoc_precheck:
+	@if ! which protoc >/dev/null; then\
+		echo "No protoc in $(PATH), consider visiting https://github.com/protocolbuffers/protobuf/releases to get the protoc(version $(PROTOC_VERSION))";\
+		exit 1;\
+	fi;
+	@if [ ! "libprotoc $(PROTOC_VERSION)" = "$(shell protoc --version)" ]; then\
+		echo "protoc version should be $(PROTOC_VERSION)";\
+		exit 1;\
+	fi
+
+protoc: protoc_precheck
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
 
 goimports:

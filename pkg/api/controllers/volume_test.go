@@ -69,6 +69,7 @@ func NewFakeVolumePortal() *VolumePortal {
 		Id:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		Size:    int64(20),
 		Context: c.NewAdminContext().ToJson(),
+		Profile: SampleProfiles[0].ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
 		Context: c.NewAdminContext().ToJson(),

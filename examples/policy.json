@@ -46,5 +46,20 @@
   "volume_group:get": "rule:admin_or_owner",
   "volume_group:update": "rule:admin_or_owner",
   "volume_group:delete": "rule:admin_or_owner",
-  "availability_zone:list":""
+  "availability_zone:list":"",
+  "metrics:get": "rule:admin_or_owner",
+  "metrics:collect": "rule:admin_or_owner",
+  "metrics:uploadconf": "rule:admin_api",
+  "metrics:downloadconf": "rule:admin_api",
+  "metrics:urls": "rule:admin_or_owner",
+  "fileshare:create": "rule:admin_or_owner",
+  "fileshare:delete": "rule:admin_or_owner",
+  "fileshare:list": "rule:admin_or_owner",
+  "fileshare:get": "rule:admin_or_owner",
+  "fileshare:update": "rule:admin_or_owner",
+  "fileshareacl:create": "rule:admin_or_owner",
+  "fileshareacl:delete": "rule:admin_or_owner",
+  "fileshareacl:list": "rule:admin_or_owner",
+  "fileshareacl:get": "rule:admin_or_owner",
+  "fileshareacl:update": "rule:admin_or_owner"
 }

@@ -56,21 +56,20 @@ var BackupExtension string
 
 func init() {
 
-	// TODO Prakash read these from conf and save to these variables
-	ReloadPath = "/-/reload"
+	ReloadPath = CONF.OsdsApiServer.ConfReloadUrl
 	BackupExtension = ".bak"
 
-	PrometheusConfHome = "/etc/prometheus/"
-	PrometheusUrl = "http://localhost:9090"
-	PrometheusConfFile = "prometheus.yml"
+	PrometheusConfHome = CONF.OsdsApiServer.PrometheusConfHome
+	PrometheusUrl = CONF.OsdsApiServer.PrometheusUrl
+	PrometheusConfFile = CONF.OsdsApiServer.PrometheusConfFile
 
-	AlertmgrConfHome = "/root/alertmanager-0.16.2.linux-amd64/"
-	AlertmgrUrl = "http://localhost:9093"
-	AlertmgrConfFile = "alertmanager.yml"
+	AlertmgrConfHome = CONF.OsdsApiServer.AlertmgrConfHome
+	AlertmgrUrl = CONF.OsdsApiServer.AlertMgrUrl
+	AlertmgrConfFile = CONF.OsdsApiServer.AlertmgrConfFile
 
-	GrafanaConfHome = "/etc/grafana/"
-	GrafanaRestartCmd = "grafana-server"
-	GrafanaConfFile = "grafana.ini"
+	GrafanaConfHome = CONF.OsdsApiServer.GrafanaConfHome
+	GrafanaRestartCmd = CONF.OsdsApiServer.GrafanaRestartCmd
+	GrafanaConfFile = CONF.OsdsApiServer.GrafanaConfFile
 }
 
 func NewMetricsPortal() *MetricsPortal {
@@ -128,6 +127,9 @@ func (m *MetricsPortal) GetMetrics() {
 
 func (m *MetricsPortal) UploadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:uploadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -212,6 +214,9 @@ func DoUpload(metricsPortal *MetricsPortal, confHome string, url string, reloadP
 
 func (m *MetricsPortal) DownloadConfFile() {
 
+	if !policy.Authorize(m.Ctx, "metrics:downloadconf") {
+		return
+	}
 	params, _ := m.GetParameters()
 	confType := params["conftype"][0]
 
@@ -237,4 +242,69 @@ func DoDownload(metricsPortal *MetricsPortal, confHome string, confFile string) 
 	}
 	// file exists, download it
 	metricsPortal.Ctx.Output.Download(path, path)
+}
+
+func (m *MetricsPortal) CollectMetrics() {
+	if !policy.Authorize(m.Ctx, "metrics:collect") {
+		return
+	}
+	ctx := c.GetContext(m.Ctx)
+	var collMetricSpec = model.CollectMetricSpec{
+		BaseModel: &model.BaseModel{},
+	}
+
+	// Unmarshal the request body
+	if err := json.NewDecoder(m.Ctx.Request.Body).Decode(&collMetricSpec); err != nil {
+		errMsg := fmt.Sprintf("parse collect metric request body failed: %s", err.Error())
+		m.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	// connect to the dock to collect metrics from the driver
+	if err := m.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Errorf("error when connecting controller client: %s", err.Error())
+		return
+	}
+	defer m.CtrClient.Close()
+
+	opt := &pb.CollectMetricsOpts{
+		DriverName: collMetricSpec.DriverType,
+		Context:    ctx.ToJson(),
+	}
+
+	res, err := m.CtrClient.CollectMetrics(context.Background(), opt)
+
+	if err != nil {
+		log.Errorf("collect metrics failed in controller service: %s", err.Error())
+		return
+	}
+
+	body, _ := json.Marshal(res)
+	m.SuccessHandle(StatusOK, body)
+
+	return
+}
+
+func (m *MetricsPortal) GetUrls() {
+	if !policy.Authorize(m.Ctx, "metrics:urls") {
+		return
+	}
+
+	if err := m.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer m.CtrClient.Close()
+
+	opt := &pb.NoParams{}
+	res, err := m.CtrClient.GetUrls(context.Background(), opt)
+
+	if err != nil {
+		log.Error("get urls failed in controller service:", err)
+		return
+	}
+
+	m.SuccessHandle(StatusOK, []byte(res.GetResult().GetMessage()))
+
+	return
 }

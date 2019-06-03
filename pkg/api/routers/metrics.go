@@ -16,6 +16,7 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
+
 	"github.com/opensds/opensds/pkg/api/controllers"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
@@ -24,14 +25,16 @@ func init() {
 
 	// add router for metric api
 	metricns :=
-		beego.NewNamespace("/"+constants.APIVersion+":tenantId/metrics",
+		beego.NewNamespace("/"+constants.APIVersion+"/:tenantId/metrics",
 
 			// All operations of metrics can be used for both admin and users.
-			beego.NSRouter("/", controllers.NewMetricsPortal(), "get:GetMetrics"),
+			beego.NSRouter("/", controllers.NewMetricsPortal(), "post:CollectMetrics;get:GetMetrics"),
 
 			// All operations of file can be used for both admin and users.
 			beego.NSRouter("/uploadconf", controllers.NewMetricsPortal(), "post:UploadConfFile"),
 			beego.NSRouter("/downloadconf", controllers.NewMetricsPortal(), "get:DownloadConfFile"),
+
+			beego.NSRouter("/urls", controllers.NewMetricsPortal(), "get:GetUrls"),
 		)
 	beego.AddNamespace(metricns)
 }

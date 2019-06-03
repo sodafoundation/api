@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright (c) 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,12 @@ split_line(){
     echo "================================================================================================"
 }
 
+# Start the openapi-spec validation.
+split_line "Start openapi-spec validation"
+wget https://github.com/go-swagger/go-swagger/releases/download/v0.19.0/swagger_linux_amd64
+chmod +x ./swagger_linux_amd64 && ./swagger_linux_amd64 validate --stop-on-error openapi-spec/swagger.yaml
+rm ./swagger_linux_amd64
+
 # Start unit test.
 split_line "Start unit test"
 go test -v github.com/opensds/opensds/osdsctl/... -cover
@@ -48,6 +54,6 @@ go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
 # Start lvm e2e flow test
 split_line "Start lvm e2e flow test"
-go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/ 
+go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
 sudo $OPENSDS_DIR/install/devsds/uninstall.sh

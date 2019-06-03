@@ -6,10 +6,11 @@ package proto
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2646,6 +2647,714 @@ func (m *DetachVolumeOpts) GetContext() string {
 	return ""
 }
 
+// DreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+type DeleteFileShareAclOpts struct {
+	// The uuid of the file share, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The fileshareId
+	FileshareId string `protobuf:"bytes,2,opt,name=fileshareId,proto3" json:"fileshareId,omitempty"`
+	// The description
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// The type of access. Ex: IP based.
+	Type string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	// The accessCapability for fileshare.
+	AccessCapability []string `protobuf:"bytes,5,rep,name=accessCapability,proto3" json:"accessCapability,omitempty"`
+	// accessTo of the fileshare.
+	AccessTo string `protobuf:"bytes,6,opt,name=accessTo,proto3" json:"accessTo,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,7,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The driverName
+	DriverName string `protobuf:"bytes,8,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,9,opt,name=context,proto3" json:"context,omitempty"`
+	// The Name
+	Name string `protobuf:"bytes,10,opt,name=Name,proto3" json:"Name,omitempty"`
+	// The metadata of the file share, optional.
+	Metadata             map[string]string `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *DeleteFileShareAclOpts) Reset()         { *m = DeleteFileShareAclOpts{} }
+func (m *DeleteFileShareAclOpts) String() string { return proto.CompactTextString(m) }
+func (*DeleteFileShareAclOpts) ProtoMessage()    {}
+func (*DeleteFileShareAclOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{21}
+}
+
+func (m *DeleteFileShareAclOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteFileShareAclOpts.Unmarshal(m, b)
+}
+func (m *DeleteFileShareAclOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteFileShareAclOpts.Marshal(b, m, deterministic)
+}
+func (m *DeleteFileShareAclOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteFileShareAclOpts.Merge(m, src)
+}
+func (m *DeleteFileShareAclOpts) XXX_Size() int {
+	return xxx_messageInfo_DeleteFileShareAclOpts.Size(m)
+}
+func (m *DeleteFileShareAclOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteFileShareAclOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteFileShareAclOpts proto.InternalMessageInfo
+
+func (m *DeleteFileShareAclOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetFileshareId() string {
+	if m != nil {
+		return m.FileshareId
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetAccessCapability() []string {
+	if m != nil {
+		return m.AccessCapability
+	}
+	return nil
+}
+
+func (m *DeleteFileShareAclOpts) GetAccessTo() string {
+	if m != nil {
+		return m.AccessTo
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DeleteFileShareAclOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// CreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+type CreateFileShareAclOpts struct {
+	// The uuid of the file share, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The fileshareId
+	FileshareId string `protobuf:"bytes,2,opt,name=fileshareId,proto3" json:"fileshareId,omitempty"`
+	// The description
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// The type of access. Ex: IP based.
+	Type string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	// The accessCapability for fileshare.
+	AccessCapability []string `protobuf:"bytes,5,rep,name=accessCapability,proto3" json:"accessCapability,omitempty"`
+	// accessTo of the fileshare.
+	AccessTo string `protobuf:"bytes,6,opt,name=accessTo,proto3" json:"accessTo,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,7,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The driverName
+	DriverName string `protobuf:"bytes,8,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,9,opt,name=context,proto3" json:"context,omitempty"`
+	// The Name
+	Name string `protobuf:"bytes,10,opt,name=Name,proto3" json:"Name,omitempty"`
+	// The metadata of the file share, optional.
+	Metadata             map[string]string `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *CreateFileShareAclOpts) Reset()         { *m = CreateFileShareAclOpts{} }
+func (m *CreateFileShareAclOpts) String() string { return proto.CompactTextString(m) }
+func (*CreateFileShareAclOpts) ProtoMessage()    {}
+func (*CreateFileShareAclOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{22}
+}
+
+func (m *CreateFileShareAclOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateFileShareAclOpts.Unmarshal(m, b)
+}
+func (m *CreateFileShareAclOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateFileShareAclOpts.Marshal(b, m, deterministic)
+}
+func (m *CreateFileShareAclOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateFileShareAclOpts.Merge(m, src)
+}
+func (m *CreateFileShareAclOpts) XXX_Size() int {
+	return xxx_messageInfo_CreateFileShareAclOpts.Size(m)
+}
+func (m *CreateFileShareAclOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateFileShareAclOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateFileShareAclOpts proto.InternalMessageInfo
+
+func (m *CreateFileShareAclOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetFileshareId() string {
+	if m != nil {
+		return m.FileshareId
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetAccessCapability() []string {
+	if m != nil {
+		return m.AccessCapability
+	}
+	return nil
+}
+
+func (m *CreateFileShareAclOpts) GetAccessTo() string {
+	if m != nil {
+		return m.AccessTo
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateFileShareAclOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// CreateFileShareOpts is a structure which indicates all required properties for creating a file share.
+type CreateFileShareOpts struct {
+	// The uuid of the file share, optional when creating.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The name of the file share, required.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// The requested capacity of the file share, required.
+	Size int64 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	// The description of the file share, optional.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// The locality that file share belongs to, required.
+	AvailabilityZone string `protobuf:"bytes,6,opt,name=availabilityZone,proto3" json:"availabilityZone,omitempty"`
+	// The uuid of the pool on which file share will be created, required.
+	PoolId string `protobuf:"bytes,8,opt,name=poolId,proto3" json:"poolId,omitempty"`
+	// The name of the pool on which file share will be created, required.
+	PoolName string `protobuf:"bytes,9,opt,name=poolName,proto3" json:"poolName,omitempty"`
+	// The metadata of the file share, optional.
+	Metadata map[string]string `protobuf:"bytes,10,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,11,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,12,opt,name=context,proto3" json:"context,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,13,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The ExportLocations
+	ExportLocations      []string `protobuf:"bytes,14,rep,name=exportLocations,proto3" json:"exportLocations,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CreateFileShareOpts) Reset()         { *m = CreateFileShareOpts{} }
+func (m *CreateFileShareOpts) String() string { return proto.CompactTextString(m) }
+func (*CreateFileShareOpts) ProtoMessage()    {}
+func (*CreateFileShareOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{23}
+}
+
+func (m *CreateFileShareOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateFileShareOpts.Unmarshal(m, b)
+}
+func (m *CreateFileShareOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateFileShareOpts.Marshal(b, m, deterministic)
+}
+func (m *CreateFileShareOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateFileShareOpts.Merge(m, src)
+}
+func (m *CreateFileShareOpts) XXX_Size() int {
+	return xxx_messageInfo_CreateFileShareOpts.Size(m)
+}
+func (m *CreateFileShareOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateFileShareOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateFileShareOpts proto.InternalMessageInfo
+
+func (m *CreateFileShareOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetSize() int64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *CreateFileShareOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetAvailabilityZone() string {
+	if m != nil {
+		return m.AvailabilityZone
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetPoolName() string {
+	if m != nil {
+		return m.PoolName
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *CreateFileShareOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *CreateFileShareOpts) GetExportLocations() []string {
+	if m != nil {
+		return m.ExportLocations
+	}
+	return nil
+}
+
+// DeleteFileShareOpts is a structure which indicates all required properties
+// for deleting a file share.
+type DeleteFileShareOpts struct {
+	// The uuid of the fileshare, required.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The uuid of the pool on which fileshare will be created, required.
+	PoolId string `protobuf:"bytes,3,opt,name=poolId,proto3" json:"poolId,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,5,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,6,opt,name=context,proto3" json:"context,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,7,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The name of fileShare
+	Name string `protobuf:"bytes,8,opt,name=name,proto3" json:"name,omitempty"`
+	// The name of pool
+	Poolname             string   `protobuf:"bytes,9,opt,name=poolname,proto3" json:"poolname,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteFileShareOpts) Reset()         { *m = DeleteFileShareOpts{} }
+func (m *DeleteFileShareOpts) String() string { return proto.CompactTextString(m) }
+func (*DeleteFileShareOpts) ProtoMessage()    {}
+func (*DeleteFileShareOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{24}
+}
+
+func (m *DeleteFileShareOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteFileShareOpts.Unmarshal(m, b)
+}
+func (m *DeleteFileShareOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteFileShareOpts.Marshal(b, m, deterministic)
+}
+func (m *DeleteFileShareOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteFileShareOpts.Merge(m, src)
+}
+func (m *DeleteFileShareOpts) XXX_Size() int {
+	return xxx_messageInfo_DeleteFileShareOpts.Size(m)
+}
+func (m *DeleteFileShareOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteFileShareOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteFileShareOpts proto.InternalMessageInfo
+
+func (m *DeleteFileShareOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetPoolId() string {
+	if m != nil {
+		return m.PoolId
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *DeleteFileShareOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DeleteFileShareOpts) GetPoolname() string {
+	if m != nil {
+		return m.Poolname
+	}
+	return ""
+}
+
+// CreateFileShareSnapshotOpts is a structure which indicates all required
+// properties for creating a file share snapshot.
+type CreateFileShareSnapshotOpts struct {
+	// The uuid of the file share snapshot, optional.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The name of the file share snapshot, required.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// The size of the file share that snapshot belongs to, required.
+	Size int64 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	// The description of the file share snapshot, optional.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// The uuid of the file share that snapshot belongs to, required.
+	FileshareId string `protobuf:"bytes,5,opt,name=fileshareId,proto3" json:"fileshareId,omitempty"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,6,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,7,opt,name=context,proto3" json:"context,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,8,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata             map[string]string `protobuf:"bytes,9,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *CreateFileShareSnapshotOpts) Reset()         { *m = CreateFileShareSnapshotOpts{} }
+func (m *CreateFileShareSnapshotOpts) String() string { return proto.CompactTextString(m) }
+func (*CreateFileShareSnapshotOpts) ProtoMessage()    {}
+func (*CreateFileShareSnapshotOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{25}
+}
+
+func (m *CreateFileShareSnapshotOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateFileShareSnapshotOpts.Unmarshal(m, b)
+}
+func (m *CreateFileShareSnapshotOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateFileShareSnapshotOpts.Marshal(b, m, deterministic)
+}
+func (m *CreateFileShareSnapshotOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateFileShareSnapshotOpts.Merge(m, src)
+}
+func (m *CreateFileShareSnapshotOpts) XXX_Size() int {
+	return xxx_messageInfo_CreateFileShareSnapshotOpts.Size(m)
+}
+func (m *CreateFileShareSnapshotOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateFileShareSnapshotOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateFileShareSnapshotOpts proto.InternalMessageInfo
+
+func (m *CreateFileShareSnapshotOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetSize() int64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
+func (m *CreateFileShareSnapshotOpts) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetFileshareId() string {
+	if m != nil {
+		return m.FileshareId
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *CreateFileShareSnapshotOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+// DeleteFileShareSnapshotOpts is a structure which indicates all required
+// properties for deleting a file share snapshot.
+type DeleteFileShareSnapshotOpts struct {
+	// The uuid of the file share snapshot, required.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The uuid of the file share that snapshot belongs to, required.
+	FileshareId string `protobuf:"bytes,2,opt,name=fileshareId,proto3" json:"fileshareId,omitempty"`
+	// The storage driver type.
+	DriverName string `protobuf:"bytes,3,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	// The Context
+	Context string `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
+	// The Serialized profile
+	Profile string `protobuf:"bytes,5,opt,name=profile,proto3" json:"profile,omitempty"`
+	// The metadata of the fileshare, optional.
+	Metadata             map[string]string `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *DeleteFileShareSnapshotOpts) Reset()         { *m = DeleteFileShareSnapshotOpts{} }
+func (m *DeleteFileShareSnapshotOpts) String() string { return proto.CompactTextString(m) }
+func (*DeleteFileShareSnapshotOpts) ProtoMessage()    {}
+func (*DeleteFileShareSnapshotOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{26}
+}
+
+func (m *DeleteFileShareSnapshotOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteFileShareSnapshotOpts.Unmarshal(m, b)
+}
+func (m *DeleteFileShareSnapshotOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteFileShareSnapshotOpts.Marshal(b, m, deterministic)
+}
+func (m *DeleteFileShareSnapshotOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteFileShareSnapshotOpts.Merge(m, src)
+}
+func (m *DeleteFileShareSnapshotOpts) XXX_Size() int {
+	return xxx_messageInfo_DeleteFileShareSnapshotOpts.Size(m)
+}
+func (m *DeleteFileShareSnapshotOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteFileShareSnapshotOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteFileShareSnapshotOpts proto.InternalMessageInfo
+
+func (m *DeleteFileShareSnapshotOpts) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetFileshareId() string {
+	if m != nil {
+		return m.FileshareId
+	}
+	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *DeleteFileShareSnapshotOpts) GetMetadata() map[string]string {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
 // Generic response, it return:
 // 1. Return result with message when create/update resource successfully.
 // 2. Return result without message when delete resource successfully.
@@ -2664,7 +3373,7 @@ func (m *GenericResponse) Reset()         { *m = GenericResponse{} }
 func (m *GenericResponse) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse) ProtoMessage()    {}
 func (*GenericResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{21}
+	return fileDescriptor_4c16552f9fdb66d8, []int{27}
 }
 
 func (m *GenericResponse) XXX_Unmarshal(b []byte) error {
@@ -2741,7 +3450,7 @@ func (m *GenericResponse_Result) Reset()         { *m = GenericResponse_Result{}
 func (m *GenericResponse_Result) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse_Result) ProtoMessage()    {}
 func (*GenericResponse_Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{21, 0}
+	return fileDescriptor_4c16552f9fdb66d8, []int{27, 0}
 }
 
 func (m *GenericResponse_Result) XXX_Unmarshal(b []byte) error {
@@ -2781,7 +3490,7 @@ func (m *GenericResponse_Error) Reset()         { *m = GenericResponse_Error{} }
 func (m *GenericResponse_Error) String() string { return proto.CompactTextString(m) }
 func (*GenericResponse_Error) ProtoMessage()    {}
 func (*GenericResponse_Error) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{21, 1}
+	return fileDescriptor_4c16552f9fdb66d8, []int{27, 1}
 }
 
 func (m *GenericResponse_Error) XXX_Unmarshal(b []byte) error {
@@ -2816,11 +3525,17 @@ func (m *GenericResponse_Error) GetDescription() string {
 	return ""
 }
 
+// GetMetricsOpts is used to pass specifics to get metric values
 type GetMetricsOpts struct {
-	InstanceId           string   `protobuf:"bytes,1,opt,name=instanceId,proto3" json:"instanceId,omitempty"`
-	MetricName           string   `protobuf:"bytes,2,opt,name=metricName,proto3" json:"metricName,omitempty"`
-	StartTime            string   `protobuf:"bytes,3,opt,name=startTime,proto3" json:"startTime,omitempty"`
-	EndTime              string   `protobuf:"bytes,4,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	// instance ID of the resource to collect metrics for
+	InstanceId string `protobuf:"bytes,1,opt,name=instanceId,proto3" json:"instanceId,omitempty"`
+	// the metric to be collected
+	MetricName string `protobuf:"bytes,2,opt,name=metricName,proto3" json:"metricName,omitempty"`
+	// the start of the time range to collect metrics
+	StartTime string `protobuf:"bytes,3,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	// the end of the time range to collect metrics
+	EndTime string `protobuf:"bytes,4,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	// context
 	Context              string   `protobuf:"bytes,5,opt,name=context,proto3" json:"context,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -2831,7 +3546,7 @@ func (m *GetMetricsOpts) Reset()         { *m = GetMetricsOpts{} }
 func (m *GetMetricsOpts) String() string { return proto.CompactTextString(m) }
 func (*GetMetricsOpts) ProtoMessage()    {}
 func (*GetMetricsOpts) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4c16552f9fdb66d8, []int{22}
+	return fileDescriptor_4c16552f9fdb66d8, []int{28}
 }
 
 func (m *GetMetricsOpts) XXX_Unmarshal(b []byte) error {
@@ -2887,6 +3602,105 @@ func (m *GetMetricsOpts) GetContext() string {
 	return ""
 }
 
+// CollectMetricsOpts is used to pass specifics to collect metric values
+type CollectMetricsOpts struct {
+	// instance ID of the resource to collect metrics for
+	InstanceId string `protobuf:"bytes,1,opt,name=instanceId,proto3" json:"instanceId,omitempty"`
+	// the metrics to be collected
+	MetricNames []string `protobuf:"bytes,2,rep,name=metricNames,proto3" json:"metricNames,omitempty"`
+	// context
+	Context string `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
+	// metrics driver
+	DriverName           string   `protobuf:"bytes,4,opt,name=driverName,proto3" json:"driverName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CollectMetricsOpts) Reset()         { *m = CollectMetricsOpts{} }
+func (m *CollectMetricsOpts) String() string { return proto.CompactTextString(m) }
+func (*CollectMetricsOpts) ProtoMessage()    {}
+func (*CollectMetricsOpts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{29}
+}
+
+func (m *CollectMetricsOpts) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CollectMetricsOpts.Unmarshal(m, b)
+}
+func (m *CollectMetricsOpts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CollectMetricsOpts.Marshal(b, m, deterministic)
+}
+func (m *CollectMetricsOpts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CollectMetricsOpts.Merge(m, src)
+}
+func (m *CollectMetricsOpts) XXX_Size() int {
+	return xxx_messageInfo_CollectMetricsOpts.Size(m)
+}
+func (m *CollectMetricsOpts) XXX_DiscardUnknown() {
+	xxx_messageInfo_CollectMetricsOpts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CollectMetricsOpts proto.InternalMessageInfo
+
+func (m *CollectMetricsOpts) GetInstanceId() string {
+	if m != nil {
+		return m.InstanceId
+	}
+	return ""
+}
+
+func (m *CollectMetricsOpts) GetMetricNames() []string {
+	if m != nil {
+		return m.MetricNames
+	}
+	return nil
+}
+
+func (m *CollectMetricsOpts) GetContext() string {
+	if m != nil {
+		return m.Context
+	}
+	return ""
+}
+
+func (m *CollectMetricsOpts) GetDriverName() string {
+	if m != nil {
+		return m.DriverName
+	}
+	return ""
+}
+
+type NoParams struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *NoParams) Reset()         { *m = NoParams{} }
+func (m *NoParams) String() string { return proto.CompactTextString(m) }
+func (*NoParams) ProtoMessage()    {}
+func (*NoParams) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4c16552f9fdb66d8, []int{30}
+}
+
+func (m *NoParams) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_NoParams.Unmarshal(m, b)
+}
+func (m *NoParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_NoParams.Marshal(b, m, deterministic)
+}
+func (m *NoParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NoParams.Merge(m, src)
+}
+func (m *NoParams) XXX_Size() int {
+	return xxx_messageInfo_NoParams.Size(m)
+}
+func (m *NoParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_NoParams.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_NoParams proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*CreateVolumeOpts)(nil), "proto.CreateVolumeOpts")
 	proto.RegisterMapType((map[string]string)(nil), "proto.CreateVolumeOpts.MetadataEntry")
@@ -2938,137 +3752,178 @@ func init() {
 	proto.RegisterMapType((map[string]string)(nil), "proto.AttachVolumeOpts.MetadataEntry")
 	proto.RegisterType((*DetachVolumeOpts)(nil), "proto.DetachVolumeOpts")
 	proto.RegisterMapType((map[string]string)(nil), "proto.DetachVolumeOpts.MetadataEntry")
+	proto.RegisterType((*DeleteFileShareAclOpts)(nil), "proto.DeleteFileShareAclOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.DeleteFileShareAclOpts.MetadataEntry")
+	proto.RegisterType((*CreateFileShareAclOpts)(nil), "proto.CreateFileShareAclOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.CreateFileShareAclOpts.MetadataEntry")
+	proto.RegisterType((*CreateFileShareOpts)(nil), "proto.CreateFileShareOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.CreateFileShareOpts.MetadataEntry")
+	proto.RegisterType((*DeleteFileShareOpts)(nil), "proto.DeleteFileShareOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.DeleteFileShareOpts.MetadataEntry")
+	proto.RegisterType((*CreateFileShareSnapshotOpts)(nil), "proto.CreateFileShareSnapshotOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.CreateFileShareSnapshotOpts.MetadataEntry")
+	proto.RegisterType((*DeleteFileShareSnapshotOpts)(nil), "proto.DeleteFileShareSnapshotOpts")
+	proto.RegisterMapType((map[string]string)(nil), "proto.DeleteFileShareSnapshotOpts.MetadataEntry")
 	proto.RegisterType((*GenericResponse)(nil), "proto.GenericResponse")
 	proto.RegisterType((*GenericResponse_Result)(nil), "proto.GenericResponse.Result")
 	proto.RegisterType((*GenericResponse_Error)(nil), "proto.GenericResponse.Error")
 	proto.RegisterType((*GetMetricsOpts)(nil), "proto.GetMetricsOpts")
+	proto.RegisterType((*CollectMetricsOpts)(nil), "proto.CollectMetricsOpts")
+	proto.RegisterType((*NoParams)(nil), "proto.NoParams")
 }
 
 func init() { proto.RegisterFile("model.proto", fileDescriptor_4c16552f9fdb66d8) }
 
 var fileDescriptor_4c16552f9fdb66d8 = []byte{
-	// 1931 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5a, 0x49, 0x6f, 0x1b, 0x47,
-	0x16, 0x36, 0x9b, 0xfb, 0xa3, 0x16, 0xaa, 0xb4, 0xb8, 0xc1, 0x91, 0x35, 0x32, 0xc7, 0x63, 0x08,
-	0xb6, 0x47, 0x1e, 0x73, 0x06, 0xf0, 0x2c, 0xf0, 0xcc, 0x48, 0x96, 0x2c, 0x11, 0xb6, 0xc6, 0x32,
-	0xbd, 0x1c, 0xe6, 0xd6, 0xee, 0x2e, 0x8f, 0x1a, 0x6a, 0x76, 0x31, 0xdd, 0x2d, 0xda, 0xca, 0x29,
-	0x48, 0x72, 0x48, 0x7c, 0xcc, 0x31, 0xb7, 0x18, 0xc8, 0x2d, 0xf9, 0x09, 0x41, 0x7e, 0x45, 0x72,
-	0x0c, 0x90, 0x63, 0x80, 0x9c, 0x73, 0x08, 0x72, 0x08, 0xba, 0x7a, 0x61, 0x55, 0x2f, 0xc5, 0x66,
-	0xb4, 0x58, 0x86, 0x79, 0x22, 0xeb, 0x55, 0xf5, 0xeb, 0xf7, 0xbe, 0xf7, 0xde, 0x57, 0x4b, 0x17,
-	0xd4, 0xba, 0x44, 0xc3, 0xc6, 0x6a, 0xcf, 0x22, 0x0e, 0x41, 0x45, 0xfa, 0xd3, 0x7c, 0x59, 0x82,
-	0xfa, 0x6d, 0x0b, 0x2b, 0x0e, 0x7e, 0x42, 0x8c, 0x83, 0x2e, 0xbe, 0xdf, 0x73, 0x6c, 0x34, 0x05,
-	0x92, 0xae, 0xc9, 0xb9, 0xe5, 0xdc, 0x4a, 0xb5, 0x23, 0xe9, 0x1a, 0x42, 0x50, 0x30, 0x95, 0x2e,
-	0x96, 0x25, 0x2a, 0xa1, 0xff, 0x5d, 0x99, 0xad, 0xbf, 0x8b, 0xe5, 0xfc, 0x72, 0x6e, 0x25, 0xdf,
-	0xa1, 0xff, 0xd1, 0x32, 0xd4, 0x34, 0x6c, 0xab, 0x96, 0xde, 0x73, 0x74, 0x62, 0xca, 0x05, 0x3a,
-	0x9c, 0x15, 0xa1, 0x25, 0x00, 0xdb, 0x54, 0x7a, 0xf6, 0x1e, 0x71, 0xda, 0x9a, 0x5c, 0xa4, 0x03,
-	0x18, 0x09, 0xba, 0x02, 0x75, 0xa5, 0xaf, 0xe8, 0x86, 0xf2, 0x54, 0x37, 0x74, 0xe7, 0xf0, 0x7f,
-	0xc4, 0xc4, 0x72, 0x89, 0x8e, 0x8a, 0xc9, 0xd1, 0x22, 0x54, 0x7b, 0x16, 0x79, 0xa6, 0x1b, 0xb8,
-	0xad, 0xc9, 0x65, 0x3a, 0x68, 0x20, 0x40, 0x0b, 0x50, 0xea, 0x11, 0x62, 0xb4, 0x35, 0xb9, 0x42,
-	0xbb, 0xfc, 0x16, 0x6a, 0x40, 0xc5, 0xfd, 0xf7, 0x5f, 0xd7, 0x9f, 0x2a, 0xed, 0x09, 0xdb, 0x68,
-	0x0d, 0x2a, 0x5d, 0xec, 0x28, 0x9a, 0xe2, 0x28, 0x32, 0x2c, 0xe7, 0x57, 0x6a, 0xad, 0x3f, 0x7a,
-	0x68, 0xad, 0x46, 0x21, 0x5a, 0xdd, 0xf1, 0xc7, 0x6d, 0x9a, 0x8e, 0x75, 0xd8, 0x09, 0x1f, 0x73,
-	0x1d, 0xd4, 0x2c, 0xbd, 0x8f, 0x2d, 0xfa, 0x82, 0x9a, 0xe7, 0xe0, 0x40, 0x82, 0x64, 0x28, 0xab,
-	0xc4, 0x74, 0xf0, 0x0b, 0x47, 0x9e, 0xa0, 0x9d, 0x41, 0x13, 0xed, 0xc1, 0xbc, 0x85, 0x7b, 0x86,
-	0xae, 0x2a, 0x2e, 0x52, 0x1b, 0xf4, 0x91, 0x0d, 0xd7, 0x92, 0x49, 0x6a, 0x49, 0x2b, 0xcd, 0x92,
-	0x4e, 0xd2, 0x43, 0x9e, 0x59, 0xc9, 0x0a, 0xd1, 0x25, 0x98, 0x64, 0x3a, 0xda, 0x9a, 0x3c, 0x45,
-	0x2d, 0xe1, 0x85, 0xa8, 0x09, 0x13, 0x41, 0x60, 0x1e, 0xba, 0x81, 0x9e, 0xa6, 0x81, 0xe6, 0x64,
-	0xe8, 0x1a, 0xcc, 0x04, 0xed, 0x3b, 0x16, 0xe9, 0xde, 0x36, 0xc8, 0x81, 0x26, 0xd7, 0x97, 0x73,
-	0x2b, 0x95, 0x4e, 0xbc, 0xc3, 0xf5, 0xdd, 0x8f, 0x8f, 0x3c, 0xe3, 0xf9, 0xee, 0x37, 0x1b, 0xff,
-	0x84, 0x49, 0x0e, 0x50, 0x54, 0x87, 0xfc, 0x3e, 0x3e, 0xf4, 0x53, 0xd0, 0xfd, 0x8b, 0xe6, 0xa0,
-	0xd8, 0x57, 0x8c, 0x83, 0x20, 0x09, 0xbd, 0xc6, 0x3f, 0xa4, 0xbf, 0xe5, 0x1a, 0xdb, 0xd0, 0x48,
-	0xc7, 0x60, 0x14, 0x4d, 0xcd, 0x2f, 0x24, 0xa8, 0x6f, 0x60, 0x03, 0x0b, 0x8b, 0x81, 0x4b, 0x3b,
-	0x29, 0x3d, 0xed, 0xf2, 0x5c, 0xda, 0xb1, 0xa9, 0x55, 0xe0, 0x52, 0x2b, 0xfa, 0xc2, 0x8c, 0xa9,
-	0x55, 0x14, 0xa5, 0x56, 0x89, 0x4f, 0x2d, 0x06, 0xf8, 0xf2, 0xf1, 0x01, 0xdf, 0xfc, 0x2e, 0x0f,
-	0xf5, 0xcd, 0x17, 0x0e, 0x36, 0xb5, 0x31, 0x77, 0x08, 0xb8, 0x23, 0x0a, 0xd1, 0x09, 0x70, 0x07,
-	0x13, 0xe0, 0xc9, 0x63, 0x0c, 0xf0, 0xcb, 0x3c, 0xc8, 0x2c, 0xdf, 0x3c, 0xf4, 0xc1, 0x3e, 0xe1,
-	0x40, 0x37, 0xa0, 0xd2, 0xa7, 0xef, 0x0b, 0xc3, 0x1c, 0xb6, 0xf9, 0xc0, 0x95, 0xa2, 0x81, 0x6b,
-	0x33, 0x41, 0x28, 0xd3, 0x20, 0xfc, 0x29, 0x81, 0x36, 0x59, 0x37, 0x32, 0x06, 0xa3, 0x22, 0x0a,
-	0x46, 0x35, 0x35, 0x18, 0x70, 0x8c, 0xc1, 0x78, 0x25, 0x81, 0xcc, 0x72, 0x85, 0x30, 0x18, 0x2c,
-	0x84, 0x52, 0x04, 0x42, 0x16, 0xa4, 0x3c, 0x07, 0x52, 0x9a, 0xfa, 0x8c, 0x20, 0x15, 0x44, 0x20,
-	0x15, 0x53, 0x41, 0x2a, 0x1d, 0x23, 0x48, 0x9f, 0xe7, 0xa1, 0xc1, 0x86, 0x7a, 0xcd, 0x71, 0x14,
-	0x75, 0xaf, 0x8b, 0xcd, 0xd1, 0x61, 0xba, 0x04, 0x93, 0x1a, 0xb9, 0x47, 0x54, 0xc5, 0xf0, 0x94,
-	0xd0, 0x24, 0xae, 0x74, 0x78, 0xa1, 0x9b, 0x8f, 0xdd, 0x03, 0xc3, 0xd1, 0x77, 0x15, 0x67, 0x8f,
-	0x02, 0x50, 0xe9, 0x0c, 0x04, 0xe8, 0x2a, 0x54, 0xf6, 0x88, 0xed, 0xb4, 0xcd, 0x67, 0x84, 0x02,
-	0x50, 0x6b, 0x4d, 0xfb, 0x50, 0x6f, 0xfb, 0xe2, 0x4e, 0x38, 0x00, 0xdd, 0x65, 0xe2, 0x52, 0xa2,
-	0x71, 0xb9, 0x9e, 0x90, 0xbc, 0xbc, 0x47, 0x19, 0x23, 0x53, 0x16, 0x45, 0xa6, 0xc2, 0x47, 0xe6,
-	0x32, 0x4c, 0xad, 0xa9, 0x2a, 0xb6, 0xed, 0x5d, 0xf7, 0xdd, 0x2a, 0x31, 0xfc, 0xfc, 0x8e, 0x48,
-	0x8f, 0x16, 0xa7, 0xef, 0x25, 0x68, 0xb0, 0xd9, 0x76, 0x84, 0x38, 0xb1, 0x18, 0xe7, 0x47, 0xc1,
-	0xb8, 0xc0, 0x61, 0x9c, 0x6e, 0xcd, 0x09, 0x4c, 0xc8, 0x71, 0x8c, 0xcb, 0xc7, 0x8f, 0xf1, 0x97,
-	0x79, 0x58, 0xf4, 0x32, 0x27, 0xa8, 0xe5, 0x21, 0x28, 0xf3, 0x13, 0xac, 0x14, 0x9b, 0x60, 0x4f,
-	0xbd, 0x22, 0x76, 0x62, 0x15, 0x71, 0x83, 0xab, 0x88, 0x64, 0xbf, 0xde, 0xd4, 0x9a, 0xf8, 0x41,
-	0x82, 0x45, 0x2f, 0x0b, 0x8f, 0x29, 0x5e, 0x23, 0x55, 0xc6, 0x4e, 0xac, 0x32, 0x6e, 0x70, 0x95,
-	0x71, 0x24, 0xac, 0xcf, 0x5c, 0x6d, 0xbc, 0x97, 0x83, 0x4a, 0x00, 0x02, 0x5d, 0xd6, 0x19, 0x8a,
-	0xf3, 0x8c, 0x58, 0x5d, 0xff, 0xe9, 0xb0, 0xed, 0x2e, 0x05, 0x89, 0xfd, 0xe8, 0xb0, 0x17, 0xe8,
-	0xf0, 0x5b, 0xee, 0xca, 0xc6, 0x85, 0xce, 0x5f, 0xe5, 0xd3, 0xff, 0x34, 0x3e, 0x3d, 0x7f, 0x16,
-	0x94, 0xf4, 0x9e, 0x5b, 0x09, 0xba, 0xa9, 0x3b, 0xba, 0xe2, 0x10, 0xcb, 0x87, 0x60, 0x20, 0x68,
-	0xf6, 0x01, 0x3c, 0xb6, 0xa1, 0x7b, 0xb2, 0xeb, 0x50, 0xa0, 0xd0, 0xe7, 0x28, 0xf4, 0xbf, 0xf3,
-	0xa1, 0x1f, 0x0c, 0x58, 0x1d, 0xec, 0xea, 0xe8, 0xc0, 0xc6, 0x4d, 0xa8, 0xfe, 0xb6, 0x4d, 0xce,
-	0x57, 0x55, 0x98, 0xf7, 0xca, 0x87, 0xd9, 0x35, 0x65, 0x5e, 0xd1, 0x45, 0x56, 0x6f, 0xf9, 0xf8,
-	0xea, 0x6d, 0x05, 0xa6, 0x7b, 0x96, 0xde, 0x55, 0xac, 0xc3, 0x27, 0x01, 0x65, 0x7b, 0x90, 0x44,
-	0xc5, 0x74, 0xf7, 0x88, 0x55, 0x62, 0x6a, 0xec, 0x58, 0x0f, 0xa7, 0x78, 0xc7, 0x6b, 0x5e, 0xde,
-	0xbf, 0x9f, 0x83, 0x45, 0xdf, 0xfe, 0xc4, 0xcd, 0xa6, 0x5c, 0xa3, 0x81, 0xfb, 0x17, 0xc7, 0x4f,
-	0x11, 0x80, 0x57, 0x77, 0x05, 0x0a, 0xbc, 0xd8, 0x0a, 0xdf, 0x81, 0x3e, 0xca, 0xc1, 0x52, 0x08,
-	0x4c, 0xb2, 0x19, 0x13, 0xd4, 0x8c, 0xff, 0x08, 0xcd, 0x78, 0x28, 0x54, 0xe1, 0x19, 0x32, 0xe4,
-	0x3d, 0x2e, 0x86, 0x1a, 0x51, 0xf7, 0xdb, 0x9a, 0xbf, 0xe1, 0xf0, 0x5b, 0x91, 0xba, 0x9f, 0x12,
-	0xd5, 0xfd, 0x34, 0x5f, 0xf7, 0x6e, 0xb5, 0xd8, 0x3e, 0x42, 0xfe, 0x19, 0xc2, 0x40, 0x80, 0xee,
-	0x30, 0xf4, 0x34, 0x43, 0x7d, 0xbc, 0x22, 0xf4, 0x31, 0x8d, 0x97, 0xfe, 0x0e, 0x53, 0xfd, 0xb0,
-	0xa8, 0xee, 0xe9, 0xb6, 0x23, 0x23, 0xaa, 0x6d, 0x26, 0x56, 0x71, 0x9d, 0xc8, 0x40, 0x37, 0xb1,
-	0x99, 0x13, 0x92, 0x1d, 0xa2, 0x61, 0x79, 0xd6, 0x4b, 0xec, 0x88, 0xd8, 0x4d, 0x6c, 0xc6, 0x9e,
-	0x5d, 0x6c, 0xe9, 0x44, 0x93, 0xe7, 0xe8, 0x1e, 0x28, 0xde, 0x81, 0x5a, 0x30, 0xc7, 0x08, 0xd7,
-	0x15, 0x53, 0x7b, 0xae, 0x6b, 0xce, 0x9e, 0x3c, 0x4f, 0x1f, 0x48, 0xec, 0x63, 0x97, 0xcf, 0x0b,
-	0xfc, 0xf2, 0xf9, 0x3e, 0x5c, 0x1c, 0x9a, 0x66, 0x23, 0x1d, 0xaf, 0x3c, 0x80, 0x3f, 0x64, 0x48,
-	0x98, 0x91, 0x54, 0x1e, 0x89, 0xba, 0x7f, 0x2a, 0xc3, 0xbc, 0x37, 0x25, 0x8d, 0xf9, 0xeb, 0xc4,
-	0xf8, 0x2b, 0x11, 0xe0, 0xd3, 0xe7, 0xaf, 0x64, 0x33, 0xce, 0x26, 0x7f, 0xb1, 0x0c, 0x55, 0xe7,
-	0x18, 0x2a, 0xd9, 0x8b, 0x34, 0x86, 0xe2, 0x78, 0x70, 0x26, 0xca, 0x83, 0x4c, 0xe1, 0xa3, 0xb7,
-	0xb0, 0xf0, 0x37, 0x4d, 0xe5, 0xa9, 0x31, 0x2e, 0xfc, 0x93, 0x2b, 0xfc, 0x44, 0x80, 0x4f, 0xbf,
-	0xf0, 0x93, 0xcd, 0x78, 0xd3, 0x0a, 0x3f, 0xd9, 0x8b, 0x71, 0xe1, 0x8f, 0x58, 0xf8, 0x3f, 0x97,
-	0x61, 0x61, 0x43, 0xb7, 0xc7, 0x95, 0x3f, 0x5a, 0xe5, 0x7f, 0x90, 0xad, 0xf2, 0xff, 0x1d, 0xcc,
-	0x52, 0x89, 0x08, 0x1f, 0xb9, 0xf4, 0x3f, 0xce, 0x5a, 0xfa, 0x6b, 0x62, 0x3b, 0xce, 0x66, 0xed,
-	0x6f, 0xc5, 0x6a, 0xff, 0xaa, 0xd8, 0x8d, 0x71, 0xf1, 0x8f, 0x58, 0xfc, 0xdf, 0x54, 0xe1, 0xfc,
-	0x1d, 0x45, 0x37, 0x48, 0x1f, 0x5b, 0xe3, 0xea, 0xcf, 0x5e, 0xfd, 0x1f, 0x66, 0xab, 0xfe, 0x60,
-	0xc2, 0x4d, 0x81, 0xf8, 0xc8, 0xe5, 0xff, 0x32, 0x6b, 0xf9, 0xaf, 0x0f, 0x31, 0xe4, 0x6c, 0xd6,
-	0xff, 0x9f, 0x61, 0x56, 0x31, 0x0c, 0xf2, 0xdc, 0x3b, 0x15, 0xc5, 0xfe, 0x57, 0x5e, 0xff, 0xf8,
-	0x22, 0xa9, 0x0b, 0xad, 0x02, 0x0a, 0xad, 0x5c, 0x57, 0xd4, 0x7d, 0x6c, 0x6a, 0x6d, 0xcd, 0xbf,
-	0x0f, 0x91, 0xd0, 0x83, 0xb6, 0x19, 0x86, 0xf1, 0x8e, 0x2a, 0xae, 0x0d, 0x41, 0x2a, 0x13, 0xc5,
-	0xcc, 0x0a, 0x28, 0x66, 0xee, 0xed, 0xa2, 0x98, 0x86, 0x0d, 0xd3, 0x03, 0x2c, 0xdf, 0x39, 0xc0,
-	0x76, 0x6a, 0x5c, 0x73, 0xa3, 0xc6, 0x55, 0x4a, 0x8b, 0x6b, 0xf3, 0x33, 0x29, 0x38, 0x86, 0xf5,
-	0x14, 0x6c, 0x59, 0xe4, 0xa0, 0x97, 0x99, 0xd5, 0xf8, 0x8c, 0xcd, 0xc7, 0x32, 0x76, 0xf8, 0x47,
-	0xf6, 0x24, 0x76, 0x2a, 0xa6, 0xb0, 0xd3, 0x12, 0x80, 0xa2, 0xf9, 0x8e, 0xda, 0xf4, 0x4b, 0x4c,
-	0xb5, 0xc3, 0x48, 0xbc, 0x0b, 0x45, 0x5d, 0xd2, 0xc7, 0xc1, 0x90, 0x32, 0x1d, 0xc2, 0x0b, 0x53,
-	0x59, 0x2c, 0xf5, 0x4b, 0x7a, 0xf3, 0xeb, 0x1c, 0xcc, 0x3f, 0xee, 0x69, 0x19, 0x30, 0xe2, 0xf1,
-	0x90, 0x62, 0x78, 0xf0, 0x1e, 0xe4, 0x87, 0x7b, 0x50, 0x10, 0x7b, 0x50, 0x4c, 0xf3, 0x80, 0xff,
-	0x98, 0xd1, 0x3c, 0x0c, 0xce, 0xaa, 0x86, 0x39, 0x30, 0x50, 0x2d, 0x71, 0xaa, 0x87, 0x05, 0x9a,
-	0x79, 0x75, 0x81, 0x7f, 0xf5, 0x2f, 0x39, 0xa8, 0x7b, 0x39, 0xca, 0xdc, 0xce, 0xb9, 0x0c, 0x53,
-	0x0a, 0xff, 0x71, 0xc5, 0x33, 0x21, 0x22, 0x75, 0xc7, 0xa9, 0xc4, 0x34, 0xb1, 0x4a, 0x0b, 0xd3,
-	0xe5, 0x1e, 0xcf, 0xac, 0x88, 0x94, 0xbb, 0xf5, 0x92, 0xe7, 0x6e, 0xbd, 0x44, 0x5f, 0x9d, 0x4a,
-	0x4b, 0xa9, 0x1e, 0x1c, 0x6d, 0xdd, 0xe0, 0xba, 0xbf, 0x81, 0x5f, 0x9b, 0xfb, 0xd1, 0x57, 0x9f,
-	0xb6, 0xfb, 0x3f, 0xe6, 0x60, 0x7a, 0x0b, 0x9b, 0xd8, 0xd2, 0xd5, 0x0e, 0xb6, 0x7b, 0xc4, 0xb4,
-	0x31, 0xba, 0x09, 0x25, 0x0b, 0xdb, 0x07, 0x86, 0x43, 0x55, 0xd4, 0x5a, 0x17, 0x7c, 0x5b, 0x23,
-	0xe3, 0x56, 0x3b, 0x74, 0xd0, 0xf6, 0xb9, 0x8e, 0x3f, 0x1c, 0xfd, 0x15, 0x8a, 0xd8, 0xb2, 0x88,
-	0x45, 0x5f, 0x53, 0x6b, 0x2d, 0xa6, 0x3c, 0xb7, 0xe9, 0x8e, 0xd9, 0x3e, 0xd7, 0xf1, 0x06, 0x37,
-	0x9a, 0x50, 0xf2, 0x34, 0xb9, 0x3e, 0x76, 0xb1, 0x6d, 0x2b, 0xff, 0xc7, 0xbe, 0xf1, 0x41, 0xb3,
-	0x71, 0x0b, 0x8a, 0xf4, 0x29, 0x97, 0xe4, 0x54, 0xa2, 0x05, 0xfd, 0xf4, 0x7f, 0x94, 0xc4, 0xa4,
-	0x18, 0x89, 0xad, 0x97, 0xa1, 0x68, 0xe1, 0x9e, 0x71, 0xd8, 0x7c, 0x95, 0x83, 0xa9, 0x2d, 0xec,
-	0xec, 0x60, 0xc7, 0xd2, 0x55, 0x9b, 0xc6, 0x7a, 0x09, 0x40, 0x37, 0x6d, 0x47, 0x31, 0x55, 0x77,
-	0x4d, 0xe5, 0xe9, 0x65, 0x24, 0x6e, 0x7f, 0x97, 0x0e, 0x67, 0x29, 0x63, 0x20, 0x71, 0xa7, 0x4b,
-	0xdb, 0x51, 0x2c, 0xe7, 0x91, 0x1e, 0x16, 0xde, 0x40, 0xe0, 0xba, 0x84, 0x4d, 0x8d, 0xf6, 0xf9,
-	0x61, 0xf3, 0x9b, 0xe9, 0x77, 0x5e, 0x5a, 0xdf, 0x56, 0x01, 0x6e, 0x13, 0xd3, 0xb1, 0x88, 0x61,
-	0x60, 0x0b, 0xad, 0xc1, 0x04, 0x3b, 0x01, 0xa0, 0xf3, 0x29, 0x37, 0x3c, 0x1b, 0x0b, 0xc9, 0x78,
-	0x37, 0xcf, 0xb9, 0x2a, 0x58, 0x7a, 0x09, 0x55, 0x44, 0xef, 0x14, 0x8a, 0x55, 0xb0, 0x17, 0xd4,
-	0x42, 0x15, 0xd1, 0x5b, 0x6b, 0x02, 0x15, 0x0f, 0x60, 0x2e, 0xe9, 0x7a, 0x15, 0xfa, 0xfd, 0x90,
-	0xbb, 0x57, 0x62, 0x95, 0x49, 0x97, 0x91, 0x42, 0x95, 0x69, 0x37, 0x95, 0x04, 0x2a, 0x1f, 0xc3,
-	0x42, 0xf2, 0x3d, 0x1a, 0x74, 0x71, 0xe8, 0x35, 0x1b, 0xb1, 0xda, 0xe4, 0xab, 0x23, 0xa1, 0xda,
-	0xf4, 0x9b, 0x25, 0x02, 0xb5, 0x77, 0x61, 0x26, 0xf6, 0x61, 0x0b, 0x2d, 0x8a, 0x3e, 0x79, 0x89,
-	0x95, 0xc5, 0xce, 0xa0, 0x43, 0x65, 0x89, 0xa7, 0xd3, 0x62, 0x65, 0xb1, 0x73, 0xad, 0x50, 0x59,
-	0xe2, 0x89, 0x97, 0x40, 0xd9, 0x0e, 0xa0, 0xf8, 0x46, 0x19, 0x5d, 0x10, 0xee, 0xa1, 0x05, 0xea,
-	0xee, 0xc3, 0x6c, 0xc2, 0xaa, 0x18, 0x2d, 0x89, 0x57, 0xcc, 0x59, 0xc2, 0xc0, 0xcc, 0xdf, 0x91,
-	0x30, 0x44, 0x66, 0x76, 0xb1, 0xb2, 0xd8, 0x6a, 0x26, 0x54, 0x96, 0xb8, 0xce, 0xc9, 0x12, 0xd3,
-	0x24, 0x65, 0x89, 0x6b, 0x0e, 0x81, 0xb2, 0x5b, 0x00, 0x03, 0xf6, 0x44, 0xf3, 0xe1, 0x38, 0x96,
-	0x50, 0xd3, 0x1f, 0x6f, 0x7d, 0x5a, 0x85, 0xc9, 0x5d, 0x8b, 0xf4, 0x75, 0xdb, 0x9d, 0x18, 0x89,
-	0xba, 0x3f, 0xe6, 0xb6, 0x31, 0xb7, 0x8d, 0xb9, 0x6d, 0xcc, 0x6d, 0x67, 0x80, 0xdb, 0x5a, 0x9f,
-	0xe4, 0x00, 0xbc, 0xd4, 0x0c, 0x98, 0x89, 0xdd, 0x9a, 0x84, 0x9c, 0x10, 0xdd, 0xaf, 0x0c, 0x63,
-	0xa6, 0x04, 0x15, 0xd1, 0x35, 0x7f, 0xba, 0x8a, 0xa7, 0x25, 0xda, 0xf1, 0x97, 0x5f, 0x03, 0x00,
-	0x00, 0xff, 0xff, 0x19, 0x29, 0x77, 0x97, 0x93, 0x35, 0x00, 0x00,
+	// 2368 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5b, 0xcd, 0x6f, 0x24, 0x47,
+	0x15, 0xdf, 0xe9, 0x9e, 0xcf, 0x37, 0xeb, 0xaf, 0xf2, 0xda, 0xdb, 0xcc, 0x3a, 0xc6, 0x19, 0x42,
+	0x64, 0x25, 0xc1, 0x49, 0x86, 0x48, 0xe1, 0x43, 0x01, 0xbc, 0xb6, 0xd7, 0xb6, 0xb2, 0xce, 0x3a,
+	0xb3, 0xbb, 0x41, 0xe2, 0xd6, 0xdb, 0x5d, 0x8b, 0x5b, 0xdb, 0xd3, 0xd5, 0x74, 0xb7, 0x27, 0x6b,
+	0x4e, 0x08, 0x38, 0xc0, 0x9e, 0x10, 0xff, 0x01, 0x91, 0xb8, 0x01, 0x47, 0x6e, 0x88, 0x0b, 0x7f,
+	0x00, 0x12, 0xe2, 0x8a, 0x94, 0x23, 0x12, 0x17, 0x2e, 0x80, 0x10, 0x07, 0xd4, 0xd5, 0x1f, 0x53,
+	0xd5, 0x5d, 0x5d, 0xd3, 0xb3, 0x63, 0x3b, 0x4e, 0x32, 0x27, 0x4f, 0xbd, 0xaa, 0x7e, 0xfd, 0xea,
+	0xf7, 0xde, 0xef, 0x75, 0x7d, 0x3c, 0x43, 0x7b, 0x40, 0x4c, 0x6c, 0x6f, 0xb9, 0x1e, 0x09, 0x08,
+	0xaa, 0xd1, 0x3f, 0xdd, 0x67, 0x75, 0x58, 0xdc, 0xf1, 0xb0, 0x1e, 0xe0, 0x0f, 0x88, 0x7d, 0x3a,
+	0xc0, 0xf7, 0xdc, 0xc0, 0x47, 0xf3, 0xa0, 0x58, 0xa6, 0x56, 0xd9, 0xa8, 0x6c, 0xb6, 0xfa, 0x8a,
+	0x65, 0x22, 0x04, 0x55, 0x47, 0x1f, 0x60, 0x4d, 0xa1, 0x12, 0xfa, 0x3b, 0x94, 0xf9, 0xd6, 0x0f,
+	0xb1, 0xa6, 0x6e, 0x54, 0x36, 0xd5, 0x3e, 0xfd, 0x8d, 0x36, 0xa0, 0x6d, 0x62, 0xdf, 0xf0, 0x2c,
+	0x37, 0xb0, 0x88, 0xa3, 0x55, 0xe9, 0x70, 0x56, 0x84, 0xd6, 0x01, 0x7c, 0x47, 0x77, 0xfd, 0x13,
+	0x12, 0x1c, 0x9a, 0x5a, 0x8d, 0x0e, 0x60, 0x24, 0xe8, 0x15, 0x58, 0xd4, 0x87, 0xba, 0x65, 0xeb,
+	0x8f, 0x2c, 0xdb, 0x0a, 0xce, 0xbe, 0x47, 0x1c, 0xac, 0xd5, 0xe9, 0xa8, 0x9c, 0x1c, 0xad, 0x41,
+	0xcb, 0xf5, 0xc8, 0x63, 0xcb, 0xc6, 0x87, 0xa6, 0xd6, 0xa0, 0x83, 0x46, 0x02, 0xb4, 0x0a, 0x75,
+	0x97, 0x10, 0xfb, 0xd0, 0xd4, 0x9a, 0xb4, 0x2b, 0x6e, 0xa1, 0x0e, 0x34, 0xc3, 0x5f, 0xef, 0x85,
+	0xf3, 0x69, 0xd1, 0x9e, 0xb4, 0x8d, 0xb6, 0xa1, 0x39, 0xc0, 0x81, 0x6e, 0xea, 0x81, 0xae, 0xc1,
+	0x86, 0xba, 0xd9, 0xee, 0x7d, 0x39, 0x42, 0x6b, 0x2b, 0x0b, 0xd1, 0xd6, 0x51, 0x3c, 0x6e, 0xcf,
+	0x09, 0xbc, 0xb3, 0x7e, 0xfa, 0x58, 0x38, 0x41, 0xd3, 0xb3, 0x86, 0xd8, 0xa3, 0x2f, 0x68, 0x47,
+	0x13, 0x1c, 0x49, 0x90, 0x06, 0x0d, 0x83, 0x38, 0x01, 0x7e, 0x1a, 0x68, 0xd7, 0x69, 0x67, 0xd2,
+	0x44, 0x27, 0xb0, 0xe2, 0x61, 0xd7, 0xb6, 0x0c, 0x3d, 0x44, 0x6a, 0x97, 0x3e, 0xb2, 0x1b, 0x5a,
+	0x32, 0x47, 0x2d, 0xe9, 0x15, 0x59, 0xd2, 0x17, 0x3d, 0x14, 0x99, 0x25, 0x56, 0x88, 0x5e, 0x82,
+	0x39, 0xa6, 0xe3, 0xd0, 0xd4, 0xe6, 0xa9, 0x25, 0xbc, 0x10, 0x75, 0xe1, 0x7a, 0xe2, 0x98, 0xfb,
+	0xa1, 0xa3, 0x17, 0xa8, 0xa3, 0x39, 0x19, 0x7a, 0x0d, 0x96, 0x92, 0xf6, 0x1d, 0x8f, 0x0c, 0x76,
+	0x6c, 0x72, 0x6a, 0x6a, 0x8b, 0x1b, 0x95, 0xcd, 0x66, 0x3f, 0xdf, 0x11, 0xce, 0x3d, 0xf6, 0x8f,
+	0xb6, 0x14, 0xcd, 0x3d, 0x6e, 0x76, 0xbe, 0x09, 0x73, 0x1c, 0xa0, 0x68, 0x11, 0xd4, 0x27, 0xf8,
+	0x2c, 0x0e, 0xc1, 0xf0, 0x27, 0xba, 0x01, 0xb5, 0xa1, 0x6e, 0x9f, 0x26, 0x41, 0x18, 0x35, 0xbe,
+	0xa1, 0x7c, 0xad, 0xd2, 0x39, 0x80, 0x4e, 0x31, 0x06, 0x93, 0x68, 0xea, 0xfe, 0x46, 0x81, 0xc5,
+	0x5d, 0x6c, 0x63, 0x29, 0x19, 0xb8, 0xb0, 0x53, 0x8a, 0xc3, 0x4e, 0xe5, 0xc2, 0x8e, 0x0d, 0xad,
+	0x2a, 0x17, 0x5a, 0xd9, 0x17, 0x96, 0x0c, 0xad, 0x9a, 0x2c, 0xb4, 0xea, 0x7c, 0x68, 0x31, 0xc0,
+	0x37, 0xce, 0x0f, 0xf8, 0xee, 0xdf, 0x54, 0x58, 0xdc, 0x7b, 0x1a, 0x60, 0xc7, 0x9c, 0xe5, 0x0e,
+	0x49, 0xee, 0xc8, 0x42, 0x74, 0x01, 0xb9, 0x83, 0x71, 0xf0, 0xdc, 0x39, 0x3a, 0xf8, 0x99, 0x0a,
+	0x1a, 0x9b, 0x6f, 0xee, 0xc7, 0x60, 0x5f, 0xb0, 0xa3, 0x3b, 0xd0, 0x1c, 0xd2, 0xf7, 0xa5, 0x6e,
+	0x4e, 0xdb, 0xbc, 0xe3, 0xea, 0x59, 0xc7, 0x1d, 0x32, 0x4e, 0x68, 0x50, 0x27, 0x7c, 0x45, 0x90,
+	0x36, 0xd9, 0x69, 0x94, 0x74, 0x46, 0x53, 0xe6, 0x8c, 0x56, 0xa1, 0x33, 0xe0, 0x1c, 0x9d, 0xf1,
+	0x91, 0x02, 0x1a, 0x9b, 0x2b, 0xa4, 0xce, 0x60, 0x21, 0x54, 0x32, 0x10, 0xb2, 0x20, 0xa9, 0x1c,
+	0x48, 0x45, 0xea, 0x4b, 0x82, 0x54, 0x95, 0x81, 0x54, 0x2b, 0x04, 0xa9, 0x7e, 0x8e, 0x20, 0xfd,
+	0x5a, 0x85, 0x0e, 0xeb, 0xea, 0xed, 0x20, 0xd0, 0x8d, 0x93, 0x01, 0x76, 0x26, 0x87, 0xe9, 0x25,
+	0x98, 0x33, 0xc9, 0x5d, 0x62, 0xe8, 0x76, 0xa4, 0x84, 0x06, 0x71, 0xb3, 0xcf, 0x0b, 0xc3, 0x78,
+	0x1c, 0x9c, 0xda, 0x81, 0x75, 0xac, 0x07, 0x27, 0x14, 0x80, 0x66, 0x7f, 0x24, 0x40, 0xaf, 0x42,
+	0xf3, 0x84, 0xf8, 0xc1, 0xa1, 0xf3, 0x98, 0x50, 0x00, 0xda, 0xbd, 0x85, 0x18, 0xea, 0x83, 0x58,
+	0xdc, 0x4f, 0x07, 0xa0, 0x77, 0x19, 0xbf, 0xd4, 0xa9, 0x5f, 0x5e, 0x17, 0x04, 0x2f, 0x3f, 0xa3,
+	0x92, 0x9e, 0x69, 0xc8, 0x3c, 0xd3, 0xe4, 0x3d, 0xf3, 0x32, 0xcc, 0x6f, 0x1b, 0x06, 0xf6, 0xfd,
+	0xe3, 0xf0, 0xdd, 0x06, 0xb1, 0xe3, 0xf8, 0xce, 0x48, 0xa7, 0xf3, 0xd3, 0xc7, 0x0a, 0x74, 0xd8,
+	0x68, 0x9b, 0xc2, 0x4f, 0x2c, 0xc6, 0xea, 0x24, 0x18, 0x57, 0x39, 0x8c, 0x8b, 0xad, 0xb9, 0x80,
+	0x0f, 0x72, 0x1e, 0xe3, 0xc6, 0xf9, 0x63, 0xfc, 0x5b, 0x15, 0xd6, 0xa2, 0xc8, 0x49, 0xb8, 0x3c,
+	0x06, 0x65, 0xfe, 0x03, 0xab, 0xe4, 0x3e, 0xb0, 0x97, 0xce, 0x88, 0xa3, 0x1c, 0x23, 0xde, 0xe4,
+	0x18, 0x21, 0x9e, 0xd7, 0xa7, 0x95, 0x13, 0x7f, 0x57, 0x60, 0x2d, 0x8a, 0xc2, 0x73, 0xf2, 0xd7,
+	0x44, 0xcc, 0x38, 0xca, 0x31, 0xe3, 0x4d, 0x8e, 0x19, 0x53, 0x61, 0x7d, 0xe5, 0xb8, 0xf1, 0xa3,
+	0x0a, 0x34, 0x13, 0x10, 0xe8, 0xb2, 0xce, 0xd6, 0x83, 0xc7, 0xc4, 0x1b, 0xc4, 0x4f, 0xa7, 0xed,
+	0x70, 0x29, 0x48, 0xfc, 0x07, 0x67, 0x6e, 0xa2, 0x23, 0x6e, 0x85, 0x2b, 0x9b, 0x10, 0xba, 0x78,
+	0x95, 0x4f, 0x7f, 0x53, 0xff, 0xb8, 0xf1, 0x57, 0x50, 0xb1, 0xdc, 0x90, 0x09, 0x96, 0x63, 0x05,
+	0x96, 0x1e, 0x10, 0x2f, 0x86, 0x60, 0x24, 0xe8, 0x0e, 0x01, 0xa2, 0x6c, 0x43, 0xf7, 0x64, 0xaf,
+	0x43, 0x95, 0x42, 0x5f, 0xa1, 0xd0, 0xdf, 0x8a, 0xa1, 0x1f, 0x0d, 0xd8, 0x1a, 0xed, 0xea, 0xe8,
+	0xc0, 0xce, 0xdb, 0xd0, 0x7a, 0xbe, 0x4d, 0xce, 0x1f, 0x5a, 0xb0, 0x12, 0xd1, 0x87, 0xd9, 0x35,
+	0x95, 0x5e, 0xd1, 0x65, 0x56, 0x6f, 0x6a, 0x7e, 0xf5, 0xb6, 0x09, 0x0b, 0xae, 0x67, 0x0d, 0x74,
+	0xef, 0xec, 0x83, 0x24, 0x65, 0x47, 0x90, 0x64, 0xc5, 0x74, 0xf7, 0x88, 0x0d, 0xe2, 0x98, 0xec,
+	0xd8, 0x08, 0xa7, 0x7c, 0xc7, 0x27, 0xbc, 0xbc, 0xff, 0x71, 0x05, 0xd6, 0x62, 0xfb, 0x85, 0x9b,
+	0x4d, 0xad, 0x4d, 0x1d, 0xf7, 0x2d, 0x2e, 0x3f, 0x65, 0x00, 0xde, 0x3a, 0x96, 0x28, 0x88, 0x7c,
+	0x2b, 0x7d, 0x07, 0xfa, 0x59, 0x05, 0xd6, 0x53, 0x60, 0xc4, 0x66, 0x5c, 0xa7, 0x66, 0x7c, 0x47,
+	0x6a, 0xc6, 0x7d, 0xa9, 0x8a, 0xc8, 0x90, 0x31, 0xef, 0x09, 0x31, 0x34, 0x89, 0xf1, 0xe4, 0xd0,
+	0x8c, 0x37, 0x1c, 0x71, 0x2b, 0xc3, 0xfb, 0x79, 0x19, 0xef, 0x17, 0x78, 0xde, 0x87, 0x6c, 0xf1,
+	0x63, 0x84, 0xe2, 0x33, 0x84, 0x91, 0x00, 0xdd, 0x61, 0xd2, 0xd3, 0x12, 0x9d, 0xe3, 0x2b, 0xd2,
+	0x39, 0x16, 0xe5, 0xa5, 0xaf, 0xc3, 0xfc, 0x30, 0x25, 0xd5, 0x5d, 0xcb, 0x0f, 0x34, 0x44, 0xb5,
+	0x2d, 0xe5, 0x18, 0xd7, 0xcf, 0x0c, 0x0c, 0x03, 0x9b, 0x39, 0x21, 0x39, 0x22, 0x26, 0xd6, 0x96,
+	0xa3, 0xc0, 0xce, 0x88, 0xc3, 0xc0, 0x66, 0xec, 0x39, 0xc6, 0x9e, 0x45, 0x4c, 0xed, 0x06, 0xdd,
+	0x03, 0xe5, 0x3b, 0x50, 0x0f, 0x6e, 0x30, 0xc2, 0xdb, 0xba, 0x63, 0x7e, 0x68, 0x99, 0xc1, 0x89,
+	0xb6, 0x42, 0x1f, 0x10, 0xf6, 0xb1, 0xcb, 0xe7, 0x55, 0x7e, 0xf9, 0x7c, 0x0f, 0x5e, 0x1c, 0x1b,
+	0x66, 0x13, 0x1d, 0xaf, 0xbc, 0x0f, 0x5f, 0x2a, 0x11, 0x30, 0x13, 0xa9, 0x9c, 0x2a, 0x75, 0xff,
+	0xab, 0x01, 0x2b, 0xd1, 0x27, 0x69, 0x96, 0xbf, 0x2e, 0x2c, 0x7f, 0x09, 0x01, 0xbe, 0xfc, 0xfc,
+	0x25, 0x36, 0xe3, 0x6a, 0xe6, 0x2f, 0x36, 0x43, 0x2d, 0x72, 0x19, 0x4a, 0x3c, 0x8b, 0xa2, 0x0c,
+	0xc5, 0xe5, 0xc1, 0xa5, 0x6c, 0x1e, 0x64, 0x88, 0x8f, 0x3e, 0x87, 0xc4, 0xdf, 0x73, 0xf4, 0x47,
+	0xf6, 0x8c, 0xf8, 0x17, 0x47, 0x7c, 0x21, 0xc0, 0x97, 0x4f, 0x7c, 0xb1, 0x19, 0x9f, 0x36, 0xe2,
+	0x8b, 0x67, 0x31, 0x23, 0xfe, 0x84, 0xc4, 0xff, 0x6f, 0x03, 0x56, 0x77, 0x2d, 0x7f, 0xc6, 0xfc,
+	0xc9, 0x98, 0xff, 0x93, 0x72, 0xcc, 0xff, 0x76, 0xf2, 0x95, 0x12, 0x22, 0x3c, 0x35, 0xf5, 0x7f,
+	0x5e, 0x96, 0xfa, 0xdb, 0x72, 0x3b, 0xae, 0x26, 0xf7, 0xf7, 0x73, 0xdc, 0x7f, 0x55, 0x3e, 0x8d,
+	0x19, 0xf9, 0x27, 0x24, 0xff, 0x5f, 0x5b, 0x70, 0xf3, 0x8e, 0x6e, 0xd9, 0x64, 0x88, 0xbd, 0x19,
+	0xfb, 0xcb, 0xb3, 0xff, 0xa7, 0xe5, 0xd8, 0x9f, 0x7c, 0x70, 0x0b, 0x20, 0x9e, 0x9a, 0xfe, 0xcf,
+	0xca, 0xd2, 0xff, 0xf6, 0x18, 0x43, 0xae, 0x26, 0xff, 0xdf, 0x80, 0x65, 0xdd, 0xb6, 0xc9, 0x87,
+	0xd1, 0xa9, 0x28, 0x8e, 0x6f, 0x79, 0xe3, 0xe3, 0x0b, 0x51, 0x17, 0xda, 0x02, 0x94, 0x5a, 0x79,
+	0x5b, 0x37, 0x9e, 0x60, 0xc7, 0x3c, 0x34, 0xe3, 0x7a, 0x08, 0x41, 0x0f, 0x3a, 0x60, 0x32, 0x4c,
+	0x74, 0x54, 0xf1, 0xda, 0x18, 0xa4, 0x4a, 0xa5, 0x98, 0x65, 0x49, 0x8a, 0xb9, 0xf1, 0xf9, 0x4a,
+	0x31, 0x1d, 0x1f, 0x16, 0x46, 0x58, 0xfe, 0xe0, 0x14, 0xfb, 0x85, 0x7e, 0xad, 0x4c, 0xea, 0x57,
+	0xa5, 0xc8, 0xaf, 0xdd, 0x5f, 0x29, 0xc9, 0x31, 0x6c, 0xa4, 0x60, 0xdf, 0x23, 0xa7, 0x6e, 0xe9,
+	0xac, 0xc6, 0x47, 0xac, 0x9a, 0x8b, 0xd8, 0xf1, 0x97, 0xec, 0xa2, 0xec, 0x54, 0x2b, 0xc8, 0x4e,
+	0xeb, 0x00, 0xba, 0x19, 0x4f, 0xd4, 0xa7, 0x37, 0x31, 0xad, 0x3e, 0x23, 0x89, 0x0a, 0x8a, 0x06,
+	0x64, 0x88, 0x93, 0x21, 0x0d, 0x3a, 0x84, 0x17, 0x16, 0x66, 0xb1, 0xc2, 0x9b, 0xf4, 0xee, 0x1f,
+	0x2b, 0xb0, 0xf2, 0xd0, 0x35, 0x4b, 0x60, 0xc4, 0xe3, 0xa1, 0xe4, 0xf0, 0xe0, 0x67, 0xa0, 0x8e,
+	0x9f, 0x41, 0x55, 0x3e, 0x83, 0x5a, 0xd1, 0x0c, 0xf8, 0xcb, 0x8c, 0xee, 0x59, 0x72, 0x56, 0x35,
+	0x6e, 0x02, 0x23, 0xd5, 0x0a, 0xa7, 0x7a, 0x9c, 0xa3, 0x99, 0x57, 0x57, 0xf9, 0x57, 0xff, 0xaf,
+	0x02, 0x8b, 0x51, 0x8c, 0x32, 0xd5, 0x39, 0x2f, 0xc3, 0xbc, 0xce, 0x5f, 0xae, 0x44, 0x26, 0x64,
+	0xa4, 0xe1, 0x38, 0x83, 0x38, 0x0e, 0x36, 0x28, 0x31, 0xc3, 0xdc, 0x13, 0x99, 0x95, 0x91, 0x72,
+	0x55, 0x2f, 0x2a, 0x57, 0xf5, 0x92, 0x7d, 0x75, 0x61, 0x5a, 0x2a, 0x9c, 0xc1, 0x74, 0xeb, 0x86,
+	0x70, 0xfa, 0xbb, 0xf8, 0x13, 0x9b, 0x7e, 0xf6, 0xd5, 0x97, 0x3d, 0xfd, 0xdf, 0xab, 0xb0, 0x1a,
+	0x45, 0xde, 0x1d, 0xcb, 0xc6, 0xf7, 0x4f, 0x74, 0x0f, 0x6f, 0x1b, 0xb6, 0x30, 0xf4, 0x36, 0xa0,
+	0x1d, 0xe6, 0x79, 0x3f, 0x1c, 0x93, 0xc6, 0x1f, 0x2b, 0x2a, 0xb1, 0x86, 0x42, 0x50, 0x0d, 0xce,
+	0xdc, 0xa4, 0x04, 0x84, 0xfe, 0xa6, 0x19, 0x86, 0xc2, 0xba, 0xa3, 0xbb, 0x71, 0x36, 0xd1, 0x6a,
+	0x94, 0x56, 0x39, 0x79, 0xb8, 0x92, 0x89, 0x64, 0x0f, 0x48, 0x4c, 0xa1, 0xb4, 0x5d, 0x5c, 0xbd,
+	0x36, 0x45, 0x8d, 0x0e, 0x82, 0x2a, 0x7d, 0x26, 0x2a, 0xd0, 0xa1, 0xbf, 0xb9, 0xb5, 0x7c, 0x9b,
+	0x5f, 0xcb, 0x0b, 0x81, 0x2c, 0x72, 0xe9, 0xf4, 0x8e, 0x8b, 0xbe, 0x0b, 0x33, 0xc7, 0x4d, 0xed,
+	0x38, 0x31, 0x90, 0x17, 0xe3, 0xb8, 0x3f, 0xab, 0xb0, 0x9c, 0x79, 0xdf, 0x05, 0xd7, 0xc9, 0x4d,
+	0xb2, 0xc1, 0x78, 0x9e, 0x2d, 0xc4, 0x6e, 0xae, 0xa4, 0x71, 0x53, 0x8c, 0xeb, 0x65, 0x57, 0x35,
+	0x86, 0x5b, 0x36, 0xfc, 0xd4, 0x25, 0x5e, 0x70, 0x97, 0x44, 0x6b, 0x47, 0x5f, 0x9b, 0xa7, 0x01,
+	0x9a, 0x15, 0x4f, 0xe7, 0xd2, 0x3f, 0x29, 0xb0, 0x9c, 0xe1, 0xfe, 0x98, 0x8f, 0x37, 0x5f, 0xf4,
+	0xbb, 0x9b, 0xab, 0xa9, 0xd8, 0x14, 0x67, 0x94, 0xcb, 0xae, 0xfb, 0x4d, 0x83, 0xb0, 0xc9, 0x04,
+	0x61, 0x1c, 0x0a, 0x4e, 0x26, 0x14, 0xc2, 0xf6, 0x74, 0x30, 0xfe, 0x47, 0x81, 0x5b, 0x99, 0x88,
+	0xb9, 0xa4, 0x4a, 0xd2, 0x4c, 0x86, 0xac, 0xe5, 0x33, 0x24, 0x0f, 0x6e, 0x5d, 0x06, 0x6e, 0xa3,
+	0x10, 0xdc, 0x26, 0x0f, 0xee, 0x5d, 0xc6, 0xed, 0x2d, 0xea, 0xf6, 0x37, 0xc4, 0xbc, 0x29, 0x53,
+	0x63, 0x39, 0x1d, 0xf4, 0xbf, 0x53, 0xe0, 0x56, 0x26, 0xd6, 0xa4, 0xd0, 0x8f, 0xff, 0xa4, 0x3c,
+	0xf7, 0x82, 0x94, 0x05, 0xac, 0x56, 0x0c, 0x58, 0x9d, 0x03, 0x4c, 0x62, 0xfb, 0xc5, 0x00, 0xf6,
+	0x8f, 0x0a, 0x2c, 0xec, 0x63, 0x07, 0x7b, 0x96, 0xd1, 0xc7, 0xbe, 0x4b, 0x1c, 0x1f, 0xa3, 0xb7,
+	0xa1, 0xee, 0x61, 0xff, 0xd4, 0x0e, 0xa8, 0x8a, 0x76, 0xef, 0x85, 0xd8, 0xb8, 0xcc, 0xb8, 0xad,
+	0x3e, 0x1d, 0x74, 0x70, 0xad, 0x1f, 0x0f, 0x47, 0x6f, 0x41, 0x0d, 0x7b, 0x1e, 0xf1, 0xe8, 0x6b,
+	0xda, 0xbd, 0xb5, 0x82, 0xe7, 0xf6, 0xc2, 0x31, 0x07, 0xd7, 0xfa, 0xd1, 0xe0, 0x4e, 0x17, 0xea,
+	0x91, 0xa6, 0x10, 0xb1, 0x01, 0xf6, 0x7d, 0xfd, 0xfb, 0x38, 0x36, 0x3e, 0x69, 0x76, 0xde, 0x81,
+	0x1a, 0x7d, 0x2a, 0xe4, 0x85, 0x41, 0xcc, 0xa4, 0x9f, 0xfe, 0xce, 0xf2, 0x42, 0xc9, 0xf1, 0xe2,
+	0x76, 0x03, 0x6a, 0x1e, 0x76, 0xed, 0xb3, 0xee, 0x47, 0x15, 0x98, 0xdf, 0xc7, 0xc1, 0x11, 0x0e,
+	0x3c, 0xcb, 0xf0, 0x69, 0x48, 0xac, 0x03, 0x58, 0x8e, 0x1f, 0xe8, 0x8e, 0x11, 0x46, 0x40, 0xa4,
+	0x97, 0x91, 0x84, 0xfd, 0x03, 0x3a, 0x9c, 0xdd, 0x6a, 0x8d, 0x24, 0x68, 0x0d, 0x5a, 0x7e, 0xa0,
+	0x7b, 0xc1, 0x03, 0x2b, 0x8d, 0x8f, 0x91, 0x20, 0x9c, 0x12, 0x76, 0x4c, 0xda, 0x17, 0x87, 0x47,
+	0xdc, 0x2c, 0xae, 0x15, 0xee, 0xfe, 0xa2, 0x02, 0x68, 0x87, 0xd8, 0x36, 0x36, 0x26, 0x32, 0x74,
+	0x03, 0xda, 0x23, 0xb3, 0x7c, 0x4d, 0xa1, 0x1f, 0x08, 0x56, 0xc4, 0xbe, 0x52, 0xe5, 0x63, 0x75,
+	0x4c, 0x61, 0x73, 0x17, 0xa0, 0xf9, 0x1e, 0x39, 0xd6, 0x3d, 0x7d, 0xe0, 0xf7, 0xfe, 0x02, 0x00,
+	0x3b, 0xc4, 0x09, 0xbc, 0xd0, 0x44, 0x0f, 0x6d, 0xc3, 0x75, 0x76, 0x5f, 0x8f, 0x6e, 0x16, 0xfc,
+	0xe3, 0x4e, 0x67, 0x55, 0x1c, 0x0e, 0xdd, 0x6b, 0xa1, 0x0a, 0x76, 0xd7, 0x98, 0xaa, 0xc8, 0xfe,
+	0xab, 0x88, 0x5c, 0x05, 0xfb, 0x7f, 0x07, 0xa9, 0x8a, 0xec, 0x3f, 0x23, 0x48, 0x54, 0xbc, 0x0f,
+	0x37, 0x44, 0x55, 0xf3, 0xe8, 0x8b, 0x63, 0x4a, 0xea, 0xe5, 0x2a, 0x45, 0x35, 0xe6, 0xa9, 0xca,
+	0xa2, 0x02, 0x74, 0x89, 0xca, 0x87, 0xc9, 0x72, 0x39, 0x5b, 0xba, 0x8b, 0x5e, 0x1c, 0x5b, 0x3d,
+	0x2d, 0x57, 0x2b, 0xae, 0x08, 0x4e, 0xd5, 0x16, 0x17, 0x0c, 0x4b, 0xd4, 0xbe, 0x0b, 0x4b, 0xb9,
+	0x7a, 0x25, 0xb4, 0x26, 0xab, 0x64, 0x92, 0x2b, 0xcb, 0x95, 0x16, 0xa4, 0xca, 0x84, 0x45, 0x07,
+	0x72, 0x65, 0xb9, 0xeb, 0xca, 0x54, 0x99, 0xf0, 0x22, 0x53, 0xa2, 0xec, 0x08, 0x50, 0xfe, 0xfe,
+	0x03, 0xbd, 0x20, 0xbd, 0x1a, 0x91, 0xa8, 0xbb, 0x07, 0xcb, 0x82, 0xc3, 0x4e, 0xb4, 0x2e, 0x3f,
+	0x08, 0x2d, 0xe3, 0x06, 0xe6, 0x58, 0x26, 0xe3, 0x86, 0xcc, 0x81, 0x8d, 0x5c, 0x59, 0xee, 0x90,
+	0x2a, 0x55, 0x26, 0x3c, 0xbe, 0x2a, 0xe3, 0x53, 0x91, 0x32, 0xe1, 0x51, 0x92, 0x44, 0xd9, 0x3b,
+	0x00, 0xa3, 0xe4, 0x8e, 0x56, 0xd2, 0x71, 0x6c, 0x1a, 0x95, 0x3c, 0xbe, 0x07, 0xf3, 0x7c, 0xda,
+	0x45, 0x5f, 0x48, 0x20, 0xca, 0x65, 0x63, 0x89, 0x9a, 0xb7, 0xa0, 0xb1, 0x8f, 0x83, 0x87, 0x9e,
+	0xed, 0xa3, 0xa4, 0xfe, 0x38, 0xc9, 0x9d, 0xc5, 0x4f, 0xf5, 0x3e, 0x6e, 0xc1, 0xdc, 0xb1, 0x47,
+	0x86, 0x96, 0x6f, 0x11, 0x67, 0x97, 0x18, 0x4f, 0x66, 0x89, 0x75, 0x96, 0x58, 0x67, 0x89, 0x75,
+	0x96, 0x58, 0xaf, 0x42, 0x62, 0x3d, 0x9f, 0xcc, 0xd8, 0xfb, 0xb7, 0x0a, 0xcb, 0xe9, 0xde, 0x86,
+	0x59, 0x42, 0xee, 0xc3, 0x42, 0x66, 0xa7, 0x88, 0x3a, 0xc5, 0x27, 0x2f, 0x12, 0x3b, 0xf7, 0x61,
+	0x21, 0xb3, 0x83, 0x4a, 0x15, 0x09, 0x4e, 0x20, 0x24, 0x8a, 0xbe, 0x0b, 0x37, 0x0b, 0xf6, 0xae,
+	0xa8, 0x3b, 0x7e, 0x6f, 0x2b, 0x57, 0x5c, 0xb0, 0xc7, 0x4b, 0x15, 0x4b, 0xf6, 0x80, 0x72, 0xa6,
+	0xe4, 0x4f, 0xff, 0x52, 0xa6, 0x88, 0x0f, 0x06, 0xc7, 0x10, 0x2f, 0x77, 0x0a, 0x3c, 0x22, 0x9e,
+	0xf0, 0x80, 0x58, 0xe2, 0xf9, 0x7f, 0xaa, 0x30, 0x97, 0x0e, 0xa7, 0x5f, 0xb7, 0x99, 0xcf, 0x3f,
+	0xeb, 0x3e, 0xff, 0x65, 0x05, 0x20, 0xfa, 0x9e, 0x25, 0xcb, 0x19, 0xf6, 0x8e, 0x2c, 0x5d, 0x48,
+	0x64, 0x2f, 0xce, 0xc6, 0x2d, 0x67, 0x04, 0x2a, 0xb2, 0x97, 0x4f, 0xc5, 0x2a, 0x1e, 0xd5, 0x69,
+	0xc7, 0x57, 0xff, 0x1f, 0x00, 0x00, 0xff, 0xff, 0xaa, 0xed, 0x6d, 0x44, 0x1c, 0x44, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -3113,7 +3968,12 @@ type ControllerClient interface {
 	UpdateVolumeGroup(ctx context.Context, in *UpdateVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete volume group
 	DeleteVolumeGroup(ctx context.Context, in *DeleteVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Get metrics from Prometheus
 	GetMetrics(ctx context.Context, in *GetMetricsOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Collect metrics from metrics driver
+	CollectMetrics(ctx context.Context, in *CollectMetricsOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Get 3rd party re-direct URLs for telemetry
+	GetUrls(ctx context.Context, in *NoParams, opts ...grpc.CallOption) (*GenericResponse, error)
 }
 
 type controllerClient struct {
@@ -3268,6 +4128,24 @@ func (c *controllerClient) GetMetrics(ctx context.Context, in *GetMetricsOpts, o
 	return out, nil
 }
 
+func (c *controllerClient) CollectMetrics(ctx context.Context, in *CollectMetricsOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.Controller/CollectMetrics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetUrls(ctx context.Context, in *NoParams, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.Controller/GetUrls", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControllerServer is the server API for Controller service.
 type ControllerServer interface {
 	// Create a volume
@@ -3300,7 +4178,71 @@ type ControllerServer interface {
 	UpdateVolumeGroup(context.Context, *UpdateVolumeGroupOpts) (*GenericResponse, error)
 	// Delete volume group
 	DeleteVolumeGroup(context.Context, *DeleteVolumeGroupOpts) (*GenericResponse, error)
+	// Get metrics from Prometheus
 	GetMetrics(context.Context, *GetMetricsOpts) (*GenericResponse, error)
+	// Collect metrics from metrics driver
+	CollectMetrics(context.Context, *CollectMetricsOpts) (*GenericResponse, error)
+	// Get 3rd party re-direct URLs for telemetry
+	GetUrls(context.Context, *NoParams) (*GenericResponse, error)
+}
+
+// UnimplementedControllerServer can be embedded to have forward compatible implementations.
+type UnimplementedControllerServer struct {
+}
+
+func (*UnimplementedControllerServer) CreateVolume(ctx context.Context, req *CreateVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
+}
+func (*UnimplementedControllerServer) DeleteVolume(ctx context.Context, req *DeleteVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
+}
+func (*UnimplementedControllerServer) ExtendVolume(ctx context.Context, req *ExtendVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExtendVolume not implemented")
+}
+func (*UnimplementedControllerServer) CreateVolumeSnapshot(ctx context.Context, req *CreateVolumeSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeSnapshot not implemented")
+}
+func (*UnimplementedControllerServer) DeleteVolumeSnapshot(ctx context.Context, req *DeleteVolumeSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeSnapshot not implemented")
+}
+func (*UnimplementedControllerServer) CreateVolumeAttachment(ctx context.Context, req *CreateVolumeAttachmentOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeAttachment not implemented")
+}
+func (*UnimplementedControllerServer) DeleteVolumeAttachment(ctx context.Context, req *DeleteVolumeAttachmentOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeAttachment not implemented")
+}
+func (*UnimplementedControllerServer) CreateReplication(ctx context.Context, req *CreateReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateReplication not implemented")
+}
+func (*UnimplementedControllerServer) DeleteReplication(ctx context.Context, req *DeleteReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteReplication not implemented")
+}
+func (*UnimplementedControllerServer) EnableReplication(ctx context.Context, req *EnableReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnableReplication not implemented")
+}
+func (*UnimplementedControllerServer) DisableReplication(ctx context.Context, req *DisableReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableReplication not implemented")
+}
+func (*UnimplementedControllerServer) FailoverReplication(ctx context.Context, req *FailoverReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FailoverReplication not implemented")
+}
+func (*UnimplementedControllerServer) CreateVolumeGroup(ctx context.Context, req *CreateVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeGroup not implemented")
+}
+func (*UnimplementedControllerServer) UpdateVolumeGroup(ctx context.Context, req *UpdateVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolumeGroup not implemented")
+}
+func (*UnimplementedControllerServer) DeleteVolumeGroup(ctx context.Context, req *DeleteVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeGroup not implemented")
+}
+func (*UnimplementedControllerServer) GetMetrics(ctx context.Context, req *GetMetricsOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMetrics not implemented")
+}
+func (*UnimplementedControllerServer) CollectMetrics(ctx context.Context, req *CollectMetricsOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollectMetrics not implemented")
+}
+func (*UnimplementedControllerServer) GetUrls(ctx context.Context, req *NoParams) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUrls not implemented")
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
@@ -3595,6 +4537,42 @@ func _Controller_GetMetrics_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_CollectMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectMetricsOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).CollectMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Controller/CollectMetrics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).CollectMetrics(ctx, req.(*CollectMetricsOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetUrls_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NoParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetUrls(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Controller/GetUrls",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetUrls(ctx, req.(*NoParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Controller_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.Controller",
 	HandlerType: (*ControllerServer)(nil),
@@ -3663,6 +4641,14 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetMetrics",
 			Handler:    _Controller_GetMetrics_Handler,
 		},
+		{
+			MethodName: "CollectMetrics",
+			Handler:    _Controller_CollectMetrics_Handler,
+		},
+		{
+			MethodName: "GetUrls",
+			Handler:    _Controller_GetUrls_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "model.proto",
@@ -3702,6 +4688,8 @@ type ProvisionDockClient interface {
 	UpdateVolumeGroup(ctx context.Context, in *UpdateVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 	// Delete volume group
 	DeleteVolumeGroup(ctx context.Context, in *DeleteVolumeGroupOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Collect metrics from metrics driver
+	CollectMetrics(ctx context.Context, in *CollectMetricsOpts, opts ...grpc.CallOption) (*GenericResponse, error)
 }
 
 type provisionDockClient struct {
@@ -3847,6 +4835,15 @@ func (c *provisionDockClient) DeleteVolumeGroup(ctx context.Context, in *DeleteV
 	return out, nil
 }
 
+func (c *provisionDockClient) CollectMetrics(ctx context.Context, in *CollectMetricsOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.ProvisionDock/CollectMetrics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProvisionDockServer is the server API for ProvisionDock service.
 type ProvisionDockServer interface {
 	// Create a volume
@@ -3879,6 +4876,61 @@ type ProvisionDockServer interface {
 	UpdateVolumeGroup(context.Context, *UpdateVolumeGroupOpts) (*GenericResponse, error)
 	// Delete volume group
 	DeleteVolumeGroup(context.Context, *DeleteVolumeGroupOpts) (*GenericResponse, error)
+	// Collect metrics from metrics driver
+	CollectMetrics(context.Context, *CollectMetricsOpts) (*GenericResponse, error)
+}
+
+// UnimplementedProvisionDockServer can be embedded to have forward compatible implementations.
+type UnimplementedProvisionDockServer struct {
+}
+
+func (*UnimplementedProvisionDockServer) CreateVolume(ctx context.Context, req *CreateVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
+}
+func (*UnimplementedProvisionDockServer) DeleteVolume(ctx context.Context, req *DeleteVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
+}
+func (*UnimplementedProvisionDockServer) ExtendVolume(ctx context.Context, req *ExtendVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExtendVolume not implemented")
+}
+func (*UnimplementedProvisionDockServer) CreateVolumeSnapshot(ctx context.Context, req *CreateVolumeSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeSnapshot not implemented")
+}
+func (*UnimplementedProvisionDockServer) DeleteVolumeSnapshot(ctx context.Context, req *DeleteVolumeSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeSnapshot not implemented")
+}
+func (*UnimplementedProvisionDockServer) CreateVolumeAttachment(ctx context.Context, req *CreateVolumeAttachmentOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeAttachment not implemented")
+}
+func (*UnimplementedProvisionDockServer) DeleteVolumeAttachment(ctx context.Context, req *DeleteVolumeAttachmentOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeAttachment not implemented")
+}
+func (*UnimplementedProvisionDockServer) CreateReplication(ctx context.Context, req *CreateReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateReplication not implemented")
+}
+func (*UnimplementedProvisionDockServer) DeleteReplication(ctx context.Context, req *DeleteReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteReplication not implemented")
+}
+func (*UnimplementedProvisionDockServer) EnableReplication(ctx context.Context, req *EnableReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnableReplication not implemented")
+}
+func (*UnimplementedProvisionDockServer) DisableReplication(ctx context.Context, req *DisableReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableReplication not implemented")
+}
+func (*UnimplementedProvisionDockServer) FailoverReplication(ctx context.Context, req *FailoverReplicationOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FailoverReplication not implemented")
+}
+func (*UnimplementedProvisionDockServer) CreateVolumeGroup(ctx context.Context, req *CreateVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolumeGroup not implemented")
+}
+func (*UnimplementedProvisionDockServer) UpdateVolumeGroup(ctx context.Context, req *UpdateVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolumeGroup not implemented")
+}
+func (*UnimplementedProvisionDockServer) DeleteVolumeGroup(ctx context.Context, req *DeleteVolumeGroupOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolumeGroup not implemented")
+}
+func (*UnimplementedProvisionDockServer) CollectMetrics(ctx context.Context, req *CollectMetricsOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollectMetrics not implemented")
 }
 
 func RegisterProvisionDockServer(s *grpc.Server, srv ProvisionDockServer) {
@@ -4155,6 +5207,24 @@ func _ProvisionDock_DeleteVolumeGroup_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProvisionDock_CollectMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectMetricsOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProvisionDockServer).CollectMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ProvisionDock/CollectMetrics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProvisionDockServer).CollectMetrics(ctx, req.(*CollectMetricsOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ProvisionDock_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.ProvisionDock",
 	HandlerType: (*ProvisionDockServer)(nil),
@@ -4219,6 +5289,538 @@ var _ProvisionDock_serviceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteVolumeGroup",
 			Handler:    _ProvisionDock_DeleteVolumeGroup_Handler,
 		},
+		{
+			MethodName: "CollectMetrics",
+			Handler:    _ProvisionDock_CollectMetrics_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "model.proto",
+}
+
+// FileShareControllerClient is the client API for FileShareController service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type FileShareControllerClient interface {
+	// Create a file share
+	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a file share snapshot
+	CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	//Delete a file share snapshot
+	DeleteFileShareSnapshot(ctx context.Context, in *DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a file share Acl
+	CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share Acl
+	DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+}
+
+type fileShareControllerClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewFileShareControllerClient(cc *grpc.ClientConn) FileShareControllerClient {
+	return &fileShareControllerClient{cc}
+}
+
+func (c *fileShareControllerClient) CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/CreateFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareControllerClient) DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/DeleteFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareControllerClient) CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/CreateFileShareSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareControllerClient) DeleteFileShareSnapshot(ctx context.Context, in *DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/DeleteFileShareSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareControllerClient) CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/CreateFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareControllerClient) DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareController/DeleteFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FileShareControllerServer is the server API for FileShareController service.
+type FileShareControllerServer interface {
+	// Create a file share
+	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
+	// Create a file share snapshot
+	CreateFileShareSnapshot(context.Context, *CreateFileShareSnapshotOpts) (*GenericResponse, error)
+	//Delete a file share snapshot
+	DeleteFileShareSnapshot(context.Context, *DeleteFileShareSnapshotOpts) (*GenericResponse, error)
+	// Create a file share Acl
+	CreateFileShareAcl(context.Context, *CreateFileShareAclOpts) (*GenericResponse, error)
+	// Delete a file share Acl
+	DeleteFileShareAcl(context.Context, *DeleteFileShareAclOpts) (*GenericResponse, error)
+}
+
+// UnimplementedFileShareControllerServer can be embedded to have forward compatible implementations.
+type UnimplementedFileShareControllerServer struct {
+}
+
+func (*UnimplementedFileShareControllerServer) CreateFileShare(ctx context.Context, req *CreateFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShare not implemented")
+}
+func (*UnimplementedFileShareControllerServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedFileShareControllerServer) CreateFileShareSnapshot(ctx context.Context, req *CreateFileShareSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareSnapshot not implemented")
+}
+func (*UnimplementedFileShareControllerServer) DeleteFileShareSnapshot(ctx context.Context, req *DeleteFileShareSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareSnapshot not implemented")
+}
+func (*UnimplementedFileShareControllerServer) CreateFileShareAcl(ctx context.Context, req *CreateFileShareAclOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareAcl not implemented")
+}
+func (*UnimplementedFileShareControllerServer) DeleteFileShareAcl(ctx context.Context, req *DeleteFileShareAclOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareAcl not implemented")
+}
+
+func RegisterFileShareControllerServer(s *grpc.Server, srv FileShareControllerServer) {
+	s.RegisterService(&_FileShareController_serviceDesc, srv)
+}
+
+func _FileShareController_CreateFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).CreateFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/CreateFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).CreateFileShare(ctx, req.(*CreateFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareController_DeleteFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).DeleteFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/DeleteFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).DeleteFileShare(ctx, req.(*DeleteFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareController_CreateFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareSnapshotOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).CreateFileShareSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/CreateFileShareSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).CreateFileShareSnapshot(ctx, req.(*CreateFileShareSnapshotOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareController_DeleteFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareSnapshotOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).DeleteFileShareSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/DeleteFileShareSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).DeleteFileShareSnapshot(ctx, req.(*DeleteFileShareSnapshotOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareController_CreateFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).CreateFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/CreateFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).CreateFileShareAcl(ctx, req.(*CreateFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareController_DeleteFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareControllerServer).DeleteFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareController/DeleteFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareControllerServer).DeleteFileShareAcl(ctx, req.(*DeleteFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _FileShareController_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.FileShareController",
+	HandlerType: (*FileShareControllerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateFileShare",
+			Handler:    _FileShareController_CreateFileShare_Handler,
+		},
+		{
+			MethodName: "DeleteFileShare",
+			Handler:    _FileShareController_DeleteFileShare_Handler,
+		},
+		{
+			MethodName: "CreateFileShareSnapshot",
+			Handler:    _FileShareController_CreateFileShareSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteFileShareSnapshot",
+			Handler:    _FileShareController_DeleteFileShareSnapshot_Handler,
+		},
+		{
+			MethodName: "CreateFileShareAcl",
+			Handler:    _FileShareController_CreateFileShareAcl_Handler,
+		},
+		{
+			MethodName: "DeleteFileShareAcl",
+			Handler:    _FileShareController_DeleteFileShareAcl_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "model.proto",
+}
+
+// FileShareDockClient is the client API for FileShareDock service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type FileShareDockClient interface {
+	// Create a file share
+	CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a file share snapshot
+	CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	//Delete a file share snapshot
+	DeleteFileShareSnapshot(ctx context.Context, in *DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Create a file share Acl
+	CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+	// Delete a file share Acl
+	DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error)
+}
+
+type fileShareDockClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewFileShareDockClient(cc *grpc.ClientConn) FileShareDockClient {
+	return &fileShareDockClient{cc}
+}
+
+func (c *fileShareDockClient) CreateFileShare(ctx context.Context, in *CreateFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/CreateFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareDockClient) DeleteFileShare(ctx context.Context, in *DeleteFileShareOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/DeleteFileShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareDockClient) CreateFileShareSnapshot(ctx context.Context, in *CreateFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/CreateFileShareSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareDockClient) DeleteFileShareSnapshot(ctx context.Context, in *DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/DeleteFileShareSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareDockClient) CreateFileShareAcl(ctx context.Context, in *CreateFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/CreateFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileShareDockClient) DeleteFileShareAcl(ctx context.Context, in *DeleteFileShareAclOpts, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
+	err := c.cc.Invoke(ctx, "/proto.FileShareDock/DeleteFileShareAcl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FileShareDockServer is the server API for FileShareDock service.
+type FileShareDockServer interface {
+	// Create a file share
+	CreateFileShare(context.Context, *CreateFileShareOpts) (*GenericResponse, error)
+	// Delete a file share
+	DeleteFileShare(context.Context, *DeleteFileShareOpts) (*GenericResponse, error)
+	// Create a file share snapshot
+	CreateFileShareSnapshot(context.Context, *CreateFileShareSnapshotOpts) (*GenericResponse, error)
+	//Delete a file share snapshot
+	DeleteFileShareSnapshot(context.Context, *DeleteFileShareSnapshotOpts) (*GenericResponse, error)
+	// Create a file share Acl
+	CreateFileShareAcl(context.Context, *CreateFileShareAclOpts) (*GenericResponse, error)
+	// Delete a file share Acl
+	DeleteFileShareAcl(context.Context, *DeleteFileShareAclOpts) (*GenericResponse, error)
+}
+
+// UnimplementedFileShareDockServer can be embedded to have forward compatible implementations.
+type UnimplementedFileShareDockServer struct {
+}
+
+func (*UnimplementedFileShareDockServer) CreateFileShare(ctx context.Context, req *CreateFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShare not implemented")
+}
+func (*UnimplementedFileShareDockServer) DeleteFileShare(ctx context.Context, req *DeleteFileShareOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShare not implemented")
+}
+func (*UnimplementedFileShareDockServer) CreateFileShareSnapshot(ctx context.Context, req *CreateFileShareSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareSnapshot not implemented")
+}
+func (*UnimplementedFileShareDockServer) DeleteFileShareSnapshot(ctx context.Context, req *DeleteFileShareSnapshotOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareSnapshot not implemented")
+}
+func (*UnimplementedFileShareDockServer) CreateFileShareAcl(ctx context.Context, req *CreateFileShareAclOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFileShareAcl not implemented")
+}
+func (*UnimplementedFileShareDockServer) DeleteFileShareAcl(ctx context.Context, req *DeleteFileShareAclOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFileShareAcl not implemented")
+}
+
+func RegisterFileShareDockServer(s *grpc.Server, srv FileShareDockServer) {
+	s.RegisterService(&_FileShareDock_serviceDesc, srv)
+}
+
+func _FileShareDock_CreateFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).CreateFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/CreateFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).CreateFileShare(ctx, req.(*CreateFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareDock_DeleteFileShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).DeleteFileShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/DeleteFileShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).DeleteFileShare(ctx, req.(*DeleteFileShareOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareDock_CreateFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareSnapshotOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).CreateFileShareSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/CreateFileShareSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).CreateFileShareSnapshot(ctx, req.(*CreateFileShareSnapshotOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareDock_DeleteFileShareSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareSnapshotOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).DeleteFileShareSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/DeleteFileShareSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).DeleteFileShareSnapshot(ctx, req.(*DeleteFileShareSnapshotOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareDock_CreateFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).CreateFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/CreateFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).CreateFileShareAcl(ctx, req.(*CreateFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileShareDock_DeleteFileShareAcl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileShareAclOpts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileShareDockServer).DeleteFileShareAcl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.FileShareDock/DeleteFileShareAcl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileShareDockServer).DeleteFileShareAcl(ctx, req.(*DeleteFileShareAclOpts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _FileShareDock_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.FileShareDock",
+	HandlerType: (*FileShareDockServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateFileShare",
+			Handler:    _FileShareDock_CreateFileShare_Handler,
+		},
+		{
+			MethodName: "DeleteFileShare",
+			Handler:    _FileShareDock_DeleteFileShare_Handler,
+		},
+		{
+			MethodName: "CreateFileShareSnapshot",
+			Handler:    _FileShareDock_CreateFileShareSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteFileShareSnapshot",
+			Handler:    _FileShareDock_DeleteFileShareSnapshot_Handler,
+		},
+		{
+			MethodName: "CreateFileShareAcl",
+			Handler:    _FileShareDock_CreateFileShareAcl_Handler,
+		},
+		{
+			MethodName: "DeleteFileShareAcl",
+			Handler:    _FileShareDock_DeleteFileShareAcl_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "model.proto",
@@ -4266,6 +5868,17 @@ type AttachDockServer interface {
 	AttachVolume(context.Context, *AttachVolumeOpts) (*GenericResponse, error)
 	// Detach a volume
 	DetachVolume(context.Context, *DetachVolumeOpts) (*GenericResponse, error)
+}
+
+// UnimplementedAttachDockServer can be embedded to have forward compatible implementations.
+type UnimplementedAttachDockServer struct {
+}
+
+func (*UnimplementedAttachDockServer) AttachVolume(ctx context.Context, req *AttachVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachVolume not implemented")
+}
+func (*UnimplementedAttachDockServer) DetachVolume(ctx context.Context, req *DetachVolumeOpts) (*GenericResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DetachVolume not implemented")
 }
 
 func RegisterAttachDockServer(s *grpc.Server, srv AttachDockServer) {
