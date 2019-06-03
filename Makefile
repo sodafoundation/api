@@ -20,6 +20,8 @@ VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
 		 --always --dirty --abbrev=8)
 BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
 
+PROTOC_VERSION ?= 3.8.0
+
 all: build
 
 ubuntu-dev-setup:
@@ -59,7 +61,17 @@ docker: build
 test: build
 	install/CI/test
 
-protoc:
+protoc_precheck:
+	@if ! which protoc >/dev/null; then\
+		echo "No protoc in $(PATH), consider visiting https://github.com/protocolbuffers/protobuf/releases to get the protoc(version $(PROTOC_VERSION))";\
+		exit 1;\
+	fi;
+	@if [ ! "libprotoc $(PROTOC_VERSION)" = "$(shell protoc --version)" ]; then\
+		echo "protoc version should be $(PROTOC_VERSION)";\
+		exit 1;\
+	fi
+
+protoc: protoc_precheck
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
 
 goimports:
