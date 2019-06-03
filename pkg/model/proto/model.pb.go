@@ -2647,7 +2647,7 @@ func (m *DetachVolumeOpts) GetContext() string {
 	return ""
 }
 
-// DreateFileShareAclOpts is a structure which indicates all required properties for creating a file share.
+// DeleteFileShareAclOpts is a structure which indicates all required properties for creating a file share.
 type DeleteFileShareAclOpts struct {
 	// The uuid of the file share, optional when creating.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
