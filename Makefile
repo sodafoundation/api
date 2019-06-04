@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
                  git describe --match=$(git rev-parse --short=8 HEAD) \
 		 --always --dirty --abbrev=8)
 BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
+
+DOCKER_TAG ?= latest
 
 PROTOC_VERSION ?= 3.8.0
 
@@ -54,9 +56,9 @@ docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
-	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
-	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
-	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
+	docker build cmd/osdsdock -t opensdsio/opensds-dock:$(DOCKER_TAG)
+	docker build cmd/osdslet -t opensdsio/opensds-controller:$(DOCKER_TAG)
+	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:$(DOCKER_TAG)
 
 test: build
 	install/CI/test
