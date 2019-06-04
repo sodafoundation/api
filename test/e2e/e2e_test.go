@@ -763,3 +763,109 @@ func TestUpdateVolumeGroup(t *testing.T) {
 	}
 	t.Log("Update volume group success!")
 }
+
+func TestCreateFileShare(t *testing.T) {
+	t.Log("Start creating file share...")
+	var body = &model.FileShareSpec{
+		Name:        "share_test",
+		Description: "This is a test",
+		Size:        int64(1),
+	}
+	fileshare, err := c.CreateFileShare(body)
+	if err != nil {
+		t.Error("create fileshare failed:", err)
+		return
+	}
+
+	// Check if the status of created fileshare is available.
+	fileshare, _ = c.GetFileShare(fileshare.Id)
+	if fileshare.Status != model.FileShareAvailable {
+		t.Errorf("status expected is %s, got %s\n", model.FileShareAvailable, fileshare.Status)
+		return
+	}
+	t.Log("Create file share success!")
+}
+
+func prepareGetFileShare(t *testing.T) (string, error) {
+	t.Log("Start preparing fileshare...")
+	var fileshare_id string
+	var filesharelst []*model.FileShareSpec
+	if filesharelst, _ = c.ListFileShares(); len(filesharelst) == 0 {
+		fmt.Errorf("list of fileshare is empty!")
+		return "", nil
+	}
+
+	for _, item := range filesharelst {
+		if item.Name == "share_test" {
+			fileshare_id = item.Id
+		}
+	}
+
+	t.Log("End preparing fileshare...")
+	return fileshare_id, nil
+}
+
+func TestGetFileShare(t *testing.T) {
+	fileshareId, err := prepareGetFileShare(t)
+	if err != nil {
+		t.Error("failed to run fileshare prepare function:", err)
+		return
+	}
+
+	t.Log("Start checking fileshare...")
+	fileshare, err := c.GetFileShare(fileshareId)
+	if err != nil {
+		t.Error("check fileshare failed:", err)
+		return
+	}
+	// Test the status of created fileshare.
+	if fileshare.Status != model.FileShareAvailable {
+		t.Error("the status of fileshare is not available!")
+		return
+	}
+	t.Log("Check fileshare success!")
+}
+
+func TestListFileShares(t *testing.T) {
+	t.Log("Start checking all fileshares...")
+	if _, err := c.ListFileShares(); err != nil {
+		t.Error("check all fileshares failed:", err)
+		return
+	}
+	t.Log("Check all fileshares success!")
+}
+
+func prepareGetShare(t *testing.T) (string, error) {
+	t.Log("Start preparing fileshare...")
+	var fileshare_id string
+	var filesharelst []*model.FileShareSpec
+	if filesharelst, _ = c.ListFileShares(); len(filesharelst) == 0 {
+		fmt.Errorf("list of fileshare is empty!")
+		return "", nil
+	}
+
+	for _, item := range filesharelst {
+		if item.Name == "share_test" {
+			fileshare_id = item.Id
+		}
+	}
+
+	t.Log("End preparing fileshare...")
+	return fileshare_id, nil
+}
+
+func TestDeleteFileShare(t *testing.T) {
+	t.Log("Start deleting fileshare...")
+	fileshareId, err := prepareGetShare(t)
+	if err != nil {
+		t.Error("failed to run fileshare prepare function:", err)
+		return
+	}
+	fmt.Println("got id", fileshareId)
+	t.Log("Start deleting fileshare...")
+	if err := c.DeleteFileShare(fileshareId); err != nil {
+		t.Error("delete fileshare failed:", err)
+		return
+	}
+	t.Log("Delete fileshare success!")
+}
