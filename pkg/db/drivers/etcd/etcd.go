@@ -512,8 +512,9 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	if fshare.Metadata != nil {
 		result.Metadata = fshare.Metadata
 	}
-
-	result.Status = fshare.Status
+  if fshare.Status != "" {
+	  result.Status = fshare.Status
+  }
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
