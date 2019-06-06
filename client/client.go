@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright (c) 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ type Client struct {
 	*VolumeMgr
 	*VersionMgr
 	*ReplicationMgr
+	*FileShareMgr
 
 	cfg *Config
 }
@@ -96,6 +97,7 @@ func NewClient(c *Config) (*Client, error) {
 		VolumeMgr:      NewVolumeMgr(r, c.Endpoint, t),
 		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
 		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
+		FileShareMgr:   NewFileShareMgr(r, c.Endpoint, t),
 	}, nil
 }
 

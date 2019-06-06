@@ -41,8 +41,6 @@ matrix:
   #   env: TARGET=ppc64le
 
 install:
-  - go get github.com/mattn/goveralls
-  - go get github.com/wadey/gocovmerge
   # Build OpenSDS Controller source code
   - make all
 
@@ -51,6 +49,6 @@ script:
   - ./install/CI/test
 
 after_success:
-  - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
+  - bash <(curl -s https://codecov.io/bash)
   # Clean OpenSDS Controller built data
   - make clean

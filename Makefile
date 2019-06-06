@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,45 +20,60 @@ VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
 		 --always --dirty --abbrev=8)
 BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
 
+DOCKER_TAG ?= latest
+
+PROTOC_VERSION ?= 3.8.0
+
 all: build
 
 ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build:osdsdock osdslet osdsapiserver osdsctl metricexporter
+build: prebuild osdsdock osdslet osdsapiserver osdsctl metricexporter
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
 
-.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc
+.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
 
-osdsdock: prebuild
+osdsdock:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
 
-osdslet: prebuild
+osdslet:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
-osdsapiserver: prebuild
+osdsapiserver:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
-osdsctl: prebuild
+osdsctl:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
 
-metricexporter: prebuild
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/pkg/controller/metrics/exporters/lvm_exporter
+metricexporter:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/contrib/exporters/lvm_exporter
+
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
 	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
-	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
-	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
-	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
+	docker build cmd/osdsdock -t opensdsio/opensds-dock:$(DOCKER_TAG)
+	docker build cmd/osdslet -t opensdsio/opensds-controller:$(DOCKER_TAG)
+	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:$(DOCKER_TAG)
 
 test: build
 	install/CI/test
 
-protoc:
+protoc_precheck:
+	@if ! which protoc >/dev/null; then\
+		echo "No protoc in $(PATH), consider visiting https://github.com/protocolbuffers/protobuf/releases to get the protoc(version $(PROTOC_VERSION))";\
+		exit 1;\
+	fi;
+	@if [ ! "libprotoc $(PROTOC_VERSION)" = "$(shell protoc --version)" ]; then\
+		echo "protoc version should be $(PROTOC_VERSION)";\
+		exit 1;\
+	fi
+
+protoc: protoc_precheck
 	cd pkg/model/proto && protoc --go_out=plugins=grpc:. model.proto
 
 goimports:

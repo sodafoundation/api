@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/opensds/opensds/pkg/api/policy"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/util"
@@ -43,7 +44,12 @@ type FileSharePortal struct {
 
 // Function to store Acl's related entry into databse
 func (f *FileSharePortal) CreateFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
+	// Get profile
+	var prf *model.ProfileSpec
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -55,11 +61,23 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		return
 	}
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
-
 	if err != nil {
-		reason := fmt.Sprintf("create access rules for fileshare failed: %s", err.Error())
+		reason := fmt.Sprintf("createFileshareAcldbentry failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, reason)
 		log.Error(reason)
+		return
+	}
+	fileshare, err := db.C.GetFileShare(ctx, result.FileShareId)
+	if err != nil {
+		reason := fmt.Sprintf("getFileshare failed in createfileshare acl: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 	// Marshal the result.
@@ -70,7 +88,6 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
-
 	f.SuccessHandle(StatusAccepted, body)
 
 	// FileShare acl access creation request is sent to dock and drivers
@@ -82,12 +99,14 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
-		FileShareId:      result.FileShareId,
+		FileshareId:      result.FileShareId,
 		Description:      result.Description,
 		Type:             result.Type,
 		AccessCapability: result.AccessCapability,
 		AccessTo:         result.AccessTo,
+		Metadata:         fileshare.Metadata,
 		Context:          ctx.ToJson(),
+		Profile:          prf.ToJson(),
 	}
 
 	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
@@ -98,6 +117,9 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 }
 
 func (f *FileSharePortal) ListFileSharesAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
@@ -117,8 +139,11 @@ func (f *FileSharePortal) ListFileSharesAcl() {
 	return
 }
 
-// Function to store filesahre related entry into databse
+// Function to store fileshare related entry into databse
 func (f *FileSharePortal) CreateFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	var fileshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
@@ -205,6 +230,9 @@ func (f *FileSharePortal) CreateFileShare() {
 }
 
 func (f *FileSharePortal) ListFileShares() {
+	if !policy.Authorize(f.Ctx, "fileshare:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshares failed: %s", err.Error())
@@ -225,6 +253,9 @@ func (f *FileSharePortal) ListFileShares() {
 }
 
 func (f *FileSharePortal) GetFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":aclId")
 
 	// Call db api module to handle get fileshare request.
@@ -249,6 +280,9 @@ func (f *FileSharePortal) GetFileShareAcl() {
 }
 
 func (f *FileSharePortal) GetFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":fileshareId")
 
 	// Call db api module to handle get file share request.
@@ -273,6 +307,9 @@ func (f *FileSharePortal) GetFileShare() {
 }
 
 func (f *FileSharePortal) UpdateFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:update") {
+		return
+	}
 	var fshare = model.FileShareSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -300,6 +337,12 @@ func (f *FileSharePortal) UpdateFileShare() {
 }
 
 func (f *FileSharePortal) DeleteFileShareAcl() {
+	if !policy.Authorize(f.Ctx, "fileshareacl:delete") {
+		return
+	}
+	// Get profile
+	var prf *model.ProfileSpec
+
 	ctx := c.GetContext(f.Ctx)
 
 	var err error
@@ -311,16 +354,55 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		return
 	}
 
+	fileshare, err := db.C.GetFileShare(ctx, acl.FileShareId)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare for the acl %s not found: %s", id, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
+	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	if err := db.C.DeleteFileShareAcl(ctx, acl.Id); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare acl failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 	f.SuccessHandle(StatusAccepted, nil)
+	// NOTE: The real file share deletion process.
+	// File Share deletion request is sent to the Dock. Dock will delete file share from driver
+	// and database or update file share status to "errorDeleting" if deletion from driver failed.
+	if err := f.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+		log.Error("when connecting controller client:", err)
+		return
+	}
+	defer f.CtrClient.Close()
+	opt := &pb.DeleteFileShareAclOpts{
+		FileshareId:      acl.FileShareId,
+		Description:      acl.Description,
+		Type:             acl.Type,
+		AccessCapability: acl.AccessCapability,
+		AccessTo:         acl.AccessTo,
+		Metadata:         fileshare.Metadata,
+		Context:          ctx.ToJson(),
+		Profile:          prf.ToJson(),
+	}
+	if _, err = f.CtrClient.DeleteFileShareAcl(context.Background(), opt); err != nil {
+		log.Error("delete fileshare failed in controller service:", err)
+		return
+	}
 	return
 }
 
 func (f *FileSharePortal) DeleteFileShare() {
+	if !policy.Authorize(f.Ctx, "fileshare:delete") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 
 	var err error
@@ -399,6 +481,9 @@ type FileShareSnapshotPortal struct {
 }
 
 func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:create") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	var snapshot = model.FileShareSnapshotSpec{
 		BaseModel: &model.BaseModel{},
@@ -473,6 +558,9 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) ListFileShareSnapshots() {
+	if !policy.Authorize(f.Ctx, "snapshot:list") {
+		return
+	}
 	m, err := f.GetParameters()
 	if err != nil {
 		errMsg := fmt.Sprintf("list fileshare snapshots failed: %s", err.Error())
@@ -494,6 +582,9 @@ func (f *FileShareSnapshotPortal) ListFileShareSnapshots() {
 }
 
 func (f *FileShareSnapshotPortal) GetFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:get") {
+		return
+	}
 	id := f.Ctx.Input.Param(":snapshotId")
 
 	result, err := db.C.GetFileShareSnapshot(c.GetContext(f.Ctx), id)
@@ -511,6 +602,9 @@ func (f *FileShareSnapshotPortal) GetFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) UpdateFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:update") {
+		return
+	}
 	var snapshot = model.FileShareSnapshotSpec{
 		BaseModel: &model.BaseModel{},
 	}
@@ -539,6 +633,9 @@ func (f *FileShareSnapshotPortal) UpdateFileShareSnapshot() {
 }
 
 func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
+	if !policy.Authorize(f.Ctx, "snapshot:delete") {
+		return
+	}
 	ctx := c.GetContext(f.Ctx)
 	id := f.Ctx.Input.Param(":snapshotId")
 
@@ -581,6 +678,7 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		FileshareId: snapshot.FileShareId,
 		Context:     ctx.ToJson(),
 		Profile:     prf.ToJson(),
+		Metadata:    snapshot.Metadata,
 	}
 	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
 		log.Error("delete file share snapshot failed in controller service:", err)

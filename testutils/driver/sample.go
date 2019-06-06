@@ -134,6 +134,10 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.File
 	return &SampleFileSharesAcl[0], nil
 }
 
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	return &SampleFileSharesAcl[0], nil
+}
+
 // CreateFileShareSnapshot
 func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
 	return &SampleFileShareSnapshots[0], nil

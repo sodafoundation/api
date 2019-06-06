@@ -22,6 +22,7 @@ package filesharedrivers
 
 import (
 	nfs "github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
+	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/oceanstor"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -38,6 +39,8 @@ type FileShareDriver interface {
 
 	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
 
+	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error)
+
 	ListPools() ([]*model.StoragePoolSpec, error)
 
 	DeleteFileShare(opts *pb.DeleteFileShareOpts) (*model.FileShareSpec, error)
@@ -53,6 +56,9 @@ func Init(resourceType string) FileShareDriver {
 	switch resourceType {
 	case config.NFSDriverType:
 		f = &nfs.Driver{}
+		break
+	case config.HuaweiOceanFileDriverType:
+		f = &oceanstor.Driver{}
 		break
 	default:
 		f = &sample.Driver{}

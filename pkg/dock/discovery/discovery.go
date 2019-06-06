@@ -129,7 +129,7 @@ func (pdd *provisionDockDiscoverer) Init() error {
 	return nil
 }
 
-var filesharedrivers = []string{config.NFSDriverType}
+var filesharedrivers = []string{config.NFSDriverType, config.HuaweiOceanFileDriverType}
 
 func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info

@@ -23,6 +23,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -41,12 +42,12 @@ const (
 )
 
 const (
-	KLvPath        = "lvPath"
-	KLvsPath       = "lvsPath"
-	KFileshareName = "nfsFileshareName"
-	KFileshareID   = "nfsFileshareID"
-	AccessLevelRo  = "ro"
-	AccessLevelRw  = "rw"
+	KLvPath            = "lvPath"
+	KLvsPath           = "lvsPath"
+	KFileshareName     = "nfsFileshareName"
+	KFileshareID       = "nfsFileshareID"
+	KFileshareSnapName = "snapshotName"
+	KFileshareSnapID   = "snapshotID"
 )
 
 type NFSConfig struct {
@@ -84,27 +85,39 @@ func (*Driver) Unset() error { return nil }
 
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
 	var access string
-	var accessTo []string
 	var accessCapability []string
 	// Get accessto list
-	accessTo = opt.GetAccessTo()
+	accessTo := opt.GetAccessTo()
 	// get accessCapability list
 	accessCapability = opt.GetAccessCapability()
 	// get fileshare name
-	fname := opt.GetName()
+	fname := opt.Name
+
+	permissions := []string{"read", "write"}
 
 	for _, value := range accessCapability {
-		if value == "w" {
-			access = AccessLevelRw
-			break
+		value = strings.ToLower(value)
+		if utils.Contains(permissions, value) {
+			access += value[:1]
 		} else {
-			access = AccessLevelRo
+			log.Error("invalid permission:", value)
+			return nil, nil
 		}
 	}
 
-	for _, server := range accessTo {
-		err = d.cli.CreateAccess(server, access, fname)
-	}
+	err = d.cli.CreateAccess(accessTo, access, fname)
+	return fshare, nil
+}
+
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
+	var accessTo string
+	// Get accessto list
+	accessTo = opt.GetAccessTo()
+	// get fileshare name
+	fname := opt.Name
+
+	err = d.cli.DeleteAccess(accessTo, fname)
+
 	return fshare, nil
 }
 
@@ -233,7 +246,11 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.Fil
 		log.Error("failed to remove logic volume:", err)
 		return fshare, err
 	}
-
+	// Delete the directory
+	if err := d.cli.DeleteDirectory(dirName); err != nil {
+		log.Error("failed to delete the directory:", err)
+		return nil, err
+	}
 	return fshare, nil
 }
 
@@ -246,7 +263,6 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		return nil, err
 	}
 	snapName := opt.GetName()
-
 	fields := strings.Split(lvPath, "/")
 
 	vg, sourceLvName := fields[2], fields[3]
@@ -263,9 +279,9 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		SnapshotSize: opt.GetSize(),
 		Description:  opt.GetDescription(),
 		Metadata: map[string]string{
-			KFileshareName: snapName,
-			KFileshareID:   opt.GetId(),
-			KLvPath:        lvPath,
+			KFileshareSnapName: snapName,
+			KFileshareSnapID:   opt.GetId(),
+			KLvPath:            lvPath,
 		},
 	}, nil
 }
@@ -273,13 +289,14 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 // DeleteFileShareSnapshot
 func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
 	lvsPath, ok := opt.GetMetadata()[KLvPath]
+	snapName := opt.GetMetadata()[KFileshareSnapName]
 	if !ok {
 		err := errors.New("can't find 'lvsPath' in snapshot metadata, ingnore it!")
 		log.Error(err)
 		return nil, nil
 	}
 	fields := strings.Split(lvsPath, "/")
-	vg, snapName := fields[2], fields[3]
+	vg := fields[2]
 	if !d.cli.Exists(snapName) {
 		log.Warningf("Snapshot(%s) does not exist, nothing to remove", snapName)
 		return nil, nil

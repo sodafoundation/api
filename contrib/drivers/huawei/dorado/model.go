@@ -366,3 +366,15 @@ type ObjCountResp struct {
 type Count struct {
 	Count string `json:"COUNT"`
 }
+
+type Performance struct {
+	Uuid       string `json:"CMO_STATISTIC_UUID"`
+	DataIdList string `json:"CMO_STATISTIC_DATA_ID_LIST"`
+	DataList   string `json:"CMO_STATISTIC_DATA_LIST"`
+	TimeStamp  string `json:"CMO_STATISTIC_TIMESTAMP"`
+}
+
+type PerformancesResp struct {
+	Data  []Performance `json:"data"`
+	Error Error         `json:"error"`
+}

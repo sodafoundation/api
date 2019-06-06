@@ -925,7 +925,11 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	result.PoolId, result.ProfileId = opt.GetPoolId(), prf.Id
 
 	// Update the file share data in database.
-	db.C.UpdateStatus(ctx, result, model.FileShareAvailable)
+	// Update the file share data in database.
+	log.V(5).Infof("file share creation result is %v", result)
+	if err := db.C.UpdateStatus(ctx, result, model.FileShareAvailable); err != nil {
+		return nil, err
+	}
 
 	return pb.GenericResponseResult(result), nil
 }
@@ -965,7 +969,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	log.Info("controller server receive create file share acl request, vr =", opt)
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 
-	fileshare, err := db.C.GetFileShare(ctx, opt.FileShareId)
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
@@ -987,6 +991,44 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	opt.Name = fileshare.Name
 
 	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
+	if err != nil {
+		// Change the status of the file share acl to error when the creation faild
+		defer db.UpdateFileShareStatus(ctx, db.C, fileshare.Id, model.FileShareError)
+		log.Error("when create file share:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteFileShareAcl implements pb.ControllerServer.DeleteFileShare
+func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
+	var err error
+	log.Info("controller server receive create file share acl request, vr =", opt)
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+	opt.Name = fileshare.Name
+
+	result, err := c.fileshareController.DeleteFileShareAcl((*pb.DeleteFileShareAclOpts)(opt))
 	if err != nil {
 		// Change the status of the file share acl to error when the creation faild
 		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
@@ -1019,8 +1061,6 @@ func (c *Controller) CreateFileShareSnapshot(contx context.Context, opt *pb.Crea
 		return pb.GenericResponseError(err), err
 	}
 	opt.Size = fileshare.Size
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, fileshare.Metadata)
-
 	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
 		log.Error("when search supported dock resource: ", err)

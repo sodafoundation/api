@@ -11,6 +11,7 @@
 //    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 //    License for the specific language governing permissions and limitations
 //    under the License.
+
 package lvm
 
 import (
@@ -118,7 +119,7 @@ func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map[st
 		metricMap["write_throughput"] = 4
 		metricMap["response_time"] = 7
 		metricMap["service_time"] = 8
-		metricMap["utilization_prcnt"] = 9
+		metricMap["utilization"] = 9
 		//call parser
 		cli.parseCommandOutput(metricList, returnMap, labelMap, metricMap, out)
 	} else {
