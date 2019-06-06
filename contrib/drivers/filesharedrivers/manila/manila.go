@@ -209,7 +209,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 	manilaExportLocations, err := sharesv2.GetExportLocations(d.sharedFileSystemV2, share.ID).Extract()
 	if err != nil {
 		log.Errorf("function GetExportLocations failed, err:%v", err)
-		return nil, err
+		//return nil, err
 	}
 
 	var exportLocations []string
