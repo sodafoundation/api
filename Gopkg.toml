@@ -67,7 +67,7 @@
 
 [[constraint]]
   name = "github.com/gophercloud/gophercloud"
-  revision = "754e57e7867bfa48062ff2a237caad538085700a"
+  revision = "3ad89c4ea008e0e0b729720040b0be25a35d4615"
 
 [[constraint]]
   name = "github.com/ceph/go-ceph"
