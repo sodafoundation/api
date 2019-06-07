@@ -494,6 +494,7 @@ func (c *Client) getFileShare(ctx *c.Context, fshareID string) (*model.FileShare
 // UpdateFileShare ...
 func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	result, err := c.GetFileShare(ctx, fshare.Id)
+
 	if err != nil {
 		return nil, err
 	}
@@ -518,7 +519,9 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
-	result.PoolId = fshare.PoolId
+	if fshare.PoolId != "" {
+	   result.PoolId = fshare.PoolId
+  }
 
 	log.V(5).Infof("update file share object %+v into db", result)
 
