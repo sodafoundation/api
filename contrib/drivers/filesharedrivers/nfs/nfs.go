@@ -48,6 +48,8 @@ const (
 	KFileshareID       = "nfsFileshareID"
 	KFileshareSnapName = "snapshotName"
 	KFileshareSnapID   = "snapshotID"
+	AccessLevelRo      = "ro"
+	AccessLevelRw      = "rw"
 )
 
 type NFSConfig struct {
@@ -93,16 +95,23 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 	// get fileshare name
 	fname := opt.Name
 
-	permissions := []string{"read", "write"}
+	permissions := []string{"write"}
+  WriteAccess := false
 
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
 		if utils.Contains(permissions, value) {
-			access += value[:1]
-		} else {
+			WriteAccess = true
+		}
+		if value == "Execute"{
 			log.Error("invalid permission:", value)
 			return nil, nil
 		}
+	}
+  if WriteAccess{
+		access = AccessLevelRw
+	} else{
+		access = AccessLevelRo
 	}
 
 	err = d.cli.CreateAccess(accessTo, access, fname)
