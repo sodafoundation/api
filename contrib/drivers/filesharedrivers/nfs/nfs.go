@@ -96,7 +96,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 	fname := opt.Name
 
 	permissions := []string{"write"}
-  WriteAccess := false
+        WriteAccess := false
 
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
@@ -108,9 +108,9 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 			return nil, nil
 		}
 	}
-  if WriteAccess{
+        if WriteAccess {
 		access = AccessLevelRw
-	} else{
+	} else {
 		access = AccessLevelRo
 	}
 
