@@ -119,9 +119,7 @@ func (d *Driver) Setup() error {
 		return err
 	}
 
-	d.sharedFileSystemV2.Microversion = "2.7"
 	log.V(5).Info("setup succeeded\n")
-
 	return nil
 }
 
@@ -208,6 +206,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 	}()
 	<-done
 
+	d.sharedFileSystemV2.Microversion = "2.14"
 	manilaExportLocations, err := sharesv2.GetExportLocations(d.sharedFileSystemV2, share.ID).Extract()
 	if err != nil {
 		log.Errorf("function GetExportLocations failed, err:%v", err)
@@ -304,6 +303,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 		AccessLevel: accessLevel,
 	}
 
+	d.sharedFileSystemV2.Microversion = "2.7"
 	shareACL, err := sharesv2.GrantAccess(d.sharedFileSystemV2, opt.Metadata[KManilaShareID], opts).Extract()
 	if err != nil {
 		log.Errorf("cannot grant access, err:%v, mailaShareID:%v, opts:%+v\n", err, opt.Metadata[KManilaShareID], opts)
@@ -335,7 +335,8 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.File
 		AccessID: opt.Metadata[KManilaShareACLID],
 	}
 
-	if err := sharesv2.RevokeAccess(d.sharedFileSystemV2, opt.FileshareId, opts).ExtractErr(); err != nil {
+	d.sharedFileSystemV2.Microversion = "2.7"
+	if err := sharesv2.RevokeAccess(d.sharedFileSystemV2, opt.Metadata[KManilaShareID], opts).ExtractErr(); err != nil {
 		log.Error("cannot revoke access:", err)
 		return nil, err
 	}
