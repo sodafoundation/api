@@ -298,7 +298,7 @@ func (c *Client) UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec)
 	}
 
 	dbReq := &Request{
-		Url:        urls.GenerateFileShareSnapshotURL(urls.Etcd, result.TenantId, acl.Id),
+		Url:        urls.GenerateFileShareAclURL(urls.Etcd, result.TenantId, acl.Id),
 		NewContent: string(jsonBody),
 	}
 	dbRes := c.Update(dbReq)
