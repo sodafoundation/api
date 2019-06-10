@@ -63,8 +63,8 @@ type AuthOptions struct {
 	DomainName       string `yaml:"domainName,omitempty"`
 	Username         string `yaml:"username,omitempty"`
 	Password         string `yaml:"password,omitempty"`
-	PwdEncrypter     string `yaml:"PwdEncrypter,omitempty"`
-	EnableEncrypted  bool   `yaml:"EnableEncrypted,omitempty"`
+	PwdEncrypter     string `yaml:"pwdEncrypter,omitempty"`
+	EnableEncrypted  bool   `yaml:"enableEncrypted,omitempty"`
 	TenantID         string `yaml:"tenantId,omitempty"`
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
@@ -113,13 +113,15 @@ func (d *Driver) Setup() error {
 	}
 
 	d.sharedFileSystemV2, err = openstack.NewSharedFileSystemV2(provider,
-		gophercloud.EndpointOpts{Region: "RegionOne"})
+		gophercloud.EndpointOpts{})
 	if err != nil {
 		log.Error("openstack.NewSharedFileSystemV2 failed:", err)
 		return err
 	}
 
+	d.sharedFileSystemV2.Microversion = "2.7"
 	log.V(5).Info("setup succeeded\n")
+
 	return nil
 }
 
@@ -177,7 +179,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		return nil, err
 	}
 
-	log.Info("sharesv2.Create succeeded\n")
+	log.V(5).Infof("sharesv2.Create succeeded\n")
 	// Currently dock framework doesn't support sync data from storage system,
 	// therefore, it's necessary to wait for the result of resource's creation.
 	// Timout after 10s.
@@ -209,8 +211,9 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 	manilaExportLocations, err := sharesv2.GetExportLocations(d.sharedFileSystemV2, share.ID).Extract()
 	if err != nil {
 		log.Errorf("function GetExportLocations failed, err:%v", err)
-		//return nil, err
+		return nil, err
 	}
+	log.V(5).Infof("sharesv2.GetExportLocations succeeded\n")
 
 	var exportLocations []string
 	for _, v := range manilaExportLocations {
@@ -307,7 +310,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 		return nil, err
 	}
 
-	log.Info("sharesv2.GrantAccess succeeded\n")
+	log.V(5).Infof("sharesv2.GrantAccess succeeded\n")
 	respShareACL := model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.Id,
