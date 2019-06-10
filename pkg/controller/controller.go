@@ -998,6 +998,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 		return pb.GenericResponseError(err), err
 	}
 
+	db.C.UpdateFileShareAcl(ctx, result)
 	return pb.GenericResponseResult(result), nil
 }
 
