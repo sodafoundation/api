@@ -276,7 +276,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	log.V(8).Infof("TerminateConnection: opt info is %v", opt)
 	accPro := opt.AccessProtocol
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
-	if err := t.RemoveExport(opt.GetVolumeId()); err != nil {
+	if err := t.RemoveExport(opt.GetVolumeId(), opt.GetHostInfo().GetIp()); err != nil {
 		log.Error("failed to terminate connection of logic volume:", err)
 		return err
 	}
@@ -389,7 +389,6 @@ func (d *Driver) deleteUploadedSnapshot(backupId string, bucket string) error {
 		Id:       backupId,
 		Metadata: metadata,
 	}
-
 	if err := mc.Delete(b); err != nil {
 		log.Errorf("delete backup snapshot  failed, err: %v", err)
 		return err
@@ -570,7 +569,7 @@ func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpt
 	}
 	log.Info("terminate snapshot conn")
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
-	if err := t.RemoveExport(opt.GetSnapshotId()); err != nil {
+	if err := t.RemoveExport(opt.GetSnapshotId(), opt.GetHostInfo().GetIp()); err != nil {
 		log.Error("Failed to terminate snapshot connection of logic volume:", err)
 		return err
 	}

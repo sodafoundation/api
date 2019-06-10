@@ -26,7 +26,7 @@ const (
 type Target interface {
 	CreateExport(volId, path, hostIp, initiator string, chapAuth []string) (map[string]interface{}, error)
 
-	RemoveExport(volId string) error
+	RemoveExport(volId, hostIp string) error
 }
 
 // NewTarget method creates a new target based on its type.
@@ -70,9 +70,9 @@ func (t *iscsiTarget) CreateExport(volId, path, hostIp, initiator string, chapAu
 	return conn, nil
 }
 
-func (t *iscsiTarget) RemoveExport(volId string) error {
+func (t *iscsiTarget) RemoveExport(volId, hostIp string) error {
 	tgtIqn := iscsiTgtPrefix + volId
-	return t.RemoveISCSITarget(volId, tgtIqn)
+	return t.RemoveISCSITarget(volId, tgtIqn, hostIp)
 }
 
 type nvmeofTarget struct {
@@ -99,7 +99,7 @@ func (t *nvmeofTarget) CreateExport(volId, path, hostIp, initiator string, chapA
 	return conn, nil
 }
 
-func (t *nvmeofTarget) RemoveExport(volId string) error {
+func (t *nvmeofTarget) RemoveExport(volId, hostIp string) error {
 	tgtNqn := nvmeofTgtPrefix + volId
-	return t.RemoveNvmeofTarget(volId, tgtNqn)
+	return t.RemoveNvmeofTarget(volId, tgtNqn, hostIp)
 }

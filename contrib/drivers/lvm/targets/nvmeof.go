@@ -35,7 +35,7 @@ const (
 type NvmeofTarget interface {
 	CreateNvmeofTarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error
 	GetNvmeofTarget(iqn string) int
-	RemoveNvmeofTarget(volId, iqn string) error
+	RemoveNvmeofTarget(volId, iqn, hostIp string) error
 }
 
 func NewNvmeofTarget(bip, tgtConfDir string) NvmeofTarget {
@@ -203,7 +203,7 @@ func (t *NvmeoftgtTarget) GetNvmeofTarget(nqn string) int {
 	return 0
 }
 
-func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn string) error {
+func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn, hostIp string) error {
 	log.Info("removing target", nqn)
 	tgtConfPath := NvmetDir + "/subsystems/" + nqn
 	if exist, _ := utils.PathExists(tgtConfPath); !exist {
