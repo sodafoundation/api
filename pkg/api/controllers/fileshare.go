@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/opensds/opensds/pkg/api/policy"
 
 	log "github.com/golang/glog"
@@ -382,13 +383,22 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		return
 	}
 	defer f.CtrClient.Close()
+	metadata := make(map[string]string)
+	for k, v := range fileshare.Metadata {
+		metadata[k] = v
+	}
+
+	for k, v := range acl.Metadata {
+		metadata[k] = v
+	}
+
 	opt := &pb.DeleteFileShareAclOpts{
 		FileshareId:      acl.FileShareId,
 		Description:      acl.Description,
 		Type:             acl.Type,
 		AccessCapability: acl.AccessCapability,
 		AccessTo:         acl.AccessTo,
-		Metadata:         fileshare.Metadata,
+		Metadata:         metadata,
 		Context:          ctx.ToJson(),
 		Profile:          prf.ToJson(),
 	}
