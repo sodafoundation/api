@@ -100,6 +100,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
+		Id:               result.Id,
 		FileshareId:      result.FileShareId,
 		Description:      result.Description,
 		Type:             result.Type,
