@@ -954,7 +954,7 @@ func (cli *MetricCli) CollectVolumeMetrics() ([]CephMetricStats, error) {
 				"volume"})
 			returnMap = append(returnMap, CephMetricStats{"object_size",
 				output[4],
-				"", const_label,
+				"bytes", const_label,
 				"", nil,
 				"volume"})
 		}

@@ -130,7 +130,7 @@ resources:
       - volume_name
       - volume_size_bytes
       - volume_objects
-      - volume_objects_size
+      - volume_objects_size_bytes
 `
 
 type MetricDriver struct {
