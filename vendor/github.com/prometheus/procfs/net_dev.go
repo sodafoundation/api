@@ -59,7 +59,7 @@ func NewNetDev() (NetDev, error) {
 
 // NewNetDev returns kernel/system statistics read from /proc/net/dev.
 func (fs FS) NewNetDev() (NetDev, error) {
-	return newNetDev(fs.proc.Path("net/dev"))
+	return newNetDev(fs.Path("net/dev"))
 }
 
 // NewNetDev returns kernel/system statistics read from /proc/[pid]/net/dev.
@@ -75,7 +75,7 @@ func newNetDev(file string) (NetDev, error) {
 	}
 	defer f.Close()
 
-	netDev := NetDev{}
+	nd := NetDev{}
 	s := bufio.NewScanner(f)
 	for n := 0; s.Scan(); n++ {
 		// Skip the 2 header lines.
@@ -83,20 +83,20 @@ func newNetDev(file string) (NetDev, error) {
 			continue
 		}
 
-		line, err := netDev.parseLine(s.Text())
+		line, err := nd.parseLine(s.Text())
 		if err != nil {
-			return netDev, err
+			return nd, err
 		}
 
-		netDev[line.Name] = *line
+		nd[line.Name] = *line
 	}
 
-	return netDev, s.Err()
+	return nd, s.Err()
 }
 
 // parseLine parses a single line from the /proc/net/dev file. Header lines
 // must be filtered prior to calling this method.
-func (netDev NetDev) parseLine(rawLine string) (*NetDevLine, error) {
+func (nd NetDev) parseLine(rawLine string) (*NetDevLine, error) {
 	parts := strings.SplitN(rawLine, ":", 2)
 	if len(parts) != 2 {
 		return nil, errors.New("invalid net/dev line, missing colon")
@@ -185,11 +185,11 @@ func (netDev NetDev) parseLine(rawLine string) (*NetDevLine, error) {
 
 // Total aggregates the values across interfaces and returns a new NetDevLine.
 // The Name field will be a sorted comma separated list of interface names.
-func (netDev NetDev) Total() NetDevLine {
+func (nd NetDev) Total() NetDevLine {
 	total := NetDevLine{}
 
-	names := make([]string, 0, len(netDev))
-	for _, ifc := range netDev {
+	names := make([]string, 0, len(nd))
+	for _, ifc := range nd {
 		names = append(names, ifc.Name)
 		total.RxBytes += ifc.RxBytes
 		total.RxPackets += ifc.RxPackets

@@ -322,9 +322,7 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr TargetInfo, opts Conne
 		}
 	}
 
-	if err := t.framer.writer.Flush(); err != nil {
-		return nil, err
-	}
+	t.framer.writer.Flush()
 	go func() {
 		t.loopy = newLoopyWriter(clientSide, t.framer, t.controlBuf, t.bdpEst)
 		err := t.loopy.run()
@@ -419,7 +417,7 @@ func (t *http2Client) createHeaderFields(ctx context.Context, callHdr *CallHdr) 
 	if dl, ok := ctx.Deadline(); ok {
 		// Send out timeout regardless its value. The server can detect timeout context by itself.
 		// TODO(mmukhi): Perhaps this field should be updated when actually writing out to the wire.
-		timeout := time.Until(dl)
+		timeout := dl.Sub(time.Now())
 		headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-timeout", Value: encodeTimeout(timeout)})
 	}
 	for k, v := range authData {
@@ -794,21 +792,21 @@ func (t *http2Client) Close() error {
 // stream is closed.  If there are no active streams, the transport is closed
 // immediately.  This does nothing if the transport is already draining or
 // closing.
-func (t *http2Client) GracefulClose() {
+func (t *http2Client) GracefulClose() error {
 	t.mu.Lock()
 	// Make sure we move to draining only from active.
 	if t.state == draining || t.state == closing {
 		t.mu.Unlock()
-		return
+		return nil
 	}
 	t.state = draining
 	active := len(t.activeStreams)
 	t.mu.Unlock()
 	if active == 0 {
-		t.Close()
-		return
+		return t.Close()
 	}
 	t.controlBuf.put(&incomingGoAway{})
+	return nil
 }
 
 // Write formats the data into HTTP2 data frame(s) and sends it out. The caller
@@ -1140,27 +1138,15 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 	if !ok {
 		return
 	}
-	endStream := frame.StreamEnded()
 	atomic.StoreUint32(&s.bytesReceived, 1)
-	initialHeader := atomic.SwapUint32(&s.headerDone, 1) == 0
-
-	if !initialHeader && !endStream {
-		// As specified by RFC 7540, a HEADERS frame (and associated CONTINUATION frames) can only appear
-		// at the start or end of a stream. Therefore, second HEADERS frame must have EOS bit set.
-		st := status.New(codes.Internal, "a HEADERS frame cannot appear in the middle of a stream")
-		t.closeStream(s, st.Err(), true, http2.ErrCodeProtocol, st, nil, false)
-		return
-	}
-
-	state := &decodeState{}
-	// Initialize isGRPC value to be !initialHeader, since if a gRPC ResponseHeader has been received
-	// which indicates peer speaking gRPC, we are in gRPC mode.
-	state.data.isGRPC = !initialHeader
+	var state decodeState
 	if err := state.decodeHeader(frame); err != nil {
-		t.closeStream(s, err, true, http2.ErrCodeProtocol, status.Convert(err), nil, endStream)
+		t.closeStream(s, err, true, http2.ErrCodeProtocol, status.New(codes.Internal, err.Error()), nil, false)
+		// Something wrong. Stops reading even when there is remaining.
 		return
 	}
 
+	endStream := frame.StreamEnded()
 	var isHeader bool
 	defer func() {
 		if t.statsHandler != nil {
@@ -1179,30 +1165,29 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 			}
 		}
 	}()
-
 	// If headers haven't been received yet.
-	if initialHeader {
+	if atomic.SwapUint32(&s.headerDone, 1) == 0 {
 		if !endStream {
-			// Headers frame is ResponseHeader.
+			// Headers frame is not actually a trailers-only frame.
 			isHeader = true
 			// These values can be set without any synchronization because
 			// stream goroutine will read it only after seeing a closed
 			// headerChan which we'll close after setting this.
-			s.recvCompress = state.data.encoding
-			if len(state.data.mdata) > 0 {
-				s.header = state.data.mdata
+			s.recvCompress = state.encoding
+			if len(state.mdata) > 0 {
+				s.header = state.mdata
 			}
-			close(s.headerChan)
-			return
+		} else {
+			s.noHeaders = true
 		}
-		// Headers frame is Trailers-only.
-		s.noHeaders = true
 		close(s.headerChan)
 	}
-
+	if !endStream {
+		return
+	}
 	// if client received END_STREAM from server while stream was still active, send RST_STREAM
 	rst := s.getState() == streamActive
-	t.closeStream(s, io.EOF, rst, http2.ErrCodeNo, state.status(), state.data.mdata, true)
+	t.closeStream(s, io.EOF, rst, http2.ErrCodeNo, state.status(), state.mdata, true)
 }
 
 // reader runs as a separate goroutine in charge of reading data from network
@@ -1368,8 +1353,6 @@ func (t *http2Client) ChannelzMetric() *channelz.SocketInternalMetric {
 	s.RemoteFlowControlWindow = t.getOutFlowWindow()
 	return &s
 }
-
-func (t *http2Client) RemoteAddr() net.Addr { return t.remoteAddr }
 
 func (t *http2Client) IncrMsgSent() {
 	atomic.AddInt64(&t.czData.msgSent, 1)
