@@ -30,6 +30,7 @@ const (
 	HuaweiOceanFileDriverType     = "huawei_oceanstor"
 	HpeNimbleDriverType           = "hpe_nimble"
 	DRBDDriverType                = "drbd"
+	ManilaDriverType              = "manila"
 )
 
 const (

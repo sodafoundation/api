@@ -113,19 +113,11 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var accessTo string
-	if "" != shareAclAccessTo {
-		err := json.Unmarshal([]byte(shareAclAccessTo), &accessTo)
-		if err != nil {
-			log.Fatalf("error parsing accessTo %s: %+v", shareAclAccessTo, err)
-		}
-	}
-
 	acl := &model.FileShareAclSpec{
 		FileShareId:      args[0],
 		Type:             shareAclType,
 		AccessCapability: accessCapability,
-		AccessTo:         accessTo,
+		AccessTo:         shareAclAccessTo,
 		Description:      shareAclDesp,
 	}
 

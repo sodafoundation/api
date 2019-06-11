@@ -44,7 +44,8 @@ func init() {
 	flag.StringVar(&CONF.OsdsLet.NodeExporterWatchFolder, "node-exporter-watch-folder", CONF.OsdsLet.NodeExporterWatchFolder, "Node exporter watch folder")
 	flag.StringVar(&CONF.OsdsLet.KafkaEndpoint, "kafka-endpoint", CONF.OsdsLet.KafkaEndpoint, "Kafka endpoint")
 	flag.StringVar(&CONF.OsdsLet.KafkaTopic, "kafka-topic", CONF.OsdsLet.KafkaTopic, "Kafka topic")
-
+	flag.StringVar(&CONF.OsdsLet.GrafanaUrl, "grafana-url", CONF.OsdsLet.GrafanaUrl, "Grafana listen endpoint")
+	flag.StringVar(&CONF.OsdsLet.AlertMgrUrl, "alertmgr-url", CONF.OsdsLet.AlertMgrUrl, "Alert manager listen endpoint")
 	flag.Parse()
 
 	daemon.CheckAndRunDaemon(CONF.OsdsLet.Daemon)

@@ -56,6 +56,8 @@ type OsdsLet struct {
 	NodeExporterWatchFolder string `conf:"node_exporter_watch_folder,/root/prom_nodeexporter_folder/"`
 	KafkaEndpoint           string `conf:"kafka_endpoint,localhost:9092"`
 	KafkaTopic              string `conf:"kafka_topic,metrics"`
+	AlertMgrUrl             string `conf:"alertmgr_url,http://localhost:9093"`
+	GrafanaUrl              string `conf:"grafana_url,http://localhost:3000"`
 }
 
 type OsdsDock struct {
@@ -93,6 +95,7 @@ type Backends struct {
 	HuaweiOceanstor     BackendProperties `conf:"huawei_oceanstor"`
 	HpeNimble           BackendProperties `conf:"hpe_nimble"`
 	NFS                 BackendProperties `conf:"nfs"`
+	Manila              BackendProperties `conf:"manila"`
 }
 
 type KeystoneAuthToken struct {

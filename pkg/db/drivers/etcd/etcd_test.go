@@ -62,6 +62,9 @@ func (*fakeClientCaller) Get(req *Request) *Response {
 	if strings.Contains(req.Url, "replications") {
 		resp = append(resp, StringSliceReplications[0])
 	}
+	if strings.Contains(req.Url, "acls") {
+		resp = append(resp, ByteFileShareAcl)
+	}
 	return &Response{
 		Status:  "Success",
 		Message: resp,
@@ -611,5 +614,33 @@ func TestExtendVolume(t *testing.T) {
 
 	if result.Size != 9 {
 		t.Errorf("Expected %+v, got %+v\n", 9, result.Size)
+	}
+}
+
+func TestUpdateFileShareAcl(t *testing.T) {
+	metadata := make(map[string]string)
+	metadata["manilaShareID"] = "a55156cd-05b7-4e36-9d78-c3cb4006713b"
+	metadata["manilaAclId"] = "081071b1-01bd-49ad-80dd-c2aa795f1d15"
+
+	var acl = model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+		},
+		Metadata: metadata,
+	}
+
+	result, err := fc.UpdateFileShareAcl(c.NewAdminContext(), &acl)
+	if err != nil {
+		t.Error("Update fileShare acl failed:", err)
+	}
+
+	manilaShareID, ok := result.Metadata["manilaShareID"]
+	if !ok || manilaShareID != "a55156cd-05b7-4e36-9d78-c3cb4006713b" {
+		t.Errorf("Expected %+v, got %+v\n", "a55156cd-05b7-4e36-9d78-c3cb4006713b", manilaShareID)
+	}
+
+	manilaAclId, ok := result.Metadata["manilaAclId"]
+	if !ok || manilaAclId != "081071b1-01bd-49ad-80dd-c2aa795f1d15" {
+		t.Errorf("Expected %+v, got %+v\n", "081071b1-01bd-49ad-80dd-c2aa795f1d15", manilaAclId)
 	}
 }
