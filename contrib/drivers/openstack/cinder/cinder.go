@@ -147,7 +147,7 @@ func (d *Driver) Setup() error {
 			return err
 		}
 
-		d.blockStoragev2, err = noauth.NewBlockStorageV2(provider, noauth.EndpointOpts{
+		d.blockStoragev2, err = noauth.NewBlockStorageNoAuth(provider, noauth.EndpointOpts{
 			CinderEndpoint: d.conf.CinderEndpoint,
 		})
 		if err != nil {
@@ -252,7 +252,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 // DeleteVolume
 func (d *Driver) DeleteVolume(req *pb.DeleteVolumeOpts) error {
 	cinderVolId := req.Metadata[KCinderVolumeId]
-	if err := volumesv2.Delete(d.blockStoragev2, cinderVolId).ExtractErr(); err != nil {
+	if err := volumesv2.Delete(d.blockStoragev2, cinderVolId, nil).ExtractErr(); err != nil {
 		log.Error("Cannot delete volume:", err)
 		return err
 	}

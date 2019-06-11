@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/opensds/opensds/pkg/api/policy"
 
 	log "github.com/golang/glog"
@@ -28,6 +29,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -99,6 +101,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
+		Id:               result.Id,
 		FileshareId:      result.FileShareId,
 		Description:      result.Description,
 		Type:             result.Type,
@@ -381,14 +384,16 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
+	defer f.CtrClient.Close()	
+	metadata := utils.MergeStringMaps(fileshare.Metadata, acl.Metadata)
+
 	opt := &pb.DeleteFileShareAclOpts{
 		FileshareId:      acl.FileShareId,
 		Description:      acl.Description,
 		Type:             acl.Type,
 		AccessCapability: acl.AccessCapability,
 		AccessTo:         acl.AccessTo,
-		Metadata:         fileshare.Metadata,
+		Metadata:         metadata,
 		Context:          ctx.ToJson(),
 		Profile:          prf.ToJson(),
 	}

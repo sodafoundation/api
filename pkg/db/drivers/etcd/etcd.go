@@ -276,6 +276,39 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 	return fshare, nil
 }
 
+// UpdateFileShareAcl
+func (c *Client) UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	result, err := c.GetFileShareAcl(ctx, acl.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	result.Metadata = acl.Metadata
+
+	jsonBody, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateFileShareAclURL(urls.Etcd, result.TenantId, acl.Id),
+		NewContent: string(jsonBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when update fileshare acl in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
 func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	fshare.TenantId = ctx.TenantId
 	fshareBody, err := json.Marshal(fshare)

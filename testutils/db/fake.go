@@ -35,6 +35,11 @@ func (fc *FakeDbClient) CreateFileShareAcl(ctx *c.Context, fshare *model.FileSha
 	return fshare, nil
 }
 
+// UpdateFileShareAcl
+func (fc *FakeDbClient) UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	return acl, nil
+}
+
 // ListFileShareAcl
 func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error) {
 	var fshares []*model.FileShareAclSpec

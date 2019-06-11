@@ -21,6 +21,7 @@ plugin, just modify Init() and Clean() method.
 package filesharedrivers
 
 import (
+	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/manila"
 	nfs "github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
 	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/oceanstor"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -59,6 +60,9 @@ func Init(resourceType string) FileShareDriver {
 		break
 	case config.HuaweiOceanFileDriverType:
 		f = &oceanstor.Driver{}
+		break
+	case config.ManilaDriverType:
+		f = &manila.Driver{}
 		break
 	default:
 		f = &sample.Driver{}
