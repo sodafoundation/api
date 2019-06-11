@@ -236,8 +236,8 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 		for _, res := range fv.Data.Result {
 
 			metricValues := make([]*model.Metric, 0)
-			metricValue := &model.Metric{}
 			for j := 0; j < len(res.Values); j++ {
+				metricValue := &model.Metric{}
 				for _, v := range res.Values[j] {
 					switch v.(type) {
 					case string:
@@ -251,13 +251,14 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 
 				}
 				metricValues = append(metricValues, metricValue)
-				metric := &model.MetricSpec{}
-				metric.InstanceID = res.Metric.Instance
-				metric.Name = res.Metric.Name
-				metric.InstanceName = res.Metric.Device
-				metric.MetricValues = metricValues
-				metrics = append(metrics, metric)
+
 			}
+			metric := &model.MetricSpec{}
+			metric.InstanceID = res.Metric.Instance
+			metric.Name = res.Metric.Name
+			metric.InstanceName = res.Metric.Device
+			metric.MetricValues = metricValues
+			metrics = append(metrics, metric)
 		}
 
 		bArr, _ := json.Marshal(metrics)
