@@ -20,7 +20,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	log "github.com/golang/glog"
@@ -33,9 +32,12 @@ const (
 )
 
 type NvmeofTarget interface {
-	CreateNvmeofTarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error
-	GetNvmeofTarget(iqn string) int
-	RemoveNvmeofTarget(volId, iqn, hostIp string) error
+	AddNvmeofSubsystem(volId, tgtNqn, path, initiator string) (string, error)
+	RemoveNvmeofSubsystem(volId, nqn string) error
+	GetNvmeofSubsystem(nqn string) (string, error)
+	CreateNvmeofTarget(volId, tgtIqn, path, initiator, transtype string) error
+	GetNvmeofTarget(nqn, transtype string) (bool, error)
+	RemoveNvmeofTarget(volId, nqn, transtype string) error
 }
 
 func NewNvmeofTarget(bip, tgtConfDir string) NvmeofTarget {
@@ -53,14 +55,29 @@ type NvmeoftgtTarget struct {
 func (t *NvmeoftgtTarget) init() {
 	t.execCmd("modprobe", "nvmet")
 	t.execCmd("modprobe", "nvmet-rdma")
+	t.execCmd("modprobe", "nvmet-tcp")
+	t.execCmd("modprobe", "nvmet-fc")
 }
 
 func (t *NvmeoftgtTarget) getTgtConfPath(volId string) string {
 	return NvmetDir + "/" + opensdsNvmeofPrefix + volId
 }
 
-func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initiator string, chapAuth []string) error {
+func (t *NvmeoftgtTarget) convertTranstype(transtype string) string {
+	var portid string
+	switch transtype {
+	case "fc":
+		portid = "3"
+	case "rdma":
+		portid = "2"
+	default:
+		portid = "1"
+		log.Infof("default nvmeof transtype : tcp")
+	}
+	return portid
+}
 
+func (t *NvmeoftgtTarget) AddNvmeofSubsystem(volId, tgtNqn, path, initiator string) (string, error) {
 	if exist, _ := utils.PathExists(NvmetDir); !exist {
 		os.MkdirAll(NvmetDir, 0755)
 	}
@@ -77,11 +94,12 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 		err = t.WriteWithIo(attrfile, content)
 		if err != nil {
 			log.Errorf("can not set attr_allow_any_host ")
-			return err
+			t.RemoveNvmeofSubsystem(volId, tgtNqn)
+			return "", err
 		}
 	} else {
 		// allow specific initiators to connect to this target
-		var initiatorInfo = "initiator:" + hostIp + ":" + initiator
+		var initiatorInfo = initiator
 		hostpath := NvmetDir + "/hosts"
 		if exist, _ := utils.PathExists(hostpath); !exist {
 			os.MkdirAll(hostpath, 0755)
@@ -91,20 +109,21 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 		if exist, _ := utils.PathExists(hostDir); !exist {
 			os.MkdirAll(hostDir, 0755)
 		}
-
 		// create symbolic link of host
 		hostsys := sysdir + "/allowed_hosts/"
 		_, err = t.execCmd("ln", "-s", hostDir, hostsys)
 		if err != nil {
 			log.Errorf("Fail to create host link: " + initiatorInfo)
-			return err
+			t.RemoveNvmeofSubsystem(volId, tgtNqn)
+			return "", err
 		}
 	}
 
 	// get volume namespaceid
 	namespaceid := t.Getnamespaceid(volId)
 	if namespaceid == "" {
-		return errors.New("null namesapce")
+		t.RemoveNvmeofSubsystem(volId, tgtNqn)
+		return "", errors.New("null namesapce")
 	}
 	namespace := sysdir + "/namespaces/" + namespaceid
 	if exist, _ := utils.PathExists(namespace); !exist {
@@ -116,44 +135,102 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 	err = t.WriteWithIo(devpath, path)
 	if err != nil {
 		log.Errorf("Fail to set device path")
-		return err
+		t.RemoveNvmeofSubsystem(volId, tgtNqn)
+		return "", err
 	}
 
 	enablepath := namespace + "/enable"
 	err = t.WriteWithIo(enablepath, "1")
 	if err != nil {
 		log.Errorf("Fail to set device path")
+		t.RemoveNvmeofSubsystem(volId, tgtNqn)
+		return "", err
+	}
+	log.Infof("new added subsys : %s", sysdir)
+	return sysdir, nil
+}
+
+func (t *NvmeoftgtTarget) GetNvmeofSubsystem(nqn string) (string, error) {
+	subsysdir := NvmetDir + "/subsystems/" + nqn
+	if _, err := os.Stat(subsysdir); err == nil {
+		return subsysdir, nil
+
+	} else if os.IsNotExist(err) {
+		return "", nil
+
+	} else {
+		log.Errorf("can not get nvmeof subsystem")
+		return "", err
+	}
+
+}
+
+func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, initiator, transtype string) error {
+
+	if tgtexisted, err := t.GetNvmeofTarget(tgtNqn, transtype); tgtexisted == true && err == nil {
+		log.Infof("Nvmeof target %s with transtype %s has existed", tgtNqn, transtype)
+		return nil
+	} else if err != nil {
+		log.Errorf("can not get nvmeof target %s with transport type %s", tgtNqn, transtype)
 		return err
 	}
 
+	var subexisted string
+	subexisted, err := t.GetNvmeofSubsystem(tgtNqn)
+	if err != nil {
+		log.Errorf("can not get nvmeof subsystem %s ", tgtNqn)
+		return err
+	} else if subexisted == "" {
+		log.Infof("add new nqn subsystem %s", tgtNqn)
+		subexisted, err = t.AddNvmeofSubsystem(volId, tgtNqn, path, initiator)
+		log.Infof("new subdir:", subexisted)
+	} else {
+		log.Infof("%s subsystem has existed", tgtNqn)
+	}
+
+	subexisted =  NvmetDir + "/subsystems/" + tgtNqn 
+	log.Infof("new subdir:", subexisted)
+//	subexisted, err = t.GetNvmeofSubsystem(tgtNqn)
+//	log.Infof("new subdir: %s ", subexisted)
+//	if  subexisted == "" {
+//	log.Infof("still no subsystem after add new subsystem")
+//		//t.RemoveNvmeofSubsystem(volId, tgtNqn)
+//		return errors.New("still can not get subsystem after add new one")
+//	}
+//
 	//create port
-	portid := 1
-	portspath := NvmetDir + "/ports/" + strconv.Itoa(portid)
+	portid := t.convertTranstype(transtype)
+	portspath := NvmetDir + "/ports/" + portid
 	if exist, _ := utils.PathExists(portspath); !exist {
 		//log.Errorf(portspath)
 		os.MkdirAll(portspath, 0755)
 	}
 
 	// get target ip
+	// here the ip should be the ip interface of the specific nic
+	// for example, if transport type is rdma, then the rdma ip should be used.
+	// here just set the generic ip address since tcp is the default choice.
 	ippath := portspath + "/addr_traddr"
 	ip, err := t.execCmd("hostname", "-I")
 	if err != nil {
 		log.Errorf("fail to get target ipv4 address")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
-	// Set nvmeof parameters, rightnow only supports rdma
-	// if built on virtual machine the return string ip may contain several ip addresses
+
 	ip = strings.Split(ip, " ")[0]
 	err = t.WriteWithIo(ippath, ip)
 	if err != nil {
 		log.Errorf("Fail to set target ip")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 
 	trtypepath := portspath + "/addr_trtype"
-	err = t.WriteWithIo(trtypepath, "rdma")
+	err = t.WriteWithIo(trtypepath, transtype)
 	if err != nil {
-		log.Errorf("Fail to set rdma type")
+		log.Errorf("Fail to set transport type")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 
@@ -161,6 +238,7 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 	err = t.WriteWithIo(trsvcidpath, "4420")
 	if err != nil {
 		log.Errorf("Fail to set ip port")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 
@@ -168,14 +246,16 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 	err = t.WriteWithIo(adrfampath, "ipv4")
 	if err != nil {
 		log.Errorf("Fail to set ip family")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 
 	// create a soft link
 	portssub := portspath + "/subsystems/" + tgtNqn
-	_, err = t.execCmd("ln", "-s", sysdir, portssub)
+	_, err = t.execCmd("ln", "-s", subexisted, portssub)
 	if err != nil {
 		log.Errorf("Fail to create link")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 
@@ -183,54 +263,49 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initia
 	info, err := t.execCmd("dmesg", `|grep "enabling port"`)
 	if err != nil || info == "" {
 		log.Errorf("nvme target is not listening on the port")
+		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 		return err
 	}
 	log.Info("create nvme target")
 	return nil
 }
 
-func (t *NvmeoftgtTarget) GetNvmeofTarget(nqn string) int {
-	_, err := t.execCmd("cd", "/sys/kernel/config/nvmet/subsystems")
-	if err != nil {
-		log.Errorf("Fail to exec to enter nvme target dir:%v", err)
-		return -1
+func (t *NvmeoftgtTarget) GetNvmeofTarget(nqn, transtype string) (bool, error) {
+	portid := t.convertTranstype(transtype)
+
+	targetlinkpath := NvmetDir + "/ports/" + portid + "/subsystems/" + nqn
+	if _, err := os.Lstat(targetlinkpath); err == nil {
+		return true, nil
+
+	} else if os.IsNotExist(err) {
+		return false, nil
+
+	} else {
+		log.Errorf("can not get nvmeof target")
+		return false, err
 	}
-	_, err = t.execCmd("cd", nqn)
-	if err != nil {
-		log.Errorf("Fail to exec to display nvme target :%v", err)
-		return -1
-	}
-	return 0
+
 }
 
-func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn, hostIp string) error {
-	log.Info("removing target", nqn)
+func (t *NvmeoftgtTarget) RemoveNvmeofSubsystem(volId, nqn string) error {
+	log.Info("removing subsystem", nqn)
 	tgtConfPath := NvmetDir + "/subsystems/" + nqn
 	if exist, _ := utils.PathExists(tgtConfPath); !exist {
 		log.Warningf("Volume path %s does not exist, nothing to remove.", tgtConfPath)
 		return nil
 	}
 
-	//  port's link has to be removed first or the subsystem cannot be removed
-	portpath := NvmetDir + "/ports/1/subsystems/" + nqn
-	info, err := t.execCmd("rm", "-f", portpath)
-	if err != nil {
-		log.Errorf("can not rm port")
-		log.Errorf(info)
-		return err
-	}
-
-	// remove namespace
+	// remove namespace， whether it succeed or not, the removement should be executed.
 	ns := t.Getnamespaceid(volId)
 	if ns == "" {
-		log.Errorf("can not find volume %s's namespace", volId)
-		return errors.New("null namespace")
+		log.Infof("can not find volume %s's namespace", volId)
+		// return errors.New("null namespace")
 	}
 	naspPath := NvmetDir + "/subsystems/" + nqn + "/namespaces/" + ns
-	info, err = t.execCmd("rmdir", naspPath)
+	info, err := t.execCmd("rmdir", naspPath)
 	if err != nil {
-		log.Errorf("can not rm nasp")
-		return err
+		log.Infof("can not rm nasp")
+		// return err
 	}
 
 	// remove namespaces ; if it allows all initiators ,then this dir should be empty
@@ -238,17 +313,69 @@ func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn, hostIp string) error {
 	cmd := "rm -f " + NvmetDir + "/subsystems/" + nqn + "/allowed_hosts/" + "*"
 	info, err = t.execBash(cmd)
 	if err != nil {
-		log.Errorf("can not rm allowed hosts")
-		log.Errorf(info)
-		return err
+		log.Infof("can not rm allowed hosts")
+		log.Infof(info)
+		// return err
 	}
 
 	// remove subsystem
 	syspath := NvmetDir + "/subsystems/" + nqn
 	info, err = t.execCmd("rmdir", syspath)
 	if err != nil {
-		log.Errorf("can not rm subsys")
+		log.Infof("can not rm subsys")
 		return err
+	}
+	return nil
+}
+
+func (t *NvmeoftgtTarget) RemoveNvmeofPort(nqn, transtype string) error {
+	log.Infof("removing nvmeof port", transtype)
+	portid := t.convertTranstype(transtype)
+
+	portpath := NvmetDir + "/ports/" + portid + "/subsystems/" + nqn
+
+	//  port's link has to be removed first or the subsystem cannot be removed
+	tgtConfPath := NvmetDir + "/subsystems/" + nqn
+	if exist, _ := utils.PathExists(tgtConfPath); !exist {
+		log.Warningf("Volume path %s does not exist, nothing to remove.", tgtConfPath)
+		return nil
+	}
+
+	info, err := t.execCmd("rm", "-f", portpath)
+	if err != nil {
+		log.Errorf("can not rm nvme port transtype: %s, nqn: %s", transtype, nqn)
+		log.Errorf(info)
+		return err
+	}
+	return nil
+}
+
+func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn, transtype string) error {
+	log.Infof("removing target", nqn)
+	if tgtexisted, err := t.GetNvmeofTarget(nqn, transtype); err != nil {
+		log.Errorf("can not get nvmeof target %s with type %s", nqn, transtype)
+		return err
+	} else if tgtexisted == false {
+		log.Infof("nvmeof target %s with type %s does not exist", nqn, transtype)
+	} else {
+		err = t.RemoveNvmeofPort(nqn, transtype)
+		if err != nil {
+			return err
+		}
+	}
+
+	if subexisted, err := t.GetNvmeofSubsystem(nqn); err != nil {
+		log.Errorf("can not get nvmeof subsystem %s ", nqn)
+		return err
+	} else if subexisted == "" {
+		log.Errorf("subsystem %s does not exist", nqn)
+		return nil
+	} else {
+		err = t.RemoveNvmeofSubsystem(volId, nqn)
+		if err != nil {
+			log.Errorf("can not remove nvme subsystem %s", nqn)
+			return err
+		}
 	}
 	return nil
 }
