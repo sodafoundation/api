@@ -1490,6 +1490,29 @@ func (_m *Client) UpdateFileShare(ctx *context.Context, fshare *model.FileShareS
 	return r0, r1
 }
 
+// UpdateFileShareAcl provides a mock function with given fields: ctx, fshare
+func (_m *Client) UpdateFileShareAcl(ctx *context.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx, acl)
+
+	var r0 *model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.FileShareAclSpec) *model.FileShareAclSpec); ok {
+		r0 = rf(ctx, acl)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.FileShareAclSpec) error); ok {
+		r1 = rf(ctx, acl)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateFileShareSnapshot provides a mock function with given fields: ctx, snapshotID, vs
 func (_m *Client) UpdateFileShareSnapshot(ctx *context.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
 	ret := _m.Called(ctx, snapshotID, vs)
