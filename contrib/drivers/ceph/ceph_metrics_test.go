@@ -15,9 +15,12 @@
 package ceph
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/opensds/opensds/pkg/utils/exec"
 
 	"github.com/opensds/opensds/pkg/model"
 )
@@ -26,6 +29,7 @@ var pool_Label map[string]string = map[string]string{"cluster": "ceph", "pool": 
 var osd_label map[string]string = map[string]string{"cluster": "ceph", "osd": "osd.0"}
 var cluster_label map[string]string = map[string]string{"cluster": "ceph"}
 var health_label map[string]string = map[string]string{"cluster": "ceph"}
+var volume_label map[string]string = map[string]string{"cluster": "ceph"}
 
 var expected_data map[string]CephMetricStats = map[string]CephMetricStats{
 	"pool_used_bytes":          {"used", "859", "bytes", nil, "", pool_Label, "pool"},
@@ -69,11 +73,14 @@ var expected_data map[string]CephMetricStats = map[string]CephMetricStats{
 	"degraded_objects":         {"degraded_objects", "0", "", nil, "", health_label, ""},
 	"misplaced_objects":        {"misplaced_objects", "0", "", nil, "", health_label, ""},
 	"osds":                     {"osds", "1", "", nil, "", health_label, ""}, "osds_up": {"osds_up", "1", "", nil, "", health_label, ""}, "osds_in": {"osds_in", "1", "", nil, "", health_label, ""},
-	"pgs_remapped": {"pgs_remapped", "0", "", nil, "", health_label, ""}, "total_pgs": {"total_pgs", "102", "", nil, "", health_label, ""}}
+	"pgs_remapped": {"pgs_remapped", "0", "", nil, "", health_label, ""}, "total_pgs": {"total_pgs", "102", "", nil, "", health_label, ""}, "volume_name": {"name", "opensds-4c5cb264-50d1-4bfd-a663-dface9b669c9", "", nil, "", volume_label, "volume"},
+	"volume_size_bytes":  {"size", "1073741824", "bytes", nil, "", volume_label, "volume"},
+	"volume_objects":     {"objects", "1024", "", nil, "", volume_label, "volume"},
+	"volume_object_size": {"object_size", "1048576", "", nil, "", volume_label, "volume"}}
 
 var expctdMetricList []string = []string{"pool_used_bytes", "pool_raw_used_bytes", "pool_available_bytes", "pool_objects_total", "pool_dirty_objects_total", "pool_read_total", "pool_read_bytes_total", "pool_write_total", "pool_write_bytes_total",
 	"cluster_capacity_bytes", "cluster_available_bytes", "cluster_used_bytes", "cluster_objects", "perf_commit_latency_ms", "perf_apply_latency_ms", "osd_crush_weight", "osd_depth", "osd_reweight", "osd_bytes", "osd_bytes_used", "osd_bytes_avail", "osd_utilization",
-	"osd_var", "osd_pgs", "osd_total_bytes", "osd_total_used_bytes", "osd_total_avail_bytes", "osd_average_utilization", "osd", "osd_up", "osd_in", "client_io_write_ops", "client_io_read_bytes", "client_io_read_ops", "client_io_write_bytes", "cache_flush_io_bytes", "cache_evict_io_bytes", "cache_promote_io_ops", "degraded_objects", "misplaced_objects", "osds", "osds_up", "osds_in", "pgs_remapped", "total_pgs"}
+	"osd_var", "osd_pgs", "osd_total_bytes", "osd_total_used_bytes", "osd_total_avail_bytes", "osd_average_utilization", "osd", "osd_up", "osd_in", "client_io_write_ops", "client_io_read_bytes", "client_io_read_ops", "client_io_write_bytes", "cache_flush_io_bytes", "cache_evict_io_bytes", "cache_promote_io_ops", "degraded_objects", "misplaced_objects", "osds", "osds_up", "osds_in", "pgs_remapped", "total_pgs", "volume_name", "volume_size_bytes", "volume_objects", "volume_object_size"}
 
 var fakeResp map[string]*MetricFakeResp = map[string]*MetricFakeResp{`{"detail":"detail","format":"json","prefix":"df"}`: {[]byte(`{"stats":{"total_bytes":494462976000,"total_used_bytes":238116864,"total_avail_bytes":494224859136,"total_objects":14},"pools":[{"name":"rbd","id":1,"stats":{"kb_used":1,"bytes_used":859,"percent_used":0.00,"max_avail":469501706240,"objects":14,"quota_objects":0,"quota_bytes":0,"dirty":14,"rd":145,"rd_bytes":918304,"wr":1057,"wr_bytes":16384,"raw_bytes_used":859}}]}`), "", nil},
 	`{"format":"json","prefix":"osd df"}`:           {[]byte(`{"nodes":[{"id":0,"device_class":"hdd","name":"osd.0","type":"osd","type_id":0,"crush_weight":0,"depth":2,"pool_weights":{},"reweight":1.000000,"kb":15717356,"kb_used":114624,"kb_avail":15602732,"utilization":0.729283,"var":1.000000,"pgs":102}],"stray":[],"summary":{"total_kb":15717356,"total_kb_used":114624,"total_kb_avail":15602732,"average_utilization":0.729283,"min_var":1.000000,"max_var":1.000000,"dev":0.000000}}`), "", nil},
@@ -81,6 +88,8 @@ var fakeResp map[string]*MetricFakeResp = map[string]*MetricFakeResp{`{"detail":
 	`{"format":"json","prefix":"osd perf"}`:         {[]byte(`{"osd_perf_infos":[{"id":0,"perf_stats":{"commit_latency_ms":0,"apply_latency_ms":0}}]}`), "", nil},
 	`{"format":"json","prefix":"status"}`:           {[]byte(`{"fsid":"282d4751-4f33-4186-b983-b51cc21a5a8e","health":{"checks":{"PG_AVAILABILITY":{"severity":"HEALTH_WARN","summary":{"message":"Reduced data availability: 2 pgs inactive"}},"PG_DEGRADED":{"severity":"HEALTH_WARN","summary":{"message":"Degraded data redundancy: 2 pgs undersized"}},"POOL_APP_NOT_ENABLED":{"severity":"HEALTH_WARN","summary":{"message":"application not enabled on 1 pool(s)"}}},"status":"HEALTH_WARN","summary":[{"severity":"HEALTH_WARN","summary":"'ceph health' JSON format has changed in luminous. If you see this your monitoring system is scraping the wrong fields. Disable this with 'mon health preluminous compat warning = false'"}],"overall_status":"HEALTH_WARN"},"election_epoch":5,"quorum":[0],"quorum_names":["openSDS-arpita"],"monmap":{"epoch":1,"fsid":"282d4751-4f33-4186-b983-b51cc21a5a8e","modified":"2019-05-07 11:49:01.502074","created":"2019-05-07 11:49:01.502074","features":{"persistent":["kraken","luminous"],"optional":[]},"mons":[{"rank":0,"name":"openSDS-arpita","addr":"192.168.1.47:6789/0","public_addr":"192.168.1.47:6789/0"}]},"osdmap":{"osdmap":{"epoch":19,"num_osds":1,"num_up_osds":1,"num_in_osds":1,"full":false,"nearfull":false,"num_remapped_pgs":0}},"pgmap":{"pgs_by_state":[{"state_name":"active+clean","count":100},{"state_name":"undersized+peered","count":2}],"num_pgs":102,"num_pools":3,"num_objects":8,"data_bytes":247,"bytes_used":117374976,"bytes_avail":15977197568,"bytes_total":16094572544,"inactive_pgs_ratio":0.019608},"fsmap":{"epoch":1,"by_rank":[]},"mgrmap":{"epoch":9,"active_gid":14097,"active_name":"openSDS-arpita","active_addr":"192.168.1.47:6804/1294","available":true,"standbys":[],"modules":["status"],"available_modules":["balancer","dashboard","influx","localpool","prometheus","restful","selftest","status","zabbix"],"services":{}},"servicemap":{"epoch":1,"modified":"0.000000","services":{}}}`), "", nil},
 	`{"format":"json","prefix":"time-sync-status"}`: {[]byte(`{"timechecks":{"epoch":5,"round":0,"round_status":"finished"}}`), "", nil}}
+
+var respMap map[string]*MetricFakeRep = map[string]*MetricFakeRep{"ls": {"opensds-4c5cb264-50d1-4bfd-a663-dface9b669c9", nil}, "info": {`{"name":"opensds-4c5cb264-50d1-4bfd-a663-dface9b669c9","size":1073741824,"objects":1024,"order":20,"object_size":1048576,"block_name_prefix":"rbd_data.1e5246b8b4567","format":2,"features":["layering"],"flags":[],"create_timestamp":"Wed Jun  5 12:45:23 2019"}`, nil}}
 
 type MetricFakeconn struct {
 	RespMap map[string]*MetricFakeResp
@@ -119,11 +128,36 @@ func (n *MetricFakeconn) MonCommand(arg []byte) ([]byte, string, error) {
 
 func (n *MetricFakeconn) Shutdown() {}
 
+type MetricFakeExecuter struct {
+	RespMap map[string]*MetricFakeRep
+}
+
+type MetricFakeRep struct {
+	out string
+	err error
+}
+
+func (f *MetricFakeExecuter) Run(name string, args ...string) (string, error) {
+	var cmd = name
+	if name == "env" {
+		cmd = args[1]
+	}
+	v, ok := f.RespMap[cmd]
+	if !ok {
+		return "", fmt.Errorf("can't find specified op: %s", args[1])
+	}
+	return v.out, v.err
+}
+func NewMetricFakeExecuter(respMap map[string]*MetricFakeRep) exec.Executer {
+	return &MetricFakeExecuter{RespMap: respMap}
+}
+
 func TestCollectMetrics(t *testing.T) {
 	var md = &MetricDriver{}
-	md.cli=&MetricCli{nil}
+	md.Setup()
+	md.cli = &MetricCli{nil, nil}
 	md.cli.conn = NewMetricFakeconn(fakeResp)
-
+	md.cli.RootExecuter = NewMetricFakeExecuter(respMap)
 	var tempMetricArray []*model.MetricSpec
 	for _, element := range expctdMetricList {
 		val, _ := strconv.ParseFloat(expected_data[element].Value, 64)

@@ -16,13 +16,16 @@ package ceph
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/ceph/go-ceph/rados"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
 type MetricCli struct {
-	conn Conn
+	conn         Conn
+	RootExecuter exec.Executer
 }
 
 type Conn interface {
@@ -58,6 +61,7 @@ func NewMetricCli() (*MetricCli, error) {
 
 	return &MetricCli{
 		conn,
+		exec.NewRootExecuter(),
 	}, nil
 }
 
@@ -878,7 +882,7 @@ func (cli *MetricCli) CollectMonitorsMetrics() ([]CephMetricStats, error) {
 		var_label := make(map[string]string)
 		var_label["monitor"] = monNode
 		returnMap = append(returnMap, CephMetricStats{
-			"clock_skew_seconds",
+			"clock_skew",
 			tstat.Skew.String(),
 			"seconds",
 			const_label,
@@ -904,9 +908,63 @@ func (cli *MetricCli) CollectMonitorsMetrics() ([]CephMetricStats, error) {
 	return returnMap, nil
 }
 
+func (c *MetricCli) execute(cmd ...string) (string, error) {
+	return c.RootExecuter.Run(cmd[0], cmd[1:]...)
+}
+func (cli *MetricCli) CollectVolumeMetrics() ([]CephMetricStats, error) {
+	var returnMap []CephMetricStats
+	returnMap = []CephMetricStats{}
+	const_label := make(map[string]string)
+	const_label["cluster"] = "ceph"
+	cmd := []string{"env", "rbd", "ls"}
+	out, err := cli.execute(cmd...)
+	if err != nil {
+		log.Errorf("cmd.Run() failed with %s\n", err)
+		err = nil
+
+	}
+	result := strings.Split(string(out), "\n")
+
+	for i := 0; i < len(result); i++ {
+		if result[i] != "" {
+			command := []string{"env", "rbd", "info", result[i], "--format", "json"}
+			command_out, _ := cli.execute(command...)
+			command_output := strings.Split(string(command_out), ",")
+			var output []string
+			for j := 0; j < (len(command_output)); j++ {
+				result := strings.Split(command_output[j], ":")
+				output = append(output, result[1])
+
+			}
+
+			returnMap = append(returnMap, CephMetricStats{"name",
+				result[i],
+				"", const_label,
+				"", nil,
+				"volume"})
+			returnMap = append(returnMap, CephMetricStats{"size",
+				output[1],
+				"bytes", const_label,
+				"", nil,
+				"volume"})
+			returnMap = append(returnMap, CephMetricStats{"objects",
+				output[2],
+				"", const_label,
+				"", nil,
+				"volume"})
+			returnMap = append(returnMap, CephMetricStats{"object_size",
+				output[4],
+				"", const_label,
+				"", nil,
+				"volume"})
+		}
+	}
+
+	return returnMap, nil
+}
+
 func (cli *MetricCli) CollectMetrics() ([]CephMetricStats, []string, error) {
 	returnMap := []CephMetricStats{}
-
 	var instance []string
 	instanceID, _ := cli.conn.GetFSID()
 	instance = append(instance, instanceID)
@@ -946,6 +1004,11 @@ func (cli *MetricCli) CollectMetrics() ([]CephMetricStats, []string, error) {
 	monitor_metrics, _ := cli.CollectMonitorsMetrics()
 	for i := range monitor_metrics {
 		returnMap = append(returnMap, monitor_metrics[i])
+	}
+	// Collects Ceph Volume Metrics
+	volume_metrics, _ := cli.CollectVolumeMetrics()
+	for i := range volume_metrics {
+		returnMap = append(returnMap, volume_metrics[i])
 	}
 	return returnMap, instance, nil
 }
