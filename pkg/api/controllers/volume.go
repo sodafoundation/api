@@ -30,20 +30,31 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
 	"github.com/opensds/opensds/pkg/db"
+	dock "github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/pkg/utils/config"
 )
 
+var apiEndpoint string
+
 func NewVolumePortal() *VolumePortal {
+	ctrClient := func() client.Client {
+		if CONF.OsdsApiServer.InstallType == "thin" {
+			apiEndpoint = CONF.OsdsDock.ApiEndpoint
+			return &dock.DockClient{}
+		} else {
+			apiEndpoint = CONF.OsdsLet.ApiEndpoint
+			return client.NewClient()
+		}
+	}()
 	return &VolumePortal{
-		CtrClient: client.NewClient(),
+		CtrClient: ctrClient,
 	}
 }
 
 type VolumePortal struct {
 	BasePortal
-
 	CtrClient client.Client
 }
 
@@ -69,16 +80,40 @@ func (v *VolumePortal) CreateVolume() {
 	if volume.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
+		if err != nil {
+			errMsg := fmt.Sprintf("get default profile failed: %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 		volume.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 	}
-	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
+	// To get pool details for Thin OpenSDS
+	var pools []*model.StoragePoolSpec
+	var poolID string
+	var poolName string
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		pools, err = db.C.ListPools(c.NewAdminContext())
+		if err != nil {
+			log.Error("when listing pools: ", err)
+			return
+		}
+		//Pool selecter for Thin OpenSDS
+		for i := 0; i < len(pools); i++ {
+			if volume.Size <= pools[i].FreeCapacity {
+				poolID = pools[i].Id
+				poolName = pools[i].Name
+				break
+			}
+		}
+		volume.PoolId = poolID
 	}
-
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
@@ -90,7 +125,6 @@ func (v *VolumePortal) CreateVolume() {
 	}
 
 	log.V(8).Infof("create volume DB entry success %+v", result)
-
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	v.SuccessHandle(StatusAccepted, body)
@@ -98,10 +132,11 @@ func (v *VolumePortal) CreateVolume() {
 	// NOTE:The real volume creation process.
 	// Volume creation request is sent to the Dock. Dock will update volume status to "available"
 	// after volume creation is completed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
+
 	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeOpts{
@@ -119,12 +154,18 @@ func (v *VolumePortal) CreateVolume() {
 		SnapshotFromCloud: result.SnapshotFromCloud,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.CreateVolume(context.Background(), opt); err != nil {
+
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+		opt.PoolName = poolName
+	}
+
+	if _, err := v.CtrClient.CreateVolume(context.Background(), opt); err != nil {
 		log.Error("create volume failed in controller service:", err)
 		return
 	}
-
 	return
+
 }
 
 func (v *VolumePortal) ListVolumes() {
@@ -149,7 +190,6 @@ func (v *VolumePortal) ListVolumes() {
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	v.SuccessHandle(StatusOK, body)
-
 	return
 }
 
@@ -249,10 +289,38 @@ func (v *VolumePortal) ExtendVolume() {
 	// NOTE:The real volume extension process.
 	// Volume extension request is sent to the Dock. Dock will update volume status to "available"
 	// after volume extension is completed.
-	if err = v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("when connecting controller client:", err)
+	var pool *model.StoragePoolSpec
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		// To roll back size and status if INVALID
+		var rollBack = false
+		defer func() {
+			if rollBack {
+				db.UpdateVolumeStatus(ctx, db.C, result.Id, model.VolumeAvailable)
+				log.Info("extend volume failed due to invalid size")
+			}
+		}()
+
+		pool, err = db.C.GetPool(ctx, result.PoolId)
+		if nil != err {
+			log.Error("get pool failed in extend volume method: ", err.Error())
+			rollBack = true
+			return
+		}
+
+		var newSize = extendRequestBody.NewSize
+		if pool.FreeCapacity <= (newSize - result.Size) {
+			log.Info("pool free capacity is less than volume size requested")
+			rollBack = true
+			return
+		}
+
+	}
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
+		log.Error("when connecting dock client:", err)
 		return
 	}
+
 	defer v.CtrClient.Close()
 
 	opt := &pb.ExtendVolumeOpts{
@@ -260,6 +328,7 @@ func (v *VolumePortal) ExtendVolume() {
 		Size:     extendRequestBody.NewSize,
 		Metadata: result.Metadata,
 		Context:  ctx.ToJson(),
+		PoolId:   result.PoolId,
 		Profile:  prf.ToJson(),
 	}
 	if _, err = v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
@@ -267,6 +336,15 @@ func (v *VolumePortal) ExtendVolume() {
 		return
 	}
 
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		opt.PoolName = pool.Name
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+	}
+
+	if _, err := v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
+		log.Error("extend volume failed in dock service:", err)
+		return
+	}
 	return
 }
 
@@ -284,7 +362,6 @@ func (v *VolumePortal) DeleteVolume() {
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-
 	// If profileId or poolId of the volume doesn't exist, it would mean that
 	// the volume provisioning operation failed before the create method in
 	// storage driver was called, therefore the volume entry should be deleted
@@ -319,10 +396,12 @@ func (v *VolumePortal) DeleteVolume() {
 	// NOTE:The real volume deletion process.
 	// Volume deletion request is sent to the Dock. Dock will delete volume from driver
 	// and database or update volume status to "errorDeleting" if deletion from driver faild.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
+
 	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeOpts{
@@ -333,17 +412,35 @@ func (v *VolumePortal) DeleteVolume() {
 		Context:   ctx.ToJson(),
 		Profile:   prf.ToJson(),
 	}
+
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+
+	}
 	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
 		log.Error("delete volume failed in controller service:", err)
 		return
 	}
-
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		if err = db.C.DeleteVolume(ctx, opt.GetId()); err != nil {
+			return
+		}
+	}
 	return
 }
 
 func NewVolumeAttachmentPortal() *VolumeAttachmentPortal {
+	ctrClient := func() client.Client {
+		if CONF.OsdsApiServer.InstallType == "thin" {
+			apiEndpoint = CONF.OsdsDock.ApiEndpoint
+			return &dock.DockClient{}
+		} else {
+			apiEndpoint = CONF.OsdsLet.ApiEndpoint
+			return client.NewClient()
+		}
+	}()
 	return &VolumeAttachmentPortal{
-		CtrClient: client.NewClient(),
+		CtrClient: ctrClient,
 	}
 }
 
@@ -385,8 +482,9 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	// NOTE:The real volume attachment creation process.
 	// Volume attachment creation request is sent to the Dock. Dock will update volume attachment status to "available"
 	// after volume attachment creation is completed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("when connecting controller client:", err)
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
+		log.Error("when connecting dock client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -404,11 +502,33 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		Metadata: result.Metadata,
 		Context:  ctx.ToJson(),
 	}
+
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		vol, err := db.C.GetVolume(ctx, result.VolumeId)
+		if err != nil {
+			log.Error("create volume attachment failed in dock service")
+			return
+		}
+
+		pol, err := db.C.GetPool(ctx, vol.PoolId)
+		if err != nil {
+			log.Error("get pool failed in create volume attachment method: ", err)
+			db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
+			return
+		}
+		var protocol = pol.Extras.IOConnectivity.AccessProtocol
+		if protocol == "" {
+			// Default protocol is iscsi
+			protocol = "iscsi"
+		}
+		opt.AccessProtocol = protocol
+		opt.Metadata = vol.Metadata
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+	}
 	if _, err = v.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("create volume attachment failed in controller service:", err)
 		return
 	}
-
 	return
 }
 
@@ -509,7 +629,8 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	// NOTE:The real volume attachment deletion process.
 	// Volume attachment deletion request is sent to the Dock. Dock will delete volume attachment from database
 	// or update its status to "errorDeleting" if volume connection termination failed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -529,23 +650,31 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		Metadata: attachment.Metadata,
 		Context:  ctx.ToJson(),
 	}
+
 	if _, err = v.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
 		log.Error("delete volume attachment failed in controller service:", err)
 		return
 	}
-
 	return
 }
 
 func NewVolumeSnapshotPortal() *VolumeSnapshotPortal {
+	ctrClient := func() client.Client {
+		if CONF.OsdsApiServer.InstallType == "thin" {
+			apiEndpoint = CONF.OsdsDock.ApiEndpoint
+			return &dock.DockClient{}
+		} else {
+			apiEndpoint = CONF.OsdsLet.ApiEndpoint
+			return client.NewClient()
+		}
+	}()
 	return &VolumeSnapshotPortal{
-		CtrClient: client.NewClient(),
+		CtrClient: ctrClient,
 	}
 }
 
 type VolumeSnapshotPortal struct {
 	BasePortal
-
 	CtrClient client.Client
 }
 
@@ -592,6 +721,21 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		// Get snapshot profile
+		if result.ProfileId != "" {
+			profile, err := db.C.GetProfile(ctx, result.ProfileId)
+			if err != nil {
+				log.Error("when get profile resource: ", err)
+				db.UpdateVolumeSnapshotStatus(ctx, db.C, result.Id, model.VolumeSnapError)
+				return
+			}
+
+			if profile.SnapshotProperties.Topology.Bucket != "" {
+				result.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
+			}
+		}
+	}
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	v.SuccessHandle(StatusAccepted, body)
@@ -599,7 +743,8 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	// NOTE:The real volume snapshot creation process.
 	// Volume snapshot creation request is sent to the Dock. Dock will update volume snapshot status to "available"
 	// after volume snapshot creation complete.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
 		log.Error("when connecting controller client:", err)
 		return
 	}
@@ -615,11 +760,22 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		Context:     ctx.ToJson(),
 		Profile:     prf.ToJson(),
 	}
+
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		volume, err := db.C.GetVolume(ctx, result.VolumeId)
+		if err != nil {
+			log.Error("create volume snapshot failed in dock service")
+			return
+		}
+		opt.Metadata = volume.Metadata
+		opt.Size = volume.Size
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+
+	}
 	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
-		log.Error("create volume snapthot failed in controller service:", err)
+		log.Error("create volume snapshot failed in controller service:", err)
 		return
 	}
-
 	return
 }
 
@@ -734,8 +890,9 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	// NOTE:The real volume snapshot deletion process.
 	// Volume snapshot deletion request is sent to the Dock. Dock will delete volume snapshot from driver and
 	// database or update its status to "errorDeleting" if volume snapshot deletion from driver failed.
-	if err := v.CtrClient.Connect(CONF.OsdsLet.ApiEndpoint); err != nil {
-		log.Error("when connecting controller client:", err)
+
+	if err := v.CtrClient.Connect(apiEndpoint); err != nil {
+		log.Error("when connecting controller or dock client:", err)
 		return
 	}
 	defer v.CtrClient.Close()
@@ -747,10 +904,13 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		Context:  ctx.ToJson(),
 		Profile:  prf.ToJson(),
 	}
+	if CONF.OsdsApiServer.InstallType == "thin" {
+		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
+	}
 	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
-		log.Error("delete volume snapthot failed in controller service:", err)
+		log.Error("delete volume snapshot failed in controller service:", err)
 		return
 	}
-
+	v.Ctx.Output.SetStatus(StatusAccepted)
 	return
 }

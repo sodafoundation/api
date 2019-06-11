@@ -147,6 +147,12 @@ service ProvisionDock {
 
     // Collect metrics from metrics driver
     rpc CollectMetrics (CollectMetricsOpts) returns (GenericResponse){}
+
+    // Get metrics from Prometheus
+    rpc GetMetrics (GetMetricsOpts) returns (GenericResponse){}
+
+    // Get 3rd party re-direct URLs for telemetry
+    rpc GetUrls (NoParams) returns (GenericResponse){}
 }
 
 service FileShareController {

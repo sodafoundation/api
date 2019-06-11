@@ -27,6 +27,7 @@ type OsdsApiServer struct {
 	HTTPSEnabled       bool          `conf:"https_enabled,false"`
 	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
 	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
+	InstallType        string        `conf:"install_type,thin"`
 	BeegoServerTimeOut int64         `conf:"beego_server_time_out,120"`
 
 	// prometheus related
