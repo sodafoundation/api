@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	log "github.com/golang/glog"
@@ -34,7 +35,6 @@ import (
 	driverConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 	"github.com/satori/go.uuid"
@@ -277,14 +277,17 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 	var accessLevel string
 	accessCapability := opt.GetAccessCapability()
 	canRead, canWrite, canExecute := false, false, false
-	if utils.Contains(accessCapability, "read") {
-		canRead = true
-	}
-	if utils.Contains(accessCapability, "write") {
-		canWrite = true
-	}
-	if utils.Contains(accessCapability, "execute") {
-		canExecute = true
+	for _, v := range accessCapability {
+		switch strings.ToLower(v) {
+		case "read":
+			canRead = true
+		case "write":
+			canWrite = true
+		case "execute":
+			canExecute = true
+		default:
+			return nil, errors.New("accessCapability can only be read, write or execute")
+		}
 	}
 
 	switch {

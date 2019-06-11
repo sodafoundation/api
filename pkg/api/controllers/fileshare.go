@@ -29,6 +29,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -383,15 +384,8 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
-	metadata := make(map[string]string)
-	for k, v := range fileshare.Metadata {
-		metadata[k] = v
-	}
-
-	for k, v := range acl.Metadata {
-		metadata[k] = v
-	}
+	defer f.CtrClient.Close()	
+	metadata := utils.MergeStringMaps(fileshare.Metadata, acl.Metadata)
 
 	opt := &pb.DeleteFileShareAclOpts{
 		FileshareId:      acl.FileShareId,
