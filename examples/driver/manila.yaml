@@ -31,8 +31,8 @@ pool:
         provisioningPolicy: Thin
         isSpaceEfficient: false
         storageAccessCapability:
-        - read
-        - write
+        - Read
+        - Write
       ioConnectivity:
         accessProtocol: NFS 
         maxIOPS: 7000000
