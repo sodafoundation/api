@@ -183,13 +183,13 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, initiator, tra
 	} else if subexisted == "" {
 		log.Infof("add new nqn subsystem %s", tgtNqn)
 		subexisted, err = t.AddNvmeofSubsystem(volId, tgtNqn, path, initiator)
-		log.Infof("new subdir:", subexisted)
+		log.Infof("new subdir: %s", subexisted)
 	} else {
 		log.Infof("%s subsystem has existed", tgtNqn)
 	}
 
 	subexisted =  NvmetDir + "/subsystems/" + tgtNqn 
-	log.Infof("new subdir:", subexisted)
+	log.Infof("new subdir: %s", subexisted)
 //	subexisted, err = t.GetNvmeofSubsystem(tgtNqn)
 //	log.Infof("new subdir: %s ", subexisted)
 //	if  subexisted == "" {
@@ -329,7 +329,7 @@ func (t *NvmeoftgtTarget) RemoveNvmeofSubsystem(volId, nqn string) error {
 }
 
 func (t *NvmeoftgtTarget) RemoveNvmeofPort(nqn, transtype string) error {
-	log.Infof("removing nvmeof port", transtype)
+	log.Infof("removing nvmeof port %s", transtype)
 	portid := t.convertTranstype(transtype)
 
 	portpath := NvmetDir + "/ports/" + portid + "/subsystems/" + nqn
@@ -351,7 +351,7 @@ func (t *NvmeoftgtTarget) RemoveNvmeofPort(nqn, transtype string) error {
 }
 
 func (t *NvmeoftgtTarget) RemoveNvmeofTarget(volId, nqn, transtype string) error {
-	log.Infof("removing target", nqn)
+	log.Infof("removing target %s", nqn)
 	if tgtexisted, err := t.GetNvmeofTarget(nqn, transtype); err != nil {
 		log.Errorf("can not get nvmeof target %s with type %s", nqn, transtype)
 		return err
