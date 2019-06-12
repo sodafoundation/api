@@ -239,7 +239,7 @@ func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.Delete
 		log.Error("error occurred in dock module when terminate volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+	db.UpdateVolumeStatus(c.NewContextFromJson(opt.GetContext()), db.C, opt.VolumeId, model.VolumeAvailable)
 	return pb.GenericResponseResult(nil), nil
 }
 
