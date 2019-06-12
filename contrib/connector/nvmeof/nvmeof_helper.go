@@ -30,11 +30,11 @@ const (
 
 // ConnectorInfo define
 type ConnectorInfo struct {
-	Nqn       string `mapstructure:"targetNQN"`     //NVMe subsystem name to the volume to be connected
-	TgtPort   string `mapstructure:"targetPort"`    //NVMe target port that hosts the nqn sybsystem
-	TgtPortal string `mapstructure:"targetIP"`      //NVMe target ip that hosts the nqn sybsystem
+	Nqn       string `mapstructure:"targetNQN"`    //NVMe subsystem name to the volume to be connected
+	TgtPort   string `mapstructure:"targetPort"`   //NVMe target port that hosts the nqn sybsystem
+	TgtPortal string `mapstructure:"targetIP"`     //NVMe target ip that hosts the nqn sybsystem
 	TranType  string `mapstructure:"transporType"` // Nvme transport type
-	HostNqn   string `mapstructure:"hostNqn"`       // host nqn
+	HostNqn   string `mapstructure:"hostNqn"`      // host nqn
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,16 +146,16 @@ func Connect(connMap map[string]interface{}) (string, error) {
 	connNqn := conn.Nqn
 	targetPortal := conn.TgtPortal
 	port := conn.TgtPort
-	nvmeTransportType := conn.TranType 
- 	hostName := conn.HostNqn
-	
-	cmd := "nvme connect -t " + nvmeTransportType + " -n " + connNqn + " -s " + port + " -a " + targetPortal
-       if hostName != "ALL" {
-               cmd += " -q " + hostName
-       }
-       //log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal, port)
+	nvmeTransportType := conn.TranType
+	hostName := conn.HostNqn
 
-       _, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+	cmd := "nvme connect -t " + nvmeTransportType + " -n " + connNqn + " -s " + port + " -a " + targetPortal
+	if hostName != "ALL" {
+		cmd += " -q " + hostName
+	}
+	//log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal, port)
+
+	_, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 
 	if err != nil {
 		log.Println("Failed to connect to NVMe nqn :", connNqn)
