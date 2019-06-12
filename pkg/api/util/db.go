@@ -47,22 +47,18 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
 	// validate type
-	if !(in.Type == "ip" || in.Type == "") {
+	if in.Type != "ip" {
 		errMsg := fmt.Sprintf("invalid fileshare type: %v. Supported type is: ip", in.Type)
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if in.Type == "" {
-		in.Type = "ip"
-	}
 	// validate accessTo
 	accessto := in.AccessTo
 	if in.AccessTo == "" {
-		errMsg := fmt.Sprintf("accessTo is empty. Please give valid ip")
+		errMsg := fmt.Sprintf("accessTo is empty. Please give valid ip segment")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	} else if strings.Contains(accessto, "/") {
-		fmt.Println("in cidr functon...")
 		first, cidr, bool := net.ParseCIDR(accessto)
 		log.Info(first, cidr)
 		if bool != nil {
