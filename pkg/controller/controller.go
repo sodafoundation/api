@@ -998,6 +998,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 		return pb.GenericResponseError(err), err
 	}
 
+	db.C.UpdateFileShareAcl(ctx, result)
 	return pb.GenericResponseResult(result), nil
 }
 
@@ -1028,15 +1029,14 @@ func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFil
 	opt.DriverName = dockInfo.DriverName
 	opt.Name = fileshare.Name
 
-	result, err := c.fileshareController.DeleteFileShareAcl((*pb.DeleteFileShareAclOpts)(opt))
-	if err != nil {
+	if err = c.fileshareController.DeleteFileShareAcl((*pb.DeleteFileShareAclOpts)(opt)); err != nil {
 		// Change the status of the file share acl to error when the creation faild
 		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		log.Error("when create file share:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 
-	return pb.GenericResponseResult(result), nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // CreateFileShareSnapshot implements pb.ControllerServer.CreateFileShareSnapshot

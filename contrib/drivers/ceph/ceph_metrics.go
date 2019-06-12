@@ -125,6 +125,12 @@ resources:
       - skew
       - latency
       - quorum
+  - resource: volume
+    metrics:
+      - volume_name
+      - volume_size_bytes
+      - volume_objects
+      - volume_objects_size_bytes
 `
 
 type MetricDriver struct {

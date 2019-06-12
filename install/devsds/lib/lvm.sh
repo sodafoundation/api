@@ -57,19 +57,27 @@ osds::lvm::pkg_uninstall(){
 
 osds::lvm::nvmeofpkginstall(){
     # nvme-cli utility for nvmeof initiator
-    sudo wget https://github.com/linux-nvme/nvme-cli/archive/v1.7.tar.gz -O /opt/nvmecli-1.7.tar.gz
-    sudo tar -zxvf /opt/nvmecli-1.7.tar.gz -C /opt/
-    cd /opt/nvme-cli-1.7 && sudo make && sudo make install
+    sudo wget https://github.com/linux-nvme/nvme-cli/archive/v1.8.1.tar.gz -O /opt/nvmecli-1.8.1.tar.gz
+    sudo tar -zxvf /opt/nvmecli-1.8.1.tar.gz -C /opt/
+    cd /opt/nvme-cli-1.8.1 && sudo make && sudo make install
     # nvme kernel
     sudo modprobe nvmet
+    sudo modprobe nvme-tcp
+    sudo modprobe nvmet-tcp
     sudo modprobe nvme-rdma
     sudo modprobe nvmet-rdma
+    sudo modprobe nvme-fc
+    sudo modprobe nvmet-fc
 }
 
 osds::lvm::nvmeofpkguninstall(){
     sudo nvme disconnect-all
     sudo modprobe -r nvme-rdma
     sudo modprobe -r nvmet-rdma
+    sudo modprobe -r nvme-tcp
+    sudo modprobe -r nvmet-tcp
+    sudo modprobe -r nvme-fc
+    sudo modprobe -r nvmet-fc
     sudo modprobe -r nvmet
 }
 
@@ -217,6 +225,7 @@ cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
     diskType: NL-SAS
     availabilityZone: default
     multiAttach: true
+    storageType: block
     extras:
       dataStorage:
         provisioningPolicy: Thin
@@ -365,17 +374,18 @@ osds::lvm::install() {
     # Check nvmeof prerequisites
     local nvmevg=$NVME_VOLUME_GROUP_NAME
     if [[ -e "$LVM_DEVICE" ]]; then
-        phys_port_cnt=$(ibv_devinfo |grep -Eow hca_id |wc -l)
-        echo "The actual quantity of RDMA ports is $phys_port_cnt"
-        if [[ "$phys_port_cnt" < '1' ]]; then
-            echo "RDMA card not found"
-        else
+        #phys_port_cnt=$(ibv_devinfo |grep -Eow hca_id |wc -l)
+        #echo "The actual quantity of RDMA ports is $phys_port_cnt"
+	#nvmetcpsupport=$(sudo modprobe nvmet-tcp)
+        #if [[ "$phys_port_cnt" < '1' ]] && [ $nvmetcpsupport -ne 0 ] ; then
+        #    echo "RDMA card not found , and kernel version can not support nvme-tcp "
+        #else
         osds::lvm::create_nvme_vg $nvmevg $size
         osds::lvm::nvmeofpkginstall
         # Remove volumes that already exist
         osds::lvm::remove_volumes $nvmevg
         osds::lvm::set_nvme_configuration
-        fi
+        #fi
     fi
     osds::lvm::set_lvm_filter
 }

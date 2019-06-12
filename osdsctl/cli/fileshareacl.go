@@ -70,6 +70,8 @@ var (
 	shareAclAccessCapability string
 	shareAclAccessTo         string
 	shareAclDesp             string
+
+	shareAclFormatters = FormatterList{"Metadata": JsonFormatter}
 )
 
 func init() {
@@ -113,19 +115,11 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var accessTo string
-	if "" != shareAclAccessTo {
-		err := json.Unmarshal([]byte(shareAclAccessTo), &accessTo)
-		if err != nil {
-			log.Fatalf("error parsing accessTo %s: %+v", shareAclAccessTo, err)
-		}
-	}
-
 	acl := &model.FileShareAclSpec{
 		FileShareId:      args[0],
 		Type:             shareAclType,
 		AccessCapability: accessCapability,
-		AccessTo:         accessTo,
+		AccessTo:         shareAclAccessTo,
 		Description:      shareAclDesp,
 	}
 
@@ -134,9 +128,9 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		Fatalln(HttpErrStrip(err))
 	}
 
-	keys := KeyList{"Id", "CreatedAt", "TenantId", "FileShareId",
+	keys := KeyList{"Id", "CreatedAt", "TenantId", "FileShareId", "Metadata",
 		"Type", "AccessCapability", "AccessTo", "Description"}
-	PrintDict(resp, keys, FormatterList{})
+	PrintDict(resp, keys, shareAclFormatters)
 }
 
 func fileShareAclDeleteAction(cmd *cobra.Command, args []string) {
@@ -156,8 +150,8 @@ func fileShareAclShowAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "FileShareId",
-		"Type", "AccessCapability", "AccessTo", "Description"}
-	PrintDict(resp, keys, FormatterList{})
+		"Type", "AccessCapability", "AccessTo", "Description", "Metadata"}
+	PrintDict(resp, keys, shareAclFormatters)
 }
 
 func fileSharesAclListAction(cmd *cobra.Command, args []string) {
@@ -176,5 +170,5 @@ func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 
 	keys := KeyList{"Id", "FileShareId",
 		"Type", "AccessCapability", "AccessTo", "Description"}
-	PrintList(resp, keys, FormatterList{})
+	PrintList(resp, keys, shareAclFormatters)
 }

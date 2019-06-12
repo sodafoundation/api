@@ -21,6 +21,7 @@ plugin, just modify Init() and Clean() method.
 package filesharedrivers
 
 import (
+	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/manila"
 	nfs "github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
 	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/oceanstor"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -37,17 +38,17 @@ type FileShareDriver interface {
 
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
 
-	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
-
-	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error)
-
-	ListPools() ([]*model.StoragePoolSpec, error)
-
-	DeleteFileShare(opts *pb.DeleteFileShareOpts) (*model.FileShareSpec, error)
+	DeleteFileShare(opts *pb.DeleteFileShareOpts) error
 
 	CreateFileShareSnapshot(opts *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
 
-	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
+	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error
+
+	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
+
+	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error
+
+	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
 // Init
@@ -59,6 +60,9 @@ func Init(resourceType string) FileShareDriver {
 		break
 	case config.HuaweiOceanFileDriverType:
 		f = &oceanstor.Driver{}
+		break
+	case config.ManilaDriverType:
+		f = &manila.Driver{}
 		break
 	default:
 		f = &sample.Driver{}
