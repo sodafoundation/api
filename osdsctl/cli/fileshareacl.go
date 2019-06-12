@@ -70,7 +70,6 @@ var (
 	shareAclAccessCapability string
 	shareAclAccessTo         string
 	shareAclDesp             string
-	shareAclProfileID        string
 
 	shareAclFormatters = FormatterList{"Metadata": JsonFormatter}
 )
@@ -85,13 +84,12 @@ func init() {
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessCapability, "capability", "c", "", "the accessCapability for fileshare")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "aclTo", "a", "", "accessTo of the fileshare")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclDesp, "description", "d", "", "the description of of the fileshare acl")
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclProfileID, "profileId", "p", "", "the uuid of the profile which the fileshare belongs to")
 
 	fileShareAclListCommand.Flags().StringVarP(&shareAclLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclOffset, "offset", "", "0", "all requested data offsets")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), tenantId, fileshareId, type, accessCapability, accessTo, description, profileId")
+		"the sort key of all requested data. supports id(default), tenantId, fileshareId, type, accessCapability, accessTo, description")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclID, "id", "", "", "list fileshare acls by id")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclTenantID, "tenantId", "", "", "list fileshare acls by tenantId")
 	fileShareAclListCommand.Flags().StringVarP(&fileshareID, "fileshareId", "", "", "list fileshare acls by fileshareId")
@@ -99,7 +97,6 @@ func init() {
 	fileShareAclListCommand.Flags().StringVarP(&shareAclAccessCapability, "accessCapability", "", "", "list fileshare acls by accessCapability")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "", "", "list fileshare acls by accessTo")
 	fileShareAclListCommand.Flags().StringVarP(&shareAclDesp, "description", "", "", "list fileshare acls by description")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclProfileID, "profileId", "", "", "list fileshare acls by profileId")
 }
 
 func fileShareAclAction(cmd *cobra.Command, args []string) {
@@ -124,7 +121,6 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 		AccessCapability: accessCapability,
 		AccessTo:         shareAclAccessTo,
 		Description:      shareAclDesp,
-		ProfileId:        shareAclProfileID,
 	}
 
 	resp, err := client.CreateFileShareAcl(acl)
@@ -133,7 +129,7 @@ func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "TenantId", "FileShareId", "Metadata",
-		"Type", "AccessCapability", "AccessTo", "Description", "ProfileId"}
+		"Type", "AccessCapability", "AccessTo", "Description"}
 	PrintDict(resp, keys, shareAclFormatters)
 }
 
@@ -154,7 +150,7 @@ func fileShareAclShowAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "TenantId", "FileShareId",
-		"Type", "AccessCapability", "AccessTo", "Description", "ProfileId", "Metadata"}
+		"Type", "AccessCapability", "AccessTo", "Description", "Metadata"}
 	PrintDict(resp, keys, shareAclFormatters)
 }
 
@@ -165,7 +161,7 @@ func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 		"sortKey": shareAclSortKey, "Id": shareAclID,
 		"TenantId": shareAclTenantID, "FileshareID": fileshareID, "ShareAclType": shareAclType,
 		"ShareAclAccessCapability": shareAclAccessCapability, "ShareAclAccessTo": shareAclAccessTo,
-		"ShareAclDesp": shareAclDesp, "ProfileId": shareAclProfileID}
+		"ShareAclDesp": shareAclDesp}
 
 	resp, err := client.ListFileSharesAcl(opts)
 	if err != nil {
@@ -173,6 +169,6 @@ func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "FileShareId",
-		"Type", "AccessCapability", "AccessTo", "Description", "ProfileId"}
+		"Type", "AccessCapability", "AccessTo", "Description"}
 	PrintList(resp, keys, shareAclFormatters)
 }
