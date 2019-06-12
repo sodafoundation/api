@@ -188,16 +188,16 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, initiator, tra
 		log.Infof("%s subsystem has existed", tgtNqn)
 	}
 
-	subexisted =  NvmetDir + "/subsystems/" + tgtNqn 
+	subexisted = NvmetDir + "/subsystems/" + tgtNqn
 	log.Infof("new subdir: %s", subexisted)
-//	subexisted, err = t.GetNvmeofSubsystem(tgtNqn)
-//	log.Infof("new subdir: %s ", subexisted)
-//	if  subexisted == "" {
-//	log.Infof("still no subsystem after add new subsystem")
-//		//t.RemoveNvmeofSubsystem(volId, tgtNqn)
-//		return errors.New("still can not get subsystem after add new one")
-//	}
-//
+	//	subexisted, err = t.GetNvmeofSubsystem(tgtNqn)
+	//	log.Infof("new subdir: %s ", subexisted)
+	//	if  subexisted == "" {
+	//	log.Infof("still no subsystem after add new subsystem")
+	//		//t.RemoveNvmeofSubsystem(volId, tgtNqn)
+	//		return errors.New("still can not get subsystem after add new one")
+	//	}
+	//
 	//create port
 	portid := t.convertTranstype(transtype)
 	portspath := NvmetDir + "/ports/" + portid

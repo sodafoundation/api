@@ -37,7 +37,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/pwd"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -239,15 +239,15 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 }
 
 // DeleteFileShare implementation
-func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareSpec, error) {
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	manilaShareID := opt.Metadata[KManilaShareID]
 	if err := sharesv2.Delete(d.sharedFileSystemV2, manilaShareID).ExtractErr(); err != nil {
 		log.Error("cannot delete share:", err)
-		return nil, err
+		return err
 	}
 
 	log.V(5).Info("function DeleteFileShare succeeded\n")
-	return nil, nil
+	return nil
 }
 
 // PullFileShare implementation
@@ -318,8 +318,6 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 		BaseModel: &model.BaseModel{
 			Id: opt.Id,
 		},
-
-		//TenantId:
 		FileShareId:      opt.FileshareId,
 		Type:             opt.Type,
 		AccessCapability: opt.GetAccessCapability(),
@@ -333,7 +331,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 }
 
 // DeleteFileShareAcl implementation
-func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 	opts := &sharesv2.RevokeAccessOpts{
 		AccessID: opt.Metadata[KManilaShareACLID],
 	}
@@ -341,11 +339,11 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.File
 	d.sharedFileSystemV2.Microversion = "2.7"
 	if err := sharesv2.RevokeAccess(d.sharedFileSystemV2, opt.Metadata[KManilaShareID], opts).ExtractErr(); err != nil {
 		log.Error("cannot revoke access:", err)
-		return nil, err
+		return err
 	}
 
 	log.V(5).Info("function DeleteFileShareAcl succeeded\n")
-	return nil, nil
+	return nil
 }
 
 // CreateFileShareSnapshot implementation
@@ -409,15 +407,15 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 }
 
 // DeleteFileShareSnapshot implementation
-func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
 	manilaSnapID := opt.Metadata[KManilaSnapID]
 	if err := snapshotsv2.Delete(d.sharedFileSystemV2, manilaSnapID).ExtractErr(); err != nil {
 		log.Error("cannot delete share:", err)
-		return nil, err
+		return err
 	}
 
 	log.V(5).Info("function DeleteFileShareSnapshot succeeded\n")
-	return nil, nil
+	return nil
 }
 
 // PullFileShareSnapshot implementation

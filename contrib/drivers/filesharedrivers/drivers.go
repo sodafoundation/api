@@ -38,17 +38,17 @@ type FileShareDriver interface {
 
 	CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error)
 
-	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
-
-	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error)
-
-	ListPools() ([]*model.StoragePoolSpec, error)
-
-	DeleteFileShare(opts *pb.DeleteFileShareOpts) (*model.FileShareSpec, error)
+	DeleteFileShare(opts *pb.DeleteFileShareOpts) error
 
 	CreateFileShareSnapshot(opts *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
 
-	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error)
+	DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error
+
+	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
+
+	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error
+
+	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
 // Init

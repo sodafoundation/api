@@ -85,52 +85,68 @@ func (d *Driver) Setup() error {
 
 func (*Driver) Unset() error { return nil }
 
-func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
+func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
 	var access string
-	var accessCapability []string
 	// Get accessto list
 	accessTo := opt.GetAccessTo()
 	// get accessCapability list
-	accessCapability = opt.GetAccessCapability()
+	accessCapability := opt.GetAccessCapability()
 	// get fileshare name
 	fname := opt.Name
 
 	permissions := []string{"write"}
-        WriteAccess := false
+	WriteAccess := false
 
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
 		if utils.Contains(permissions, value) {
 			WriteAccess = true
 		}
-		if value == "Execute"{
+		if value == "Execute" {
 			log.Error("invalid permission:", value)
 			return nil, nil
 		}
 	}
-        if WriteAccess {
+	if WriteAccess {
 		access = AccessLevelRw
 	} else {
 		access = AccessLevelRo
 	}
 
-	err = d.cli.CreateAccess(accessTo, access, fname)
-	return fshare, nil
+	if err := d.cli.CreateAccess(accessTo, access, fname); err != nil {
+		log.Errorf("grant access %s to %s failed %v", accessTo, fname, err)
+		return nil, err
+	}
+
+	shareAccess := &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.Id,
+		},
+		FileShareId:      opt.FileshareId,
+		Type:             opt.Type,
+		AccessCapability: accessCapability,
+		AccessTo:         accessTo,
+		Metadata:         map[string]string{},
+	}
+	return shareAccess, nil
 }
 
-func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (fshare *model.FileShareAclSpec, err error) {
-	var accessTo string
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 	// Get accessto list
-	accessTo = opt.GetAccessTo()
+	accessTo := opt.GetAccessTo()
 	// get fileshare name
 	fname := opt.Name
 
-	err = d.cli.DeleteAccess(accessTo, fname)
+	if err := d.cli.DeleteAccess(accessTo, fname); err != nil {
+		log.Error("cannot revoke access:", err)
+		return err
+	}
 
-	return fshare, nil
+	return nil
 }
 
-func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.FileShareSpec, err error) {
+func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	var fshare *model.FileShareSpec
 	//get the server ip for configuration
 	var server = d.conf.TgtBindIp
 	//get fileshare name
@@ -147,8 +163,8 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		return nil, err
 	}
 
-	if err = d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
-		return
+	if err := d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
+		return nil, err
 	}
 	// remove created volume if got error
 	defer func() {
@@ -165,28 +181,26 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 		log.Error("failed to create filesystem logic volume:", err)
 		return nil, err
 	}
-
 	// mount the volume to directory
 	if err := d.cli.Mount(lvPath, dirName); err != nil {
 		log.Error("failed to mount a directory:", err)
 		return nil, err
 	}
-
 	// Set permission to directory
 	if err := d.cli.SetPermission(dirName); err != nil {
 		log.Error("failed to set permission:", err)
 		return nil, err
 	}
-
 	// get export location of fileshare
 	var location []string
 	location = []string{d.cli.GetExportLocation(name, server)}
 	if len(location) == 0 {
-		log.Error("failed to get exportlocation:", err)
-		return nil, err
+		errMsg := errors.New("failed to get exportlocation: export location is empty!")
+		log.Error(errMsg)
+		return nil, errMsg
 	}
 
-	ffshare := &model.FileShareSpec{
+	fshare = &model.FileShareSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
@@ -202,7 +216,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (fshare *model.Fil
 			KLvPath:        lvPath,
 		},
 	}
-	return ffshare, nil
+	return fshare, nil
 }
 
 // ListPools
@@ -237,7 +251,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 // delete fileshare from device
-func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.FileShareSpec, err error) {
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	// get fileshare name to be deleted
 	fname := opt.GetMetadata()[KFileshareName]
 	// get fileshare path
@@ -245,22 +259,22 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (fshare *model.Fil
 	// get directory where fileshare mounted
 	var dirName = path.Join("/var/", fname)
 
-	// unmount the volume to directory
+	// umount the volume to directory
 	if err := d.cli.UnMount(dirName); err != nil {
 		log.Error("failed to mount a directory:", err)
-		return fshare, err
+		return err
 	}
-	// dlete the actual fileshare from device
+	// delete the actual fileshare from device
 	if err := d.cli.Delete(fname, lvPath); err != nil {
 		log.Error("failed to remove logic volume:", err)
-		return fshare, err
+		return err
 	}
 	// Delete the directory
 	if err := d.cli.DeleteDirectory(dirName); err != nil {
 		log.Error("failed to delete the directory:", err)
-		return nil, err
+		return err
 	}
-	return fshare, nil
+	return nil
 }
 
 // CreateFileShareSnapshot
@@ -296,24 +310,24 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 }
 
 // DeleteFileShareSnapshot
-func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
 	lvsPath, ok := opt.GetMetadata()[KLvPath]
 	snapName := opt.GetMetadata()[KFileshareSnapName]
 	if !ok {
 		err := errors.New("can't find 'lvsPath' in snapshot metadata, ingnore it!")
 		log.Error(err)
-		return nil, nil
+		return nil
 	}
 	fields := strings.Split(lvsPath, "/")
 	vg := fields[2]
 	if !d.cli.Exists(snapName) {
 		log.Warningf("Snapshot(%s) does not exist, nothing to remove", snapName)
-		return nil, nil
+		return nil
 	}
 
 	if err := d.cli.DeleteFileShareSnapshots(snapName, vg); err != nil {
 		log.Error("failed to remove logic volume:", err)
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
