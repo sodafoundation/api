@@ -122,20 +122,20 @@ func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareSpec, error) {
-	return nil, nil
-}
-
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
 	return &SampleFileShares[0], nil
+}
+
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
+	return nil
 }
 
 func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
 	return &SampleFileSharesAcl[0], nil
 }
 
-func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
-	return &SampleFileSharesAcl[0], nil
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
+	return nil
 }
 
 // CreateFileShareSnapshot
@@ -144,6 +144,6 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 }
 
 // DeleteFileShareSnapshot
-func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
-	return nil, nil
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
+	return nil
 }
