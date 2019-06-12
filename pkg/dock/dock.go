@@ -520,7 +520,6 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
 
 	result, err := ds.MetricDriver.CollectMetrics()
-
 	if err != nil {
 		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())
 		return pb.GenericResponseError(err), err
@@ -554,13 +553,12 @@ func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFile
 
 	log.Info("dock server receive delete file share acl request, vr =", opt)
 
-	fileshare, err := ds.FileShareDriver.DeleteFileShareAcl(opt)
-	if err != nil {
+	if err := ds.FileShareDriver.DeleteFileShareAcl(opt); err != nil {
 		log.Error("when create file share in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 	// TODO: maybe need to update status in DB.
-	return pb.GenericResponseResult(fileshare), nil
+	return pb.GenericResponseResult(nil), nil
 }
 
 // CreateFileShare implements pb.DockServer.CreateFileShare
@@ -591,7 +589,7 @@ func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileSha
 
 	log.Info("Dock server receive delete file share request, vr =", opt)
 
-	if _, err := ds.FileShareDriver.DeleteFileShare(opt); err != nil {
+	if err := ds.FileShareDriver.DeleteFileShare(opt); err != nil {
 		log.Error("error occurred in dock module when delete file share:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -624,7 +622,7 @@ func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.Delet
 
 	log.Info("Dock server receive delete file share snapshot request, vr =", opt)
 
-	if _, err := ds.FileShareDriver.DeleteFileShareSnapshot(opt); err != nil {
+	if err := ds.FileShareDriver.DeleteFileShareSnapshot(opt); err != nil {
 		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}

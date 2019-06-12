@@ -30,11 +30,11 @@ const (
 
 // ConnectorInfo define
 type ConnectorInfo struct {
-	Nqn       string `mapstructure:"targetNQN"`     //NVMe subsystem name to the volume to be connected
-	TgtPort   string `mapstructure:"targetPort"`    //NVMe target port that hosts the nqn sybsystem
-	TgtPortal string `mapstructure:"targetIP"`      //NVMe target ip that hosts the nqn sybsystem
-	TranType  string `mapstructure:"transporType "` // Nvme transport type
-	HostNqn   string `mapstructure:"hostNqn"`       // host nqn
+	Nqn       string `mapstructure:"targetNQN"`    //NVMe subsystem name to the volume to be connected
+	TgtPort   string `mapstructure:"targetPort"`   //NVMe target port that hosts the nqn sybsystem
+	TgtPortal string `mapstructure:"targetIP"`     //NVMe target ip that hosts the nqn sybsystem
+	TranType  string `mapstructure:"transporType"` // Nvme transport type
+	HostNqn   string `mapstructure:"hostNqn"`      // host nqn
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -52,8 +52,8 @@ func GetInitiator() ([]string, error) {
 
 	lines := strings.Split(string(res), "\n")
 	for _, l := range lines {
-		if strings.Contains(l, "UUID:") {
-			tmp := iniNvmePrefix + strings.Split(l, ":")[1]
+		if strings.Contains(l, "UUID: ") {
+			tmp := iniNvmePrefix + strings.Split(l, ": ")[1]
 			nqns = append(nqns, tmp)
 			log.Printf("Found the following nqns: %s", nqns)
 			return nqns, nil
@@ -131,7 +131,7 @@ func Discovery(connMap map[string]interface{}) error {
 	conn := ParseNvmeofConnectInfo(connMap)
 	targetip := conn.TgtPortal
 	targetport := conn.TgtPort
-	info, err := connector.ExecCmd("nvme", "discover", "-t", "rdma", "-a", targetip, "-s", targetport)
+	info, err := connector.ExecCmd("nvme", "discover", "-t", "tcp", "-a", targetip, "-s", targetport)
 	if err != nil {
 		log.Printf("Error encountered in send targets:%v, %v\n", err, info)
 		return err
@@ -146,11 +146,17 @@ func Connect(connMap map[string]interface{}) (string, error) {
 	connNqn := conn.Nqn
 	targetPortal := conn.TgtPortal
 	port := conn.TgtPort
-	nvmeTransportType := "rdma"
-	log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal, port)
+	nvmeTransportType := conn.TranType
+	hostName := conn.HostNqn
 
-	_, err := connector.ExecCmd("nvme", "connect", "-t",
-		nvmeTransportType, "-n", connNqn, "-a", targetPortal, "-s", port)
+	cmd := "nvme connect -t " + nvmeTransportType + " -n " + connNqn + " -s " + port + " -a " + targetPortal
+	if hostName != "ALL" {
+		cmd += " -q " + hostName
+	}
+	//log.Printf("conn information:%s, %s, %s ", connNqn, targetPortal, port)
+
+	_, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+
 	if err != nil {
 		log.Println("Failed to connect to NVMe nqn :", connNqn)
 		return "", err
