@@ -28,7 +28,7 @@ import (
 	model "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 func (d *Driver) Setup() error {
@@ -343,18 +343,18 @@ func (d *Driver) GetProtoFromProfile(prf string) (string, error) {
 	return shareProto, nil
 }
 
-func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareSpec, error) {
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	shareProto, err := d.GetProtoFromProfile(opt.GetProfile())
 	if err != nil {
 		log.Error(err.Error())
-		return nil, err
+		return err
 	}
 
 	meta := opt.GetMetadata()
 	if meta == nil || (meta != nil && meta[FileShareName] == "" && meta[FileShareID] == "") {
 		msg := "cannot get file share name and id"
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	fsName := meta[FileShareName]
@@ -366,21 +366,20 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) (*model.FileShareS
 	if err := shareDriver.deleteShare(shareID); err != nil {
 		msg := fmt.Sprintf("delete file share %s failed: %v", sharePath, err)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	log.Infof("delete share %s successfully", sharePath)
 
-	err = d.DeleteFileSystem(fsName)
-	if err != nil {
+	if err := d.DeleteFileSystem(fsName); err != nil {
 		msg := fmt.Sprintf("delete filesystem %s failed: %v", fsName, err)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	log.Infof("delete file system %s successfully", fsName)
 
-	return nil, nil
+	return nil
 }
 
 func (d *Driver) DeleteFileSystem(fsName string) error {
@@ -451,12 +450,12 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 	}, nil
 }
 
-func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
 	meta := opt.GetMetadata()
 	if meta == nil || (meta != nil && meta[FileShareSnapshotID] == "") {
 		msg := "cannot get file share snapshot id"
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	snapID := meta[FileShareSnapshotID]
@@ -465,12 +464,12 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) (*
 	if err != nil {
 		msg := fmt.Sprintf("delete filesystem snapshot %s failed, %v", snapID, err)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	log.Infof("delete file share snapshot %s successfully", snapID)
 
-	return nil, nil
+	return nil
 }
 
 func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (string, error) {
@@ -621,11 +620,11 @@ func (d *Driver) createAccessIfNotExist(shareID, accessTo, shareProto, accessLev
 	return nil
 }
 
-func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 	shareName, shareProto, accessTo, err := d.DeleteFileShareAclParamCheck(opt)
 	if err != nil {
 		log.Error(err.Error())
-		return nil, err
+		return err
 	}
 
 	shareDriver := NewProtocol(shareProto, d.Client)
@@ -633,13 +632,13 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.File
 	share, err := shareDriver.getShare(shareName)
 	if err != nil {
 		log.Error(err.Error())
-		return nil, err
+		return err
 	}
 
 	if share == nil {
 		msg := fmt.Sprintf("share %s does not exist", shareName)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	shareID := shareDriver.getShareID(share)
@@ -648,22 +647,22 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.File
 	if err != nil {
 		msg := fmt.Sprintf("get access from share failed: %v", err)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if accessID == "" {
 		msg := fmt.Sprintf("can not get access id from share %s", shareName)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if err := d.removeAccessFromShare(accessID, shareProto); err != nil {
 		msg := fmt.Sprintf("remove access from share failed: %v", err)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (d *Driver) DeleteFileShareAclParamCheck(opt *pb.DeleteFileShareAclOpts) (string, string, string, error) {

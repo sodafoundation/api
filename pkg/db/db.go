@@ -57,6 +57,8 @@ func Init(db *Database) {
 type Client interface {
 	CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
 
+	UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
+
 	ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error)
 
 	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)

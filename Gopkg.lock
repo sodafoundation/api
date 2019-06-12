@@ -111,7 +111,7 @@
   revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
 
 [[projects]]
-  digest = "1:d62e1f788b10e2e345faa5b6482a6a69db04e378b7d2ab73d7252fa26efcb11c"
+  digest = "1:eb8b5727782de0c0743ee8088168cb94eef04c3f3bb786ab4a5bcaf8c31f47d2"
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
@@ -124,11 +124,13 @@
     "openstack/identity/v2/tenants",
     "openstack/identity/v2/tokens",
     "openstack/identity/v3/tokens",
+    "openstack/sharedfilesystems/v2/shares",
+    "openstack/sharedfilesystems/v2/snapshots",
     "openstack/utils",
     "pagination",
   ]
   pruneopts = "NUT"
-  revision = "754e57e7867bfa48062ff2a237caad538085700a"
+  revision = "3ad89c4ea008e0e0b729720040b0be25a35d4615"
 
 [[projects]]
   digest = "1:406338ad39ab2e37b7f4452906442a3dbf0eb3379dd1f06aafb5c07e769a5fbb"
@@ -390,18 +392,20 @@
     "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots",
     "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
     "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens",
+    "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares",
+    "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots",
     "github.com/gophercloud/gophercloud/pagination",
     "github.com/mitchellh/mapstructure",
     "github.com/prometheus/client_golang/prometheus",
-    "github.com/prometheus/client_golang/prometheus/internal",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/prometheus/client_golang/prometheus/push",
     "github.com/satori/go.uuid",
     "github.com/segmentio/kafka-go",
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/mock",
-    "golang.org/x/net/context",
     "google.golang.org/grpc",
+    "google.golang.org/grpc/codes",
+    "google.golang.org/grpc/status",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"

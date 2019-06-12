@@ -15,7 +15,6 @@
 package dorado
 
 import (
-	"github.com/satori/go.uuid"
 	"strconv"
 	"time"
 
@@ -23,6 +22,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils/config"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/yaml.v2"
 )
 
