@@ -81,7 +81,17 @@ type nvmeofTarget struct {
 
 func (t *nvmeofTarget) CreateExport(volId, path, hostIp, initiator string, chapAuth []string) (map[string]interface{}, error) {
 	tgtNqn := nvmeofTgtPrefix + volId
-	if err := t.CreateNvmeofTarget(volId, tgtNqn, path, hostIp, initiator, chapAuth); err != nil {
+	// So far nvmeof transtport type is defaultly set as tcp because of its widely use, but it can also be rdma/fc.
+	// The difference of transport type leads to different performance of volume attachment latency and iops.
+	// This choice of transport type depends on 3 following factors:
+	// 1. initiator's latency/iops requiremnet
+	// 2. initiator's availiable nic(whether the inititator can use rdma/fc/tcpip)
+	// 3. target server's availiable nic(whether the target server can use rdma/fc/tcpip)
+	// According to the opensds architecture, it is a more approprite way for the opensds controller
+	//to take the decision in the future.
+	var transtype string
+	transtype = "tcp"
+	if err := t.CreateNvmeofTarget(volId, tgtNqn, path, initiator, transtype); err != nil {
 		return nil, err
 	}
 	conn := map[string]interface{}{
@@ -89,17 +99,25 @@ func (t *nvmeofTarget) CreateExport(volId, path, hostIp, initiator string, chapA
 		"targetNQN":        tgtNqn,
 		"targetIP":         t.NvmeofTarget.(*NvmeoftgtTarget).BindIp,
 		"targetPort":       "4420",
+		"hostNqn":          initiator,
 		"discard":          false,
+		"transporType":     transtype,
 	}
-	if len(chapAuth) == 2 {
-		conn["authMethod"] = "chap"
-		conn["authUserName"] = chapAuth[0]
-		conn["authPassword"] = chapAuth[1]
-	}
+
 	return conn, nil
 }
 
 func (t *nvmeofTarget) RemoveExport(volId, hostIp string) error {
 	tgtNqn := nvmeofTgtPrefix + volId
-	return t.RemoveNvmeofTarget(volId, tgtNqn, hostIp)
+	// So far nvmeof transtport type is defaultly set as tcp because of its widely use, but it can also be rdma/fc.
+	// The difference of transport type leads to different performance of volume attachment latency and iops.
+	// This choice of transport type depends on 3 following factors:
+	// 1. initiator's latency/iops requiremnet
+	// 2. initiator's availiable nic(whether the inititator can use rdma/fc/tcpip)
+	// 3. target server's availiable nic(whether the target server can use rdma/fc/tcpip)
+	// According to the opensds architecture, it is a more approprite way for the opensds controller
+	//to take the decision in the future.
+	var transtype string
+	transtype = "tcp"
+	return t.RemoveNvmeofTarget(volId, tgtNqn, transtype)
 }

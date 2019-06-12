@@ -554,7 +554,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
-	
+
 	log.V(5).Infof("update file share object %+v into db", result)
 
 	body, err := json.Marshal(result)
