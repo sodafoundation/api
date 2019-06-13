@@ -546,13 +546,8 @@ func (c *Controller) CreateReplication(contx context.Context, opt *pb.CreateRepl
 		return pb.GenericResponseError(err), err
 	}
 
-	// update driver data, metadata
-	resp, err := db.C.UpdateReplication(ctx, result.Id, result)
-	log.Error(resp, err)
-	// update status
-	err = db.UpdateReplicationStatus(ctx, db.C, result.Id, model.ReplicationAvailable)
-	log.Error(err)
-
+	// update status ,driver data, metadata
+	db.C.UpdateStatus(ctx, result, model.ReplicationAvailable)
 	return pb.GenericResponseResult(result), nil
 }
 

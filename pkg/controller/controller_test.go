@@ -435,8 +435,6 @@ func TestCreateReplication(t *testing.T) {
 	mockClient.On("GetReplication", c.NewAdminContext(), req.Id).Return(replica, nil)
 	mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), replica, model.ReplicationAvailable).Return(nil)
-	mockClient.On("UpdateReplication", c.NewAdminContext(), req.Id, replica).Return(replica, nil)
-	mockClient.On("UpdateReplicationStatus", db.C, c.NewAdminContext(), req.Id, model.ReplicationAvailable).Return(nil)
 	db.C = mockClient
 
 	var ctrl = &Controller{
