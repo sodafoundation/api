@@ -28,7 +28,7 @@ import (
 )
 
 type NFSConnectorInfo struct {
-	ExportLocations []string `mapstructure:"ExportLocations"`
+	ExportLocations []string `mapstructure:"exportLocations"`
 }
 
 func connect(conn map[string]interface{}) (string, error) {
