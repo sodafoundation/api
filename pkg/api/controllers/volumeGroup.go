@@ -96,8 +96,14 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 		RemoveVolumes:    result.RemoveVolumes,
 		Context:          ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.CreateVolumeGroup(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.CreateVolumeGroup(context.Background(), opt)
+	if err != nil {
 		log.Error("create volume group failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create volume group in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -153,8 +159,14 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 		PoolId:        result.PoolId,
 		Context:       ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.UpdateVolumeGroup(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.UpdateVolumeGroup(context.Background(), opt)
+	if err != nil {
 		log.Error("update volume group failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to update volume group in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -197,8 +209,14 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 		PoolId:  vg.PoolId,
 		Context: ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.DeleteVolumeGroup(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.DeleteVolumeGroup(context.Background(), opt)
+	if err != nil {
 		log.Error("delete volume group failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete volume group in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 

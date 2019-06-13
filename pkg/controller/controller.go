@@ -1004,7 +1004,7 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 // DeleteFileShareAcl implements pb.ControllerServer.DeleteFileShare
 func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
 	var err error
-	log.Info("controller server receive create file share acl request, vr =", opt)
+	log.Info("controller server receive delete file share acl request, vr =", opt)
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 
 	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
