@@ -974,13 +974,8 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
 	}
-	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
-	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
-		return pb.GenericResponseError(err), err
-	}
 
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		log.Error("when search supported dock resource:", err.Error())
@@ -1013,13 +1008,7 @@ func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFil
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		return pb.GenericResponseError(err), err
 	}
-	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
-	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
-		return pb.GenericResponseError(err), err
-	}
-
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
 		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 		log.Error("when search supported dock resource:", err.Error())

@@ -172,6 +172,12 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	//validate the snapshot name
+	if strings.HasPrefix(in.Name, "snapshot") {
+		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.Status = model.FileShareSnapCreating
 	in.Metadata = fshare.Metadata
 	return db.C.CreateFileShareSnapshot(ctx, in)
