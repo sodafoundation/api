@@ -48,7 +48,7 @@ type ReplicationDriver interface {
 	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 }
 
-func IsSupportHostBasedReplication(resourceType string) bool {
+func IsSupportArrayBasedReplication(resourceType string) bool {
 	v := reflect.ValueOf(config.CONF.Backends)
 	t := reflect.TypeOf(config.CONF.Backends)
 	for i := 0; i < t.NumField(); i++ {

@@ -554,7 +554,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
-	
+
 	log.V(5).Infof("update file share object %+v into db", result)
 
 	body, err := json.Marshal(result)
@@ -2993,6 +2993,13 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 	case []*model.VolumeSpec:
 		vols := in.([]*model.VolumeSpec)
 		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
+			return errUpdate
+		}
+
+	case *model.ReplicationSpec:
+		replica := in.(*model.ReplicationSpec)
+		replica.ReplicationStatus = status
+		if _, errUpdate := c.UpdateReplication(ctx, replica.Id, replica); errUpdate != nil {
 			return errUpdate
 		}
 	}

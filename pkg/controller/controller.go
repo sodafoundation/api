@@ -546,8 +546,13 @@ func (c *Controller) CreateReplication(contx context.Context, opt *pb.CreateRepl
 		return pb.GenericResponseError(err), err
 	}
 
-	// update status ,driver data, metadata
-	db.C.UpdateStatus(ctx, result, model.ReplicationAvailable)
+	// update driver data, metadata
+	resp, err := db.C.UpdateReplication(ctx, result.Id, result)
+	log.Error(resp, err)
+	// update status
+	err = db.UpdateReplicationStatus(ctx, db.C, result.Id, model.ReplicationAvailable)
+	log.Error(err)
+
 	return pb.GenericResponseResult(result), nil
 }
 
@@ -582,8 +587,7 @@ func (c *Controller) DeleteReplication(contx context.Context, opt *pb.DeleteRepl
 	}
 
 	if err = db.C.DeleteReplication(ctx, opt.Id); err != nil {
-		log.Error("error occurred in controller module when delete volume snapshot in db: ", err)
-		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		log.Error("error occurred in controller module when delete replication in db: ", err)
 		return pb.GenericResponseError(err), err
 	}
 
