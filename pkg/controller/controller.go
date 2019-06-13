@@ -582,8 +582,7 @@ func (c *Controller) DeleteReplication(contx context.Context, opt *pb.DeleteRepl
 	}
 
 	if err = db.C.DeleteReplication(ctx, opt.Id); err != nil {
-		log.Error("error occurred in controller module when delete volume snapshot in db: ", err)
-		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		log.Error("error occurred in controller module when delete replication in db: ", err)
 		return pb.GenericResponseError(err), err
 	}
 

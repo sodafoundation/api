@@ -2995,6 +2995,13 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
 			return errUpdate
 		}
+
+	case *model.ReplicationSpec:
+		replica := in.(*model.ReplicationSpec)
+		replica.ReplicationStatus = status
+		if _, errUpdate := c.UpdateReplication(ctx, replica.Id, replica); errUpdate != nil {
+			return errUpdate
+		}
 	}
 	return nil
 }
