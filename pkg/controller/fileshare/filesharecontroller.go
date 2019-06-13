@@ -39,7 +39,7 @@ type Controller interface {
 
 	CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error)
 
-	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error)
+	DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error
 
 	DeleteFileShare(opt *pb.DeleteFileShareOpts) error
 
@@ -89,32 +89,25 @@ func (c *controller) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.
 
 }
 
-func (c *controller) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) (*model.FileShareAclSpec, error) {
+func (c *controller) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 	if err := c.Client.Connect(c.DockInfo.Endpoint); err != nil {
 		log.Error("when connecting dock client:", err)
-		return nil, err
+		return err
 	}
 
 	response, err := c.Client.DeleteFileShareAcl(context.Background(), opt)
 	if err != nil {
 		log.Error("delete file share acl failed in file share controller:", err)
-		return nil, err
+		return err
 	}
 	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
-		return nil,
-			fmt.Errorf("failed to delete file share acl in file share controller, code: %v, message: %v",
-				errorMsg.GetCode(), errorMsg.GetDescription())
+		return fmt.Errorf("failed to delete file share acl in file share controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 	}
 
-	var fileshare = &model.FileShareAclSpec{}
-	if err = json.Unmarshal([]byte(response.GetResult().GetMessage()), fileshare); err != nil {
-		log.Error("delete file share acl failed in file share controller:", err)
-		return nil, err
-	}
-
-	return fileshare, nil
+	return nil
 }
 
 func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {

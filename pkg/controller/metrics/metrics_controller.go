@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 	"strconv"
 
 	log "github.com/golang/glog"
@@ -236,8 +238,8 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 		for _, res := range fv.Data.Result {
 
 			metricValues := make([]*model.Metric, 0)
-			metricValue := &model.Metric{}
 			for j := 0; j < len(res.Values); j++ {
+				metricValue := &model.Metric{}
 				for _, v := range res.Values[j] {
 					switch v.(type) {
 					case string:
@@ -251,13 +253,14 @@ func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpe
 
 				}
 				metricValues = append(metricValues, metricValue)
-				metric := &model.MetricSpec{}
-				metric.InstanceID = res.Metric.Instance
-				metric.Name = res.Metric.Name
-				metric.InstanceName = res.Metric.Device
-				metric.MetricValues = metricValues
-				metrics = append(metrics, metric)
+
 			}
+			metric := &model.MetricSpec{}
+			metric.InstanceID = res.Metric.Instance
+			metric.Name = res.Metric.Name
+			metric.InstanceName = res.Metric.Device
+			metric.MetricValues = metricValues
+			metrics = append(metrics, metric)
 		}
 
 		bArr, _ := json.Marshal(metrics)
@@ -312,15 +315,28 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 	return res, nil
 
 }
-
+func CheckServiceStatus(sName string) error {
+	cmd := exec.Command("systemctl", "status", sName, "--no-pager")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Errorf("status of service %s is inactive err: %s\n", sName, err)
+		return err
+	}
+	return nil
+}
 func (c *controller) GetUrls() (*map[string]string, error) {
 
 	res := map[string]string{}
 	flagGrafanaUrl := flag.Lookup("grafana-url")
 	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
-
-	res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
-	res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+	if CheckServiceStatus("grafana-server.service") == nil {
+		res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
+	}
+	if CheckServiceStatus("alertmanager.service") == nil {
+		res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+	}
 
 	return &res, nil
 

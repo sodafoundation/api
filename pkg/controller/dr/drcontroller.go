@@ -186,7 +186,7 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 	db.C.UpdateVolume(ctx, primaryVol)
 	secondaryVol.ReplicationDriverData = make(map[string]string)
 	db.C.UpdateVolume(ctx, secondaryVol)
-	return db.C.DeleteReplication(ctx, replica.Id)
+	return nil
 }
 
 func (d *DrController) EnableReplication(ctx *c.Context, replica *ReplicationSpec, primaryVol, secondaryVol *VolumeSpec) error {
@@ -330,9 +330,10 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 					Host:      atm.Host,
 					Initiator: atm.Initiator,
 				},
-				Metadata:   utils.MergeStringMaps(atm.Metadata, vol.Metadata),
-				DriverName: provisionerDock.DriverName,
-				Context:    ctx.ToJson(),
+				AccessProtocol: protocol,
+				Metadata:       utils.MergeStringMaps(atm.Metadata, vol.Metadata),
+				DriverName:     provisionerDock.DriverName,
+				Context:        ctx.ToJson(),
 			}
 			p.volumeController.SetDock(provisionerDock)
 			p.volumeController.DeleteVolumeAttachment(opt)

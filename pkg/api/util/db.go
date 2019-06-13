@@ -21,6 +21,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -30,7 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 //function to store filesahreAcl metadata into database
@@ -45,18 +46,51 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
-	in.Description = in.Description
-
-	in.Type = in.Type
-	in.AccessTo = in.AccessTo
-	in.AccessCapability = in.AccessCapability
+	// validate type
+	if in.Type != "ip" {
+		errMsg := fmt.Sprintf("invalid fileshare type: %v. Supported type is: ip", in.Type)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	// validate accessTo
+	accessto := in.AccessTo
+	if in.AccessTo == "" {
+		errMsg := fmt.Sprintf("accessTo is empty. Please give valid ip segment")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	} else if strings.Contains(accessto, "/") {
+		first, cidr, bool := net.ParseCIDR(accessto)
+		log.Info(first, cidr)
+		if bool != nil {
+			errMsg := fmt.Sprintf("invalid IP segment %v", accessto)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	} else {
+		server := net.ParseIP(in.AccessTo)
+		if server == nil {
+			errMsg := fmt.Sprintf("%v is not a valid ip. Please give the proper ip", in.AccessTo)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	// validate accesscapability
+	accessCapability := in.AccessCapability
+	permissions := []string{"write", "read"}
+	for _, value := range accessCapability {
+		value = strings.ToLower(value)
+		if !(utils.Contains(permissions, value)) {
+			errMsg := fmt.Sprintf("invalid fileshare accesscapability: %v. Supported accesscapability are: {read, write}", value)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	// get fileshare details
 	_, err := db.C.GetFileShare(ctx, in.FileShareId)
 	if err != nil {
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
-	in.FileShareId = in.FileShareId
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
 }
@@ -66,6 +100,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
+	// validate the size
 	if in.Size <= 0 {
 		errMsg := fmt.Sprintf("invalid fileshare size: %d", in.Size)
 		log.Error(errMsg)
@@ -81,13 +116,19 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
-	in.Description = in.Description
-
-	in.Name = in.Name
+	//validate the name
+	if in.Name == "" {
+		errMsg := fmt.Sprintf("Empty fileshare name is not allowed. Please give valid name.")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if len(in.Name) > 128 {
+		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.UserId = ctx.UserId
 	in.Status = model.FileShareCreating
-	in.ExportLocations = in.ExportLocations
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShare(ctx, in)
 }
@@ -131,6 +172,12 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	//validate the snapshot name
+	if strings.HasPrefix(in.Name, "snapshot") {
+		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.Status = model.FileShareSnapCreating
 	in.Metadata = fshare.Metadata
 	return db.C.CreateFileShareSnapshot(ctx, in)
@@ -386,11 +433,14 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// Check if specified volume has already been used in other replication.
 	v, err := db.C.GetReplicationByVolumeId(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
-			in.PrimaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
+				in.PrimaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
+
 	if v != nil {
 		var errMsg = fmt.Errorf("specified primary volume(%s) has already been used in replication(%s)",
 			in.PrimaryVolumeId, v.Id)
@@ -401,10 +451,12 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// check if specified volume has already been used in other replication.
 	v, err = db.C.GetReplicationByVolumeId(ctx, in.SecondaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
-			in.SecondaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
+				in.SecondaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
 	if v != nil {
 		var errMsg = fmt.Errorf("specified secondary volume(%s) has already been used in replication(%s)",

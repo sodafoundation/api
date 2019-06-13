@@ -28,8 +28,8 @@ import (
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
-	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils"
+	. "github.com/opensds/opensds/pkg/utils/config"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -384,7 +384,7 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()	
+	defer f.CtrClient.Close()
 	metadata := utils.MergeStringMaps(fileshare.Metadata, acl.Metadata)
 
 	opt := &pb.DeleteFileShareAclOpts{
@@ -500,25 +500,21 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		return
 	}
 
+	var err error
+	fileshare, err := db.C.GetFileShare(ctx, snapshot.FileShareId)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare %s not found: %s", snapshot.FileShareId, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+
 	// Get profile
 	var prf *model.ProfileSpec
-	var err error
-	if snapshot.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfileFileShare(ctx)
-		if err != nil {
-			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-			f.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
-		snapshot.ProfileId = prf.Id
-	} else {
-		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
-		if err != nil {
-			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-			f.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
+	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
 	}
 
 	// NOTE:It will create a fileshare snapshot entry into the database and initialize its status
