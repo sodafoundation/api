@@ -95,6 +95,19 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	return db.C.CreateFileShareAcl(ctx, in)
 }
 
+func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error {
+	// If fileshare id is invalid, it would mean that fileshare snapshot
+	// creation failed before the create method in storage driver was
+	// called, and delete its db entry directly.
+	if _, err := db.C.GetFileShare(ctx, in.FileShareId); err != nil {
+		if err := db.C.DeleteFileShareAcl(ctx, in.Id); err != nil {
+			log.Error("when delete fileshare acl in db:", err)
+			return err
+		}
+	}
+	return nil
+}
+
 // Function to store metadeta of fileshare into database
 func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
 	if in.Id == "" {
