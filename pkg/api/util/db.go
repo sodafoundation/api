@@ -21,6 +21,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -45,18 +46,51 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
-	in.Description = in.Description
-
-	in.Type = in.Type
-	in.AccessTo = in.AccessTo
-	in.AccessCapability = in.AccessCapability
+	// validate type
+	if in.Type != "ip" {
+		errMsg := fmt.Sprintf("invalid fileshare type: %v. Supported type is: ip", in.Type)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	// validate accessTo
+	accessto := in.AccessTo
+	if in.AccessTo == "" {
+		errMsg := fmt.Sprintf("accessTo is empty. Please give valid ip segment")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	} else if strings.Contains(accessto, "/") {
+		first, cidr, bool := net.ParseCIDR(accessto)
+		log.Info(first, cidr)
+		if bool != nil {
+			errMsg := fmt.Sprintf("invalid IP segment %v", accessto)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	} else {
+		server := net.ParseIP(in.AccessTo)
+		if server == nil {
+			errMsg := fmt.Sprintf("%v is not a valid ip. Please give the proper ip", in.AccessTo)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	// validate accesscapability
+	accessCapability := in.AccessCapability
+	permissions := []string{"write", "read"}
+	for _, value := range accessCapability {
+		value = strings.ToLower(value)
+		if !(utils.Contains(permissions, value)) {
+			errMsg := fmt.Sprintf("invalid fileshare accesscapability: %v. Supported accesscapability are: {read, write}", value)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	// get fileshare details
 	_, err := db.C.GetFileShare(ctx, in.FileShareId)
 	if err != nil {
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
-	in.FileShareId = in.FileShareId
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
 }
@@ -66,6 +100,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
+	// validate the size
 	if in.Size <= 0 {
 		errMsg := fmt.Sprintf("invalid fileshare size: %d", in.Size)
 		log.Error(errMsg)
@@ -81,13 +116,19 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
-	in.Description = in.Description
-
-	in.Name = in.Name
+	//validate the name
+	if in.Name == "" {
+		errMsg := fmt.Sprintf("Empty fileshare name is not allowed. Please give valid name.")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if len(in.Name) > 128 {
+		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.UserId = ctx.UserId
 	in.Status = model.FileShareCreating
-	in.ExportLocations = in.ExportLocations
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShare(ctx, in)
 }

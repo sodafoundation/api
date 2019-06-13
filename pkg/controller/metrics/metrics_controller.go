@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 	"strconv"
 
 	log "github.com/golang/glog"
@@ -313,15 +315,28 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 	return res, nil
 
 }
-
+func CheckServiceStatus(sName string) error {
+	cmd := exec.Command("systemctl", "status", sName, "--no-pager")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Errorf("status of service %s is inactive err: %s\n", sName, err)
+		return err
+	}
+	return nil
+}
 func (c *controller) GetUrls() (*map[string]string, error) {
 
 	res := map[string]string{}
 	flagGrafanaUrl := flag.Lookup("grafana-url")
 	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
-
-	res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
-	res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+	if CheckServiceStatus("grafana-server.service") == nil {
+		res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
+	}
+	if CheckServiceStatus("alertmanager.service") == nil {
+		res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+	}
 
 	return &res, nil
 
