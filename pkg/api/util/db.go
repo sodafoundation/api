@@ -31,7 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 //function to store filesahreAcl metadata into database
@@ -427,11 +427,14 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// Check if specified volume has already been used in other replication.
 	v, err := db.C.GetReplicationByVolumeId(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
-			in.PrimaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
+				in.PrimaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
+
 	if v != nil {
 		var errMsg = fmt.Errorf("specified primary volume(%s) has already been used in replication(%s)",
 			in.PrimaryVolumeId, v.Id)
@@ -442,10 +445,12 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// check if specified volume has already been used in other replication.
 	v, err = db.C.GetReplicationByVolumeId(ctx, in.SecondaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
-			in.SecondaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
+				in.SecondaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
 	if v != nil {
 		var errMsg = fmt.Errorf("specified secondary volume(%s) has already been used in replication(%s)",
