@@ -68,6 +68,7 @@ const (
 const (
 	VolumeAttachCreating      = "creating"
 	VolumeAttachAvailable     = "available"
+	VolumeAttachDeleting      = "deleting"
 	VolumeAttachErrorDeleting = "errorDeleting"
 	VolumeAttachError         = "error"
 )

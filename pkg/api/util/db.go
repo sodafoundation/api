@@ -348,6 +348,37 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAt
 	return db.C.CreateVolumeAttachment(ctx, volAttachment)
 }
 
+// DeleteVolumeAttachmentDBEntry just modifies the state of the volume attachment to
+// be deleting in the DB, the real deletion operation would be executed in
+// another new thread.
+func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
+	validStatus := []string{model.VolumeAttachAvailable, model.VolumeAttachError,
+		model.VolumeAttachErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the volume attachment with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If volume id is invalid, it would mean that volume attachment creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetVolume(ctx, in.VolumeId)
+	if err != nil {
+		if err := db.C.DeleteVolumeAttachment(ctx, in.Id); err != nil {
+			log.Error("when delete volume attachment in db:", err)
+			return err
+		}
+		return nil
+	}
+
+	in.Status = model.VolumeAttachDeleting
+	_, err = db.C.UpdateVolumeAttachment(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
