@@ -1384,6 +1384,11 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	// profile name must be unique with the same storage type.
+	if _, err := c.getProfileByName(ctx, prf.Name, prf.StorageType); err == nil {
+		return nil, fmt.Errorf("the profile name '%s' already exists", prf.Name)
+	}
+
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err
@@ -1421,36 +1426,30 @@ func (c *Client) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, e
 	return prf, nil
 }
 
-// GetDefaultProfile
-func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+func (c *Client) getProfileByName(ctx *c.Context, name, storageType string) (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
-		log.Error("Get default profile failed in db: ", err)
+		log.Error("List profile failed: ", err)
 		return nil, err
 	}
 
 	for _, profile := range profiles {
-		if profile.Name == "default" && profile.StorageType == "block" {
+		if profile.Name == name && profile.StorageType == storageType {
 			return profile, nil
 		}
 	}
-	return nil, errors.New("No default profile in db.")
+	var msg = fmt.Sprintf("can't find profile(name: %s, storageType:%s)", name, storageType)
+	return nil, model.NewNotFoundError(msg)
+}
+
+// GetDefaultProfile
+func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+	return c.getProfileByName(ctx, "default", "block")
 }
 
 // GetDefaultProfileFileShare
 func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
-	profiles, err := c.ListProfiles(ctx)
-	if err != nil {
-		log.Error("Get default profile failed in db: ", err)
-		return nil, err
-	}
-
-	for _, profile := range profiles {
-		if profile.Name == "default" && profile.StorageType == "file" {
-			return profile, nil
-		}
-	}
-	return nil, errors.New("No default profile in db.")
+	return c.getProfileByName(ctx, "default", "file")
 }
 
 // ListProfiles
