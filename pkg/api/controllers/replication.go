@@ -98,8 +98,14 @@ func (r *ReplicationPortal) CreateReplication() {
 		ProfileId:         result.ProfileId,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = r.CtrClient.CreateReplication(context.Background(), opt); err != nil {
+	response, err := r.CtrClient.CreateReplication(context.Background(), opt)
+	if err != nil {
 		log.Error("create volume replication failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create volume replication in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -278,8 +284,14 @@ func (r *ReplicationPortal) DeleteReplication() {
 		Metadata:          rep.Metadata,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = r.CtrClient.DeleteReplication(context.Background(), opt); err != nil {
+	response, err := r.CtrClient.DeleteReplication(context.Background(), opt)
+	if err != nil {
 		log.Error("delete volume replication failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete volume replication in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -325,8 +337,14 @@ func (r *ReplicationPortal) EnableReplication() {
 		Metadata:          rep.Metadata,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = r.CtrClient.EnableReplication(context.Background(), opt); err != nil {
+	response, err := r.CtrClient.EnableReplication(context.Background(), opt)
+	if err != nil {
 		log.Error("enable volume replication failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to enable volume replication in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -372,8 +390,14 @@ func (r *ReplicationPortal) DisableReplication() {
 		Metadata:          rep.Metadata,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = r.CtrClient.DisableReplication(context.Background(), opt); err != nil {
+	response, err := r.CtrClient.DisableReplication(context.Background(), opt)
+	if err != nil {
 		log.Error("disable volume replication failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to disable volume replication in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -428,8 +452,14 @@ func (r *ReplicationPortal) FailoverReplication() {
 		SecondaryBackendId:  failover.SecondaryBackendId,
 		Context:             ctx.ToJson(),
 	}
-	if _, err = r.CtrClient.FailoverReplication(context.Background(), opt); err != nil {
+	response, err := r.CtrClient.FailoverReplication(context.Background(), opt)
+	if err != nil {
 		log.Error("failover volume replication failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to failover volume replication in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 

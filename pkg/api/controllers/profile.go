@@ -86,7 +86,7 @@ func (p *ProfilePortal) CreateProfile() {
 		}
 		break
 	default:
-		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", stype)
+		errMsg := fmt.Sprintf("parse profile request body failed: %v is invalid storagetype", stype)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}

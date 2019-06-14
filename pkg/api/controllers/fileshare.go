@@ -19,9 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opensds/opensds/pkg/api/policy"
-
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"
@@ -97,7 +96,6 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
@@ -111,11 +109,17 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		Context:          ctx.ToJson(),
 		Profile:          prf.ToJson(),
 	}
-
-	if _, err = f.CtrClient.CreateFileShareAcl(context.Background(), opt); err != nil {
+	response, err := f.CtrClient.CreateFileShareAcl(context.Background(), opt)
+	if err != nil {
 		log.Error("create file share acl failed in controller service:", err)
 		return
 	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create file share acl in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
+		return
+	}
+
 	return
 }
 
@@ -208,7 +212,6 @@ func (f *FileSharePortal) CreateFileShare() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-
 	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareOpts{
@@ -223,9 +226,14 @@ func (f *FileSharePortal) CreateFileShare() {
 		Metadata:         result.Metadata,
 		Context:          ctx.ToJson(),
 	}
-
-	if _, err = f.CtrClient.CreateFileShare(context.Background(), opt); err != nil {
+	response, err := f.CtrClient.CreateFileShare(context.Background(), opt)
+	if err != nil {
 		log.Error("create file share failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create file share in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -343,12 +351,8 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 	if !policy.Authorize(f.Ctx, "fileshareacl:delete") {
 		return
 	}
-	// Get profile
-	var prf *model.ProfileSpec
-
 	ctx := c.GetContext(f.Ctx)
 
-	var err error
 	id := f.Ctx.Input.Param(":aclId")
 	acl, err := db.C.GetFileShareAcl(ctx, id)
 	if err != nil {
@@ -356,27 +360,29 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-
 	fileshare, err := db.C.GetFileShare(ctx, acl.FileShareId)
 	if err != nil {
 		errMsg := fmt.Sprintf("fileshare for the acl %s not found: %s", id, err.Error())
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-
-	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
-	if err := db.C.DeleteFileShareAcl(ctx, acl.Id); err != nil {
+	// NOTE: It will update the the status of the file share acl waiting for deletion
+	// in the database to "deleting" and return the result immediately.
+	if err = util.DeleteFileShareAclDBEntry(ctx, acl); err != nil {
 		errMsg := fmt.Sprintf("delete fileshare acl failed: %v", err.Error())
-		f.ErrorHandle(model.ErrorInternalServer, errMsg)
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
 	f.SuccessHandle(StatusAccepted, nil)
+
 	// NOTE: The real file share deletion process.
 	// File Share deletion request is sent to the Dock. Dock will delete file share from driver
 	// and database or update file share status to "errorDeleting" if deletion from driver failed.
@@ -385,22 +391,29 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		return
 	}
 	defer f.CtrClient.Close()
-	metadata := utils.MergeStringMaps(fileshare.Metadata, acl.Metadata)
 
 	opt := &pb.DeleteFileShareAclOpts{
+		Id:               acl.Id,
 		FileshareId:      acl.FileShareId,
 		Description:      acl.Description,
 		Type:             acl.Type,
 		AccessCapability: acl.AccessCapability,
 		AccessTo:         acl.AccessTo,
-		Metadata:         metadata,
+		Metadata:         utils.MergeStringMaps(fileshare.Metadata, acl.Metadata),
 		Context:          ctx.ToJson(),
 		Profile:          prf.ToJson(),
 	}
-	if _, err = f.CtrClient.DeleteFileShareAcl(context.Background(), opt); err != nil {
-		log.Error("delete fileshare failed in controller service:", err)
+	response, err := f.CtrClient.DeleteFileShareAcl(context.Background(), opt)
+	if err != nil {
+		log.Error("delete fileshare acl failed in controller service:", err)
 		return
 	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete fileshare acl in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
+		return
+	}
+
 	return
 }
 
@@ -410,12 +423,17 @@ func (f *FileSharePortal) DeleteFileShare() {
 	}
 	ctx := c.GetContext(f.Ctx)
 
-	var err error
 	id := f.Ctx.Input.Param(":fileshareId")
 	fileshare, err := db.C.GetFileShare(ctx, id)
 	if err != nil {
 		errMsg := fmt.Sprintf("fileshare %s not found: %s", id, err.Error())
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("delete file share failed: %v", err.Error())
+		f.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
 
@@ -441,13 +459,6 @@ func (f *FileSharePortal) DeleteFileShare() {
 		return
 	}
 
-	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete file share failed: %v", err.Error())
-		f.ErrorHandle(model.ErrorInternalServer, errMsg)
-		return
-	}
-
 	f.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE: The real file share deletion process.
@@ -458,6 +469,7 @@ func (f *FileSharePortal) DeleteFileShare() {
 		return
 	}
 	defer f.CtrClient.Close()
+
 	opt := &pb.DeleteFileShareOpts{
 		Id:       fileshare.Id,
 		PoolId:   fileshare.PoolId,
@@ -465,8 +477,14 @@ func (f *FileSharePortal) DeleteFileShare() {
 		Context:  ctx.ToJson(),
 		Profile:  prf.ToJson(),
 	}
-	if _, err = f.CtrClient.DeleteFileShare(context.Background(), opt); err != nil {
+	response, err := f.CtrClient.DeleteFileShare(context.Background(), opt)
+	if err != nil {
 		log.Error("delete fileshare failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete fileshare in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -500,17 +518,14 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		return
 	}
 
-	var err error
 	fileshare, err := db.C.GetFileShare(ctx, snapshot.FileShareId)
 	if err != nil {
 		errMsg := fmt.Sprintf("fileshare %s not found: %s", snapshot.FileShareId, err.Error())
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-
 	// Get profile
-	var prf *model.ProfileSpec
-	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
+	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -550,8 +565,14 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		Metadata:    result.Metadata,
 		Profile:     prf.ToJson(),
 	}
-	if _, err = f.CtrClient.CreateFileShareSnapshot(context.Background(), opt); err != nil {
+	response, err := f.CtrClient.CreateFileShareSnapshot(context.Background(), opt)
+	if err != nil {
 		log.Error("create file share snapthot failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create file share snapshot in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -611,7 +632,6 @@ func (f *FileShareSnapshotPortal) UpdateFileShareSnapshot() {
 	}
 
 	id := f.Ctx.Input.Param(":snapshotId")
-
 	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&snapshot); err != nil {
 		errMsg := fmt.Sprintf("parse fileshare snapshot request body failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -681,11 +701,16 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		Profile:     prf.ToJson(),
 		Metadata:    snapshot.Metadata,
 	}
-	if _, err = f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt); err != nil {
+	response, err := f.CtrClient.DeleteFileShareSnapshot(context.Background(), opt)
+	if err != nil {
 		log.Error("delete file share snapshot failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete file share snapshot in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
 	return
-
 }

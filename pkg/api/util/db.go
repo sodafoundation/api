@@ -31,7 +31,7 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 //function to store filesahreAcl metadata into database
@@ -93,6 +93,19 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	}
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
+}
+
+func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error {
+	// If fileshare id is invalid, it would mean that fileshare snapshot
+	// creation failed before the create method in storage driver was
+	// called, and delete its db entry directly.
+	if _, err := db.C.GetFileShare(ctx, in.FileShareId); err != nil {
+		if err := db.C.DeleteFileShareAcl(ctx, in.Id); err != nil {
+			log.Error("when delete fileshare acl in db:", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // Function to store metadeta of fileshare into database
@@ -313,7 +326,11 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	return db.C.ExtendVolume(ctx, volume)
 }
 
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+// CreateVolumeAttachmentDBEntry just modifies the state of the volume attachment
+// to be creating in the DB, the real operation would be executed in another new
+// thread.
+func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (
+	*model.VolumeAttachmentSpec, error) {
 	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
 	if err != nil {
 		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
@@ -354,6 +371,40 @@ func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAt
 	return db.C.CreateVolumeAttachment(ctx, volAttachment)
 }
 
+// DeleteVolumeAttachmentDBEntry just modifies the state of the volume attachment to
+// be deleting in the DB, the real deletion operation would be executed in
+// another new thread.
+func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
+	validStatus := []string{model.VolumeAttachAvailable, model.VolumeAttachError,
+		model.VolumeAttachErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the volume attachment with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If volume id is invalid, it would mean that volume attachment creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetVolume(ctx, in.VolumeId)
+	if err != nil {
+		if err := db.C.DeleteVolumeAttachment(ctx, in.Id); err != nil {
+			log.Error("when delete volume attachment in db:", err)
+			return err
+		}
+		return nil
+	}
+
+	in.Status = model.VolumeAttachDeleting
+	_, err = db.C.UpdateVolumeAttachment(ctx, in.Id, in)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateVolumeSnapshotDBEntry just modifies the state of the volume snapshot
+// to be creating in the DB, the real operation would be executed in another new
+// thread.
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
@@ -408,6 +459,9 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 	return nil
 }
 
+// CreateReplicationDBEntry just modifies the state of the volume replication
+// to be creating in the DB, the real deletion operation would be executed
+// in another new thread.
 func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
 	pVol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
@@ -561,6 +615,9 @@ func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secon
 	return nil
 }
 
+// CreateVolumeGroupDBEntry just modifies the state of the volume group
+// to be creating in the DB, the real deletion operation would be
+// executed in another new thread.
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	if len(in.Profiles) == 0 {
 		msg := fmt.Sprintf("profiles must be provided to create volume group.")
@@ -583,6 +640,9 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 	return db.C.CreateVolumeGroup(ctx, in)
 }
 
+// UpdateVolumeGroupDBEntry just modifies the state of the volume group
+// to be updating in the DB, the real deletion operation would be
+// executed in another new thread.
 func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	vg, err := db.C.GetVolumeGroup(ctx, vgUpdate.Id)
 	if err != nil {
@@ -740,6 +800,9 @@ func ValidateRemoveVolumes(ctx *c.Context, volumes []*model.VolumeSpec, removeVo
 	return removeVolumes, nil
 }
 
+// DeleteVolumeGroupDBEntry just modifies the state of the volume group
+// to be deleting in the DB, the real deletion operation would be
+// executed in another new thread.
 func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	vg, err := db.C.GetVolumeGroup(ctx, volumeGroupId)
 	if err != nil {
