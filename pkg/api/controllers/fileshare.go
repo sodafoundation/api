@@ -531,6 +531,7 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+	snapshot.ProfileId = prf.Id
 
 	// NOTE:It will create a fileshare snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real fileshare snapshot creation to complete
@@ -669,7 +670,7 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 
 	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
-		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+		errMsg := fmt.Sprintf("profile (%s) not found: %v", snapshot.ProfileId, err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -678,7 +679,7 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 	// the database to "deleting" and return the result immediately.
 	err = util.DeleteFileShareSnapshotDBEntry(ctx, snapshot)
 	if err != nil {
-		errMsg := fmt.Sprintf("delete file share snapshot failed: %v", err.Error())
+		errMsg := fmt.Sprintf("delete file share snapshot in db failed: %v", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
