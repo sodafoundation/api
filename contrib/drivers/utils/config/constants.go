@@ -31,6 +31,7 @@ const (
 	HpeNimbleDriverType           = "hpe_nimble"
 	DRBDDriverType                = "drbd"
 	ManilaDriverType              = "manila"
+	ChubaofsDriverType            = "chubaofs"
 )
 
 const (
