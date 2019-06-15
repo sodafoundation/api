@@ -49,6 +49,14 @@ func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAcl
 	return fshares, nil
 }
 
+func (fc *FakeDbClient) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	var acls []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		acls = append(acls, &SampleFileSharesAcl[i])
+	}
+	return acls, nil
+}
+
 // CreateFileShare
 func (fc *FakeDbClient) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	return fshare, nil
@@ -130,7 +138,17 @@ func (fc *FakeDbClient) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[s
 	}
 	return snps, nil
 }
+
 func (fc *FakeDbClient) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+func (fc *FakeDbClient) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
 	var snps []*model.FileShareSnapshotSpec
 
 	for i := range SampleFileShareSnapshots {
