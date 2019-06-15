@@ -114,7 +114,6 @@ func (m *MetricsPortal) GetMetrics() {
 		Context:    ctx.ToJson(),
 	}
 	res, err := m.CtrClient.GetMetrics(context.Background(), opt)
-
 	if err != nil {
 		log.Error("collect metrics failed in controller service:", err)
 		return
