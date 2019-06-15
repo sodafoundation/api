@@ -408,6 +408,36 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 	return fileshares, nil
 }
 
+func (c *Client) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var aclList []*model.FileShareAclSpec
+	for _, acl := range acls {
+		if acl.FileShareId == fileshareId {
+			aclList = append(aclList, acl)
+		}
+	}
+	return aclList, nil
+}
+
+func (c *Client) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.FileShareSnapshotSpec
+	for _, snap := range snaps {
+		if snap.FileShareId == fileshareId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
+}
+
 func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	fileshares, err := c.ListFileShares(ctx)
 	if err != nil {

@@ -71,6 +71,8 @@ type Client interface {
 
 	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
 
+	ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error)
+
 	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
 
 	GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error)
@@ -86,6 +88,8 @@ type Client interface {
 	GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
 
 	ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error)
 
 	ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
 

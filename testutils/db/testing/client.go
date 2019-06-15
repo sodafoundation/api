@@ -925,6 +925,29 @@ func (_m *Client) ListDocksWithFilter(ctx *context.Context, m map[string][]strin
 	return r0, r1
 }
 
+// ListFileShareAclsByShareId provides a mock function with given fields: ctx, fileshareId
+func (_m *Client) ListFileShareAclsByShareId(ctx *context.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	ret := _m.Called(ctx, fileshareId)
+
+	var r0 []*model.FileShareAclSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []*model.FileShareAclSpec); ok {
+		r0 = rf(ctx, fileshareId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.FileShareAclSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, fileshareId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListFileShareSnapshots provides a mock function with given fields: ctx
 func (_m *Client) ListFileShareSnapshots(ctx *context.Context) ([]*model.FileShareSnapshotSpec, error) {
 	ret := _m.Called(ctx)
@@ -1217,6 +1240,29 @@ func (_m *Client) ListReplicationWithFilter(ctx *context.Context, m map[string][
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
 		r1 = rf(ctx, m)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListSnapshotsByShareId provides a mock function with given fields: ctx, fileshareId
+func (_m *Client) ListSnapshotsByShareId(ctx *context.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	ret := _m.Called(ctx, fileshareId)
+
+	var r0 []*model.FileShareSnapshotSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []*model.FileShareSnapshotSpec); ok {
+		r0 = rf(ctx, fileshareId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.FileShareSnapshotSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, fileshareId)
 	} else {
 		r1 = ret.Error(1)
 	}
