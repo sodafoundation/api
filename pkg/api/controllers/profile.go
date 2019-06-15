@@ -28,7 +28,6 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
@@ -60,33 +59,9 @@ func (p *ProfilePortal) CreateProfile() {
 	case constants.Block:
 		break
 	case constants.File:
-		if pp := profile.ProvisioningProperties; pp.IsEmpty() {
-			errMsg := fmt.Sprintf("parse profile request body failed : Please provide ProvisionProperties")
-			p.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		} else {
-			if ds := pp.DataStorage; !ds.IsEmpty() {
-				if len(ds.StorageAccessCapability) == 0 {
-					errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",
-						ds.StorageAccessCapability)
-					p.ErrorHandle(model.ErrorBadRequest, errMsg)
-					return
-				} else {
-					for _, x := range ds.StorageAccessCapability {
-						if !utils.Contains(StorageAccessCapabilities, x) {
-							errMsg := fmt.Sprintf("parse profile request body failed %v is invalid storageaccesscapability",
-								ds.StorageAccessCapability)
-							p.ErrorHandle(model.ErrorBadRequest, errMsg)
-							return
-						}
-					}
-				}
-
-			}
-		}
 		break
 	default:
-		errMsg := fmt.Sprintf("parse profile request body failed : %v is invalid storagetype", stype)
+		errMsg := fmt.Sprintf("parse profile request body failed: %v is invalid storagetype", stype)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}

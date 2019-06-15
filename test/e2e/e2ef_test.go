@@ -299,11 +299,11 @@ func TestNvmeofAttachIssues(t *testing.T) {
 		t.Error("connect nvmeof attachment fail", err)
 		return
 	}
-        err = NvmeofVolumeAttachHost(t)
-        if err != nil {
-               t.Error("connect nvmeof attachment fail", err)
-                return
-        }
+	err = NvmeofVolumeAttachHost(t)
+	if err != nil {
+		t.Error("connect nvmeof attachment fail", err)
+		return
+	}
 	err = DeleteNvmeofAttach(t)
 	if err != nil {
 		t.Error("delete nvmeof attachment fail", err)
@@ -397,46 +397,46 @@ func DeleteNvmeofAttach(t *testing.T) error {
 
 //Test Case:Nvmeof Volume Attach to specific host
 func NvmeofVolumeAttachHost(t *testing.T) error {
-       attc, err := PrepareNvmeofAttachmentHost(t)
-       if err != nil {
-               t.Error("Prepare Attachment Fail:", err)
-               return err
-       }
-       defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
-       getatt, err := u.GetVolumeAttachment(attc.Id)
-       if err != nil || getatt.Status != "available" {
-               t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
-               return err
-       }
+	attc, err := PrepareNvmeofAttachmentHost(t)
+	if err != nil {
+		t.Error("Prepare Attachment Fail:", err)
+		return err
+	}
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+	getatt, err := u.GetVolumeAttachment(attc.Id)
+	if err != nil || getatt.Status != "available" {
+		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
+		return err
+	}
 
-       t.Log("Begin to Scan Volume:")
-       t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
-       t.Log("getatt.Metadata", getatt.ConnectionData)
+	t.Log("Begin to Scan Volume:")
+	t.Log("getatt.AccessProtocol", getatt.AccessProtocol)
+	t.Log("getatt.Metadata", getatt.ConnectionData)
 
-       output, _ := execCmd("/bin/bash", "-c", "ps -ef")
-       t.Log(output)
-       //execute bin file
-       conn, err := json.Marshal(&getatt.ConnectionData)
-       if err != nil {
-               t.Error("Failed to marshal connection data:", err)
-               return err
-       }
-       accPro := getatt.AccessProtocol
-       output, err = execCmd("sudo", "./volume-connector",
-               "attach", string(conn), accPro)
-       if err != nil {
-               t.Error("Failed to attach volume:", output, err)
-               return err
-       }
-       t.Log(output)
-       t.Log("Nvmeof Volume attach yoyo success!")
-       // detach it
-       err = NvmeofVolumeDetach(t, attc)
-       if err != nil {
-               t.Error("detach failed")
-               return err
-       }
-       return nil
+	output, _ := execCmd("/bin/bash", "-c", "ps -ef")
+	t.Log(output)
+	//execute bin file
+	conn, err := json.Marshal(&getatt.ConnectionData)
+	if err != nil {
+		t.Error("Failed to marshal connection data:", err)
+		return err
+	}
+	accPro := getatt.AccessProtocol
+	output, err = execCmd("sudo", "./volume-connector",
+		"attach", string(conn), accPro)
+	if err != nil {
+		t.Error("Failed to attach volume:", output, err)
+		return err
+	}
+	t.Log(output)
+	t.Log("Nvmeof Volume attach yoyo success!")
+	// detach it
+	err = NvmeofVolumeDetach(t, attc)
+	if err != nil {
+		t.Error("detach failed")
+		return err
+	}
+	return nil
 }
 
 //Test Case:Nvmeof Volume Attach
@@ -629,26 +629,26 @@ func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 
 // prepare nvmeof attachment availible to specific host
 func PrepareNvmeofAttachmentHost(t *testing.T) (*model.VolumeAttachmentSpec, error) {
-       vol, err := PrepareNvmeVolume()
-       if err != nil {
-               t.Error("Prepare nvmeof  Volume Fail", err)
-               return nil, err
-       }
+	vol, err := PrepareNvmeVolume()
+	if err != nil {
+		t.Error("Prepare nvmeof  Volume Fail", err)
+		return nil, err
+	}
 
-       var body = &model.VolumeAttachmentSpec{
-               VolumeId: vol.Id,
-               HostInfo: model.HostInfo{
-                       Initiator: "nqn.ini.1A2B3C4D5E6F7G8H",
-              },
-       }
-       attc, err := u.CreateVolumeAttachment(body)
-       if err != nil {
-               t.Error("prepare volume attachment failed:", err)
-               return nil, err
-       }
+	var body = &model.VolumeAttachmentSpec{
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{
+			Initiator: "nqn.ini.1A2B3C4D5E6F7G8H",
+		},
+	}
+	attc, err := u.CreateVolumeAttachment(body)
+	if err != nil {
+		t.Error("prepare volume attachment failed:", err)
+		return nil, err
+	}
 
-       t.Log("prepare nvmeof Volume Attachment Success")
-       return attc, nil
+	t.Log("prepare nvmeof Volume Attachment Success")
+	return attc, nil
 }
 
 func cleanVolumeForTest(t *testing.T, volID string) {

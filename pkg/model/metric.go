@@ -80,7 +80,7 @@ type MetricSpec struct {
 
 type Metric struct {
 	Timestamp int64   `json:"timestamp,omitempty"`
-	Value     float64 `json:"value,omitempty"`
+	Value     float64 `json:"value"`
 }
 
 type NoParam struct{}

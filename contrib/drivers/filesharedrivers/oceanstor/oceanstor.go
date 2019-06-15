@@ -27,6 +27,7 @@ import (
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	model "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -473,34 +474,26 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) er
 }
 
 func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (string, error) {
+	var accessLevel string
+
 	if accessLevels == nil || (accessLevels != nil && len(accessLevels) == 0) {
 		return "", errors.New("access level cannot be empty")
 	}
 
+	if len(accessLevels) > 2 {
+		return "", errors.New("invalid access level")
+	}
+
 	if len(accessLevels) == 1 && strings.ToLower(accessLevels[0]) != AccessLevelRead {
-		return "", errors.New("only read only and read write access level are supported")
+		return "", errors.New("only read only or read write access level are supported")
+	} else {
+		accessLevel = "ro"
 	}
 
-	var accessLevel string
-	// make sure accessLevel is ro or rw
-	for _, level := range accessLevels {
-		if strings.ToLower(level) == AccessLevelExecute {
-			return "", errors.New("only read only and read write access level are supported, execute is not supported")
-		}
-		if strings.ToLower(level) == AccessLevelRead && !strings.Contains(accessLevel, "r") {
-			accessLevel += "r"
-		}
-	}
-
-	for _, level := range accessLevels {
-		if strings.ToLower(level) == AccessLevelWrite {
-			accessLevel += "w"
-			break
-		}
-	}
-
-	if accessLevel == "r" {
-		accessLevel += "o"
+	if !utils.Contained(AccessLevelRead, accessLevels) || !utils.Contained(AccessLevelWrite, accessLevels) {
+		return "", errors.New("only read only or read write access level are supported")
+	} else {
+		accessLevel = "rw"
 	}
 
 	shareDriver := NewProtocol(shareProto, d.Client)
@@ -551,8 +544,12 @@ func (d *Driver) CreateFileShareAclParamCheck(opt *pb.CreateFileShareAclOpts) (s
 		return "", "", "", "", errors.New("access client cannot be empty")
 	}
 
-	if shareProto == NFSProto && accessType == AccessTypeUser {
-		accessTo += "@"
+	if shareProto == NFSProto {
+		if accessType == AccessTypeUser {
+			accessTo += "@"
+		} else {
+			accessTo = "*"
+		}
 	}
 
 	return fsName, shareProto, accessLevel, accessTo, nil
