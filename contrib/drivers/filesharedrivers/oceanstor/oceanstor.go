@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	log "github.com/golang/glog"
@@ -146,7 +145,7 @@ func (d *Driver) parameterCheck(poolID, prf string, size int64, fsName, sharePro
 	}
 
 	if !checkProtocol(proto) {
-		return fmt.Errorf("%s protocol is not supported, support is NFS and CIFS", proto)
+		return fmt.Errorf("%s protocol is not supported, support is %s and %s", proto, NFSProto, CIFSProto)
 	}
 
 	*shareProto = proto
@@ -480,20 +479,20 @@ func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (strin
 		return "", errors.New("access level cannot be empty")
 	}
 
-	if len(accessLevels) > 2 {
+	supportAccessLevels := []string{AccessLevelRead, AccessLevelWrite}
+
+	if len(accessLevels) > len(supportAccessLevels) {
 		return "", errors.New("invalid access level")
 	}
 
-	if len(accessLevels) == 1 && strings.ToLower(accessLevels[0]) != AccessLevelRead {
-		return "", errors.New("only read only or read write access level are supported")
-	} else {
-		accessLevel = "ro"
-	}
-
-	if !utils.Contained(AccessLevelRead, accessLevels) || !utils.Contained(AccessLevelWrite, accessLevels) {
-		return "", errors.New("only read only or read write access level are supported")
-	} else {
-		accessLevel = "rw"
+	accessLevel = "ro"
+	for _, v := range accessLevels {
+		if !utils.Contained(v, supportAccessLevels) {
+			return "", errors.New("only read only or read write access level are supported")
+		}
+		if v == AccessLevelWrite {
+			accessLevel = "rw"
+		}
 	}
 
 	shareDriver := NewProtocol(shareProto, d.Client)
@@ -623,6 +622,8 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 		log.Error(err.Error())
 		return err
 	}
+
+	accessTo = "*"
 
 	shareDriver := NewProtocol(shareProto, d.Client)
 

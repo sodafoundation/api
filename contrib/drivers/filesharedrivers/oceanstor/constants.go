@@ -18,8 +18,8 @@ const (
 	DefaultConfPath       = "/etc/opensds/driver/oceanstor_fileshare.yaml"
 	PwdExpired            = 3
 	PwdReset              = 4
-	NFSProto              = "NFS"
-	CIFSProto             = "CIFS"
+	NFSProto              = "nfs"
+	CIFSProto             = "cifs"
 	UnitGi                = 1024 * 1024 * 1024
 	defaultAZ             = "default"
 	defaultFileSystem     = "opensds_file_system"
