@@ -142,7 +142,7 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 		log.Infof("no metrics found in the  supported metric list")
 	}
 	// discover lvm volumes
-	volumeList, err := d.cli.DiscoverVolumes()
+	volumeList, vgList, err := d.cli.DiscoverVolumes()
 	if err != nil {
 		log.Errorf("discover volume function returned error, err: %v", err)
 	}
@@ -157,8 +157,8 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	}
 	var tempMetricArray []*model.MetricSpec
 	// fill volume metrics
-	for _, volume := range volumeList {
-		convrtedVolID := convert(volume)
+	for i, volume := range volumeList {
+		convrtedVolID := convert(volume, vgList[i])
 		aMetricMap := metricMap[convrtedVolID]
 		aLabelMap := labelMap[convrtedVolID]
 		for _, element := range supportedMetrics {
@@ -213,11 +213,12 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	metricArray := tempMetricArray
 	return metricArray, err
 }
-func convert(instanceID string) string {
+func convert(instanceID string, vg string) string {
 	// systat utilities (sar/iostat) returnes  volume with -- instead of -, so we need to modify volume name to map lvs output
 	instanceID = strings.Replace(instanceID, "-", "--", -1)
+	vg = strings.Replace(vg, "-", "--", -1)
 	//add opensds--volumes--default-- to the start of volume
-	instanceID = "opensds--volumes--default-" + instanceID
+	instanceID = vg + "-" + instanceID
 	return instanceID
 }
 func formatDiskName(instanceID string) string {
