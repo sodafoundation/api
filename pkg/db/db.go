@@ -65,6 +65,8 @@ type Client interface {
 
 	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 
+	ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error)
+
 	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
 
 	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
@@ -146,6 +148,8 @@ type Client interface {
 	GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error)
 
 	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
+
+	ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error)
 
 	ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error)
 

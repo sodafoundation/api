@@ -12,28 +12,6 @@ type Client struct {
 	mock.Mock
 }
 
-func (_m *Client) GetDefaultProfileFileShare(ctx *context.Context) (*model.ProfileSpec, error) {
-	ret := _m.Called(ctx)
-
-	var r0 *model.ProfileSpec
-	if rf, ok := ret.Get(0).(func(*context.Context) *model.ProfileSpec); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ProfileSpec)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // AddCustomProperty provides a mock function with given fields: ctx, prfID, custom
 func (_m *Client) AddCustomProperty(ctx *context.Context, prfID string, custom model.CustomPropertiesSpec) (*model.CustomPropertiesSpec, error) {
 	ret := _m.Called(ctx, prfID, custom)
@@ -489,6 +467,29 @@ func (_m *Client) ExtendVolume(ctx *context.Context, vol *model.VolumeSpec) (*mo
 
 // GetDefaultProfile provides a mock function with given fields: ctx
 func (_m *Client) GetDefaultProfile(ctx *context.Context) (*model.ProfileSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *model.ProfileSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) *model.ProfileSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ProfileSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDefaultProfileFileShare provides a mock function with given fields: ctx
+func (_m *Client) GetDefaultProfileFileShare(ctx *context.Context) (*model.ProfileSpec, error) {
 	ret := _m.Called(ctx)
 
 	var r0 *model.ProfileSpec
@@ -1039,6 +1040,29 @@ func (_m *Client) ListFileSharesAclWithFilter(ctx *context.Context, m map[string
 	return r0, r1
 }
 
+// ListFileSharesByProfileId provides a mock function with given fields: ctx, prfId
+func (_m *Client) ListFileSharesByProfileId(ctx *context.Context, prfId string) ([]string, error) {
+	ret := _m.Called(ctx, prfId)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []string); ok {
+		r0 = rf(ctx, prfId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, prfId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListFileSharesWithFilter provides a mock function with given fields: ctx, m
 func (_m *Client) ListFileSharesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	ret := _m.Called(ctx, m)
@@ -1407,6 +1431,29 @@ func (_m *Client) ListVolumesByGroupId(ctx *context.Context, vgId string) ([]*mo
 	return r0, r1
 }
 
+// ListVolumesByProfileId provides a mock function with given fields: ctx, prfID
+func (_m *Client) ListVolumesByProfileId(ctx *context.Context, prfID string) ([]string, error) {
+	ret := _m.Called(ctx, prfID)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []string); ok {
+		r0 = rf(ctx, prfID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, prfID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListVolumesWithFilter provides a mock function with given fields: ctx, m
 func (_m *Client) ListVolumesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.VolumeSpec, error) {
 	ret := _m.Called(ctx, m)
@@ -1490,7 +1537,7 @@ func (_m *Client) UpdateFileShare(ctx *context.Context, fshare *model.FileShareS
 	return r0, r1
 }
 
-// UpdateFileShareAcl provides a mock function with given fields: ctx, fshare
+// UpdateFileShareAcl provides a mock function with given fields: ctx, acl
 func (_m *Client) UpdateFileShareAcl(ctx *context.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
 	ret := _m.Called(ctx, acl)
 

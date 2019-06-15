@@ -452,6 +452,21 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 	return fileshares, nil
 }
 
+// ListFileSharesByProfileId
+func (c *Client) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res_fileshares []string
+	for _, shares := range fileshares {
+		if shares.ProfileId == prfId {
+			res_fileshares = append(res_fileshares, shares.Name)
+		}
+	}
+	return res_fileshares, nil
+}
+
 // GetFileShareAcl
 func (c *Client) GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
 	acl, err := c.getFileShareAcl(ctx, aclID)
@@ -1765,6 +1780,23 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 		vols = append(vols, vol)
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (c *Client) ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error) {
+	vols, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var resvols []string
+	for _, v := range vols {
+		if v.ProfileId == prfID {
+			resvols = append(resvols, v.Name)
+		}
+	}
+
+	return resvols, nil
+
 }
 
 var volume_sortKey string
