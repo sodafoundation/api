@@ -51,6 +51,10 @@ osds::lvm::pkg_install(){
     sudo apt-get install -y lvm2 tgt open-iscsi ibverbs-utils
 }
 
+osds::nfs::pkg_install(){
+    sudo apt-get install -y nfs-kernel-server
+}
+
 osds::lvm::pkg_uninstall(){
     sudo apt-get purge -y lvm2 tgt open-iscsi ibvverbs-utils
 }
@@ -361,6 +365,7 @@ osds::lvm::install() {
 
     # Install lvm relative packages.
     osds::lvm::pkg_install
+    osds::nfs::pkg_install
     osds::lvm::create_volume_group_for_file $fvg $size
     osds::lvm::create_volume_group $vg $size
 
