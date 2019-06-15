@@ -95,6 +95,11 @@ func (fc *FakeDbClient) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, 
 	return fshares, nil
 }
 
+// ListFileSharesByProfileId
+func (fc *FakeDbClient) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	return []string{}, nil
+}
+
 // UpdateFileShare
 func (fc *FakeDbClient) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	return &SampleFileShares[0], nil
@@ -370,6 +375,12 @@ func (fc *FakeDbClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 		vols = append(vols, &SampleVolumes[i])
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (fc *FakeDbClient) ListVolumesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+
+	return []string{}, nil
 }
 
 // UpdateVolume
