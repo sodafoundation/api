@@ -285,7 +285,7 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		log.Error(err)
 		return nil, err
 	}
-	snapName := opt.GetName()
+	snapName := snapshotPrefix + opt.GetName()
 	fields := strings.Split(lvPath, "/")
 
 	vg, sourceLvName := fields[2], fields[3]
