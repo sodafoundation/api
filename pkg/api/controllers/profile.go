@@ -58,7 +58,17 @@ func (p *ProfilePortal) CreateProfile() {
 	case constants.Block:
 		break
 	case constants.File:
-		break
+		pp := profile.ProvisioningProperties
+		if ds := pp.DataStorage; ds.IsEmpty() {
+			if len(ds.StorageAccessCapability) == 0 {
+				profile.ProvisioningProperties.DataStorage.StorageAccessCapability = []string{"Read", "Write", "Execute"}
+			}
+		}
+		if io := pp.IOConnectivity; io.IsEmpty(){
+			if io.AccessProtocol == "" {
+				profile.ProvisioningProperties.IOConnectivity.AccessProtocol = "nfs"
+			}
+		}
 	default:
 		errMsg := fmt.Sprintf("parse profile request body failed: %v is invalid storagetype", stype)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
