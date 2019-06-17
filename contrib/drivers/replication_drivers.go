@@ -26,6 +26,7 @@ import (
 
 	"github.com/opensds/opensds/contrib/drivers/drbd"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
+	scms "github.com/opensds/opensds/contrib/drivers/scutech/cms"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -71,6 +72,8 @@ func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 	case driversConfig.HuaweiDoradoDriverType:
 		d = &dorado.ReplicationDriver{}
 		break
+	case driversConfig.ScutechCMSDriverType:
+		d = &scms.ReplicationDriver{}
 	default:
 		d = &replication_sample.ReplicationDriver{}
 		break
