@@ -96,7 +96,6 @@ type ManagerConfig struct {
 	EnableSidInHTTPHeader   bool   `json:"EnableSidInHTTPHeader"`
 	SessionNameInHTTPHeader string `json:"SessionNameInHTTPHeader"`
 	EnableSidInURLQuery     bool   `json:"EnableSidInURLQuery"`
-	SessionIDPrefix         string `json:"sessionIDPrefix"`
 }
 
 // Manager contains Provider and its configuration.
@@ -152,11 +151,6 @@ func NewManager(provideName string, cf *ManagerConfig) (*Manager, error) {
 		provider,
 		cf,
 	}, nil
-}
-
-// GetProvider return current manager's provider
-func (manager *Manager) GetProvider() Provider {
-	return manager.provider
 }
 
 // getSid retrieves session identifier from HTTP Request.
@@ -337,7 +331,7 @@ func (manager *Manager) sessionID() (string, error) {
 	if n != len(b) || err != nil {
 		return "", fmt.Errorf("Could not successfully read from the system CSPRNG")
 	}
-	return manager.config.SessionIDPrefix + hex.EncodeToString(b), nil
+	return hex.EncodeToString(b), nil
 }
 
 // Set cookie with https.

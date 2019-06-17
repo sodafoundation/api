@@ -37,7 +37,6 @@ var (
 	acceptsHTMLRegex = regexp.MustCompile(`(text/html|application/xhtml\+xml)(?:,|$)`)
 	acceptsXMLRegex  = regexp.MustCompile(`(application/xml|text/xml)(?:,|$)`)
 	acceptsJSONRegex = regexp.MustCompile(`(application/json)(?:,|$)`)
-	acceptsYAMLRegex = regexp.MustCompile(`(application/x-yaml)(?:,|$)`)
 	maxParam         = 50
 )
 
@@ -203,10 +202,6 @@ func (input *BeegoInput) AcceptsXML() bool {
 // AcceptsJSON Checks if request accepts json response
 func (input *BeegoInput) AcceptsJSON() bool {
 	return acceptsJSONRegex.MatchString(input.Header("Accept"))
-}
-// AcceptsYAML Checks if request accepts json response
-func (input *BeegoInput) AcceptsYAML() bool {
-	return acceptsYAMLRegex.MatchString(input.Header("Accept"))
 }
 
 // IP returns request client ip.

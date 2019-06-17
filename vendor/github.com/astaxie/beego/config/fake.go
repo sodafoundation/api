@@ -126,7 +126,7 @@ func (c *fakeConfigContainer) SaveConfigFile(filename string) error {
 
 var _ Configer = new(fakeConfigContainer)
 
-// NewFakeConfig return a fake Configer
+// NewFakeConfig return a fake Congiger
 func NewFakeConfig() Configer {
 	return &fakeConfigContainer{
 		data: make(map[string]string),

@@ -71,7 +71,7 @@ var (
 	// these beego.Controller's methods shouldn't reflect to AutoRouter
 	exceptMethod = []string{"Init", "Prepare", "Finish", "Render", "RenderString",
 		"RenderBytes", "Redirect", "Abort", "StopRun", "UrlFor", "ServeJSON", "ServeJSONP",
-		"ServeYAML", "ServeXML", "Input", "ParseForm", "GetString", "GetStrings", "GetInt", "GetBool",
+		"ServeXML", "Input", "ParseForm", "GetString", "GetStrings", "GetInt", "GetBool",
 		"GetFloat", "GetFile", "SaveToFile", "StartSession", "SetSession", "GetSession",
 		"DelSession", "SessionRegenerateID", "DestroySession", "IsAjax", "GetSecureCookie",
 		"SetSecureCookie", "XsrfToken", "CheckXsrfCookie", "XsrfFormHtml",
@@ -133,15 +133,14 @@ type ControllerRegister struct {
 
 // NewControllerRegister returns a new ControllerRegister.
 func NewControllerRegister() *ControllerRegister {
-	return &ControllerRegister{
+	cr := &ControllerRegister{
 		routers:  make(map[string]*Tree),
 		policies: make(map[string]*Tree),
-		pool: sync.Pool{
-			New: func() interface{} {
-				return beecontext.NewContext()
-			},
-		},
 	}
+	cr.pool.New = func() interface{} {
+		return beecontext.NewContext()
+	}
+	return cr
 }
 
 // Add controller handler and pattern rules to ControllerRegister.
@@ -202,12 +201,9 @@ func (p *ControllerRegister) addWithMethodParams(pattern string, c ControllerInt
 
 		numOfFields := elemVal.NumField()
 		for i := 0; i < numOfFields; i++ {
+			fieldVal := elemVal.Field(i)
 			fieldType := elemType.Field(i)
-			elemField := execElem.FieldByName(fieldType.Name)
-			if elemField.CanSet() {
-				fieldVal := elemVal.Field(i)
-				elemField.Set(fieldVal)
-			}
+			execElem.FieldByName(fieldType.Name).Set(fieldVal)
 		}
 
 		return execController
@@ -278,10 +274,6 @@ func (p *ControllerRegister) Include(cList ...ControllerInterface) {
 		key := t.PkgPath() + ":" + t.Name()
 		if comm, ok := GlobalControllerRouter[key]; ok {
 			for _, a := range comm {
-				for _, f := range a.Filters {
-					p.InsertFilter(f.Pattern, f.Pos, f.Filter, f.ReturnOnOutput, f.ResetParams)
-				}
-
 				p.addWithMethodParams(a.Router, c, a.MethodParams, strings.Join(a.AllowHTTPMethods, ",")+":"+a.Method)
 			}
 		}
@@ -799,7 +791,7 @@ func (p *ControllerRegister) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 	if !isRunnable {
 		//Invoke the request handler
 		var execController ControllerInterface
-		if routerInfo != nil && routerInfo.initialize != nil {
+		if routerInfo.initialize != nil {
 			execController = routerInfo.initialize()
 		} else {
 			vc := reflect.New(runRouter)
@@ -889,11 +881,8 @@ Admin:
 		statusCode = 200
 	}
 
-	logAccess(context, &startTime, statusCode)
-
-	timeDur := time.Since(startTime)
-	context.ResponseWriter.Elapsed = timeDur
 	if BConfig.Listen.EnableAdmin {
+		timeDur := time.Since(startTime)
 		pattern := ""
 		if routerInfo != nil {
 			pattern = routerInfo.pattern
@@ -908,29 +897,49 @@ Admin:
 		}
 	}
 
-	if BConfig.RunMode == DEV && !BConfig.Log.AccessLogs {
+	if BConfig.RunMode == DEV || BConfig.Log.AccessLogs {
+		timeDur := time.Since(startTime)
 		var devInfo string
+
 		iswin := (runtime.GOOS == "windows")
 		statusColor := logs.ColorByStatus(iswin, statusCode)
 		methodColor := logs.ColorByMethod(iswin, r.Method)
 		resetColor := logs.ColorByMethod(iswin, "")
-		if findRouter {
-			if routerInfo != nil {
-				devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s   r:%s", context.Input.IP(), statusColor, statusCode,
-					resetColor, timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path,
-					routerInfo.pattern)
+		if BConfig.Log.AccessLogsFormat != "" {
+			record := &logs.AccessLogRecord{
+				RemoteAddr:     context.Input.IP(),
+				RequestTime:    startTime,
+				RequestMethod:  r.Method,
+				Request:        fmt.Sprintf("%s %s %s", r.Method, r.RequestURI, r.Proto),
+				ServerProtocol: r.Proto,
+				Host:           r.Host,
+				Status:         statusCode,
+				ElapsedTime:    timeDur,
+				HTTPReferrer:   r.Header.Get("Referer"),
+				HTTPUserAgent:  r.Header.Get("User-Agent"),
+				RemoteUser:     r.Header.Get("Remote-User"),
+				BodyBytesSent:  0, //@todo this one is missing!
+			}
+			logs.AccessLog(record, BConfig.Log.AccessLogsFormat)
+		} else {
+			if findRouter {
+				if routerInfo != nil {
+					devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s   r:%s", context.Input.IP(), statusColor, statusCode,
+						resetColor, timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path,
+						routerInfo.pattern)
+				} else {
+					devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s", context.Input.IP(), statusColor, statusCode, resetColor,
+						timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path)
+				}
 			} else {
 				devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s", context.Input.IP(), statusColor, statusCode, resetColor,
-					timeDur.String(), "match", methodColor, r.Method, resetColor, r.URL.Path)
+					timeDur.String(), "nomatch", methodColor, r.Method, resetColor, r.URL.Path)
 			}
-		} else {
-			devInfo = fmt.Sprintf("|%15s|%s %3d %s|%13s|%8s|%s %-7s %s %-3s", context.Input.IP(), statusColor, statusCode, resetColor,
-				timeDur.String(), "nomatch", methodColor, r.Method, resetColor, r.URL.Path)
-		}
-		if iswin {
-			logs.W32Debug(devInfo)
-		} else {
-			logs.Debug(devInfo)
+			if iswin {
+				logs.W32Debug(devInfo)
+			} else {
+				logs.Debug(devInfo)
+			}
 		}
 	}
 	// Call WriteHeader if status code has been set changed
@@ -948,7 +957,7 @@ func (p *ControllerRegister) handleParamResponse(context *beecontext.Context, ex
 			context.RenderMethodResult(resultValue)
 		}
 	}
-	if !context.ResponseWriter.Started && len(results) > 0 && context.Output.Status == 0 {
+	if !context.ResponseWriter.Started && context.Output.Status == 0 {
 		context.Output.SetStatus(200)
 	}
 }
@@ -978,39 +987,4 @@ func toURL(params map[string]string) string {
 		u += k + "=" + v + "&"
 	}
 	return strings.TrimRight(u, "&")
-}
-
-func logAccess(ctx *beecontext.Context, startTime *time.Time, statusCode int) {
-	//Skip logging if AccessLogs config is false
-	if !BConfig.Log.AccessLogs {
-		return
-	}
-	//Skip logging static requests unless EnableStaticLogs config is true
-	if !BConfig.Log.EnableStaticLogs && DefaultAccessLogFilter.Filter(ctx) {
-		return
-	}
-	var (
-		requestTime time.Time
-		elapsedTime time.Duration
-		r           = ctx.Request
-	)
-	if startTime != nil {
-		requestTime = *startTime
-		elapsedTime = time.Since(*startTime)
-	}
-	record := &logs.AccessLogRecord{
-		RemoteAddr:     ctx.Input.IP(),
-		RequestTime:    requestTime,
-		RequestMethod:  r.Method,
-		Request:        fmt.Sprintf("%s %s %s", r.Method, r.RequestURI, r.Proto),
-		ServerProtocol: r.Proto,
-		Host:           r.Host,
-		Status:         statusCode,
-		ElapsedTime:    elapsedTime,
-		HTTPReferrer:   r.Header.Get("Referer"),
-		HTTPUserAgent:  r.Header.Get("User-Agent"),
-		RemoteUser:     r.Header.Get("Remote-User"),
-		BodyBytesSent:  0, //@todo this one is missing!
-	}
-	logs.AccessLog(record, BConfig.Log.AccessLogsFormat)
 }

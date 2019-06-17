@@ -1,95 +1,88 @@
-INI [![Build Status](https://travis-ci.org/go-ini/ini.svg?branch=master)](https://travis-ci.org/go-ini/ini) [![Sourcegraph](https://sourcegraph.com/github.com/go-ini/ini/-/badge.svg)](https://sourcegraph.com/github.com/go-ini/ini?badge)
-===
+本包提供了 Go 语言中读写 INI 文件的功能。
 
-![](https://avatars0.githubusercontent.com/u/10216035?v=3&s=200)
+## 功能特性
 
-Package ini provides INI file read and write functionality in Go.
+- 支持覆盖加载多个数据源（`[]byte`、文件和 `io.ReadCloser`）
+- 支持递归读取键值
+- 支持读取父子分区
+- 支持读取自增键名
+- 支持读取多行的键值
+- 支持大量辅助方法
+- 支持在读取时直接转换为 Go 语言类型
+- 支持读取和 **写入** 分区和键的注释
+- 轻松操作分区、键值和注释
+- 在保存文件时分区和键值会保持原有的顺序
 
-[简体中文](README_ZH.md)
+## 下载安装
 
-## Feature
+使用一个特定版本：
 
-- Load multiple data sources(`[]byte`, file and `io.ReadCloser`) with overwrites.
-- Read with recursion values.
-- Read with parent-child sections.
-- Read with auto-increment key names.
-- Read with multiple-line values.
-- Read with tons of helper methods.
-- Read and convert values to Go types.
-- Read and **WRITE** comments of sections and keys.
-- Manipulate sections, keys and comments with ease.
-- Keep sections and keys in order as you parse and save.
+    go get gopkg.in/ini.v1
 
-## Installation
-
-To use a tagged revision:
-
-	go get gopkg.in/ini.v1
-
-To use with latest changes:
+使用最新版：
 
 	go get github.com/go-ini/ini
 
-Please add `-u` flag to update in the future.
+如需更新请添加 `-u` 选项。
 
-### Testing
+### 测试安装
 
-If you want to test on your machine, please apply `-t` flag:
+如果您想要在自己的机器上运行测试，请使用 `-t` 标记：
 
 	go get -t gopkg.in/ini.v1
 
-Please add `-u` flag to update in the future.
+如需更新请添加 `-u` 选项。
 
-## Getting Started
+## 开始使用
 
-### Loading from data sources
+### 从数据源加载
 
-A **Data Source** is either raw data in type `[]byte`, a file name with type `string` or `io.ReadCloser`. You can load **as many data sources as you want**. Passing other types will simply return an error.
+一个 **数据源** 可以是 `[]byte` 类型的原始数据，`string` 类型的文件路径或 `io.ReadCloser`。您可以加载 **任意多个** 数据源。如果您传递其它类型的数据源，则会直接返回错误。
 
 ```go
 cfg, err := ini.Load([]byte("raw data"), "filename", ioutil.NopCloser(bytes.NewReader([]byte("some other data"))))
 ```
 
-Or start with an empty object:
+或者从一个空白的文件开始：
 
 ```go
 cfg := ini.Empty()
 ```
 
-When you cannot decide how many data sources to load at the beginning, you will still be able to **Append()** them later.
+当您在一开始无法决定需要加载哪些数据源时，仍可以使用 **Append()** 在需要的时候加载它们。
 
 ```go
 err := cfg.Append("other file", []byte("other raw data"))
 ```
 
-If you have a list of files with possibilities that some of them may not available at the time, and you don't know exactly which ones, you can use `LooseLoad` to ignore nonexistent files without returning error.
+当您想要加载一系列文件，但是不能够确定其中哪些文件是不存在的，可以通过调用函数 `LooseLoad` 来忽略它们（`Load` 会因为文件不存在而返回错误）：
 
 ```go
 cfg, err := ini.LooseLoad("filename", "filename_404")
 ```
 
-The cool thing is, whenever the file is available to load while you're calling `Reload` method, it will be counted as usual.
+更牛逼的是，当那些之前不存在的文件在重新调用 `Reload` 方法的时候突然出现了，那么它们会被正常加载。
 
-#### Ignore cases of key name
+#### 忽略键名的大小写
 
-When you do not care about cases of section and key names, you can use `InsensitiveLoad` to force all names to be lowercased while parsing.
+有时候分区和键的名称大小写混合非常烦人，这个时候就可以通过 `InsensitiveLoad` 将所有分区和键名在读取里强制转换为小写：
 
 ```go
 cfg, err := ini.InsensitiveLoad("filename")
 //...
 
-// sec1 and sec2 are the exactly same section object
+// sec1 和 sec2 指向同一个分区对象
 sec1, err := cfg.GetSection("Section")
 sec2, err := cfg.GetSection("SecTIOn")
 
-// key1 and key2 are the exactly same key object
+// key1 和 key2 指向同一个键对象
 key1, err := sec1.GetKey("Key")
 key2, err := sec2.GetKey("KeY")
 ```
 
-#### MySQL-like boolean key
+#### 类似 MySQL 配置中的布尔值键
 
-MySQL's configuration allows a key without value as follows:
+MySQL 的配置文件中会出现没有具体值的布尔类型的键：
 
 ```ini
 [mysqld]
@@ -98,119 +91,119 @@ skip-host-cache
 skip-name-resolve
 ```
 
-By default, this is considered as missing value. But if you know you're going to deal with those cases, you can assign advanced load options:
+默认情况下这被认为是缺失值而无法完成解析，但可以通过高级的加载选项对它们进行处理：
 
 ```go
 cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, "my.cnf"))
 ```
 
-The value of those keys are always `true`, and when you save to a file, it will keep in the same foramt as you read.
+这些键的值永远为 `true`，且在保存到文件时也只会输出键名。
 
-To generate such keys in your program, you could use `NewBooleanKey`:
+如果您想要通过程序来生成此类键，则可以使用 `NewBooleanKey`：
 
 ```go
 key, err := sec.NewBooleanKey("skip-host-cache")
 ```
 
-#### Comment
+#### 关于注释
 
-Take care that following format will be treated as comment:
+下述几种情况的内容将被视为注释：
 
-1. Line begins with `#` or `;`
-2. Words after `#` or `;`
-3. Words after section name (i.e words after `[some section name]`)
+1. 所有以 `#` 或 `;` 开头的行
+2. 所有在 `#` 或 `;` 之后的内容
+3. 分区标签后的文字 (即 `[分区名]` 之后的内容)
 
-If you want to save a value with `#` or `;`, please quote them with ``` ` ``` or ``` """ ```.
+如果你希望使用包含 `#` 或 `;` 的值，请使用 ``` ` ``` 或 ``` """ ``` 进行包覆。
 
-Alternatively, you can use following `LoadOptions` to completely ignore inline comments:
+除此之外，您还可以通过 `LoadOptions` 完全忽略行内注释：
 
 ```go
 cfg, err := ini.LoadSources(ini.LoadOptions{IgnoreInlineComment: true}, "app.ini"))
 ```
 
-### Working with sections
+### 操作分区（Section）
 
-To get a section, you would need to:
+获取指定分区：
 
 ```go
 section, err := cfg.GetSection("section name")
 ```
 
-For a shortcut for default section, just give an empty string as name:
+如果您想要获取默认分区，则可以用空字符串代替分区名：
 
 ```go
 section, err := cfg.GetSection("")
 ```
 
-When you're pretty sure the section exists, following code could make your life easier:
+当您非常确定某个分区是存在的，可以使用以下简便方法：
 
 ```go
 section := cfg.Section("section name")
 ```
 
-What happens when the section somehow does not exist? Don't panic, it automatically creates and returns a new section to you.
+如果不小心判断错了，要获取的分区其实是不存在的，那会发生什么呢？没事的，它会自动创建并返回一个对应的分区对象给您。
 
-To create a new section:
+创建一个分区：
 
 ```go
 err := cfg.NewSection("new section")
 ```
 
-To get a list of sections or section names:
+获取所有分区对象或名称：
 
 ```go
 sections := cfg.Sections()
 names := cfg.SectionStrings()
 ```
 
-### Working with keys
+### 操作键（Key）
 
-To get a key under a section:
+获取某个分区下的键：
 
 ```go
 key, err := cfg.Section("").GetKey("key name")
 ```
 
-Same rule applies to key operations:
+和分区一样，您也可以直接获取键而忽略错误处理：
 
 ```go
 key := cfg.Section("").Key("key name")
 ```
 
-To check if a key exists:
+判断某个键是否存在：
 
 ```go
 yes := cfg.Section("").HasKey("key name")
 ```
 
-To create a new key:
+创建一个新的键：
 
 ```go
 err := cfg.Section("").NewKey("name", "value")
 ```
 
-To get a list of keys or key names:
+获取分区下的所有键或键名：
 
 ```go
 keys := cfg.Section("").Keys()
 names := cfg.Section("").KeyStrings()
 ```
 
-To get a clone hash of keys and corresponding values:
+获取分区下的所有键值对的克隆：
 
 ```go
 hash := cfg.Section("").KeysHash()
 ```
 
-### Working with values
+### 操作键值（Value）
 
-To get a string value:
+获取一个类型为字符串（string）的值：
 
 ```go
 val := cfg.Section("").Key("key name").String()
 ```
 
-To validate key value on the fly:
+获取值的同时通过自定义函数进行处理验证：
 
 ```go
 val := cfg.Section("").Key("key name").Validate(func(in string) string {
@@ -221,24 +214,24 @@ val := cfg.Section("").Key("key name").Validate(func(in string) string {
 })
 ```
 
-If you do not want any auto-transformation (such as recursive read) for the values, you can get raw value directly (this way you get much better performance):
+如果您不需要任何对值的自动转变功能（例如递归读取），可以直接获取原值（这种方式性能最佳）：
 
 ```go
 val := cfg.Section("").Key("key name").Value()
 ```
 
-To check if raw value exists:
+判断某个原值是否存在：
 
 ```go
 yes := cfg.Section("").HasValue("test value")
 ```
 
-To get value with types:
+获取其它类型的值：
 
 ```go
-// For boolean values:
-// true when value is: 1, t, T, TRUE, true, True, YES, yes, Yes, y, ON, on, On
-// false when value is: 0, f, F, FALSE, false, False, NO, no, No, n, OFF, off, Off
+// 布尔值的规则：
+// true 当值为：1, t, T, TRUE, true, True, YES, yes, Yes, y, ON, on, On
+// false 当值为：0, f, F, FALSE, false, False, NO, no, No, n, OFF, off, Off
 v, err = cfg.Section("").Key("BOOL").Bool()
 v, err = cfg.Section("").Key("FLOAT64").Float64()
 v, err = cfg.Section("").Key("INT").Int()
@@ -257,11 +250,11 @@ v = cfg.Section("").Key("UINT64").MustUint64()
 v = cfg.Section("").Key("TIME").MustTimeFormat(time.RFC3339)
 v = cfg.Section("").Key("TIME").MustTime() // RFC3339
 
-// Methods start with Must also accept one argument for default value
-// when key not found or fail to parse value to given type.
-// Except method MustString, which you have to pass a default value.
+// 由 Must 开头的方法名允许接收一个相同类型的参数来作为默认值，
+// 当键不存在或者转换失败时，则会直接返回该默认值。
+// 但是，MustString 方法必须传递一个默认值。
 
-v = cfg.Section("").Key("String").MustString("default")
+v = cfg.Seciont("").Key("String").MustString("default")
 v = cfg.Section("").Key("BOOL").MustBool(true)
 v = cfg.Section("").Key("FLOAT64").MustFloat64(1.25)
 v = cfg.Section("").Key("INT").MustInt(10)
@@ -272,7 +265,7 @@ v = cfg.Section("").Key("TIME").MustTimeFormat(time.RFC3339, time.Now())
 v = cfg.Section("").Key("TIME").MustTime(time.Now()) // RFC3339
 ```
 
-What if my value is three-line long?
+如果我的值有好多行怎么办？
 
 ```ini
 [advance]
@@ -281,7 +274,7 @@ NotFound, State, 5000
 Earth"""
 ```
 
-Not a problem!
+嗯哼？小 case！
 
 ```go
 cfg.Section("advance").Key("ADDRESS").String()
@@ -293,7 +286,7 @@ Earth
 ------  end  --- */
 ```
 
-That's cool, how about continuation lines?
+赞爆了！那要是我属于一行的内容写不下想要写到第二行怎么办？
 
 ```ini
 [advance]
@@ -305,14 +298,14 @@ lots_of_lines = 1 \
 	4
 ```
 
-Piece of cake!
+简直是小菜一碟！
 
 ```go
 cfg.Section("advance").Key("two_lines").String() // how about continuation lines?
 cfg.Section("advance").Key("lots_of_lines").String() // 1 2 3 4
 ```
 
-Well, I hate continuation lines, how do I disable that?
+可是我有时候觉得两行连在一起特别没劲，怎么才能不自动连接两行呢？
 
 ```go
 cfg, err := ini.LoadSources(ini.LoadOptions{
@@ -320,34 +313,34 @@ cfg, err := ini.LoadSources(ini.LoadOptions{
 }, "filename")
 ```
 
-Holy crap!
+哇靠给力啊！
 
-Note that single quotes around values will be stripped:
+需要注意的是，值两侧的单引号会被自动剔除：
 
 ```ini
 foo = "some value" // foo: some value
 bar = 'some value' // bar: some value
 ```
 
-Sometimes you downloaded file from [Crowdin](https://crowdin.com/) has values like the following (value is surrounded by double quotes and quotes in the value are escaped):
+有时您会获得像从 [Crowdin](https://crowdin.com/) 网站下载的文件那样具有特殊格式的值（值使用双引号括起来，内部的双引号被转义）：
 
 ```ini
-create_repo="created repository <a href=\"%s\">%s</a>"
+create_repo="创建了仓库 <a href=\"%s\">%s</a>"
 ```
 
-How do you transform this to regular format automatically?
+那么，怎么自动地将这类值进行处理呢？
 
 ```go
 cfg, err := ini.LoadSources(ini.LoadOptions{UnescapeValueDoubleQuotes: true}, "en-US.ini"))
 cfg.Section("<name of your section>").Key("create_repo").String()
-// You got: created repository <a href="%s">%s</a>
+// You got: 创建了仓库 <a href="%s">%s</a>
 ```
 
-That's all? Hmm, no.
+这就是全部了？哈哈，当然不是。
 
-#### Helper methods of working with values
+#### 操作键值的辅助方法
 
-To get value with given candidates:
+获取键值时设定候选值：
 
 ```go
 v = cfg.Section("").Key("STRING").In("default", []string{"str", "arr", "types"})
@@ -360,9 +353,9 @@ v = cfg.Section("").Key("TIME").InTimeFormat(time.RFC3339, time.Now(), []time.Ti
 v = cfg.Section("").Key("TIME").InTime(time.Now(), []time.Time{time1, time2, time3}) // RFC3339
 ```
 
-Default value will be presented if value of key is not in candidates you given, and default value does not need be one of candidates.
+如果获取到的值不是候选值的任意一个，则会返回默认值，而默认值不需要是候选值中的一员。
 
-To validate value in a given range:
+验证获取的值是否在指定范围内：
 
 ```go
 vals = cfg.Section("").Key("FLOAT64").RangeFloat64(0.0, 1.1, 2.2)
@@ -374,9 +367,9 @@ vals = cfg.Section("").Key("TIME").RangeTimeFormat(time.RFC3339, time.Now(), min
 vals = cfg.Section("").Key("TIME").RangeTime(time.Now(), minTime, maxTime) // RFC3339
 ```
 
-##### Auto-split values into a slice
+##### 自动分割键值到切片（slice）
 
-To use zero value of type for invalid inputs:
+当存在无效输入时，使用零值代替：
 
 ```go
 // Input: 1.1, 2.2, 3.3, 4.4 -> [1.1 2.2 3.3 4.4]
@@ -390,7 +383,7 @@ vals = cfg.Section("").Key("UINT64S").Uint64s(",")
 vals = cfg.Section("").Key("TIMES").Times(",")
 ```
 
-To exclude invalid values out of result slice:
+从结果切片中剔除无效输入：
 
 ```go
 // Input: 1.1, 2.2, 3.3, 4.4 -> [1.1 2.2 3.3 4.4]
@@ -403,7 +396,7 @@ vals = cfg.Section("").Key("UINT64S").ValidUint64s(",")
 vals = cfg.Section("").Key("TIMES").ValidTimes(",")
 ```
 
-Or to return nothing but error when have invalid inputs:
+当存在无效输入时，直接返回错误：
 
 ```go
 // Input: 1.1, 2.2, 3.3, 4.4 -> [1.1 2.2 3.3 4.4]
@@ -416,11 +409,11 @@ vals = cfg.Section("").Key("UINT64S").StrictUint64s(",")
 vals = cfg.Section("").Key("TIMES").StrictTimes(",")
 ```
 
-### Save your configuration
+### 保存配置
 
-Finally, it's time to save your configuration to somewhere.
+终于到了这个时刻，是时候保存一下配置了。
 
-A typical way to save configuration is writing it to a file:
+比较原始的做法是输出配置到某个文件：
 
 ```go
 // ...
@@ -428,7 +421,7 @@ err = cfg.SaveTo("my.ini")
 err = cfg.SaveToIndent("my.ini", "\t")
 ```
 
-Another way to save is writing to a `io.Writer` interface:
+另一个比较高级的做法是写入到任何实现 `io.Writer` 接口的对象中：
 
 ```go
 // ...
@@ -436,17 +429,17 @@ cfg.WriteTo(writer)
 cfg.WriteToIndent(writer, "\t")
 ```
 
-By default, spaces are used to align "=" sign between key and values, to disable that:
+默认情况下，空格将被用于对齐键值之间的等号以美化输出结果，以下代码可以禁用该功能：
 
 ```go
 ini.PrettyFormat = false
 ```
 
-## Advanced Usage
+## 高级用法
 
-### Recursive Values
+### 递归读取键值
 
-For all value of keys, there is a special syntax `%(<name>)s`, where `<name>` is the key name in same section or default section, and `%(<name>)s` will be replaced by corresponding value(empty string if key not found). You can use this syntax at most 99 level of recursions.
+在获取所有键值的过程中，特殊语法 `%(<name>)s` 会被应用，其中 `<name>` 可以是相同分区或者默认分区下的键名。字符串 `%(<name>)s` 会被相应的键值所替代，如果指定的键不存在，则会用空字符串替代。您可以最多使用 99 层的递归嵌套。
 
 ```ini
 NAME = ini
@@ -464,9 +457,9 @@ cfg.Section("author").Key("GITHUB").String()		// https://github.com/Unknwon
 cfg.Section("package").Key("FULL_NAME").String()	// github.com/go-ini/ini
 ```
 
-### Parent-child Sections
+### 读取父子分区
 
-You can use `.` in section name to indicate parent-child relationship between two or more sections. If the key not found in the child section, library will try again on its parent section until there is no parent section.
+您可以在分区名称中使用 `.` 来表示两个或多个分区之间的父子关系。如果某个键在子分区中不存在，则会去它的父分区中再次寻找，直到没有父分区为止。
 
 ```ini
 NAME = ini
@@ -483,15 +476,15 @@ CLONE_URL = https://%(IMPORT_PATH)s
 cfg.Section("package.sub").Key("CLONE_URL").String()	// https://gopkg.in/ini.v1
 ```
 
-#### Retrieve parent keys available to a child section
+#### 获取上级父分区下的所有键名
 
 ```go
 cfg.Section("package.sub").ParentKeys() // ["CLONE_URL"]
 ```
 
-### Same Key with Multiple Values
+### 同个键名包含多个值
 
-Do you ever have a configuration file like this?
+你是否也曾被下面的配置文件所困扰？
 
 ```ini
 [remote "origin"]
@@ -500,7 +493,7 @@ url = https://github.com/Antergone/test2.git
 fetch = +refs/heads/*:refs/remotes/origin/*
 ```
 
-By default, only the last read value will be kept for the key `url`. If you want to keep all copies of value of this key, you can use `ShadowLoad` to achieve it:
+没错！默认情况下，只有最后一次出现的值会被保存到 `url` 中，可我就是想要保留所有的值怎么办啊？不要紧，用 `ShadowLoad` 轻松解决你的烦恼：
 
 ```go
 cfg, err := ini.ShadowLoad(".gitconfig")
@@ -516,12 +509,12 @@ f.Section(`remote "origin"`).Key("url").ValueWithShadows()
 //          }
 ```
 
-### Unparseable Sections
+### 无法解析的分区
 
-Sometimes, you have sections that do not contain key-value pairs but raw content, to handle such case, you can use `LoadOptions.UnparsableSections`:
+如果遇到一些比较特殊的分区，它们不包含常见的键值对，而是没有固定格式的纯文本，则可以使用 `LoadOptions.UnparsableSections` 进行处理：
 
 ```go
-cfg, err := ini.LoadSources(ini.LoadOptions{UnparseableSections: []string{"COMMENTS"}}, `[COMMENTS]
+cfg, err := LoadSources(ini.LoadOptions{UnparseableSections: []string{"COMMENTS"}}, `[COMMENTS]
 <1><L.Slide#2> This slide has the fuel listed in the wrong units <e.1>`))
 
 body := cfg.Section("COMMENTS").Body()
@@ -531,9 +524,9 @@ body := cfg.Section("COMMENTS").Body()
 ------  end  --- */
 ```
 
-### Auto-increment Key Names
+### 读取自增键名
 
-If key name is `-` in data source, then it would be seen as special syntax for auto-increment key name start from 1, and every section is independent on counter.
+如果数据源中的键名为 `-`，则认为该键使用了自增键名的特殊语法。计数器从 1 开始，并且分区之间是相互独立的。
 
 ```ini
 [features]
@@ -546,9 +539,9 @@ If key name is `-` in data source, then it would be seen as special syntax for a
 cfg.Section("features").KeyStrings()	// []{"#1", "#2", "#3"}
 ```
 
-### Map To Struct
+### 映射到结构
 
-Want more objective way to play with INI? Cool.
+想要使用更加面向对象的方式玩转 INI 吗？好主意。
 
 ```ini
 Name = Unknwon
@@ -583,20 +576,18 @@ func main() {
 	err = cfg.MapTo(p)
 	// ...
 
-	// Things can be simpler.
+	// 一切竟可以如此的简单。
 	err = ini.MapTo(p, "path/to/ini")
 	// ...
 
-	// Just map a section? Fine.
+	// 嗯哼？只需要映射一个分区吗？
 	n := new(Note)
 	err = cfg.Section("Note").MapTo(n)
 	// ...
 }
 ```
 
-Can I have default value for field? Absolutely.
-
-Assign it before you map to struct. It will keep the value as it is if the key is not presented or got wrong type.
+结构的字段怎么设置默认值呢？很简单，只要在映射之前对指定字段进行赋值就可以了。如果键未找到或者类型错误，该值不会发生改变。
 
 ```go
 // ...
@@ -606,11 +597,11 @@ p := &Person{
 // ...
 ```
 
-It's really cool, but what's the point if you can't give me my file back from struct?
+这样玩 INI 真的好酷啊！然而，如果不能还给我原来的配置文件，有什么卵用？
 
-### Reflect From Struct
+### 从结构反射
 
-Why not?
+可是，我有说不能吗？
 
 ```go
 type Embeded struct {
@@ -641,7 +632,7 @@ func main() {
 }
 ```
 
-So, what do I get?
+瞧瞧，奇迹发生了。
 
 ```ini
 NAME = Unknwon
@@ -657,19 +648,19 @@ Dates = 2015-08-07T22:14:22+08:00|2015-08-07T22:14:22+08:00
 places = HangZhou,Boston
 ```
 
-#### Name Mapper
+#### 名称映射器（Name Mapper）
 
-To save your time and make your code cleaner, this library supports [`NameMapper`](https://gowalker.org/gopkg.in/ini.v1#NameMapper) between struct field and actual section and key name.
+为了节省您的时间并简化代码，本库支持类型为 [`NameMapper`](https://gowalker.org/gopkg.in/ini.v1#NameMapper) 的名称映射器，该映射器负责结构字段名与分区名和键名之间的映射。
 
-There are 2 built-in name mappers:
+目前有 2 款内置的映射器：
 
-- `AllCapsUnderscore`: it converts to format `ALL_CAPS_UNDERSCORE` then match section or key.
-- `TitleUnderscore`: it converts to format `title_underscore` then match section or key.
+- `AllCapsUnderscore`：该映射器将字段名转换至格式 `ALL_CAPS_UNDERSCORE` 后再去匹配分区名和键名。
+- `TitleUnderscore`：该映射器将字段名转换至格式 `title_underscore` 后再去匹配分区名和键名。
 
-To use them:
+使用方法：
 
 ```go
-type Info struct {
+type Info struct{
 	PackageName string
 }
 
@@ -686,11 +677,11 @@ func main() {
 }
 ```
 
-Same rules of name mapper apply to `ini.ReflectFromWithMapper` function.
+使用函数 `ini.ReflectFromWithMapper` 时也可应用相同的规则。
 
-#### Value Mapper
+#### 值映射器（Value Mapper）
 
-To expand values (e.g. from environment variables), you can use the `ValueMapper` to transform values:
+值映射器允许使用一个自定义函数自动展开值的具体内容，例如：运行时获取环境变量：
 
 ```go
 type Env struct {
@@ -706,11 +697,11 @@ func main() {
 }
 ```
 
-This would set the value of `env.Foo` to the value of the environment variable `MY_VAR`.
+本例中，`env.Foo` 将会是运行时所获取到环境变量 `MY_VAR` 的值。
 
-#### Other Notes On Map/Reflect
+#### 映射/反射的其它说明
 
-Any embedded struct is treated as a section by default, and there is no automatic parent-child relations in map/reflect feature:
+任何嵌入的结构都会被默认认作一个不同的分区，并且不会自动产生所谓的父子分区关联：
 
 ```go
 type Child struct {
@@ -728,7 +719,7 @@ type Config struct {
 }
 ```
 
-Example configuration:
+示例配置文件：
 
 ```ini
 City = Boston
@@ -740,7 +731,7 @@ Name = Unknwon
 Age = 21
 ```
 
-What if, yes, I'm paranoid, I want embedded struct to be in the same section. Well, all roads lead to Rome.
+很好，但是，我就是要嵌入结构也在同一个分区。好吧，你爹是李刚！
 
 ```go
 type Child struct {
@@ -758,7 +749,7 @@ type Config struct {
 }
 ```
 
-Example configuration:
+示例配置文件：
 
 ```ini
 City = Boston
@@ -768,23 +759,19 @@ Name = Unknwon
 Age = 21
 ```
 
-## Getting Help
+## 获取帮助
 
-- [API Documentation](https://gowalker.org/gopkg.in/ini.v1)
-- [File An Issue](https://github.com/go-ini/ini/issues/new)
+- [API 文档](https://gowalker.org/gopkg.in/ini.v1)
+- [创建工单](https://github.com/go-ini/ini/issues/new)
 
-## FAQs
+## 常见问题
 
-### What does `BlockMode` field do?
+### 字段 `BlockMode` 是什么？
 
-By default, library lets you read and write values so we need a locker to make sure your data is safe. But in cases that you are very sure about only reading data through the library, you can set `cfg.BlockMode = false` to speed up read operations about **50-70%** faster.
+默认情况下，本库会在您进行读写操作时采用锁机制来确保数据时间。但在某些情况下，您非常确定只进行读操作。此时，您可以通过设置 `cfg.BlockMode = false` 来将读操作提升大约 **50-70%** 的性能。
 
-### Why another INI library?
+### 为什么要写另一个 INI 解析库？
 
-Many people are using my another INI library [goconfig](https://github.com/Unknwon/goconfig), so the reason for this one is I would like to make more Go style code. Also when you set `cfg.BlockMode = false`, this one is about **10-30%** faster.
+许多人都在使用我的 [goconfig](https://github.com/Unknwon/goconfig) 来完成对 INI 文件的操作，但我希望使用更加 Go 风格的代码。并且当您设置 `cfg.BlockMode = false` 时，会有大约 **10-30%** 的性能提升。
 
-To make those changes I have to confirm API broken, so it's safer to keep it in another place and start using `gopkg.in` to version my package at this time.(PS: shorter import path)
-
-## License
-
-This project is under Apache v2 License. See the [LICENSE](LICENSE) file for the full license text.
+为了做出这些改变，我必须对 API 进行破坏，所以新开一个仓库是最安全的做法。除此之外，本库直接使用 `gopkg.in` 来进行版本化发布。（其实真相是导入路径更短了）

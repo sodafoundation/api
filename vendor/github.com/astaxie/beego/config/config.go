@@ -150,12 +150,12 @@ func ExpandValueEnv(value string) (realValue string) {
 	}
 
 	key := ""
-	defaultV := ""
+	defalutV := ""
 	// value start with "${"
 	for i := 2; i < vLen; i++ {
 		if value[i] == '|' && (i+1 < vLen && value[i+1] == '|') {
 			key = value[2:i]
-			defaultV = value[i+2 : vLen-1] // other string is default value.
+			defalutV = value[i+2 : vLen-1] // other string is default value.
 			break
 		} else if value[i] == '}' {
 			key = value[2:i]
@@ -165,7 +165,7 @@ func ExpandValueEnv(value string) (realValue string) {
 
 	realValue = os.Getenv(key)
 	if realValue == "" {
-		realValue = defaultV
+		realValue = defalutV
 	}
 
 	return

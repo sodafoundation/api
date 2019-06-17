@@ -20,9 +20,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"reflect"
 	"text/template"
 	"time"
+
+	"reflect"
 
 	"github.com/astaxie/beego/grace"
 	"github.com/astaxie/beego/logs"
@@ -34,7 +35,7 @@ import (
 var beeAdminApp *adminApp
 
 // FilterMonitorFunc is default monitor filter when admin module is enable.
-// if this func returns, admin module records qps for this request by condition of this function logic.
+// if this func returns, admin module records qbs for this request by condition of this function logic.
 // usage:
 // 	func MyFilterMonitor(method, requestPath string, t time.Duration, pattern string, statusCode int) bool {
 //	 	if method == "POST" {
@@ -66,27 +67,15 @@ func init() {
 
 // AdminIndex is the default http.Handler for admin module.
 // it matches url pattern "/".
-func adminIndex(rw http.ResponseWriter, _ *http.Request) {
+func adminIndex(rw http.ResponseWriter, r *http.Request) {
 	execTpl(rw, map[interface{}]interface{}{}, indexTpl, defaultScriptsTpl)
 }
 
-// QpsIndex is the http.Handler for writing qps statistics map result info in http.ResponseWriter.
-// it's registered with url pattern "/qps" in admin module.
-func qpsIndex(rw http.ResponseWriter, _ *http.Request) {
+// QpsIndex is the http.Handler for writing qbs statistics map result info in http.ResponseWriter.
+// it's registered with url pattern "/qbs" in admin module.
+func qpsIndex(rw http.ResponseWriter, r *http.Request) {
 	data := make(map[interface{}]interface{})
 	data["Content"] = toolbox.StatisticsMap.GetMap()
-
-	// do html escape before display path, avoid xss
-	if content, ok := (data["Content"]).(M); ok {
-		if resultLists, ok := (content["Data"]).([][]string); ok {
-			for i := range resultLists {
-				if len(resultLists[i]) > 0 {
-					resultLists[i][0] = template.HTMLEscapeString(resultLists[i][0])
-				}
-			}
-		}
-	}
-
 	execTpl(rw, data, qpsTpl, defaultScriptsTpl)
 }
 
@@ -103,7 +92,7 @@ func listConf(rw http.ResponseWriter, r *http.Request) {
 	data := make(map[interface{}]interface{})
 	switch command {
 	case "conf":
-		m := make(M)
+		m := make(map[string]interface{})
 		list("BConfig", BConfig, m)
 		m["AppConfigPath"] = appConfigPath
 		m["AppConfigProvider"] = appConfigProvider
@@ -127,14 +116,14 @@ func listConf(rw http.ResponseWriter, r *http.Request) {
 		execTpl(rw, data, routerAndFilterTpl, defaultScriptsTpl)
 	case "filter":
 		var (
-			content = M{
+			content = map[string]interface{}{
 				"Fields": []string{
 					"Router Pattern",
 					"Filter Function",
 				},
 			}
 			filterTypes    = []string{}
-			filterTypeData = make(M)
+			filterTypeData = make(map[string]interface{})
 		)
 
 		if BeeApp.Handlers.enableFilter {
@@ -172,7 +161,7 @@ func listConf(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func list(root string, p interface{}, m M) {
+func list(root string, p interface{}, m map[string]interface{}) {
 	pt := reflect.TypeOf(p)
 	pv := reflect.ValueOf(p)
 	if pt.Kind() == reflect.Ptr {
@@ -195,11 +184,11 @@ func list(root string, p interface{}, m M) {
 }
 
 // PrintTree prints all registered routers.
-func PrintTree() M {
+func PrintTree() map[string]interface{} {
 	var (
-		content     = M{}
+		content     = map[string]interface{}{}
 		methods     = []string{}
-		methodsData = make(M)
+		methodsData = make(map[string]interface{})
 	)
 	for method, t := range BeeApp.Handlers.routers {
 
@@ -290,12 +279,12 @@ func profIndex(rw http.ResponseWriter, r *http.Request) {
 
 // Healthcheck is a http.Handler calling health checking and showing the result.
 // it's in "/healthcheck" pattern in admin module.
-func healthcheck(rw http.ResponseWriter, _ *http.Request) {
+func healthcheck(rw http.ResponseWriter, req *http.Request) {
 	var (
 		result     []string
 		data       = make(map[interface{}]interface{})
 		resultList = new([][]string)
-		content    = M{
+		content    = map[string]interface{}{
 			"Fields": []string{"Name", "Message", "Status"},
 		}
 	)
@@ -343,7 +332,7 @@ func taskStatus(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// List Tasks
-	content := make(M)
+	content := make(map[string]interface{})
 	resultList := new([][]string)
 	var fields = []string{
 		"Task Name",

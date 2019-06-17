@@ -1,6 +1,6 @@
 # github.com/LINBIT/godrbdutils v0.0.0-20180425110027-65b98a0f103a
 github.com/LINBIT/godrbdutils
-# github.com/astaxie/beego v1.11.1
+# github.com/astaxie/beego v1.9.2
 github.com/astaxie/beego/httplib
 github.com/astaxie/beego
 github.com/astaxie/beego/context
@@ -16,7 +16,7 @@ github.com/beorn7/perks/quantile
 # github.com/ceph/go-ceph v0.0.0-20170728144007-81e4191e131b
 github.com/ceph/go-ceph/rados
 github.com/ceph/go-ceph/rbd
-# github.com/coreos/etcd v3.3.11+incompatible
+# github.com/coreos/etcd v3.3.3+incompatible
 github.com/coreos/etcd/clientv3
 github.com/coreos/etcd/auth/authpb
 github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes
@@ -25,7 +25,7 @@ github.com/coreos/etcd/mvcc/mvccpb
 github.com/coreos/etcd/pkg/types
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/go-ini/ini v1.41.0
+# github.com/go-ini/ini v1.33.0
 github.com/go-ini/ini
 # github.com/gogo/protobuf v1.2.0
 github.com/gogo/protobuf/gogoproto
@@ -33,7 +33,7 @@ github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 github.com/golang/glog
-# github.com/golang/protobuf v1.2.0
+# github.com/golang/protobuf v1.3.2-0.20190517061210-b285ee9cfc6c
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
@@ -75,7 +75,7 @@ github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 # github.com/prometheus/procfs v0.0.0-20190425082905-87a4384529e0
 github.com/prometheus/procfs
-# github.com/satori/go.uuid v1.2.0
+# github.com/satori/go.uuid v1.1.0
 github.com/satori/go.uuid
 # github.com/segmentio/kafka-go v0.2.2
 github.com/segmentio/kafka-go
@@ -88,10 +88,7 @@ github.com/stretchr/objx
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/assert
-# golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
-golang.org/x/crypto/acme/autocert
-golang.org/x/crypto/acme
-# golang.org/x/net v0.0.0-20190125091013-d26f9f9a57f3 => github.com/golang/net v0.0.0-20190125091013-d26f9f9a57f3
+# golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
 golang.org/x/net/http2
@@ -106,9 +103,9 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 golang.org/x/text/transform
-# google.golang.org/genproto v0.0.0-20190128161407-8ac453e89fca => github.com/google/go-genproto v0.0.0-20190128161407-8ac453e89fca
+# google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.18.0 => github.com/grpc/grpc-go v1.18.0
+# google.golang.org/grpc v1.17.0 => github.com/grpc/grpc-go v1.17.0
 google.golang.org/grpc
 google.golang.org/grpc/codes
 google.golang.org/grpc/status

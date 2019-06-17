@@ -428,9 +428,6 @@ func run() {
 			continue
 		case <-changed:
 			now = time.Now().Local()
-			for _, t := range AdminTaskList {
-				t.SetNext(now)
-			}
 			continue
 		case <-stop:
 			return
@@ -449,7 +446,6 @@ func StopTask() {
 
 // AddTask add task with name
 func AddTask(taskname string, t Tasker) {
-	t.SetNext(time.Now().Local())
 	AdminTaskList[taskname] = t
 	if isstart {
 		changed <- true

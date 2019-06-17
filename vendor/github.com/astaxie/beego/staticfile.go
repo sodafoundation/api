@@ -74,7 +74,7 @@ func serverStaticRouter(ctx *context.Context) {
 	if enableCompress {
 		acceptEncoding = context.ParseEncoding(ctx.Request)
 	}
-	b, n, sch, reader, err := openFile(filePath, fileInfo, acceptEncoding)
+	b, n, sch, err := openFile(filePath, fileInfo, acceptEncoding)
 	if err != nil {
 		if BConfig.RunMode == DEV {
 			logs.Warn("Can't compress the file:", filePath, err)
@@ -89,18 +89,14 @@ func serverStaticRouter(ctx *context.Context) {
 		ctx.Output.Header("Content-Length", strconv.FormatInt(sch.size, 10))
 	}
 
-	http.ServeContent(ctx.ResponseWriter, ctx.Request, filePath, sch.modTime, reader)
+	http.ServeContent(ctx.ResponseWriter, ctx.Request, filePath, sch.modTime, sch)
 }
 
 type serveContentHolder struct {
-	data     []byte
+	*bytes.Reader
 	modTime  time.Time
 	size     int64
 	encoding string
-}
-
-type serveContentReader struct {
-	*bytes.Reader
 }
 
 var (
@@ -108,34 +104,32 @@ var (
 	mapLock       sync.RWMutex
 )
 
-func openFile(filePath string, fi os.FileInfo, acceptEncoding string) (bool, string, *serveContentHolder, *serveContentReader, error) {
+func openFile(filePath string, fi os.FileInfo, acceptEncoding string) (bool, string, *serveContentHolder, error) {
 	mapKey := acceptEncoding + ":" + filePath
 	mapLock.RLock()
 	mapFile := staticFileMap[mapKey]
 	mapLock.RUnlock()
 	if isOk(mapFile, fi) {
-		reader := &serveContentReader{Reader: bytes.NewReader(mapFile.data)}
-		return mapFile.encoding != "", mapFile.encoding, mapFile, reader, nil
+		return mapFile.encoding != "", mapFile.encoding, mapFile, nil
 	}
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	if mapFile = staticFileMap[mapKey]; !isOk(mapFile, fi) {
 		file, err := os.Open(filePath)
 		if err != nil {
-			return false, "", nil, nil, err
+			return false, "", nil, err
 		}
 		defer file.Close()
 		var bufferWriter bytes.Buffer
 		_, n, err := context.WriteFile(acceptEncoding, &bufferWriter, file)
 		if err != nil {
-			return false, "", nil, nil, err
+			return false, "", nil, err
 		}
-		mapFile = &serveContentHolder{data: bufferWriter.Bytes(), modTime: fi.ModTime(), size: int64(bufferWriter.Len()), encoding: n}
+		mapFile = &serveContentHolder{Reader: bytes.NewReader(bufferWriter.Bytes()), modTime: fi.ModTime(), size: int64(bufferWriter.Len()), encoding: n}
 		staticFileMap[mapKey] = mapFile
 	}
 
-	reader := &serveContentReader{Reader: bytes.NewReader(mapFile.data)}
-	return mapFile.encoding != "", mapFile.encoding, mapFile, reader, nil
+	return mapFile.encoding != "", mapFile.encoding, mapFile, nil
 }
 
 func isOk(s *serveContentHolder, fi os.FileInfo) bool {
@@ -178,7 +172,7 @@ func searchFile(ctx *context.Context) (string, os.FileInfo, error) {
 		if !strings.Contains(requestPath, prefix) {
 			continue
 		}
-		if prefix != "/" &&  len(requestPath) > len(prefix) && requestPath[len(prefix)] != '/' {
+		if len(requestPath) > len(prefix) && requestPath[len(prefix)] != '/' {
 			continue
 		}
 		filePath := path.Join(staticDir, requestPath[len(prefix):])
