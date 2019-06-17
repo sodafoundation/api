@@ -408,6 +408,36 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 	return fileshares, nil
 }
 
+func (c *Client) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var aclList []*model.FileShareAclSpec
+	for _, acl := range acls {
+		if acl.FileShareId == fileshareId {
+			aclList = append(aclList, acl)
+		}
+	}
+	return aclList, nil
+}
+
+func (c *Client) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.FileShareSnapshotSpec
+	for _, snap := range snaps {
+		if snap.FileShareId == fileshareId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
+}
+
 func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	fileshares, err := c.ListFileShares(ctx)
 	if err != nil {
@@ -450,6 +480,21 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 		fileshares = append(fileshares, share)
 	}
 	return fileshares, nil
+}
+
+// ListFileSharesByProfileId
+func (c *Client) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res_fileshares []string
+	for _, shares := range fileshares {
+		if shares.ProfileId == prfId {
+			res_fileshares = append(res_fileshares, shares.Name)
+		}
+	}
+	return res_fileshares, nil
 }
 
 // GetFileShareAcl
@@ -1765,6 +1810,23 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 		vols = append(vols, vol)
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (c *Client) ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error) {
+	vols, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var resvols []string
+	for _, v := range vols {
+		if v.ProfileId == prfID {
+			resvols = append(resvols, v.Name)
+		}
+	}
+
+	return resvols, nil
+
 }
 
 var volume_sortKey string

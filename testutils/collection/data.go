@@ -266,6 +266,8 @@ var (
 		},
 	}
 
+	SampleVolumeNames = []string{}
+
 	SampleVolumes = []model.VolumeSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -292,6 +294,8 @@ var (
 			SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
 		},
 	}
+
+	SampleShareNames = []string{}
 
 	SampleShares = []model.FileShareSpec{
 		{
