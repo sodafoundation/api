@@ -578,9 +578,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	if fshare.Name != "" {
 		result.Name = fshare.Name
 	}
-	if fshare.Description != "" {
-		result.Description = fshare.Description
-	}
+	result.Description = fshare.Description
 	if fshare.ExportLocations != nil {
 		result.ExportLocations = fshare.ExportLocations
 	}
