@@ -110,6 +110,14 @@ func Mount(device, mountpoint, fsType string, mountFlags []string) error {
 		log.Printf("failed to mount: %v\n", err)
 		return err
 	}
+
+	// Make sure the mount is not lost after the host reboots
+	cmd := fmt.Sprintf("echo \"%s %s %s defaults 0 0\" >> /etc/fstab", device, mountpoint, fsType)
+	_, err = ExecCmd("/bin/bash", "-c", cmd)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -120,6 +128,12 @@ func Umount(mountpoint string) error {
 	_, err := ExecCmd("umount", mountpoint)
 	if err != nil {
 		log.Printf("failed to Umount: %v\n", err)
+		return err
+	}
+
+	cmd := fmt.Sprintf("cat -n /etc/fstab | grep -w '%s' | awk -F ' ' '{ print $1 }'| xargs -i sed -i '{}d' /etc/fstab", mountpoint)
+	_, err = ExecCmd("/bin/bash", "-c", cmd)
+	if err != nil {
 		return err
 	}
 	return nil

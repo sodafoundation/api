@@ -14,7 +14,7 @@
 
 package model
 
-// Fileshare status
+// fileshare status
 const (
 	FileShareCreating      = "creating"
 	FileShareAvailable     = "available"

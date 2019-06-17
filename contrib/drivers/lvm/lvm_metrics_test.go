@@ -46,6 +46,7 @@ volume-d96cc42b-b285-474e-aa98-c61e66df7461 opensds-volumes-default -wi-a----- 1
 	"pvs": {`PV          VG                      Fmt  Attr PSize   PFree  
 /dev/loop10 opensds-volumes-default lvm2 a--  <20.00g <18.00g`, nil},
 }
+var expectdVgs []string = []string{"opensds-volumes-default", "opensds-volumes-default"}
 var expctdMetricList []string = []string{"iops", "read_throughput", "write_throughput", "response_time", "service_time", "utilization"}
 var expctedVolList []string = []string{"volume-b902e771-8e02-4099-b601-a6b3881f8", "volume-d96cc42b-b285-474e-aa98-c61e66df7461"}
 var expctedDiskList []string = []string{"/dev/loop10"}
@@ -104,8 +105,8 @@ func TestCollectMetrics(t *testing.T) {
 	md.cli.RootExecuter = NewMetricFakeExecuter(respMap)
 	md.cli.BaseExecuter = NewMetricFakeExecuter(respMap)
 	var tempMetricArray []*model.MetricSpec
-	for _, volume := range expctedVolList {
-		convrtedVolID := convert(volume)
+	for i, volume := range expctedVolList {
+		convrtedVolID := convert(volume, expectdVgs[i])
 		thismetricMAp := expctedMetricMap[convrtedVolID]
 		thisLabelMap := expctedLabelMap[convrtedVolID]
 		for _, element := range expctdMetricList {

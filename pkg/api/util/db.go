@@ -86,13 +86,33 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		}
 	}
 	// get fileshare details
-	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	fileshare, err := db.C.GetFileShare(ctx, in.FileShareId)
 	if err != nil {
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
+
+	if fileshare.Status != model.FileShareAvailable {
+		var errMsg = "only the status of file share is available, the acl can be created"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
+}
+
+func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error {
+	// If fileshare id is invalid, it would mean that fileshare snapshot
+	// creation failed before the create method in storage driver was
+	// called, and delete its db entry directly.
+	if _, err := db.C.GetFileShare(ctx, in.FileShareId); err != nil {
+		if err := db.C.DeleteFileShareAcl(ctx, in.Id); err != nil {
+			log.Error("when delete fileshare acl in db:", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // Function to store metadeta of fileshare into database
@@ -144,8 +164,28 @@ func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 		return errors.New(errMsg)
 	}
 
+	snaps, err := db.C.ListSnapshotsByShareId(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+	if len(snaps) > 0 {
+		errMsg := fmt.Sprintf("file share %s can not be deleted, because it still has snapshots", in.Id)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	acls, err := db.C.ListFileShareAclsByShareId(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+	if len(acls) > 0 {
+		errMsg := fmt.Sprintf("file share %s can not be deleted, because it still has acls", in.Id)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
 	in.Status = model.FileShareDeleting
-	_, err := db.C.UpdateFileShare(ctx, in)
+	_, err = db.C.UpdateFileShare(ctx, in)
 	if err != nil {
 		return err
 	}
@@ -172,6 +212,12 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	//validate the snapshot name
+	if strings.HasPrefix(in.Name, "snapshot") {
+		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.Status = model.FileShareSnapCreating
 	in.Metadata = fshare.Metadata
 	return db.C.CreateFileShareSnapshot(ctx, in)
@@ -307,7 +353,11 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	return db.C.ExtendVolume(ctx, volume)
 }
 
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+// CreateVolumeAttachmentDBEntry just modifies the state of the volume attachment
+// to be creating in the DB, the real operation would be executed in another new
+// thread.
+func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (
+	*model.VolumeAttachmentSpec, error) {
 	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
 	if err != nil {
 		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
@@ -379,6 +429,9 @@ func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 	return nil
 }
 
+// CreateVolumeSnapshotDBEntry just modifies the state of the volume snapshot
+// to be creating in the DB, the real operation would be executed in another new
+// thread.
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
@@ -433,6 +486,9 @@ func DeleteVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) e
 	return nil
 }
 
+// CreateReplicationDBEntry just modifies the state of the volume replication
+// to be creating in the DB, the real deletion operation would be executed
+// in another new thread.
 func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
 	pVol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
 	if err != nil {
@@ -458,11 +514,14 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// Check if specified volume has already been used in other replication.
 	v, err := db.C.GetReplicationByVolumeId(ctx, in.PrimaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
-			in.PrimaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by primary volume id %s failed: %v",
+				in.PrimaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
+
 	if v != nil {
 		var errMsg = fmt.Errorf("specified primary volume(%s) has already been used in replication(%s)",
 			in.PrimaryVolumeId, v.Id)
@@ -473,10 +532,12 @@ func CreateReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec) (*model
 	// check if specified volume has already been used in other replication.
 	v, err = db.C.GetReplicationByVolumeId(ctx, in.SecondaryVolumeId)
 	if err != nil {
-		var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
-			in.SecondaryVolumeId, err)
-		log.Error(errMsg)
-		return nil, errMsg
+		if _, ok := err.(*model.NotFoundError); !ok {
+			var errMsg = fmt.Errorf("get replication by secondary volume id %s failed: %v",
+				in.SecondaryVolumeId, err)
+			log.Error(errMsg)
+			return nil, errMsg
+		}
 	}
 	if v != nil {
 		var errMsg = fmt.Errorf("specified secondary volume(%s) has already been used in replication(%s)",
@@ -581,6 +642,9 @@ func FailoverReplicationDBEntry(ctx *c.Context, in *model.ReplicationSpec, secon
 	return nil
 }
 
+// CreateVolumeGroupDBEntry just modifies the state of the volume group
+// to be creating in the DB, the real deletion operation would be
+// executed in another new thread.
 func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	if len(in.Profiles) == 0 {
 		msg := fmt.Sprintf("profiles must be provided to create volume group.")
@@ -603,6 +667,9 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 	return db.C.CreateVolumeGroup(ctx, in)
 }
 
+// UpdateVolumeGroupDBEntry just modifies the state of the volume group
+// to be updating in the DB, the real deletion operation would be
+// executed in another new thread.
 func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
 	vg, err := db.C.GetVolumeGroup(ctx, vgUpdate.Id)
 	if err != nil {
@@ -760,6 +827,9 @@ func ValidateRemoveVolumes(ctx *c.Context, volumes []*model.VolumeSpec, removeVo
 	return removeVolumes, nil
 }
 
+// DeleteVolumeGroupDBEntry just modifies the state of the volume group
+// to be deleting in the DB, the real deletion operation would be
+// executed in another new thread.
 func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 	vg, err := db.C.GetVolumeGroup(ctx, volumeGroupId)
 	if err != nil {

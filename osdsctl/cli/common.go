@@ -16,6 +16,7 @@ package cli
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	c "github.com/opensds/opensds/client"
@@ -84,6 +85,9 @@ func Fatalln(a ...interface{}) {
 func HttpErrStrip(err error) error {
 	if httpErr, ok := err.(*c.HttpError); ok {
 		httpErr.Decode()
+		if len(httpErr.Msg) == 0 {
+			return fmt.Errorf("%d %s", httpErr.Code, http.StatusText(httpErr.Code))
+		}
 		return fmt.Errorf(httpErr.Msg)
 	}
 	return err
