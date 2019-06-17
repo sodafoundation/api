@@ -144,11 +144,12 @@ func (cli *MetricCli) CollectMetrics(metricList []string) ( /*returnMAp*/ map[st
 }
 
 // Discover LVM volumes
-func (c *MetricCli) DiscoverVolumes() ([]string, error) {
+func (c *MetricCli) DiscoverVolumes() ([]string, []string, error) {
 	cmd := []string{"env", "LC_ALL=C", "lvs"}
 	out, err := c.execute(cmd...)
 	tableRows := strings.Split(string(out), "\n")
 	var volumes []string
+	var vgs []string
 	for _, row := range tableRows[1:] {
 		if row != "" {
 			tokens := regexp.MustCompile(" ")
@@ -160,10 +161,11 @@ func (c *MetricCli) DiscoverVolumes() ([]string, error) {
 				}
 			}
 			volumes = append(volumes, columns[0])
+			vgs = append(vgs, columns[1])
 
 		}
 	}
-	return volumes, err
+	return volumes, vgs, err
 }
 
 // Discover LVM Disks

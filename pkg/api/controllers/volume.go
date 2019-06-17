@@ -119,8 +119,14 @@ func (v *VolumePortal) CreateVolume() {
 		SnapshotFromCloud: result.SnapshotFromCloud,
 		Context:           ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.CreateVolume(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.CreateVolume(context.Background(), opt)
+	if err != nil {
 		log.Error("create volume failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create volume in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -262,8 +268,14 @@ func (v *VolumePortal) ExtendVolume() {
 		Context:  ctx.ToJson(),
 		Profile:  prf.ToJson(),
 	}
-	if _, err = v.CtrClient.ExtendVolume(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.ExtendVolume(context.Background(), opt)
+	if err != nil {
 		log.Error("extend volume failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to extend volume in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -333,8 +345,14 @@ func (v *VolumePortal) DeleteVolume() {
 		Context:   ctx.ToJson(),
 		Profile:   prf.ToJson(),
 	}
-	if _, err = v.CtrClient.DeleteVolume(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.DeleteVolume(context.Background(), opt)
+	if err != nil {
 		log.Error("delete volume failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete volume in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -404,8 +422,14 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		Metadata: result.Metadata,
 		Context:  ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.CreateVolumeAttachment(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.CreateVolumeAttachment(context.Background(), opt)
+	if err != nil {
 		log.Error("create volume attachment failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create volume attachment in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -504,6 +528,12 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 	}
 	// NOTE:It will not wait for the real volume attachment deletion to complete
 	// and will return ok immediately.
+	if err = util.DeleteVolumeAttachmentDBEntry(ctx, attachment); err != nil {
+		errMsg := fmt.Sprintf("delete volume attachment failed: %v", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	v.SuccessHandle(StatusAccepted, nil)
 
 	// NOTE:The real volume attachment deletion process.
@@ -529,8 +559,14 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		Metadata: attachment.Metadata,
 		Context:  ctx.ToJson(),
 	}
-	if _, err = v.CtrClient.DeleteVolumeAttachment(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.DeleteVolumeAttachment(context.Background(), opt)
+	if err != nil {
 		log.Error("delete volume attachment failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete volume attachment in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -568,13 +604,17 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	var prf *model.ProfileSpec
 	var err error
 
-	if "" == snapshot.ProfileId {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(ctx)
-		snapshot.ProfileId = prf.Id
-	} else {
-		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
+	// If user doesn't specified profile, using profile derived form volume
+	if len(snapshot.ProfileId) == 0 {
+		log.Warning("User doesn't specified profile id, using profile derived form volume")
+		vol, err := db.C.GetVolume(ctx, snapshot.VolumeId)
+		if err != nil {
+			v.ErrorHandle(model.ErrorBadRequest, err.Error())
+			return
+		}
+		snapshot.ProfileId = vol.ProfileId
 	}
+	prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
 
 	if err != nil {
 		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
@@ -615,8 +655,14 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		Context:     ctx.ToJson(),
 		Profile:     prf.ToJson(),
 	}
-	if _, err = v.CtrClient.CreateVolumeSnapshot(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.CreateVolumeSnapshot(context.Background(), opt)
+	if err != nil {
 		log.Error("create volume snapthot failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to create volume snapshot in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 
@@ -747,8 +793,14 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		Context:  ctx.ToJson(),
 		Profile:  prf.ToJson(),
 	}
-	if _, err = v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt); err != nil {
+	response, err := v.CtrClient.DeleteVolumeSnapshot(context.Background(), opt)
+	if err != nil {
 		log.Error("delete volume snapthot failed in controller service:", err)
+		return
+	}
+	if errorMsg := response.GetError(); errorMsg != nil {
+		log.Errorf("failed to delete volume snapshot in controller, code: %v, message: %v",
+			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
 

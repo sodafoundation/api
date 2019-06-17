@@ -14,7 +14,7 @@
 
 package model
 
-// Fileshare status
+// fileshare status
 const (
 	FileShareCreating      = "creating"
 	FileShareAvailable     = "available"
@@ -68,6 +68,7 @@ const (
 const (
 	VolumeAttachCreating      = "creating"
 	VolumeAttachAvailable     = "available"
+	VolumeAttachDeleting      = "deleting"
 	VolumeAttachErrorDeleting = "errorDeleting"
 	VolumeAttachError         = "error"
 )

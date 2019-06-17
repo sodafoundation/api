@@ -46,6 +46,7 @@ const (
 	RBDProtocol    = "rbd"
 	FCProtocol     = "fibre_channel"
 	NVMEOFProtocol = "nvmeof"
+	NFSProtocol    = "nfs"
 )
 
 // Telemetry metric resource type

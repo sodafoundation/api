@@ -24,6 +24,7 @@ import (
 
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock"
+	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/daemon"
@@ -52,8 +53,14 @@ func main() {
 	// Set up database session.
 	db.Init(&CONF.Database)
 
+	// FixMe: osdsdock attacher service needs to specify the endpoint via configuration file,
+	//  so add this temporarily.
+	listenEndpoint := constants.OpensdsDockBindEndpoint
+	if CONF.OsdsDock.DockType == model.DockTypeAttacher {
+		listenEndpoint = CONF.OsdsDock.ApiEndpoint
+	}
 	// Construct dock module grpc server struct and run dock server process.
-	ds := dock.NewDockServer(CONF.OsdsDock.DockType, constants.OpensdsDockBindEndpoint)
+	ds := dock.NewDockServer(CONF.OsdsDock.DockType, listenEndpoint)
 	if err := ds.Run(); err != nil {
 		panic(err)
 	}
