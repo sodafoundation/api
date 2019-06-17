@@ -397,13 +397,7 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 		Mountpoint: "Test Mountpoint",
 		Status:     "Test Status",
 		VolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{Platform: "Test Platform",
-			OsType:    "Test OsType",
-			Ip:        "Test Ip",
-			Host:      "Test Host",
-			Initiator: "Test Initiator"},
 		ConnectionInfo: model.ConnectionInfo{
-			DriverVolumeType: "Test DriverVolumeType",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
 				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
@@ -424,30 +418,6 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 
 	if result.Status != "Test Status" {
 		t.Errorf("Expected %+v, got %+v\n", "Test Status", result.Status)
-	}
-
-	if result.Platform != "Test Platform" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Platform", result.Platform)
-	}
-
-	if result.OsType != "Test OsType" {
-		t.Errorf("Expected %+v, got %+v\n", "Test OsType", result.OsType)
-	}
-
-	if result.Ip != "Test Ip" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Ip", result.Ip)
-	}
-
-	if result.Host != "Test Host" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Host", result.Host)
-	}
-
-	if result.Initiator != "Test Initiator" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Initiator", result.Initiator)
-	}
-
-	if result.DriverVolumeType != "Test DriverVolumeType" {
-		t.Errorf("Expected %+v, got %+v\n", "Test DriverVolumeType", result.DriverVolumeType)
 	}
 }
 

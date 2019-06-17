@@ -2276,27 +2276,7 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.Status) > 0 {
 		result.Status = attachment.Status
 	}
-	if len(attachment.Platform) > 0 {
-		result.Platform = attachment.Platform
-	}
-	if len(attachment.OsType) > 0 {
-		result.OsType = attachment.OsType
-	}
-	if len(attachment.Ip) > 0 {
-		result.Ip = attachment.Ip
-	}
-	if len(attachment.Host) > 0 {
-		result.Host = attachment.Host
-	}
-	if len(attachment.Initiator) > 0 {
-		result.Initiator = attachment.Initiator
-	}
-	if len(attachment.DriverVolumeType) > 0 {
-		result.DriverVolumeType = attachment.DriverVolumeType
-	}
-	if len(attachment.AccessProtocol) > 0 {
-		result.AccessProtocol = attachment.AccessProtocol
-	}
+
 	// Update metadata
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
