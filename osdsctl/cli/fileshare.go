@@ -19,7 +19,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"strconv"
@@ -101,7 +100,6 @@ func init() {
 	fileShareCreateCommand.Flags().StringVarP(&shareAZ, "availabilityZone", "a", "", "the locality that fileshare belongs to")
 	fileShareCreateCommand.Flags().StringVarP(&shareSnapshotID, "snapshotId", "s", "", "the uuid of the snapshot which the fileshare is created")
 	fileShareCreateCommand.Flags().StringVarP(&shareProfileID, "profileId", "p", "", "the uuid of the profile which the fileshare belongs to")
-	fileShareCreateCommand.Flags().StringVarP(&shareExportLocations, "exportLocations", "e", "", "exportLocations of the fileshare")
 	fileShareCreateCommand.Flags().StringVarP(&shareUserID, "userId", "u", "", "the uuid of the user that the fileshare belongs to")
 
 	fileShareListCommand.Flags().StringVarP(&shareLimit, "limit", "", "50", "the number of ertries displayed per page")
@@ -139,21 +137,12 @@ func fileShareCreateAction(cmd *cobra.Command, args []string) {
 		log.Fatalf("error parsing size %s: %+v", args[0], err)
 	}
 
-	var exportLocations []string
-	if "" != shareExportLocations {
-		err = json.Unmarshal([]byte(shareExportLocations), &exportLocations)
-		if err != nil {
-			log.Fatalf("error parsing exportLocations %s: %+v", shareExportLocations, err)
-		}
-	}
-
 	share := &model.FileShareSpec{
 		Description:      shareDescription,
 		Name:             shareName,
 		Size:             int64(size),
 		UserId:           shareUserID,
 		AvailabilityZone: shareAZ,
-		ExportLocations:  exportLocations,
 		ProfileId:        shareProfileID,
 		SnapshotId:       shareSnapshotID,
 	}
