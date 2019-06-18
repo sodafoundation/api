@@ -49,11 +49,10 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		return
 	}
 	ctx := c.GetContext(f.Ctx)
-	// Get profile
-	var prf *model.ProfileSpec
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
+
 	// Unmarshal the request body
 	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshareacl); err != nil {
 		reason := fmt.Sprintf("parse fileshare access rules request body failed: %s", err.Error())
@@ -61,6 +60,26 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
+
+	fileshare, err := db.C.GetFileShare(ctx, fileshareacl.FileShareId)
+	if err != nil {
+		reason := fmt.Sprintf("getFileshare failed in create fileshare acl: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	// If user doesn't specified profile, using profile derived from fileshare
+	if len(fileshareacl.ProfileId) == 0 {
+		log.Warning("User doesn't specified profile id, using profile derived from file share")
+		fileshareacl.ProfileId = fileshare.ProfileId
+	}
+	prf, err := db.C.GetProfile(ctx, fileshareacl.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
 	if err != nil {
 		reason := fmt.Sprintf("createFileshareAcldbentry failed: %s", err.Error())
@@ -68,19 +87,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
-	fileshare, err := db.C.GetFileShare(ctx, result.FileShareId)
-	if err != nil {
-		reason := fmt.Sprintf("getFileshare failed in createfileshare acl: %s", err.Error())
-		f.ErrorHandle(model.ErrorBadRequest, reason)
-		log.Error(reason)
-		return
-	}
-	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		f.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
+
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {

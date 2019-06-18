@@ -371,3 +371,11 @@ func (fc *fakeClient) CreateFileShareSnapshot(ctx context.Context, in *pb.Create
 func (fc *fakeClient) DeleteFileShareSnapshot(ctx context.Context, in *pb.DeleteFileShareSnapshotOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return nil, nil
 }
+
+func (fc *fakeClient) GetMetrics(ctx context.Context, in *pb.GetMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakeClient) GetUrls(ctx context.Context, in *pb.NoParams, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}

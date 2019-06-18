@@ -39,6 +39,7 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		Name:        "volume sample",
 		Description: "This is a sample volume for testing",
 		Size:        int64(1),
+		ProfileId:   "3769855c-a102-11e7-b772-17b880d2f537",
 		Status:      model.VolumeCreating,
 	}
 
@@ -65,6 +66,17 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		expectedError := fmt.Sprintf("invalid volume size: %d", in.Size)
 		assertTestResult(t, err.Error(), expectedError)
 	})
+
+	t.Run("The profile id should not be empty", func(t *testing.T) {
+		in.Size, in.ProfileId = int64(1), ""
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", context.NewAdminContext(), in).Return(&SampleVolumes[0], nil)
+		db.C = mockClient
+
+		_, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
+		expectedError := "profile id can not be empty when creating volume in db"
+		assertTestResult(t, err.Error(), expectedError)
+	})
 }
 
 func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
@@ -73,6 +85,7 @@ func TestCreateVolumeFromSnapshotDBEntry(t *testing.T) {
 		Name:        "volume sample",
 		Description: "This is a sample volume for testing",
 		Size:        int64(1),
+		ProfileId:   "3769855c-a102-11e7-b772-17b880d2f537",
 		Status:      model.VolumeCreating,
 		SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
 	}
@@ -361,6 +374,7 @@ func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 		Name:        "sample-snapshot-01",
 		Description: "This is the first sample snapshot for testing",
 		Size:        int64(1),
+		ProfileId:   "3769855c-a102-11e7-b772-17b880d2f537",
 		Status:      "creating",
 		Metadata:    map[string]string{"a": "a"},
 	}
@@ -377,6 +391,18 @@ func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 			t.Errorf("failed to create volume snapshot, err is %v\n", err)
 		}
 		assertTestResult(t, result, expected)
+	})
+
+	t.Run("The profile id should not be empty", func(t *testing.T) {
+		req.ProfileId = ""
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
+		mockClient.On("CreateVolumeSnapshot", context.NewAdminContext(), req).Return(&SampleSnapshots[0], nil)
+		db.C = mockClient
+
+		_, err := CreateVolumeSnapshotDBEntry(context.NewAdminContext(), req)
+		expectedError := "profile id can not be empty when creating volume snapshot in db"
+		assertTestResult(t, err.Error(), expectedError)
 	})
 }
 

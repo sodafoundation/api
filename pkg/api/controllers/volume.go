@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,6 +69,8 @@ func (v *VolumePortal) CreateVolume() {
 	if volume.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
+		// Assign the default profile id to volume so that users can know which
+		// profile is used for creating a volume.
 		volume.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
@@ -600,13 +602,9 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
-	// get profile
-	var prf *model.ProfileSpec
-	var err error
-
-	// If user doesn't specified profile, using profile derived form volume
+	// If user doesn't specified profile, using profile derived from volume
 	if len(snapshot.ProfileId) == 0 {
-		log.Warning("User doesn't specified profile id, using profile derived form volume")
+		log.Warning("User doesn't specified profile id, using profile derived from volume")
 		vol, err := db.C.GetVolume(ctx, snapshot.VolumeId)
 		if err != nil {
 			v.ErrorHandle(model.ErrorBadRequest, err.Error())
@@ -614,8 +612,7 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		}
 		snapshot.ProfileId = vol.ProfileId
 	}
-	prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
-
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
