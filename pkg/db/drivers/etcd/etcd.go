@@ -408,6 +408,36 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 	return fileshares, nil
 }
 
+func (c *Client) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var aclList []*model.FileShareAclSpec
+	for _, acl := range acls {
+		if acl.FileShareId == fileshareId {
+			aclList = append(aclList, acl)
+		}
+	}
+	return aclList, nil
+}
+
+func (c *Client) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.FileShareSnapshotSpec
+	for _, snap := range snaps {
+		if snap.FileShareId == fileshareId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
+}
+
 func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	fileshares, err := c.ListFileShares(ctx)
 	if err != nil {
@@ -450,6 +480,21 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 		fileshares = append(fileshares, share)
 	}
 	return fileshares, nil
+}
+
+// ListFileSharesByProfileId
+func (c *Client) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res_fileshares []string
+	for _, shares := range fileshares {
+		if shares.ProfileId == prfId {
+			res_fileshares = append(res_fileshares, shares.Name)
+		}
+	}
+	return res_fileshares, nil
 }
 
 // GetFileShareAcl
@@ -1767,6 +1812,23 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
+// ListVolumesByProfileId
+func (c *Client) ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error) {
+	vols, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var resvols []string
+	for _, v := range vols {
+		if v.ProfileId == prfID {
+			resvols = append(resvols, v.Name)
+		}
+	}
+
+	return resvols, nil
+
+}
+
 var volume_sortKey string
 
 type VolumeSlice []*model.VolumeSpec
@@ -2214,27 +2276,7 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.Status) > 0 {
 		result.Status = attachment.Status
 	}
-	if len(attachment.Platform) > 0 {
-		result.Platform = attachment.Platform
-	}
-	if len(attachment.OsType) > 0 {
-		result.OsType = attachment.OsType
-	}
-	if len(attachment.Ip) > 0 {
-		result.Ip = attachment.Ip
-	}
-	if len(attachment.Host) > 0 {
-		result.Host = attachment.Host
-	}
-	if len(attachment.Initiator) > 0 {
-		result.Initiator = attachment.Initiator
-	}
-	if len(attachment.DriverVolumeType) > 0 {
-		result.DriverVolumeType = attachment.DriverVolumeType
-	}
-	if len(attachment.AccessProtocol) > 0 {
-		result.AccessProtocol = attachment.AccessProtocol
-	}
+
 	// Update metadata
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)

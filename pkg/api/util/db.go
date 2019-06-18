@@ -86,11 +86,18 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		}
 	}
 	// get fileshare details
-	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	fileshare, err := db.C.GetFileShare(ctx, in.FileShareId)
 	if err != nil {
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
+
+	if fileshare.Status != model.FileShareAvailable {
+		var errMsg = "only the status of file share is available, the acl can be created"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
 	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
 }
@@ -157,8 +164,28 @@ func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 		return errors.New(errMsg)
 	}
 
+	snaps, err := db.C.ListSnapshotsByShareId(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+	if len(snaps) > 0 {
+		errMsg := fmt.Sprintf("file share %s can not be deleted, because it still has snapshots", in.Id)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	acls, err := db.C.ListFileShareAclsByShareId(ctx, in.Id)
+	if err != nil {
+		return err
+	}
+	if len(acls) > 0 {
+		errMsg := fmt.Sprintf("file share %s can not be deleted, because it still has acls", in.Id)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
 	in.Status = model.FileShareDeleting
-	_, err := db.C.UpdateFileShare(ctx, in)
+	_, err = db.C.UpdateFileShare(ctx, in)
 	if err != nil {
 		return err
 	}

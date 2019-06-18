@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"strings"
 
+	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -34,8 +35,6 @@ import (
 type ProfilePortal struct {
 	BasePortal
 }
-
-var StorageAccessCapabilities = []string{constants.Read, constants.Write, constants.Execute}
 
 func (p *ProfilePortal) CreateProfile() {
 	if !policy.Authorize(p.Ctx, "profile:create") {
@@ -59,7 +58,17 @@ func (p *ProfilePortal) CreateProfile() {
 	case constants.Block:
 		break
 	case constants.File:
-		break
+		pp := profile.ProvisioningProperties
+		if ds := pp.DataStorage; ds.IsEmpty() {
+			if len(ds.StorageAccessCapability) == 0 {
+				profile.ProvisioningProperties.DataStorage.StorageAccessCapability = []string{"Read", "Write", "Execute"}
+			}
+		}
+		if io := pp.IOConnectivity; io.IsEmpty(){
+			if io.AccessProtocol == "" {
+				profile.ProvisioningProperties.IOConnectivity.AccessProtocol = "nfs"
+			}
+		}
 	default:
 		errMsg := fmt.Sprintf("parse profile request body failed: %v is invalid storagetype", stype)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -191,7 +200,39 @@ func (p *ProfilePortal) DeleteProfile() {
 		return
 	}
 
-	if err = db.C.DeleteProfile(ctx, profile.Id); err != nil {
+	// Check the depedency before deletion of profile
+	// If no dependency then only allow user to delete profile
+	// 1. Check the volumes created through that profile
+	// 2. Check the fileshares created through that profile
+	if profile.StorageType == constants.Block {
+		vols, err := db.C.ListVolumesByProfileId(ctx, id)
+		if err != nil {
+			errMsg := fmt.Sprintf("failed to fetch volumes for specified profile: %v", err)
+			p.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		if len(vols) > 0 {
+			errMsg := fmt.Sprintf("There are dependent volumes : %v for the specified profile %v", vols, id)
+			p.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+	} else {
+		fileshares, err := db.C.ListFileSharesByProfileId(ctx, id)
+		if err != nil {
+			errMsg := fmt.Sprintf("failed to fetch fileshares for specified profileId: %v", err)
+			p.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		if len(fileshares) > 0 {
+			errMsg := fmt.Sprintf("There are dependent fileshares : %v for the specified profile %v", fileshares, id)
+			p.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+	}
+
+	log.V(5).Infof("There are no dependecies on the specified profile, so deleting : %v", profile)
+	err = db.C.DeleteProfile(ctx, profile.Id)
+	if err != nil {
 		errMsg := fmt.Sprintf("delete profiles failed: %v", err)
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
