@@ -76,6 +76,11 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	}
 	// validate accesscapability
 	accessCapability := in.AccessCapability
+	if len(accessCapability) == 0 {
+		errMsg := fmt.Sprintf("empty fileshare accesscapability. Supported accesscapability are: {read, write}")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	permissions := []string{"write", "read"}
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
@@ -138,7 +143,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	}
 	//validate the name
 	if in.Name == "" {
-		errMsg := fmt.Sprintf("Empty fileshare name is not allowed. Please give valid name.")
+		errMsg := fmt.Sprintf("empty fileshare name is not allowed. Please give valid name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -157,9 +162,9 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 // the DB, the real deletion operation would be executed in another new thread.
 func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 	validStatus := []string{model.FileShareAvailable, model.FileShareError,
-		model.FileShareErrorDeleting, model.FileShareCreating}
+		model.FileShareErrorDeleting}
 	if !utils.Contained(in.Status, validStatus) {
-		errMsg := fmt.Sprintf("only the fileshare with the status available, error, error_deleting, can be deleted, the fileshare status is %s", in.Status)
+		errMsg := fmt.Sprintf("only the fileshare with the status available, error, errorDeleting, can be deleted, the fileshare status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -213,8 +218,13 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 	}
 
 	//validate the snapshot name
+	if in.Name == "" {
+		errMsg := fmt.Sprintf("snapshot name can not be empty. Please give valid snapshot name")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	if strings.HasPrefix(in.Name, "snapshot") {
-		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		errMsg := fmt.Sprintf("names starting 'snapshot' are reserved. Please choose a different snapshot name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
