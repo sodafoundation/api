@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,14 @@ func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAcl
 	return fshares, nil
 }
 
+func (fc *FakeDbClient) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	var acls []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		acls = append(acls, &SampleFileSharesAcl[i])
+	}
+	return acls, nil
+}
+
 // CreateFileShare
 func (fc *FakeDbClient) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	return fshare, nil
@@ -95,6 +103,11 @@ func (fc *FakeDbClient) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, 
 	return fshares, nil
 }
 
+// ListFileSharesByProfileId
+func (fc *FakeDbClient) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	return []string{}, nil
+}
+
 // UpdateFileShare
 func (fc *FakeDbClient) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
 	return &SampleFileShares[0], nil
@@ -130,7 +143,17 @@ func (fc *FakeDbClient) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[s
 	}
 	return snps, nil
 }
+
 func (fc *FakeDbClient) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+func (fc *FakeDbClient) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
 	var snps []*model.FileShareSnapshotSpec
 
 	for i := range SampleFileShareSnapshots {
@@ -370,6 +393,12 @@ func (fc *FakeDbClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 		vols = append(vols, &SampleVolumes[i])
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (fc *FakeDbClient) ListVolumesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+
+	return []string{}, nil
 }
 
 // UpdateVolume

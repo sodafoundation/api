@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ type OsdsApiServer struct {
 	PrometheusUrl      string `conf:"prometheus_url,http://localhost:9090"`
 	PrometheusConfFile string `conf:"prometheus_conf_file,prometheus.yml"`
 	// alert manager related
-	AlertmgrConfHome string `conf:"alertmgr_conf_home,/root/alertmanager-0.16.2.linux-amd64/"`
+	AlertmgrConfHome string `conf:"alertmgr_conf_home,/etc/alertmanager/"`
 	AlertMgrUrl      string `conf:"alertmgr_url,http://localhost:9093"`
 	AlertmgrConfFile string `conf:"alertmgr_conf_file,alertmanager.yml"`
 	// grafana related

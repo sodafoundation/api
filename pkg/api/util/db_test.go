@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -322,6 +322,28 @@ func TestCreateVolumeAttachmentDBEntry(t *testing.T) {
 		expected := &SampleAttachments[0]
 		result, _ := CreateVolumeAttachmentDBEntry(context.NewAdminContext(), req)
 		assertTestResult(t, result, expected)
+	})
+}
+
+func TestDeleteVolumeAttachmentDBEntry(t *testing.T) {
+	var req = &model.VolumeAttachmentSpec{
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Status:   "available",
+	}
+
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateVolumeAttachment", context.NewAdminContext(), "f2dda3d2-bf79-11e7-8665-f750b088f63e", req).Return(nil, nil)
+		mockClient.On("GetVolume", context.NewAdminContext(), req.VolumeId).Return(nil, nil)
+		db.C = mockClient
+
+		err := DeleteVolumeAttachmentDBEntry(context.NewAdminContext(), req)
+		if err != nil {
+			t.Errorf("failed to delete volume attachment, err is %v\n", err)
+		}
 	})
 }
 

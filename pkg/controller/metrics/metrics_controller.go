@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 	"strconv"
 
 	log "github.com/golang/glog"
@@ -42,7 +44,7 @@ type Controller interface {
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
-	GetUrls() (*map[string]string, error)
+	GetUrls() (*map[string]model.UrlDesc, error)
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -313,15 +315,28 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 	return res, nil
 
 }
+func CheckServiceStatus(sName string) error {
+	cmd := exec.Command("systemctl", "status", sName, "--no-pager")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Errorf("status of service %s is inactive err: %s\n", sName, err)
+		return err
+	}
+	return nil
+}
 
-func (c *controller) GetUrls() (*map[string]string, error) {
-
-	res := map[string]string{}
+func (c *controller) GetUrls() (*map[string]model.UrlDesc, error) {
+	res := map[string]model.UrlDesc{}
 	flagGrafanaUrl := flag.Lookup("grafana-url")
 	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
-
-	res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
-	res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+	if CheckServiceStatus("grafana-server.service") == nil {
+		res["Grafana"] = model.UrlDesc{Url: flagGrafanaUrl.Value.String(), Desc: "Open Grafana tool to visualize collected metrics"}
+	}
+	if CheckServiceStatus("alertmanager.service") == nil {
+		res["Alert Manager"] = model.UrlDesc{Url: flagAlertMgrUrl.Value.String(), Desc: "Open Alert Manager to view and handle alerts sent by prometheus"}
+	}
 
 	return &res, nil
 

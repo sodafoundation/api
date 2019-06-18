@@ -20,13 +20,13 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	model "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
+	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -145,7 +145,7 @@ func (d *Driver) parameterCheck(poolID, prf string, size int64, fsName, sharePro
 	}
 
 	if !checkProtocol(proto) {
-		return fmt.Errorf("%s protocol is not supported, support is NFS and CIFS", proto)
+		return fmt.Errorf("%s protocol is not supported, support is %s and %s", proto, NFSProto, CIFSProto)
 	}
 
 	*shareProto = proto
@@ -473,34 +473,26 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) er
 }
 
 func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (string, error) {
+	var accessLevel string
+
 	if accessLevels == nil || (accessLevels != nil && len(accessLevels) == 0) {
 		return "", errors.New("access level cannot be empty")
 	}
 
-	if len(accessLevels) == 1 && strings.ToLower(accessLevels[0]) != AccessLevelRead {
-		return "", errors.New("only read only and read write access level are supported")
+	supportAccessLevels := []string{AccessLevelRead, AccessLevelWrite}
+
+	if len(accessLevels) > len(supportAccessLevels) {
+		return "", errors.New("invalid access level")
 	}
 
-	var accessLevel string
-	// make sure accessLevel is ro or rw
-	for _, level := range accessLevels {
-		if strings.ToLower(level) == AccessLevelExecute {
-			return "", errors.New("only read only and read write access level are supported, execute is not supported")
+	accessLevel = "ro"
+	for _, v := range accessLevels {
+		if !utils.Contained(v, supportAccessLevels) {
+			return "", errors.New("only read only or read write access level are supported")
 		}
-		if strings.ToLower(level) == AccessLevelRead && !strings.Contains(accessLevel, "r") {
-			accessLevel += "r"
+		if v == AccessLevelWrite {
+			accessLevel = "rw"
 		}
-	}
-
-	for _, level := range accessLevels {
-		if strings.ToLower(level) == AccessLevelWrite {
-			accessLevel += "w"
-			break
-		}
-	}
-
-	if accessLevel == "r" {
-		accessLevel += "o"
 	}
 
 	shareDriver := NewProtocol(shareProto, d.Client)
@@ -551,8 +543,12 @@ func (d *Driver) CreateFileShareAclParamCheck(opt *pb.CreateFileShareAclOpts) (s
 		return "", "", "", "", errors.New("access client cannot be empty")
 	}
 
-	if shareProto == NFSProto && accessType == AccessTypeUser {
-		accessTo += "@"
+	if shareProto == NFSProto {
+		if accessType == AccessTypeUser {
+			accessTo += "@"
+		} else {
+			accessTo = "*"
+		}
 	}
 
 	return fsName, shareProto, accessLevel, accessTo, nil
@@ -626,6 +622,8 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 		log.Error(err.Error())
 		return err
 	}
+
+	accessTo = "*"
 
 	shareDriver := NewProtocol(shareProto, d.Client)
 

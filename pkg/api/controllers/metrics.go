@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,7 +114,6 @@ func (m *MetricsPortal) GetMetrics() {
 		Context:    ctx.ToJson(),
 	}
 	res, err := m.CtrClient.GetMetrics(context.Background(), opt)
-
 	if err != nil {
 		log.Error("collect metrics failed in controller service:", err)
 		return

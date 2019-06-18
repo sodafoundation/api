@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -249,6 +249,8 @@ func TestDeleteProfile(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			&SampleProfiles[1], nil)
+		mockClient.On("ListVolumesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			SampleVolumeNames, nil)
 		mockClient.On("DeleteProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
 		db.C = mockClient
 
@@ -266,6 +268,8 @@ func TestDeleteProfile(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("Invalid resource uuid"))
+		mockClient.On("ListVolumesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			nil, errors.New("Depency volumes"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE",
@@ -491,6 +495,8 @@ func TestDeleteFileShareProfile(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			&SampleFileShareProfiles[1], nil)
+		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			SampleShareNames, nil)
 		mockClient.On("DeleteProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
 		db.C = mockClient
 
@@ -508,6 +514,8 @@ func TestDeleteFileShareProfile(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("Invalid resource uuid"))
+		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			nil, errors.New("Depency FileShares"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE",

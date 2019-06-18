@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -408,6 +408,36 @@ func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, e
 	return fileshares, nil
 }
 
+func (c *Client) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var aclList []*model.FileShareAclSpec
+	for _, acl := range acls {
+		if acl.FileShareId == fileshareId {
+			aclList = append(aclList, acl)
+		}
+	}
+	return aclList, nil
+}
+
+func (c *Client) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.FileShareSnapshotSpec
+	for _, snap := range snaps {
+		if snap.FileShareId == fileshareId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
+}
+
 func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
 	fileshares, err := c.ListFileShares(ctx)
 	if err != nil {
@@ -450,6 +480,21 @@ func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) 
 		fileshares = append(fileshares, share)
 	}
 	return fileshares, nil
+}
+
+// ListFileSharesByProfileId
+func (c *Client) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res_fileshares []string
+	for _, shares := range fileshares {
+		if shares.ProfileId == prfId {
+			res_fileshares = append(res_fileshares, shares.Name)
+		}
+	}
+	return res_fileshares, nil
 }
 
 // GetFileShareAcl
@@ -749,7 +794,7 @@ func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapsho
 		return p.Id
 	case "CreatedAt":
 		return p.CreatedAt
-	case "UpdatedAte":
+	case "UpdatedAt":
 		return p.UpdatedAt
 	case "TenantId":
 		return p.TenantId
@@ -836,6 +881,11 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 	if snp.Status != "" {
 		result.Status = snp.Status
 	}
+
+	if snp.SnapshotSize > 0 {
+		result.SnapshotSize = snp.SnapshotSize
+	}
+
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -1384,6 +1434,11 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	// profile name must be unique with the same storage type.
+	if _, err := c.getProfileByName(ctx, prf.Name, prf.StorageType); err == nil {
+		return nil, fmt.Errorf("the profile name '%s' already exists", prf.Name)
+	}
+
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err
@@ -1421,36 +1476,30 @@ func (c *Client) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, e
 	return prf, nil
 }
 
-// GetDefaultProfile
-func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+func (c *Client) getProfileByName(ctx *c.Context, name, storageType string) (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
-		log.Error("Get default profile failed in db: ", err)
+		log.Error("List profile failed: ", err)
 		return nil, err
 	}
 
 	for _, profile := range profiles {
-		if profile.Name == "default" && profile.StorageType == "block" {
+		if profile.Name == name && profile.StorageType == storageType {
 			return profile, nil
 		}
 	}
-	return nil, errors.New("No default profile in db.")
+	var msg = fmt.Sprintf("can't find profile(name: %s, storageType:%s)", name, storageType)
+	return nil, model.NewNotFoundError(msg)
+}
+
+// GetDefaultProfile
+func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+	return c.getProfileByName(ctx, "default", "block")
 }
 
 // GetDefaultProfileFileShare
 func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
-	profiles, err := c.ListProfiles(ctx)
-	if err != nil {
-		log.Error("Get default profile failed in db: ", err)
-		return nil, err
-	}
-
-	for _, profile := range profiles {
-		if profile.Name == "default" && profile.StorageType == "file" {
-			return profile, nil
-		}
-	}
-	return nil, errors.New("No default profile in db.")
+	return c.getProfileByName(ctx, "default", "file")
 }
 
 // ListProfiles
@@ -1766,6 +1815,23 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 		vols = append(vols, vol)
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (c *Client) ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error) {
+	vols, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var resvols []string
+	for _, v := range vols {
+		if v.ProfileId == prfID {
+			resvols = append(resvols, v.Name)
+		}
+	}
+
+	return resvols, nil
+
 }
 
 var volume_sortKey string
@@ -2215,27 +2281,7 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.Status) > 0 {
 		result.Status = attachment.Status
 	}
-	if len(attachment.Platform) > 0 {
-		result.Platform = attachment.Platform
-	}
-	if len(attachment.OsType) > 0 {
-		result.OsType = attachment.OsType
-	}
-	if len(attachment.Ip) > 0 {
-		result.Ip = attachment.Ip
-	}
-	if len(attachment.Host) > 0 {
-		result.Host = attachment.Host
-	}
-	if len(attachment.Initiator) > 0 {
-		result.Initiator = attachment.Initiator
-	}
-	if len(attachment.DriverVolumeType) > 0 {
-		result.DriverVolumeType = attachment.DriverVolumeType
-	}
-	if len(attachment.AccessProtocol) > 0 {
-		result.AccessProtocol = attachment.AccessProtocol
-	}
+
 	// Update metadata
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
@@ -2993,6 +3039,13 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 	case []*model.VolumeSpec:
 		vols := in.([]*model.VolumeSpec)
 		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
+			return errUpdate
+		}
+
+	case *model.ReplicationSpec:
+		replica := in.(*model.ReplicationSpec)
+		replica.ReplicationStatus = status
+		if _, errUpdate := c.UpdateReplication(ctx, replica.Id, replica); errUpdate != nil {
 			return errUpdate
 		}
 	}

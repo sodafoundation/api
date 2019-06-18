@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -77,12 +77,13 @@ var (
 	shareSnapName      string
 	shareSnapDesp      string
 	shareSnapStatus    string
-	shareSnapShareID   string
 	shareSize          string
 	shareSnapSize      string
 	shareSnapTenantID  string
-	shareSnapProfileId string
+	shareSnapProfileID string
 	fileshareID        string
+	shareSnapCreatedAt string
+	shareSnapUpdatedAt string
 
 	shareSnapFormatters = FormatterList{"Metadata": JsonFormatter}
 )
@@ -96,23 +97,24 @@ func init() {
 
 	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapName, "name", "n", "", "the name of the fileshare snapshot")
 	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapDesp, "description", "d", "", "the description of the fileshare snapshot")
-	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapProfileId, "profileId", "P", "", "the description of the fileshare snapshot")
+	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapProfileID, "profileId", "P", "", "the description of the fileshare snapshot")
 
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapOffset, "offset", "", "0", "all requested data offsets")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), name, description, shareSize, snapshotSize, status, userid, tenantid, fileshareId, profileId")
+		"the sort key of all requested data. supports id(default), createdAt, updatedAt, name, description, snapshotSize, status, userId, tenantId, fileshareId, profileId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapID, "id", "", "", "list fileshare snapshot by id")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapName, "name", "", "", "list fileshare snapshot by name")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapDesp, "description", "", "", "list fileshare snapshot by description")
-	fileShareSnapshotListCommand.Flags().StringVarP(&shareSize, "shareSize", "", "", "list fileshare snapshot by shareSize")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSize, "snapshotSize", "", "", "list fileshare snapshot by snapshotSize")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapStatus, "status", "", "", "list fileshare snapshot by status")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapUserID, "userId", "", "", "list fileshare snapshot by userId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapTenantID, "tenantId", "", "", "list fileshare snapshot by tenantId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&fileshareID, "fileshareId", "", "", "list fileshare snapshot by fileshareId")
-	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapProfileId, "profileId", "", "", "list fileshare snapshot by profileId")
+	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapProfileID, "profileId", "", "", "list fileshare snapshot by profileId")
+	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapCreatedAt, "createdAt", "", "", "list fileshare snapshot by createdAt")
+	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapUpdatedAt, "updatedAt", "", "", "list fileshare snapshot by updatedAt")
 
 	fileShareSnapshotUpdateCommand.Flags().StringVarP(&shareSnapshotName, "name", "n", "", "the name of the fileshare snapshot")
 	fileShareSnapshotUpdateCommand.Flags().StringVarP(&shareSnapshotDesp, "description", "d", "", "the description of the fileshare snapshot")
@@ -129,7 +131,7 @@ func fileShareSnapshotCreateAction(cmd *cobra.Command, args []string) {
 		Name:        shareSnapName,
 		Description: shareSnapDesp,
 		FileShareId: args[0],
-		ProfileId:   shareSnapProfileId,
+		ProfileId:   shareSnapProfileID,
 	}
 
 	resp, err := client.CreateFileShareSnapshot(snp)
@@ -162,8 +164,8 @@ func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
 	var opts = map[string]string{"limit": shareSnapLimit, "offset": shareSnapOffset, "sortDir": shareSnapSortDir,
 		"sortKey": shareSnapSortKey, "Id": shareSnapID,
 		"Name": shareSnapName, "Description": shareSnapDesp, "UserId": shareSnapUserID,
-		"Status": shareSnapStatus, "ShareSize": shareSize,
-		"SnapshotSize": shareSnapSize, "TenantId": shareSnapTenantID, "FileShareId": fileshareID}
+		"Status": shareSnapStatus, "CreatedAt": shareSnapCreatedAt, "UpdatedAt": shareSnapUpdatedAt,
+		"Size": shareSnapSize, "TenantId": shareSnapTenantID, "FileShareId": fileshareID}
 
 	resp, err := client.ListFileShareSnapshots(opts)
 	if err != nil {
@@ -171,7 +173,7 @@ func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "Name", "Description", "Status",
-		"FileShareId", "ProfileId"}
+		"FileShareId", "ProfileId", "SnapshotSize"}
 	PrintList(resp, keys, shareSnapFormatters)
 }
 

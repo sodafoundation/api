@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 
 			replicationDriverName := dck.Metadata["HostReplicationDriver"]
 			replicationType := model.ReplicationTypeHost
-			if drivers.IsSupportHostBasedReplication(dck.DriverName) {
+			if drivers.IsSupportArrayBasedReplication(dck.DriverName) {
 				replicationType = model.ReplicationTypeArray
 				replicationDriverName = dck.DriverName
 			}
@@ -220,12 +220,9 @@ func (add *attachDockDiscoverer) Discover() error {
 		return err
 	}
 
-	var localIqn string
-
-	localIqn, err = connector.NewConnector(connector.IscsiDriver).GetInitiatorInfo()
+	localIqn, err := connector.NewConnector(connector.IscsiDriver).GetInitiatorInfo()
 	if err != nil {
-		log.Error("get initiator failed", err)
-		return err
+		log.Warning("get initiator failed, ", err)
 	}
 
 	bindIp := CONF.BindIp
@@ -235,12 +232,10 @@ func (add *attachDockDiscoverer) Discover() error {
 
 	fcInitiator, err := connector.NewConnector(connector.FcDriver).GetInitiatorInfo()
 	if err != nil {
-		log.Error("get initiator failed", err)
-		return err
+		log.Warning("get initiator failed, ", err)
 	}
 
 	var wwpns []string
-
 	for _, v := range strings.Split(fcInitiator, ",") {
 		if strings.Contains(v, "node_name") {
 			wwpns = append(wwpns, strings.Split(v, ":")[1])

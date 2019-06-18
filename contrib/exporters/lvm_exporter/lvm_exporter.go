@@ -1,10 +1,10 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may
 // not use this file except in compliance with the License. You may obtain
 // a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -78,20 +78,20 @@ func newLvmCollector() *lvmCollector {
 			"Shows Utilization in percentage",
 			labelKeys, nil,
 		),
-		DiskIOPS: prometheus.NewDesc("lvm_volume_iops_tps",
+		DiskIOPS: prometheus.NewDesc("lvm_disk_iops_tps",
 			"Shows IOPS",
 			labelKeys, nil,
 		),
-		DiskReadThroughput: prometheus.NewDesc("lvm_disk_read_hroughput_kbs",
-			"Shows ReadThroughput",
+		DiskReadThroughput: prometheus.NewDesc("lvm_disk_read_throughput_kbs",
+			"Shows Disk ReadThroughput",
 			labelKeys, nil,
 		),
 		DiskWriteThroughput: prometheus.NewDesc("lvm_disk_write_throughput_kbs",
-			"Shows ReadThroughput",
+			"Shows Write Throughput",
 			labelKeys, nil,
 		),
 		DiskResponseTime: prometheus.NewDesc("lvm_disk_response_time_ms",
-			"Shows ReadThroughput",
+			"Shows Disk Response Time",
 			labelKeys, nil,
 		),
 		DiskServiceTime: prometheus.NewDesc("lvm_disk_service_time_ms",
@@ -146,21 +146,39 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 	metricArray, _ := metricDriver.CollectMetrics()
 	for _, metric := range metricArray {
 		lableVals := []string{metric.InstanceName}
-		switch metric.Name {
-		case "iops":
-			ch <- prometheus.MustNewConstMetric(c.VolumeIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-		case "read_throughput":
-			ch <- prometheus.MustNewConstMetric(c.VolumeReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-		case "write_throughput":
-			ch <- prometheus.MustNewConstMetric(c.VolumeWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-		case "response_time":
-			ch <- prometheus.MustNewConstMetric(c.VolumeResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
-		case "service_time":
-			ch <- prometheus.MustNewConstMetric(c.VolumeServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+		switch metric.Component {
+		case "volume":
+			switch metric.Name {
+			case "iops":
+				ch <- prometheus.MustNewConstMetric(c.VolumeIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "read_throughput":
+				ch <- prometheus.MustNewConstMetric(c.VolumeReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "write_throughput":
+				ch <- prometheus.MustNewConstMetric(c.VolumeWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "response_time":
+				ch <- prometheus.MustNewConstMetric(c.VolumeResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "service_time":
+				ch <- prometheus.MustNewConstMetric(c.VolumeServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "utilization_prcnt":
+				ch <- prometheus.MustNewConstMetric(c.VolumeUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
-		case "utilization_prcnt":
-			ch <- prometheus.MustNewConstMetric(c.VolumeUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			}
+		case "disk":
+			switch metric.Name {
+			case "iops":
+				ch <- prometheus.MustNewConstMetric(c.DiskIOPS, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "read_throughput":
+				ch <- prometheus.MustNewConstMetric(c.DiskReadThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "write_throughput":
+				ch <- prometheus.MustNewConstMetric(c.DiskWriteThroughput, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "response_time":
+				ch <- prometheus.MustNewConstMetric(c.DiskResponseTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "service_time":
+				ch <- prometheus.MustNewConstMetric(c.DiskServiceTime, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
+			case "utilization_prcnt":
+				ch <- prometheus.MustNewConstMetric(c.DiskUtilization, prometheus.GaugeValue, metric.MetricValues[0].Value, lableVals...)
 
+			}
 		}
 	}
 }
