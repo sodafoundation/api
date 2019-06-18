@@ -1165,7 +1165,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
 	log.V(5).Info("in controller get urls method")
 
-	var result *map[string]string
+	var result *map[string]model.UrlDesc
 	var err error
 
 	result, err = c.metricsController.GetUrls()
@@ -1177,7 +1177,8 @@ func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse
 		// make each url spec
 		urlSpec := model.UrlSpec{}
 		urlSpec.Name = k
-		urlSpec.Url = v
+		urlSpec.Url = v.Url
+		urlSpec.Desc = v.Desc
 		// add to the array
 		arrUrls = append(arrUrls, urlSpec)
 	}

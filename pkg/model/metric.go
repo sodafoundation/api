@@ -88,4 +88,10 @@ type NoParam struct{}
 type UrlSpec struct {
 	Name string `json:"name,omitempty"`
 	Url  string `json:"url,omitempty"`
+	Desc string `json:"description,omitempty"`
+}
+
+type UrlDesc struct {
+	Url  string `json:"url,omitempty"`
+	Desc string `json:"desc,omitempty"`
 }
