@@ -65,16 +65,16 @@ var fileShareUpdateCommand = &cobra.Command{
 
 var (
 	shareAZ          string
-	shareDescription string	
-	shareID        string
-	shareName      string
-	sharePoolID    string
-	shareProfileID string
-	shareStatus    string
-	shareTenantID  string
-	shareUserID    string
-	shareCreatedAt string
-	shareUpdatedAt string
+	shareDescription string
+	shareID          string
+	shareName        string
+	sharePoolID      string
+	shareProfileID   string
+	shareStatus      string
+	shareTenantID    string
+	shareUserID      string
+	shareCreatedAt   string
+	shareUpdatedAt   string
 
 	shareLimit   string
 	shareOffset  string
