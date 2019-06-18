@@ -173,7 +173,7 @@ func fileShareSnapshotListAction(cmd *cobra.Command, args []string) {
 	}
 
 	keys := KeyList{"Id", "Name", "Description", "Status",
-		"FileShareId", "ProfileId"}
+		"FileShareId", "ProfileId", "SnapshotSize"}
 	PrintList(resp, keys, shareSnapFormatters)
 }
 
