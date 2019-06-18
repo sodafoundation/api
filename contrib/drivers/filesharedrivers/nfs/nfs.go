@@ -255,6 +255,10 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	// get fileshare name to be deleted
 	fname := opt.GetMetadata()[KFileshareName]
+	if !d.cli.Exists(fname) {
+		log.Warningf("fileshare(%s) does not exist, nothing to remove", fname)
+		return nil
+	}
 	// get fileshare path
 	lvPath := opt.GetMetadata()[KLvPath]
 	// get directory where fileshare mounted
