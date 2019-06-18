@@ -82,7 +82,7 @@ func init() {
 
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclType, "type", "t", "", "the type of access")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessCapability, "capability", "c", "", "the accessCapability for fileshare")
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "aclTo", "a", "", "accessTo of the fileshare")
+	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "a", "", "accessTo of the fileshare")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclDesp, "description", "d", "", "the description of of the fileshare acl")
 
 	fileShareAclListCommand.Flags().StringVarP(&shareAclLimit, "limit", "", "50", "the number of ertries displayed per page")
