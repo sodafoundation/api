@@ -69,4 +69,17 @@ func TestGenericResponseResult(t *testing.T) {
 		result := GenericResponseResult(resMsg)
 		assertTestResult(t, result, expected)
 	})
+
+	t.Run("nil pointer", func(t *testing.T) {
+		expected := &GenericResponse{
+			Reply: &GenericResponse_Result_{
+				Result: &GenericResponse_Result{
+					Message: "",
+				},
+			},
+		}
+
+		result := GenericResponseResult(nil)
+		assertTestResult(t, result, expected)
+	})
 }

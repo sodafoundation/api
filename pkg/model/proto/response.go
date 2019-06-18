@@ -28,7 +28,10 @@ func GenericResponseResult(resMsg interface{}) *GenericResponse {
 		msg = resMsg.(string)
 		break
 	default:
-		msgJSON, _ := json.Marshal(resMsg)
+		msgJSON, err := json.Marshal(resMsg)
+		if err != nil {
+			fmt.Printf("unmarshal error in response result: %v", err)
+		}
 		msg = string(msgJSON)
 	}
 
@@ -39,7 +42,6 @@ func GenericResponseResult(resMsg interface{}) *GenericResponse {
 			},
 		},
 	}
-
 }
 
 func GenericResponseError(errMsg interface{}) *GenericResponse {

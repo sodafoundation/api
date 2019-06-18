@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
@@ -44,6 +45,7 @@ import (
 
 // dockServer is used to implement pb.DockServer
 type dockServer struct {
+	l    sync.Mutex
 	Port string
 	// Discoverer represents the mechanism of DockHub discovering the storage
 	// capabilities from different backends.
@@ -134,9 +136,13 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 
 // DeleteVolume implements pb.DockServer.DeleteVolume
 func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	defer func() {
+		drivers.Clean(ds.Driver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("Dock server receive delete volume request, vr =", opt)
 
@@ -200,10 +206,13 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 
 // DeleteVolumeAttachment implements pb.DockServer.DeleteVolumeAttachment
 func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
-
+	defer func() {
+		drivers.Clean(ds.Driver)
+		ds.l.Unlock()
+	}()
 	log.Info("Dock server receive delete volume attachment request, vr =", opt)
 
 	if err := ds.Driver.TerminateConnection(opt); err != nil {
@@ -233,10 +242,13 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 
 // DeleteVolumeSnapshot implements pb.DockServer.DeleteVolumeSnapshot
 func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
-
+	defer func() {
+		drivers.Clean(ds.Driver)
+		ds.l.Unlock()
+	}()
 	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
 	if err := ds.Driver.DeleteSnapshot(opt); err != nil {
@@ -315,9 +327,13 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 }
 
 func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage replication drivers and do some initializations.
 	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	defer func() {
+		drivers.CleanReplicationDriver(driver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("Dock server receive delete replication request, vr =", opt)
 
@@ -426,9 +442,13 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 }
 
 func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	defer func() {
+		drivers.Clean(ds.Driver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("Dock server receive delete volume group request, vr =", opt)
 
@@ -506,9 +526,13 @@ func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFile
 
 // DeleteFileShareAcl implements pb.DockServer.DeleteFileShare
 func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	defer func() {
+		filesharedrivers.Clean(ds.FileShareDriver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("dock server receive delete file share acl request, vr =", opt)
 
@@ -541,10 +565,13 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 
 // DeleteFileShare implements pb.DockServer.DeleteFileShare
 func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileShareOpts) (*pb.GenericResponse, error) {
-
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	defer func() {
+		filesharedrivers.Clean(ds.FileShareDriver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("Dock server receive delete file share request, vr =", opt)
 
@@ -575,9 +602,13 @@ func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.Creat
 }
 
 func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+	ds.l.Lock()
 	// Get the storage drivers and do some initializations.
 	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	defer func() {
+		filesharedrivers.Clean(ds.FileShareDriver)
+		ds.l.Unlock()
+	}()
 
 	log.Info("Dock server receive delete file share snapshot request, vr =", opt)
 
