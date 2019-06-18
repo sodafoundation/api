@@ -76,6 +76,11 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	}
 	// validate accesscapability
 	accessCapability := in.AccessCapability
+	if len(accessCapability) == 0 {
+		errMsg := fmt.Sprintf("empty fileshare accesscapability. Supported accesscapability are: {read, write}")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	permissions := []string{"write", "read"}
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
