@@ -794,7 +794,7 @@ func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapsho
 		return p.Id
 	case "CreatedAt":
 		return p.CreatedAt
-	case "UpdatedAte":
+	case "UpdatedAt":
 		return p.UpdatedAt
 	case "TenantId":
 		return p.TenantId
@@ -881,6 +881,11 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 	if snp.Status != "" {
 		result.Status = snp.Status
 	}
+
+	if snp.SnapshotSize > 0 {
+		result.SnapshotSize = snp.SnapshotSize
+	}
+
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 

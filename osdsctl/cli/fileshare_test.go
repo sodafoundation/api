@@ -15,7 +15,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"os"
 	"os/exec"
 	"testing"
@@ -52,8 +51,6 @@ func TestFileShareAction(t *testing.T) {
 func TestFileShareCreateAction(t *testing.T) {
 	var args []string
 	args = append(args, "1")
-	exportLocations, _ := json.Marshal([]string{"ExportLocation00"})
-	shareExportLocations = string(exportLocations)
 	fileShareCreateAction(fileShareCreateCommand, args)
 }
 
