@@ -397,7 +397,7 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		},
 		Name:         opt.GetName(),
 		Description:  opt.GetDescription(),
-		SnapshotSize: opt.GetSize(),
+		SnapshotSize: int64(snapshot.Size),
 		Status:       snapshot.Status,
 		Metadata:     map[string]string{KManilaSnapID: snapshot.ID},
 	}

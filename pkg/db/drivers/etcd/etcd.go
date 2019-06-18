@@ -794,7 +794,7 @@ func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapsho
 		return p.Id
 	case "CreatedAt":
 		return p.CreatedAt
-	case "UpdatedAte":
+	case "UpdatedAt":
 		return p.UpdatedAt
 	case "TenantId":
 		return p.TenantId
