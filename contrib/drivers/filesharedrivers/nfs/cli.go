@@ -96,7 +96,11 @@ func (c *Cli) UnMount(dirName string) error {
 		"umount",
 		dirName,
 	}
-	_, err := c.execute(cmd...)
+	errorlog, err := c.execute(cmd...)
+	glog.Error(errorlog)
+	if err.Error() == "exit status 32" {
+		return nil
+	}
 	return err
 }
 
