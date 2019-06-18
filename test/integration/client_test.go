@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,17 +95,6 @@ func TestClientListProfiles(t *testing.T) {
 	if !reflect.DeepEqual(prfs, expected) {
 		t.Errorf("expected %+v, got %+v\n", expected, prfs)
 	}
-}
-
-func TestClientDeleteProfile(t *testing.T) {
-	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
-
-	if err := c.DeleteProfile(prfID); err != nil {
-		t.Error("delete profile in client failed:", err)
-		return
-	}
-
-	t.Log("Delete profile success!")
 }
 
 func TestClientAddCustomProperty(t *testing.T) {
@@ -442,6 +431,17 @@ func TestClientDeleteVolume(t *testing.T) {
 	}
 
 	t.Log("Delete volume success!")
+}
+
+func TestClientDeleteProfile(t *testing.T) {
+	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
+
+	if err := c.DeleteProfile(prfID); err != nil {
+		t.Error("delete profile in client failed:", err)
+		return
+	}
+
+	t.Log("Delete profile success!")
 }
 
 // TODO: There are some deployment issues when testing Replicaiton operation,

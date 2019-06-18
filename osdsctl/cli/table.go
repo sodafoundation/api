@@ -1,5 +1,5 @@
-// This source file has been modified by Huawei Technologies Co., Ltd.
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// This source file has been modified by The OpenSDS Authors.
+// Copyright 2017 The OpenSDS Authors.
 
 // Copyright 2017 modood. All rights reserved.
 // license that can be found in the LICENSE file.

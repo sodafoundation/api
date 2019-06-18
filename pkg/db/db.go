@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,9 +65,13 @@ type Client interface {
 
 	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
 
+	ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error)
+
 	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
 
 	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
+
+	ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error)
 
 	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
 
@@ -84,6 +88,8 @@ type Client interface {
 	GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
 
 	ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error)
 
 	ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
 
@@ -146,6 +152,8 @@ type Client interface {
 	GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error)
 
 	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
+
+	ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error)
 
 	ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error)
 
