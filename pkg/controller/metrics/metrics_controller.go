@@ -44,7 +44,7 @@ type Controller interface {
 	GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error)
 	CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error)
 	SetDock(dockInfo *model.DockSpec)
-	GetUrls() (*map[string]string, error)
+	GetUrls() (*map[string]model.UrlDesc, error)
 }
 
 // NewController method creates a controller structure and expose its pointer.
@@ -326,16 +326,16 @@ func CheckServiceStatus(sName string) error {
 	}
 	return nil
 }
-func (c *controller) GetUrls() (*map[string]string, error) {
 
-	res := map[string]string{}
+func (c *controller) GetUrls() (*map[string]model.UrlDesc, error) {
+	res := map[string]model.UrlDesc{}
 	flagGrafanaUrl := flag.Lookup("grafana-url")
 	flagAlertMgrUrl := flag.Lookup("alertmgr-url")
 	if CheckServiceStatus("grafana-server.service") == nil {
-		res[flagGrafanaUrl.Name] = flagGrafanaUrl.Value.String()
+		res["Grafana"] = model.UrlDesc{Url: flagGrafanaUrl.Value.String(), Desc: "Open Grafana tool to visualize collected metrics"}
 	}
 	if CheckServiceStatus("alertmanager.service") == nil {
-		res[flagAlertMgrUrl.Name] = flagAlertMgrUrl.Value.String()
+		res["Alert Manager"] = model.UrlDesc{Url: flagAlertMgrUrl.Value.String(), Desc: "Open Alert Manager to view and handle alerts sent by prometheus"}
 	}
 
 	return &res, nil
