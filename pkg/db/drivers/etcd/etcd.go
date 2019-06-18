@@ -881,6 +881,11 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 	if snp.Status != "" {
 		result.Status = snp.Status
 	}
+
+	if snp.SnapshotSize > 0 {
+		result.SnapshotSize = snp.SnapshotSize
+	}
+
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
