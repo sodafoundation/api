@@ -138,7 +138,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	}
 	//validate the name
 	if in.Name == "" {
-		errMsg := fmt.Sprintf("Empty fileshare name is not allowed. Please give valid name.")
+		errMsg := fmt.Sprintf("empty fileshare name is not allowed. Please give valid name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -214,12 +214,12 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 
 	//validate the snapshot name
 	if in.Name == "" {
-		errMsg := fmt.Sprintf("Snapshot name can not be empty. Please give valid snapshot name")
+		errMsg := fmt.Sprintf("snapshot name can not be empty. Please give valid snapshot name")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
 	if strings.HasPrefix(in.Name, "snapshot") {
-		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		errMsg := fmt.Sprintf("names starting 'snapshot' are reserved. Please choose a different snapshot name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}

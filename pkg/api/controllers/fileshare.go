@@ -29,6 +29,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -180,6 +181,12 @@ func (f *FileSharePortal) CreateFileShare() {
 		prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
 		if err != nil {
 			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+		if prf.StorageType != constants.File {
+			errMsg := fmt.Sprintf("storageType should be only file. Currently it is: %s", prf.StorageType)
+			log.Error(errMsg)
 			f.ErrorHandle(model.ErrorBadRequest, errMsg)
 			return
 		}
