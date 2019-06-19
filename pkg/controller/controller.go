@@ -888,7 +888,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fileshare:  get fileshare from db %+v", fileshare)
+	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
 
 	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
 
@@ -897,7 +897,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fileshare:  selected poolInfo %+v", polInfo)
+	log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -912,7 +912,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	c.fileshareController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-	log.V(5).Infof("controller create fleshare:  selected Driver name %+v", opt.DriverName)
+	log.V(5).Infof("controller create fleshare: selected Driver name %+v", opt.DriverName)
 
 	result, err := c.fileshareController.CreateFileShare((*pb.CreateFileShareOpts)(opt))
 	if err != nil {
@@ -1136,7 +1136,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	dockSpec, err := db.C.ListDocks(ctx)
 	if err != nil {
-		log.Errorf("list dock  failed in CollectMetrics method: %s", err.Error())
+		log.Errorf("list dock failed in CollectMetrics method: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 	for i, d := range dockSpec {
@@ -1184,7 +1184,7 @@ func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse
 	}
 
 	if err != nil {
-		log.Errorf("get urls failed: %s\n", err.Error())
+		log.Errorf("get urls failed: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 
