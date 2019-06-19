@@ -34,6 +34,7 @@ const (
 	nvmepool       = "opensds-volumes-nvme"
 	defaultgroup   = "opensds-volumes-default"
 	localIqn       = "iqn.2017-10.io.opensds:volume:00000001"
+	localNqn       = "nqn.ini.1a2bc3d4-27c5-448f-ac84-5bf7fc154321"
 	nvmeofProtocol = "nvmeof"
 	iscsiProtocol  = "iscsi"
 )
@@ -278,37 +279,49 @@ func TestNvmeofAttachIssues(t *testing.T) {
 		t.Log("no nvme pool ")
 		return
 	}
-	//PrepareNvmeVolume()
-	err = CreateNvmeofAttach(t)
+
+	vol, err := PrepareNvmeVolume()
 	if err != nil {
-		t.Error("create nvmeof attachment fail", err)
+		t.Error("prepare nvme volume failed:", err)
+		return 
+	}
+
+	host, _ := os.Hostname()
+	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{
+			Host:      host,
+			Platform:  runtime.GOARCH,
+			OsType:    runtime.GOOS,
+			Ip:        "127.0.0.1",
+			Initiator: localNqn,
+		},
+		AccessProtocol: nvmeofProtocol,
+	})
+	if err != nil {
+		t.Error("create volume attachment failed:", err)
 		return
 	}
-	err = ListNvmeofAttachment(t)
-	if err != nil {
-		t.Error("list nvmeof attachment fail", err)
+	defer cleanVolumeAndAttachmentForTest(t, vol.Id, atc.Id)
+	// Check if the status of created volume attachment is available.
+	if atc, _ = u.GetVolumeAttachment(atc.Id); atc.Status != model.VolumeAttachAvailable {
+		t.Errorf("status expected %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
 		return
 	}
-	err = ShowNvmeofAttachDetail(t)
-	if err != nil {
-		t.Error("show nvmeof attachment fail", err)
+	t.Log("Create volume attachment success!")
+
+	t.Log("Begin to delete volume attachment...")
+	if err := u.DeleteVolumeAttachment(atc.Id, nil); err != nil {
+		t.Error("delete volume attachment failed:", err)
 		return
 	}
-	err = NvmeofVolumeAttach(t)
-	if err != nil {
-		t.Error("connect nvmeof attachment fail", err)
-		return
-	}
-	err = NvmeofVolumeAttachHost(t)
-	if err != nil {
-		t.Error("connect nvmeof attachment fail", err)
-		return
-	}
-	err = DeleteNvmeofAttach(t)
-	if err != nil {
-		t.Error("delete nvmeof attachment fail", err)
-		return
-	}
+	t.Log("Delete volume attachment success!")
+	
+	 err = NvmeofVolumeAttachHost(t)
+	 if err != nil {
+	 	t.Error("connect nvmeof attachment fail", err)
+	 	return
+	 }
 
 	t.Log("nvmeof attach issues success")
 }
@@ -524,10 +537,28 @@ func execCmd(name string, arg ...string) (string, error) {
 // prepare volume for test
 func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
+	// get poolid
+	pols, err := u.ListPools()
+	if err != nil {
+		return nil, err
+	}
+	polId := ""
+	for _, p := range pols {
+		if p.Name == defaultgroup {
+			polId = p.Id
+			break
+		}
+	}
+	if polId == "" {
+		return nil, nil
+	}
+
+	// create volume in default pool
 	vol, err := u.CreateVolume(&model.VolumeSpec{
 		Name:        "test",
 		Description: "This is a test",
 		Size:        int64(1),
+		PoolId:      polId,
 	})
 	if err != nil {
 		t.Error("prepare volume failed:", err)
@@ -640,6 +671,7 @@ func PrepareNvmeofAttachmentHost(t *testing.T) (*model.VolumeAttachmentSpec, err
 		HostInfo: model.HostInfo{
 			Initiator: "nqn.ini.1A2B3C4D5E6F7G8H",
 		},
+		AccessProtocol: nvmeofProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
 	if err != nil {

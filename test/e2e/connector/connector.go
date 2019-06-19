@@ -44,6 +44,7 @@ func main() {
 	}
 
 	accPro := os.Args[3]
+	fmt.Printf("accpro: %s",accPro)
 	switch os.Args[1] {
 	case attachCommand:
 		dev, err := connector.NewConnector(accPro).Attach(connData)
