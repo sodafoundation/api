@@ -260,7 +260,7 @@ func (t *NvmeoftgtTarget) CreateNvmeofTarget(volId, tgtNqn, path, initiator, tra
 	}
 
 	// check
-	info, err := t.execCmd("dmesg", `|grep "enabling port"`)
+	info, err := t.execBash("dmesg | grep 'enabling port' ")
 	if err != nil || info == "" {
 		log.Errorf("nvme target is not listening on the port")
 		t.RemoveNvmeofTarget(volId, tgtNqn, transtype)

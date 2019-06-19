@@ -2286,6 +2286,10 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
 	}
+	// Update DriverVolumeType
+	if len(attachment.DriverVolumeType) > 0{
+		result.DriverVolumeType = attachment.DriverVolumeType
+	}
 	// Update connectionData
 	// Debug
 	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
