@@ -537,10 +537,28 @@ func execCmd(name string, arg ...string) (string, error) {
 // prepare volume for test
 func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
+	// get poolid
+	pols, err := u.ListPools()
+	if err != nil {
+		return nil, err
+	}
+	polId := ""
+	for _, p := range pols {
+		if p.Name == defaultgroup {
+			polId = p.Id
+			break
+		}
+	}
+	if polId == "" {
+		return nil, nil
+	}
+
+	// create volume in default pool
 	vol, err := u.CreateVolume(&model.VolumeSpec{
 		Name:        "test",
 		Description: "This is a test",
 		Size:        int64(1),
+		PoolId:      polId,
 	})
 	if err != nil {
 		t.Error("prepare volume failed:", err)
