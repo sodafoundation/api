@@ -80,7 +80,6 @@ var (
 	shareSize          string
 	shareSnapSize      string
 	shareSnapTenantID  string
-	shareSnapProfileID string
 	fileshareID        string
 	shareSnapCreatedAt string
 	shareSnapUpdatedAt string
@@ -97,7 +96,6 @@ func init() {
 
 	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapName, "name", "n", "", "the name of the fileshare snapshot")
 	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapDesp, "description", "d", "", "the description of the fileshare snapshot")
-	fileShareSnapshotCreateCommand.Flags().StringVarP(&shareSnapProfileID, "profileId", "P", "", "the description of the fileshare snapshot")
 
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapOffset, "offset", "", "0", "all requested data offsets")
@@ -112,7 +110,6 @@ func init() {
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapUserID, "userId", "", "", "list fileshare snapshot by userId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapTenantID, "tenantId", "", "", "list fileshare snapshot by tenantId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&fileshareID, "fileshareId", "", "", "list fileshare snapshot by fileshareId")
-	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapProfileID, "profileId", "", "", "list fileshare snapshot by profileId")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapCreatedAt, "createdAt", "", "", "list fileshare snapshot by createdAt")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapUpdatedAt, "updatedAt", "", "", "list fileshare snapshot by updatedAt")
 
@@ -131,7 +128,6 @@ func fileShareSnapshotCreateAction(cmd *cobra.Command, args []string) {
 		Name:        shareSnapName,
 		Description: shareSnapDesp,
 		FileShareId: args[0],
-		ProfileId:   shareSnapProfileID,
 	}
 
 	resp, err := client.CreateFileShareSnapshot(snp)
