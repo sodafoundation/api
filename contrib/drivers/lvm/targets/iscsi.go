@@ -86,8 +86,9 @@ func (t *tgtTarget) getTgtConfPath(volId string) string {
 type configMap map[string][]string
 
 func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
-	if hostIp == "" {
-		return errors.New("create ISCSI target failed, host ip cannot be empty")
+	// Multi-attach require a specific ip
+	if hostIp == "" || hostIp == "ALL" {
+		return errors.New("create ISCSI target failed: host ip cannot be empty")
 	}
 
 	if exist, _ := utils.PathExists(t.TgtConfDir); !exist {
