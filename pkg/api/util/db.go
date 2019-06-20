@@ -680,10 +680,10 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 // UpdateVolumeGroupDBEntry just modifies the state of the volume group
 // to be updating in the DB, the real deletion operation would be
 // executed in another new thread.
-func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) ([]string, []string, error) {
 	vg, err := db.C.GetVolumeGroup(ctx, vgUpdate.Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var name string
@@ -712,31 +712,31 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	if len(invalidUuids) > 0 {
 		msg := fmt.Sprintf("uuid %s is in both add and remove volume list", strings.Join(invalidUuids, ","))
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return nil, nil, errors.New(msg)
 	}
 
 	volumes, err := db.C.ListVolumesByGroupId(ctx, vgUpdate.Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	var addVolumesNew, removeVolumeNew []string
+	var addVolumesNew, removeVolumesNew []string
 	// Validate volumes in AddVolumes and RemoveVolumes.
 	if len(vgUpdate.AddVolumes) > 0 {
 		if addVolumesNew, err = ValidateAddVolumes(ctx, volumes, vgUpdate.AddVolumes, vgUpdate); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	if len(vgUpdate.RemoveVolumes) > 0 {
-		if removeVolumeNew, err = ValidateRemoveVolumes(ctx, volumes, vgUpdate.RemoveVolumes, vgUpdate); err != nil {
-			return nil, err
+		if removeVolumesNew, err = ValidateRemoveVolumes(ctx, volumes, vgUpdate.RemoveVolumes, vgUpdate); err != nil {
+			return nil, nil, err
 		}
 	}
 
-	if name == "" && description == "" && len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+	if name == "" && description == "" && len(addVolumesNew) == 0 && len(removeVolumesNew) == 0 {
 		msg := fmt.Sprintf("update group %s faild, because no valid name, description, addvolumes or removevolumes were provided", vgUpdate.Id)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return nil, nil, errors.New(msg)
 	}
 
 	vgNew := &model.VolumeGroupSpec{
@@ -753,13 +753,19 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	if description != "" {
 		vgNew.Description = description
 	}
-	if len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+	if len(addVolumesNew) == 0 && len(removeVolumesNew) == 0 {
 		vgNew.Status = model.VolumeGroupAvailable
 	} else {
 		vgNew.Status = model.VolumeGroupUpdating
 	}
 
-	return db.C.UpdateVolumeGroup(ctx, vgNew)
+	_, err = db.C.UpdateVolumeGroup(ctx, vgNew)
+	if err != nil {
+		log.Errorf("when update volume group in db: %v", err)
+		return nil, nil, err
+	}
+
+	return addVolumesNew, removeVolumesNew, nil
 }
 
 func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes []string, vg *model.VolumeGroupSpec) ([]string, error) {
