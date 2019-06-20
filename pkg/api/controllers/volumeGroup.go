@@ -134,18 +134,20 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 		return
 	}
 
+	// get pool id
 	var poolId string
+	vgNew, err := db.C.GetVolumeGroup(ctx, id)
+	if err != nil {
+		errMsg := fmt.Sprintf("volume group %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+	poolId = vgNew.PoolId
+
 	// No more values in group need to be updated
 	if addVolumes == nil && removeVolumes == nil {
-		vg, err := db.C.GetVolumeGroup(ctx, id)
-		if err != nil {
-			errMsg := fmt.Sprintf("volume group %s not found: %s", id, err.Error())
-			v.ErrorHandle(model.ErrorNotFound, errMsg)
-			return
-		}
-		poolId = vg.PoolId
 		// Marshal the result.
-		body, err := json.Marshal(vg)
+		body, err := json.Marshal(vgNew)
 		if err != nil {
 			errMsg := fmt.Sprintf("marshal volume group updated result failed: %s", err.Error())
 			v.ErrorHandle(model.ErrorInternalServer, errMsg)
