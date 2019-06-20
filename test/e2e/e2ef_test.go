@@ -283,7 +283,7 @@ func TestNvmeofAttachIssues(t *testing.T) {
 	vol, err := PrepareNvmeVolume()
 	if err != nil {
 		t.Error("prepare nvme volume failed:", err)
-		return 
+		return
 	}
 
 	host, _ := os.Hostname()
@@ -316,12 +316,12 @@ func TestNvmeofAttachIssues(t *testing.T) {
 		return
 	}
 	t.Log("Delete volume attachment success!")
-	
-	 err = NvmeofVolumeAttachHost(t)
-	 if err != nil {
-	 	t.Error("connect nvmeof attachment fail", err)
-	 	return
-	 }
+
+	err = NvmeofVolumeAttachHost(t)
+	if err != nil {
+		t.Error("connect nvmeof attachment fail", err)
+		return
+	}
 
 	t.Log("nvmeof attach issues success")
 }
@@ -582,8 +582,10 @@ func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, 
 
 	t.Log("Start preparing volume attachment...")
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
-		VolumeId:       vol.Id,
-		HostInfo:       model.HostInfo{},
+		VolumeId: vol.Id,
+		HostInfo: model.HostInfo{
+			Ip: "0.0.0.0",
+		},
 		AccessProtocol: iscsiProtocol,
 	})
 	if err != nil {
