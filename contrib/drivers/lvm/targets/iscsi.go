@@ -89,12 +89,16 @@ type configMap map[string][]string
 func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
 	// Multi-attach require a specific ip
 	if hostIp == "" || hostIp == "ALL" {
-		return fmt.Errorf("create ISCSI target failed: host ip %s cannot be empty or ALL, iscsi only allows specific ip access, not all", hostIp)
+		msg := fmt.Sprintf("create ISCSI target failed: host ip %s cannot be empty or ALL, iscsi only allows specific ip access, not all", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
 	}
 
 	result := net.ParseIP(hostIp)
 	if result == nil {
-		return fmt.Errorf("%s is not a valid ip. Please give the proper ip", hostIp)
+		msg := fmt.Sprintf("%s is not a valid ip, please give the proper ip", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
 	}
 
 	if exist, _ := utils.PathExists(t.TgtConfDir); !exist {

@@ -155,7 +155,7 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	v.SuccessHandle(StatusAccepted, body)
 
 	// No more values in group need to be updated
-	if addVolumes == nil && removeVolumes == nil {
+	if len(addVolumes) == 0 && len(removeVolumes) == 0 {
 		return
 	}
 
