@@ -19,6 +19,7 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -572,6 +573,22 @@ func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 	return vol, nil
 }
 
+// GetHostIP return Host IP
+func GetHostIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			return ipnet.IP.String()
+		}
+	}
+
+	return "127.0.0.1"
+}
+
 // prepare volume attachment for test
 func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := prepareVolumeForTest(t)
@@ -584,7 +601,7 @@ func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, 
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
 		HostInfo: model.HostInfo{
-			Ip: "0.0.0.0",
+			Ip: GetHostIP(),
 		},
 		AccessProtocol: iscsiProtocol,
 	})

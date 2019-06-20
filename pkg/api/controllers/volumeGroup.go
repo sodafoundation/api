@@ -144,16 +144,18 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 	poolId = vgNew.PoolId
 
+	// Marshal the result.
+	body, err := json.Marshal(vgNew)
+	if err != nil {
+		errMsg := fmt.Sprintf("marshal volume group updated result failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorInternalServer, errMsg)
+		return
+	}
+
+	v.SuccessHandle(StatusAccepted, body)
+
 	// No more values in group need to be updated
 	if addVolumes == nil && removeVolumes == nil {
-		// Marshal the result.
-		body, err := json.Marshal(vgNew)
-		if err != nil {
-			errMsg := fmt.Sprintf("marshal volume group updated result failed: %s", err.Error())
-			v.ErrorHandle(model.ErrorInternalServer, errMsg)
-			return
-		}
-		v.SuccessHandle(StatusAccepted, body)
 		return
 	}
 
