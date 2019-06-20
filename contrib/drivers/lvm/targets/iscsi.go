@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"strconv"
@@ -86,8 +87,18 @@ func (t *tgtTarget) getTgtConfPath(volId string) string {
 type configMap map[string][]string
 
 func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
-	if hostIp == "" {
-		return errors.New("create ISCSI target failed, host ip cannot be empty")
+	// Multi-attach require a specific ip
+	if hostIp == "" || hostIp == "ALL" {
+		msg := fmt.Sprintf("create ISCSI target failed: host ip %s cannot be empty or ALL, iscsi only allows specific ip access, not all", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	result := net.ParseIP(hostIp)
+	if result == nil {
+		msg := fmt.Sprintf("%s is not a valid ip, please give the proper ip", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
 	}
 
 	if exist, _ := utils.PathExists(t.TgtConfDir); !exist {

@@ -240,7 +240,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 
 	hostIP := opt.HostInfo.GetIp()
 	if hostIP == "" {
-		hostIP = "ALL"
+		hostIP = d.conf.TgtBindIp
 	}
 
 	lvPath, ok := opt.GetMetadata()[KLvPath]
@@ -527,7 +527,7 @@ func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOp
 
 	hostIP := opt.HostInfo.GetIp()
 	if hostIP == "" {
-		hostIP = "ALL"
+		hostIP = d.conf.TgtBindIp
 	}
 
 	lvsPath, ok := opt.GetMetadata()[KLvsPath]
