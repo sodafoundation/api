@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -794,7 +794,7 @@ func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapsho
 		return p.Id
 	case "CreatedAt":
 		return p.CreatedAt
-	case "UpdatedAte":
+	case "UpdatedAt":
 		return p.UpdatedAt
 	case "TenantId":
 		return p.TenantId
@@ -881,6 +881,11 @@ func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *mode
 	if snp.Status != "" {
 		result.Status = snp.Status
 	}
+
+	if snp.SnapshotSize > 0 {
+		result.SnapshotSize = snp.SnapshotSize
+	}
+
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
@@ -2280,6 +2285,10 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	// Update metadata
 	if attachment.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
+	}
+	// Update DriverVolumeType
+	if len(attachment.DriverVolumeType) > 0{
+		result.DriverVolumeType = attachment.DriverVolumeType
 	}
 	// Update connectionData
 	// Debug

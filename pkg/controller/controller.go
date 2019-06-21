@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -789,15 +789,26 @@ func (c *Controller) UpdateVolumeGroup(contx context.Context, opt *pb.UpdateVolu
 
 	vg, err := c.volumeController.UpdateVolumeGroup(opt)
 	if err != nil {
-		log.Error("when create volume group: ", err)
+		log.Errorf("when update volume group: %v", err)
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 
-		//for _, addVol := range opt.AddVolumes {
-		//	db.UpdateVolumeStatus(ctx, db.C, addVol, model.VolumeError)
-		//}
-		//for _, rmVol := range opt.RemoveVolumes {
-		//	db.UpdateVolumeStatus(ctx, db.C, rmVol, model.VolumeError)
-		//}
+		// Update volume status in group
+		for _, addVolId := range opt.AddVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: addVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
+		for _, rmVolId := range opt.RemoveVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: rmVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
 
 		return pb.GenericResponseError(err), err
 	}
@@ -888,7 +899,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fileshare:  get fileshare from db %+v", fileshare)
+	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
 
 	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
 
@@ -897,7 +908,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fileshare:  selected poolInfo %+v", polInfo)
+	log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -912,7 +923,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	c.fileshareController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-	log.V(5).Infof("controller create fleshare:  selected Driver name %+v", opt.DriverName)
+	log.V(5).Infof("controller create fleshare: selected Driver name %+v", opt.DriverName)
 
 	result, err := c.fileshareController.CreateFileShare((*pb.CreateFileShareOpts)(opt))
 	if err != nil {
@@ -1136,7 +1147,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	dockSpec, err := db.C.ListDocks(ctx)
 	if err != nil {
-		log.Errorf("list dock  failed in CollectMetrics method: %s", err.Error())
+		log.Errorf("list dock failed in CollectMetrics method: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 	for i, d := range dockSpec {
@@ -1165,7 +1176,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
 	log.V(5).Info("in controller get urls method")
 
-	var result *map[string]string
+	var result *map[string]model.UrlDesc
 	var err error
 
 	result, err = c.metricsController.GetUrls()
@@ -1177,13 +1188,14 @@ func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse
 		// make each url spec
 		urlSpec := model.UrlSpec{}
 		urlSpec.Name = k
-		urlSpec.Url = v
+		urlSpec.Url = v.Url
+		urlSpec.Desc = v.Desc
 		// add to the array
 		arrUrls = append(arrUrls, urlSpec)
 	}
 
 	if err != nil {
-		log.Errorf("get urls failed: %s\n", err.Error())
+		log.Errorf("get urls failed: %s", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 

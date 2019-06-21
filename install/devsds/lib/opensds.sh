@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2018 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,7 +84,8 @@ osds::opensds::install(){
     export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
     export OPENSDS_ENDPOINT=http://localhost:50040
     build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy", "storageType": "block"}'
-    build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy", "storageType": "file"}'
+    build/out/bin/osdsctl profile create '{"name": "default", "description": "default policy", "storageType": "file", "provisioningProperties":{"ioConnectivity": {"accessProtocol": "NFS"},"DataStorage":{"StorageAccessCapability":["Read","Write","Execute"]}}}'
+
     if [ $? == 0 ]; then
         osds::echo_summary devsds installed successfully !!
     fi

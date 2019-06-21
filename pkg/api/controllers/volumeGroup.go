@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -127,20 +127,37 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	}
 
 	vg.Id = id
-	result, err := util.UpdateVolumeGroupDBEntry(ctx, vg)
+	addVolumes, removeVolumes, err := util.UpdateVolumeGroupDBEntry(ctx, vg)
 	if err != nil {
 		errMsg := fmt.Sprintf("update volume group failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
+	// get pool id
+	var poolId string
+	vgNew, err := db.C.GetVolumeGroup(ctx, id)
+	if err != nil {
+		errMsg := fmt.Sprintf("volume group %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+	poolId = vgNew.PoolId
+
 	// Marshal the result.
-	body, err := json.Marshal(result)
+	body, err := json.Marshal(vgNew)
 	if err != nil {
 		errMsg := fmt.Sprintf("marshal volume group updated result failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorInternalServer, errMsg)
 		return
 	}
+
 	v.SuccessHandle(StatusAccepted, body)
+
+	// No more values in group need to be updated
+	if len(addVolumes) == 0 && len(removeVolumes) == 0 {
+		return
+	}
 
 	// NOTE:The real volume group update process.
 	// Volume group update request is sent to the Dock. Dock will set
@@ -153,10 +170,10 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 	defer v.CtrClient.Close()
 
 	opt := &pb.UpdateVolumeGroupOpts{
-		Id:            result.Id,
-		AddVolumes:    result.AddVolumes,
-		RemoveVolumes: result.RemoveVolumes,
-		PoolId:        result.PoolId,
+		Id:            id,
+		AddVolumes:    addVolumes,
+		RemoveVolumes: removeVolumes,
+		PoolId:        poolId,
 		Context:       ctx.ToJson(),
 	}
 	response, err := v.CtrClient.UpdateVolumeGroup(context.Background(), opt)

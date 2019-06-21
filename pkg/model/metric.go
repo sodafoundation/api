@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,4 +88,10 @@ type NoParam struct{}
 type UrlSpec struct {
 	Name string `json:"name,omitempty"`
 	Url  string `json:"url,omitempty"`
+	Desc string `json:"description,omitempty"`
+}
+
+type UrlDesc struct {
+	Url  string `json:"url,omitempty"`
+	Desc string `json:"desc,omitempty"`
 }

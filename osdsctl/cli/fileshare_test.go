@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"os"
 	"os/exec"
 	"testing"
@@ -52,8 +51,6 @@ func TestFileShareAction(t *testing.T) {
 func TestFileShareCreateAction(t *testing.T) {
 	var args []string
 	args = append(args, "1")
-	exportLocations, _ := json.Marshal([]string{"ExportLocation00"})
-	shareExportLocations = string(exportLocations)
 	fileShareCreateAction(fileShareCreateCommand, args)
 }
 
