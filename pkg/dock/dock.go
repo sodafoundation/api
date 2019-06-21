@@ -39,8 +39,8 @@ import (
 	_ "github.com/opensds/opensds/contrib/connector/fc"
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
 	_ "github.com/opensds/opensds/contrib/connector/nfs"
-	_ "github.com/opensds/opensds/contrib/connector/rbd"
 	_ "github.com/opensds/opensds/contrib/connector/nvmeof"
+	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
 
 // dockServer is used to implement pb.DockServer
@@ -129,7 +129,6 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 		log.Error("when create volume in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	log.Info("Volume Created Successfully")
 
 	return pb.GenericResponseResult(vol), nil
 }

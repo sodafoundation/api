@@ -56,6 +56,7 @@ func NewVolumePortal() *VolumePortal {
 
 type VolumePortal struct {
 	BasePortal
+
 	CtrClient client.Client
 }
 
@@ -81,19 +82,14 @@ func (v *VolumePortal) CreateVolume() {
 	if volume.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
-		if err != nil {
-			errMsg := fmt.Sprintf("get default profile failed: %s", err.Error())
-			v.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
 		volume.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
-		if err != nil {
-			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-			v.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
+	}
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
 	}
 
 	// NOTE:It will create a volume entry into the database and initialize its status
@@ -107,6 +103,7 @@ func (v *VolumePortal) CreateVolume() {
 	}
 
 	log.V(8).Infof("create volume DB entry success %+v", result)
+
 	// Marshal the result.
 	body, _ := json.Marshal(result)
 	v.SuccessHandle(StatusAccepted, body)
@@ -137,6 +134,11 @@ func (v *VolumePortal) CreateVolume() {
 	}
 	// To get backend details for Thin OpenSDS
 	if CONF.OsdsApiServer.InstallType == "thin" {
+		if opt.PoolId == "" {
+			log.Error("poolId must be set when creating volume in thin mode!")
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+			return
+		}
 		// Currently poolName should be fetched from metadata field.
 		opt.PoolName = result.Metadata["poolName"]
 		if opt.PoolName == "" {
@@ -157,17 +159,10 @@ func (v *VolumePortal) CreateVolume() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume status for Thin OpenSDS in DB
-	// Updating Volume status in DB
+	// Update volume status for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		if err := json.Unmarshal([]byte(response.GetResult().GetMessage()), result); err != nil {
 			log.Error("unmarshal create volume result failed in apiserver:", err)
-			return
-		}
-		// Currently poolId should be fetched from metadata field.
-		result.PoolId, result.ProfileId = result.Metadata["poolId"], prf.Id
-		if opt.PoolId == "" {
-			log.Error("PoolId must be set in metadata when creating volume in thin mode!")
 			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 			return
 		}
@@ -313,7 +308,13 @@ func (v *VolumePortal) ExtendVolume() {
 	}
 	// To get backend details for Thin OpenSDS
 	if CONF.OsdsApiServer.InstallType == "thin" {
-		opt.PoolId = result.PoolId
+		// Currently poolName should be fetched from metadata field.
+		opt.PoolName = result.Metadata["poolName"]
+		if opt.PoolName == "" {
+			log.Error("poolName must be set in metadata when extending volume in thin mode!")
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+			return
+		}
 		opt.DriverName = CONF.OsdsDock.EnabledBackends[0]
 	}
 
@@ -327,11 +328,11 @@ func (v *VolumePortal) ExtendVolume() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume status for Thin OpenSDS in DB
-	// Updating Volume status in DB
+	// Update volume status for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		if err := json.Unmarshal([]byte(response.GetResult().GetMessage()), result); err != nil {
 			log.Error("unmarshal extend volume result failed in apiserver:", err)
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 			return
 		}
 		db.C.UpdateStatus(ctx, result, model.VolumeAvailable)
@@ -417,8 +418,7 @@ func (v *VolumePortal) DeleteVolume() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume status for Thin OpenSDS in DB
-	// Updating Volume status in DB
+	// Remove volume record for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		db.C.DeleteVolume(ctx, opt.GetId())
 	}
@@ -503,6 +503,7 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		vol, err := db.C.GetVolume(ctx, result.VolumeId)
 		if err != nil {
 			log.Error("get volume failed in create volume attachment method:", err)
+			db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
 			return
 		}
 
@@ -532,15 +533,14 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume status for Thin OpenSDS in DB
-	// Updating Volume status in DB
+	// Update volume and volume attachment status for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		if err := json.Unmarshal([]byte(response.GetResult().GetMessage()), result); err != nil {
 			log.Error("unmarshal create volume attachment result failed in apiserver:", err)
+			db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
 			return
 		}
-		vol, _ := db.C.GetVolume(ctx, result.VolumeId)
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
+		db.UpdateVolumeStatus(ctx, db.C, result.VolumeId, model.VolumeInUse)
 		db.C.UpdateStatus(ctx, result, model.VolumeAttachAvailable)
 	}
 
@@ -684,11 +684,11 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume attachment status for Thin OpenSDS in DB
-	// Updating Volume attachment status in DB
+	// Remove volume attachment record for Thin OpenSDS in DB,
+	// and update volume status in DB
 	if CONF.InstallType == "thin" {
 		db.C.DeleteVolumeAttachment(ctx, opt.Id)
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeAvailable)
+		db.UpdateVolumeStatus(ctx, db.C, opt.VolumeId, model.VolumeAvailable)
 	}
 
 	return
@@ -801,11 +801,11 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume snapshot status for Thin OpenSDS in DB
-	// Updating Volume snapshot status in DB
+	// Update volume snapshot status for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		if err := json.Unmarshal([]byte(response.GetResult().GetMessage()), result); err != nil {
 			log.Error("unmarshal create volume snapshot result failed in apiserver:", err)
+			db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
 			return
 		}
 		db.C.UpdateStatus(ctx, result, model.VolumeSnapAvailable)
@@ -953,8 +953,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 			errorMsg.GetCode(), errorMsg.GetDescription())
 		return
 	}
-	// TODO Update volume snapshot status for Thin OpenSDS in DB
-	// Updating Volume snapshot status in DB
+	// Remove volume snapshot record for Thin OpenSDS in DB
 	if CONF.InstallType == "thin" {
 		db.C.DeleteVolumeSnapshot(ctx, opt.Id)
 	}
