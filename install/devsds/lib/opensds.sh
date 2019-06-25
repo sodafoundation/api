@@ -32,9 +32,10 @@ auth_strategy = $OPENSDS_AUTH_STRATEGY
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
+install_type = thin
 
-[osdslet]
-api_endpoint = $HOST_IP:50049
+#[osdslet]
+#api_endpoint = $HOST_IP:50049
 
 [osdsdock]
 api_endpoint = $HOST_IP:50050
@@ -54,7 +55,7 @@ osds::opensds::install(){
 (
     cd ${OPENSDS_DIR}
     sudo build/out/bin/osdsapiserver --daemon
-    sudo build/out/bin/osdslet --daemon
+   #sudo build/out/bin/osdslet --daemon
     sudo build/out/bin/osdsdock --daemon
 
     osds::echo_summary "Waiting for osdsapiserver to come up."
@@ -93,7 +94,7 @@ osds::opensds::install(){
 }
 
 osds::opensds::cleanup() {
-    sudo killall -9 osdsapiserver osdslet osdsdock &>/dev/null
+    sudo killall -9 osdsapiserver osdsdock &>/dev/null
 }
 
 osds::opensds::uninstall(){
