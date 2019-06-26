@@ -30,7 +30,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build: prebuild osdsdock osdsapiserver osdsctl metricexporter
+build: prebuild osdsdock osdslet osdsapiserver osdsctl metricexporter
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -39,6 +39,9 @@ prebuild:
 
 osdsdock:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+
+osdslet:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
 
 osdsapiserver:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
@@ -51,8 +54,10 @@ metricexporter:
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
+	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
 	docker build cmd/osdsdock -t opensdsio/opensds-dock:$(DOCKER_TAG)
+	docker build cmd/osdslet -t opensdsio/opensds-controller:$(DOCKER_TAG)
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:$(DOCKER_TAG)
 
 test: build
