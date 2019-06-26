@@ -78,7 +78,7 @@ mkdir -p ${OPENSDS_ROOT}
 cd ${OPENSDS_ROOT}
 if [ ! -d ${OPENSDS_DIR} ]; then
     log "Downloading the OpenSDS source code..."
-    git clone https://github.com/Click2Cloud-Gamma/opensds.git -b thin-opensds-test
+    git clone https://github.com/opensds/opensds.git -b thin-opensds
 fi
 
 # make sure 'make' has been installed.
