@@ -97,7 +97,7 @@ function osds::echo_nolog {
 }
 
 # Log file
-LOGFILE=/var/log/opensds/ nohup etcd --advertise-client-urls http.log
+LOGFILE=/var/log/opensds/devsds.log
 TIMESTAMP_FORMAT=${TIMESTAMP_FORMAT:-"%F-%H%M%S"}
 LOGDAYS=${LOGDAYS:-7}
 CURRENT_LOG_TIME=$(date "+$TIMESTAMP_FORMAT")
