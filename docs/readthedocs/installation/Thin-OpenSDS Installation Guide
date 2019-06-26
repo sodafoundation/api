@@ -101,6 +101,8 @@ osdsctl volume list
 osdsctl volume delete <your_volume_id>
 ```
 
+
+You can install [CSI Plugin using Helm](https://github.com/opensds/opensds-installer/blob/master/charts/OpenSDS%20Installation%20using%20Helm.md)
 ## Uninstall the local cluster
 ### OpenSDS(Hotpot)
 It's also nice to uninstall the cluster with one command:
@@ -114,4 +116,3 @@ cd $GOPATH/src/github.com/opensds/opensds && script/devsds/uninstall.sh -purge
 ```
 
 
-You can install CSI Plugin using Helm or 

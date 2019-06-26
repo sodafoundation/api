@@ -43,6 +43,9 @@ osdsdock:
 osdsapiserver:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
 
+osdsctl:
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+
 metricexporter:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/contrib/exporters/lvm_exporter
 
@@ -52,8 +55,8 @@ docker: build
 	docker build cmd/osdsdock -t opensdsio/opensds-dock:$(DOCKER_TAG)
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:$(DOCKER_TAG)
 
-#test: build
-	#install/CI/test
+test: build
+	install/CI/test
 
 protoc_precheck:
 	@if ! which protoc >/dev/null; then\
