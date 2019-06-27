@@ -96,6 +96,7 @@ type Backends struct {
 	HpeNimble           BackendProperties `conf:"hpe_nimble"`
 	NFS                 BackendProperties `conf:"nfs"`
 	Manila              BackendProperties `conf:"manila"`
+	FujitsuEternus      BackendProperties `conf:"fujitsu_eternus"`
 }
 
 type KeystoneAuthToken struct {

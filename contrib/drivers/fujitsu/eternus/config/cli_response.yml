@@ -1,0 +1,497 @@
+cli:
+  show_thin-pro-pools:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+    - type: data
+      drop: true
+      data:
+        - name: available_logical_capacity
+          byte: 4
+    - type: count
+      data:
+        - name: tpp_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: tpp_number
+          byte: 2
+        - name: tpp_name
+          byte: 16
+        - name: disk_type
+          byte: 1
+        - name: nearline
+          byte: 1
+        - name: raid_level
+          byte: 1
+        - name: tpp_status
+          byte: 2
+        - name: total_capacity
+          byte: 8
+        - name: used_capacity
+          byte: 8
+        - name: alarm_status
+          byte: 1
+        - name: warning_level_range
+          byte: 1
+        - name: attention_level_range
+          byte: 1
+        - name: encryption_status
+          byte: 1
+        - name: dedup
+          byte: 1
+        - name: data_reduction_rate
+          byte: 1
+        - name: provisioned_capacity
+          byte: 8
+        - name: provisioned_rate
+          byte: 4
+        - name: dedup_status
+          byte: 1
+        - name: chunk_size
+          byte: 1
+  show_volumes:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: volume_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: volume_number
+          byte: 2
+        - name: volume_name
+          byte: 32
+        - name: volume_status
+          byte: 2
+        - name: volume_type
+          byte: 1
+        - name: encryption
+          byte: 1
+        - name: pool_number # RAID Group/External RAID Group/TPP/FTRP number
+          byte: 2
+        - name: pool_name # RAID Group/External RAID Group/TPP/FTRP name
+          byte: 16
+        - name: size
+          byte: 8
+        - name: copy_protection
+          byte: 1
+        - name: alarm # TPV/FTV Alarm
+          byte: 1
+        - name: used_capacity # TPV/FTV Used Capacity
+          byte: 8
+        - name: threshold # TPV/FTV Threshold
+          byte: 2
+        - name: sdpv_deletion_flag
+          byte: 1
+        - name: sdpv_resolution
+          byte: 1
+        - name: sdp_id
+          byte: 1
+        - name: domain_number
+          byte: 1
+        - name: dummy_volume
+          byte: 1
+        - name: balancing_level
+          byte: 1
+      # omitted other definitions. above definitions are enough for osds.
+  create_volume:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: volume_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: volume_number
+          byte: 2
+  delete_volume:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+  expand_volume:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+  show_host-iscsi-names:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: host_iscsi_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: host_iscsi_number
+          byte: 2
+        - name: host_iscsi_nickname
+          byte: 16
+        - name: host_response_number
+          byte: 2
+        - name: host_response_name
+          byte: 16
+        - name: host_iscsi_ip_address
+          byte: 16
+        - name: host_iscsi_name
+          byte: 223
+        - name: ip_version
+          byte: 1
+  show_host-wwn-names:
+    - type: status
+      data: 
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: host_fc_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: host_wwn_no
+          byte: 2
+        - name: host_wwn_alias_name
+          byte: 16
+        - name: host_wwn_name
+          byte: 8
+        - name: host_response_no
+          byte: 2
+        - name: host_response_name
+          byte: 16
+  create_host-iscsi-name:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: data
+      data:
+        - name: host_number
+          byte: 2
+    - type: count
+      data:
+        - name: host_group_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: host_group_number
+          byte: 2
+  delete_host-iscsi-name:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+  create_host-wwn-name:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: data
+      data:
+        - name: host_number
+          byte: 2
+    - type: count
+      data:
+        - name: host_group_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: host_group_number
+          byte: 2
+  delete_host-wwn-name:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+  create_lun-group:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: data
+      data:
+        - name: lun_group_number
+          byte: 2
+  delete_lun-group:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+  set_lun-group:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: lun_group_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: lun
+          byte: 2
+  show_iscsi-parameters:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: iscsi-ca_port_count
+          byte: 1
+    - type: multiple_data
+      data:
+        - name: ca_module_id
+          byte: 1
+        - name: port_number
+          byte: 1
+        - name: port_mode
+          byte: 1
+        - name: host_affinity
+          byte: 1
+        - name: iscsi_name
+          byte: 224
+        - name: alias_name
+          byte: 31
+        - name: host_response_no
+          byte: 1
+        - name: host_response_name
+          byte: 16
+        - name: reset_scope
+          byte: 1
+        - name: reserve_cancel
+          byte: 1
+        - name: ip_address
+          byte: 16
+        - name: subnet_mask
+          byte: 16
+        - name: gateway_address
+          byte: 16
+        - name: mac_address
+          byte: 6
+        - name: tcp_port_number
+          byte: 2
+        - name: tcp_window_size
+          byte: 1
+        - name: iscsi_flag
+          byte: 4
+        - name: iscsi_option_flag
+          byte: 2
+        - name: isns_server_ip_address
+          byte: 40
+        - name: isns_server_port_number
+          byte: 2
+        - name: chap_user_name
+          byte: 256
+        - name: header_digest
+          byte: 1
+        - name: data_digest
+          byte: 1
+        - name: transfer_rate
+          byte: 1
+        - name: link_status
+          byte: 2
+        - name: cmdsn_count
+          byte: 1
+        - name: vlan_id
+          byte: 2
+        - name: mtu_size
+          byte: 2
+        - name: bandwidth_limit
+          byte: 2
+        - name: chap_user_name_ra
+          byte: 64
+        - name: link_local_ip_address
+          byte: 40
+        - name: connect_ip_address
+          byte: 40
+        - name: ipv6_gateway_address
+          byte: 40
+        - name: rec_line_no.
+          byte: 1
+        - name: rec_transfer_mode
+          byte: 1
+        - name: ip_flag
+          byte: 4
+        - name: session_kind
+          byte: 1
+        - name: tfo_pair_status
+          byte: 1
+  show_fc-parameters:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: fc-ca_port_count
+          byte: 1
+    - type: multiple_data
+      data:
+        - name: ca_module_id
+          byte: 
+        - name: port_number
+          byte: 
+        - name: port_mode
+          byte: 
+        - name: connection
+          byte: 
+        - name: loop_id_assign
+          byte: 
+        - name: loop_id
+          byte: 
+        - name: transfer_rate
+          byte: 
+        - name: frame_size
+          byte: 
+        - name: host_affinity
+          byte: 
+        - name: host_response_no
+          byte: 
+        - name: host_response_name
+          byte: 
+        - name: reset_scope
+          byte: 
+        - name: reserve_cancel
+          byte: 
+        - name: rec_line_no
+          byte: 
+        - name: rec_transfer_mode
+          byte: 
+        - name: session_kind
+          byte: 
+        - name: wwn_mode
+          byte: 
+        - name: wwpn
+          byte: 
+        - name: tfo_wwpn
+          byte: 
+        - name: tfo_pair_status
+          byte: 
+  set_host-affinity:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: data
+      data:
+        - name: lun_mask_group_no
+          byte: 2
+  release_host-affinity:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+  show_lun-group:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      if_zero_skip_all: true
+      data:
+        - name: lun_group_count
+          byte: 2
+    - type: multiple_data
+      drop: true
+      data:
+        - name: lun_group_no
+          byte: 2
+        - name: lun_group_name
+          byte: 16
+        - name: previous_affinity_group_no
+          byte: 2
+        - name: next_affinity_group_no
+          byte: 2
+    - type: count
+      data:
+        - name: lun_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: lun
+          byte: 2
+        - name: volume_no
+          byte: 2
+        - name: volume_name
+          byte: 16
+        - name: volume_raw_status
+          byte: 2
+        - name: volume_round_status
+          byte: 1
+        - name: volume_size
+          byte: 8
+        - name: uid
+          byte: 16
+  show_lun-groups:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: lun_group_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: lun_group_no
+          byte: 2
+        - name: lun_group_name
+          byte: 16
+        - name: previous_affinity_group_no
+          byte: 2
+        - name: next_affinity_group_no
+          byte: 2
+  show_mapping:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+    - type: count
+      data:
+        - name: mapping_port_count
+          byte: 2
+    - type: multiple_data
+      drop: true
+      data:
+        - name: mapping_port
+          byte: 2
+        - name: affinity_mode
+          byte: 2
+    - type: count
+      data:
+        - name: lun_count
+          byte: 2
+    - type: multiple_data
+      data:
+        - name: lun
+          byte: 2
+        - name: volume_number
+          byte: 2
+        - name: volume_name
+          byte: 2
+        - name: volume_raw_status
+          byte: 2
+        - name: volume_round_status
+          byte: 2
+        - name: volume_size
+          byte: 2
+  set_mapping:
+    - type: status
+      data:
+        - name: status
+          byte: 1
+  release_mapping:
+    - type: status
+      data:
+        - name: status
+          byte: 1
