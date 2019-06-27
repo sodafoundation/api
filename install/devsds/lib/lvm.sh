@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2017 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,13 +51,17 @@ osds::lvm::pkg_install(){
     sudo apt-get install -y lvm2 tgt open-iscsi ibverbs-utils
 }
 
+osds::nfs::pkg_install(){
+    sudo apt-get install -y nfs-kernel-server
+}
+
 osds::lvm::pkg_uninstall(){
     sudo apt-get purge -y lvm2 tgt open-iscsi ibvverbs-utils
 }
 
 osds::lvm::nvmeofpkginstall(){
     # nvme-cli utility for nvmeof initiator
-    sudo wget https://github.com/linux-nvme/nvme-cli/archive/v1.8.1.tar.gz -O /opt/nvmecli-1.8.1.tar.gz
+    wget https://github.com/linux-nvme/nvme-cli/archive/v1.8.1.tar.gz -O /opt/nvmecli-1.8.1.tar.gz
     sudo tar -zxvf /opt/nvmecli-1.8.1.tar.gz -C /opt/
     cd /opt/nvme-cli-1.8.1 && sudo make && sudo make install
     # nvme kernel
@@ -361,6 +365,7 @@ osds::lvm::install() {
 
     # Install lvm relative packages.
     osds::lvm::pkg_install
+    osds::nfs::pkg_install
     osds::lvm::create_volume_group_for_file $fvg $size
     osds::lvm::create_volume_group $vg $size
 

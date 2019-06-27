@@ -29,6 +29,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func NewFileSharePortal() *FileSharePortal {
@@ -180,6 +181,12 @@ func (f *FileSharePortal) CreateFileShare() {
 		prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
 		if err != nil {
 			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			f.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+		if prf.StorageType != constants.File {
+			errMsg := fmt.Sprintf("storageType should be only file. Currently it is: %s", prf.StorageType)
+			log.Error(errMsg)
 			f.ErrorHandle(model.ErrorBadRequest, errMsg)
 			return
 		}
@@ -524,14 +531,23 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		f.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
+	snapshot.ShareSize = fileshare.Size
+	// Usually snapshot.SnapshotSize and fileshare.Size are equal, even if they
+	// are not equal, then snapshot.SnapshotSize will be updated to the correct value.
+	snapshot.SnapshotSize = fileshare.Size
+
+	if len(snapshot.ProfileId) == 0 {
+		log.Warning("User doesn't specified profile id, using profile derived form fileshare")
+		snapshot.ProfileId = fileshare.ProfileId
+	}
+
 	// Get profile
-	prf, err := db.C.GetProfile(ctx, fileshare.ProfileId)
+	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
-	snapshot.ProfileId = prf.Id
 
 	// NOTE:It will create a fileshare snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real fileshare snapshot creation to complete

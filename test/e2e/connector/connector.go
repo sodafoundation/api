@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ func main() {
 	}
 
 	accPro := os.Args[3]
+	fmt.Printf("accpro: %s",accPro)
 	switch os.Args[1] {
 	case attachCommand:
 		dev, err := connector.NewConnector(accPro).Attach(connData)

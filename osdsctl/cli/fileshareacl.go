@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,13 +59,6 @@ var fileShareAclListCommand = &cobra.Command{
 }
 
 var (
-	shareAclLimit            string
-	shareAclOffset           string
-	shareAclSortDir          string
-	shareAclSortKey          string
-	shareAclID               string
-	shareAclTenantID         string
-	shareAclFileShareId      string
 	shareAclType             string
 	shareAclAccessCapability string
 	shareAclAccessTo         string
@@ -82,21 +75,8 @@ func init() {
 
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclType, "type", "t", "", "the type of access")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessCapability, "capability", "c", "", "the accessCapability for fileshare")
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "aclTo", "a", "", "accessTo of the fileshare")
+	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "a", "", "accessTo of the fileshare")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclDesp, "description", "d", "", "the description of of the fileshare acl")
-
-	fileShareAclListCommand.Flags().StringVarP(&shareAclLimit, "limit", "", "50", "the number of ertries displayed per page")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclOffset, "offset", "", "0", "all requested data offsets")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), tenantId, fileshareId, type, accessCapability, accessTo, description")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclID, "id", "", "", "list fileshare acls by id")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclTenantID, "tenantId", "", "", "list fileshare acls by tenantId")
-	fileShareAclListCommand.Flags().StringVarP(&fileshareID, "fileshareId", "", "", "list fileshare acls by fileshareId")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclType, "type", "", "", "list fileshare acls by type")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclAccessCapability, "accessCapability", "", "", "list fileshare acls by accessCapability")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "", "", "list fileshare acls by accessTo")
-	fileShareAclListCommand.Flags().StringVarP(&shareAclDesp, "description", "", "", "list fileshare acls by description")
 }
 
 func fileShareAclAction(cmd *cobra.Command, args []string) {
@@ -156,14 +136,7 @@ func fileShareAclShowAction(cmd *cobra.Command, args []string) {
 
 func fileSharesAclListAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 0)
-
-	var opts = map[string]string{"limit": shareAclLimit, "offset": shareAclOffset, "sortDir": shareAclSortDir,
-		"sortKey": shareAclSortKey, "Id": shareAclID,
-		"TenantId": shareAclTenantID, "FileshareID": fileshareID, "ShareAclType": shareAclType,
-		"ShareAclAccessCapability": shareAclAccessCapability, "ShareAclAccessTo": shareAclAccessTo,
-		"ShareAclDesp": shareAclDesp}
-
-	resp, err := client.ListFileSharesAcl(opts)
+	resp, err := client.ListFileSharesAcl()
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
