@@ -24,6 +24,7 @@ package drivers
 import (
 	_ "github.com/opensds/opensds/contrib/backup/multicloud"
 	"github.com/opensds/opensds/contrib/drivers/ceph"
+	"github.com/opensds/opensds/contrib/drivers/fujitsu/eternus"
 	"github.com/opensds/opensds/contrib/drivers/hpe/nimble"
 	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
@@ -103,6 +104,9 @@ func Init(resourceType string) VolumeDriver {
 	case config.HpeNimbleDriverType:
 		d = &nimble.Driver{}
 		break
+	case config.FujitsuEternusDriverType:
+		d = &eternus.Driver{}
+		break
 	default:
 		d = &sample.Driver{}
 		break
@@ -126,6 +130,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *fusionstorage.Driver:
 		break
 	case *nimble.Driver:
+		break
+	case *eternus.Driver:
 		break
 	default:
 		break
