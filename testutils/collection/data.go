@@ -55,6 +55,56 @@ var (
 		},
 	}
 
+	SamplemetricsSpec = []*model.MetricSpec{
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "iops",
+			Unit:         "tps",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+				Timestamp: 1561465759,
+				Value: 32.14,
+				},
+			},
+		},
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "read_throughput",
+			Unit:         "kbs",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1561465759,
+					Value: 32.14,
+				},
+			},
+		},
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "write_throughput",
+			Unit:         "kbs",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1561465759,
+					Value: 32.14,
+				},
+			},
+		},
+
+	}
+
+
 	SampleFileShareProfiles = []model.ProfileSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -701,6 +751,44 @@ var (
 		}
 	]`
 
+	ByteMetrics = `[
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"iops",
+			"aggrType":"",
+			"unit":"tps",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		},
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"read_throughput",
+			"aggrType":"",
+			"unit":"kbs",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		},
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"write_throughput",
+			"aggrType":"",
+			"unit":"kbs",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		}
+	]`
 	ByteAttachment = `{
 		"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		"name": "sample-volume-attachment",
