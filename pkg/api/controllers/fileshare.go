@@ -549,6 +549,22 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		return
 	}
 
+	// Check existence of fileshare snapshot name #931
+	filesnaps, err := db.C.ListFileShareSnapshots(ctx)
+	if err != nil{
+		errMsg := fmt.Sprintf("get list of fileshare snapshot failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}else{
+		for _, filesnap := range filesnaps {
+			if filesnap.Name == snapshot.Name {
+				errMsg := fmt.Sprintf("file share snapshot name already exists ")
+				f.ErrorHandle(model.ErrorBadRequest, errMsg)
+				return
+			}
+		}
+	}
+
 	// NOTE:It will create a fileshare snapshot entry into the database and initialize its status
 	// as "creating". It will not wait for the real fileshare snapshot creation to complete
 	// and will return result immediately.
