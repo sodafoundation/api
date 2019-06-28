@@ -1,16 +1,16 @@
 // Copyright 2019 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package eternus
 
@@ -59,7 +59,7 @@ func (d *Driver) Setup() (err error) {
 	return nil
 }
 
-//Unset eternus driver
+// Unset eternus driver
 func (d *Driver) Unset() error {
 	d.client.Destroy()
 	return nil
@@ -100,10 +100,10 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
-	return nil, &model.NotImplementError{"method createVolumeFromSnapshot did not implement."}
+	return nil, &model.NotImplementError{"method createVolumeFromSnapshot is not implement."}
 }
 
-// CreateVolume : craete volume.
+// CreateVolume : create volume.
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 	log.Infof("start creating volume. opt = %v", opt)
 	if opt.GetSnapshotId() != "" {
@@ -113,7 +113,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	id := opt.GetId()
 	desc := opt.GetDescription()
 	provPolicy := d.conf.Pool[opt.GetPoolName()].Extras.DataStorage.ProvisioningPolicy
-	//execute create volume
+	// execute create volume
 	vol, err := d.client.CreateVolume(id, opt.GetSize(), desc, opt.GetPoolName(), provPolicy)
 	if err != nil {
 		log.Error("create Volume Failed:", err)
@@ -136,7 +136,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 
 // PullVolume : get volume information
 func (d *Driver) PullVolume(id string) (*model.VolumeSpec, error) {
-	return nil, &model.NotImplementError{"method PullVolume did not implement."}
+	return nil, &model.NotImplementError{"method PullVolume is not implement."}
 }
 
 // DeleteVolume : delete volume
@@ -157,7 +157,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	log.Infof("start extend volume. opt = %v", opt)
 
 	volID := opt.GetMetadata()[KLunId]
-	//execute extend volume
+	// execute extend volume
 	err := d.client.ExtendVolume(volID, opt.GetSize())
 	if err != nil {
 		log.Error("extend Volume Failed:", err)
@@ -572,7 +572,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 
 // PullSnapshot :
 func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
-	return nil, &model.NotImplementError{"method PullSnapshot did not implement."}
+	return nil, &model.NotImplementError{"method PullSnapshot is not implement."}
 }
 
 // DeleteSnapshot :
