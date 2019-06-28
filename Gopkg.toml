@@ -93,11 +93,11 @@
   name = "github.com/segmentio/kafka-go"
   revision = "0b3aacc527812d4040e51211146a43545e82d670"
 
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+
 [prune]
   go-tests = true
   non-go = true
   unused-packages = true
-
-[[constraint]]
-  branch = "master"
-  name = "golang.org/x/crypto"
