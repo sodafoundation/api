@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -41,6 +42,23 @@ func init() {
 	connector.RegisterConnector(connector.RbdDriver, &RBD{})
 }
 
+func convertToStrList(in interface{}) ([]string, error) {
+	var out []string
+	switch in.(type) {
+	case []string:
+		out = in.([]string)
+	case []interface{}:
+		for _, v := range in.([]interface{}) {
+			out = append(out, v.(string))
+		}
+	case string:
+		out = append(out, in.(string))
+	default:
+		return out, fmt.Errorf("unsupported type: %v", reflect.TypeOf(in))
+	}
+	return out, nil
+}
+
 func (*RBD) Attach(conn map[string]interface{}) (string, error) {
 	if _, ok := conn["name"]; !ok {
 		return "", fmt.Errorf("cann't get name in connection")
@@ -50,14 +68,15 @@ func (*RBD) Attach(conn map[string]interface{}) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("invalid connection name %v", conn["name"])
 	}
-	hosts, ok := conn["hosts"].([]string)
-	if !ok {
-		return "", fmt.Errorf("invalid connection hosts %v", conn["hosts"])
+
+	hosts, err := convertToStrList(conn["hosts"])
+	if err != nil {
+		return "", fmt.Errorf("invalid connection hosts %v: %v", conn["hosts"], err)
 	}
 
-	ports, ok := conn["ports"].([]string)
-	if !ok {
-		return "", fmt.Errorf("invalid connection ports %v", conn["hosts"])
+	ports, err := convertToStrList(conn["ports"])
+	if err != nil {
+		return "", fmt.Errorf("invalid connection ports %v: %v", conn["ports"], err)
 	}
 
 	device, err := mapDevice(name, hosts, ports)

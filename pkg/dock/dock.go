@@ -460,6 +460,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 		}); err != nil {
 			log.Error(fmt.Sprintf("error occurred when delete volume %s from group.", volRef.Id))
 			db.UpdateVolumeStatus(ctx, db.C, volRef.Id, model.VolumeError)
+			db.UpdateVolumeGroupStatus(ctx, db.C, opt.GetId(), model.VolumeGroupError)
 		} else {
 			// Delete the volume entry in DB after successfully deleting the
 			// volume on the storage.

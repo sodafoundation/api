@@ -789,15 +789,26 @@ func (c *Controller) UpdateVolumeGroup(contx context.Context, opt *pb.UpdateVolu
 
 	vg, err := c.volumeController.UpdateVolumeGroup(opt)
 	if err != nil {
-		log.Error("when create volume group: ", err)
+		log.Errorf("when update volume group: %v", err)
 		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
 
-		//for _, addVol := range opt.AddVolumes {
-		//	db.UpdateVolumeStatus(ctx, db.C, addVol, model.VolumeError)
-		//}
-		//for _, rmVol := range opt.RemoveVolumes {
-		//	db.UpdateVolumeStatus(ctx, db.C, rmVol, model.VolumeError)
-		//}
+		// Update volume status in group
+		for _, addVolId := range opt.AddVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: addVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
+		for _, rmVolId := range opt.RemoveVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: rmVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
 
 		return pb.GenericResponseError(err), err
 	}
