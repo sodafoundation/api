@@ -1,4 +1,4 @@
-#Thin OpenSDS Installation Guide
+# Thin OpenSDS Installation Guide
 ## Prepare
 Before you start, please make sure you have all the following:
 - Ubuntu environment (suggest v16.04+).
@@ -68,13 +68,13 @@ export OS_USER_DOMAIN_ID=default
 ```
 
 #### Create a volume using create volume API request
-#####Endpoint
+##### Endpoint
 
 ```$xslt
 http://localhost:50040/v1beta/{{ tenant ID }}/block/volumes
 ```
 
-#####Request body (update poolName and poolID)
+##### Request body (update poolName and poolID)
 ```
 {
   "name": "test-1",
@@ -107,12 +107,12 @@ You can install [CSI Plugin using Helm](https://github.com/opensds/opensds-insta
 ### OpenSDS(Hotpot)
 It's also nice to uninstall the cluster with one command:
 ```
-cd $GOPATH/src/github.com/opensds/opensds && script/devsds/uninstall.sh
+cd $GOPATH/src/github.com/opensds/opensds && install/devsds/uninstall.sh
 ```
 
 If you want to destroy the cluster, please run the command below instead:
 ```
-cd $GOPATH/src/github.com/opensds/opensds && script/devsds/uninstall.sh -purge
+cd $GOPATH/src/github.com/opensds/opensds && install/devsds/uninstall.sh -purge
 ```
 
 
