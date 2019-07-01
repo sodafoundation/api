@@ -32,6 +32,7 @@ const (
 	DRBDDriverType                = "drbd"
 	ScutechCMSDriverType          = "scutech_cms"
 	ManilaDriverType              = "manila"
+	FujitsuEternusDriverType      = "fujitsu_eternus"
 )
 
 const (
