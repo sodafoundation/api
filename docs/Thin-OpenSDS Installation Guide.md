@@ -26,18 +26,17 @@ cd $GOPATH/src/github.com/opensds/opensds && install/devsds/install.sh
 ```
 If everything goes well, you will get some connection messages at the console output:
 ```shell
-Execute commands blow to set up ENVs which are needed by OpenSDS CLI:
+Execute commands below to set up ENVs which are needed by OpenSDS CLI:
 ------------------------------------------------------------------
 export OPENSDS_AUTH_STRATEGY=keystone
 export OPENSDS_ENDPOINT=http://localhost:50040
-export OS_AUTH_URL=http://10.10.3.150/identity
+export OS_AUTH_URL=http://<host_ip>/identity
 export OS_USERNAME=admin
 export OS_PASSWORD=opensds@123
 export OS_TENANT_NAME=admin
 export OS_PROJECT_NAME=admin
 export OS_USER_DOMAIN_ID=default
 ------------------------------------------------------------------
-Enjoy it !!
 ```
 
 ## Testing
@@ -82,7 +81,7 @@ http://localhost:50040/v1beta/{{ tenant ID }}/block/volumes
   "size": 1,
   "availabilityZone": "default",
   "profileId": "",
-  "poolId":"{{ pool ID }]",
+  "poolId":"{{ pool ID }}",
   "metadata": {
   	"poolName": "opensds-volumes"
   },
