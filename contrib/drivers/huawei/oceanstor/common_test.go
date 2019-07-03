@@ -12,9 +12,11 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package dorado
+package oceanstor
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -45,9 +47,15 @@ func TestEncodeHostName(t *testing.T) {
 		t.Error("EncodeName exceed the max name length")
 	}
 
-	longName := "opensds-huawei-dorado-opensds-huawei-dorado"
+	longName := "opensds-huawei-oceanstor-opensds-huawei-oceanstor"
 	result = EncodeHostName(longName)
-	if result != "5620c8980c702896b3c719b187c5bfa" {
+	// generate expected result
+	h := md5.New()
+	h.Write([]byte(longName))
+	encodedName := hex.EncodeToString(h.Sum(nil))
+	expectedResult := encodedName[:MaxNameLength]
+
+	if result != expectedResult {
 		t.Error("Test EncodeHostName failed")
 	}
 	if len(result) > MaxNameLength {
@@ -56,7 +64,13 @@ func TestEncodeHostName(t *testing.T) {
 
 	invalidName := "iqn.1993-08.org.debian:01:d1f6c8e930e7"
 	result = EncodeHostName(invalidName)
-	if result != "7b1d1cdfe7761ae3e7663ff76343ddc" {
+	// generate expected result
+	h = md5.New()
+	h.Write([]byte(invalidName))
+	encodedName = hex.EncodeToString(h.Sum(nil))
+	expectedResult = encodedName[:MaxNameLength]
+
+	if result != expectedResult {
 		t.Error("Test EncodeHostName failed")
 	}
 	if len(result) > MaxNameLength {
@@ -74,7 +88,7 @@ func randSeq(n int) string {
 }
 
 func TestTruncateDescription(t *testing.T) {
-	normalDescription := "This is huawei dorado driver testing"
+	normalDescription := "This is huawei oceanstor driver testing"
 	result := TruncateDescription(normalDescription)
 	if result != normalDescription {
 		t.Error("Test TruncateDescription failed")

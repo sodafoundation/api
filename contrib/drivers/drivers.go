@@ -26,8 +26,8 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"github.com/opensds/opensds/contrib/drivers/fujitsu/eternus"
 	"github.com/opensds/opensds/contrib/drivers/hpe/nimble"
-	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
+	"github.com/opensds/opensds/contrib/drivers/huawei/oceanstor"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -96,8 +96,8 @@ func Init(resourceType string) VolumeDriver {
 	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
-	case config.HuaweiDoradoDriverType:
-		d = &dorado.Driver{}
+	case config.HuaweiOceanStorBlockDriverType:
+		d = &oceanstor.Driver{}
 		break
 	case config.HuaweiFusionStorageDriverType:
 		d = &fusionstorage.Driver{}
@@ -125,7 +125,7 @@ func Clean(d VolumeDriver) VolumeDriver {
 		break
 	case *lvm.Driver:
 		break
-	case *dorado.Driver:
+	case *oceanstor.Driver:
 		break
 	case *fusionstorage.Driver:
 		break
@@ -175,8 +175,8 @@ func InitMetricDriver(resourceType string) MetricDriver {
 	case config.CephDriverType:
 		d = &ceph.MetricDriver{}
 		break
-	case config.HuaweiDoradoDriverType:
-		d = &dorado.MetricDriver{}
+	case config.HuaweiOceanStorBlockDriverType:
+		d = &oceanstor.MetricDriver{}
 		break
 	default:
 		//d = &sample.Driver{}

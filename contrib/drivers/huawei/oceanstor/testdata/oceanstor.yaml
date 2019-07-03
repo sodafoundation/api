@@ -18,7 +18,7 @@ replication:
 pool:
   StoragePool001:
     storageType: block
-    availabilityZone: dorado1
+    availabilityZone: oceanstor1
     multiAttach: true
     extras:
       dataStorage:

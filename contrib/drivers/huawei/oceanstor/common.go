@@ -1,4 +1,4 @@
-package dorado
+package oceanstor
 
 import (
 	"crypto/md5"
@@ -24,7 +24,7 @@ type Replication struct {
 	RemoteAuthOpt AuthOptions `yaml:"remoteAuthOptions"`
 }
 
-type DoradoConfig struct {
+type OceanStorConfig struct {
 	AuthOptions `yaml:"authOptions"`
 	Replication `yaml:"replication"`
 	Pool        map[string]PoolProperties `yaml:"pool,flow"`

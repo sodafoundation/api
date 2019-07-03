@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package dorado
+package oceanstor
 
 import (
 	"fmt"
@@ -30,16 +30,16 @@ import (
 
 // ReplicationDriver
 type ReplicationDriver struct {
-	conf *DoradoConfig
+	conf *OceanStorConfig
 	mgr  *ReplicaPairMgr
 }
 
 // Setup
 func (r *ReplicationDriver) Setup() (err error) {
-	// Read huawei dorado config file
-	conf := &DoradoConfig{}
+	// Read huawei oceanstor config file
+	conf := &OceanStorConfig{}
 	r.conf = conf
-	path := config.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanStorBlock.ConfigPath
 
 	if "" == path {
 		path = defaultConfPath
@@ -57,7 +57,7 @@ func (r *ReplicationDriver) Unset() error { return nil }
 
 // CreateReplication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
-	log.Info("dorado replication start ...")
+	log.Info("oceanstro replication start ...")
 	//just be invoked on the primary side.
 	if !opt.GetIsPrimary() {
 		return &model.ReplicationSpec{}, nil
@@ -143,7 +143,7 @@ func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts)
 	return r.mgr.Failback(pairId)
 }
 
-func NewReplicaPairMgr(conf *DoradoConfig) (r *ReplicaPairMgr, err error) {
+func NewReplicaPairMgr(conf *OceanStorConfig) (r *ReplicaPairMgr, err error) {
 	r = &ReplicaPairMgr{}
 	r.conf = conf
 
@@ -165,13 +165,13 @@ func NewReplicaPairMgr(conf *DoradoConfig) (r *ReplicaPairMgr, err error) {
 }
 
 type ReplicaPairMgr struct {
-	localClient  *DoradoClient
-	remoteClient *DoradoClient
+	localClient  *OceanStorClient
+	remoteClient *OceanStorClient
 	localOp      *PairOperation
 	remoteOp     *PairOperation
 	localDriver  *ReplicaCommonDriver
 	remoteDriver *ReplicaCommonDriver
-	conf         *DoradoConfig
+	conf         *OceanStorConfig
 }
 
 func (r *ReplicaPairMgr) TryGetRemoteWwn() string {
@@ -215,7 +215,7 @@ func (r *ReplicaPairMgr) GetRemoteDevInfo() (id, name string) {
 	return dev.Id, dev.Name
 }
 
-func (r *ReplicaPairMgr) WaitVolumeOnline(client *DoradoClient, lun *Lun, interval, timeout time.Duration) error {
+func (r *ReplicaPairMgr) WaitVolumeOnline(client *OceanStorClient, lun *Lun, interval, timeout time.Duration) error {
 	if lun.RunningStatus == StatusVolumeReady {
 		return nil
 	}
@@ -313,12 +313,12 @@ func (r *ReplicaPairMgr) Failover(pairId string) error {
 	return r.remoteDriver.Failover(pairId)
 }
 
-func NewReplicaCommonDriver(conf *DoradoConfig, op *PairOperation) *ReplicaCommonDriver {
+func NewReplicaCommonDriver(conf *OceanStorConfig, op *PairOperation) *ReplicaCommonDriver {
 	return &ReplicaCommonDriver{conf: conf, op: op}
 }
 
 type ReplicaCommonDriver struct {
-	conf *DoradoConfig
+	conf *OceanStorConfig
 	op   *PairOperation
 }
 
@@ -521,12 +521,12 @@ func (r *ReplicaCommonDriver) WaitExpectState(replicaId string, runningStatus, h
 	}, interval, timeout)
 }
 
-func NewPairOperation(client *DoradoClient) *PairOperation {
+func NewPairOperation(client *OceanStorClient) *PairOperation {
 	return &PairOperation{client: client}
 }
 
 type PairOperation struct {
-	client *DoradoClient
+	client *OceanStorClient
 }
 
 func (p *PairOperation) isPrimary(replicaPair *ReplicationPair) bool {

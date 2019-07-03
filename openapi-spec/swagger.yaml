@@ -1729,7 +1729,7 @@ definitions:
               - lvm
               - ceph
               - cinder
-              - huawei_dorado
+              - huawei_oceanstor_block
               - huawei_fusionstorage
           endpoint:
             type: string
