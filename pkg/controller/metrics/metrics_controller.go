@@ -55,12 +55,17 @@ func NewController() Controller {
 
 	return &controller{
 		Client: client.NewClient(),
+		API:&API{
+			Client:  http.DefaultClient,
+			baseURL: "http://localhost:9090",
+		},
 	}
 }
 
 type controller struct {
 	client.Client
 	DockInfo *model.DockSpec
+	API *API
 }
 
 // latest+instant metrics structs begin
@@ -106,11 +111,21 @@ type RangeData struct {
 }
 
 // latest+range metrics structs end
+type API struct{
+	Client *http.Client
+	baseURL string
+}
+func (api *API) Do_get_call(q string)(*http.Response,error){
+	resp,err := api.Client.Get(api.baseURL+q)
 
+	return resp,err
+}
 func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	// make a call to Prometheus, convert the response to our format, return
-	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName)
+	query:="/api/v1/query?query="+opt.MetricName
+
+	response, err := c.API.Do_get_call(query) //Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName)
 	if err != nil {
 		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
@@ -165,7 +180,9 @@ func (c *controller) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSp
 func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	// make a call to Prometheus, convert the response to our format, return
-	response, err := http.Get("http://localhost:9090/api/v1/query?query=" + opt.MetricName + "&time=" + opt.StartTime)
+	query:="/api/v1/query?query="+ opt.MetricName + "&time=" + opt.StartTime
+
+	response, err := c.API.Do_get_call(query)
 	if err != nil {
 		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
@@ -220,7 +237,9 @@ func (c *controller) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricS
 func (c *controller) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
 
 	// make a call to Prometheus, convert the response to our format, return
-	response, err := http.Get("http://localhost:9090/api/v1/query_range?query=" + opt.MetricName + "&start=" + opt.StartTime + "&end=" + opt.EndTime + "&step=30")
+	query:="/api/v1/query?query="+ opt.MetricName + "&start=" + opt.StartTime + "&end=" + opt.EndTime + "&step=30"
+
+	response, err := c.API.Do_get_call(query)
 	if err != nil {
 		log.Errorf("the HTTP query request failed with error %s\n", err)
 	} else {
