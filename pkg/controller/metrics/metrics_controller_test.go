@@ -2,7 +2,12 @@ package metrics
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -25,10 +30,14 @@ func (fc *fakeClient) Connect(edp string) error {
 func (fc *fakeClient) Close() {
 	return
 }
-func NewFakeController() Controller {
+func NewFakeController(client2 *http.Client, URL string) Controller {
 	return &controller{
 		Client:   NewFakeClient(),
 		DockInfo: &model.DockSpec{},
+		API: &API{
+			Client:  client2,
+			baseURL: URL,
+		},
 	}
 }
 func (fc *fakeClient) CollectMetrics(ctx context.Context, in *pb.CollectMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
@@ -42,7 +51,7 @@ func (fc *fakeClient) CollectMetrics(ctx context.Context, in *pb.CollectMetricsO
 
 }
 func Test_CollectMetrics(t *testing.T) {
-	fc := NewFakeController()
+	fc := NewFakeController(nil, "")
 	retunMetrics, _ := fc.CollectMetrics(&pb.CollectMetricsOpts{})
 	expectedMetrics := SamplemetricsSpec
 	if !reflect.DeepEqual(expectedMetrics, retunMetrics) {
@@ -63,6 +72,251 @@ func Test_logMetricSpec(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logMetricSpec(tt.args.spec)
+		})
+	}
+}
+func equals(tb testing.TB, exp, act interface{}) {
+	if !reflect.DeepEqual(exp, act) {
+		_, file, line, _ := runtime.Caller(1)
+		fmt.Printf("\033[31m%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\033[39m\n\n", filepath.Base(file), line, exp, act)
+		tb.FailNow()
+	}
+}
+func Test_controller_GetLatestMetrics(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		equals(t, req.URL.String(), "/api/v1/query?query=iops")
+		// Send response to be tested
+		rw.Write([]byte(ByteGetMetrics))
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	type fields struct {
+		Client   client.Client
+		DockInfo *model.DockSpec
+		API      *API
+	}
+	type args struct {
+		opt *pb.GetMetricsOpts
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []*model.MetricSpec
+		wantErr bool
+	}{
+		{
+			name:   "test1",
+			fields: fields{},
+			args: args{
+				opt: &pb.GetMetricsOpts{
+					InstanceId:           "",
+					MetricName:           "iops",
+					StartTime:            "",
+					EndTime:              "",
+					Context:              "",
+					XXX_NoUnkeyedLiteral: struct{}{},
+					XXX_unrecognized:     nil,
+					XXX_sizecache:        0,
+				},
+			},
+			want:    SampleGetmetricsSpec,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewFakeController(server.Client(), server.URL)
+			got, err := c.GetLatestMetrics(tt.args.opt)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("controller.GetLatestMetrics() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("controller.GetLatestMetrics() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func Test_controller_GetInstantMetrics(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		equals(t, req.URL.String(), "/api/v1/query?query=iops&time=1560169109")
+		// Send response to be tested
+		rw.Write([]byte(ByteGetMetrics))
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	type fields struct {
+		Client   client.Client
+		DockInfo *model.DockSpec
+		API      *API
+	}
+	type args struct {
+		opt *pb.GetMetricsOpts
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []*model.MetricSpec
+		wantErr bool
+	}{
+		{
+			name:   "test1",
+			fields: fields{},
+			args: args{
+				opt: &pb.GetMetricsOpts{
+					InstanceId:           "",
+					MetricName:           "iops",
+					StartTime:            "1560169109",
+					EndTime:              "1560169109",
+					Context:              "",
+					XXX_NoUnkeyedLiteral: struct{}{},
+					XXX_unrecognized:     nil,
+					XXX_sizecache:        0,
+				},
+			},
+			want:    SampleGetmetricsSpec,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewFakeController(server.Client(), server.URL)
+			//c. = API{server.Client(), server.URL}
+			got, err := c.GetInstantMetrics(tt.args.opt)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("controller.GetLatestMetrics() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("controller.GetLatestMetrics() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func Test_controller_GetRangeMetrics(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		equals(t, req.URL.String(), "/api/v1/query?query=iops&start=1560169109&end=1560169109&step=30")
+		// Send response to be tested
+		rw.Write([]byte(ByteGetRangeMetrics))
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	type fields struct {
+		Client   client.Client
+		DockInfo *model.DockSpec
+		API      *API
+	}
+	type args struct {
+		opt *pb.GetMetricsOpts
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []*model.MetricSpec
+		wantErr bool
+	}{
+		{
+			name:   "test1",
+			fields: fields{},
+			args: args{
+				opt: &pb.GetMetricsOpts{
+					InstanceId:           "",
+					MetricName:           "iops",
+					StartTime:            "1560169109",
+					EndTime:              "1560169109",
+					Context:              "",
+					XXX_NoUnkeyedLiteral: struct{}{},
+					XXX_unrecognized:     nil,
+					XXX_sizecache:        0,
+				},
+			},
+			want:    SampleGetmetricsRangeSpec,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewFakeController(server.Client(), server.URL)
+			//c. = API{server.Client(), server.URL}
+			got, err := c.GetRangeMetrics(tt.args.opt)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("controller.GetLatestMetrics() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got[0], tt.want[0]) {
+				t.Errorf("controller.GetLatestMetrics() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCheckServiceStatus(t *testing.T) {
+	type args struct {
+		sName string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				sName: "test_telemetry_service",
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := CheckServiceStatus(tt.args.sName); (err != nil) != tt.wantErr {
+				t.Errorf("CheckServiceStatus() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_controller_GetUrls(t *testing.T) {
+	type fields struct {
+		Client   client.Client
+		DockInfo *model.DockSpec
+		API      *API
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    *map[string]model.UrlDesc
+		wantErr bool
+	}{
+		{
+			name:    "test1",
+			fields:  fields{},
+			want:    nil,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &controller{
+				Client:   tt.fields.Client,
+				DockInfo: tt.fields.DockInfo,
+				API:      tt.fields.API,
+			}
+			_, err := c.GetUrls()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("controller.GetUrls() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
 		})
 	}
 }
