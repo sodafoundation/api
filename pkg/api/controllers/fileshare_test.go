@@ -227,7 +227,7 @@ func TestUpdateFileShare(t *testing.T) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//                         Tests for fileshare snapshot                          //
+//                      Tests for fileshare snapshot                          //
 ////////////////////////////////////////////////////////////////////////////////
 
 func TestListFileShareSnapshots(t *testing.T) {

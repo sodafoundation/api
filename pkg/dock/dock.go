@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import (
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
 	_ "github.com/opensds/opensds/contrib/connector/nfs"
 	_ "github.com/opensds/opensds/contrib/connector/rbd"
+	_ "github.com/opensds/opensds/contrib/connector/nvmeof"
 )
 
 // dockServer is used to implement pb.DockServer
@@ -322,7 +323,7 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 	log.Info("Dock server receive delete replication request, vr =", opt)
 
 	if err := driver.DeleteReplication(opt); err != nil {
-		log.Error("error occurred in dock module when delete snapshot:", err)
+		log.Error("error occurred in dock module when delete replication:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -459,6 +460,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 		}); err != nil {
 			log.Error(fmt.Sprintf("error occurred when delete volume %s from group.", volRef.Id))
 			db.UpdateVolumeStatus(ctx, db.C, volRef.Id, model.VolumeError)
+			db.UpdateVolumeGroupStatus(ctx, db.C, opt.GetId(), model.VolumeGroupError)
 		} else {
 			// Delete the volume entry in DB after successfully deleting the
 			// volume on the storage.
@@ -497,7 +499,7 @@ func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFile
 
 	fileshare, err := ds.FileShareDriver.CreateFileShareAcl(opt)
 	if err != nil {
-		log.Error("when create file share in dock module:", err)
+		log.Error("when create file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -513,7 +515,7 @@ func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFile
 	log.Info("dock server receive delete file share acl request, vr =", opt)
 
 	if err := ds.FileShareDriver.DeleteFileShareAcl(opt); err != nil {
-		log.Error("when create file share in dock module:", err)
+		log.Error("when delete file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 
@@ -528,7 +530,7 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 
 	log.Info("Dock server receive create file share request, vr =", opt)
 
-	log.V(5).Infof("Dock server create fleshare:  sent to Driver %+v", opt.GetDriverName())
+	log.V(5).Infof("Dock server create fleshare: sent to Driver %+v", opt.GetDriverName())
 
 	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
 	if err != nil {

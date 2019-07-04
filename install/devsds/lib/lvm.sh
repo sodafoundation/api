@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2017 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ osds::lvm::pkg_uninstall(){
 
 osds::lvm::nvmeofpkginstall(){
     # nvme-cli utility for nvmeof initiator
-    sudo wget https://github.com/linux-nvme/nvme-cli/archive/v1.8.1.tar.gz -O /opt/nvmecli-1.8.1.tar.gz
+    wget https://github.com/linux-nvme/nvme-cli/archive/v1.8.1.tar.gz -O /opt/nvmecli-1.8.1.tar.gz
     sudo tar -zxvf /opt/nvmecli-1.8.1.tar.gz -C /opt/
     cd /opt/nvme-cli-1.8.1 && sudo make && sudo make install
     # nvme kernel

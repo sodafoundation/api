@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -82,6 +82,11 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	}
 	// validate accesscapability
 	accessCapability := in.AccessCapability
+	if len(accessCapability) == 0 {
+		errMsg := fmt.Sprintf("empty fileshare accesscapability. Supported accesscapability are: {read, write}")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	permissions := []string{"write", "read"}
 	for _, value := range accessCapability {
 		value = strings.ToLower(value)
@@ -149,7 +154,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	}
 	//validate the name
 	if in.Name == "" {
-		errMsg := fmt.Sprintf("Empty fileshare name is not allowed. Please give valid name.")
+		errMsg := fmt.Sprintf("empty fileshare name is not allowed. Please give valid name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -168,9 +173,9 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 // the DB, the real deletion operation would be executed in another new thread.
 func DeleteFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) error {
 	validStatus := []string{model.FileShareAvailable, model.FileShareError,
-		model.FileShareErrorDeleting, model.FileShareCreating}
+		model.FileShareErrorDeleting}
 	if !utils.Contained(in.Status, validStatus) {
-		errMsg := fmt.Sprintf("only the fileshare with the status available, error, error_deleting, can be deleted, the fileshare status is %s", in.Status)
+		errMsg := fmt.Sprintf("only the fileshare with the status available, error, errorDeleting, can be deleted, the fileshare status is %s", in.Status)
 		log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -230,8 +235,13 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 	}
 
 	//validate the snapshot name
+	if in.Name == "" {
+		errMsg := fmt.Sprintf("snapshot name can not be empty. Please give valid snapshot name")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	if strings.HasPrefix(in.Name, "snapshot") {
-		errMsg := fmt.Sprintf("Names starting 'snapshot' are reserved. Please choose a different snapshot name.")
+		errMsg := fmt.Sprintf("names starting 'snapshot' are reserved. Please choose a different snapshot name.")
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -698,10 +708,10 @@ func CreateVolumeGroupDBEntry(ctx *c.Context, in *model.VolumeGroupSpec) (*model
 // UpdateVolumeGroupDBEntry just modifies the state of the volume group
 // to be updating in the DB, the real deletion operation would be
 // executed in another new thread.
-func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
+func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) ([]string, []string, error) {
 	vg, err := db.C.GetVolumeGroup(ctx, vgUpdate.Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var name string
@@ -730,31 +740,31 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	if len(invalidUuids) > 0 {
 		msg := fmt.Sprintf("uuid %s is in both add and remove volume list", strings.Join(invalidUuids, ","))
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return nil, nil, errors.New(msg)
 	}
 
 	volumes, err := db.C.ListVolumesByGroupId(ctx, vgUpdate.Id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	var addVolumesNew, removeVolumeNew []string
+	var addVolumesNew, removeVolumesNew []string
 	// Validate volumes in AddVolumes and RemoveVolumes.
 	if len(vgUpdate.AddVolumes) > 0 {
 		if addVolumesNew, err = ValidateAddVolumes(ctx, volumes, vgUpdate.AddVolumes, vgUpdate); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	if len(vgUpdate.RemoveVolumes) > 0 {
-		if removeVolumeNew, err = ValidateRemoveVolumes(ctx, volumes, vgUpdate.RemoveVolumes, vgUpdate); err != nil {
-			return nil, err
+		if removeVolumesNew, err = ValidateRemoveVolumes(ctx, volumes, vgUpdate.RemoveVolumes, vgUpdate); err != nil {
+			return nil, nil, err
 		}
 	}
 
-	if name == "" && description == "" && len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+	if name == "" && description == "" && len(addVolumesNew) == 0 && len(removeVolumesNew) == 0 {
 		msg := fmt.Sprintf("update group %s faild, because no valid name, description, addvolumes or removevolumes were provided", vgUpdate.Id)
 		log.Error(msg)
-		return nil, errors.New(msg)
+		return nil, nil, errors.New(msg)
 	}
 
 	vgNew := &model.VolumeGroupSpec{
@@ -771,13 +781,19 @@ func UpdateVolumeGroupDBEntry(ctx *c.Context, vgUpdate *model.VolumeGroupSpec) (
 	if description != "" {
 		vgNew.Description = description
 	}
-	if len(addVolumesNew) == 0 && len(removeVolumeNew) == 0 {
+	if len(addVolumesNew) == 0 && len(removeVolumesNew) == 0 {
 		vgNew.Status = model.VolumeGroupAvailable
 	} else {
 		vgNew.Status = model.VolumeGroupUpdating
 	}
 
-	return db.C.UpdateVolumeGroup(ctx, vgNew)
+	_, err = db.C.UpdateVolumeGroup(ctx, vgNew)
+	if err != nil {
+		log.Errorf("when update volume group in db: %v", err)
+		return nil, nil, err
+	}
+
+	return addVolumesNew, removeVolumesNew, nil
 }
 
 func ValidateAddVolumes(ctx *c.Context, volumes []*model.VolumeSpec, addVolumes []string, vg *model.VolumeGroupSpec) ([]string, error) {

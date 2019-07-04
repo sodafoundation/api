@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The OpenSDS Authors.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,19 +64,17 @@ var fileShareUpdateCommand = &cobra.Command{
 }
 
 var (
-	shareAZ              string
-	shareDescription     string
-	shareExportLocations string
-	shareID              string
-	shareName            string
-	sharePoolID          string
-	shareProfileID       string
-	shareProtocols       string
-	shareSnapshotID      string
-	shareStatus          string
-	shareTenantID        string
-	shareUserID          string
-	fileShareID          string
+	shareAZ          string
+	shareDescription string
+	shareID          string
+	shareName        string
+	sharePoolID      string
+	shareProfileID   string
+	shareStatus      string
+	shareTenantID    string
+	shareUserID      string
+	shareCreatedAt   string
+	shareUpdatedAt   string
 
 	shareLimit   string
 	shareOffset  string
@@ -98,15 +96,13 @@ func init() {
 	fileShareCreateCommand.Flags().StringVarP(&shareName, "name", "n", "", "the name of the fileshare")
 	fileShareCreateCommand.Flags().StringVarP(&shareDescription, "description", "d", "", "the description of the fileshare")
 	fileShareCreateCommand.Flags().StringVarP(&shareAZ, "availabilityZone", "a", "", "the locality that fileshare belongs to")
-	fileShareCreateCommand.Flags().StringVarP(&shareSnapshotID, "snapshotId", "s", "", "the uuid of the snapshot which the fileshare is created")
 	fileShareCreateCommand.Flags().StringVarP(&shareProfileID, "profileId", "p", "", "the uuid of the profile which the fileshare belongs to")
-	fileShareCreateCommand.Flags().StringVarP(&shareUserID, "userId", "u", "", "the uuid of the user that the fileshare belongs to")
 
 	fileShareListCommand.Flags().StringVarP(&shareLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareListCommand.Flags().StringVarP(&shareOffset, "offset", "", "0", "all requested data offsets")
 	fileShareListCommand.Flags().StringVarP(&shareSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	fileShareListCommand.Flags().StringVarP(&shareSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), name, status, availabilityZone, profileId, tenantId, userId, size, poolId, description, protocols, snapshotId, exportLocations")
+		"the sort key of all requested data. supports id(default), createdAt, updatedAt, name, status, availabilityZone, profileId, tenantId, userId, size, poolId, description")
 	fileShareListCommand.Flags().StringVarP(&shareID, "id", "", "", "list share by id")
 	fileShareListCommand.Flags().StringVarP(&shareName, "name", "", "", "list share by name")
 	fileShareListCommand.Flags().StringVarP(&shareDescription, "description", "", "", "list share by description")
@@ -116,10 +112,9 @@ func init() {
 	fileShareListCommand.Flags().StringVarP(&sharePoolID, "poolId", "", "", "list share by poolId")
 	fileShareListCommand.Flags().StringVarP(&shareAZ, "availabilityZone", "", "", "list share by availabilityZone")
 	fileShareListCommand.Flags().StringVarP(&shareProfileID, "profileId", "", "", "list share by profileId")
-	fileShareListCommand.Flags().StringVarP(&shareProtocols, "protocols", "", "", "list share by protocols")
-	fileShareListCommand.Flags().StringVarP(&shareSnapshotID, "snapshotId", "", "", "list share by snapshotId")
 	fileShareListCommand.Flags().StringVarP(&shareSize, "size", "", "", "list share by size")
-	fileShareListCommand.Flags().StringVarP(&shareExportLocations, "exportLocations", "", "", "list share by exportLocations")
+	fileShareListCommand.Flags().StringVarP(&shareCreatedAt, "createdAt", "", "", "list share by createdAt")
+	fileShareListCommand.Flags().StringVarP(&shareUpdatedAt, "updatedAt", "", "", "list share by updatedAt")
 
 	fileShareUpdateCommand.Flags().StringVarP(&shareName, "name", "n", "", "the name of the fileshare")
 	fileShareUpdateCommand.Flags().StringVarP(&shareDescription, "description", "d", "", "the description of the fileshare")
@@ -141,10 +136,8 @@ func fileShareCreateAction(cmd *cobra.Command, args []string) {
 		Description:      shareDescription,
 		Name:             shareName,
 		Size:             int64(size),
-		UserId:           shareUserID,
 		AvailabilityZone: shareAZ,
 		ProfileId:        shareProfileID,
-		SnapshotId:       shareSnapshotID,
 	}
 
 	resp, err := client.CreateFileShare(share)
@@ -185,8 +178,8 @@ func fileShareListAction(cmd *cobra.Command, args []string) {
 	var opts = map[string]string{"limit": shareLimit, "offset": shareOffset, "sortDir": shareSortDir,
 		"sortKey": shareSortKey, "Id": shareID, "Name": shareName, "Description": shareDescription,
 		"TenantId": shareTenantID, "UserId": shareUserID, "AvailabilityZone": shareAZ, "Status": shareStatus,
-		"PoolId": sharePoolID, "ProfileId": shareProfileID, "Protocols": shareProtocols, "snapshotId": shareSnapshotID,
-		"size": shareSize, "ExportLocations": shareExportLocations}
+		"PoolId": sharePoolID, "ProfileId": shareProfileID, "CreatedAt": shareCreatedAt,
+		"UpdatedAt": shareUpdatedAt, "Size": shareSize}
 
 	resp, err := client.ListFileShares(opts)
 	if err != nil {
