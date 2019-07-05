@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dorado
+package oceanstor
 
 import (
 	"strconv"
@@ -79,8 +79,8 @@ type Configs struct {
 	Cfgs []Config `yaml:"resources"`
 }
 type MetricDriver struct {
-	conf   *DoradoConfig
-	client *DoradoClient
+	conf   *OceanStorConfig
+	client *OceanStorClient
 }
 
 func getCurrentUnixTimestamp() int64 {
@@ -290,13 +290,13 @@ func (d *MetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 }
 
 func (d *MetricDriver) Setup() (err error) {
-	// Read huawei dorado config file
-	path := config.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath
+	// Read huawei oceanstor config file
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanStorBlock.ConfigPath
 	if "" == path {
 		path = defaultConfPath
 	}
 
-	conf := &DoradoConfig{}
+	conf := &OceanStorConfig{}
 	Parse(conf, path)
 
 	d.conf = conf

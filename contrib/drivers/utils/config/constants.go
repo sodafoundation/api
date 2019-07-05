@@ -22,17 +22,17 @@ package config
 // These constants below represent the vendor name of all storage drivers which
 // can be supported by now.
 const (
-	CinderDriverType              = "cinder"
-	CephDriverType                = "ceph"
-	LVMDriverType                 = "lvm"
-	HuaweiDoradoDriverType        = "huawei_dorado"
-	HuaweiFusionStorageDriverType = "huawei_fusionstorage"
-	HuaweiOceanFileDriverType     = "huawei_oceanstor"
-	HpeNimbleDriverType           = "hpe_nimble"
-	DRBDDriverType                = "drbd"
-	ScutechCMSDriverType          = "scutech_cms"
-	ManilaDriverType              = "manila"
-	FujitsuEternusDriverType      = "fujitsu_eternus"
+	CinderDriverType               = "cinder"
+	CephDriverType                 = "ceph"
+	LVMDriverType                  = "lvm"
+	HuaweiOceanStorBlockDriverType = "huawei_oceanstor_block"
+	HuaweiFusionStorageDriverType  = "huawei_fusionstorage"
+	HuaweiOceanFileDriverType      = "huawei_oceanstor"
+	HpeNimbleDriverType            = "hpe_nimble"
+	DRBDDriverType                 = "drbd"
+	ScutechCMSDriverType           = "scutech_cms"
+	ManilaDriverType               = "manila"
+	FujitsuEternusDriverType       = "fujitsu_eternus"
 )
 
 const (

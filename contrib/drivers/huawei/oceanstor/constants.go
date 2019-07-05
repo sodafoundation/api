@@ -11,13 +11,13 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific l
 
-package dorado
+package oceanstor
 
 import "time"
 
 //  default value for driver
 const (
-	defaultConfPath = "/etc/opensds/driver/huawei_dorado.yaml"
+	defaultConfPath = "/etc/opensds/driver/huawei_oceanstor_block.yaml"
 	defaultAZ       = "default"
 )
 
@@ -30,9 +30,9 @@ const (
 
 // name prefix
 const (
-	PrefixMappingView = "OpenSDS_MappingView_"
-	PrefixLunGroup    = "OpenSDS_LunGroup_"
-	PrefixHostGroup   = "OpenSDS_HostGroup_"
+	PrefixMappingView = "OpenSDSMappingView"
+	PrefixLunGroup    = "OpenSDSLunGroup"
+	PrefixHostGroup   = "OpenSDSHostGroup"
 )
 
 // object type id
