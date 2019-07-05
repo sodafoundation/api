@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	c         *client.Client
+	c         *SyncClient
 	profileId string
 )
 
@@ -39,7 +39,7 @@ const (
 )
 
 func init() {
-	c, _ = client.NewClient(&client.Config{
+	c, _ = NewSyncClient(&client.Config{
 		Endpoint:    constants.DefaultOpensdsEndpoint,
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId),
 	})
