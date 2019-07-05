@@ -678,11 +678,11 @@ func TestGetMetrics(t *testing.T) {
 	var err error
 	for	_,r:= range req{
 	if response, err = ctrl.GetMetrics(context.Background(), r); err != nil {
-		t.Errorf("Failed to create volume, err is %v\n", err)
+		t.Errorf("failed  to collect metrics, err is %v\n", err)
 	}
 	expectdResponse := pb.GenericResponseResult(SamplemetricsSpec)
 	if !reflect.DeepEqual(response, expectdResponse) {
-		t.Errorf("Controller.GetMetrics() = %v, want %v", response, SamplemetricsSpec)
+		t.Errorf("unexpected result  for Controller.GetMetrics() = %v, want %v", response, SamplemetricsSpec)
 	}
 }
 }
