@@ -39,8 +39,8 @@ import (
 	_ "github.com/opensds/opensds/contrib/connector/fc"
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
 	_ "github.com/opensds/opensds/contrib/connector/nfs"
-	_ "github.com/opensds/opensds/contrib/connector/rbd"
 	_ "github.com/opensds/opensds/contrib/connector/nvmeof"
+	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
 
 // dockServer is used to implement pb.DockServer
