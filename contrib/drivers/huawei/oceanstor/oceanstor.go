@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package dorado
+package oceanstor
 
 import (
 	"errors"
@@ -30,15 +30,15 @@ import (
 )
 
 type Driver struct {
-	conf   *DoradoConfig
-	client *DoradoClient
+	conf   *OceanStorConfig
+	client *OceanStorClient
 }
 
 func (d *Driver) Setup() (err error) {
-	// Read huawei dorado config file
-	conf := &DoradoConfig{}
+	// Read huawei oceanstor config file
+	conf := &OceanStorConfig{}
 	d.conf = conf
-	path := config.CONF.OsdsDock.Backends.HuaweiDorado.ConfigPath
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanStorBlock.ConfigPath
 
 	if "" == path {
 		path = defaultConfPath

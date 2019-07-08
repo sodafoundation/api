@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package dorado
+package oceanstor
 
 type Error struct {
 	Code        int    `json:"code"`

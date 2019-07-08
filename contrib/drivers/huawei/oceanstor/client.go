@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package dorado
+package oceanstor
 
 import (
 	"crypto/tls"
@@ -56,7 +56,7 @@ func IsNotFoundError(err error) bool {
 	return false
 }
 
-type DoradoClient struct {
+type OceanStorClient struct {
 	user       string
 	passwd     string
 	endpoints  []string
@@ -67,7 +67,7 @@ type DoradoClient struct {
 	insecure   bool
 }
 
-func NewClient(opt *AuthOptions) (*DoradoClient, error) {
+func NewClient(opt *AuthOptions) (*OceanStorClient, error) {
 	endpoints := strings.Split(opt.Endpoints, ",")
 	var pwdCiphertext = opt.Password
 
@@ -81,7 +81,7 @@ func NewClient(opt *AuthOptions) (*DoradoClient, error) {
 		pwdCiphertext = password
 	}
 
-	c := &DoradoClient{
+	c := &OceanStorClient{
 		user:      opt.Username,
 		passwd:    pwdCiphertext,
 		endpoints: endpoints,
@@ -91,11 +91,11 @@ func NewClient(opt *AuthOptions) (*DoradoClient, error) {
 	return c, err
 }
 
-func (c *DoradoClient) Destroy() error {
+func (c *OceanStorClient) Destroy() error {
 	return c.logout()
 }
 
-func (c *DoradoClient) doRequest(method, url string, in interface{}) ([]byte, http.Header, error) {
+func (c *OceanStorClient) doRequest(method, url string, in interface{}) ([]byte, http.Header, error) {
 	req := httplib.NewBeegoRequest(url, method)
 	req.SetTLSClientConfig(&tls.Config{
 		InsecureSkipVerify: c.insecure,
@@ -131,7 +131,7 @@ func (c *DoradoClient) doRequest(method, url string, in interface{}) ([]byte, ht
 	return b, resp.Header, nil
 }
 
-func (c *DoradoClient) request(method, url string, in, out interface{}) error {
+func (c *OceanStorClient) request(method, url string, in, out interface{}) error {
 	var b []byte
 	var err error
 	for i := 0; i < 2; i++ {
@@ -165,7 +165,7 @@ func (c *DoradoClient) request(method, url string, in, out interface{}) error {
 	return nil
 }
 
-func (c *DoradoClient) login() error {
+func (c *OceanStorClient) login() error {
 	data := map[string]string{
 		"username": c.user,
 		"password": c.passwd,
@@ -207,14 +207,14 @@ func (c *DoradoClient) login() error {
 	return nil
 }
 
-func (c *DoradoClient) logout() error {
+func (c *OceanStorClient) logout() error {
 	if c.urlPrefix == "" {
 		return nil
 	}
 	return c.request("DELETE", "/sessions", nil, nil)
 }
 
-func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId string) (*Lun, error) {
+func (c *OceanStorClient) CreateVolume(name string, size int64, desc string, poolId string) (*Lun, error) {
 	data := map[string]interface{}{
 		"NAME":        name,
 		"CAPACITY":    Gb2Sector(size),
@@ -228,7 +228,7 @@ func (c *DoradoClient) CreateVolume(name string, size int64, desc string, poolId
 	return &lun.Data, err
 }
 
-func (c *DoradoClient) CreateLunCopy(name, srcid, tgtid, copyspeed string) (string, error) {
+func (c *OceanStorClient) CreateLunCopy(name, srcid, tgtid, copyspeed string) (string, error) {
 	url := "/luncopy"
 	if !utils.Contains(LunCopySpeedTypes, copyspeed) {
 		log.Warningf("The copy speed %s is invalid, using Medium Speed instead", copyspeed)
@@ -251,7 +251,7 @@ func (c *DoradoClient) CreateLunCopy(name, srcid, tgtid, copyspeed string) (stri
 	}
 	return lun.Data.Id, err
 }
-func (c *DoradoClient) GetLunInfo(id string) (*Lun, error) {
+func (c *OceanStorClient) GetLunInfo(id string) (*Lun, error) {
 	url := "/LUNCOPY/" + id
 	lun := &LunResp{}
 	err := c.request("GET", url, nil, lun)
@@ -260,7 +260,7 @@ func (c *DoradoClient) GetLunInfo(id string) (*Lun, error) {
 	}
 	return &lun.Data, nil
 }
-func (c *DoradoClient) StartLunCopy(luncopyid string) error {
+func (c *OceanStorClient) StartLunCopy(luncopyid string) error {
 	url := "/LUNCOPY/start"
 	data := map[string]interface{}{
 		"TYPE": ObjectTypeLunCopy,
@@ -270,13 +270,13 @@ func (c *DoradoClient) StartLunCopy(luncopyid string) error {
 	return err
 }
 
-func (c *DoradoClient) DeleteLunCopy(luncopyid string) error {
+func (c *OceanStorClient) DeleteLunCopy(luncopyid string) error {
 	url := "/LUNCOPY/" + luncopyid
 	err := c.request("DELETE", url, nil, nil)
 	return err
 }
 
-func (c *DoradoClient) GetVolume(id string) (*Lun, error) {
+func (c *OceanStorClient) GetVolume(id string) (*Lun, error) {
 	lun := &LunResp{}
 	err := c.request("GET", "/lun/"+id, nil, lun)
 	if err != nil {
@@ -285,7 +285,7 @@ func (c *DoradoClient) GetVolume(id string) (*Lun, error) {
 	return &lun.Data, err
 }
 
-func (c *DoradoClient) GetVolumeByName(name string) (*Lun, error) {
+func (c *OceanStorClient) GetVolumeByName(name string) (*Lun, error) {
 	lun := &LunResp{}
 	err := c.request("GET", "/lun?filter=NAME::"+name, nil, lun)
 	if err != nil {
@@ -293,13 +293,13 @@ func (c *DoradoClient) GetVolumeByName(name string) (*Lun, error) {
 	}
 	return &lun.Data, err
 }
-func (c *DoradoClient) DeleteVolume(id string) error {
+func (c *OceanStorClient) DeleteVolume(id string) error {
 	err := c.request("DELETE", "/lun/"+id, nil, nil)
 	return err
 }
 
 // ExtendVolume ...
-func (c *DoradoClient) ExtendVolume(size int64, id string) error {
+func (c *OceanStorClient) ExtendVolume(size int64, id string) error {
 	data := map[string]interface{}{
 		"CAPACITY": Gb2Sector(size),
 		"ID":       id,
@@ -309,7 +309,7 @@ func (c *DoradoClient) ExtendVolume(size int64, id string) error {
 	return err
 }
 
-func (c *DoradoClient) CheckLunExist(id, wwn string) bool {
+func (c *OceanStorClient) CheckLunExist(id, wwn string) bool {
 	lun := &LunResp{}
 	err := c.request("GET", "/lun/"+id, nil, lun)
 	if err != nil {
@@ -322,7 +322,7 @@ func (c *DoradoClient) CheckLunExist(id, wwn string) bool {
 	return true
 }
 
-func (c *DoradoClient) CreateSnapshot(lunId, name, desc string) (*Snapshot, error) {
+func (c *OceanStorClient) CreateSnapshot(lunId, name, desc string) (*Snapshot, error) {
 	data := map[string]interface{}{
 		"PARENTTYPE":  ObjectTypeLun,
 		"PARENTID":    lunId,
@@ -334,35 +334,35 @@ func (c *DoradoClient) CreateSnapshot(lunId, name, desc string) (*Snapshot, erro
 	return &snap.Data, err
 }
 
-func (c *DoradoClient) GetSnapshot(id string) (*Snapshot, error) {
+func (c *OceanStorClient) GetSnapshot(id string) (*Snapshot, error) {
 	snap := &SnapshotResp{}
 	err := c.request("GET", "/snapshot/"+id, nil, snap)
 	return &snap.Data, err
 }
 
-func (c *DoradoClient) GetSnapshotByName(name string) (*Snapshot, error) {
+func (c *OceanStorClient) GetSnapshotByName(name string) (*Snapshot, error) {
 	snap := &SnapshotsResp{}
 	err := c.request("GET", "/snapshot?filter=NAME::"+name, nil, snap)
 	return &snap.Data[0], err
 }
 
-func (c *DoradoClient) DeleteSnapshot(id string) error {
+func (c *OceanStorClient) DeleteSnapshot(id string) error {
 	return c.request("DELETE", "/snapshot/"+id, nil, nil)
 }
 
-func (c *DoradoClient) ListStoragePools() ([]StoragePool, error) {
+func (c *OceanStorClient) ListStoragePools() ([]StoragePool, error) {
 	pools := &StoragePoolsResp{}
 	err := c.request("GET", "/storagepool?range=[0-100]", nil, pools)
 	return pools.Data, err
 }
 
-func (c *DoradoClient) ListAllStoragePools() ([]StoragePool, error) {
+func (c *OceanStorClient) ListAllStoragePools() ([]StoragePool, error) {
 	pools := &StoragePoolsResp{}
 	err := c.request("GET", "/storagepool", nil, pools)
 	return pools.Data, err
 }
 
-func (c *DoradoClient) GetPoolIdByName(poolName string) (string, error) {
+func (c *OceanStorClient) GetPoolIdByName(poolName string) (string, error) {
 	pools, err := c.ListAllStoragePools()
 	if err != nil {
 		return "", err
@@ -375,7 +375,7 @@ func (c *DoradoClient) GetPoolIdByName(poolName string) (string, error) {
 	return "", fmt.Errorf("not found specified pool '%s'", poolName)
 }
 
-func (c *DoradoClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
+func (c *OceanStorClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
 	hostName := EncodeHostName(hostInfo.Host)
 
 	hostId, _ := c.GetHostIdByName(hostInfo.Host)
@@ -404,7 +404,7 @@ func (c *DoradoClient) AddHostWithCheck(hostInfo *pb.HostInfo) (string, error) {
 		hostInfo.Host, hostResp.Error.Code, hostResp.Error.Description)
 }
 
-func (c *DoradoClient) GetHostIdByName(hostName string) (string, error) {
+func (c *OceanStorClient) GetHostIdByName(hostName string) (string, error) {
 	hostName = EncodeHostName(hostName)
 	hostsResp := &HostsResp{}
 
@@ -422,7 +422,7 @@ func (c *DoradoClient) GetHostIdByName(hostName string) (string, error) {
 	return "", &NotFoundError{name: hostName}
 }
 
-func (c *DoradoClient) AddInitiatorToHostWithCheck(hostId, initiatorName string) error {
+func (c *OceanStorClient) AddInitiatorToHostWithCheck(hostId, initiatorName string) error {
 
 	if !c.IsArrayContainInitiator(initiatorName) {
 		if err := c.AddInitiatorToArray(initiatorName); err != nil {
@@ -437,7 +437,7 @@ func (c *DoradoClient) AddInitiatorToHostWithCheck(hostId, initiatorName string)
 	return nil
 }
 
-func (c *DoradoClient) IsArrayContainInitiator(initiatorName string) bool {
+func (c *OceanStorClient) IsArrayContainInitiator(initiatorName string) bool {
 	initiatorResp := &InitiatorResp{}
 
 	if err := c.request("GET", "/iscsi_initiator/"+initiatorName, nil, initiatorResp); err != nil {
@@ -454,7 +454,7 @@ func (c *DoradoClient) IsArrayContainInitiator(initiatorName string) bool {
 	return true
 }
 
-func (c *DoradoClient) IsHostContainInitiator(hostId, initiatorName string) bool {
+func (c *OceanStorClient) IsHostContainInitiator(hostId, initiatorName string) bool {
 	initiatorsResp := &InitiatorsResp{}
 
 	if err := c.request("GET", "/iscsi_initiator?ISFREE=false&PARENTID="+hostId, nil, initiatorsResp); err != nil {
@@ -473,7 +473,7 @@ func (c *DoradoClient) IsHostContainInitiator(hostId, initiatorName string) bool
 	return false
 }
 
-func (c *DoradoClient) AddInitiatorToArray(initiatorName string) error {
+func (c *OceanStorClient) AddInitiatorToArray(initiatorName string) error {
 
 	reqBody := map[string]interface{}{
 		"ID": initiatorName,
@@ -496,7 +496,7 @@ func (c *DoradoClient) AddInitiatorToArray(initiatorName string) error {
 	return nil
 }
 
-func (c *DoradoClient) AddInitiatorToHost(hostId, initiatorName string) error {
+func (c *OceanStorClient) AddInitiatorToHost(hostId, initiatorName string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":       initiatorName,
@@ -520,7 +520,7 @@ func (c *DoradoClient) AddInitiatorToHost(hostId, initiatorName string) error {
 	return nil
 }
 
-func (c *DoradoClient) AddHostToHostGroup(hostId string) (string, error) {
+func (c *OceanStorClient) AddHostToHostGroup(hostId string) (string, error) {
 
 	hostGrpName := PrefixHostGroup + hostId
 	hostGrpId, err := c.CreateHostGroupWithCheck(hostGrpName)
@@ -543,7 +543,7 @@ func (c *DoradoClient) AddHostToHostGroup(hostId string) (string, error) {
 	return hostGrpId, nil
 }
 
-func (c *DoradoClient) CreateHostGroupWithCheck(hostGrpName string) (string, error) {
+func (c *OceanStorClient) CreateHostGroupWithCheck(hostGrpName string) (string, error) {
 
 	hostGrpId, _ := c.FindHostGroup(hostGrpName)
 	if hostGrpId != "" {
@@ -558,7 +558,7 @@ func (c *DoradoClient) CreateHostGroupWithCheck(hostGrpName string) (string, err
 	return hostGrpId, nil
 }
 
-func (c *DoradoClient) FindHostGroup(groupName string) (string, error) {
+func (c *OceanStorClient) FindHostGroup(groupName string) (string, error) {
 
 	hostGrpsResp := &HostGroupsResp{}
 
@@ -582,7 +582,7 @@ func (c *DoradoClient) FindHostGroup(groupName string) (string, error) {
 	return hostGrpsResp.Data[0].Id, nil
 }
 
-func (c *DoradoClient) CreateHostGroup(groupName string) (string, error) {
+func (c *OceanStorClient) CreateHostGroup(groupName string) (string, error) {
 
 	reqBody := map[string]interface{}{
 		"NAME": groupName,
@@ -604,7 +604,7 @@ func (c *DoradoClient) CreateHostGroup(groupName string) (string, error) {
 	return hostGrpResp.Data.Id, nil
 }
 
-func (c *DoradoClient) IsHostGroupContainHost(hostGrpId, hostId string) bool {
+func (c *OceanStorClient) IsHostGroupContainHost(hostGrpId, hostId string) bool {
 	hostsResp := &HostsResp{}
 
 	if err := c.request("GET", "/host/associate?ASSOCIATEOBJTYPE=14&ASSOCIATEOBJID="+hostGrpId, nil, hostsResp); err != nil {
@@ -623,7 +623,7 @@ func (c *DoradoClient) IsHostGroupContainHost(hostGrpId, hostId string) bool {
 	return false
 }
 
-func (c *DoradoClient) AssociateHostToHostGroup(hostGrpId, hostId string) error {
+func (c *OceanStorClient) AssociateHostToHostGroup(hostGrpId, hostId string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":               hostGrpId,
@@ -647,7 +647,7 @@ func (c *DoradoClient) AssociateHostToHostGroup(hostGrpId, hostId string) error 
 	return nil
 }
 
-func (c *DoradoClient) DoMapping(lunId, hostGrpId, hostId string) error {
+func (c *OceanStorClient) DoMapping(lunId, hostGrpId, hostId string) error {
 
 	var err error
 	// Find or create lun group and add lun into lun group.
@@ -699,7 +699,7 @@ func (c *DoradoClient) DoMapping(lunId, hostGrpId, hostId string) error {
 	return nil
 }
 
-func (c *DoradoClient) FindLunGroup(groupName string) (string, error) {
+func (c *OceanStorClient) FindLunGroup(groupName string) (string, error) {
 
 	lunGrpsResp := &LunGroupsResp{}
 
@@ -723,7 +723,7 @@ func (c *DoradoClient) FindLunGroup(groupName string) (string, error) {
 	return lunGrpsResp.Data[0].Id, nil
 }
 
-func (c *DoradoClient) FindMappingView(name string) (string, error) {
+func (c *OceanStorClient) FindMappingView(name string) (string, error) {
 
 	mvsResp := &MappingViewsResp{}
 
@@ -747,7 +747,7 @@ func (c *DoradoClient) FindMappingView(name string) (string, error) {
 	return mvsResp.Data[0].Id, nil
 }
 
-func (c *DoradoClient) CreateLunGroup(groupName string) (string, error) {
+func (c *OceanStorClient) CreateLunGroup(groupName string) (string, error) {
 
 	reqBody := map[string]interface{}{
 		"NAME":      groupName,
@@ -771,7 +771,7 @@ func (c *DoradoClient) CreateLunGroup(groupName string) (string, error) {
 	return lunGrpResp.Data.Id, nil
 }
 
-func (c *DoradoClient) CreateMappingView(name string) (string, error) {
+func (c *OceanStorClient) CreateMappingView(name string) (string, error) {
 
 	reqBody := map[string]interface{}{
 		"NAME": name,
@@ -793,7 +793,7 @@ func (c *DoradoClient) CreateMappingView(name string) (string, error) {
 	return mvResp.Data.Id, nil
 }
 
-func (c *DoradoClient) IsLunGroupContainLun(lunGrpId, lunId string) bool {
+func (c *OceanStorClient) IsLunGroupContainLun(lunGrpId, lunId string) bool {
 	lunsResp := &LunsResp{}
 
 	if err := c.request("GET", "/lun/associate?ASSOCIATEOBJTYPE=256&ASSOCIATEOBJID="+lunGrpId, nil, lunsResp); err != nil {
@@ -812,7 +812,7 @@ func (c *DoradoClient) IsLunGroupContainLun(lunGrpId, lunId string) bool {
 	return false
 }
 
-func (c *DoradoClient) AssociateLunToLunGroup(lunGrpId, lunId string) error {
+func (c *OceanStorClient) AssociateLunToLunGroup(lunGrpId, lunId string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":               lunGrpId,
@@ -836,7 +836,7 @@ func (c *DoradoClient) AssociateLunToLunGroup(lunGrpId, lunId string) error {
 	return nil
 }
 
-func (c *DoradoClient) IsMappingViewContainHostGroup(viewId, groupId string) bool {
+func (c *OceanStorClient) IsMappingViewContainHostGroup(viewId, groupId string) bool {
 	mvsResp := &MappingViewsResp{}
 	if err := c.request("GET", "/mappingview/associate?ASSOCIATEOBJTYPE=14&ASSOCIATEOBJID="+groupId, nil, mvsResp); err != nil {
 		log.Errorf("List mapping views failed by host group id: %s, error: %v", groupId, err)
@@ -854,7 +854,7 @@ func (c *DoradoClient) IsMappingViewContainHostGroup(viewId, groupId string) boo
 	return false
 }
 
-func (c *DoradoClient) AssocateHostGroupToMappingView(viewId, groupId string) error {
+func (c *OceanStorClient) AssocateHostGroupToMappingView(viewId, groupId string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":               viewId,
@@ -877,7 +877,7 @@ func (c *DoradoClient) AssocateHostGroupToMappingView(viewId, groupId string) er
 	return nil
 }
 
-func (c *DoradoClient) IsMappingViewContainLunGroup(viewId, groupId string) bool {
+func (c *OceanStorClient) IsMappingViewContainLunGroup(viewId, groupId string) bool {
 	mvsResp := &MappingViewsResp{}
 	if err := c.request("GET", "/mappingview/associate?ASSOCIATEOBJTYPE=256&ASSOCIATEOBJID="+groupId, nil, mvsResp); err != nil {
 		log.Errorf("List mapping views failed by lun group id: %s, error: %v", groupId, err)
@@ -895,7 +895,7 @@ func (c *DoradoClient) IsMappingViewContainLunGroup(viewId, groupId string) bool
 	return false
 }
 
-func (c *DoradoClient) AssocateLunGroupToMappingView(viewId, groupId string) error {
+func (c *OceanStorClient) AssocateLunGroupToMappingView(viewId, groupId string) error {
 
 	reqBody := map[string]interface{}{
 		"ID":               viewId,
@@ -918,7 +918,7 @@ func (c *DoradoClient) AssocateLunGroupToMappingView(viewId, groupId string) err
 	return nil
 }
 
-func (c *DoradoClient) ListTgtPort() (*IscsiTgtPortsResp, error) {
+func (c *OceanStorClient) ListTgtPort() (*IscsiTgtPortsResp, error) {
 	resp := &IscsiTgtPortsResp{}
 	if err := c.request("GET", "/iscsi_tgt_port", nil, resp); err != nil {
 		log.Errorf("Get tgt port failed, error: %v", err)
@@ -933,7 +933,7 @@ func (c *DoradoClient) ListTgtPort() (*IscsiTgtPortsResp, error) {
 	return resp, nil
 }
 
-func (c *DoradoClient) ListHostAssociateLuns(hostId string) (*HostAssociateLunsResp, error) {
+func (c *OceanStorClient) ListHostAssociateLuns(hostId string) (*HostAssociateLunsResp, error) {
 	resp := &HostAssociateLunsResp{}
 	url := fmt.Sprintf("/lun/associate?TYPE=11&ASSOCIATEOBJTYPE=21&ASSOCIATEOBJID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -942,7 +942,7 @@ func (c *DoradoClient) ListHostAssociateLuns(hostId string) (*HostAssociateLunsR
 	return resp, nil
 }
 
-func (c *DoradoClient) GetHostLunId(hostId, lunId string) (int, error) {
+func (c *OceanStorClient) GetHostLunId(hostId, lunId string) (int, error) {
 	resp, err := c.ListHostAssociateLuns(hostId)
 	if err != nil {
 		return -1, err
@@ -965,7 +965,7 @@ func (c *DoradoClient) GetHostLunId(hostId, lunId string) (int, error) {
 	return 1, nil
 }
 
-func (c *DoradoClient) RemoveLunFromLunGroup(lunGrpId, lunId string) error {
+func (c *OceanStorClient) RemoveLunFromLunGroup(lunGrpId, lunId string) error {
 	url := fmt.Sprintf("/lungroup/associate?ID=%s&ASSOCIATEOBJTYPE=11&ASSOCIATEOBJID=%s", lunGrpId, lunId)
 	if err := c.request("DELETE", url, nil, nil); err != nil {
 		log.Errorf("Remove lun %s from lun group %s failed, %v", lunId, lunGrpId, err)
@@ -975,7 +975,7 @@ func (c *DoradoClient) RemoveLunFromLunGroup(lunGrpId, lunId string) error {
 	return nil
 }
 
-func (c *DoradoClient) RemoveLunGroupFromMappingView(viewId, lunGrpId string) error {
+func (c *OceanStorClient) RemoveLunGroupFromMappingView(viewId, lunGrpId string) error {
 	if !c.IsMappingViewContainLunGroup(viewId, lunGrpId) {
 		log.Infof("Lun group %s has already been removed from mapping view %s", lunGrpId, viewId)
 		return nil
@@ -994,7 +994,7 @@ func (c *DoradoClient) RemoveLunGroupFromMappingView(viewId, lunGrpId string) er
 	return nil
 }
 
-func (c *DoradoClient) RemoveHostGroupFromMappingView(viewId, hostGrpId string) error {
+func (c *OceanStorClient) RemoveHostGroupFromMappingView(viewId, hostGrpId string) error {
 	if !c.IsMappingViewContainHostGroup(viewId, hostGrpId) {
 		log.Infof("Host group %s has already been removed from mapping view %s", hostGrpId, viewId)
 		return nil
@@ -1013,7 +1013,7 @@ func (c *DoradoClient) RemoveHostGroupFromMappingView(viewId, hostGrpId string) 
 	return nil
 }
 
-func (c *DoradoClient) RemoveHostFromHostGroup(hostGrpId, hostId string) error {
+func (c *OceanStorClient) RemoveHostFromHostGroup(hostGrpId, hostId string) error {
 
 	url := fmt.Sprintf("/host/associate?TYPE=14&ID=%s&ASSOCIATEOBJTYPE=21&ASSOCIATEOBJID=%s",
 		hostGrpId, hostId)
@@ -1025,7 +1025,7 @@ func (c *DoradoClient) RemoveHostFromHostGroup(hostGrpId, hostId string) error {
 	return nil
 }
 
-func (c *DoradoClient) RemoveIscsiFromHost(initiator string) error {
+func (c *OceanStorClient) RemoveIscsiFromHost(initiator string) error {
 
 	url := "/iscsi_initiator/remove_iscsi_from_host"
 	data := map[string]interface{}{"TYPE": ObjectTypeIscsiInitiator, "ID": initiator}
@@ -1037,23 +1037,23 @@ func (c *DoradoClient) RemoveIscsiFromHost(initiator string) error {
 	return nil
 }
 
-func (c *DoradoClient) DeleteHostGroup(id string) error {
+func (c *OceanStorClient) DeleteHostGroup(id string) error {
 	return c.request("DELETE", "/hostgroup/"+id, nil, nil)
 }
 
-func (c *DoradoClient) DeleteLunGroup(id string) error {
+func (c *OceanStorClient) DeleteLunGroup(id string) error {
 	return c.request("DELETE", "/LUNGroup/"+id, nil, nil)
 }
 
-func (c *DoradoClient) DeleteHost(id string) error {
+func (c *OceanStorClient) DeleteHost(id string) error {
 	return c.request("DELETE", "/host/"+id, nil, nil)
 }
 
-func (c *DoradoClient) DeleteMappingView(id string) error {
+func (c *OceanStorClient) DeleteMappingView(id string) error {
 	return c.request("DELETE", "/mappingview/"+id, nil, nil)
 }
 
-func (c *DoradoClient) GetArrayInfo() (*System, error) {
+func (c *OceanStorClient) GetArrayInfo() (*System, error) {
 	sys := &SystemResp{}
 	err := c.request("GET", "/system/", nil, sys)
 	if err != nil {
@@ -1063,7 +1063,7 @@ func (c *DoradoClient) GetArrayInfo() (*System, error) {
 	return &sys.Data, nil
 }
 
-func (c *DoradoClient) ListRemoteDevices() (*[]RemoteDevice, error) {
+func (c *OceanStorClient) ListRemoteDevices() (*[]RemoteDevice, error) {
 	dev := &RemoteDevicesResp{}
 	err := c.request("GET", "/remote_device", nil, dev)
 	if err != nil {
@@ -1073,13 +1073,13 @@ func (c *DoradoClient) ListRemoteDevices() (*[]RemoteDevice, error) {
 	return &dev.Data, nil
 }
 
-func (c *DoradoClient) CreatePair(params map[string]interface{}) (*ReplicationPair, error) {
+func (c *OceanStorClient) CreatePair(params map[string]interface{}) (*ReplicationPair, error) {
 	pair := &ReplicationPairResp{}
 	err := c.request("POST", "/REPLICATIONPAIR", params, pair)
 	return &pair.Data, err
 }
 
-func (c *DoradoClient) GetPair(id string) (*ReplicationPair, error) {
+func (c *OceanStorClient) GetPair(id string) (*ReplicationPair, error) {
 	pair := &ReplicationPairResp{}
 	err := c.request("GET", "/REPLICATIONPAIR/"+id, nil, pair)
 	if err != nil {
@@ -1089,7 +1089,7 @@ func (c *DoradoClient) GetPair(id string) (*ReplicationPair, error) {
 	return &pair.Data, err
 }
 
-func (c *DoradoClient) SwitchPair(id string) error {
+func (c *OceanStorClient) SwitchPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/switch", data, nil)
 	if err != nil {
@@ -1098,7 +1098,7 @@ func (c *DoradoClient) SwitchPair(id string) error {
 	return err
 }
 
-func (c *DoradoClient) SplitPair(id string) error {
+func (c *OceanStorClient) SplitPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/split", data, nil)
 	if err != nil {
@@ -1107,7 +1107,7 @@ func (c *DoradoClient) SplitPair(id string) error {
 	return err
 }
 
-func (c *DoradoClient) SyncPair(id string) error {
+func (c *OceanStorClient) SyncPair(id string) error {
 	data := map[string]interface{}{"ID": id, "TYPE": ObjectTypeReplicationPair}
 	err := c.request("PUT", "/REPLICATIONPAIR/sync", data, nil)
 	if err != nil {
@@ -1116,7 +1116,7 @@ func (c *DoradoClient) SyncPair(id string) error {
 	return err
 }
 
-func (c *DoradoClient) SetPairSecondAccess(id string, access string) error {
+func (c *OceanStorClient) SetPairSecondAccess(id string, access string) error {
 	data := map[string]interface{}{"ID": id, "SECRESACCESS": access}
 	err := c.request("PUT", "/REPLICATIONPAIR/"+id, data, nil)
 	if err != nil {
@@ -1125,17 +1125,17 @@ func (c *DoradoClient) SetPairSecondAccess(id string, access string) error {
 	return err
 }
 
-func (c *DoradoClient) DeletePair(id string) error {
+func (c *OceanStorClient) DeletePair(id string) error {
 	return c.request("DELETE", "/REPLICATIONPAIR/"+id, nil, nil)
 }
 
-func (c *DoradoClient) CheckPairExist(id string) bool {
+func (c *OceanStorClient) CheckPairExist(id string) bool {
 	resp := &SimpleResp{}
 	err := c.request("GET", "/REPLICATIONPAIR/"+id, nil, resp)
 	return err == nil
 }
 
-func (c *DoradoClient) GetHostOnlineFCInitiators(hostId string) ([]string, error) {
+func (c *OceanStorClient) GetHostOnlineFCInitiators(hostId string) ([]string, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/fc_initiator?PARENTTYPE=21&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1155,7 +1155,7 @@ func (c *DoradoClient) GetHostOnlineFCInitiators(hostId string) ([]string, error
 	return initiators, nil
 }
 
-func (c *DoradoClient) GetOnlineFreeWWNs() ([]string, error) {
+func (c *OceanStorClient) GetOnlineFreeWWNs() ([]string, error) {
 	resp := &FCInitiatorsResp{}
 	url := "/fc_initiator?ISFREE=true&range=[0-65535]"
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1176,7 +1176,7 @@ func (c *DoradoClient) GetOnlineFreeWWNs() ([]string, error) {
 	return wwns, nil
 }
 
-func (c *DoradoClient) GetOnlineFCInitiatorOnArray() ([]string, error) {
+func (c *OceanStorClient) GetOnlineFCInitiatorOnArray() ([]string, error) {
 	resp := &FCInitiatorsResp{}
 	url := "/fc_initiator?range=[0-65535]"
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1195,7 +1195,7 @@ func (c *DoradoClient) GetOnlineFCInitiatorOnArray() ([]string, error) {
 	return fcInitiators, nil
 }
 
-func (c *DoradoClient) GetHostFCInitiators(hostId string) ([]string, error) {
+func (c *OceanStorClient) GetHostFCInitiators(hostId string) ([]string, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/fc_initiator?PARENTTYPE=21&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1214,7 +1214,7 @@ func (c *DoradoClient) GetHostFCInitiators(hostId string) ([]string, error) {
 	return initiators, nil
 }
 
-func (c *DoradoClient) GetHostIscsiInitiators(hostId string) ([]string, error) {
+func (c *OceanStorClient) GetHostIscsiInitiators(hostId string) ([]string, error) {
 	resp := &InitiatorsResp{}
 	url := fmt.Sprintf("/iscsi_initiator?PARENTTYPE=21&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1235,7 +1235,7 @@ func (c *DoradoClient) GetHostIscsiInitiators(hostId string) ([]string, error) {
 	return initiators, nil
 }
 
-func (c *DoradoClient) IsHostAssociatedToHostgroup(hostId string) (bool, error) {
+func (c *OceanStorClient) IsHostAssociatedToHostgroup(hostId string) (bool, error) {
 	resp := &HostResp{}
 	url := fmt.Sprintf("/host/%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1250,11 +1250,11 @@ func (c *DoradoClient) IsHostAssociatedToHostgroup(hostId string) (bool, error) 
 	return false, nil
 }
 
-func (c *DoradoClient) RemoveHost(hostId string) error {
+func (c *OceanStorClient) RemoveHost(hostId string) error {
 	return c.request("DELETE", fmt.Sprintf("/host/%s", hostId), nil, nil)
 }
 
-func (c *DoradoClient) AddFCPortTohost(hostId string, wwn string) error {
+func (c *OceanStorClient) AddFCPortTohost(hostId string, wwn string) error {
 	url := fmt.Sprintf("/fc_initiator/%s", wwn)
 	data := map[string]interface{}{
 		"TYPE":       ObjectTypeFcInitiator,
@@ -1271,7 +1271,7 @@ func (c *DoradoClient) AddFCPortTohost(hostId string, wwn string) error {
 	return nil
 }
 
-func (c *DoradoClient) GetIniTargMap(wwns []string) ([]string, map[string][]string, error) {
+func (c *OceanStorClient) GetIniTargMap(wwns []string) ([]string, map[string][]string, error) {
 	initTargMap := make(map[string][]string)
 	var tgtPortWWNs []string
 	for _, wwn := range wwns {
@@ -1300,7 +1300,7 @@ func (c *DoradoClient) GetIniTargMap(wwns []string) ([]string, map[string][]stri
 	return tgtPortWWNs, initTargMap, nil
 }
 
-func (c *DoradoClient) isInStringArray(s string, source []string) bool {
+func (c *OceanStorClient) isInStringArray(s string, source []string) bool {
 	for _, i := range source {
 		if s == i {
 			return true
@@ -1309,7 +1309,7 @@ func (c *DoradoClient) isInStringArray(s string, source []string) bool {
 	return false
 }
 
-func (c *DoradoClient) getFCTargetWWPNs(wwn string) ([]string, error) {
+func (c *OceanStorClient) getFCTargetWWPNs(wwn string) ([]string, error) {
 	resp := &FCTargWWPNResp{}
 	url := fmt.Sprintf("/host_link?INITIATOR_TYPE=223&INITIATOR_PORT_WWN=%s", wwn)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1329,7 +1329,7 @@ func (c *DoradoClient) getFCTargetWWPNs(wwn string) ([]string, error) {
 	return fcWWPNs, nil
 }
 
-func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string) (int, error) {
+func (c *OceanStorClient) getObjCountFromLungroupByType(lunGroupId, lunType string) (int, error) {
 	// Get obj count associated to the lungroup.
 	var cmdType string
 	if lunType == ObjectTypeLun {
@@ -1352,7 +1352,7 @@ func (c *DoradoClient) getObjCountFromLungroupByType(lunGroupId, lunType string)
 	return count, nil
 }
 
-func (c *DoradoClient) getObjectCountFromLungroup(lunGrpId string) (int, error) {
+func (c *OceanStorClient) getObjectCountFromLungroup(lunGrpId string) (int, error) {
 	lunCount, err := c.getObjCountFromLungroupByType(lunGrpId, ObjectTypeLun)
 	if err != nil {
 		return 0, nil
@@ -1364,7 +1364,7 @@ func (c *DoradoClient) getObjectCountFromLungroup(lunGrpId string) (int, error) 
 	return lunCount + snapshotCount, nil
 }
 
-func (c *DoradoClient) getHostGroupNumFromHost(hostId string) (int, error) {
+func (c *OceanStorClient) getHostGroupNumFromHost(hostId string) (int, error) {
 	resp := &ObjCountResp{}
 	url := fmt.Sprintf("/hostgroup/count?TYPE=14&ASSOCIATEOBJTYPE=21&ASSOCIATEOBJID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1376,7 +1376,7 @@ func (c *DoradoClient) getHostGroupNumFromHost(hostId string) (int, error) {
 	return count, nil
 }
 
-func (c *DoradoClient) removeFCFromHost(wwn string) error {
+func (c *OceanStorClient) removeFCFromHost(wwn string) error {
 	data := map[string]interface{}{
 		"TYPE": ObjectTypeFcInitiator,
 		"ID":   wwn,
@@ -1386,7 +1386,7 @@ func (c *DoradoClient) removeFCFromHost(wwn string) error {
 	return err
 }
 
-func (c *DoradoClient) getHostgroupAssociatedViews(hostGrpId string) ([]MappingView, error) {
+func (c *OceanStorClient) getHostgroupAssociatedViews(hostGrpId string) ([]MappingView, error) {
 	resp := &MappingViewsResp{}
 	url := fmt.Sprintf("/mappingview/associate?TYPE=245&ASSOCIATEOBJTYPE=14&ASSOCIATEOBJID=%s", hostGrpId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1397,7 +1397,7 @@ func (c *DoradoClient) getHostgroupAssociatedViews(hostGrpId string) ([]MappingV
 	return resp.Data, nil
 }
 
-func (c *DoradoClient) getHostsInHostgroup(hostGrpId string) ([]Host, error) {
+func (c *OceanStorClient) getHostsInHostgroup(hostGrpId string) ([]Host, error) {
 	resp := &HostsResp{}
 	url := fmt.Sprintf("/host/associate?ASSOCIATEOBJTYPE=14&ASSOCIATEOBJID=%s", hostGrpId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1414,7 +1414,7 @@ func (c *DoradoClient) getHostsInHostgroup(hostGrpId string) ([]Host, error) {
 	return resp.Data, nil
 }
 
-func (c *DoradoClient) checkFCInitiatorsExistInHost(hostId string) (bool, error) {
+func (c *OceanStorClient) checkFCInitiatorsExistInHost(hostId string) (bool, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/fc_initiator?range=[0-65535]&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1428,7 +1428,7 @@ func (c *DoradoClient) checkFCInitiatorsExistInHost(hostId string) (bool, error)
 	return false, nil
 }
 
-func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, error) {
+func (c *OceanStorClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, error) {
 	resp := &FCInitiatorsResp{}
 	url := fmt.Sprintf("/iscsi_initiator?range=[0-65535]&PARENTID=%s", hostId)
 	if err := c.request("GET", url, nil, resp); err != nil {
@@ -1442,13 +1442,13 @@ func (c *DoradoClient) checkIscsiInitiatorsExistInHost(hostId string) (bool, err
 	return false, nil
 }
 
-func (c *DoradoClient) ListControllers() ([]SimpleStruct, error) {
+func (c *OceanStorClient) ListControllers() ([]SimpleStruct, error) {
 	resp := &SimpleResp{}
 	err := c.request("GET", "/controller", nil, resp)
 	return resp.Data, err
 }
 
-func (c *DoradoClient) GetPerformance(resId string, dataIdList []string) (map[string]string, error) {
+func (c *OceanStorClient) GetPerformance(resId string, dataIdList []string) (map[string]string, error) {
 	perf := &PerformancesResp{}
 	url := fmt.Sprintf("/performace_statistic/cur_statistic_data/"+
 		"?CMO_STATISTIC_UUID=%s&CMO_STATISTIC_DATA_ID_LIST=%s", resId, strings.Join(dataIdList, ","))
