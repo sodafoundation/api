@@ -16,7 +16,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"reflect"
 	"runtime"
@@ -61,17 +60,18 @@ func (g *GrpcServer) Run() error {
 	return s.Serve(lis)
 }
 
-// print error
+// AsyncDecorator is used to provide common method to print info to logs when got error.
+// It will check the wrapped function parameter type and number, also the return value number.
 func AsyncDecorator(fn interface{}, args ...interface{}) {
 	f := reflect.ValueOf(fn)
 	if f.Type().NumIn() != len(args) {
-		panic(fmt.Sprintf("incorrect number of parameter(s) for function %v!",
-			runtime.FuncForPC(f.Pointer()).Name()))
+		log.Errorf("incorrect number of parameter(s) for function %v!",
+			runtime.FuncForPC(f.Pointer()).Name())
 	}
 	for i := 0; i < f.Type().NumIn(); i++ {
 		if f.Type().In(i) != reflect.TypeOf(args[i]) && !reflect.TypeOf(args[i]).ConvertibleTo(f.Type().In(i)) {
-			panic(fmt.Sprintf("parameter(s) for function %v is wrong type (should be %v)",
-				runtime.FuncForPC(f.Pointer()).Name(), f.Type().In(i)))
+			log.Errorf("parameter(s) for function %v is wrong type (should be %v)",
+				runtime.FuncForPC(f.Pointer()).Name(), f.Type().In(i))
 		}
 	}
 	inputs := make([]reflect.Value, len(args))
@@ -81,6 +81,7 @@ func AsyncDecorator(fn interface{}, args ...interface{}) {
 
 	out := f.Call(inputs)
 
+	// Wrapped function return value number must equal to 2
 	if len(out) != 2 {
 		panic("incorrect number of return value(s)")
 	}
