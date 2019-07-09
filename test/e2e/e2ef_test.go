@@ -39,11 +39,11 @@ const (
 	iscsiProtocol  = "iscsi"
 )
 
-var u *client.Client
+var u *SyncClient
 
 // init Create Profile
 func init() {
-	u, _ = client.NewClient(&client.Config{
+	u, _ = NewSyncClient(&client.Config{
 		Endpoint:    constants.DefaultOpensdsEndpoint,
 		AuthOptions: client.NewNoauthOptions(constants.DefaultTenantId),
 	})
