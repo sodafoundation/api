@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
 
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -38,7 +37,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -49,7 +47,7 @@ const (
 	EXTEND_LIFECIRCLE_FLAG
 )
 
-func NewController(port string) *Controller {
+func NewController() *Controller {
 	volCtrl := volume.NewController()
 	fileShareCtrl := fileshare.NewController()
 	metricsCtrl := metrics.NewController()
@@ -59,7 +57,6 @@ func NewController(port string) *Controller {
 		fileshareController: fileShareCtrl,
 		metricsController:   metricsCtrl,
 		drController:        dr.NewController(volCtrl),
-		Port:                port,
 	}
 }
 
@@ -70,30 +67,6 @@ type Controller struct {
 	metricsController   metrics.Controller
 	drController        dr.Controller
 	policyController    policy.Controller
-
-	Port string
-}
-
-// Run method would start the listen mechanism of controller module.
-func (c *Controller) Run() error {
-	// New Grpc Server
-	s := grpc.NewServer()
-	// Register controller service.
-	pb.RegisterControllerServer(s, c)
-	pb.RegisterFileShareControllerServer(s, c)
-
-	// Listen the controller server port.
-	lis, err := net.Listen("tcp", c.Port)
-	if err != nil {
-		log.Fatalf("failed to listen: %+v", err)
-		return err
-	}
-
-	log.Info("Controller server initialized! Start listening on port:", lis.Addr())
-
-	// Start controller server watching loop.
-	defer s.Stop()
-	return s.Serve(lis)
 }
 
 // CreateVolume implements pb.ControllerServer.CreateVolume

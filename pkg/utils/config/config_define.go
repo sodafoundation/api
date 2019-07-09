@@ -87,16 +87,17 @@ type BackendProperties struct {
 }
 
 type Backends struct {
-	Ceph                BackendProperties `conf:"ceph"`
-	Cinder              BackendProperties `conf:"cinder"`
-	Sample              BackendProperties `conf:"sample"`
-	LVM                 BackendProperties `conf:"lvm"`
-	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
-	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
-	HuaweiOceanstor     BackendProperties `conf:"huawei_oceanstor"`
-	HpeNimble           BackendProperties `conf:"hpe_nimble"`
-	NFS                 BackendProperties `conf:"nfs"`
-	Manila              BackendProperties `conf:"manila"`
+	Ceph                 BackendProperties `conf:"ceph"`
+	Cinder               BackendProperties `conf:"cinder"`
+	Sample               BackendProperties `conf:"sample"`
+	LVM                  BackendProperties `conf:"lvm"`
+	HuaweiOceanStorBlock BackendProperties `conf:"huawei_oceanstor_block"`
+	HuaweiFusionStorage  BackendProperties `conf:"huawei_fusionstorage"`
+	HuaweiOceanstor      BackendProperties `conf:"huawei_oceanstor"`
+	HpeNimble            BackendProperties `conf:"hpe_nimble"`
+	NFS                  BackendProperties `conf:"nfs"`
+	Manila               BackendProperties `conf:"manila"`
+	FujitsuEternus       BackendProperties `conf:"fujitsu_eternus"`
 }
 
 type KeystoneAuthToken struct {

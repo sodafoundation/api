@@ -2287,7 +2287,7 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
 	}
 	// Update DriverVolumeType
-	if len(attachment.DriverVolumeType) > 0{
+	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
 	// Update connectionData

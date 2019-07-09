@@ -25,7 +25,7 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/contrib/drivers/drbd"
-	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
+	"github.com/opensds/opensds/contrib/drivers/huawei/oceanstor"
 	scms "github.com/opensds/opensds/contrib/drivers/scutech/cms"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -69,8 +69,8 @@ func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 	case driversConfig.DRBDDriverType:
 		d = &drbd.ReplicationDriver{}
 		break
-	case driversConfig.HuaweiDoradoDriverType:
-		d = &dorado.ReplicationDriver{}
+	case driversConfig.HuaweiOceanStorBlockDriverType:
+		d = &oceanstor.ReplicationDriver{}
 		break
 	case driversConfig.ScutechCMSDriverType:
 		d = &scms.ReplicationDriver{}
@@ -88,8 +88,8 @@ func CleanReplicationDriver(d ReplicationDriver) ReplicationDriver {
 	switch d.(type) {
 	case *drbd.ReplicationDriver:
 		break
-	case *dorado.ReplicationDriver:
-		d = &dorado.ReplicationDriver{}
+	case *oceanstor.ReplicationDriver:
+		d = &oceanstor.ReplicationDriver{}
 	default:
 		break
 	}

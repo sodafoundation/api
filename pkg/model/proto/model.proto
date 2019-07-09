@@ -797,21 +797,21 @@ message CreateFileShareOpts {
     // The description of the file share, optional.
     string description = 4;
     // The locality that file share belongs to, required.
-    string availabilityZone = 6;
+    string availabilityZone = 5;
     // The uuid of the pool on which file share will be created, required.
-    string poolId = 8;
+    string poolId = 6;
     // The name of the pool on which file share will be created, required.
-    string poolName = 9;
+    string poolName = 7;
     // The metadata of the file share, optional.
-    map<string, string> metadata = 10;
+    map<string, string> metadata = 8;
     // The storage driver type.
-    string driverName = 11;
+    string driverName = 9;
     // The Context
-    string context = 12;
+    string context = 10;
     // The Serialized profile
-    string profile = 13;
+    string profile = 11;
     // The ExportLocations
-    repeated string exportLocations = 14;
+    repeated string exportLocations = 12;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
@@ -820,19 +820,19 @@ message DeleteFileShareOpts {
     // The uuid of the fileshare, required.
     string id = 1;
     // The uuid of the pool on which fileshare will be created, required.
-    string poolId = 3;
+    string poolId = 2;
     // The metadata of the fileshare, optional.
-    map<string, string> metadata = 4;
+    map<string, string> metadata = 3;
     // The storage driver type.
-    string driverName = 5;
+    string driverName = 4;
     // The Context
-    string context = 6;
+    string context = 5;
     // The Serialized profile
-    string profile = 7;
+    string profile = 6;
     // The name of fileShare
-    string name = 8;
+    string name = 7;
     // The name of pool
-    string poolname = 9;
+    string poolname = 8;
 }
 
 // CreateFileShareSnapshotOpts is a structure which indicates all required

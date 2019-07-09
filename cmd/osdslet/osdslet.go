@@ -60,7 +60,7 @@ func main() {
 	db.Init(&CONF.Database)
 
 	// Construct controller module grpc server struct and run controller server process.
-	if err := c.NewController(constants.OpensdsCtrBindEndpoint).Run(); err != nil {
+	if err := c.NewGrpcServer(constants.OpensdsCtrBindEndpoint).Run(); err != nil {
 		panic(err)
 	}
 }

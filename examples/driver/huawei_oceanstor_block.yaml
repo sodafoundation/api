@@ -1,0 +1,22 @@
+authOptions:
+  username: "root"
+  password: "Admin@123"
+  # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+  EnableEncrypted: false
+  # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+  PwdEncrypter: "aes"
+  uri: "https://0.0.0.0:8088/deviceManager/rest"
+
+pool:
+  opensds_file:
+    storageType: file
+    availabilityZone: fileshare
+    extras:
+      dataStorage:
+        storageAccessCapability: ["Read","Write","Execute"]          
+      ioConnectivity:
+        accessProtocol: NFS
+        maxIOPS: 1000
+      advanced:
+        diskType: SSD
+        throughput: 1000
