@@ -34,7 +34,7 @@ type Client interface {
 	Close()
 }
 
-// client structure is one implementation of Client interface and will be
+// DockClient structure is one implementation of Client interface and will be
 // called in real environment. There would be more other kind of connection
 // in the long run.
 type DockClient struct {

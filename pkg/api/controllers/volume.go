@@ -82,6 +82,8 @@ func (v *VolumePortal) CreateVolume() {
 	if volume.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
+		// Assign the default profile id to volume so that users can know which
+		// profile is used for creating a volume.
 		volume.ProfileId = prf.Id
 	} else {
 		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
@@ -729,10 +731,9 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		return
 	}
 
-	// get profile
-	// If user doesn't specified profile, using profile derived form volume
+	// If user doesn't specified profile, using profile derived from volume
 	if len(snapshot.ProfileId) == 0 {
-		log.Warning("User doesn't specified profile id, using profile derived form volume")
+		log.Warning("User doesn't specified profile id, using profile derived from volume")
 		vol, err := db.C.GetVolume(ctx, snapshot.VolumeId)
 		if err != nil {
 			v.ErrorHandle(model.ErrorBadRequest, err.Error())

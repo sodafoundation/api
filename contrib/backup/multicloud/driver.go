@@ -20,10 +20,11 @@ import (
 	"io/ioutil"
 	"os"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/backup"
 	"github.com/opensds/opensds/pkg/utils"
-	"gopkg.in/yaml.v2"
 )
 
 const (

@@ -72,8 +72,8 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 	}
 
 	if _, err := cmsadm.Up(); err != nil {
-                return nil, err
-        }
+		return nil, err
+	}
 
 	return replica, nil
 }

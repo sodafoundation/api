@@ -22,9 +22,10 @@ package config
 import (
 	"io/ioutil"
 
+	"gopkg.in/yaml.v2"
+
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/model"
-	"gopkg.in/yaml.v2"
 )
 
 type PoolProperties struct {
