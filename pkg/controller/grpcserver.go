@@ -65,13 +65,15 @@ func (g *GrpcServer) Run() error {
 func AsyncDecorator(fn interface{}, args ...interface{}) {
 	f := reflect.ValueOf(fn)
 	if f.Type().NumIn() != len(args) {
-		log.Errorf("incorrect number of parameter(s) for function %v!",
+		log.Errorf("incorrect number of parameter(s) for function %v!\n",
 			runtime.FuncForPC(f.Pointer()).Name())
+		runtime.Goexit()
 	}
 	for i := 0; i < f.Type().NumIn(); i++ {
 		if f.Type().In(i) != reflect.TypeOf(args[i]) && !reflect.TypeOf(args[i]).ConvertibleTo(f.Type().In(i)) {
-			log.Errorf("parameter(s) for function %v is wrong type (should be %v)",
+			log.Errorf("parameter(s) for function %v is wrong type (should be %v)\n",
 				runtime.FuncForPC(f.Pointer()).Name(), f.Type().In(i))
+			runtime.Goexit()
 		}
 	}
 	inputs := make([]reflect.Value, len(args))
@@ -83,7 +85,8 @@ func AsyncDecorator(fn interface{}, args ...interface{}) {
 
 	// Wrapped function return value number must equal to 2
 	if len(out) != 2 {
-		panic("incorrect number of return value(s)")
+		log.Errorf("incorrect number of return value(s)\n")
+		runtime.Goexit()
 	}
 	if !out[1].IsNil() {
 		log.Errorf("call function '%v' failed: %v", runtime.FuncForPC(f.Pointer()).Name(), out[1].Interface())
