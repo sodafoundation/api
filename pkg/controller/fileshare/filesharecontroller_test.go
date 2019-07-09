@@ -226,3 +226,11 @@ func (fc *fakefileshareClient) AttachVolume(ctx context.Context, in *pb.AttachVo
 func (fc *fakefileshareClient) DetachVolume(ctx context.Context, in *pb.DetachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return nil, nil
 }
+
+func (fc *fakefileshareClient) GetMetrics(ctx context.Context, in *pb.GetMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakefileshareClient) GetUrls(ctx context.Context, in *pb.NoParams, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}

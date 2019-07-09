@@ -39,8 +39,8 @@ import (
 	_ "github.com/opensds/opensds/contrib/connector/fc"
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
 	_ "github.com/opensds/opensds/contrib/connector/nfs"
-	_ "github.com/opensds/opensds/contrib/connector/rbd"
 	_ "github.com/opensds/opensds/contrib/connector/nvmeof"
+	_ "github.com/opensds/opensds/contrib/connector/rbd"
 )
 
 // dockServer is used to implement pb.DockServer
@@ -129,7 +129,7 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 		log.Error("when create volume in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(vol), nil
 }
 
@@ -145,7 +145,7 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 		log.Error("error occurred in dock module when delete volume:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -162,7 +162,7 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 		log.Error("when extend volume in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(vol), nil
 }
 
@@ -179,7 +179,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 		log.Error("error occurred in dock module when initialize volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	var atc = &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -211,7 +211,7 @@ func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.Delete
 		log.Error("error occurred in dock module when terminate volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -228,7 +228,7 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 		log.Error("error occurred in dock module when create snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(snp), nil
 }
 
@@ -244,7 +244,7 @@ func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVo
 		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -268,7 +268,7 @@ func (ds *dockServer) AttachVolume(ctx context.Context, opt *pb.AttachVolumeOpts
 		log.Error("error occurred in dock module when attach volume:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(atc), nil
 }
 
@@ -291,7 +291,7 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 		log.Error("error occurred in dock module when detach volume:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -502,7 +502,7 @@ func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFile
 		log.Error("when create file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(fileshare), nil
 }
 
@@ -518,7 +518,7 @@ func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFile
 		log.Error("when delete file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -537,7 +537,7 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 		log.Error("when create file share in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(fileshare), nil
 }
 
@@ -555,7 +555,6 @@ func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileSha
 		return pb.GenericResponseError(err), err
 	}
 
-	// TODO: maybe need to update status in DB.
 	return pb.GenericResponseResult(nil), nil
 }
 
@@ -572,7 +571,7 @@ func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.Creat
 		log.Error("error occurred in dock module when create snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(snp), nil
 }
 
@@ -587,6 +586,18 @@ func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.Delet
 		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
-	// TODO: maybe need to update status in DB.
+
 	return pb.GenericResponseResult(nil), nil
+}
+
+// GetMetrics method is only defined to make ProvisioinDock service consistent with
+// ProvisionController service, so this method is not allowed to be called.
+func (ds *dockServer) GetMetrics(context.Context, *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
+	return nil, &model.NotImplementError{"method GetMetrics has not been implemented yet"}
+}
+
+// GetUrls method is only defined to make ProvisioinDock service consistent with
+// ProvisionController service, so this method is not allowed to be called.
+func (ds *dockServer) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	return nil, &model.NotImplementError{"method GetUrls has not been implemented yet"}
 }
