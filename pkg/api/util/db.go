@@ -39,12 +39,18 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
-
 	if in.CreatedAt == "" {
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare acl in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
 	}
 	// validate type
 	if in.Type != "ip" {
@@ -96,7 +102,6 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
-
 	if fileshare.Status != model.FileShareAvailable {
 		var errMsg = "only the status of file share is available, the acl can be created"
 		log.Error(errMsg)
@@ -124,6 +129,12 @@ func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error
 func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
+	}
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
 	}
 	// validate the size
 	if in.Size <= 0 {
@@ -209,6 +220,12 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare snapshot in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 
 	// Check existence of fileshare snapshot name #931
 	filesnaps, err := db.C.ListFileShareSnapshots(ctx)
@@ -283,6 +300,11 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 	}
 	if in.Size <= 0 {
 		errMsg := fmt.Sprintf("invalid volume size: %d", in.Size)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating volume in db"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -459,13 +481,18 @@ func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpe
 // to be creating in the DB, the real operation would be executed in another new
 // thread.
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating volume snapshot in db"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
 	if vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
-		var errMsg = "only the status of volume is available or in-use, the snapshot can be created"
+		errMsg := "only the status of volume is available or in-use, the snapshot can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -478,6 +505,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 	}
 
 	in.Status = model.VolumeSnapCreating
+	in.Metadata = utils.MergeStringMaps(in.Metadata, vol.Metadata)
 	return db.C.CreateVolumeSnapshot(ctx, in)
 }
 
