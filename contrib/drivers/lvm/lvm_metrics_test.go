@@ -196,3 +196,57 @@ func printMetricSpec(m []*model.MetricSpec) {
 	}
 
 }
+func Test_getMetricToUnitMap(t *testing.T) {
+	tests := []struct {
+		name string
+		want map[string]string
+	}{
+		{name: "test1", want: metricToUnitMap},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getMetricToUnitMap(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("difference in expected result of getMetricToUnitMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func Test_convert(t *testing.T) {
+	type args struct {
+		instanceID string
+		vg         string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{name: "test1", args: args{instanceID: "volume-b902e771-8e02-4099-b601-a6b3881f8", vg: "opensds-volumes-default"}, want: "opensds--volumes--default-volume--b902e771--8e02--4099--b601--a6b3881f8"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := convert(tt.args.instanceID, tt.args.vg); got != tt.want {
+				t.Errorf("difference in expected result of convert() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func Test_formatDiskName(t *testing.T) {
+	type args struct {
+		instanceID string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{name: "test1", args: args{instanceID: "/dev/loop10"}, want: "loop10"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := formatDiskName(tt.args.instanceID); got != tt.want {
+				t.Errorf("difference in expected result of formatDiskName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
