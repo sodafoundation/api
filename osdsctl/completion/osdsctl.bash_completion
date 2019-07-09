@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# bash completion for openstack nova-manage
 _osdsctl() {
     COMPREPLY=()
     local cur=${COMP_WORDS[COMP_CWORD]};
     local pre=${COMP_WORDS[COMP_CWORD-1]};
     case "$COMP_CWORD $pre" in
     '1 osdsctl')
-          COMPREPLY=($(compgen -W 'dock pool profile version volume replication' -- $cur)) ;;
+          COMPREPLY=($(compgen -W 'dock pool profile version volume replication fileshare' -- $cur)) ;;
     '2 dock')
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     '2 pool')
@@ -40,12 +39,16 @@ _osdsctl() {
           COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
     '3 group')
         COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+    '2 fileshare')
+              COMPREPLY=($(compgen -W 'create delete list show acl snapshot' -- $cur)) ;;
+    '3 acl')
+          COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
     '*')
           ;;
     esac
 
     [ $COMP_CWORD == 1 ] && {
-        COMPREPLY=($(compgen -W 'dock pool profile version volume replication' -- $cur))
+        COMPREPLY=($(compgen -W 'dock pool profile version volume replication fileshare' -- $cur))
     }
     return 0
 }
