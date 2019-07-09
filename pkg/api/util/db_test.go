@@ -427,3 +427,51 @@ func TestDeleteVolumeSnapshotDBEntry(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateFileShareSnapshotDBEntry(t *testing.T) {
+	var fileshare = &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status: "available",
+	}
+	var req = &model.FileShareSnapshotSpec{
+		BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+		},
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Status:      "available",
+		ShareSize:  int64(1),
+		FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+	}
+
+	var sampleSnapshots = []*model.FileShareSnapshotSpec{&SampleShareSnapshots[0]}
+	t.Run("-ve test case - snapshot name already exists", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(fileshare, nil)
+		mockClient.On("ListFileShareSnapshots", context.NewAdminContext()).Return(sampleSnapshots, nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareSnapshotDBEntry(context.NewAdminContext(), req)
+		expectedError := "file share snapshot name already exists"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("test +ve", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(fileshare, nil)
+		mockClient.On("ListFileShareSnapshots", context.NewAdminContext()).Return(nil, nil)
+		mockClient.On("CreateFileShareSnapshot", context.NewAdminContext(), req).Return(&SampleShareSnapshots[0], nil)
+		db.C = mockClient
+
+		var expected = &SampleShareSnapshots[0]
+		result, err := CreateFileShareSnapshotDBEntry(context.NewAdminContext(), req)
+		if err != nil {
+			t.Errorf("failed to create fileshare snapshot, err is %v\n", err)
+		}
+		assertTestResult(t, result, expected)
+	})
+
+}

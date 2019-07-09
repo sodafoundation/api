@@ -227,6 +227,22 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		return nil, errors.New(errMsg)
 	}
 
+	// Check existence of fileshare snapshot name #931
+	filesnaps, err := db.C.ListFileShareSnapshots(ctx)
+	if err != nil {
+		errMsg := fmt.Sprintf("get list of fileshare snapshot failed: %s", err.Error())
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	} else {
+		for _, filesnap := range filesnaps {
+			if filesnap.Name == in.Name {
+				errMsg := fmt.Sprintf("file share snapshot name already exists")
+				log.Error(errMsg)
+				return nil, errors.New(errMsg)
+			}
+		}
+	}
+
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
