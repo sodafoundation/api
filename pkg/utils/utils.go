@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,23 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"reflect"
+	"time"
 
 	log "github.com/golang/glog"
 )
+
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
 
 //remove redundant elements
 func RvRepElement(arr []string) []string {
@@ -125,6 +136,25 @@ func StructToMap(structObj interface{}) (map[string]interface{}, error) {
 	return result, nil
 }
 
+func CompareArray(key string, value interface{}, reqValue interface{}) (bool, error) {
+	aInterface := value.([]interface{})
+	astring := make([]string, len(aInterface))
+	for i, v := range aInterface {
+		astring[i] = v.(string)
+	}
+	switch reflect.TypeOf(reqValue).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(reqValue)
+		for i := 0; i < s.Len(); i++ {
+			val := s.Index(i).String()
+			if !Contains(astring, val) {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
+}
+
 // Epsilon ...
 const Epsilon float64 = 0.00000001
 
@@ -178,6 +208,10 @@ func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) 
 		}
 
 		return false, errors.New("the type of " + key + " must be string")
+
+	case []interface{}:
+		return CompareArray(key, value, reqValue)
+
 	default:
 		return false, errors.New("the type of " + key + " must be bool or float64 or string")
 	}
@@ -194,4 +228,25 @@ func RandSeq(n int, chs []rune) string {
 		b[i] = chs[rand.Intn(len(chs))]
 	}
 	return string(b)
+}
+
+func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
+	endAt := time.Now().Add(timeout)
+	time.Sleep(time.Duration(interval))
+	for {
+		startTime := time.Now()
+		ok, err := f()
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
+		if time.Now().After(endAt) {
+			break
+		}
+		elapsed := time.Now().Sub(startTime)
+		time.Sleep(interval - elapsed)
+	}
+	return fmt.Errorf("wait for condition timeout")
 }

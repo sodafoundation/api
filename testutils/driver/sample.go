@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ package sample
 import (
 	"errors"
 
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
@@ -64,12 +64,12 @@ func (*Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error)
 }
 
 // InitializeConnection
-func (*Driver) InitializeConnection(opt *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (*Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	return &SampleConnection, nil
 }
 
 // TerminateConnection
-func (*Driver) TerminateConnection(opt *pb.DeleteAttachmentOpts) error { return nil }
+func (*Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error { return nil }
 
 // CreateSnapshot
 func (*Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
@@ -103,21 +103,47 @@ func (*Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet"}
+	return nil, &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet"}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet"}
+	return &model.NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet"}
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup has not been implemented yet"}
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
-	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
-	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented yet"}
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
+}
+
+func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
+
+func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
+	return nil
+}
+
+func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	return &SampleFileSharesAcl[0], nil
+}
+
+func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
+	return nil
+}
+
+// CreateFileShareSnapshot
+func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+// DeleteFileShareSnapshot
+func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) error {
+	return nil
 }

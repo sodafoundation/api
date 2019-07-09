@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import (
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/pwd"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -66,7 +66,8 @@ type AuthOptions struct {
 	DomainName       string `yaml:"domainName,omitempty"`
 	Username         string `yaml:"username,omitempty"`
 	Password         string `yaml:"password,omitempty"`
-	PasswordTool     string `yaml:"passwordtool,omitempty"`
+	PwdEncrypter     string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted  bool   `yaml:"EnableEncrypted,omitempty"`
 	TenantID         string `yaml:"tenantId,omitempty"`
 	TenantName       string `yaml:"tenantName,omitempty"`
 }
@@ -117,12 +118,16 @@ func (d *Driver) Setup() error {
 	}
 	Parse(d.conf, p)
 
-	// Decrypte the password
-	pwdCiphertext := d.conf.Password
-	pwdTool := pwd.NewPwdTool(d.conf.PasswordTool)
-	pwd, err := pwdTool.Decrypter(pwdCiphertext)
-	if err != nil {
-		return err
+	var pwdCiphertext = d.conf.Password
+
+	if d.conf.EnableEncrypted {
+		// Decrypte the password
+		pwdTool := pwd.NewPwdEncrypter(d.conf.PwdEncrypter)
+		password, err := pwdTool.Decrypter(pwdCiphertext)
+		if err != nil {
+			return err
+		}
+		pwdCiphertext = password
 	}
 
 	opts := gophercloud.AuthOptions{
@@ -130,7 +135,7 @@ func (d *Driver) Setup() error {
 		DomainID:         d.conf.DomainID,
 		DomainName:       d.conf.DomainName,
 		Username:         d.conf.Username,
-		Password:         pwd,
+		Password:         pwdCiphertext,
 		TenantID:         d.conf.TenantID,
 		TenantName:       d.conf.TenantName,
 	}
@@ -142,7 +147,7 @@ func (d *Driver) Setup() error {
 			return err
 		}
 
-		d.blockStoragev2, err = noauth.NewBlockStorageV2(provider, noauth.EndpointOpts{
+		d.blockStoragev2, err = noauth.NewBlockStorageNoAuth(provider, noauth.EndpointOpts{
 			CinderEndpoint: d.conf.CinderEndpoint,
 		})
 		if err != nil {
@@ -247,7 +252,7 @@ func (d *Driver) PullVolume(volID string) (*model.VolumeSpec, error) {
 // DeleteVolume
 func (d *Driver) DeleteVolume(req *pb.DeleteVolumeOpts) error {
 	cinderVolId := req.Metadata[KCinderVolumeId]
-	if err := volumesv2.Delete(d.blockStoragev2, cinderVolId).ExtractErr(); err != nil {
+	if err := volumesv2.Delete(d.blockStoragev2, cinderVolId, nil).ExtractErr(); err != nil {
 		log.Error("Cannot delete volume:", err)
 		return err
 	}
@@ -280,7 +285,7 @@ func (d *Driver) ExtendVolume(req *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 // InitializeConnection
-func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *Driver) InitializeConnection(req *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	opts := &volumeactions.InitializeConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),
@@ -303,8 +308,8 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 	connData := map[string]interface{}{
 		"accessMode":       data["access_mode"],
 		"targetDiscovered": data["target_discovered"],
-		"targetIQN":        data["target_iqn"],
-		"targetPortal":     data["target_portal"],
+		"targetIQN":        []string{data["target_iqn"].(string)},
+		"targetPortal":     []string{data["target_portal"].(string)},
 		"discard":          false,
 		"targetLun":        data["target_lun"],
 	}
@@ -321,7 +326,7 @@ func (d *Driver) InitializeConnection(req *pb.CreateAttachmentOpts) (*model.Conn
 }
 
 // TerminateConnection
-func (d *Driver) TerminateConnection(req *pb.DeleteAttachmentOpts) error {
+func (d *Driver) TerminateConnection(req *pb.DeleteVolumeAttachmentOpts) error {
 	opts := volumeactions.TerminateConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),
@@ -458,6 +463,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			StorageType:      d.conf.Pool[page.Name].StorageType,
 			AvailabilityZone: d.conf.Pool[page.Name].AvailabilityZone,
 			Extras:           d.conf.Pool[page.Name].Extras,
+			MultiAttach:      d.conf.Pool[page.Name].MultiAttach,
 		}
 		pols = append(pols, pol)
 	}
@@ -465,21 +471,21 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	return nil, &model.NotImplementError{S: "Method InitializeSnapshotConnection has not been implemented yet"}
+	return nil, &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet"}
 }
 
 func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
-	return &model.NotImplementError{S: "Method TerminateSnapshotConnection has not been implemented yet"}
+	return &model.NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet"}
 }
 
-func (d *Driver) CreateVolumeGroup(req *pb.CreateVolumeGroupOpts, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, &model.NotImplementError{"Method CreateVolumeGroup has not been implemented"}
+func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(req *pb.UpdateVolumeGroupOpts, vg *model.VolumeGroupSpec, addVolumesRef []*model.VolumeSpec, removeVolumesRef []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, []*model.VolumeSpec, error) {
-	return nil, nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented"}
+func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(req *pb.DeleteVolumeGroupOpts, vg *model.VolumeGroupSpec, volumes []*model.VolumeSpec) (*model.VolumeGroupSpec, []*model.VolumeSpec, error) {
-	return nil, nil, &model.NotImplementError{"Method UpdateVolumeGroup has not been implemented"}
+func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,6 +61,9 @@ func (*fakeClientCaller) Get(req *Request) *Response {
 	}
 	if strings.Contains(req.Url, "replications") {
 		resp = append(resp, StringSliceReplications[0])
+	}
+	if strings.Contains(req.Url, "acls") {
+		resp = append(resp, ByteFileShareAcl)
 	}
 	return &Response{
 		Status:  "Success",
@@ -394,13 +397,7 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 		Mountpoint: "Test Mountpoint",
 		Status:     "Test Status",
 		VolumeId:   "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{Platform: "Test Platform",
-			OsType:    "Test OsType",
-			Ip:        "Test Ip",
-			Host:      "Test Host",
-			Initiator: "Test Initiator"},
 		ConnectionInfo: model.ConnectionInfo{
-			DriverVolumeType: "Test DriverVolumeType",
 			ConnectionData: map[string]interface{}{
 				"targetDiscovered": true,
 				"targetIqn":        "iqn.2017-10.io.opensds:volume:00000001",
@@ -421,30 +418,6 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 
 	if result.Status != "Test Status" {
 		t.Errorf("Expected %+v, got %+v\n", "Test Status", result.Status)
-	}
-
-	if result.Platform != "Test Platform" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Platform", result.Platform)
-	}
-
-	if result.OsType != "Test OsType" {
-		t.Errorf("Expected %+v, got %+v\n", "Test OsType", result.OsType)
-	}
-
-	if result.Ip != "Test Ip" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Ip", result.Ip)
-	}
-
-	if result.Host != "Test Host" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Host", result.Host)
-	}
-
-	if result.Initiator != "Test Initiator" {
-		t.Errorf("Expected %+v, got %+v\n", "Test Initiator", result.Initiator)
-	}
-
-	if result.DriverVolumeType != "Test DriverVolumeType" {
-		t.Errorf("Expected %+v, got %+v\n", "Test DriverVolumeType", result.DriverVolumeType)
 	}
 }
 
@@ -611,5 +584,33 @@ func TestExtendVolume(t *testing.T) {
 
 	if result.Size != 9 {
 		t.Errorf("Expected %+v, got %+v\n", 9, result.Size)
+	}
+}
+
+func TestUpdateFileShareAcl(t *testing.T) {
+	metadata := make(map[string]string)
+	metadata["manilaShareID"] = "a55156cd-05b7-4e36-9d78-c3cb4006713b"
+	metadata["manilaAclId"] = "081071b1-01bd-49ad-80dd-c2aa795f1d15"
+
+	var acl = model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d9",
+		},
+		Metadata: metadata,
+	}
+
+	result, err := fc.UpdateFileShareAcl(c.NewAdminContext(), &acl)
+	if err != nil {
+		t.Error("Update fileShare acl failed:", err)
+	}
+
+	manilaShareID, ok := result.Metadata["manilaShareID"]
+	if !ok || manilaShareID != "a55156cd-05b7-4e36-9d78-c3cb4006713b" {
+		t.Errorf("Expected %+v, got %+v\n", "a55156cd-05b7-4e36-9d78-c3cb4006713b", manilaShareID)
+	}
+
+	manilaAclId, ok := result.Metadata["manilaAclId"]
+	if !ok || manilaAclId != "081071b1-01bd-49ad-80dd-c2aa795f1d15" {
+		t.Errorf("Expected %+v, got %+v\n", "081071b1-01bd-49ad-80dd-c2aa795f1d15", manilaAclId)
 	}
 }

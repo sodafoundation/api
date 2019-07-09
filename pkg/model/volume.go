@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -81,6 +81,9 @@ type VolumeSpec struct {
 	ReplicationDriverData map[string]string `json:"replicationDriverData,omitempty"`
 	// Attach status of the volume.
 	AttachStatus string
+
+	// Whether the volume can be attached more than once, default value is false.
+	MultiAttach bool `json:"multiAttach,omitempty"`
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.
@@ -117,6 +120,9 @@ type VolumeAttachmentSpec struct {
 
 	// The protocol
 	AccessProtocol string `json:"accessProtocol,omitempty"`
+
+	// read-only (‘ro’) or read-and-write (‘rw’), default is ‘rw’
+	AttachMode string `json:"attachMode,omitempty"`
 }
 
 // HostInfo is a structure for all properties of host when create a volume

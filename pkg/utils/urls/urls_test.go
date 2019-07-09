@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ func TestGenerateURL(t *testing.T) {
 	if url := generateURL("docks", Client, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}
-
 	expected = "v1beta/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/pools/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
 	if url := generateURL("pools", Client, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "8e5e92ca-d673-11e7-bca8-2ba95b86eb06"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)

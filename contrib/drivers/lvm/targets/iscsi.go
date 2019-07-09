@@ -1,21 +1,24 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package targets
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"strconv"
@@ -33,7 +36,7 @@ const (
 type ISCSITarget interface {
 	CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error
 	GetISCSITarget(iqn string) int
-	RemoveISCSITarget(volId, iqn string) error
+	RemoveISCSITarget(volId, iqn, hostIp string) error
 	GetLun(path string) int
 }
 
@@ -81,43 +84,57 @@ func (t *tgtTarget) getTgtConfPath(volId string) string {
 	return t.TgtConfDir + "/" + opensdsPrefix + volId + ".conf"
 }
 
+type configMap map[string][]string
+
 func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
+	// Multi-attach require a specific ip
+	if hostIp == "" || hostIp == "ALL" {
+		msg := fmt.Sprintf("create ISCSI target failed: host ip %s cannot be empty or ALL, iscsi only allows specific ip access, not all", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
+	}
+
+	result := net.ParseIP(hostIp)
+	if result == nil {
+		msg := fmt.Sprintf("%s is not a valid ip, please give the proper ip", hostIp)
+		log.Error(msg)
+		return errors.New(msg)
+	}
 
 	if exist, _ := utils.PathExists(t.TgtConfDir); !exist {
 		os.MkdirAll(t.TgtConfDir, 0755)
 	}
 
+	config := make(configMap)
+
+	configFile := t.getTgtConfPath(volId)
+
+	if IsExist(configFile) {
+		data, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			return err
+		}
+		config.parse(string(data))
+	}
+
 	var charStr string
 	if len(chapAuth) != 0 {
-		charStr = fmt.Sprintf("incominguser %s %s", chapAuth[0], chapAuth[1])
+		charStr = fmt.Sprintf("%s %s", chapAuth[0], chapAuth[1])
+		config.updateConfigmap("incominguser", charStr)
 	}
 
-	var tgtConfFormatter = `
-<target %s>
-	backing-store %s
-	driver %s
-	%s
-	%s
-	%s
-	write-cache %s
-</target>
-`
-	var initiatorAddr = "initiator-address " + hostIp
-	var initiatorName string
-	if initiator != "ALL" {
-		initiatorName = "initiator-name " + initiator
-	}
+	config.updateConfigmap("initiator-address", hostIp)
+	config.updateConfigmap("driver", "iscsi")
+	config.updateConfigmap("backing-store", path)
+	config.updateConfigmap("write-cache", "on")
 
-	confStr := fmt.Sprintf(tgtConfFormatter, tgtIqn, path, "iscsi", charStr, initiatorAddr, initiatorName, "on")
-	f, err := os.Create(t.getTgtConfPath(volId))
+	err := config.writeConfig(configFile, tgtIqn)
 	if err != nil {
+		log.Errorf("failed to update config file %s %v", t.getTgtConfPath(volId), err)
 		return err
 	}
-	defer f.Close()
-	f.WriteString(confStr)
-	f.Sync()
 
-	if info, err := t.execCmd(tgtAdminCmd, "--update", tgtIqn); err != nil {
+	if info, err := t.execCmd(tgtAdminCmd, "--force", "--update", tgtIqn); err != nil {
 		log.Errorf("Fail to exec '%s' to create iscsi target, %s,%v", tgtAdminCmd, string(info), err)
 		return err
 	}
@@ -155,20 +172,65 @@ func (t *tgtTarget) GetISCSITarget(iqn string) int {
 	return tid
 }
 
-func (t *tgtTarget) RemoveISCSITarget(volId, iqn string) error {
+func (t *tgtTarget) RemoveISCSITarget(volId, iqn, hostIp string) error {
+	if hostIp == "" {
+		return errors.New("remove ISCSI target failed, host ip cannot be empty")
+	}
+
 	tgtConfPath := t.getTgtConfPath(volId)
 	if exist, _ := utils.PathExists(tgtConfPath); !exist {
 		log.Warningf("Volume path %s does not exist, nothing to remove.", tgtConfPath)
 		return nil
 	}
 
-	if info, err := t.execCmd(tgtAdminCmd, "--force", "--delete", iqn); err != nil {
-		log.Errorf("Fail to exec '%s' to forcely remove iscsi target, %s, %v",
-			tgtAdminCmd, string(info), err)
+	config := make(configMap)
+
+	data, err := ioutil.ReadFile(tgtConfPath)
+	if err != nil {
 		return err
 	}
 
-	os.Remove(tgtConfPath)
+	config.parse(string(data))
+
+	ips := config["initiator-address"]
+	for i, v := range ips {
+		if v == hostIp {
+			ips = append(ips[:i], ips[i+1:]...)
+			break
+		}
+	}
+	config["initiator-address"] = ips
+	if len(ips) == 0 {
+		if info, err := t.execCmd(tgtAdminCmd, "--force", "--delete", iqn); err != nil {
+			log.Errorf("Fail to exec '%s' to forcely remove iscsi target, %s, %v",
+				tgtAdminCmd, string(info), err)
+			return err
+		}
+
+		os.Remove(tgtConfPath)
+	} else {
+		err := config.writeConfig(t.getTgtConfPath(volId), iqn)
+		if err != nil {
+			log.Errorf("failed to update config file %s %v", t.getTgtConfPath(volId), err)
+			return err
+		}
+
+		if info, err := t.execCmd(tgtAdminCmd, "--force", "--update", iqn); err != nil {
+			log.Errorf("Fail to exec '%s' to create iscsi target, %s,%v", tgtAdminCmd, string(info), err)
+			return err
+		}
+
+		if t.GetISCSITarget(iqn) == -1 {
+			log.Errorf("Failed to create iscsi target for Volume "+
+				"ID: %s. It could be caused by problem "+
+				"with concurrency. "+
+				"Also please ensure your tgtd config "+
+				"file contains 'include %s/*'",
+				volId, t.TgtConfDir)
+			return fmt.Errorf("failed to create volume(%s) attachment", volId)
+		}
+	}
+
 	return nil
 }
 
@@ -180,4 +242,56 @@ func (*tgtTarget) execCmd(name string, cmd ...string) (string, error) {
 		log.Error("error info:", err)
 	}
 	return string(ret), err
+}
+
+func (m *configMap) parse(data string) {
+	var lines = strings.Split(data, "\n")
+
+	for _, line := range lines {
+		for _, key := range []string{"backing-store", "driver", "initiator-address", "write-cache"} {
+			if strings.Contains(line, key) {
+				s := strings.TrimSpace(line)
+				if (*m)[key] == nil {
+					(*m)[key] = []string{strings.Split(s, " ")[1]}
+				} else {
+					(*m)[key] = append((*m)[key], strings.Split(s, " ")[1])
+				}
+			}
+		}
+	}
+}
+
+func (m *configMap) updateConfigmap(key, value string) {
+	v := (*m)[key]
+	if v == nil {
+		(*m)[key] = []string{value}
+	} else {
+		if !utils.Contains(v, value) {
+			v = append(v, value)
+			(*m)[key] = v
+		}
+	}
+}
+
+func (m configMap) writeConfig(file, tgtIqn string) error {
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	f.WriteString(fmt.Sprintf("<target %s>\n", tgtIqn))
+	for k, v := range m {
+		for _, vl := range v {
+			f.WriteString(fmt.Sprintf("        %s %s\n", k, vl))
+		}
+	}
+	f.WriteString("</target>")
+	f.Sync()
+	return nil
+}
+
+func IsExist(f string) bool {
+	_, err := os.Stat(f)
+	return err == nil || os.IsExist(err)
 }

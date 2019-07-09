@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@ func TestRvRepElement(t *testing.T) {
 	var expect = "default"
 	if len(str) != 1 || res != expect {
 		t.Errorf("%v remove redundant elements fail,expect:%v,result:%v\n", str, expect, res)
+	}
+}
+
+func TestContains(t *testing.T) {
+	var permissions = []string{"Read", "Write", "Execute"}
+	var testkey = "Read"
+	if !Contains(permissions, testkey) {
+		t.Errorf("%v is not contains in %v\n", testkey, permissions)
 	}
 }
 

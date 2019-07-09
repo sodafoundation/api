@@ -1,0 +1,50 @@
+# Copyright 2019 The OpenSDS Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##################################################################################################
+# Apiserver service v1beta
+##################################################################################################
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apiserver-v1beta
+  namespace: opensds
+  labels:
+    app: apiserver
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: apiserver
+        version: v1beta
+    spec:
+      containers:
+      - name: apiserver
+        image: opensdsio/opensds-apiserver:latest
+        imagePullPolicy: IfNotPresent
+        command: ["bin/sh"]
+        args: ["-c", "/usr/bin/osdsapiserver -logtostderr"]
+        ports:
+        - containerPort: 50040
+        volumeMounts:
+        - name: opensds-conf-dir
+          mountPath: /etc/opensds
+      volumes:
+      - name: opensds-conf-dir
+        hostPath:
+          path: /etc/opensds
+          type: Directory
+---

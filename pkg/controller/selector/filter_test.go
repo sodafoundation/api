@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -393,6 +393,36 @@ func TestAdvancedFilter(t *testing.T) {
 
 		if !reflect.DeepEqual(result, testCase.expected) {
 			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
+	}
+}
+
+func TestIsMultiAttachFilter(t *testing.T) {
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"multiAttach": "<is> true",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"multiAttach": "<is> false",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[1],
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected[0], result[0])
 		}
 	}
 }

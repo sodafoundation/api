@@ -1,16 +1,16 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package dr
 
@@ -24,10 +24,10 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	. "github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type Controller interface {
@@ -186,7 +186,7 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 	db.C.UpdateVolume(ctx, primaryVol)
 	secondaryVol.ReplicationDriverData = make(map[string]string)
 	db.C.UpdateVolume(ctx, secondaryVol)
-	return db.C.DeleteReplication(ctx, replica.Id)
+	return nil
 }
 
 func (d *DrController) EnableReplication(ctx *c.Context, replica *ReplicationSpec, primaryVol, secondaryVol *VolumeSpec) error {
@@ -289,7 +289,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 		initiator = attacherDock.Metadata["WWPNS"]
 	}
 
-	var createAttachOpt = &pb.CreateAttachmentOpts{
+	var createAttachOpt = &pb.CreateVolumeAttachmentOpts{
 		Id:       attachmentId,
 		VolumeId: vol.Id,
 		HostInfo: &pb.HostInfo{
@@ -320,7 +320,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	rollback := false
 	defer func() {
 		if rollback {
-			opt := &pb.DeleteAttachmentOpts{
+			opt := &pb.DeleteVolumeAttachmentOpts{
 				Id:       atm.Id,
 				VolumeId: atm.VolumeId,
 				HostInfo: &pb.HostInfo{
@@ -330,9 +330,10 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 					Host:      atm.Host,
 					Initiator: atm.Initiator,
 				},
-				Metadata:   utils.MergeStringMaps(atm.Metadata, vol.Metadata),
-				DriverName: provisionerDock.DriverName,
-				Context:    ctx.ToJson(),
+				AccessProtocol: protocol,
+				Metadata:       utils.MergeStringMaps(atm.Metadata, vol.Metadata),
+				DriverName:     provisionerDock.DriverName,
+				Context:        ctx.ToJson(),
 			}
 			p.volumeController.SetDock(provisionerDock)
 			p.volumeController.DeleteVolumeAttachment(opt)
@@ -392,7 +393,7 @@ func (p *PairOperator) doDetach(ctx *c.Context, attachmentId string, vol *Volume
 		return err
 	}
 
-	opt := &pb.DeleteAttachmentOpts{
+	opt := &pb.DeleteVolumeAttachmentOpts{
 		Id:       atm.Id,
 		VolumeId: atm.VolumeId,
 		HostInfo: &pb.HostInfo{

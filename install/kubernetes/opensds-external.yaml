@@ -1,0 +1,120 @@
+# Copyright 2019 The OpenSDS Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##################################################################################################
+# DB service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: opensds
+  labels:
+    app: db
+    service: db
+spec:
+  ports:
+  - port: 2379
+    name: tcp-db1
+  - port: 2380
+    name: tcp-db2
+  selector:
+    app: db
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-v1
+  namespace: opensds
+  labels:
+    app: db
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+        version: v1
+    spec:
+      containers:
+      - name: db
+        image: quay.io/coreos/etcd:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["-c", "/usr/local/bin/etcd \
+          --name s1 \
+          --listen-client-urls http://0.0.0.0:2379 \
+          --advertise-client-urls http://0.0.0.0:2379 \
+          --listen-peer-urls http://0.0.0.0:2380 \
+          --initial-advertise-peer-urls http://0.0.0.0:2380 \
+          --initial-cluster s1=http://0.0.0.0:2380"]
+        ports:
+        - containerPort: 2379
+        - containerPort: 2380
+        volumeMounts:
+        - name: etcd-cert-dir
+          mountPath: /etc/ssl/certs
+      volumes:
+      - name: etcd-cert-dir
+        hostPath:
+          path: /usr/share/ca-certificates/
+          type: Directory
+---
+##################################################################################################
+# Authchecker service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: authchecker
+  namespace: opensds
+  labels:
+    app: authchecker
+    service: authchecker
+spec:
+  ports:
+  - port: 80
+    name: http-authchecker
+  selector:
+    app: authchecker
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: authchecker-v1
+  namespace: opensds
+  labels:
+    app: authchecker
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authchecker
+        version: v1
+    spec:
+      containers:
+      - name: authchecker
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
+        image: opensdsio/opensds-authchecker:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+---

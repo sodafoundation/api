@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package client
 
 import (
 	log "github.com/golang/glog"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"google.golang.org/grpc"
 )
 
@@ -27,24 +27,26 @@ import (
 type Client interface {
 	pb.ProvisionDockClient
 	pb.AttachDockClient
+	pb.FileShareDockClient
 
 	Connect(edp string) error
 
 	Close()
 }
 
-// client structure is one implementation of Client interface and will be
+// DockClient structure is one implementation of Client interface and will be
 // called in real environment. There would be more other kind of connection
 // in the long run.
-type client struct {
+type DockClient struct {
 	pb.ProvisionDockClient
 	pb.AttachDockClient
+	pb.FileShareDockClient
 	*grpc.ClientConn
 }
 
-func NewClient() Client { return &client{} }
+func NewClient() Client { return &DockClient{} }
 
-func (c *client) Connect(edp string) error {
+func (c *DockClient) Connect(edp string) error {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(edp, grpc.WithInsecure())
 	if err != nil {
@@ -52,6 +54,7 @@ func (c *client) Connect(edp string) error {
 		return err
 	}
 	// Create dock client via the connection.
+	c.FileShareDockClient = pb.NewFileShareDockClient(conn)
 	c.ProvisionDockClient = pb.NewProvisionDockClient(conn)
 	c.AttachDockClient = pb.NewAttachDockClient(conn)
 	c.ClientConn = conn
@@ -59,6 +62,6 @@ func (c *client) Connect(edp string) error {
 	return nil
 }
 
-func (c *client) Close() {
+func (c *DockClient) Close() {
 	c.ClientConn.Close()
 }

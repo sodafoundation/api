@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+# Copyright 2019 The OpenSDS Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 swagger: '2.0'
 info:
-  version: "v1beta"
+  version: v1beta
   title: OpenSDS Controller API
   description: OpenSDS Controller API to manage mutliple backend storages.
   termsOfService: 'https://www.linuxfoundation.org/terms'
@@ -25,7 +25,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: opensds
+host: localhost:50040
 schemes:
   - https
   - http
@@ -80,9 +80,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/docks':
+  '/v1beta/{tenantId}/docks':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Dock
@@ -100,9 +100,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/docks/{dockId}':
+  '/v1beta/{tenantId}/docks/{dockId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/dockId'
     get:
       tags:
@@ -121,9 +121,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/pools':
+  '/v1beta/{tenantId}/pools':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Pool
@@ -141,9 +141,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/availabilityZones':
+  '/v1beta/{tenantId}/availabilityZones':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Availability Zone
@@ -153,7 +153,7 @@ paths:
           description: OK
           schema:
             type: array
-            items: 
+            items:
               type: string
         '401':
           $ref: '#/responses/HTTPStatus401'
@@ -161,9 +161,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/pools/{poolId}':
+  '/v1beta/{tenantId}/pools/{poolId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/poolId'
     get:
       tags:
@@ -182,9 +182,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles':
+  '/v1beta/{tenantId}/profiles':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Profiles
@@ -292,9 +292,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}':
+  '/v1beta/{tenantId}/profiles/{profileId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
     get:
       tags:
@@ -331,11 +331,17 @@ paths:
         - Profiles
       description: Updates a profile.
       parameters:
-        - name: body
+        - name: profile
           in: body
-          required: true
           schema:
-            $ref: '#/definitions/ProfileSpec'
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+              description:
+                type: string
       responses:
         '200':
           description: OK
@@ -377,9 +383,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}/customeProperties':
+  '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
     post:
       tags:
@@ -420,7 +426,7 @@ paths:
         '200':
           description: OK
           schema:
-              $ref: '#/definitions/CustomPropertiesSpec'
+             $ref: '#/definitions/CustomPropertiesSpec'
           examples:
             application/json:
               key1: value1
@@ -436,9 +442,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/profiles/{profileId}/customProperties/{customKey}':
+  '/v1beta/{tenantId}/profiles/{profileId}/customProperties/{customKey}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/profileId'
       - $ref: '#/parameters/customKey'
     delete:
@@ -456,9 +462,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes':
+  '/v1beta/{tenantId}/block/volumes':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block volumes
@@ -498,9 +504,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes/{volumeId}':
+  '/v1beta/{tenantId}/block/volumes/{volumeId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeId'
     get:
       tags:
@@ -563,9 +569,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumes/{volumeId}/resize':
+  '/v1beta/{tenantId}/block/volumes/{volumeId}/resize':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeId'
     post:
       tags:
@@ -589,9 +595,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/attachments':
+  '/v1beta/{tenantId}/block/attachments':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       parameters:
         - uniqueItems: true
@@ -640,9 +646,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/attachments/{attachmentId}':
+  '/v1beta/{tenantId}/block/attachments/{attachmentId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/attachmentId'
     get:
       tags:
@@ -700,9 +706,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/snapshots':
+  '/v1beta/{tenantId}/block/snapshots':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       parameters:
         - uniqueItems: true
@@ -748,9 +754,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/snapshots/{snapshotId}':
+  '/v1beta/{tenantId}/block/snapshots/{snapshotId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/snapshotId'
     get:
       tags:
@@ -813,9 +819,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups':
+  '/v1beta/{tenantId}/block/volumeGroups':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block volume group
@@ -833,8 +839,8 @@ paths:
                 name: volumeGroup-demo
                 status: available
                 description: volumeGroup test
-                profiles: 
-                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                profiles:
+                  - 993c87dc-1928-498b-9767-9da8f901d6ce
                   - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
                 availabilityZone: default
                 poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
@@ -865,8 +871,8 @@ paths:
                 name: volumeGroup-demo
                 status: creating
                 description: volumeGroup test
-                profiles: 
-                  - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                profiles:
+                  - 993c87dc-1928-498b-9767-9da8f901d6ce
                   - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
                 availabilityZone: default
         '400':
@@ -877,9 +883,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/volumeGroups/{volumeGroupId}':
+  '/v1beta/{tenantId}/block/volumeGroups/{volumeGroupId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/volumeGroupId'
     get:
       tags:
@@ -929,14 +935,14 @@ paths:
                 example: volumeGroup test
               addVolumes:
                 type: array
-                items: 
+                items:
                   type: string
-                  example: 
-                    - 993c87dc-1928-498b-9767-9da8f901d6ce 
+                  example:
+                    - 993c87dc-1928-498b-9767-9da8f901d6ce
                     - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
               removeVolumes:
                 type: array
-                items: 
+                items:
                   type: string
                   example: 1b7277b8-493a-4c8d-bccd-89db580e5f60
       responses:
@@ -969,9 +975,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications':
+  '/v1beta/{tenantId}/block/replications':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -1042,9 +1048,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}':
+  '/v1beta/{tenantId}/block/replications/{replicationId}':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
       - $ref: '#/parameters/replicationId'
     get:
       tags:
@@ -1163,9 +1169,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/detail':
+  '/v1beta/{tenantId}/block/replications/detail':
     parameters:
-      - $ref: '#/parameters/projectId'
+      - $ref: '#/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -1209,9 +1215,9 @@ paths:
           $ref: '#/responses/HTTPStatus403'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/enable':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/enable':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1235,9 +1241,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/disable':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/disable':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1261,9 +1267,9 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{projectId}/block/replications/{replicationId}/failover':
+  '/v1beta/{tenantId}/block/replications/{replicationId}/failover':
     parameters:
-    - $ref: '#/parameters/projectId'
+    - $ref: '#/parameters/tenantId'
     - $ref: '#/parameters/replicationId'
     post:
       tags:
@@ -1287,13 +1293,299 @@ paths:
           $ref: '#/responses/HTTPStatus404'
         '500':
           $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/shares':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+    get:
+      tags:
+        - File Shares
+      description: Lists information for all file shares.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileShareSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - File Shares
+      description: Creates a file share.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/FileShareSpec'
+      responses:
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/FileShareSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/shares/{fileshareId}':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+      - $ref: '#/parameters/fileshareId'
+    get:
+      tags:
+        - File Shares
+      description: Gets fileshare detail by fileshare id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileShareSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    put:
+      tags:
+        - File Shares
+      description: Updates a file share.
+      parameters:
+        - name: fileshare
+          in: body
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileShareSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - File Shares
+      description: Deletes a fileshare.
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/snapshots':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+    get:
+      tags:
+        - File Share Snapshots
+      description: Lists information for all file share spanshots.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileShareSnapshotSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - File Share Snapshots
+      description: Creates a file share snapshot.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/FileShareSnapshotSpec'
+      responses:
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/FileShareSnapshotSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/snapshots/{shareSnapshotId}':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+      - $ref: '#/parameters/shareSnapshotId'
+    get:
+      tags:
+        - File Share Snapshots
+      description: Gets fileshare snapshot details by fileshare id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileShareSnapshotSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    put:
+      tags:
+        - File Share Snapshots
+      description: Updates a file share Snapshot.
+      parameters:
+        - name: fileshare
+          in: body
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileShareSnapshotSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - File Share Snapshots
+      description: Deletes a fileshare snapshot.
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/acls':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+    get:
+      tags:
+        - File Share Acls
+      description: Lists information for all file share acls.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileShareAclSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    post:
+      tags:
+        - File Share Acls
+      description: Creates a file share acl.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/FileShareAclSpec'
+      responses:
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/FileShareAclSpec'
+        '400':
+          $ref: '#/responses/HTTPStatus400'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/acls/{fileshareaclId}':
+    parameters:
+      - $ref: '#/parameters/tenantId'
+      - $ref: '#/parameters/fileshareaclId'
+    get:
+      tags:
+        - File Share Acls
+      description: Gets fileshareacl detail by fileshareacl id.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileShareAclSpec'
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
+    delete:
+      tags:
+        - File Share Acls
+      description: Deletes a fileshareacl.
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/responses/HTTPStatus401'
+        '403':
+          $ref: '#/responses/HTTPStatus403'
+        '404':
+          $ref: '#/responses/HTTPStatus404'
+        '500':
+          $ref: '#/responses/HTTPStatus500'
 definitions:
   BaseModel:
     type: object
-    required:
-      - id
-      - createdAt
-      - updatedAt
     properties:
       id:
         type: string
@@ -1325,6 +1617,17 @@ definitions:
           - Thick
       isSpaceEfficient:
         type: boolean
+      characterCodeSet:
+        type: string
+      maxFileNameLengthBytes:
+        type: integer
+        format: int64
+      storageAccessCapability:
+        type: string
+        enum:
+          - Read
+          - Write
+          - Execute
   IOConnectivityLoS:
     description: >-
       IOConnectivityLoS can be used to specify the characteristics of storage
@@ -1426,7 +1729,7 @@ definitions:
               - lvm
               - ceph
               - cinder
-              - huawei_dorado
+              - huawei_oceanstor_block
               - huawei_fusionstorage
           endpoint:
             type: string
@@ -1462,6 +1765,8 @@ definitions:
               - object
           description:
             type: string
+          multiAttach:
+            type: boolean
           status:
             type: string
             enum:
@@ -1534,6 +1839,140 @@ definitions:
             $ref: '#/definitions/DataProtectionPropertiesSpec'
           customProperties:
             $ref: '#/definitions/CustomPropertiesSpec'
+  FileShareSpec:
+    description: >-
+      FileShare is a file system created by nfs southbound driver, it can be mounted on
+      to physical machine or virtual machine instance.
+    allOf:
+      - $ref: '#/definitions/BaseModel'
+      - type: object
+        required:
+          - tenantId
+          - name
+          - availabilityZone
+          - size
+          - profileId
+          - poolId
+        properties:
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+          description:
+            type: string
+          size:
+            type: integer
+            format: int64
+            example: 2
+          availabilityZone:
+            type: string
+            default: default
+          status:
+            type: string
+            readOnly: true
+          profileId:
+            type: string
+          exportLocations:
+            type: array
+            items:
+              type: string
+            readOnly: true
+          metadata:
+            type: object
+            readOnly: true
+            additionalProperties:
+              type: string
+            example:
+              lvPath: string
+              nfsFileshareID: string
+              nfsFileshareName: string
+  FileShareSnapshotSpec:
+    description: >-
+      Snapshot is a description of fileshare snapshot resource.
+    allOf:
+       - $ref: '#/definitions/BaseModel'
+       - type: object
+         required:
+           - tenantId
+           - name
+           - status
+           - snapshotId
+           - fileshareId
+         properties:
+           fileshareId:
+             type: string
+           tenantId:
+             type: string
+             readOnly: true
+           userId:
+             type: string
+             readOnly: true
+           name:
+             type: string
+           description:
+             type: string
+           status:
+             type: string
+             readOnly: true
+           profileId:
+             type: string
+           metadata:
+             type: object
+             readOnly: true
+             additionalProperties:
+               type: string
+             example:
+               snapshotId: string
+               snapshotName: string
+               lvPath: string
+  FileShareAclSpec:
+     description: >-
+       File Share Acl API describes the  acl of file share resource
+     allOf:
+       - $ref: '#/definitions/BaseModel'
+       - type: object
+         required:
+           - tenantId
+           - fileshareId
+           - type
+           - accessCapability
+           - accessTo
+         properties:
+           fileshareId:
+             type: string
+           type:
+             type: string
+           accessCapability:
+             type: string
+           accessTo:
+             type: string
+           tenantId:
+             type: string
+             readOnly: true
+           userId:
+             type: string
+             readOnly: true
+           name:
+             type: string
+           description:
+             type: string
+           status:
+             type: string
+             readOnly: true
+           profileId:
+             type: string
+           metadata:
+             type: object
+             readOnly: true
+             additionalProperties:
+               type: string
+             example:
+               key1: value1
+               key2: value2
   ProvisioningPropertiesSpec:
     description: >-
       ProvisioningPropertiesSpec represents some suggested properties for performing
@@ -1611,7 +2050,7 @@ definitions:
       dataProtection:
         $ref: '#/definitions/DataProtectionLoS'
       consistencyEnalbed:
-        type: boolean	
+        type: boolean
   CustomPropertiesSpec:
     description: >-
       CustomPropertiesSpec is a map of keys and JSON object that represents the
@@ -1633,14 +2072,14 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - availabilityZone
           - size
           - profileId
           - poolId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1648,6 +2087,8 @@ definitions:
             readOnly: true
           name:
             type: string
+          multiAttach:
+            type: boolean
           description:
             type: string
           size:
@@ -1704,19 +2145,24 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - hostInfo
           - connectionInfo
           - mountpoint
           - status
           - volumeId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
             type: string
             readOnly: true
+          attachMode:
+            type: string
+            enum:
+              - rw
+              - ro
           hostInfo:
             $ref: '#/definitions/HostInfo'
           connectionInfo:
@@ -1782,13 +2228,13 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - status
           - volumeId
           - profileId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1822,14 +2268,14 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - profiles
           - name
           - description
           - availabilityZone
           - status
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1853,10 +2299,10 @@ definitions:
             readOnly: true
           profiles:
             type: array
-            items: 
+            items:
               type: string
-            example: 
-              - 993c87dc-1928-498b-9767-9da8f901d6ce 
+            example:
+              - 993c87dc-1928-498b-9767-9da8f901d6ce
               - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
   ReplicationSpec:
     description: >-
@@ -1866,7 +2312,7 @@ definitions:
       - $ref: '#/definitions/BaseModel'
       - type: object
         required:
-          - projectId
+          - tenantId
           - name
           - primaryVolumeId
           - scondaryVolumeId
@@ -1875,7 +2321,7 @@ definitions:
           - replicationMode
           - profileId
         properties:
-          projectId:
+          tenantId:
             type: string
             readOnly: true
           userId:
@@ -1997,11 +2443,11 @@ parameters:
     description: API version string
     type: string
     pattern: 'v([1-9][0-9]*)((alpha)([1-9][0-9]*)|(beta)([1-9][0-9]*))?'
-  projectId:
-    name: projectId
+  tenantId:
+    name: tenantId
     in: path
     required: true
-    description: The project UUID in a multi-tenancy environment.
+    description: The tenant UUID in a multi-tenancy environment.
     type: string
   dockId:
     name: dockId
@@ -2020,6 +2466,18 @@ parameters:
     in: path
     required: true
     description: The UUID of the profile.
+    type: string
+  fileshareId:
+    name: fileshareId
+    in: path
+    required: true
+    description: The UUID of the file share.
+    type: string
+  fileshareaclId:
+    name: fileshareaclId
+    in: path
+    required: true
+    description: The UUID of the file share acl.
     type: string
   volumeId:
     name: volumeId
@@ -2045,6 +2503,12 @@ parameters:
     required: true
     description: The UUID of the volume snapshot.
     type: string
+  shareSnapshotId:
+    name: shareSnapshotId
+    in: path
+    required: true
+    description: The UUID of the fileshare snapshot.
+    type: string
   volumeGroupId:
     name: volumeGroupId
     in: path
@@ -2060,31 +2524,31 @@ parameters:
 responses:
   HTTPStatus400:
     description: BadRequest
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus401:
     description: NotAuthorized
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus403:
     description: Forbidden
-    content:
-    application/json:
-      schema:
-        $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus404:
     description: The resource does not exist
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
   HTTPStatus500:
     description: An unexpected error occured.
-    content:
-      application/json:
-        schema:
-          $ref: '#/definitions/ErrorSpec'
+    schema:
+      $ref: '#/definitions/ErrorSpec'
+
+securityDefinitions:
+  basicAuth:
+    type: basic
+security:
+  - basicAuth: []
+
+externalDocs:
+  description: The offical OpenSDS Controller API specification
+  url: 'https://github.com/opensds/opensds'

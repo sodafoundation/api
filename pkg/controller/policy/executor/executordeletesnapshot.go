@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ profiles configured by admin.
 package executor
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -28,9 +29,8 @@ import (
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/client"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
-	"golang.org/x/net/context"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 )
 
 const (

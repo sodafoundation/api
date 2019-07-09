@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package client
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
@@ -27,15 +28,16 @@ const (
 	OpensdsTenantId     = "OPENSDS_TENANT_ID"
 
 	// Keystone Auth ENVs
-	OsAuthUrl      = "OS_AUTH_URL"
-	OsUsername     = "OS_USERNAME"
-	OsPassword     = "OS_PASSWORD"
-	OsTenantName   = "OS_TENANT_NAME"
-	OsProjectName  = "OS_PROJECT_NAME"
-	OsUserDomainId = "OS_USER_DOMAIN_ID"
-	OsPasswordTool = "OS_PASSWORD_DECRYPT_TOOL"
-	Keystone       = "keystone"
-	Noauth         = "noauth"
+	OsAuthUrl       = "OS_AUTH_URL"
+	OsUsername      = "OS_USERNAME"
+	OsPassword      = "OS_PASSWORD"
+	OsTenantName    = "OS_TENANT_NAME"
+	OsProjectName   = "OS_PROJECT_NAME"
+	OsUserDomainId  = "OS_USER_DOMAIN_ID"
+	PwdEncrypter    = "PASSWORD_ENCRYPTER"
+	EnableEncrypted = "ENABLE_ENCRYPTED"
+	Keystone        = "keystone"
+	Noauth          = "noauth"
 )
 
 type AuthOptions interface {
@@ -51,6 +53,8 @@ type KeystoneAuthOptions struct {
 	Username         string
 	UserID           string
 	Password         string
+	PwdEncrypter     string
+	EnableEncrypted  bool
 	DomainID         string
 	DomainName       string
 	TenantID         string
@@ -75,18 +79,34 @@ func (n *NoAuthOptions) GetTenantId() string {
 	return n.TenantID
 }
 
-func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
+func LoadKeystoneAuthOptionsFromEnv() (*KeystoneAuthOptions, error) {
+	// pre-check
+	envs := []string{OsAuthUrl, OsUsername, OsPassword, OsTenantName, OsProjectName, OsUserDomainId}
+	for _, env := range envs {
+		if _, ok := os.LookupEnv(env); !ok {
+			return nil, fmt.Errorf("can not get keystone ENV: %s", env)
+		}
+	}
+
 	opt := NewKeystoneAuthOptions()
 	opt.IdentityEndpoint = os.Getenv(OsAuthUrl)
 	opt.Username = os.Getenv(OsUsername)
-	// Decrypte the password
-	// Get the cipher text of the password
-	pwdCiphertext := os.Getenv(OsPassword)
-	// Instantiate an encryption tool
-	pwdTool := pwd.NewPwdTool(os.Getenv(OsPasswordTool))
-	// Decrypt the password and obtain the password.
-	opt.Password, _ = pwdTool.Decrypter(pwdCiphertext)
+	var pwdCiphertext = os.Getenv(OsPassword)
+	if os.Getenv(EnableEncrypted) == "T" {
+		// Decrypte the password
+		pwdTool := os.Getenv(PwdEncrypter)
+		if pwdTool == "" {
+			return nil, fmt.Errorf("The password encrypter can not be empty if password encrypted is enabled.")
+		}
 
+		password, err := pwd.NewPwdEncrypter(pwdTool).Decrypter(pwdCiphertext)
+		if err != nil {
+			return nil, fmt.Errorf("Decryption failed, %v", err)
+		}
+		pwdCiphertext = password
+	}
+
+	opt.Password = pwdCiphertext
 	opt.TenantName = os.Getenv(OsTenantName)
 	projectName := os.Getenv(OsProjectName)
 	opt.DomainID = os.Getenv(OsUserDomainId)
@@ -94,7 +114,7 @@ func LoadKeystoneAuthOptionsFromEnv() *KeystoneAuthOptions {
 		opt.TenantName = projectName
 	}
 
-	return opt
+	return opt, nil
 }
 
 func LoadNoAuthOptionsFromEnv() *NoAuthOptions {

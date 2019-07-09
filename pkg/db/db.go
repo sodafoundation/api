@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,6 +55,48 @@ func Init(db *Database) {
 // Client is an interface for exposing some operations of managing database
 // client.
 type Client interface {
+	CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
+
+	UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error)
+
+	ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error)
+
+	CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error)
+
+	ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error)
+
+	ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error)
+
+	ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error)
+
+	ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error)
+
+	GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error)
+
+	GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error)
+
+	UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error)
+
+	DeleteFileShare(ctx *c.Context, fshareID string) error
+
+	DeleteFileShareAcl(ctx *c.Context, aclID string) error
+
+	CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error)
+
+	ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error)
+
+	ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error)
+
+	UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error)
+
+	DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error
+
 	CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error)
 
 	GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error)
@@ -89,6 +131,8 @@ type Client interface {
 
 	GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error)
 
+	GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error)
+
 	ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error)
 
 	ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error)
@@ -108,6 +152,8 @@ type Client interface {
 	GetVolume(ctx *c.Context, volID string) (*model.VolumeSpec, error)
 
 	ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
+
+	ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error)
 
 	ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSpec, error)
 
@@ -165,6 +211,8 @@ type Client interface {
 
 	ListVolumesByGroupId(ctx *c.Context, vgId string) ([]*model.VolumeSpec, error)
 
+	ListAttachmentsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeAttachmentSpec, error)
+
 	ListSnapshotsByVolumeId(ctx *c.Context, volId string) ([]*model.VolumeSnapshotSpec, error)
 
 	DeleteVolumeGroup(ctx *c.Context, vgId string) error
@@ -174,4 +222,39 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+}
+
+func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetFileShare(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
+}
+
+func UpdateFileShareSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetFileShareSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
+}
+
+func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
+	vol, _ := client.GetVolume(ctx, volID)
+	return client.UpdateStatus(ctx, vol, status)
+}
+
+func UpdateVolumeAttachmentStatus(ctx *c.Context, client Client, atcID, status string) error {
+	atc, _ := client.GetVolumeAttachment(ctx, atcID)
+	return client.UpdateStatus(ctx, atc, status)
+}
+
+func UpdateVolumeSnapshotStatus(ctx *c.Context, client Client, snapID, status string) error {
+	snap, _ := client.GetVolumeSnapshot(ctx, snapID)
+	return client.UpdateStatus(ctx, snap, status)
+}
+
+func UpdateReplicationStatus(ctx *c.Context, client Client, replicaID, status string) error {
+	replica, _ := client.GetReplication(ctx, replicaID)
+	return client.UpdateStatus(ctx, replica, status)
+}
+
+func UpdateVolumeGroupStatus(ctx *c.Context, client Client, vgID, status string) error {
+	vg, _ := client.GetVolumeGroup(ctx, vgID)
+	return client.UpdateStatus(ctx, vg, status)
 }

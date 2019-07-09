@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/controller/volume"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 )
 
@@ -76,7 +76,7 @@ func TestControllerExtendVolume(t *testing.T) {
 func TestControllerCreateVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	atc, err := vc.CreateVolumeAttachment(&pb.CreateAttachmentOpts{})
+	atc, err := vc.CreateVolumeAttachment(&pb.CreateVolumeAttachmentOpts{})
 	if err != nil {
 		t.Error("create volume attachment in controller failed:", err)
 		return
@@ -94,7 +94,7 @@ func TestControllerCreateVolumeAttachment(t *testing.T) {
 func TestControllerDeleteVolumeAttachment(t *testing.T) {
 	vc.SetDock(dckInfo)
 
-	err := vc.DeleteVolumeAttachment(&pb.DeleteAttachmentOpts{})
+	err := vc.DeleteVolumeAttachment(&pb.DeleteVolumeAttachmentOpts{})
 	if err != nil {
 		t.Error("delete volume attachment in controller failed:", err)
 	}
@@ -121,5 +121,44 @@ func TestControllerDeleteVolumeSnapshot(t *testing.T) {
 	err := vc.DeleteVolumeSnapshot(&pb.DeleteVolumeSnapshotOpts{})
 	if err != nil {
 		t.Error("delete volume snapshot in controller failed:", err)
+	}
+}
+
+func TestControllerCreateVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	vg, err := vc.CreateVolumeGroup(&pb.CreateVolumeGroupOpts{})
+	if err != nil {
+		t.Error("create volume group in controller failed:", err)
+		return
+	}
+
+	var expected = &SampleVolumeGroups[0]
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vg)
+	}
+}
+
+func TestControllerUpdateVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	vg, err := vc.UpdateVolumeGroup(&pb.UpdateVolumeGroupOpts{})
+	if err != nil {
+		t.Error("update volume group in controller failed:", err)
+		return
+	}
+
+	var expected = &SampleVolumeGroups[0]
+	if !reflect.DeepEqual(vg, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, vg)
+	}
+}
+
+func TestControllerDeleteVolumeGroup(t *testing.T) {
+	vc.SetDock(dckInfo)
+
+	err := vc.DeleteVolumeGroup(&pb.DeleteVolumeGroupOpts{})
+	if err != nil {
+		t.Error("delete volume group in controller failed:", err)
 	}
 }

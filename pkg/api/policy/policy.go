@@ -1,16 +1,16 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 package policy
 
@@ -25,7 +25,6 @@ import (
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
 )
@@ -85,7 +84,7 @@ func (e *Enforcer) Authorize(rule string, target map[string]string, cred map[str
 }
 
 func (e *Enforcer) LoadRules(forcedReload bool) error {
-	path := config.CONF.OsdsLet.PolicyPath
+	path := config.CONF.OsdsApiServer.PolicyPath
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -205,7 +204,7 @@ func Authorize(httpCtx *bctx.Context, action string) bool {
 		log.Errorf("Authorize failed, %s", err)
 	}
 	if !ok {
-		model.HttpError(httpCtx, http.StatusForbidden, "Operation is not permitted")
+		context.HttpError(httpCtx, http.StatusForbidden, "operation is not permitted")
 	} else {
 		ctx.IsAdmin = utils.Contained("admin", ctx.Roles)
 	}

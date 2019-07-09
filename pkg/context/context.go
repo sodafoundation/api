@@ -1,16 +1,16 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License. You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License. You may obtain
+// a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations
+// under the License.
 
 // This is self defined context which is stored in context.Input.data.
 // It is used to transport data in the pipe line.
@@ -19,10 +19,12 @@ package context
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/astaxie/beego/context"
-	"github.com/golang/glog"
+	log "github.com/golang/glog"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 func NewAdminContext() *Context {
@@ -43,7 +45,7 @@ func NewContextFromJson(s string) *Context {
 	ctx := &Context{}
 	err := json.Unmarshal([]byte(s), ctx)
 	if err != nil {
-		glog.Errorf("Unmarshal json to context failed, reason: %v", err)
+		log.Errorf("Unmarshal json to context failed, reason: %v", err)
 	}
 	return ctx
 }
@@ -60,7 +62,7 @@ func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Con
 
 	ctx := GetContext(httpCtx)
 	if param == nil || len(param) == 0 {
-		glog.Warning("Context parameter is empty, nothing to be updated")
+		log.Warning("Context parameter is empty, nothing to be updated")
 		return ctx, nil
 	}
 	ctxV := reflect.ValueOf(ctx).Elem()
@@ -70,7 +72,7 @@ func UpdateContext(httpCtx *context.Context, param map[string]interface{}) (*Con
 		if field.Kind() == pv.Kind() && field.CanSet() {
 			field.Set(pv)
 		} else {
-			glog.Errorf("Invalid parameter %s : %v", key, val)
+			log.Errorf("Invalid parameter %s : %v", key, val)
 		}
 	}
 
@@ -140,7 +142,30 @@ func (ctx *Context) ToPolicyValue() map[string]interface{} {
 func (ctx *Context) ToJson() string {
 	b, err := json.Marshal(ctx)
 	if err != nil {
-		glog.Errorf("Context convert to json failed, reason: %v", err)
+		log.Errorf("context convert to json failed, reason: %v", err)
 	}
 	return string(b)
+}
+
+func HttpError(ctx *context.Context, code int, format string, a ...interface{}) error {
+	ctx.Output.SetStatus(code)
+	msg := fmt.Sprintf(format, a...)
+	ctx.Output.Body(errorStatus(code, msg))
+	errInfo := fmt.Errorf("code: %d, reason: %s", code, msg)
+	log.Error(errInfo)
+	return errInfo
+}
+
+func errorStatus(code int, message string) []byte {
+	errStatus := &model.ErrorSpec{
+		Code:    code,
+		Message: message,
+	}
+
+	// Mashal the error status.
+	body, err := json.Marshal(errStatus)
+	if err != nil {
+		return []byte("failed to mashal error response: " + err.Error())
+	}
+	return body
 }

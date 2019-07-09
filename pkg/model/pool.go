@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ type StoragePoolSpec struct {
 	// The free capaicty of the pool.
 	// Default unit of FreeCapacity is GB.
 	FreeCapacity int64 `json:"freeCapacity,omitempty"`
+
+	// MultiAttach
+	// If true, this volume can attach to more than one instance. Default will be multiattach:False
+	MultiAttach bool `json:"multiAttach"`
 
 	// The storage type of the storage pool.
 	// One of: "block", "file" or "object".

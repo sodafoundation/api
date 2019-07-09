@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ func TestGetPool(t *testing.T) {
 		},
 		Name:          "sample-pool-01",
 		Description:   "This is the first sample storage pool for testing",
+		StorageType:   "block",
 		TotalCapacity: int64(100),
 		FreeCapacity:  int64(90),
 		DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -71,6 +72,7 @@ func TestListPools(t *testing.T) {
 			},
 			Name:          "sample-pool-01",
 			Description:   "This is the first sample storage pool for testing",
+			StorageType:   "block",
 			TotalCapacity: int64(100),
 			FreeCapacity:  int64(90),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
@@ -96,6 +98,7 @@ func TestListPools(t *testing.T) {
 			},
 			Name:          "sample-pool-02",
 			Description:   "This is the second sample storage pool for testing",
+			StorageType:   "block",
 			TotalCapacity: int64(200),
 			FreeCapacity:  int64(170),
 			DockId:        "b7602e18-771e-11e7-8f38-dbd6d291f4e0",

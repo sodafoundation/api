@@ -1,5 +1,5 @@
-// This source file has been modified by Huawei Technologies Co., Ltd.
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// This source file has been modified by The OpenSDS Authors.
+// Copyright 2017 The OpenSDS Authors.
 
 // Copyright 2017 modood. All rights reserved.
 // license that can be found in the LICENSE file.
@@ -9,6 +9,7 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -38,8 +39,12 @@ type StructElemCb func(name string, value reflect.Value) error
 var m = bd{'-', '|', '+', '+', '+', '+', '+', '+', '+', '+', '+'}
 
 func JsonFormatter(v interface{}) string {
-	b, _ := json.MarshalIndent(v, "", " ")
-	return string(b)
+	buf := bytes.NewBuffer([]byte{})
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", strings.Repeat(" ", 2))
+	enc.Encode(v)
+	return buf.String()
 }
 
 // Output formats slice of structs data and writes to standard output.(Using box drawing characters)

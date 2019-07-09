@@ -1,0 +1,33 @@
+authOptions:
+  endpoints: "https://8.46.185.114:8088/deviceManager/rest"
+  username: "opensds"
+  password: "Opensds@123"
+  # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+  EnableEncrypted: false
+  # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+  PwdEncrypter: "aes"
+  insecure: true
+
+replication:
+  remoteAuthOptions:
+    endpoints: "https://8.46.185.104:8088/deviceManager/rest"
+    username: "opensds"
+    password: "Opensds@123"
+    insecure: true
+
+pool:
+  StoragePool001:
+    storageType: block
+    availabilityZone: oceanstor1
+    multiAttach: true
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 1000
+      advanced:
+        diskType: SSD
+        throughput: 1000
+targetIp: 8.46.192.247

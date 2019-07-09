@@ -1,5 +1,16 @@
 version: '2'
 services:
+  osdsapiserver:
+    image: 'opensdsio/opensds-apiserver:latest'
+    tty: true
+    network_mode: "host"
+    volumes:
+    - /etc/opensds:/etc/opensds
+    depends_on:
+    - osdsdb
+    - osdsauthchecker
+    restart: on-failure
+    command: /bin/bash -c '/usr/bin/osdsapiserver -logtostderr'
   osdslet:
     image: 'opensdsio/opensds-controller:latest'
     tty: true
@@ -24,8 +35,6 @@ services:
     - /lib/modules:/lib/modules:ro
     depends_on:
     - osdsdb
-    ports:
-    - 3260:3260
     network_mode: "host"
     restart: on-failure
     command: /bin/bash -c '/usr/sbin/tgtd && /usr/bin/osdsdock -logtostderr'
@@ -35,3 +44,19 @@ services:
     network_mode: "host"
     volumes:
     - /usr/share/ca-certificates/:/etc/ssl/certs
+    restart: on-failure
+  osdsauthchecker:
+    image: 'opensdsio/opensds-authchecker:latest'
+    tty: true
+    network_mode: "host"
+    privileged: true
+    restart: on-failure
+  osdsdashboard:
+    image: 'opensdsio/dashboard:latest'
+    tty: true
+    network_mode: "host"
+    restart: on-failure
+    environment:
+    - OPENSDS_AUTH_URL=http://127.0.0.1/identity
+    - OPENSDS_HOTPOT_URL=http://127.0.0.1:50040
+    - OPENSDS_GELATO_URL=http://127.0.0.1:8089

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,13 +107,11 @@ func request(urlStr string, method string, headers HeaderOption, input interface
 	// Set the request timeout a little bit longer upload snapshot to cloud temporarily.
 	req.SetTimeout(time.Minute*6, time.Minute*6)
 	// init body
-	log.Printf("%s %s\n", strings.ToUpper(method), urlStr)
 	if input != nil {
 		body, err := json.MarshalIndent(input, "", "  ")
 		if err != nil {
 			return err
 		}
-		log.Printf("Request body:\n%s\n", string(body))
 		req.Body(body)
 	}
 
@@ -125,6 +123,9 @@ func request(urlStr string, method string, headers HeaderOption, input interface
 	}
 	// Get http response.
 	resp, err := req.Response()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return err
 	}
@@ -154,17 +155,20 @@ func (*receiver) Recv(url string, method string, input interface{}, output inter
 	return request(url, method, nil, input, output)
 }
 
-func NewKeystoneReciver(auth *KeystoneAuthOptions) Receiver {
-	k := &KeystoneReciver{Auth: auth}
-	k.GetToken()
-	return k
+func NewKeystoneReceiver(auth *KeystoneAuthOptions) (Receiver, error) {
+	k := &KeystoneReceiver{Auth: auth}
+	if err := k.GetToken(); err != nil {
+		log.Printf("get token failed, %v", err)
+		return nil, err
+	}
+	return k, nil
 }
 
-type KeystoneReciver struct {
+type KeystoneReceiver struct {
 	Auth *KeystoneAuthOptions
 }
 
-func (k *KeystoneReciver) GetToken() error {
+func (k *KeystoneReceiver) GetToken() error {
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: k.Auth.IdentityEndpoint,
 		Username:         k.Auth.Username,
@@ -201,7 +205,7 @@ func (k *KeystoneReciver) GetToken() error {
 	return nil
 }
 
-func (k *KeystoneReciver) Recv(url string, method string, body interface{}, output interface{}) error {
+func (k *KeystoneReceiver) Recv(url string, method string, body interface{}, output interface{}) error {
 	desc := fmt.Sprintf("%s %s", method, url)
 	return utils.Retry(2, desc, true, func(retryIdx int, lastErr error) error {
 		if retryIdx > 0 {

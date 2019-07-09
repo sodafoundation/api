@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,23 @@ This module implements a entry into the OpenSDS northbound service.
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
 	log "github.com/golang/glog"
-	c "github.com/opensds/opensds/pkg/context"
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
+	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
+	"github.com/opensds/opensds/pkg/controller/fileshare"
+	"github.com/opensds/opensds/pkg/controller/metrics"
 	"github.com/opensds/opensds/pkg/controller/policy"
 	"github.com/opensds/opensds/pkg/controller/selector"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
@@ -43,128 +47,110 @@ const (
 	EXTEND_LIFECIRCLE_FLAG
 )
 
-var Brain *Controller
-
 func NewController() *Controller {
 	volCtrl := volume.NewController()
+	fileShareCtrl := fileshare.NewController()
+	metricsCtrl := metrics.NewController()
 	return &Controller{
-		selector:         selector.NewSelector(),
-		volumeController: volCtrl,
-		drController:     dr.NewController(volCtrl),
+		selector:            selector.NewSelector(),
+		volumeController:    volCtrl,
+		fileshareController: fileShareCtrl,
+		metricsController:   metricsCtrl,
+		drController:        dr.NewController(volCtrl),
 	}
 }
 
 type Controller struct {
-	selector         selector.Selector
-	volumeController volume.Controller
-	drController     dr.Controller
-	policyController policy.Controller
+	selector            selector.Selector
+	volumeController    volume.Controller
+	fileshareController fileshare.Controller
+	metricsController   metrics.Controller
+	drController        dr.Controller
+	policyController    policy.Controller
 }
 
-func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanVolume chan error) {
+// CreateVolume implements pb.ControllerServer.CreateVolume
+func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
 	var err error
-	var prf *model.ProfileSpec
 	var snap *model.VolumeSnapshotSpec
 	var snapVol *model.VolumeSpec
-	var snapSize int64
 
-	if in.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(ctx)
-	} else {
-		prf, err = db.C.GetProfile(ctx, in.ProfileId)
-	}
-	if err != nil {
-		log.Error("Get profile failed: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
-	}
-	if in.SnapshotId != "" {
-		snap, err = db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
+	log.Info("Controller server receive create volume request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	prf := model.NewProfileFromJson(opt.Profile)
+
+	if opt.SnapshotId != "" {
+		snap, err = db.C.GetVolumeSnapshot(ctx, opt.SnapshotId)
 		if err != nil {
-			log.Error("Get snapshot failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
-			errchanVolume <- err
-			return
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+			log.Error("get snapshot failed in create volume method: ", err)
+			return pb.GenericResponseError(err), err
 		}
 		snapVol, err = db.C.GetVolume(ctx, snap.VolumeId)
 		if err != nil {
-			log.Error("Get volume failed in create volume method: ", err)
-			if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-				errchanVolume <- errUpdate
-				return
-			}
-			errchanVolume <- err
-			return
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+			log.Error("get volume failed in create volume method: ", err)
+			return pb.GenericResponseError(err), err
 		}
-		snapSize = snapVol.Size
-		in.PoolId = snapVol.PoolId
-		in.Metadata = utils.MergeStringMaps(in.Metadata, snap.Metadata)
+		opt.SnapshotSize = snapVol.Size
+		opt.PoolId = snapVol.PoolId
+		opt.Metadata = utils.MergeStringMaps(opt.Metadata, snap.Metadata)
 	}
 
-	polInfo, err := c.selector.SelectSupportedPoolForVolume(in)
+	// This vol structure is currently fetched from database, but eventually
+	// it will be removed after SelectSupportedPoolForVolume method in selector
+	// is updated.
+	vol, err := db.C.GetVolume(ctx, opt.Id)
 	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+		return pb.GenericResponseError(err), err
 	}
+
+	log.V(5).Infof("controller create volume:  get volume from db %+v", vol)
+
+	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
+	if err != nil {
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+		return pb.GenericResponseError(err), err
+	}
+
+	// The default value of multi-attach is false, if it becomes true, then update into db
+	log.V(5).Infof("update volume %+v", vol)
+
+	if vol.MultiAttach {
+		db.C.UpdateVolume(ctx, vol)
+	}
+
+	// whether specify a pool or not, opt's poolid and pool name should be
+	// assigned by polInfo
+	opt.PoolId = polInfo.Id
+	opt.PoolName = polInfo.Name
+
+	log.V(5).Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
-		log.Error("When search supported dock resource:", err.Error())
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		errchanVolume <- err
-		return
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
 	}
 	c.volumeController.SetDock(dockInfo)
-	opt := &pb.CreateVolumeOpts{
-		Id:                in.Id,
-		Name:              in.Name,
-		Description:       in.Description,
-		Size:              in.Size,
-		AvailabilityZone:  in.AvailabilityZone,
-		PoolId:            polInfo.Id,
-		ProfileId:         prf.Id,
-		SnapshotId:        in.SnapshotId,
-		SnapshotSize:      snapSize,
-		PoolName:          polInfo.Name,
-		DriverName:        dockInfo.DriverName,
-		Context:           ctx.ToJson(),
-		Metadata:          in.Metadata,
-		SnapshotFromCloud: in.SnapshotFromCloud,
-	}
+	opt.DriverName = dockInfo.DriverName
+
+	log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
 
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
-		//Change the status of the volume to error when the creation faild
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeError); errUpdate != nil {
-			errchanVolume <- errUpdate
-			return
-		}
-		log.Error("When create volume:", err.Error())
-		errchanVolume <- err
-		return
+		// Change the status of the volume to error when the creation faild
+		defer db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+		log.Error("when create volume:", err.Error())
+		return pb.GenericResponseError(err), err
 	}
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
 
 	// Update the volume data in database.
-	if err = db.C.UpdateStatus(ctx, result, model.VolumeAvailable); err != nil {
-		errchanVolume <- err
-		return
-	}
+	db.C.UpdateStatus(ctx, result, model.VolumeAvailable)
 
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
@@ -176,135 +162,92 @@ func (c *Controller) CreateVolume(ctx *c.Context, in *model.VolumeSpec, errchanV
 	volBody, _ := json.Marshal(result)
 	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChanPolicy)
 	if err := <-errChanPolicy; err != nil {
-		log.Error("When execute async policy:", err)
-		errchanVolume <- err
-		return
+		return pb.GenericResponseError(err), err
 	}
-	errchanVolume <- nil
+
+	return pb.GenericResponseResult(result), nil
 }
 
-func (c *Controller) DeleteVolume(ctx *c.Context, in *model.VolumeSpec, errchanvol chan error) {
-	prf, err := db.C.GetProfile(ctx, in.ProfileId)
-	if err != nil {
-		log.Error("when search profile in db:", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
-			errchanvol <- errUpdate
-			return
-		}
+// DeleteVolume implements pb.ControllerServer.DeleteVolume
+func (c *Controller) DeleteVolume(contx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
 
-		errchanvol <- err
-		return
-	}
+	log.Info("Controller server receive delete volume request, vr =", opt)
 
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	prf := model.NewProfileFromJson(opt.Profile)
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
 	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
 
-	dockInfo, err := db.C.GetDockByPoolId(ctx, in.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
-		log.Error("When search dock in db by pool id: ", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
-			errchanvol <- errUpdate
-			return
-		}
-
-		errchanvol <- err
-		return
+		log.Error("when search dock in db by pool id: ", err)
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
-
-	opt := &pb.DeleteVolumeOpts{
-		Id:         in.Id,
-		Metadata:   in.Metadata,
-		DriverName: dockInfo.DriverName,
-		Context:    ctx.ToJson(),
-	}
+	opt.DriverName = dockInfo.DriverName
 
 	var errChan = make(chan error, 1)
 	defer close(errChan)
 	go c.policyController.ExecuteAsyncPolicy(opt, "", errChan)
 
 	if err := <-errChan; err != nil {
-		log.Error("When execute async policy:", err)
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
-			errchanvol <- errUpdate
-			return
-		}
-
-		errchanvol <- err
-		return
+		log.Error("when execute async policy: ", err)
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
 
-	err = c.volumeController.DeleteVolume(opt)
-	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeErrorDeleting); errUpdate != nil {
-			errchanvol <- errUpdate
-			return
-		}
-		errchanvol <- err
-		return
+	if err = c.volumeController.DeleteVolume(opt); err != nil {
+		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
+
 	if err = db.C.DeleteVolume(ctx, opt.GetId()); err != nil {
-		log.Error("Error occurred in dock module when delete volume in db:", err.Error())
-		errchanvol <- err
-		return
+		return pb.GenericResponseError(err), err
 	}
-	errchanvol <- nil
+
+	return pb.GenericResponseResult(nil), nil
 }
 
-// ExtendVolume ...
-func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, errchanVolume chan error) {
-	vol, err := db.C.GetVolume(ctx, volID)
+// ExtendVolume implements pb.ControllerServer.ExtendVolume
+func (c *Controller) ExtendVolume(contx context.Context, opt *pb.ExtendVolumeOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive extend volume request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.Id)
 	if err != nil {
-		log.Error("Get volume failed in extend volume method: ", err.Error())
-		errchanVolume <- err
-		return
+		log.Error("get volume failed in extend volume method: ", err.Error())
+		return pb.GenericResponseError(err), err
 	}
 
 	// roll back size and status
 	var rollBack = false
 	defer func() {
 		if rollBack {
-			vol.Status = model.VolumeAvailable
-			if errUpdate, _ := db.C.UpdateVolume(ctx, vol); errUpdate != nil {
-				log.Errorf("update volume failed: %v", errUpdate)
-			}
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeAvailable)
 		}
 	}()
 
-	if newSize <= vol.Size {
-		reason := fmt.Sprintf("New size for extend must be greater than current size."+
-			"(current: %d GB, extended: %d GB).", vol.Size, newSize)
-		errchanVolume <- errors.New(reason)
-		log.Error(reason)
-		rollBack = true
-		return
-	}
-
 	pool, err := db.C.GetPool(ctx, vol.PoolId)
 	if nil != err {
-		log.Error("Get pool failed in extend volume method: ", err.Error())
-		errchanVolume <- err
+		log.Error("get pool failed in extend volume method: ", err.Error())
 		rollBack = true
-		return
+		return pb.GenericResponseError(err), err
 	}
 
+	var newSize = opt.GetSize()
 	if pool.FreeCapacity <= (newSize - vol.Size) {
 		reason := fmt.Sprintf("pool free capacity(%d) < new size(%d) - old size(%d)",
 			pool.FreeCapacity, newSize, vol.Size)
-		errchanVolume <- errors.New(reason)
 		rollBack = true
-		return
+		return pb.GenericResponseError(reason), errors.New(reason)
 	}
-
-	prf, err := db.C.GetProfile(ctx, vol.ProfileId)
-	if err != nil {
-		log.Error("when search profile in db:", err)
-		errchanVolume <- err
-		rollBack = true
-		return
-	}
+	opt.PoolId = pool.Id
+	opt.PoolName = pool.Name
+	prf := model.NewProfileFromJson(opt.Profile)
 
 	// Select the storage tag according to the lifecycle flag.
 	c.policyController = policy.NewController(prf)
@@ -312,472 +255,476 @@ func (c *Controller) ExtendVolume(ctx *c.Context, volID string, newSize int64, e
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
 	if err != nil {
-		log.Error("When search dock in db by pool id: ", err.Error())
-		errchanVolume <- err
+		log.Error("when search dock in db by pool id: ", err.Error())
 		rollBack = true
-		return
+		return pb.GenericResponseError(err), err
 
 	}
 	c.policyController.SetDock(dockInfo)
 	c.volumeController.SetDock(dockInfo)
-
-	opt := &pb.ExtendVolumeOpts{
-		Id:         vol.Id,
-		PoolName:   pool.Name,
-		PoolId:     pool.Id,
-		Size:       newSize,
-		Metadata:   vol.Metadata,
-		DriverName: dockInfo.DriverName,
-		Context:    ctx.ToJson(),
-	}
+	opt.DriverName = dockInfo.DriverName
 
 	result, err := c.volumeController.ExtendVolume(opt)
 	if err != nil {
 		log.Error("extend volume failed: ", err.Error())
-		errchanVolume <- err
 		rollBack = true
-		return
+		return pb.GenericResponseError(err), err
 	}
 
 	// Update the volume data in database.
-	vol.Size = newSize
-	vol.Status = model.VolumeAvailable
-	if errUpdate, _ := db.C.UpdateVolume(ctx, vol); errUpdate != nil {
-		log.Errorf("update volume failed: %v", errUpdate)
-		errchanVolume <- err
-		return
-	}
-
+	result.Size = newSize
 	result.PoolId, result.ProfileId = opt.GetPoolId(), opt.GetProfileId()
+	db.C.UpdateStatus(ctx, result, model.VolumeAvailable)
+
 	volBody, _ := json.Marshal(result)
 	var errChan = make(chan error, 1)
 	defer close(errChan)
 	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChan)
 
 	if err := <-errChan; err != nil {
-		log.Error("When execute async policy:", err.Error())
-		errchanVolume <- err
-		return
+		log.Error("when execute async policy:", err.Error())
+		return pb.GenericResponseError(err), err
 	}
 
-	errchanVolume <- nil
+	return pb.GenericResponseResult(result), nil
 }
 
-func (c *Controller) CreateVolumeAttachment(ctx *c.Context, in *model.VolumeAttachmentSpec, errchanVolAtm chan error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
+// CreateVolumeAttachment implements pb.ControllerServer.CreateVolumeAttachment
+func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.CreateVolumeAttachmentOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive create volume attachment request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
-		log.Error("Get volume failed in create volume attachment method: ", err)
-		errchanVolAtm <- err
-		return
+		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		errchanVolAtm <- err
-		return
-	}
-	c.volumeController.SetDock(dockInfo)
+
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
 
 	pol, err := db.C.GetPool(ctx, vol.PoolId)
 	if err != nil {
-		log.Error("Get pool failed in create volume attachment method: ", err)
-		errchanVolAtm <- err
-		return
+		msg := fmt.Sprintf("get pool failed in create volume attachment method: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
-		protocol = "iscsi"
+		protocol = config.ISCSIProtocol
 	}
 
-	var atm = &pb.CreateAttachmentOpts{
-		Id:       in.Id,
-		VolumeId: in.VolumeId,
-		HostInfo: &pb.HostInfo{
-			Platform:  in.Platform,
-			OsType:    in.OsType,
-			Ip:        in.Ip,
-			Host:      in.Host,
-			Initiator: in.Initiator,
-		},
-		AccessProtocol: protocol,
-		Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
-		DriverName:     dockInfo.DriverName,
-		Context:        ctx.ToJson(),
-	}
-	result, err := c.volumeController.CreateVolumeAttachment(atm)
+	opt.AccessProtocol = protocol
+
+	dockInfo, err := db.C.GetDock(ctx, pol.DockId)
 	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeAttachError); errUpdate != nil {
-			errchanVolAtm <- errUpdate
-			return
-		}
-		errchanVolAtm <- err
-		return
+		msg := fmt.Sprintf("when search supported dock resource: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
-	if err = db.C.UpdateStatus(ctx, result, model.VolumeAttachAvailable); err != nil {
-		errchanVolAtm <- err
-		return
+	c.volumeController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.volumeController.CreateVolumeAttachment(opt)
+	if err != nil {
+		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+		msg := fmt.Sprintf("create volume attachment failed: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
-	result.Status = model.VolumeAttachAvailable
+
 	result.AccessProtocol = protocol
-	if _, err = db.C.UpdateVolumeAttachment(ctx, result.Id, result); err != nil {
-		errchanVolAtm <- err
-		return
-	}
-	errchanVolAtm <- nil
-}
-
-func (c *Controller) UpdateVolumeAttachment(in *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
-	return nil, errors.New("Not implemented!")
-}
-
-func (c *Controller) DeleteVolumeAttachment(ctx *c.Context, in *model.VolumeAttachmentSpec, errchan chan error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
-	if err != nil {
-		log.Error("Get volume failed in delete volume attachment method: ", err)
-		errchan <- err
-		return
-	}
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		errchan <- err
-		return
-	}
-	c.volumeController.SetDock(dockInfo)
-
-	err = c.volumeController.DeleteVolumeAttachment(
-		&pb.DeleteAttachmentOpts{
-			Id:       in.Id,
-			VolumeId: in.VolumeId,
-			HostInfo: &pb.HostInfo{
-				Platform:  in.Platform,
-				OsType:    in.OsType,
-				Ip:        in.Ip,
-				Host:      in.Host,
-				Initiator: in.Initiator,
-			},
-			AccessProtocol: in.AccessProtocol,
-			Metadata:       utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DriverName:     dockInfo.DriverName,
-			Context:        ctx.ToJson(),
-		},
-	)
-
-	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeAttachErrorDeleting); errUpdate != nil {
-			errchan <- errUpdate
-			return
-		}
-		errchan <- err
-		return
-	}
-	if err := db.C.DeleteVolumeAttachment(ctx, in.Id); err != nil {
-		log.Error("Error occurred in dock module when delete volume attachment in db:", err)
-		errchan <- err
-		return
-	}
-
-	errchan <- nil
-}
-
-func (c *Controller) CreateVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec, errchan chan error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
-	if err != nil {
-		log.Error("Get volume failed in create volume snapshot method: ", err)
-		errchan <- err
-		return
-	}
-
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		errchan <- err
-		return
-	}
-	c.volumeController.SetDock(dockInfo)
-
-	if in.Metadata == nil {
-		in.Metadata = map[string]string{}
-	}
-	// Get snapshot profile
-	if in.ProfileId != "" {
-		profile, err := db.C.GetProfile(ctx, in.ProfileId)
-		if err != nil {
-			log.Error("When get profile resource:", err)
-			errchan <- err
-			return
-		}
-
-		if profile.SnapshotProperties.Topology.Bucket != "" {
-			in.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
-		}
-	}
-
-	snp, err := c.volumeController.CreateVolumeSnapshot(
-		&pb.CreateVolumeSnapshotOpts{
-			Id:          in.Id,
-			Name:        in.Name,
-			Description: in.Description,
-			VolumeId:    in.VolumeId,
-			Size:        vol.Size,
-			Metadata:    utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DriverName:  dockInfo.DriverName,
-			Context:     ctx.ToJson(),
-		},
-	)
-	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeSnapError); errUpdate != nil {
-			errchan <- errUpdate
-			return
-		}
-		errchan <- err
-		return
-	}
-	if errUpdate := db.C.UpdateStatus(ctx, snp, model.VolumeSnapAvailable); errUpdate != nil {
-		errchan <- errUpdate
-		return
-	}
-	errchan <- nil
-}
-
-func (c *Controller) DeleteVolumeSnapshot(ctx *c.Context, in *model.VolumeSnapshotSpec, errchan chan error) {
-	vol, err := db.C.GetVolume(ctx, in.VolumeId)
-	if err != nil {
-		log.Error("Get volume failed in delete volume snapshot method: ", err)
-		errchan <- err
-		return
-	}
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
-	if err != nil {
-		log.Error("When search supported dock resource:", err)
-		errchan <- err
-		return
-	}
-	c.volumeController.SetDock(dockInfo)
-
-	err = c.volumeController.DeleteVolumeSnapshot(
-		&pb.DeleteVolumeSnapshotOpts{
-			Id:         in.Id,
-			VolumeId:   in.VolumeId,
-			Metadata:   utils.MergeStringMaps(in.Metadata, vol.Metadata),
-			DriverName: dockInfo.DriverName,
-			Context:    ctx.ToJson(),
-		},
-	)
-	if err != nil {
-		if errUpdate := db.C.UpdateStatus(ctx, in, model.VolumeSnapErrorDeleting); errUpdate != nil {
-			errchan <- errUpdate
-			return
-		}
-		log.Error("Error occurred in dock module when delete volume snapshot in driver:", err)
-		errchan <- err
-		return
-	}
-	if err = db.C.DeleteVolumeSnapshot(ctx, in.Id); err != nil {
-		log.Error("Error occurred in dock module when delete volume snapshot in db:", err)
-		errchan <- err
-		return
-	}
-	errchan <- nil
-}
-
-func (c *Controller) CreateVolumeGroup(ctx *c.Context, in *model.VolumeGroupSpec) error {
-	polInfo, err := c.selector.SelectSupportedPoolForVG(in)
-	if err != nil {
-		msg := "No valid pool find for group"
+	if vol.Status == model.VolumeAttaching {
+		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
+	} else {
+		msg := fmt.Sprintf("wrong volume status when volume attachment creation completed")
 		log.Error(msg)
-		if err = db.C.UpdateStatus(ctx, in, model.VolumeGroupError); err != nil {
-			return err
-		}
-		return errors.New(msg)
+		return pb.GenericResponseError(msg), err
 	}
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+
+	result.Status = model.VolumeAttachAvailable
+
+	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
+	// Save changes to db.
+	db.C.UpdateVolumeAttachment(ctx, opt.Id, result)
+
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteVolumeAttachment implements pb.ControllerServer.DeleteVolumeAttachment
+func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete volume attachment request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
 	if err != nil {
-		msg := "No valid dock find for group"
+		msg := fmt.Sprintf("get volume failed in delete volume attachment method: %v", err)
 		log.Error(msg)
-		if err = db.C.UpdateStatus(ctx, in, model.VolumeGroupError); err != nil {
-			return err
-		}
-		return errors.New(msg)
+		return pb.GenericResponseError(msg), err
+	}
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		msg := fmt.Sprintf("when search supported dock resource: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 
 	c.volumeController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
 
-	opt := &pb.CreateVolumeGroupOpts{
-		Id:               in.Id,
-		Name:             in.Name,
-		Description:      in.Description,
-		AvailabilityZone: in.AvailabilityZone,
-		DriverName:       dockInfo.DriverName,
-		PoolId:           polInfo.Id,
-		Context:          ctx.ToJson(),
+	if err = c.volumeController.DeleteVolumeAttachment(opt); err != nil {
+		msg := fmt.Sprintf("delete volume attachment failed: %v", err)
+		log.Error(msg)
+		db.C.DeleteVolumeAttachment(ctx, opt.Id)
+		return pb.GenericResponseError(msg), err
 	}
 
-	_, err = c.volumeController.CreateVolumeGroup(opt)
-	if err != nil {
-		return err
+	if err = db.C.DeleteVolumeAttachment(ctx, opt.Id); err != nil {
+		msg := fmt.Sprintf("error occurred in dock module when delete volume attachment in db: %v", err)
+		log.Error(msg)
+		return pb.GenericResponseError(msg), err
 	}
 
-	// TODO Policy controller for the vg need to be modified.
-	//	// Select the storage tag according to the lifecycle flag.
-	//	c.policyController = policy.NewController(profile)
-	//	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
-	//	c.policyController.SetDock(dockInfo)
+	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
 
-	//	var errChanPolicy = make(chan error, 1)
-	//	defer close(errChanPolicy)
-	//	volBody, _ := json.Marshal(result)
-	//	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChanPolicy)
-	//	if err := <-errChanPolicy; err != nil {
-	//		log.Error("When execute async policy:", err)
-	//		errchanVolume <- err
-	//		return
-	//	}
-	return nil
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) CreateReplication(ctx *c.Context, in *model.ReplicationSpec) (*model.ReplicationSpec, error) {
+// CreateVolumeSnapshot implements pb.ControllerServer.CreateVolumeSnapshot
+func (c *Controller) CreateVolumeSnapshot(contx context.Context, opt *pb.CreateVolumeSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive create volume snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	if opt.Metadata == nil {
+		opt.Metadata = map[string]string{}
+	}
+
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
+	}
+
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
+	if err != nil {
+		log.Error("get volume failed in create volume snapshot method: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	opt.Size = vol.Size
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.volumeController.CreateVolumeSnapshot(opt)
+	if err != nil {
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapError)
+		return pb.GenericResponseError(err), err
+	}
+
+	db.C.UpdateStatus(ctx, result, model.VolumeSnapAvailable)
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteVolumeSnapshot implements pb.ControllerServer.DeleteVolumeSnapshot
+func (c *Controller) DeleteVolumeSnapshot(contx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete volume snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
+	if err != nil {
+		log.Error("get volume failed in delete volume snapshot method: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
+	prf := model.NewProfileFromJson(opt.Profile)
+	// Select the storage tag according to the lifecycle flag.
+	c.policyController = policy.NewController(prf)
+	c.policyController.Setup(DELETE_LIFECIRCLE_FLAG)
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	if err = c.volumeController.DeleteVolumeSnapshot(opt); err != nil {
+		log.Error("error occurred in controller module when delete volume snapshot: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	if err = db.C.DeleteVolumeSnapshot(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete volume snapshot in db: ", err)
+		db.UpdateVolumeSnapshotStatus(ctx, db.C, opt.Id, model.VolumeSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+
+// CreateReplication implements pb.ControllerServer.CreateReplication
+func (c *Controller) CreateReplication(contx context.Context, opt *pb.CreateReplicationOpts) (*pb.GenericResponse, error) {
 	// TODO: Get profile and do some policy action.
 
-	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
+	log.Info("Controller server receive create volume replication request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	pvol, err := db.C.GetVolume(ctx, opt.PrimaryVolumeId)
 	if err != nil {
-		return nil, err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationError)
+		return pb.GenericResponseError(err), err
 	}
 	// TODO: If user does not provide the secondary volume. Do the following steps:
 	// 1. Get profile from db.
 	// 2. Use selector to choose backend.
 	// 3. Create volume.
 	// TODO: The secondary volume may be across region.
-	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	svol, err := db.C.GetVolume(ctx, opt.SecondaryVolumeId)
 	if err != nil {
-		return nil, err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationError)
+		return pb.GenericResponseError(err), err
 	}
 
-	result, err := c.drController.CreateReplication(ctx, in, pvol, svol)
-	result.ReplicationStatus = model.ReplicationEnabled
+	// This replica structure is currently fetched from database, but eventually
+	// it will be removed after CreateReplication method in drController is
+	// updated.
+	replica, err := db.C.GetReplication(ctx, opt.Id)
 	if err != nil {
-		result.ReplicationStatus = model.ReplicationError
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationError)
+		return pb.GenericResponseError(err), err
+	}
+	result, err := c.drController.CreateReplication(ctx, replica, pvol, svol)
+	if err != nil {
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationError)
+		return pb.GenericResponseError(err), err
 	}
 
 	// update status ,driver data, metadata
-	db.C.UpdateReplication(ctx, result.Id, result)
-	return result, err
+	db.C.UpdateStatus(ctx, result, model.ReplicationAvailable)
+	return pb.GenericResponseResult(result), nil
 }
 
-func (c *Controller) DeleteReplication(ctx *c.Context, in *model.ReplicationSpec) error {
+// DeleteReplication implements pb.ControllerServer.DeleteReplication
+func (c *Controller) DeleteReplication(contx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
 
-	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
+	log.Info("Controller server receive delete volume replication request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	pvol, err := db.C.GetVolume(ctx, opt.PrimaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
-	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	svol, err := db.C.GetVolume(ctx, opt.SecondaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
 
-	err = c.drController.DeleteReplication(ctx, in, pvol, svol)
+	// This replica structure is currently fetched from database, but eventually
+	// it will be removed after DeleteReplication method in drController is
+	// updated.
+	replica, err := db.C.GetReplication(ctx, opt.Id)
 	if err != nil {
-		db.C.UpdateStatus(ctx, in, model.ReplicationErrorDeleting)
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		return pb.GenericResponseError(err), err
 	}
-	return err
+	if err = c.drController.DeleteReplication(ctx, replica, pvol, svol); err != nil {
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	if err = db.C.DeleteReplication(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete replication in db: ", err)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) EnableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
-	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
+// EnableReplication implements pb.ControllerServer.EnableReplication
+func (c *Controller) EnableReplication(contx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive enable volume replication request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	pvol, err := db.C.GetVolume(ctx, opt.PrimaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorEnabling)
+		return pb.GenericResponseError(err), err
 	}
-	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	svol, err := db.C.GetVolume(ctx, opt.SecondaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorEnabling)
+		return pb.GenericResponseError(err), err
 	}
 
-	err = c.drController.EnableReplication(ctx, in, pvol, svol)
-	in.ReplicationStatus = model.ReplicationEnabled
+	// This replica structure is currently fetched from database, but eventually
+	// it will be removed after EnableReplication method in drController is
+	// updated.
+	replica, err := db.C.GetReplication(ctx, opt.Id)
 	if err != nil {
-		in.ReplicationStatus = model.ReplicationErrorEnabling
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorEnabling)
+		return pb.GenericResponseError(err), err
 	}
-	if _, err := db.C.UpdateReplication(ctx, in.Id, in); err != nil {
-		log.Error("update replication in db error, ", err)
+	if err = c.drController.EnableReplication(ctx, replica, pvol, svol); err != nil {
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorEnabling)
+		return pb.GenericResponseError(err), err
 	}
-	return err
+
+	db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationEnabled)
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) DisableReplication(ctx *c.Context, in *model.ReplicationSpec) error {
-	pvol, err := db.C.GetVolume(ctx, in.PrimaryVolumeId)
+// DisableReplication implements pb.ControllerServer.DisableReplication
+func (c *Controller) DisableReplication(contx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive disable volume replication request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	pvol, err := db.C.GetVolume(ctx, opt.PrimaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDisabling)
+		return pb.GenericResponseError(err), err
 	}
-	svol, err := db.C.GetVolume(ctx, in.SecondaryVolumeId)
+	svol, err := db.C.GetVolume(ctx, opt.SecondaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDisabling)
+		return pb.GenericResponseError(err), err
 	}
 
-	err = c.drController.DisableReplication(ctx, in, pvol, svol)
-	in.ReplicationStatus = model.ReplicationDisabled
+	// This replica structure is currently fetched from database, but eventually
+	// it will be removed after DisableReplication method in drController is
+	// updated.
+	replica, err := db.C.GetReplication(ctx, opt.Id)
 	if err != nil {
-		in.ReplicationStatus = model.ReplicationErrorDisabling
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDisabling)
+		return pb.GenericResponseError(err), err
 	}
-	if _, err := db.C.UpdateReplication(ctx, in.Id, in); err != nil {
-		log.Error("update replication in db error, ", err)
+	if err = c.drController.DisableReplication(ctx, replica, pvol, svol); err != nil {
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDisabling)
+		return pb.GenericResponseError(err), err
 	}
 
-	return err
+	db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationDisabled)
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) FailoverReplication(ctx *c.Context, replication *model.ReplicationSpec, failover *model.FailoverReplicationSpec) error {
-	pvol, err := db.C.GetVolume(ctx, replication.PrimaryVolumeId)
+// FailoverReplication implements pb.ControllerServer.FailoverReplication
+func (c *Controller) FailoverReplication(contx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive failover volume replication request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	pvol, err := db.C.GetVolume(ctx, opt.PrimaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorFailover)
+		return pb.GenericResponseError(err), err
 	}
-	svol, err := db.C.GetVolume(ctx, replication.SecondaryVolumeId)
+	svol, err := db.C.GetVolume(ctx, opt.SecondaryVolumeId)
 	if err != nil {
-		return err
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorFailover)
+		return pb.GenericResponseError(err), err
 	}
 
-	err = c.drController.FailoverReplication(ctx, replication, failover, pvol, svol)
+	var replicaStatus string
+	var failover = &model.FailoverReplicationSpec{
+		AllowAttachedVolume: opt.AllowAttachedVolume,
+		SecondaryBackendId:  opt.SecondaryBackendId,
+	}
+	// This replica structure is currently fetched from database, but eventually
+	// it will be removed after FailoverReplication method in drController is
+	// updated.
+	replica, err := db.C.GetReplication(ctx, opt.Id)
+	if err != nil {
+		db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorDisabling)
+		return pb.GenericResponseError(err), err
+	}
+	err = c.drController.FailoverReplication(ctx, replica, failover, pvol, svol)
 	if failover.SecondaryBackendId == model.ReplicationDefaultBackendId {
 		if err != nil {
-			replication.ReplicationStatus = model.ReplicationErrorFailover
-		} else {
-			replication.ReplicationStatus = model.ReplicationFailover
+			db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorFailover)
+			return pb.GenericResponseError(err), err
 		}
+		replicaStatus = model.ReplicationFailover
 	} else {
 		if err != nil {
-			replication.ReplicationStatus = model.ReplicationErrorFailback
-		} else {
-			replication.ReplicationStatus = model.ReplicationEnabled
+			db.UpdateReplicationStatus(ctx, db.C, opt.Id, model.ReplicationErrorFailback)
+			return pb.GenericResponseError(err), err
 		}
+		replicaStatus = model.ReplicationEnabled
 	}
 
-	if _, err := db.C.UpdateReplication(ctx, replication.Id, replication); err != nil {
-		log.Error("update replication in db error, ", err)
-	}
-	return err
+	db.UpdateReplicationStatus(ctx, db.C, opt.Id, replicaStatus)
+	return pb.GenericResponseResult(nil), nil
 }
 
-func (c *Controller) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec, addVolumes []string, removeVolumes []string) error {
-	dock, err := db.C.GetDockByPoolId(ctx, vg.PoolId)
+// CreateVolumeGroup implements pb.ControllerServer.CreateVolumeGroup
+func (c *Controller) CreateVolumeGroup(contx context.Context, opt *pb.CreateVolumeGroupOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive create volume group request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	// This vg structure is currently fetched from database, but eventually
+	// it will be removed after SelectSupportedPoolForVG method in selector
+	// is updated.
+	vg, err := db.C.GetVolumeGroup(ctx, opt.Id)
 	if err != nil {
-		return err
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		return pb.GenericResponseError(err), err
 	}
-
-	c.volumeController.SetDock(dock)
-
-	opt := &pb.UpdateVolumeGroupOpts{
-		Id:            vg.Id,
-		DriverName:    dock.DriverName,
-		AddVolumes:    addVolumes,
-		RemoveVolumes: removeVolumes,
-		Context:       ctx.ToJson(),
-	}
-
-	err = c.volumeController.UpdateVolumeGroup(opt)
+	polInfo, err := c.selector.SelectSupportedPoolForVG(vg)
 	if err != nil {
-		log.Error("When create volume group:", err)
-		return err
+		log.Error("no valid pool find for group: ", err)
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		return pb.GenericResponseError(err), err
+	}
+	opt.PoolId = polInfo.Id
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		log.Error("no valid dock find for group: ", err)
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.volumeController.CreateVolumeGroup(opt)
+	if err != nil {
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		return pb.GenericResponseError(err), err
+	}
+	result.PoolId = polInfo.Id
+
+	// Update group id in the volumes
+	for _, addVolId := range opt.AddVolumes {
+		if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+			BaseModel: &model.BaseModel{Id: addVolId},
+			GroupId:   opt.GetId(),
+		}); err != nil {
+			return pb.GenericResponseError(err), err
+		}
 	}
 
 	// TODO Policy controller for the vg need to be modified.
@@ -795,28 +742,435 @@ func (c *Controller) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec
 	//		errchanVolume <- err
 	//		return
 	//	}
-	return nil
+	db.C.UpdateStatus(ctx, result, model.VolumeGroupAvailable)
+	return pb.GenericResponseResult(result), nil
 }
 
-func (c *Controller) DeleteVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) error {
-	dock, err := db.C.GetDockByPoolId(ctx, vg.PoolId)
-	if err != nil {
-		return err
-	}
+// UpdateVolumeGroup implements pb.ControllerServer.UpdateVolumeGroup
+func (c *Controller) UpdateVolumeGroup(contx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
 
+	log.Info("Controller server receive update volume group request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	dock, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
+	if err != nil {
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+		return pb.GenericResponseError(err), err
+	}
 	c.volumeController.SetDock(dock)
+	opt.DriverName = dock.DriverName
 
-	opt := &pb.DeleteVolumeGroupOpts{
-		Id:         vg.Id,
-		DriverName: dock.DriverName,
-		Context:    ctx.ToJson(),
-	}
-
-	err = c.volumeController.DeleteVolumeGroup(opt)
+	vg, err := c.volumeController.UpdateVolumeGroup(opt)
 	if err != nil {
-		log.Error("When delete volume group:", err)
-		return err
+		log.Errorf("when update volume group: %v", err)
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupError)
+
+		// Update volume status in group
+		for _, addVolId := range opt.AddVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: addVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
+		for _, rmVolId := range opt.RemoveVolumes {
+			if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+				BaseModel: &model.BaseModel{Id: rmVolId},
+				Status:    model.VolumeError,
+			}); err != nil {
+				return pb.GenericResponseError(err), err
+			}
+		}
+
+		return pb.GenericResponseError(err), err
 	}
 
-	return nil
+	// Update group id in the volumes
+	for _, addVolId := range opt.AddVolumes {
+		if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+			BaseModel: &model.BaseModel{Id: addVolId},
+			GroupId:   opt.GetId(),
+		}); err != nil {
+			return pb.GenericResponseError(err), err
+		}
+	}
+
+	for _, rmVolId := range opt.RemoveVolumes {
+		if _, err = db.C.UpdateVolume(ctx, &model.VolumeSpec{
+			BaseModel: &model.BaseModel{Id: rmVolId},
+			GroupId:   "",
+		}); err != nil {
+			return pb.GenericResponseError(err), err
+		}
+	}
+
+	// TODO Policy controller for the vg need to be modified.
+	//	// Select the storage tag according to the lifecycle flag.
+	//	c.policyController = policy.NewController(profile)
+	//	c.policyController.Setup(CREATE_LIFECIRCLE_FLAG)
+	//	c.policyController.SetDock(dockInfo)
+
+	//	var errChanPolicy = make(chan error, 1)
+	//	defer close(errChanPolicy)
+	//	volBody, _ := json.Marshal(result)
+	//	go c.policyController.ExecuteAsyncPolicy(opt, string(volBody), errChanPolicy)
+	//	if err := <-errChanPolicy; err != nil {
+	//		log.Error("When execute async policy:", err)
+	//		errchanVolume <- err
+	//		return
+	//	}
+	db.C.UpdateStatus(ctx, vg, model.VolumeGroupAvailable)
+	return pb.GenericResponseResult(vg), nil
+}
+
+// DeleteVolumeGroup implements pb.ControllerServer.DeleteVolumeGroup
+func (c *Controller) DeleteVolumeGroup(contx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	log.Info("Controller server receive delete volume group request, vr =", opt)
+
+	dock, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
+	if err != nil {
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	c.volumeController.SetDock(dock)
+	opt.DriverName = dock.DriverName
+
+	if err = c.volumeController.DeleteVolumeGroup(opt); err != nil {
+		log.Error("when delete volume group: ", err)
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupErrorDeleting)
+		return pb.GenericResponseError(err), err
+
+	}
+
+	if err = db.C.DeleteVolumeGroup(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete volume group in db: ", err)
+		db.UpdateVolumeGroupStatus(ctx, db.C, opt.Id, model.VolumeGroupErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+
+// CreateFileShare implements pb.ControllerServer.CreateFileShare
+func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileShareOpts) (*pb.GenericResponse, error) {
+	var err error
+
+	log.Info("Controller server receive create file share request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	prf := model.NewProfileFromJson(opt.Profile)
+
+	// This file share structure is currently fetched from database, but eventually
+	// it will be removed after SelectSupportedPoolForFileShare method in selector
+	// is updated.
+	fileshare, err := db.C.GetFileShare(ctx, opt.Id)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
+
+	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
+
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
+	// whether specify a pool or not, opt's poolid and pool name should be
+	// assigned by polInfo
+	opt.PoolId = polInfo.Id
+	opt.PoolName = polInfo.Name
+
+	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	log.V(5).Infof("controller create fleshare: selected Driver name %+v", opt.DriverName)
+
+	result, err := c.fileshareController.CreateFileShare((*pb.CreateFileShareOpts)(opt))
+	if err != nil {
+		// Change the status of the file share to error when the creation faild
+		defer db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when create file share:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	result.PoolId, result.ProfileId = opt.GetPoolId(), prf.Id
+
+	// Update the file share data in database.
+	log.V(5).Infof("file share creation result is %v", result)
+	if err := db.C.UpdateStatus(ctx, result, model.FileShareAvailable); err != nil {
+		return nil, err
+	}
+
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteFileShare implements pb.ControllerServer.DeleteFileShare
+func (c *Controller) DeleteFileShare(contx context.Context, opt *pb.DeleteFileShareOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete file share request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
+	if err != nil {
+		log.Error("when search dock in db by pool id: ", err)
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	if err = c.fileshareController.DeleteFileShare(opt); err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	if err = db.C.DeleteFileShare(ctx, opt.GetId()); err != nil {
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), err
+}
+
+// CreateFileShare implements pb.ControllerServer.CreateFileShareAcl
+func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
+
+	log.Info("controller server receive create file share acl request, vr =", opt)
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+	opt.Name = fileshare.Name
+
+	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
+	if err != nil {
+		// Change the status of the file share acl to error when the creation faild
+		defer db.UpdateFileShareStatus(ctx, db.C, fileshare.Id, model.FileShareError)
+		log.Error("when create file share acl:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	db.C.UpdateFileShareAcl(ctx, result)
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteFileShareAcl implements pb.ControllerServer.DeleteFileShareAcl
+func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
+
+	log.Info("controller server receive delete file share acl request, vr =", opt)
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+	opt.Name = fileshare.Name
+
+	if err = c.fileshareController.DeleteFileShareAcl((*pb.DeleteFileShareAclOpts)(opt)); err != nil {
+		// Change the status of the file share acl to error when the creation faild
+		log.Error("when delete file share acl:", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	if err = db.C.DeleteFileShareAcl(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete file share acl in db: ", err)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+
+// CreateFileShareSnapshot implements pb.ControllerServer.CreateFileShareSnapshot
+func (c *Controller) CreateFileShareSnapshot(contx context.Context, opt *pb.CreateFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive create file share snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	if opt.Metadata == nil {
+		opt.Metadata = map[string]string{}
+	}
+
+	profile := model.NewProfileFromJson(opt.Profile)
+	if profile.SnapshotProperties.Topology.Bucket != "" {
+		opt.Metadata["bucket"] = profile.SnapshotProperties.Topology.Bucket
+	}
+
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		log.Error("get file share failed in create file share snapshot method: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	opt.Size = fileshare.Size
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	result, err := c.fileshareController.CreateFileShareSnapshot(opt)
+	if err != nil {
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapError)
+		return pb.GenericResponseError(err), err
+	}
+
+	db.C.UpdateStatus(ctx, result, model.FileShareSnapAvailable)
+	return pb.GenericResponseResult(result), nil
+}
+
+// DeleteFileshareSnapshot implements pb.ControllerServer.DeleteFileshareSnapshot
+func (c *Controller) DeleteFileShareSnapshot(contx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
+
+	log.Info("Controller server receive delete file share snapshot request, vr =", opt)
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
+	if err != nil {
+		log.Error("get file share failed in delete file share snapshot method: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
+	if err != nil {
+		log.Error("when search supported dock resource: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	c.fileshareController.SetDock(dockInfo)
+	opt.DriverName = dockInfo.DriverName
+
+	if err = c.fileshareController.DeleteFileShareSnapshot(opt); err != nil {
+		log.Error("error occurred in controller module when delete file share snapshot: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+	if err = db.C.DeleteFileShareSnapshot(ctx, opt.Id); err != nil {
+		log.Error("error occurred in controller module when delete file share snapshot in db: ", err)
+		db.UpdateFileShareSnapshotStatus(ctx, db.C, opt.Id, model.FileShareSnapErrorDeleting)
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(nil), nil
+}
+
+func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts) (*pb.GenericResponse, error) {
+	log.Info("in controller get metrics methods")
+
+	var result []*model.MetricSpec
+	var err error
+
+	if opt.StartTime == "" && opt.EndTime == "" {
+		// no start and end time specified, get the latest value of this metric
+		result, err = c.metricsController.GetLatestMetrics(opt)
+	} else if opt.StartTime == opt.EndTime {
+		// same start and end time specified, get the value of this metric at that timestamp
+		result, err = c.metricsController.GetInstantMetrics(opt)
+	} else {
+		// range of start and end time is specified
+		result, err = c.metricsController.GetRangeMetrics(opt)
+	}
+
+	if err != nil {
+		log.Errorf("get metrics failed: %s\n", err.Error())
+
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(result), err
+}
+
+func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller collect metrics methods")
+
+	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
+	dockSpec, err := db.C.ListDocks(ctx)
+	if err != nil {
+		log.Errorf("list dock failed in CollectMetrics method: %s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+	for i, d := range dockSpec {
+		if d.DriverName == opt.DriverName {
+			log.Infof("driver found driver: %s", d.DriverName)
+			dockInfo, err := db.C.GetDock(ctx, dockSpec[i].BaseModel.Id)
+			if err != nil {
+				log.Errorf("error %s when search dock in db by dock id: %s", err.Error(), dockSpec[i].BaseModel.Id)
+				return pb.GenericResponseError(err), err
+
+			}
+			c.metricsController.SetDock(dockInfo)
+			result, err := c.metricsController.CollectMetrics(opt)
+			if err != nil {
+				log.Errorf("collectMetrics failed: %s", err.Error())
+
+				return pb.GenericResponseError(err), err
+			}
+
+			return pb.GenericResponseResult(result), nil
+		}
+	}
+	return nil, nil
+}
+
+func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
+	log.V(5).Info("in controller get urls method")
+
+	var result *map[string]model.UrlDesc
+	var err error
+
+	result, err = c.metricsController.GetUrls()
+
+	// make return array
+	arrUrls := make([]model.UrlSpec, 0)
+
+	for k, v := range *result {
+		// make each url spec
+		urlSpec := model.UrlSpec{}
+		urlSpec.Name = k
+		urlSpec.Url = v.Url
+		urlSpec.Desc = v.Desc
+		// add to the array
+		arrUrls = append(arrUrls, urlSpec)
+	}
+
+	if err != nil {
+		log.Errorf("get urls failed: %s", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
+	return pb.GenericResponseResult(arrUrls), err
 }

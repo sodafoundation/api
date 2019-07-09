@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Copyright 2018 The OpenSDS Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+source $TOP_DIR/local.conf
+
+# Global
+HOST_IP=${HOST_IP:-}
+HOST_IP=$(osds::util::get_default_host_ip "$HOST_IP" "inet")
+if [ "$HOST_IP" == "" ]; then
+    osds::util::die $LINENO "Could not determine host ip address.  See local.conf for suggestions on setting HOST_IP."
+fi
+
+# OpenSDS configuration.
+OPENSDS_VERSION=${OPENSDS_VERSION:-v1beta}
+#openstack authentication strategy, support 'noauth', 'keystone'.
+OPENSDS_AUTH_STRATEGY=${OPENSDS_AUTH_STRATEGY:-noauth}
+# OpenSDS service name in keystone.
+OPENSDS_SERVER_NAME=${OPENSDS_SERVER_NAME:-opensds}
+# OpenSDS backend list.
+OPENSDS_BACKEND_LIST=${OPENSDS_BACKEND_LIST:-lvm}
+
+# devstack keystone configuration
+STACK_GIT_BASE=${STACK_GIT_BASE:-https://git.openstack.org}
+STACK_USER_NAME=${STACK_USER_NAME:-stack}
+STACK_PASSWORD=${STACK_PASSWORD:-opensds@123}
+STACK_HOME=${STACK_HOME:-/opt/stack}
+STACK_BRANCH=${STACK_BRANCH:-stable/queens}
+DEV_STACK_DIR=$STACK_HOME/devstack
+
+# ETCD configuration
+ETCD_VERSION=${ETCD_VERSION:-3.3.10}
+ETCD_HOST=${ETCD_HOST:-$HOST_IP}
+ETCD_PORT=${ETCD_PORT:-62379}
+ETCD_PEER_PORT=${ETCD_PEER_PORT:-62380}
+ETCD_DIR=${OPT_DIR}/etcd
+ETCD_LOGFILE=${ETCD_DIR}/etcd.log
+ETCD_DATADIR=${ETCD_DIR}/data
+
+OPENSDS_ENABLED_SERVICES=opensds,etcd,certificate
+if [ $OPENSDS_AUTH_STRATEGY = keystone ];then
+    OPENSDS_ENABLED_SERVICES+=,keystone
+fi
+OPENSDS_ENABLED_SERVICES+=,$OPENSDS_BACKEND_LIST
+SUPPORT_SERVICES=certificate,keystone,lvm,ceph,etcd,opensds

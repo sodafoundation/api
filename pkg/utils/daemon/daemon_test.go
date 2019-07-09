@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package daemon
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,8 +32,7 @@ const testFile = "test.txt"
 
 func TestDaemon(t *testing.T) {
 	var godaemon bool
-
-	SetDaemonFlag(&godaemon, false)
+	flag.BoolVar(&godaemon, "daemon", false, "Run app as a daemon with -daemon=true")
 
 	execCmdHandler = mockCmdHandler
 

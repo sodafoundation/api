@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,28 +18,7 @@ This module implements the common data structure.
 
 package model
 
-import "github.com/opensds/opensds/pkg/dock/proto"
-
-//volume status
-const (
-	ReplicationDeleted        = "deleted"
-	ReplicationCreating       = "creating"
-	ReplicationDeleting       = "deleting"
-	ReplicationEnabling       = "enabling"
-	ReplicationDisabling      = "disabling"
-	ReplicationFailingOver    = "failing_over"
-	ReplicationFailingBack    = "failing_back"
-	ReplicationAvailable      = "available"
-	ReplicationError          = "error"
-	ReplicationErrorDeleting  = "error_deleting"
-	ReplicationErrorEnabling  = "error_enabling"
-	ReplicationErrorDisabling = "error_disabling"
-	ReplicationErrorFailover  = "error_failover"
-	ReplicationErrorFailback  = "error_failback"
-	ReplicationEnabled        = "enabled"
-	ReplicationDisabled       = "disabled"
-	ReplicationFailover       = "failed_over"
-)
+import "github.com/opensds/opensds/pkg/model/proto"
 
 const (
 	ReplicationModeSync         = "sync"

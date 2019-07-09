@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package cli
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	c "github.com/opensds/opensds/client"
@@ -84,6 +85,9 @@ func Fatalln(a ...interface{}) {
 func HttpErrStrip(err error) error {
 	if httpErr, ok := err.(*c.HttpError); ok {
 		httpErr.Decode()
+		if len(httpErr.Msg) == 0 {
+			return fmt.Errorf("%d %s", httpErr.Code, http.StatusText(httpErr.Code))
+		}
 		return fmt.Errorf(httpErr.Msg)
 	}
 	return err

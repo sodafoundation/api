@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2019 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ This module implements a entry into the OpenSDS CLI service.
 package cli
 
 import (
-	"fmt"
 	"log"
-	"net/url"
 	"os"
 
 	c "github.com/opensds/opensds/client"
@@ -51,6 +49,7 @@ func init() {
 	rootCommand.AddCommand(poolCommand)
 	rootCommand.AddCommand(profileCommand)
 	rootCommand.AddCommand(replicationCommand)
+	rootCommand.AddCommand(fileShareCommand)
 	flags := rootCommand.PersistentFlags()
 	flags.BoolVar(&Debug, "debug", false, "shows debugging output.")
 }
@@ -80,36 +79,38 @@ func Run() error {
 
 	ep, ok := os.LookupEnv(c.OpensdsEndpoint)
 	if !ok {
-		return fmt.Errorf("ERROR: You must provide the endpoint by setting " +
-			"the environment variable OPENSDS_ENDPOINT")
+		ep = constants.DefaultOpensdsEndpoint
+		Warnf("OPENSDS_ENDPOINT is not specified, use default(%s)\n", ep)
 	}
 
 	cfg := &c.Config{Endpoint: ep}
 
-	u, _ := url.Parse(ep)
-	if u.Scheme == "https" {
-		cfg.CACert = constants.OpensdsCaCertFile
-	}
-
 	authStrategy, ok := os.LookupEnv(c.OpensdsAuthStrategy)
 	if !ok {
 		authStrategy = c.Noauth
-		fmt.Println("WARNING: Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)")
+		Warnf("Not found Env OPENSDS_AUTH_STRATEGY, use default(noauth)\n")
 	}
+
+	var authOptions c.AuthOptions
+	var err error
 
 	switch authStrategy {
 	case c.Keystone:
-		cfg.AuthOptions = c.LoadKeystoneAuthOptionsFromEnv()
+		authOptions, err = c.LoadKeystoneAuthOptionsFromEnv()
+		if err != nil {
+			return err
+		}
 	case c.Noauth:
-		cfg.AuthOptions = c.LoadNoAuthOptionsFromEnv()
+		authOptions = c.LoadNoAuthOptionsFromEnv()
 	default:
-		cfg.AuthOptions = c.NewNoauthOptions(constants.DefaultTenantId)
+		authOptions = c.NewNoauthOptions(constants.DefaultTenantId)
 	}
 
-	client = c.NewClient(cfg)
+	cfg.AuthOptions = authOptions
 
-	if client == nil {
-		return fmt.Errorf("ERROR: osdsctl client is nil.")
+	client, err = c.NewClient(cfg)
+	if client == nil || err != nil {
+		return err
 	}
 
 	return rootCommand.Execute()

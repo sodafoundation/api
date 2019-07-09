@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,14 +23,12 @@ package etcd
 import (
 	"encoding/json"
 	"errors"
-	"time"
-
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
-
-	"reflect"
+	"time"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -38,7 +36,7 @@ import (
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/urls"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -190,6 +188,757 @@ func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []str
 	return &Parameter{beginIdx, endIdx, sortDir, sortKey}
 }
 
+// *************   FileShare code block  *************
+
+var fileshare_sortKey string
+
+type FileShareSlice []*model.FileShareSpec
+
+func (fileshare FileShareSlice) Len() int { return len(fileshare) }
+
+func (fileshare FileShareSlice) Swap(i, j int) {
+	fileshare[i], fileshare[j] = fileshare[j], fileshare[i]
+}
+
+func (fileshare FileShareSlice) Less(i, j int) bool {
+	switch fileshare_sortKey {
+
+	case "ID":
+		return fileshare[i].Id < fileshare[j].Id
+	case "NAME":
+		return fileshare[i].Name < fileshare[j].Name
+	case "STATUS":
+		return fileshare[i].Status < fileshare[j].Status
+	case "AVAILABILITYZONE":
+		return fileshare[i].AvailabilityZone < fileshare[j].AvailabilityZone
+	case "PROFILEID":
+		return fileshare[i].ProfileId < fileshare[j].ProfileId
+	case "TENANTID":
+		return fileshare[i].TenantId < fileshare[j].TenantId
+	case "SIZE":
+		return fileshare[i].Size < fileshare[j].Size
+	case "POOLID":
+		return fileshare[i].PoolId < fileshare[j].PoolId
+	case "DESCRIPTION":
+		return fileshare[i].Description < fileshare[j].Description
+	}
+	return false
+}
+
+func (c *Client) FindFileShareValue(k string, p *model.FileShareSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "AvailabilityZone":
+		return p.AvailabilityZone
+	case "Size":
+		return strconv.FormatInt(p.Size, 10)
+	case "Status":
+		return p.Status
+	case "PoolId":
+		return p.PoolId
+	case "ProfileId":
+		return p.ProfileId
+	}
+	return ""
+}
+
+func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+
+	fshare.TenantId = ctx.TenantId
+	fshareBody, err := json.Marshal(fshare)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateFileShareAclURL(urls.Etcd, ctx.TenantId, fshare.Id),
+		Content: string(fshareBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when create fileshare access rules in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return fshare, nil
+}
+
+// UpdateFileShareAcl
+func (c *Client) UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	result, err := c.GetFileShareAcl(ctx, acl.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	result.Metadata = acl.Metadata
+
+	jsonBody, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateFileShareAclURL(urls.Etcd, result.TenantId, acl.Id),
+		NewContent: string(jsonBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when update fileshare acl in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
+func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	fshare.TenantId = ctx.TenantId
+	fshareBody, err := json.Marshal(fshare)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId, fshare.Id),
+		Content: string(fshareBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when create fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return fshare, nil
+}
+
+func (c *Client) SelectFileShares(m map[string][]string, fileshares []*model.FileShareSpec) []*model.FileShareSpec {
+	if !c.SelectOrNot(m) {
+		return fileshares
+	}
+
+	var fshares = []*model.FileShareSpec{}
+	var flag bool
+	for _, fshare := range fileshares {
+		flag = true
+		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
+			f := c.FindFileShareValue(key, fshare)
+			if !strings.EqualFold(m[key][0], f) {
+				flag = false
+				break
+			}
+		}
+		if flag {
+			fshares = append(fshares, fshare)
+		}
+	}
+	return fshares
+
+}
+
+func (c *Client) SortFileShares(shares []*model.FileShareSpec, p *Parameter) []*model.FileShareSpec {
+	volume_sortKey = p.sortKey
+
+	if strings.EqualFold(p.sortDir, "dsc") {
+		sort.Sort(FileShareSlice(shares))
+
+	} else {
+		sort.Sort(sort.Reverse(FileShareSlice(shares)))
+	}
+	return shares
+}
+
+func (c *Client) ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
+	fileshares, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		log.Error("list fileshare failed: ", err)
+		return nil, err
+	}
+	return fileshares, nil
+}
+
+func (c *Client) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareAclURL(urls.Etcd, ctx.TenantId),
+	}
+
+	// Admin user should get all fileshares including the fileshares whose tenant is not admin.
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateFileShareAclURL(urls.Etcd, "")
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when list fileshares in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fileshares = []*model.FileShareAclSpec{}
+	if len(dbRes.Message) == 0 {
+		return fileshares, nil
+	}
+	for _, msg := range dbRes.Message {
+		var share = &model.FileShareAclSpec{}
+		if err := json.Unmarshal([]byte(msg), share); err != nil {
+			log.Error("when parsing fileshare in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		fileshares = append(fileshares, share)
+	}
+	return fileshares, nil
+}
+
+func (c *Client) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var aclList []*model.FileShareAclSpec
+	for _, acl := range acls {
+		if acl.FileShareId == fileshareId {
+			aclList = append(aclList, acl)
+		}
+	}
+	return aclList, nil
+}
+
+func (c *Client) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapList []*model.FileShareSnapshotSpec
+	for _, snap := range snaps {
+		if snap.FileShareId == fileshareId {
+			snapList = append(snapList, snap)
+		}
+	}
+	return snapList, nil
+}
+
+func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		log.Error("list fileshare failed: ", err)
+		return nil, err
+	}
+
+	vols := c.SelectFileShares(m, fileshares)
+	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS", "EXPORTLOCATIONS", "SNAPSHOTID"})
+	return c.SortFileShares(vols, p), nil
+}
+
+// ListFileShares
+func (c *Client) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId),
+	}
+
+	// Admin user should get all fileshares including the fileshares whose tenant is not admin.
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateFileShareURL(urls.Etcd, "")
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when list fileshares in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fileshares = []*model.FileShareSpec{}
+	if len(dbRes.Message) == 0 {
+		return fileshares, nil
+	}
+	for _, msg := range dbRes.Message {
+		var share = &model.FileShareSpec{}
+		if err := json.Unmarshal([]byte(msg), share); err != nil {
+			log.Error("when parsing fileshare in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		fileshares = append(fileshares, share)
+	}
+	return fileshares, nil
+}
+
+// ListFileSharesByProfileId
+func (c *Client) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	fileshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res_fileshares []string
+	for _, shares := range fileshares {
+		if shares.ProfileId == prfId {
+			res_fileshares = append(res_fileshares, shares.Name)
+		}
+	}
+	return res_fileshares, nil
+}
+
+// GetFileShareAcl
+func (c *Client) GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
+	acl, err := c.getFileShareAcl(ctx, aclID)
+	if !IsAdminContext(ctx) || err == nil {
+		return acl, err
+	}
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range acls {
+		if f.Id == aclID {
+			return f, nil
+		}
+	}
+	return nil, fmt.Errorf("specified fileshare acl(%s) can't find", aclID)
+}
+
+func (c *Client) getFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareAclURL(urls.Etcd, ctx.TenantId, aclID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when get fileshare acl in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var acl = &model.FileShareAclSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), acl); err != nil {
+		log.Error("when parsing fileshare acl in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return acl, nil
+}
+
+// GetFileShare
+func (c *Client) GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error) {
+	fshare, err := c.getFileShare(ctx, fshareID)
+	if !IsAdminContext(ctx) || err == nil {
+		return fshare, err
+	}
+	fshares, err := c.ListFileShares(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range fshares {
+		if f.Id == fshareID {
+			return f, nil
+		}
+	}
+	return nil, fmt.Errorf("specified fileshare(%s) can't find", fshareID)
+}
+
+func (c *Client) getFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareURL(urls.Etcd, ctx.TenantId, fshareID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when get fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fshare = &model.FileShareSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), fshare); err != nil {
+		log.Error("when parsing fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return fshare, nil
+}
+
+// UpdateFileShare ...
+func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	result, err := c.GetFileShare(ctx, fshare.Id)
+	if err != nil {
+		return nil, err
+	}
+	if fshare.Name != "" {
+		result.Name = fshare.Name
+	}
+	if fshare.Description != "" {
+		result.Description = fshare.Description
+	}
+	if fshare.ExportLocations != nil {
+		result.ExportLocations = fshare.ExportLocations
+	}
+	if fshare.Protocols != nil {
+		result.Protocols = fshare.Protocols
+	}
+	if fshare.Metadata != nil {
+		result.Metadata = fshare.Metadata
+	}
+	if fshare.Status != "" {
+		result.Status = fshare.Status
+	}
+	if fshare.PoolId != "" {
+		result.PoolId = fshare.PoolId
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	log.V(5).Infof("update file share object %+v into db", result)
+
+	body, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateFileShareURL(urls.Etcd, result.TenantId, fshare.Id),
+		NewContent: string(body),
+	}
+
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when update fileshare in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
+// DeleteFileShareAcl
+func (c *Client) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		fshare, err := c.GetFileShareAcl(ctx, aclID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = fshare.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateFileShareAclURL(urls.Etcd, tenantId, aclID),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when delete fileshare in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+// DeleteFileShare
+func (c *Client) DeleteFileShare(ctx *c.Context, fileshareID string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		fshare, err := c.GetFileShare(ctx, fileshareID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = fshare.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateFileShareURL(urls.Etcd, tenantId, fileshareID),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when delete fileshare in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+// CreateFileShareSnapshot
+func (c *Client) CreateFileShareSnapshot(ctx *c.Context, snp *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	snp.TenantId = ctx.TenantId
+	snpBody, err := json.Marshal(snp)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateFileShareSnapshotURL(urls.Etcd, ctx.TenantId, snp.Id),
+		Content: string(snpBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when create fileshare snapshot in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return snp, nil
+}
+
+func (c *Client) GetFileShareSnapshot(ctx *c.Context, snpID string) (*model.FileShareSnapshotSpec, error) {
+	snap, err := c.getFileShareSnapshot(ctx, snpID)
+	if !IsAdminContext(ctx) || err == nil {
+		return snap, err
+	}
+	snaps, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range snaps {
+		if v.Id == snpID {
+			return v, nil
+		}
+	}
+	return nil, fmt.Errorf("specified fileshare snapshot(%s) can't find", snpID)
+}
+
+// GetFileShareSnapshot
+func (c *Client) getFileShareSnapshot(ctx *c.Context, snpID string) (*model.FileShareSnapshotSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareSnapshotURL(urls.Etcd, ctx.TenantId, snpID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when get fileshare attachment in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fs = &model.FileShareSnapshotSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), fs); err != nil {
+		log.Error("when parsing fileshare snapshot in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return fs, nil
+}
+
+// ListFileShareSnapshots
+func (c *Client) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateFileShareSnapshotURL(urls.Etcd, ctx.TenantId),
+	}
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateFileShareSnapshotURL(urls.Etcd, "")
+	}
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when list fileshare snapshots in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var fss = []*model.FileShareSnapshotSpec{}
+	if len(dbRes.Message) == 0 {
+		return fss, nil
+	}
+	for _, msg := range dbRes.Message {
+		var fs = &model.FileShareSnapshotSpec{}
+		if err := json.Unmarshal([]byte(msg), fs); err != nil {
+			log.Error("When parsing fileshare snapshot in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		fss = append(fss, fs)
+	}
+	return fss, nil
+}
+
+var fileshareSnapshotSortKey string
+
+type FileShareSnapshotSlice []*model.FileShareSnapshotSpec
+
+func (fileshareSnapshot FileShareSnapshotSlice) Len() int { return len(fileshareSnapshot) }
+
+func (fileshareSnapshot FileShareSnapshotSlice) Swap(i, j int) {
+
+	fileshareSnapshot[i], fileshareSnapshot[j] = fileshareSnapshot[j], fileshareSnapshot[i]
+}
+
+func (fileshareSnapshot FileShareSnapshotSlice) Less(i, j int) bool {
+	switch fileshareSnapshotSortKey {
+	case "ID":
+		return fileshareSnapshot[i].Id < fileshareSnapshot[j].Id
+	case "VOLUMEID":
+		return fileshareSnapshot[i].FileShareId < fileshareSnapshot[j].FileShareId
+	case "STATUS":
+		return fileshareSnapshot[i].Status < fileshareSnapshot[j].Status
+	case "USERID":
+		return fileshareSnapshot[i].UserId < fileshareSnapshot[j].UserId
+	case "TENANTID":
+		return fileshareSnapshot[i].TenantId < fileshareSnapshot[j].TenantId
+	case "SIZE":
+		return fileshareSnapshot[i].SnapshotSize < fileshareSnapshot[j].SnapshotSize
+	}
+	return false
+}
+
+func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapshotSpec) string {
+	switch k {
+	case "Id":
+		return p.Id
+	case "CreatedAt":
+		return p.CreatedAt
+	case "UpdatedAt":
+		return p.UpdatedAt
+	case "TenantId":
+		return p.TenantId
+	case "UserId":
+		return p.UserId
+	case "Name":
+		return p.Name
+	case "Description":
+		return p.Description
+	case "Status":
+		return p.Status
+	case "Size":
+		return strconv.FormatInt(p.SnapshotSize, 10)
+	case "FileShareId":
+		return p.FileShareId
+	}
+	return ""
+}
+
+func (c *Client) SelectFileShareSnapshots(m map[string][]string, snapshots []*model.FileShareSnapshotSpec) []*model.FileShareSnapshotSpec {
+	if !c.SelectOrNot(m) {
+		return snapshots
+	}
+
+	var snps = []*model.FileShareSnapshotSpec{}
+	var flag bool
+	for _, snapshot := range snapshots {
+		flag = true
+		for key := range m {
+			if utils.Contained(key, validKey) {
+				continue
+			}
+			v := c.FindFileShareSnapshotsValue(key, snapshot)
+			if !strings.EqualFold(m[key][0], v) {
+				flag = false
+				break
+			}
+		}
+		if flag {
+			snps = append(snps, snapshot)
+		}
+	}
+	return snps
+
+}
+
+func (c *Client) SortFileShareSnapshots(snapshots []*model.FileShareSnapshotSpec, p *Parameter) []*model.FileShareSnapshotSpec {
+	fileshareSnapshotSortKey = p.sortKey
+
+	if strings.EqualFold(p.sortDir, "asc") {
+		sort.Sort(FileShareSnapshotSlice(snapshots))
+	} else {
+		sort.Sort(sort.Reverse(FileShareSnapshotSlice(snapshots)))
+	}
+	return snapshots
+
+}
+
+func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
+	fileshareSnapshots, err := c.ListFileShareSnapshots(ctx)
+	if err != nil {
+		log.Error("list fileshareSnapshots failed: ", err)
+		return nil, err
+	}
+
+	snps := c.SelectFileShareSnapshots(m, fileshareSnapshots)
+	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
+
+	return c.SortFileShareSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
+}
+
+// UpdateFileShareSnapshot
+func (c *Client) UpdateFileShareSnapshot(ctx *c.Context, snpID string, snp *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	result, err := c.GetFileShareSnapshot(ctx, snpID)
+	if err != nil {
+		return nil, err
+	}
+	if snp.Name != "" {
+		result.Name = snp.Name
+	}
+	if snp.Description != "" {
+		result.Description = snp.Description
+	}
+	if snp.Status != "" {
+		result.Status = snp.Status
+	}
+
+	if snp.SnapshotSize > 0 {
+		result.SnapshotSize = snp.SnapshotSize
+	}
+
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	result.Metadata = snp.Metadata
+
+	atcBody, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateFileShareSnapshotURL(urls.Etcd, result.TenantId, snpID),
+		NewContent: string(atcBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when update fileshare snapshot in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
+// DeleteFileShareSnapshot
+func (c *Client) DeleteFileShareSnapshot(ctx *c.Context, snpID string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		snap, err := c.GetFileShareSnapshot(ctx, snpID)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = snap.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateFileShareSnapshotURL(urls.Etcd, tenantId, snpID),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("when delete fileshare snapshot in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+// ********************** End Of FileShare *********************
+
 // CreateDock
 func (c *Client) CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpec, error) {
 	if dck.Id == "" {
@@ -211,7 +960,7 @@ func (c *Client) CreateDock(ctx *c.Context, dck *model.DockSpec) (*model.DockSpe
 	}
 	dbRes := c.Create(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When create dock in db:", dbRes.Error)
+		log.Error("when create dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
@@ -225,13 +974,13 @@ func (c *Client) GetDock(ctx *c.Context, dckID string) (*model.DockSpec, error) 
 	}
 	dbRes := c.Get(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("When get dock in db:", dbRes.Error)
+		log.Error("when get dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 
 	var dck = &model.DockSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), dck); err != nil {
-		log.Error("When parsing dock in db:", dbRes.Error)
+		log.Error("when parsing dock in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
 	return dck, nil
@@ -685,6 +1434,11 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
+	// profile name must be unique with the same storage type.
+	if _, err := c.getProfileByName(ctx, prf.Name, prf.StorageType); err == nil {
+		return nil, fmt.Errorf("the profile name '%s' already exists", prf.Name)
+	}
+
 	prfBody, err := json.Marshal(prf)
 	if err != nil {
 		return nil, err
@@ -722,20 +1476,30 @@ func (c *Client) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, e
 	return prf, nil
 }
 
-// GetDefaultProfile
-func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+func (c *Client) getProfileByName(ctx *c.Context, name, storageType string) (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
-		log.Error("Get default profile failed in db: ", err)
+		log.Error("List profile failed: ", err)
 		return nil, err
 	}
 
 	for _, profile := range profiles {
-		if profile.Name == "default" {
+		if profile.Name == name && profile.StorageType == storageType {
 			return profile, nil
 		}
 	}
-	return nil, errors.New("No default profile in db.")
+	var msg = fmt.Sprintf("can't find profile(name: %s, storageType:%s)", name, storageType)
+	return nil, model.NewNotFoundError(msg)
+}
+
+// GetDefaultProfile
+func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
+	return c.getProfileByName(ctx, "default", "block")
+}
+
+// GetDefaultProfileFileShare
+func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
+	return c.getProfileByName(ctx, "default", "file")
 }
 
 // ListProfiles
@@ -1053,6 +1817,23 @@ func (c *Client) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error) {
 	return vols, nil
 }
 
+// ListVolumesByProfileId
+func (c *Client) ListVolumesByProfileId(ctx *c.Context, prfID string) ([]string, error) {
+	vols, err := c.ListVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var resvols []string
+	for _, v := range vols {
+		if v.ProfileId == prfID {
+			resvols = append(resvols, v.Name)
+		}
+	}
+
+	return resvols, nil
+
+}
+
 var volume_sortKey string
 
 type VolumeSlice []*model.VolumeSpec
@@ -1190,7 +1971,7 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 		result.Description = vol.Description
 	}
 	if vol.Metadata != nil {
-		result.Metadata = vol.Metadata
+		result.Metadata = utils.MergeStringMaps(result.Metadata, vol.Metadata)
 	}
 	if vol.PoolId != "" {
 		result.PoolId = vol.PoolId
@@ -1207,7 +1988,12 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.ReplicationDriverData != nil {
 		result.ReplicationDriverData = vol.ReplicationDriverData
 	}
-	result.GroupId = vol.GroupId
+	if vol.MultiAttach {
+		result.MultiAttach = vol.MultiAttach
+	}
+	if vol.GroupId != "" {
+		result.GroupId = vol.GroupId
+	}
 
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -1495,37 +2281,28 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	if len(attachment.Status) > 0 {
 		result.Status = attachment.Status
 	}
-	if len(attachment.Platform) > 0 {
-		result.Platform = attachment.Platform
+
+	// Update metadata
+	if attachment.Metadata != nil {
+		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
 	}
-	if len(attachment.OsType) > 0 {
-		result.OsType = attachment.OsType
-	}
-	if len(attachment.Ip) > 0 {
-		result.Ip = attachment.Ip
-	}
-	if len(attachment.Host) > 0 {
-		result.Host = attachment.Host
-	}
-	if len(attachment.Initiator) > 0 {
-		result.Initiator = attachment.Initiator
-	}
+	// Update DriverVolumeType
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
 	}
-	if len(attachment.AccessProtocol) > 0 {
-		result.AccessProtocol = attachment.AccessProtocol
-	}
-	// Update metadata
-	if result.Metadata == nil {
-		result.Metadata = make(map[string]string)
-	}
-	for k, v := range attachment.Metadata {
-		result.Metadata[k] = v
-	}
-	// Update onnectionData
-	for k, v := range attachment.ConnectionData {
-		result.ConnectionData[k] = v
+	// Update connectionData
+	// Debug
+	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
+	log.V(8).Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
+
+	if attachment.ConnectionData != nil {
+		if result.ConnectionData == nil {
+			result.ConnectionData = make(map[string]interface{})
+		}
+
+		for k, v := range attachment.ConnectionData {
+			result.ConnectionData[k] = v
+		}
 	}
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
@@ -1781,7 +2558,7 @@ func (c *Client) UpdateVolumeSnapshot(ctx *c.Context, snpID string, snp *model.V
 		result.Name = snp.Name
 	}
 	if snp.Metadata != nil {
-		result.Metadata = snp.Metadata
+		result.Metadata = utils.MergeStringMaps(result.Metadata, snp.Metadata)
 	}
 	if snp.Size > 0 {
 		result.Size = snp.Size
@@ -2101,7 +2878,7 @@ func (c *Client) UpdateReplication(ctx *c.Context, replicationId string, input *
 		r.SecondaryReplicationDriverData = input.SecondaryReplicationDriverData
 	}
 	if input.Metadata != nil {
-		r.Metadata = input.Metadata
+		r.Metadata = utils.MergeStringMaps(r.Metadata, input.Metadata)
 	}
 	if input.ReplicationStatus != "" {
 		r.ReplicationStatus = input.ReplicationStatus
@@ -2239,6 +3016,22 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 			return errUpdate
 		}
 
+	case *model.FileShareSpec:
+		fileshare := in.(*model.FileShareSpec)
+		fileshare.Status = status
+		if _, errUpdate := c.UpdateFileShare(ctx, fileshare); errUpdate != nil {
+			log.Error("when update fileshare status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
+	case *model.FileShareSnapshotSpec:
+		fsnap := in.(*model.FileShareSnapshotSpec)
+		fsnap.Status = status
+		if _, errUpdate := c.UpdateFileShareSnapshot(ctx, fsnap.Id, fsnap); errUpdate != nil {
+			log.Error("when update fileshare status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
 	case *model.VolumeGroupSpec:
 		vg := in.(*model.VolumeGroupSpec)
 		vg.Status = status
@@ -2250,6 +3043,13 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 	case []*model.VolumeSpec:
 		vols := in.([]*model.VolumeSpec)
 		if _, errUpdate := c.VolumesToUpdate(ctx, vols); errUpdate != nil {
+			return errUpdate
+		}
+
+	case *model.ReplicationSpec:
+		replica := in.(*model.ReplicationSpec)
+		replica.ReplicationStatus = status
+		if _, errUpdate := c.UpdateReplication(ctx, replica.Id, replica); errUpdate != nil {
 			return errUpdate
 		}
 	}
@@ -2350,6 +3150,10 @@ func (c *Client) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string) ([]*mo
 		}
 	}
 	return snapList, nil
+}
+
+func (c *Client) ListAttachmentsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	return c.ListVolumeAttachments(ctx, volumeId)
 }
 
 func (c *Client) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {

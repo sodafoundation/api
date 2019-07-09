@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,27 +17,35 @@ package connector
 import (
 	"fmt"
 	"log"
+
+	"github.com/opensds/opensds/contrib/drivers/utils/config"
 )
 
 const (
-	FcDriver = "fibre_channel"
+	FcDriver = config.FCProtocol
 	PortName = "port_name"
 	NodeName = "node_name"
 	Wwpn     = "wwpn"
 	Wwnn     = "wwnn"
 
-	IscsiDriver = "iscsi"
+	IscsiDriver = config.ISCSIProtocol
 	Iqn         = "iqn"
 
-	RbdDriver = "rbd"
+	RbdDriver = config.RBDProtocol
+
+	NvmeofDriver = config.NVMEOFProtocol
+	Nqn          = "nqn"
+	NFSDriver    = config.NFSProtocol
 )
 
 // Connector implementation
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
 	Detach(map[string]interface{}) error
-	GetInitiatorInfo() (InitiatorInfo, error)
+	GetInitiatorInfo() (string, error)
 }
+
+var cnts = map[string]Connector{}
 
 // NewConnector implementation
 func NewConnector(cType string) Connector {
@@ -48,8 +56,6 @@ func NewConnector(cType string) Connector {
 	log.Printf("%s is not registered to connector", cType)
 	return nil
 }
-
-var cnts = map[string]Connector{}
 
 // RegisterConnector implementation
 func RegisterConnector(cType string, cnt Connector) error {

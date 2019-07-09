@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -129,7 +129,8 @@ func volumeGroupCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "Status", "AvailabilityZone",
+		"PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -139,7 +140,8 @@ func volumeGroupShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone",
+		"PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }
 
@@ -155,7 +157,7 @@ func volumeGroupListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
+	keys := KeyList{"Id", "Name", "Description", "Status", "Profiles"}
 	PrintList(resp, keys, FormatterList{})
 }
 
@@ -181,6 +183,7 @@ func volumeGroupUpdateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone", "PoolId", "Profiles"}
+	keys := KeyList{"Id", "UpdatedAt", "Name", "Description", "Status", "AvailabilityZone",
+		"PoolId", "Profiles"}
 	PrintDict(resp, keys, FormatterList{})
 }

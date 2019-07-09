@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2018 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,11 @@ import (
 	"reflect"
 
 	"github.com/opensds/opensds/contrib/drivers/drbd"
-	"github.com/opensds/opensds/contrib/drivers/huawei/dorado"
+	"github.com/opensds/opensds/contrib/drivers/huawei/oceanstor"
+	scms "github.com/opensds/opensds/contrib/drivers/scutech/cms"
 	driversConfig "github.com/opensds/opensds/contrib/drivers/utils/config"
-	pb "github.com/opensds/opensds/pkg/dock/proto"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	replication_sample "github.com/opensds/opensds/testutils/driver"
 )
@@ -48,7 +49,7 @@ type ReplicationDriver interface {
 	FailoverReplication(opt *pb.FailoverReplicationOpts) error
 }
 
-func IsSupportHostBasedReplication(resourceType string) bool {
+func IsSupportArrayBasedReplication(resourceType string) bool {
 	v := reflect.ValueOf(config.CONF.Backends)
 	t := reflect.TypeOf(config.CONF.Backends)
 	for i := 0; i < t.NumField(); i++ {
@@ -68,9 +69,11 @@ func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 	case driversConfig.DRBDDriverType:
 		d = &drbd.ReplicationDriver{}
 		break
-	case driversConfig.HuaweiDoradoDriverType:
-		d = &dorado.ReplicationDriver{}
+	case driversConfig.HuaweiOceanStorBlockDriverType:
+		d = &oceanstor.ReplicationDriver{}
 		break
+	case driversConfig.ScutechCMSDriverType:
+		d = &scms.ReplicationDriver{}
 	default:
 		d = &replication_sample.ReplicationDriver{}
 		break
@@ -85,8 +88,8 @@ func CleanReplicationDriver(d ReplicationDriver) ReplicationDriver {
 	switch d.(type) {
 	case *drbd.ReplicationDriver:
 		break
-	case *dorado.ReplicationDriver:
-		d = &dorado.ReplicationDriver{}
+	case *oceanstor.ReplicationDriver:
+		d = &oceanstor.ReplicationDriver{}
 	default:
 		break
 	}

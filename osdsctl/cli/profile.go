@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,7 +88,8 @@ func profileAction(cmd *cobra.Command, args []string) {
 	os.Exit(1)
 }
 
-var profileFormatters = FormatterList{"Extras": JsonFormatter}
+var profileFormatters = FormatterList{"ProvisioningProperties": JsonFormatter, "ReplicationProperties": JsonFormatter,
+	"SnapshotProperties": JsonFormatter, "DataProtectionProperties": JsonFormatter, "CustomProperties": JsonFormatter}
 
 func profileCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
@@ -103,7 +104,8 @@ func profileCreateAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
+	keys := KeyList{"Id", "CreatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
+		"ReplicationProperties", "SnapshotProperties", "DataProtectionProperties", "CustomProperties"}
 	PrintDict(resp, keys, profileFormatters)
 }
 
@@ -113,7 +115,8 @@ func profileShowAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "Extras"}
+	keys := KeyList{"Id", "CreatedAt", "UpdatedAt", "Name", "Description", "StorageType", "ProvisioningProperties",
+		"ReplicationProperties", "SnapshotProperties", "DataProtectionProperties", "CustomProperties"}
 	PrintDict(resp, keys, profileFormatters)
 }
 
@@ -127,7 +130,7 @@ func profileListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description"}
+	keys := KeyList{"Id", "Name", "Description", "StorageType"}
 	PrintList(resp, keys, FormatterList{})
 }
 

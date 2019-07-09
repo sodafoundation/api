@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,11 +96,12 @@ func IsAvailablePool(filterReq map[string]interface{}, pool *model.StoragePoolSp
 
 		poolValue, ok := poolMap[key]
 		if !ok {
-			log.Info("pool: " + pool.Name + " doesn't provide capability: " + key)
+			log.Error("pool: " + pool.Name + " doesn't provide capability: " + key)
 			return false, nil
 		}
 		ismatch, err := match(key, poolValue, reqValue)
 		if nil != err {
+			log.Errorf("[%v]: The request value %v is not match the pool value %v.", key, reqValue, poolValue)
 			return false, err
 		}
 

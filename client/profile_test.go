@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ func TestCreateProfile(t *testing.T) {
 		},
 		Name:        "default",
 		Description: "default policy",
+		StorageType: "block",
 	}
 
 	prf, err := fpr.CreateProfile(&model.ProfileSpec{})
@@ -54,6 +55,7 @@ func TestGetProfile(t *testing.T) {
 		},
 		Name:        "default",
 		Description: "default policy",
+		StorageType: "block",
 	}
 
 	prf, err := fpr.GetProfile(prfID)
@@ -76,6 +78,7 @@ func TestListProfiles(t *testing.T) {
 			},
 			Name:        "default",
 			Description: "default policy",
+			StorageType: "block",
 		},
 		{
 			BaseModel: &model.BaseModel{

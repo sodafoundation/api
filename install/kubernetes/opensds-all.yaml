@@ -1,0 +1,369 @@
+# Copyright 2019 The OpenSDS Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##################################################################################################
+# Apiserver service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiserver
+  namespace: opensds
+  labels:
+    app: apiserver
+    service: apiserver
+spec:
+  ports:
+  - port: 50040
+    name: http-apiserver
+  selector:
+    app: apiserver
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apiserver-v1beta
+  namespace: opensds
+  labels:
+    app: apiserver
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: apiserver
+        version: v1beta
+    spec:
+      containers:
+      - name: apiserver
+        image: opensdsio/opensds-apiserver:latest
+        imagePullPolicy: IfNotPresent
+        command: ["bin/sh"]
+        args: ["-c", "/usr/bin/osdsapiserver -logtostderr"]
+        ports:
+        - containerPort: 50040
+        volumeMounts:
+        - name: opensds-conf-dir
+          mountPath: /etc/opensds
+      volumes:
+      - name: opensds-conf-dir
+        hostPath:
+          path: /etc/opensds
+          type: Directory
+---
+##################################################################################################
+# Controller service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: controller
+  namespace: opensds
+  labels:
+    app: controller
+    service: controller
+spec:
+  ports:
+  - port: 50049
+    name: tcp-controller
+  selector:
+    app: controller
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: controller-v1beta
+  namespace: opensds
+  labels:
+    app: controller
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: controller
+        version: v1beta
+    spec:
+      containers:
+      - name: controller
+        image: opensdsio/opensds-controller:latest
+        imagePullPolicy: IfNotPresent
+        command: ["bin/sh"]
+        args: ["-c", "/usr/bin/osdslet -logtostderr"]
+        ports:
+        - containerPort: 50049
+        volumeMounts:
+        - name: opensds-conf-dir
+          mountPath: /etc/opensds
+      volumes:
+        - name: opensds-conf-dir
+          hostPath:
+            path: /etc/opensds
+            type: Directory
+---
+##################################################################################################
+# Dock service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: dock
+  namespace: opensds
+  labels:
+    app: dock
+    service: dock
+spec:
+  ports:
+  - port: 50050
+    name: tcp-dock
+  selector:
+    app: dock
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dock-v1beta
+  namespace: opensds
+  labels:
+    app: dock
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dock
+        version: v1beta
+    spec:
+      containers:
+        - name: dock
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          image: opensdsio/opensds-dock:latest
+          imagePullPolicy: IfNotPresent
+          command: ["bin/sh"]
+          args: ["-c", "/usr/sbin/tgtd; /usr/bin/osdsdock -logtostderr"]
+          ports:
+          - containerPort: 50050
+          volumeMounts:
+          - name: opensds-conf-dir
+            mountPath: /etc/opensds
+          - name: ceph-conf-dir
+            mountPath: /etc/ceph
+          - name: tgt-conf-dir
+            mountPath: /etc/tgt
+            mountPropagation: "Bidirectional"
+          - name: run-dir
+            mountPath: /run
+            mountPropagation: "Bidirectional"
+          - name: dev-dir
+            mountPath: /dev
+            mountPropagation: "HostToContainer"
+          - name: local-time-file
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: lib-modules-dir
+            mountPath: /lib/modules
+            readOnly: true
+      volumes:
+        - name: opensds-conf-dir
+          hostPath:
+            path: /etc/opensds
+            type: Directory
+        - name: ceph-conf-dir
+          hostPath:
+            path: /etc/ceph
+            type: DirectoryOrCreate
+        - name: tgt-conf-dir
+          hostPath:
+            path: /etc/tgt
+            type: Directory
+        - name: run-dir
+          hostPath:
+            path: /run
+            type: Directory
+        - name: dev-dir
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: local-time-file
+          hostPath:
+            path: /etc/localtime
+            type: File
+        - name: lib-modules-dir
+          hostPath:
+            path: /lib/modules
+            type: Directory
+---
+##################################################################################################
+# Dashboard service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  namespace: opensds
+  labels:
+    app: dashboard
+    service: dashboard
+spec:
+  ports:
+  - port: 8088
+    nodePort: 31975
+    name: http-dashboard
+  selector:
+    app: dashboard
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dashboard-v1beta
+  namespace: opensds
+  labels:
+    app: dashboard
+    version: v1beta
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dashboard
+        version: v1beta
+    spec:
+      containers:
+      - name: dashboard
+        image: opensdsio/dashboard:latest
+        env:
+        - name: OPENSDS_AUTH_URL
+          value: http://authchecker.opensds.svc.cluster.local/identity
+        - name: OPENSDS_HOTPOT_URL
+          value: http://apiserver.opensds.svc.cluster.local:50040
+        - name: OPENSDS_GELATO_URL
+          value: http://127.0.0.1:8089
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8088
+---
+##################################################################################################
+# DB service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: opensds
+  labels:
+    app: db
+    service: db
+spec:
+  ports:
+  - port: 2379
+    name: tcp-db1
+  - port: 2380
+    name: tcp-db2
+  selector:
+    app: db
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-v1
+  namespace: opensds
+  labels:
+    app: db
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+        version: v1
+    spec:
+      containers:
+      - name: db
+        image: quay.io/coreos/etcd:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["-c", "/usr/local/bin/etcd \
+          --name s1 \
+          --listen-client-urls http://0.0.0.0:2379 \
+          --advertise-client-urls http://0.0.0.0:2379 \
+          --listen-peer-urls http://0.0.0.0:2380 \
+          --initial-advertise-peer-urls http://0.0.0.0:2380 \
+          --initial-cluster s1=http://0.0.0.0:2380"]
+        ports:
+        - containerPort: 2379
+        - containerPort: 2380
+        volumeMounts:
+        - name: etcd-cert-dir
+          mountPath: /etc/ssl/certs
+      volumes:
+      - name: etcd-cert-dir
+        hostPath:
+          path: /usr/share/ca-certificates/
+          type: Directory
+---
+##################################################################################################
+# Authchecker service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: authchecker
+  namespace: opensds
+  labels:
+    app: authchecker
+    service: authchecker
+spec:
+  ports:
+  - port: 80
+    name: http-authchecker
+  selector:
+    app: authchecker
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: authchecker-v1
+  namespace: opensds
+  labels:
+    app: authchecker
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authchecker
+        version: v1
+    spec:
+      containers:
+      - name: authchecker
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+          allowPrivilegeEscalation: true
+        image: opensdsio/opensds-authchecker:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+---

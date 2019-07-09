@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,148 @@ type FakeDbClient struct{}
 // NewFakeDbClient
 func NewFakeDbClient() *FakeDbClient {
 	return &FakeDbClient{}
+}
+
+// CreateFileShareAcl
+func (fc *FakeDbClient) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	return fshare, nil
+}
+
+// UpdateFileShareAcl
+func (fc *FakeDbClient) UpdateFileShareAcl(ctx *c.Context, acl *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	return acl, nil
+}
+
+// ListFileShareAcl
+func (fc *FakeDbClient) ListFileSharesAcl(ctx *c.Context) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
+func (fc *FakeDbClient) ListFileShareAclsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareAclSpec, error) {
+	var acls []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		acls = append(acls, &SampleFileSharesAcl[i])
+	}
+	return acls, nil
+}
+
+// CreateFileShare
+func (fc *FakeDbClient) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	return fshare, nil
+}
+
+// GetFileShare
+func (fc *FakeDbClient) GetFileShare(ctx *c.Context, fshareID string) (*model.FileShareSpec, error) {
+	fshare := SampleFileShares[0]
+	return &fshare, nil
+}
+
+// GetFileShareAcl
+func (fc *FakeDbClient) GetFileShareAcl(ctx *c.Context, aclID string) (*model.FileShareAclSpec, error) {
+	acl := SampleFileSharesAcl[0]
+	return &acl, nil
+}
+
+// ListFileShares
+func (fc *FakeDbClient) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSpec, error) {
+	var fshares []*model.FileShareSpec
+
+	for i := range SampleFileShares {
+		fshares = append(fshares, &SampleFileShares[i])
+	}
+	return fshares, nil
+}
+
+// ListFileShares
+func (fc *FakeDbClient) ListFileSharesAclWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareAclSpec, error) {
+	var fshares []*model.FileShareAclSpec
+
+	for i := range SampleFileSharesAcl {
+		fshares = append(fshares, &SampleFileSharesAcl[i])
+	}
+	return fshares, nil
+}
+
+func (fc *FakeDbClient) ListFileShares(ctx *c.Context) ([]*model.FileShareSpec, error) {
+	var fshares []*model.FileShareSpec
+
+	for i := range SampleFileShares {
+		fshares = append(fshares, &SampleFileShares[i])
+	}
+	return fshares, nil
+}
+
+// ListFileSharesByProfileId
+func (fc *FakeDbClient) ListFileSharesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+	return []string{}, nil
+}
+
+// UpdateFileShare
+func (fc *FakeDbClient) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
+
+// DeleteFileShare
+func (fc *FakeDbClient) DeleteFileShare(ctx *c.Context, fshareID string) error {
+	return nil
+}
+
+// DeleteFileShareAcl
+func (fc *FakeDbClient) DeleteFileShareAcl(ctx *c.Context, aclID string) error {
+	return nil
+}
+
+// CreateSnapshot
+func (fc *FakeDbClient) CreateFileShareSnapshot(ctx *c.Context, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	return vs, nil
+}
+
+// GetFileShareSnapshot
+func (fc *FakeDbClient) GetFileShareSnapshot(ctx *c.Context, snapshotID string) (*model.FileShareSnapshotSpec, error) {
+	snap := SampleFileShareSnapshots[0]
+	return &snap, nil
+}
+
+// ListFileShareSnapshots
+func (fc *FakeDbClient) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+func (fc *FakeDbClient) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+func (fc *FakeDbClient) ListSnapshotsByShareId(ctx *c.Context, fileshareId string) ([]*model.FileShareSnapshotSpec, error) {
+	var snps []*model.FileShareSnapshotSpec
+
+	for i := range SampleFileShareSnapshots {
+		snps = append(snps, &SampleFileShareSnapshots[i])
+	}
+	return snps, nil
+}
+
+// UpdateFileShareSnapshot
+func (fc *FakeDbClient) UpdateFileShareSnapshot(ctx *c.Context, snapshotID string, vs *model.FileShareSnapshotSpec) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+// DeleteFileShareSnapshot
+func (fc *FakeDbClient) DeleteFileShareSnapshot(ctx *c.Context, snapshotID string) error {
+	return nil
 }
 
 // CreateDock
@@ -168,6 +310,17 @@ func (fc *FakeDbClient) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, e
 	return nil, errors.New("Can't find default profile resource!")
 }
 
+// GetDefaultProfileFileShare
+func (fc *FakeDbClient) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
+	for _, profile := range SampleProfiles {
+		if profile.Name == "default" && profile.StorageType == "file" {
+			return &profile, nil
+		}
+	}
+
+	return nil, errors.New("Can't find default profile resource!")
+}
+
 // ListProfiles
 func (fc *FakeDbClient) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	var prfs []*model.ProfileSpec
@@ -240,6 +393,12 @@ func (fc *FakeDbClient) ListVolumes(ctx *c.Context) ([]*model.VolumeSpec, error)
 		vols = append(vols, &SampleVolumes[i])
 	}
 	return vols, nil
+}
+
+// ListVolumesByProfileId
+func (fc *FakeDbClient) ListVolumesByProfileId(ctx *c.Context, prfId string) ([]string, error) {
+
+	return []string{}, nil
 }
 
 // UpdateVolume
@@ -372,15 +531,15 @@ func (fc *FakeDbClient) UpdateReplication(ctx *c.Context, replicationId string, 
 
 // CreateVolumeGroup
 func (fc *FakeDbClient) CreateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) UpdateVolumeGroup(ctx *c.Context, vg *model.VolumeGroupSpec) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) GetVolumeGroup(ctx *c.Context, vgId string) (*model.VolumeGroupSpec, error) {
-	return nil, nil
+	return &SampleVolumeGroups[0], nil
 }
 
 func (fc *FakeDbClient) UpdateStatus(ctx *c.Context, in interface{}, status string) error {
@@ -399,16 +558,26 @@ func (fc *FakeDbClient) ListSnapshotsByVolumeId(ctx *c.Context, volumeId string)
 	return nil, nil
 }
 
+func (fc *FakeDbClient) ListAttachmentsByVolumeId(ctx *c.Context, volumeId string) ([]*model.VolumeAttachmentSpec, error) {
+	return nil, nil
+}
+
 func (fc *FakeDbClient) DeleteVolumeGroup(ctx *c.Context, volumeId string) error {
 	return nil
 }
 
 func (fc *FakeDbClient) ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error) {
-	return nil, nil
+	var vgs = []*model.VolumeGroupSpec{
+		&SampleVolumeGroups[0],
+	}
+	return vgs, nil
 }
 
 func (fc *FakeDbClient) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSpec, error) {
-	return nil, nil
+	var vgs = []*model.VolumeGroupSpec{
+		&SampleVolumeGroups[0],
+	}
+	return vgs, nil
 }
 
 func (fc *FakeDbClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+// Copyright 2017 The OpenSDS Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,46 @@ import "time"
 
 type Default struct{}
 
+type OsdsApiServer struct {
+	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
+	AuthStrategy       string        `conf:"auth_strategy,noauth"`
+	Daemon             bool          `conf:"daemon,false"`
+	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
+	LogFlushFrequency  time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	HTTPSEnabled       bool          `conf:"https_enabled,false"`
+	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
+	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
+	BeegoServerTimeOut int64         `conf:"beego_server_time_out,120"`
+
+	// prometheus related
+	PrometheusConfHome string `conf:"prometheus_conf_home,/etc/prometheus/"`
+	PrometheusUrl      string `conf:"prometheus_url,http://localhost:9090"`
+	PrometheusConfFile string `conf:"prometheus_conf_file,prometheus.yml"`
+	// alert manager related
+	AlertmgrConfHome string `conf:"alertmgr_conf_home,/etc/alertmanager/"`
+	AlertMgrUrl      string `conf:"alertmgr_url,http://localhost:9093"`
+	AlertmgrConfFile string `conf:"alertmgr_conf_file,alertmanager.yml"`
+	// grafana related
+	GrafanaConfHome   string `conf:"grafana_conf_home,/etc/grafana/"`
+	GrafanaRestartCmd string `conf:"grafana_restart_cmd,grafana-server"`
+	GrafanaConfFile   string `conf:"grafana_conf_file,grafana.ini"`
+	GrafanaUrl        string `conf:"grafana_url,http://localhost:3000"`
+	// prometheus and alert manager configuration reload url
+	ConfReloadUrl string `conf:"conf_reload_url,/-/reload"`
+}
+
 type OsdsLet struct {
-	ApiEndpoint         string        `conf:"api_endpoint,localhost:50040"`
-	Graceful            bool          `conf:"graceful,true"`
-	SocketOrder         string        `conf:"socket_order"`
-	AuthStrategy        string        `conf:"auth_strategy,noauth"`
-	Daemon              bool          `conf:"daemon,false"`
-	PolicyPath          string        `conf:"policy_path,/etc/opensds/policy.json"`
-	LogFlushFrequency   time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
-	HTTPSEnabled        bool          `conf:"https_enabled,false"`
-	BeegoHTTPSCertFile  string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
-	BeegoHTTPSKeyFile   string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
-	PasswordDecryptTool string        `conf:"password_decrypt_tool,aes"`
+	ApiEndpoint       string        `conf:"api_endpoint,localhost:50049"`
+	Daemon            bool          `conf:"daemon,false"`
+	LogFlushFrequency time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
+	// how to push metrics to Prometheus ? options are PushGateway or NodeExporter
+	PrometheusPushMechanism string `conf:"prometheus_push_mechanism,NodeExporter"`
+	PushGatewayUrl          string `conf:"prometheus_push_gateway_url,http://localhost:9091"`
+	NodeExporterWatchFolder string `conf:"node_exporter_watch_folder,/root/prom_nodeexporter_folder/"`
+	KafkaEndpoint           string `conf:"kafka_endpoint,localhost:9092"`
+	KafkaTopic              string `conf:"kafka_topic,metrics"`
+	AlertMgrUrl             string `conf:"alertmgr_url,http://localhost:9093"`
+	GrafanaUrl              string `conf:"grafana_url,http://localhost:3000"`
 }
 
 type OsdsDock struct {
@@ -58,12 +86,17 @@ type BackendProperties struct {
 }
 
 type Backends struct {
-	Ceph                BackendProperties `conf:"ceph"`
-	Cinder              BackendProperties `conf:"cinder"`
-	Sample              BackendProperties `conf:"sample"`
-	LVM                 BackendProperties `conf:"lvm"`
-	HuaweiDorado        BackendProperties `conf:"huawei_dorado"`
-	HuaweiFusionStorage BackendProperties `conf:"huawei_fusionstorage"`
+	Ceph                 BackendProperties `conf:"ceph"`
+	Cinder               BackendProperties `conf:"cinder"`
+	Sample               BackendProperties `conf:"sample"`
+	LVM                  BackendProperties `conf:"lvm"`
+	HuaweiOceanStorBlock BackendProperties `conf:"huawei_oceanstor_block"`
+	HuaweiFusionStorage  BackendProperties `conf:"huawei_fusionstorage"`
+	HuaweiOceanstor      BackendProperties `conf:"huawei_oceanstor"`
+	HpeNimble            BackendProperties `conf:"hpe_nimble"`
+	NFS                  BackendProperties `conf:"nfs"`
+	Manila               BackendProperties `conf:"manila"`
+	FujitsuEternus       BackendProperties `conf:"fujitsu_eternus"`
 }
 
 type KeystoneAuthToken struct {
@@ -75,16 +108,20 @@ type KeystoneAuthToken struct {
 	ProjectName       string `conf:"project_name"`
 	UserDomainName    string `conf:"user_domain_name"`
 	Password          string `conf:"password"`
-	Username          string `conf:"username"`
-	AuthUrl           string `conf:"auth_url"`
-	AuthType          string `conf:"auth_type"`
+	// Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
+	PwdEncrypter string `conf:"pwd_encrypter,aes"`
+	// Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
+	EnableEncrypted bool   `conf:"enable_encrypted,false"`
+	Username        string `conf:"username"`
+	AuthUrl         string `conf:"auth_url"`
+	AuthType        string `conf:"auth_type"`
 }
 
 type Config struct {
 	Default           `conf:"default"`
+	OsdsApiServer     `conf:"osdsapiserver"`
 	OsdsLet           `conf:"osdslet"`
 	OsdsDock          `conf:"osdsdock"`
 	Database          `conf:"database"`
 	KeystoneAuthToken `conf:"keystone_authtoken"`
-	Flag              FlagSet
 }
