@@ -22,6 +22,22 @@ import (
 	"strings"
 )
 
+type Mounter interface {
+	GetFSType(device string) (string, error)
+	Format(device string, fsType string) error
+	Mount(device, mountpoint, fsType string, mountFlags []string) error
+	Umount(mountpoint string) error
+	IsMounted(target string) (bool, error)
+	GetHostName() (string, error)
+	GetHostIP() string
+}
+
+type CommonMounter struct{}
+
+func GetCommonMounter() Mounter {
+	return &CommonMounter{}
+}
+
 // ExecCmd Log and convert the result of exec.Command
 func ExecCmd(name string, arg ...string) (string, error) {
 	log.Printf("Command: %s %s:\n", name, strings.Join(arg, " "))
@@ -30,7 +46,7 @@ func ExecCmd(name string, arg ...string) (string, error) {
 }
 
 // GetFSType returns the File System Type of device
-func GetFSType(device string) (string, error) {
+func (m *CommonMounter) GetFSType(device string) (string, error) {
 	log.Printf("GetFSType: %s\n", device)
 
 	var fsType string
@@ -56,7 +72,7 @@ func GetFSType(device string) (string, error) {
 }
 
 // Format device by File System Type
-func Format(device string, fsType string) error {
+func (m *CommonMounter) Format(device string, fsType string) error {
 	log.Printf("Format device: %s fstype: %s\n", device, fsType)
 
 	mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
@@ -85,7 +101,7 @@ func Format(device string, fsType string) error {
 }
 
 // Mount device into mount point
-func Mount(device, mountpoint, fsType string, mountFlags []string) error {
+func (m *CommonMounter) Mount(device, mountpoint, fsType string, mountFlags []string) error {
 	log.Printf("Mount device: %s mountpoint: %s, fsType: %s, mountFlags:　%v\n", device, mountpoint, fsType, mountFlags)
 
 	_, err := ExecCmd("mkdir", "-p", mountpoint)
@@ -122,7 +138,7 @@ func Mount(device, mountpoint, fsType string, mountFlags []string) error {
 }
 
 // Umount from mountpoint
-func Umount(mountpoint string) error {
+func (m *CommonMounter) Umount(mountpoint string) error {
 	log.Printf("Umount mountpoint: %s\n", mountpoint)
 
 	_, err := ExecCmd("umount", mountpoint)
@@ -140,7 +156,7 @@ func Umount(mountpoint string) error {
 }
 
 // GetHostIP return Host IP
-func GetHostIP() string {
+func (m *CommonMounter) GetHostIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "127.0.0.1"
@@ -156,7 +172,7 @@ func GetHostIP() string {
 }
 
 // GetHostName ...
-func GetHostName() (string, error) {
+func (m *CommonMounter) GetHostName() (string, error) {
 	hostName, err := ExecCmd("hostname")
 	if err != nil {
 		log.Printf("failed to get host name: %v\n", err)
@@ -167,7 +183,7 @@ func GetHostName() (string, error) {
 }
 
 // IsMounted ...
-func IsMounted(target string) (bool, error) {
+func (m *CommonMounter) IsMounted(target string) (bool, error) {
 	findmntCmd := "findmnt"
 	_, err := exec.LookPath(findmntCmd)
 	if err != nil {

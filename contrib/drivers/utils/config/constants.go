@@ -48,6 +48,7 @@ const (
 	FCProtocol     = "fibre_channel"
 	NVMEOFProtocol = "nvmeof"
 	NFSProtocol    = "nfs"
+	SampleProtocol = "sample"
 )
 
 // Telemetry metric resource type

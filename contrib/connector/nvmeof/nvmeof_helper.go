@@ -78,7 +78,7 @@ func getInitiatorInfo() (string, error) {
 		return "", errors.New("the number of nqn is wrong")
 	}
 
-	hostName, err := connector.GetHostName()
+	hostName, err := connector.GetCommonMounter().GetHostName()
 	if err != nil {
 		return "", errors.New("can not get hostname")
 	}
