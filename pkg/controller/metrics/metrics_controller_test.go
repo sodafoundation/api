@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -319,6 +320,11 @@ func Test_controller_GetUrls(t *testing.T) {
 				DockInfo: tt.fields.DockInfo,
 				API:      tt.fields.API,
 			}
+			var grafan_url string = "http://127.0.0.1:3000"
+			var alert_mgr_url string = "http://127.0.0.1:9093"
+			flag.StringVar(&grafan_url, "grafana-url", "http://127.0.0.1:3000", "Grafana listen endpoint")
+			flag.StringVar(&alert_mgr_url, "alertmgr-url", "http://127.0.0.1:9093", "Alert manager listen endpoint")
+			flag.Parse()
 			_, err := c.GetUrls()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("controller.GetUrls() error = %v, wantErr %v", err, tt.wantErr)
