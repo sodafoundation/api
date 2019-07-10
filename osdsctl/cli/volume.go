@@ -128,6 +128,7 @@ func init() {
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 	volumeCommand.AddCommand(volumeAttachmentCommand)
 	volumeCommand.AddCommand(volumeGroupCommand)
+	volumeCommand.AddCommand(replicationCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
