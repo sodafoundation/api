@@ -26,6 +26,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	. "github.com/opensds/opensds/testutils/collection"
 	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	"github.com/opensds/opensds/pkg/controller/fileshare"
 )
 
 type fakeSelector struct {
@@ -641,5 +642,147 @@ func TestDeleteVolumeGroup(t *testing.T) {
 
 	if _, err := ctrl.DeleteVolumeGroup(context.Background(), req); err != nil {
 		t.Errorf("Failed to delete volume group: %v\n", err)
+	}
+}
+
+func NewFakeFileShareController() fileshare.Controller {
+	return &fakeFileShareController{}
+}
+
+type fakeFileShareController struct {}
+
+func (fakeFileShareController) SetDock(dockInfo *model.DockSpec) { return }
+
+func (fakeFileShareController) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
+
+func (fakeFileShareController) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	return &SampleFileSharesAcl[0], nil
+}
+
+func (fakeFileShareController) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {return nil}
+
+func (fakeFileShareController) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {return nil}
+
+func (fakeFileShareController) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+func (fakeFileShareController) DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error {return nil}
+
+func TestCreateFileShare(t *testing.T) {
+	prf := &SampleFileShareProfiles[0]
+	var req = &pb.CreateFileShareOpts{
+		Id:          "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Name:        "sample-fileshare-01",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		Profile:     prf.ToJson(),
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetFileShareDefaultProfile", c.NewAdminContext()).Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), fileshare, fileshare.Status).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.CreateFileShare(context.Background(), req); err != nil {
+		t.Errorf("failed to create fileshare, err is %v\n", err)
+	}
+
+}
+
+func TestDeleteFileShare(t *testing.T) {
+	prf := &SampleFileShareProfiles[0]
+	var req = &pb.DeleteFileShareOpts{
+		Id:      "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+		Profile: prf.ToJson(),
+		PoolId:  "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context: c.NewAdminContext().ToJson(),
+	}
+	profile_out := model.NewProfileFromJson(prf.ToJson())
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetProfile", c.NewAdminContext(), profile_out.Id).Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShare", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShare(context.Background(), req); err != nil {
+		t.Errorf("failed to delete volume, err is %v\n", err)
+	}
+}
+
+func TestCreateFileShareSnapshot(t *testing.T) {
+	var req = &pb.CreateFileShareSnapshotOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f537",
+		FileshareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Size:        int64(1),
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	var snp = &SampleFileShareSnapshots[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), snp, "available").Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.CreateFileShareSnapshot(context.Background(), req); err != nil {
+		t.Errorf("failed to create file share snapshot: %v\n", err)
+	}
+}
+
+func TestDeleteFileShareSnapshot(t *testing.T) {
+	var req = &pb.DeleteFileShareSnapshotOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f537",
+		FileshareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShareSnapshot", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShareSnapshot(context.Background(), req); err != nil {
+		t.Errorf("failed to delete file share snapshot: %v\n", err)
 	}
 }

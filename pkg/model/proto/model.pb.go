@@ -3068,7 +3068,9 @@ type DeleteFileShareOpts struct {
 	// The name of fileShare
 	Name string `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty"`
 	// The name of pool
-	Poolname             string   `protobuf:"bytes,8,opt,name=poolname,proto3" json:"poolname,omitempty"`
+	Poolname string `protobuf:"bytes,8,opt,name=poolname,proto3" json:"poolname,omitempty"`
+	// The ExportLocations
+	ExportLocations      []string `protobuf:"bytes,9,rep,name=exportLocations,proto3" json:"exportLocations,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -3153,6 +3155,13 @@ func (m *DeleteFileShareOpts) GetPoolname() string {
 		return m.Poolname
 	}
 	return ""
+}
+
+func (m *DeleteFileShareOpts) GetExportLocations() []string {
+	if m != nil {
+		return m.ExportLocations
+	}
+	return nil
 }
 
 // CreateFileShareSnapshotOpts is a structure which indicates all required

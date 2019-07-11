@@ -8,11 +8,11 @@
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
-## Latest Release: v0.4.0 Bali
+## Latest Release: v0.6.0 Capri
 
-[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.4.0/openapi-spec/swagger.yaml)
+[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.6.0/openapi-spec/swagger.yaml)
 
-[Release notes](https://github.com/opensds/opensds/releases/tag/v0.4.0)
+[Release notes](https://github.com/opensds/opensds/releases/tag/v0.6.0)
 
 ## Introduction
 

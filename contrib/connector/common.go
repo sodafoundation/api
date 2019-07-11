@@ -32,10 +32,10 @@ type Mounter interface {
 	GetHostIP() string
 }
 
-type CommonMounter struct{}
+type commonMounter struct{}
 
-func GetCommonMounter() Mounter {
-	return &CommonMounter{}
+func NewMounter() Mounter {
+	return &commonMounter{}
 }
 
 // ExecCmd Log and convert the result of exec.Command
@@ -46,7 +46,7 @@ func ExecCmd(name string, arg ...string) (string, error) {
 }
 
 // GetFSType returns the File System Type of device
-func (m *CommonMounter) GetFSType(device string) (string, error) {
+func (m *commonMounter) GetFSType(device string) (string, error) {
 	log.Printf("GetFSType: %s\n", device)
 
 	var fsType string
@@ -72,7 +72,7 @@ func (m *CommonMounter) GetFSType(device string) (string, error) {
 }
 
 // Format device by File System Type
-func (m *CommonMounter) Format(device string, fsType string) error {
+func (m *commonMounter) Format(device string, fsType string) error {
 	log.Printf("Format device: %s fstype: %s\n", device, fsType)
 
 	mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
@@ -101,7 +101,7 @@ func (m *CommonMounter) Format(device string, fsType string) error {
 }
 
 // Mount device into mount point
-func (m *CommonMounter) Mount(device, mountpoint, fsType string, mountFlags []string) error {
+func (m *commonMounter) Mount(device, mountpoint, fsType string, mountFlags []string) error {
 	log.Printf("Mount device: %s mountpoint: %s, fsType: %s, mountFlags:　%v\n", device, mountpoint, fsType, mountFlags)
 
 	_, err := ExecCmd("mkdir", "-p", mountpoint)
@@ -138,7 +138,7 @@ func (m *CommonMounter) Mount(device, mountpoint, fsType string, mountFlags []st
 }
 
 // Umount from mountpoint
-func (m *CommonMounter) Umount(mountpoint string) error {
+func (m *commonMounter) Umount(mountpoint string) error {
 	log.Printf("Umount mountpoint: %s\n", mountpoint)
 
 	_, err := ExecCmd("umount", mountpoint)
@@ -156,7 +156,7 @@ func (m *CommonMounter) Umount(mountpoint string) error {
 }
 
 // GetHostIP return Host IP
-func (m *CommonMounter) GetHostIP() string {
+func (m *commonMounter) GetHostIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "127.0.0.1"
@@ -172,7 +172,7 @@ func (m *CommonMounter) GetHostIP() string {
 }
 
 // GetHostName ...
-func (m *CommonMounter) GetHostName() (string, error) {
+func (m *commonMounter) GetHostName() (string, error) {
 	hostName, err := ExecCmd("hostname")
 	if err != nil {
 		log.Printf("failed to get host name: %v\n", err)
@@ -183,7 +183,7 @@ func (m *CommonMounter) GetHostName() (string, error) {
 }
 
 // IsMounted ...
-func (m *CommonMounter) IsMounted(target string) (bool, error) {
+func (m *commonMounter) IsMounted(target string) (bool, error) {
 	findmntCmd := "findmnt"
 	_, err := exec.LookPath(findmntCmd)
 	if err != nil {
