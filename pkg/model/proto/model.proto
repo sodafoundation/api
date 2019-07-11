@@ -833,6 +833,8 @@ message DeleteFileShareOpts {
     string name = 7;
     // The name of pool
     string poolname = 8;
+    // The ExportLocations
+    repeated string exportLocations = 9;
 }
 
 // CreateFileShareSnapshotOpts is a structure which indicates all required

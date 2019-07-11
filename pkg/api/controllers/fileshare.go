@@ -485,11 +485,12 @@ func (f *FileSharePortal) DeleteFileShare() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareOpts{
-		Id:       fileshare.Id,
-		PoolId:   fileshare.PoolId,
-		Metadata: fileshare.Metadata,
-		Context:  ctx.ToJson(),
-		Profile:  prf.ToJson(),
+		Id:              fileshare.Id,
+		PoolId:          fileshare.PoolId,
+		Metadata:        fileshare.Metadata,
+		Context:         ctx.ToJson(),
+		Profile:         prf.ToJson(),
+		ExportLocations: fileshare.ExportLocations,
 	}
 	response, err := f.CtrClient.DeleteFileShare(context.Background(), opt)
 	if err != nil {
