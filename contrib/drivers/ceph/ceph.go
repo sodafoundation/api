@@ -253,7 +253,12 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 			err = d.createVolumeFromSnapshot(opt)
 		}
 	} else {
-		err = d.createVolume(opt)
+		if opt.GetMetadata()["cephsnap"] != "" {
+			opt.SnapshotId = opt.GetMetadata()["cephsnap"]
+			err = d.createVolumeFromSnapshot(opt)
+		} else {
+			err = d.createVolume(opt)
+		}
 	}
 
 	return &model.VolumeSpec{
