@@ -15,8 +15,6 @@
 package ceph
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/astaxie/beego/logs"
 	log "github.com/golang/glog"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
@@ -24,6 +22,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"golang.org/x/crypto/ssh"
+	"time"
 )
 
 type ReplicationDriver struct {
@@ -42,15 +41,6 @@ type Replication struct {
 type Config struct {
 	ConfigFile  string `yaml:"configFile,omitempty"`
 	Replication `yaml:"replication"`
-}
-
-type Peerinfo struct {
-	Mode  string `json:"mode"`
-	Peers []struct {
-		UUID         json.Number `json:"uuid"`
-		Cluster_Name string      `json:"cluster_name"`
-		Client_Name  string      `json:"client_name"`
-	} `json:"peers"`
 }
 
 // Setup
@@ -277,43 +267,6 @@ func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) err
 
 	}
 
-	cephsession2, err := cephclient.NewSession()
-	var peerremove bytes.Buffer
-	cephsession2.Stdout = &peerremove
-	cephsession2.Run("rbd mirror pool info --format json")
-	cephsession2.Close()
-
-	byteValue := []byte(peerremove.String())
-	peerinfo := &Peerinfo{}
-	if err := json.Unmarshal(byteValue, peerinfo); err != nil {
-		logs.Error("unmarshal error: %v", err)
-	}
-
-	uuid := peerinfo.Peers[0].UUID.String()
-
-	ceph2, err := cephclient.NewSession()
-	if err != nil {
-	}
-	cmd := "rbd mirror pool peer remove rbd " + uuid
-	ceph2.Run(cmd)
-	ceph2.Close()
-
-	backupsession2, err := backupclient.NewSession()
-	var peerremoveremote bytes.Buffer
-	backupsession2.Stdout = &peerremoveremote
-	backupsession2.Run("rbd --cluster remote mirror pool info --format json")
-	cephsession2.Close()
-	remotebytevalue := []byte(peerremoveremote.String())
-	if err := json.Unmarshal(remotebytevalue, peerinfo); err != nil {
-		logs.Error("unmarshal error: %v", err)
-	}
-	remoteuuid := peerinfo.Peers[0].UUID.String()
-
-	backupsession3, err := backupclient.NewSession()
-	backupcmd := "rbd mirror pool peer remove rbd " + remoteuuid + " --cluster remote"
-	backupsession3.Run(backupcmd)
-	backupsession3.Close()
-
 	cephsession, err := cephclient.NewSession()
 
 	if err := cephsession.Run("systemctl stop ceph-rbd-mirror@ceph"); err != nil {
@@ -383,18 +336,68 @@ func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) e
 		log.Error("Failed to dial: " + err.Error())
 
 	}
-	cephdisablesession, err := cephclient.NewSession()
-	if err != nil {
+	backupconfig := &ssh.ClientConfig{
+		User: r.conf.Username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(r.conf.Password),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	backupclient, error := ssh.Dial("tcp", r.conf.PeerdailIP, backupconfig)
+
+	if error != nil {
+		log.Error("Failed to dial: " + error.Error())
+
 	}
 	volumename := opensdsPrefix + opt.PrimaryVolumeId
 
-	cmd := "rbd mirror image disable rbd/" + volumename + " --pool rbd"
+	cephdemotesession, err := cephclient.NewSession()
+	if err != nil {
+	}
+
+	demotecmd := "rbd mirror image demote rbd/" + volumename
+	if err := cephdemotesession.Run(demotecmd); err != nil {
+		log.Error("Failed to run: " + err.Error())
+	}
+
+	cephdemotesession.Close()
+
+	time.Sleep(10 * time.Second)
+
+	backuppromotesession, err := backupclient.NewSession()
+	if err != nil {
+	}
+	promotecmd := "rbd mirror image promote rbd/" + volumename + " --cluster remote"
+	if err := backuppromotesession.Run(promotecmd); err != nil {
+		log.Error("Failed to run: " + err.Error())
+
+	}
+
+	backuppromotesession.Close()
+
+	time.Sleep(10 * time.Second)
+
+	cephdisablesession, err := cephclient.NewSession()
+	if err != nil {
+	}
+
+	cmd := "rbd mirror image disable rbd/" + volumename + " --force"
 	if err := cephdisablesession.Run(cmd); err != nil {
 		log.Error("Failed to run: " + err.Error())
 
 	}
 
 	cephdisablesession.Close()
+	time.Sleep(10 * time.Second)
+
+	backupsnapshot, err := backupclient.NewSession()
+	snapcmd := "rbd snap create rbd/" + volumename + "@" + volumename + " --cluster remote"
+	if err := backupsnapshot.Run(snapcmd); err != nil {
+		log.Error("Failed to run: " + err.Error())
+	}
+
+	backupsnapshot.Close()
+	time.Sleep(10 * time.Second)
 
 	return nil
 }
