@@ -17,8 +17,6 @@ package dr
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	c "github.com/opensds/opensds/pkg/context"
@@ -28,6 +26,7 @@ import (
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	uuid "github.com/satori/go.uuid"
+	"strings"
 )
 
 type Controller interface {
@@ -110,13 +109,10 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 			log.Errorf("Attach primary volume failed, %s", err)
 			return replica, err
 		}
-		replica, err = d.secondaryOp.Attach(ctx, replica, secondaryVol)
-		if err != nil {
-			log.Errorf("Attach secondary volume failed, %s", err)
-			return replica, err
-		}
+
 	}
 	// Do replication.
+
 	pResult, err := d.primaryOp.Create(ctx, replica, primaryVol)
 	if err != nil {
 		log.Errorf("Create primary replication failed, %s", err)
@@ -144,6 +140,7 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 	if secondaryVol.ReplicationDriverData != nil {
 		secondaryVol.ReplicationDriverData["IsPrimary"] = "false"
 		db.C.UpdateVolume(ctx, secondaryVol)
+
 	}
 
 	return replica, nil
@@ -155,11 +152,13 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 	if err != nil {
 		return err
 	}
-	err = d.secondaryOp.Delete(ctx, replica, secondaryVol)
-	if err != nil {
-		return err
-	}
 
+	if primaryVol.Id != secondaryVol.Id {
+		err = d.secondaryOp.Delete(ctx, replica, secondaryVol)
+		if err != nil {
+			return err
+		}
+	}
 	pPool, err := db.C.GetPool(ctx, primaryVol.PoolId)
 	if err != nil {
 		return err
@@ -173,11 +172,12 @@ func (d *DrController) DeleteReplication(ctx *c.Context, replica *ReplicationSpe
 			log.Errorf("Detach primary volume failed, %s", err)
 			return err
 		}
-
-		err = d.secondaryOp.Detach(ctx, replica, secondaryVol)
-		if err != nil {
-			log.Errorf("Detach secondary volume failed, %s", err)
-			return err
+		if primaryVol.Id != secondaryVol.Id {
+			err = d.secondaryOp.Detach(ctx, replica, secondaryVol)
+			if err != nil {
+				log.Errorf("Detach secondary volume failed, %s", err)
+				return err
+			}
 		}
 	}
 
@@ -195,10 +195,13 @@ func (d *DrController) EnableReplication(ctx *c.Context, replica *ReplicationSpe
 	if err != nil {
 		return err
 	}
-	err = d.secondaryOp.Enable(ctx, replica, secondaryVol)
-	if err != nil {
-		return err
+	if primaryVol.Id != secondaryVol.Id {
+		err = d.secondaryOp.Enable(ctx, replica, secondaryVol)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -208,9 +211,11 @@ func (d *DrController) DisableReplication(ctx *c.Context, replica *ReplicationSp
 	if err != nil {
 		return err
 	}
-	err = d.secondaryOp.Disable(ctx, replica, secondaryVol)
-	if err != nil {
-		return err
+	if primaryVol.Id != secondaryVol.Id {
+		err = d.secondaryOp.Disable(ctx, replica, secondaryVol)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

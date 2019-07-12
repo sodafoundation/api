@@ -22,6 +22,7 @@ plugin, just modify Init() and Clean() method.
 package drivers
 
 import (
+	"github.com/opensds/opensds/contrib/drivers/ceph"
 	"reflect"
 
 	"github.com/opensds/opensds/contrib/drivers/drbd"
@@ -74,6 +75,9 @@ func InitReplicationDriver(resourceType string) (ReplicationDriver, error) {
 		break
 	case driversConfig.ScutechCMSDriverType:
 		d = &scms.ReplicationDriver{}
+	case driversConfig.CephDriverType:
+		d = &ceph.ReplicationDriver{}
+		break
 	default:
 		d = &replication_sample.ReplicationDriver{}
 		break

@@ -28,3 +28,11 @@ pool:
       advanced:
         diskType: SSD
         latency: 5ms
+#replication:
+#  hostip: 192.168.1.145
+#  peerip: 192.168.1.88
+#  username: root
+#  password: ROOT#123
+#  hostdailip: 192.168.1.145:22
+#  peerdailip: 192.168.1.88:22
+
