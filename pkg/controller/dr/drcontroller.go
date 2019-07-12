@@ -109,7 +109,11 @@ func (d *DrController) CreateReplication(ctx *c.Context, replica *ReplicationSpe
 			log.Errorf("Attach primary volume failed, %s", err)
 			return replica, err
 		}
-
+		replica, err = d.secondaryOp.Attach(ctx, replica, secondaryVol)	
+ 		if err != nil {	
+			log.Errorf("Attach secondary volume failed, %s", err)	
+			return replica, err	
+		}
 	}
 	// Do replication.
 
