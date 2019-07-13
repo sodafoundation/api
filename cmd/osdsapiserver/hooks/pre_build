@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd ../..
+BASE_DIR=`pwd` 
+apt-get update && apt-get install -y git make curl wget libltdl7 libseccomp2 libffi-dev gawk build-essential gcc librados-dev librbd-dev
+wget https://storage.googleapis.com/golang/go1.12.1.linux-amd64.tar.gz
+tar -C /usr/local -xzf go1.12.1.linux-amd64.tar.gz
+echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+echo 'export GOPATH=$HOME/gopath' >> /etc/profile
+source /etc/profile
+cd $HOME
+mkdir -p gopath/src/github.com/opensds/opensds
+cd gopath/src/github.com/opensds/opensds
+cp -r ${BASE_DIR}/* .
+make docker
+cp cmd/osdsapiserver/osdsapiserver ${BASE_DIR}/cmd/osdsapiserver
