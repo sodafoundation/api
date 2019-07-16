@@ -16,7 +16,6 @@ package nfs
 
 import (
 	"errors"
-	"fmt"
 	"path"
 	"strings"
 
@@ -147,7 +146,7 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 }
 
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
-	fmt.Println("..")
+
 	var fshare *model.FileShareSpec
 	//get the server ip for configuration
 	var server = d.conf.TgtBindIp
