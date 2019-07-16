@@ -2935,7 +2935,11 @@ type CreateFileShareOpts struct {
 	// The Serialized profile
 	Profile string `protobuf:"bytes,11,opt,name=profile,proto3" json:"profile,omitempty"`
 	// The ExportLocations
-	ExportLocations      []string `protobuf:"bytes,12,rep,name=exportLocations,proto3" json:"exportLocations,omitempty"`
+	ExportLocations []string `protobuf:"bytes,12,rep,name=exportLocations,proto3" json:"exportLocations,omitempty"`
+	// The uuid of the snapshot on which file share will be created, required.
+	SnapshotId string `protobuf:"bytes,13,opt,name=snapshotId,proto3" json:"snapshotId,omitempty"`
+	// The Name of the snapshot on which file share will be created, required.
+	SnapshotName         string   `protobuf:"bytes,14,opt,name=snapshotName,proto3" json:"snapshotName,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

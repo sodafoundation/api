@@ -160,6 +160,21 @@ func (c *Cli) CreateFileShare(lvPath string) error {
 	return err
 }
 
+func (c *Cli) CreateFileShareFromSnapshot(lvPath string) error {
+	cmd := []string{
+		"env", "LC_ALL=C",
+		"lvconvert",
+		"--merge",
+		lvPath,
+	}
+	_, err := c.execute(cmd...)
+	if err == nil {
+		// Deal with the error, probably pushing it up the call stack
+		return err
+	}
+	return err
+}
+
 func (c *Cli) CreateVolume(name string, vg string, size int64) error {
 	cmd := []string{
 		"env", "LC_ALL=C",
@@ -301,7 +316,6 @@ func (c *Cli) CreateLvSnapshot(name, sourceLvName, vg string, size int64) error 
 		"-p", "r",
 		"-s", path.Join("/dev", vg, sourceLvName),
 	}
-	fmt.Println("cmd==:", cmd)
 	if _, err := c.execute(cmd...); err != nil {
 		return err
 	}

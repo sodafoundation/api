@@ -172,6 +172,29 @@ func (f *FileSharePortal) CreateFileShare() {
 		return
 	}
 
+	// make the fileshare name global so that we can use at multiple place
+	var fileshareMetadata map[string]string
+	fileshareMetadata = fileshare.Metadata
+	var snapshotName string
+
+	// Validate the snapthot existance
+	if fileshare.SnapshotId != "" {
+		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
+		if _err != nil {
+			errMsg := fmt.Sprintf("give valid snapshotId %s. %s", fileshare.SnapshotId, _err.Error())
+			f.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
+		if _err != nil {
+			errMsg := fmt.Sprintf("This snapshot %s is not associated with any filesystem.", fileshare.SnapshotId)
+			f.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		fileshareMetadata = existingFs.Metadata
+		snapshotName = snapshot.Name
+	}
+
 	// Get profile
 	var prf *model.ProfileSpec
 	var err error
@@ -237,7 +260,9 @@ func (f *FileSharePortal) CreateFileShare() {
 		Profile:          prf.ToJson(),
 		PoolId:           result.PoolId,
 		ExportLocations:  result.ExportLocations,
-		Metadata:         result.Metadata,
+		SnapshotId:       result.SnapshotId,
+		SnapshotName:     snapshotName,
+		Metadata:         fileshareMetadata,
 		Context:          ctx.ToJson(),
 	}
 	response, err := f.CtrClient.CreateFileShare(context.Background(), opt)
