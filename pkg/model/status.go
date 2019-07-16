@@ -33,6 +33,15 @@ const (
 	FileShareSnapErrorDeleting = "errorDeleting"
 )
 
+// fileshare acl status
+const (
+	FileShareAclAvailable     = "available"
+	FileShareAclDeleting      = "deleting"
+	FileShareAclError         = "error"
+	FileShareAclErrorDeleting = "errorDeleting"
+	FileShareAclInUse         = "in_Use"
+)
+
 // volume status
 const (
 	VolumeCreating       = "creating"
