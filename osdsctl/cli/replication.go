@@ -121,13 +121,13 @@ func init() {
 	flags := replicationCreateCommand.Flags()
 	flags.StringVarP(&replicationName, "name", "n", "", "the name of created replication")
 	flags.StringVarP(&replicationDesp, "description", "d", "", "the description of created replication")
-	flags.StringVarP(&primaryReplicationDriverData, "primary_driver_data", "p", "", "the primary replication driver data of created replication")
-	flags.StringVarP(&secondaryReplicationDriverData, "secondary_driver_data", "s", "", "the secondary replication driver data of created replication")
+	flags.StringVarP(&primaryReplicationDriverData, "primary_driver_data", "", "", "the primary replication driver data of created replication")
+	flags.StringVarP(&secondaryReplicationDriverData, "secondary_driver_data", "", "", "the secondary replication driver data of created replication")
 	flags.StringVarP(&replicationMode, "replication_mode", "m", model.ReplicationModeSync, "the replication mode of created replication, value can be sync/async")
 	flags.Int64VarP(&replicationPeriod, "replication_period", "t", 0, "the replication period(minute) of created replication, the value must greater than 0, only in sync replication mode should set this value (default 60)")
 	replicationUpdateCommand.Flags().StringVarP(&replicationName, "name", "n", "", "the name of updated replication")
 	replicationUpdateCommand.Flags().StringVarP(&replicationDesp, "description", "d", "", "the description of updated replication")
-	// TODO: Add some other update items, such as status, replicatoin_period ... etc.
+	// TODO: Add some other update items, such as status, replication_period ... etc.
 	replicationFailoverCommand.Flags().BoolVarP(&allowAttachedVolume, "allow_attached_volume", "a", false, "whether allow attached volume when failing over replication")
 	replicationFailoverCommand.Flags().StringVarP(&secondaryBackendId, "secondary_backend_id", "s", model.ReplicationDefaultBackendId, "the secondary backend id of failoverr replication")
 	replicationCommand.AddCommand(replicationShowCommand)

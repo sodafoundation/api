@@ -17,6 +17,7 @@ package util
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/opensds/opensds/pkg/context"
@@ -474,4 +475,210 @@ func TestCreateFileShareSnapshotDBEntry(t *testing.T) {
 		assertTestResult(t, result, expected)
 	})
 
+}
+
+func TestCreateFileShareDBEntry(t *testing.T) {
+	var in = &model.FileShareSpec{
+		BaseModel:   &model.BaseModel{},
+		Name:        "sample-fileshare-01",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		ProfileId:   "b3585ebe-c42c-120g-b28e-f373746a71ca",
+		Status:      model.FileShareCreating,
+	}
+	
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		var expected = &SampleFileShares[0]
+		result, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed to create fileshare err is %v\n", err)
+		}
+		assertTestResult(t, result, expected)
+	})
+
+	t.Run("The size of fileshare created should be greater than zero", func(t *testing.T) {
+		in.Size = int64(-2)
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("invalid fileshare size: %d", in.Size)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("The profile id should not be empty", func(t *testing.T) {
+		in.ProfileId = ""
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		expectedError := "profile id can not be empty when creating fileshare in db!"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Empty file share name is allowed", func(t *testing.T) {
+		in.Size, in.Name, in.ProfileId = int64(1),"", "b3585ebe-c42c-120g-b28e-f373746a71ca"
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		expectedError := "empty fileshare name is not allowed. Please give valid name."
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("File share name length more than 128 characters are not allowed", func(t *testing.T) {
+		in.Size, in.Name, in.ProfileId = int64(1),"kjxdpvfuenecpyhbxdumwibipjkigcjykabuhghjghjgjgjgjgjghhkkkkkkkkkkkkkkklsccdesnkgxnjnhfjusigceorogdgjlyciemscgvncerucokfekdiviuyplbly", "b3585ebe-c42c-120g-b28e-f373746a71ca"
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		expectedError := "fileshare name length should not more than 128 characters. current length is : "+strconv.Itoa(len(in.Name))
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Special characters in file share description are not allowed", func(t *testing.T) {
+		in.Size, in.Name, in.ProfileId, in.Description = int64(1),"sample-fileshare-01", "b3585ebe-c42c-120g-b28e-f373746a71ca", "#FileShare Code!$! test"
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
+		expectedError := "invalid fileshare description and it has some special characters"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+}
+
+func TestDeleteFileShareDBEntry(t *testing.T) {
+	var fileshare = &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status:    model.FileShareAvailable,
+		ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
+		PoolId:    "3762355c-a102-11e7-b772-17b880d2f537",
+	}
+	var in = &model.FileShareSpec{
+		BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		},
+		Status:    model.FileShareInUse,
+		ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
+		PoolId:    "3762355c-a102-11e7-b772-17b880d2f537",
+	}
+	t.Run("FileShare to be deleted should not be in-use", func(t *testing.T) {
+		fileshare.Status = model.FileShareInUse
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListSnapshotsByShareId", context.NewAdminContext(), fileshare.Id).Return(nil, nil)
+		mockClient.On("ListFileShareAclsByShareId", context.NewAdminContext(), fileshare.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShare", context.NewAdminContext(), in).Return(nil, nil)
+		mockClient.On("DeleteFileShare", context.NewAdminContext(), fileshare.Id).Return(nil)
+		db.C = mockClient
+
+		err := DeleteFileShareDBEntry(context.NewAdminContext(), fileshare)
+		expectedError := fmt.Sprintf("only the fileshare with the status available, error, errorDeleting, can be deleted, the fileshare status is %s", in.Status)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	var sampleSnapshots = []*model.FileShareSnapshotSpec{&SampleShareSnapshots[0]}
+	t.Run("FileShare should not be deleted if it has dependent snapshots", func(t *testing.T) {
+		//in.Status = model.FileShareAvailable
+		fileshare.Status = model.FileShareAvailable
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListSnapshotsByShareId", context.NewAdminContext(), fileshare.Id).Return(sampleSnapshots, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareDBEntry(context.NewAdminContext(), fileshare)
+		expectedError := fmt.Sprintf("file share %s can not be deleted, because it still has snapshots", in.Id)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	var sampleAcls = []*model.FileShareAclSpec{&SampleSharesAcl[0]}
+	t.Run("FileShare should not be deleted if it has dependent acls", func(t *testing.T) {
+		//in.Status = model.FileShareAvailable
+		fileshare.Status = model.FileShareAvailable
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListSnapshotsByShareId", context.NewAdminContext(), fileshare.Id).Return(nil, nil)
+		mockClient.On("ListFileShareAclsByShareId", context.NewAdminContext(), fileshare.Id).Return(sampleAcls, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareDBEntry(context.NewAdminContext(), fileshare)
+		expectedError := fmt.Sprintf("file share %s can not be deleted, because it still has acls", in.Id)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("FileShare deletion when it is available", func(t *testing.T) {
+		in.Status = model.FileShareDeleting
+		//fileshare.Status = model.FileShareAvailable
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListSnapshotsByShareId", context.NewAdminContext(), fileshare.Id).Return(nil, nil)
+		mockClient.On("ListFileShareAclsByShareId", context.NewAdminContext(), fileshare.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShare", context.NewAdminContext(), in).Return(nil, nil)
+		mockClient.On("DeleteFileShare", context.NewAdminContext(), fileshare.Id).Return(nil)
+		db.C = mockClient
+
+		err := DeleteFileShareDBEntry(context.NewAdminContext(), fileshare)
+		if err != nil {
+			t.Errorf("failed to delete fileshare, err is %v\n", err)
+		}
+	})
+}
+
+func TestDeleteFileShareAclDBEntry(t *testing.T) {
+	var in = &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		},
+		Status:           model.FileShareAclAvailable,
+		ProfileId:        "3769855c-a102-11e7-b772-17b880d2f537",
+		FileShareId:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Type:             "ip",
+		AccessTo:         "10.21.23.10",
+		AccessCapability: []string{"Read", "Write"},
+	}
+	var out = &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		},
+		Status:           model.FileShareAclDeleting,
+		ProfileId:        "3769855c-a102-11e7-b772-17b880d2f537",
+		FileShareId:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Type:             "ip",
+		AccessTo:         "10.21.23.10",
+		AccessCapability: []string{"Read", "Write"},
+	}
+
+	t.Run("FileShareAcl to be deleted should not be in-use", func(t *testing.T) {
+		in.Status = model.FileShareAclInUse
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(nil, nil)
+		mockClient.On("DeleteFileShareAcl", context.NewAdminContext(), in.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShareAcl", context.NewAdminContext(), in).Return(nil, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("only the file share acl with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("FileShareAcl deletion when everything works fine", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		in.Status = model.FileShareAclAvailable
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("DeleteFileShareAcl", context.NewAdminContext(), in.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShareAcl", context.NewAdminContext(), in).Return(out, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareAclDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed delete fileshare acl in db:%v\n", err)
+		}
+	})
 }
