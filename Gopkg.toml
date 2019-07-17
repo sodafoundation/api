@@ -66,8 +66,8 @@
   version = "2.0.0"
 
 [[constraint]]
+  branch = "master"
   name = "github.com/gophercloud/gophercloud"
-  revision = "3ad89c4ea008e0e0b729720040b0be25a35d4615"
 
 [[constraint]]
   name = "github.com/ceph/go-ceph"

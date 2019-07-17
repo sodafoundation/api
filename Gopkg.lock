@@ -88,6 +88,17 @@
   version = "v1.41.0"
 
 [[projects]]
+  digest = "1:4672ade40f62158f16cb834e445515ba035df2a91e384ed424a76f6c8323455e"
+  name = "github.com/go-log/log"
+  packages = [
+    ".",
+    "log",
+  ]
+  pruneopts = "NUT"
+  revision = "37e2e1f19306361e1fc152a1839f1236149cb4e4"
+  version = "v0.1.0"
+
+[[projects]]
   digest = "1:8873557c930ebcd43c106fdc72324ee20f7b2bd55e66d8f93a97f0b6f676a9d4"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -122,7 +133,8 @@
   revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
 
 [[projects]]
-  digest = "1:eb8b5727782de0c0743ee8088168cb94eef04c3f3bb786ab4a5bcaf8c31f47d2"
+  branch = "master"
+  digest = "1:d647ae0dbf6399d34e16394fcc50b644561a593a90550e4cf98131745d20950f"
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
@@ -134,6 +146,7 @@
     "openstack/blockstorage/v2/volumes",
     "openstack/identity/v2/tenants",
     "openstack/identity/v2/tokens",
+    "openstack/identity/v3/credentials",
     "openstack/identity/v3/tokens",
     "openstack/sharedfilesystems/v2/shares",
     "openstack/sharedfilesystems/v2/snapshots",
@@ -141,7 +154,7 @@
     "pagination",
   ]
   pruneopts = "NUT"
-  revision = "3ad89c4ea008e0e0b729720040b0be25a35d4615"
+  revision = "00c1d0b31215aa8ee476f9df2fa7f000cfe5130f"
 
 [[projects]]
   digest = "1:406338ad39ab2e37b7f4452906442a3dbf0eb3379dd1f06aafb5c07e769a5fbb"
@@ -168,6 +181,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:60d50fc9418f2fd1de15210071619b60f50b31b9c381228f55bf5d2e131b1777"
+  name = "github.com/micro/go-log"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "7a2f08f5128a7c1d65292235d6a22c86c047882c"
+
+[[projects]]
   digest = "1:a45ae66dea4c899d79fceb116accfa1892105c251f0dcd9a217ddc276b42ec68"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
@@ -190,6 +211,25 @@
   pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:4a0d29182e8c9e7420833869d9aba61fd40290156f0d8d18d31de38e728787b7"
+  name = "github.com/opensds/multi-cloud"
+  packages = [
+    "api/pkg/filters/auth",
+    "api/pkg/filters/context",
+    "api/pkg/filters/signature/credentials",
+    "api/pkg/filters/signature/credentials/keystonecredentials",
+    "api/pkg/filters/signature/signer",
+    "api/pkg/model",
+    "api/pkg/utils",
+    "api/pkg/utils/constants",
+    "testhelper",
+    "testhelper/gophercloudclient",
+  ]
+  pruneopts = "NUT"
+  revision = "cf6d2eab1761d088bcecf0f29d392c0629300288"
+  version = "v0.6.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -434,11 +474,20 @@
     "github.com/gophercloud/gophercloud/openstack/blockstorage/noauth",
     "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots",
     "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
+    "github.com/gophercloud/gophercloud/openstack/identity/v3/credentials",
     "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens",
     "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares",
     "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots",
     "github.com/gophercloud/gophercloud/pagination",
+    "github.com/micro/go-log",
     "github.com/mitchellh/mapstructure",
+    "github.com/opensds/multi-cloud/api/pkg/filters/signature/credentials",
+    "github.com/opensds/multi-cloud/api/pkg/filters/signature/credentials/keystonecredentials",
+    "github.com/opensds/multi-cloud/api/pkg/filters/signature/signer",
+    "github.com/opensds/multi-cloud/api/pkg/model",
+    "github.com/opensds/multi-cloud/api/pkg/utils/constants",
+    "github.com/opensds/multi-cloud/testhelper",
+    "github.com/opensds/multi-cloud/testhelper/gophercloudclient",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/prometheus/client_golang/prometheus/push",
