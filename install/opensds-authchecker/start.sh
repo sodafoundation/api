@@ -54,7 +54,7 @@ export OS_USER_DOMAIN_ID="default"
 export OS_PROJECT_DOMAIN_ID="default"
 export OS_PROJECT_NAME="admin"
 export OS_USERNAME="admin"
-export OS_PASSWORD="admin"
+export OS_PASSWORD="opensds@123"
 
 OPENSDS_VERSION=${OPENSDS_VERSION:-v1beta}
 OPENSDS_SERVER_NAME=${OPENSDS_SERVER_NAME:-opensds}
