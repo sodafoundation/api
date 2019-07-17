@@ -15,13 +15,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/opensds/opensds/contrib/drivers"
 	"net/http"
 	"os"
 	"strconv"
 	"sync"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/lvm"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -46,6 +46,7 @@ type lvmCollector struct {
 	DiskResponseTime    *prometheus.Desc
 	DiskServiceTime     *prometheus.Desc
 	DiskUtilization     *prometheus.Desc
+	metricDriver	drivers.MetricDriver
 }
 
 // constructor for lvm collector that
@@ -102,6 +103,7 @@ func newLvmCollector() *lvmCollector {
 			"Shows Utilization in percentage",
 			labelKeys, nil,
 		),
+		metricDriver:drivers.InitMetricDriver("lvm"),
 	}
 
 }
@@ -140,10 +142,10 @@ func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	metricDriver := lvm.MetricDriver{}
-	metricDriver.Setup()
+	//c.metricDriver = drivers.InitMetricDriver("lvm")
+	c.metricDriver.Setup()
 
-	metricArray, _ := metricDriver.CollectMetrics()
+	metricArray, _ := c.metricDriver.CollectMetrics()
 	for _, metric := range metricArray {
 		lableVals := []string{metric.InstanceName}
 		switch metric.Component {
