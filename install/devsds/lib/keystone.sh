@@ -138,6 +138,9 @@ osds::keystone::install(){
         docker run -d --privileged=true --net=host --name=opensds-authchecker opensdsio/opensds-authchecker:latest
         osds::keystone::opensds_conf
         docker cp $TOP_DIR/lib/keystone.policy.json opensds-authchecker:/etc/keystone/policy.json
+        if osds::util::wait_for_url http://$HOST_IP/identity "keystone" 5 40; then
+            return
+        fi
     else
         if [ "true" != $USE_EXISTING_KEYSTONE ] 
         then

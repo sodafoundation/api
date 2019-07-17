@@ -1,21 +1,19 @@
 # Docker build usage:
-#   docker build . -t opensdsio/opensds-authchecker:base
-#   docker run -d --privileged=true --name opensds-authchecker-base opensdsio/opensds-authchecker:base "/sbin/init"
-#   docker exec -it opensds-authchecker-base /keystone.sh
-#   docker commit opensds-authchecker-base opensdsio/opensds-authchecker:latest
-#   docker rm -f opensds-authchecker-base
-# Docker run usage:
-#   docker run -d --privileged=true --name opensds-authchecker opensdsio/opensds-authchecker:latest
+#   docker build . -t opensdsio/opensds-authchecker:latest
 
-FROM ubuntu:16.04
+FROM centos:7
 MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
-COPY keystone.sh /keystone.sh
-COPY entrypoint.sh /entrypoint.sh
+COPY start.sh /start.sh
 
-# Install some packages before running command.
-RUN apt-get update && apt-get install -y \
-    sudo nano git telnet net-tools iptables gnutls-bin ca-certificates && \
-    mkdir -p /opt/stack/
+RUN yum -y update && \
+    yum -y install centos-release-openstack-queens && \
+    yum -y install openstack-keystone openstack-utils python-openstackclient httpd mod_wsgi initscripts && \
+    yum clean all
 
-RUN ["chmod", "+x", "/keystone.sh", "/entrypoint.sh"]
+RUN chmod +x /start.sh && \
+    chmod +x /etc/rc.d/rc.local && \
+    sed -i '13i bash \/start\.sh >> \/start.log' /etc/rc.d/rc.local
+
+CMD ["/sbin/init"]
+
