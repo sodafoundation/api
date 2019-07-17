@@ -139,11 +139,9 @@ type Configs struct {
 
 // Collect implements required collect function for all promehteus collectors
 func (c *lvmCollector) Collect(ch chan<- prometheus.Metric) {
-
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.metricDriver.Setup()
-
 	metricArray, _ := c.metricDriver.CollectMetrics()
 	for _, metric := range metricArray {
 		lableVals := []string{metric.InstanceName}
