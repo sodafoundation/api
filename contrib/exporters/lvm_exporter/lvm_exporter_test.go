@@ -14,64 +14,65 @@
 package main
 
 import (
-	"github.com/opensds/opensds/contrib/drivers"
-	"github.com/opensds/opensds/pkg/model"
-	"os"
 	"reflect"
 	"sync"
 	"testing"
 
+	"github.com/opensds/opensds/contrib/drivers"
+	"github.com/opensds/opensds/pkg/model"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
+
 var (
-	SampleVolumeIOPS *prometheus.Desc=prometheus.NewDesc("lvm_volume_iops_tps",
-"Shows IOPS",
-[]string{"device"}, nil,
-)
-	SampleVolumeReadThroughput*prometheus.Desc= prometheus.NewDesc("lvm_volume_read_throughput_kbs",
-"Shows ReadThroughput",
-[]string{"device"}, nil,
-)
-	SampleVolumeWriteThroughput *prometheus.Desc= prometheus.NewDesc("lvm_volume_write_throughput_kbs",
-"Shows ReadThroughput",
-[]string{"device"}, nil,
-)
-	SampleVolumeResponseTime *prometheus.Desc= prometheus.NewDesc("lvm_volume_response_time_ms",
-"Shows ReadThroughput",
-[]string{"device"}, nil,
-)
-	SampleVolumeServiceTime *prometheus.Desc= prometheus.NewDesc("lvm_volume_service_time_ms",
-"Shows ServiceTime",
-[]string{"device"}, nil,
-)
-	SampleVolumeUtilization *prometheus.Desc= prometheus.NewDesc("lvm_volume_utilization_prcnt",
-"Shows Utilization in percentage",
-[]string{"device"}, nil,
-)
-	SampleDiskIOPS *prometheus.Desc= prometheus.NewDesc("lvm_disk_iops_tps",
-"Shows IOPS",
-[]string{"device"}, nil,
-)
-	SampleDiskReadThroughput *prometheus.Desc= prometheus.NewDesc("lvm_disk_read_throughput_kbs",
-"Shows Disk ReadThroughput",
-[]string{"device"}, nil,
-)
-	SampleDiskWriteThroughput *prometheus.Desc= prometheus.NewDesc("lvm_disk_write_throughput_kbs",
-"Shows Write Throughput",
-[]string{"device"}, nil,
-)
-	SampleDiskResponseTime *prometheus.Desc= prometheus.NewDesc("lvm_disk_response_time_ms",
-"Shows Disk Response Time",
-[]string{"device"}, nil,
-)
-	SampleDiskServiceTime *prometheus.Desc= prometheus.NewDesc("lvm_disk_service_time_ms",
-"Shows ServiceTime",
-[]string{"device"}, nil,
-)
-	SampleDiskUtilization *prometheus.Desc= prometheus.NewDesc("lvm_disk_utilization_prcnt",
-"Shows Utilization in percentage",
-[]string{"device"}, nil,
-)
+	SampleVolumeIOPS *prometheus.Desc = prometheus.NewDesc("lvm_volume_iops_tps",
+		"Shows IOPS",
+		[]string{"device"}, nil,
+	)
+	SampleVolumeReadThroughput *prometheus.Desc = prometheus.NewDesc("lvm_volume_read_throughput_kbs",
+		"Shows ReadThroughput",
+		[]string{"device"}, nil,
+	)
+	SampleVolumeWriteThroughput *prometheus.Desc = prometheus.NewDesc("lvm_volume_write_throughput_kbs",
+		"Shows ReadThroughput",
+		[]string{"device"}, nil,
+	)
+	SampleVolumeResponseTime *prometheus.Desc = prometheus.NewDesc("lvm_volume_response_time_ms",
+		"Shows ReadThroughput",
+		[]string{"device"}, nil,
+	)
+	SampleVolumeServiceTime *prometheus.Desc = prometheus.NewDesc("lvm_volume_service_time_ms",
+		"Shows ServiceTime",
+		[]string{"device"}, nil,
+	)
+	SampleVolumeUtilization *prometheus.Desc = prometheus.NewDesc("lvm_volume_utilization_prcnt",
+		"Shows Utilization in percentage",
+		[]string{"device"}, nil,
+	)
+	SampleDiskIOPS *prometheus.Desc = prometheus.NewDesc("lvm_disk_iops_tps",
+		"Shows IOPS",
+		[]string{"device"}, nil,
+	)
+	SampleDiskReadThroughput *prometheus.Desc = prometheus.NewDesc("lvm_disk_read_throughput_kbs",
+		"Shows Disk ReadThroughput",
+		[]string{"device"}, nil,
+	)
+	SampleDiskWriteThroughput *prometheus.Desc = prometheus.NewDesc("lvm_disk_write_throughput_kbs",
+		"Shows Write Throughput",
+		[]string{"device"}, nil,
+	)
+	SampleDiskResponseTime *prometheus.Desc = prometheus.NewDesc("lvm_disk_response_time_ms",
+		"Shows Disk Response Time",
+		[]string{"device"}, nil,
+	)
+	SampleDiskServiceTime *prometheus.Desc = prometheus.NewDesc("lvm_disk_service_time_ms",
+		"Shows ServiceTime",
+		[]string{"device"}, nil,
+	)
+	SampleDiskUtilization *prometheus.Desc = prometheus.NewDesc("lvm_disk_utilization_prcnt",
+		"Shows Utilization in percentage",
+		[]string{"device"}, nil,
+	)
 	SamplemetricsSpec1 = []*model.MetricSpec{
 		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
 			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
@@ -166,7 +167,7 @@ var (
 			},
 		},
 	}
-	execCount =0
+	execCount = 0
 )
 
 func Test_newLvmCollector(t *testing.T) {
@@ -178,26 +179,26 @@ func Test_newLvmCollector(t *testing.T) {
 			name: "test1",
 			want: &lvmCollector{
 				mu:                    sync.Mutex{},
-				VolumeIOPS: SampleVolumeIOPS,
-				VolumeReadThroughput: SampleVolumeReadThroughput,
+				VolumeIOPS:            SampleVolumeIOPS,
+				VolumeReadThroughput:  SampleVolumeReadThroughput,
 				VolumeWriteThroughput: SampleVolumeWriteThroughput,
-				VolumeResponseTime: SampleVolumeResponseTime,
-				VolumeServiceTime: SampleVolumeServiceTime,
-				VolumeUtilization: SampleVolumeUtilization,
-				DiskIOPS: SampleDiskIOPS,
-				DiskReadThroughput: SampleDiskReadThroughput,
-				DiskWriteThroughput: SampleDiskWriteThroughput,
-				DiskResponseTime: SampleDiskResponseTime,
-				DiskServiceTime: SampleDiskServiceTime,
-				DiskUtilization: SampleDiskUtilization,
-				metricDriver:drivers.InitMetricDriver("lvm"),
+				VolumeResponseTime:    SampleVolumeResponseTime,
+				VolumeServiceTime:     SampleVolumeServiceTime,
+				VolumeUtilization:     SampleVolumeUtilization,
+				DiskIOPS:              SampleDiskIOPS,
+				DiskReadThroughput:    SampleDiskReadThroughput,
+				DiskWriteThroughput:   SampleDiskWriteThroughput,
+				DiskResponseTime:      SampleDiskResponseTime,
+				DiskServiceTime:       SampleDiskServiceTime,
+				DiskUtilization:       SampleDiskUtilization,
+				metricDriver:          drivers.InitMetricDriver("lvm"),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := newLvmCollector(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("newLvmCollector() = %v, want %v", got, tt.want)
+				t.Errorf("unexpected result newLvmCollector() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -228,29 +229,29 @@ func Test_lvmCollector_Describe(t *testing.T) {
 		args   args
 	}{
 		{
-			name:   "test1",
+			name: "test1",
 			fields: fields{
 				mu:                    sync.Mutex{},
-				VolumeIOPS: SampleVolumeIOPS,
-				VolumeReadThroughput: SampleVolumeReadThroughput,
+				VolumeIOPS:            SampleVolumeIOPS,
+				VolumeReadThroughput:  SampleVolumeReadThroughput,
 				VolumeWriteThroughput: SampleVolumeWriteThroughput,
-				VolumeResponseTime: SampleVolumeResponseTime,
-				VolumeServiceTime: SampleVolumeServiceTime,
-				VolumeUtilization: SampleVolumeUtilization,
-				DiskIOPS: SampleDiskIOPS,
-				DiskReadThroughput: SampleDiskReadThroughput,
-				DiskWriteThroughput: SampleDiskWriteThroughput,
-				DiskResponseTime: SampleDiskResponseTime,
-				DiskServiceTime: SampleDiskServiceTime,
-				DiskUtilization: SampleDiskUtilization,
+				VolumeResponseTime:    SampleVolumeResponseTime,
+				VolumeServiceTime:     SampleVolumeServiceTime,
+				VolumeUtilization:     SampleVolumeUtilization,
+				DiskIOPS:              SampleDiskIOPS,
+				DiskReadThroughput:    SampleDiskReadThroughput,
+				DiskWriteThroughput:   SampleDiskWriteThroughput,
+				DiskResponseTime:      SampleDiskResponseTime,
+				DiskServiceTime:       SampleDiskServiceTime,
+				DiskUtilization:       SampleDiskUtilization,
 			},
-			args:   args{
+			args: args{
 				ch: make(chan *prometheus.Desc),
 			},
 		},
 	}
 	for _, tt := range tests {
-		 t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			c := &lvmCollector{
 				mu:                    tt.fields.mu,
 				VolumeIOPS:            tt.fields.VolumeIOPS,
@@ -266,16 +267,15 @@ func Test_lvmCollector_Describe(t *testing.T) {
 				DiskServiceTime:       tt.fields.DiskServiceTime,
 				DiskUtilization:       tt.fields.DiskUtilization,
 			}
-//fmt.Println(c)
+			//fmt.Println(c)
 			go Consume(tt.args.ch)
-			 c.Describe(tt.args.ch)
+			c.Describe(tt.args.ch)
 
 		})
 	}
 }
-func  Consume(ch <-chan *prometheus.Desc) {
+func Consume(ch <-chan *prometheus.Desc) {
 
-	//Update this section with the each metric you create for a given collector
 	for {
 		<-ch
 
@@ -306,44 +306,44 @@ func Test_lvmCollector_Collect(t *testing.T) {
 		args   args
 	}{
 		{
-			name:   "test1",
+			name: "test1",
 			fields: fields{
 				mu:                    sync.Mutex{},
-				VolumeIOPS: SampleVolumeIOPS,
-				VolumeReadThroughput: SampleVolumeReadThroughput,
+				VolumeIOPS:            SampleVolumeIOPS,
+				VolumeReadThroughput:  SampleVolumeReadThroughput,
 				VolumeWriteThroughput: SampleVolumeWriteThroughput,
-				VolumeResponseTime: SampleVolumeResponseTime,
-				VolumeServiceTime: SampleVolumeServiceTime,
-				VolumeUtilization: SampleVolumeUtilization,
-				DiskIOPS: SampleDiskIOPS,
-				DiskReadThroughput: SampleDiskReadThroughput,
-				DiskWriteThroughput: SampleDiskWriteThroughput,
-				DiskResponseTime: SampleDiskResponseTime,
-				DiskServiceTime: SampleDiskServiceTime,
-				DiskUtilization: SampleDiskUtilization,
+				VolumeResponseTime:    SampleVolumeResponseTime,
+				VolumeServiceTime:     SampleVolumeServiceTime,
+				VolumeUtilization:     SampleVolumeUtilization,
+				DiskIOPS:              SampleDiskIOPS,
+				DiskReadThroughput:    SampleDiskReadThroughput,
+				DiskWriteThroughput:   SampleDiskWriteThroughput,
+				DiskResponseTime:      SampleDiskResponseTime,
+				DiskServiceTime:       SampleDiskServiceTime,
+				DiskUtilization:       SampleDiskUtilization,
 			},
-			args:   args{
+			args: args{
 				ch: make(chan prometheus.Metric),
 			},
 		},
 		{
-			name:   "test2",
+			name: "test2",
 			fields: fields{
 				mu:                    sync.Mutex{},
-				VolumeIOPS: SampleVolumeIOPS,
-				VolumeReadThroughput: SampleVolumeReadThroughput,
+				VolumeIOPS:            SampleVolumeIOPS,
+				VolumeReadThroughput:  SampleVolumeReadThroughput,
 				VolumeWriteThroughput: SampleVolumeWriteThroughput,
-				VolumeResponseTime: SampleVolumeResponseTime,
-				VolumeServiceTime: SampleVolumeServiceTime,
-				VolumeUtilization: SampleVolumeUtilization,
-				DiskIOPS: SampleDiskIOPS,
-				DiskReadThroughput: SampleDiskReadThroughput,
-				DiskWriteThroughput: SampleDiskWriteThroughput,
-				DiskResponseTime: SampleDiskResponseTime,
-				DiskServiceTime: SampleDiskServiceTime,
-				DiskUtilization: SampleDiskUtilization,
+				VolumeResponseTime:    SampleVolumeResponseTime,
+				VolumeServiceTime:     SampleVolumeServiceTime,
+				VolumeUtilization:     SampleVolumeUtilization,
+				DiskIOPS:              SampleDiskIOPS,
+				DiskReadThroughput:    SampleDiskReadThroughput,
+				DiskWriteThroughput:   SampleDiskWriteThroughput,
+				DiskResponseTime:      SampleDiskResponseTime,
+				DiskServiceTime:       SampleDiskServiceTime,
+				DiskUtilization:       SampleDiskUtilization,
 			},
-			args:   args{
+			args: args{
 				ch: make(chan prometheus.Metric),
 			},
 		},
@@ -364,31 +364,30 @@ func Test_lvmCollector_Collect(t *testing.T) {
 				DiskResponseTime:      tt.fields.DiskResponseTime,
 				DiskServiceTime:       tt.fields.DiskServiceTime,
 				DiskUtilization:       tt.fields.DiskUtilization,
-				metricDriver: NewFakeMetricDriver(),
+				metricDriver:          NewFakeMetricDriver(),
 			}
 			go ConsumeMetrics(tt.args.ch)
 			c.Collect(tt.args.ch)
 		})
 	}
 }
-func  ConsumeMetrics(ch <-chan prometheus.Metric) {
+func ConsumeMetrics(ch <-chan prometheus.Metric) {
 
-	//Update this section with the each metric you create for a given collector
 	for {
 		<-ch
 
 	}
 }
-type fakeMetricDriver struct {
 
+type fakeMetricDriver struct {
 }
 
 func (d *fakeMetricDriver) CollectMetrics() ([]*model.MetricSpec, error) {
 	execCount++
-	if execCount%2==0{
-	return SamplemetricsSpec1,nil
-	}else{
-		return SamplemetricsSpec2,nil
+	if execCount%2 == 0 {
+		return SamplemetricsSpec1, nil
+	} else {
+		return SamplemetricsSpec2, nil
 	}
 }
 
@@ -397,12 +396,10 @@ func (d *fakeMetricDriver) GetMetricList(resourceType string) (supportedMetrics 
 }
 func (d *fakeMetricDriver) Setup() error {
 
-
 	return nil
 }
 
 func (*fakeMetricDriver) Teardown() error { return nil }
-
 
 func NewFakeMetricDriver() drivers.MetricDriver {
 
@@ -425,7 +422,6 @@ func Test_validateCliArg(t *testing.T) {
 			},
 			want: "9601",
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -435,20 +431,3 @@ func Test_validateCliArg(t *testing.T) {
 		})
 	}
 }
-
-func Test_main(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			oldArg:=os.Args[1]
-			os.Args[1]="0"
-			 main()
-			os.Args[1]=oldArg
-		})
-	}
-}
-
