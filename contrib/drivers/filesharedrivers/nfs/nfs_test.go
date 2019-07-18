@@ -12,22 +12,24 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package lvm
+package nfs
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
+	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/exec"
 )
 
 var fp = map[string]PoolProperties{
 	"vg001": {
-		StorageType:      "block",
+		StorageType:      "file",
 		AvailabilityZone: "default",
 		MultiAttach:      true,
 		Extras: model.StoragePoolExtraSpec{
@@ -49,19 +51,19 @@ var fp = map[string]PoolProperties{
 }
 
 func TestSetup(t *testing.T) {
-	var d = &Driver{}
-	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/lvm.yaml"
+	var d = &nfs.Driver{}
+	config.CONF.OsdsDock.Backends.NFS.ConfigPath = "testdata/nfs.yaml"
 	var expectedDriver = &Driver{
-		conf: &LVMConfig{
+		conf: &NFSConfig{
 			Pool:           fp,
-			TgtBindIp:      "192.168.56.105",
+			TgtBindIp:      "11.242.178.20",
 			TgtConfDir:     "/etc/tgt/conf.d",
 			EnableChapAuth: true,
 		},
 	}
 
 	if err := d.Setup(); err != nil {
-		t.Errorf("Setup lvm driver failed: %+v\n", err)
+		t.Errorf("Setup nfs driver failed: %+v\n", err)
 	}
 	if !reflect.DeepEqual(d.conf, expectedDriver.conf) {
 		t.Errorf("Expected %+v, got %+v", expectedDriver.conf, d.conf)
@@ -132,7 +134,7 @@ func TestCreateFileShare(t *testing.T) {
 
 func TestListPools(t *testing.T) {
 	var fd = &Driver{}
-	config.CONF.OsdsDock.Backends.LVM.ConfigPath = "testdata/nfs.yaml"
+	config.CONF.OsdsDock.Backends.NFS.ConfigPath = "testdata/nfs.yaml"
 	fd.Setup()
 
 	var vgsResp = `  vg001  18.00 18.00 ahF6kS-QNOH-X63K-avat-6Kag-XLTo-c9ghQ6
@@ -155,9 +157,9 @@ func TestListPools(t *testing.T) {
 			MultiAttach:      true,
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
-					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   false,
-          storageAccessCapability:[]string{"Read", "Write", "Execute"}
+					ProvisioningPolicy:      "Thin",
+					IsSpaceEfficient:        false,
+					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "nfs",
