@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/opensds/multi-cloud/api/pkg/filters/signature/credentials/keystonecredentials"
-	th "github.com/opensds/multi-cloud/testhelper"
-	"github.com/opensds/multi-cloud/testhelper/gophercloudclient"
+	"github.com/opensds/opensds/contrib/backup/multicloud/credentials/keystonecredentials"
+	th "github.com/opensds/opensds/contrib/backup/multicloud/testhelper"
+	"github.com/opensds/opensds/contrib/backup/multicloud/testhelper/gophercloudclient"
 )
 
 const ListOutput = `
@@ -75,7 +75,7 @@ func TestRetrieveKeystoneCredentials(t *testing.T) {
 	HandleListCredentialsSuccessfully(t)
 
 	c := gophercloudclient.ServiceClient()
-	p := &keystonecredentials.KeystoneProvider{c, "access_key"}
+	p := &keystonecredentials.KeystoneProvider{c, "7da79ff0aa364e1396f067e352b9b79a"}
 	credentials, err := p.Retrieve()
 	t.Log(credentials)
 

@@ -16,7 +16,7 @@ package gophercloudclient
 
 import (
 	"github.com/gophercloud/gophercloud"
-	"github.com/opensds/multi-cloud/testhelper"
+	"github.com/opensds/opensds/contrib/backup/multicloud/testhelper"
 )
 
 // Fake token to use.

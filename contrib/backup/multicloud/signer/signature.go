@@ -32,8 +32,8 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials/keystonecredentials"
-	"github.com/opensds/multi-cloud/api/pkg/model"
-	"github.com/opensds/multi-cloud/api/pkg/utils/constants"
+	"github.com/opensds/opensds/contrib/backup/multicloud/model"
+	"github.com/opensds/opensds/contrib/backup/multicloud/utils/constants"
 )
 
 const (
