@@ -786,3 +786,50 @@ func TestDeleteFileShareSnapshot(t *testing.T) {
 		t.Errorf("failed to delete file share snapshot: %v\n", err)
 	}
 }
+
+func TestCreateFileShareAcl(t *testing.T) {
+	var req = &pb.CreateFileShareAclOpts{
+		Id: "6ad25d59-a160-45b2-8920-211be282e2df",
+		Description:      "This is a sample Acl for testing",
+		Type:             "ip",
+		AccessCapability: []string{"Read", "Write"},
+		AccessTo:         "10.32.109.15",
+		FileshareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	var acl = &SampleFileSharesAcl[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), acl, "available").Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.CreateFileShareAcl(context.Background(), req); err != nil {
+		t.Errorf("failed to create file share snapshot: %v\n", err)
+	}
+}
+
+func TestDeleteFileShareAcl(t *testing.T) {
+	var req = &pb.DeleteFileShareAclOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f537",
+		FileshareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShareAcl", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShareAcl(context.Background(), req); err != nil {
+		t.Errorf("failed to delete file share snapshot: %v\n", err)
+	}
+}
