@@ -874,14 +874,33 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 
 	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
 
-	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
-
-	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
-		return pb.GenericResponseError(err), err
+	// If snapshot is given in parameter then select the pool info
+	// from existing filesystem from where snapshot was created.
+	// If snapshot not given then select the appropriate pool based on profile
+	//(i.e its a new fileshare creation)
+	var polInfo *model.StoragePoolSpec
+	if opt.SnapshotId != "" {
+		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
+		if _err != nil {
+			log.V(5).Infof("unable to get fileshare snapshot details %+v.", _err)
+		}
+		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
+		if _err != nil {
+			log.V(5).Infof("unable to get fileshare details %+v.", _err)
+		}
+		polInfo, err = db.C.GetPool(ctx, existingFs.PoolId)
+		log.V(5).Infof("controller get get previous created fileshare poolInfo detail%+v", polInfo)
+		if err != nil {
+			log.V(5).Infof("unable to get previous created fileshare poolInfo detail %+v", err)
+		}
+	} else {
+		polInfo, err = c.selector.SelectSupportedPoolForFileShare(fileshare)
+		if err != nil {
+			db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+			return pb.GenericResponseError(err), err
+		}
+		log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	}
-
-	log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
