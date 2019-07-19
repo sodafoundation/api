@@ -55,6 +55,9 @@ func (d *Driver) Setup() error {
 }
 
 func (d *Driver) Unset() error {
+	if d.Client == nil {
+		return errors.New("cannot get client")
+	}
 	return d.Client.logout()
 }
 

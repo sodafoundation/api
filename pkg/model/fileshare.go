@@ -39,6 +39,10 @@ type FileShareAclSpec struct {
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`
 
+	// The status of the fileshareacl.
+	// One of: "available", "error" etc.
+	Status string `json:"status,omitempty"`
+
 	// The uuid of the profile which the fileshare belongs to.
 	ProfileId string `json:"profileId,omitempty"`
 
