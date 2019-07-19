@@ -3,6 +3,7 @@ exec > >(tee -i /start.log)
 exec 2>&1
 
 set -x
+starttime=$(date +'%Y-%m-%d %H:%M:%S')
 
 get_default_host_ip() {
     local host_ip=$1
@@ -86,3 +87,7 @@ openstack endpoint create --region RegionOne "multicloud${MULTICLOUD_VERSION}" p
 openstack endpoint create --region RegionOne "multicloud${MULTICLOUD_VERSION}" internal "http://${HOST_IP}:8089/${MULTICLOUD_VERSION}/%(tenant_id)s"
 openstack endpoint create --region RegionOne "multicloud${MULTICLOUD_VERSION}" admin "http://${HOST_IP}:8089/${MULTICLOUD_VERSION}/%(tenant_id)s"
 
+endtime=$(date +'%Y-%m-%d %H:%M:%S')
+start_seconds=$(date --date="$starttime" +%s);
+end_seconds=$(date --date="$endtime" +%s);
+echo "Total running time: "$((end_seconds-start_seconds))"s"
