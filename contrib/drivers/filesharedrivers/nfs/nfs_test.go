@@ -19,7 +19,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
+	//"github.com/opensds/opensds/contrib/drivers/filesharedrivers/nfs"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -28,17 +28,18 @@ import (
 )
 
 var fp = map[string]PoolProperties{
-	"vg001": {
+	"opensds-files-default": {
 		StorageType:      "file",
 		AvailabilityZone: "default",
 		MultiAttach:      true,
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage: model.DataStorageLoS{
-				ProvisioningPolicy: "Thin",
-				IsSpaceEfficient:   false,
+				ProvisioningPolicy:      "Thin",
+				IsSpaceEfficient:        false,
+				StorageAccessCapability: []string{"Read", "Write", "Execute"},
 			},
 			IOConnectivity: model.IOConnectivityLoS{
-				AccessProtocol: "iscsi",
+				AccessProtocol: "nfs",
 				MaxIOPS:        7000000,
 				MaxBWS:         600,
 			},
@@ -51,14 +52,14 @@ var fp = map[string]PoolProperties{
 }
 
 func TestSetup(t *testing.T) {
-	var d = &nfs.Driver{}
+	var d = &Driver{}
 	config.CONF.OsdsDock.Backends.NFS.ConfigPath = "testdata/nfs.yaml"
 	var expectedDriver = &Driver{
 		conf: &NFSConfig{
 			Pool:           fp,
 			TgtBindIp:      "11.242.178.20",
 			TgtConfDir:     "/etc/tgt/conf.d",
-			EnableChapAuth: true,
+			EnableChapAuth: false,
 		},
 	}
 
@@ -90,7 +91,7 @@ func (f *FakeExecuter) Run(name string, args ...string) (string, error) {
 	}
 	v, ok := f.RespMap[cmd]
 	if !ok {
-		return "", fmt.Errorf("can find specified op: %s", args[1])
+		return "", fmt.Errorf("can not find specified op: %s", args[1])
 	}
 	return v.out, v.err
 }
@@ -101,7 +102,12 @@ func TestCreateFileShare(t *testing.T) {
 	fd.Setup()
 
 	respMap := map[string]*FakeResp{
-		"lvcreate": {"", nil},
+		"mkdir":     {"", nil},
+		"mke2fs":    {"", nil},
+		"mount":     {"", nil},
+		"chmod":     {"", nil},
+		"lvconvert": {"", nil},
+		"lvcreate":  {"", nil},
 	}
 	fd.cli.RootExecuter = NewFakeExecuter(respMap)
 	fd.cli.BaseExecuter = NewFakeExecuter(respMap)
@@ -114,12 +120,17 @@ func TestCreateFileShare(t *testing.T) {
 		PoolName:    "vg001",
 	}
 	var expected = &model.FileShareSpec{
-		BaseModel:   &model.BaseModel{},
-		Name:        "test001",
-		Description: "fileshare for testing",
-		Size:        int64(1),
+		BaseModel:       &model.BaseModel{},
+		Name:            "test001",
+		Description:     "fileshare for testing",
+		Size:            int64(1),
+		Protocols:       []string{"nfs"},
+		ExportLocations: []string{"11.242.178.20:/var/test001"},
 		Metadata: map[string]string{
-			"lvPath": "/dev/vg001/test001",
+			"lvPath":           "/dev/vg001/test001",
+			"nfsFileshareID":   "e1bb066c-5ce7-46eb-9336-25508cee9f71",
+			"nfsFileshareName": "test001",
+			"snapshotName":     "",
 		},
 	}
 	fileshare, err := fd.CreateFileShare(opt)
@@ -137,9 +148,8 @@ func TestListPools(t *testing.T) {
 	config.CONF.OsdsDock.Backends.NFS.ConfigPath = "testdata/nfs.yaml"
 	fd.Setup()
 
-	var vgsResp = `  vg001  18.00 18.00 ahF6kS-QNOH-X63K-avat-6Kag-XLTo-c9ghQ6
-  ubuntu-vg               127.52  0.03 fQbqtg-3vDQ-vk3U-gfsT-50kJ-30pq-OZVSJH
-`
+	var vgsResp = `opensds-files-default   20.00 20.00 WSpJ3r-JYVF-DYNq-1rCe-5I6j-Zb3d-8Ub0Hg
+  opensds-volumes-default 20.00 20.00 t7mLWW-AeCf-LtuF-7K8p-R4xA-QC5x-61qx3H`
 	respMap := map[string]*FakeResp{
 		"vgs": {vgsResp, nil},
 	}
@@ -149,12 +159,12 @@ func TestListPools(t *testing.T) {
 	var expected = []*model.StoragePoolSpec{
 		{
 			BaseModel:        &model.BaseModel{},
-			Name:             "vg001",
-			TotalCapacity:    int64(18),
-			FreeCapacity:     int64(18),
+			Name:             "opensds-files-default",
+			TotalCapacity:    int64(20),
+			FreeCapacity:     int64(20),
 			AvailabilityZone: "default",
 			StorageType:      "file",
-			MultiAttach:      true,
+			MultiAttach:      false,
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy:      "Thin",

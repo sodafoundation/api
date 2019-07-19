@@ -193,31 +193,31 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 			log.Error("failed to mount a directory:", err)
 			return nil, err
 		}
-	}	else {
-    	if err := d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
-	  	return nil, err
-	    }
-	    // remove created volume if got error
-	    defer func() {
-		  // using return value as the error flag
-		   if fshare == nil {
-			 if err := d.cli.Delete(name, vg); err != nil {
-				log.Error("failed to remove volume fileshare:", err)
-			}
+	} else {
+		if err := d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
+			return nil, err
 		}
-	}()
+		// remove created volume if got error
+		defer func() {
+			// using return value as the error flag
+			if fshare == nil {
+				if err := d.cli.Delete(name, vg); err != nil {
+					log.Error("failed to remove volume fileshare:", err)
+				}
+			}
+		}()
 
-	// Crete fileshare on this path
-	if err := d.cli.CreateFileShare(lvPath); err != nil {
-		log.Error("failed to create filesystem logic volume:", err)
-		return nil, err
+		// Crete fileshare on this path
+		if err := d.cli.CreateFileShare(lvPath); err != nil {
+			log.Error("failed to create filesystem logic volume:", err)
+			return nil, err
+		}
+		// mount the volume to directory
+		if err := d.cli.Mount(lvPath, dirName); err != nil {
+			log.Error("failed to mount a directory:", err)
+			return nil, err
+		}
 	}
-	// mount the volume to directory
-	if err := d.cli.Mount(lvPath, dirName); err != nil {
-		log.Error("failed to mount a directory:", err)
-		return nil, err
-	}
-}
 	// Set permission to directory
 	if err := d.cli.SetPermission(dirName); err != nil {
 		log.Error("failed to set permission:", err)
@@ -244,10 +244,10 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		Protocols:        []string{NFSProtocol},
 		ExportLocations:  location,
 		Metadata: map[string]string{
-			KFileshareName: name,
+			KFileshareName:     name,
 			KFileshareSnapName: "",
-			KFileshareID:   opt.GetId(),
-			KLvPath:        lvPath,
+			KFileshareID:       opt.GetId(),
+			KLvPath:            lvPath,
 		},
 	}
 	return fshare, nil
