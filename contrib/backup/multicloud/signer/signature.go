@@ -191,7 +191,6 @@ func (signer Signer) Sign(req *http.Request, body string, service, region string
 		Request:         req,
 		requestDateTime: requestDateTime,
 		requestDate:     requestDate,
-		Body:            body,
 		Query:           req.URL.Query(),
 		Service:         service,
 		Region:          region,
@@ -296,6 +295,11 @@ func (sign *Signature) buildCanonicalString() {
 		// the payload is an empty string ("").
 		sign.requestPayload,
 	}, "\n") //Step 7: Combine elements to create canonical request
+	log.V(5).Infof("sign.Request.URL.RawQuery:%v", sign.Request.URL.RawQuery)
+	log.V(5).Infof("sign.canonicalHeaders:%v", sign.canonicalHeaders)
+	log.V(5).Infof("sign.signedHeaders:%v", sign.signedHeaders)
+	log.V(5).Infof("sign.requestPayload:%v", sign.requestPayload)
+	log.V(5).Infof("sign.canonicalString:%v", sign.canonicalString)
 }
 
 // ************* TASK 2: CREATE THE STRING TO SIGN *************
@@ -313,6 +317,7 @@ func (sign *Signature) buildStringToSign() {
 		//Step 4: Append the hash of the canonical request created in Task 1
 		hex.EncodeToString(makeSha256([]byte(sign.canonicalString))),
 	}, "\n") //Step 5: Combine elements to create canonical request
+	log.V(5).Infof("sign.stringToSign:%v", sign.stringToSign)
 }
 
 // ************* TASK 3: CALCULATE THE SIGNATURE *************
@@ -329,6 +334,7 @@ func (sign *Signature) buildSignature() {
 	// to the keyed hash function. Convert the binary value to a hexadecimal representation.
 	signature := makeHmac(signingKey, []byte(sign.stringToSign))
 	sign.signature = hex.EncodeToString(signature)
+	log.V(5).Infof("sign.signature:%v", sign.signature)
 }
 
 // Use a SHA256 hash to create a hashed value from the payload in the body of the HTTP request

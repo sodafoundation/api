@@ -15,6 +15,7 @@
 package multicloud
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -22,13 +23,21 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/opensds/opensds/contrib/backup/multicloud/utils/constants"
+
+	"github.com/opensds/opensds/contrib/backup/multicloud/credentials/keystonecredentials"
+	"github.com/opensds/opensds/contrib/backup/multicloud/signer"
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
+	creds "github.com/gophercloud/gophercloud/openstack/identity/v3/credentials"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
+	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
@@ -44,10 +53,44 @@ type Client struct {
 	tenantId      string
 	version       string
 	baseURL       string
+	userId        string
+	Identity      *gophercloud.ServiceClient
 	auth          *AuthOptions
 	token         *tokens.Token
 	timeout       time.Duration
 	uploadTimeout time.Duration
+}
+
+type Blob struct {
+	Access string `json:"access"`
+	Secret string `json:"secret"`
+}
+
+type getCredentialsOutput struct {
+	AccessKeyID     string
+	SecretAccessKey string
+}
+
+type Signature struct {
+	Service string
+	Region  string
+	Request *http.Request
+	Body    string
+	Query   url.Values
+
+	SignedHeaderValues http.Header
+
+	credValues       credentials.Value
+	requestDateTime  string
+	requestDate      string
+	requestPayload   string
+	signedHeaders    string
+	canonicalHeaders string
+	canonicalString  string
+	credentialString string
+	stringToSign     string
+	signature        string
+	authorization    string
 }
 
 func NewClient(endpooint string, opt *AuthOptions, uploadTimeout int64) (*Client, error) {
@@ -68,7 +111,7 @@ func NewClient(endpooint string, opt *AuthOptions, uploadTimeout int64) (*Client
 		auth:          opt,
 	}
 
-	if opt.Strategy == "keystone" {
+	if opt.Strategy == "keystone" || opt.Strategy == "AK/SK" {
 		if err := client.UpdateToken(); err != nil {
 			return nil, err
 		}
@@ -107,6 +150,8 @@ func (c *Client) getToken(opt *AuthOptions) (*tokens.CreateResult, error) {
 
 	// Only support keystone v3
 	identity, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{})
+	c.Identity = identity
+
 	if err != nil {
 		log.Error("When get identity session:", err)
 		return nil, err
@@ -121,6 +166,13 @@ func (c *Client) UpdateToken() error {
 		log.Errorf("Get token failed, %v", err)
 		return err
 	}
+	user, err := t.ExtractUser()
+	if err != nil {
+		log.Errorf("extract user failed, %v", user)
+		return err
+	}
+	c.userId = user.ID
+	log.V(5).Infof("userId:%v", user.ID)
 	project, err := t.ExtractProject()
 	if err != nil {
 		log.Errorf("extract project failed, %v", err)
@@ -137,6 +189,47 @@ func (c *Client) UpdateToken() error {
 	return nil
 }
 
+// from Keystone And error will be returned if the retrieval fails.
+func (c *Client) getCredentials() (*getCredentialsOutput, error) {
+	credsOptList := creds.ListOpts{
+		UserID: c.userId,
+	}
+	allPages, err := creds.List(c.Identity, credsOptList).AllPages()
+
+	credentials, err := creds.ExtractCredentials(allPages)
+	log.V(4).Infof("Credentials: %s", credentials)
+
+	if err != nil {
+		return nil, err
+	}
+
+	blob, err := getBlob(credentials)
+
+	if blob != nil {
+		return &getCredentialsOutput{
+			AccessKeyID:     blob.Access,
+			SecretAccessKey: blob.Secret,
+		}, nil
+	}
+	return nil, err
+}
+
+// Returns a credential Blob for getting access and secret
+// And error will be returned if it fails.
+func getBlob(credentials []creds.Credential) (*Blob, error) {
+	blob := &Blob{}
+	credential := credentials[0]
+
+	var blobStr = credential.Blob
+	b := strings.Replace(blobStr, "\\", "", -1)
+	err := json.Unmarshal([]byte(b), blob)
+
+	if err != nil {
+		return nil, err
+	}
+	return blob, nil
+}
+
 func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([]byte, http.Header, error) {
 	req := httplib.NewBeegoRequest(u, method)
 	req.Header("Content-Type", "application/xml")
@@ -149,6 +242,43 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 			}
 		}
 		req.Header("X-Auth-Token", c.token.ID)
+	} else if c.auth.Strategy == "AK/SK" {
+		beforeExpires := c.token.ExpiresAt.Add(time.Minute)
+		if time.Now().After(beforeExpires) {
+			log.Warning("token is about to expire, update it")
+			if err := c.UpdateToken(); err != nil {
+				return nil, nil, err
+			}
+		}
+		getCredentialsOutput, err := c.getCredentials()
+		if err != nil {
+			return nil, nil, err
+		}
+		AK := getCredentialsOutput.AccessKeyID
+		SK := getCredentialsOutput.SecretAccessKey
+		log.V(5).Infof("AK:%v, SK:%v", AK, SK)
+		//Create a keystone credentials Provider client for retrieving credentials
+		credentials := keystonecredentials.NewCredentialsClient(AK)
+		//Create a Signer and the calculate the signature based on the Header parameters passed in request
+		signer := signer.NewSigner(credentials)
+		request, err := http.NewRequest(method, u, nil)
+
+		if err != nil {
+			return nil, nil, err
+		}
+		service := "s3"
+		region := "default_region"
+		requestDateTime := time.Now().Format("2006-01-02")
+		requestDate := time.Now().Format("2006-01-02")
+		request.Header.Add(constants.SignDateHeader, requestDateTime)
+		credentialStr := AK + "/" + requestDate + "/" + region + "/" + service + "/" + "sign_request"
+		calculatedSignature, err := signer.Sign(request, "", service, region, requestDateTime, requestDate, credentialStr)
+		log.V(5).Infof("req.Request=%v,service=%v,region=%v,requestDateTime=%v,requestDate=%v,credentialStr=%v", request, service, region, requestDateTime, requestDate, credentialStr)
+		log.V(5).Infof("calculatedSignature:%v", calculatedSignature)
+		Authorization := "OPENSDS-HMAC-SHA256 Credential=" + credentialStr + ",SignedHeaders=host;x-auth-date,Signature=" + calculatedSignature
+		req.Header(constants.AuthorizationHeader, Authorization)
+		req.Header(constants.SignDateHeader, requestDateTime)
+
 	}
 
 	req.SetTimeout(c.timeout, c.timeout)

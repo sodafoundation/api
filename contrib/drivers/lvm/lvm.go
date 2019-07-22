@@ -296,7 +296,9 @@ func (d *Driver) AttachSnapshot(snapshotId string, lvsPath string) (string, *mod
 			OsType:    runtime.GOOS,
 			Host:      d.conf.TgtBindIp,
 			Initiator: "",
+			Ip:        d.conf.TgtBindIp,
 		},
+		AccessProtocol: ISCSIProtocol,
 	}
 
 	info, err := d.InitializeSnapshotConnection(createOpt)
@@ -332,6 +334,9 @@ func (d *Driver) DetachSnapshot(snapshotId string, info *model.ConnectionInfo) e
 	attach := &pb.DeleteSnapshotAttachmentOpts{
 		SnapshotId:     snapshotId,
 		AccessProtocol: info.DriverVolumeType,
+		HostInfo: &pb.HostInfo{
+			Ip: d.conf.TgtBindIp,
+		},
 	}
 	return d.TerminateSnapshotConnection(attach)
 }

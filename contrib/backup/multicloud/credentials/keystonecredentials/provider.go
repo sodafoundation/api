@@ -20,10 +20,11 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/opensds/opensds/contrib/backup/multicloud/auth"
+
 	log "github.com/golang/glog"
 	"github.com/gophercloud/gophercloud"
 	creds "github.com/gophercloud/gophercloud/openstack/identity/v3/credentials"
-	"github.com/opensds/opensds/contrib/backup/multicloud/auth"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
 	"github.com/opensds/opensds/contrib/backup/multicloud/model"
 )
@@ -43,6 +44,10 @@ type KeystoneProvider struct {
 type Blob struct {
 	Access string `json:"access"`
 	Secret string `json:"secret"`
+}
+type getCredentialsOutput struct {
+	AccessKeyID     string
+	SecretAccessKey string
 }
 
 // NewProviderClient returns a credentials Provider for retrieving credentials
@@ -82,11 +87,6 @@ func (p *KeystoneProvider) Retrieve() (credentials.Value, error) {
 		SecretAccessKey: resp.SecretAccessKey,
 		ProviderName:    ProviderName,
 	}, nil
-}
-
-type getCredentialsOutput struct {
-	AccessKeyID     string
-	SecretAccessKey string
 }
 
 // Returns AccessKey and SecretKey Values, Retrieves Credentials

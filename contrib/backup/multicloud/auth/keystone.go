@@ -17,7 +17,6 @@ package auth
 
 import (
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -50,11 +49,11 @@ func NewKeystone() AuthBase {
 
 func (k *Keystone) SetUp() error {
 	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: os.Getenv("OS_AUTH_URL"),
-		DomainName:       os.Getenv("OS_USER_DOMIN_ID"),
-		Username:         os.Getenv("OS_USERNAME"),
-		Password:         os.Getenv("OS_PASSWORD"),
-		TenantName:       os.Getenv("OS_PROJECT_NAME"),
+		IdentityEndpoint: "http://10.10.3.154/identity",
+		DomainName:       "Default",
+		Username:         "opensds",
+		Password:         "opensds@123",
+		TenantName:       "service",
 	}
 	log.Infof("opts:%v", opts)
 	provider, err := openstack.AuthenticatedClient(opts)
