@@ -1,9 +1,9 @@
-"Endpoint": "http://10.10.3.154:8088"
+"Endpoint": "http://127.0.0.1:8088"
 # upload object timeout in seconds
 "UploadTimeout": 30
 AuthOptions:
   Strategy: "AK/SK"
-  AuthUrl: "http://10.10.3.154/identity"
+  AuthUrl: "http://127.0.0.1/identity"
   DomainName: "Default"
   UserName: "admin"
   Password: "opensds@123"
