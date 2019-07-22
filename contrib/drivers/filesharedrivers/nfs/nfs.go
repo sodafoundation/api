@@ -185,7 +185,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		}
 
 		if err := d.cli.CreateFileShareFromSnapshot(lvPathForSnap); err != nil {
-			log.Error("failed to create filesystem from given snapshots:", err)
+			log.Error("failed to create filesystem from given snapshot:", err)
 			return nil, err
 		}
 		// mount the volume to directory
