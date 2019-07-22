@@ -168,11 +168,11 @@ func (c *Cli) CreateFileShareFromSnapshot(lvPath string) error {
 		lvPath,
 	}
 	_, err := c.execute(cmd...)
-	if err == nil {
+	if err != nil {
 		// Deal with the error, probably pushing it up the call stack
 		return err
 	}
-	return err
+	return nil
 }
 
 func (c *Cli) CreateVolume(name string, vg string, size int64) error {
