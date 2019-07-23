@@ -50,6 +50,7 @@ const (
 	KFileshareSnapID   = "snapshotID"
 	AccessLevelRo      = "ro"
 	AccessLevelRw      = "rw"
+	MountPath          = "/mnt"
 )
 
 type NFSConfig struct {
@@ -146,6 +147,7 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 }
 
 func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+
 	var fshare *model.FileShareSpec
 	//get the server ip for configuration
 	var server = d.conf.TgtBindIp
@@ -154,7 +156,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 	//get volume group
 	var vg = opt.GetPoolName()
 	// Crete a directory to mount
-	var dirName = path.Join("/var/", name)
+	var dirName = path.Join(MountPath, name)
 	// create a fileshare path
 	var lvPath = path.Join("/dev", vg, name)
 
@@ -163,28 +165,59 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		return nil, err
 	}
 
-	if err := d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
-		return nil, err
-	}
-	// remove created volume if got error
-	defer func() {
-		// using return value as the error flag
-		if fshare == nil {
-			if err := d.cli.Delete(name, vg); err != nil {
-				log.Error("failed to remove volume fileshare:", err)
-			}
-		}
-	}()
+	if opt.SnapshotId != "" {
+		// User requested for creating fileshare using existing snapshot
+		//get fileshare name
+		var existingFsName = opt.GetMetadata()[KFileshareName]
 
-	// Crete fileshare on this path
-	if err := d.cli.CreateFileShare(lvPath); err != nil {
-		log.Error("failed to create filesystem logic volume:", err)
-		return nil, err
-	}
-	// mount the volume to directory
-	if err := d.cli.Mount(lvPath, dirName); err != nil {
-		log.Error("failed to mount a directory:", err)
-		return nil, err
+		// get existingfileshare snap logical path
+		//get volume group
+		var vg = opt.GetPoolName()
+		// create a fileshare device path
+		var lvPathForSnap = path.Join("/dev", vg, opt.SnapshotName)
+		// create a existing fileshare device path
+		var lvPathExistingPath = path.Join("/dev", vg, existingFsName)
+		// get directory where fileshare mounted
+		var olddirName = path.Join(MountPath, existingFsName)
+		// umount the volume to directory
+		if err := d.cli.UnMount(olddirName); err != nil {
+			log.Error("failed to mount a directory:", err)
+			return nil, err
+		}
+
+		if err := d.cli.CreateFileShareFromSnapshot(lvPathForSnap); err != nil {
+			log.Error("failed to create filesystem from given snapshot:", err)
+			return nil, err
+		}
+		// mount the volume to directory
+		if err := d.cli.Mount(lvPathExistingPath, dirName); err != nil {
+			log.Error("failed to mount a directory:", err)
+			return nil, err
+		}
+	} else {
+		if err := d.cli.CreateVolume(name, vg, opt.GetSize()); err != nil {
+			return nil, err
+		}
+		// remove created volume if got error
+		defer func() {
+			// using return value as the error flag
+			if fshare == nil {
+				if err := d.cli.Delete(name, vg); err != nil {
+					log.Error("failed to remove volume fileshare:", err)
+				}
+			}
+		}()
+
+		// Crete fileshare on this path
+		if err := d.cli.CreateFileShare(lvPath); err != nil {
+			log.Error("failed to create filesystem logic volume:", err)
+			return nil, err
+		}
+		// mount the volume to directory
+		if err := d.cli.Mount(lvPath, dirName); err != nil {
+			log.Error("failed to mount a directory:", err)
+			return nil, err
+		}
 	}
 	// Set permission to directory
 	if err := d.cli.SetPermission(dirName); err != nil {
@@ -212,9 +245,10 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		Protocols:        []string{NFSProtocol},
 		ExportLocations:  location,
 		Metadata: map[string]string{
-			KFileshareName: name,
-			KFileshareID:   opt.GetId(),
-			KLvPath:        lvPath,
+			KFileshareName:     name,
+			KFileshareSnapName: "",
+			KFileshareID:       opt.GetId(),
+			KLvPath:            lvPath,
 		},
 	}
 	return fshare, nil
@@ -262,11 +296,11 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 	// get fileshare path
 	lvPath := opt.GetMetadata()[KLvPath]
 	// get directory where fileshare mounted
-	var dirName = path.Join("/var/", fname)
+	var dirName = path.Join(MountPath, fname)
 
 	// umount the volume to directory
 	if err := d.cli.UnMount(dirName); err != nil {
-		log.Error("failed to mount a directory:", err)
+		log.Error("failed to unmount the directory:", err)
 		return err
 	}
 	// delete the actual fileshare from device
