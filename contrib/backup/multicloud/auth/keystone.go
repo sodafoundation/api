@@ -16,9 +16,13 @@
 package auth
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/emicklei/go-restful"
 	log "github.com/golang/glog"
@@ -30,8 +34,31 @@ import (
 	"github.com/opensds/opensds/contrib/backup/multicloud/utils/constants"
 )
 
+const (
+	ConfFile             = "/etc/opensds/driver/multi-cloud.yaml"
+	DefaultUploadTimeout = 30 // in Seconds
+)
+
 type Keystone struct {
 	identity *gophercloud.ServiceClient
+	conf     *MultiCloudConf
+}
+
+type MultiCloudConf struct {
+	Endpoint      string `yaml:"Endpoint,omitempty"`
+	UploadTimeout int64  `yaml:"UploadTimeout,omitempty"`
+	AuthOptions   `yaml:"AuthOptions,omitempty"`
+}
+
+type AuthOptions struct {
+	Strategy        string `yaml:"Strategy"`
+	AuthUrl         string `yaml:"AuthUrl,omitempty"`
+	DomainName      string `yaml:"DomainName,omitempty"`
+	UserName        string `yaml:"UserName,omitempty"`
+	Password        string `yaml:"Password,omitempty"`
+	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
+	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
+	TenantName      string `yaml:"TenantName,omitempty"`
 }
 
 func GetIdentity(k *Keystone) *gophercloud.ServiceClient {
@@ -47,15 +74,39 @@ func NewKeystone() AuthBase {
 	return k
 }
 
-func (k *Keystone) SetUp() error {
-	opts := gophercloud.AuthOptions{
-		IdentityEndpoint: "http://10.10.3.154/identity",
-		DomainName:       "Default",
-		Username:         "opensds",
-		Password:         "opensds@123",
-		TenantName:       "service",
+func (k *Keystone) loadConf(p string) (*MultiCloudConf, error) {
+	conf := &MultiCloudConf{
+		Endpoint:      "http://127.0.0.1:8088",
+		UploadTimeout: DefaultUploadTimeout,
 	}
-	log.Infof("opts:%v", opts)
+	confYaml, err := ioutil.ReadFile(p)
+	if err != nil {
+		log.Errorf("Read config yaml file (%s) failed, reason:(%v)", p, err)
+		return nil, err
+	}
+	if err = yaml.Unmarshal(confYaml, conf); err != nil {
+		log.Errorf("Parse error: %v", err)
+		return nil, err
+	}
+	return conf, nil
+}
+
+func (k *Keystone) SetUp() error {
+	var err error
+	if k.conf, err = k.loadConf(ConfFile); err != nil {
+		return err
+	}
+
+	opts := gophercloud.AuthOptions{
+		IdentityEndpoint: k.conf.AuthUrl,
+		DomainName:       k.conf.DomainName,
+		Username:         k.conf.UserName,
+		Password:         k.conf.Password,
+		TenantName:       k.conf.TenantName,
+	}
+	bytes, _ := json.Marshal(opts)
+	log.Infof("bytes:%v", string(bytes))
+	log.Infof("opts:%+v", opts)
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
 		log.Error("When get auth client:", err)

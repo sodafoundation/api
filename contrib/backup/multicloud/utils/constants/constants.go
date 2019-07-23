@@ -54,5 +54,5 @@ const (
 )
 
 const (
-	Tier999                     = 999
+	Tier999 = 999
 )

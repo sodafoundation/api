@@ -268,8 +268,8 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 		}
 		service := "s3"
 		region := "default_region"
-		requestDateTime := time.Now().Format("2006-01-02")
-		requestDate := time.Now().Format("2006-01-02")
+		requestDate := time.Now().UTC().Format("20060102")
+		requestDateTime := time.Now().UTC().Format("20060102T150405Z")
 		request.Header.Add(constants.SignDateHeader, requestDateTime)
 		credentialStr := AK + "/" + requestDate + "/" + region + "/" + service + "/" + "sign_request"
 		calculatedSignature, err := signer.Sign(request, "", service, region, requestDateTime, requestDate, credentialStr)
@@ -278,7 +278,6 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 		Authorization := "OPENSDS-HMAC-SHA256 Credential=" + credentialStr + ",SignedHeaders=host;x-auth-date,Signature=" + calculatedSignature
 		req.Header(constants.AuthorizationHeader, Authorization)
 		req.Header(constants.SignDateHeader, requestDateTime)
-
 	}
 
 	req.SetTimeout(c.timeout, c.timeout)
