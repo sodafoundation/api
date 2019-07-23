@@ -34,7 +34,7 @@ func TestLoadConf(t *testing.T) {
 		Endpoint:      "http://127.0.0.1:8088",
 		UploadTimeout: DefaultUploadTimeout,
 		AuthOptions: AuthOptions{
-			Strategy:        "keystone",
+			Strategy:        "AK/SK",
 			AuthUrl:         "http://127.0.0.1/identity",
 			DomainName:      "Default",
 			UserName:        "admin",
