@@ -883,15 +883,18 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
 		if _err != nil {
 			log.V(5).Infof("unable to get fileshare snapshot details %+v.", _err)
+			return pb.GenericResponseError(_err), _err
 		}
 		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
 		if _err != nil {
 			log.V(5).Infof("unable to get fileshare details %+v.", _err)
+			return pb.GenericResponseError(_err), _err
 		}
 		polInfo, err = db.C.GetPool(ctx, existingFs.PoolId)
 		log.V(5).Infof("controller get get previous created fileshare poolInfo detail%+v", polInfo)
 		if err != nil {
 			log.V(5).Infof("unable to get previous created fileshare poolInfo detail %+v", err)
+			return pb.GenericResponseError(err), err
 		}
 	} else {
 		polInfo, err = c.selector.SelectSupportedPoolForFileShare(fileshare)
