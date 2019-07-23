@@ -18,8 +18,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/opensds/multi-cloud/api/pkg/filters/signature/credentials"
-	"github.com/opensds/multi-cloud/api/pkg/filters/signature/signer"
+	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
+	"github.com/opensds/opensds/contrib/backup/multicloud/signer"
 )
 
 const authorizationStr = "OPENSDS-HMAC-SHA256 Credential=access_key/20190301/us-east-1/s3/sign_request,SignedHeaders=authorization;host;x-auth-date,Signature=472f0a1b7815974847620da53fcdd2fdd53203b5d8d08e7ce81943b260560e26"
@@ -66,7 +66,7 @@ func TestSignRequestValidation(t *testing.T) {
 	}
 
 	expectedDate := "20190301T220855Z"
-	expectedSignature := "219270ad1f7a4430b7a6362ab525d94134f5a2b7c3f7e54a6b67629f5262dda4"
+	expectedSignature := "f8640cfcd36e79a7eb0d38cc504f256f98ff57398ac7106cf5129fe314ea2f84"
 
 	if e, a := expectedSignature, calculatedSignature; e != a {
 		t.Errorf("expect \n %v \n actual \n %v \n", e, a)
