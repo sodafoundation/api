@@ -75,7 +75,7 @@ func TestRetrieveKeystoneCredentials(t *testing.T) {
 	HandleListCredentialsSuccessfully(t)
 
 	c := gophercloudclient.ServiceClient()
-	p := &keystonecredentials.KeystoneProvider{c, "7da79ff0aa364e1396f067e352b9b79a"}
+	p := &keystonecredentials.KeystoneProvider{c, "access_key"}
 	credentials, err := p.Retrieve()
 	t.Log(credentials)
 
