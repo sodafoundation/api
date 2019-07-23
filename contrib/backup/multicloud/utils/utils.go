@@ -17,7 +17,6 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"math/rand"
 	"os"
 	"reflect"
 
@@ -181,17 +180,4 @@ func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) 
 	default:
 		return false, errors.New("the type of " + key + " must be bool or float64 or string")
 	}
-}
-
-func RandSeqWithAlnum(n int) string {
-	alnum := []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	return RandSeq(n, alnum)
-}
-
-func RandSeq(n int, chs []rune) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = chs[rand.Intn(len(chs))]
-	}
-	return string(b)
 }

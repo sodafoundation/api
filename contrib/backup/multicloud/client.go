@@ -233,23 +233,16 @@ func getBlob(credentials []creds.Credential) (*Blob, error) {
 func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([]byte, http.Header, error) {
 	req := httplib.NewBeegoRequest(u, method)
 	req.Header("Content-Type", "application/xml")
-	if c.auth.Strategy == "keystone" {
-		beforeExpires := c.token.ExpiresAt.Add(time.Minute)
-		if time.Now().After(beforeExpires) {
-			log.Warning("token is about to expire, update it")
-			if err := c.UpdateToken(); err != nil {
-				return nil, nil, err
-			}
+	beforeExpires := c.token.ExpiresAt.Add(time.Minute)
+	if time.Now().After(beforeExpires) {
+		log.Warning("token is about to expire, update it")
+		if err := c.UpdateToken(); err != nil {
+			return nil, nil, err
 		}
+	}
+	if c.auth.Strategy == "keystone" {
 		req.Header("X-Auth-Token", c.token.ID)
 	} else if c.auth.Strategy == "AK/SK" {
-		beforeExpires := c.token.ExpiresAt.Add(time.Minute)
-		if time.Now().After(beforeExpires) {
-			log.Warning("token is about to expire, update it")
-			if err := c.UpdateToken(); err != nil {
-				return nil, nil, err
-			}
-		}
 		getCredentialsOutput, err := c.getCredentials()
 		if err != nil {
 			return nil, nil, err

@@ -15,22 +15,12 @@
 package auth
 
 import (
-	"os"
-
 	"github.com/emicklei/go-restful"
 	"github.com/micro/go-log"
 	c "github.com/opensds/opensds/contrib/backup/multicloud/context"
 )
 
-type AuthBase interface {
-	Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain)
-}
-
 type NoAuth struct {
-}
-
-func NewNoAuth() AuthBase {
-	return &NoAuth{}
 }
 
 func (auth *NoAuth) Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
@@ -44,19 +34,4 @@ func (auth *NoAuth) Filter(req *restful.Request, resp *restful.Response, chain *
 
 	ctx.IsAdmin = ctx.TenantId == c.NoAuthAdminTenantId
 	chain.ProcessFilter(req, resp)
-}
-
-func FilterFactory() restful.FilterFunction {
-	var auth AuthBase
-	log.Log(os.Getenv("OS_AUTH_AUTHSTRATEGY"))
-	switch os.Getenv("OS_AUTH_AUTHSTRATEGY") {
-	case "keystone":
-		auth = NewKeystone()
-	case "noauth":
-		log.Log("filter is noauth")
-		auth = NewNoAuth()
-	default:
-		auth = NewNoAuth()
-	}
-	return auth.Filter
 }

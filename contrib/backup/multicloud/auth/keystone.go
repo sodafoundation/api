@@ -65,15 +65,6 @@ func GetIdentity(k *Keystone) *gophercloud.ServiceClient {
 	return k.identity
 }
 
-func NewKeystone() AuthBase {
-	k := &Keystone{}
-	if err := k.SetUp(); err != nil {
-		// If auth set up failed, raise panic.
-		panic(err)
-	}
-	return k
-}
-
 func (k *Keystone) loadConf(p string) (*MultiCloudConf, error) {
 	conf := &MultiCloudConf{
 		Endpoint:      "http://127.0.0.1:8088",

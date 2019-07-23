@@ -15,7 +15,6 @@
 package testhelper
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -56,17 +55,5 @@ func TestMethod(t *testing.T, r *http.Request, expected string) {
 func TestHeader(t *testing.T, r *http.Request, header string, expected string) {
 	if actual := r.Header.Get(header); expected != actual {
 		t.Errorf("Header %s = %s, expected %s", header, actual, expected)
-	}
-}
-
-// TestBody verifies that the request body matches an expected body.
-func TestBody(t *testing.T, r *http.Request, expected string) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		t.Errorf("Unable to read body: %v", err)
-	}
-	str := string(b)
-	if expected != str {
-		t.Errorf("Body = %s, expected %s", str, expected)
 	}
 }

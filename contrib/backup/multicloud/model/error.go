@@ -20,7 +20,6 @@ This module implements the common data structure.
 package model
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -31,16 +30,9 @@ import (
 const (
 	// ErrorBadRequest
 	ErrorBadRequest = 400
-	// ErrorUnauthorized
-	ErrorUnauthorized = 401
-	// ErrorForbidden
-	ErrorForbidden = 403
-	// ErrorNotFound
-	ErrorNotFound = 404
+	ErrorNotFound   = 404
 	// ErrorInternalServer
 	ErrorInternalServer = 500
-	// ErrorNotImplemented
-	ErrorNotImplemented = 501
 )
 
 // ErrorSpec describes Detailed HTTP error response, which consists of a HTTP
@@ -49,61 +41,6 @@ type ErrorSpec struct {
 	Code    int    `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`
 }
-
-// ErrorBadRequestStatus
-func ErrorBadRequestStatus(message string) []byte {
-	return errorStatus(ErrorBadRequest, message)
-}
-
-// ErrorForbiddenStatus
-func ErrorForbiddenStatus(message string) []byte {
-	return errorStatus(ErrorForbidden, message)
-}
-
-// ErrorUnauthorizedStatus
-func ErrorUnauthorizedStatus(message string) []byte {
-	return errorStatus(ErrorUnauthorized, message)
-}
-
-// ErrorNotFoundStatus
-func ErrorNotFoundStatus(message string) []byte {
-	return errorStatus(ErrorNotFound, message)
-}
-
-// ErrorInternalServerStatus
-func ErrorInternalServerStatus(message string) []byte {
-	return errorStatus(ErrorInternalServer, message)
-}
-
-// ErrorNotImplementedStatus
-func ErrorNotImplementedStatus(message string) []byte {
-	return errorStatus(ErrorNotImplemented, message)
-}
-
-func errorStatus(code int, message string) []byte {
-	errStatus := &ErrorSpec{
-		Code:    code,
-		Message: message,
-	}
-
-	// Mashal the error status.
-	body, err := json.Marshal(errStatus)
-	if err != nil {
-		return []byte("Failed to mashal error response: " + err.Error())
-	}
-	return body
-}
-
-/*
-func HttpError(ctx *context.Context, code int, format string, a ...interface{}) error {
-	ctx.Output.SetStatus(code)
-	msg := fmt.Sprintf(format, a...)
-	ctx.Output.Body(errorStatus(code, msg))
-	errInfo := fmt.Sprintf("Code:%d, Reason:%s", code, msg)
-	log.Error(errInfo)
-	return fmt.Errorf(errInfo)
-}
-*/
 
 func HttpError(res *restful.Response, code int, format string, a ...interface{}) error {
 	msg := fmt.Sprintf(format, a...)

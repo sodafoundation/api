@@ -28,22 +28,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/emicklei/go-restful"
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
-	"github.com/opensds/opensds/contrib/backup/multicloud/credentials/keystonecredentials"
-	"github.com/opensds/opensds/contrib/backup/multicloud/model"
-	"github.com/opensds/opensds/contrib/backup/multicloud/utils/constants"
 )
 
 const (
 	authHeaderPrefix  = "OPENSDS-HMAC-SHA256"
 	emptyStringSHA256 = `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
 )
-
-type SignatureBase interface {
-	Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain)
-}
 
 type Signature struct {
 	Service string
@@ -65,100 +57,6 @@ type Signature struct {
 	stringToSign     string
 	signature        string
 	authorization    string
-}
-
-func NewSignature() SignatureBase {
-	return &Signature{}
-}
-
-func FilterFactory() restful.FilterFunction {
-	sign := NewSignature()
-	return sign.Filter
-}
-
-// Signature Authorization Filter to validate the Request Signature
-// Authorization: algorithm Credential=accesskeyID/credential scope, SignedHeaders=SignedHeaders, Signature=signature
-// credential scope <requestDate>/<region>/<service>/sign_request
-func (sign *Signature) Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-
-	//Get the Authorization Header from the request
-	authorization, err := getHeaderParams(req, resp, constants.AuthorizationHeader)
-
-	if err != nil {
-		log.Error("When get Authorization value:", err)
-		return
-	}
-
-	//Get the X-Auth-Date Header from the request
-	requestDateTime, err := getHeaderParams(req, resp, constants.SignDateHeader)
-
-	if err != nil {
-		log.Error("When get Request DateTimeStamp value:", err)
-		return
-	}
-
-	//Get the Authorization parameters from the Authorization String
-	authorizationParts := strings.Split(authorization, ",")
-	credential, signature := strings.TrimSpace(authorizationParts[0]), strings.TrimSpace(authorizationParts[2])
-
-	signatureParts := strings.Split(signature, "=")
-	expectedSignature := signatureParts[1]
-
-	credentialParts := strings.Split(credential, " ")
-	creds := credentialParts[1]
-
-	credsParts := strings.Split(creds, "=")
-	credentialStr := credsParts[1]
-
-	credentialStrParts := strings.Split(credentialStr, "/")
-	accessKeyID, requestDate, region, service := credentialStrParts[0], credentialStrParts[1], credentialStrParts[2], credentialStrParts[3]
-
-	//TODO Get Request Body
-	body := ""
-
-	//Create a keystone credentials Provider client for retrieving credentials
-	credentials := keystonecredentials.NewCredentialsClient(accessKeyID)
-
-	//Create a Signer and the calculate the signature based on the Header parameters passed in request
-	signer := NewSigner(credentials)
-	calculatedSignature, err := signer.Sign(req.Request, body, service, region, requestDateTime, requestDate, credentialStr)
-
-	if err != nil {
-		return
-	}
-
-	//Validate the signature
-	if err := sign.validateSignature(req, resp, expectedSignature, calculatedSignature); err != nil {
-		return
-	}
-
-	chain.ProcessFilter(req, resp)
-}
-
-//Returns nil if the signatures are matched, else http error
-func (sign *Signature) validateSignature(req *restful.Request, res *restful.Response, expectedSign string, calculatedSign string) error {
-	if expectedSign == "" {
-		return model.HttpError(res, http.StatusUnauthorized, "signature not found in header")
-	}
-	if calculatedSign == "" {
-		return model.HttpError(res, http.StatusUnauthorized, "signature calculation failed")
-	}
-	if calculatedSign != expectedSign {
-		return model.HttpError(res, http.StatusUnauthorized, "signature validation failed")
-	}
-
-	return nil
-}
-
-//Returns the Header value, else http error
-func getHeaderParams(req *restful.Request, resp *restful.Response, header string) (string, error) {
-	// Strip the spaces around the Header
-	value := strings.TrimSpace(req.HeaderParameter(header))
-
-	if value == "" {
-		return "", model.HttpError(resp, http.StatusUnauthorized, header+" not found in header")
-	}
-	return value, nil
 }
 
 // Signer provides sign requests that need to be signed with the Signature.
