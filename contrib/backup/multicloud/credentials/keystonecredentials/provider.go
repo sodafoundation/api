@@ -26,7 +26,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	creds "github.com/gophercloud/gophercloud/openstack/identity/v3/credentials"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
-	"github.com/opensds/opensds/contrib/backup/multicloud/model"
+	"github.com/opensds/opensds/pkg/model"
 )
 
 // ProviderName is the name of the credentials provider.

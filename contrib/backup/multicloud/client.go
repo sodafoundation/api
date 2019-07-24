@@ -26,8 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opensds/opensds/contrib/backup/multicloud/utils/constants"
-
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials/keystonecredentials"
 	"github.com/opensds/opensds/contrib/backup/multicloud/signer"
 
@@ -38,6 +36,7 @@ import (
 	creds "github.com/gophercloud/gophercloud/openstack/identity/v3/credentials"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/opensds/opensds/contrib/backup/multicloud/credentials"
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 )
 
@@ -259,14 +258,13 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 		if err != nil {
 			return nil, nil, err
 		}
-		service := "s3"
-		region := "default_region"
+
 		requestDate := time.Now().UTC().Format("20060102")
 		requestDateTime := time.Now().UTC().Format("20060102T150405Z")
 		request.Header.Add(constants.SignDateHeader, requestDateTime)
-		credentialStr := AK + "/" + requestDate + "/" + region + "/" + service + "/" + "sign_request"
-		calculatedSignature, err := signer.Sign(request, "", service, region, requestDateTime, requestDate, credentialStr)
-		log.V(5).Infof("req.Request=%v,service=%v,region=%v,requestDateTime=%v,requestDate=%v,credentialStr=%v", request, service, region, requestDateTime, requestDate, credentialStr)
+		credentialStr := AK + "/" + requestDate + "/" + constants.Region + "/" + constants.Service + "/" + "sign_request"
+		calculatedSignature, err := signer.Sign(request, "", constants.Service, constants.Region, requestDateTime, requestDate, credentialStr)
+		log.V(5).Infof("req.Request=%v,service=%v,region=%v,requestDateTime=%v,requestDate=%v,credentialStr=%v", request, constants.Service, constants.Region, requestDateTime, requestDate, credentialStr)
 		log.V(5).Infof("calculatedSignature:%v", calculatedSignature)
 		Authorization := "OPENSDS-HMAC-SHA256 Credential=" + credentialStr + ",SignedHeaders=host;x-auth-date,Signature=" + calculatedSignature
 		req.Header(constants.AuthorizationHeader, Authorization)

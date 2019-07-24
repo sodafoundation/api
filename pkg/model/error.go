@@ -21,7 +21,11 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+
+	"github.com/emicklei/go-restful"
 )
 
 const (
@@ -103,4 +107,11 @@ func NewNotFoundError(msg string) error {
 
 func (e *NotFoundError) Error() string {
 	return e.S
+}
+
+func HttpError(res *restful.Response, code int, format string, a ...interface{}) error {
+	msg := fmt.Sprintf(format, a...)
+	res.WriteError(code, errors.New(msg))
+	errInfo := fmt.Sprintf("Code:%d, Reason:%s", code, msg)
+	return fmt.Errorf(errInfo)
 }

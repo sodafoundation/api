@@ -17,7 +17,6 @@ package context
 import (
 	"encoding/json"
 
-	"github.com/emicklei/go-restful"
 	"github.com/micro/go-log"
 )
 
@@ -53,26 +52,10 @@ func NewContext() *Context {
 	}
 }
 
-func NewContextFromJson(s string) *Context {
-	ctx := &Context{}
-	err := json.Unmarshal([]byte(s), ctx)
-	if err != nil {
-		log.Logf("Unmarshal json to context failed, reason: %v", err)
-	}
-	return ctx
-}
-
 func (ctx *Context) ToJson() string {
 	b, err := json.Marshal(ctx)
 	if err != nil {
 		log.Logf("Context convert to json failed, reason: %v", err)
 	}
 	return string(b)
-}
-
-func FilterFactory() restful.FilterFunction {
-	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		req.SetAttribute(KContext, NewContext())
-		chain.ProcessFilter(req, resp)
-	}
 }
