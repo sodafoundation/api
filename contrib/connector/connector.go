@@ -18,24 +18,24 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
+	. "github.com/opensds/opensds/contrib/drivers/utils/constants"
 )
 
 const (
-	FcDriver = config.FCProtocol
+	FcDriver = FCProtocol
 	PortName = "port_name"
 	NodeName = "node_name"
 	Wwpn     = "wwpn"
 	Wwnn     = "wwnn"
 
-	IscsiDriver = config.ISCSIProtocol
+	IscsiDriver = ISCSIProtocol
 	Iqn         = "iqn"
 
-	RbdDriver = config.RBDProtocol
+	RbdDriver = RBDProtocol
 
-	NvmeofDriver = config.NVMEOFProtocol
+	NvmeofDriver = NVMEOFProtocol
 	Nqn          = "nqn"
-	NFSDriver    = config.NFSProtocol
+	NFSDriver    = NFSProtocol
 )
 
 // Connector implementation

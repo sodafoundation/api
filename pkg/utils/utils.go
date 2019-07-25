@@ -232,7 +232,6 @@ func RandSeq(n int, chs []rune) string {
 
 func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) error {
 	endAt := time.Now().Add(timeout)
-	time.Sleep(time.Duration(interval))
 	for {
 		startTime := time.Now()
 		ok, err := f()

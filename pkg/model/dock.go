@@ -59,6 +59,9 @@ type DockSpec struct {
 	// Currently One of: "cinder", "ceph", "lvm", "default".
 	DriverName string `json:"driverName,omitempty"`
 
+	// BackendName represents one used backend
+	BackendName string `json:"backendName,omitempty"`
+
 	// Metadata should be kept until the scemantics between opensds volume
 	// attachment and backend attached storage resouce description are clear.
 	// +optional

@@ -20,14 +20,14 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
+	"github.com/opensds/opensds/contrib/drivers/utils/constants"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
 	. "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 type Controller interface {
@@ -279,13 +279,13 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	p.volumeController.SetDock(provisionerDock)
 	attachmentId := uuid.NewV4().String()
 	// Default protocol is iscsi
-	protocol := config.ISCSIProtocol
+	protocol := constants.ISCSIProtocol
 	if len(p.pool.Extras.IOConnectivity.AccessProtocol) != 0 {
 		protocol = p.pool.Extras.IOConnectivity.AccessProtocol
 	}
 
 	initiator := attacherDock.Metadata["Initiator"]
-	if protocol == config.FCProtocol {
+	if protocol == constants.FCProtocol {
 		initiator = attacherDock.Metadata["WWPNS"]
 	}
 

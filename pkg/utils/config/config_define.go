@@ -63,12 +63,13 @@ type OsdsLet struct {
 type OsdsDock struct {
 	ApiEndpoint                string        `conf:"api_endpoint,localhost:50050"`
 	DockType                   string        `conf:"dock_type,provisioner"`
-	EnabledBackends            []string      `conf:"enabled_backends,lvm"`
+	EnabledBackends            []string      `conf:"enabled_backends"`
 	Daemon                     bool          `conf:"daemon,false"`
 	BindIp                     string        `conf:"bind_ip"` // Just used for attacher dock
 	HostBasedReplicationDriver string        `conf:"host_based_replication_driver,drbd"`
 	LogFlushFrequency          time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
-	Backends
+	// structure tag '__backend_map' is only used backend map, don't use it in anywhere.
+	BackendMap map[string]BackendProperties `conf:"__backend_map__"`
 }
 
 type Database struct {
@@ -78,11 +79,13 @@ type Database struct {
 }
 
 type BackendProperties struct {
-	Name               string `conf:"name"`
-	Description        string `conf:"description"`
-	DriverName         string `conf:"driver_name"`
-	ConfigPath         string `conf:"config_path"`
-	SupportReplication bool   `conf:"support_replication,false"`
+	StorageType           string `conf:"storage_type"`
+	Name                  string `conf:"name"`
+	Description           string `conf:"description"`
+	DriverName            string `conf:"driver_name"`
+	ConfigPath            string `conf:"config_path"`
+	ReplicationDriverName string `conf:"replication_driver_name"`
+	MetricDriverName      string `conf:"metric_driver_name"`
 }
 
 type Backends struct {

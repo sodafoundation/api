@@ -23,9 +23,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/opensds/opensds/contrib/drivers/utils/constants"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/fileshare"
@@ -314,7 +314,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	var protocol = pol.Extras.IOConnectivity.AccessProtocol
 	if protocol == "" {
 		// Default protocol is iscsi
-		protocol = config.ISCSIProtocol
+		protocol = constants.ISCSIProtocol
 	}
 
 	opt.AccessProtocol = protocol

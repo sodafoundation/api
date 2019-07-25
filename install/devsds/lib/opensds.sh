@@ -39,8 +39,10 @@ api_endpoint = $HOST_IP:50049
 [osdsdock]
 api_endpoint = $HOST_IP:50050
 # Specify which backends should be enabled, sample,ceph,cinder,lvm,nfs and so on.
+# enabled_backends is duplicated, use enabled_block_backends and enabled_file_backends instead
 enabled_backends = $OPENSDS_BACKEND_LIST
-
+enabled_block_backends =
+enabled_file_backends =
 [database]
 endpoint = $HOST_IP:$ETCD_PORT,$HOST_IP:$ETCD_PEER_PORT
 driver = etcd

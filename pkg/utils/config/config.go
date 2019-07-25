@@ -35,6 +35,9 @@ const (
 )
 
 func setSlice(v reflect.Value, str string) error {
+	if len(str) == 0 {
+		return nil
+	}
 	sList := strings.Split(str, ",")
 	s := reflect.MakeSlice(v.Type(), 0, 5)
 	switch v.Type().Elem().Kind() {
@@ -232,7 +235,10 @@ func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) error {
 			if err := parseSections(cfg, field.Type(), field); err != nil {
 				return err
 			}
+		} else if "__backend_map__" == section {
+			continue // ignore it,when get tag __backend_map__
 		}
+
 		if err := parseItems(section, field, cfg); err != nil {
 			return err
 		}
@@ -240,7 +246,26 @@ func parseSections(cfg *ini.File, t reflect.Type, v reflect.Value) error {
 	return nil
 }
 
-func initConf(confFile string, conf interface{}) {
+func parseBackends(cfg *ini.File, nameList []string) map[string]BackendProperties {
+	log.Printf("start parserBackends ...")
+	backendMap := make(map[string]BackendProperties, len(nameList))
+	for _, name := range nameList {
+		bp := BackendProperties{}
+		v := reflect.ValueOf(&bp)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if err := parseItems(name, v, cfg); err != nil {
+			log.Printf("[ERROR] parsebackend error %v", err)
+			continue
+		}
+		backendMap[name] = bp
+	}
+	log.Println(">>>>>", nameList, ">>>", backendMap)
+	return backendMap
+}
+
+func initConf(confFile string, conf *Config) {
 	cfg, err := ini.Load(confFile)
 	if err != nil && confFile != "" {
 		log.Printf("[ERROR] Read configuration failed, use default value")
@@ -249,6 +274,11 @@ func initConf(confFile string, conf interface{}) {
 	v := reflect.ValueOf(conf)
 	if err := parseSections(cfg, t, v); err != nil {
 		log.Fatalf("[ERROR] parse configure file failed: %v", err)
+	}
+
+	if len(conf.OsdsDock.EnabledBackends) != 0 {
+		log.Printf("len, %v", len(conf.OsdsDock.EnabledBackends))
+		conf.OsdsDock.BackendMap = parseBackends(cfg, conf.OsdsDock.EnabledBackends)
 	}
 }
 
@@ -281,15 +311,6 @@ func (c *Config) Load() {
 	initConf(GetConfigPath(), CONF)
 }
 
-func GetBackendsMap() map[string]BackendProperties {
-	backendsMap := map[string]BackendProperties{}
-	v := reflect.ValueOf(CONF.Backends)
-	t := reflect.TypeOf(CONF.Backends)
-
-	for i := 0; i < t.NumField(); i++ {
-		feild := v.Field(i)
-		name := t.Field(i).Tag.Get("conf")
-		backendsMap[name] = feild.Interface().(BackendProperties)
-	}
-	return backendsMap
+func GetBackendMap() map[string]BackendProperties {
+	return CONF.OsdsDock.BackendMap
 }

@@ -21,6 +21,7 @@ package discovery
 
 import (
 	"fmt"
+	consts "github.com/opensds/opensds/contrib/drivers/utils/constants"
 	"os"
 	"runtime"
 	"strings"
@@ -29,14 +30,11 @@ import (
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
-	fd "github.com/opensds/opensds/contrib/drivers/filesharedrivers"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
 	. "github.com/opensds/opensds/pkg/utils/config"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 type Context struct {
@@ -73,11 +71,12 @@ type DockDiscoverer interface {
 }
 
 // NewDockDiscoverer method creates a new DockDiscoverer.
-func NewDockDiscoverer(dockType string) DockDiscoverer {
+func NewDockDiscoverer(dockType string, driverMgr *drivers.DriverManager) DockDiscoverer {
 	switch dockType {
 	case model.DockTypeProvioner:
 		return &provisionDockDiscoverer{
 			DockRegister: NewDockRegister(),
+			driverMgr:    driverMgr,
 		}
 	case model.DockTypeAttacher:
 		return &attachDockDiscoverer{
@@ -91,94 +90,99 @@ func NewDockDiscoverer(dockType string) DockDiscoverer {
 // dock service discovery.
 type provisionDockDiscoverer struct {
 	*DockRegister
-
-	dcks []*model.DockSpec
-	pols []*model.StoragePoolSpec
+	driverMgr *drivers.DriverManager
+	dcks      []*model.DockSpec
+	pols      []*model.StoragePoolSpec
 }
 
 func (pdd *provisionDockDiscoverer) Init() error {
 	// Load resource from specified file
-	bm := GetBackendsMap()
-	host, err := os.Hostname()
+	hostName, err := os.Hostname()
 	if err != nil {
 		log.Error("When get os hostname:", err)
 		return err
 	}
 
-	for _, v := range CONF.EnabledBackends {
-		b := bm[v]
-		if b.Name == "" {
+	for _, name := range CONF.EnabledBackends {
+		bp := CONF.OsdsDock.BackendMap[name]
+		if len(bp.DriverName) == 0 || len(bp.Name) == 0 {
+			log.Errorf("invalid backend (%s) properties, ignore it", name)
+			continue
+		}
+		if bp.StorageType != string(consts.StorageTypeBlock) && bp.StorageType != (consts.StorageTypeFile) {
+			log.Errorf("backend (%s) properties: storage_type must be %v or %v ,ignore it",
+				name, consts.StorageTypeBlock, consts.StorageTypeFile)
 			continue
 		}
 
-		dck := &model.DockSpec{
+		baseName := strings.Join([]string{hostName, bp.DriverName, bp.StorageType}, ":")
+		dock := &model.DockSpec{
 			BaseModel: &model.BaseModel{
-				Id: uuid.NewV5(uuid.NamespaceOID, host+":"+b.DriverName).String(),
+				Id: uuid.NewV5(uuid.NamespaceOID, baseName).String(),
 			},
-			Name:        b.Name,
-			Description: b.Description,
-			DriverName:  b.DriverName,
+			Name:        bp.Name,
+			Description: bp.Description,
+			// DriverName:  bp.DriverName, use driver name temporarily
+			DriverName:  name,
+			BackendName: name,
 			Endpoint:    CONF.OsdsDock.ApiEndpoint,
-			NodeId:      host,
+			NodeId:      hostName,
 			Type:        model.DockTypeProvioner,
-			Metadata:    map[string]string{"HostReplicationDriver": CONF.OsdsDock.HostBasedReplicationDriver},
+			StorageType: bp.StorageType,
+			Metadata:    map[string]string{},
 		}
-		pdd.dcks = append(pdd.dcks, dck)
+		pdd.dcks = append(pdd.dcks, dock)
 	}
-
 	return nil
 }
 
-var filesharedrivers = []string{config.NFSDriverType, config.HuaweiOceanFileDriverType, config.ManilaDriverType}
+type PoolDriver interface {
+	ListPools() ([]*model.StoragePoolSpec, error)
+}
+
+func (pdd *provisionDockDiscoverer) discoverPool(backendName, dockId string) ([]*model.StoragePoolSpec, error) {
+	d, err := pdd.driverMgr.GetDriverWrapper(consts.DriverTypeProvision, backendName)
+	if err != nil {
+		log.Error("Get driver failed:", err)
+		return nil, err
+	}
+
+	pols, err := d.Driver.(PoolDriver).ListPools()
+	if err != nil {
+		log.Error("Call driver %s to list pools failed:", backendName, err)
+		return nil, err
+	}
+
+	for _, pol := range pols {
+		log.Infof("Backend %s discovered pool %s", backendName, pol.Name)
+		pol.DockId = dockId
+		if rdn, err := pdd.driverMgr.GetDriverWrapper(consts.DriverTypeReplication, backendName); err == nil {
+			pol.ReplicationType = model.ReplicationTypeHost
+			if rdn.Name == d.Name {
+				pol.ReplicationType = model.ReplicationTypeArray
+			}
+			pol.ReplicationDriverName = rdn.Name
+		}
+	}
+	return pols, nil
+}
 
 func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info
 	pdd.pols = pdd.pols[:0]
-	var pols []*model.StoragePoolSpec
-	var err error
 	for _, dck := range pdd.dcks {
-		// Call function of StorageDrivers configured by storage drivers.
-		if utils.Contains(filesharedrivers, dck.DriverName) {
-			d := fd.Init(dck.DriverName)
-			defer fd.Clean(d)
-			pols, err = d.ListPools()
-			for _, pol := range pols {
-				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
-				pol.DockId = dck.Id
-			}
-		} else {
-			d := drivers.Init(dck.DriverName)
-			defer drivers.Clean(d)
-			pols, err = d.ListPools()
-
-			replicationDriverName := dck.Metadata["HostReplicationDriver"]
-			replicationType := model.ReplicationTypeHost
-			if drivers.IsSupportArrayBasedReplication(dck.DriverName) {
-				replicationType = model.ReplicationTypeArray
-				replicationDriverName = dck.DriverName
-			}
-			for _, pol := range pols {
-				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
-				pol.DockId = dck.Id
-				pol.ReplicationType = replicationType
-				pol.ReplicationDriverName = replicationDriverName
-			}
-		}
+		pols, err := pdd.discoverPool(dck.BackendName, dck.Id)
 		if err != nil {
-			log.Error("Call driver to list pools failed:", err)
 			continue
 		}
-
 		if len(pols) == 0 {
 			log.Warningf("The pool of dock %s is empty!\n", dck.Id)
 		}
-
 		pdd.pols = append(pdd.pols, pols...)
 	}
 	if len(pdd.pols) == 0 {
 		return fmt.Errorf("There is no pool can be found.")
 	}
-
 	return nil
 }
 

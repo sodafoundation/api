@@ -353,7 +353,7 @@ func TestOpensdsConfig(t *testing.T) {
 	if CONF.LVM.ConfigPath != "/etc/opensds/driver/lvm.yaml" {
 		t.Error("Test LVM.ConfigPath error")
 	}
-	bm := GetBackendsMap()
+	bm := GetBackendMap()
 	if bm["ceph"].Name != "ceph" {
 		t.Error("Test bm[\"ceph\"].Name error")
 	}

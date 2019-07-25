@@ -24,6 +24,8 @@ DOCKER_TAG ?= latest
 
 PROTOC_VERSION ?= 3.8.0
 
+OSDS_DOCK_TAGS ?= driver_plugin
+
 all: build
 
 ubuntu-dev-setup:
@@ -38,7 +40,11 @@ prebuild:
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
 
 osdsdock:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+	go build -tags $(OSDS_DOCK_TAGS) -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+ifeq ($(strip $(OSDS_DOCK_TAGS)), driver_plugin)
+	make -f block_pulgin.mk
+	make -f file_pulgin.mk
+endif
 
 osdslet:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet

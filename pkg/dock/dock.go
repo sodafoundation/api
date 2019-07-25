@@ -23,18 +23,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
-
 	log "github.com/golang/glog"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
-	"github.com/opensds/opensds/contrib/drivers/filesharedrivers"
+	"github.com/opensds/opensds/contrib/drivers/fileshare"
+	"github.com/opensds/opensds/contrib/drivers/utils/constants"
+	"github.com/opensds/opensds/contrib/drivers/volume"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/dock/discovery"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"google.golang.org/grpc"
+	"net"
+	"time"
 
 	_ "github.com/opensds/opensds/contrib/connector/fc"
 	_ "github.com/opensds/opensds/contrib/connector/iscsi"
@@ -49,22 +51,18 @@ type dockServer struct {
 	// Discoverer represents the mechanism of DockHub discovering the storage
 	// capabilities from different backends.
 	Discoverer discovery.DockDiscoverer
-	// Driver represents the specified backend resource. This field is used
-	// for initializing the specified volume driver.
-	Driver drivers.VolumeDriver
-	// Metrics driver to collect metrics
-	MetricDriver drivers.MetricDriver
 
-	// FileShareDriver represents the specified backend resource. This field is used
-	// for initializing the specified file share driver.
-	FileShareDriver filesharedrivers.FileShareDriver
+	// DriverManager used to manage the drivers lifecycle
+	DriverMgr *drivers.DriverManager
 }
 
 // NewDockServer returns a dockServer instance.
 func NewDockServer(dockType, port string) *dockServer {
+	driverMgr := drivers.NewDriverManager()
 	return &dockServer{
 		Port:       port,
-		Discoverer: discovery.NewDockDiscoverer(dockType),
+		Discoverer: discovery.NewDockDiscoverer(dockType, driverMgr),
+		DriverMgr:  driverMgr,
 	}
 }
 
@@ -77,9 +75,12 @@ func (ds *dockServer) Run() error {
 	pb.RegisterProvisionDockServer(s, ds)
 	pb.RegisterAttachDockServer(s, ds)
 	pb.RegisterFileShareDockServer(s, ds)
-
 	// Trigger the discovery and report loop so that the dock service would
 	// update the capabilities from backends automatically.
+	if err := ds.DriverMgr.LoadDriver(); err != nil {
+		return err
+	}
+	time.Sleep(time.Second)
 	if err := func() error {
 		var err error
 		if err = ds.Discoverer.Init(); err != nil {
@@ -119,12 +120,14 @@ func (ds *dockServer) Run() error {
 // CreateVolume implements pb.DockServer.CreateVolume
 func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create volume request, vr =", opt)
 
-	vol, err := ds.Driver.CreateVolume(opt)
+	vol, err := d.(volume.VolumeDriver).CreateVolume(opt)
 	if err != nil {
 		log.Error("when create volume in dock module:", err)
 		return pb.GenericResponseError(err), err
@@ -136,12 +139,13 @@ func (ds *dockServer) CreateVolume(ctx context.Context, opt *pb.CreateVolumeOpts
 // DeleteVolume implements pb.DockServer.DeleteVolume
 func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
-
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 	log.Info("Dock server receive delete volume request, vr =", opt)
 
-	if err := ds.Driver.DeleteVolume(opt); err != nil {
+	if err := d.(volume.VolumeDriver).DeleteVolume(opt); err != nil {
 		log.Error("error occurred in dock module when delete volume:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -152,12 +156,14 @@ func (ds *dockServer) DeleteVolume(ctx context.Context, opt *pb.DeleteVolumeOpts
 // ExtendVolume implements pb.DockServer.ExtendVolume
 func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive extend volume request, vr =", opt)
 
-	vol, err := ds.Driver.ExtendVolume(opt)
+	vol, err := d.(volume.VolumeDriver).ExtendVolume(opt)
 	if err != nil {
 		log.Error("when extend volume in dock module:", err)
 		return pb.GenericResponseError(err), err
@@ -169,12 +175,14 @@ func (ds *dockServer) ExtendVolume(ctx context.Context, opt *pb.ExtendVolumeOpts
 // CreateVolumeAttachment implements pb.DockServer.CreateVolumeAttachment
 func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.CreateVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create volume attachment request, vr =", opt)
 
-	connInfo, err := ds.Driver.InitializeConnection(opt)
+	connInfo, err := d.(volume.VolumeDriver).InitializeConnection(opt)
 	if err != nil {
 		log.Error("error occurred in dock module when initialize volume connection:", err)
 		return pb.GenericResponseError(err), err
@@ -202,12 +210,14 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 // DeleteVolumeAttachment implements pb.DockServer.DeleteVolumeAttachment
 func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.DeleteVolumeAttachmentOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete volume attachment request, vr =", opt)
 
-	if err := ds.Driver.TerminateConnection(opt); err != nil {
+	if err := d.(volume.VolumeDriver).TerminateConnection(opt); err != nil {
 		log.Error("error occurred in dock module when terminate volume connection:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -218,12 +228,14 @@ func (ds *dockServer) DeleteVolumeAttachment(ctx context.Context, opt *pb.Delete
 // CreateVolumeSnapshot implements pb.DockServer.CreateVolumeSnapshot
 func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVolumeSnapshotOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create volume snapshot request, vr =", opt)
 
-	snp, err := ds.Driver.CreateSnapshot(opt)
+	snp, err := d.(volume.VolumeDriver).CreateSnapshot(opt)
 	if err != nil {
 		log.Error("error occurred in dock module when create snapshot:", err)
 		return pb.GenericResponseError(err), err
@@ -235,12 +247,14 @@ func (ds *dockServer) CreateVolumeSnapshot(ctx context.Context, opt *pb.CreateVo
 // DeleteVolumeSnapshot implements pb.DockServer.DeleteVolumeSnapshot
 func (ds *dockServer) DeleteVolumeSnapshot(ctx context.Context, opt *pb.DeleteVolumeSnapshotOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete volume snapshot request, vr =", opt)
 
-	if err := ds.Driver.DeleteSnapshot(opt); err != nil {
+	if err := d.(volume.VolumeDriver).DeleteSnapshot(opt); err != nil {
 		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -298,11 +312,13 @@ func (ds *dockServer) DetachVolume(ctx context.Context, opt *pb.DetachVolumeOpts
 // CreateReplication implements opensds.DockServer
 func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateReplicationOpts) (*pb.GenericResponse, error) {
 	//Get the storage replication drivers and do some initializations.
-	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeReplication, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create replication request, vr =", opt)
-	replica, err := driver.CreateReplication(opt)
+	replica, err := d.(volume.VolumeReplicationDriver).CreateReplication(opt)
 	if err != nil {
 		log.Error("error occurred in dock module when create replication:", err)
 		return pb.GenericResponseError(err), err
@@ -317,12 +333,14 @@ func (ds *dockServer) CreateReplication(ctx context.Context, opt *pb.CreateRepli
 
 func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteReplicationOpts) (*pb.GenericResponse, error) {
 	// Get the storage replication drivers and do some initializations.
-	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeReplication, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete replication request, vr =", opt)
 
-	if err := driver.DeleteReplication(opt); err != nil {
+	if err := d.(volume.VolumeReplicationDriver).DeleteReplication(opt); err != nil {
 		log.Error("error occurred in dock module when delete replication:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -332,12 +350,14 @@ func (ds *dockServer) DeleteReplication(ctx context.Context, opt *pb.DeleteRepli
 
 func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableReplicationOpts) (*pb.GenericResponse, error) {
 	// Get the storage replication drivers and do some initializations.
-	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeReplication, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive enable replication request, vr =", opt)
 
-	if err := driver.EnableReplication(opt); err != nil {
+	if err := d.(volume.VolumeReplicationDriver).EnableReplication(opt); err != nil {
 		log.Error("error occurred in dock module when enable replication:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -347,12 +367,14 @@ func (ds *dockServer) EnableReplication(ctx context.Context, opt *pb.EnableRepli
 
 func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableReplicationOpts) (*pb.GenericResponse, error) {
 	// Get the storage replication drivers and do some initializations.
-	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeReplication, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive disable replication request, vr =", opt)
 
-	if err := driver.DisableReplication(opt); err != nil {
+	if err := d.(volume.VolumeReplicationDriver).DisableReplication(opt); err != nil {
 		log.Error("error occurred in dock module when disable replication:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -362,12 +384,14 @@ func (ds *dockServer) DisableReplication(ctx context.Context, opt *pb.DisableRep
 
 func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverReplicationOpts) (*pb.GenericResponse, error) {
 	// Get the storage replication drivers and do some initializations.
-	driver, _ := drivers.InitReplicationDriver(opt.GetDriverName())
-	defer drivers.CleanReplicationDriver(driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeReplication, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive failover replication request, vr =", opt)
 
-	if err := driver.FailoverReplication(opt); err != nil {
+	if err := d.(volume.VolumeReplicationDriver).FailoverReplication(opt); err != nil {
 		log.Error("error occurred in dock module when failover replication:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -378,12 +402,14 @@ func (ds *dockServer) FailoverReplication(ctx context.Context, opt *pb.FailoverR
 // CreateVolumeGroup implements pb.DockServer.CreateVolumeGroup
 func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolumeGroupOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create volume group request, vr =", opt)
 
-	vg, err := ds.Driver.CreateVolumeGroup(opt)
+	vg, err := d.(volume.VolumeDriver).CreateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			log.Error("when calling volume driver to create volume group:", err)
@@ -403,12 +429,14 @@ func (ds *dockServer) CreateVolumeGroup(ctx context.Context, opt *pb.CreateVolum
 
 func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolumeGroupOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive update volume group request, vr =", opt)
 
-	vg, err := ds.Driver.UpdateVolumeGroup(opt)
+	vg, err := d.(volume.VolumeDriver).UpdateVolumeGroup(opt)
 	if err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			err = errors.New("error occurred when updating group" + opt.GetId() + "," + err.Error())
@@ -428,16 +456,18 @@ func (ds *dockServer) UpdateVolumeGroup(ctx context.Context, opt *pb.UpdateVolum
 
 func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolumeGroupOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.Driver = drivers.Init(opt.GetDriverName())
-	defer drivers.Clean(ds.Driver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete volume group request, vr =", opt)
 
-	if err := ds.Driver.DeleteVolumeGroup(opt); err != nil {
+	if err := d.(volume.VolumeDriver).DeleteVolumeGroup(opt); err != nil {
 		if _, ok := err.(*model.NotImplementError); !ok {
 			return pb.GenericResponseError(err), err
 		}
-		if err = ds.deleteGroupGeneric(opt); err != nil {
+		if err = ds.deleteGroupGeneric(d.(volume.VolumeDriver), opt); err != nil {
 			return pb.GenericResponseError(err), err
 		}
 	}
@@ -446,7 +476,7 @@ func (ds *dockServer) DeleteVolumeGroup(ctx context.Context, opt *pb.DeleteVolum
 	return pb.GenericResponseResult(nil), nil
 }
 
-func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
+func (ds *dockServer) deleteGroupGeneric(driver volume.VolumeDriver, opt *pb.DeleteVolumeGroupOpts) error {
 	ctx := c.NewContextFromJson(opt.GetContext())
 
 	volumes, err := db.C.ListVolumesByGroupId(ctx, opt.GetId())
@@ -454,7 +484,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 		return err
 	}
 	for _, volRef := range volumes {
-		if err = ds.Driver.DeleteVolume(&pb.DeleteVolumeOpts{
+		if err = driver.DeleteVolume(&pb.DeleteVolumeOpts{
 			Id:       volRef.Id,
 			Metadata: volRef.Metadata,
 		}); err != nil {
@@ -474,13 +504,14 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 // Collect the specified metrics from the metric driver
 func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
 	log.V(5).Info("in dock CollectMetrics methods")
-	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
-
-	defer drivers.CleanMetricDriver(ds.MetricDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeMetric, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Infof("dock server receive CollectMetrics request, vr =%s", opt)
 
-	result, err := ds.MetricDriver.CollectMetrics()
+	result, err := d.(volume.MetricDriver).CollectMetrics()
 	if err != nil {
 		log.Errorf("error occurred in dock module for collect metrics: %s", err.Error())
 		return pb.GenericResponseError(err), err
@@ -492,29 +523,33 @@ func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetrics
 // CreateFileShareAcl implements pb.DockServer.CreateFileShare
 func (ds *dockServer) CreateFileShareAcl(ctx context.Context, opt *pb.CreateFileShareAclOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("dock server receive create file share acl request, vr =", opt)
 
-	fileshare, err := ds.FileShareDriver.CreateFileShareAcl(opt)
+	fs, err := d.(fileshare.FileShareDriver).CreateFileShareAcl(opt)
 	if err != nil {
 		log.Error("when create file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 
-	return pb.GenericResponseResult(fileshare), nil
+	return pb.GenericResponseResult(fs), nil
 }
 
 // DeleteFileShareAcl implements pb.DockServer.DeleteFileShare
 func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFileShareAclOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("dock server receive delete file share acl request, vr =", opt)
 
-	if err := ds.FileShareDriver.DeleteFileShareAcl(opt); err != nil {
+	if err := d.(fileshare.FileShareDriver).DeleteFileShareAcl(opt); err != nil {
 		log.Error("when delete file share acl in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -525,32 +560,36 @@ func (ds *dockServer) DeleteFileShareAcl(ctx context.Context, opt *pb.DeleteFile
 // CreateFileShare implements pb.DockServer.CreateFileShare
 func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileShareOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create file share request, vr =", opt)
 
 	log.V(5).Infof("Dock server create fleshare: sent to Driver %+v", opt.GetDriverName())
 
-	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
+	fs, err := d.(fileshare.FileShareDriver).CreateFileShare(opt)
 	if err != nil {
 		log.Error("when create file share in dock module:", err)
 		return pb.GenericResponseError(err), err
 	}
 
-	return pb.GenericResponseResult(fileshare), nil
+	return pb.GenericResponseResult(fs), nil
 }
 
 // DeleteFileShare implements pb.DockServer.DeleteFileShare
 func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileShareOpts) (*pb.GenericResponse, error) {
 
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete file share request, vr =", opt)
 
-	if err := ds.FileShareDriver.DeleteFileShare(opt); err != nil {
+	if err := d.(fileshare.FileShareDriver).DeleteFileShare(opt); err != nil {
 		log.Error("error occurred in dock module when delete file share:", err)
 		return pb.GenericResponseError(err), err
 	}
@@ -561,12 +600,14 @@ func (ds *dockServer) DeleteFileShare(ctx context.Context, opt *pb.DeleteFileSha
 // CreateFileShareSnapshot implements pb.DockServer.CreateFileShareSnapshot
 func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.CreateFileShareSnapshotOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive create file share snapshot request, vr =", opt)
 
-	snp, err := ds.FileShareDriver.CreateFileShareSnapshot(opt)
+	snp, err := d.(fileshare.FileShareDriver).CreateFileShareSnapshot(opt)
 	if err != nil {
 		log.Error("error occurred in dock module when create snapshot:", err)
 		return pb.GenericResponseError(err), err
@@ -577,12 +618,14 @@ func (ds *dockServer) CreateFileShareSnapshot(ctx context.Context, opt *pb.Creat
 
 func (ds *dockServer) DeleteFileShareSnapshot(ctx context.Context, opt *pb.DeleteFileShareSnapshotOpts) (*pb.GenericResponse, error) {
 	// Get the storage drivers and do some initializations.
-	ds.FileShareDriver = filesharedrivers.Init(opt.GetDriverName())
-	defer filesharedrivers.Clean(ds.FileShareDriver)
+	d, err := ds.DriverMgr.GetDriver(constants.DriverTypeProvision, opt.GetDriverName())
+	if err != nil {
+		return pb.GenericResponseError(err), err
+	}
 
 	log.Info("Dock server receive delete file share snapshot request, vr =", opt)
 
-	if err := ds.FileShareDriver.DeleteFileShareSnapshot(opt); err != nil {
+	if err := d.(fileshare.FileShareDriver).DeleteFileShareSnapshot(opt); err != nil {
 		log.Error("error occurred in dock module when delete snapshot:", err)
 		return pb.GenericResponseError(err), err
 	}
