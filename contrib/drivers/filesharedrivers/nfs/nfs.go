@@ -181,7 +181,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		var olddirName = path.Join(MountPath, existingFsName)
 		// umount the volume to directory
 		if err := d.cli.UnMount(olddirName); err != nil {
-			log.Error("failed to mount a directory:", err)
+			log.Error("failed to unmount a directory:", err)
 			return nil, err
 		}
 
