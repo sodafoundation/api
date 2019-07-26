@@ -120,7 +120,7 @@ func TestCreateFileShare(t *testing.T) {
 		PoolName:    "vg001",
 	}
 	var expected = &model.FileShareSpec{
-		BaseModel:       &model.BaseModel{},
+		BaseModel:       &model.BaseModel{Id: "e1bb066c-5ce7-46eb-9336-25508cee9f71"},
 		Name:            "test001",
 		Description:     "fileshare for testing",
 		Size:            int64(1),
@@ -137,7 +137,6 @@ func TestCreateFileShare(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to create fileshare:", err)
 	}
-	fileshare.Id = ""
 	if !reflect.DeepEqual(fileshare, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, fileshare)
 	}
