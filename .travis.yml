@@ -56,7 +56,7 @@ jobs:
       name: "unit test opensds"     # names the third Tests stage job
     - script: make osds_integration_test
       name: "integration test opensds"     # names the fourth Tests stage job
-    - script: make e2e_test_build
+    - script: make osds_e2etest_build
       name: "e2e_test"     # names the seventh Tests stage job
     - script: make osds_e2eflowtest_build
       name: "e2e_flow_test"     # names the fifth Tests stage job

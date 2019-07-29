@@ -30,8 +30,9 @@ split_line(){
 
 # Start the openapi-spec validation.
 split_line "Start openapi-spec validation"
+
 wget https://github.com/go-swagger/go-swagger/releases/download/v0.19.0/swagger_linux_amd64
-chmod +x ./swagger_linux_amd64 && ./swagger_linux_amd64 validate --stop-on-error openapi-spec/swagger.yaml
+chmod +x ./swagger_linux_amd64 && ./swagger_linux_amd64 validate --stop-on-error $OPENSDS_DIR/openapi-spec/swagger.yaml
 rm ./swagger_linux_amd64
 
 # Start unit test.
