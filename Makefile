@@ -70,7 +70,7 @@ osds_core:
 # unit tests
 .PHONY: osds_unit_test
 osds_unit_test:
-	cd osds && $(MAKE) test
+	cd osds && $(MAKE) unit_test
 
 # verify
 .PHONY: osds_verify

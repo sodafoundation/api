@@ -25,6 +25,9 @@ split_line(){
     echo $*
     echo "================================================================================================"
 }
+
+
+
 # Start the openapi-spec validation.
 split_line "Start openapi-spec validation"
 wget https://github.com/go-swagger/go-swagger/releases/download/v0.19.0/swagger_linux_amd64

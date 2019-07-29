@@ -44,10 +44,22 @@ install:
   # Build OpenSDS Controller source code
   - make all
 
-script:
-  - ./install/CI/coverage
-  - ./install/CI/test
 
+jobs:
+  include:
+    - stage: "Test Jobs"                # naming the Tests stage
+      script: make 
+      name: "builds osds core components"            # names the first Tests stage job
+    - script: make osds_verify
+      name: "verify osds"     # names the second Tests stage job
+    - script: make osds_unit_test
+      name: "unit test opensds"     # names the third Tests stage job
+    - script: make osds_integration_test
+      name: "integration test opensds"     # names the fourth Tests stage job
+    - script: make e2e_test_build
+      name: "e2e_test"     # names the seventh Tests stage job
+    - script: make osds_e2eflowtest_build
+      name: "e2e_flow_test"     # names the fifth Tests stage job
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   # Clean OpenSDS Controller built data

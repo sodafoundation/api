@@ -31,5 +31,5 @@ split_line(){
 split_line "Start e2e flow test"
 go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/ 
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
-sudo $OPENSDS_DIR/script/devsds/uninstall.sh
+sudo $OPENSDS_DIR/install/devsds/uninstall.sh
 

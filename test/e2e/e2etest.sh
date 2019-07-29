@@ -28,7 +28,7 @@ split_line(){
 
 # Start e2e test
 split_line "Start e2e test"
-sudo $OPENSDS_DIR/script/devsds/install.sh
+sudo $OPENSDS_DIR/install/devsds/install.sh
 ps -ef|grep osds
 go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
 
