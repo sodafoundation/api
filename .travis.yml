@@ -57,9 +57,8 @@ jobs:
     - script: make osds_integration_test
       name: "integration test opensds"     # names the fourth Tests stage job
     - script: make osds_e2etest_build
-      name: "e2e_test"     # names the seventh Tests stage job
-    - script: make osds_e2eflowtest_build
-      name: "e2e_flow_test"     # names the fifth Tests stage job
+      name: "e2e_test"     # names the fifth Tests stage job
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   # Clean OpenSDS Controller built data

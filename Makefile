@@ -60,8 +60,8 @@ docker: build
 	docker build cmd/osdslet -t opensdsio/opensds-controller:$(DOCKER_TAG)
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:$(DOCKER_TAG)
 
-test: build osds_verify osds_unit_test osds_integration_test osds_e2eflowtest_build osds_e2etest_build
-
+test: build #osds_verify osds_unit_test osds_integration_test osds_e2eflowtest_build osds_e2etest_build
+	install/CI/test
 # make osds_core
 .PHONY: osds_core
 osds_core:
@@ -84,11 +84,6 @@ osds_integration_test:
 .PHONY: osds_e2etest_build
 osds_e2etest_build:
 	cd osds && $(MAKE) e2etest_build
-
-.PHONY: osds_e2eflowtest_build
-osds_e2eflowtest_build:
-	cd osds && $(MAKE) e2eflowtest_build
-
 
 protoc_precheck:
 	@if ! which protoc >/dev/null; then\

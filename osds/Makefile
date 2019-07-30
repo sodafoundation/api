@@ -39,10 +39,7 @@ integration_test:
 .PHONY: e2etest_build
 e2etest_build:
 	bash -x ./../test/e2e/e2etest.sh
-.PHONY: e2eflowtest_build
-e2eflowtest_build:
-	bash -x ./../test//e2e/e2eflowtest.sh
-	
+
 .PHONY: clean
 clean:
 	bash -x hack/clean.sh
