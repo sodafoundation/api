@@ -30,6 +30,7 @@ matrix:
   fast_finish: true
   allow_failures:
   - go: tip
+  - script: osds_verify
   exclude:
   # - go: tip
   #   env: TARGET=arm
