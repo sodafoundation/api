@@ -31,6 +31,7 @@ matrix:
   allow_failures:
   - go: tip
   - script: osds_verify
+  - script: osds_e2etest_build
   exclude:
   # - go: tip
   #   env: TARGET=arm
