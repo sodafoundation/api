@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -79,4 +80,25 @@ func InitLogs(LogFlushFrequency time.Duration) {
 
 func FlushLogs() {
 	glog.Flush()
+}
+
+//timeNow: Current system time, accurate to microseconds, for example:
+//timeNow := time.Now().UTC().Format("2006-01-02 15:04:05.000000")
+//LogPrefix: multi-cloud、hotpot、nbp
+//os.Getpid: current process id
+//logLevel: Log level,such as INFO、WARNING、ERROR、FATAL.
+//filename: go file name.
+//line: Line Number.
+//funcname: function name
+//logMsg: log detail Messages
+//errorCode: if logLevel is ERROR ,else errorCode=""
+func GetLogContent(logPrefix string, pid string, logLevel string, fileName string, line string, funcName string, logMsg string, errorCode string) string {
+	timeNow := time.Now().UTC().Format("2006-01-02 15:04:05.000000")
+	var logContent string
+	if logLevel != "ERROR" {
+		logContent = strings.Join([]string{"[", logLevel, "]", timeNow, logPrefix, "[ pid:", pid, "]", "[", fileName, ":", line, funcName, "]", logMsg}, " ")
+	} else {
+		logContent = strings.Join([]string{"[", logLevel, "]", "[ ErrorCode:", errorCode, "]", timeNow, logPrefix, "[ pid:", pid, "]", "[", fileName, ":", line, funcName, "]", logMsg}, " ")
+	}
+	return logContent
 }
