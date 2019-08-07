@@ -14,7 +14,6 @@
 
 /*
 This module implements the common data structure.
-
 */
 package model
 
@@ -94,6 +93,9 @@ type FileShareSpec struct {
 
 	// The uuid of the snapshot which the fileshare is created
 	SnapshotId string `json:"snapshotId,omitempty"`
+
+	// The name of the snapshot which the fileshare is created
+	SnapshotName string `json:"snapshotName,omitempty"`
 
 	// ExportLocations of the fileshare.
 	ExportLocations []string `json:"exportLocations,omitempty"`
