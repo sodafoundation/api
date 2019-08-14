@@ -812,6 +812,10 @@ message CreateFileShareOpts {
     string profile = 11;
     // The ExportLocations
     repeated string exportLocations = 12;
+    // The snapshots
+    string snapshotId = 13;
+    // The snapshots
+    string snapshotName = 14;
 }
 
 // DeleteFileShareOpts is a structure which indicates all required properties
@@ -833,6 +837,8 @@ message DeleteFileShareOpts {
     string name = 7;
     // The name of pool
     string poolname = 8;
+    // The ExportLocations
+    repeated string exportLocations = 9;
 }
 
 // CreateFileShareSnapshotOpts is a structure which indicates all required
