@@ -243,31 +243,29 @@ var (
 			},
 			Description: "This is a sample Acl for testing",
 		},
-	}
-	SampleSharesAcl = []model.FileShareAclSpec{
 		{
 			BaseModel: &model.BaseModel{
-				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+				Id: "6ad25d59-a160-45b2-8920-211be282e2df",
 			},
-			Status: "available",
-			FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
-			Type: "ip",
-			AccessTo: "10.21.23.10",
-			AccessCapability:[]string{"Read", "Write"},
+			Description:      "This is a sample Acl for testing",
+			Type:             "ip",
+			AccessCapability: []string{"Read", "Write"},
+			AccessTo:         "10.32.109.15",
+			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
 		},
 		{
 			BaseModel: &model.BaseModel{
-				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
+				Id: "ad25d59-a160-45b2-8920-211be282e2dfh",
 			},
-			Status: "available",
-			FileShareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			ProfileId: "3769855c-a102-11e7-b772-17b880d2f537",
+			Description: "This is a sample Acl for testing",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
 			Type: "ip",
-			AccessTo: "101.21.23.10",
-			AccessCapability:[]string{"Read"},
+			AccessCapability: []string{"Read", "Write"},
+			AccessTo: "10.32.109.151",
+			FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
 		},
 	}
+
 	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{
 		{
 			BaseModel: &model.BaseModel{
