@@ -33,6 +33,7 @@ const (
 	ScutechCMSDriverType           = "scutech_cms"
 	ManilaDriverType               = "manila"
 	FujitsuEternusDriverType       = "fujitsu_eternus"
+	ChubaofsDriverType             = "chubaofs"
 )
 
 const (

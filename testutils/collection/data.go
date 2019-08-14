@@ -243,6 +243,27 @@ var (
 			},
 			Description: "This is a sample Acl for testing",
 		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "6ad25d59-a160-45b2-8920-211be282e2df",
+			},
+			Description:      "This is a sample Acl for testing",
+			Type:             "ip",
+			AccessCapability: []string{"Read", "Write"},
+			AccessTo:         "10.32.109.15",
+			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "ad25d59-a160-45b2-8920-211be282e2dfh",
+			},
+			Description: "This is a sample Acl for testing",
+			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Type: "ip",
+			AccessCapability: []string{"Read", "Write"},
+			AccessTo: "10.32.109.151",
+			FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		},
 	}
 
 	SampleFileShareSnapshots = []model.FileShareSnapshotSpec{

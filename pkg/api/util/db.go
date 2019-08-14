@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"regexp"
 	"strings"
 	"time"
 
@@ -108,19 +109,36 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		return nil, errors.New(errMsg)
 	}
 
-	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
 }
 
 func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error {
-	// If fileshare id is invalid, it would mean that fileshare snapshot
+	// If fileshare id is invalid, it would mean that fileshare acl
 	// creation failed before the create method in storage driver was
 	// called, and delete its db entry directly.
-	if _, err := db.C.GetFileShare(ctx, in.FileShareId); err != nil {
+	validStatus := []string{model.FileShareAclAvailable, model.FileShareAclError,
+		model.FileShareAclErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the file share acl with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If fileshare id is invalid, it would mean that file share acl creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
 		if err := db.C.DeleteFileShareAcl(ctx, in.Id); err != nil {
-			log.Error("when delete fileshare acl in db:", err)
+			log.Error("failed delete fileshare acl in db:", err)
 			return err
 		}
+		return nil
+	}
+
+	in.Status = model.FileShareAclDeleting
+	_, err = db.C.UpdateFileShareAcl(ctx, in)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -163,6 +181,20 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+
+	// validate the description
+	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
+	if err != nil {
+		errMsg := fmt.Sprintf("regex compilation for file share description validation failed")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if reg.MatchString(in.Description) {
+		errMsg := fmt.Sprintf("invalid fileshare description and it has some special characters")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
 	in.UserId = ctx.UserId
 	in.Status = model.FileShareCreating
 	// Store the fileshare meadata into database.

@@ -234,6 +234,11 @@ func UpdateFileShareSnapshotStatus(ctx *c.Context, client Client, snapID, status
 	return client.UpdateStatus(ctx, snap, status)
 }
 
+func UpdateFileShareAclStatus(ctx *c.Context, client Client, fileID, status string) error {
+	file, _ := client.GetFileShareAcl(ctx, fileID)
+	return client.UpdateStatus(ctx, file, status)
+}
+
 func UpdateVolumeStatus(ctx *c.Context, client Client, volID, status string) error {
 	vol, _ := client.GetVolume(ctx, volID)
 	return client.UpdateStatus(ctx, vol, status)

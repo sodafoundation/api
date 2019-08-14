@@ -1,0 +1,27 @@
+clusterInfo:
+  name: chubaofs-test
+  masterAddr:
+    - 192.168.0.100:80
+    - 192.168.0.101:80
+    - 192.168.0.102:80
+  volumeCapLimit: 100000
+
+runtimeEnv:
+  mntPoint: /mnt/chubaofs
+  clientPath: /var/chubaofs
+
+pool:
+  opensds-files-chubaofs:
+    diskType: NL-SAS
+    availabilityZone: default
+    multiAttach: true
+    storageType: file
+    extras:
+      dataStorage:
+        storageAccessCapability:
+          - Read
+          - Write
+          - Execute
+      ioConnectivity:
+        accessProtocol: NFS
+
