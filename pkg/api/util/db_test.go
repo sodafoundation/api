@@ -600,7 +600,7 @@ func TestDeleteFileShareDBEntry(t *testing.T) {
 		assertTestResult(t, err.Error(), expectedError)
 	})
 
-	var sampleAcls = []*model.FileShareAclSpec{&SampleSharesAcl[0]}
+	var sampleAcls = []*model.FileShareAclSpec{&SampleFileSharesAcl[2]}
 	t.Run("FileShare should not be deleted if it has dependent acls", func(t *testing.T) {
 		//in.Status = model.FileShareAvailable
 		fileshare.Status = model.FileShareAvailable
