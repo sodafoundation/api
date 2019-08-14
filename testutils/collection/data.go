@@ -55,6 +55,173 @@ var (
 		},
 	}
 
+	SamplemetricsSpec = []*model.MetricSpec{
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "iops",
+			Unit:         "tps",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1561465759,
+					Value:     32.14,
+				},
+			},
+		},
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "read_throughput",
+			Unit:         "kbs",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1561465759,
+					Value:     32.14,
+				},
+			},
+		},
+		{InstanceID: "volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			Job:          "lvm",
+			Labels:       map[string]string{"device": "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			Component:    "volume",
+			Name:         "write_throughput",
+			Unit:         "kbs",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1561465759,
+					Value:     32.14,
+				},
+			},
+		},
+	}
+	SampleGetmetricsSpec = []*model.MetricSpec{
+		{InstanceID: "",
+			InstanceName: "loop25",
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560169109,
+					Value:     32.14,
+				},
+			},
+		},
+		{InstanceID: "",
+			InstanceName: "loop26",
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560169109,
+					Value:     32.14,
+				},
+			},
+		},
+		{InstanceID: "",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560169109,
+					Value:     32.14,
+				},
+			},
+		},
+	}
+	SampleGetmetricsRangeSpec = []*model.MetricSpec{
+		{InstanceID: "localhost:8080",
+			InstanceName: "loop25",
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560168850,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168880,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168910,
+					Value:     0,
+				},
+			},
+		},
+		{InstanceID: "localhost:8080",
+			InstanceName: "loop26",
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560168850,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168880,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168910,
+					Value:     0,
+				},
+			},
+		},
+		{InstanceID: "localhost:8080",
+			InstanceName: "opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+
+			Job:          "",
+			Labels:       nil,
+			Component:    "",
+			Name:         "lvm_volume_iops_tps",
+			Unit:         "",
+			AggrType:     "",
+			MetricValues: []*model.Metric{
+				&model.Metric{
+					Timestamp: 1560168850,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168880,
+					Value:     0,
+				},
+				{
+					Timestamp: 1560168910,
+					Value:     0,
+				},
+			},
+		},
+	}
 	SampleFileShareProfiles = []model.ProfileSpec{
 		{
 			BaseModel: &model.BaseModel{
@@ -721,6 +888,47 @@ var (
 			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
 		}
 	]`
+
+	ByteMetrics = `[
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"iops",
+			"aggrType":"",
+			"unit":"tps",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		},
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"read_throughput",
+			"aggrType":"",
+			"unit":"kbs",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		},
+		{
+			"instanceID":"volume-38aa800e-dc4b-4e01-9a0f-926f58ee2f14",
+			"instanceName":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14",
+			"job":"lvm",
+			"labels":{"device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14"},
+			"component":"volume",
+			"name":"write_throughput",
+			"aggrType":"",
+			"unit":"kbs",
+			"metricValues":[{"timestamp":1561465759,"value":32.14}]
+
+		}
+	]`
+	ByteGetMetrics = `{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"lvm_volume_iops_tps","device":"loop25","instance":"localhost:8080","job":"lvm_exporter"},"value":[1560169109,"32.14"]},{"metric":{"__name__":"lvm_volume_iops_tps","device":"loop26","instance":"localhost:8080","job":"lvm_exporter"},"value":[1560169109,"32.14"]},{"metric":{"__name__":"lvm_volume_iops_tps","device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14","instance":"localhost:8080","job":"lvm_exporter"},"value":[1560169109,"32.14"]}]}}`
+	ByteGetRangeMetrics=`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"lvm_volume_iops_tps","device":"loop25","instance":"localhost:8080","job":"lvm_exporter"},"values":[[1560168850,"0"],[1560168880,"0"],[1560168910,"0"]]},{"metric":{"__name__":"lvm_volume_iops_tps","device":"loop26","instance":"localhost:8080","job":"lvm_exporter"},"values":[[1560168850,"0"],[1560168880,"0"],[1560168910,"0"]]},{"metric":{"__name__":"lvm_volume_iops_tps","device":"opensds--volumes--default-volume--38aa800e--dc4b--4e01--9a0f--926f58ee2f14","instance":"localhost:8080","job":"lvm_exporter"},"values":[[1560168850,"0"],[1560168880,"0"],[1560168910,"0"]]}]}}`
 
 	ByteAttachment = `{
 		"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",

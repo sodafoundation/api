@@ -16,10 +16,12 @@ package controller
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
+	"github.com/opensds/opensds/pkg/controller/metrics"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
@@ -643,6 +645,56 @@ func TestDeleteVolumeGroup(t *testing.T) {
 	if _, err := ctrl.DeleteVolumeGroup(context.Background(), req); err != nil {
 		t.Errorf("Failed to delete volume group: %v\n", err)
 	}
+}
+func NewFakeMetricController() metrics.Controller {
+	return &fakeMetricsController{}
+}
+type fakeMetricsController struct {
+}
+
+func (fakeMetricsController) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.MetricSpec, error) {
+	return nil,nil
+}
+
+func (fakeMetricsController) SetDock(dockInfo *model.DockSpec) {
+	return
+}
+
+func (fakeMetricsController) GetUrls() (*map[string]model.UrlDesc, error) {
+	return nil,nil
+}
+
+func TestGetMetrics(t *testing.T) {
+
+	var req = []*pb.GetMetricsOpts{
+		{InstanceId: "", StartTime: "", EndTime: ""},
+		{InstanceId: "1234", StartTime: "1234", EndTime: "1234"},
+		{InstanceId: "1234", StartTime: "1234", EndTime: "3456"},
+	}
+
+	var ctrl = &Controller{
+		metricsController: NewFakeMetricController(),
+	}
+	var response *pb.GenericResponse
+	var err error
+	for	_,r:= range req{
+	if response, err = ctrl.GetMetrics(context.Background(), r); err != nil {
+		t.Errorf("failed  to collect metrics, err is %v\n", err)
+	}
+	expectdResponse := pb.GenericResponseResult(SamplemetricsSpec)
+	if !reflect.DeepEqual(response, expectdResponse) {
+		t.Errorf("unexpected result  for Controller.GetMetrics() = %v, want %v", response, SamplemetricsSpec)
+	}
+}
+}
+func (c *fakeMetricsController) GetInstantMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
+	return SamplemetricsSpec, nil
+}
+func (c *fakeMetricsController) GetLatestMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
+	return SamplemetricsSpec, nil
+}
+func (c *fakeMetricsController) GetRangeMetrics(opt *pb.GetMetricsOpts) ([]*model.MetricSpec, error) {
+	return SamplemetricsSpec, nil
 }
 
 func NewFakeFileShareController() fileshare.Controller {
