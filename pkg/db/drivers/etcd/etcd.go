@@ -1434,8 +1434,8 @@ func (c *Client) CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.P
 		prf.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
-	// profile name must be unique with the same storage type.
-	if _, err := c.getProfileByName(ctx, prf.Name, prf.StorageType); err == nil {
+	// profile name must be unique.
+	if _, err := c.getProfileByName(ctx, prf.Name); err == nil {
 		return nil, fmt.Errorf("the profile name '%s' already exists", prf.Name)
 	}
 
@@ -1476,7 +1476,23 @@ func (c *Client) GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, e
 	return prf, nil
 }
 
-func (c *Client) getProfileByName(ctx *c.Context, name, storageType string) (*model.ProfileSpec, error) {
+func (c *Client) getProfileByName(ctx *c.Context, name string) (*model.ProfileSpec, error) {
+	profiles, err := c.ListProfiles(ctx)
+	if err != nil {
+		log.Error("List profile failed: ", err)
+		return nil, err
+	}
+
+	for _, profile := range profiles {
+		if profile.Name == name {
+			return profile, nil
+		}
+	}
+	var msg = fmt.Sprintf("can't find profile(name: %s)", name)
+	return nil, model.NewNotFoundError(msg)
+}
+
+func (c *Client) getProfileByNameAndType(ctx *c.Context, name, storageType string) (*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
 		log.Error("List profile failed: ", err)
@@ -1494,12 +1510,12 @@ func (c *Client) getProfileByName(ctx *c.Context, name, storageType string) (*mo
 
 // GetDefaultProfile
 func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
-	return c.getProfileByName(ctx, "default", "block")
+	return c.getProfileByNameAndType(ctx, "default", "block")
 }
 
 // GetDefaultProfileFileShare
 func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
-	return c.getProfileByName(ctx, "default", "file")
+	return c.getProfileByNameAndType(ctx, "default", "file")
 }
 
 // ListProfiles
