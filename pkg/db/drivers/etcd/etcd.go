@@ -40,10 +40,14 @@ import (
 )
 
 const (
-	defaultLimit   = 50
-	defaultOffset  = 0
-	defaultSortDir = "desc"
-	defaultSortKey = "ID"
+	defaultLimit            = 50
+	defaultOffset           = 0
+	defaultSortDir          = "desc"
+	defaultSortKey          = "ID"
+	defaultBlockProfileName = "default_block"
+	defaultFileProfileName  = "default_file"
+	typeBlock               = "block"
+	typeFile                = "file"
 )
 
 var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
@@ -1510,12 +1514,12 @@ func (c *Client) getProfileByNameAndType(ctx *c.Context, name, storageType strin
 
 // GetDefaultProfile
 func (c *Client) GetDefaultProfile(ctx *c.Context) (*model.ProfileSpec, error) {
-	return c.getProfileByNameAndType(ctx, "default", "block")
+	return c.getProfileByNameAndType(ctx, defaultBlockProfileName, typeBlock)
 }
 
 // GetDefaultProfileFileShare
 func (c *Client) GetDefaultProfileFileShare(ctx *c.Context) (*model.ProfileSpec, error) {
-	return c.getProfileByNameAndType(ctx, "default", "file")
+	return c.getProfileByNameAndType(ctx, defaultFileProfileName, typeFile)
 }
 
 // ListProfiles
