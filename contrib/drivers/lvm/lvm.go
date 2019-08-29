@@ -22,7 +22,7 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/backup"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
@@ -232,7 +232,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
-	log.V(8).Infof("lvm initialize connection information: %v", opt)
+	log.Infof("lvm initialize connection information: %v", opt)
 	initiator := opt.HostInfo.GetInitiator()
 	if initiator == "" {
 		initiator = "ALL"
@@ -264,7 +264,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		return nil, err
 	}
 
-	log.V(8).Infof("lvm ConnectionData: %v", expt)
+	log.Infof("lvm ConnectionData: %v", expt)
 
 	return &model.ConnectionInfo{
 		DriverVolumeType: accPro,
@@ -273,7 +273,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 }
 
 func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
-	log.V(8).Infof("TerminateConnection: opt info is %v", opt)
+	log.Infof("TerminateConnection: opt info is %v", opt)
 	accPro := opt.AccessProtocol
 	t := targets.NewTarget(d.conf.TgtBindIp, d.conf.TgtConfDir, accPro)
 	if err := t.RemoveExport(opt.GetVolumeId(), opt.GetHostInfo().GetIp()); err != nil {
@@ -317,7 +317,7 @@ func (d *Driver) AttachSnapshot(snapshotId string, lvsPath string) (string, *mod
 	if err != nil {
 		return "", nil, err
 	}
-	log.V(8).Infof("Attach snapshot success, MountPoint:%s", mountPoint)
+	log.Infof("Attach snapshot success, MountPoint:%s", mountPoint)
 	return mountPoint, info, nil
 }
 

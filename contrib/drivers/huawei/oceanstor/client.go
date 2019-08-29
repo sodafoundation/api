@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/httplib"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/pwd"
@@ -136,7 +136,7 @@ func (c *OceanStorClient) request(method, url string, in, out interface{}) error
 	var err error
 	for i := 0; i < 2; i++ {
 		// For debugging
-		log.V(5).Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
+		log.Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		b, _, err = c.doRequest(method, c.urlPrefix+url, in)
 		if err == nil {
 			break
@@ -159,7 +159,7 @@ func (c *OceanStorClient) request(method, url string, in, out interface{}) error
 
 	if out != nil {
 		// This will print tones of info, so set to level 8
-		log.V(8).Infof("Response Body: %s", string(b))
+		log.Infof("Response Body: %s", string(b))
 		json.Unmarshal(b, out)
 	}
 	return nil

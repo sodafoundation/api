@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	sharesv2 "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares"
@@ -119,7 +119,7 @@ func (d *Driver) Setup() error {
 		return err
 	}
 
-	log.V(5).Info("setup succeeded\n")
+	log.Info("setup succeeded\n")
 	return nil
 }
 
@@ -147,7 +147,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	}
 
 	pols = append(pols, pol)
-	log.V(5).Infof("function ListPools succeeded, pols:%+v\n", pols)
+	log.Infof("function ListPools succeeded, pols:%+v\n", pols)
 	return pols, nil
 }
 
@@ -177,7 +177,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		return nil, err
 	}
 
-	log.V(5).Infof("sharesv2.Create succeeded\n")
+	log.Infof("sharesv2.Create succeeded\n")
 	// Currently dock framework doesn't support sync data from storage system,
 	// therefore, it's necessary to wait for the result of resource's creation.
 	// Timout after 10s.
@@ -212,7 +212,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		log.Errorf("function GetExportLocations failed, err:%v", err)
 		return nil, err
 	}
-	log.V(5).Infof("sharesv2.GetExportLocations succeeded\n")
+	log.Infof("sharesv2.GetExportLocations succeeded\n")
 
 	var exportLocations []string
 	for _, v := range manilaExportLocations {
@@ -234,7 +234,7 @@ func (d *Driver) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareS
 		ExportLocations:  exportLocations,
 	}
 
-	log.V(5).Infof("function CreateFileShare succeeded, share:%+v\n", respShare)
+	log.Infof("function CreateFileShare succeeded, share:%+v\n", respShare)
 	return &respShare, nil
 }
 
@@ -246,7 +246,7 @@ func (d *Driver) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 		return err
 	}
 
-	log.V(5).Info("function DeleteFileShare succeeded\n")
+	log.Info("function DeleteFileShare succeeded\n")
 	return nil
 }
 
@@ -268,7 +268,7 @@ func (d *Driver) PullFileShare(ID string) (*model.FileShareSpec, error) {
 		Status:      share.Status,
 	}
 
-	log.V(5).Infof("function PullFileShare succeeded, share:%+v\n", respShare)
+	log.Infof("function PullFileShare succeeded, share:%+v\n", respShare)
 	return &respShare, nil
 }
 
@@ -313,7 +313,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 		return nil, err
 	}
 
-	log.V(5).Infof("sharesv2.GrantAccess succeeded\n")
+	log.Infof("sharesv2.GrantAccess succeeded\n")
 	respShareACL := model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.Id,
@@ -326,7 +326,7 @@ func (d *Driver) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (fshare *mod
 		Metadata:         map[string]string{KManilaShareACLID: shareACL.ID},
 	}
 
-	log.V(5).Infof("function CreateFileShareAcl succeeded, respShareAcl:%+v\n", respShareACL)
+	log.Infof("function CreateFileShareAcl succeeded, respShareAcl:%+v\n", respShareACL)
 	return &respShareACL, nil
 }
 
@@ -342,7 +342,7 @@ func (d *Driver) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 		return err
 	}
 
-	log.V(5).Info("function DeleteFileShareAcl succeeded\n")
+	log.Info("function DeleteFileShareAcl succeeded\n")
 	return nil
 }
 
@@ -402,7 +402,7 @@ func (d *Driver) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*
 		Metadata:     map[string]string{KManilaSnapID: snapshot.ID},
 	}
 
-	log.V(5).Infof("function CreateFileShareSnapshot succeeded, snapshot:%+v\n", respSnapshot)
+	log.Infof("function CreateFileShareSnapshot succeeded, snapshot:%+v\n", respSnapshot)
 	return &respSnapshot, nil
 }
 
@@ -414,7 +414,7 @@ func (d *Driver) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts) er
 		return err
 	}
 
-	log.V(5).Info("function DeleteFileShareSnapshot succeeded\n")
+	log.Info("function DeleteFileShareSnapshot succeeded\n")
 	return nil
 }
 
@@ -436,7 +436,7 @@ func (d *Driver) PullFileShareSnapshot(ID string) (*model.FileShareSnapshotSpec,
 		Status:       snapshot.Status,
 	}
 
-	log.V(5).Infof("function PullFileShareSnapshot succeeded, snapshot:%+v\n", respShareSnap)
+	log.Infof("function PullFileShareSnapshot succeeded, snapshot:%+v\n", respShareSnap)
 	return &respShareSnap, nil
 }
 
@@ -447,7 +447,7 @@ func (d *Driver) GetProtoFromProfile(prf string) (string, error) {
 		return "", errors.New(msg)
 	}
 
-	log.V(5).Infof("file share profile is %s", prf)
+	log.Infof("file share profile is %s", prf)
 	profile := &model.ProfileSpec{}
 	err := json.Unmarshal([]byte(prf), profile)
 	if err != nil {

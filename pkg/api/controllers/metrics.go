@@ -28,7 +28,7 @@ import (
 	"os"
 	"os/exec"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/client"

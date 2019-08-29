@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	model "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -326,7 +326,7 @@ func (d *Driver) GetProtoFromProfile(prf string) (string, error) {
 		return "", errors.New(msg)
 	}
 
-	log.V(5).Infof("file share profile is %s", prf)
+	log.Infof("file share profile is %s", prf)
 	profile := &model.ProfileSpec{}
 	err := json.Unmarshal([]byte(prf), profile)
 	if err != nil {
@@ -500,7 +500,7 @@ func (d *Driver) getAccessLevel(accessLevels []string, shareProto string) (strin
 }
 
 func (d *Driver) CreateFileShareAclParamCheck(opt *pb.CreateFileShareAclOpts) (string, string, string, string, error) {
-	log.V(5).Infof("create file share access client parameters %#v", opt)
+	log.Infof("create file share access client parameters %#v", opt)
 	meta := opt.GetMetadata()
 
 	if meta == nil || (meta != nil && meta[FileShareName] == "" && meta[FileShareID] == "") {

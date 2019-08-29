@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/utils"
 )
 
@@ -237,7 +237,7 @@ func (t *tgtTarget) RemoveISCSITarget(volId, iqn, hostIp string) error {
 func (*tgtTarget) execCmd(name string, cmd ...string) (string, error) {
 	ret, err := exec.Command(name, cmd...).Output()
 	log.Infoln("Command:", cmd, strings.Join(cmd, " "))
-	log.V(8).Infof("result:%s", string(ret))
+	log.Infof("result:%s", string(ret))
 	if err != nil {
 		log.Error("error info:", err)
 	}

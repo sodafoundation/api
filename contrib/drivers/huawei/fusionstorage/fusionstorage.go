@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	. "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -73,7 +73,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*VolumeSpec, error) {
 		log.Error(msg)
 		return nil, errors.New(msg)
 	}
-	log.V(8).Infof("create volume %s (%s) success.", opt.GetName(), opt.GetId())
+	log.Infof("create volume %s (%s) success.", opt.GetName(), opt.GetId())
 	return &VolumeSpec{
 		BaseModel: &BaseModel{
 			Id: opt.GetId(),

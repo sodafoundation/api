@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -230,7 +230,7 @@ func (p *ProfilePortal) DeleteProfile() {
 		}
 	}
 
-	log.V(5).Infof("There are no dependecies on the specified profile, so deleting : %v", profile)
+	log.Infof("There are no dependecies on the specified profile, so deleting : %v", profile)
 	err = db.C.DeleteProfile(ctx, profile.Id)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete profiles failed: %v", err)

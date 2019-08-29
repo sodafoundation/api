@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"net"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
 	"github.com/opensds/opensds/contrib/drivers/filesharedrivers"
@@ -195,7 +195,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 		ConnectionInfo: *connInfo,
 		Metadata:       opt.GetMetadata(),
 	}
-	log.V(8).Infof("CreateVolumeAttachment result: %v", atc)
+	log.Infof("CreateVolumeAttachment result: %v", atc)
 	return pb.GenericResponseResult(atc), nil
 }
 
@@ -473,7 +473,7 @@ func (ds *dockServer) deleteGroupGeneric(opt *pb.DeleteVolumeGroupOpts) error {
 
 // Collect the specified metrics from the metric driver
 func (ds *dockServer) CollectMetrics(ctx context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
-	log.V(5).Info("in dock CollectMetrics methods")
+	log.Info("in dock CollectMetrics methods")
 	ds.MetricDriver = drivers.InitMetricDriver(opt.GetDriverName())
 
 	defer drivers.CleanMetricDriver(ds.MetricDriver)
@@ -530,7 +530,7 @@ func (ds *dockServer) CreateFileShare(ctx context.Context, opt *pb.CreateFileSha
 
 	log.Info("Dock server receive create file share request, vr =", opt)
 
-	log.V(5).Infof("Dock server create fleshare: sent to Driver %+v", opt.GetDriverName())
+	log.Infof("Dock server create fleshare: sent to Driver %+v", opt.GetDriverName())
 
 	fileshare, err := ds.FileShareDriver.CreateFileShare(opt)
 	if err != nil {

@@ -11,72 +11,159 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package logs
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
+	"os/user"
+	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/go-ini/ini"
+	"github.com/lestrrat-go/file-rotatelogs"
+	"github.com/rifflock/lfshook"
+	"github.com/sirupsen/logrus"
+	"github.com/t-tomalak/logrus-easy-formatter"
 )
 
-const DefaultLogDir = "/var/log/opensds"
+const (
+	debugLevel       = "debug"
+	infoLevel        = "info"
+	warnLevel        = "warn"
+	errorLevel       = "error"
+	path             = "path"
+	level            = "level"
+	format           = "format"
+	defaultLogPath   = "/var/log/opensds"
+	defaultLogLevel  = "info"
+	unknownHost      = "unknownhost"
+	unknownUser      = "unknownuser"
+	configFileName   = "log.conf"
+	defaultLogFormat = "[%lvl%]: %time% - %msg%"
+	defaultTimestampFormat = "2006-01-02 15:04:05"
+)
 
-// flushDaemon periodically flushes the log file buffers.
-func flushDaemon(period time.Duration) {
-	for range time.NewTicker(period).C {
-		glog.Flush()
-	}
+func InitLogs() {
+	path, level, format := readConfigurationFile()
+	configureLogModule(path, level, format)
 }
 
-func init() {
-	//Set OpenSDS default log directory.
-	flag.CommandLine.VisitAll(func(flag *flag.Flag) {
-		if flag.Name == "log_dir" {
-			flag.DefValue = DefaultLogDir
-			flag.Value.Set(DefaultLogDir)
-		}
+func configureLogModule(path, level, format string) {
+	configurePathAndFormat(path, format)
+	configureLevel(level)
+}
+
+func configurePathAndFormat(path, format string) error {
+	debugWriter, debugWriterErr := createWriter(path, debugLevel)
+	infoWriter, infoWriterErr := createWriter(path, infoLevel)
+	warnWriter, warnWriterErr := createWriter(path, warnLevel)
+	errorWriter, errorWriterErr := createWriter(path, errorLevel)
+	if debugWriterErr != nil || infoWriterErr != nil || warnWriterErr != nil || errorWriterErr != nil {
+		return errors.New("Failed to create writer!\n")
+	}
+	lfsHook := lfshook.NewHook(lfshook.WriterMap{
+		logrus.DebugLevel: debugWriter,
+		logrus.InfoLevel:  infoWriter,
+		logrus.WarnLevel:  warnWriter,
+		logrus.ErrorLevel: errorWriter}, &easy.Formatter{
+		TimestampFormat: defaultTimestampFormat,
+		LogFormat:       format + "\n",
 	})
+	logrus.AddHook(lfsHook)
+	return nil
 }
 
-type GlogWriter struct{}
-
-func (writer GlogWriter) Write(data []byte) (n int, err error) {
-	glog.Info(string(data))
-	return len(data), nil
-}
-
-// flush log when be interrupted.
-func handleInterrupt() {
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
-	go func() {
-		sig := <-sigs
-		fmt.Println(sig)
-		FlushLogs()
-		os.Exit(-1)
-	}()
-}
-
-func InitLogs(LogFlushFrequency time.Duration) {
-	log.SetOutput(GlogWriter{})
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	logDir := flag.CommandLine.Lookup("log_dir").Value.String()
-	if exist, _ := utils.PathExists(logDir); !exist {
-		os.MkdirAll(logDir, 0755)
+func createWriter(path, level string) (*rotatelogs.RotateLogs, error) {
+	writer, err := rotatelogs.New(
+		filepath.Join(path, logNameForRotateLogs(level)),
+		rotatelogs.WithLinkName(filepath.Join(path, shortLogNameForRotateLogs(level))),
+		rotatelogs.WithRotationTime(time.Hour))
+	if err != nil {
+		log.Println(err)
 	}
-	glog.Infof("[Info] LogFlushFrequency: %v", LogFlushFrequency)
-	go flushDaemon(LogFlushFrequency)
-	handleInterrupt()
+	return writer, err
 }
 
-func FlushLogs() {
-	glog.Flush()
+func configureLevel(level string) {
+	switch level {
+	case debugLevel:
+		logrus.SetLevel(logrus.DebugLevel)
+	case infoLevel:
+		logrus.SetLevel(logrus.InfoLevel)
+	case warnLevel:
+		logrus.SetLevel(logrus.WarnLevel)
+	case errorLevel:
+		logrus.SetLevel(logrus.ErrorLevel)
+	}
+	logrus.SetReportCaller(true)
+}
+
+func logNameForRotateLogs(level string) (name string) {
+	name = fmt.Sprintf("%s.%s.%s.log.%s.%%Y%%m%%d%%H.%d",
+		filepath.Base(os.Args[0]),
+		hostName(),
+		userName(),
+		strings.ToUpper(level),
+		os.Getpid())
+	return name
+}
+
+func shortLogNameForRotateLogs(level string) (name string) {
+	name = fmt.Sprintf("%s.%s",
+		filepath.Base(os.Args[0]),
+		strings.ToUpper(level))
+	return name
+}
+
+func shortHostname(hostname string) string {
+	if i := strings.Index(hostname, "."); i >= 0 {
+		return hostname[:i]
+	}
+	return hostname
+}
+
+func hostName() string {
+	host := unknownHost
+	h, err := os.Hostname()
+	if err == nil {
+		host = shortHostname(h)
+	}
+	return host
+}
+
+func userName() string {
+	userName := unknownUser
+	current, err := user.Current()
+	if err == nil {
+		userName = current.Username
+	}
+	// Sanitize userName since it may contain filepath separators on Windows.
+	userName = strings.Replace(userName, `\`, "_", -1)
+	return userName
+}
+
+func readConfigurationFile() (cfgPath, cfgLevel, cfgFormat string) {
+	cfgPath = defaultLogPath
+	cfgLevel = defaultLogLevel
+	cfgFormat = defaultLogFormat
+	cfg, err := ini.Load(configFileName)
+	if err != nil {
+		log.Println("Failed to open config file")
+		return cfgPath, cfgLevel, cfgFormat
+	}
+	if cfg.Section("").HasKey(path) {
+		cfgPath = cfg.Section("").Key(path).String()
+	}
+	if cfg.Section("").HasKey(level) {
+		cfgLevel = strings.ToLower(cfg.Section("").Key(level).String())
+	}
+	if cfg.Section("").HasKey(format) {
+		cfgFormat = cfg.Section("").Key(format).String()
+	}
+
+	return cfgPath, cfgLevel, cfgFormat
 }

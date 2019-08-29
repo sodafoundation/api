@@ -101,3 +101,19 @@
   go-tests = true
   non-go = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/lestrrat-go/file-rotatelogs"
+  version = "2.2.0"
+
+[[constraint]]
+  name = "github.com/rifflock/lfshook"
+  version = "2.4.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.4.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/t-tomalak/logrus-easy-formatter"

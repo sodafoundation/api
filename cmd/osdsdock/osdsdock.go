@@ -47,8 +47,7 @@ func init() {
 
 func main() {
 	// Open OpenSDS dock service log file.
-	logs.InitLogs(CONF.OsdsDock.LogFlushFrequency)
-	defer logs.FlushLogs()
+	logs.InitLogs()
 
 	// Set up database session.
 	db.Init(&CONF.Database)

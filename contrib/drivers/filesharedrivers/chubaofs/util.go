@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 )
 

@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
 	"github.com/opensds/opensds/pkg/utils"
@@ -604,7 +604,7 @@ func (c *Client) UpdateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	// Set update time
 	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
 
-	log.V(5).Infof("update file share object %+v into db", result)
+	log.Infof("update file share object %+v into db", result)
 
 	body, err := json.Marshal(result)
 	if err != nil {
@@ -2312,8 +2312,8 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 	}
 	// Update connectionData
 	// Debug
-	log.V(8).Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
-	log.V(8).Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
+	log.Infof("etcd: update volume attachment connection data from db: %v", result.ConnectionData)
+	log.Infof("etcd: update volume attachment connection data from target: %v", attachment.ConnectionData)
 
 	if attachment.ConnectionData != nil {
 		if result.ConnectionData == nil {

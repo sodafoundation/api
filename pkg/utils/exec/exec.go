@@ -19,7 +19,7 @@ import (
 	"os/exec"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 type Executer interface {
@@ -35,13 +35,13 @@ func Run(name string, arg ...string) (string, error) {
 		return "", err
 	}
 
-	log.V(5).Infof("Command: %s %s", name, strings.Join(arg, " "))
+	log.Infof("Command: %s %s", name, strings.Join(arg, " "))
 	info, err := exec.Command(name, arg...).CombinedOutput()
 	if err != nil {
 		log.Errorf("Execute command failed\ninfo:\n%s\nerror: %v", info, err)
 		return string(info), err
 	}
-	log.V(5).Infof("Command Result:\n%s", string(info))
+	log.Infof("Command Result:\n%s", string(info))
 	return string(info), nil
 }
 

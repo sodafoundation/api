@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 )
 

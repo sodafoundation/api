@@ -24,7 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/api/policy"
 	"github.com/opensds/opensds/pkg/api/util"
 	c "github.com/opensds/opensds/pkg/context"
@@ -91,7 +91,7 @@ func (v *VolumePortal) CreateVolume() {
 		return
 	}
 
-	log.V(8).Infof("create volume DB entry success %+v", result)
+	log.Infof("create volume DB entry success %+v", result)
 
 	// Marshal the result.
 	body, _ := json.Marshal(result)

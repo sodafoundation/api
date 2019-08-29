@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/httplib"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
@@ -133,7 +133,7 @@ func (c *Client) UpdateToken() error {
 		return err
 	}
 	c.token = token
-	log.V(5).Infof("TokenId:%s, ExpiresAt:%v", token.ID, token.ExpiresAt)
+	log.Infof("TokenId:%s, ExpiresAt:%v", token.ID, token.ExpiresAt)
 	return nil
 }
 
@@ -175,7 +175,7 @@ func (c *Client) doRequest(method, u string, in interface{}, cb ReqSettingCB) ([
 		return nil, nil, err
 	}
 
-	log.V(5).Infof("%s: %s OK\n", method, u)
+	log.Infof("%s: %s OK\n", method, u)
 	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Get byte[] from response failed, method: %s\n url: %s\n error: %v", method, u, err)
@@ -201,7 +201,7 @@ func (c *Client) request(method, p string, in, out interface{}, cb ReqSettingCB)
 	}
 
 	if out != nil {
-		log.V(5).Infof("Response:\n%s\n", string(b))
+		log.Infof("Response:\n%s\n", string(b))
 		err := xml.Unmarshal(b, out)
 		if err != nil {
 			log.Errorf("unmarshal error, reason:%v", err)

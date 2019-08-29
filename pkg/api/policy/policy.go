@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	bctx "github.com/astaxie/beego/context"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/config"
@@ -196,9 +196,9 @@ func Authorize(httpCtx *bctx.Context, action string) bool {
 		"tenant_id": TenantId,
 	}
 
-	log.V(8).Infof("Action: %v", action)
-	log.V(8).Infof("Target: %v", target)
-	log.V(8).Infof("Credentials: %v", credentials)
+	log.Infof("Action: %v", action)
+	log.Infof("Target: %v", target)
+	log.Infof("Credentials: %v", credentials)
 	ok, err := enforcer.Authorize(action, target, credentials)
 	if err != nil {
 		log.Errorf("Authorize failed, %s", err)

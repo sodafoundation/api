@@ -24,7 +24,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 // An OpenSDS profile is identified by a unique name and ID. With additional
@@ -75,7 +75,7 @@ func NewProfileFromJson(s string) *ProfileSpec {
 	p := &ProfileSpec{}
 	err := json.Unmarshal([]byte(s), p)
 	if err != nil {
-		glog.Errorf("Unmarshal json to ProfileSpec failed, %v", err)
+		log.Errorf("Unmarshal json to ProfileSpec failed, %v", err)
 	}
 	return p
 }
@@ -83,7 +83,7 @@ func NewProfileFromJson(s string) *ProfileSpec {
 func (p *ProfileSpec) ToJson() string {
 	b, err := json.Marshal(p)
 	if err != nil {
-		glog.Errorf("ProfileSpec convert to json failed, %v", err)
+		log.Errorf("ProfileSpec convert to json failed, %v", err)
 	}
 	return string(b)
 }

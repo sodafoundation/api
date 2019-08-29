@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/model"
 	. "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/prometheus/client_golang/prometheus"

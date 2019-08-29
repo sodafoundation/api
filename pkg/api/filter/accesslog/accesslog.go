@@ -17,13 +17,13 @@ package accesslog
 import (
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 func Factory() beego.FilterFunc {
 	return func(httpCtx *bctx.Context) {
 		r := httpCtx.Request
-		glog.Infof("\033[32m[D] %s -- %s %s\033[0m\n", r.RemoteAddr, r.Method,
+		log.Infof("\033[32m[D] %s -- %s %s\033[0m\n", r.RemoteAddr, r.Method,
 			r.URL)
 	}
 }

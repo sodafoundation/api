@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 func Contains(a []string, x string) bool {

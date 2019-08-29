@@ -20,7 +20,7 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -89,7 +89,7 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 			if getVolumeResult.HealthStatus == StatusHealth && getVolumeResult.RunningStatus == StatusVolumeReady {
 				return true, nil
 			}
-			log.V(5).Infof("Current lun HealthStatus : %s , RunningStatus : %s",
+			log.Infof("Current lun HealthStatus : %s , RunningStatus : %s",
 				getVolumeResult.HealthStatus, getVolumeResult.RunningStatus)
 			return false, nil
 		}

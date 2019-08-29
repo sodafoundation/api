@@ -24,7 +24,7 @@ import (
 	"errors"
 	"fmt"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -116,7 +116,7 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 		return nil, err
 	}
 
-	log.V(5).Infof("dock create fleshare:  connected to dock endpoint : %+v", c.DockInfo.Endpoint)
+	log.Infof("dock create fleshare:  connected to dock endpoint : %+v", c.DockInfo.Endpoint)
 
 	response, err := c.Client.CreateFileShare(context.Background(), (opt))
 	if err != nil {
@@ -125,7 +125,7 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 	}
 	defer c.Client.Close()
 
-	log.V(5).Infof("dock create fleshare:  Sent to driver : %+v", c.DockInfo.DriverName)
+	log.Infof("dock create fleshare:  Sent to driver : %+v", c.DockInfo.DriverName)
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,

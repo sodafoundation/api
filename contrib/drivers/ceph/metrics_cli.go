@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/ceph/go-ceph/rados"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/utils/exec"
 )
 

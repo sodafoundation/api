@@ -22,7 +22,7 @@ package config
 import (
 	"io/ioutil"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/model"
 	"gopkg.in/yaml.v2"
 )

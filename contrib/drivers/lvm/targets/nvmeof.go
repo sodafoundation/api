@@ -22,7 +22,7 @@ import (
 	"os/exec"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/utils"
 )
 

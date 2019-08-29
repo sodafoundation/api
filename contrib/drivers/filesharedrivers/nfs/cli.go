@@ -21,8 +21,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/utils/exec"
+	log "github.com/sirupsen/logrus"
 )
 
 type Cli struct {
@@ -50,7 +50,7 @@ func sizeStr(size int64) string {
 func (c *Cli) GetExportLocation(share_name, ip string) string {
 	server := net.ParseIP(ip)
 	if server == nil {
-		glog.Errorf("this is not a valid ip:")
+		log.Errorf("this is not a valid ip:")
 		return ""
 	}
 	var exportLocation string
@@ -155,7 +155,7 @@ func (c *Cli) CreateFileShare(lvPath string) error {
 		lvPath,
 	}
 	out := cmd
-	glog.Infof(": CMD: %s, RESPONSE: %s", strings.Join(cmd, " "), out)
+	log.Infof(": CMD: %s, RESPONSE: %s", strings.Join(cmd, " "), out)
 	_, err := c.execute(cmd...)
 	return err
 }
@@ -222,7 +222,7 @@ func (c *Cli) LvIsActivate(name, vg string) bool {
 	}
 	out, err := c.execute(cmd...)
 	if err != nil {
-		glog.Error("failed to display logic volume:", err)
+		log.Error("failed to display logic volume:", err)
 		return false
 	}
 	out = strings.TrimSpace(out)
@@ -242,7 +242,7 @@ func (c *Cli) Delete(name, lvpath string) error {
 	}
 
 	if out, err := c.execute(cmd...); err != nil {
-		glog.Infof("error reported running lvremove: CMD: %s, RESPONSE: %s",
+		log.Infof("error reported running lvremove: CMD: %s, RESPONSE: %s",
 			strings.Join(cmd, " "), out)
 		// run_udevadm_settle
 		c.execute("udevadm", "settle")
@@ -262,7 +262,7 @@ func (c *Cli) Delete(name, lvpath string) error {
 		if _, err := c.execute(cmd...); err != nil {
 			return err
 		}
-		glog.Infof("successfully deleted volume: %s after udev settle.", name)
+		log.Infof("successfully deleted volume: %s after udev settle.", name)
 	}
 	return nil
 }
@@ -336,7 +336,7 @@ func (c *Cli) DeleteFileShareSnapshots(name, vg string) error {
 	}
 
 	if out, err := c.execute(cmd...); err != nil {
-		glog.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
+		log.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
 			strings.Join(cmd, " "), out)
 		// run_udevadm_settle
 		c.execute("udevadm", "settle")
@@ -352,7 +352,7 @@ func (c *Cli) DeleteFileShareSnapshots(name, vg string) error {
 		if _, err := c.execute(cmd...); err != nil {
 			return err
 		}
-		glog.Infof("Successfully deleted fileshare snapshot: %s after udev settle.", name)
+		log.Infof("Successfully deleted fileshare snapshot: %s after udev settle.", name)
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ import (
 	"errors"
 	"fmt"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
@@ -107,7 +107,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create volume:  get volume from db %+v", vol)
+	log.Infof("controller create volume:  get volume from db %+v", vol)
 
 	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 	if err != nil {
@@ -116,7 +116,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	}
 
 	// The default value of multi-attach is false, if it becomes true, then update into db
-	log.V(5).Infof("update volume %+v", vol)
+	log.Infof("update volume %+v", vol)
 
 	if vol.MultiAttach {
 		db.C.UpdateVolume(ctx, vol)
@@ -127,7 +127,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	opt.PoolId = polInfo.Id
 	opt.PoolName = polInfo.Name
 
-	log.V(5).Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
+	log.Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
 
 	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	c.volumeController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-	log.V(5).Infof("selected driver name for create volume %+v", opt.DriverName)
+	log.Infof("selected driver name for create volume %+v", opt.DriverName)
 
 	result, err := c.volumeController.CreateVolume(opt)
 	if err != nil {
@@ -348,7 +348,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 
 	result.Status = model.VolumeAttachAvailable
 
-	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
+	log.Infof("Create volume attachment successfully, the info is %v", result)
 	// Save changes to db.
 	db.C.UpdateVolumeAttachment(ctx, opt.Id, result)
 
@@ -872,7 +872,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 		return pb.GenericResponseError(err), err
 	}
 
-	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
+	log.Infof("controller create fileshare: get fileshare from db %+v", fileshare)
 
 	// If snapshot is given in parameter then select the pool info
 	// from existing filesystem from where snapshot was created.
@@ -882,18 +882,18 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	if opt.SnapshotId != "" {
 		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
 		if _err != nil {
-			log.V(5).Infof("unable to get fileshare snapshot details %+v.", _err)
+			log.Infof("unable to get fileshare snapshot details %+v.", _err)
 			return pb.GenericResponseError(_err), _err
 		}
 		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
 		if _err != nil {
-			log.V(5).Infof("unable to get fileshare details %+v.", _err)
+			log.Infof("unable to get fileshare details %+v.", _err)
 			return pb.GenericResponseError(_err), _err
 		}
 		polInfo, err = db.C.GetPool(ctx, existingFs.PoolId)
-		log.V(5).Infof("controller get get previous created fileshare poolInfo detail%+v", polInfo)
+		log.Infof("controller get get previous created fileshare poolInfo detail%+v", polInfo)
 		if err != nil {
-			log.V(5).Infof("unable to get previous created fileshare poolInfo detail %+v", err)
+			log.Infof("unable to get previous created fileshare poolInfo detail %+v", err)
 			return pb.GenericResponseError(err), err
 		}
 	} else {
@@ -902,7 +902,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 			db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
 			return pb.GenericResponseError(err), err
 		}
-		log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
+		log.Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	}
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
@@ -918,7 +918,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	c.fileshareController.SetDock(dockInfo)
 	opt.DriverName = dockInfo.DriverName
 
-	log.V(5).Infof("controller create fleshare: selected Driver name %+v", opt.DriverName)
+	log.Infof("controller create fleshare: selected Driver name %+v", opt.DriverName)
 
 	result, err := c.fileshareController.CreateFileShare((*pb.CreateFileShareOpts)(opt))
 	if err != nil {
@@ -930,7 +930,7 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 	result.PoolId, result.ProfileId = opt.GetPoolId(), prf.Id
 
 	// Update the file share data in database.
-	log.V(5).Infof("file share creation result is %v", result)
+	log.Infof("file share creation result is %v", result)
 	if err := db.C.UpdateStatus(ctx, result, model.FileShareAvailable); err != nil {
 		return nil, err
 	}
@@ -1142,7 +1142,7 @@ func (c *Controller) GetMetrics(context context.Context, opt *pb.GetMetricsOpts)
 }
 
 func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetricsOpts) (*pb.GenericResponse, error) {
-	log.V(5).Info("in controller collect metrics methods")
+	log.Info("in controller collect metrics methods")
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
 	dockSpec, err := db.C.ListDocks(ctx)
@@ -1174,7 +1174,7 @@ func (c *Controller) CollectMetrics(context context.Context, opt *pb.CollectMetr
 }
 
 func (c *Controller) GetUrls(context.Context, *pb.NoParams) (*pb.GenericResponse, error) {
-	log.V(5).Info("in controller get urls method")
+	log.Info("in controller get urls method")
 
 	var result *map[string]model.UrlDesc
 	var err error

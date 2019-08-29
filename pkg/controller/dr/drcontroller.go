@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/volume"

@@ -28,7 +28,7 @@ import (
 
 	"github.com/ceph/go-ceph/rados"
 	"github.com/ceph/go-ceph/rbd"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/backup"
 	"github.com/opensds/opensds/contrib/connector"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"

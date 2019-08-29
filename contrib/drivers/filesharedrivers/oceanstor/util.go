@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 func handleReponse(respContent []byte, out interface{}) error {

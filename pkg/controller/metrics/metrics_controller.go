@@ -30,7 +30,7 @@ import (
 	"os/exec"
 	"strconv"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/controller/metrics/adapters"
 	"github.com/opensds/opensds/pkg/dock/client"
 	"github.com/opensds/opensds/pkg/model"

@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/utils/pwd"
 	"golang.org/x/crypto/ssh"
 	yaml "gopkg.in/yaml.v2"

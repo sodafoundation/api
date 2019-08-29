@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers"
 	fd "github.com/opensds/opensds/contrib/drivers/filesharedrivers"

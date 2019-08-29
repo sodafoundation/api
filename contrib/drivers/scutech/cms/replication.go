@@ -17,7 +17,7 @@ package scms
 import (
 	"path/filepath"
 
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 )
@@ -33,7 +33,7 @@ func (r *ReplicationDriver) Unset() error { return nil }
 
 // Create and start replication
 func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*model.ReplicationSpec, error) {
-	glog.Infoln("CMS create migration task ...")
+	log.Infoln("CMS create migration task ...")
 
 	replica := &model.ReplicationSpec{
 		// TODO: return additional important information
@@ -57,7 +57,7 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 
 	path, _ = secondaryData["Mountpoint"]
 	secondaryBackingDevice, _ := filepath.Abs(path)
-	glog.Infof("%s:%s\n", primaryBackingDevice, secondaryBackingDevice)
+	log.Infof("%s:%s\n", primaryBackingDevice, secondaryBackingDevice)
 	sourceVol := CmsVolume{VolumeId: primaryVolId, VolumeName: primaryBackingDevice}
 	targetVol := CmsVolume{VolumeId: secondaryVolId, VolumeName: secondaryBackingDevice}
 
@@ -80,7 +80,7 @@ func (r *ReplicationDriver) CreateReplication(opt *pb.CreateReplicationOpts) (*m
 
 // Delete replication
 func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
-	glog.Infoln("CMS delete migration task ...")
+	log.Infoln("CMS delete migration task ...")
 
 	isPrimary := opt.GetIsPrimary()
 	if !isPrimary {
@@ -94,7 +94,7 @@ func (r *ReplicationDriver) DeleteReplication(opt *pb.DeleteReplicationOpts) err
 
 // Start replication
 func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) error {
-	glog.Infoln("CMS start migration task ....")
+	log.Infoln("CMS start migration task ....")
 
 	isPrimary := opt.GetIsPrimary()
 	if !isPrimary {
@@ -108,7 +108,7 @@ func (r *ReplicationDriver) EnableReplication(opt *pb.EnableReplicationOpts) err
 
 // Stop replication
 func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) error {
-	glog.Infoln("CMS stop migration task")
+	log.Infoln("CMS stop migration task")
 
 	isPrimary := opt.GetIsPrimary()
 	if !isPrimary {
@@ -123,7 +123,7 @@ func (r *ReplicationDriver) DisableReplication(opt *pb.DisableReplicationOpts) e
 
 // Failover Replication
 func (r *ReplicationDriver) FailoverReplication(opt *pb.FailoverReplicationOpts) error {
-	glog.Infoln("CMS failover ....")
+	log.Infoln("CMS failover ....")
 	// Nothing to do here. Failover is executed automatically by CMS plugin.
 	return nil
 }

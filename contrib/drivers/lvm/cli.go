@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/pkg/utils"
 	"github.com/opensds/opensds/pkg/utils/exec"
 )
@@ -93,7 +93,7 @@ func (c *Cli) Delete(name, vg string) error {
 	}
 
 	if out, err := c.execute(cmd...); err != nil {
-		glog.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
+		log.Infof("Error reported running lvremove: CMD: %s, RESPONSE: %s",
 			strings.Join(cmd, " "), out)
 		// run_udevadm_settle
 		c.execute("udevadm", "settle")
@@ -113,7 +113,7 @@ func (c *Cli) Delete(name, vg string) error {
 		if _, err := c.execute(cmd...); err != nil {
 			return err
 		}
-		glog.Infof("Successfully deleted volume: %s after udev settle.", name)
+		log.Infof("Successfully deleted volume: %s after udev settle.", name)
 	}
 	return nil
 }
@@ -128,7 +128,7 @@ func (c *Cli) LvHasSnapshot(name, vg string) bool {
 	}
 	out, err := c.execute(cmd...)
 	if err != nil {
-		glog.Error("Failed to display logic volume:", err)
+		log.Error("Failed to display logic volume:", err)
 		return false
 	}
 	out = strings.TrimSpace(out)
@@ -145,7 +145,7 @@ func (c *Cli) LvIsActivate(name, vg string) bool {
 	}
 	out, err := c.execute(cmd...)
 	if err != nil {
-		glog.Error("Failed to display logic volume:", err)
+		log.Error("Failed to display logic volume:", err)
 		return false
 	}
 	out = strings.TrimSpace(out)

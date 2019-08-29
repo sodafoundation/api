@@ -22,7 +22,7 @@ import (
 	"time"
 
 	bctx "github.com/astaxie/beego/context"
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
@@ -79,7 +79,7 @@ func (k *Keystone) SetUp() error {
 		log.Error("When get identity session:", err)
 		return err
 	}
-	log.V(4).Infof("Service Token Info: %s", provider.TokenID)
+	log.Infof("Service Token Info: %s", provider.TokenID)
 	return nil
 }
 
@@ -143,7 +143,7 @@ func (k *Keystone) validateToken(ctx *bctx.Context, token string) error {
 		return context.HttpError(ctx, http.StatusUnauthorized, "extract token failed,%v", err)
 
 	}
-	log.V(8).Infof("token: %v", t)
+	log.Infof("token: %v", t)
 
 	if time.Now().After(t.ExpiresAt) {
 		return context.HttpError(ctx, http.StatusUnauthorized,

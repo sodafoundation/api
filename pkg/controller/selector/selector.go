@@ -24,7 +24,7 @@ import (
 	"errors"
 	"strconv"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"

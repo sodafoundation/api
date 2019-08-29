@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/opensds/opensds/contrib/backup"
 	"github.com/opensds/opensds/pkg/utils"
 	"gopkg.in/yaml.v2"
@@ -68,11 +68,11 @@ func (m *MultiCloud) loadConf(p string) (*MultiCloudConf, error) {
 	}
 	confYaml, err := ioutil.ReadFile(p)
 	if err != nil {
-		glog.Errorf("Read config yaml file (%s) failed, reason:(%v)", p, err)
+		log.Errorf("Read config yaml file (%s) failed, reason:(%v)", p, err)
 		return nil, err
 	}
 	if err = yaml.Unmarshal(confYaml, conf); err != nil {
-		glog.Errorf("Parse error: %v", err)
+		log.Errorf("Parse error: %v", err)
 		return nil, err
 	}
 	return conf, nil
@@ -108,7 +108,7 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 	key := backup.Id
 	initResp, err := m.client.InitMultiPartUpload(bucket, key)
 	if err != nil {
-		glog.Errorf("Init part failed, err:%v", err)
+		log.Errorf("Init part failed, err:%v", err)
 		return err
 	}
 
@@ -116,7 +116,7 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 	var parts []Part
 	for partNum := int64(1); ; partNum++ {
 		size, err := volFile.Read(buf)
-		glog.Infof("read buf size len:%d", size)
+		log.Infof("read buf size len:%d", size)
 		if err == io.EOF {
 			break
 		}
@@ -133,7 +133,7 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 			return inErr
 		})
 		if err != nil {
-			glog.Errorf("upload part failed, err:%v", err)
+			log.Errorf("upload part failed, err:%v", err)
 			return err
 		}
 		parts = append(parts, Part{PartNumber: partNum, ETag: uploadResp.ETag})
@@ -141,11 +141,11 @@ func (m *MultiCloud) Backup(backup *backup.BackupSpec, volFile *os.File) error {
 	input.Part = parts
 	_, err = m.client.CompleteMultipartUpload(bucket, key, initResp.UploadId, input)
 	if err != nil {
-		glog.Errorf("complete part failed, err:%v", err)
+		log.Errorf("complete part failed, err:%v", err)
 		return err
 	}
 	m.client.AbortMultipartUpload(bucket, key)
-	glog.Infof("backup success ...")
+	log.Infof("backup success ...")
 	return nil
 }
 
@@ -165,23 +165,23 @@ func (m *MultiCloud) Restore(backup *backup.BackupSpec, backupId string, volFile
 			return inErr
 		})
 		if err != nil {
-			glog.Errorf("download part failed: %v", err)
+			log.Errorf("download part failed: %v", err)
 			return err
 		}
 		downloadSize = len(data)
-		glog.V(5).Infof("download size: %d\n", downloadSize)
+		log.Infof("download size: %d\n", downloadSize)
 		volFile.Seek(offset, 0)
 		size, err := volFile.Write(data)
 		if err != nil {
-			glog.Errorf("write part failed: %v", err)
+			log.Errorf("write part failed: %v", err)
 			return err
 		}
 		if size != downloadSize {
 			return errors.New("size not equal to download size")
 		}
-		glog.V(5).Infof("write buf size len:%d", size)
+		log.Infof("write buf size len:%d", size)
 	}
-	glog.Infof("restore success ...")
+	log.Infof("restore success ...")
 	return nil
 }
 
