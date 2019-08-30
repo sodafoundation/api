@@ -16,7 +16,7 @@
 package integration
 
 import (
-	"opensds/opensds/test/integration/utils"
+	"utils"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
