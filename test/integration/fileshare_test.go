@@ -21,7 +21,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/opensds/opensds/test/integration/utils"
+	utils "github.com/opensds/opensds/test/integration/utils"
 )
 
 func TestFileShare(t *testing.T) {
