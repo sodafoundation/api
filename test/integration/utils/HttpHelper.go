@@ -30,7 +30,7 @@ func ConnectToHttpPost(operation, testMgrEndPoint string, payload []byte) {
 		// handle error
 		// common.Failf("Frame HTTP request failed: %v", err)
 
-		fmt.Errorf("Error while getting http request", err)
+		fmt.Printf("Error while getting http request", err)
 		// return false
 	}
 
@@ -61,7 +61,7 @@ func ConnectToHttpGet(operation, testMgrEndPoint string) {
 		// handle error
 		// common.Failf("Frame HTTP request failed: %v", err)
 
-		fmt.Errorf("Error while getting http request", err)
+		fmt.Printf("Error while getting http request", err)
 		// return false
 	}
 
@@ -88,7 +88,7 @@ func readResponseBody(resp *http.Response) {
 	if resp.StatusCode == http.StatusOK {
 		bodyBytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Errorf("", err)
+			fmt.Printf("Reading response body failed", err)
 		}
 		bodyString := string(bodyBytes)
 		fmt.Printf(bodyString)
@@ -116,12 +116,12 @@ func ConnectToHTTP(operation, testMgrEndPoint string, payload map[string]interfa
 
 	respbytes, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Errorf("Payload marshal failed", err)
+		fmt.Printf("Payload marshal failed", err)
 	}
 
 	req, err := http.NewRequest(httpMethod, testMgrEndPoint, bytes.NewBuffer(respbytes))
 	if err != nil {
-		fmt.Errorf("Error while getting http request", err)
+		fmt.Printf("Error while getting http request", err)
 
 	}
 

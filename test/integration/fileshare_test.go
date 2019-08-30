@@ -16,17 +16,18 @@
 package integration
 
 import (
-	"utils"
+	
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"githube.com/opensds/opensds/test/integration/utils"
 )
 
 func TestFileShare(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "FileShare Suite")
-}osdslet.ubuntu-123.root.log.WARNING.20190819-120511.96186
+}
 
 var (
 	OPERATION_FAILED = "OPERATION_FAILED"
