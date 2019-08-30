@@ -16,12 +16,12 @@
 package integration
 
 import (
-	
+
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"githube.com/opensds/opensds/test/integration/utils"
+	. "github.com/opensds/opensds/test/integration/utils"
 )
 
 func TestFileShare(t *testing.T) {
