@@ -78,7 +78,7 @@ var _ = Describe("FileShare Testing", func() {
 		})
 		It("TC_FS_IT_04: fileshare GET of specific Id", func() {
 			fId := "v1beta/file/shares/e93b4c0934da416eb9c8d120c5d04d96/f2ab9308-f208-40c6-bb1f-6fbfa8bf14b5"
-			url := "http://127.0.0.1.123:50040/v1beta/e93b4c0934da416eb9c8d120c5d04d96/file/shares/f2ab9308-f208-40c6-bb1f-6fbfa8bf14b5" //curl -X POST -H "Content-Type: application/json" -d '{"name":"share1", "description":"This is just for test", "size": 1}' -url "http://127.0.0.1:50040/v1beta/e93b4c0934da416eb9c8d120c5d04d96/file/shares"
+			url := "http://127.0.0.1:50040/v1beta/e93b4c0934da416eb9c8d120c5d04d96/file/shares/f2ab9308-f208-40c6-bb1f-6fbfa8bf14b5" //curl -X POST -H "Content-Type: application/json" -d '{"name":"share1", "description":"This is just for test", "size": 1}' -url "http://127.0.0.1:50040/v1beta/e93b4c0934da416eb9c8d120c5d04d96/file/shares"
 			methodName := "GET"
 			utils.ConnectToHTTP(methodName, url, nil)
 			// ctx, kv := utils.ConnectToDB()
