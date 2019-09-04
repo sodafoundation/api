@@ -68,6 +68,10 @@ development for OpenSDS.
 Please refer to [INSTALL](INSTALL.md) for any requirements when you want to perform code
 development for OpenSDS.
 
+## Auto-generated SDK
+
+To generate SDK (e.g. Java, C#, Ruby, etc) to access the REST API, please consider using [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) given the [OpenAPI/Swagger spec](https://raw.githubusercontent.com/opensds/opensds/master/openapi-spec/swagger.yaml). If you need help with OpenAPI Generator, please reach out to the OpenAPI Generator community by opening an [issue](https://github.com/OpenAPITools/openapi-generator/issues/new).
+
 ## License
 
 OpenSDS is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
