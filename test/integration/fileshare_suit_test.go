@@ -20,21 +20,21 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
 //Function to run the Ginkgo Test
 func TestFileShareIntegration(t *testing.T) {
-	RegisterFailHandler(Fail)
+	gomega.RegisterFailHandler(ginkgo.Fail)
 	//var UID string
-	var _ = BeforeSuite(func() {
+	var _ = ginkgo.BeforeSuite(func() {
 		fmt.Println("Before Suite Execution")
 
 	})
-	AfterSuite(func() {
-		By("After Suite Execution....!")
+	ginkgo.AfterSuite(func() {
+		ginkgo.By("After Suite Execution....!")
 	})
 
-	RunSpecs(t, "File Share Integration Test Suite")
+	ginkgo.RunSpecs(t, "File Share Integration Test Suite")
 }
