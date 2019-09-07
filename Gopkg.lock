@@ -308,14 +308,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4b9e1de78e0e4614923e4d3d52391f7a86642d666c287355e15f1efbd7181872"
-  name = "github.com/t-tomalak/logrus-easy-formatter"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "c074f06c5816d948eb1ffb6d95256020e4be70ed"
-
-[[projects]]
-  branch = "master"
   digest = "1:b1f60a779b568f0fcef80ec107eb514a2f94048a01a3c547fa20a3c1ae85d7ea"
   name = "golang.org/x/crypto"
   packages = [
@@ -472,7 +464,6 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/mock",
-    "github.com/t-tomalak/logrus-easy-formatter",
     "golang.org/x/crypto/ssh",
     "google.golang.org/grpc",
     "google.golang.org/grpc/codes",
