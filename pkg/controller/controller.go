@@ -107,28 +107,47 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	}
 
 	log.V(5).Infof("controller create volume:  get volume from db %+v", vol)
+	var dockInfo *model.DockSpec
+	if opt.ProfileId != "" || opt.SnapshotId != "" {
 
-	polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
-	if err != nil {
-		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
-		return pb.GenericResponseError(err), err
+		polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
+		if err != nil {
+			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
+			return pb.GenericResponseError(err), err
+		}
+
+		// The default value of multi-attach is false, if it becomes true, then update into db
+		log.V(5).Infof("update volume %+v", vol)
+
+		if vol.MultiAttach {
+			db.C.UpdateVolume(ctx, vol)
+		}
+
+		// whether specify a pool or not, opt's poolid and pool name should be
+		// assigned by polInfo
+		opt.PoolId = polInfo.Id
+		opt.PoolName = polInfo.Name
+
+		log.V(5).Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
+
+		dockInfo, err = db.C.GetDock(ctx, polInfo.DockId)
+	} else if opt.PoolId != "" {
+		//get poolname for poolid
+		pools, _ := db.C.ListPools(ctx)
+		for _, p := range pools {
+			if p.Id == opt.PoolId {
+				opt.PoolName = p.Name
+			}
+		}
+		// if poolname is still null set err
+		if opt.PoolName == "" {
+			err = errors.New(" No matching poolid found")
+		} else {
+
+			dockInfo, err = db.C.GetDockByPoolId(ctx, opt.PoolId)
+		}
+
 	}
-
-	// The default value of multi-attach is false, if it becomes true, then update into db
-	log.V(5).Infof("update volume %+v", vol)
-
-	if vol.MultiAttach {
-		db.C.UpdateVolume(ctx, vol)
-	}
-
-	// whether specify a pool or not, opt's poolid and pool name should be
-	// assigned by polInfo
-	opt.PoolId = polInfo.Id
-	opt.PoolName = polInfo.Name
-
-	log.V(5).Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
-
-	dockInfo, err := db.C.GetDock(ctx, polInfo.DockId)
 	if err != nil {
 		db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 		log.Error("when search supported dock resource:", err.Error())
