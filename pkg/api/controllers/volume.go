@@ -66,21 +66,32 @@ func (v *VolumePortal) CreateVolume() {
 	// get profile
 	var prf *model.ProfileSpec
 	var err error
-	if volume.ProfileId == "" {
-		log.Warning("Use default profile when user doesn't specify profile.")
-		prf, err = db.C.GetDefaultProfile(ctx)
-		// Assign the default profile id to volume so that users can know which
-		// profile is used for creating a volume.
-		volume.ProfileId = prf.Id
-	} else {
-		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
-	}
-	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
+	// If pool id is not specified, get a profile or take default pool
+	if volume.PoolId == "" {
+		if volume.ProfileId == "" {
+			log.Warning("Use default profile when user doesn't specify profile.")
+			prf, err = db.C.GetDefaultProfile(ctx)
+			// Assign the default profile id to volume so that users can know which
+			// profile is used for creating a volume.
+			if err == nil {
+				volume.ProfileId = prf.Id
 
+			} else {
+				//return Error: user should either have Profile or PoolID
+				errMsg := fmt.Sprintf("no pool id in the request or no default profile availble. %s", err.Error())
+				v.ErrorHandle(model.ErrorBadRequest, errMsg)
+				return
+
+			}
+		} else {
+			prf, err = db.C.GetProfile(ctx, volume.ProfileId)
+		}
+		if err != nil {
+			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
+	}
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
@@ -105,7 +116,16 @@ func (v *VolumePortal) CreateVolume() {
 		return
 	}
 	defer v.CtrClient.Close()
+	var profId string
+	var poolID string
+	if volume.ProfileId == "" {
+		profId = ""
+		poolID = volume.PoolId
 
+	} else {
+		profId = result.ProfileId
+		poolID = result.PoolId
+	}
 	opt := &pb.CreateVolumeOpts{
 		Id:               result.Id,
 		Name:             result.Name,
@@ -113,9 +133,9 @@ func (v *VolumePortal) CreateVolume() {
 		Size:             result.Size,
 		AvailabilityZone: result.AvailabilityZone,
 		// TODO: ProfileId will be removed later.
-		ProfileId:         result.ProfileId,
+		ProfileId:         profId,
 		Profile:           prf.ToJson(),
-		PoolId:            result.PoolId,
+		PoolId:            poolID,
 		SnapshotId:        result.SnapshotId,
 		Metadata:          result.Metadata,
 		SnapshotFromCloud: result.SnapshotFromCloud,
@@ -614,9 +634,8 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 	}
 	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
+		log.Infof("get profile failed, Try snapshot creation with Assocated Pool: %s", err.Error())
+
 	}
 
 	// NOTE:It will create a volume snapshot entry into the database and initialize its status

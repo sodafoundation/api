@@ -75,7 +75,7 @@ func TestCreateVolumeDBEntry(t *testing.T) {
 		db.C = mockClient
 
 		_, err := CreateVolumeDBEntry(context.NewAdminContext(), in)
-		expectedError := "profile id can not be empty when creating volume in db"
+		expectedError := "profile id and pool id can not be empty when creating volume in db"
 		assertTestResult(t, err.Error(), expectedError)
 	})
 }
@@ -400,9 +400,10 @@ func TestCreateVolumeSnapshotDBEntry(t *testing.T) {
 		mockClient.On("GetVolume", context.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(vol, nil)
 		mockClient.On("CreateVolumeSnapshot", context.NewAdminContext(), req).Return(&SampleSnapshots[0], nil)
 		db.C = mockClient
+		req.VolumeId= ""
 
 		_, err := CreateVolumeSnapshotDBEntry(context.NewAdminContext(), req)
-		expectedError := "profile id can not be empty when creating volume snapshot in db"
+		expectedError := "profile id and volume id  can not be empty when creating volume snapshot in db"
 		assertTestResult(t, err.Error(), expectedError)
 	})
 }
