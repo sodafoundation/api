@@ -44,7 +44,7 @@ const (
 	path                   = "path"
 	level                  = "level"
 	format                 = "format"
-	configFileName         = "log.conf"
+	configFileName         = "/etc/opensds/opensds.conf"
 	defaultLogPath         = "/var/log/opensds"
 	defaultLogLevel        = "info"
 	unknownHost            = "unknownhost"
@@ -52,6 +52,7 @@ const (
 	defaultLogFormat       = "[%time%] [%level%] [%filename%] [%funcName%():%lineNo%] [PID:%process%] %message%"
 	defaultTimestampFormat = time.RFC3339
 	callStackDeep          = 7
+	logSection             = "log"
 )
 
 func InitLogs() {
@@ -162,14 +163,14 @@ func readConfigurationFile() (cfgPath, cfgLevel, cfgFormat string) {
 		log.Println("Failed to open config file")
 		return cfgPath, cfgLevel, cfgFormat
 	}
-	if cfg.Section("").HasKey(path) {
-		cfgPath = cfg.Section("").Key(path).String()
+	if cfg.Section(logSection).HasKey(path) {
+		cfgPath = cfg.Section(logSection).Key(path).String()
 	}
-	if cfg.Section("").HasKey(level) {
-		cfgLevel = strings.ToLower(cfg.Section("").Key(level).String())
+	if cfg.Section(logSection).HasKey(level) {
+		cfgLevel = strings.ToLower(cfg.Section(logSection).Key(level).String())
 	}
-	if cfg.Section("").HasKey(format) {
-		cfgFormat = cfg.Section("").Key(format).String()
+	if cfg.Section(logSection).HasKey(format) {
+		cfgFormat = cfg.Section(logSection).Key(format).String()
 	}
 
 	return cfgPath, cfgLevel, cfgFormat
