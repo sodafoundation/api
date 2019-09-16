@@ -51,7 +51,7 @@ const (
 	unknownUser            = "unknownuser"
 	defaultLogFormat       = "[%time%] [%level%] [%filename%] [%funcName%():%lineNo%] [PID:%process%] %message%"
 	defaultTimestampFormat = time.RFC3339
-	callStackDeep          = 7
+	callStackDeep          = 11
 	logSection             = "log"
 )
 
