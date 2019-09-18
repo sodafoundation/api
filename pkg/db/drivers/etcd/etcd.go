@@ -1993,6 +1993,9 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, vol.Metadata)
 	}
+	if vol.Identifier != nil {
+		result.Identifier = vol.Identifier
+	}
 	if vol.PoolId != "" {
 		result.PoolId = vol.PoolId
 	}
