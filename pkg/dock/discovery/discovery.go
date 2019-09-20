@@ -165,8 +165,17 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			}
 		}
 		if err != nil {
-			log.Error("Call driver to list pools failed:", err)
-			continue
+			//NOTE(thatsdone):
+			// Returning an error causes discovery process stop.
+			// So, better to have a retry count? In addition,
+			// consindering multiple backends case, maybe
+			// retry count per dock is more better only returning
+			// an error when all the backends returned
+			// non-nil result.
+			return fmt.Errorf("Call driver to list pools failed: ", err)
+			//NOTE(thatsdon): original code.
+			//log.Error("Call driver to list pools failed:", err)
+			//continue
 		}
 
 		if len(pols) == 0 {
@@ -176,7 +185,11 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		pdd.pols = append(pdd.pols, pols...)
 	}
 	if len(pdd.pols) == 0 {
-		return fmt.Errorf("There is no pool can be found.")
+		log.Warningf("No pools found for all the docks.")
+		//NOTE(thatsdone):
+		// original code. Returning an error below is
+		// the root cause of issue #991.
+		//return fmt.Errorf("There is no pool can be found.")
 	}
 
 	return nil
