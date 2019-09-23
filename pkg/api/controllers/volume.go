@@ -78,7 +78,7 @@ func (v *VolumePortal) CreateVolume() {
 
 			} else {
 				//return Error: user should either have Profile or PoolID
-				errMsg := fmt.Sprintf("no pool id in the request or no default profile availble. %s", err.Error())
+				errMsg := fmt.Sprintf("no pool id in the request or no default profile available. %s", err.Error())
 				v.ErrorHandle(model.ErrorBadRequest, errMsg)
 				return
 
