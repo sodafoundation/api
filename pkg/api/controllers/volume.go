@@ -69,7 +69,7 @@ func (v *VolumePortal) CreateVolume() {
 	// If pool id is not specified, get a profile or take default pool
 	if volume.PoolId == "" {
 		if volume.ProfileId == "" {
-			log.Warning("Use default profile when user doesn't specify profile.")
+			log.Warning("use default profile when user doesn't specify profile.")
 			prf, err = db.C.GetDefaultProfile(ctx)
 			// Assign the default profile id to volume so that users can know which
 			// profile is used for creating a volume.
