@@ -25,6 +25,9 @@ before_install:
   - sudo apt-get install -y build-essential gcc
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
+  - go get github.com/onsi/gomega
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/modocache/gover
 
 matrix:
   fast_finish: true
@@ -61,6 +64,10 @@ jobs:
     - script: make osds_e2etest_build
       name: "e2e_test"     # names the fifth Tests stage job
 
+after_failure:
+        - for v in /var/log/opensds/*.log ; do
+          echo $v logtail ======================== ; tail -100 $v ;
+          done
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   # Clean OpenSDS Controller built data
