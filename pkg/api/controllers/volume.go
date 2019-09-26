@@ -91,6 +91,19 @@ func (v *VolumePortal) CreateVolume() {
 			v.ErrorHandle(model.ErrorBadRequest, errMsg)
 			return
 		}
+	} else if volume.ProfileId != "" {
+		// if both PoolID and ProfileID is given then use only PoolID
+		volume.ProfileId = ""
+		log.Warning("using only poolid when user provided both pool and profile .")
+	} else {
+		pool, err := db.C.GetPool(ctx, volume.PoolId)
+		if err == nil {
+			volume.PoolId = pool.Id
+		} else {
+			errMsg := fmt.Sprintf("get pool failed: %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 	}
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
