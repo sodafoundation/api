@@ -335,7 +335,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if in.ProfileId == "" && in.PoolId=="" {
+	if in.ProfileId == "" && in.PoolId == "" {
 		errMsg := "profile id and pool id can not be empty when creating volume in db"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
@@ -437,7 +437,7 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 // to be creating in the DB, the real operation would be executed in another new
 // thread.
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
-	if in.ProfileId == "" && in.VolumeId=="" {
+	if in.ProfileId == "" && in.VolumeId == "" {
 		errMsg := "profile id and volume id  can not be empty when creating volume snapshot in db"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
