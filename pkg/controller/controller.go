@@ -142,7 +142,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 		}
 		// if poolname is still null set err
 		if opt.PoolName == "" {
-			err = errors.New(" No matching poolid found")
+			err = errors.New(" no matching poolid found")
 		} else {
 
 			dockInfo, err = db.C.GetDockByPoolId(ctx, opt.PoolId)
