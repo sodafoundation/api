@@ -66,36 +66,9 @@ func (v *VolumePortal) CreateVolume() {
 	// get profile
 	var prf *model.ProfileSpec
 	var err error
-	// If pool id is not specified, get a profile or take default pool
-	if volume.PoolId == "" {
-		if volume.ProfileId == "" {
-			log.Warning("use default profile when user doesn't specify profile.")
-			prf, err = db.C.GetDefaultProfile(ctx)
-			// Assign the default profile id to volume so that users can know which
-			// profile is used for creating a volume.
-			if err == nil {
-				volume.ProfileId = prf.Id
-
-			} else {
-				//return Error: user should either have Profile or PoolID
-				errMsg := fmt.Sprintf("no pool id in the request or no default profile available. %s", err.Error())
-				v.ErrorHandle(model.ErrorBadRequest, errMsg)
-				return
-
-			}
-		} else {
-			prf, err = db.C.GetProfile(ctx, volume.ProfileId)
-		}
-		if err != nil {
-			errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-			v.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
-	} else if volume.ProfileId != "" {
-		// if both PoolID and ProfileID is given then use only PoolID
+	// If pool id is  specified, ignore profile
+	if volume.PoolId != "" {
 		volume.ProfileId = ""
-		log.Warning("using only poolid when user provided both pool and profile .")
-	} else {
 		pool, err := db.C.GetPool(ctx, volume.PoolId)
 		if err == nil {
 			volume.PoolId = pool.Id
@@ -104,7 +77,31 @@ func (v *VolumePortal) CreateVolume() {
 			v.ErrorHandle(model.ErrorBadRequest, errMsg)
 			return
 		}
+
+	} else if volume.ProfileId == "" { //when poolId and profileId is not specified in the request
+		log.Warning("use default profile when user doesn't specify profile.")
+		prf, err = db.C.GetDefaultProfile(ctx)
+		// Assign the default profile id to volume so that users can know which
+		// profile is used for creating a volume.
+		if err == nil { //when profile is specified in the request
+			volume.ProfileId = prf.Id
+
+		} else {
+			//return Error: user should either have Profile or PoolID
+			errMsg := fmt.Sprintf("no pool id in the request or no default profile available. %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+
+		}
+	} else {
+		prf, err = db.C.GetProfile(ctx, volume.ProfileId)
 	}
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	// NOTE:It will create a volume entry into the database and initialize its status
 	// as "creating". It will not wait for the real volume creation to complete
 	// and will return result immediately.
