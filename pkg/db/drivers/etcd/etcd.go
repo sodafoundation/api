@@ -289,6 +289,19 @@ func (c *Client) FindFileShareValue(k string, p *model.FileShareSpec) string {
 }
 
 func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileSharesAcl(ctx)
+	if err != nil {
+		log.Error("failed to list acls")
+		return nil, err
+	}
+
+	for _, acl := range acls {
+		if acl.AccessTo == fshare.AccessTo {
+			errstr :=  "acl already exists for this ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
+			log.Error(errstr)
+			return nil, fmt.Errorf(errstr)
+		}
+	}
 
 	fshare.TenantId = ctx.TenantId
 	fshareBody, err := json.Marshal(fshare)
