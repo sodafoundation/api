@@ -84,10 +84,6 @@ func TestDiscover(t *testing.T) {
 		expected = append(expected, &SamplePools[i])
 	}
 	mockClient := new(dbtest.Client)
-	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
-	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
-	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)
-	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[2]).Return(nil, nil)
 	mockClient.On("ListPools", c.NewAdminContext()).Return(fdd.pols, nil)
 	fdd.c = mockClient
 
