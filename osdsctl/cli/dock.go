@@ -20,9 +20,14 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
+	"strings"
+	"io/ioutil"
 
 	"github.com/spf13/cobra"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 var dockCommand = &cobra.Command{
@@ -43,6 +48,12 @@ var dockListCommand = &cobra.Command{
 	Run:   dockListAction,
 }
 
+var dockImportCommand = &cobra.Command{
+	Use:   "import <storage type> <dock config file>",
+	Short: "import dock to opensds",
+	Run:   dockImportAction,
+}
+
 var (
 	dockLimit       string
 	dockOffset      string
@@ -55,6 +66,7 @@ var (
 	dockStorageType string
 	dockEndpoint    string
 	dockDriverName  string
+	dockPoolConfigFilePath string
 )
 
 func init() {
@@ -69,10 +81,11 @@ func init() {
 	dockListCommand.Flags().StringVarP(&dockStorageType, "storageType", "", "", "list docks by storage type")
 	dockListCommand.Flags().StringVarP(&dockEndpoint, "endpoint", "", "", "list docks by endpoint")
 	dockListCommand.Flags().StringVarP(&dockDriverName, "driverName", "", "", "list docks by driver name")
+	dockImportCommand.Flags().StringVarP(&dockPoolConfigFilePath, "poolConfig", "p", "", "indicate the pool config file")
 
 	dockCommand.AddCommand(dockShowCommand)
 	dockCommand.AddCommand(dockListCommand)
-
+	dockCommand.AddCommand(dockImportCommand)
 }
 
 func dockAction(cmd *cobra.Command, args []string) {
@@ -106,4 +119,54 @@ func dockListAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName"}
 	PrintList(resp, keys, dockFormatters)
+}
+
+func dockImportAction(cmd *cobra.Command, args []string) {
+	ArgsNumCheck(cmd, args, 2)
+	storageType := args[0]
+	dockConfigFilePath := args[1]
+	addBackendType(storageType)
+	addBackendInfo(dockConfigFilePath)
+	if dockPoolConfigFilePath != "" {
+		importDriverConfig(storageType, dockPoolConfigFilePath)
+	}
+}
+
+func addBackendType(backendType string) {
+	config, err := ioutil.ReadFile(constants.OpensdsConfigPath)
+	if err != nil {
+		Errorln(constants.OpensdsConfigPath, " is not exist!")
+		os.Exit(1)
+	}
+	lines := strings.Split(string(config), "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "enabled_backends") {
+			lines[i] = lines[i] + "," + backendType
+		}
+	}
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(constants.OpensdsConfigPath, []byte(output), 0644)
+}
+
+func addBackendInfo(backendConfig string) {
+	dockConfig, err := ioutil.ReadFile(backendConfig)
+	if err != nil {
+		Errorln(backendConfig, " is not exist!")
+		os.Exit(1)
+	}
+	importDockCmd := fmt.Sprintf("cat>>%s<<EOF\n%sEOF", constants.OpensdsConfigPath, string(dockConfig))
+	_,err = exec.Command("bash", "-c",importDockCmd).CombinedOutput()
+	if err != nil {
+		fmt.Println("err is ", err)
+	}
+}
+
+func importDriverConfig(storageType string, driverConfig string) {
+	poolConfig, err := ioutil.ReadFile(driverConfig)
+	driverPath := fmt.Sprintf("/etc/opensds/driver/%s.yaml", storageType)
+	err = ioutil.WriteFile(driverPath, poolConfig, 0644)
+	if err != nil {
+		Errorln("Write file failed")
+		os.Exit(1)
+	}
 }
