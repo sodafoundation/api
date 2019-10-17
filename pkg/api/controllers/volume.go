@@ -58,7 +58,7 @@ func (v *VolumePortal) CreateVolume() {
 
 	// Unmarshal the request body
 	if err := json.NewDecoder(v.Ctx.Request.Body).Decode(&volume); err != nil {
-		errMsg := fmt.Sprintf("parse volume request body failed: %s", err.Error())
+		errMsg := fmt.Sprintf("parse volume request body failed Please correct the body params: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
