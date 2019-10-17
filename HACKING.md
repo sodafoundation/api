@@ -20,4 +20,4 @@ plugin for your infrastructure.
 
 - Language : Go environment
 
-To run a Go project, configuring Gopath is indispensable. After downloading the project, you should add "path_to_OpenSDS" in GOPATH environ variable.
+To run a Go project, configuring Gopath is indispensable. After downloading the project, you should add "path_to_OpenSDS" in GOPATH environment variable.
