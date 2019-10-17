@@ -1,4 +1,4 @@
-# Design Specs
+# Design Specifications
 OpenSDS design proposals repo.
 
 ## OpenSDS Architecture
