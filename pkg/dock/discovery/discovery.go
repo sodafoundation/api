@@ -186,7 +186,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 	ctx := c.NewAdminContext()
 	polsInDb, err = pdd.c.ListPools(ctx)
 	if err != nil {
-		return fmt.Errorf("Can not read pools in db")
+		return fmt.Errorf("can not read pools in db")
 	}
 	dbPolsMap := make(map[string]*model.StoragePoolSpec)
 	for _, polInDb := range polsInDb {
@@ -200,7 +200,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		pdd.pols = append(pdd.pols, unavailablePol)
 	}
 	if len(pdd.pols) == 0 {
-		return fmt.Errorf("There is no pool can be found.")
+		return fmt.Errorf("there is no pool can be found")
 	}
 
 	return nil
