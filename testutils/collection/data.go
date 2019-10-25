@@ -58,19 +58,19 @@ var (
 	SampleFileShareProfiles = []model.ProfileSpec{
 		{
 			BaseModel: &model.BaseModel{
-				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+				Id: "2106b972-66ef-11e7-b172-db03f3689c9c",
 			},
-			Name:             "default",
+			Name:             "default_file",
 			Description:      "default policy",
 			StorageType:      "file",
 			CustomProperties: model.CustomPropertiesSpec{},
 		},
 		{
 			BaseModel: &model.BaseModel{
-				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+				Id: "3f9c0a04-66ef-11e7-ade2-43158893e017",
 			},
-			Name:        "silver",
-			Description: "silver policy",
+			Name:        "gold",
+			Description: "gold policy",
 			StorageType: "file",
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
@@ -209,8 +209,8 @@ var (
 			Size:             int64(1),
 			Status:           "available",
 			PoolId:           "a5965ebe-dg2c-434t-b28e-f373746a71ca",
-			ProfileId:        "b3585ebe-c42c-120g-b28e-f373746a71ca",
-			SnapshotId:       "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			SnapshotId:       "3769855c-a102-11e7-b772-17b880d2f537",
 			AvailabilityZone: "default",
 			ExportLocations:  []string{"192.168.100.100"},
 		},
@@ -223,8 +223,8 @@ var (
 			Size:             int64(1),
 			Status:           "available",
 			PoolId:           "d5f65ebe-ag2c-341s-a25e-f373746a71dr",
-			ProfileId:        "1e643aca-4922-4b1a-bb98-4245054aeff4",
-			SnapshotId:       "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			SnapshotId:       "3bfaf2cc-a102-11e7-8ecb-63aea739d755",
 			AvailabilityZone: "default",
 			ExportLocations:  []string{"192.168.100.101"},
 		},
@@ -236,22 +236,25 @@ var (
 				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			},
 			Description: "This is a sample Acl for testing",
+			Status:      "available",
 		},
 		{
 			BaseModel: &model.BaseModel{
 				Id: "1e643aca-4922-4b1a-bb98-4245054aeff4",
 			},
 			Description: "This is a sample Acl for testing",
+			Status:      "available",
 		},
 		{
 			BaseModel: &model.BaseModel{
 				Id: "6ad25d59-a160-45b2-8920-211be282e2df",
 			},
 			Description:      "This is a sample Acl for testing",
-			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			ProfileId:        "2106b972-66ef-11e7-b172-db03f3689c9c",
 			Type:             "ip",
 			AccessCapability: []string{"Read", "Write"},
 			AccessTo:         "10.32.109.15",
+			Status:           "available",
 			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
 		},
 		{
@@ -259,11 +262,12 @@ var (
 				Id: "ad25d59-a160-45b2-8920-211be282e2dfh",
 			},
 			Description:      "This is a sample Acl for testing",
-			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			ProfileId:        "3f9c0a04-66ef-11e7-ade2-43158893e017",
 			Type:             "ip",
 			AccessCapability: []string{"Read", "Write"},
 			AccessTo:         "10.32.109.151",
-			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			Status:           "available",
+			FileShareId:      "1e643aca-4922-4b1a-bb98-4245054aeff4",
 		},
 	}
 
@@ -277,6 +281,7 @@ var (
 			SnapshotSize: int64(1),
 			FileShareId:  "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			Status:       "available",
+			ProfileId:    "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -285,7 +290,9 @@ var (
 			Name:         "sample-snapshot-02",
 			Description:  "This is the second sample snapshot for testing",
 			SnapshotSize: int64(1),
+			FileShareId:  "1e643aca-4922-4b1a-bb98-4245054aeff4",
 			Status:       "available",
+			ProfileId:    "3f9c0a04-66ef-11e7-ade2-43158893e017",
 		},
 	}
 

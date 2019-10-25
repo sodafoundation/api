@@ -493,15 +493,15 @@ func TestDeleteFileShareProfile(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("GetProfile", c.NewAdminContext(), "3f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			&SampleFileShareProfiles[1], nil)
-		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "3f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			SampleShareNames, nil)
-		mockClient.On("DeleteProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
+		mockClient.On("DeleteProfile", c.NewAdminContext(), "3f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE",
-			"/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+			"/v1beta/profiles/3f9c0a04-66ef-11e7-ade2-43158893e017", nil)
 		w := httptest.NewRecorder()
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
@@ -512,14 +512,14 @@ func TestDeleteFileShareProfile(t *testing.T) {
 
 	t.Run("Should return 404 if delete profile with bad request", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetProfile", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("GetProfile", c.NewAdminContext(), "3f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("Invalid resource uuid"))
-		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("ListFileSharesByProfileId", c.NewAdminContext(), "3f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("Depency FileShares"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE",
-			"/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
+			"/v1beta/profiles/3f9c0a04-66ef-11e7-ade2-43158893e017", nil)
 		w := httptest.NewRecorder()
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())

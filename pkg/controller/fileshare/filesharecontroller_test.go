@@ -163,7 +163,7 @@ func TestCreateFileShareAcl(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to create fileshare acl, err is %v\n", err)
 	}
-
+    result.Status = "available"
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("expected %v, got %v\n", expected, result)
 	}
