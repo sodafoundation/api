@@ -141,33 +141,6 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:58999a98719fddbac6303cb17e8d85b945f60b72f48e3a2df6b950b97fa926f1"
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
-  digest = "1:bfd3efe80b851037c1d1e58c7b8f18b7a3a250352bdd137a43df825d0ace4707"
-  name = "github.com/lestrrat-go/file-rotatelogs"
-  packages = [
-    ".",
-    "internal/option",
-  ]
-  pruneopts = "NUT"
-  revision = "3b4f34a036f374c18d604e1b8006d9fbb9593c06"
-  version = "v2.2.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:13dd539a69e687ce1552e1cc05e6faf43723811739993e8f246590b72b425275"
-  name = "github.com/lestrrat-go/strftime"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "5c849dd2c51dd10faf5f1b86abec2db1ac3b9101"
-
-[[projects]]
   digest = "1:5985ef4caf91ece5d54817c11ea25f182697534f8ae6521eadcd628c142ac4b6"
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
@@ -182,14 +155,6 @@
   pruneopts = "NUT"
   revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
   version = "v1.1.2"
-
-[[projects]]
-  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -239,14 +204,6 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "87a4384529e0652f5035fb5cc8095faf73ea9b0b"
-
-[[projects]]
-  digest = "1:ffe8353de82ab7608fc1fd9a246e71b231af2479727dd165e3720cc2e8918177"
-  name = "github.com/rifflock/lfshook"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "b9218ef580f59a2e72dad1aa33d660150445d05a"
-  version = "v2.4"
 
 [[projects]]
   digest = "1:6bc0652ea6e39e22ccd522458b8bdd8665bf23bdc5a20eec90056e4dc7e273ca"
@@ -428,6 +385,14 @@
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
 
+[[projects]]
+  digest = "1:c805e517269b0ba4c21ded5836019ed7d16953d4026cb7d00041d039c7906be9"
+  name = "gopkg.in/natefinch/lumberjack.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a96e63847dc3c67d17befa69c303767e2f84e54f"
+  version = "v2.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -453,12 +418,10 @@
     "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/shares",
     "github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/snapshots",
     "github.com/gophercloud/gophercloud/pagination",
-    "github.com/lestrrat-go/file-rotatelogs",
     "github.com/mitchellh/mapstructure",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/prometheus/client_golang/prometheus/push",
-    "github.com/rifflock/lfshook",
     "github.com/satori/go.uuid",
     "github.com/segmentio/kafka-go",
     "github.com/sirupsen/logrus",
@@ -469,6 +432,7 @@
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/status",
     "gopkg.in/yaml.v2",
+    "gopkg.in/natefinch/lumberjack.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

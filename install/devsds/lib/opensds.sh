@@ -45,6 +45,11 @@ enabled_backends = $OPENSDS_BACKEND_LIST
 endpoint = $HOST_IP:$ETCD_PORT,$HOST_IP:$ETCD_PEER_PORT
 driver = etcd
 
+[log]
+path = /var/log/opensds
+level = info
+format = [%time%] [%level%] [%filename%] [%funcName%():%lineNo%] [PID:%process%] %message%
+
 OPENSDS_GLOBAL_CONFIG_DOC
 }
 

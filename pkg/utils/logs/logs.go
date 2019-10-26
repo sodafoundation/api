@@ -14,7 +14,6 @@
 package logs
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -25,9 +24,8 @@ import (
 	"time"
 
 	"github.com/go-ini/ini"
-	"github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type LogFormatter struct {
@@ -51,6 +49,8 @@ const (
 	defaultLogFormat       = "[%time%] [%level%] [%filename%] [%funcName%():%lineNo%] [PID:%process%] %message%"
 	defaultTimestampFormat = time.RFC3339
 	logSection             = "log"
+	tenMb				   = 10
+	threeMonth			   = 100
 )
 
 func InitLogs() {
@@ -64,34 +64,17 @@ func configureLogModule(path, level, format string) {
 }
 
 func configureWriter(path, format string) error {
-	debugWriter, debugWriterErr := createWriter(path, debugLevel)
-	infoWriter, infoWriterErr := createWriter(path, infoLevel)
-	warnWriter, warnWriterErr := createWriter(path, warnLevel)
-	errorWriter, errorWriterErr := createWriter(path, errorLevel)
-	if debugWriterErr != nil || infoWriterErr != nil || warnWriterErr != nil || errorWriterErr != nil {
-		return errors.New("Failed to create writer!\n")
-	}
-	lfsHook := lfshook.NewHook(lfshook.WriterMap{
-		logrus.DebugLevel: debugWriter,
-		logrus.InfoLevel:  infoWriter,
-		logrus.WarnLevel:  warnWriter,
-		logrus.ErrorLevel: errorWriter}, &LogFormatter{
+	logrus.SetFormatter(&LogFormatter{
 		TimestampFormat: defaultTimestampFormat,
 		LogFormat:       format + "\n",
 	})
-	logrus.AddHook(lfsHook)
+	logrus.SetOutput(&lumberjack.Logger{
+		Filename: filepath.Join(path, logName()),
+		MaxSize: tenMb,
+		MaxAge: threeMonth,
+		Compress: true,
+	})
 	return nil
-}
-
-func createWriter(path, level string) (*rotatelogs.RotateLogs, error) {
-	writer, err := rotatelogs.New(
-		filepath.Join(path, logNameForRotateLogs(level)),
-		rotatelogs.WithLinkName(filepath.Join(path, shortLogNameForRotateLogs(level))),
-		rotatelogs.WithRotationTime(time.Hour))
-	if err != nil {
-		log.Println(err)
-	}
-	return writer, err
 }
 
 func configureLevel(level string) {
@@ -108,20 +91,11 @@ func configureLevel(level string) {
 	logrus.SetReportCaller(true)
 }
 
-func logNameForRotateLogs(level string) (name string) {
-	name = fmt.Sprintf("%s.%s.%s.log.%s.%%Y%%m%%d%%H.%d",
+func logName() (name string) {
+	name = fmt.Sprintf("%s.%s.%s.log",
 		filepath.Base(os.Args[0]),
 		hostName(),
-		userName(),
-		strings.ToUpper(level),
-		os.Getpid())
-	return name
-}
-
-func shortLogNameForRotateLogs(level string) (name string) {
-	name = fmt.Sprintf("%s.%s",
-		filepath.Base(os.Args[0]),
-		strings.ToUpper(level))
+		userName())
 	return name
 }
 
