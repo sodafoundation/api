@@ -63,7 +63,7 @@ func configureLogModule(path, level, format string) {
 	configureLevel(level)
 }
 
-func configureWriter(path, format string) error {
+func configureWriter(path, format string) {
 	logrus.SetFormatter(&LogFormatter{
 		TimestampFormat: defaultTimestampFormat,
 		LogFormat:       format + "\n",
@@ -74,7 +74,6 @@ func configureWriter(path, format string) error {
 		MaxAge: threeMonth,
 		Compress: true,
 	})
-	return nil
 }
 
 func configureLevel(level string) {
