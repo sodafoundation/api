@@ -38,12 +38,16 @@ func TestParse(t *testing.T) {
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
-						IsSpaceEfficient:   true,
+						Compression:        true,
+						Deduplication:      true,
 					},
 					IOConnectivity: model.IOConnectivityLoS{
 						AccessProtocol: "rbd",
 						MaxIOPS:        8000000,
 						MaxBWS:         700,
+						MinIOPS:        1000000,
+						MinBWS:         100,
+						Latency:        5,
 					},
 					Advanced: map[string]interface{}{
 						"diskType": "SSD",

@@ -44,12 +44,16 @@ var (
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true,
+					"compression":        true,
+					"deduplication":      true,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
 					"maxIOPS":        float64(5000000),
+					"minIOPS":        float64(5000000),
 					"maxBWS":         float64(500),
+					"minBWS":         float64(500),
+					"latency":        float64(100),
 				},
 			},
 		},
@@ -75,12 +79,16 @@ var (
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true,
+					"compression":        true,
+					"deduplication":      true,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "NFS",
 					"maxIOPS":        float64(5000000),
+					"minIOPS":        float64(5000000),
 					"maxBWS":         float64(500),
+					"minBWS":         float64(500),
+					"latency":        float64(100),
 				},
 			},
 		},
@@ -89,12 +97,16 @@ var (
 	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
-			"isSpaceEfficient":   true,
+			"compression":        true,
+			"deduplication":      true,
 		},
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
 			"maxIOPS":        float64(5000000),
+			"minIOPS":        float64(5000000),
 			"maxBWS":         float64(500),
+			"minBWS":         float64(500),
+			"latency":        float64(100),
 		},
 	}
 
@@ -127,12 +139,16 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:        true,
+					Deduplication:      true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
 					MaxIOPS:        8000000,
 					MaxBWS:         700,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        5,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -154,12 +170,16 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:        true,
+					Deduplication:      true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
 					MaxIOPS:        3000000,
 					MaxBWS:         350,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        5,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SAS",
@@ -181,13 +201,17 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy:      "Thin",
-					IsSpaceEfficient:        false,
+					Compression:             false,
+					Deduplication:           false,
 					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "nfs",
 					MaxIOPS:        7000000,
 					MaxBWS:         600,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        5,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -257,12 +281,12 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "ad25d59-a160-45b2-8920-211be282e2dfh",
 			},
-			Description: "This is a sample Acl for testing",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-			Type: "ip",
+			Description:      "This is a sample Acl for testing",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Type:             "ip",
 			AccessCapability: []string{"Read", "Write"},
-			AccessTo: "10.32.109.151",
-			FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			AccessTo:         "10.32.109.151",
+			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
 		},
 	}
 
@@ -488,12 +512,16 @@ var (
 			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        5000000,
-					"maxBWS":         500
+					"maxBWS":         500,
+					"minIOPS":        1000000,
+					"minBWS": 	  100,
+					"latency":        5
 				}
 			}
 		}
@@ -502,12 +530,16 @@ var (
 	ByteCustomProperties = `{
 		"dataStorage": {
 			"provisioningPolicy": "Thin",
-			"isSpaceEfficient":   true
+			"compression":   true,
+                        "deduplication": true
 		},
 		"ioConnectivity": {
 			"accessProtocol": "rbd",
 			"maxIOPS":        5000000,
-			"maxBWS":         500
+			"maxBWS":         500,
+			"minIOPS":        1000000,
+			"minBWS": 	  100,
+			"latency":        5
 		}
 	}`
 
@@ -540,7 +572,8 @@ var (
 		"extras": {
 			"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 			"ioConnectivity": {
 				"accessProtocol": "rbd",
@@ -565,12 +598,16 @@ var (
 			"extras": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        8000000,
-					"maxBWS": 	      700
+					"maxBWS": 	  700,
+					"minIOPS":        1000000,
+					"minBWS": 	  100,
+					"latency":        5
 				},
 				"advanced": {
 					"diskType": "SSD",
@@ -589,12 +626,16 @@ var (
 			"extras": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        3000000,
-					"maxBWS": 	      350
+					"maxBWS": 	  350,
+					"minIOPS":        1000000,
+					"minBWS": 	  100,
+					"latency":        5
 				},
 				"advanced": {
 					"diskType": "SAS",
@@ -682,7 +723,7 @@ var (
 
 	ByteFileShareAcl = `{
 		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-		"description": "This is a sample Acl for testing"	
+		"description": "This is a sample Acl for testing"
     }`
 
 	ByteFileSharesAcls = `[
@@ -871,12 +912,16 @@ var (
 			"customProperties": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        5000000,
-					"maxBWS":         500
+					"maxBWS":         500,
+					"minIOPS":        1000000,
+					"minBWS": 	  100,
+					"latency":        5
 				}
 			}
 		}`,
@@ -907,12 +952,16 @@ var (
 			"extras": {
 				"dataStorage": {
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true
+					"compression":   true,
+                                        "deduplication": true
 				},
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        8000000,
-					"maxBWS": 	      700
+					"maxBWS": 	  700,
+					"minIOPS":        1000000,
+					"minBWS": 	  100,
+					"latency":        5
 				},
 				"advanced": {
 					"diskType": "SSD",

@@ -52,12 +52,16 @@ func TestSetup(t *testing.T) {
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
-						IsSpaceEfficient:   false,
+						Compression:        false,
+						Deduplication:      false,
 					},
 					IOConnectivity: model.IOConnectivityLoS{
 						AccessProtocol: "iscsi",
 						MaxIOPS:        7000000,
 						MaxBWS:         600,
+						MinIOPS:        1000000,
+						MinBWS:         100,
+						Latency:        5,
 					},
 					Advanced: map[string]interface{}{
 						"diskType": "SSD",
@@ -72,12 +76,16 @@ func TestSetup(t *testing.T) {
 				Extras: model.StoragePoolExtraSpec{
 					DataStorage: model.DataStorageLoS{
 						ProvisioningPolicy: "Thin",
-						IsSpaceEfficient:   false,
+						Compression:        false,
+						Deduplication:      false,
 					},
 					IOConnectivity: model.IOConnectivityLoS{
 						AccessProtocol: "iscsi",
 						MaxIOPS:        3000000,
 						MaxBWS:         300,
+						MinIOPS:        1000000,
+						MinBWS:         100,
+						Latency:        5,
 					},
 					Advanced: map[string]interface{}{
 						"diskType": "SSD",

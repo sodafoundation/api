@@ -206,7 +206,8 @@ paths:
                 dataStorage:
                   recoveryTimeObjective: 10
                   provisioningPolicy: Thin
-                  IsSpaceEfficient: true
+                  compression: true
+                  deduplication: true
                 ioConnectivity:
                   accessProtocol: iscsi
                   maxIOPS: 100000
@@ -1615,7 +1616,9 @@ definitions:
         enum:
           - Thin
           - Thick
-      isSpaceEfficient:
+      compression:
+        type: boolean
+      deduplication:
         type: boolean
       characterCodeSet:
         type: string
@@ -2067,7 +2070,7 @@ definitions:
   VolumeSpec:
     description: >-
       Volume is an block device created by storage service, it can be attached
-      to physical machine or virtual machine instance. 
+      to physical machine or virtual machine instance.
     allOf:
       - $ref: '#/definitions/BaseModel'
       - type: object
