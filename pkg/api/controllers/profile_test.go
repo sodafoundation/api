@@ -76,8 +76,8 @@ func TestCreateProfile(t *testing.T) {
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"compression":        true,
-					"deduplication":      true,
+					"compression": false,
+					"deduplication": false,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
@@ -334,8 +334,8 @@ func TestFileShareCreateProfile(t *testing.T) {
 				DataStorage: model.DataStorageLoS{
 					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 					ProvisioningPolicy:      "Thin",
-					Compression:             true,
-					Deduplication:           true,
+					Compression:             false,
+					Deduplication:           false,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "NFS",
@@ -375,8 +375,8 @@ func TestFileShareUpdateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-				"compression": true
-				"deduplication": true
+				"compression": false
+				"deduplication": false
                         },
                         "ioConnectivity": {
                                 "accessProtocol": "NFS",
@@ -572,7 +572,7 @@ func TestAddCustomProperty(t *testing.T) {
 		mockClient.On("AddCustomProperty", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017", model.CustomPropertiesSpec{
 			"dataStorage": map[string]interface{}{
 				"provisioningPolicy": "Thin",
-				"compression":        true, "deduplication": true}}).Return(&SampleCustomProperties, nil)
+				"compression": false, "deduplication": false}}).Return(&SampleCustomProperties, nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("POST", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017/customProperties", strings.NewReader(fakeBody))
