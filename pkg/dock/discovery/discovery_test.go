@@ -80,8 +80,13 @@ func TestDiscover(t *testing.T) {
 		fdd.dcks = append(fdd.dcks, &SampleDocks[i])
 	}
 	for i := range SamplePools {
+		fdd.pols = append(fdd.pols, &SamplePools[i])
 		expected = append(expected, &SamplePools[i])
 	}
+	mockClient := new(dbtest.Client)
+	mockClient.On("ListPools", c.NewAdminContext()).Return(fdd.pols, nil)
+	fdd.c = mockClient
+
 	if err := fdd.Discover(); err != nil {
 		t.Errorf("Failed to discoverer pools: %v\n", err)
 	}

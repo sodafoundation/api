@@ -39,6 +39,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+const (
+	availableStatus = "available"
+	unavailableStatus = "unavailable"
+)
+
 type Context struct {
 	StopChan chan bool
 	ErrChan  chan error
@@ -135,6 +140,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info
 	pdd.pols = pdd.pols[:0]
 	var pols []*model.StoragePoolSpec
+	var polsInDb []*model.StoragePoolSpec
 	var err error
 	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
@@ -145,6 +151,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 				pol.DockId = dck.Id
+				pol.Status = availableStatus
 			}
 		} else {
 			d := drivers.Init(dck.DriverName)
@@ -162,6 +169,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 				pol.DockId = dck.Id
 				pol.ReplicationType = replicationType
 				pol.ReplicationDriverName = replicationDriverName
+				pol.Status = availableStatus
 			}
 		}
 		if err != nil {
@@ -175,8 +183,24 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 
 		pdd.pols = append(pdd.pols, pols...)
 	}
+	ctx := c.NewAdminContext()
+	polsInDb, err = pdd.c.ListPools(ctx)
+	if err != nil {
+		return fmt.Errorf("can not read pools in db")
+	}
+	dbPolsMap := make(map[string]*model.StoragePoolSpec)
+	for _, polInDb := range polsInDb {
+		dbPolsMap[polInDb.Id] = polInDb
+	}
+	for _, pol := range pdd.pols {
+		delete(dbPolsMap, pol.Id)
+	}
+	for _, unavailablePol := range dbPolsMap {
+		unavailablePol.Status = unavailableStatus
+		pdd.pols = append(pdd.pols, unavailablePol)
+	}
 	if len(pdd.pols) == 0 {
-		return fmt.Errorf("There is no pool can be found.")
+		return fmt.Errorf("there is no pool can be found")
 	}
 
 	return nil
