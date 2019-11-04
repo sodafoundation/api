@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -41,7 +42,6 @@ const (
 	path                   = "path"
 	level                  = "level"
 	format                 = "format"
-	configFileName         = "/etc/opensds/opensds.conf"
 	defaultLogPath         = "/var/log/opensds"
 	defaultLogLevel        = "info"
 	unknownHost            = "unknownhost"
@@ -49,8 +49,8 @@ const (
 	defaultLogFormat       = "[%time%] [%level%] [%filename%] [%funcName%():%lineNo%] [PID:%process%] %message%"
 	defaultTimestampFormat = time.RFC3339
 	logSection             = "log"
-	tenMb				   = 10
-	threeMonth			   = 100
+	tenMb                  = 10
+	threeMonth             = 100
 )
 
 func InitLogs() {
@@ -70,8 +70,8 @@ func configureWriter(path, format string) {
 	})
 	logrus.SetOutput(&lumberjack.Logger{
 		Filename: filepath.Join(path, logName()),
-		MaxSize: tenMb,
-		MaxAge: threeMonth,
+		MaxSize:  tenMb,
+		MaxAge:   threeMonth,
 		Compress: true,
 	})
 }
@@ -129,7 +129,7 @@ func readConfigurationFile() (cfgPath, cfgLevel, cfgFormat string) {
 	cfgPath = defaultLogPath
 	cfgLevel = defaultLogLevel
 	cfgFormat = defaultLogFormat
-	cfg, err := ini.Load(configFileName)
+	cfg, err := ini.Load(constants.OpensdsConfigPath)
 	if err != nil {
 		log.Println("Failed to open config file")
 		return cfgPath, cfgLevel, cfgFormat
