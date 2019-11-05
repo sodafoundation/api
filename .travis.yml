@@ -21,16 +21,9 @@ before_install:
   - sudo apt-get install -y build-essential gcc
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
-<<<<<<< 0feeb98168409d1666fe427663d0ab192adb5e68
   - sudo docker pull p1c2u/openapi-spec-validator
-
-=======
   - go get -v github.com/onsi/gomega
   - go get -v github.com/onsi/ginkgo/ginkgo
-  - go get github.com/modocache/gover
-  - go get -v -t ./...
-  - export PATH=$PATH:$HOME/gopath/bin
->>>>>>> end
 
 matrix:
   fast_finish: true

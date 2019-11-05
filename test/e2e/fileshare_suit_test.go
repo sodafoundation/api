@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build integration
+// +build e2e
 
-package integration
+package e2e
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ import (
 //Function to run the Ginkgo Test
 func TestFileShareIntegration(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	//var UID string
+
 	var _ = ginkgo.BeforeSuite(func() {
 		fmt.Println("Before Suite Execution")
 
@@ -36,5 +36,5 @@ func TestFileShareIntegration(t *testing.T) {
 		ginkgo.By("After Suite Execution....!")
 	})
 
-	ginkgo.RunSpecs(t, "File Share Integration Test Suite")
+	ginkgo.RunSpecs(t, "File Share E2E Test Suite")
 }
