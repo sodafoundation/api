@@ -21,13 +21,13 @@ package cli
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-	"io/ioutil"
 
-	"github.com/spf13/cobra"
 	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/spf13/cobra"
 )
 
 var dockCommand = &cobra.Command{
@@ -55,18 +55,18 @@ var dockImportCommand = &cobra.Command{
 }
 
 var (
-	dockLimit       string
-	dockOffset      string
-	dockSortDir     string
-	dockSortKey     string
-	dockId          string
-	dockName        string
-	dockDescription string
-	dockStatus      string
-	dockStorageType string
-	dockEndpoint    string
-	dockDriverName  string
-	dockPoolConfigFilePath string
+	dockLimit          string
+	dockOffset         string
+	dockSortDir        string
+	dockSortKey        string
+	dockId             string
+	dockName           string
+	dockDescription    string
+	dockStatus         string
+	dockStorageType    string
+	dockEndpoint       string
+	dockDriverName     string
+	poolConfigFilePath string
 )
 
 func init() {
@@ -81,7 +81,7 @@ func init() {
 	dockListCommand.Flags().StringVarP(&dockStorageType, "storageType", "", "", "list docks by storage type")
 	dockListCommand.Flags().StringVarP(&dockEndpoint, "endpoint", "", "", "list docks by endpoint")
 	dockListCommand.Flags().StringVarP(&dockDriverName, "driverName", "", "", "list docks by driver name")
-	dockImportCommand.Flags().StringVarP(&dockPoolConfigFilePath, "poolConfig", "p", "", "indicate the pool config file")
+	dockImportCommand.Flags().StringVarP(&poolConfigFilePath, "poolConfig", "p", "", "indicate the pool config file")
 
 	dockCommand.AddCommand(dockShowCommand)
 	dockCommand.AddCommand(dockListCommand)
@@ -125,19 +125,26 @@ func dockImportAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 2)
 	storageType := args[0]
 	dockConfigFilePath := args[1]
-	addBackendType(storageType)
-	addBackendInfo(dockConfigFilePath)
-	if dockPoolConfigFilePath != "" {
-		importDriverConfig(storageType, dockPoolConfigFilePath)
+
+	importDockConfig(storageType, dockConfigFilePath)
+	if poolConfigFilePath != "" {
+		importPoolConfig(storageType, poolConfigFilePath)
 	}
 }
 
-func addBackendType(backendType string) {
+func importDockConfig(storageType, dockConfigFilePath string) {
+	addEnabledBackendType(storageType)
+	addEnabledBackendInfo(dockConfigFilePath)
+}
+
+func addEnabledBackendType(backendType string) {
+	// Read contents from file
 	config, err := ioutil.ReadFile(constants.OpensdsConfigPath)
 	if err != nil {
-		Errorln(constants.OpensdsConfigPath, " is not exist!")
+		Errorln("open ", constants.OpensdsConfigPath, " failed")
 		os.Exit(1)
 	}
+	// Add storage type to line "enabled_backends"
 	lines := strings.Split(string(config), "\n")
 	for i, line := range lines {
 		if strings.Contains(line, "enabled_backends") {
@@ -145,28 +152,44 @@ func addBackendType(backendType string) {
 		}
 	}
 	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(constants.OpensdsConfigPath, []byte(output), 0644)
+	// Write contents back to file
+	fileStat, err := os.Lstat(constants.OpensdsConfigPath)
+	if err != nil {
+		Errorln("open ", constants.OpensdsConfigPath, " failed")
+		os.Exit(1)
+	}
+	err = ioutil.WriteFile(constants.OpensdsConfigPath, []byte(output), fileStat.Mode().Perm())
+	if err != nil {
+		Errorln("write ", constants.OpensdsConfigPath, " failed")
+		os.Exit(1)
+	}
 }
 
-func addBackendInfo(backendConfig string) {
+func addEnabledBackendInfo(backendConfig string) {
 	dockConfig, err := ioutil.ReadFile(backendConfig)
 	if err != nil {
-		Errorln(backendConfig, " is not exist!")
+		Errorln(backendConfig, " is not exist")
 		os.Exit(1)
 	}
 	importDockCmd := fmt.Sprintf("cat>>%s<<EOF\n%sEOF", constants.OpensdsConfigPath, string(dockConfig))
-	_,err = exec.Command("bash", "-c",importDockCmd).CombinedOutput()
+	_, err = exec.Command("bash", "-c", importDockCmd).CombinedOutput()
 	if err != nil {
-		fmt.Println("err is ", err)
+		Errorln("write config file failed, ", err)
+		os.Exit(1)
 	}
 }
 
-func importDriverConfig(storageType string, driverConfig string) {
+func importPoolConfig(storageType string, driverConfig string) {
 	poolConfig, err := ioutil.ReadFile(driverConfig)
-	driverPath := fmt.Sprintf("/etc/opensds/driver/%s.yaml", storageType)
-	err = ioutil.WriteFile(driverPath, poolConfig, 0644)
 	if err != nil {
-		Errorln("Write file failed")
+		Errorln("open ", driverConfig, " failed")
+		os.Exit(1)
+	}
+	driverPath := fmt.Sprintf("/etc/opensds/driver/%s.yaml", storageType)
+	importPoolCmd := fmt.Sprintf("cat>>%s<<EOF\n%sEOF", driverPath, poolConfig)
+	_, err = exec.Command("bash", "-c", importPoolCmd).CombinedOutput()
+	if err != nil {
+		Errorln("write config file failed, ", err)
 		os.Exit(1)
 	}
 }
