@@ -608,6 +608,12 @@ paths:
           schema:
             type: string
             uniqueItems: true
+        - name: hostId
+          in: query
+          description: The UUID of the host assosicated with the attachment.
+          schema:
+            type: string
+            uniqueItems: true
       tags:
         - Block volume attachments
       description: Lists information for all volume attachments.
@@ -619,7 +625,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeAttachmentSpec'
+                  $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -636,10 +642,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  attachment:
-                    $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -649,7 +652,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
+        $ref: '#/components/requestBodies/VolumeAttachmentCreateSpec'
   '/v1beta/{tenantId}/block/attachments/{attachmentId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -664,7 +667,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -683,7 +686,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -695,7 +698,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
+        $ref: '#/components/requestBodies/VolumeAttachmentUpdateSpec'
     delete:
       tags:
         - Block volume attachments
@@ -1632,6 +1635,156 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
+  /v1beta/{tenantId}/host/hosts:
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+      - Host
+      description: Lists host information.
+      parameters:
+      - name: limit
+        in: query
+        description: Number of query results on multiple pages
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        description: Start position of the pagination query
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: sortKey
+        in: query
+        description: Sorting keyword, which can be sorted based on the number of initiators
+        schema:
+          type: string
+          enum:
+          - name
+      - name: sortDir
+        in: query
+        description: Asending or descending
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+      - name: hostName
+        in: query
+        description: Host name
+        schema:
+          maxLength: 255
+          minLength: 1
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    post:
+      tags:
+      - Host
+      description: Creates host.
+      requestBody:
+        $ref: '#/components/requestBodies/HostCreateSpec'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+
+  /v1beta/{tenantId}/host/{hostId}:
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/hostId'
+    get:
+      tags:
+      - Host
+      description: Get details about the host
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    put:
+      tags:
+      - Host
+      description: Modify host details
+      operationId: putHost
+      requestBody:
+        $ref: '#/components/requestBodies/HostUpdateSpec'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    delete:
+      tags:
+      - Host
+      description: Removes host
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
 security:
   - basicAuth: []
 externalDocs:
@@ -1741,6 +1894,13 @@ components:
       description: The UUID of the relication.
       schema:
         type: string
+    hostId:
+      name: hostId
+      in: path
+      required: true
+      description: The UUID of the host.
+      schema:
+        type: string
   responses:
     HTTPStatus400:
       description: BadRequest
@@ -1790,11 +1950,26 @@ components:
                 type: string
               description:
                 type: string
-    VolumeAttachmentSpec:
+    VolumeAttachmentCreateSpec:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/VolumeAttachmentSpec'
+            $ref: '#/components/schemas/VolumeAttachmentCreateSpec'
+    VolumeAttachmentUpdateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeAttachmentUpdateSpec'
+    HostCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HostCreateSpec'
+    HostUpdateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HostUpdateSpec'
   securitySchemes:
     basicAuth:
       type: http
@@ -2351,62 +2526,61 @@ components:
           type: integer
           format: int64
           example: 2
-    VolumeAttachmentSpec:
+    VolumeAttachmentCreateSpec:
+      description: Attachment is a description of volume attached resource.
+      required:
+      - volumeId
+      - hostId
+      type: object
+      properties:
+        hostId:
+          type: string
+        volumeId:
+          type: string
+        attachMode:
+          type: string
+          enum:
+          - ro
+          - rw
+    VolumeAttachmentRespSpec:
       description: Attachment is a description of volume attached resource.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - tenantId
-            - hostInfo
-            - connectionInfo
-            - mountpoint
-            - status
-            - volumeId
-          properties:
-            tenantId:
-              type: string
-              readOnly: true
-            userId:
-              type: string
-              readOnly: true
-            attachMode:
-              type: string
-              enum:
-                - rw
-                - ro
-            hostInfo:
-              $ref: '#/components/schemas/HostInfo'
-            connectionInfo:
-              $ref: '#/components/schemas/ConnectionInfo'
-            mountpoint:
-              type: string
-            status:
-              type: string
-              readOnly: true
-            volumeId:
-              type: string
-    HostInfo:
-      description: >-
-        HostInfo is a structure for all properties of host when create a volume
-        attachment.
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          attachMode:
+            type: string
+            enum:
+            - rw
+            - ro
+          hostId:
+            type: string
+          volumeId:
+            type: string
+          mountpoint:
+            type: string
+          status:
+            type: string
+            readOnly: true
+          connectionInfo:
+            $ref: '#/components/schemas/ConnectionInfo'
+
+
+    VolumeAttachmentUpdateSpec:
       type: object
-      required:
-        - platform
-        - osType
-        - ip
-        - host
       properties:
-        platform:
+        connectionInfo:
+          $ref: '#/components/schemas/ConnectionInfo'
+        mountpoint:
           type: string
-        osType:
-          type: string
-        ip:
-          type: string
-        host:
-          type: string
-        initiator:
-          type: string
+
+
     ConnectionInfo:
       description: >-
         ConnectionInfo is a structure for all properties of connection when
@@ -2646,3 +2820,185 @@ components:
           type: string
           format: date-time
           example: '2017-04-10T14:36:58.014Z'
+    HostCreateSpec:
+      required:
+      - accessMode
+      - osType
+      - ip
+      - hostName
+      type: object
+      properties:
+        osType:
+          type: string
+          enum:
+          - Linux
+          - Windows
+        hostName:
+          type: string
+          minLength: 1
+          maxLength: 28
+          description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
+        ip:
+          type: string
+          description: IP address of the host, mandatory
+          example: 8.8.8.8
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          description: Host access port
+          format: int32
+          example: 22
+        accessMode:
+          type: string
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'Agent'. 'port', 'username'and 'password' are requried in 'Agent' mode.
+          enum:
+          - Agent
+          - AgentLess
+        username:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: username to access Host
+          example: root
+        password:
+          maxLength: 1024
+          minLength: 1
+          type: string
+          description: password to access Host
+          example: password
+        availabilityZones:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+            minLength: 1
+            description: name or uuid of availablity zone
+        initiators:
+          type: array
+          description: Initiator of host
+          items:
+            type: object
+            properties:
+              portName:
+                maxLength: 255
+                minLength: 1
+                type: string
+                description: Host initiator. Set the wwn, iSCSI type of the host whose
+                  FC type is set to iqn of the host
+                example: 20000024ff5bb888
+              protocol:
+                type: string
+                description: Initiator type FC or iSCSI
+                example: iSCSI
+                enum:
+                - iSCSI
+                - FC
+      description: Host is a consumer of volume from storage.
+
+    HostUpdateSpec:
+      type: object
+      properties:
+        hostName:
+          type: string
+          minLength: 1
+          maxLength: 28
+          description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
+        ip:
+          type: string
+          description: IP address of the host, mandatory
+          example: 8.8.8.8
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          description: Host access port
+          format: int32
+          example: 22
+        accessMode:
+          type: string
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'Agent'. 'port', 'username'and 'password' are requried in 'Agent' mode.
+          enum:
+          - Agent
+          - AgentLess
+        username:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: username to access Host
+          example: root
+        password:
+          maxLength: 1024
+          minLength: 1
+          type: string
+          description: password to access Host
+          example: password
+        availabilityZones:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+            minLength: 1
+            description: name or uuid of availablity zone
+        initiators:
+          type: array
+          description: Initiator of host
+          items:
+            type: object
+            properties:
+              portName:
+                maxLength: 255
+                minLength: 1
+                type: string
+                description: Host initiator. Set the wwn, iSCSI type of the host whose
+                  FC type is set to iqn of the host
+                example: 20000024ff5bb888
+              protocol:
+                type: string
+                description: Initiator type FC or iSCSI
+                example: iSCSI
+                enum:
+                - iSCSI
+                - FC
+      description: Host is a consumer of volume from storage.
+    HostRespSpec:
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          id:
+            type: string
+          tenantId:
+            type: string
+          hostName:
+            type: string
+          osType:
+            type: string
+          accessMode:
+            type: string
+          ip:
+            type: string
+          port:
+            type: string
+          username:
+            type: string
+          availabilityZones:
+            type: array
+            items:
+              type: string
+          initiators:
+            type: array
+            items:
+              type: object
+              properties:
+                portName:
+                  type: string
+                  example: 20000024ff5bb888
+                protocol:
+                  type: string
+                  example: iSCSI
+                  enum:
+                  - iSCSI
+                  - FC
+
+      description: Host is a consumer of volume from storage.
