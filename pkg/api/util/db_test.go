@@ -682,3 +682,159 @@ func TestDeleteFileShareAclDBEntry(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateFileShareAclDBEntry(t *testing.T) {
+	var in = &model.FileShareAclSpec{
+		BaseModel: &model.BaseModel{
+			Id: "6ad25d59-a160-45b2-8920-211be282e2df",
+		},
+		Description: "This is a sample Acl for testing",
+		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Type: "ip",
+		AccessCapability: []string{"Read", "Write"},
+		AccessTo: "10.32.109.15",
+		FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+	}
+
+	t.Run("Everything should work well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		var expected = &SampleFileSharesAcl[2]
+		result, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed to create fileshare err is %v\n", err)
+		}
+		assertTestResult(t, result, expected)
+	})
+
+	t.Run("If profile id is empty", func(t *testing.T) {
+		in.ProfileId = ""
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := "profile id can not be empty when creating fileshare acl in db!"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Invalid Access Type", func(t *testing.T) {
+		in.ProfileId, in.Type = "d2975ebe-d82c-430f-b28e-f373746a71ca", "system"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("invalid fileshare type: %v. Supported type is: ip", in.Type)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Empty Access To", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", ""
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := "accessTo is empty. Please give valid ip segment"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Invalid Ip Segment", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", "201.100.101.8/9.9"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("invalid IP segment %v", in.AccessTo)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Invalid Ip", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", "201.100.101"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("%v is not a valid ip. Please give the proper ip", in.AccessTo)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Empty accesscapability", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo, in.AccessCapability = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", "201.100.101.9", []string{}
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("empty fileshare accesscapability. Supported accesscapability are: {read, write}")
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Invalid accesscapabilities", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo, in.AccessCapability = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", "201.100.101.9", []string{"read", "execute"}
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		value := "execute"
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("invalid fileshare accesscapability: %v. Supported accesscapability are: {read, write}", value)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+
+	t.Run("Invalid fileshare id given", func(t *testing.T) {
+		in.ProfileId, in.Type, in.AccessTo, in.AccessCapability = "d2975ebe-d82c-430f-b28e-f373746a71ca", "ip", "201.100.101.9", []string{"read"}
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0], nil)
+		SampleFileShares[0].Status = model.FileShareError
+		mockClient.On("CreateFileShareAcl", context.NewAdminContext(), in).Return(&SampleFileSharesAcl[2], nil)
+		db.C = mockClient
+
+		_, err := CreateFileShareAclDBEntry(context.NewAdminContext(), in)
+		expectedError := "only the status of file share is available, the acl can be created"
+		assertTestResult(t, err.Error(), expectedError)
+	})
+}
+
+func TestDeleteFileShareSnapshotDBEntry(t *testing.T) {
+	var in = &SampleFileShareSnapshots[0]
+
+	t.Run("When everything works fine", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(&SampleFileShares[0],nil)
+		mockClient.On("DeleteFileShareSnapshot", context.NewAdminContext(), in.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShareSnapshot", context.NewAdminContext(), in.Id, in).Return(nil, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareSnapshotDBEntry(context.NewAdminContext(), in)
+		if err != nil {
+			t.Errorf("failed to delete fileshare snapshot, err is %v\n", err)
+		}
+	})
+
+	t.Run("File status not available", func(t *testing.T) {
+		in.Status = model.FileShareAclInUse
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", context.NewAdminContext(), in.FileShareId).Return(nil, nil)
+		mockClient.On("DeleteFileShareSnapshot", context.NewAdminContext(), in.Id).Return(nil, nil)
+		mockClient.On("UpdateFileShareSnapshot", context.NewAdminContext(), in.Id, in).Return(nil, nil)
+		db.C = mockClient
+
+		err := DeleteFileShareSnapshotDBEntry(context.NewAdminContext(), in)
+		expectedError := fmt.Sprintf("only the fileshare snapshot with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		assertTestResult(t, err.Error(), expectedError)
+	})
+}
