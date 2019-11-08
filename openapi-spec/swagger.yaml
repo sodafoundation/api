@@ -1659,11 +1659,11 @@ paths:
           format: int32
       - name: sortKey
         in: query
-        description: Sorting keyword, which can be sorted based on the number of initiators
+        description: Sorting keyword, which can be sorted based on host name
         schema:
           type: string
           enum:
-          - name
+          - hostName
       - name: sortDir
         in: query
         description: Asending or descending
@@ -1718,7 +1718,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
 
-  /v1beta/{tenantId}/host/{hostId}:
+  /v1beta/{tenantId}/host/hosts/{hostId}:
     parameters:
       - $ref: '#/components/parameters/tenantId'
       - $ref: '#/components/parameters/hostId'
@@ -2575,8 +2575,6 @@ components:
     VolumeAttachmentUpdateSpec:
       type: object
       properties:
-        connectionInfo:
-          $ref: '#/components/schemas/ConnectionInfo'
         mountpoint:
           type: string
 
@@ -2831,8 +2829,8 @@ components:
         osType:
           type: string
           enum:
-          - Linux
-          - Windows
+          - linux
+          - windows
         hostName:
           type: string
           minLength: 1
@@ -2851,10 +2849,10 @@ components:
           example: 22
         accessMode:
           type: string
-          description: The way to access host, system will access host to get more information and install agent if accessMode is 'Agent'. 'port', 'username'and 'password' are requried in 'Agent' mode.
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'agent'. 'port', 'username'and 'password' are requried in 'agent' mode.
           enum:
-          - Agent
-          - AgentLess
+          - agent
+          - agentless
         username:
           maxLength: 255
           minLength: 1
@@ -2890,10 +2888,10 @@ components:
               protocol:
                 type: string
                 description: Initiator type FC or iSCSI
-                example: iSCSI
+                example: iscsi
                 enum:
-                - iSCSI
-                - FC
+                - iscsi
+                - fibre_channel
       description: Host is a consumer of volume from storage.
 
     HostUpdateSpec:
@@ -2917,10 +2915,10 @@ components:
           example: 22
         accessMode:
           type: string
-          description: The way to access host, system will access host to get more information and install agent if accessMode is 'Agent'. 'port', 'username'and 'password' are requried in 'Agent' mode.
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'agent'. 'port', 'username'and 'password' are requried in 'agent' mode.
           enum:
-          - Agent
-          - AgentLess
+          - agent
+          - agentless
         username:
           maxLength: 255
           minLength: 1
@@ -2956,10 +2954,10 @@ components:
               protocol:
                 type: string
                 description: Initiator type FC or iSCSI
-                example: iSCSI
+                example: iscsi
                 enum:
-                - iSCSI
-                - FC
+                - iscsi
+                - fibre_channel
       description: Host is a consumer of volume from storage.
     HostRespSpec:
       allOf:
@@ -2996,9 +2994,9 @@ components:
                   example: 20000024ff5bb888
                 protocol:
                   type: string
-                  example: iSCSI
+                  example: iscsi
                   enum:
-                  - iSCSI
-                  - FC
+                  - iscsi
+                  - fibre_channel
 
       description: Host is a consumer of volume from storage.
