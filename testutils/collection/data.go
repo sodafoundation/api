@@ -258,12 +258,12 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "ad25d59-a160-45b2-8920-211be282e2dfh",
 			},
-			Description: "This is a sample Acl for testing",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-			Type: "ip",
+			Description:      "This is a sample Acl for testing",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Type:             "ip",
 			AccessCapability: []string{"Read", "Write"},
-			AccessTo: "10.32.109.151",
-			FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			AccessTo:         "10.32.109.151",
+			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
 		},
 	}
 
@@ -461,6 +461,27 @@ var (
 			Description: "This is the first sample group for testing",
 			Status:      "available",
 			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		},
+	}
+
+	SampleHosts = []model.HostSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			HostName:          "sample-db1",
+			OsType:            "Linux",
+			IP:                "192.168.100.100",
+			AvailabilityZones: []string{"default"},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a72d6",
+			},
+			HostName:          "sample-db1",
+			OsType:            "Linux",
+			IP:                "192.168.100.101",
+			AvailabilityZones: []string{"default"},
 		},
 	}
 )
@@ -684,7 +705,7 @@ var (
 
 	ByteFileShareAcl = `{
 		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
-		"description": "This is a sample Acl for testing"	
+		"description": "This is a sample Acl for testing"
     }`
 
 	ByteFileSharesAcls = `[
