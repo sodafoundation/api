@@ -32,8 +32,9 @@ output=$(docker run -v $OPENSDS_DIR/openapi-spec/swagger.yaml:/swagger.yaml --rm
 if [ "$output" != "OK" ]
 then
     echo "Faild to validate openapi spec"
-    echo "Got validation result: $output"
     exit -1
+else
+    echo "Openapi spec validation is passed~"
 fi
 
 # Start unit test.

@@ -10,8 +10,8 @@ go:
   - tip
 
 env:
-  matrix:
   - TARGET=amd64
+    GO111MODULE=on
 
 services:
   - docker
