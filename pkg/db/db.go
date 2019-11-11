@@ -225,6 +225,8 @@ type Client interface {
 
 	ListHosts(ctx *c.Context) ([]*model.HostSpec, error)
 
+	ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error)
+
 	CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error)
 
 	UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error)

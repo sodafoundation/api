@@ -3264,7 +3264,6 @@ func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
 		Url: urls.GenerateHostURL(urls.Etcd, ctx.TenantId),
 	}
 
-	// Admin user should get all volumes including the volumes whose tenant is not admin.
 	if IsAdminContext(ctx) {
 		dbReq.Url = urls.GenerateHostURL(urls.Etcd, "")
 	}
@@ -3288,6 +3287,23 @@ func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
 		hosts = append(hosts, host)
 	}
 	return hosts, nil
+}
+
+func (c *Client) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		log.Error("List hosts failed: ", err)
+		return nil, err
+	}
+
+	var res []*model.HostSpec
+	for _, host := range hosts {
+		if hostName == host.HostName {
+			res = append(res, host)
+		}
+	}
+
+	return res, nil
 }
 
 func (c *Client) CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {

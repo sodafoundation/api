@@ -593,6 +593,15 @@ func (c *FakeDbClient) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
 	return hosts, nil
 }
 
+func (c *FakeDbClient) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
+	var hosts []*model.HostSpec
+
+	for i := range SampleHosts {
+		hosts = append(hosts, &SampleHosts[i])
+	}
+	return hosts, nil
+}
+
 func (c *FakeDbClient) CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {
 	return &SampleHosts[0], nil
 }

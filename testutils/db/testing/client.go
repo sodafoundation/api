@@ -1192,6 +1192,29 @@ func (_m *Client) ListHosts(ctx *context.Context) ([]*model.HostSpec, error) {
 	return r0, r1
 }
 
+// ListHostsByName provides a mock function with given fields: ctx, hostName
+func (_m *Client) ListHostsByName(ctx *context.Context, hostName string) ([]*model.HostSpec, error) {
+	ret := _m.Called(ctx, hostName)
+
+	var r0 []*model.HostSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) []*model.HostSpec); ok {
+		r0 = rf(ctx, hostName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.HostSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, hostName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListPools provides a mock function with given fields: ctx
 func (_m *Client) ListPools(ctx *context.Context) ([]*model.StoragePoolSpec, error) {
 	ret := _m.Called(ctx)

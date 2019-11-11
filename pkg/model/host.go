@@ -19,7 +19,9 @@ This module implements the host data structure.
 
 package model
 
-// HostSpec is a comupter system which can be discoveried manually in Agentless
+import "encoding/json"
+
+// HostSpec is a comupter system which can be discoveried manually in agentless
 // mode or automatically in Agent mode.
 // It's a consumer of volume or file share from storage.
 type HostSpec struct {
@@ -42,7 +44,7 @@ type HostSpec struct {
 	// The way to access host, system will access host to get more information
 	// and install agent if accessMode is 'Agent'.
 	// 'port', 'username'and 'password' are requried in 'Agent' mode.
-	// Enum: [Agent Agentless]
+	// Enum: [agent agentless]
 	AccessMode string `json:"accessMode,omitempty"`
 
 	// The locality that pool belongs to.
@@ -78,4 +80,12 @@ type Initiator struct {
 	// protocol
 	// Enum: [iSCSI FC]
 	Protocol string `json:"protocol,omitempty"`
+}
+
+// MarshalJSON to remove sensitive data
+func (m HostSpec) MarshalJSON() ([]byte, error) {
+	type hostResp HostSpec
+	resp := hostResp(m)
+	resp.Password = ""
+	return json.Marshal(resp)
 }
