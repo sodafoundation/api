@@ -56,4 +56,10 @@ const (
 	Read    = "Read"
 	Write   = "Write"
 	Execute = "Execute"
+
+	//Signature parameter name
+	AuthorizationHeader = "Authorization"
+	SignDateHeader      = "X-Auth-Date"
+	Service             = "s3"
+	Region              = "default_region"
 )
