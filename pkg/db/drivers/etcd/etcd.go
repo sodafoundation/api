@@ -1359,6 +1359,142 @@ func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
 	return azs, nil
 }
 
+// GetZone
+func (c *Client) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var z = &model.ZoneSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), z); err != nil {
+		log.Error("When parsing zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return z, nil
+}
+
+// CreateZone
+func (c *Client) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	if zone.Id == "" {
+		zone.Id = uuid.NewV4().String()
+	}
+	if zone.CreatedAt == "" {
+		zone.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	// zone name must be unique.
+	// if _, err := c.getZoneByName(ctx, zone.Name); err == nil {
+	// 	return nil, fmt.Errorf("the zone name '%s' already exists", zone.Name)
+	// }
+
+	zoneBody, err := json.Marshal(zone)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateZoneURL(urls.Etcd, "", zone.Id),
+		Content: string(zoneBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When create zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return zone, nil
+}
+
+// UpdateZone
+func (c *Client) UpdateZone(ctx *c.Context, zoneID string, input *model.ZoneSpec) (*model.ZoneSpec, error) {
+	z, err := c.GetZone(ctx, zoneID)
+	if err != nil {
+		return nil, err
+	}
+	if name := input.Name; name != "" {
+		z.Name = name
+	}
+	if desc := input.Description; desc != "" {
+		z.Description = desc
+	}
+	z.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	zBody, err := json.Marshal(z)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+		NewContent: string(zBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return z, nil
+}
+
+// DeleteZone
+func (c *Client) DeleteZone(ctx *c.Context, zoneID string) error {
+	dbReq := &Request{
+		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+	}
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When delete profile in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+//ListZonesWithFilter
+func (c *Client) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
+	zones, err := c.ListZones(ctx)
+	if err != nil {
+		log.Error("List zones failed: ", err.Error())
+		return nil, err
+	}
+
+	// z := c.SelectZones(m, zones)
+	// p := c.ParameterFilter(m, len(z), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
+	// return c.SortZones(z, p)[p.beginIdx:p.endIdx], nil
+
+	return zones, nil
+}
+
+//ListZones
+func (c *Client) ListZones(ctx *c.Context) ([]*model.ZoneSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateZoneURL(urls.Etcd, ""),
+	}
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("Failed to get zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	var azs = []*model.ZoneSpec{}
+	if len(dbRes.Message) == 0 {
+		return azs, nil
+	}
+	for _, msg := range dbRes.Message {
+		var az = &model.ZoneSpec{}
+		if err := json.Unmarshal([]byte(msg), az); err != nil {
+			log.Error("When parsing zone in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		azs = append(azs, az)
+	}
+
+	return azs, nil
+}
+
 // ListPools
 func (c *Client) ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error) {
 	dbReq := &Request{

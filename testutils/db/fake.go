@@ -230,6 +230,35 @@ func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]string, error) 
 	return azs, nil
 }
 
+// GetZone
+func (fc *FakeDbClient) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// CreateZone
+func (fc *FakeDbClient) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// UpdateZone
+func (fc *FakeDbClient) UpdateZone(ctx *c.Context, zoneID string, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// DeleteZone
+func (fc *FakeDbClient) DeleteZone(ctx *c.Context, zoneID string) error {
+	return nil
+}
+
+// ListZonesWithFilter
+func (fc *FakeDbClient) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+func (fc *FakeDbClient) ListZones(ctx *c.Context) ([]*model.ZoneSpec, error) {
+	return nil, nil
+}
+
 // UpdateDock
 func (fc *FakeDbClient) UpdateDock(ctx *c.Context, dckID, name, desp string) (*model.DockSpec, error) {
 	return nil, nil

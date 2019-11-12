@@ -32,26 +32,26 @@ import (
 func init() {
 	var poolPortal PoolPortal
 	beego.Router("/v1beta/pools", &poolPortal, "get:ListPools")
-	beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
+	// beego.Router("/v1beta/availabilityZones", &poolPortal, "get:ListAvailabilityZones")
 	beego.Router("/v1beta/pools/:poolId", &poolPortal, "get:GetPool")
 }
 
-func TestListAvailabilityZones(t *testing.T) {
+// func TestListAvailabilityZones(t *testing.T) {
 
-	t.Run("Should return 200 if everything works well", func(t *testing.T) {
-		mockClient := new(dbtest.Client)
-		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(SampleAvailabilityZones, nil)
-		db.C = mockClient
+// 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
+// 		mockClient := new(dbtest.Client)
+// 		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(SampleAvailabilityZones, nil)
+// 		db.C = mockClient
 
-		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
-		w := httptest.NewRecorder()
-		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		var output []string
-		json.Unmarshal(w.Body.Bytes(), &output)
-		assertTestResult(t, w.Code, 200)
-		assertTestResult(t, output, SampleAvailabilityZones)
-	})
-}
+// 		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+// 		w := httptest.NewRecorder()
+// 		beego.BeeApp.Handlers.ServeHTTP(w, r)
+// 		var output []string
+// 		json.Unmarshal(w.Body.Bytes(), &output)
+// 		assertTestResult(t, w.Code, 200)
+// 		assertTestResult(t, output, SampleAvailabilityZones)
+// 	})
+// }
 
 func TestListPools(t *testing.T) {
 

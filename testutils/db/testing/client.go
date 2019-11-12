@@ -916,6 +916,35 @@ func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) 
 	return r0, r1
 }
 
+// GetZone
+func (_m *Client) GetZone(ctx *context.Context, zoneID string) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// CreateZone
+func (_m *Client) CreateZone(ctx *context.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// UpdateZone
+func (_m *Client) UpdateZone(ctx *context.Context, zoneID string, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+// DeleteZone
+func (_m *Client) DeleteZone(ctx *context.Context, zoneID string) error {
+	return nil
+}
+
+// ListZonesWithFilter
+func (_m *Client) ListZonesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
+	return nil, nil
+}
+
+func (f_m *Client) ListZones(ctx *context.Context) ([]*model.ZoneSpec, error) {
+	return nil, nil
+}
+
 // ListCustomProperties provides a mock function with given fields: ctx, prfID
 func (_m *Client) ListCustomProperties(ctx *context.Context, prfID string) (*model.CustomPropertiesSpec, error) {
 	ret := _m.Called(ctx, prfID)

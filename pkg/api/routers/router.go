@@ -60,7 +60,8 @@ func init() {
 			// ListPools and GetPool are used for checking the status of backend pool, admin only
 			beego.NSRouter("/:tenantId/pools", &controllers.PoolPortal{}, "get:ListPools"),
 			beego.NSRouter("/:tenantId/pools/:poolId", &controllers.PoolPortal{}, "get:GetPool"),
-			beego.NSRouter("/:tenantId/availabilityZones", &controllers.PoolPortal{}, "get:ListAvailabilityZones"),
+			beego.NSRouter("/:tenantId/availabilityZones", &controllers.ZonePortal{}, "get:ListAvailabilityZones;post:CreateZone"),
+			beego.NSRouter("/:tenantId/availabilityZones/:zoneId", &controllers.ZonePortal{}, "get:GetZone;put:UpdateZone;delete:DeleteZone"),
 		)
 	beego.AddNamespace(ns)
 

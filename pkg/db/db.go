@@ -125,6 +125,18 @@ type Client interface {
 
 	DeletePool(ctx *c.Context, polID string) error
 
+	GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error)
+
+	CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error)
+
+	ListZones(ctx *c.Context) ([]*model.ZoneSpec, error)
+
+	ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ZoneSpec, error)
+
+	UpdateZone(ctx *c.Context, zoneID string, zone *model.ZoneSpec) (*model.ZoneSpec, error)
+
+	DeleteZone(ctx *c.Context, zoneID string) error
+
 	CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.ProfileSpec, error)
 
 	GetProfile(ctx *c.Context, prfID string) (*model.ProfileSpec, error)

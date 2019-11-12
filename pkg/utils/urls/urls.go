@@ -49,6 +49,10 @@ func GeneratePoolURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("pools", urlType, tenantId, in...)
 }
 
+func GenerateZoneURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("availabilityZones", urlType, tenantId, in...)
+}
+
 func GenerateProfileURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("profiles", urlType, tenantId, in...)
 }
