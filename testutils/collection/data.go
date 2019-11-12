@@ -248,6 +248,7 @@ var (
 				Id: "6ad25d59-a160-45b2-8920-211be282e2df",
 			},
 			Description:      "This is a sample Acl for testing",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 			Type:             "ip",
 			AccessCapability: []string{"Read", "Write"},
 			AccessTo:         "10.32.109.15",
@@ -274,6 +275,7 @@ var (
 			Name:         "sample-snapshot-01",
 			Description:  "This is the first sample snapshot for testing",
 			SnapshotSize: int64(1),
+			FileShareId:  "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			Status:       "available",
 		},
 		{

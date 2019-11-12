@@ -10,12 +10,8 @@ go:
   - tip
 
 env:
-  matrix:
   - TARGET=amd64
-  # - TARGET=arm64
-  # - TARGET=arm
-  # - TARGET=386
-  # - TARGET=ppc64le
+    GO111MODULE=on
 
 services:
   - docker
@@ -25,41 +21,23 @@ before_install:
   - sudo apt-get install -y build-essential gcc
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
+  - sudo docker pull p1c2u/openapi-spec-validator
+
 
 matrix:
   fast_finish: true
   allow_failures:
   - go: tip
-  - script: osds_verify
-  - script: osds_e2etest_build
   exclude:
-  # - go: tip
-  #   env: TARGET=arm
-  # - go: tip
-  #   env: TARGET=arm64
-  # - go: tip
-  #   env: TARGET=386
-  # - go: tip
-  #   env: TARGET=ppc64le
+
 
 install:
   # Build OpenSDS Controller source code
   - make all
 
-
-jobs:
-  include:
-    - stage: "Test Jobs"                # naming the Tests stage
-      script: make 
-      name: "builds osds core components"            # names the first Tests stage job
-    - script: make osds_verify
-      name: "verify osds"     # names the second Tests stage job
-    - script: make osds_unit_test
-      name: "unit test opensds"     # names the third Tests stage job
-    - script: make osds_integration_test
-      name: "integration test opensds"     # names the fourth Tests stage job
-    - script: make osds_e2etest_build
-      name: "e2e_test"     # names the fifth Tests stage job
+script:
+  - ./install/CI/coverage
+  - ./install/CI/test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
