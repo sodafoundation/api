@@ -248,14 +248,18 @@ func connect(connMap map[string]interface{}) (string, error) {
 
 	targetlun := strconv.Itoa(conn.TgtLun)
 
-	cmd := "pgrep -f /sbin/iscsid"
-	_, err = connector.ExecCmd("/bin/bash", "-c", cmd)
+    cmd := "ls -ali / | sed '2!d' |awk {'print $1'}"
+    INODE_NUM, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+    if err != nil && INODE_NUM == "2" {
+		cmd = "\"pgrep -f /sbin/iscsid\""
+		_, err = connector.ExecCmd("/bin/bash", "-c", cmd)
 
-	if err != nil {
-		cmd = "/sbin/iscsid"
-		_, errExec := connector.ExecCmd("/bin/bash", "-c", cmd)
-		if errExec != nil {
-			return "", fmt.Errorf("Please stop the iscsi process outside the container first: %v", errExec)
+		if err != nil {
+			cmd = "/sbin/iscsid"
+			_, errExec := connector.ExecCmd("/bin/bash", "-c", cmd)
+			if errExec != nil {
+				return "", fmt.Errorf("Please stop the iscsi process: %v", errExec)
+			}
 		}
 	}
 
