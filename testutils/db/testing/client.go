@@ -311,6 +311,29 @@ func (_m *Client) CreateVolumeSnapshot(ctx *context.Context, vs *model.VolumeSna
 	return r0, r1
 }
 
+// CreateZone
+func (_m *Client) CreateZone(ctx *context.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+	ret := _m.Called(ctx, zone)
+
+	var r0 *model.ZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.ZoneSpec) *model.ZoneSpec); ok {
+		r0 = rf(ctx, zone)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ZoneSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.ZoneSpec) error); ok {
+		r1 = rf(ctx, zone)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteDock provides a mock function with given fields: ctx, dckID
 func (_m *Client) DeleteDock(ctx *context.Context, dckID string) error {
 	ret := _m.Called(ctx, dckID)
@@ -472,6 +495,20 @@ func (_m *Client) DeleteVolumeSnapshot(ctx *context.Context, snapshotID string) 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
 		r0 = rf(ctx, snapshotID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteZone
+func (_m *Client) DeleteZone(ctx *context.Context, zoneID string) error {
+	ret := _m.Called(ctx, zoneID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*context.Context, string) error); ok {
+		r0 = rf(ctx, zoneID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -870,6 +907,29 @@ func (_m *Client) GetVolumeSnapshot(ctx *context.Context, snapshotID string) (*m
 	return r0, r1
 }
 
+// GetZone
+func (_m *Client) GetZone(ctx *context.Context, zoneID string) (*model.ZoneSpec, error) {
+	ret := _m.Called(ctx, zoneID)
+
+	var r0 *model.ZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.ZoneSpec); ok {
+		r0 = rf(ctx, zoneID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ZoneSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
+		r1 = rf(ctx, zoneID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListAttachmentsByVolumeId provides a mock function with given fields: ctx, volId
 func (_m *Client) ListAttachmentsByVolumeId(ctx *context.Context, volId string) ([]*model.VolumeAttachmentSpec, error) {
 	ret := _m.Called(ctx, volId)
@@ -914,35 +974,6 @@ func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) 
 	}
 
 	return r0, r1
-}
-
-// GetZone
-func (_m *Client) GetZone(ctx *context.Context, zoneID string) (*model.ZoneSpec, error) {
-	return nil, nil
-}
-
-// CreateZone
-func (_m *Client) CreateZone(ctx *context.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
-	return nil, nil
-}
-
-// UpdateZone
-func (_m *Client) UpdateZone(ctx *context.Context, zoneID string, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
-	return nil, nil
-}
-
-// DeleteZone
-func (_m *Client) DeleteZone(ctx *context.Context, zoneID string) error {
-	return nil
-}
-
-// ListZonesWithFilter
-func (_m *Client) ListZonesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
-	return nil, nil
-}
-
-func (f_m *Client) ListZones(ctx *context.Context) ([]*model.ZoneSpec, error) {
-	return nil, nil
 }
 
 // ListCustomProperties provides a mock function with given fields: ctx, prfID
@@ -1658,6 +1689,52 @@ func (_m *Client) ListVolumesWithFilter(ctx *context.Context, m map[string][]str
 	return r0, r1
 }
 
+// ListZones
+func (_m *Client) ListZones(ctx *context.Context) ([]*model.ZoneSpec, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []*model.ZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.ZoneSpec); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.ZoneSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListZonesWithFilter
+func (_m *Client) ListZonesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
+	ret := _m.Called(ctx, m)
+
+	var r0 []*model.ZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.ZoneSpec); ok {
+		r0 = rf(ctx, m)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.ZoneSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
+		r1 = rf(ctx, m)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // RemoveCustomProperty provides a mock function with given fields: ctx, prfID, customKey
 func (_m *Client) RemoveCustomProperty(ctx *context.Context, prfID string, customKey string) error {
 	ret := _m.Called(ctx, prfID, customKey)
@@ -1978,6 +2055,29 @@ func (_m *Client) VolumesToUpdate(ctx *context.Context, volumeList []*model.Volu
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, []*model.VolumeSpec) error); ok {
 		r1 = rf(ctx, volumeList)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateZone
+func (_m *Client) UpdateZone(ctx *context.Context, zoneID string, input *model.ZoneSpec) (*model.ZoneSpec, error) {
+	ret := _m.Called(ctx, zoneID, input)
+
+	var r0 *model.ZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string, *model.ZoneSpec) *model.ZoneSpec); ok {
+		r0 = rf(ctx, zoneID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ZoneSpec)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*context.Context, string, *model.ZoneSpec) error); ok {
+		r1 = rf(ctx, zoneID, input)
 	} else {
 		r1 = ret.Error(1)
 	}

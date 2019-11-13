@@ -223,6 +223,23 @@ var (
 
 	SampleAvailabilityZones = []string{"default"}
 
+	SampleZones = []model.ZoneSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+			},
+			Name:             "default",
+			Description:      "default zone",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			},
+			Name:        "test",
+			Description: "test zone",
+		},
+	}
+
 	SampleFileShares = []model.FileShareSpec{
 		{
 			BaseModel: &model.BaseModel{
