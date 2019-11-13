@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -198,7 +199,7 @@ func (d *Driver) initializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	hostExist := false
 
 	// check initiator is specified
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false
@@ -214,7 +215,7 @@ func (d *Driver) initializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	// Create host if not exist.
 	if needHostAffinity {
 		// Create resource name
-		initiator := hostInfo.GetInitiator()
+		initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 		ipAddr := hostInfo.GetIp()
 		rscName := GetFnvHash(initiator + ipAddr)
 		hostID, hostExist, err = d.client.AddIscsiHostWithCheck(rscName, initiator, ipAddr)
@@ -276,7 +277,7 @@ func (d *Driver) initializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	hostExist := false
 
 	// check initiator is specified
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false
@@ -291,7 +292,7 @@ func (d *Driver) initializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 
 	// initiator is specified
 	if needHostAffinity {
-		wwnName := hostInfo.GetInitiator()
+		wwnName := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 		rscName := GetFnvHash(wwnName)
 		// Create host if not exist.
 		hostID, hostExist, err = d.client.AddFcHostWithCheck(rscName, wwnName)
@@ -407,7 +408,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 
 	lunID := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false
