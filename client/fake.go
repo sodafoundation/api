@@ -63,8 +63,13 @@ func NewFakeClient(config *Config) *Client {
 				Receiver: NewFakeFileShareReceiver(),
 				Endpoint: config.Endpoint,
 			},
+<<<<<<< 211553282aff0b5c8d3f9d7faec703fbb9d34cdb
 			HostMgr: &HostMgr{
 				Receiver: NewFakeHostReceiver(),
+=======
+			ZoneMgr: &ZoneMgr{
+				Receiver: NewFakeZoneReceiver(),
+>>>>>>> Add testcases for zone client
 				Endpoint: config.Endpoint,
 			},
 		}
@@ -480,6 +485,66 @@ func (*fakeHostReceiver) Recv(
 		default:
 			return errors.New("output format not supported")
 		}
+	case "DELETE":
+		break
+	default:
+		return errors.New("inputed method format not supported")
+	}
+
+	return nil
+}
+
+func NewFakeZoneReceiver() Receiver {
+	return &fakeZoneReceiver{}
+}
+
+type fakeZoneReceiver struct{}
+
+func (*fakeZoneReceiver) Recv(
+	string,
+	method string,
+	in interface{},
+	out interface{},
+) error {
+	switch strings.ToUpper(method) {
+	case "POST":
+		switch out.(type) {
+		case *model.ZoneSpec:
+			if err := json.Unmarshal([]byte(ByteZone), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported")
+		}
+		break
+	case "GET":
+		switch out.(type) {
+		case *model.ZoneSpec:
+			if err := json.Unmarshal([]byte(ByteZone), out); err != nil {
+				return err
+			}
+			break
+		case *[]*model.ZoneSpec:
+			if err := json.Unmarshal([]byte(ByteZones), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported")
+		}
+		break
+	case "PUT":
+		switch out.(type) {
+		case *model.ZoneSpec:
+			if err := json.Unmarshal([]byte(ByteZone), out); err != nil {
+				return err
+			}
+			break
+		default:
+			return errors.New("output format not supported")
+		}
+		break
 	case "DELETE":
 		break
 	default:
