@@ -1387,10 +1387,16 @@ func (c *Client) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSp
 		zone.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
-	// zone name must be unique.
-	// if _, err := c.getZoneByName(ctx, zone.Name); err == nil {
-	// 	return nil, fmt.Errorf("the zone name '%s' already exists", zone.Name)
-	// }
+	// zone name and id must be unique.
+	azs, err := c.ListZones(ctx)
+	for _, az := range azs {
+		if az.Name == zone.Name {
+			return nil, fmt.Errorf("the zone name '%s' already exists", zone.Name)
+		}
+		if az.Id == zone.Id {
+			return nil, fmt.Errorf("the zone ID '%s' already exists", zone.Id)
+		}
+	}
 
 	zoneBody, err := json.Marshal(zone)
 	if err != nil {
@@ -1417,7 +1423,8 @@ func (c *Client) UpdateZone(ctx *c.Context, zoneID string, input *model.ZoneSpec
 		return nil, err
 	}
 	if name := input.Name; name != "" {
-		z.Name = name
+		// Update of name is not supported yet
+		// z.Name = name
 	}
 	if desc := input.Description; desc != "" {
 		z.Description = desc

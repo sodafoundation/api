@@ -100,6 +100,15 @@ func TestDiscover(t *testing.T) {
 
 func TestReport(t *testing.T) {
 	var fdd = NewFakeDockDiscoverer()
+	var azs []*model.ZoneSpec
+	var az *model.ZoneSpec
+
+	az = &model.ZoneSpec {
+		BaseModel: &model.BaseModel {
+			Id: "",
+		},
+		Name: "default",
+	}
 
 	for i := range SampleDocks {
 		fdd.dcks = append(fdd.dcks, &SampleDocks[i])
@@ -107,12 +116,17 @@ func TestReport(t *testing.T) {
 	for i := range SamplePools {
 		fdd.pols = append(fdd.pols, &SamplePools[i])
 	}
+	for i := range SampleZones {
+		azs = append(azs, &SampleZones[i])
+	}
 
 	mockClient := new(dbtest.Client)
 	mockClient.On("CreateDock", c.NewAdminContext(), fdd.dcks[0]).Return(nil, nil)
 	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[0]).Return(nil, nil)
 	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[1]).Return(nil, nil)
 	mockClient.On("CreatePool", c.NewAdminContext(), fdd.pols[2]).Return(nil, nil)
+	mockClient.On("ListZones", c.NewAdminContext()).Return(azs, nil)
+	mockClient.On("CreateZone", c.NewAdminContext(), az).Return(&SampleZones[0], nil)
 	fdd.c = mockClient
 
 	if err := fdd.Report(); err != nil {
