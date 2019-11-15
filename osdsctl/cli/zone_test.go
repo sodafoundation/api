@@ -51,7 +51,7 @@ func TestZoneAction(t *testing.T) {
 
 func TestZoneCreateAction(t *testing.T) {
 	var args []string
-	args = append(args, ByteZone)
+	args = append(args, ByteAvailabilityZone)
 	zoneCreateAction(zoneCreateCommand, args)
 }
 

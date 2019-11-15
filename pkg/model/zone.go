@@ -25,31 +25,31 @@ import (
 	"github.com/golang/glog"
 )
 
-// An OpenSDS zone is identified by a unique name and ID. 
-type ZoneSpec struct {
+// An OpenSDS availability zone is identified by a unique name and ID.
+type AvailabilityZoneSpec struct {
 	*BaseModel
 
-	// The name of the zone.
+	// The name of the availability zone.
 	Name string `json:"name,omitempty"`
 
-	// The description of the zone.
+	// The description of the availability zone.
 	// +optional
 	Description string `json:"description,omitempty"`
 }
 
-func NewZoneFromJson(s string) *ZoneSpec {
-	p := &ZoneSpec{}
+func NewZoneFromJson(s string) *AvailabilityZoneSpec {
+	p := &AvailabilityZoneSpec{}
 	err := json.Unmarshal([]byte(s), p)
 	if err != nil {
-		glog.Errorf("Unmarshal json to ZoneSpec failed, %v", err)
+		glog.Errorf("Unmarshal json to AvailabilityZoneSpec failed, %v", err)
 	}
 	return p
 }
 
-func (p *ZoneSpec) ToJson() string {
+func (p *AvailabilityZoneSpec) ToJson() string {
 	b, err := json.Marshal(p)
 	if err != nil {
-		glog.Errorf("ZoneSpec convert to json failed, %v", err)
+		glog.Errorf("AvailabilityZoneSpec convert to json failed, %v", err)
 	}
 	return string(b)
 }

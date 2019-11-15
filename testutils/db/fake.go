@@ -220,51 +220,41 @@ func (fc *FakeDbClient) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
-//ListAvailabilityZones
-func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
-	var azs []string
-	for i := range SamplePools {
-		az := SamplePools[i].AvailabilityZone
-		azs = append(azs, az)
-	}
-	return azs, nil
+// GetAvailabilityZone
+func (fc *FakeDbClient) GetAvailabilityZone(ctx *c.Context, zoneID string) (*model.AvailabilityZoneSpec, error) {
+	return &SampleAvailabilityZones[0], nil
 }
 
-// GetZone
-func (fc *FakeDbClient) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error) {
-	return &SampleZones[0], nil
+// CreateAvailabilityZone
+func (fc *FakeDbClient) CreateAvailabilityZone(ctx *c.Context, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
+	return &SampleAvailabilityZones[0], nil
 }
 
-// CreateZone
-func (fc *FakeDbClient) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
-	return &SampleZones[0], nil
+// UpdateAvailabilityZone
+func (fc *FakeDbClient) UpdateAvailabilityZone(ctx *c.Context, zoneID string, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
+	return &SampleAvailabilityZones[0], nil
 }
 
-// UpdateZone
-func (fc *FakeDbClient) UpdateZone(ctx *c.Context, zoneID string, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
-	return &SampleZones[0], nil
-}
-
-// DeleteZone
-func (fc *FakeDbClient) DeleteZone(ctx *c.Context, zoneID string) error {
+// DeleteAvailabilityZone
+func (fc *FakeDbClient) DeleteAvailabilityZone(ctx *c.Context, zoneID string) error {
 	return nil
 }
 
 // ListZonesWithFilter
-func (fc *FakeDbClient) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
-	var zones []*model.ZoneSpec
+func (fc *FakeDbClient) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.AvailabilityZoneSpec, error) {
+	var zones []*model.AvailabilityZoneSpec
 
-	for z := range SampleZones {
-		zones = append(zones, &SampleZones[z])
+	for z := range SampleAvailabilityZones {
+		zones = append(zones, &SampleAvailabilityZones[z])
 	}
 	return zones, nil
 }
 
-func (fc *FakeDbClient) ListZones(ctx *c.Context) ([]*model.ZoneSpec, error) {
-	var zones []*model.ZoneSpec
+func (fc *FakeDbClient) ListAvailabilityZones(ctx *c.Context) ([]*model.AvailabilityZoneSpec, error) {
+	var zones []*model.AvailabilityZoneSpec
 
-	for z := range SampleZones {
-		zones = append(zones, &SampleZones[z])
+	for z := range SampleAvailabilityZones {
+		zones = append(zones, &SampleAvailabilityZones[z])
 	}
 	return zones, nil
 }

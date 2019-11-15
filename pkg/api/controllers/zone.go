@@ -22,25 +22,22 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	// "strings"
 
-	// log "github.com/golang/glog"
 	"github.com/opensds/opensds/pkg/api/policy"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
-	// "github.com/opensds/opensds/pkg/utils/constants"
 )
 
-type ZonePortal struct {
+type AvailabilityZonePortal struct {
 	BasePortal
 }
 
-func (p *ZonePortal) ListAvailabilityZones() {
+func (p *AvailabilityZonePortal) ListAvailabilityZones() {
 	if !policy.Authorize(p.Ctx, "availability_zone:list") {
 		return
 	}
-	azs, err := db.C.ListZones(c.GetContext(p.Ctx))
+	azs, err := db.C.ListAvailabilityZones(c.GetContext(p.Ctx))
 	if err != nil {
 		errMsg := fmt.Sprintf("get AvailabilityZones failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
@@ -58,12 +55,12 @@ func (p *ZonePortal) ListAvailabilityZones() {
 	return
 }
 
-func (p *ZonePortal) CreateZone() {
+func (p *AvailabilityZonePortal) CreateAvailabilityZone() {
 	if !policy.Authorize(p.Ctx, "availability_zone:create") {
 		return
 	}
 
-	var zone = model.ZoneSpec{
+	var zone = model.AvailabilityZoneSpec{
 		BaseModel: &model.BaseModel{},
 	}
 
@@ -75,7 +72,7 @@ func (p *ZonePortal) CreateZone() {
 	}
 
 	// Call db api module to handle create zone request.
-	result, err := db.C.CreateZone(c.GetContext(p.Ctx), &zone)
+	result, err := db.C.CreateAvailabilityZone(c.GetContext(p.Ctx), &zone)
 	if err != nil {
 		errMsg := fmt.Sprintf("create zone failed: %v", err)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -94,44 +91,13 @@ func (p *ZonePortal) CreateZone() {
 	return
 }
 
-func (p *ZonePortal) ListZones() {
-	if !policy.Authorize(p.Ctx, "availability_zone:list") {
-		return
-	}
-
-	m, err := p.GetParameters()
-	if err != nil {
-		errMsg := fmt.Sprintf("list zones failed: %v", err)
-		p.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
-
-	result, err := db.C.ListZonesWithFilter(c.GetContext(p.Ctx), m)
-	if err != nil {
-		errMsg := fmt.Sprintf("list zones failed: %v", err)
-		p.ErrorHandle(model.ErrorInternalServer, errMsg)
-		return
-	}
-
-	// Marshal the result.
-	body, err := json.Marshal(result)
-	if err != nil {
-		errMsg := fmt.Sprintf("marshal zones listed result failed: %v", err)
-		p.ErrorHandle(model.ErrorInternalServer, errMsg)
-		return
-	}
-
-	p.SuccessHandle(StatusOK, body)
-	return
-}
-
-func (p *ZonePortal) GetZone() {
+func (p *AvailabilityZonePortal) GetAvailabilityZone() {
 	if !policy.Authorize(p.Ctx, "availability_zone:get") {
 		return
 	}
 	id := p.Ctx.Input.Param(":zoneId")
 
-	result, err := db.C.GetZone(c.GetContext(p.Ctx), id)
+	result, err := db.C.GetAvailabilityZone(c.GetContext(p.Ctx), id)
 	if err != nil {
 		errMsg := fmt.Sprintf("zone %s not found: %v", id, err)
 		p.ErrorHandle(model.ErrorNotFound, errMsg)
@@ -150,13 +116,13 @@ func (p *ZonePortal) GetZone() {
 	return
 }
 
-func (p *ZonePortal) UpdateZone() {
+func (p *AvailabilityZonePortal) UpdateAvailabilityZone() {
 
 	if !policy.Authorize(p.Ctx, "availability_zone:update") {
 		return
 	}
 
-	var zone = model.ZoneSpec{
+	var zone = model.AvailabilityZoneSpec{
 		BaseModel: &model.BaseModel{},
 	}
 	id := p.Ctx.Input.Param(":zoneId")
@@ -167,7 +133,7 @@ func (p *ZonePortal) UpdateZone() {
 		return
 	}
 
-	result, err := db.C.UpdateZone(c.GetContext(p.Ctx), id, &zone)
+	result, err := db.C.UpdateAvailabilityZone(c.GetContext(p.Ctx), id, &zone)
 	if err != nil {
 		errMsg := fmt.Sprintf("update zones failed: %v", err)
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)
@@ -186,21 +152,21 @@ func (p *ZonePortal) UpdateZone() {
 	return
 }
 
-func (p *ZonePortal) DeleteZone() {
+func (p *AvailabilityZonePortal) DeleteAvailabilityZone() {
 
 	if !policy.Authorize(p.Ctx, "availability_zone:delete") {
 		return
 	}
 	id := p.Ctx.Input.Param(":zoneId")
 	ctx := c.GetContext(p.Ctx)
-	zone, err := db.C.GetZone(ctx, id)
+	zone, err := db.C.GetAvailabilityZone(ctx, id)
 	if err != nil {
 		errMsg := fmt.Sprintf("zone %s not found: %v", id, err)
 		p.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
 
-	err = db.C.DeleteZone(ctx, zone.Id)
+	err = db.C.DeleteAvailabilityZone(ctx, zone.Id)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete zones failed: %v", err)
 		p.ErrorHandle(model.ErrorInternalServer, errMsg)

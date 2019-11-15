@@ -21,30 +21,30 @@ import (
 	"github.com/opensds/opensds/pkg/utils/urls"
 )
 
-// ZoneBuilder contains request body of handling a zone request.
-// Currently it's assigned as the pointer of ZoneSpec struct, but it
+// AvailabilityZoneBuilder contains request body of handling a zone request.
+// Currently it's assigned as the pointer of AvailabilityZoneSpec struct, but it
 // could be discussed if it's better to define an interface.
-type ZoneBuilder *model.ZoneSpec
+type AvailabilityZoneBuilder *model.AvailabilityZoneSpec
 
-// NewZoneMgr
-func NewZoneMgr(r Receiver, edp string, tenantId string) *ZoneMgr {
-	return &ZoneMgr{
+// NewAvailabilityZoneMgr
+func NewAvailabilityZoneMgr(r Receiver, edp string, tenantId string) *AvailabilityZoneMgr {
+	return &AvailabilityZoneMgr{
 		Receiver: r,
 		Endpoint: edp,
 		TenantId: tenantId,
 	}
 }
 
-// ZoneMgr
-type ZoneMgr struct {
+// AvailabilityZoneMgr
+type AvailabilityZoneMgr struct {
 	Receiver
 	Endpoint string
 	TenantId string
 }
 
-// CreateZone
-func (p *ZoneMgr) CreateZone(body ZoneBuilder) (*model.ZoneSpec, error) {
-	var res model.ZoneSpec
+// CreateAvailabilityZone
+func (p *AvailabilityZoneMgr) CreateAvailabilityZone(body AvailabilityZoneBuilder) (*model.AvailabilityZoneSpec, error) {
+	var res model.AvailabilityZoneSpec
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateZoneURL(urls.Client, p.TenantId)}, "/")
@@ -56,9 +56,9 @@ func (p *ZoneMgr) CreateZone(body ZoneBuilder) (*model.ZoneSpec, error) {
 	return &res, nil
 }
 
-// GetZone
-func (p *ZoneMgr) GetZone(zoneID string) (*model.ZoneSpec, error) {
-	var res model.ZoneSpec
+// GetAvailabilityZone
+func (p *AvailabilityZoneMgr) GetAvailabilityZone(zoneID string) (*model.AvailabilityZoneSpec, error) {
+	var res model.AvailabilityZoneSpec
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateZoneURL(urls.Client, p.TenantId, zoneID)}, "/")
@@ -70,9 +70,9 @@ func (p *ZoneMgr) GetZone(zoneID string) (*model.ZoneSpec, error) {
 	return &res, nil
 }
 
-// UpdateZone ...
-func (p *ZoneMgr) UpdateZone(zoneID string, body ZoneBuilder) (*model.ZoneSpec, error) {
-	var res model.ZoneSpec
+// UpdateAvailabilityZone ...
+func (p *AvailabilityZoneMgr) UpdateAvailabilityZone(zoneID string, body AvailabilityZoneBuilder) (*model.AvailabilityZoneSpec, error) {
+	var res model.AvailabilityZoneSpec
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateZoneURL(urls.Client, p.TenantId, zoneID)}, "/")
@@ -84,9 +84,9 @@ func (p *ZoneMgr) UpdateZone(zoneID string, body ZoneBuilder) (*model.ZoneSpec, 
 	return &res, nil
 }
 
-// ListZones
-func (p *ZoneMgr) ListZones(args ...interface{}) ([]*model.ZoneSpec, error) {
-	var res []*model.ZoneSpec
+// ListAvailabilityZones
+func (p *AvailabilityZoneMgr) ListAvailabilityZones(args ...interface{}) ([]*model.AvailabilityZoneSpec, error) {
+	var res []*model.AvailabilityZoneSpec
 
 	url := strings.Join([]string{
 		p.Endpoint,
@@ -107,8 +107,8 @@ func (p *ZoneMgr) ListZones(args ...interface{}) ([]*model.ZoneSpec, error) {
 	return res, nil
 }
 
-// DeleteZone
-func (p *ZoneMgr) DeleteZone(zoneID string) error {
+// DeleteAvailabilityZone
+func (p *AvailabilityZoneMgr) DeleteAvailabilityZone(zoneID string) error {
 	url := strings.Join([]string{
 		p.Endpoint,
 		urls.GenerateZoneURL(urls.Client, p.TenantId, zoneID)}, "/")

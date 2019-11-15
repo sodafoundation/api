@@ -21,12 +21,12 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 )
 
-var fzn = &ZoneMgr{
+var fzn = &AvailabilityZoneMgr{
 	Receiver: NewFakeZoneReceiver(),
 }
 
-func TestCreateZone(t *testing.T) {
-	expected := &model.ZoneSpec{
+func TestCreateAvailabilityZone(t *testing.T) {
+	expected := &model.AvailabilityZoneSpec{
 		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
@@ -34,7 +34,7 @@ func TestCreateZone(t *testing.T) {
 		Description: "default zone",
 	}
 
-	zn, err := fzn.CreateZone(&model.ZoneSpec{})
+	zn, err := fzn.CreateAvailabilityZone(&model.AvailabilityZoneSpec{})
 	if err != nil {
 		t.Error(err)
 		return
@@ -46,9 +46,9 @@ func TestCreateZone(t *testing.T) {
 	}
 }
 
-func TestGetZone(t *testing.T) {
+func TestGetAvailabilityZone(t *testing.T) {
 	var znID = "1106b972-66ef-11e7-b172-db03f3689c9c"
-	expected := &model.ZoneSpec{
+	expected := &model.AvailabilityZoneSpec{
 		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
@@ -56,7 +56,7 @@ func TestGetZone(t *testing.T) {
 		Description: "default zone",
 	}
 
-	zn, err := fzn.GetZone(znID)
+	zn, err := fzn.GetAvailabilityZone(znID)
 	if err != nil {
 		t.Error(err)
 		return
@@ -68,8 +68,8 @@ func TestGetZone(t *testing.T) {
 	}
 }
 
-func TestListZones(t *testing.T) {
-	expected := []*model.ZoneSpec{
+func TestListAvailabilityZone(t *testing.T) {
+	expected := []*model.AvailabilityZoneSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
@@ -86,7 +86,7 @@ func TestListZones(t *testing.T) {
 		},
 	}
 
-	zns, err := fzn.ListZones()
+	zns, err := fzn.ListAvailabilityZones()
 	if err != nil {
 		t.Error(err)
 		return
@@ -98,8 +98,8 @@ func TestListZones(t *testing.T) {
 	}
 }
 
-func TestUpdateZone(t *testing.T) {
-	expected := &model.ZoneSpec{
+func TestUpdateAvailabilityZone(t *testing.T) {
+	expected := &model.AvailabilityZoneSpec{
 		BaseModel: &model.BaseModel{
 			Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
@@ -107,7 +107,7 @@ func TestUpdateZone(t *testing.T) {
 		Description: "default zone",
 	}
 
-	zn, err := fzn.UpdateZone("1106b972-66ef-11e7-b172-db03f3689c9c", &model.ZoneSpec{})
+	zn, err := fzn.UpdateAvailabilityZone("1106b972-66ef-11e7-b172-db03f3689c9c", &model.AvailabilityZoneSpec{})
 	if err != nil {
 		t.Error(err)
 		return
@@ -119,10 +119,10 @@ func TestUpdateZone(t *testing.T) {
 	}
 }
 
-func TestDeleteZone(t *testing.T) {
+func TestDeleteAvailabilityZone(t *testing.T) {
 	var znID = "1106b972-66ef-11e7-b172-db03f3689c9c"
 
-	if err := fzn.DeleteZone(znID); err != nil {
+	if err := fzn.DeleteAvailabilityZone(znID); err != nil {
 		t.Error(err)
 		return
 	}

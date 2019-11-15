@@ -221,9 +221,7 @@ var (
 		},
 	}
 
-	SampleAvailabilityZones = []string{"default"}
-
-	SampleZones = []model.ZoneSpec{
+	SampleAvailabilityZones = []model.AvailabilityZoneSpec{
 		{
 			BaseModel: &model.BaseModel{
 				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
@@ -1017,13 +1015,13 @@ var (
             }
     	]`
 
-	ByteZone = `{
+	ByteAvailabilityZone = `{
 		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 		"name": "default",
 		"description": "default zone"
 	}`
 
-	ByteZones = `[
+	ByteAvailabilityZones = `[
 		{
 			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
 			"name": "default",

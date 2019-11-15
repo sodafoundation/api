@@ -33,16 +33,16 @@ import (
 )
 
 func init() {
-	var zonePortal ZonePortal
-	beego.Router("/v1beta/availabilityZones", &zonePortal, "post:CreateZone;get:ListZones")
-	beego.Router("/v1beta/availabilityZones/:zoneId", &zonePortal, "get:GetZone;put:UpdateZone;delete:DeleteZone")
+	var zonePortal AvailabilityZonePortal
+	beego.Router("/v1beta/availabilityZones", &zonePortal, "post:CreateAvailabilityZone;get:ListAvailabilityZones")
+	beego.Router("/v1beta/availabilityZones/:zoneId", &zonePortal, "get:GetAvailabilityZone;put:UpdateAvailabilityZone;delete:DeleteAvailabilityZone")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                            Tests for zone                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-func TestCreateZone(t *testing.T) {
+func TestCreateAvailabilityZone(t *testing.T) {
 	var fakeBody = `{
 		"name": "default",
 		"description": "default zone"
@@ -50,11 +50,11 @@ func TestCreateZone(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("CreateZone", c.NewAdminContext(), &model.ZoneSpec{
+		mockClient.On("CreateAvailabilityZone", c.NewAdminContext(), &model.AvailabilityZoneSpec{
 			BaseModel:   &model.BaseModel{},
 			Name:        "default",
 			Description: "default zone",
-		}).Return(&SampleZones[1], nil)
+		}).Return(&SampleAvailabilityZones[1], nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("POST", "/v1beta/availabilityZones", strings.NewReader(fakeBody))
@@ -63,14 +63,14 @@ func TestCreateZone(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		var output model.ZoneSpec
+		var output model.AvailabilityZoneSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
-		assertTestResult(t, &output, &SampleZones[1])
+		assertTestResult(t, &output, &SampleAvailabilityZones[1])
 	})
 }
 
-func TestUpdateZone(t *testing.T) {
+func TestUpdateAvailabilityZone(t *testing.T) {
 	var jsonStr = []byte(`{
 		"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
 		"name": "test",
@@ -81,14 +81,14 @@ func TestUpdateZone(t *testing.T) {
 		"name": "test",
 		"description": "test zone"
 	}`)
-	var expected model.ZoneSpec
+	var expected model.AvailabilityZoneSpec
 	json.Unmarshal(expectedJson, &expected)
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
-		zone := model.ZoneSpec{BaseModel: &model.BaseModel{}}
+		zone := model.AvailabilityZoneSpec{BaseModel: &model.BaseModel{}}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&zone)
 		mockClient := new(dbtest.Client)
-		mockClient.On("UpdateZone", c.NewAdminContext(), zone.Id, &zone).
+		mockClient.On("UpdateAvailabilityZone", c.NewAdminContext(), zone.Id, &zone).
 			Return(&expected, nil)
 		db.C = mockClient
 
@@ -98,17 +98,17 @@ func TestUpdateZone(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		var output model.ZoneSpec
+		var output model.AvailabilityZoneSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, &output, &expected)
 	})
 
 	t.Run("Should return 500 if update zone with bad request", func(t *testing.T) {
-		zone := model.ZoneSpec{BaseModel: &model.BaseModel{}}
+		zone := model.AvailabilityZoneSpec{BaseModel: &model.BaseModel{}}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&zone)
 		mockClient := new(dbtest.Client)
-		mockClient.On("UpdateZone", c.NewAdminContext(), zone.Id, &zone).
+		mockClient.On("UpdateAvailabilityZone", c.NewAdminContext(), zone.Id, &zone).
 			Return(nil, errors.New("db error"))
 		db.C = mockClient
 
@@ -122,18 +122,12 @@ func TestUpdateZone(t *testing.T) {
 	})
 }
 
-func TestListZones(t *testing.T) {
+func TestListAvailabilityZone(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
-		var sampleZones = []*model.ZoneSpec{&SampleZones[1]}
+		var sampleZones = []*model.AvailabilityZoneSpec{&SampleAvailabilityZones[1]}
 		mockClient := new(dbtest.Client)
-		m := map[string][]string{
-			"offset":  {"0"},
-			"limit":   {"1"},
-			"sortDir": {"asc"},
-			"sortKey": {"name"},
-		}
-		mockClient.On("ListZonesWithFilter", c.NewAdminContext(), m).Return(
+		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(
 			sampleZones, nil)
 		db.C = mockClient
 
@@ -143,7 +137,7 @@ func TestListZones(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		var output []*model.ZoneSpec
+		var output []*model.AvailabilityZoneSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, output, sampleZones)
@@ -151,13 +145,7 @@ func TestListZones(t *testing.T) {
 
 	t.Run("Should return 500 if list zones with bad request", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		m := map[string][]string{
-			"offset":  {"0"},
-			"limit":   {"1"},
-			"sortDir": {"asc"},
-			"sortKey": {"name"},
-		}
-		mockClient.On("ListZonesWithFilter", c.NewAdminContext(), m).Return(nil, errors.New("db error"))
+		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones?offset=0&limit=1&sortDir=asc&sortKey=name", nil)
@@ -170,12 +158,12 @@ func TestListZones(t *testing.T) {
 	})
 }
 
-func TestGetZone(t *testing.T) {
+func TestGetAvailabilityZone(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").
-			Return(&SampleZones[1], nil)
+		mockClient.On("GetAvailabilityZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").
+			Return(&SampleAvailabilityZones[1], nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones/2f9c0a04-66ef-11e7-ade2-43158893e017", nil)
@@ -184,15 +172,15 @@ func TestGetZone(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		var output model.ZoneSpec
+		var output model.AvailabilityZoneSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
-		assertTestResult(t, &output, &SampleZones[1])
+		assertTestResult(t, &output, &SampleAvailabilityZones[1])
 	})
 
 	t.Run("Should return 404 if get zone with bad request", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("GetAvailabilityZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("db error"))
 		db.C = mockClient
 
@@ -207,13 +195,13 @@ func TestGetZone(t *testing.T) {
 	})
 }
 
-func TestDeleteZone(t *testing.T) {
+func TestDeleteAvailabilityZone(t *testing.T) {
 
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
-			&SampleZones[1], nil)
-		mockClient.On("DeleteZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
+		mockClient.On("GetAvailabilityZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+			&SampleAvailabilityZones[1], nil)
+		mockClient.On("DeleteAvailabilityZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE",
@@ -228,7 +216,7 @@ func TestDeleteZone(t *testing.T) {
 
 	t.Run("Should return 404 if delete zone with bad request", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
-		mockClient.On("GetZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
+		mockClient.On("GetAvailabilityZone", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017").Return(
 			nil, errors.New("Invalid resource uuid"))
 		db.C = mockClient
 

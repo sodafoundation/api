@@ -97,14 +97,14 @@ var zoneFormatters = FormatterList{}
 
 func zoneCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
-	az := &model.ZoneSpec{}
+	az := &model.AvailabilityZoneSpec{}
 	if err := json.Unmarshal([]byte(args[0]), az); err != nil {
 		Errorln(err)
 		cmd.Usage()
 		os.Exit(1)
 	}
 
-	resp, err := client.CreateZone(az)
+	resp, err := client.CreateAvailabilityZone(az)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -114,7 +114,7 @@ func zoneCreateAction(cmd *cobra.Command, args []string) {
 
 func zoneShowAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
-	resp, err := client.GetZone(args[0])
+	resp, err := client.GetAvailabilityZone(args[0])
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -128,7 +128,7 @@ func zoneListAction(cmd *cobra.Command, args []string) {
 		"sortKey": zoneSortKey, "Id": zoneId,
 		"Name": zoneName, "Description": zoneDescription}
 
-	resp, err := client.ListZones(opts)
+	resp, err := client.ListAvailabilityZones(opts)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -138,7 +138,7 @@ func zoneListAction(cmd *cobra.Command, args []string) {
 
 func zoneDeleteAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
-	err := client.DeleteZone(args[0])
+	err := client.DeleteAvailabilityZone(args[0])
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
@@ -146,7 +146,7 @@ func zoneDeleteAction(cmd *cobra.Command, args []string) {
 
 func zoneUpdateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 2)
-	az := &model.ZoneSpec{}
+	az := &model.AvailabilityZoneSpec{}
 
 	if err := json.Unmarshal([]byte(args[1]), az); err != nil {
 		Errorln(err)
@@ -154,7 +154,7 @@ func zoneUpdateAction(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	resp, err := client.UpdateZone(args[0], az)
+	resp, err := client.UpdateAvailabilityZone(args[0], az)
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}

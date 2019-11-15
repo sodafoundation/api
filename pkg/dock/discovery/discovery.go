@@ -319,7 +319,7 @@ func (dr *DockRegister) Register(in interface{}) error {
 		}
 		// Check if AZ name for pool, exists else create it
 		azExists := false
-		azs, err := dr.c.ListZones(ctx)
+		azs, err := dr.c.ListAvailabilityZones(ctx)
 		if err != nil {
 			log.Errorf("When list zone %s in db: %v\n", pol.AvailabilityZone, err)
 		}
@@ -329,14 +329,14 @@ func (dr *DockRegister) Register(in interface{}) error {
 			}
 		}
 		if azExists == false {
-			var z = &model.ZoneSpec {
+			var z = &model.AvailabilityZoneSpec {
 				BaseModel: &model.BaseModel {
 					Id: "",
 				},
 				Name: pol.AvailabilityZone,
 			}
 
-			_, err := dr.c.CreateZone(ctx, z)
+			_, err := dr.c.CreateAvailabilityZone(ctx, z)
 			if err != nil {
 				log.Errorf("When create zone %s in db: %v\n", pol.AvailabilityZone, err)
 				return err

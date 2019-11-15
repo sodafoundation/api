@@ -1332,35 +1332,8 @@ func (c *Client) GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, 
 	return pol, nil
 }
 
-//ListAvailabilityZones
-func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
-	dbReq := &Request{
-		Url: urls.GeneratePoolURL(urls.Etcd, ""),
-	}
-	dbRes := c.List(dbReq)
-	if dbRes.Status != "Success" {
-		log.Error("Failed to get AZ for pools in db:", dbRes.Error)
-		return nil, errors.New(dbRes.Error)
-	}
-	var azs = []string{}
-	if len(dbRes.Message) == 0 {
-		return azs, nil
-	}
-	for _, msg := range dbRes.Message {
-		var pol = &model.StoragePoolSpec{}
-		if err := json.Unmarshal([]byte(msg), pol); err != nil {
-			log.Error("When parsing pool in db:", dbRes.Error)
-			return nil, errors.New(dbRes.Error)
-		}
-		azs = append(azs, pol.AvailabilityZone)
-	}
-	//remove redundant AZ
-	azs = utils.RvRepElement(azs)
-	return azs, nil
-}
-
-// GetZone
-func (c *Client) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error) {
+// GetAvailabilityZone
+func (c *Client) GetAvailabilityZone(ctx *c.Context, zoneID string) (*model.AvailabilityZoneSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
 	}
@@ -1370,7 +1343,7 @@ func (c *Client) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error)
 		return nil, errors.New(dbRes.Error)
 	}
 
-	var z = &model.ZoneSpec{}
+	var z = &model.AvailabilityZoneSpec{}
 	if err := json.Unmarshal([]byte(dbRes.Message[0]), z); err != nil {
 		log.Error("When parsing zone in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
@@ -1378,8 +1351,8 @@ func (c *Client) GetZone(ctx *c.Context, zoneID string) (*model.ZoneSpec, error)
 	return z, nil
 }
 
-// CreateZone
-func (c *Client) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+// CreateAvailabilityZone
+func (c *Client) CreateAvailabilityZone(ctx *c.Context, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
 	if zone.Id == "" {
 		zone.Id = uuid.NewV4().String()
 	}
@@ -1388,7 +1361,7 @@ func (c *Client) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSp
 	}
 
 	// zone name and id must be unique.
-	azs, err := c.ListZones(ctx)
+	azs, err := c.ListAvailabilityZones(ctx)
 	for _, az := range azs {
 		if az.Name == zone.Name {
 			return nil, fmt.Errorf("the zone name '%s' already exists", zone.Name)
@@ -1416,9 +1389,9 @@ func (c *Client) CreateZone(ctx *c.Context, zone *model.ZoneSpec) (*model.ZoneSp
 	return zone, nil
 }
 
-// UpdateZone
-func (c *Client) UpdateZone(ctx *c.Context, zoneID string, input *model.ZoneSpec) (*model.ZoneSpec, error) {
-	z, err := c.GetZone(ctx, zoneID)
+// UpdateAvailabilityZone
+func (c *Client) UpdateAvailabilityZone(ctx *c.Context, zoneID string, input *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
+	z, err := c.GetAvailabilityZone(ctx, zoneID)
 	if err != nil {
 		return nil, err
 	}
@@ -1448,8 +1421,8 @@ func (c *Client) UpdateZone(ctx *c.Context, zoneID string, input *model.ZoneSpec
 	return z, nil
 }
 
-// DeleteZone
-func (c *Client) DeleteZone(ctx *c.Context, zoneID string) error {
+// DeleteAvailabilityZone
+func (c *Client) DeleteAvailabilityZone(ctx *c.Context, zoneID string) error {
 	dbReq := &Request{
 		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
 	}
@@ -1462,8 +1435,8 @@ func (c *Client) DeleteZone(ctx *c.Context, zoneID string) error {
 }
 
 //ListZonesWithFilter
-func (c *Client) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
-	zones, err := c.ListZones(ctx)
+func (c *Client) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.AvailabilityZoneSpec, error) {
+	zones, err := c.ListAvailabilityZones(ctx)
 	if err != nil {
 		log.Error("List zones failed: ", err.Error())
 		return nil, err
@@ -1476,8 +1449,8 @@ func (c *Client) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*
 	return zones, nil
 }
 
-//ListZones
-func (c *Client) ListZones(ctx *c.Context) ([]*model.ZoneSpec, error) {
+//ListAvailabilityZones
+func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]*model.AvailabilityZoneSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateZoneURL(urls.Etcd, ""),
 	}
@@ -1486,12 +1459,12 @@ func (c *Client) ListZones(ctx *c.Context) ([]*model.ZoneSpec, error) {
 		log.Error("Failed to get zone in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
-	var azs = []*model.ZoneSpec{}
+	var azs = []*model.AvailabilityZoneSpec{}
 	if len(dbRes.Message) == 0 {
 		return azs, nil
 	}
 	for _, msg := range dbRes.Message {
-		var az = &model.ZoneSpec{}
+		var az = &model.AvailabilityZoneSpec{}
 		if err := json.Unmarshal([]byte(msg), az); err != nil {
 			log.Error("When parsing zone in db:", dbRes.Error)
 			return nil, errors.New(dbRes.Error)

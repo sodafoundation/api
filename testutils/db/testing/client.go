@@ -311,21 +311,21 @@ func (_m *Client) CreateVolumeSnapshot(ctx *context.Context, vs *model.VolumeSna
 	return r0, r1
 }
 
-// CreateZone
-func (_m *Client) CreateZone(ctx *context.Context, zone *model.ZoneSpec) (*model.ZoneSpec, error) {
+// CreateAvailabilityZone
+func (_m *Client) CreateAvailabilityZone(ctx *context.Context, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
 	ret := _m.Called(ctx, zone)
 
-	var r0 *model.ZoneSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, *model.ZoneSpec) *model.ZoneSpec); ok {
+	var r0 *model.AvailabilityZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, *model.AvailabilityZoneSpec) *model.AvailabilityZoneSpec); ok {
 		r0 = rf(ctx, zone)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ZoneSpec)
+			r0 = ret.Get(0).(*model.AvailabilityZoneSpec)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context, *model.ZoneSpec) error); ok {
+	if rf, ok := ret.Get(1).(func(*context.Context, *model.AvailabilityZoneSpec) error); ok {
 		r1 = rf(ctx, zone)
 	} else {
 		r1 = ret.Error(1)
@@ -502,8 +502,8 @@ func (_m *Client) DeleteVolumeSnapshot(ctx *context.Context, snapshotID string) 
 	return r0
 }
 
-// DeleteZone
-func (_m *Client) DeleteZone(ctx *context.Context, zoneID string) error {
+// DeleteAvailabilityZone
+func (_m *Client) DeleteAvailabilityZone(ctx *context.Context, zoneID string) error {
 	ret := _m.Called(ctx, zoneID)
 
 	var r0 error
@@ -907,16 +907,16 @@ func (_m *Client) GetVolumeSnapshot(ctx *context.Context, snapshotID string) (*m
 	return r0, r1
 }
 
-// GetZone
-func (_m *Client) GetZone(ctx *context.Context, zoneID string) (*model.ZoneSpec, error) {
+// GetAvailabilityZone
+func (_m *Client) GetAvailabilityZone(ctx *context.Context, zoneID string) (*model.AvailabilityZoneSpec, error) {
 	ret := _m.Called(ctx, zoneID)
 
-	var r0 *model.ZoneSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.ZoneSpec); ok {
+	var r0 *model.AvailabilityZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string) *model.AvailabilityZoneSpec); ok {
 		r0 = rf(ctx, zoneID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ZoneSpec)
+			r0 = ret.Get(0).(*model.AvailabilityZoneSpec)
 		}
 	}
 
@@ -946,29 +946,6 @@ func (_m *Client) ListAttachmentsByVolumeId(ctx *context.Context, volId string) 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*context.Context, string) error); ok {
 		r1 = rf(ctx, volId)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ListAvailabilityZones provides a mock function with given fields: ctx
-func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]string, error) {
-	ret := _m.Called(ctx)
-
-	var r0 []string
-	if rf, ok := ret.Get(0).(func(*context.Context) []string); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]string)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
-		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1689,16 +1666,16 @@ func (_m *Client) ListVolumesWithFilter(ctx *context.Context, m map[string][]str
 	return r0, r1
 }
 
-// ListZones
-func (_m *Client) ListZones(ctx *context.Context) ([]*model.ZoneSpec, error) {
+// ListAvailabilityZones
+func (_m *Client) ListAvailabilityZones(ctx *context.Context) ([]*model.AvailabilityZoneSpec, error) {
 	ret := _m.Called(ctx)
 
-	var r0 []*model.ZoneSpec
-	if rf, ok := ret.Get(0).(func(*context.Context) []*model.ZoneSpec); ok {
+	var r0 []*model.AvailabilityZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context) []*model.AvailabilityZoneSpec); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.ZoneSpec)
+			r0 = ret.Get(0).([]*model.AvailabilityZoneSpec)
 		}
 	}
 
@@ -1713,15 +1690,15 @@ func (_m *Client) ListZones(ctx *context.Context) ([]*model.ZoneSpec, error) {
 }
 
 // ListZonesWithFilter
-func (_m *Client) ListZonesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.ZoneSpec, error) {
+func (_m *Client) ListZonesWithFilter(ctx *context.Context, m map[string][]string) ([]*model.AvailabilityZoneSpec, error) {
 	ret := _m.Called(ctx, m)
 
-	var r0 []*model.ZoneSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.ZoneSpec); ok {
+	var r0 []*model.AvailabilityZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.AvailabilityZoneSpec); ok {
 		r0 = rf(ctx, m)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.ZoneSpec)
+			r0 = ret.Get(0).([]*model.AvailabilityZoneSpec)
 		}
 	}
 
@@ -2062,21 +2039,21 @@ func (_m *Client) VolumesToUpdate(ctx *context.Context, volumeList []*model.Volu
 	return r0, r1
 }
 
-// UpdateZone
-func (_m *Client) UpdateZone(ctx *context.Context, zoneID string, input *model.ZoneSpec) (*model.ZoneSpec, error) {
+// UpdateAvailabilityZone
+func (_m *Client) UpdateAvailabilityZone(ctx *context.Context, zoneID string, input *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
 	ret := _m.Called(ctx, zoneID, input)
 
-	var r0 *model.ZoneSpec
-	if rf, ok := ret.Get(0).(func(*context.Context, string, *model.ZoneSpec) *model.ZoneSpec); ok {
+	var r0 *model.AvailabilityZoneSpec
+	if rf, ok := ret.Get(0).(func(*context.Context, string, *model.AvailabilityZoneSpec) *model.AvailabilityZoneSpec); ok {
 		r0 = rf(ctx, zoneID, input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.ZoneSpec)
+			r0 = ret.Get(0).(*model.AvailabilityZoneSpec)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context, string, *model.ZoneSpec) error); ok {
+	if rf, ok := ret.Get(1).(func(*context.Context, string, *model.AvailabilityZoneSpec) error); ok {
 		r1 = rf(ctx, zoneID, input)
 	} else {
 		r1 = ret.Error(1)
