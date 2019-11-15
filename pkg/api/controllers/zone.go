@@ -59,7 +59,7 @@ func (p *ZonePortal) ListAvailabilityZones() {
 }
 
 func (p *ZonePortal) CreateZone() {
-	if !policy.Authorize(p.Ctx, "zone:create") {
+	if !policy.Authorize(p.Ctx, "availability_zone:create") {
 		return
 	}
 
@@ -95,7 +95,7 @@ func (p *ZonePortal) CreateZone() {
 }
 
 func (p *ZonePortal) ListZones() {
-	if !policy.Authorize(p.Ctx, "zone:list") {
+	if !policy.Authorize(p.Ctx, "availability_zone:list") {
 		return
 	}
 
@@ -126,7 +126,7 @@ func (p *ZonePortal) ListZones() {
 }
 
 func (p *ZonePortal) GetZone() {
-	if !policy.Authorize(p.Ctx, "zone:get") {
+	if !policy.Authorize(p.Ctx, "availability_zone:get") {
 		return
 	}
 	id := p.Ctx.Input.Param(":zoneId")
@@ -152,7 +152,7 @@ func (p *ZonePortal) GetZone() {
 
 func (p *ZonePortal) UpdateZone() {
 
-	if !policy.Authorize(p.Ctx, "zone:update") {
+	if !policy.Authorize(p.Ctx, "availability_zone:update") {
 		return
 	}
 
@@ -188,7 +188,7 @@ func (p *ZonePortal) UpdateZone() {
 
 func (p *ZonePortal) DeleteZone() {
 
-	if !policy.Authorize(p.Ctx, "zone:delete") {
+	if !policy.Authorize(p.Ctx, "availability_zone:delete") {
 		return
 	}
 	id := p.Ctx.Input.Param(":zoneId")
