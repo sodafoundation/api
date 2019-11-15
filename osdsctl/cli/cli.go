@@ -49,6 +49,7 @@ func init() {
 	rootCommand.AddCommand(poolCommand)
 	rootCommand.AddCommand(profileCommand)
 	rootCommand.AddCommand(fileShareCommand)
+	rootCommand.AddCommand(hostCommand)
 	flags := rootCommand.PersistentFlags()
 	flags.BoolVar(&Debug, "debug", false, "shows debugging output.")
 }

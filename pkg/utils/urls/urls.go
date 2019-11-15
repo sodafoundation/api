@@ -25,6 +25,10 @@ const (
 	Client        // Client == 1
 )
 
+func GenerateHostURL(urlType int, tenantId string, in ...string) string {
+	return generateURL("host/hosts", urlType, tenantId, in...)
+}
+
 func GenerateFileShareAclURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("file/acls", urlType, tenantId, in...)
 }

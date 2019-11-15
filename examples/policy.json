@@ -61,5 +61,10 @@
   "fileshareacl:delete": "rule:admin_or_owner",
   "fileshareacl:list": "rule:admin_or_owner",
   "fileshareacl:get": "rule:admin_or_owner",
-  "fileshareacl:update": "rule:admin_or_owner"
+  "host:update": "rule:admin_or_owner",
+  "host:create": "rule:admin_or_owner",
+  "host:delete": "rule:admin_or_owner",
+  "host:list": "rule:admin_or_owner",
+  "host:get": "rule:admin_or_owner",
+  "host:update": "rule:admin_or_owner"
 }
