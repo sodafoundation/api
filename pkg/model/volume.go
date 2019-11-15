@@ -83,7 +83,15 @@ type VolumeSpec struct {
 	AttachStatus string
 
 	// Whether the volume can be attached more than once, default value is false.
-	MultiAttach bool `json:"multiAttach,omitempty"`
+	MultiAttach bool        `json:"multiAttach,omitempty"`
+	Identifier  *Identifier `json:"identifier,omitempty"`
+}
+
+// This type describes any additional identifiers for a resource which is used to uniquly identify the resource.
+type Identifier struct {
+	//This indicates the world wide, persistent name of the resource
+	DurableName       string `json:"durableName,omitempty"`
+	DurableNameFormat string `json:"durableNameFormat,omitempty"`
 }
 
 // VolumeAttachmentSpec is a description of volume attached resource.
