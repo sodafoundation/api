@@ -203,7 +203,8 @@ paths:
                         dataStorage:
                           recoveryTimeObjective: 10
                           provisioningPolicy: Thin
-                          IsSpaceEfficient: true
+                          compression: true
+                          deduplication: true
                         ioConnectivity:
                           accessProtocol: iscsi
                           maxIOPS: 100000
@@ -1831,8 +1832,10 @@ components:
           enum:
             - Thin
             - Thick
-        isSpaceEfficient:
+        compression:
           type: boolean
+        deduplicaiton:
+          type: boolean  
         characterCodeSet:
           type: string
         maxFileNameLengthBytes:

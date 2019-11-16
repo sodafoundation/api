@@ -92,7 +92,8 @@ var (
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:        true,
+					Deduplication:      true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
@@ -124,7 +125,8 @@ var (
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:        true,
+					Deduplication:      true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
@@ -169,7 +171,8 @@ var (
 				DataStorage: model.DataStorageLoS{
 					RecoveryTimeObjective: 1,
 					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
+					Compression:           true,
+					Deduplication:         true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
@@ -200,7 +203,8 @@ var (
 				DataStorage: model.DataStorageLoS{
 					RecoveryTimeObjective: 1,
 					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
+					Compression:           true,
+					Deduplication:         true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",

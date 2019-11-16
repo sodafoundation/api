@@ -26,7 +26,8 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
       ioConnectivity:
         accessProtocol: iscsi
         maxIOPS: 7000000
@@ -40,11 +41,15 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
       ioConnectivity:
         accessProtocol: iscsi
         maxIOPS: 3000000
         maxBWS: 300
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 500ms
