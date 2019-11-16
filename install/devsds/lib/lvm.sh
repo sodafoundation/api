@@ -165,11 +165,15 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
       ioConnectivity:
         accessProtocol: iscsi
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 5ms
@@ -198,7 +202,8 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
         storageAccessCapability:
          - Read
          - Write
@@ -207,6 +212,9 @@ pool:
         accessProtocol: nfs
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 5ms
@@ -233,11 +241,15 @@ cat >> $OPENSDS_DRIVER_CONFIG_DIR/lvm.yaml << OPENSDS_LVM_CONFIG_DOC
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
       ioConnectivity:
         accessProtocol: nvmeof
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 20us

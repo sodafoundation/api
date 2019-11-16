@@ -9,7 +9,8 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
         storageAccessCapability:
           - Read
           - Write
@@ -18,6 +19,9 @@ pool:
         accessProtocol: nfs
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 5ms

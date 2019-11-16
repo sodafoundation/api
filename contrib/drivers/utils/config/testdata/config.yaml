@@ -7,11 +7,15 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: true
+        compression: true
+        deduplication: true
       ioConnectivity:
         accessProtocol: rbd
         maxIOPS: 8000000
         maxBWS: 700
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 5
       advanced:
         diskType: SSD
         latency: 3ms
