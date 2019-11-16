@@ -583,3 +583,41 @@ func (fc *FakeDbClient) ListVolumeGroups(ctx *c.Context) ([]*model.VolumeGroupSp
 func (fc *FakeDbClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error) {
 	return nil, nil
 }
+
+func (c *FakeDbClient) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
+	var hosts []*model.HostSpec
+
+	for i := range SampleHosts {
+		hosts = append(hosts, &SampleHosts[i])
+	}
+	return hosts, nil
+}
+
+func (c *FakeDbClient) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
+	var hosts []*model.HostSpec
+
+	for i := range SampleHosts {
+		hosts = append(hosts, &SampleHosts[i])
+	}
+	return hosts, nil
+}
+
+func (c *FakeDbClient) CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {
+	return &SampleHosts[0], nil
+}
+
+func (c *FakeDbClient) UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {
+	return &SampleHosts[0], nil
+}
+
+func (c *FakeDbClient) GetHost(ctx *c.Context, hostId string) (*model.HostSpec, error) {
+	return &SampleHosts[0], nil
+}
+
+func (c *FakeDbClient) getHost(ctx *c.Context, hostId string) (*model.HostSpec, error) {
+	return &SampleHosts[0], nil
+}
+
+func (c *FakeDbClient) DeleteHost(ctx *c.Context, hostId string) error {
+	return nil
+}

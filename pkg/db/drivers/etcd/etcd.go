@@ -1993,6 +1993,9 @@ func (c *Client) UpdateVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 	if vol.Metadata != nil {
 		result.Metadata = utils.MergeStringMaps(result.Metadata, vol.Metadata)
 	}
+	if vol.Identifier != nil {
+		result.Identifier = vol.Identifier
+	}
 	if vol.PoolId != "" {
 		result.PoolId = vol.PoolId
 	}
@@ -3254,4 +3257,187 @@ func (c *Client) SelectVolumeGroup(param map[string][]string, vgs []*model.Volum
 		}
 	}
 	return vglist
+}
+
+func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateHostURL(urls.Etcd, ctx.TenantId),
+	}
+
+	if IsAdminContext(ctx) {
+		dbReq.Url = urls.GenerateHostURL(urls.Etcd, "")
+	}
+
+	dbRes := c.List(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When list hosts in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var hosts = []*model.HostSpec{}
+	if len(dbRes.Message) == 0 {
+		return hosts, nil
+	}
+	for _, msg := range dbRes.Message {
+		var host = &model.HostSpec{}
+		if err := json.Unmarshal([]byte(msg), host); err != nil {
+			log.Error("When parsing host in db:", dbRes.Error)
+			return nil, errors.New(dbRes.Error)
+		}
+		hosts = append(hosts, host)
+	}
+	return hosts, nil
+}
+
+func (c *Client) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		log.Error("List hosts failed: ", err)
+		return nil, err
+	}
+
+	var res []*model.HostSpec
+	for _, host := range hosts {
+		if hostName == host.HostName {
+			res = append(res, host)
+		}
+	}
+
+	return res, nil
+}
+
+func (c *Client) CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {
+	host.TenantId = ctx.TenantId
+	if host.Id == "" {
+		host.Id = uuid.NewV4().String()
+	}
+	host.CreatedAt = time.Now().Format(constants.TimeFormat)
+	hostBody, err := json.Marshal(host)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateHostURL(urls.Etcd, ctx.TenantId, host.Id),
+		Content: string(hostBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When create host in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return host, nil
+}
+
+func (c *Client) UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error) {
+	result, err := c.GetHost(ctx, host.Id)
+	if err != nil {
+		return nil, err
+	}
+	if host.HostName != "" {
+		result.HostName = host.HostName
+	}
+	if host.IP != "" {
+		result.IP = host.IP
+	}
+	if host.Port > 0 {
+		result.Port = host.Port
+	}
+	if host.AccessMode != "" {
+		result.AccessMode = host.AccessMode
+	}
+	if host.Username != "" {
+		result.Username = host.Username
+	}
+	if host.Password != "" {
+		result.Password = host.Password
+	}
+	if len(host.AvailabilityZones) > 0 {
+		result.AvailabilityZones = host.AvailabilityZones
+	}
+	if len(host.Initiators) > 0 {
+		result.Initiators = host.Initiators
+	}
+	// Set update time
+	result.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	body, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	if !IsAdminContext(ctx) && !AuthorizeProjectContext(ctx, result.TenantId) {
+		return nil, fmt.Errorf("opertaion is not permitted")
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateHostURL(urls.Etcd, result.TenantId, result.Id),
+		NewContent: string(body),
+	}
+
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update host in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return result, nil
+}
+
+func (c *Client) GetHost(ctx *c.Context, hostId string) (*model.HostSpec, error) {
+	host, err := c.getHost(ctx, hostId)
+	if !IsAdminContext(ctx) || err == nil {
+		return host, err
+	}
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range hosts {
+		if v.Id == hostId {
+			return v, nil
+		}
+	}
+	return nil, fmt.Errorf("specified host(%s) can't find", hostId)
+}
+
+func (c *Client) getHost(ctx *c.Context, hostId string) (*model.HostSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateHostURL(urls.Etcd, ctx.TenantId, hostId),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get host in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var host = &model.HostSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), host); err != nil {
+		log.Error("When parsing host in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return host, nil
+}
+
+func (c *Client) DeleteHost(ctx *c.Context, hostId string) error {
+	// If an admin want to access other tenant's resource just fake other's tenantId.
+	tenantId := ctx.TenantId
+	if IsAdminContext(ctx) {
+		host, err := c.GetHost(ctx, hostId)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		tenantId = host.TenantId
+	}
+	dbReq := &Request{
+		Url: urls.GenerateHostURL(urls.Etcd, tenantId, hostId),
+	}
+
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When delete host in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
 }

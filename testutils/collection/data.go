@@ -487,6 +487,47 @@ var (
 			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		},
 	}
+
+	SampleHosts = []model.HostSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id:        "202964b5-8e73-46fd-b41b-a8e403f3c30b",
+				CreatedAt: "2019-11-11T11:01:33",
+			},
+			TenantId:          "x",
+			AccessMode:        "agentless",
+			HostName:          "sap1",
+			IP:                "192.168.56.12",
+			AvailabilityZones: []string{"az1", "az2"},
+			Initiators: []*model.Initiator{
+				&model.Initiator{
+					PortName: "20000024ff5bb888",
+					Protocol: "iscsi",
+				},
+				&model.Initiator{
+					PortName: "20000024ff5bc999",
+					Protocol: "iscsi",
+				},
+			},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id:        "eb73e59a-8b0f-4517-8b95-023ec134aec9",
+				CreatedAt: "2019-11-11T11:13:57",
+			},
+			TenantId:          "x",
+			AccessMode:        "agentless",
+			HostName:          "sap2",
+			IP:                "192.168.56.13",
+			AvailabilityZones: []string{"az1", "az2"},
+			Initiators: []*model.Initiator{
+				&model.Initiator{
+					PortName: "20012324ff5ac132",
+					Protocol: "iscsi",
+				},
+			},
+		},
+	}
 )
 
 // The Byte*** variable here is designed for unit test in client package.
@@ -892,6 +933,72 @@ var (
 			"updatedAt": "2017-07-10T14:36:58.014Z"
 		}
 	]`
+
+	ByteHost = `{
+        "id": "202964b5-8e73-46fd-b41b-a8e403f3c30b",
+        "accessMode": "agentless",
+        "createdAt": "2019-11-11T11:01:33",
+        "tenantId": "x",
+        "hostName": "sap1",
+        "ip": "192.168.56.12",
+        "availabilityZones": [
+            "az1",
+            "az2"
+        ],
+        "initiators": [
+            {
+                "portName": "20000024ff5bb888",
+                "protocol": "iscsi"
+            },
+            {
+                "portName": "20000024ff5bc999",
+                "protocol": "iscsi"
+            }
+        ]
+    }`
+
+	ByteHosts = `[
+            {
+                "id": "202964b5-8e73-46fd-b41b-a8e403f3c30b",
+                "accessMode": "agentless",
+                "createdAt": "2019-11-11T11:01:33",
+                "tenantId": "x",
+                "hostName": "sap1",
+                "ip": "192.168.56.12",
+                "availabilityZones": [
+                    "az1",
+                    "az2"
+                ],
+                "initiators": [
+                    {
+                        "portName": "20000024ff5bb888",
+                        "protocol": "iscsi"
+                    },
+                    {
+                        "portName": "20000024ff5bc999",
+                        "protocol": "iscsi"
+                    }
+                ]
+            },
+            {
+                "id": "eb73e59a-8b0f-4517-8b95-023ec134aec9",
+                "accessMode": "agentless",
+                "createdAt": "2019-11-11T11:13:57",
+                "tenantId": "x",
+                "hostName": "sap2",
+                "ip": "192.168.56.13",
+                "availabilityZones": [
+                    "az1",
+                    "az2"
+                ],
+                "initiators": [
+                    {
+                        "portName": "20012324ff5ac132",
+                        "protocol": "iscsi"
+                    }
+                ]
+            }
+    	]`
 )
 
 // The StringSlice*** variable here is designed for unit test in etcd package.

@@ -42,6 +42,7 @@ type Client struct {
 	*VersionMgr
 	*ReplicationMgr
 	*FileShareMgr
+	*HostMgr
 
 	cfg *Config
 }
@@ -98,6 +99,7 @@ func NewClient(c *Config) (*Client, error) {
 		VersionMgr:     NewVersionMgr(r, c.Endpoint, t),
 		ReplicationMgr: NewReplicationMgr(r, c.Endpoint, t),
 		FileShareMgr:   NewFileShareMgr(r, c.Endpoint, t),
+		HostMgr:        NewHostMgr(r, c.Endpoint, t),
 	}, nil
 }
 

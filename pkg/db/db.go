@@ -222,6 +222,18 @@ type Client interface {
 	VolumesToUpdate(ctx *c.Context, volumeList []*model.VolumeSpec) ([]*model.VolumeSpec, error)
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
+
+	ListHosts(ctx *c.Context) ([]*model.HostSpec, error)
+
+	ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error)
+
+	CreateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error)
+
+	UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSpec, error)
+
+	GetHost(ctx *c.Context, hostId string) (*model.HostSpec, error)
+
+	DeleteHost(ctx *c.Context, hostId string) error
 }
 
 func UpdateFileShareStatus(ctx *c.Context, client Client, fileID, status string) error {
