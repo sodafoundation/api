@@ -1,20 +1,6 @@
-# Copyright 2019 The OpenSDS Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-swagger: '2.0'
+openapi: 3.0.0
 info:
-  version: v1beta
+  version: "v1beta"
   title: OpenSDS Controller API
   description: OpenSDS Controller API to manage mutliple backend storages.
   termsOfService: 'https://www.linuxfoundation.org/terms'
@@ -25,14 +11,6 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: localhost:50040
-schemes:
-  - https
-  - http
-produces:
-  - application/json
-consumes:
-  - application/json
 paths:
   /:
     get:
@@ -42,23 +20,26 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: object
-            properties:
-              versions:
-                type: array
-                items:
-                  $ref: '#/definitions/VersionSpec'
-          examples:
+          content:
             application/json:
-              - name: v1beta
-                status: CURRENT
-                updated: '2017-07-10T14:36:58.014Z'
+              schema:
+                type: object
+                properties:
+                  versions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VersionSpec'
+              examples:
+                response:
+                  value:
+                    - name: v1beta
+                      status: CURRENT
+                      updated: '2017-07-10T14:36:58.014Z'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/{apiVersion}':
     parameters:
-      - $ref: '#/parameters/apiVersion'
+      - $ref: '#/components/parameters/apiVersion'
     get:
       tags:
         - API versions
@@ -66,23 +47,26 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: object
-            properties:
-              version:
-                $ref: '#/definitions/VersionSpec'
-          examples:
+          content:
             application/json:
-              name: v1beta
-              status: SUPPORTED
-              updated: '2017-04-10T14:36:58.014Z'
+              schema:
+                type: object
+                properties:
+                  version:
+                    $ref: '#/components/schemas/VersionSpec'
+              examples:
+                response:
+                  value:
+                    name: v1beta
+                    status: SUPPORTED
+                    updated: '2017-04-10T14:36:58.014Z'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/docks':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Dock
@@ -90,20 +74,22 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/DockSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DockSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/docks/{dockId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/dockId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/dockId'
     get:
       tags:
         - Dock
@@ -111,19 +97,21 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/DockSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/pools':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Pool
@@ -131,19 +119,21 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/StoragePoolSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StoragePoolSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/availabilityZones':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Availability Zone
@@ -151,20 +141,22 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/pools/{poolId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/poolId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/poolId'
     get:
       tags:
         - Pool
@@ -172,19 +164,21 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/StoragePoolSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoragePoolSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/profiles':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Profiles
@@ -192,111 +186,117 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ProfileSpec'
-          examples:
+          content:
             application/json:
-            - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
-              name: Gold
-              description: provide gold storage service
-              storageType: block
-              provisioningProperties:
-                dataStorage:
-                  recoveryTimeObjective: 10
-                  provisioningPolicy: Thin
-                  compression: true
-                  deduplication: true
-                ioConnectivity:
-                  accessProtocol: iscsi
-                  maxIOPS: 100000
-                  maxBWS: 60000
-              replicationProperties:
-                dataProtection:
-                  isIsolated: true
-                  minLifetime: P3Y6M4DT12H30M5S
-                  recoveryGeographicObjective: Datacenter
-                  recoveryPointObjectiveTime: P3Y6M4DT12H30M5S
-                  RecoveryTimeObjective: OnlineActive
-                  replicaType: Clone
-                replicaInfos:
-                  replicaUpdateMode: Active
-                  consistencyEnabled: true
-                  replicationPeriod: P3Y6M4DT12H30M5S
-                  replicationBandwidth: 60000
-              snapshotProperties:
-                schedule:
-                  datetime: 2008-09-15T15:53:00
-                  occurrence: Weekly
-                retention:
-                  number: 10
-                  duration: 60
-                topology:
-                  bucket: s3
-              customProperties:
-                key1: value1
-                key2:
-                  subKey1: subValue1
-                  subKey2: subValue2
-                key3: value3
-            - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-              name: Silver
-              description: provide silver storage service
-              provisioningProperties:
-                dataStorage:
-                  provisioningPolicy: Thin
-                ioConnectivity:
-                  accessProtocol: iscsi
-              customProperties:
-                key1: value1
-                key2: value2
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileSpec'
+              examples:
+                response:
+                  value:
+                    - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c1
+                      name: Gold
+                      description: provide gold storage service
+                      storageType: block
+                      provisioningProperties:
+                        dataStorage:
+                          recoveryTimeObjective: 10
+                          provisioningPolicy: Thin
+                          compression: true
+                          deduplication: true
+                        ioConnectivity:
+                          accessProtocol: iscsi
+                          maxIOPS: 100000
+                          maxBWS: 60000
+                      replicationProperties:
+                        dataProtection:
+                          isIsolated: true
+                          minLifetime: P3Y6M4DT12H30M5S
+                          recoveryGeographicObjective: Datacenter
+                          recoveryPointObjectiveTime: P3Y6M4DT12H30M5S
+                          RecoveryTimeObjective: OnlineActive
+                          replicaType: Clone
+                        replicaInfos:
+                          replicaUpdateMode: Active
+                          consistencyEnabled: true
+                          replicationPeriod: P3Y6M4DT12H30M5S
+                          replicationBandwidth: 60000
+                      snapshotProperties:
+                        schedule:
+                          datetime: '2008-09-15T15:53:00.000Z'
+                          occurrence: Weekly
+                        retention:
+                          number: 10
+                          duration: 60
+                        topology:
+                          bucket: s3
+                      customProperties:
+                        key1: value1
+                        key2:
+                          subKey1: subValue1
+                          subKey2: subValue2
+                        key3: value3
+                    - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+                      name: Silver
+                      description: provide silver storage service
+                      provisioningProperties:
+                        dataStorage:
+                          provisioningPolicy: Thin
+                        ioConnectivity:
+                          accessProtocol: iscsi
+                      customProperties:
+                        key1: value1
+                        key2: value2
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Profiles
       description: Creates a profile.
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ProfileSpec'
       responses:
         '201':
           description: Created
-          schema:
-            $ref: '#/definitions/ProfileSpec'
-          examples:
+          content:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-              name: Silver
-              description: provide silver storage service
-              provisioningProperties:
-                dataStorage:
-                  provisioningPolicy: Thin
-                ioConnectivity:
-                  accessProtocol: iscsi
-              customProperties:
-                key1: value1
-                key2: value2
+              schema:
+                $ref: '#/components/schemas/ProfileSpec'
+              examples:
+                response:
+                  value:
+                    id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+                    name: Silver
+                    description: provide silver storage service
+                    provisioningProperties:
+                      dataStorage:
+                        provisioningPolicy: Thin
+                      ioConnectivity:
+                        accessProtocol: iscsi
+                    customProperties:
+                      key1: value1
+                      key2: value2
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileSpec'
+        required: true
   '/v1beta/{tenantId}/profiles/{profileId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/profileId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/profileId'
     get:
       tags:
         - Profiles
@@ -304,71 +304,67 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/ProfileSpec'
-          examples:
+          content:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-              name: Silver
-              description: provide silver storage service
-              provisioningProperties:
-                dataStorage:
-                  provisioningPolicy: Thin
-                ioConnectivity:
-                  accessProtocol: iscsi
-              customProperties:
-                key1: value1
-                key2: value2
+              schema:
+                $ref: '#/components/schemas/ProfileSpec'
+              examples:
+                response:
+                  value:
+                    id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+                    name: Silver
+                    description: provide silver storage service
+                    provisioningProperties:
+                      dataStorage:
+                        provisioningPolicy: Thin
+                      ioConnectivity:
+                        accessProtocol: iscsi
+                    customProperties:
+                      key1: value1
+                      key2: value2
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Profiles
       description: Updates a profile.
-      parameters:
-        - name: profile
-          in: body
-          schema:
-            type: object
-            required:
-              - name
-            properties:
-              name:
-                type: string
-              description:
-                type: string
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/ProfileSpec'
-          examples:
+          content:
             application/json:
-              id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-              name: Silver
-              description: provide silver storage service
-              provisioningProperties:
-                dataStorage:
-                  provisioningPolicy: Thin
-                ioConnectivity:
-                  accessProtocol: iscsi
-              customProperties:
-                key1: value1
-                key2: value2
+              schema:
+                $ref: '#/components/schemas/ProfileSpec'
+              examples:
+                response:
+                  value:
+                    id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
+                    name: Silver
+                    description: provide silver storage service
+                    provisioningProperties:
+                      dataStorage:
+                        provisioningPolicy: Thin
+                      ioConnectivity:
+                        accessProtocol: iscsi
+                    customProperties:
+                      key1: value1
+                      key2: value2
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/Profile'
     delete:
       tags:
         - Profiles
@@ -377,48 +373,51 @@ paths:
         '200':
           description: OK
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/profileId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/profileId'
     post:
       tags:
         - Profiles
       description: Adds customized property to the profile.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/CustomPropertiesSpec'
       responses:
         '201':
           description: Created
-          schema:
-            $ref: '#/definitions/CustomPropertiesSpec'
-          examples:
+          content:
             application/json:
-              key1: value1
-              key2:
-                subKey1: subValue1
-                subKey2: subValue2
-              key3: value3
+              schema:
+                $ref: '#/components/schemas/CustomPropertiesSpec'
+              examples:
+                response:
+                  value:
+                    key1: value1
+                    key2:
+                      subKey1: subValue1
+                      subKey2: subValue2
+                    key3: value3
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomPropertiesSpec'
     get:
       tags:
         - Profiles
@@ -426,28 +425,31 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-             $ref: '#/definitions/CustomPropertiesSpec'
-          examples:
+          content:
             application/json:
-              key1: value1
-              key2:
-                subKey1: subValue1
-                subKey2: subValue2
-              key3: value3
+              schema:
+                $ref: '#/components/schemas/CustomPropertiesSpec'
+              examples:
+                response:
+                  value:
+                    key1: value1
+                    key2:
+                      subKey1: subValue1
+                      subKey2: subValue2
+                    key3: value3
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/profiles/{profileId}/customProperties/{customKey}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/profileId'
-      - $ref: '#/parameters/customKey'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/profileId'
+      - $ref: '#/components/parameters/customKey'
     delete:
       tags:
         - Profiles
@@ -456,16 +458,16 @@ paths:
         '200':
           description: OK
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/volumes':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Block volumes
@@ -473,42 +475,46 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/VolumeSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Block volumes
       description: Creates a volume.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/VolumeSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/VolumeSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VolumeSpec'
   '/v1beta/{tenantId}/block/volumes/{volumeId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/volumeId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/volumeId'
     get:
       tags:
         - Block volumes
@@ -516,45 +522,39 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Block volumes
       description: Updates a volume.
-      parameters:
-        - name: volume
-          in: body
-          schema:
-            type: object
-            required:
-              - name
-            properties:
-              name:
-                type: string
-              description:
-                type: string
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/Profile'
     delete:
       tags:
         - Block volumes
@@ -563,94 +563,98 @@ paths:
         '202':
           description: Accepted
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/volumes/{volumeId}/resize':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/volumeId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/volumeId'
     post:
       tags:
         - Block volumes
       description: Extends a volume.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/ExtendVolumeSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/VolumeSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtendVolumeSpec'
   '/v1beta/{tenantId}/block/attachments':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       parameters:
-        - uniqueItems: true
-          type: string
-          name: volumeId
+        - name: volumeId
           description: The UUID of the volume assosicated with the attachment.
           in: query
+          schema:
+            type: string
+            uniqueItems: true
       tags:
         - Block volume attachments
       description: Lists information for all volume attachments.
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/VolumeAttachmentSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeAttachmentSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Block volume attachments
       description: Creates a volume attachment.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/VolumeAttachmentSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            type: object
-            properties:
-              attachment:
-                $ref: '#/definitions/VolumeAttachmentSpec'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attachment:
+                    $ref: '#/components/schemas/VolumeAttachmentSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
   '/v1beta/{tenantId}/block/attachments/{attachmentId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/attachmentId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/attachmentId'
     get:
       tags:
         - Block volume attachments
@@ -658,40 +662,41 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeAttachmentSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeAttachmentSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Block volume attachments
       description: Updates a volume attachments
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/VolumeAttachmentSpec'
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeAttachmentSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeAttachmentSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
     delete:
       tags:
         - Block volume attachments
@@ -700,65 +705,70 @@ paths:
         '202':
           description: Accepted
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/snapshots':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       parameters:
-        - uniqueItems: true
-          type: string
-          name: volumeId
+        - name: volumeId
           description: The UUID of the volume assosicated with the snapshot.
           in: query
+          schema:
+            type: string
+            uniqueItems: true
       tags:
         - Block volume snapshots
       description: Lists information for all volume snapshots.
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/VolumeSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeSnapshotSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Block volume snapshots
       description: Creates a volume snapshot.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/VolumeSnapshotSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/VolumeSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSnapshotSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VolumeSnapshotSpec'
   '/v1beta/{tenantId}/block/snapshots/{snapshotId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/snapshotId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/snapshotId'
     get:
       tags:
         - Block volume snapshots
@@ -766,45 +776,49 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSnapshotSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Block volume snapshots
       description: Updates a volume snapshot.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeSnapshotSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
     delete:
       tags:
         - Block volume snapshots
@@ -813,16 +827,16 @@ paths:
         '202':
           description: Accepted
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/volumeGroups':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Block volume group
@@ -830,64 +844,70 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/VolumeGroupSpec'
-          examples:
+          content:
             application/json:
-              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
-                name: volumeGroup-demo
-                status: available
-                description: volumeGroup test
-                profiles:
-                  - 993c87dc-1928-498b-9767-9da8f901d6ce
-                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-                availabilityZone: default
-                poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeGroupSpec'
+              examples:
+                response:
+                  value:
+                    - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                      name: volumeGroup-demo
+                      status: available
+                      description: volumeGroup test
+                      profiles:
+                        - 993c87dc-1928-498b-9767-9da8f901d6ce
+                        - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                      availabilityZone: default
+                      poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Block volume group
       description: Creates a volume group.
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/VolumeGroupSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/VolumeGroupSpec'
-          examples:
+          content:
             application/json:
-              - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
-                name: volumeGroup-demo
-                status: creating
-                description: volumeGroup test
-                profiles:
-                  - 993c87dc-1928-498b-9767-9da8f901d6ce
-                  - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-                availabilityZone: default
+              schema:
+                $ref: '#/components/schemas/VolumeGroupSpec'
+              examples:
+                response:
+                  value:
+                    - id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                      name: volumeGroup-demo
+                      status: creating
+                      description: volumeGroup test
+                      profiles:
+                        - 993c87dc-1928-498b-9767-9da8f901d6ce
+                        - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                      availabilityZone: default
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VolumeGroupSpec'
+        required: true
   '/v1beta/{tenantId}/block/volumeGroups/{volumeGroupId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/volumeGroupId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/volumeGroupId'
     get:
       tags:
         - Block volume group
@@ -895,72 +915,77 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeGroupSpec'
-          examples:
+          content:
             application/json:
-              id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
-              createdAt: "2018-06-03T07:02:35.389Z"
-              name: volumeGroup-demo
-              status: available
-              description: volumeGroup test
-              profiles:
-                - 993c87dc-1928-498b-9767-9da8f901d6ce
-                - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-              availabilityZone: default
-              poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
+              schema:
+                $ref: '#/components/schemas/VolumeGroupSpec'
+              examples:
+                response:
+                  value:
+                    id: 015184f3-8e73-47fd-8f57-26ea912e2a6b
+                    createdAt: '2018-06-03T07:02:35.389Z'
+                    name: volumeGroup-demo
+                    status: available
+                    description: volumeGroup test
+                    profiles:
+                      - 993c87dc-1928-498b-9767-9da8f901d6ce
+                      - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                    availabilityZone: default
+                    poolId: 6e14588f-9da9-5ef3-a89d-86375c1352f6
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Block volume group
       description: Updates a volume group.
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                example: volumeGroup-demo
-              description:
-                type: string
-                example: volumeGroup test
-              addVolumes:
-                type: array
-                items:
-                  type: string
-                  example:
-                    - 993c87dc-1928-498b-9767-9da8f901d6ce
-                    - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-              removeVolumes:
-                type: array
-                items:
-                  type: string
-                  example: 1b7277b8-493a-4c8d-bccd-89db580e5f60
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/VolumeGroupSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeGroupSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: volumeGroup-demo
+                description:
+                  type: string
+                  example: volumeGroup test
+                addVolumes:
+                  type: array
+                  items:
+                    type: string
+                    example:
+                      - 993c87dc-1928-498b-9767-9da8f901d6ce
+                      - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+                removeVolumes:
+                  type: array
+                  items:
+                    type: string
+                    example: 1b7277b8-493a-4c8d-bccd-89db580e5f60
+        required: true
     delete:
       tags:
         - Block volume group
@@ -969,16 +994,16 @@ paths:
         '202':
           description: Accepted
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/replications':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -986,73 +1011,80 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ReplicationSpec'
-          examples:
+          content:
             application/json:
-              - id: e416db95-b6f4-4669-a075-5a873d050a93
-                name: replication-demo
-                ReplicationStatus: enabled
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReplicationSpec'
+              examples:
+                response:
+                  value:
+                    - id: e416db95-b6f4-4669-a075-5a873d050a93
+                      name: replication-demo
+                      ReplicationStatus: enabled
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - Block Replications
       description: Create a replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-             $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/ReplicationSpec'
-          examples:
+          content:
             application/json:
-              id: e416db95-b6f4-4669-a075-5a873d050a93
-              createdAt: "2018-05-07T07:02:35.389Z"
-              updatedAt:
-              name: replication-demo
-              description: volume replication demo
-              availabilityZone: default
-              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
-              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
-              primaryReplicationDriverData:
-                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
-              secondaryReplicationDriverData:
-                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
-              ReplicationStatus: enabled
-              replicationMode: sync
-              replicationPeriod: 0
-              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+              schema:
+                $ref: '#/components/schemas/ReplicationSpec'
+              examples:
+                response:
+                  value:
+                    id: e416db95-b6f4-4669-a075-5a873d050a93
+                    createdAt: '2018-05-07T07:02:35.389Z'
+                    updatedAt: null
+                    name: replication-demo
+                    description: volume replication demo
+                    availabilityZone: default
+                    primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+                    secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+                    primaryReplicationDriverData:
+                      AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+                    secondaryReplicationDriverData:
+                      AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+                    ReplicationStatus: enabled
+                    replicationMode: sync
+                    replicationPeriod: 0
+                    profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/ReplicationSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/replicationId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/replicationId'
     get:
       tags:
         - Block Replications
@@ -1060,99 +1092,113 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/ReplicationSpec'
-          examples:
+          content:
             application/json:
-              id: e416db95-b6f4-4669-a075-5a873d050a93
-              createdAt: "2018-05-07T07:02:35.389Z"
-              updatedAt:
-              name: replication-demo
-              description: volume replication demo
-              availabilityZone: default
-              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
-              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
-              primaryReplicationDriverData:
-                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
-              secondaryReplicationDriverData:
-                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
-              ReplicationStatus: enabled
-              replicationMode: sync
-              replicationPeriod: 0
-              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+              schema:
+                $ref: '#/components/schemas/ReplicationSpec'
+              examples:
+                response:
+                  value:
+                    id: e416db95-b6f4-4669-a075-5a873d050a93
+                    createdAt: '2018-05-07T07:02:35.389Z'
+                    updatedAt: null
+                    name: replication-demo
+                    description: volume replication demo
+                    availabilityZone: default
+                    primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+                    secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+                    primaryReplicationDriverData:
+                      AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+                    secondaryReplicationDriverData:
+                      AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+                    ReplicationStatus: enabled
+                    replicationMode: sync
+                    replicationPeriod: 0
+                    profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - Block Replications
       description: Updates a replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
-            required:
-              - name
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/ReplicationSpec'
-          examples:
+          content:
             application/json:
-              id: e416db95-b6f4-4669-a075-5a873d050a93
-              createdAt: "2018-05-07T07:02:35.389Z"
-              updatedAt:
-              name: replication-demo
-              description: volume replication demo
-              availabilityZone: default
-              primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
-              secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
-              primaryReplicationDriverData:
-                AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
-              secondaryReplicationDriverData:
-                AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
-                HostIp: 192.168.56.100
-                HostName: opensds-master
-                Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
-                lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
-              ReplicationStatus: enabled
-              replicationMode: sync
-              replicationPeriod: 0
-              profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+              schema:
+                $ref: '#/components/schemas/ReplicationSpec'
+              examples:
+                response:
+                  value:
+                    id: e416db95-b6f4-4669-a075-5a873d050a93
+                    createdAt: '2018-05-07T07:02:35.389Z'
+                    updatedAt: null
+                    name: replication-demo
+                    description: volume replication demo
+                    availabilityZone: default
+                    primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+                    secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+                    primaryReplicationDriverData:
+                      AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+                    secondaryReplicationDriverData:
+                      AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                      HostIp: 192.168.56.100
+                      HostName: opensds-master
+                      Mountpoint: >-
+                        /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                      lvPath: >-
+                        /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+                    ReplicationStatus: enabled
+                    replicationMode: sync
+                    replicationPeriod: 0
+                    profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - name
     delete:
       tags:
         - Block Replications
@@ -1161,18 +1207,18 @@ paths:
         '202':
           description: Accepted
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/replications/detail':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - Block Replications
@@ -1180,123 +1226,124 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ReplicationSpec'
-          examples:
+          content:
             application/json:
-              - id: e416db95-b6f4-4669-a075-5a873d050a93
-                createdAt: "2018-05-07T07:02:35.389Z"
-                updatedAt:
-                name: replication-demo
-                description: volume replication demo
-                availabilityZone: default
-                primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
-                secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
-                primaryReplicationDriverData:
-                  AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
-                  HostIp: 192.168.56.100
-                  HostName: opensds-master
-                  Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
-                  lvPath: /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
-                secondaryReplicationDriverData:
-                  AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
-                  HostIp: 192.168.56.100
-                  HostName: opensds-master
-                  Mountpoint: /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
-                  lvPath: /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
-                ReplicationStatus: enabled
-                replicationMode: sync
-                replicationPeriod: 0
-                profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReplicationSpec'
+              examples:
+                response:
+                  value:
+                    - id: e416db95-b6f4-4669-a075-5a873d050a93
+                      createdAt: '2018-05-07T07:02:35.389Z'
+                      updatedAt: null
+                      name: replication-demo
+                      description: volume replication demo
+                      availabilityZone: default
+                      primaryVolumeId: 655ec3e2-5840-4138-b5bd-bce930d2acda
+                      secondaryVolumeId: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+                      primaryReplicationDriverData:
+                        AttachmentId: 0a1bb216-3096-4be0-a392-5124937717b7
+                        HostIp: 192.168.56.100
+                        HostName: opensds-master
+                        Mountpoint: >-
+                          /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1
+                        lvPath: >-
+                          /dev/opensds-volumes-default/volume-baec258b-8f79-4bbc-bf97-28addfa903d3
+                      secondaryReplicationDriverData:
+                        AttachmentId: b3e1d639-66f4-486c-9be9-217b7ac05ac3
+                        HostIp: 192.168.56.100
+                        HostName: opensds-master
+                        Mountpoint: >-
+                          /dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:1f782f63-21cd-4475-9dcb-e2cc0eae7546-lun-1
+                        lvPath: >-
+                          /dev/opensds-volumes-default/volume-1f782f63-21cd-4475-9dcb-e2cc0eae7546
+                      ReplicationStatus: enabled
+                      replicationMode: sync
+                      replicationPeriod: 0
+                      profileId: fb210bfe-8809-4a8f-aaf2-53acd98e28ac
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/block/replications/{replicationId}/enable':
     parameters:
-    - $ref: '#/parameters/tenantId'
-    - $ref: '#/parameters/replicationId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/replicationId'
     post:
       tags:
         - Block Replications
       description: Enable Replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/ReplicationSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}/disable':
     parameters:
-    - $ref: '#/parameters/tenantId'
-    - $ref: '#/parameters/replicationId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/replicationId'
     post:
       tags:
         - Block Replications
       description: Disable Replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/ReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/ReplicationSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}/failover':
     parameters:
-    - $ref: '#/parameters/tenantId'
-    - $ref: '#/parameters/replicationId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/replicationId'
     post:
       tags:
         - Block Replications
       description: Failover Replication.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/FailoverReplicationSpec'
       responses:
         '202':
           description: Accepted
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FailoverReplicationSpec'
   '/v1beta/{tenantId}/file/shares':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - File Shares
@@ -1304,42 +1351,46 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/FileShareSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileShareSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - File Shares
       description: Creates a file share.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/FileShareSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/FileShareSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileShareSpec'
   '/v1beta/{tenantId}/file/shares/{fileshareId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/fileshareId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/fileshareId'
     get:
       tags:
         - File Shares
@@ -1347,43 +1398,37 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/FileShareSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - File Shares
       description: Updates a file share.
-      parameters:
-        - name: fileshare
-          in: body
-          schema:
-            type: object
-            required:
-              - name
-            properties:
-              name:
-                type: string
-              description:
-                type: string
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/FileShareSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/Profile'
     delete:
       tags:
         - File Shares
@@ -1392,16 +1437,16 @@ paths:
         '202':
           description: Accepted
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
   '/v1beta/{tenantId}/file/snapshots':
     parameters:
-      - $ref: '#/parameters/tenantId'
+      - $ref: '#/components/parameters/tenantId'
     get:
       tags:
         - File Share Snapshots
@@ -1409,42 +1454,46 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/FileShareSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileShareSnapshotSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     post:
       tags:
         - File Share Snapshots
       description: Creates a file share snapshot.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/FileShareSnapshotSpec'
       responses:
         '202':
           description: Accepted
-          schema:
-            $ref: '#/definitions/FileShareSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSnapshotSpec'
         '400':
-          $ref: '#/responses/HTTPStatus400'
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileShareSnapshotSpec'
   '/v1beta/{tenantId}/file/snapshots/{shareSnapshotId}':
     parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/shareSnapshotId'
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/shareSnapshotId'
     get:
       tags:
         - File Share Snapshots
@@ -1452,23 +1501,287 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/FileShareSnapshotSpec'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSnapshotSpec'
         '401':
-          $ref: '#/responses/HTTPStatus401'
+          $ref: '#/components/responses/HTTPStatus401'
         '403':
-          $ref: '#/responses/HTTPStatus403'
+          $ref: '#/components/responses/HTTPStatus403'
         '404':
-          $ref: '#/responses/HTTPStatus404'
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
-          $ref: '#/responses/HTTPStatus500'
+          $ref: '#/components/responses/HTTPStatus500'
     put:
       tags:
         - File Share Snapshots
       description: Updates a file share Snapshot.
-      parameters:
-        - name: fileshare
-          in: body
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareSnapshotSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        $ref: '#/components/requestBodies/Profile'
+    delete:
+      tags:
+        - File Share Snapshots
+      description: Deletes a fileshare snapshot.
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/file/acls':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - File Share Acls
+      description: Lists information for all file share acls.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileShareAclSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    post:
+      tags:
+        - File Share Acls
+      description: Creates a file share acl.
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareAclSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileShareAclSpec'
+  '/v1beta/{tenantId}/file/acls/{fileshareaclId}':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/fileshareaclId'
+    get:
+      tags:
+        - File Share Acls
+      description: Gets fileshareacl detail by fileshareacl id.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileShareAclSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    delete:
+      tags:
+        - File Share Acls
+      description: Deletes a fileshareacl.
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+security:
+  - basicAuth: []
+externalDocs:
+  description: The offical OpenSDS Controller API specification
+  url: 'https://github.com/opensds/opensds'
+servers:
+  - url: 'https://localhost:50040/'
+  - url: 'http://localhost:50040/'
+components:
+  parameters:
+    apiVersion:
+      name: apiVersion
+      in: path
+      required: true
+      description: API version string
+      schema:
+        type: string
+        pattern: 'v([1-9][0-9]*)((alpha)([1-9][0-9]*)|(beta)([1-9][0-9]*))?'
+    tenantId:
+      name: tenantId
+      in: path
+      required: true
+      description: The tenant UUID in a multi-tenancy environment.
+      schema:
+        type: string
+    dockId:
+      name: dockId
+      in: path
+      required: true
+      description: The UUID of the storage backend (dock) service.
+      schema:
+        type: string
+    poolId:
+      name: poolId
+      in: path
+      required: true
+      description: The UUID of the storage pool.
+      schema:
+        type: string
+    profileId:
+      name: profileId
+      in: path
+      required: true
+      description: The UUID of the profile.
+      schema:
+        type: string
+    fileshareId:
+      name: fileshareId
+      in: path
+      required: true
+      description: The UUID of the file share.
+      schema:
+        type: string
+    fileshareaclId:
+      name: fileshareaclId
+      in: path
+      required: true
+      description: The UUID of the file share acl.
+      schema:
+        type: string
+    volumeId:
+      name: volumeId
+      in: path
+      required: true
+      description: The UUID of the volume.
+      schema:
+        type: string
+    customKey:
+      name: customKey
+      in: path
+      required: true
+      description: The key of the customized properties.
+      schema:
+        type: string
+    attachmentId:
+      name: attachmentId
+      in: path
+      required: true
+      description: The UUID of the volume attachment.
+      schema:
+        type: string
+    snapshotId:
+      name: snapshotId
+      in: path
+      required: true
+      description: The UUID of the volume snapshot.
+      schema:
+        type: string
+    shareSnapshotId:
+      name: shareSnapshotId
+      in: path
+      required: true
+      description: The UUID of the fileshare snapshot.
+      schema:
+        type: string
+    volumeGroupId:
+      name: volumeGroupId
+      in: path
+      required: true
+      description: The UUID of the volume group.
+      schema:
+        type: string
+    replicationId:
+      name: replicationId
+      in: path
+      required: true
+      description: The UUID of the relication.
+      schema:
+        type: string
+  responses:
+    HTTPStatus400:
+      description: BadRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSpec'
+    HTTPStatus401:
+      description: NotAuthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSpec'
+    HTTPStatus403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSpec'
+    HTTPStatus404:
+      description: The resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSpec'
+    HTTPStatus500:
+      description: An unexpected error occured.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSpec'
+  requestBodies:
+    ReplicationSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReplicationSpec'
+    Profile:
+      content:
+        application/json:
           schema:
             type: object
             required:
@@ -1478,1080 +1791,861 @@ paths:
                 type: string
               description:
                 type: string
-      responses:
-        '200':
-          description: OK
+    VolumeAttachmentSpec:
+      content:
+        application/json:
           schema:
-            $ref: '#/definitions/FileShareSnapshotSpec'
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '404':
-          $ref: '#/responses/HTTPStatus404'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-    delete:
-      tags:
-        - File Share Snapshots
-      description: Deletes a fileshare snapshot.
-      responses:
-        '202':
-          description: Accepted
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '404':
-          $ref: '#/responses/HTTPStatus404'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{tenantId}/file/acls':
-    parameters:
-      - $ref: '#/parameters/tenantId'
-    get:
-      tags:
-        - File Share Acls
-      description: Lists information for all file share acls.
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/FileShareAclSpec'
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-    post:
-      tags:
-        - File Share Acls
-      description: Creates a file share acl.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/FileShareAclSpec'
-      responses:
-        '202':
-          description: Accepted
-          schema:
-            $ref: '#/definitions/FileShareAclSpec'
-        '400':
-          $ref: '#/responses/HTTPStatus400'
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-  '/v1beta/{tenantId}/file/acls/{fileshareaclId}':
-    parameters:
-      - $ref: '#/parameters/tenantId'
-      - $ref: '#/parameters/fileshareaclId'
-    get:
-      tags:
-        - File Share Acls
-      description: Gets fileshareacl detail by fileshareacl id.
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/FileShareAclSpec'
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '404':
-          $ref: '#/responses/HTTPStatus404'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-    delete:
-      tags:
-        - File Share Acls
-      description: Deletes a fileshareacl.
-      responses:
-        '202':
-          description: Accepted
-        '401':
-          $ref: '#/responses/HTTPStatus401'
-        '403':
-          $ref: '#/responses/HTTPStatus403'
-        '404':
-          $ref: '#/responses/HTTPStatus404'
-        '500':
-          $ref: '#/responses/HTTPStatus500'
-definitions:
-  BaseModel:
-    type: object
-    properties:
-      id:
-        type: string
-        example: 084bf71e-a102-11e7-88a8-e31fe6d52248
-        readOnly: true
-      createdAt:
-        type: string
-        format: date-time
-        example: 2017-07-10T14:36:58.014Z
-        readOnly: true
-      updatedAt:
-        type: string
-        format: date-time
-        example: 2017-07-10T14:36:58.014Z
-        readOnly: true
-  DataStorageLoS:
-    description: >-
-      DataStorageLoS can be used to describe a service option covering storage
-      provisioning and availability.
-    type: object
-    properties:
-      recoveryTimeObjective:
-        type: integer
-        format: int64
-      provisioningPolicy:
-        type: string
-        enum:
-          - Thin
-          - Thick
-      compression:
-        type: boolean
-      deduplication:
-        type: boolean
-      characterCodeSet:
-        type: string
-      maxFileNameLengthBytes:
-        type: integer
-        format: int64
-      storageAccessCapability:
-        type: string
-        enum:
-          - Read
-          - Write
-          - Execute
-  IOConnectivityLoS:
-    description: >-
-      IOConnectivityLoS can be used to specify the characteristics of storage
-      connectivity.
-    type: object
-    required:
-      - accessProtocol
-    properties:
-      accessProtocol:
-        type: string
-        enum:
-          - iscsi
-          - rbd
-          - fibre_channel
-          - DSWARE
-      maxIOPS:
-        type: integer
-        format: int64
-      maxBWS:
-        type: integer
-        format: int64
-  DataProtectionLoS:
-    description: >-
-      DataProtectionLoS describes a replica that protects data from loss. The
-      requirements must be met collectively by the communication path and the
-      replica.
-    type: object
-    properties:
-      isIsolated:
-        type: boolean
-      minLifetime:
-        type: string
-        example: P3Y6M4DT12H30M5S
-      RecoveryGeographicObjective:
-        type: string
-        enum:
-          - Datacenter
-          - Rack
-          - RackGroup
-          - Region
-          - Row
-          - Server
-      RecoveryPointObjectiveTime:
-        type: string
-        example: P3Y6M4DT12H30M5S
-      RecoveryTimeObjective:
-        type: string
-        enum:
-          - OnlineActive
-          - OnlinePassive
-          - Nearline
-          - Offline
-      ReplicaType:
-        type: string
-        enum:
-          - Clone
-          - Mirror
-          - Snapshot
-          - TokenizedClone
-  DockSpec:
-    description: >-
-      A backend is initialized by specific driver configuration. Each backend
-      can be regarded as a docking service between SDS controller and storage
-      service.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - name
-          - status
-          - driverName
-          - endpoint
-          - nodeId
-        properties:
-          type:
-            type: string
-            enum:
-              - provisioner
-              - attacher
-          name:
-            type: string
-          description:
-            type: string
-          storageType:
-            type: string
-            enum:
-              - block
-              - file
-              - object
-          status:
-            type: string
-            enum:
-              - available
-              - unavailable
-          driverName:
-            type: string
-            enum:
-              - default
-              - lvm
-              - ceph
-              - cinder
-              - huawei_oceanstor_block
-              - huawei_fusionstorage
-          endpoint:
-            type: string
-            example: 0.0.0.0:50050
-          nodeId:
-            type: string
-            example: 127.0.0.1
-          metadata:
-            type: object
-  StoragePoolSpec:
-    description: >-
-      A pool is discoveried and updated by a dock service. Each pool can be
-      regarded as a physical storage pool or a virtual storage pool. It is a
-      logical and atomic pool and can be abstracted from any storage platform.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - name
-          - status
-          - availabilityZone
-          - totalCapacity
-          - freeCapacity
-          - dockId
-        properties:
-          name:
-            type: string
-          storageType:
-            type: string
-            enum:
-              - block
-              - file
-              - object
-          description:
-            type: string
-          multiAttach:
-            type: boolean
-          status:
-            type: string
-            enum:
-              - available
-              - unavailable
-          availabilityZone:
-            type: string
-            default: default
-          totalCapacity:
-            type: integer
-            format: int64
-          freeCapacity:
-            type: integer
-            format: int64
-          dockId:
-            type: string
-            example: f4a5e666-c669-4c64-a2a1-8f9ecd560c78
-          extras:
-            $ref: '#/definitions/StoragePoolExtraSpec'
-  StoragePoolExtraSpec:
-    description: >-
-      StoragePoolExtraSpec object represents the extra properties of the pool,
-      such as supported capabilities.
-    type: object
-    properties:
-      dataStorage:
-        $ref: '#/definitions/DataStorageLoS'
-      ioConnectivity:
-        $ref: '#/definitions/IOConnectivityLoS'
-      dataProtection:
-        $ref: '#/definitions/DataProtectionLoS'
-      customProperties:
-        type: object
-        additionalProperties:
-          type: object
-        example:
-          key1: value1
-          key2: false
-          key3:
-            key31: value31
-  ProfileSpec:
-    description: >-
-      An OpenSDS profile is identified by a unique name and ID. With adding
-      extra properties, each profile can contains a set of tags of storage
-      capabilities which are desirable features for a class of applications.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - name
-          - description
-        properties:
-          name:
-            type: string
-          storageType:
-            type: string
-            enum:
-              - block
-              - file
-              - object
-          description:
-            type: string
-          provisioningProperties:
-            $ref: '#/definitions/ProvisioningPropertiesSpec'
-          replicationProperties:
-            $ref: '#/definitions/ReplicationPropertiesSpec'
-          snapshotProperties:
-            $ref: '#/definitions/SnapshotPropertiesSpec'
-          dataProtectionProperties:
-            $ref: '#/definitions/DataProtectionPropertiesSpec'
-          customProperties:
-            $ref: '#/definitions/CustomPropertiesSpec'
-  FileShareSpec:
-    description: >-
-      FileShare is a file system created by nfs southbound driver, it can be mounted on
-      to physical machine or virtual machine instance.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - name
-          - availabilityZone
-          - size
-          - profileId
-          - poolId
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          name:
-            type: string
-          description:
-            type: string
-          size:
-            type: integer
-            format: int64
-            example: 2
-          availabilityZone:
-            type: string
-            default: default
-          status:
-            type: string
-            readOnly: true
-          profileId:
-            type: string
-          exportLocations:
-            type: array
-            items:
-              type: string
-            readOnly: true
-          metadata:
-            type: object
-            readOnly: true
-            additionalProperties:
-              type: string
-            example:
-              lvPath: string
-              nfsFileshareID: string
-              nfsFileshareName: string
-  FileShareSnapshotSpec:
-    description: >-
-      Snapshot is a description of fileshare snapshot resource.
-    allOf:
-       - $ref: '#/definitions/BaseModel'
-       - type: object
-         required:
-           - tenantId
-           - name
-           - status
-           - snapshotId
-           - fileshareId
-         properties:
-           fileshareId:
-             type: string
-           tenantId:
-             type: string
-             readOnly: true
-           userId:
-             type: string
-             readOnly: true
-           name:
-             type: string
-           description:
-             type: string
-           status:
-             type: string
-             readOnly: true
-           profileId:
-             type: string
-           metadata:
-             type: object
-             readOnly: true
-             additionalProperties:
-               type: string
-             example:
-               snapshotId: string
-               snapshotName: string
-               lvPath: string
-  FileShareAclSpec:
-     description: >-
-       File Share Acl API describes the  acl of file share resource
-     allOf:
-       - $ref: '#/definitions/BaseModel'
-       - type: object
-         required:
-           - tenantId
-           - fileshareId
-           - type
-           - accessCapability
-           - accessTo
-         properties:
-           fileshareId:
-             type: string
-           type:
-             type: string
-           accessCapability:
-             type: string
-           accessTo:
-             type: string
-           tenantId:
-             type: string
-             readOnly: true
-           userId:
-             type: string
-             readOnly: true
-           name:
-             type: string
-           description:
-             type: string
-           status:
-             type: string
-             readOnly: true
-           profileId:
-             type: string
-           metadata:
-             type: object
-             readOnly: true
-             additionalProperties:
-               type: string
-             example:
-               key1: value1
-               key2: value2
-  ProvisioningPropertiesSpec:
-    description: >-
-      ProvisioningPropertiesSpec represents some suggested properties for performing
-      provisioning policies.
-    type: object
-    properties:
-      dataStorage:
-        $ref: '#/definitions/DataStorageLoS'
-      ioConnectivity:
-        $ref: '#/definitions/IOConnectivityLoS'
-  ReplicationPropertiesSpec:
-    description: >-
-      ReplicationPropertiesSpec represents some suggested properties for performing
-      replication policies.
-    type: object
-    properties:
-      dataProtection:
-        $ref: '#/definitions/DataProtectionLoS'
-      replicaInfos:
-        type: object
-        properties:
-          replicaUpdateMode:
-            type: string
-            enum:
-              - Active
-              - Adaptive
-              - Asynchronous
-              - Synchronous
-          consistencyEnalbed:
-            type: boolean
-          replicationPeriod:
-            type: string
-            example: P3Y6M4DT12H30M5S
-          replcationBandwidth:
-            type: integer
-            format: int64
-  SnapshotPropertiesSpec:
-    description: >-
-      SnapshotPropertiesSpec represents some suggested properties for performing
-      snapshot policies.
-    type: object
-    properties:
-      schedule:
-        type: object
-        properties:
-          datetime:
-            type: string
-            format: date-time
-          occurrence:
-            type: string
-            enum:
-              - Daily
-              - Weekly
-              - Monthly
-      retention:
-        type: object
-        properties:
-          number:
-            type: integer
-            format: int64
-          duration:
-            type: integer
-            format: int64
-      topology:
-        type: object
-        properties:
-          bucket:
-            type: string
-  DataProtectionPropertiesSpec:
-    description: >-
-      DataProtectionPropertiesSpec represents some suggested properties for
-      performing data protection policies.
-    type: object
-    properties:
-      dataProtection:
-        $ref: '#/definitions/DataProtectionLoS'
-      consistencyEnalbed:
-        type: boolean
-  CustomPropertiesSpec:
-    description: >-
-      CustomPropertiesSpec is a map of keys and JSON object that represents the
-      customized properties of profile, such as requested capabilities
-      including diskType, latency, deduplicaiton, compression and so forth.
-    type: object
-    additionalProperties:
+            $ref: '#/components/schemas/VolumeAttachmentSpec'
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    BaseModel:
       type: object
-    example:
-      key1: value1
-      key2: false
-      key3:
-        key31: value31
-  VolumeSpec:
-    description: >-
-      Volume is an block device created by storage service, it can be attached
-      to physical machine or virtual machine instance.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - name
-          - availabilityZone
-          - size
-          - profileId
-          - poolId
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          name:
-            type: string
-          multiAttach:
-            type: boolean
-          description:
-            type: string
-          size:
-            type: integer
-            format: int64
-            example: 2
-          availabilityZone:
-            type: string
-            default: default
-          status:
-            type: string
-            readOnly: true
-          profileId:
-            type: string
-          poolId:
-            type: string
-          snapshotId:
-            type: string
-          groupId:
-            type: string
-          snapshotFromCloud:
-            type: boolean
-          replicationId:
-            type: string
-          replicationDriverData:
-            type: object
-            additionalProperties:
+      properties:
+        id:
+          type: string
+          example: 084bf71e-a102-11e7-88a8-e31fe6d52248
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          example: '2017-07-10T14:36:58.014Z'
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2017-07-10T14:36:58.014Z'
+          readOnly: true
+    DataStorageLoS:
+      description: >-
+        DataStorageLoS can be used to describe a service option covering storage
+        provisioning and availability.
+      type: object
+      properties:
+        recoveryTimeObjective:
+          type: integer
+          format: int64
+        provisioningPolicy:
+          type: string
+          enum:
+            - Thin
+            - Thick
+        compression:
+          type: boolean
+        deduplication:
+          type: boolean
+        characterCodeSet:
+          type: string
+        maxFileNameLengthBytes:
+          type: integer
+          format: int64
+        storageAccessCapability:
+          type: string
+          enum:
+            - Read
+            - Write
+            - Execute
+    IOConnectivityLoS:
+      description: >-
+        IOConnectivityLoS can be used to specify the characteristics of storage
+        connectivity.
+      type: object
+      required:
+        - accessProtocol
+      properties:
+        accessProtocol:
+          type: string
+          enum:
+            - iscsi
+            - rbd
+            - fibre_channel
+            - DSWARE
+        maxIOPS:
+          type: integer
+          format: int64
+        maxBWS:
+          type: integer
+          format: int64
+    DataProtectionLoS:
+      description: >-
+        DataProtectionLoS describes a replica that protects data from loss. The
+        requirements must be met collectively by the communication path and the
+        replica.
+      type: object
+      properties:
+        isIsolated:
+          type: boolean
+        minLifetime:
+          type: string
+          example: P3Y6M4DT12H30M5S
+        RecoveryGeographicObjective:
+          type: string
+          enum:
+            - Datacenter
+            - Rack
+            - RackGroup
+            - Region
+            - Row
+            - Server
+        RecoveryPointObjectiveTime:
+          type: string
+          example: P3Y6M4DT12H30M5S
+        RecoveryTimeObjective:
+          type: string
+          enum:
+            - OnlineActive
+            - OnlinePassive
+            - Nearline
+            - Offline
+        ReplicaType:
+          type: string
+          enum:
+            - Clone
+            - Mirror
+            - Snapshot
+            - TokenizedClone
+    DockSpec:
+      description: >-
+        A backend is initialized by specific driver configuration. Each backend
+        can be regarded as a docking service between SDS controller and storage
+        service.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - name
+            - status
+            - driverName
+            - endpoint
+            - nodeId
+          properties:
+            type:
               type: string
-            example:
-              key1: value1
-              key2: value2
-          metadata:
-            type: object
-            additionalProperties:
+              enum:
+                - provisioner
+                - attacher
+            name:
               type: string
-            example:
-              key1: value1
-              key2: value2
-  ExtendVolumeSpec:
-    description: >-
-      Extends the size of a volume to a requested size, in gibibytes (GiB).
-    type: object
-    required:
-      - newSize
-    properties:
-      newSize:
-        type: integer
-        format: int64
-        example: 2
-  VolumeAttachmentSpec:
-    description: >-
-      Attachment is a description of volume attached resource.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - hostInfo
-          - connectionInfo
-          - mountpoint
-          - status
-          - volumeId
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          attachMode:
-            type: string
-            enum:
-              - rw
-              - ro
-          hostInfo:
-            $ref: '#/definitions/HostInfo'
-          connectionInfo:
-            $ref: '#/definitions/ConnectionInfo'
-          mountpoint:
-            type: string
-          status:
-            type: string
-            readOnly: true
-          volumeId:
-            type: string
-  HostInfo:
-    description: >-
-      HostInfo is a structure for all properties of host when create a volume
-      attachment.
-    type: object
-    required:
-      - platform
-      - osType
-      - ip
-      - host
-    properties:
-      platform:
-        type: string
-      osType:
-        type: string
-      ip:
-        type: string
-      host:
-        type: string
-      initiator:
-        type: string
-  ConnectionInfo:
-    description: >-
-      ConnectionInfo is a structure for all properties of connection when
-      creating a volume attachment.
-    type: object
-    properties:
-      driverVolumeType:
-        type: string
-      data:
-        type: object
-        additionalProperties:
+            description:
+              type: string
+            storageType:
+              type: string
+              enum:
+                - block
+                - file
+                - object
+            status:
+              type: string
+              enum:
+                - available
+                - unavailable
+            driverName:
+              type: string
+              enum:
+                - default
+                - lvm
+                - ceph
+                - cinder
+                - huawei_oceanstor_block
+                - huawei_fusionstorage
+            endpoint:
+              type: string
+              example: '0.0.0.0:50050'
+            nodeId:
+              type: string
+              example: 127.0.0.1
+            metadata:
+              type: object
+    StoragePoolSpec:
+      description: >-
+        A pool is discoveried and updated by a dock service. Each pool can be
+        regarded as a physical storage pool or a virtual storage pool. It is a
+        logical and atomic pool and can be abstracted from any storage platform.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - name
+            - status
+            - availabilityZone
+            - totalCapacity
+            - freeCapacity
+            - dockId
+          properties:
+            name:
+              type: string
+            storageType:
+              type: string
+              enum:
+                - block
+                - file
+                - object
+            description:
+              type: string
+            multiAttach:
+              type: boolean
+            status:
+              type: string
+              enum:
+                - available
+                - unavailable
+            availabilityZone:
+              type: string
+              default: default
+            totalCapacity:
+              type: integer
+              format: int64
+            freeCapacity:
+              type: integer
+              format: int64
+            dockId:
+              type: string
+              example: f4a5e666-c669-4c64-a2a1-8f9ecd560c78
+            extras:
+              $ref: '#/components/schemas/StoragePoolExtraSpec'
+    StoragePoolExtraSpec:
+      description: >-
+        StoragePoolExtraSpec object represents the extra properties of the pool,
+        such as supported capabilities.
+      type: object
+      properties:
+        dataStorage:
+          $ref: '#/components/schemas/DataStorageLoS'
+        ioConnectivity:
+          $ref: '#/components/schemas/IOConnectivityLoS'
+        dataProtection:
+          $ref: '#/components/schemas/DataProtectionLoS'
+        customProperties:
           type: object
-        example:
-          key1: value1
-          key2: false
-          key3:
-            key31: value31
-      extraProperties:
-        type: object
-        additionalProperties:
+          additionalProperties:
+            type: object
+          example:
+            key1: value1
+            key2: false
+            key3:
+              key31: value31
+    ProfileSpec:
+      description: >-
+        An OpenSDS profile is identified by a unique name and ID. With adding
+        extra properties, each profile can contains a set of tags of storage
+        capabilities which are desirable features for a class of applications.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - name
+            - description
+          properties:
+            name:
+              type: string
+            storageType:
+              type: string
+              enum:
+                - block
+                - file
+                - object
+            description:
+              type: string
+            provisioningProperties:
+              $ref: '#/components/schemas/ProvisioningPropertiesSpec'
+            replicationProperties:
+              $ref: '#/components/schemas/ReplicationPropertiesSpec'
+            snapshotProperties:
+              $ref: '#/components/schemas/SnapshotPropertiesSpec'
+            dataProtectionProperties:
+              $ref: '#/components/schemas/DataProtectionPropertiesSpec'
+            customProperties:
+              $ref: '#/components/schemas/CustomPropertiesSpec'
+    FileShareSpec:
+      description: >-
+        FileShare is a file system created by nfs southbound driver, it can be
+        mounted on to physical machine or virtual machine instance.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - name
+            - availabilityZone
+            - size
+            - profileId
+            - poolId
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+            description:
+              type: string
+            size:
+              type: integer
+              format: int64
+              example: 2
+            availabilityZone:
+              type: string
+              default: default
+            status:
+              type: string
+              readOnly: true
+            profileId:
+              type: string
+            exportLocations:
+              type: array
+              items:
+                type: string
+              readOnly: true
+            metadata:
+              type: object
+              readOnly: true
+              additionalProperties:
+                type: string
+              example:
+                lvPath: string
+                nfsFileshareID: string
+                nfsFileshareName: string
+    FileShareSnapshotSpec:
+      description: Snapshot is a description of fileshare snapshot resource.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - name
+            - status
+            - snapshotId
+            - fileshareId
+          properties:
+            fileshareId:
+              type: string
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+            description:
+              type: string
+            status:
+              type: string
+              readOnly: true
+            profileId:
+              type: string
+            metadata:
+              type: object
+              readOnly: true
+              additionalProperties:
+                type: string
+              example:
+                snapshotId: string
+                snapshotName: string
+                lvPath: string
+    FileShareAclSpec:
+      description: File Share Acl API describes the  acl of file share resource
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - fileshareId
+            - type
+            - accessCapability
+            - accessTo
+          properties:
+            fileshareId:
+              type: string
+            type:
+              type: string
+            accessCapability:
+              type: string
+            accessTo:
+              type: string
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+            description:
+              type: string
+            status:
+              type: string
+              readOnly: true
+            profileId:
+              type: string
+            metadata:
+              type: object
+              readOnly: true
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+    ProvisioningPropertiesSpec:
+      description: >-
+        ProvisioningPropertiesSpec represents some suggested properties for
+        performing provisioning policies.
+      type: object
+      properties:
+        dataStorage:
+          $ref: '#/components/schemas/DataStorageLoS'
+        ioConnectivity:
+          $ref: '#/components/schemas/IOConnectivityLoS'
+    ReplicationPropertiesSpec:
+      description: >-
+        ReplicationPropertiesSpec represents some suggested properties for
+        performing replication policies.
+      type: object
+      properties:
+        dataProtection:
+          $ref: '#/components/schemas/DataProtectionLoS'
+        replicaInfos:
           type: object
-        example:
-          key1: value1
-          key2: false
-          key3:
-            key31: value31
-  VolumeSnapshotSpec:
-    description: >-
-      Snapshot is a description of volume snapshot resource.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - name
-          - status
-          - volumeId
-          - profileId
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          name:
-            type: string
-          description:
-            type: string
-          size:
-            type: integer
-            format: int64
-            readOnly: true
-          status:
-            type: string
-            readOnly: true
-          volumeId:
-            type: string
-          profileId:
-            type: string
-          metadata:
-            type: object
-            example:
-              key1: value1
-              key2: value2
-  VolumeGroupSpec:
-    description: >-
-      Volume group contains a list of volumes that are used in the same
-      application.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - profiles
-          - name
-          - description
-          - availabilityZone
-          - status
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          name:
-            type: string
-            example: volumeGroup-demo
-          description:
-            type: string
-            example: volume group test
-          availabilityZone:
-            type: string
-            example: default
-            readOnly: true
-          status:
-            type: string
-            readOnly: true
-          poolId:
-            type: string
-            readOnly: true
-          profiles:
-            type: array
-            items:
+          properties:
+            replicaUpdateMode:
               type: string
-            example:
-              - 993c87dc-1928-498b-9767-9da8f901d6ce
-              - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-  ReplicationSpec:
-    description: >-
-      Replication represents a replication relationship between the volumes
-      on the primary and secondary sites.
-    allOf:
-      - $ref: '#/definitions/BaseModel'
-      - type: object
-        required:
-          - tenantId
-          - name
-          - primaryVolumeId
-          - scondaryVolumeId
-          - availabilityZone
-          - replicationPeriod
-          - replicationMode
-          - profileId
-        properties:
-          tenantId:
-            type: string
-            readOnly: true
-          userId:
-            type: string
-            readOnly: true
-          name:
-            type: string
-            example: replication-demo
-          description:
-            type: string
-            example: This is replication demo api specs
-          availabilityZone:
-            type: string
-            example: default
-          replicationStatus:
-            type: string
-            enum:
-              - available
-              - creating
-              - deleting
-              - enabling
-              - disabling
-              - failing_over
-              - failing_back
-              - error
-              - error_deleting
-              - error_enabling
-              - error_disabling
-              - error_failover
-              - error_failback
-              - enabled
-              - disabled
-              - failed_over
-            readOnly: true
-          primaryVolumeId:
-            type: string
-            example: 655ec3e2-5840-4138-b5bd-bce930d2acda
-          secondaryVolumeId:
-            type: string
-            example: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
-          primaryReplicationDriverData:
-            type: object
-            additionalProperties:
+              enum:
+                - Active
+                - Adaptive
+                - Asynchronous
+                - Synchronous
+            consistencyEnalbed:
+              type: boolean
+            replicationPeriod:
               type: string
-            example:
-              key1: value1
-              key2: value2
-          secondaryReplicationDriverData:
-            type: object
-            additionalProperties:
+              example: P3Y6M4DT12H30M5S
+            replcationBandwidth:
+              type: integer
+              format: int64
+    SnapshotPropertiesSpec:
+      description: >-
+        SnapshotPropertiesSpec represents some suggested properties for
+        performing snapshot policies.
+      type: object
+      properties:
+        schedule:
+          type: object
+          properties:
+            datetime:
               type: string
-            example:
-              key1: value1
-              key2: value2
-          replicationMode:
-            type: string
-            enum:
-              - sync
-              - async
-          replicationPeriod:
-            type: integer
-            format: int64
-            minimum: 0
-          profileId:
-            type: string
-            example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
-  FailoverReplicationSpec:
-    description: >-
-      FailoverReplicationSpec represents failover replication relationship between the volumes
-      on the primary and secondary sites.
-    type: object
-    properties:
-      allowAttachedVolume:
-        type: boolean
-      secondaryBackendId:
-        type: string
-  ErrorSpec:
-    description: >-
-      Detailed HTTP error response, which consists of a HTTP status code, and a
-      custom error message unique for each failure case.
-    type: object
-    required:
-      - code
-      - message
-    properties:
-      code:
-        type: integer
-      message:
-        type: string
-  VersionSpec:
-    description: >-
-      Lists information for all SDS controller API versions. An API version is
-      a  string that consists of a 'v' + number, or 'v' + number + 'alpha'  or
-      'beta' + number.
-    type: object
-    required:
-      - name
-      - status
-      - updated
-    properties:
-      name:
-        type: string
-        example: v1beta
-      status:
-        type: string
-        enum:
-          - CURRENT
-          - SUPPORTED
-          - DEPRECATED
-      updated:
-        type: string
-        format: date-time
-        example: '2017-04-10T14:36:58.014Z'
-parameters:
-  apiVersion:
-    name: apiVersion
-    in: path
-    required: true
-    description: API version string
-    type: string
-    pattern: 'v([1-9][0-9]*)((alpha)([1-9][0-9]*)|(beta)([1-9][0-9]*))?'
-  tenantId:
-    name: tenantId
-    in: path
-    required: true
-    description: The tenant UUID in a multi-tenancy environment.
-    type: string
-  dockId:
-    name: dockId
-    in: path
-    required: true
-    description: The UUID of the storage backend (dock) service.
-    type: string
-  poolId:
-    name: poolId
-    in: path
-    required: true
-    description: The UUID of the storage pool.
-    type: string
-  profileId:
-    name: profileId
-    in: path
-    required: true
-    description: The UUID of the profile.
-    type: string
-  fileshareId:
-    name: fileshareId
-    in: path
-    required: true
-    description: The UUID of the file share.
-    type: string
-  fileshareaclId:
-    name: fileshareaclId
-    in: path
-    required: true
-    description: The UUID of the file share acl.
-    type: string
-  volumeId:
-    name: volumeId
-    in: path
-    required: true
-    description: The UUID of the volume.
-    type: string
-  customKey:
-    name: customKey
-    in: path
-    required: true
-    description: The key of the customized properties.
-    type: string
-  attachmentId:
-    name: attachmentId
-    in: path
-    required: true
-    description: The UUID of the volume attachment.
-    type: string
-  snapshotId:
-    name: snapshotId
-    in: path
-    required: true
-    description: The UUID of the volume snapshot.
-    type: string
-  shareSnapshotId:
-    name: shareSnapshotId
-    in: path
-    required: true
-    description: The UUID of the fileshare snapshot.
-    type: string
-  volumeGroupId:
-    name: volumeGroupId
-    in: path
-    required: true
-    description: The UUID of the volume group.
-    type: string
-  replicationId:
-    name: replicationId
-    in: path
-    required: true
-    description: The UUID of the relication.
-    type: string
-responses:
-  HTTPStatus400:
-    description: BadRequest
-    schema:
-      $ref: '#/definitions/ErrorSpec'
-  HTTPStatus401:
-    description: NotAuthorized
-    schema:
-      $ref: '#/definitions/ErrorSpec'
-  HTTPStatus403:
-    description: Forbidden
-    schema:
-      $ref: '#/definitions/ErrorSpec'
-  HTTPStatus404:
-    description: The resource does not exist
-    schema:
-      $ref: '#/definitions/ErrorSpec'
-  HTTPStatus500:
-    description: An unexpected error occured.
-    schema:
-      $ref: '#/definitions/ErrorSpec'
-
-securityDefinitions:
-  basicAuth:
-    type: basic
-security:
-  - basicAuth: []
-
-externalDocs:
-  description: The offical OpenSDS Controller API specification
-  url: 'https://github.com/opensds/opensds'
+              format: date-time
+            occurrence:
+              type: string
+              enum:
+                - Daily
+                - Weekly
+                - Monthly
+        retention:
+          type: object
+          properties:
+            number:
+              type: integer
+              format: int64
+            duration:
+              type: integer
+              format: int64
+        topology:
+          type: object
+          properties:
+            bucket:
+              type: string
+    DataProtectionPropertiesSpec:
+      description: >-
+        DataProtectionPropertiesSpec represents some suggested properties for
+        performing data protection policies.
+      type: object
+      properties:
+        dataProtection:
+          $ref: '#/components/schemas/DataProtectionLoS'
+        consistencyEnalbed:
+          type: boolean
+    CustomPropertiesSpec:
+      description: >-
+        CustomPropertiesSpec is a map of keys and JSON object that represents
+        the customized properties of profile, such as requested capabilities
+        including diskType, latency, deduplicaiton, compression and so forth.
+      type: object
+      additionalProperties:
+        type: object
+      example:
+        key1: value1
+        key2: false
+        key3:
+          key31: value31
+    VolumeSpec:
+      description: >-
+        Volume is an block device created by storage service, it can be attached
+        to physical machine or virtual machine instance.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - name
+            - availabilityZone
+            - size
+            - profileId
+            - poolId
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+            multiAttach:
+              type: boolean
+            description:
+              type: string
+            size:
+              type: integer
+              format: int64
+              example: 2
+            availabilityZone:
+              type: string
+              default: default
+            status:
+              type: string
+              readOnly: true
+            profileId:
+              type: string
+            poolId:
+              type: string
+            snapshotId:
+              type: string
+            groupId:
+              type: string
+            snapshotFromCloud:
+              type: boolean
+            replicationId:
+              type: string
+            replicationDriverData:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+            metadata:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+    ExtendVolumeSpec:
+      description: 'Extends the size of a volume to a requested size, in gibibytes (GiB).'
+      type: object
+      required:
+        - newSize
+      properties:
+        newSize:
+          type: integer
+          format: int64
+          example: 2
+    VolumeAttachmentSpec:
+      description: Attachment is a description of volume attached resource.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - hostInfo
+            - connectionInfo
+            - mountpoint
+            - status
+            - volumeId
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            attachMode:
+              type: string
+              enum:
+                - rw
+                - ro
+            hostInfo:
+              $ref: '#/components/schemas/HostInfo'
+            connectionInfo:
+              $ref: '#/components/schemas/ConnectionInfo'
+            mountpoint:
+              type: string
+            status:
+              type: string
+              readOnly: true
+            volumeId:
+              type: string
+    HostInfo:
+      description: >-
+        HostInfo is a structure for all properties of host when create a volume
+        attachment.
+      type: object
+      required:
+        - platform
+        - osType
+        - ip
+        - host
+      properties:
+        platform:
+          type: string
+        osType:
+          type: string
+        ip:
+          type: string
+        host:
+          type: string
+        initiator:
+          type: string
+    ConnectionInfo:
+      description: >-
+        ConnectionInfo is a structure for all properties of connection when
+        creating a volume attachment.
+      type: object
+      properties:
+        driverVolumeType:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: object
+          example:
+            key1: value1
+            key2: false
+            key3:
+              key31: value31
+        extraProperties:
+          type: object
+          additionalProperties:
+            type: object
+          example:
+            key1: value1
+            key2: false
+            key3:
+              key31: value31
+    VolumeSnapshotSpec:
+      description: Snapshot is a description of volume snapshot resource.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - name
+            - status
+            - volumeId
+            - profileId
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+            description:
+              type: string
+            size:
+              type: integer
+              format: int64
+              readOnly: true
+            status:
+              type: string
+              readOnly: true
+            volumeId:
+              type: string
+            profileId:
+              type: string
+            metadata:
+              type: object
+              example:
+                key1: value1
+                key2: value2
+    VolumeGroupSpec:
+      description: >-
+        Volume group contains a list of volumes that are used in the same
+        application.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - profiles
+            - name
+            - description
+            - availabilityZone
+            - status
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+              example: volumeGroup-demo
+            description:
+              type: string
+              example: volume group test
+            availabilityZone:
+              type: string
+              example: default
+              readOnly: true
+            status:
+              type: string
+              readOnly: true
+            poolId:
+              type: string
+              readOnly: true
+            profiles:
+              type: array
+              items:
+                type: string
+              example:
+                - 993c87dc-1928-498b-9767-9da8f901d6ce
+                - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+    ReplicationSpec:
+      description: >-
+        Replication represents a replication relationship between the volumes on
+        the primary and secondary sites.
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - tenantId
+            - name
+            - primaryVolumeId
+            - scondaryVolumeId
+            - availabilityZone
+            - replicationPeriod
+            - replicationMode
+            - profileId
+          properties:
+            tenantId:
+              type: string
+              readOnly: true
+            userId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+              example: replication-demo
+            description:
+              type: string
+              example: This is replication demo api specs
+            availabilityZone:
+              type: string
+              example: default
+            replicationStatus:
+              type: string
+              enum:
+                - available
+                - creating
+                - deleting
+                - enabling
+                - disabling
+                - failing_over
+                - failing_back
+                - error
+                - error_deleting
+                - error_enabling
+                - error_disabling
+                - error_failover
+                - error_failback
+                - enabled
+                - disabled
+                - failed_over
+              readOnly: true
+            primaryVolumeId:
+              type: string
+              example: 655ec3e2-5840-4138-b5bd-bce930d2acda
+            secondaryVolumeId:
+              type: string
+              example: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+            primaryReplicationDriverData:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+            secondaryReplicationDriverData:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+            replicationMode:
+              type: string
+              enum:
+                - sync
+                - async
+            replicationPeriod:
+              type: integer
+              format: int64
+              minimum: 0
+            profileId:
+              type: string
+              example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
+    FailoverReplicationSpec:
+      description: >-
+        FailoverReplicationSpec represents failover replication relationship
+        between the volumes on the primary and secondary sites.
+      type: object
+      properties:
+        allowAttachedVolume:
+          type: boolean
+        secondaryBackendId:
+          type: string
+    ErrorSpec:
+      description: >-
+        Detailed HTTP error response, which consists of a HTTP status code, and
+        a custom error message unique for each failure case.
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    VersionSpec:
+      description: >-
+        Lists information for all SDS controller API versions. An API version is
+        a  string that consists of a 'v' + number, or 'v' + number + 'alpha'  or
+        'beta' + number.
+      type: object
+      required:
+        - name
+        - status
+        - updated
+      properties:
+        name:
+          type: string
+          example: v1beta
+        status:
+          type: string
+          enum:
+            - CURRENT
+            - SUPPORTED
+            - DEPRECATED
+        updated:
+          type: string
+          format: date-time
+          example: '2017-04-10T14:36:58.014Z'
