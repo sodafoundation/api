@@ -203,8 +203,7 @@ paths:
                         dataStorage:
                           recoveryTimeObjective: 10
                           provisioningPolicy: Thin
-                          compression: true
-                          deduplication: true
+                          IsSpaceEfficient: true
                         ioConnectivity:
                           accessProtocol: iscsi
                           maxIOPS: 100000
@@ -1832,9 +1831,7 @@ components:
           enum:
             - Thin
             - Thick
-        compression:
-          type: boolean
-        deduplication:
+        isSpaceEfficient:
           type: boolean
         characterCodeSet:
           type: string
