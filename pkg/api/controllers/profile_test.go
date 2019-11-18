@@ -52,8 +52,8 @@ func TestCreateProfile(t *testing.T) {
 		"customProperties": {
 			"dataStorage": {
 				"provisioningPolicy": "Thin",
-				"compression": false
-                                "deduplication": false
+				"compression": false,
+        "deduplication": false
 			},
 			"ioConnectivity": {
 				"accessProtocol": "rbd",
@@ -83,9 +83,9 @@ func TestCreateProfile(t *testing.T) {
 					"accessProtocol": "rbd",
 					"maxIOPS":        float64(5000000),
 					"maxBWS":         float64(500),
-					"minIOPS":        float64(5000000),
-					"minBWS":         float64(500),
-					"latency":        float64(100),
+					"minIOPS":        float64(1000000),
+					"minBWS":         float64(100),
+					"latency":        float64(5),
 				},
 			}}).Return(&SampleProfiles[1], nil)
 		db.C = mockClient
@@ -116,8 +116,8 @@ func TestUpdateProfile(t *testing.T) {
 		"customProperties": {
 			"dataStorage": {
 				"provisioningPolicy": "Thin",
-                                "compression": false
-                                "deduplication": false
+        "compression": false,
+        "deduplication": false
 			},
 			"ioConnectivity": {
 				"accessProtocol": "rbd",
@@ -309,7 +309,7 @@ func TestFileShareCreateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-				"compression": false
+				"compression": false,
 				"deduplication": false
                         },
                         "ioConnectivity": {
@@ -375,7 +375,7 @@ func TestFileShareUpdateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-				"compression": false
+				"compression": false,
 				"deduplication": false
                         },
                         "ioConnectivity": {
@@ -562,7 +562,7 @@ func TestAddCustomProperty(t *testing.T) {
 	var fakeBody = `{
 		"dataStorage": {
 			"provisioningPolicy": "Thin",
-			"compression": false
+			"compression": false,
 			"deduplication": false
 		}
 	}`

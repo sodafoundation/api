@@ -50,9 +50,9 @@ var (
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
 					"maxIOPS":        float64(5000000),
-					"minIOPS":        float64(5000000),
+					"minIOPS":        float64(1000000),
 					"maxBWS":         float64(500),
-					"minBWS":         float64(500),
+					"minBWS":         float64(100),
 					"latency":        float64(100),
 				},
 			},
@@ -85,9 +85,9 @@ var (
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "NFS",
 					"maxIOPS":        float64(5000000),
-					"minIOPS":        float64(5000000),
+					"minIOPS":        float64(1000000),
 					"maxBWS":         float64(500),
-					"minBWS":         float64(500),
+					"minBWS":         float64(100),
 					"latency":        float64(100),
 				},
 			},
@@ -103,9 +103,9 @@ var (
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
 			"maxIOPS":        float64(5000000),
-			"minIOPS":        float64(5000000),
+			"minIOPS":        float64(1000000),
 			"maxBWS":         float64(500),
-			"minBWS":         float64(500),
+			"minBWS":         float64(100),
 			"latency":        float64(100),
 		},
 	}

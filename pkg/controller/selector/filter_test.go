@@ -231,7 +231,7 @@ func TestParseBoolAndCompare(t *testing.T) {
 		t.Errorf("Expected %v, get %v", true, result)
 	}
 
-	result, err := ParseBoolAndCompare("deduplication", true, "T")
+	result, err = ParseBoolAndCompare("deduplication", true, "T")
 	if nil != err {
 		t.Errorf("Expected %v, get %v", nil, err)
 	}
@@ -365,7 +365,7 @@ func TestDeduplicationFilter(t *testing.T) {
 	testCases := []FilterCaseSpec{
 		{
 			request: map[string]interface{}{
-				"extras.dataStorage.Deduplication": "<is> true",
+				"extras.dataStorage.deduplication": "<is> true",
 			},
 			expected: []*model.StoragePoolSpec{
 				&SamplePools[0],
@@ -374,7 +374,7 @@ func TestDeduplicationFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"extras.dataStorage.Deduplication": "<is> false",
+				"extras.dataStorage.deduplication": "<is> false",
 			},
 			expected: nil,
 		},
