@@ -53,7 +53,7 @@ var (
 					"minIOPS":        float64(1000000),
 					"maxBWS":         float64(500),
 					"minBWS":         float64(100),
-					"latency":        float64(100),
+					"latency":        float64(5),
 				},
 			},
 		},
