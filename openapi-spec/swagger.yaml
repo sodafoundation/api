@@ -203,11 +203,15 @@ paths:
                         dataStorage:
                           recoveryTimeObjective: 10
                           provisioningPolicy: Thin
-                          IsSpaceEfficient: true
+                          compression: true
+                          deduplication: true
                         ioConnectivity:
                           accessProtocol: iscsi
-                          maxIOPS: 100000
+                          maxIOPS: 1000000
                           maxBWS: 60000
+                          minIOPS: 1000000
+                          minBWS: 100
+                          latency: 100
                       replicationProperties:
                         dataProtection:
                           isIsolated: true
@@ -1831,7 +1835,9 @@ components:
           enum:
             - Thin
             - Thick
-        isSpaceEfficient:
+        compression:
+          type: boolean
+        deduplication:
           type: boolean
         characterCodeSet:
           type: string
@@ -1863,6 +1869,15 @@ components:
           type: integer
           format: int64
         maxBWS:
+          type: integer
+          format: int64
+        minIOPS:
+          type: integer
+          format: int64
+        minBWS:
+          type: integer
+          format: int64
+        latency:
           type: integer
           format: int64
     DataProtectionLoS:
@@ -2269,7 +2284,7 @@ components:
       description: >-
         CustomPropertiesSpec is a map of keys and JSON object that represents
         the customized properties of profile, such as requested capabilities
-        including diskType, latency, deduplicaiton, compression and so forth.
+        including diskType, latency, deduplication, compression and so forth.
       type: object
       additionalProperties:
         type: object
