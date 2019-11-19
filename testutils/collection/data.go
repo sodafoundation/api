@@ -146,9 +146,9 @@ var (
 					AccessProtocol: "rbd",
 					MaxIOPS:        8000000,
 					MaxBWS:         700,
-					MinIOPS: 				1000000,
-					MinBWS: 				100,
-					Latency:				100,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:	100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -177,9 +177,9 @@ var (
 					AccessProtocol: "rbd",
 					MaxIOPS:        3000000,
 					MaxBWS:         350,
-					MinIOPS: 				1000000,
-					MinBWS: 				100,
-					Latency:				100,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:	100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SAS",
@@ -209,9 +209,9 @@ var (
 					AccessProtocol: "nfs",
 					MaxIOPS:        7000000,
 					MaxBWS:         600,
-					MinIOPS: 				1000000,
-					MinBWS: 				100,
-					Latency:				100,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:	100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -562,9 +562,9 @@ var (
 					"accessProtocol": "rbd",
 					"maxIOPS":        5000000,
 					"maxBWS":         500,
-					"minIOPS": 				1000000,
-					"minBWS": 				100,
-					"latency":				100
+					"minIOPS": 	  1000000,
+					"minBWS": 	  100,
+					"latency":	  100
 				}
 			}
 		}
@@ -580,9 +580,9 @@ var (
 			"accessProtocol": "rbd",
 			"maxIOPS":        5000000,
 			"maxBWS":         500,
-			"minIOPS": 				1000000,
-			"minBWS": 				100,
-			"latency":				100
+			"minIOPS": 	  1000000,
+			"minBWS": 	  100,
+			"latency":	  100
 		}
 	}`
 
@@ -647,10 +647,10 @@ var (
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        8000000,
-					"maxBWS": 	      700,
-					"minIOPS": 				1000000,
-					"minBWS": 				100,
-					"latency":				100
+					"maxBWS": 	  700,
+					"minIOPS": 	  1000000,
+					"minBWS": 	  100,
+					"latency":	  100
 				},
 				"advanced": {
 					"diskType": "SSD",
@@ -675,10 +675,10 @@ var (
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        3000000,
-					"maxBWS": 	      350,
-					"minIOPS": 				1000000,
-					"minBWS": 				100,
-					"latency":				100
+					"maxBWS": 	  350,
+					"minIOPS": 	  1000000,
+					"minBWS": 	  100,
+					"latency":	  100
 				},
 				"advanced": {
 					"diskType": "SAS",
@@ -1028,9 +1028,9 @@ var (
 					"accessProtocol": "rbd",
 					"maxIOPS":        5000000,
 					"maxBWS":         500,
-					"minIOPS": 				1000000,
-					"minBWS": 				100,
-					"latency":				100
+					"minIOPS": 	  1000000,
+					"minBWS": 	  100,
+					"latency":	  100
 				}
 			}
 		}`,
@@ -1067,10 +1067,10 @@ var (
 				"ioConnectivity": {
 					"accessProtocol": "rbd",
 					"maxIOPS":        8000000,
-					"maxBWS": 	      700,
-					"minIOPS": 				1000000,
-					"minBWS": 				100,
-					"latency":				100
+					"maxBWS": 	  700,
+					"minIOPS": 	  1000000,
+					"minBWS": 	  100,
+					"latency":	  100
 				},
 				"advanced": {
 					"diskType": "SSD",
