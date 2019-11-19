@@ -28,6 +28,9 @@ const (
 	AuthTokenHeader    = "X-Auth-Token"
 	SubjectTokenHeader = "X-Subject-Token"
 
+	// ContentType for api
+	ContentType = "application/json"
+
 	// OpenSDS current api version
 	APIVersion = "v1beta"
 
