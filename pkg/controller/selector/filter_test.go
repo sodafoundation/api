@@ -361,62 +361,34 @@ func TestFreeCapacityFilter(t *testing.T) {
 	}
 }
 
-// func TestDeduplicationFilter(t *testing.T) {
-// 	testCases := []FilterCaseSpec{
-// 		{
-// 			request: map[string]interface{}{
-// 				"extras.dataStorage.deduplication": "<is> true",
-// 			},
-// 			expected: []*model.StoragePoolSpec{
-// 				&SamplePools[0],
-// 				&SamplePools[1],
-// 			},
-// 		},
-// 		// {
-// 		// 	request: map[string]interface{}{
-// 		// 		"extras.dataStorage.deduplication": "<is> false",
-// 		// 	},
-// 		// 	expected: nil,
-// 		// },
-// 	}
-//
-// 	for _, testCase := range testCases {
-// 		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
-// 			FakePools)
-// 		if !reflect.DeepEqual(result, testCase.expected) {
-// 			t.Errorf("Expected %v, get %v", testCase.expected, result)
-// 		}
-// 	}
-// }
-//
-// func TestCompressionFilter(t *testing.T) {
-// 	testCases := []FilterCaseSpec{
-// 		{
-// 			request: map[string]interface{}{
-// 				"extras.dataStorage.compression": "<is> true",
-// 			},
-// 			expected: []*model.StoragePoolSpec{
-// 				&SamplePools[0],
-// 				&SamplePools[1],
-// 			},
-// 		},
-// 		{
-// 			request: map[string]interface{}{
-// 				"extras.dataStorage.compression": "<is> false",
-// 			},
-// 			expected: nil,
-// 		},
-// 	}
-//
-// 	for _, testCase := range testCases {
-// 		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
-// 			FakePools)
-//
-// 		if !reflect.DeepEqual(result, testCase.expected) {
-// 			t.Errorf("Expected %v, get %v", testCase.expected, result)
-// 		}
-// 	}
-// }
+func TestCompressionFilter(t *testing.T) {
+	testCases := []FilterCaseSpec{
+		{
+			request: map[string]interface{}{
+				"extras.dataStorage.compression": "<is> true",
+			},
+			expected: []*model.StoragePoolSpec{
+				&SamplePools[0],
+				&SamplePools[1],
+			},
+		},
+		{
+			request: map[string]interface{}{
+				"extras.dataStorage.compression": "<is> false",
+			},
+			expected: nil,
+		},
+	}
+
+	for _, testCase := range testCases {
+		result, _ := SelectSupportedPools(len(FakePools), testCase.request,
+			FakePools)
+
+		if !reflect.DeepEqual(result, testCase.expected) {
+			t.Errorf("Expected %v, get %v", testCase.expected, result)
+		}
+	}
+}
 
 func TestAdvancedFilter(t *testing.T) {
 	testCases := []FilterCaseSpec{
