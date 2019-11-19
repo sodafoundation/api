@@ -364,7 +364,7 @@ var (
 			},
 			Status:   "available",
 			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: model.HostInfo{},
+			HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 			ConnectionInfo: model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{
@@ -771,7 +771,7 @@ var (
 		"description": "This is a sample volume attachment for testing",
 		"status": "available",
 		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		"hostInfo": {},
+		"hostId": "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 		"connectionInfo": {
 			"driverVolumeType": "iscsi",
 			"data": {
@@ -790,7 +790,7 @@ var (
 			"description": "This is a sample volume attachment for testing",
 			"status": "available",
 			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"hostInfo": {},
+			"hostId": "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 			"connectionInfo": {
 				"driverVolumeType": "iscsi",
 				"data": {
@@ -1048,7 +1048,7 @@ var (
 			"id": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 			"status":   "available",
 			"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			"hostInfo": {},
+			"hostId": "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 			"connectionInfo": {
 				"driverVolumeType": "iscsi",
 				"data": {

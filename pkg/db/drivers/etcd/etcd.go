@@ -2102,6 +2102,10 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	if attachment.Id == "" {
+		attachment.Id = uuid.NewV4().String()
+	}
+	attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
 	attachment.TenantId = ctx.TenantId
 
 	atcBody, err := json.Marshal(attachment)
@@ -2305,10 +2309,6 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		result.Status = attachment.Status
 	}
 
-	// Update metadata
-	if attachment.Metadata != nil {
-		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
-	}
 	// Update DriverVolumeType
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType

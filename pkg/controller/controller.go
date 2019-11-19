@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/fileshare"
@@ -295,31 +294,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	log.Info("Controller server receive create volume attachment request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
-
-	pol, err := db.C.GetPool(ctx, vol.PoolId)
-	if err != nil {
-		msg := fmt.Sprintf("get pool failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-
-	var protocol = pol.Extras.IOConnectivity.AccessProtocol
-	if protocol == "" {
-		// Default protocol is iscsi
-		protocol = config.ISCSIProtocol
-	}
-
-	opt.AccessProtocol = protocol
-
-	dockInfo, err := db.C.GetDock(ctx, pol.DockId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
 		msg := fmt.Sprintf("when search supported dock resource: %v", err)
 		log.Error(msg)
@@ -331,13 +306,18 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	result, err := c.volumeController.CreateVolumeAttachment(opt)
 	if err != nil {
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+		db.UpdateVolumeStatus(ctx, db.C, opt.VolumeId, model.VolumeAvailable)
 		msg := fmt.Sprintf("create volume attachment failed: %v", err)
 		log.Error(msg)
 		return pb.GenericResponseError(msg), err
 	}
 
-	result.AccessProtocol = protocol
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
+	if err != nil {
+		log.Error("get volume failed in CreateVolumeAttachment method: ", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
 	if vol.Status == model.VolumeAttaching {
 		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
 	} else {
@@ -345,7 +325,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 		log.Error(msg)
 		return pb.GenericResponseError(msg), err
 	}
-
+	result.AccessProtocol = opt.AccessProtocol
 	result.Status = model.VolumeAttachAvailable
 
 	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
@@ -361,15 +341,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	log.Info("Controller server receive delete volume attachment request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in delete volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
-
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
 		msg := fmt.Sprintf("when search supported dock resource: %v", err)
 		log.Error(msg)
@@ -392,7 +364,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 		return pb.GenericResponseError(msg), err
 	}
 
-	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+	db.UpdateVolumeStatus(ctx, db.C, opt.VolumeId, model.VolumeAvailable)
 
 	return pb.GenericResponseResult(nil), nil
 }

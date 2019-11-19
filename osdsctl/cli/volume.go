@@ -189,7 +189,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "GroupId"}
+	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "AvailabilityZone"}
 	PrintList(resp, keys, volFormatters)
 }
 
