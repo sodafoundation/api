@@ -123,9 +123,9 @@ func TestUpdateProfile(t *testing.T) {
 				"accessProtocol": "rbd",
 				"maxIOPS":        5000000,
 				"maxBWS":         500,
-				"minIOPS": 				1000000,
-				"minBWS": 				100,
-				"latency": 				100
+				"minIOPS": 	  1000000,
+				"minBWS": 	  100,
+				"latency": 	  100
 			}
 		}
 	}`)
@@ -308,16 +308,16 @@ func TestFileShareCreateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-																"compression": true,
-																"deduplication": true
+				"compression": true,
+				"deduplication": true
                         },
                         "ioConnectivity": {
                                 "accessProtocol": "NFS",
                                 "maxIOPS": 5000000,
                                 "maxBWS": 500,
-																"minIOPS": 1000000,
-																"minBWS": 100,
-																"latency": 100
+				"minIOPS": 1000000,
+				"minBWS": 100,
+				"latency": 100
                         }
                 }
         }`
@@ -340,8 +340,8 @@ func TestFileShareCreateProfile(t *testing.T) {
 					AccessProtocol: "NFS",
 					MaxIOPS:        5000000,
 					MaxBWS:         500,
-					MinIOPS: 				1000000,
-					MinBWS: 				100,
+					MinIOPS:        1000000,
+					MinBWS:         100,
 					Latency:        100,
 				},
 			}}).Return(&SampleFileShareProfiles[1], nil)
@@ -374,16 +374,16 @@ func TestFileShareUpdateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-																"compression": true,
-																"deduplication": true
+				"compression": true,
+				"deduplication": true
                         },
                         "ioConnectivity": {
                                 "accessProtocol": "NFS",
                                 "maxIOPS":        5000000,
                                 "maxBWS":         500,
-																"minIOPS": 				1000000,
-																"minBWS": 				100,
-																"latency": 				100
+				"minIOPS": 	  1000000,
+				"minBWS": 	  100,
+				"latency": 	  100
                         }
                 }
         }`)
