@@ -81,7 +81,7 @@ func TestListPools(t *testing.T) {
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
 					Compression:   true,
-                                        Deduplication: true,
+				        Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
