@@ -370,6 +370,18 @@ func (f *FileSharePortal) UpdateFileShare() {
 		f.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+	
+	fshare1, err := db.C.GetFileShare(c.GetContext(f.Ctx), id)
+	if err != nil {
+		errMsg := fmt.Sprintf("fileshare %s not found: %s", id, err.Error())
+		f.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+	if fshare1.Status == "error" {
+		errMsg := fmt.Sprintf("can't update file share %s because it's status is error", fshare1.Id)
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	fshare.Id = id
 	result, err := db.C.UpdateFileShare(c.GetContext(f.Ctx), &fshare)
