@@ -176,8 +176,8 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if len(in.Name) > 128 {
-		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+	if len(in.Name) > 255 {
+		errMsg := fmt.Sprintf("fileshare name length should not be more than 255 characters. input name length is : %d", len(in.Name))
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
