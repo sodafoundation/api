@@ -39,7 +39,8 @@ func TestGetPool(t *testing.T) {
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage: model.DataStorageLoS{
 				ProvisioningPolicy: "Thin",
-				IsSpaceEfficient:   true,
+				Compression:   true,
+				Deduplication: true,
 			},
 			IOConnectivity: model.IOConnectivityLoS{
 				AccessProtocol: "rbd",
@@ -79,12 +80,16 @@ func TestListPools(t *testing.T) {
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:   true,
+				        Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
 					MaxIOPS:        8000000,
 					MaxBWS:         700,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -105,12 +110,16 @@ func TestListPools(t *testing.T) {
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:   true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
 					MaxIOPS:        3000000,
 					MaxBWS:         350,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SAS",
@@ -125,7 +134,6 @@ func TestListPools(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
 	if !reflect.DeepEqual(pols, expected) {
 		t.Errorf("Expected %v, got %v", expected, pols)
 		return

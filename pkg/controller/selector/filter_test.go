@@ -85,9 +85,14 @@ func TestGetPoolCapabilityMap(t *testing.T) {
 		t.Errorf("Expected %v/%v, get %v/%v", true, float64(Pool.FreeCapacity), ok, FreeCapacity)
 	}
 
-	IsSpaceEfficient, ok := result["extras.dataStorage.isSpaceEfficient"].(bool)
-	if (!ok) || (Pool.Extras.DataStorage.IsSpaceEfficient != IsSpaceEfficient) {
-		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.IsSpaceEfficient, ok, IsSpaceEfficient)
+	compression, ok := result["extras.dataStorage.compression"].(bool)
+	if (!ok) || (Pool.Extras.DataStorage.Compression != compression) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.Compression, ok, compression)
+	}
+
+	deduplication, ok := result["extras.dataStorage.deduplication"].(bool)
+	if (!ok) || (Pool.Extras.DataStorage.Deduplication != deduplication) {
+		t.Errorf("Expected %v/%v, get %v/%v", true, Pool.Extras.DataStorage.Deduplication, ok, deduplication)
 	}
 
 	latency, ok := result["extras.advanced.latency"].(string)
@@ -217,7 +222,7 @@ func TestStringCompare(t *testing.T) {
 
 func TestParseBoolAndCompare(t *testing.T) {
 
-	result, err := ParseBoolAndCompare("isSpaceEfficient", true, "T")
+	result, err := ParseBoolAndCompare("compression", true, "T")
 	if nil != err {
 		t.Errorf("Expected %v, get %v", nil, err)
 	}
@@ -226,7 +231,16 @@ func TestParseBoolAndCompare(t *testing.T) {
 		t.Errorf("Expected %v, get %v", true, result)
 	}
 
-	result, err = ParseBoolAndCompare("isSpaceEfficient", true, "0")
+	result, err = ParseBoolAndCompare("deduplication", true, "T")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if true != result {
+		t.Errorf("Expected %v, get %v", true, result)
+	}
+
+	result, err = ParseBoolAndCompare("deduplication", true, "0")
 	if nil != err {
 		t.Errorf("Expected %v, get %v", nil, err)
 	}
@@ -234,6 +248,15 @@ func TestParseBoolAndCompare(t *testing.T) {
 	if false != result {
 		t.Errorf("Expected %v, get %v", false, result)
 	}
+
+	result, err = ParseBoolAndCompare("compression", true, "0")
+	if nil != err {
+		t.Errorf("Expected %v, get %v", nil, err)
+	}
+
+	if false != result {
+	t.Errorf("Expected %v, get %v", false, result)
+  }
 }
 
 func TestParseFloat64AndCompare(t *testing.T) {
@@ -338,11 +361,11 @@ func TestFreeCapacityFilter(t *testing.T) {
 	}
 }
 
-func TestIsSpaceEfficientFilter(t *testing.T) {
+func TestCompressionFilter(t *testing.T) {
 	testCases := []FilterCaseSpec{
 		{
 			request: map[string]interface{}{
-				"extras.dataStorage.isSpaceEfficient": "<is> true",
+				"extras.dataStorage.compression": "<is> true",
 			},
 			expected: []*model.StoragePoolSpec{
 				&SamplePools[0],
@@ -351,7 +374,7 @@ func TestIsSpaceEfficientFilter(t *testing.T) {
 		},
 		{
 			request: map[string]interface{}{
-				"extras.dataStorage.isSpaceEfficient": "<is> false",
+				"extras.dataStorage.compression": "<is> false",
 			},
 			expected: nil,
 		},

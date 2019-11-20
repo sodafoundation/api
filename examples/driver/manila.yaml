@@ -25,19 +25,22 @@ authOptions:
 pool:
   pool1:
     storageType: file
-    availabilityZone: default 
+    availabilityZone: default
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
         storageAccessCapability:
         - Read
         - Write
       ioConnectivity:
-        accessProtocol: NFS 
+        accessProtocol: NFS
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 100
       advanced:
         diskType: SSD
         latency: 3ms
-
