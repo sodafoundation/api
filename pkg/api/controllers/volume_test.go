@@ -243,6 +243,7 @@ func TestExtendVolume(t *testing.T) {
 		"name": "sample-volume",
 		"description": "This is a sample volume for testing",
 		"size": 1,
+        "availabilityZone": "default",
 		"status": "extending",
 		"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"

@@ -41,8 +41,15 @@ func (p *HostPortal) ListHosts() {
 	if !policy.Authorize(p.Ctx, "host:list") {
 		return
 	}
-	// TODO: handle query parameters
-	hosts, err := db.C.ListHosts(c.GetContext(p.Ctx))
+
+	m, err := p.GetParameters()
+	if err != nil {
+		errMsg := fmt.Sprintf("list hosts failed: %s", err.Error())
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	hosts, err := db.C.ListHosts(c.GetContext(p.Ctx), m)
 	if err != nil {
 		errMsg := fmt.Sprintf("list hosts failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -76,7 +83,18 @@ func (p *HostPortal) CreateHost() {
 		return
 	}
 
-	// TODO: Add prameter validation
+	// HostName should be unique in the system
+	hostArr, err := db.C.ListHostsByName(c.GetContext(p.Ctx), host.HostName)
+	if err != nil {
+		errMsg := fmt.Sprintf("list hosts failed in CreateHost method: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+	if len(hostArr) > 0 {
+		errMsg := fmt.Sprintf("the host with name %s already exists in the system", host.HostName)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
 	result, err := db.C.CreateHost(c.GetContext(p.Ctx), &host)
 	if err != nil {
@@ -164,10 +182,27 @@ func (p *HostPortal) DeleteHost() {
 		return
 	}
 	id := p.Ctx.Input.Param(":hostId")
+	host, err := db.C.GetHost(c.GetContext(p.Ctx), id)
+	if err != nil {
+		errMsg := fmt.Sprintf("host %s not found: %s", id, err.Error())
+		p.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
 
-	// TODO: Add deletion constraition check
+	// Check relationship with volume
+	attachments, err := db.C.ListVolumeAttachmentsWithFilter(c.GetContext(p.Ctx), map[string][]string{"hostId": []string{id}})
+	if err != nil {
+		errMsg := fmt.Sprintf("list attachments failed in DeleteHost method: %v", err)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+	if len(attachments) > 0 {
+		errMsg := fmt.Sprintf("some volumes are attached to host: %s, please remove them first", host.HostName)
+		p.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
 
-	err := db.C.DeleteHost(c.GetContext(p.Ctx), id)
+	err = db.C.DeleteHost(c.GetContext(p.Ctx), id)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete host failed: %v", err)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)

@@ -206,9 +206,10 @@ func TestClientListPools(t *testing.T) {
 
 func TestClientCreateVolume(t *testing.T) {
 	var body = &model.VolumeSpec{
-		Name:        "test",
-		Description: "This is a test",
-		Size:        int64(1),
+		Name:             "test",
+		Description:      "This is a test",
+		Size:             int64(1),
+		AvailabilityZone: "default",
 	}
 
 	if _, err := c.CreateVolume(body); err != nil {
