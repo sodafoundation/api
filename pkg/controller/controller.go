@@ -110,7 +110,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 	var dockInfo *model.DockSpec
 	if opt.ProfileId != "" || opt.SnapshotId != "" {
 
-		polInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
+		poolInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 		if err != nil {
 			db.UpdateVolumeStatus(ctx, db.C, opt.Id, model.VolumeError)
 			return pb.GenericResponseError(err), err
@@ -125,12 +125,12 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 
 		// whether specify a pool or not, opt's poolid and pool name should be
 		// assigned by polInfo
-		opt.PoolId = polInfo.Id
-		opt.PoolName = polInfo.Name
+		opt.PoolId = poolInfo.Id
+		opt.PoolName = poolInfo.Name
 
 		log.V(5).Infof("select pool %v and poolinfo : %v  for volume %+v", opt.PoolId, opt.PoolName, vol)
 
-		dockInfo, err = db.C.GetDock(ctx, polInfo.DockId)
+		dockInfo, err = db.C.GetDock(ctx, poolInfo.DockId)
 	} else if opt.PoolId != "" {
 		//get poolname for poolid
 		pools, _ := db.C.ListPools(ctx)
