@@ -16,10 +16,11 @@ package util
 
 import (
 	"fmt"
-	"github.com/opensds/opensds/pkg/utils"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/opensds/opensds/pkg/utils"
 
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -434,7 +435,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length equal to 0 character are not allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(0)
+		in.Name = utils.RandSeqWithAlnum(0)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
@@ -446,7 +447,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length equal to 1 character are allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(1)
+		in.Name = utils.RandSeqWithAlnum(1)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
@@ -461,7 +462,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length equal to 10 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(10)
+		in.Name = utils.RandSeqWithAlnum(10)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
@@ -476,7 +477,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length equal to 254 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(254)
+		in.Name = utils.RandSeqWithAlnum(254)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
@@ -491,7 +492,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length equal to 255 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(255)
+		in.Name = utils.RandSeqWithAlnum(255)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
@@ -506,26 +507,26 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	})
 
 	t.Run("File share name length more than 255 characters are not allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(256)
+		in.Name = utils.RandSeqWithAlnum(256)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "fileshare name length should not be more than 255 characters. input name length is : "+strconv.Itoa(len(in.Name))
+		expectedError := "fileshare name length should not be more than 255 characters. input name length is : " + strconv.Itoa(len(in.Name))
 		assertTestResult(t, err.Error(), expectedError)
 	})
 
 	t.Run("File share name length more than 255 characters are not allowed", func(t *testing.T) {
-		in.Name = utils.RandomString(257)
+		in.Name = utils.RandSeqWithAlnum(257)
 		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "fileshare name length should not be more than 255 characters. input name length is : "+strconv.Itoa(len(in.Name))
+		expectedError := "fileshare name length should not be more than 255 characters. input name length is : " + strconv.Itoa(len(in.Name))
 		assertTestResult(t, err.Error(), expectedError)
 	})
 

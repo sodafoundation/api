@@ -44,7 +44,7 @@ var (
             "hostName": "sap1",
             "ip": "192.168.56.12",
             "availabilityZones": [
-                "az1",
+                "default",
                 "az2"
             ],
             "initiators": [
@@ -64,7 +64,7 @@ var (
 		AccessMode:        "agentless",
 		HostName:          "sap1",
 		IP:                "192.168.56.12",
-		AvailabilityZones: []string{"az1", "az2"},
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: "20000024ff5bb888",
@@ -85,6 +85,7 @@ func TestCreateHost(t *testing.T) {
 
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateHost", c.NewAdminContext(), &hostReq).Return(fakeHost, nil)
+		mockClient.On("ListHostsByName", c.NewAdminContext(), hostReq.HostName).Return(nil, nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("POST", "/v1beta/host/hosts", bytes.NewBuffer(ByteHostReq))
@@ -108,7 +109,7 @@ func TestListHosts(t *testing.T) {
 	t.Run("Should return 200 if everything works well", func(t *testing.T) {
 		fakeHosts := []*model.HostSpec{&SampleHosts[0], &SampleHosts[1]}
 		mockClient := new(dbtest.Client)
-		mockClient.On("ListHosts", c.NewAdminContext()).Return(fakeHosts, nil)
+		mockClient.On("ListHosts", c.NewAdminContext(), map[string][]string{}).Return(fakeHosts, nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("GET", "/v1beta/host/hosts", nil)
@@ -175,6 +176,9 @@ func TestDeleteHost(t *testing.T) {
 		fakeHost := &SampleHosts[0]
 		mockClient := new(dbtest.Client)
 		mockClient.On("DeleteHost", c.NewAdminContext(), fakeHost.Id).Return(nil)
+		mockClient.On("GetHost", c.NewAdminContext(), fakeHost.Id).Return(fakeHost, nil)
+		mockClient.On("ListVolumeAttachmentsWithFilter", c.NewAdminContext(),
+			map[string][]string{"hostId": []string{fakeHost.Id}}).Return(nil, nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE", "/v1beta/host/hosts/"+fakeHost.Id, nil)

@@ -21,6 +21,7 @@ type Default struct{}
 type OsdsApiServer struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
 	AuthStrategy       string        `conf:"auth_strategy,noauth"`
+	ApiSpecPath        string        `conf:"api_spec_path,/etc/opensds/swagger.yaml"`
 	Daemon             bool          `conf:"daemon,false"`
 	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
 	LogFlushFrequency  time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s

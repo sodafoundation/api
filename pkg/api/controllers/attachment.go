@@ -79,6 +79,14 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		return
 	}
 
+	if !utils.Contains(host.AvailabilityZones, vol.AvailabilityZone) {
+		errMsg := fmt.Sprintf("availability zone of volume: %s is not in the host availability zones: %v",
+			vol.AvailabilityZone,
+			host.AvailabilityZones)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	if vol.Status == model.VolumeAvailable {
 		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
 	} else if vol.Status == model.VolumeInUse {

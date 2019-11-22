@@ -559,10 +559,11 @@ func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 
 	// create volume in default pool
 	vol, err := u.CreateVolume(&model.VolumeSpec{
-		Name:        "test",
-		Description: "This is a test",
-		Size:        int64(1),
-		PoolId:      polId,
+		Name:             "test",
+		Description:      "This is a test",
+		Size:             int64(1),
+		PoolId:           polId,
+		AvailabilityZone: "default",
 	})
 	if err != nil {
 		t.Error("prepare volume failed:", err)
@@ -581,9 +582,11 @@ func prepareHostForTest(t *testing.T) (*model.HostSpec, error) {
 
 	hostName, _ := os.Hostname()
 	var body = &model.HostSpec{
-		HostName: hostName,
-		IP:       getHostIp(),
-		OsType:   runtime.GOOS,
+		HostName:          hostName,
+		IP:                getHostIp(),
+		OsType:            runtime.GOOS,
+		AccessMode:        "agentless",
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: localIqn,

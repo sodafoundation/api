@@ -383,7 +383,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-  '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
+  '/v1beta/{tenantId}/profiles/{profileId}/customProperties':
     parameters:
       - $ref: '#/components/parameters/tenantId'
       - $ref: '#/components/parameters/profileId'
@@ -2020,18 +2020,18 @@ components:
           type: integer
           format: int64
         storageAccessCapability:
-          type: string
-          enum:
-            - Read
-            - Write
-            - Execute
+          type: array
+          items:
+            type: string
+            enum:
+              - Read
+              - Write
+              - Execute
     IOConnectivityLoS:
       description: >-
         IOConnectivityLoS can be used to specify the characteristics of storage
         connectivity.
       type: object
-      required:
-        - accessProtocol
       properties:
         accessProtocol:
           type: string
@@ -2040,6 +2040,7 @@ components:
             - rbd
             - fibre_channel
             - DSWARE
+            - NFS
         maxIOPS:
           type: integer
           format: int64
@@ -2253,12 +2254,8 @@ components:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
           required:
-            - tenantId
             - name
-            - availabilityZone
             - size
-            - profileId
-            - poolId
           properties:
             tenantId:
               type: string
@@ -2461,8 +2458,7 @@ components:
         the customized properties of profile, such as requested capabilities
         including diskType, latency, deduplication, compression and so forth.
       type: object
-      additionalProperties:
-        type: object
+      additionalProperties: {}
       example:
         key1: value1
         key2: false
@@ -2476,12 +2472,8 @@ components:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
           required:
-            - tenantId
             - name
-            - availabilityZone
             - size
-            - profileId
-            - poolId
           properties:
             tenantId:
               type: string
@@ -2626,11 +2618,8 @@ components:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
           required:
-            - tenantId
             - name
-            - status
             - volumeId
-            - profileId
           properties:
             tenantId:
               type: string
@@ -2666,12 +2655,8 @@ components:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
           required:
-            - tenantId
             - profiles
             - name
-            - description
-            - availabilityZone
-            - status
           properties:
             tenantId:
               type: string
@@ -2849,7 +2834,7 @@ components:
         hostName:
           type: string
           minLength: 1
-          maxLength: 28
+          maxLength: 64
           description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
         ip:
           type: string
@@ -2907,6 +2892,7 @@ components:
                 enum:
                 - iscsi
                 - fibre_channel
+                - nvmeof
       description: Host is a consumer of volume from storage.
 
     HostUpdateSpec:
@@ -2915,7 +2901,7 @@ components:
         hostName:
           type: string
           minLength: 1
-          maxLength: 28
+          maxLength: 64
           description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
         ip:
           type: string
@@ -2973,6 +2959,7 @@ components:
                 enum:
                 - iscsi
                 - fibre_channel
+                - nvmeof
       description: Host is a consumer of volume from storage.
     HostRespSpec:
       allOf:
@@ -3013,5 +3000,6 @@ components:
                   enum:
                   - iscsi
                   - fibre_channel
+                  - nvmeof
 
       description: Host is a consumer of volume from storage.

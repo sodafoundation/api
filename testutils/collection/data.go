@@ -44,8 +44,8 @@ var (
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"compression":   true,
-					"deduplication": true,
+					"compression":        true,
+					"deduplication":      true,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
@@ -79,8 +79,8 @@ var (
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"compression":   true,
-					"deduplication": false,
+					"compression":        true,
+					"deduplication":      false,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "NFS",
@@ -97,8 +97,8 @@ var (
 	SampleCustomProperties = model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
-			"compression":   true,
-			"deduplication": true,
+			"compression":        true,
+			"deduplication":      true,
 		},
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
@@ -139,8 +139,8 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					Compression:   true,
-					Deduplication: false,
+					Compression:        true,
+					Deduplication:      false,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
@@ -148,7 +148,7 @@ var (
 					MaxBWS:         700,
 					MinIOPS:        1000000,
 					MinBWS:         100,
-					Latency:	100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -170,8 +170,8 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					Compression:   true,
-					Deduplication: false,
+					Compression:        true,
+					Deduplication:      false,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
@@ -179,7 +179,7 @@ var (
 					MaxBWS:         350,
 					MinIOPS:        1000000,
 					MinBWS:         100,
-					Latency:	100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SAS",
@@ -201,8 +201,8 @@ var (
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy:      "Thin",
-					Compression:              false,
-					Deduplication:            false,
+					Compression:             false,
+					Deduplication:           false,
 					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 				},
 				IOConnectivity: model.IOConnectivityLoS{
@@ -211,7 +211,7 @@ var (
 					MaxBWS:         600,
 					MinIOPS:        1000000,
 					MinBWS:         100,
-					Latency:	100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",
@@ -320,25 +320,27 @@ var (
 			BaseModel: &model.BaseModel{
 				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			},
-			Name:        "sample-volume",
-			Description: "This is a sample volume for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-			SnapshotId:  "",
+			Name:             "sample-volume",
+			Description:      "This is a sample volume for testing",
+			AvailabilityZone: "default",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			SnapshotId:       "",
 		},
 		{
 			BaseModel: &model.BaseModel{
 				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			},
-			Name:        "sample-volume",
-			Description: "This is a sample volume for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
-			SnapshotId:  "3769855c-a102-11e7-b772-17b880d2f537",
+			Name:             "sample-volume",
+			AvailabilityZone: "default",
+			Description:      "This is a sample volume for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			SnapshotId:       "3769855c-a102-11e7-b772-17b880d2f537",
 		},
 	}
 
@@ -498,7 +500,7 @@ var (
 			AccessMode:        "agentless",
 			HostName:          "sap1",
 			IP:                "192.168.56.12",
-			AvailabilityZones: []string{"az1", "az2"},
+			AvailabilityZones: []string{"default", "az2"},
 			Initiators: []*model.Initiator{
 				&model.Initiator{
 					PortName: "20000024ff5bb888",
@@ -519,7 +521,7 @@ var (
 			AccessMode:        "agentless",
 			HostName:          "sap2",
 			IP:                "192.168.56.13",
-			AvailabilityZones: []string{"az1", "az2"},
+			AvailabilityZones: []string{"default", "az2"},
 			Initiators: []*model.Initiator{
 				&model.Initiator{
 					PortName: "20012324ff5ac132",
@@ -789,6 +791,7 @@ var (
 		"name": "sample-volume",
 		"description": "This is a sample volume for testing",
 		"size": 1,
+        "availabilityZone": "default",
 		"status": "available",
 		"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
@@ -800,6 +803,7 @@ var (
 			"name": "sample-volume",
 			"description": "This is a sample volume for testing",
 			"size": 1,
+            "availabilityZone": "default",
 			"status": "available",
 			"poolId": "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
@@ -942,7 +946,7 @@ var (
         "hostName": "sap1",
         "ip": "192.168.56.12",
         "availabilityZones": [
-            "az1",
+            "default",
             "az2"
         ],
         "initiators": [
@@ -966,7 +970,7 @@ var (
                 "hostName": "sap1",
                 "ip": "192.168.56.12",
                 "availabilityZones": [
-                    "az1",
+                    "default",
                     "az2"
                 ],
                 "initiators": [
@@ -988,7 +992,7 @@ var (
                 "hostName": "sap2",
                 "ip": "192.168.56.13",
                 "availabilityZones": [
-                    "az1",
+                    "default",
                     "az2"
                 ],
                 "initiators": [
@@ -1086,6 +1090,7 @@ var (
 			"name":        "sample-volume",
 			"description": "This is a sample volume for testing",
 			"size":        1,
+            "availabilityZone": "default",
 			"status":      "available",
 			"poolId":      "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			"profileId":   "1106b972-66ef-11e7-b172-db03f3689c9c"

@@ -391,9 +391,10 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
 	var body = &model.VolumeSpec{
-		Name:        "test",
-		Description: "This is a test",
-		Size:        int64(1),
+		Name:             "test",
+		Description:      "This is a test",
+		Size:             int64(1),
+		AvailabilityZone: "default",
 	}
 	vol, err := c.CreateVolume(body)
 	if err != nil {
@@ -412,9 +413,11 @@ func prepareHost(t *testing.T) (*model.HostSpec, error) {
 	t.Log("Start preparing host...")
 	hostName, _ := os.Hostname()
 	var body = &model.HostSpec{
-		HostName: hostName,
-		IP:       getHostIp(),
-		OsType:   runtime.GOOS,
+		HostName:          hostName,
+		IP:                getHostIp(),
+		OsType:            runtime.GOOS,
+		AccessMode:        "agentless",
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: localIqn,
